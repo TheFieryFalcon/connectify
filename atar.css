@@ -1,0 +1,54 @@
+#connectea-atar-toggle{position:fixed;bottom:18px;right:18px;z-index:9998;background:#234b70;color:#fff;border:1px solid #466988;border-radius:9px;padding:11px 16px;font:600 13px system-ui;cursor:pointer;box-shadow:0 3px 12px #0003}
+#connectea-atar{box-sizing:border-box;position:fixed;right:18px;bottom:70px;width:min(450px,calc(100vw - 28px));max-height:calc(100vh - 150px);overflow:auto;z-index:10030;padding:18px;background:#fff;color:#253b53;border:1px solid #b9cbe1;border-radius:12px;box-shadow:0 8px 30px #0003;font:13px/1.5 system-ui;text-align:left}
+#connectea-atar[hidden]{display:none!important}
+#connectea-atar *{box-sizing:border-box}
+#connectea-atar button,#connectea-atar input{font:inherit}
+.cta-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.cta-heading strong{font-size:17px}.cta-heading button,.cta-reset{background:transparent;color:inherit;border:1px solid #9daebf;border-radius:5px;padding:5px 8px;cursor:pointer}
+.cta-note{font-size:12px;color:#55667a;margin:12px 0}.cta-semesters{display:flex;gap:10px}.cta-semester{flex:1;white-space:pre-line;padding:12px;border:1px solid #b9cbe1;border-radius:8px;background:#f3f7fc;color:#253b53;cursor:pointer}.cta-semester[aria-pressed=true]{border:2px solid #3474ab;background:#e8f1fa;font-weight:700}.cta-label{font-size:11px;font-weight:600;margin:15px 0 5px}.cta-course{display:grid;grid-template-columns:1fr 72px;gap:3px 10px;padding:10px 0;border-bottom:1px solid #d9e2eb}.cta-include{display:flex;gap:7px;align-items:center}.cta-include input{flex:none}.cta-score{width:72px;padding:5px;border:1px solid #9daebf;border-radius:5px;background:white;color:#253b53}.cta-score[aria-invalid=true]{border-color:#ba3838}.cta-course small{grid-column:1/-1;color:#55667a;font-size:11px}.cta-breakdown{font-size:12px}.cta-reset{font-size:11px!important}.cta-method{margin-top:14px;font-size:11px}.cta-method summary{cursor:pointer}.cta-method a{display:block;color:#236292;margin:5px 0}
+.connectea-dark #connectea-atar{background:#222830;color:#dce2e8;border-color:#496078}.connectea-dark #connectea-atar :is(.cta-note,.cta-course small){color:#b4c5d5}.connectea-dark .cta-semester{background:#293746;color:#dce2e8;border-color:#496078}.connectea-dark .cta-semester[aria-pressed=true]{background:#334c65;border-color:#93bce0}.connectea-dark .cta-course{border-color:#414954}.connectea-dark .cta-method a{color:#a9cbeb}
+#connectea-atar :focus-visible,#connectea-atar-toggle:focus-visible{outline:2px solid #659dd0;outline-offset:2px}
+@media print{#connectea-atar,#connectea-atar-toggle{display:none!important}}
+.cta-planner{margin-top:14px}.cta-target-label{display:flex;align-items:center;gap:12px;margin-bottom:10px}.cta-target-output{white-space:pre-line}.cta-target-output>.cta-course{display:block}.cta-target-output>.cta-course small{display:block;margin-top:4px}.cta-heading+.cta-note+.cta-semesters{margin-bottom:10px}
+.cta-subject-select{min-width:0;max-width:100%;flex:1;padding:7px;font:inherit;color:inherit;background:transparent;border:1px solid #9daebf;border-radius:5px}.cta-grade-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}.cta-grade-table th,.cta-grade-table td{text-align:left;padding:6px 4px;border-bottom:1px solid #aab9c7}.cta-grade-table th{font-weight:700}#connectea-atar [hidden]{display:none!important}.connectea-dark .cta-subject-select{background:#202a35;color:#e4edf6}
+/* Compact calculator layout: results first, optional task detail below. */
+#connectea-atar{width:min(540px,calc(100vw - 28px));padding:16px;line-height:1.4;box-shadow:0 12px 38px #15263830}
+#connectea-atar .cta-heading{gap:16px;margin-bottom:12px;align-items:flex-start}
+#connectea-atar .cta-heading strong{font-size:15px;line-height:1.4;font-weight:650;max-width:420px}
+#connectea-atar .cta-heading button{flex:none;padding:4px 8px;font-size:11px}
+#connectea-atar .cta-tabs{padding:4px;gap:4px;background:#edf2f7;border-radius:9px;margin-bottom:10px}
+#connectea-atar .cta-tabs .cta-semester{background:transparent;border:0;padding:7px 8px;font-size:12px;white-space:nowrap}
+#connectea-atar .cta-tabs .cta-semester[aria-pressed=true]{background:white;color:#215d90;box-shadow:0 1px 4px #17395420}
+#connectea-atar .cta-semesters:not(.cta-tabs){gap:8px;margin-bottom:8px}
+#connectea-atar .cta-semesters:not(.cta-tabs) .cta-semester{padding:8px;font-size:12px;border-width:1px}
+#connectea-atar .cta-semester:disabled{opacity:.5;cursor:default}
+#connectea-atar .cta-course{padding:7px 0;gap:1px 10px;grid-template-columns:minmax(0,1fr) 72px;align-items:center}
+#connectea-atar .cta-course>.cta-score{grid-column:2;grid-row:1/3}
+#connectea-atar .cta-course>small{grid-column:1;margin-left:22px;font-size:10px}
+#connectea-atar .cta-include{gap:6px;font-size:12px}
+#connectea-atar .cta-score{border-radius:6px;padding:6px 8px;text-align:right}
+#connectea-atar .cta-breakdown{background:#f2f6fa;border-radius:7px;padding:9px 11px;margin:10px 0;font-size:11px;color:#506278}
+#connectea-atar .cta-target-label{font-size:12px;gap:8px;margin-bottom:8px}
+#connectea-atar .cta-planner{margin-top:10px}
+#connectea-atar .cta-target-output{margin-top:12px}
+#connectea-atar .cta-target-output>strong{display:block;background:#edf5fb;border-left:3px solid #528dbd;border-radius:5px;padding:10px 12px;font-size:13px;line-height:1.5}
+#connectea-atar .cta-note{font-size:11px;margin:8px 0}
+#connectea-atar .cta-assessment-details{border-top:1px solid #d9e2eb;padding-top:9px;margin-top:10px;white-space:normal}
+#connectea-atar .cta-assessment-details>summary{font-size:11px;font-weight:600;cursor:pointer;color:#426580}
+#connectea-atar .cta-assessment-details .cta-course{display:block}
+#connectea-atar .cta-assessment-details .cta-course small{display:block;margin:3px 0;font-size:11px}
+#connectea-atar .cta-method{margin-top:10px}
+.connectea-dark #connectea-atar .cta-tabs{background:#191f27}
+.connectea-dark #connectea-atar .cta-tabs .cta-semester[aria-pressed=true]{background:#34485d;color:#e0eefb}
+.connectea-dark #connectea-atar :is(.cta-breakdown,.cta-target-output>strong){background:#293746;color:#d9e6f3}
+.connectea-dark #connectea-atar .cta-assessment-details{border-color:#414954}
+.connectea-dark #connectea-atar .cta-assessment-details>summary{color:#a9cbeb}
+@media(max-width:420px){#connectea-atar{padding:12px}.cta-tabs{gap:2px}#connectea-atar .cta-tabs .cta-semester{padding:7px 4px;font-size:11px}}
+/* Clearly separated controls and permanently visible breakdowns. */
+#connectea-atar .cta-form-controls{display:grid;grid-template-columns:max-content max-content;align-items:center;gap:12px 16px;margin:12px 0 16px}
+#connectea-atar .cta-form-controls .cta-target-label{display:flex!important;align-items:center;gap:10px;margin:0!important;white-space:nowrap}
+#connectea-atar .cta-form-controls .cta-subject-label{grid-column:1/-1;white-space:normal}
+#connectea-atar .cta-form-controls .cta-subject-select{flex:1;width:100%;min-width:0}
+#connectea-atar .cta-form-controls>.cta-reset{padding:7px 14px;border-radius:6px;min-height:32px}
+#connectea-atar .cta-breakdown-title{display:block;font-size:12px;color:#426580;margin-bottom:8px}
+.connectea-dark #connectea-atar .cta-breakdown-title{color:#a9cbeb}
+@media(max-width:380px){#connectea-atar .cta-form-controls{grid-template-columns:minmax(0,1fr);gap:12px}#connectea-atar .cta-form-controls>.cta-reset{justify-self:start}}

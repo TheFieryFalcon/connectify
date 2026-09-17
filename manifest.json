@@ -1,0 +1,36 @@
+{
+   "browser_specific_settings": {
+      "gecko": {
+         "id": "connect-chart-tea@local",
+         "strict_min_version": "140.0",
+         "data_collection_permissions": {
+      			"required": ["none"]
+    		}
+        }
+   },
+   "content_scripts": [ {
+      "css": [ "atar.css", "progress.css", "sidebar.css" ],
+      "js": [ "data.js", "thing.js", "atar.js", "progress.js", "sidebar.js" ],
+      "matches": [ "https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*" ],
+      "run_at": "document_idle",
+      "world": "MAIN"
+   }, {
+      "css": [ "theme.css" ],
+      "js": [ "theme.js" ],
+      "matches": [ "https://connect.det.wa.edu.au/*" ],
+      "run_at": "document_idle"
+   }, {
+      "js": [ "navigation.js" ],
+      "matches": [ "https://connect.det.wa.edu.au/*" ],
+      "run_at": "document_idle"
+   } ],
+   "description": "Subject progress graphs, assessment statistics, grade planning and a site-wide Connect theme.",
+   "icons": {
+      "128": "logo.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwloUCzVE+Fw/IiHtROGdlXlOlCB0vM62SRRN62Nn0h8/yZJoNlz1MpjolldoN/NtuOMiUkplgz+/OOsbZS31T/5jg75k79yvBpzUTaLBBXIB3ps9ZrT2eC9RQ+z+OYiY1Sdl0t/3KGWOx2/1NnlEmTqMCB8OS59CcQaFmKNhV9M9XrkLXv74Yzlc7jy7+EfnbjTMOviTvQLvlmSSy1YHXbU/RsMsxn4s7O9D0lp4JveoWu53rR74QxWL3oXtiG2KUROlcelU/nHXUxZvso5+jOaCa7GLED0d6G4A7rdnNHcmzeoYaJrUE9xJvcBFOxp/kZjTc6AwxzdwqUW36F4kgwIDAQAB",
+   "manifest_version": 3,
+   "name": "Connext",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "2.1.14"
+}
