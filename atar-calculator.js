@@ -344,36 +344,6 @@
         });
 
       let markValue = markMatch ? scoreValue(markMatch[1]) : undefined;
-      const isEconomics =
-        window.ConnextData?.economicsStatus().active && window.ConnextData.economicsCard(card);
-
-      if (isEconomics) {
-        if (index === 1) {
-          const economicsSubject = window.ConnextData.collect(true).find(s => /^Economics ATAR Year 11$/i.test(s.name));
-          if (economicsSubject) {
-            tasks = economicsSubject.tasks.map(t =>
-              t.weight === null
-                ? null
-                : {
-                    name: t.name,
-                    weight: t.weight,
-                    pending: t.pending,
-                    score: t.score,
-                    earned: t.pending ? 0 : (t.score * t.weight) / 100
-                  }
-            );
-          }
-        }
-        const isValid = tasks.length && tasks.every(Boolean);
-        const completedWeight = isValid
-          ? tasks.filter(t => !t.pending).reduce((sum, t) => sum + t.weight, 0)
-          : 0;
-
-        markValue =
-          completedWeight > 0
-            ? (tasks.reduce((sum, t) => sum + t.earned, 0) / completedWeight) * 100
-            : undefined;
-      }
 
       const hasFinalLetter = Array.from(
         summaryRow?.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark') || []
@@ -383,7 +353,6 @@
         id,
         name,
         mark: markValue,
-        economics: isEconomics,
         finalLetter: hasFinalLetter,
         progress: taskProgress(tasks, markValue, index + 1)
       });
@@ -951,7 +920,7 @@
         '',
         course.mark === undefined
           ? 'No school mark'
-          : `${course.economics ? 'Calculated Economics' : 'School'} ${round(course.mark)}%`
+          : `School ${round(course.mark)}%`
       );
 
       const updateCourse = () => {

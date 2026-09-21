@@ -53,19 +53,9 @@
   }
 
   /**
-   * Correct known inverted task labels from published school outlines.
-   * Specifically handles Year 11 Physics outline discrepancies.
+   * Return task caption without hardcoded subject overrides.
    */
   function correctedCaption(title, task, caption) {
-    if (!/\bPhysics\s+ATAR\s+Year\s*11\b/i.test(title)) {
-      return caption;
-    }
-    if (/^portfolio\s+assessment\s+1c$/i.test(task) && /^term\s*3,?\s*week\s*6$/i.test(caption)) {
-      return 'Term 3, week 4';
-    }
-    if (/^test\s*3\s*:\s*waves$/i.test(task) && /^term\s*3,?\s*week\s*4$/i.test(caption)) {
-      return 'Term 3, week 6';
-    }
     return caption;
   }
 
@@ -193,40 +183,6 @@
   }
 
   /**
-   * Checks if an outline card corresponds to Year 11 Economics ATAR at Willetton Senior High School.
-   */
-  function economicsCard(card) {
-    const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
-    const text = [card.innerText, ...Array.from(card.querySelectorAll('.v-label')).map(e => e.textContent)].join(' ');
-    return /\bEconomics\s+ATAR\s+Year\s*11\b/i.test(title) && /\bWilletton\s+Senior\s+High\s*School\b/i.test(text);
-  }
-
-  /**
-   * Determines eligibility and completion status of Economics outlines.
-   */
-  function economicsStatus() {
-    const cards = Array.from(document.querySelectorAll('.eds-c-tile')).filter(economicsCard);
-
-    const finalized = [1, 2].map(semNumber =>
-      cards.some(card => {
-        const cardSemester = Number(card.querySelector('.eds-c-tile__title')?.textContent.match(/Semester\s*([12])/i)?.[1]);
-        if (cardSemester !== semNumber) return false;
-
-        const summaryRows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(r => !r.closest('.cvr-c-tasks'));
-        return summaryRows.some(row =>
-          Array.from(row.querySelectorAll('.cvr-c-task__mark')).some(markEl => /^[A-E]$/.test(normalize(markEl.textContent)))
-        );
-      })
-    );
-
-    return {
-      eligible: cards.length > 0,
-      active: cards.length > 0 && !finalized.every(Boolean),
-      finalized
-    };
-  }
-
-  /**
    * Programmatically click the accordion headers to expand or collapse details.
    */
   function expandAll(expand = true) {
@@ -244,8 +200,6 @@
     cohortMean,
     orderHint,
     correctedCaption,
-    economicsCard,
-    economicsStatus,
     expandAll
   };
 })();
