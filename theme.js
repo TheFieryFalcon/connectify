@@ -1,93 +1,198 @@
+/**
+ * Connext Dark Theme Engine
+ *
+ * Provides site-wide dark mode styling for Connect, dynamic contrast adaptation
+ * for neutral surfaces, and accordion arrow enhancements.
+ */
 (() => {
   'use strict';
-  const key = 'connectea:theme:v1';
-  let dark = false, queued = false;
-  try { dark = localStorage.getItem(key) === 'dark'; } catch {}
-  const button = document.createElement('button');
-  button.id = 'connectea-theme-toggle'; button.type = 'button';
-  button.setAttribute('aria-label', 'Dark mode');
-  document.body.append(button);
-  function rgb(value, allowTranslucent=false) {
-    const m = value.match(/^rgba?\(([^)]+)\)/);
-    if (!m) return null;
-    const parts = m[1].split(',').map(Number);
-    return parts.length === 4 && (parts[3] === 0 || (!allowTranslucent && parts[3] < 0.9)) ? null : parts.slice(0,3);
+
+  const STORAGE_KEY = 'connectea:theme:v1';
+  let isDarkMode = false;
+  let isScheduled = false;
+
+  try {
+    isDarkMode = localStorage.getItem(STORAGE_KEY) === 'dark';
+  } catch {}
+
+  const toggleButton = document.createElement('button');
+  toggleButton.id = 'connectea-theme-toggle';
+  toggleButton.type = 'button';
+  toggleButton.setAttribute('aria-label', 'Dark mode');
+  document.body.append(toggleButton);
+
+  /**
+   * Parse RGB/RGBA color string into [r, g, b] array.
+   */
+  function parseRgb(value, allowTranslucent = false) {
+    const match = value.match(/^rgba?\(([^)]+)\)/);
+    if (!match) return null;
+
+    const parts = match[1].split(',').map(Number);
+    const isInvalidAlpha = parts.length === 4 && (parts[3] === 0 || (!allowTranslucent && parts[3] < 0.9));
+    return isInvalidAlpha ? null : parts.slice(0, 3);
   }
-  function neutral(c) { return c && Math.max(...c) - Math.min(...c) < 24; }
-  const textColors=new Map();
-  function restoreText(){
-    for(const [el,saved] of textColors){
-      if(el.style.getPropertyValue(saved.property)==='rgb(255, 255, 255)'){
-        if(saved.value)el.style.setProperty(saved.property,saved.value,saved.priority);
-        else el.style.removeProperty(saved.property);
+
+  function isNeutralColor(rgb) {
+    return rgb && Math.max(...rgb) - Math.min(...rgb) < 24;
+  }
+
+  const savedTextColors = new Map();
+
+  function restoreTextColors() {
+    for (const [el, saved] of savedTextColors) {
+      if (el.style.getPropertyValue(saved.property) === 'rgb(255, 255, 255)') {
+        if (saved.value) {
+          el.style.setProperty(saved.property, saved.value, saved.priority);
+        } else {
+          el.style.removeProperty(saved.property);
+        }
       }
     }
-    textColors.clear();
+    savedTextColors.clear();
   }
-  function surfaces() {
-    if (!dark) return;
-    // Catch native and dynamically loaded neutral surfaces across Connect versions.
-    // Preserve images, SVG chart data, brand colors and colored status indicators.
+
+  /**
+   * Adjust neutral backgrounds and dark text to high-contrast white in dark mode.
+   * Preserves charts, video, canvas, brand colors, and status indicators.
+   */
+  function adaptSurfaces() {
+    if (!isDarkMode) return;
+
     for (const el of document.body.querySelectorAll('*')) {
-      const svgText=el instanceof SVGElement && ['text','tspan'].includes(el.localName);
-      if (!(el instanceof HTMLElement)&&!svgText)continue;
-      if(el.closest('video,canvas,iframe,#connectea-theme-toggle') || ['SCRIPT','STYLE','LINK'].includes(el.tagName)) continue;
+      const isSvgText = el instanceof SVGElement && ['text', 'tspan'].includes(el.localName);
+      if (!(el instanceof HTMLElement) && !isSvgText) continue;
+
+      if (
+        el.closest('video, canvas, iframe, #connectea-theme-toggle') ||
+        ['SCRIPT', 'STYLE', 'LINK'].includes(el.tagName)
+      ) {
+        continue;
+      }
+
       const style = getComputedStyle(el);
-      const bg = rgb(style.backgroundColor), fg = rgb(svgText?style.fill:style.color,true);
-      if (!svgText&&!el.closest('.connectea-panel')&&neutral(bg) && Math.min(...bg) > 165) el.setAttribute('data-connectea-surface', '');
-      if (neutral(fg) && Math.max(...fg) < 170){
-        const property=svgText?'fill':'color';
-        textColors.set(el,{property,value:el.style.getPropertyValue(property),priority:el.style.getPropertyPriority(property)});
-        el.style.setProperty(property,'rgb(255, 255, 255)','important');
+      const bgRgb = parseRgb(style.backgroundColor);
+      const fgRgb = parseRgb(isSvgText ? style.fill : style.color, true);
+
+      // Tag bright neutral backgrounds for CSS inversion
+      if (!isSvgText && !el.closest('.connectea-panel') && isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) {
+        el.setAttribute('data-connectea-surface', '');
+      }
+
+      // Brighten dark text against dark mode backgrounds
+      if (isNeutralColor(fgRgb) && Math.max(...fgRgb) < 170) {
+        const property = isSvgText ? 'fill' : 'color';
+        savedTextColors.set(el, {
+          property,
+          value: el.style.getPropertyValue(property),
+          priority: el.style.getPropertyPriority(property)
+        });
+        el.style.setProperty(property, 'rgb(255, 255, 255)', 'important');
       }
     }
   }
-  let headerInset=null;
-  function position(reset=false) {
-    if(reset)headerInset=null;
-    if(button.parentElement!==document.body)document.body.append(button);
-    const bell=document.querySelector('.cvr-c-icon--notification-hollow')?.closest('[role="button"],button');
-    const rect=bell?.getBoundingClientRect();
-    if(headerInset===null&&rect?.width&&rect.left>120)headerInset=Math.max(8,window.innerWidth-rect.left+12);
-    button.style.right=(headerInset??16)+'px';
+
+  let headerRightInset = null;
+
+  function updateTogglePosition(forceReset = false) {
+    if (forceReset) headerRightInset = null;
+    if (toggleButton.parentElement !== document.body) {
+      document.body.append(toggleButton);
+    }
+
+    const bell = document
+      .querySelector('.cvr-c-icon--notification-hollow')
+      ?.closest('[role="button"], button');
+    const rect = bell?.getBoundingClientRect();
+
+    if (headerRightInset === null && rect?.width && rect.left > 120) {
+      headerRightInset = Math.max(8, window.innerWidth - rect.left + 12);
+    }
+
+    toggleButton.style.right = `${headerRightInset ?? 16}px`;
   }
-  function detailArrows() {
+
+  function updateDetailArrows() {
     for (const heading of document.querySelectorAll('.eds-c-tile .eds-c-accordion__section-heading')) {
       const text = heading.textContent.replace(/\s+/g, ' ').trim();
       const arrow = /hide details/i.test(text) ? '▴' : /show details/i.test(text) ? '▾' : null;
-      if (arrow && heading.getAttribute('data-cx-details-arrow') !== arrow) heading.setAttribute('data-cx-details-arrow', arrow);
-      else if (!arrow && heading.hasAttribute('data-cx-details-arrow')) heading.removeAttribute('data-cx-details-arrow');
+
+      if (arrow && heading.getAttribute('data-cx-details-arrow') !== arrow) {
+        heading.setAttribute('data-cx-details-arrow', arrow);
+      } else if (!arrow && heading.hasAttribute('data-cx-details-arrow')) {
+        heading.removeAttribute('data-cx-details-arrow');
+      }
     }
   }
-  function update() {
-    if(!button.isConnected)document.body.append(button);
-    if(!dark)restoreText();
-    document.documentElement.classList.toggle('connectea-dark', dark);
-    const label = dark ? '☀ Light mode' : '☾ Dark mode';
-    if (button.textContent !== label) button.textContent = label;
-    button.setAttribute('aria-pressed', String(dark));
-    position(); surfaces(); detailArrows();
-  }
-  function schedule() {
-    if (queued) return;
-    queued = true;
-    setTimeout(() => { queued = false; update(); }, 100);
-  }
-  button.addEventListener('click', () => {
-    dark = !dark;
-    try { localStorage.setItem(key, dark ? 'dark' : 'light'); } catch {}
-    update();
-  });
-  new MutationObserver(records => {
-    if (records.some(r => {
-      if(r.target===button||r.target.parentElement?.closest('#connectea-theme-toggle'))return false;
-      const saved=textColors.get(r.target);
-      return !(r.type==='attributes'&&r.attributeName==='style'&&saved&&r.target.style.getPropertyValue(saved.property)==='rgb(255, 255, 255)');
-    })) schedule();
-  }).observe(document.body, {childList:true, subtree:true,characterData:true,attributes:true,attributeFilter:['class','style']});
-  window.addEventListener('resize', ()=>position(true));
-  setInterval(()=>{if(!button.isConnected)update();},1000);
-  window.addEventListener('storage', e => { if (e.key === key) { dark = e.newValue === 'dark'; update(); } });
-  update();
-})();
 
+  function updateTheme() {
+    if (!toggleButton.isConnected) document.body.append(toggleButton);
+    if (!isDarkMode) restoreTextColors();
+
+    document.documentElement.classList.toggle('connectea-dark', isDarkMode);
+    const label = isDarkMode ? '☀ Light mode' : '☾ Dark mode';
+
+    if (toggleButton.textContent !== label) {
+      toggleButton.textContent = label;
+    }
+    toggleButton.setAttribute('aria-pressed', String(isDarkMode));
+
+    updateTogglePosition();
+    adaptSurfaces();
+    updateDetailArrows();
+  }
+
+  function scheduleUpdate() {
+    if (isScheduled) return;
+    isScheduled = true;
+    setTimeout(() => {
+      isScheduled = false;
+      updateTheme();
+    }, 100);
+  }
+
+  toggleButton.addEventListener('click', () => {
+    isDarkMode = !isDarkMode;
+    try {
+      localStorage.setItem(STORAGE_KEY, isDarkMode ? 'dark' : 'light');
+    } catch {}
+    updateTheme();
+  });
+
+  new MutationObserver(records => {
+    const shouldUpdate = records.some(record => {
+      if (record.target === toggleButton || record.target.parentElement?.closest('#connectea-theme-toggle')) {
+        return false;
+      }
+      const saved = savedTextColors.get(record.target);
+      return !(
+        record.type === 'attributes' &&
+        record.attributeName === 'style' &&
+        saved &&
+        record.target.style.getPropertyValue(saved.property) === 'rgb(255, 255, 255)'
+      );
+    });
+
+    if (shouldUpdate) scheduleUpdate();
+  }).observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributes: true,
+    attributeFilter: ['class', 'style']
+  });
+
+  window.addEventListener('resize', () => updateTogglePosition(true));
+  window.addEventListener('storage', e => {
+    if (e.key === STORAGE_KEY) {
+      isDarkMode = e.newValue === 'dark';
+      updateTheme();
+    }
+  });
+
+  setInterval(() => {
+    if (!toggleButton.isConnected) updateTheme();
+  }, 1000);
+
+  updateTheme();
+})();

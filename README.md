@@ -4,7 +4,7 @@ Connext adds local assessment statistics, progress graphs, grade planning and a 
 
 ## Install or update
 
-Extract the complete package into your extension folder, reload the extension in your browser's extension manager, and refresh all open Connect pages. Keep the existing extension identity to preserve saved settings. The new logo is the supplied artwork. New files include progress.js, progress.css and logo.png; the manifest must also be updated.
+Extract the complete package into your extension folder, reload the extension in your browser's extension manager, and refresh all open Connect pages. Keep the existing extension identity to preserve saved settings. The new logo is the supplied artwork. Core scripts include assessment-data.js, cohort-stats.js, atar-calculator.js, progress-graph.js, sidebar.js, theme.js and navigation.js; the manifest has been updated accordingly.
 
 ## Progress Graph
 
