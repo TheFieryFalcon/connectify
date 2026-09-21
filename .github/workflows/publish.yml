@@ -41,16 +41,13 @@ jobs:
             "*.xpi" \
             "*.zip"
 
-          cp "connext-${VERSION}.xpi" connext.xpi
-          ls -lh *.xpi
+          ls -lh "connext-${VERSION}.xpi"
 
       - name: Upload .xpi artifact
         uses: actions/upload-artifact@v4
         with:
           name: connext-${{ steps.meta.outputs.version }}-xpi
-          path: |
-            connext-${{ steps.meta.outputs.version }}.xpi
-            connext.xpi
+          path: connext-${{ steps.meta.outputs.version }}.xpi
           if-no-files-found: error
 
       - name: Publish GitHub Release
@@ -68,21 +65,21 @@ jobs:
 
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
             echo "Release $TAG_NAME exists, uploading assets..."
-            gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" connext.xpi --clobber
+            gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" --clobber
           else
             echo "Creating release $TAG_NAME..."
-            gh release create "$TAG_NAME" "connext-${VERSION}.xpi" connext.xpi \
+            gh release create "$TAG_NAME" "connext-${VERSION}.xpi" \
               --title "Connext v${VERSION}" \
-              --generate-notes || gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" connext.xpi --clobber
+              --generate-notes || gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" --clobber
           fi
 
           if gh release view "latest" >/dev/null 2>&1; then
             echo "Updating latest release assets..."
-            gh release upload "latest" "connext-${VERSION}.xpi" connext.xpi --clobber
+            gh release upload "latest" "connext-${VERSION}.xpi" --clobber
           else
             echo "Creating latest release..."
-            gh release create "latest" "connext-${VERSION}.xpi" connext.xpi \
+            gh release create "latest" "connext-${VERSION}.xpi" \
               --title "Connext Latest Build" \
               --notes "Automated build from commit ${{ github.sha }} (version ${VERSION})" \
-              --prerelease || gh release upload "latest" "connext-${VERSION}.xpi" connext.xpi --clobber
+              --prerelease || gh release upload "latest" "connext-${VERSION}.xpi" --clobber
           fi

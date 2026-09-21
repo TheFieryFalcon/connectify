@@ -28,33 +28,37 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "Building Chrome package for version: $VERSION"
 
-      - name: Prepare Chrome extension directory
-        run: |
-          mkdir -p /tmp/chrome-build
-          rsync -av --exclude='.git*' --exclude='.github*' --exclude='*.xpi' --exclude='*.zip' \
-            --exclude='_metadata*' --exclude='.DS_Store' --exclude='README.md' \
-            --exclude='ATAR-REFERENCE.md' ./ /tmp/chrome-build/
-
-          # Remove Firefox-specific gecko settings for Chrome build
-          jq 'del(.browser_specific_settings)' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.clean.json
-          mv /tmp/chrome-build/manifest.clean.json /tmp/chrome-build/manifest.json
-
-      - name: Package Chrome .zip
+      - name: Prepare Chrome extension and package .crx
+        env:
+          CRX_KEY_SECRET: ${{ secrets.CRX_KEY }}
         run: |
           VERSION="${{ steps.meta.outputs.version }}"
-          cd /tmp/chrome-build
-          zip -r "$GITHUB_WORKSPACE/connext-chrome-${VERSION}.zip" .
-          cd "$GITHUB_WORKSPACE"
-          cp "connext-chrome-${VERSION}.zip" connext-chrome.zip
-          ls -lh connext-chrome*.zip
+          mkdir -p /tmp/chrome-build
+          rsync -av --exclude='.git*' --exclude='.github*' --exclude='*.xpi' --exclude='*.zip' --exclude='*.crx' \
+            --exclude='_metadata*' --exclude='.DS_Store' --exclude='README.md' \
+            --exclude='2.0.0_changelog.md' --exclude='ATAR-REFERENCE.md' ./ /tmp/chrome-build/
 
-      - name: Upload Chrome .zip artifact
+          # Prepare private key for CRX signing
+          if [ -n "$CRX_KEY_SECRET" ]; then
+            echo "$CRX_KEY_SECRET" > /tmp/key.pem
+          else
+            openssl genrsa -out /tmp/key.pem 2048
+          fi
+
+          # Derive public key and inject into manifest.json for Chrome identity matching
+          PUB_KEY=$(openssl rsa -in /tmp/key.pem -pubout -outform DER 2>/dev/null | base64 | tr -d '\r\n')
+          jq --arg k "$PUB_KEY" 'del(.browser_specific_settings) | .key = $k' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.clean.json
+          mv /tmp/chrome-build/manifest.clean.json /tmp/chrome-build/manifest.json
+
+          # Generate valid binary CRX3 package
+          npx -y crx3 -p /tmp/key.pem -o "$GITHUB_WORKSPACE/connext-${VERSION}.crx" /tmp/chrome-build
+          ls -lh "$GITHUB_WORKSPACE/connext-${VERSION}.crx"
+
+      - name: Upload Chrome .crx artifact
         uses: actions/upload-artifact@v4
         with:
-          name: connext-chrome-${{ steps.meta.outputs.version }}-zip
-          path: |
-            connext-chrome-${{ steps.meta.outputs.version }}.zip
-            connext-chrome.zip
+          name: connext-${{ steps.meta.outputs.version }}-crx
+          path: connext-${{ steps.meta.outputs.version }}.crx
           if-no-files-found: error
 
       - name: Publish to GitHub Release
@@ -72,21 +76,21 @@ jobs:
 
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
             echo "Release $TAG_NAME exists, uploading Chrome assets..."
-            gh release upload "$TAG_NAME" "connext-chrome-${VERSION}.zip" connext-chrome.zip --clobber
+            gh release upload "$TAG_NAME" "connext-${VERSION}.crx" --clobber
           else
             echo "Creating release $TAG_NAME..."
-            gh release create "$TAG_NAME" "connext-chrome-${VERSION}.zip" connext-chrome.zip \
+            gh release create "$TAG_NAME" "connext-${VERSION}.crx" \
               --title "Connext v${VERSION}" \
-              --generate-notes || gh release upload "$TAG_NAME" "connext-chrome-${VERSION}.zip" connext-chrome.zip --clobber
+              --generate-notes || gh release upload "$TAG_NAME" "connext-${VERSION}.crx" --clobber
           fi
 
           if gh release view "latest" >/dev/null 2>&1; then
             echo "Updating latest release with Chrome assets..."
-            gh release upload "latest" "connext-chrome-${VERSION}.zip" connext-chrome.zip --clobber
+            gh release upload "latest" "connext-${VERSION}.crx" --clobber
           else
             echo "Creating latest release..."
-            gh release create "latest" "connext-chrome-${VERSION}.zip" connext-chrome.zip \
+            gh release create "latest" "connext-${VERSION}.crx" \
               --title "Connext Latest Build" \
               --notes "Automated build from commit ${{ github.sha }} (version ${VERSION})" \
-              --prerelease || gh release upload "latest" "connext-chrome-${VERSION}.zip" connext-chrome.zip --clobber
+              --prerelease || gh release upload "latest" "connext-${VERSION}.crx" --clobber
           fi
