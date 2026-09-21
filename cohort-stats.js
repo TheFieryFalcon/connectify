@@ -33,76 +33,78 @@
   };
 
   /**
-   * Concatenates card innerText and separate Vaadin label elements.
+   * Dynamically estimates subject cohort size from Highcharts boxplot data across tasks.
+   * Uses normal order statistics on the ratio of sample range to interquartile range (R / IQR),
+   * with upper/lower semi-quartile spread ratios to dampen single outliers.
+   *
+   * @param {Element} card - Subject tile DOM element
+   * @returns {number|undefined} Estimated cohort size or undefined
    */
-  function extractSchoolText(card) {
-    return [card.innerText, ...Array.from(card.querySelectorAll('.v-label')).map(e => e.textContent)].join(' ');
-  }
+  function estimateCohortSize(card) {
+    const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
+      row => row.closest('.eds-c-tile') === card
+    );
 
-  /**
-   * Preset cohort sizes for Willetton Senior High School Year 11 ATAR courses.
-   */
-  function automaticCohort(title, isYear11OnPage, schoolText) {
-    if (!isYear11OnPage || !/\bWilletton\s+Senior\s+High\s*School\b/i.test(schoolText || '')) {
-      return undefined;
+    // 1. Check if any Highcharts series or data point explicitly carries sample count
+    for (const row of rows) {
+      const host = row.querySelector('.cvr-c-task__chart [data-highcharts-chart]');
+      if (!host) continue;
+      const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
+      const chart = window.Highcharts?.charts?.[chartIndex];
+      if (!chart) continue;
+
+      for (const series of chart.series || []) {
+        for (const key of ['n', 'count', 'total', 'sampleSize', 'cohortSize']) {
+          if (validCohortSize(series.options?.[key])) return series.options[key];
+        }
+        for (const pt of series.points || series.options?.data || []) {
+          const p = pt?.options || pt;
+          for (const key of ['n', 'count', 'total', 'sampleSize', 'cohortSize']) {
+            if (validCohortSize(p?.[key])) return p[key];
+          }
+        }
+      }
     }
 
-    // A mixed-year page must not apply Year 11 presets to an explicit Year 12 card
-    const yearMatch = title.match(/\bYear\s*(\d{1,2})\b/i);
-    if (yearMatch && Number(yearMatch[1]) !== 11) {
-      return undefined;
+    // 2. Statistical sample size estimation from quantile distributions
+    const estimates = [];
+    for (const row of rows) {
+      const stats = readStats(row);
+      if (!validStats(stats)) continue;
+
+      const [min, q1, median, q3, max] = stats;
+      const range = max - min;
+      const iqr = q3 - q1;
+      if (range <= 0 || iqr <= 0 || range <= iqr) continue;
+
+      // Symmetric and semi-quartile spread ratios to dampen single outliers
+      const ratios = [range / iqr];
+      if (q3 > median && max > median) {
+        ratios.push((max - median) / (q3 - median));
+      }
+      if (median > q1 && median > min) {
+        ratios.push((median - min) / (median - q1));
+      }
+
+      // Median spread ratio across available segments
+      ratios.sort((a, b) => a - b);
+      const medianRatio = ratios[Math.floor(ratios.length / 2)];
+
+      // Expected range for sample size N from normal order statistics: E[R]/IQR ≈ 0.80 + 0.62 * ln(N)
+      if (medianRatio > 0.80) {
+        const lnN = (medianRatio - 0.80) / 0.62;
+        const estN = Math.exp(lnN);
+        if (Number.isFinite(estN) && estN >= 5 && estN <= 600) {
+          estimates.push(estN);
+        }
+      }
     }
 
-    const isEssentials = /\bmathematics essentials?\b/i.test(title);
-    if (!isEssentials && !/\bATAR\b/i.test(title)) {
-      return undefined;
-    }
-    if (isEssentials) return 117;
+    if (!estimates.length) return undefined;
 
-    const subject = normalize(title)
-      .toLowerCase()
-      .replace(/\s*[-–—]\s*semester\s+[12]\s*$/i, '')
-      .replace(/\batar\b|\byear\s*11\b/g, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .replace(/\s*:\s*$/, '');
-
-    const defaults = {
-      'mathematics specialist': 64,
-      'mathematics methods': 219,
-      'methods': 219,
-      'japanese': 44,
-      'japanese: second language': 44,
-      'japanese second language': 44,
-      'music': 10,
-      'computer science': 11,
-      'eald': 9,
-      'english as an additional language or dialect': 9,
-      'english as an additional language/dialect': 9,
-      'english as an additional dialect': 9,
-      'english as additional dialect': 9,
-      'biology': 61,
-      'human biology': 183,
-      'french': 21,
-      'french: second language': 21,
-      'french second language': 21,
-      'politics and law': 35,
-      'business management and enterprise': 24,
-      'physics': 111,
-      'chemistry': 224,
-      'literature': 52,
-      'italian': 20,
-      'italian: second language': 20,
-      'italian second language': 20,
-      'economics': 44,
-      'modern history': 15,
-      'mathematics applications': 189,
-      'mathematics application': 189,
-      'accounting': 36,
-      'accounting and finance': 36
-    };
-
-    return defaults[subject];
+    estimates.sort((a, b) => a - b);
+    const medianEst = estimates[Math.floor(estimates.length / 2)];
+    return Math.max(5, Math.round(medianEst));
   }
 
   /**
@@ -346,7 +348,7 @@
     return el;
   }
 
-  function createPanel(row, isOverall, key, autoSize) {
+  function createPanel(row, isOverall, key, estimatedSize) {
     const box = createElement('section', 'connectea-panel');
     box.setAttribute(
       'aria-label',
@@ -364,21 +366,26 @@
     let input;
     let notice;
 
-    if (isOverall && key && autoSize === undefined) {
+    if (isOverall && key) {
       const label = createElement('label', 'connectea-controls', 'Students in this subject: ');
       input = createElement('input', 'connectea-subject-cohort-input');
       input.type = 'number';
       input.min = '1';
       input.step = '1';
-      input.placeholder = 'e.g. 120';
+      input.placeholder = estimatedSize !== undefined ? `~${estimatedSize}` : 'e.g. 120';
       input.setAttribute('aria-label', 'Students in this subject');
-      input.value = loadCohortSize(key) ?? '';
+      const saved = loadCohortSize(key);
+      input.value = saved !== undefined ? String(saved) : '';
       label.append(input);
 
       notice = createElement(
         'span',
         'connectea-notice',
-        loadCohortSize(key) ? 'Saved for both semesters.' : 'Enter once; shared across semesters 1 and 2.'
+        saved !== undefined
+          ? 'Saved for both semesters.'
+          : estimatedSize !== undefined
+          ? `Estimated ~${estimatedSize} from boxplots; enter to override.`
+          : 'Enter once; shared across semesters 1 and 2.'
       );
       notice.setAttribute('aria-live', 'polite');
 
@@ -396,10 +403,12 @@
           notice,
           isInvalid
             ? 'Enter a whole number of students, at least 1.'
-            : size
+            : size !== undefined
             ? persisted
               ? 'Saved for both semesters.'
               : 'Used for this visit; browser storage is unavailable.'
+            : estimatedSize !== undefined
+            ? `Estimated ~${estimatedSize} from boxplots; enter to override.`
             : 'Enter once; shared across semesters 1 and 2.'
         );
         schedule();
@@ -413,12 +422,12 @@
     const target = row.querySelector('.cvr-c-task__details') || row;
     target.append(box);
 
-    const state = { box, distribution, result, input, key, isOverall, autoSize };
+    const state = { box, distribution, result, input, key, isOverall, estimatedSize };
     panels.set(row, state);
     return state;
   }
 
-  function render(row, isOverall, key, autoSize) {
+  function render(row, isOverall, key, estimatedSize) {
     let ui = panels.get(row);
     const mark = readMark(row);
 
@@ -430,18 +439,21 @@
 
     if (
       ui &&
-      (!ui.box.isConnected || ui.key !== key || ui.isOverall !== isOverall || ui.autoSize !== autoSize)
+      (!ui.box.isConnected || ui.key !== key || ui.isOverall !== isOverall || ui.estimatedSize !== estimatedSize)
     ) {
       ui.box.remove();
       ui = null;
     }
 
-    if (!ui) ui = createPanel(row, isOverall, key, autoSize);
+    if (!ui) ui = createPanel(row, isOverall, key, estimatedSize);
 
-    const cohortSize = autoSize ?? loadCohortSize(key);
+    const userSize = loadCohortSize(key);
+    const cohortSize = userSize ?? estimatedSize;
     if (ui.input && document.activeElement !== ui.input && ui.input.getAttribute('aria-invalid') !== 'true') {
-      const valStr = cohortSize === undefined ? '' : String(cohortSize);
+      const valStr = userSize === undefined ? '' : String(userSize);
       if (ui.input.value !== valStr) ui.input.value = valStr;
+      const expectedPlaceholder = estimatedSize !== undefined ? `~${estimatedSize}` : 'e.g. 120';
+      if (ui.input.placeholder !== expectedPlaceholder) ui.input.placeholder = expectedPlaceholder;
     }
 
     const stats = readStats(row);
@@ -472,10 +484,12 @@
       parts.push(standing(data.p));
 
       if (data.rank !== undefined) {
+        const isEstimated = userSize === undefined && estimatedSize !== undefined;
+        const totalDisplay = isEstimated ? `~${cohortSize}` : `${cohortSize}`;
         parts.push(
           data.rank === 1
             ? `You're the top of the cohort for this ${isOverall ? 'subject' : 'test'}`
-            : `Your estimated ${isOverall ? 'subject' : 'assessment'} rank is ${data.rank} out of ${cohortSize}`
+            : `Your estimated ${isOverall ? 'subject' : 'assessment'} rank is ${data.rank} out of ${totalDisplay}`
         );
       } else {
         parts.push('Enter subject cohort size for rank');
@@ -571,8 +585,6 @@
       document.head.append(styleEl);
     }
 
-    const isYear11OnPage = /\bYear\s*11\b/i.test(document.body.innerText);
-
     for (const card of document.querySelectorAll('.eds-c-tile')) {
       if (!card.querySelector('.eds-c-tile__title')) continue;
 
@@ -582,16 +594,12 @@
       if (!rows.length) continue;
 
       const key = subjectKey(card);
-      const autoSize = automaticCohort(
-        normalize(card.querySelector('.eds-c-tile__title')?.textContent),
-        isYear11OnPage,
-        extractSchoolText(card)
-      );
+      const estimatedSize = estimateCohortSize(card);
 
       for (const row of rows) {
         const isOverall = !row.closest('.cvr-c-tasks');
         try {
-          render(row, isOverall, key, autoSize);
+          render(row, isOverall, key, estimatedSize);
         } catch (error) {
           console.debug('Connext:', error);
         }

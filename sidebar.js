@@ -4,7 +4,6 @@
  * Provides a slide-out drawer hosting Connext tools:
  * - ATAR / Target ATAR / Grade calculators
  * - Assessment Progress graphs
- * - Economics average calculator
  * - Expand all / Unexpand all outline controls
  */
 (() => {
@@ -78,15 +77,6 @@
   collapseBtn.onclick = () => window.ConnextData.expandAll(false);
   outlineActions.append(expandBtn, collapseBtn);
 
-  // Economics section
-  const economicsBtn = createElement('button', 'Calculate Economics average');
-  economicsBtn.type = 'button';
-  economicsBtn.hidden = true;
-
-  const economicsSection = createElement('section');
-  economicsSection.id = 'cx-economics';
-  economicsSection.hidden = true;
-
   const introText = createElement('p', 'Choose a tool to explore your results.');
   introText.className = 'cx-tools-intro';
 
@@ -106,19 +96,11 @@
       }
     }
 
-    if (economicsBtn.parentElement !== toolMenu) {
-      toolMenu.append(economicsBtn);
-    }
-
     for (const panelId of ['connectea-atar', 'connext-progress']) {
       const panel = document.getElementById(panelId);
       if (panel && panel.parentElement !== workspace) {
         workspace.append(panel);
       }
-    }
-
-    if (economicsSection.parentElement !== workspace) {
-      workspace.append(economicsSection);
     }
   }
 
@@ -129,7 +111,6 @@
 
   function closeAllTools() {
     window.dispatchEvent(new CustomEvent('connext-open', { detail: 'home' }));
-    economicsSection.hidden = true;
   }
 
   handle.onclick = () => {
@@ -150,61 +131,14 @@
 
   window.addEventListener('connext-open', e => {
     if (e.detail !== 'home') openSidebar();
-    economicsSection.hidden = e.detail !== 'economics';
   });
-
-  let lastEconomicsSignature = '';
-
-  function renderEconomics() {
-    const rows = window.ConnextAtar.readCourses(false).map(list => list.find(r => r.economics));
-    const signature = JSON.stringify(rows);
-    if (signature === lastEconomicsSignature) return;
-    lastEconomicsSignature = signature;
-
-    economicsSection.replaceChildren(
-      createElement('h2', 'Economics overall average'),
-      createElement('p', 'Weighted average of completed assessments. Semester 2 includes semester 1 results once.')
-    );
-
-    rows.forEach((r, idx) => {
-      const card = createElement('div', 'cx-econ-result');
-      card.append(createElement('h3', `Semester ${idx + 1}`));
-      card.append(
-        createElement(
-          'strong',
-          Number.isFinite(r?.mark) ? `${r.mark.toFixed(2)}%` : 'Expand the Economics outline to calculate.'
-        )
-      );
-      if (r?.progress.error) {
-        card.append(createElement('p', r.progress.error));
-      }
-      economicsSection.append(card);
-    });
-  }
-
-  economicsBtn.onclick = () => {
-    window.ConnextData.expandAll();
-    window.dispatchEvent(new CustomEvent('connext-open', { detail: 'economics' }));
-    lastEconomicsSignature = '';
-    renderEconomics();
-  };
 
   function syncState() {
     mountTools();
 
-    const isEconomicsActive = window.ConnextData.economicsStatus().active;
-    economicsBtn.hidden = !isEconomicsActive;
-    if (economicsBtn.hidden && !economicsSection.hidden) {
-      economicsSection.hidden = true;
-    }
-
     const hasActiveTool = Array.from(workspace.children).some(p => !p.hidden);
     sidebar.classList.toggle('cx-tool-active', hasActiveTool);
     introText.hidden = hasActiveTool;
-
-    if (!economicsSection.hidden) {
-      renderEconomics();
-    }
   }
 
   new MutationObserver(syncState).observe(workspace, {
