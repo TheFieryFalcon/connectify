@@ -39,17 +39,56 @@
   function validStats(s) {
     return Array.isArray(s) && s.length === 5 && s.every(Number.isFinite) && s.every((v, i) => !i || v >= s[i - 1]);
   }
-  // Interpolate between the five published quantiles. Tied anchors use their midpoint.
-  function percentile(s, mark) {
+  // Monotone cubic spline (PCHIP) through the 5 published quantiles with zero tail slopes.
+  function percentile(s, mark, n) {
     if (!validStats(s) || !Number.isFinite(mark)) return undefined;
-    if (mark < s[0]) return 0;
-    if (mark > s[4]) return 1;
-    const ties = s.map((v, i) => v === mark ? i : -1).filter(i => i >= 0);
-    if (ties.length) return (ties[0] + ties[ties.length - 1]) / 8;
-    for (let i = 0; i < 4; i++) {
-      if (mark > s[i] && mark < s[i + 1]) return (i + (mark - s[i]) / (s[i + 1] - s[i])) / 4;
+    if (mark <= s[0]) return 0;
+    if (mark >= s[4]) return 1;
+
+    const ties = [];
+    for (let i = 0; i < 5; i++) if (s[i] === mark) ties.push(i);
+    if (ties.length > 0) {
+      const qValues = [0, 0.25, 0.50, 0.75, 1];
+      return (qValues[ties[0]] + qValues[ties[ties.length - 1]]) / 2;
     }
-    return undefined;
+
+    const p0 = validSize(n) ? 0.5 / n : 0.005;
+    const p4 = validSize(n) ? 1 - 0.5 / n : 0.995;
+    const x = [s[0], s[1], s[2], s[3], s[4]];
+    const y = [p0, 0.25, 0.50, 0.75, p4];
+
+    const h = [];
+    const delta = [];
+    for (let i = 0; i < 4; i++) {
+      h[i] = x[i + 1] - x[i];
+      delta[i] = h[i] > 0 ? (y[i + 1] - y[i]) / h[i] : 0;
+    }
+
+    const d = [0, 0, 0, 0, 0];
+    for (let i = 1; i < 4; i++) {
+      if (delta[i - 1] > 0 && delta[i] > 0) {
+        d[i] = 2 / (1 / delta[i - 1] + 1 / delta[i]);
+      } else {
+        d[i] = 0;
+      }
+    }
+    d[0] = 0;
+    d[4] = 0;
+
+    for (let i = 0; i < 4; i++) {
+      if (mark >= x[i] && mark <= x[i + 1]) {
+        if (h[i] === 0) return y[i];
+        const t = (mark - x[i]) / h[i];
+        const t2 = t * t, t3 = t2 * t;
+        const h00 = 2 * t3 - 3 * t2 + 1;
+        const h10 = t3 - 2 * t2 + t;
+        const h01 = -2 * t3 + 3 * t2;
+        const h11 = t3 - t2;
+        const val = y[i] * h00 + h[i] * d[i] * h10 + y[i + 1] * h01 + h[i] * d[i + 1] * h11;
+        return Math.max(0, Math.min(1, val));
+      }
+    }
+    return 0.5;
   }
   function summary(s, mark, n) {
     if (!validStats(s)) return null;
@@ -63,15 +102,21 @@
       variance += (a*a + a*b + b*b) / 12;
     }
     const sd = Math.sqrt(Math.max(0, variance));
-    const p = percentile(s, mark);
+    const p = percentile(s, mark, n);
     const rank = Number.isFinite(p) && validSize(n) ? Math.max(1, Math.min(n, Math.round(1 + (n - 1) * (1 - p)))) : undefined;
     return { mean, sd, p, rank, z: Number.isFinite(mark) && sd > 0 ? (mark - mean) / sd : undefined };
   }
   function standing(p) {
     if (!Number.isFinite(p)) return '';
+    if (p >= 1) return "You're at the top of the cohort";
+    if (p <= 0) return "You're at the bottom of the cohort";
     const side = p <= 0.5 ? 'bottom' : 'top';
-    const percentage = Math.round(100 * (p <= 0.5 ? p : 1 - p));
-    return `You're in the ${side} ${percentage}% of the cohort`;
+    const pct = 100 * (p <= 0.5 ? p : 1 - p);
+    let str;
+    if (pct < 0.1) str = '< 0.1%';
+    else if (pct < 10) str = Number(pct.toFixed(1)) + '%';
+    else str = (pct % 1 === 0 ? pct.toFixed(0) : Number(pct.toFixed(1))) + '%';
+    return `You're in the ${side} ${str} of the cohort`;
   }
   function readMark(row) {
     // Read only the raw score cell: never the task week or weighted mark.
@@ -199,7 +244,7 @@
     setText(ui.distribution, `Low ${fmt(s[0])}%  •  Q1 ${fmt(s[1])}%  •  Median (Q2) ${fmt(s[2])}%  •  Q3 ${fmt(s[3])}%  •  High ${fmt(s[4])}%  •  Cohort mean ${fmt(data.mean)}%  •  SD ${fmt(data.sd)}`);
     const parts = [];
     if (Number.isFinite(mark)) {
-      if (!overall) parts.push(`Your scored ${fmt(mark)}% in this test`);
+      if (!overall) parts.push(`You scored ${fmt(mark)}% in this test`);
       parts.push(`z-score ${Number.isFinite(data.z) ? '≈ ' + String(Number(data.z.toFixed(2))) : 'unavailable (zero SD)'}`);
       parts.push(standing(data.p));
       if (data.rank !== undefined) parts.push(data.rank===1 ? `You're the top of the cohort for this ${overall?'subject':'test'}` : `Your estimated ${overall ? 'subject' : 'assessment'} rank is ${data.rank} out of ${n}`);

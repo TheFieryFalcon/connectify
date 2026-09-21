@@ -1,0 +1,92 @@
+name: Publish Chrome Build
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  build-and-publish-chrome:
+    name: Build and Publish Chrome Extension
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from manifest
+        id: meta
+        run: |
+          VERSION=$(jq -r '.version // "unknown"' manifest.json)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building Chrome package for version: $VERSION"
+
+      - name: Prepare Chrome extension directory
+        run: |
+          mkdir -p /tmp/chrome-build
+          rsync -av --exclude='.git*' --exclude='.github*' --exclude='*.xpi' --exclude='*.zip' \
+            --exclude='_metadata*' --exclude='.DS_Store' --exclude='README.md' \
+            --exclude='ATAR-REFERENCE.md' ./ /tmp/chrome-build/
+
+          # Remove Firefox-specific gecko settings for Chrome build
+          jq 'del(.browser_specific_settings)' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.clean.json
+          mv /tmp/chrome-build/manifest.clean.json /tmp/chrome-build/manifest.json
+
+      - name: Package Chrome .zip
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          cd /tmp/chrome-build
+          zip -r "$GITHUB_WORKSPACE/connext-chrome-${VERSION}.zip" .
+          cd "$GITHUB_WORKSPACE"
+          cp "connext-chrome-${VERSION}.zip" connext-chrome.zip
+          ls -lh connext-chrome*.zip
+
+      - name: Upload Chrome .zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: connext-chrome-${{ steps.meta.outputs.version }}-zip
+          path: |
+            connext-chrome-${{ steps.meta.outputs.version }}.zip
+            connext-chrome.zip
+          if-no-files-found: error
+
+      - name: Publish to GitHub Release
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          TAG_NAME="v${VERSION}"
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG_NAME="${{ github.ref_name }}"
+          fi
+
+          echo "Target release tag: $TAG_NAME"
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Release $TAG_NAME exists, uploading Chrome assets..."
+            gh release upload "$TAG_NAME" "connext-chrome-${VERSION}.zip" connext-chrome.zip --clobber
+          else
+            echo "Creating release $TAG_NAME..."
+            gh release create "$TAG_NAME" "connext-chrome-${VERSION}.zip" connext-chrome.zip \
+              --title "Connext v${VERSION}" \
+              --generate-notes || gh release upload "$TAG_NAME" "connext-chrome-${VERSION}.zip" connext-chrome.zip --clobber
+          fi
+
+          if gh release view "latest" >/dev/null 2>&1; then
+            echo "Updating latest release with Chrome assets..."
+            gh release upload "latest" "connext-chrome-${VERSION}.zip" connext-chrome.zip --clobber
+          else
+            echo "Creating latest release..."
+            gh release create "latest" "connext-chrome-${VERSION}.zip" connext-chrome.zip \
+              --title "Connext Latest Build" \
+              --notes "Automated build from commit ${{ github.sha }} (version ${VERSION})" \
+              --prerelease || gh release upload "latest" "connext-chrome-${VERSION}.zip" connext-chrome.zip --clobber
+          fi

@@ -73,7 +73,7 @@ jobs:
             echo "Creating release $TAG_NAME..."
             gh release create "$TAG_NAME" "connext-${VERSION}.xpi" connext.xpi \
               --title "Connext v${VERSION}" \
-              --generate-notes
+              --generate-notes || gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" connext.xpi --clobber
           fi
 
           if gh release view "latest" >/dev/null 2>&1; then
@@ -84,5 +84,5 @@ jobs:
             gh release create "latest" "connext-${VERSION}.xpi" connext.xpi \
               --title "Connext Latest Build" \
               --notes "Automated build from commit ${{ github.sha }} (version ${VERSION})" \
-              --prerelease
+              --prerelease || gh release upload "latest" "connext-${VERSION}.xpi" connext.xpi --clobber
           fi
