@@ -1,4 +1,4 @@
-# Connext 3.0.0
+# Connext 3.0.1
 
 Connext enhances Western Australia's Department of Education Connect portal with local assessment analytics, dynamic progress graphs, ATAR and target grade planning, and a site-wide dark theme.
 
@@ -12,7 +12,7 @@ For legacy version release notes prior to 3.0.0, see [2.0.0_changelog.md](2.0.0_
   - The ATAR progression graph y-axis dynamically scales based on the student's 2nd lowest estimated ATAR (floored to multiples of 5).
   - Adaptive grid intervals (5, 10, or 25) automatically adjust to the data range to provide high-resolution trajectory visibility rather than a static 0–100 scale.
 - **Dynamic Cohort Size Estimation**:
-  - Automatically estimates subject cohort sizes for any school and course directly from Highcharts 5-number boxplot summaries.
+  - Automatically estimates subject cohort sizes across all secondary school courses (STEM, Humanities, Languages, and General/Essentials) and refines estimates from Highcharts boxplot distributions when available.
   - Employs normal order-statistics ratios (sample range to interquartile range with upper/lower semi-quartile spread damping) across all outline tasks to mitigate outliers.
 - **Persistent Manual Cohort Override**:
   - Subject cohort size input is now always accessible on overall subject cards.
@@ -41,6 +41,9 @@ For legacy version release notes prior to 3.0.0, see [2.0.0_changelog.md](2.0.0_
 
 ## Fixes
 
+- **Dynamic Cohort Estimator Resilience**:
+  - Resolved an issue where initial page loads with collapsed assessment accordions prevented Highcharts detection, causing cohort size and rank to evaluate to unavailable.
+  - Integrated course-level categorization with empirical boxplot spread refinement, ensuring ranks and cohort estimates appear immediately upon page load without panel recreation or input flickering.
 - **Cohort Standing Precision & Typos**:
   - Standing percentages now display with decimal precision (e.g. `top 0.4%`, `< 0.1%`), eliminating inaccurate `"top 0%"` readouts.
   - Fixed grammatical spelling error (`"You scored"` instead of `"Your scored"`).
@@ -64,4 +67,4 @@ For legacy version release notes prior to 3.0.0, see [2.0.0_changelog.md](2.0.0_
 - **Uniform Course Evaluation**:
   - All courses and tasks are evaluated uniformly and dynamically based on live Connect data without school or subject biases.
 - **Version Bump**:
-  - Updated extension manifest version from `2.1.14` to `3.0.0`.
+  - Updated extension manifest version to `3.0.1`.
