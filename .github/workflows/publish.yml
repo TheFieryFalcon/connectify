@@ -1,0 +1,88 @@
+name: Publish .xpi Build
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    name: Build and Publish .xpi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from manifest
+        id: meta
+        run: |
+          VERSION=$(jq -r '.version // "unknown"' manifest.json)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building version: $VERSION"
+
+      - name: Package .xpi extension
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          zip -r "connext-${VERSION}.xpi" . -x \
+            "*.git*" \
+            "*.github*" \
+            "*.DS_Store" \
+            "*_metadata*" \
+            "README.md" \
+            "ATAR-REFERENCE.md" \
+            "*.xpi" \
+            "*.zip"
+
+          cp "connext-${VERSION}.xpi" connext.xpi
+          ls -lh *.xpi
+
+      - name: Upload .xpi artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: connext-${{ steps.meta.outputs.version }}-xpi
+          path: |
+            connext-${{ steps.meta.outputs.version }}.xpi
+            connext.xpi
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          TAG_NAME="v${VERSION}"
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG_NAME="${{ github.ref_name }}"
+          fi
+
+          echo "Target release tag: $TAG_NAME"
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Release $TAG_NAME exists, uploading assets..."
+            gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" connext.xpi --clobber
+          else
+            echo "Creating release $TAG_NAME..."
+            gh release create "$TAG_NAME" "connext-${VERSION}.xpi" connext.xpi \
+              --title "Connext v${VERSION}" \
+              --generate-notes
+          fi
+
+          if gh release view "latest" >/dev/null 2>&1; then
+            echo "Updating latest release assets..."
+            gh release upload "latest" "connext-${VERSION}.xpi" connext.xpi --clobber
+          else
+            echo "Creating latest release..."
+            gh release create "latest" "connext-${VERSION}.xpi" connext.xpi \
+              --title "Connext Latest Build" \
+              --notes "Automated build from commit ${{ github.sha }} (version ${VERSION})" \
+              --prerelease
+          fi
