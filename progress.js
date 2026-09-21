@@ -30,11 +30,24 @@
     if(isHistory){const result=history(data);chart.append(make('h3','ATAR Progression'));if(result.error){chart.append(make('p',result.error));return;}points=result.points;byAssessment=result.byAssessment;chart.append(make('p','Estimated from weighted running school averages using the 2025 model. Begins once four subjects have results.'));if(byAssessment)chart.append(make('p','Some assessments have chapter labels or no readable date. Each assessment round uses the first N completed weighted assessments in each subject’s outline order (or all available if fewer). These rounds are not calendar dates.'));
     }else{selected=current.name;points=current.tasks;chart.append(make('h3',current.name));const legend=make('div');legend.className='cx-legend';const red=make('span','Red line -> Average Cohort performance'),blue=make('span','Blue line -> Your performance');red.className='cx-red-key';blue.className='cx-blue-key';legend.append(red,blue);chart.append(legend);}
     if(!points.length){chart.append(make('p',isHistory?'Not enough completed results yet to estimate ATAR progression.':'No completed assessments found. Expand all subjects and refresh.'));return;}
+    let minY=0,maxY=100;
+    if(isHistory){
+      const valid=points.map(p=>p.score).filter(Number.isFinite);
+      if(valid.length){
+        const sorted=[...valid].sort((a,b)=>a-b);
+        const secondLowest=sorted.length>1?sorted[1]:sorted[0];
+        minY=Math.max(0,Math.floor((secondLowest-5)/5)*5);
+        if(minY>=maxY)minY=maxY-5;
+      }
+    }
+    const range=maxY-minY;
+    const step=!isHistory||range===100?25:range>30&&range%10===0?10:5;
+    const yFor=v=>260-((v-minY)/range)*220;
     const svg=svgEl('svg',{viewBox:'0 0 680 310',role:'img','aria-label':isHistory?(byAssessment?'Estimated ATAR progression by assessment round':'Estimated ATAR progression over school weeks'):`${current.name}: your assessment scores and estimated cohort means`});
-    for(let value=0;value<=100;value+=25){const py=260-value*2.2;svg.append(svgEl('line',{x1:44,y1:py,x2:655,y2:py,class:'cx-grid'}),svgEl('text',{x:36,y:py+4,'text-anchor':'end'},value+(isHistory?'':'%')));}
+    for(let value=minY;value<=maxY;value+=step){const py=yFor(value);svg.append(svgEl('line',{x1:44,y1:py,x2:655,y2:py,class:'cx-grid'}),svgEl('text',{x:36,y:py+4,'text-anchor':'end'},value+(isHistory?'':'%')));}
     const first=points[0].order,last=points.at(-1).order;
     const x=i=>points.length===1?350:isHistory&&last>first?52+(points[i].order-first)*595/(last-first):52+i*595/(points.length-1);
-    function series(key,cls){let segment=[];const flush=()=>{if(segment.length)svg.append(svgEl('polyline',{points:segment.join(' '),fill:'none',class:cls}));segment=[];};points.forEach((p,i)=>{if(!Number.isFinite(p[key])){flush();return;}const cy=260-p[key]*2.2;segment.push(`${x(i)},${cy}`);const circle=svgEl('circle',{cx:x(i),cy,r:4.5,tabindex:0,class:cls+'-point'});circle.append(svgEl('title',{},`${p.name}: ${key==='mean'?'Cohort mean':isHistory?'Estimated ATAR':'Your score'} ${Number(p[key].toFixed(2))}${isHistory?'':'%'}`));svg.append(circle);});flush();}
+    function series(key,cls){let segment=[];const flush=()=>{if(segment.length)svg.append(svgEl('polyline',{points:segment.join(' '),fill:'none',class:cls}));segment=[];};points.forEach((p,i)=>{if(!Number.isFinite(p[key])){flush();return;}const cy=Math.max(40,Math.min(260,yFor(p[key])));segment.push(`${x(i)},${cy}`);const circle=svgEl('circle',{cx:x(i),cy,r:4.5,tabindex:0,class:cls+'-point'});circle.append(svgEl('title',{},`${p.name}: ${key==='mean'?'Cohort mean':isHistory?'Estimated ATAR':'Your score'} ${Number(p[key].toFixed(2))}${isHistory?'':'%'}`));svg.append(circle);});flush();}
     if(!isHistory)series('mean','cx-cohort');series('score','cx-line');
     points.forEach((p,i)=>{if(points.length<=18||i%Math.ceil(points.length/14)===0)svg.append(svgEl('text',{x:x(i),y:283,'text-anchor':'middle'},isHistory?Number(p.order.toFixed(1)):String(i+1)));});svg.append(svgEl('text',{x:350,y:306,'text-anchor':'middle'},isHistory?(byAssessment?'Assessment round':'School week'):'Assessment'));chart.append(svg);
     if(!isHistory&&points.some(p=>p.mean===null))chart.append(make('p','Gaps in the red line mean cohort statistics are not available for that task.'));
