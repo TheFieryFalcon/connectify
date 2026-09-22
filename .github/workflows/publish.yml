@@ -108,3 +108,44 @@ jobs:
               --notes "Automated build from commit ${{ github.sha }} (version ${VERSION})" \
               --prerelease || gh release upload "latest" "connectify-${VERSION}.xpi" "connectify-${VERSION}.crx" "connectify-${VERSION}.zip" --clobber
           fi
+
+      - name: Generate Auto-Update Manifests
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          TAG_NAME="v${VERSION}"
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG_NAME="${{ github.ref_name }}"
+          fi
+          
+          # Generate Chrome updates.xml
+          cat <<EOF > updates.xml
+          <?xml version='1.0' encoding='UTF-8'?>
+          <gupdate xmlns='http://www.google.com/update2/response' protocol='2.0'>
+            <app appid='lkpdfanoafghlpacagkhepdklgagihnb'>
+              <updatecheck codebase='https://github.com/TheFieryFalcon/connectify/releases/download/${TAG_NAME}/connectify-${VERSION}.crx' version='${VERSION}' />
+            </app>
+          </gupdate>
+          EOF
+          
+          # Generate Firefox updates.json
+          cat <<EOF > updates.json
+          {
+            "addons": {
+              "connect-chart-tea@local": {
+                "updates": [
+                  {
+                    "version": "${VERSION}",
+                    "update_link": "https://github.com/TheFieryFalcon/connectify/releases/download/${TAG_NAME}/connectify-${VERSION}.xpi"
+                  }
+                ]
+              }
+            }
+          }
+          EOF
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add updates.xml updates.json
+          git commit -m "chore: Update auto-update manifests for ${VERSION} [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:main

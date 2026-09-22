@@ -3,6 +3,7 @@
       "gecko": {
          "id": "connect-chart-tea@local",
          "strict_min_version": "140.0",
+         "update_url": "https://raw.githubusercontent.com/TheFieryFalcon/connectify/main/updates.json",
          "data_collection_permissions": {
       			"required": ["none"]
     		}
@@ -31,6 +32,6 @@
    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwloUCzVE+Fw/IiHtROGdlXlOlCB0vM62SRRN62Nn0h8/yZJoNlz1MpjolldoN/NtuOMiUkplgz+/OOsbZS31T/5jg75k79yvBpzUTaLBBXIB3ps9ZrT2eC9RQ+z+OYiY1Sdl0t/3KGWOx2/1NnlEmTqMCB8OS59CcQaFmKNhV9M9XrkLXv74Yzlc7jy7+EfnbjTMOviTvQLvlmSSy1YHXbU/RsMsxn4s7O9D0lp4JveoWu53rR74QxWL3oXtiG2KUROlcelU/nHXUxZvso5+jOaCa7GLED0d6G4A7rdnNHcmzeoYaJrUE9xJvcBFOxp/kZjTc6AwxzdwqUW36F4kgwIDAQAB",
    "manifest_version": 3,
    "name": "Connectify",
-   "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "2.1.3"
+   "update_url": "https://raw.githubusercontent.com/TheFieryFalcon/connectify/main/updates.xml",
+   "version": "3.1.4"
 }
