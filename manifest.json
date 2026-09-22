@@ -32,5 +32,5 @@
    "manifest_version": 3,
    "name": "Connectify",
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "3.1.2"
+   "version": "2.1.3"
 }
