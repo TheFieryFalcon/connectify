@@ -6,12 +6,20 @@
   'use strict';
 
   let hasInitializedSidebar = false;
+  let hasAutoExpanded = false;
 
   function syncFeatures() {
     if (!window.ConnextData) return;
+    
+    if (!hasAutoExpanded) {
+        window.ConnextData.expandAll(true);
+        hasAutoExpanded = true;
+    }
 
     // --- 1. WACE Exam Countdown ---
-    const yearLevel = Array.from(document.querySelectorAll('.eds-c-tile__title')).some(el => /\b(?:12|Twelve)\b/i.test(el.textContent)) ? 12 : 11;
+    const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent);
+    const isYear12 = titles.some(t => /\b12\b/i.test(t) || /\bAT[A-Z]*\b/.test(t));
+    const yearLevel = isYear12 ? 12 : 11;
     
     if (yearLevel === 12) {
       const mainContent = document.getElementById('main-content') || document.body;

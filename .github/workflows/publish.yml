@@ -1,4 +1,4 @@
-name: Publish .xpi Build
+name: Publish Extension
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-and-publish:
-    name: Build and Publish .xpi
+    name: Build and Publish
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -26,31 +26,48 @@ jobs:
         run: |
           VERSION=$(jq -r '.version // "unknown"' manifest.json)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Building version: $VERSION"
 
-      - name: Package .xpi extension
+      - name: Package Firefox .xpi
         run: |
           VERSION="${{ steps.meta.outputs.version }}"
-          zip -r "connext-${VERSION}.xpi" . -x \
-            "*.git*" \
-            "*.github*" \
-            "*.DS_Store" \
-            "*_metadata*" \
-            "README.md" \
-            "ATAR-REFERENCE.md" \
-            "*.xpi" \
-            "*.zip"
+          zip -r "connext-${VERSION}.xpi" . -x "*.git*" "*.github*" "*.DS_Store" "*_metadata*" "README.md" "ATAR-REFERENCE.md" "*.xpi" "*.zip" "*.crx"
 
-          ls -lh "connext-${VERSION}.xpi"
+      - name: Package Chrome .crx and .zip
+        env:
+          CRX_KEY_SECRET: ${{ secrets.CRX_KEY }}
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          mkdir -p /tmp/chrome-build
+          rsync -av --exclude='.git*' --exclude='.github*' --exclude='*.xpi' --exclude='*.zip' --exclude='*.crx' \
+            --exclude='_metadata*' --exclude='.DS_Store' --exclude='README.md' \
+            --exclude='2.0.0_changelog.md' --exclude='ATAR-REFERENCE.md' ./ /tmp/chrome-build/
 
-      - name: Upload .xpi artifact
+          if [ -n "$CRX_KEY_SECRET" ]; then
+            echo "$CRX_KEY_SECRET" > /tmp/key.pem
+          else
+            openssl genrsa -out /tmp/key.pem 2048
+          fi
+
+          PUB_KEY=$(openssl rsa -in /tmp/key.pem -pubout -outform DER 2>/dev/null | base64 | tr -d '\r\n')
+          jq --arg k "$PUB_KEY" 'del(.browser_specific_settings) | .key = $k' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.clean.json
+          mv /tmp/chrome-build/manifest.clean.json /tmp/chrome-build/manifest.json
+
+          npx -y crx3 -p /tmp/key.pem -o "connext-${VERSION}.crx" /tmp/chrome-build
+          
+          cd /tmp/chrome-build
+          zip -r "$GITHUB_WORKSPACE/connext-${VERSION}.zip" .
+          cd $GITHUB_WORKSPACE
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: connext-${{ steps.meta.outputs.version }}-xpi
-          path: connext-${{ steps.meta.outputs.version }}.xpi
-          if-no-files-found: error
+          name: connext-${{ steps.meta.outputs.version }}-builds
+          path: |
+            connext-${{ steps.meta.outputs.version }}.xpi
+            connext-${{ steps.meta.outputs.version }}.crx
+            connext-${{ steps.meta.outputs.version }}.zip
 
-      - name: Publish GitHub Release
+      - name: Publish to GitHub Release
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -61,35 +78,33 @@ jobs:
             TAG_NAME="${{ github.ref_name }}"
           fi
 
-          echo "Target release tag: $TAG_NAME"
           PRERELEASE_FLAG=""
 
-          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
-            echo "Release $TAG_NAME exists, appending timecode..."
-            TIMECODE=$(git show -s --format=%ct ${{ github.sha }})
-            TAG_NAME="${TAG_NAME}-${TIMECODE}"
-            VERSION="${VERSION}-${TIMECODE}"
-            PRERELEASE_FLAG="--prerelease"
-            mv "connext-${{ steps.meta.outputs.version }}.xpi" "connext-${VERSION}.xpi"
+          if [[ "${{ github.ref_type }}" != "tag" ]]; then
+            if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+              TIMECODE=$(git show -s --format=%ct ${{ github.sha }})
+              TAG_NAME="${TAG_NAME}-${TIMECODE}"
+              VERSION="${VERSION}-${TIMECODE}"
+              PRERELEASE_FLAG="--prerelease"
+              mv "connext-${{ steps.meta.outputs.version }}.xpi" "connext-${VERSION}.xpi"
+              mv "connext-${{ steps.meta.outputs.version }}.crx" "connext-${VERSION}.crx"
+              mv "connext-${{ steps.meta.outputs.version }}.zip" "connext-${VERSION}.zip"
+            fi
           fi
 
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
-            echo "Release $TAG_NAME already exists, uploading assets..."
-            gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" --clobber
+            gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" "connext-${VERSION}.crx" "connext-${VERSION}.zip" --clobber
           else
-            echo "Creating release $TAG_NAME..."
-            gh release create "$TAG_NAME" "connext-${VERSION}.xpi" \
+            gh release create "$TAG_NAME" "connext-${VERSION}.xpi" "connext-${VERSION}.crx" "connext-${VERSION}.zip" \
               --title "Connext ${TAG_NAME}" \
-              --generate-notes $PRERELEASE_FLAG || gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" --clobber
+              --generate-notes $PRERELEASE_FLAG || gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" "connext-${VERSION}.crx" "connext-${VERSION}.zip" --clobber
           fi
 
           if gh release view "latest" >/dev/null 2>&1; then
-            echo "Updating latest release assets..."
-            gh release upload "latest" "connext-${VERSION}.xpi" --clobber
+            gh release upload "latest" "connext-${VERSION}.xpi" "connext-${VERSION}.crx" "connext-${VERSION}.zip" --clobber
           else
-            echo "Creating latest release..."
-            gh release create "latest" "connext-${VERSION}.xpi" \
+            gh release create "latest" "connext-${VERSION}.xpi" "connext-${VERSION}.crx" "connext-${VERSION}.zip" \
               --title "Connext Latest Build" \
               --notes "Automated build from commit ${{ github.sha }} (version ${VERSION})" \
-              --prerelease || gh release upload "latest" "connext-${VERSION}.xpi" --clobber
+              --prerelease || gh release upload "latest" "connext-${VERSION}.xpi" "connext-${VERSION}.crx" "connext-${VERSION}.zip" --clobber
           fi
