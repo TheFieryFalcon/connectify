@@ -8,6 +8,16 @@
   let hasInitializedSidebar = false;
   let hasAutoExpanded = false;
 
+  if (!document.getElementById('cx-compound-styles')) {
+      const style = document.createElement('style');
+      style.id = 'cx-compound-styles';
+      style.textContent = `
+          .cx-compound-segment { transition: filter 0.2s; cursor: pointer; }
+          .cx-compound-segment:hover { filter: brightness(1.5); }
+      `;
+      document.head.appendChild(style);
+  }
+
   function syncFeatures() {
     if (!window.ConnextData) return;
     
@@ -21,31 +31,37 @@
     }
 
     // --- Expand/Collapse Buttons ---
-    const mainContent = document.getElementById('main-content') || document.body;
-    if (mainContent && !document.getElementById('cx-expand-btn')) {
+    // User requested: "if the sidebar doesn't work, move the buttons below the connext menu and make it scroll with the user."
+    if (!document.getElementById('cx-expand-btn')) {
         const btnContainer = document.createElement('div');
         btnContainer.id = 'cx-expand-btn';
+        btnContainer.style.position = 'fixed';
+        btnContainer.style.top = '44px'; // Below the theme toggle
+        btnContainer.style.right = '16px';
+        btnContainer.style.width = '104px'; // match theme toggle width
         btnContainer.style.display = 'flex';
+        btnContainer.style.flexDirection = 'column';
         btnContainer.style.gap = '8px';
-        btnContainer.style.padding = '0 0 16px 0';
+        btnContainer.style.zIndex = '10000';
         
         const createBtn = (text, isExpand) => {
            const btn = document.createElement('button');
            btn.textContent = text;
            btn.type = 'button';
            btn.className = 'eds-c-button';
-           btn.style.padding = '6px 16px';
-           btn.style.fontSize = '12px';
+           btn.style.padding = '6px';
+           btn.style.fontSize = '11px';
+           btn.style.width = '100%';
            btn.onclick = () => window.ConnextData.expandAll(isExpand);
            return btn;
         };
-        btnContainer.append(createBtn('Expand All Subjects', true), createBtn('Collapse All Subjects', false));
-        mainContent.prepend(btnContainer);
+        btnContainer.append(createBtn('Expand All', true), createBtn('Collapse All', false));
+        document.body.appendChild(btnContainer);
     }
 
     // --- WACE Exam Countdown ---
     const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent);
-    const isYear12 = titles.some(t => /\b12\b/i.test(t) || /\bAT[A-Z]*\b/.test(t));
+    const isYear12 = titles.some(t => /\b12\b/i.test(t) || /\bAT[A-Z]{3}\b/.test(t));
     const yearLevel = isYear12 ? 12 : 11;
     
     if (yearLevel === 12) {
@@ -84,22 +100,27 @@
        'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'portfolio'] }
     };
     
-    let categories = defaultCategories;
-    try {
-        const saved = localStorage.getItem('cx-categories');
-        if (saved) categories = JSON.parse(saved);
-    } catch (e) {}
+    // Fallback if chrome.storage fails to load yet
+    if (!window.cxCategories) {
+        window.cxCategories = defaultCategories;
+        if (typeof chrome !== 'undefined' && chrome.storage) {
+            chrome.storage.local.get(['cx-categories'], (res) => {
+                if (res['cx-categories']) {
+                    window.cxCategories = res['cx-categories'];
+                }
+            });
+        }
+    }
 
     function categorizeTask(taskName) {
        const lower = (taskName || '').toLowerCase();
        if (lower.includes('exam')) return 'Exam';
-       for (const [cat, data] of Object.entries(categories)) {
+       for (const [cat, data] of Object.entries(window.cxCategories)) {
           if (data.keywords.some(k => lower.includes(k))) return cat;
        }
        return 'Take-Home';
     }
 
-    // Use ConnextData's new persistent cache directly!
     const subjects = window.ConnextData.collect(true);
 
     // --- Compound Subject Progress Bars ---
@@ -112,7 +133,12 @@
            const header = card.querySelector('.eds-c-tile__header');
            if (!header) return;
 
+           const signature = JSON.stringify({ tasks: subject.tasks, cats: window.cxCategories });
+           
            if (header.nextElementSibling && header.nextElementSibling.classList.contains('cx-compound-progress-container')) {
+              if (header.nextElementSibling.dataset.signature === signature) {
+                  return; // Unchanged, don't destroy DOM!
+              }
               header.nextElementSibling.remove();
            }
 
@@ -150,8 +176,9 @@
               
               const pct = (t.weight / totalWeight) * 100;
               const segment = document.createElement('div');
+              segment.className = 'cx-compound-segment';
               segment.style.width = `${pct}%`;
-              segment.style.backgroundColor = categories[cat] ? categories[cat].color : '#999';
+              segment.style.backgroundColor = window.cxCategories[cat] ? window.cxCategories[cat].color : '#999';
               if (!isCompleted) {
                  segment.style.opacity = '0.25';
               }
@@ -173,6 +200,7 @@
 
            const container = document.createElement('div');
            container.className = 'cx-compound-progress-container';
+           container.dataset.signature = signature;
            container.style.padding = '0 16px';
            container.appendChild(bar);
            container.appendChild(label);
@@ -188,7 +216,6 @@
        const toolMenu = document.querySelector('.cx-tool-menu');
        const workspace = document.querySelector('.cx-workspace');
        
-       // --- Panel 1: Weakness Analyzer ---
        const toggleBtn = document.createElement('button');
        toggleBtn.textContent = 'Weakness Analyzer';
        toggleBtn.type = 'button';
@@ -214,10 +241,7 @@
 
        const renderChart = () => {
          const chartDiv = document.getElementById('connext-radar-chart');
-         if (!window.Highcharts) {
-           chartDiv.innerHTML = '<div style="padding:20px;color:red;">Highcharts not loaded.</div>';
-           return;
-         }
+         if (!window.Highcharts) return;
          
          const perf = {};
          const mode = document.getElementById('cx-radar-mode').value;
@@ -247,14 +271,14 @@
          }
 
          window.Highcharts.chart('connext-radar-chart', {
-            chart: { polar: true, type: 'line', backgroundColor: 'transparent' },
+            chart: { polar: true, type: 'area', backgroundColor: 'transparent' },
             title: { text: '' },
             pane: { size: '80%' },
             xAxis: { categories: labels, tickmarkPlacement: 'on', lineWidth: 0, labels: { style: { color: '#cccccc' } } },
             yAxis: { gridLineInterpolation: 'polygon', lineWidth: 0, min: 0, max: 100, labels: { style: { color: '#999' } } },
             tooltip: { shared: true, pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y}%</b><br/>' },
             legend: { enabled: false },
-            series: [{ name: 'Performance', data: data, pointPlacement: 'on', color: '#d4b483' }],
+            series: [{ name: 'Performance', data: data, pointPlacement: 'on', color: '#d4b483', fillOpacity: 0.2 }],
             credits: { enabled: false }
          });
        };
@@ -276,8 +300,6 @@
            }
        });
 
-
-       // --- Panel 2: Categories / Settings ---
        const catBtn = document.createElement('button');
        catBtn.textContent = 'Settings / Categories';
        catBtn.type = 'button';
@@ -294,13 +316,19 @@
          <p style="font-size:12px;color:#999;margin-bottom:12px;">Comma-separated keywords for each category.</p>
        `;
        
-       for (const cat of Object.keys(defaultCategories)) {
-           const wrap = document.createElement('div');
-           wrap.style.marginBottom = '6px';
-           wrap.innerHTML = `<label style="display:inline-block;width:80px;font-size:12px;">${cat}</label>
-                             <input type="text" id="cx-cat-${cat}" value="${(categories[cat] || defaultCategories[cat]).keywords.join(', ')}" style="width:180px; padding:4px; background:#212121; color:#ddd; border:1px solid #4a4a4a; font-size:12px;">`;
-           catInner.appendChild(wrap);
-       }
+       // Populate inputs from window.cxCategories which was loaded async
+       const renderInputs = () => {
+           Array.from(catInner.querySelectorAll('.cx-cat-wrap')).forEach(e => e.remove());
+           for (const cat of Object.keys(defaultCategories)) {
+               const wrap = document.createElement('div');
+               wrap.className = 'cx-cat-wrap';
+               wrap.style.marginBottom = '6px';
+               const currentVal = (window.cxCategories[cat] || defaultCategories[cat]).keywords.join(', ');
+               wrap.innerHTML = `<label style="display:inline-block;width:80px;font-size:12px;">${cat}</label>
+                                 <input type="text" id="cx-cat-${cat}" value="${currentVal}" style="width:180px; padding:4px; background:#212121; color:#ddd; border:1px solid #4a4a4a; font-size:12px;">`;
+               catInner.insertBefore(wrap, saveBtn);
+           }
+       };
        
        const saveBtn = document.createElement('button');
        saveBtn.textContent = 'Save Categories';
@@ -310,13 +338,15 @@
        saveBtn.onclick = () => {
            for (const cat of Object.keys(defaultCategories)) {
                const val = document.getElementById(`cx-cat-${cat}`).value;
-               categories[cat] = {
+               window.cxCategories[cat] = {
                    color: defaultCategories[cat].color,
                    keywords: val.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
                };
            }
-           localStorage.setItem('cx-categories', JSON.stringify(categories));
-           alert('Categories saved! Will apply to progress bars immediately.');
+           if (typeof chrome !== 'undefined' && chrome.storage) {
+               chrome.storage.local.set({ 'cx-categories': window.cxCategories });
+           }
+           alert('Categories saved!');
        };
        
        const resetBtn = document.createElement('button');
@@ -326,11 +356,11 @@
        resetBtn.style.marginTop = '12px';
        resetBtn.style.marginLeft = '8px';
        resetBtn.onclick = () => {
-           categories = JSON.parse(JSON.stringify(defaultCategories));
-           localStorage.removeItem('cx-categories');
-           for (const cat of Object.keys(defaultCategories)) {
-               document.getElementById(`cx-cat-${cat}`).value = defaultCategories[cat].keywords.join(', ');
+           window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
+           if (typeof chrome !== 'undefined' && chrome.storage) {
+               chrome.storage.local.remove('cx-categories');
            }
+           renderInputs();
            alert('Categories reset to default.');
        };
        
@@ -341,6 +371,7 @@
        if (workspace) workspace.append(catPanel);
 
        catBtn.addEventListener('click', () => {
+          renderInputs();
           document.querySelectorAll('.cx-workspace-panel').forEach(p => p.hidden = true);
           document.querySelectorAll('.cx-tool-menu button').forEach(b => b.setAttribute('aria-expanded', 'false'));
           catBtn.setAttribute('aria-expanded', 'true');
@@ -354,7 +385,6 @@
            }
        });
        
-       // Expose to sidebar layout array
        if (window.ConnextAtar) {
           window.ConnextAtar.toolButtons = window.ConnextAtar.toolButtons || [];
           window.ConnextAtar.toolButtons.push(toggleBtn, catBtn);

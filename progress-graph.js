@@ -108,8 +108,13 @@
 
       const calculation = window.ConnextAtar.calculate(rows);
       if (!calculation.error) {
+        const getMonthName = (week) => {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthIndex = 1 + Math.floor((week - 1) / 4.3);
+            return months[Math.max(0, Math.min(11, monthIndex))];
+        };
         points.push({
-          name: byAssessment ? `Assessment round ${step}` : `Week ${Number(step.toFixed(1))}`,
+          name: byAssessment ? `Assessment round ${step}` : getMonthName(step),
           caption: '',
           score: calculation.atar === '<30' ? null : Number(calculation.atar),
           display: calculation.atar,
@@ -254,7 +259,7 @@
       'aria-label': isHistory
         ? byAssessment
           ? 'Estimated ATAR progression by assessment round'
-          : 'Estimated ATAR progression over school weeks'
+          : 'Estimated ATAR progression over months'
         : `${current.name}: your assessment scores and estimated cohort means`
     });
 
@@ -343,6 +348,12 @@
     }
     renderSeries('score', 'cx-line');
 
+    const getMonthName = (week) => {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthIndex = 1 + Math.floor((week - 1) / 4.3);
+      return months[Math.max(0, Math.min(11, monthIndex))];
+    };
+
     // X-axis tick labels
     points.forEach((point, idx) => {
       if (points.length <= 18 || idx % Math.ceil(points.length / 14) === 0) {
@@ -354,7 +365,7 @@
               y: 283,
               'text-anchor': 'middle'
             },
-            isHistory ? Number(point.order.toFixed(1)) : String(idx + 1)
+            isHistory ? (byAssessment ? Number(point.order.toFixed(1)) : getMonthName(point.order)) : String(idx + 1)
           )
         );
       }
@@ -369,7 +380,7 @@
           y: 306,
           'text-anchor': 'middle'
         },
-        isHistory ? (byAssessment ? 'Assessment round' : 'School week') : 'Assessment'
+        isHistory ? (byAssessment ? 'Assessment round' : 'Month') : 'Assessment'
       )
     );
 
