@@ -99,17 +99,22 @@
        'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'extended', 'presentation', 'oral', 'creative'] }
     };
     
-    // Fallback if chrome.storage fails to load yet
     if (!window.cxCategories) {
         window.cxCategories = defaultCategories;
-        if (typeof chrome !== 'undefined' && chrome.storage) {
-            chrome.storage.local.get(['cx-categories'], (res) => {
+    }
+
+    // Fallback if extension storage fails to load yet
+    const resolveCategories = () => {
+        const api = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
+        if (api && api.storage) {
+            api.storage.local.get(['cx-categories'], (res) => {
                 if (res['cx-categories']) {
                     window.cxCategories = res['cx-categories'];
                 }
             });
         }
-    }
+    };
+    resolveCategories();
 
     function categorizeTask(taskName) {
        const lower = (taskName || '').toLowerCase();
@@ -345,8 +350,9 @@
                    keywords: val.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
                };
            }
-           if (typeof chrome !== 'undefined' && chrome.storage) {
-               chrome.storage.local.set({ 'cx-categories': window.cxCategories });
+           const api = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
+           if (api && api.storage) {
+               api.storage.local.set({ 'cx-categories': window.cxCategories });
            }
            alert('Categories saved!');
        };
@@ -359,8 +365,9 @@
        resetBtn.style.marginLeft = '8px';
        resetBtn.onclick = () => {
            window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
-           if (typeof chrome !== 'undefined' && chrome.storage) {
-               chrome.storage.local.remove('cx-categories');
+           const api = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
+           if (api && api.storage) {
+               api.storage.local.remove('cx-categories');
            }
            renderInputs();
            alert('Categories reset to default.');
