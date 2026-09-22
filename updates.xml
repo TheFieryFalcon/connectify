@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <gupdate xmlns='http://www.google.com/update2/response' protocol='2.0'>
   <app appid='lkpdfanoafghlpacagkhepdklgagihnb'>
-    <updatecheck codebase='https://github.com/TheFieryFalcon/connectify/releases/download/v3.1.4/connectify-3.1.4.crx' version='3.1.4' />
+    <updatecheck codebase='https://github.com/TheFieryFalcon/connectify/releases/download/v3.1.5/connectify-3.1.5.crx' version='3.1.5' />
   </app>
 </gupdate>
