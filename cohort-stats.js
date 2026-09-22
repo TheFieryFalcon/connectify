@@ -276,10 +276,10 @@
    */
   function standing(p) {
     if (!Number.isFinite(p)) return '';
-    if (p >= 1) return "You're at the top of the cohort";
-    if (p <= 0) return "You're at the bottom of the cohort";
+    if (p >= 1) return "Top of cohort";
+    if (p <= 0) return "Bottom of cohort";
 
-    const side = p <= 0.5 ? 'bottom' : 'top';
+    const side = p <= 0.5 ? 'Bottom' : 'Top';
     const pct = 100 * (p <= 0.5 ? p : 1 - p);
 
     let pctString;
@@ -288,10 +288,10 @@
     } else if (pct < 10) {
       pctString = Number(pct.toFixed(1)) + '%';
     } else {
-      pctString = (pct % 1 === 0 ? pct.toFixed(0) : Number(pct.toFixed(1))) + '%';
+      pctString = Math.round(pct) + '%';
     }
 
-    return `You're in the ${side} ${pctString} of the cohort`;
+    return `${side} ${pctString}`;
   }
 
   /**
@@ -416,7 +416,7 @@
     let notice;
 
     if (isOverall && key) {
-      const label = createElement('label', 'connectea-controls', 'Students in this subject: ');
+      const label = createElement('label', 'connectea-controls', 'Cohort Size: ');
       input = createElement('input', 'connectea-subject-cohort-input');
       input.type = 'number';
       input.min = '1';
@@ -427,12 +427,13 @@
       input.value = saved !== undefined ? String(saved) : '';
       label.append(input);
 
+      const warningText = estimatedSize < 50 ? ' (Estimates <50 students are highly inaccurate)' : '';
       notice = createElement(
         'span',
         'connectea-notice',
         saved !== undefined
           ? 'Saved for both semesters.'
-          : `Estimated ~${estimatedSize}; enter to override.`
+          : `Auto: ~${estimatedSize}${warningText}`
       );
       notice.setAttribute('aria-live', 'polite');
 
@@ -447,6 +448,9 @@
         const isInvalid = (input.value !== '' && !size) || input.validity.badInput;
         input.setAttribute('aria-invalid', String(Boolean(isInvalid)));
 
+        const currentEstimate = stateRef.state ? stateRef.state.estimatedSize : estimatedSize;
+        const currentWarning = currentEstimate < 50 ? ' (Estimates <50 students are highly inaccurate)' : '';
+
         const persisted = saveCohortSize(key, size);
         setText(
           notice,
@@ -456,7 +460,7 @@
             ? persisted
               ? 'Saved for both semesters.'
               : 'Used for this visit; browser storage is unavailable.'
-            : `Estimated ~${stateRef.state.estimatedSize}; enter to override.`
+            : `Auto: ~${currentEstimate}${currentWarning}`
         );
         schedule();
       });
@@ -508,7 +512,8 @@
       
       if (userSize === undefined && ui.notice) {
         // Keep the DOM notice text up to date if there's no manual user override
-        setText(ui.notice, `Estimated ~${estimatedSize}; enter to override.`);
+        const warningText = estimatedSize < 50 ? ' (Estimates <50 students are highly inaccurate)' : '';
+        setText(ui.notice, `Auto: ~${estimatedSize}${warningText}`);
       }
     }
 
@@ -516,27 +521,27 @@
     const data = summary(stats, mark, cohortSize);
 
     if (!data) {
-      setText(ui.distribution, 'Cohort mean and boxplot statistics unavailable');
+      setText(ui.distribution, 'Cohort stats unavailable');
       setText(
         ui.result,
-        Number.isFinite(mark) ? 'Rank and z-score unavailable' : 'Not marked · Rank and z-score unavailable'
+        Number.isFinite(mark) ? 'Rank/z-score unavailable' : 'Not marked · Rank/z-score unavailable'
       );
       return;
     }
 
     setText(
       ui.distribution,
-      `Low ${formatPercentage(stats[0])}%  •  Q1 ${formatPercentage(stats[1])}%  •  Median (Q2) ${formatPercentage(
+      `Min ${formatPercentage(stats[0])}%  •  Q1 ${formatPercentage(stats[1])}%  •  Med ${formatPercentage(
         stats[2]
-      )}%  •  Q3 ${formatPercentage(stats[3])}%  •  High ${formatPercentage(stats[4])}%  •  Cohort mean ${formatPercentage(
+      )}%  •  Q3 ${formatPercentage(stats[3])}%  •  Max ${formatPercentage(stats[4])}%  •  Mean ${formatPercentage(
         data.mean
       )}%  •  SD ${formatPercentage(data.sd)}`
     );
 
     const parts = [];
     if (Number.isFinite(mark)) {
-      if (!isOverall) parts.push(`You scored ${formatPercentage(mark)}% in this test`);
-      parts.push(`z-score ${Number.isFinite(data.z) ? '≈ ' + String(Number(data.z.toFixed(2))) : 'unavailable (zero SD)'}`);
+      if (!isOverall) parts.push(`Score: ${formatPercentage(mark)}%`);
+      parts.push(`z ≈ ${Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A'}`);
       parts.push(standing(data.p));
 
       if (data.rank !== undefined) {
@@ -544,14 +549,14 @@
         const totalDisplay = isEstimated ? `~${cohortSize}` : `${cohortSize}`;
         parts.push(
           data.rank === 1
-            ? `You're the top of the cohort for this ${isOverall ? 'subject' : 'test'}`
-            : `Your estimated ${isOverall ? 'subject' : 'assessment'} rank is ${data.rank} out of ${totalDisplay}`
+            ? `Top of ${isOverall ? 'subject' : 'test'}`
+            : `Rank: ${data.rank} / ${totalDisplay}`
         );
       } else {
-        parts.push('Enter subject cohort size for rank');
+        parts.push('Enter cohort size for rank');
       }
     } else {
-      parts.push('Not marked · Rank and z-score unavailable');
+      parts.push('Not marked · Rank/z-score unavailable');
     }
 
     setText(ui.result, parts.join('  •  '));
@@ -564,13 +569,13 @@
       max-width: 100%;
       width: 100%;
       clear: both;
-      margin: 8px 0;
-      padding: 11px 13px;
+      margin: 4px 0;
+      padding: 6px 10px;
       border: 1px solid #b9cbe1;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #f3f7fc;
       color: #253b53;
-      font: 12px/1.6 system-ui, sans-serif;
+      font: 12px/1.4 system-ui, sans-serif;
       white-space: normal;
       overflow-wrap: anywhere;
     }
