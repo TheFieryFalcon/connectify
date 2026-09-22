@@ -62,15 +62,25 @@ jobs:
           fi
 
           echo "Target release tag: $TAG_NAME"
+          PRERELEASE_FLAG=""
 
           if gh release view "$TAG_NAME" >/dev/null 2>&1; then
-            echo "Release $TAG_NAME exists, uploading assets..."
+            echo "Release $TAG_NAME exists, appending timecode..."
+            TIMECODE=$(git show -s --format=%ct ${{ github.sha }})
+            TAG_NAME="${TAG_NAME}-${TIMECODE}"
+            VERSION="${VERSION}-${TIMECODE}"
+            PRERELEASE_FLAG="--prerelease"
+            mv "connext-${{ steps.meta.outputs.version }}.xpi" "connext-${VERSION}.xpi"
+          fi
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Release $TAG_NAME already exists, uploading assets..."
             gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" --clobber
           else
             echo "Creating release $TAG_NAME..."
             gh release create "$TAG_NAME" "connext-${VERSION}.xpi" \
-              --title "Connext v${VERSION}" \
-              --generate-notes || gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" --clobber
+              --title "Connext ${TAG_NAME}" \
+              --generate-notes $PRERELEASE_FLAG || gh release upload "$TAG_NAME" "connext-${VERSION}.xpi" --clobber
           fi
 
           if gh release view "latest" >/dev/null 2>&1; then
