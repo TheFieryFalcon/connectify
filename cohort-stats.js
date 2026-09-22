@@ -432,8 +432,8 @@
         'span',
         'connectea-notice',
         saved !== undefined
-          ? 'Saved for both semesters.'
-          : `Estimated Cohort Size: ~${estimatedSize}${warningText}`
+          ? `Original Estimate: ~${estimatedSize}${warningText} • Saved.`
+          : warningText ? warningText.trim() : 'Enter to override.'
       );
       notice.setAttribute('aria-live', 'polite');
 
@@ -457,10 +457,8 @@
           isInvalid
             ? 'Enter a whole number of students, at least 1.'
             : size !== undefined
-            ? persisted
-              ? 'Saved for both semesters.'
-              : 'Used for this visit; browser storage is unavailable.'
-            : `Estimate: ~${currentEstimate}${currentWarning}`
+            ? `Original Estimate: ~${currentEstimate}${currentWarning} • ${persisted ? 'Saved.' : 'Browser storage unavailable.'}`
+            : currentWarning ? currentWarning.trim() : 'Enter to override.'
         );
         schedule();
       });
@@ -510,10 +508,16 @@
       const expectedPlaceholder = estimatedSize !== undefined ? `~${estimatedSize}` : 'e.g. 120';
       if (ui.input.placeholder !== expectedPlaceholder) ui.input.placeholder = expectedPlaceholder;
       
-      if (userSize === undefined && ui.notice) {
-        // Keep the DOM notice text up to date if there's no manual user override
-        const warningText = estimatedSize < 50 ? ' (Estimates <50 students are highly inaccurate)' : '';
-        setText(ui.notice, `Estimate: ~${estimatedSize}${warningText}`);
+      if (ui.notice) {
+        // Keep the DOM notice text up to date
+        const currentWarning = estimatedSize < 50 ? ' (Estimates <50 students are highly inaccurate)' : '';
+        if (userSize === undefined) {
+          setText(ui.notice, currentWarning ? currentWarning.trim() : 'Enter to override.');
+        } else {
+          // If a manual size is set, ensure we show the original estimate
+          // Note: we can't easily know if it persisted successfully here, but we assume it did if it was loaded.
+          setText(ui.notice, `Original Estimate: ~${estimatedSize}${currentWarning} • Saved.`);
+        }
       }
     }
 
