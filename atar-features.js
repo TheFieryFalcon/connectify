@@ -105,13 +105,14 @@
 
     // Fallback if extension storage fails to load yet
     const resolveCategories = () => {
-        const api = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
+        const isFirefox = typeof browser !== 'undefined';
+        const api = isFirefox ? browser : (typeof chrome !== 'undefined' ? chrome : null);
         if (api && api.storage) {
-            api.storage.local.get(['cx-categories'], (res) => {
-                if (res['cx-categories']) {
-                    window.cxCategories = res['cx-categories'];
-                }
-            });
+            const cb = (res) => {
+                if (res['cx-categories']) window.cxCategories = res['cx-categories'];
+            };
+            if (isFirefox) api.storage.local.get(['cx-categories']).then(cb);
+            else api.storage.local.get(['cx-categories'], cb);
         }
     };
     resolveCategories();

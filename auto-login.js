@@ -1,10 +1,24 @@
 (() => {
   'use strict';
 
-  const api = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
+  const isFirefox = typeof browser !== 'undefined';
+  const api = isFirefox ? browser : (typeof chrome !== 'undefined' ? chrome : null);
   if (!api || !api.storage) return;
 
-  api.storage.local.get(['cx-manual-logout', 'cx-autologin-enabled'], (result) => {
+  const storageGet = (keys, cb) => {
+      if (isFirefox) api.storage.local.get(keys).then(cb);
+      else api.storage.local.get(keys, cb);
+  };
+  const storageSet = (obj) => {
+      if (isFirefox) api.storage.local.set(obj);
+      else api.storage.local.set(obj);
+  };
+  const storageRemove = (key) => {
+      if (isFirefox) api.storage.local.remove(key);
+      else api.storage.local.remove(key);
+  };
+
+  storageGet(['cx-manual-logout', 'cx-autologin-enabled'], (result) => {
       // 1. Inject the toggle UI
       const loginBtn = document.getElementById('login');
       if (loginBtn && loginBtn.parentElement) {
@@ -24,7 +38,7 @@
           toggleInput.checked = result['cx-autologin-enabled'] !== false;
           
           toggleInput.addEventListener('change', () => {
-              api.storage.local.set({'cx-autologin-enabled': toggleInput.checked});
+              storageSet({'cx-autologin-enabled': toggleInput.checked});
           });
           
           toggleLabel.appendChild(toggleInput);
@@ -34,12 +48,12 @@
 
       // 2. Check if we just manually logged out
       if (result['cx-manual-logout'] === true) {
-          api.storage.local.remove('cx-manual-logout');
+          storageRemove('cx-manual-logout');
           return; // Do not auto-login this time
       }
 
       const attemptLogin = () => {
-        api.storage.local.get(['cx-autologin-enabled'], (res) => {
+        storageGet(['cx-autologin-enabled'], (res) => {
             if (res['cx-autologin-enabled'] === false) return;
             
             const userField = document.getElementById('ssousername');
