@@ -309,7 +309,7 @@
        });
 
        const catBtn = document.createElement('button');
-       catBtn.textContent = 'Settings / Categories';
+       catBtn.textContent = 'Settings';
        catBtn.type = 'button';
        catBtn.id = 'connectify-categories-toggle';
        
@@ -320,7 +320,7 @@
        
        const catInner = document.createElement('div');
        catInner.innerHTML = `
-         <header><strong>Category Settings</strong></header>
+         <header><strong>Settings</strong></header>
          <p style="font-size:12px;color:#999;margin-bottom:12px;">Comma-separated keywords for each category.</p>
        `;
        
@@ -338,6 +338,80 @@
            }
        };
        
+
+       // === CALIBRATION TABLE ===
+       const calibContainer = document.createElement('div');
+       calibContainer.style.marginTop = '20px';
+       calibContainer.style.borderTop = '1px solid var(--cvr-color-border)';
+       calibContainer.style.paddingTop = '16px';
+       calibContainer.innerHTML = `<header><strong>Semester 1 Calibration</strong></header>
+         <p style="font-size:12px;color:#999;margin-bottom:12px;">Improves accuracy. Enter your actual School Scaled Score if known.</p>`;
+       
+       const calibTable = document.createElement('div');
+       calibTable.style.display = 'grid';
+       calibTable.style.gridTemplateColumns = '1fr auto auto';
+       calibTable.style.gap = '8px 12px';
+       calibTable.style.alignItems = 'center';
+       
+       // Function to re-render the calibration table dynamically
+       const renderCalibTable = () => {
+         if (!window.ConnectifyAtar || !window.ConnectifyAtar.readCourses) return;
+         const courses = window.ConnectifyAtar.readCourses(false);
+         if (!courses || !courses[0] || courses[0].length === 0) return;
+         
+         calibTable.innerHTML = '';
+         const prefsStr = localStorage.getItem('connectea:preferences');
+         const savedPrefs = prefsStr ? JSON.parse(prefsStr) : {};
+         
+         for (const course of courses[0]) {
+           const calibEntry = savedPrefs[`sem1_calibration:${course.id}`] || {};
+           const knownSem1Raw = calibEntry.raw !== undefined ? calibEntry.raw : course.mark;
+           
+           const nameLabel = document.createElement('span');
+           nameLabel.textContent = course.name;
+           nameLabel.style.fontSize = '12px';
+           nameLabel.style.fontWeight = 'bold';
+           
+           const rawInput = document.createElement('input');
+           rawInput.type = 'number';
+           rawInput.placeholder = 'Raw';
+           rawInput.value = knownSem1Raw !== undefined ? knownSem1Raw : '';
+           rawInput.style.width = '60px';
+           
+           const scaledInput = document.createElement('input');
+           scaledInput.type = 'number';
+           scaledInput.placeholder = 'Scaled';
+           scaledInput.value = calibEntry.scaled !== undefined ? calibEntry.scaled : '';
+           scaledInput.style.width = '60px';
+           
+           calibTable.append(nameLabel, rawInput, scaledInput);
+           
+           const updateCalib = () => {
+             const prefsStr = localStorage.getItem('connectea:preferences');
+             const prefs = prefsStr ? JSON.parse(prefsStr) : {};
+             
+             prefs[`sem1_calibration:${course.id}`] = {
+                raw: rawInput.value ? Number(rawInput.value) : undefined,
+                scaled: scaledInput.value ? Number(scaledInput.value) : undefined
+             };
+             localStorage.setItem('connectea:preferences', JSON.stringify(prefs));
+             window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
+           };
+           rawInput.addEventListener('input', updateCalib);
+           scaledInput.addEventListener('input', updateCalib);
+         }
+       };
+       
+       calibContainer.append(calibTable);
+       catInner.append(calibContainer);
+       
+       // Trigger render when panel opens
+       catBtn.addEventListener('click', () => {
+          if (catPanel.hidden) { // it is about to open (or toggle logic handles it)
+             renderCalibTable();
+          }
+       });
+
        const saveBtn = document.createElement('button');
        saveBtn.textContent = 'Save Categories';
        saveBtn.type = 'button';

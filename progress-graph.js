@@ -12,7 +12,8 @@
 
   const createElement = (tag, text) => {
     const el = document.createElement(tag);
-    if (text) el.textContent = text;
+    if (text instanceof Node) el.append(text);
+    else if (text !== undefined && text !== null) el.textContent = text;
     return el;
   };
 
@@ -29,7 +30,7 @@
   function formatTimestamp(order, fallbackCaption) {
     if (!Number.isFinite(order)) return fallbackCaption || 'Unknown';
     const term = Math.floor((order - 1) / 12) + 1;
-    const week = (order - 1) % 12 + 1;
+    const week = Math.floor((order - 1) % 12) + 1;
     return `Term ${term}, Week ${week}`;
   }
 
@@ -114,9 +115,19 @@
         return {
           name: s.name.replace(/\bATAR\b|\bYear\s*\d+\b/gi, '').trim(),
           include: totalWeight > 0,
-          score: totalWeight
-            ? completedTasks.reduce((acc, t) => acc + t.score * t.weight, 0) / totalWeight
-            : undefined
+          score: (() => {
+            if (!totalWeight) return undefined;
+            const rawAvg = completedTasks.reduce((acc, t) => acc + t.score * t.weight, 0) / totalWeight;
+            
+            const prefsStr = localStorage.getItem('connectea:preferences');
+            const savedPrefs = prefsStr ? JSON.parse(prefsStr) : {};
+            const calibration = savedPrefs[`sem1_calibration:${s.id}`] || {};
+            
+            if (window.ConnectifyMath && window.ConnectifyMath.calculateShiftedScaledScore) {
+               return window.ConnectifyMath.calculateShiftedScaledScore(s.name, rawAvg, calibration.raw, calibration.scaled, 2025);
+            }
+            return rawAvg;
+          })()
         };
       });
 
@@ -295,13 +306,13 @@
       if (validScores.length) {
         const sorted = [...validScores].sort((a, b) => a - b);
         const secondLowest = sorted.length > 1 ? sorted[1] : sorted[0];
-        minY = Math.max(0, Math.floor((secondLowest - 5) / 5) * 5);
-        if (minY >= maxY) minY = maxY - 5;
+        minY = Math.max(0, Math.floor(secondLowest) - 1);
+        if (minY >= maxY) minY = maxY - 1;
       }
     }
 
     const range = maxY - minY;
-    const gridStep = !isHistory || range === 100 ? 25 : range > 30 && range % 10 === 0 ? 10 : 5;
+    const gridStep = !isHistory || range === 100 ? 25 : range > 30 && range % 10 === 0 ? 10 : (range <= 10 ? 1 : 5);
     const yFor = val => 260 - ((val - minY) / range) * 220;
 
     const svg = createSvgElement('svg', {
@@ -469,12 +480,52 @@
 
     points.forEach((point, idx) => {
       const row = createElement('tr');
+      let whenCell;
+      if (isHistory) {
+        whenCell = point.name;
+      } else if (Number.isFinite(point.order)) {
+        whenCell = formatTimestamp(point.order, point.caption);
+      } else {
+        const wrapper = createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.flexDirection = 'column';
+        wrapper.style.gap = '4px';
+        const msg = createElement('small', 'No time detected, please input a time yourself');
+        msg.style.color = '#d32f2f';
+        const input = createElement('input');
+        input.type = 'number';
+        input.placeholder = 'e.g. 17 for T2 Wk7';
+        input.style.width = '140px';
+        
+        const customKey = `connectea:time_override:${selectedSubject}:${point.name}`;
+        const savedTime = localStorage.getItem(customKey);
+        if (savedTime !== null) {
+           input.value = savedTime;
+        }
+        
+        input.addEventListener('input', () => {
+           if (input.value) localStorage.setItem(customKey, input.value);
+           else localStorage.removeItem(customKey);
+           
+           // Reload graph with new data
+           clearTimeout(window._cxTimeRefresh);
+           window._cxTimeRefresh = setTimeout(() => {
+               // Must clear cached data to recalculate everything
+               lastDataSignature = '';
+               refresh();
+           }, 800);
+        });
+        
+        wrapper.append(msg, input);
+        whenCell = wrapper;
+      }
+
       const cells = isHistory
         ? [point.name, point.display]
         : [
             String(idx + 1),
             point.name,
-            formatTimestamp(point.order, point.caption),
+            whenCell,
             `${Number(point.score.toFixed(2))}%`,
             Number.isFinite(point.mean) ? `${Number(point.mean.toFixed(2))}%` : 'Unavailable'
           ];

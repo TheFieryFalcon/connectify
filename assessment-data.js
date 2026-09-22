@@ -130,7 +130,11 @@
             weight,
             mean: cohortMean(row),
             semester: Math.min(parseSemester(card), existingTask?.semester ?? 2),
-            order: orderHint(caption),
+            order: (() => {
+               const customOrder = localStorage.getItem(`connectea:time_override:${title}:${taskName}`);
+               if (customOrder !== null && customOrder !== '') return Number(customOrder);
+               return orderHint(caption);
+            })(),
             sequence: existingTask?.sequence ?? tasks.size
           };
 

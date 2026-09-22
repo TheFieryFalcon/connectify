@@ -70,6 +70,19 @@
     }
   } catch {}
 
+  window.addEventListener('connectify-settings-updated', () => {
+    // Reload preferences since Settings might have changed calibration
+    const rawPrefs = localStorage.getItem('connectea:preferences');
+    if (rawPrefs) {
+        try {
+            const parsed = JSON.parse(rawPrefs);
+            // Since savedPreferences is a const, we can modify its keys
+            for (const key in parsed) savedPreferences[key] = parsed[key];
+        } catch(e){}
+    }
+    updateResults();
+  });
+
   let courses = [[], []];
   let gradeCourses = [[], []];
   let activeSemester = 1;
@@ -614,69 +627,7 @@
       );
     }
 
-    // Create Semester 1 Calibration Table (only if there are courses)
-    if (courses[0].length > 0 && !isGradingMode && !isPlanningMode) {
-      const calibTitle = createEl('h3', 'cx-calculator-subtitle', 'Semester 1 Calibration (Improves Accuracy)');
-      calibTitle.style.marginTop = '16px';
-      calibTitle.style.marginBottom = '8px';
-      calibTitle.style.fontSize = '12px';
-      calibTitle.style.fontWeight = 'bold';
-      calibTitle.style.color = 'var(--cvr-color-text-secondary)';
-      courseListContainer.append(calibTitle);
-      
-      const calibTable = createEl('div', 'connectea-controls connectea-grid');
-      courseListContainer.append(calibTable);
-      
-      for (const course of courses[0]) {
-        const calibEntry = savedPreferences[`sem1_calibration:${course.id}`] || {};
-        const knownSem1Raw = calibEntry.raw !== undefined ? calibEntry.raw : course.mark;
-        
-        const wrapper = createEl('div', 'connectea-subject-row');
-        wrapper.style.display = 'flex';
-        wrapper.style.alignItems = 'center';
-        wrapper.style.gap = '8px';
-        wrapper.style.marginBottom = '4px';
-        
-        const nameLabel = createEl('span', 'connectea-controls connectea-course-name', course.name);
-        nameLabel.style.flex = '1';
-        
-        const rawInput = createEl('input', 'connectea-subject-score-input');
-        rawInput.type = 'number';
-        rawInput.placeholder = 'Raw';
-        rawInput.title = 'Semester 1 Raw Mark';
-        rawInput.value = knownSem1Raw !== undefined ? knownSem1Raw : '';
-        rawInput.style.width = '60px';
-        
-        const scaledInput = createEl('input', 'connectea-subject-score-input');
-        scaledInput.type = 'number';
-        scaledInput.placeholder = 'Scaled';
-        scaledInput.title = 'School Scaled Score';
-        scaledInput.value = calibEntry.scaled !== undefined ? calibEntry.scaled : '';
-        scaledInput.style.width = '60px';
-        
-        wrapper.append(nameLabel, rawInput, scaledInput);
-        calibTable.append(wrapper);
-        
-        const updateCalib = () => {
-          savedPreferences[`sem1_calibration:${course.id}`] = {
-            raw: scoreValue(rawInput.value),
-            scaled: scoreValue(scaledInput.value)
-          };
-          persistPreferences();
-          updateResults();
-        };
-        rawInput.addEventListener('input', updateCalib);
-        scaledInput.addEventListener('input', updateCalib);
-      }
-      
-      const estTitle = createEl('h3', 'cx-calculator-subtitle', 'Current Estimate');
-      estTitle.style.marginTop = '16px';
-      estTitle.style.marginBottom = '8px';
-      estTitle.style.fontSize = '12px';
-      estTitle.style.fontWeight = 'bold';
-      estTitle.style.color = 'var(--cvr-color-text-secondary)';
-      courseListContainer.append(estTitle);
-    }
+    
 
     for (const course of courses[activeSemester]) {
       const entry = savedPreferences[`${activeSemester}:${course.id}`] || {};
