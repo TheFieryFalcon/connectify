@@ -57,7 +57,7 @@ html.connectea-dark{color-scheme:dark;background:#292929!important;color:#cccccc
 /* The theme switch previews the destination theme, beside notifications. */
 #connectea-theme-toggle{background:#25313f!important;color:#f1f6fb!important;border-color:#526a81!important}
 .connectea-dark #connectea-theme-toggle{background:#f5f8fc!important;color:#25313f!important;border-color:#bdccda!important}
-#connectea-theme-toggle{position:fixed!important;top:8px!important;left:auto!important;width:104px;box-sizing:border-box;margin:0;white-space:nowrap}
+#connectea-theme-toggle{position:absolute!important;top:8px!important;left:auto!important;width:104px;box-sizing:border-box;margin:0;white-space:nowrap}
 
 /* Draw a separate arrow without filtering the native control or its background. */
 .connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow]{position:relative!important}

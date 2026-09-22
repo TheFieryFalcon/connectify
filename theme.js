@@ -96,8 +96,10 @@
 
   function updateTogglePosition(forceReset = false) {
     if (forceReset) headerRightInset = null;
-    if (toggleButton.parentElement !== document.body) {
-      document.body.append(toggleButton);
+    const nav = document.querySelector('.cvr-c-primary-navigation');
+    const container = nav || document.body;
+    if (toggleButton.parentElement !== container) {
+      container.append(toggleButton);
     }
 
     const bell = document
@@ -126,7 +128,7 @@
   }
 
   function updateTheme() {
-    if (!toggleButton.isConnected) document.body.append(toggleButton);
+    if (!toggleButton.isConnected) updateTogglePosition();
     if (!isDarkMode) restoreTextColors();
 
     document.documentElement.classList.toggle('connectea-dark', isDarkMode);

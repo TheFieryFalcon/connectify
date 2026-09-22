@@ -355,21 +355,35 @@
     };
 
     // X-axis tick labels
-    points.forEach((point, idx) => {
-      if (points.length <= 18 || idx % Math.ceil(points.length / 14) === 0) {
-        svg.append(
-          createSvgElement(
-            'text',
-            {
-              x: xFor(idx),
-              y: 283,
-              'text-anchor': 'middle'
-            },
-            isHistory ? (byAssessment ? Number(point.order.toFixed(1)) : getMonthName(point.order)) : String(idx + 1)
-          )
-        );
+    if (isHistory && !byAssessment) {
+      // Draw evenly spaced months independent of data points
+      const getMonthIndex = (week) => Math.max(0, Math.min(11, Math.floor((week - 1) / 4.3)));
+      const startMonth = getMonthIndex(firstOrder);
+      const endMonth = getMonthIndex(lastOrder);
+      
+      for (let m = startMonth; m <= endMonth; m++) {
+        const monthStartWeek = 1 + m * 4.3;
+        const cx = lastOrder > firstOrder 
+          ? 52 + ((monthStartWeek - firstOrder) * 595) / (lastOrder - firstOrder)
+          : 350;
+          
+        if (cx >= 40 && cx <= 660) {
+          svg.append(
+            createSvgElement('text', { x: cx, y: 283, 'text-anchor': 'middle' }, getMonthName(monthStartWeek))
+          );
+        }
       }
-    });
+    } else {
+      points.forEach((point, idx) => {
+        if (points.length <= 18 || idx % Math.ceil(points.length / 14) === 0) {
+          svg.append(
+            createSvgElement('text', { x: xFor(idx), y: 283, 'text-anchor': 'middle' }, 
+              isHistory ? Number(point.order.toFixed(1)) : String(idx + 1)
+            )
+          );
+        }
+      });
+    }
 
     // X-axis caption
     svg.append(

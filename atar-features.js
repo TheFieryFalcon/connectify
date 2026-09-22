@@ -36,9 +36,8 @@
         const btnContainer = document.createElement('div');
         btnContainer.id = 'cx-expand-btn';
         btnContainer.style.position = 'fixed';
-        btnContainer.style.top = '44px'; // Below the theme toggle
-        btnContainer.style.right = '16px';
-        btnContainer.style.width = '104px'; // match theme toggle width
+        btnContainer.style.bottom = '16px';
+        btnContainer.style.left = '16px';
         btnContainer.style.display = 'flex';
         btnContainer.style.flexDirection = 'column';
         btnContainer.style.gap = '8px';
