@@ -21,7 +21,7 @@ Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, scho
 
 ### 🎨 Total UI Overhaul
 - **Stunning Dark Mode**: A completely redesigned, elegant dark theme that instantly applies across the entire Connect portal, dramatically improving contrast and readability.
-- **Blazing Fast**: Completely rewritten to be modular, efficient, and deeply integrated into Connect's native rendering engine, ensuring UI widgets instantly sync without lag.
+- **Blazingly Fast**: Completely rewritten to be modular, efficient, and deeply integrated into Connect's native rendering engine, ensuring UI widgets instantly sync without lag.
 
 ---
 *For legacy release notes prior to 3.0.0, see [2.0.0_changelog.md](2.0.0_changelog.md).*
