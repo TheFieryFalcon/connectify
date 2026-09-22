@@ -433,7 +433,7 @@
         'connectea-notice',
         saved !== undefined
           ? 'Saved for both semesters.'
-          : `Auto: ~${estimatedSize}${warningText}`
+          : `Estimated Cohort Size: ~${estimatedSize}${warningText}`
       );
       notice.setAttribute('aria-live', 'polite');
 
