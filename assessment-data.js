@@ -59,15 +59,16 @@
     return caption;
   }
 
+  const subjectsCache = new Map();
+
   /**
    * Scrape all subject assessment cards currently present in the DOM.
+   * Caches results so data persists even when cards are collapsed by the user.
    *
    * @param {boolean} includePending - Whether to include pending/unmarked assessments
    * @returns {Array<{name: string, tasks: Array<Object>}>} Array of subject records
    */
   function collect(includePending = false) {
-    const subjects = new Map();
-
     const parseSemester = card => {
       const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
       const match = title.match(/Semester\s*([12])/i);
@@ -82,66 +83,71 @@
       if (!/Semester\s*[12]/i.test(title)) continue;
 
       const subjectName = title.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '');
-      if (!subjects.has(subjectName)) {
-        subjects.set(subjectName, new Map());
-      }
-      const tasks = subjects.get(subjectName);
-      const occurrences = new Map();
-
       const taskRows = card.querySelectorAll('.cvr-c-tasks .cvr-c-task');
-      for (const row of taskRows) {
-        const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
-          .map(e => normalize(e.textContent))
-          .filter(Boolean);
+      
+      // Only update cache if tasks are actually rendered in the DOM right now
+      if (taskRows.length > 0) {
+        if (!subjectsCache.has(subjectName)) {
+          subjectsCache.set(subjectName, new Map());
+        }
+        const tasks = subjectsCache.get(subjectName);
+        const occurrences = new Map();
 
-        const rawMarkText = normalize(row.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
-        const scoreMatch = rawMarkText.match(/^(\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
-        const isPending = /^[-–—]\s*Out\s+of\s+\d/i.test(rawMarkText);
+        for (const row of taskRows) {
+          const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
+            .map(e => normalize(e.textContent))
+            .filter(Boolean);
 
-        if (!scoreMatch && !(includePending && isPending)) continue;
-        if (scoreMatch && (+scoreMatch[2] <= 0 || +scoreMatch[1] > +scoreMatch[2])) continue;
+          const rawMarkText = normalize(row.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
+          const scoreMatch = rawMarkText.match(/^(\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
+          const isPending = /^[-–—]\s*Out\s+of\s+\d/i.test(rawMarkText);
 
-        const maxScore = scoreMatch ? +scoreMatch[2] : Number(rawMarkText.match(/Out\s+of\s+(\d+(?:\.\d+)?)/i)?.[1]);
+          if (!scoreMatch && !isPending) continue;
+          if (scoreMatch && (+scoreMatch[2] <= 0 || +scoreMatch[1] > +scoreMatch[2])) continue;
 
-        const weightElement = row.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark')[1];
-        const weightMatch = normalize(weightElement?.textContent).match(/Out\s+of\s+(\d+(?:\.\d+)?)/i);
-        const weight = weightMatch ? Number(weightMatch[1]) : null;
+          const maxScore = scoreMatch ? +scoreMatch[2] : Number(rawMarkText.match(/Out\s+of\s+(\d+(?:\.\d+)?)/i)?.[1]);
 
-        const taskName = labels.at(-1) || `Assessment ${tasks.size + 1}`;
-        const caption = correctedCaption(title, taskName, labels[1] || '');
+          const weightElement = row.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark')[1];
+          const weightMatch = normalize(weightElement?.textContent).match(/Out\s+of\s+(\d+(?:\.\d+)?)/i);
+          const weight = weightMatch ? Number(weightMatch[1]) : null;
 
-        const identityKey = JSON.stringify([labels, maxScore]);
-        const occurrenceCount = occurrences.get(identityKey) || 0;
-        occurrences.set(identityKey, occurrenceCount + 1);
+          const taskName = labels.at(-1) || `Assessment ${tasks.size + 1}`;
+          const caption = correctedCaption(title, taskName, labels[1] || '');
 
-        const id = `${identityKey}:${occurrenceCount}`;
-        const existingTask = tasks.get(id);
+          const identityKey = JSON.stringify([labels, maxScore]);
+          const occurrenceCount = occurrences.get(identityKey) || 0;
+          occurrences.set(identityKey, occurrenceCount + 1);
 
-        const record = {
-          id,
-          name: taskName,
-          caption,
-          score: scoreMatch ? (+scoreMatch[1] / +scoreMatch[2]) * 100 : null,
-          pending: isPending,
-          weight,
-          mean: cohortMean(row),
-          semester: Math.min(parseSemester(card), existingTask?.semester ?? 2),
-          order: orderHint(caption),
-          sequence: existingTask?.sequence ?? tasks.size
-        };
+          const id = `${identityKey}:${occurrenceCount}`;
+          const existingTask = tasks.get(id);
 
-        // Attach underlying DOM element without serializing into JSON
-        Object.defineProperty(record, 'row', { value: row });
-        tasks.set(id, record);
+          const record = {
+            id,
+            name: taskName,
+            caption,
+            score: scoreMatch ? (+scoreMatch[1] / +scoreMatch[2]) * 100 : null,
+            pending: isPending,
+            weight,
+            mean: cohortMean(row),
+            semester: Math.min(parseSemester(card), existingTask?.semester ?? 2),
+            order: orderHint(caption),
+            sequence: existingTask?.sequence ?? tasks.size
+          };
+
+          Object.defineProperty(record, 'row', { value: row });
+          tasks.set(id, record);
+        }
       }
     }
 
-    return Array.from(subjects, ([name, tasks]) => ({
+    return Array.from(subjectsCache, ([name, tasks]) => ({
       name,
-      tasks: Array.from(tasks.values()).sort((a, b) => {
-        if (a.order !== null && b.order !== null) return a.order - b.order;
-        return a.sequence - b.sequence;
-      })
+      tasks: Array.from(tasks.values())
+        .filter(t => includePending || !t.pending)
+        .sort((a, b) => {
+          if (a.order !== null && b.order !== null) return a.order - b.order;
+          return a.sequence - b.sequence;
+        })
     }));
   }
 

@@ -7,9 +7,6 @@
 
   let hasInitializedSidebar = false;
   let hasAutoExpanded = false;
-  
-  // Cache to store tasks even when the Vaadin accordion collapses and wipes the DOM
-  const subjectCache = new Map();
 
   function syncFeatures() {
     if (!window.ConnextData) return;
@@ -19,32 +16,31 @@
             window.ConnextData.expandAll(true);
             hasAutoExpanded = true;
         } else {
-            return; // Wait for Vaadin to render the cards!
+            return;
         }
     }
 
-    // --- Left Sidebar Expand/Collapse ---
-    const leftMenu = document.querySelector('.cvr-c-category-menu__list');
-    if (leftMenu && !document.getElementById('cx-expand-btn')) {
+    // --- Expand/Collapse Buttons ---
+    const mainContent = document.getElementById('main-content') || document.body;
+    if (mainContent && !document.getElementById('cx-expand-btn')) {
         const btnContainer = document.createElement('div');
         btnContainer.id = 'cx-expand-btn';
         btnContainer.style.display = 'flex';
         btnContainer.style.gap = '8px';
-        btnContainer.style.padding = '12px 16px';
+        btnContainer.style.padding = '0 0 16px 0';
         
         const createBtn = (text, isExpand) => {
            const btn = document.createElement('button');
            btn.textContent = text;
            btn.type = 'button';
            btn.className = 'eds-c-button';
-           btn.style.flex = '1';
-           btn.style.padding = '6px';
+           btn.style.padding = '6px 16px';
            btn.style.fontSize = '12px';
            btn.onclick = () => window.ConnextData.expandAll(isExpand);
            return btn;
         };
-        btnContainer.append(createBtn('Expand', true), createBtn('Collapse', false));
-        leftMenu.prepend(btnContainer);
+        btnContainer.append(createBtn('Expand All Subjects', true), createBtn('Collapse All Subjects', false));
+        mainContent.prepend(btnContainer);
     }
 
     // --- WACE Exam Countdown ---
@@ -103,18 +99,11 @@
        return 'Take-Home';
     }
 
-    // --- Update Persistent Cache ---
-    const scrapedSubjects = window.ConnextData.collect(true);
-    scrapedSubjects.forEach(s => {
-        if (s.tasks && s.tasks.length > 0) {
-            subjectCache.set(s.name, s.tasks);
-        }
-    });
-
-    const cachedSubjects = Array.from(subjectCache.entries()).map(([name, tasks]) => ({ name, tasks }));
+    // Use ConnextData's new persistent cache directly!
+    const subjects = window.ConnextData.collect(true);
 
     // --- Compound Subject Progress Bars ---
-    cachedSubjects.forEach(subject => {
+    subjects.forEach(subject => {
        const matchingTitles = Array.from(document.querySelectorAll('.eds-c-tile__title')).filter(t => t.textContent.includes(subject.name));
        matchingTitles.forEach(cardTitle => {
            const card = cardTitle.closest('.eds-c-tile');
@@ -166,7 +155,6 @@
               if (!isCompleted) {
                  segment.style.opacity = '0.25';
               }
-              // Render individual tasks as sections using a tiny right border
               segment.style.borderRight = '1px solid #1e1e1e';
               segment.title = `${t.name}: ${t.weight}% (${isCompleted ? 'Completed' : 'Remaining'})`;
               bar.appendChild(segment);
@@ -193,9 +181,14 @@
        });
     });
 
-    // --- Weakness Analyzer ---
+    // --- Weakness Analyzer & Categories Panel ---
     if (!hasInitializedSidebar && document.querySelector('#connext-sidebar')) {
        hasInitializedSidebar = true;
+       
+       const toolMenu = document.querySelector('.cx-tool-menu');
+       const workspace = document.querySelector('.cx-workspace');
+       
+       // --- Panel 1: Weakness Analyzer ---
        const toggleBtn = document.createElement('button');
        toggleBtn.textContent = 'Weakness Analyzer';
        toggleBtn.type = 'button';
@@ -212,92 +205,28 @@
                <option value="type">By Assessment Type</option>
                <option value="subject">By Subject</option>
             </select>
-            <button id="cx-radar-config-btn" type="button" class="eds-c-button" style="padding:4px 8px;">⚙️ Edit Categories</button>
          </div>
-         <div id="cx-radar-config" style="display:none; margin-bottom:12px; font-size:12px;"></div>
          <div id="connext-radar-chart" style="width:100%;height:300px;background:#333333;border-radius:6px;border:1px solid #3a3a3a;"></div>
        `;
 
-       const toolMenu = document.querySelector('.cx-tool-menu');
        if (toolMenu) toolMenu.append(toggleBtn);
-       else document.body.append(toggleBtn);
-
-       const workspace = document.querySelector('.cx-workspace');
        if (workspace) workspace.append(panel);
-       else document.body.append(panel);
-       
-       if (window.ConnextAtar) {
-          window.ConnextAtar.toolButtons = window.ConnextAtar.toolButtons || [];
-          window.ConnextAtar.toolButtons.push(toggleBtn);
-       }
-
-       const configBtn = panel.querySelector('#cx-radar-config-btn');
-       const configDiv = panel.querySelector('#cx-radar-config');
-       const modeSelect = panel.querySelector('#cx-radar-mode');
-
-       configBtn.onclick = () => {
-           if (configDiv.style.display !== 'none') {
-               configDiv.style.display = 'none';
-               return;
-           }
-           configDiv.style.display = 'block';
-           configDiv.innerHTML = '<p style="color:#999; margin:0 0 8px 0;">Comma-separated keywords for each category:</p>';
-           
-           for (const cat of Object.keys(defaultCategories)) {
-               const wrap = document.createElement('div');
-               wrap.style.marginBottom = '4px';
-               wrap.innerHTML = `<label style="display:inline-block;width:80px;">${cat}</label>
-                                 <input type="text" id="cx-cat-${cat}" value="${(categories[cat] || defaultCategories[cat]).keywords.join(', ')}" style="width:180px; padding:2px; background:#212121; color:#ddd; border:1px solid #4a4a4a;">`;
-               configDiv.appendChild(wrap);
-           }
-           const saveBtn = document.createElement('button');
-           saveBtn.textContent = 'Save & Render';
-           saveBtn.type = 'button';
-           saveBtn.className = 'eds-c-button';
-           saveBtn.style.marginTop = '8px';
-           saveBtn.onclick = () => {
-               for (const cat of Object.keys(defaultCategories)) {
-                   const val = document.getElementById(`cx-cat-${cat}`).value;
-                   categories[cat] = {
-                       color: defaultCategories[cat].color,
-                       keywords: val.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
-                   };
-               }
-               localStorage.setItem('cx-categories', JSON.stringify(categories));
-               configDiv.style.display = 'none';
-               renderChart();
-           };
-           const resetBtn = document.createElement('button');
-           resetBtn.textContent = 'Reset';
-           resetBtn.type = 'button';
-           resetBtn.className = 'eds-c-button';
-           resetBtn.style.marginTop = '8px';
-           resetBtn.style.marginLeft = '8px';
-           resetBtn.onclick = () => {
-               categories = JSON.parse(JSON.stringify(defaultCategories));
-               localStorage.removeItem('cx-categories');
-               configDiv.style.display = 'none';
-               renderChart();
-           };
-           configDiv.append(saveBtn, resetBtn);
-       };
 
        const renderChart = () => {
          const chartDiv = document.getElementById('connext-radar-chart');
          if (!window.Highcharts) {
-           chartDiv.innerHTML = '<div style="padding:20px;color:red;">Highcharts not loaded by Connect.</div>';
+           chartDiv.innerHTML = '<div style="padding:20px;color:red;">Highcharts not loaded.</div>';
            return;
          }
          
          const perf = {};
-         const mode = modeSelect.value;
+         const mode = document.getElementById('cx-radar-mode').value;
 
-         cachedSubjects.forEach(subject => {
+         window.ConnextData.collect(true).forEach(subject => {
              subject.tasks.forEach(t => {
                  if (t.weight > 0 && !t.pending && t.score !== null) {
                      const earned = (t.score / 100) * t.weight;
                      const label = mode === 'subject' ? subject.name : categorizeTask(t.name);
-                     
                      if (!perf[label]) perf[label] = { earned: 0, total: 0 };
                      perf[label].earned += earned;
                      perf[label].total += t.weight;
@@ -330,19 +259,106 @@
          });
        };
 
-       modeSelect.addEventListener('change', renderChart);
+       document.getElementById('cx-radar-mode').addEventListener('change', renderChart);
 
        toggleBtn.addEventListener('click', () => {
-          const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
-          document.querySelectorAll('section[id^="connectea-"], section[id^="connext-"]').forEach(p => p.hidden = true);
-          document.querySelectorAll('button[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
-          
-          if (!expanded) {
-            toggleBtn.setAttribute('aria-expanded', 'true');
-            panel.hidden = false;
-            renderChart();
-          }
+          document.querySelectorAll('.cx-workspace-panel').forEach(p => p.hidden = true);
+          document.querySelectorAll('.cx-tool-menu button').forEach(b => b.setAttribute('aria-expanded', 'false'));
+          toggleBtn.setAttribute('aria-expanded', 'true');
+          panel.hidden = false;
+          renderChart();
        });
+       
+       window.addEventListener('connext-open', e => {
+           if (e.detail !== 'weakness') {
+               panel.hidden = true;
+               toggleBtn.setAttribute('aria-expanded', 'false');
+           }
+       });
+
+
+       // --- Panel 2: Categories / Settings ---
+       const catBtn = document.createElement('button');
+       catBtn.textContent = 'Settings / Categories';
+       catBtn.type = 'button';
+       catBtn.id = 'connext-categories-toggle';
+       
+       const catPanel = document.createElement('section');
+       catPanel.id = 'connext-categories';
+       catPanel.hidden = true;
+       catPanel.className = 'cx-workspace-panel';
+       
+       const catInner = document.createElement('div');
+       catInner.innerHTML = `
+         <header><strong>Category Settings</strong></header>
+         <p style="font-size:12px;color:#999;margin-bottom:12px;">Comma-separated keywords for each category.</p>
+       `;
+       
+       for (const cat of Object.keys(defaultCategories)) {
+           const wrap = document.createElement('div');
+           wrap.style.marginBottom = '6px';
+           wrap.innerHTML = `<label style="display:inline-block;width:80px;font-size:12px;">${cat}</label>
+                             <input type="text" id="cx-cat-${cat}" value="${(categories[cat] || defaultCategories[cat]).keywords.join(', ')}" style="width:180px; padding:4px; background:#212121; color:#ddd; border:1px solid #4a4a4a; font-size:12px;">`;
+           catInner.appendChild(wrap);
+       }
+       
+       const saveBtn = document.createElement('button');
+       saveBtn.textContent = 'Save Categories';
+       saveBtn.type = 'button';
+       saveBtn.className = 'eds-c-button';
+       saveBtn.style.marginTop = '12px';
+       saveBtn.onclick = () => {
+           for (const cat of Object.keys(defaultCategories)) {
+               const val = document.getElementById(`cx-cat-${cat}`).value;
+               categories[cat] = {
+                   color: defaultCategories[cat].color,
+                   keywords: val.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+               };
+           }
+           localStorage.setItem('cx-categories', JSON.stringify(categories));
+           alert('Categories saved! Will apply to progress bars immediately.');
+       };
+       
+       const resetBtn = document.createElement('button');
+       resetBtn.textContent = 'Reset to Default';
+       resetBtn.type = 'button';
+       resetBtn.className = 'eds-c-button';
+       resetBtn.style.marginTop = '12px';
+       resetBtn.style.marginLeft = '8px';
+       resetBtn.onclick = () => {
+           categories = JSON.parse(JSON.stringify(defaultCategories));
+           localStorage.removeItem('cx-categories');
+           for (const cat of Object.keys(defaultCategories)) {
+               document.getElementById(`cx-cat-${cat}`).value = defaultCategories[cat].keywords.join(', ');
+           }
+           alert('Categories reset to default.');
+       };
+       
+       catInner.append(saveBtn, resetBtn);
+       catPanel.appendChild(catInner);
+
+       if (toolMenu) toolMenu.append(catBtn);
+       if (workspace) workspace.append(catPanel);
+
+       catBtn.addEventListener('click', () => {
+          document.querySelectorAll('.cx-workspace-panel').forEach(p => p.hidden = true);
+          document.querySelectorAll('.cx-tool-menu button').forEach(b => b.setAttribute('aria-expanded', 'false'));
+          catBtn.setAttribute('aria-expanded', 'true');
+          catPanel.hidden = false;
+       });
+       
+       window.addEventListener('connext-open', e => {
+           if (e.detail !== 'categories') {
+               catPanel.hidden = true;
+               catBtn.setAttribute('aria-expanded', 'false');
+           }
+       });
+       
+       // Expose to sidebar layout array
+       if (window.ConnextAtar) {
+          window.ConnextAtar.toolButtons = window.ConnextAtar.toolButtons || [];
+          window.ConnextAtar.toolButtons.push(toggleBtn, catBtn);
+       }
     }
   }
 

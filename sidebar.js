@@ -66,7 +66,7 @@
   const workspace = createElement('div');
   workspace.className = 'cx-workspace';
 
-  const introText = createElement('p', 'Choose a tool to explore your results.');
+  const introText = createElement('p', 'Choose a tool to explore your results. Note: Everything here requires your subjects to be expanded at least once to load the data.');
   introText.className = 'cx-tools-intro';
 
   sidebar.append(header, introText, toolMenu, workspace);
@@ -85,7 +85,7 @@
       }
     }
 
-    for (const panelId of ['connectea-atar', 'connext-progress', 'connext-weakness']) {
+    for (const panelId of ['connectea-atar', 'connext-progress', 'connext-weakness', 'connext-categories']) {
       const panel = document.getElementById(panelId);
       if (panel && panel.parentElement !== workspace) {
         workspace.append(panel);
