@@ -1,5 +1,5 @@
 /**
- * Connext ATAR Features
+ * Connectify ATAR Features
  * Implements Compound Progress Bars, WACE Countdown, and Weakness Analyzer.
  */
 (() => {
@@ -19,11 +19,11 @@
   }
 
   function syncFeatures() {
-    if (!window.ConnextData) return;
+    if (!window.ConnectifyData) return;
     
     if (!hasAutoExpanded) {
         if (document.querySelectorAll('.eds-c-tile').length > 0) {
-            window.ConnextData.expandAll(true);
+            window.ConnectifyData.expandAll(true);
             hasAutoExpanded = true;
         } else {
             return;
@@ -31,7 +31,7 @@
     }
 
     // --- Expand/Collapse Buttons ---
-    // User requested: "if the sidebar doesn't work, move the buttons below the connext menu and make it scroll with the user."
+    // User requested: "if the sidebar doesn't work, move the buttons below the connectify menu and make it scroll with the user."
     if (!document.getElementById('cx-expand-btn')) {
         const btnContainer = document.createElement('div');
         btnContainer.id = 'cx-expand-btn';
@@ -51,7 +51,7 @@
            btn.style.padding = '6px';
            btn.style.fontSize = '11px';
            btn.style.width = '100%';
-           btn.onclick = () => window.ConnextData.expandAll(isExpand);
+           btn.onclick = () => window.ConnectifyData.expandAll(isExpand);
            return btn;
         };
         btnContainer.append(createBtn('Expand All', true), createBtn('Collapse All', false));
@@ -65,9 +65,9 @@
     
     if (yearLevel === 12) {
       const mainContent = document.getElementById('main-content') || document.body;
-      if (!document.getElementById('connext-wace-countdown')) {
+      if (!document.getElementById('connectify-wace-countdown')) {
         const countdown = document.createElement('div');
-        countdown.id = 'connext-wace-countdown';
+        countdown.id = 'connectify-wace-countdown';
         countdown.className = 'connectea-panel';
         countdown.style.textAlign = 'center';
         countdown.style.fontWeight = 'bold';
@@ -120,7 +120,7 @@
        return 'Take-Home';
     }
 
-    const subjects = window.ConnextData.collect(true);
+    const subjects = window.ConnectifyData.collect(true);
 
     // --- Compound Subject Progress Bars ---
     subjects.forEach(subject => {
@@ -212,7 +212,7 @@
     });
 
     // --- Weakness Analyzer & Categories Panel ---
-    if (!hasInitializedSidebar && document.querySelector('#connext-sidebar')) {
+    if (!hasInitializedSidebar && document.querySelector('#connectify-sidebar')) {
        hasInitializedSidebar = true;
        
        const toolMenu = document.querySelector('.cx-tool-menu');
@@ -221,10 +221,10 @@
        const toggleBtn = document.createElement('button');
        toggleBtn.textContent = 'Weakness Analyzer';
        toggleBtn.type = 'button';
-       toggleBtn.id = 'connext-weakness-toggle';
+       toggleBtn.id = 'connectify-weakness-toggle';
        
        const panel = document.createElement('section');
-       panel.id = 'connext-weakness';
+       panel.id = 'connectify-weakness';
        panel.hidden = true;
        panel.className = 'cx-workspace-panel';
        panel.innerHTML = `
@@ -235,20 +235,20 @@
                <option value="subject">By Subject</option>
             </select>
          </div>
-         <div id="connext-radar-chart" style="width:100%;height:300px;background:#333333;border-radius:6px;border:1px solid #3a3a3a;"></div>
+         <div id="connectify-radar-chart" style="width:100%;height:300px;background:#333333;border-radius:6px;border:1px solid #3a3a3a;"></div>
        `;
 
        if (toolMenu) toolMenu.append(toggleBtn);
        if (workspace) workspace.append(panel);
 
        const renderChart = () => {
-         const chartDiv = document.getElementById('connext-radar-chart');
+         const chartDiv = document.getElementById('connectify-radar-chart');
          if (!window.Highcharts) return;
          
          const perf = {};
          const mode = document.getElementById('cx-radar-mode').value;
 
-         window.ConnextData.collect(true).forEach(subject => {
+         window.ConnectifyData.collect(true).forEach(subject => {
              subject.tasks.forEach(t => {
                  if (t.weight > 0 && !t.pending && t.score !== null) {
                      const earned = (t.score / 100) * t.weight;
@@ -272,7 +272,7 @@
              return;
          }
 
-         window.Highcharts.chart('connext-radar-chart', {
+         window.Highcharts.chart('connectify-radar-chart', {
             chart: { polar: true, type: 'area', backgroundColor: 'transparent' },
             title: { text: '' },
             pane: { size: '80%' },
@@ -295,7 +295,7 @@
           renderChart();
        });
        
-       window.addEventListener('connext-open', e => {
+       window.addEventListener('connectify-open', e => {
            if (e.detail !== 'weakness') {
                panel.hidden = true;
                toggleBtn.setAttribute('aria-expanded', 'false');
@@ -305,10 +305,10 @@
        const catBtn = document.createElement('button');
        catBtn.textContent = 'Settings / Categories';
        catBtn.type = 'button';
-       catBtn.id = 'connext-categories-toggle';
+       catBtn.id = 'connectify-categories-toggle';
        
        const catPanel = document.createElement('section');
-       catPanel.id = 'connext-categories';
+       catPanel.id = 'connectify-categories';
        catPanel.hidden = true;
        catPanel.className = 'cx-workspace-panel';
        
@@ -380,16 +380,16 @@
           catPanel.hidden = false;
        });
        
-       window.addEventListener('connext-open', e => {
+       window.addEventListener('connectify-open', e => {
            if (e.detail !== 'categories') {
                catPanel.hidden = true;
                catBtn.setAttribute('aria-expanded', 'false');
            }
        });
        
-       if (window.ConnextAtar) {
-          window.ConnextAtar.toolButtons = window.ConnextAtar.toolButtons || [];
-          window.ConnextAtar.toolButtons.push(toggleBtn, catBtn);
+       if (window.ConnectifyAtar) {
+          window.ConnectifyAtar.toolButtons = window.ConnectifyAtar.toolButtons || [];
+          window.ConnectifyAtar.toolButtons.push(toggleBtn, catBtn);
        }
     }
   }

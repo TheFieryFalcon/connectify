@@ -1,5 +1,5 @@
 /**
- * Connext Dark Theme Engine
+ * Connectify Dark Theme Engine
  *
  * Provides site-wide dark mode styling for Connect, dynamic contrast adaptation
  * for neutral surfaces, and accordion arrow enhancements.

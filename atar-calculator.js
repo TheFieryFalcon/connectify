@@ -1,8 +1,8 @@
 /**
- * Connext ATAR & Grade Calculator
+ * Connectify ATAR & Grade Calculator
  *
  * Implements the TISC 2025 TEA/ATAR scaling model, Target ATAR planner,
- * and Subject Grade planner. Provides `window.ConnextAtar`.
+ * and Subject Grade planner. Provides `window.ConnectifyAtar`.
  */
 (() => {
   'use strict';
@@ -302,7 +302,7 @@
 
   // Publish public calculation API
   if (typeof window !== 'undefined') {
-    window.ConnextAtar = { calculate };
+    window.ConnectifyAtar = { calculate };
   }
 
   /**
@@ -421,7 +421,7 @@
     button.setAttribute('aria-controls', 'connectea-atar');
   }
 
-  window.ConnextAtar.toolButtons = [estimateTab, targetTab, gradeTab];
+  window.ConnectifyAtar.toolButtons = [estimateTab, targetTab, gradeTab];
 
   let isPlanningMode = false;
   let isGradingMode = false;
@@ -469,10 +469,10 @@
   }
 
   function openCalculator(mode) {
-    window.ConnextData?.expandAll();
+    window.ConnectifyData?.expandAll();
     refreshData();
     calculatorPanel.hidden = false;
-    window.dispatchEvent(new CustomEvent('connext-open', { detail: 'calculator' }));
+    window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
     selectTab(mode);
     panelTitle.focus();
   }
@@ -976,7 +976,7 @@
     }
   }
 
-  window.addEventListener('connext-open', e => {
+  window.addEventListener('connectify-open', e => {
     if (e.detail !== 'calculator') {
       calculatorPanel.hidden = true;
       for (const b of [estimateTab, targetTab, gradeTab]) b.setAttribute('aria-pressed', 'false');
@@ -993,7 +993,7 @@
     if (e.key === 'Escape') closeCalculator();
   });
 
-  window.ConnextAtar.readCourses = readCourses;
+  window.ConnectifyAtar.readCourses = readCourses;
 
   setInterval(refreshData, 1500);
   refreshData();

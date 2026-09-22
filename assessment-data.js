@@ -1,8 +1,8 @@
 /**
- * Connext Assessment Data Scraper
+ * Connectify Assessment Data Scraper
  *
  * Extracts assessment outlines, tasks, raw marks, weights, and cohort boxplot statistics
- * from Connect DOM cards. Provides `window.ConnextData`.
+ * from Connect DOM cards. Provides `window.ConnectifyData`.
  */
 (() => {
   'use strict';
@@ -201,7 +201,7 @@
   }
 
   // Publish public API
-  window.ConnextData = {
+  window.ConnectifyData = {
     collect,
     cohortMean,
     orderHint,

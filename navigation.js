@@ -1,5 +1,5 @@
 /**
- * Connext Navigation Shortcuts
+ * Connectify Navigation Shortcuts
  *
  * Injects a direct "Assessment Outlines" shortcut into Connect's primary navigation
  * bar (both desktop greedy menu and mobile drawer).

@@ -1,5 +1,5 @@
 /**
- * Connext Cohort Statistics & Rank Estimator
+ * Connectify Cohort Statistics & Rank Estimator
  *
  * Reads Highcharts 5-number boxplot statistics (min, Q1, median, Q3, max),
  * computes estimated cohort mean, standard deviation, z-score,
@@ -401,7 +401,7 @@
     const box = createElement('section', 'connectea-panel');
     box.setAttribute(
       'aria-label',
-      isOverall ? 'Connext overall subject statistics' : 'Connext assessment statistics'
+      isOverall ? 'Connectify overall subject statistics' : 'Connectify assessment statistics'
     );
 
     const distribution = createElement('div', 'connectea-distribution');
@@ -689,7 +689,7 @@
         try {
           render(row, isOverall, key, estimatedSize);
         } catch (error) {
-          console.debug('Connext:', error);
+          console.debug('Connectify:', error);
         }
       }
     }

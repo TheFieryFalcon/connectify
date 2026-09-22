@@ -1,5 +1,5 @@
 /**
- * Connext Progress Graph & ATAR Progression
+ * Connectify Progress Graph & ATAR Progression
  *
  * Renders SVG progress charts for individual subject assessments (showing student marks
  * vs cohort means) and an estimated ATAR Progression timeline across school weeks / rounds.
@@ -8,7 +8,7 @@
 (() => {
   'use strict';
 
-  const dataAPI = window.ConnextData;
+  const dataAPI = window.ConnectifyData;
 
   const createElement = (tag, text) => {
     const el = document.createElement(tag);
@@ -27,12 +27,12 @@
 
   // UI elements
   const toggleBtn = createElement('button', 'Progress Graph');
-  toggleBtn.id = 'connext-progress-toggle';
+  toggleBtn.id = 'connectify-progress-toggle';
   toggleBtn.type = 'button';
   toggleBtn.setAttribute('aria-expanded', 'false');
 
   const panel = createElement('section');
-  panel.id = 'connext-progress';
+  panel.id = 'connectify-progress';
   panel.hidden = true;
   panel.setAttribute('aria-label', 'Assessment progress');
 
@@ -58,7 +58,7 @@
   /**
    * Reconstruct historical running ATAR points at each assessment chronological step.
    *
-   * @param {Array<Object>} subjects - Array of subject outline data from ConnextData
+   * @param {Array<Object>} subjects - Array of subject outline data from ConnectifyData
    * @returns {{points?: Array<Object>, byAssessment?: boolean, error?: string}}
    */
   function history(subjects) {
@@ -106,7 +106,7 @@
         };
       });
 
-      const calculation = window.ConnextAtar.calculate(rows);
+      const calculation = window.ConnectifyAtar.calculate(rows);
       if (!calculation.error) {
         const getMonthName = (week) => {
             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -488,7 +488,7 @@
     panel.hidden = !panel.hidden;
     toggleBtn.setAttribute('aria-expanded', String(!panel.hidden));
     if (!panel.hidden) {
-      window.dispatchEvent(new CustomEvent('connext-open', { detail: 'progress' }));
+      window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'progress' }));
       expandAndRefresh();
       title.focus();
     }
@@ -504,7 +504,7 @@
 
   scanBtn.onclick = expandAndRefresh;
 
-  window.addEventListener('connext-open', e => {
+  window.addEventListener('connectify-open', e => {
     if (e.detail !== 'progress') {
       panel.hidden = true;
       toggleBtn.setAttribute('aria-expanded', 'false');
@@ -517,7 +517,7 @@
    */
   function updateImprovementArrows() {
     const activeTasks = new Set();
-    const courses = window.ConnextAtar.readCourses(false);
+    const courses = window.ConnectifyAtar.readCourses(false);
 
     for (const subject of dataAPI.collect()) {
       const latestTask = subject.tasks.at(-1);
@@ -557,7 +557,7 @@
     }
   }
 
-  window.ConnextProgress = { history };
+  window.ConnectifyProgress = { history };
 
   setInterval(() => {
     refresh();

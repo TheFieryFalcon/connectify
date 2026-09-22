@@ -1,7 +1,7 @@
 /**
- * Connext Sidebar & Tool Launcher
+ * Connectify Sidebar & Tool Launcher
  *
- * Provides a slide-out drawer hosting Connext tools:
+ * Provides a slide-out drawer hosting Connectify tools:
  * - ATAR / Target ATAR / Grade calculators
  * - Assessment Progress graphs
  * - Expand all / Unexpand all outline controls
@@ -16,15 +16,15 @@
   };
 
   const sidebar = createElement('aside');
-  sidebar.id = 'connext-sidebar';
+  sidebar.id = 'connectify-sidebar';
   sidebar.hidden = true;
-  sidebar.setAttribute('aria-label', 'Connext tools');
+  sidebar.setAttribute('aria-label', 'Connectify tools');
 
   const handle = createElement('button', '❮');
-  handle.id = 'connext-sidebar-handle';
+  handle.id = 'connectify-sidebar-handle';
   handle.type = 'button';
-  handle.title = 'Open Connext tools';
-  handle.setAttribute('aria-label', 'Open Connext tools');
+  handle.title = 'Open Connectify tools';
+  handle.setAttribute('aria-label', 'Open Connectify tools');
   handle.setAttribute('aria-expanded', 'false');
 
   function updateHandleState(isOpen) {
@@ -36,13 +36,13 @@
       const label = createElement('span');
       label.className = 'cx-handle-label';
       label.append(
-        createElement('strong', 'Connext tools'),
+        createElement('strong', 'Connectify tools'),
         createElement('small', 'ATAR · Grades · Progress')
       );
       handle.append(label);
     }
 
-    handle.title = isOpen ? 'Close Connext tools' : 'Open Connext tools';
+    handle.title = isOpen ? 'Close Connectify tools' : 'Open Connectify tools';
     handle.setAttribute('aria-label', handle.title);
     handle.setAttribute('aria-expanded', String(isOpen));
   }
@@ -51,7 +51,7 @@
 
   // Header and navigation
   const header = createElement('header');
-  const brand = createElement('strong', 'Connext');
+  const brand = createElement('strong', 'Connectify');
   const homeBtn = createElement('button', '← Back to Main Menu');
   const closeBtn = createElement('button', '❮ Close');
 
@@ -76,8 +76,8 @@
    * Mount tool launcher buttons into the sidebar menu and tool panels into the workspace.
    */
   function mountTools() {
-    const progressToggle = document.getElementById('connext-progress-toggle');
-    const toolButtons = [...(window.ConnextAtar.toolButtons || []), progressToggle];
+    const progressToggle = document.getElementById('connectify-progress-toggle');
+    const toolButtons = [...(window.ConnectifyAtar.toolButtons || []), progressToggle];
 
     for (const btn of toolButtons) {
       if (btn && btn.parentElement !== toolMenu) {
@@ -85,7 +85,7 @@
       }
     }
 
-    for (const panelId of ['connectea-atar', 'connext-progress', 'connext-weakness', 'connext-categories']) {
+    for (const panelId of ['connectea-atar', 'connectify-progress', 'connectify-weakness', 'connectify-categories']) {
       const panel = document.getElementById(panelId);
       if (panel && panel.parentElement !== workspace) {
         workspace.append(panel);
@@ -99,7 +99,7 @@
   }
 
   function closeAllTools() {
-    window.dispatchEvent(new CustomEvent('connext-open', { detail: 'home' }));
+    window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
   }
 
   handle.onclick = () => {
@@ -118,7 +118,7 @@
 
   homeBtn.onclick = closeAllTools;
 
-  window.addEventListener('connext-open', e => {
+  window.addEventListener('connectify-open', e => {
     if (e.detail !== 'home') openSidebar();
   });
 

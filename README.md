@@ -1,6 +1,6 @@
-# Connext 3.1.2
+# Connectify 3.1.2
 
-**Connext** is the ultimate unofficial extension for Western Australia's Department of Education Connect portal. Built for ATAR students, it instantly upgrades the default Connect interface with powerful, real-time analytics to help you track your progress, identify weaknesses, and predict your final ATAR.
+**Connectify** is the ultimate unofficial extension for Western Australia's Department of Education Connect portal. Built for ATAR students, it instantly upgrades the default Connect interface with powerful, real-time analytics to help you track your progress, identify weaknesses, and predict your final ATAR.
 
 ---
 
@@ -13,12 +13,12 @@
 
 ## 🌟 What's New in Version 3?
 
-Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, school-specific data so Connext now works universally for **every high school in WA**, while injecting an entirely new suite of ATAR tracking features directly into your LMS.
+Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, school-specific data so Connectify now works universally for **every high school in WA**, while injecting an entirely new suite of ATAR tracking features directly into your LMS.
 
 ### 📈 Powerful Analytics & Predictions
 - **Live ATAR Predictor**: Automatically scrapes your unscaled school marks, applies historical TISC scaling algorithms, and predicts your final ATAR. It even dynamically detects if you're in Year 11 or Year 12, applying a mathematical penalty to Year 11 unscaled marks for a more realistic projection.
 - **Dynamic Cohort & Rank Estimator**: Instantly estimates your exact rank and percentile within your cohort (e.g. `Top 4.2%`) using an advanced polynomial spline applied to Connect's published boxplot data. 
-- **Target Grade Planner**: Input your dream ATAR, and Connext will reverse-engineer exactly what percentage you need to score on every remaining assessment to achieve it.
+- **Target Grade Planner**: Input your dream ATAR, and Connectify will reverse-engineer exactly what percentage you need to score on every remaining assessment to achieve it.
 
 ### 📊 Beautiful Visualizations
 - **Weakness Analyzer Radar Chart**: A brand new interactive tool that categorizes every assessment you've taken (Exams, Tests, Essays, Take-Home) and plots your performance on a sleek radar chart, instantly revealing your study weaknesses.
