@@ -78,14 +78,27 @@ jobs:
             TAG_NAME="${{ github.ref_name }}"
           fi
 
-          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
-            echo "Release $TAG_NAME already exists! Version was not incremented. Skipping publish."
-            exit 0
+          PRERELEASE_FLAG=""
+
+          if [[ "${{ github.ref_type }}" != "tag" ]]; then
+            if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+              TIMECODE=$(git show -s --format=%ct ${{ github.sha }})
+              TAG_NAME="${TAG_NAME}-${TIMECODE}"
+              VERSION="${VERSION}-${TIMECODE}"
+              PRERELEASE_FLAG="--prerelease"
+              mv "connectify-${{ steps.meta.outputs.version }}.xpi" "connectify-${VERSION}.xpi"
+              mv "connectify-${{ steps.meta.outputs.version }}.crx" "connectify-${VERSION}.crx"
+              mv "connectify-${{ steps.meta.outputs.version }}.zip" "connectify-${VERSION}.zip"
+            fi
           fi
 
-          gh release create "$TAG_NAME" "connectify-${VERSION}.xpi" "connectify-${VERSION}.crx" "connectify-${VERSION}.zip" \
-            --title "Connectify ${TAG_NAME}" \
-            --generate-notes || gh release upload "$TAG_NAME" "connectify-${VERSION}.xpi" "connectify-${VERSION}.crx" "connectify-${VERSION}.zip" --clobber
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release upload "$TAG_NAME" "connectify-${VERSION}.xpi" "connectify-${VERSION}.crx" "connectify-${VERSION}.zip" --clobber
+          else
+            gh release create "$TAG_NAME" "connectify-${VERSION}.xpi" "connectify-${VERSION}.crx" "connectify-${VERSION}.zip" \
+              --title "Connectify ${TAG_NAME}" \
+              --generate-notes $PRERELEASE_FLAG || gh release upload "$TAG_NAME" "connectify-${VERSION}.xpi" "connectify-${VERSION}.crx" "connectify-${VERSION}.zip" --clobber
+          fi
 
           if gh release view "latest" >/dev/null 2>&1; then
             gh release upload "latest" "connectify-${VERSION}.xpi" "connectify-${VERSION}.crx" "connectify-${VERSION}.zip" --clobber
