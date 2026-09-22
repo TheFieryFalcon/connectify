@@ -20,13 +20,13 @@
     // Matches "Term 3, Week 5" or "Term 3 Week 5"
     let match = text.match(/term\s*(\d).*?week[s]?\s*(\d+)/i);
     if (match) {
-      return (+match[1] - 1) * 10 + (+match[2]);
+      return (+match[1] - 1) * 12 + (+match[2]);
     }
 
     // Matches "Week 5, Term 3"
     match = text.match(/weeks?\s*(\d+)(?:\s*(?:&|and|[\/–-])\s*\d+)?\s*[,;]?\s*term\s*(\d)/i);
     if (match) {
-      return (+match[2] - 1) * 10 + (+match[1]);
+      return (+match[2] - 1) * 12 + (+match[1]);
     }
 
     // Matches bare "Week 4" or "Week 4/5"

@@ -25,6 +25,14 @@
     return el;
   };
 
+  
+  function formatTimestamp(order, fallbackCaption) {
+    if (!Number.isFinite(order)) return fallbackCaption || 'Unknown';
+    const term = Math.floor((order - 1) / 12) + 1;
+    const week = (order - 1) % 12 + 1;
+    return `Term ${term}, Week ${week}`;
+  }
+
   const getMonthName = (week) => {
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const monthIndex = 1 + Math.floor((week - 1) / 4.3);
@@ -466,7 +474,7 @@
         : [
             String(idx + 1),
             point.name,
-            point.caption,
+            formatTimestamp(point.order, point.caption),
             `${Number(point.score.toFixed(2))}%`,
             Number.isFinite(point.mean) ? `${Number(point.mean.toFixed(2))}%` : 'Unavailable'
           ];
