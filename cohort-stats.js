@@ -460,7 +460,7 @@
             ? persisted
               ? 'Saved for both semesters.'
               : 'Used for this visit; browser storage is unavailable.'
-            : `Auto: ~${currentEstimate}${currentWarning}`
+            : `Estimate: ~${currentEstimate}${currentWarning}`
         );
         schedule();
       });
@@ -513,7 +513,7 @@
       if (userSize === undefined && ui.notice) {
         // Keep the DOM notice text up to date if there's no manual user override
         const warningText = estimatedSize < 50 ? ' (Estimates <50 students are highly inaccurate)' : '';
-        setText(ui.notice, `Auto: ~${estimatedSize}${warningText}`);
+        setText(ui.notice, `Estimate: ~${estimatedSize}${warningText}`);
       }
     }
 
