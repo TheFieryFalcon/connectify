@@ -7,6 +7,9 @@
 
   let hasInitializedSidebar = false;
   let hasAutoExpanded = false;
+  
+  // Cache to store tasks even when the Vaadin accordion collapses and wipes the DOM
+  const subjectCache = new Map();
 
   function syncFeatures() {
     if (!window.ConnextData) return;
@@ -100,11 +103,18 @@
        return 'Take-Home';
     }
 
-    const subjects = window.ConnextData.collect(true);
+    // --- Update Persistent Cache ---
+    const scrapedSubjects = window.ConnextData.collect(true);
+    scrapedSubjects.forEach(s => {
+        if (s.tasks && s.tasks.length > 0) {
+            subjectCache.set(s.name, s.tasks);
+        }
+    });
+
+    const cachedSubjects = Array.from(subjectCache.entries()).map(([name, tasks]) => ({ name, tasks }));
 
     // --- Compound Subject Progress Bars ---
-    subjects.forEach(subject => {
-       // Inject into ALL instances of the subject card (e.g. Sem 1 and Sem 2)
+    cachedSubjects.forEach(subject => {
        const matchingTitles = Array.from(document.querySelectorAll('.eds-c-tile__title')).filter(t => t.textContent.includes(subject.name));
        matchingTitles.forEach(cardTitle => {
            const card = cardTitle.closest('.eds-c-tile');
@@ -114,31 +124,25 @@
            if (!header) return;
 
            if (header.nextElementSibling && header.nextElementSibling.classList.contains('cx-compound-progress-container')) {
-              // Already injected or dirty. Let's remove and re-render to update
               header.nextElementSibling.remove();
            }
 
+           const sortedTasks = [...subject.tasks]
+               .filter(t => t.weight > 0)
+               .sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
+
+           if (sortedTasks.length === 0) return;
+
            let totalWeight = 0;
            let overallCompleted = 0;
-           const breakdowns = {};
-           for (const cat of Object.keys(categories)) {
-               breakdowns[cat] = { completed: 0, remaining: 0 };
-           }
-           
-           subject.tasks.forEach(t => {
-              if (t.weight === undefined || t.weight === null || isNaN(t.weight)) return;
-              totalWeight += t.weight;
-              const cat = categorizeTask(t.name);
-              const isCompleted = !t.pending;
-              
-              if (!breakdowns[cat]) breakdowns[cat] = { completed: 0, remaining: 0 };
+           let labelBreakdowns = {};
 
-              if (isCompleted) {
-                 breakdowns[cat].completed += t.weight;
-                 overallCompleted += t.weight;
-              } else {
-                 breakdowns[cat].remaining += t.weight;
-              }
+           sortedTasks.forEach(t => {
+               totalWeight += t.weight;
+               if (!t.pending) overallCompleted += t.weight;
+               const cat = categorizeTask(t.name);
+               if (!labelBreakdowns[cat]) labelBreakdowns[cat] = 0;
+               labelBreakdowns[cat] += t.weight;
            });
 
            if (totalWeight <= 0) return;
@@ -151,32 +155,26 @@
            bar.style.margin = '8px 0 4px 0';
            bar.style.border = '1px solid #3a3a3a';
 
-           let tooltipParts = [];
+           sortedTasks.forEach(t => {
+              const cat = categorizeTask(t.name);
+              const isCompleted = !t.pending;
+              
+              const pct = (t.weight / totalWeight) * 100;
+              const segment = document.createElement('div');
+              segment.style.width = `${pct}%`;
+              segment.style.backgroundColor = categories[cat] ? categories[cat].color : '#999';
+              if (!isCompleted) {
+                 segment.style.opacity = '0.25';
+              }
+              // Render individual tasks as sections using a tiny right border
+              segment.style.borderRight = '1px solid #1e1e1e';
+              segment.title = `${t.name}: ${t.weight}% (${isCompleted ? 'Completed' : 'Remaining'})`;
+              bar.appendChild(segment);
+           });
 
-           for (const [cat, data] of Object.entries(breakdowns)) {
-              const catTotal = data.completed + data.remaining;
-              if (catTotal <= 0) continue;
-              
-              if (data.completed > 0) {
-                 const pctComp = (data.completed / totalWeight) * 100;
-                 const segmentC = document.createElement('div');
-                 segmentC.style.width = `${pctComp}%`;
-                 segmentC.style.backgroundColor = categories[cat] ? categories[cat].color : '#999';
-                 segmentC.title = `${cat} (Completed): ${data.completed.toFixed(1)}%`;
-                 bar.appendChild(segmentC);
-              }
-              
-              if (data.remaining > 0) {
-                 const pctRem = (data.remaining / totalWeight) * 100;
-                 const segmentR = document.createElement('div');
-                 segmentR.style.width = `${pctRem}%`;
-                 segmentR.style.backgroundColor = categories[cat] ? categories[cat].color : '#999';
-                 segmentR.style.opacity = '0.25';
-                 segmentR.title = `${cat} (Remaining): ${data.remaining.toFixed(1)}%`;
-                 bar.appendChild(segmentR);
-              }
-              
-              tooltipParts.push(`${cat} ${Math.round((catTotal / totalWeight) * 100)}%`);
+           let tooltipParts = [];
+           for (const [cat, weight] of Object.entries(labelBreakdowns)) {
+               tooltipParts.push(`${cat} ${Math.round((weight / totalWeight) * 100)}%`);
            }
 
            const label = document.createElement('div');
@@ -233,7 +231,6 @@
           window.ConnextAtar.toolButtons.push(toggleBtn);
        }
 
-       // Config UI logic
        const configBtn = panel.querySelector('#cx-radar-config-btn');
        const configDiv = panel.querySelector('#cx-radar-config');
        const modeSelect = panel.querySelector('#cx-radar-mode');
@@ -250,7 +247,7 @@
                const wrap = document.createElement('div');
                wrap.style.marginBottom = '4px';
                wrap.innerHTML = `<label style="display:inline-block;width:80px;">${cat}</label>
-                                 <input type="text" id="cx-cat-${cat}" value="${(categories[cat] || defaultCategories[cat]).keywords.join(', ')}" style="width:180px; padding:2px;">`;
+                                 <input type="text" id="cx-cat-${cat}" value="${(categories[cat] || defaultCategories[cat]).keywords.join(', ')}" style="width:180px; padding:2px; background:#212121; color:#ddd; border:1px solid #4a4a4a;">`;
                configDiv.appendChild(wrap);
            }
            const saveBtn = document.createElement('button');
@@ -293,9 +290,9 @@
          }
          
          const perf = {};
-         const mode = modeSelect.value; // 'type' or 'subject'
+         const mode = modeSelect.value;
 
-         window.ConnextData.collect(true).forEach(subject => {
+         cachedSubjects.forEach(subject => {
              subject.tasks.forEach(t => {
                  if (t.weight > 0 && !t.pending && t.score !== null) {
                      const earned = (t.score / 100) * t.weight;
