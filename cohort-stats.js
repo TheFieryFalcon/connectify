@@ -440,6 +440,8 @@
       controls.append(label, notice);
       box.append(controls);
 
+      const stateRef = {}; // We will bind this to the state object below
+
       input.addEventListener('input', () => {
         const size = validCohortSize(input.value);
         const isInvalid = (input.value !== '' && !size) || input.validity.badInput;
@@ -454,7 +456,7 @@
             ? persisted
               ? 'Saved for both semesters.'
               : 'Used for this visit; browser storage is unavailable.'
-            : `Estimated ~${estimatedSize}; enter to override.`
+            : `Estimated ~${stateRef.state.estimatedSize}; enter to override.`
         );
         schedule();
       });
@@ -467,7 +469,10 @@
     const target = row.querySelector('.cvr-c-task__details') || row;
     target.append(box);
 
-    const state = { box, distribution, result, input, key, isOverall, estimatedSize };
+    const state = { box, distribution, result, input, notice, key, isOverall, estimatedSize };
+    if (isOverall && key && typeof stateRef !== 'undefined') {
+      stateRef.state = state;
+    }
     panels.set(row, state);
     return state;
   }
@@ -500,6 +505,11 @@
       if (ui.input.value !== valStr) ui.input.value = valStr;
       const expectedPlaceholder = estimatedSize !== undefined ? `~${estimatedSize}` : 'e.g. 120';
       if (ui.input.placeholder !== expectedPlaceholder) ui.input.placeholder = expectedPlaceholder;
+      
+      if (userSize === undefined && ui.notice) {
+        // Keep the DOM notice text up to date if there's no manual user override
+        setText(ui.notice, `Estimated ~${estimatedSize}; enter to override.`);
+      }
     }
 
     const stats = readStats(row);
