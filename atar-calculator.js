@@ -867,11 +867,20 @@
       semesterButtons[i].setAttribute('aria-pressed', String(i === activeSemester));
 
       if (i === activeSemester) {
+        const yearLevel = Array.from(document.querySelectorAll('.eds-c-tile__title')).some(el => /\b(?:12|Twelve)\b/i.test(el.textContent)) ? 12 : 11;
+        let teaAdjustment = yearLevel === 11 ? -15 : 0; // Penalize TEA by 15 points (roughly -5%) for Year 11 unscaled marks
+        const finalTEA = Math.max(0, result.tea + teaAdjustment);
+        const finalAtar = result.error ? '—' : convertTEAtoATAR(finalTEA);
+        
+        semesterButtons[i].textContent = isGradingMode
+          ? `Semester ${i + 1} target grade`
+          : `Semester ${i + 1} ATAR\n${finalAtar}`;
+
         detailSummary.textContent =
           result.error ||
-          `TEA ${round(result.tea)} = best four ${round(result.base)} + bonuses ${round(
+          `TEA ${round(finalTEA)} = best four ${round(result.base)} + bonuses ${round(
             result.bonus
-          )}. Best four: ${result.top.map(x => x.name).join(', ')}.`;
+          )}.` + (yearLevel === 11 ? ' (Year 11 Penalty Applied)' : ` Best four: ${result.top.map(x => x.name).join(', ')}.`);
       }
     }
 

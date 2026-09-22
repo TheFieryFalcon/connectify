@@ -108,6 +108,57 @@
        container.appendChild(bar);
        container.appendChild(label);
 
+       // Assessment Weighting Tracker (Completed vs Remaining)
+       let completedWeight = 0;
+       let remainingWeight = 0;
+       subject.tasks.forEach(t => {
+          if (t.weight === undefined || t.weight === null || isNaN(t.weight)) return;
+          if (t.scoreText && t.scoreText.includes('Out of')) {
+             if (t.scoreText.startsWith('-') || t.scoreText.startsWith('–')) {
+                remainingWeight += t.weight;
+             } else {
+                completedWeight += t.weight;
+             }
+          } else {
+             remainingWeight += t.weight;
+          }
+       });
+
+       if (totalWeight > 0) {
+          const compBar = document.createElement('div');
+          compBar.style.display = 'flex';
+          compBar.style.height = '4px';
+          compBar.style.borderRadius = '2px';
+          compBar.style.overflow = 'hidden';
+          compBar.style.margin = '4px 0';
+          compBar.style.border = '1px solid #3a3a3a';
+
+          const pctComp = (completedWeight / totalWeight) * 100;
+          const pctRem = (remainingWeight / totalWeight) * 100;
+
+          const segComp = document.createElement('div');
+          segComp.style.width = `${pctComp}%`;
+          segComp.style.backgroundColor = '#93b640'; // green for completed
+          segComp.title = `Completed: ${completedWeight.toFixed(1)}%`;
+          
+          const segRem = document.createElement('div');
+          segRem.style.width = `${pctRem}%`;
+          segRem.style.backgroundColor = '#414954'; // grey for remaining
+          segRem.title = `Remaining: ${remainingWeight.toFixed(1)}%`;
+
+          compBar.appendChild(segComp);
+          compBar.appendChild(segRem);
+
+          const compLabel = document.createElement('div');
+          compLabel.style.fontSize = '10px';
+          compLabel.style.color = '#999';
+          compLabel.style.textAlign = 'right';
+          compLabel.textContent = `Completed: ${Math.round(pctComp)}% • Remaining: ${Math.round(pctRem)}%`;
+          
+          container.appendChild(compBar);
+          container.appendChild(compLabel);
+       }
+
        const header = card.querySelector('.eds-c-tile__header');
        if (header) header.after(container);
     });

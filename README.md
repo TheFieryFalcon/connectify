@@ -1,4 +1,4 @@
-# Connext 3.0.1
+# Connext 3.1.0
 
 Connext enhances Western Australia's Department of Education Connect portal with local assessment analytics, dynamic progress graphs, ATAR and target grade planning, and a site-wide dark theme.
 
