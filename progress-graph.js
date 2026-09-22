@@ -191,6 +191,48 @@
       points = result.points;
       byAssessment = result.byAssessment;
 
+      if (!byAssessment) {
+        const monthGroups = new Map();
+        
+        points.forEach(p => {
+          if (p.score === null) return;
+          const monthIndex = 1 + Math.floor((p.order - 1) / 4.3);
+          const mIdx = Math.max(0, Math.min(11, monthIndex));
+          
+          if (!monthGroups.has(mIdx)) {
+            monthGroups.set(mIdx, {
+              name: p.name,
+              caption: '',
+              sum: 0,
+              count: 0,
+              orderSum: 0
+            });
+          }
+          const group = monthGroups.get(mIdx);
+          group.sum += p.score;
+          group.count++;
+          group.orderSum += p.order;
+        });
+
+        const averagedPoints = [];
+        const sortedMonths = Array.from(monthGroups.keys()).sort((a, b) => a - b);
+        for (const mIdx of sortedMonths) {
+          const group = monthGroups.get(mIdx);
+          const avgScore = group.sum / group.count;
+          averagedPoints.push({
+            name: group.name,
+            caption: 'Monthly Average',
+            score: avgScore,
+            display: avgScore.toFixed(2),
+            order: group.orderSum / group.count
+          });
+        }
+        
+        if (averagedPoints.length > 0) {
+            points = averagedPoints;
+        }
+      }
+
       chartContainer.append(
         createElement(
           'p',

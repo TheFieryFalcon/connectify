@@ -141,8 +141,11 @@
               header.nextElementSibling.remove();
            }
 
+           const cardSemesterMatch = cardTitle.textContent.match(/Semester\s*([12])/i);
+           const cardSemester = cardSemesterMatch ? +cardSemesterMatch[1] : null;
+
            const sortedTasks = [...subject.tasks]
-               .filter(t => t.weight > 0)
+               .filter(t => t.weight > 0 && (!cardSemester || t.semester === cardSemester))
                .sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
 
            if (sortedTasks.length === 0) return;
