@@ -128,13 +128,13 @@
   calculatorPanel.setAttribute('aria-label', '2025 ATAR estimates');
 
   const headingContainer = createEl('div', 'cta-heading');
-  const panelTitle = createEl('strong', '', 'Your estimated ATAR based on 2025 scaling');
+  const panelTitle = createEl('strong', '', 'Estimated ATAR');
   panelTitle.tabIndex = -1;
   headingContainer.append(panelTitle);
 
-  const estimateTab = createEl('button', 'cta-semester', 'ATAR estimate');
+  const estimateTab = createEl('button', 'cta-semester', 'ATAR Estimate');
   const targetTab = createEl('button', 'cta-semester', 'Target ATAR');
-  const gradeTab = createEl('button', 'cta-semester', 'Target grade');
+  const gradeTab = createEl('button', 'cta-semester', 'Target Grade');
   estimateTab.type = targetTab.type = gradeTab.type = 'button';
 
   for (const button of [estimateTab, targetTab, gradeTab]) {
@@ -166,10 +166,10 @@
     isGradingMode = mode === 'grade';
 
     panelTitle.textContent = isPlanningMode
-      ? 'Calculate whether or not an ATAR of your choosing is still possible'
+      ? 'Target ATAR Planner'
       : isGradingMode
-      ? 'Calculate whether or not a subject average of your pleasing is still possible'
-      : 'Your estimated ATAR based on 2025 scaling';
+      ? 'Target Grade Planner'
+      : 'Estimated ATAR';
 
     calculatorPanel.setAttribute('aria-label', panelTitle.textContent);
 
@@ -224,7 +224,7 @@
   const detailSummary = createEl('p', 'cta-breakdown');
   detailSummary.setAttribute('aria-live', 'polite');
 
-  const resetBtn = createEl('button', 'cta-reset', 'Reset this semester to school marks');
+  const resetBtn = createEl('button', 'cta-reset', 'Reset to School Marks');
   resetBtn.type = 'button';
   resetBtn.addEventListener('click', () => {
     for (const r of courses[activeSemester]) {
@@ -235,7 +235,7 @@
   });
 
   const calculationDetails = createEl('details', 'cta-method');
-  calculationDetails.append(createEl('summary', '', 'Calculation & sources'));
+  calculationDetails.append(createEl('summary', '', 'Calculation Methodology & Sources'));
   calculationDetails.append(
     createEl(
       'p',
@@ -262,7 +262,7 @@
   targetInput.value = savedPreferences.target ?? '98';
   targetLabel.append(targetInput);
 
-  const calculateTargetBtn = createEl('button', 'cta-reset', 'Calculate');
+  const calculateTargetBtn = createEl('button', 'cta-reset', 'Recalculate');
   calculateTargetBtn.type = 'button';
 
   const targetOutputContainer = createEl('div', 'cta-target-output');
@@ -316,7 +316,7 @@
   gradeTargetInput.value = savedPreferences.gradeTarget ?? '80';
   gradeTargetLabel.append(gradeTargetInput);
 
-  const calculateGradeBtn = createEl('button', 'cta-reset', 'Calculate');
+  const calculateGradeBtn = createEl('button', 'cta-reset', 'Recalculate');
   calculateGradeBtn.type = 'button';
   calculateGradeBtn.addEventListener('click', () => scanOutlineDetails(true));
 
@@ -389,18 +389,18 @@
     if (plan.error) {
       gradeOutputContainer.append(
         createEl('p', '', plan.error),
-        createEl('p', 'cta-note', 'Expand Show Details, then scan again. Include the entire published semester outline.')
+        createEl('p', 'cta-note', 'Expand assessment details in Connect, then recalculate. Ensure full outline is visible.')
       );
       return;
     }
 
     const summaryText = plan.impossible
-      ? `Not achievable from the remaining tasks. Maximum overall mark: ${round(plan.maximum)}%.`
+      ? `Goal unattainable. Maximum achievable mark: ${round(plan.maximum)}%.`
       : plan.finished
-      ? `No weighted tasks remain. Final overall mark: ${round(plan.final)}%.`
+      ? `All weighted tasks completed. Final mark: ${round(plan.final)}%.`
       : plan.required === 0
-      ? 'Your target is already secured even with 0% on the remaining tasks.'
-      : `Aim for at least ${plan.required}% across the remaining assessments to reach ${gradeTargetInput.value}% overall.`;
+      ? 'Target secured with remaining assessments at 0%.'
+      : `Requires ${plan.required}% on remaining assessments to achieve ${gradeTargetInput.value}% overall.`;
 
     gradeOutputContainer.append(
       createEl('strong', '', summaryText),
@@ -446,7 +446,7 @@
     if (!plan.impossible && !plan.finished) {
       for (const task of progress.tasks) {
         assessmentDetails.append(
-          createEl('p', 'cta-note', `${task.name}: aim ${plan.required}% · ${round(task.weight)}% annual weight`)
+          createEl('p', 'cta-note', `${task.name}: requires ${plan.required}% (${round(task.weight)}% weight)`)
         );
       }
     }
@@ -491,7 +491,7 @@
         createEl(
           'p',
           'cta-note',
-          'Expand Show Details for each included subject, then scan again. Missing weights are never treated as zero.'
+          'Expand assessment details in Connect, then recalculate. Missing task weights cannot be omitted.'
         )
       );
       return;
@@ -502,7 +502,7 @@
         createEl(
           'strong',
           '',
-          `Not achievable with the remaining weights under these assumptions. Maximum ATAR: ${plan.maximum.atar}, even with 100% on every remaining task.`
+          `Goal unattainable with remaining tasks. Maximum achievable ATAR: ${plan.maximum.atar} (assuming 100% on all remaining assessments).`
         )
       );
     } else {
@@ -511,8 +511,8 @@
           'strong',
           '',
           plan.required === 0
-            ? 'Target already secured under these assumptions, even with 0% on remaining tasks.'
-            : `Aim for at least ${round(plan.required)}% on every remaining assessment. Projected ATAR: ${
+            ? 'Target secured under current assumptions.'
+            : `Requires ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
                 plan.result.atar
               }.`
         )
@@ -523,7 +523,7 @@
       createEl(
         'p',
         'cta-note',
-        `Maximum possible in this model: ${plan.maximum.atar}. This is one uniform-score plan, not the only possible combination.`
+        `Maximum achievable ATAR: ${plan.maximum.atar}. Assumes uniform performance across remaining tasks.`
       )
     );
 
@@ -553,13 +553,13 @@
           createEl(
             'small',
             '',
-            `${task.name}: weight ${round(task.weight)}% · ${plan.impossible ? 'maximum 100%' : `aim ${round(plan.required)}%`}`
+            `${task.name}: weight ${round(task.weight)}% · ${plan.impossible ? 'max 100%' : `required ${round(plan.required)}%`}`
           )
         );
       }
 
       if (!course.progress.remaining) {
-        block.append(createEl('small', '', 'No unmarked weighted tasks remain.'));
+        block.append(createEl('small', '', 'All weighted tasks completed.'));
       }
       taskDetails.append(block);
     });
@@ -576,14 +576,16 @@
     for (let i = 0; i < 2; i++) {
       const result = calculate(courses[i].map(row => getCourseState(row, i)));
       semesterButtons[i].textContent = isGradingMode
-        ? `Semester ${i + 1} target grade`
+        ? `Semester ${i + 1} Target Grade`
+        : isPlanningMode
+        ? (isTargetClosed(i) ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`)
         : `Semester ${i + 1} ATAR\n${result.error ? '—' : result.atar}`;
 
       semesterButtons[i].hidden = isGradingMode && hasSemesterTwoStarted() && i === 0;
       semesterButtons[i].disabled = semesterButtons[i].hidden || (isPlanningMode && isTargetClosed(i));
 
       if (isPlanningMode && isTargetClosed(i)) {
-        semesterButtons[i].textContent = `Semester ${i + 1} Target ATAR · Closed`;
+        semesterButtons[i].textContent = `Semester ${i + 1} Target ATAR (Closed)`;
       }
       semesterButtons[i].setAttribute('aria-pressed', String(i === activeSemester));
 
@@ -596,14 +598,16 @@
         const finalAtar = result.error ? '—' : convertTEAtoATAR(finalTEA);
         
         semesterButtons[i].textContent = isGradingMode
-          ? `Semester ${i + 1} target grade`
+          ? `Semester ${i + 1} Target Grade`
+          : isPlanningMode
+          ? (isTargetClosed(i) ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`)
           : `Semester ${i + 1} ATAR\n${finalAtar}`;
 
         detailSummary.textContent =
           result.error ||
           `TEA ${round(finalTEA)} = best four ${round(result.base)} + bonuses ${round(
             result.bonus
-          )}.` + (yearLevel === 11 ? ' (Year 11 Penalty Applied)' : ` Best four: ${result.top.map(x => x.name).join(', ')}.`);
+          )}.` + (yearLevel === 11 ? ' (Year 11 TEA scaling adjustment applied).' : ` Best four: ${result.top.map(x => x.name).join(', ')}.`);
       }
     }
 
@@ -623,7 +627,7 @@
 
     if (!courses[activeSemester].length) {
       courseListContainer.append(
-        createEl('p', '', 'No ATAR subjects found for this semester. Show all classes in Connect.')
+        createEl('p', '', 'No ATAR subjects found for this semester. Ensure classes are visible in Connect.')
       );
     }
 

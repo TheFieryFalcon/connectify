@@ -36,7 +36,7 @@
       const label = createElement('span');
       label.className = 'cx-handle-label';
       label.append(
-        createElement('strong', 'Connectify tools'),
+        createElement('strong', 'Connectify Tools'),
         createElement('small', 'ATAR · Grades · Progress')
       );
       handle.append(label);
@@ -52,7 +52,7 @@
   // Header and navigation
   const header = createElement('header');
   const brand = createElement('strong', 'Connectify');
-  const homeBtn = createElement('button', '← Back to Main Menu');
+  const homeBtn = createElement('button', '← Back to Menu');
   const closeBtn = createElement('button', '❮ Close');
 
   homeBtn.type = closeBtn.type = 'button';
@@ -66,7 +66,7 @@
   const workspace = createElement('div');
   workspace.className = 'cx-workspace';
 
-  const introText = createElement('p', 'Choose a tool to explore your results. Note: Everything here requires your subjects to be expanded at least once to load the data.');
+  const introText = createElement('p', 'Select a tool below to view your analytics. Ensure subject outlines are expanded in Connect to load assessment data.');
   introText.className = 'cx-tools-intro';
 
   sidebar.append(header, introText, toolMenu, workspace);

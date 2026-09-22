@@ -61,7 +61,7 @@
 
   const chartContainer = createElement('div');
 
-  const scanBtn = createElement('button', 'Refresh assessments');
+  const scanBtn = createElement('button', 'Refresh Assessments');
   scanBtn.type = 'button';
 
   panel.append(head, choicesContainer, scanBtn, chartContainer);
@@ -193,7 +193,7 @@
     }
 
     if (!current) {
-      chartContainer.append(createElement('p', 'No assessments found. Expand all subjects and refresh.'));
+      chartContainer.append(createElement('p', 'No assessments found. Expand subjects in Connect to load data.'));
       return;
     }
 
@@ -257,7 +257,7 @@
       chartContainer.append(
         createElement(
           'p',
-          'Estimated from weighted running school averages using the 2025 model. Begins once four subjects have results.'
+          'Estimated from running school marks using 2025 TISC scaling. Requires at least four graded subjects.'
         )
       );
 
@@ -265,7 +265,7 @@
         chartContainer.append(
           createElement(
             'p',
-            'Some assessments have chapter labels or no readable date. Each assessment round uses the first N completed weighted assessments in each subject’s outline order (or all available if fewer). These rounds are not calendar dates.'
+            'Sequential assessment rounds are displayed when calendar dates are unavailable. These reflect syllabus outline order rather than calendar dates.'
           )
         );
       }
@@ -277,9 +277,9 @@
       const legend = createElement('div');
       legend.className = 'cx-legend';
 
-      const redKey = createElement('span', 'Red line -> Average Cohort performance');
+      const redKey = createElement('span', 'Red: Cohort Mean');
       redKey.className = 'cx-red-key';
-      const blueKey = createElement('span', 'Blue line -> Your performance');
+      const blueKey = createElement('span', 'Blue: Student Score');
       blueKey.className = 'cx-blue-key';
 
       legend.append(redKey, blueKey);
@@ -465,7 +465,7 @@
 
     if (!isHistory && points.some(p => p.mean === null)) {
       chartContainer.append(
-        createElement('p', 'Gaps in the red line mean cohort statistics are not available for that task.')
+        createElement('p', 'Note: Discontinuities in the cohort trend indicate tasks without available cohort statistics.')
       );
     }
 
@@ -495,7 +495,7 @@
           wrapper.style.gap = '4px';
 
           if (showWarning) {
-            const msg = createElement('small', 'No time detected, please input a time yourself');
+            const msg = createElement('small', 'No date detected. Enter school week (e.g. 17 for Term 2 Week 7):');
             msg.style.color = '#d32f2f';
             wrapper.append(msg);
           }

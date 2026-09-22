@@ -235,13 +235,14 @@
        panel.className = 'cx-workspace-panel';
        panel.innerHTML = `
          <header><strong>Weakness Analyzer</strong></header>
-         <div style="margin-bottom:12px; display:flex; gap:8px;">
-            <select id="cx-radar-mode" style="flex:1; padding:4px;">
-               <option value="type">By Assessment Type</option>
-               <option value="subject">By Subject</option>
+         <div style="margin-bottom:16px; display:flex; gap:10px; align-items:center;">
+            <label for="cx-radar-mode" style="font-weight:600; font-size:12px;">Group by:</label>
+            <select id="cx-radar-mode" style="padding:6px 10px; border-radius:6px; border:1px solid #bacddd; background:inherit; color:inherit; font:inherit;">
+               <option value="type">Assessment Type</option>
+               <option value="subject">Subject</option>
             </select>
          </div>
-         <div id="connectify-radar-chart" style="width:100%;height:300px;background:#333333;border-radius:6px;border:1px solid #3a3a3a;"></div>
+         <div id="connectify-radar-chart" style="width:100%;height:320px;border-radius:8px;border:1px solid #d8e3ee;overflow:hidden;"></div>
        `;
 
        if (toolMenu) toolMenu.append(toggleBtn);
@@ -320,8 +321,8 @@
        
        const catInner = document.createElement('div');
        catInner.innerHTML = `
-         <header><strong>Settings</strong></header>
-         <p style="font-size:12px;color:#999;margin-bottom:12px;">Comma-separated keywords for each category.</p>
+         <header><strong>Category Settings</strong></header>
+         <p style="font-size:12px;color:#999;margin-bottom:16px;">Configure task categorization keywords and ATAR calibration.</p>
        `;
        
        // Populate inputs from window.cxCategories which was loaded async
@@ -330,10 +331,10 @@
            for (const cat of Object.keys(defaultCategories)) {
                const wrap = document.createElement('div');
                wrap.className = 'cx-cat-wrap';
-               wrap.style.marginBottom = '6px';
+               wrap.style.marginBottom = '10px';
                const currentVal = (window.cxCategories[cat] || defaultCategories[cat]).keywords.join(', ');
-               wrap.innerHTML = `<label style="display:inline-block;width:80px;font-size:12px;">${cat}</label>
-                                 <input type="text" id="cx-cat-${cat}" value="${currentVal}" style="width:180px; padding:4px; background:#212121; color:#ddd; border:1px solid #4a4a4a; font-size:12px;">`;
+               wrap.innerHTML = `<label style="display:inline-block;width:90px;font-size:12px;font-weight:600;">${cat}</label>
+                                 <input type="text" id="cx-cat-${cat}" value="${currentVal}" style="width:200px; padding:6px 8px; border-radius:6px; border:1px solid #bacddd; font-size:12px;">`;
                catInner.insertBefore(wrap, saveBtn);
            }
        };
@@ -341,17 +342,18 @@
 
        // === CALIBRATION TABLE ===
        const calibContainer = document.createElement('div');
-       calibContainer.style.marginTop = '20px';
-       calibContainer.style.borderTop = '1px solid var(--cvr-color-border)';
-       calibContainer.style.paddingTop = '16px';
-       calibContainer.innerHTML = `<header><strong>Semester 1 Calibration</strong></header>
-         <p style="font-size:12px;color:#999;margin-bottom:12px;">Improves accuracy. Enter your actual School Scaled Score if known.</p>`;
+       calibContainer.style.marginTop = '24px';
+       calibContainer.style.borderTop = '1px solid #d8e3ee';
+       calibContainer.style.paddingTop = '18px';
+       calibContainer.innerHTML = `<header><strong>Semester 1 Scaling Calibration</strong></header>
+         <p style="font-size:12px;color:#999;margin-bottom:14px;">Enter your school's Semester 1 scaled scores to calibrate the model to your cohort's historical distribution.</p>`;
        
        const calibTable = document.createElement('div');
        calibTable.style.display = 'grid';
-       calibTable.style.gridTemplateColumns = '1fr auto auto';
-       calibTable.style.gap = '8px 12px';
+       calibTable.style.gridTemplateColumns = 'minmax(140px, 1fr) 75px 75px';
+       calibTable.style.gap = '10px 14px';
        calibTable.style.alignItems = 'center';
+       calibTable.style.marginTop = '12px';
        
        // Function to re-render the calibration table dynamically
        const renderCalibTable = () => {
@@ -383,14 +385,22 @@
            const rawInput = document.createElement('input');
            rawInput.type = 'number';
            rawInput.placeholder = 'Raw';
+           rawInput.title = 'Semester 1 School Raw Mark (%)';
            rawInput.value = knownSem1Raw !== undefined ? knownSem1Raw : '';
-           rawInput.style.width = '60px';
+           rawInput.style.width = '75px';
+           rawInput.style.padding = '5px 8px';
+           rawInput.style.borderRadius = '6px';
+           rawInput.style.border = '1px solid #bacddd';
            
            const scaledInput = document.createElement('input');
            scaledInput.type = 'number';
            scaledInput.placeholder = 'Scaled';
+           scaledInput.title = 'Semester 1 School Scaled Mark';
            scaledInput.value = calibEntry.scaled !== undefined ? calibEntry.scaled : '';
-           scaledInput.style.width = '60px';
+           scaledInput.style.width = '75px';
+           scaledInput.style.padding = '5px 8px';
+           scaledInput.style.borderRadius = '6px';
+           scaledInput.style.border = '1px solid #bacddd';
            
            calibTable.append(nameLabel, rawInput, scaledInput);
            
@@ -417,7 +427,7 @@
        saveBtn.textContent = 'Save Categories';
        saveBtn.type = 'button';
        saveBtn.className = 'eds-c-button';
-       saveBtn.style.marginTop = '12px';
+       saveBtn.style.marginTop = '16px';
        saveBtn.onclick = () => {
            for (const cat of Object.keys(defaultCategories)) {
                const val = document.getElementById(`cx-cat-${cat}`).value;
@@ -434,10 +444,10 @@
        };
        
        const resetBtn = document.createElement('button');
-       resetBtn.textContent = 'Reset to Default';
+       resetBtn.textContent = 'Reset to Defaults';
        resetBtn.type = 'button';
        resetBtn.className = 'eds-c-button';
-       resetBtn.style.marginTop = '12px';
+       resetBtn.style.marginTop = '16px';
        resetBtn.style.marginLeft = '8px';
        resetBtn.onclick = () => {
            window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));

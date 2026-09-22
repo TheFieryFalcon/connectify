@@ -67,7 +67,7 @@
                   termsBox.checked = true;
                 }
                 
-                loginBtn.value = 'Logging In...';
+                loginBtn.value = 'Logging in...';
                 loginBtn.style.opacity = '0.8';
                 loginBtn.click();
               }

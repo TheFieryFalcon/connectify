@@ -427,13 +427,13 @@
       input.value = saved !== undefined ? String(saved) : '';
       label.append(input);
 
-      const warningText = estimatedSize < 50 ? ' (Estimates <50 students are highly inaccurate)' : '';
+      const warningText = estimatedSize < 50 ? ' (Estimates under 50 students have reduced precision)' : '';
       notice = createElement(
         'span',
         'connectea-notice',
         saved !== undefined
           ? `Original Estimate: ~${estimatedSize}${warningText} • Saved.`
-          : warningText ? warningText.trim() : 'Enter to override.'
+          : warningText ? warningText.trim() : 'Enter custom size to override.'
       );
       notice.setAttribute('aria-live', 'polite');
 
@@ -449,7 +449,7 @@
         input.setAttribute('aria-invalid', String(Boolean(isInvalid)));
 
         const currentEstimate = stateRef.state ? stateRef.state.estimatedSize : estimatedSize;
-        const currentWarning = currentEstimate < 50 ? ' (Estimates <50 students are highly inaccurate)' : '';
+        const currentWarning = currentEstimate < 50 ? ' (Estimates under 50 students have reduced precision)' : '';
 
         const persisted = saveCohortSize(key, size);
         setText(
@@ -458,7 +458,7 @@
             ? 'Enter a whole number of students, at least 1.'
             : size !== undefined
             ? `Original Estimate: ~${currentEstimate}${currentWarning} • ${persisted ? 'Saved.' : 'Browser storage unavailable.'}`
-            : currentWarning ? currentWarning.trim() : 'Enter to override.'
+            : currentWarning ? currentWarning.trim() : 'Enter custom size to override.'
         );
         schedule();
       });
@@ -510,12 +510,11 @@
       
       if (ui.notice) {
         // Keep the DOM notice text up to date
-        const currentWarning = estimatedSize < 50 ? ' (Estimates <50 students are highly inaccurate)' : '';
+        const currentWarning = estimatedSize < 50 ? ' (Estimates under 50 students have reduced precision)' : '';
         if (userSize === undefined) {
-          setText(ui.notice, currentWarning ? currentWarning.trim() : 'Enter to override.');
+          setText(ui.notice, currentWarning ? currentWarning.trim() : 'Enter custom size to override.');
         } else {
           // If a manual size is set, ensure we show the original estimate
-          // Note: we can't easily know if it persisted successfully here, but we assume it did if it was loaded.
           setText(ui.notice, `Original Estimate: ~${estimatedSize}${currentWarning} • Saved.`);
         }
       }
@@ -525,10 +524,10 @@
     const data = summary(stats, mark, cohortSize);
 
     if (!data) {
-      setText(ui.distribution, 'Cohort stats unavailable');
+      setText(ui.distribution, 'Cohort statistics unavailable');
       setText(
         ui.result,
-        Number.isFinite(mark) ? 'Rank/z-score unavailable' : 'Not marked · Rank/z-score unavailable'
+        Number.isFinite(mark) ? 'Rank and z-score unavailable' : 'Not marked · Rank and z-score unavailable'
       );
       return;
     }
@@ -553,14 +552,14 @@
         const totalDisplay = isEstimated ? `~${cohortSize}` : `${cohortSize}`;
         parts.push(
           data.rank === 1
-            ? `Top of ${isOverall ? 'subject' : 'test'}`
+            ? `Top of ${isOverall ? 'subject' : 'assessment'}`
             : `Rank: ${data.rank} / ${totalDisplay}`
         );
       } else {
-        parts.push('Enter cohort size for rank');
+        parts.push('Cohort size needed for rank');
       }
     } else {
-      parts.push('Not marked · Rank/z-score unavailable');
+      parts.push('Not marked · Rank and z-score unavailable');
     }
 
     setText(ui.result, parts.join('  •  '));
