@@ -631,16 +631,39 @@
       document.head.append(styleEl);
     }
 
-    for (const card of document.querySelectorAll('.eds-c-tile')) {
-      if (!card.querySelector('.eds-c-tile__title')) continue;
+    const cards = Array.from(document.querySelectorAll('.eds-c-tile')).filter(
+      card => card.querySelector('.eds-c-tile__title')
+    );
 
+    // Pass 1: Group and find best estimates per subject key (favoring Semester 2)
+    const subjectEstimates = {};
+    for (const card of cards) {
       const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
         row => row.closest('.eds-c-tile') === card
       );
       if (!rows.length) continue;
 
       const key = subjectKey(card);
+      if (!key) continue;
+
       const estimatedSize = estimateCohortSize(card);
+      const titleEl = card.querySelector('.eds-c-tile__title');
+      const isSemester2 = titleEl && titleEl.textContent.match(/Semester\s+2/i);
+      
+      if (!(key in subjectEstimates) || isSemester2) {
+        subjectEstimates[key] = estimatedSize;
+      }
+    }
+
+    // Pass 2: Render using unified best estimates
+    for (const card of cards) {
+      const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
+        row => row.closest('.eds-c-tile') === card
+      );
+      if (!rows.length) continue;
+
+      const key = subjectKey(card);
+      const estimatedSize = key ? subjectEstimates[key] : estimateCohortSize(card);
 
       for (const row of rows) {
         const isOverall = !row.closest('.cvr-c-tasks');
