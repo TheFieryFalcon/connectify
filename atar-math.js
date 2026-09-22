@@ -130,7 +130,7 @@
   }
 
   function getSubjectData(name, year = 2025) {
-    const data = window.ConnextScalingData;
+    const data = window.ConnectifyScalingData || window.ConnextScalingData;
     if (!data || !data[year] || !data[year].subjects) return null;
     const n = normalizeSubject(name);
     const wanted = subjectAliases[n] || n;

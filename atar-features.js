@@ -357,13 +357,21 @@
        const renderCalibTable = () => {
          if (!window.ConnectifyAtar || !window.ConnectifyAtar.readCourses) return;
          const courses = window.ConnectifyAtar.readCourses(false);
-         if (!courses || !courses[0] || courses[0].length === 0) return;
+         if (!courses) return;
+
+         const courseList = new Map();
+         for (const course of [...(courses[0] || []), ...(courses[1] || [])]) {
+           if (!courseList.has(course.id)) {
+             courseList.set(course.id, course);
+           }
+         }
+         if (courseList.size === 0) return;
          
          calibTable.innerHTML = '';
          const prefsStr = localStorage.getItem('connectea:preferences');
          const savedPrefs = prefsStr ? JSON.parse(prefsStr) : {};
          
-         for (const course of courses[0]) {
+         for (const course of courseList.values()) {
            const calibEntry = savedPrefs[`sem1_calibration:${course.id}`] || {};
            const knownSem1Raw = calibEntry.raw !== undefined ? calibEntry.raw : course.mark;
            
@@ -404,13 +412,6 @@
        
        calibContainer.append(calibTable);
        catInner.append(calibContainer);
-       
-       // Trigger render when panel opens
-       catBtn.addEventListener('click', () => {
-          if (catPanel.hidden) { // it is about to open (or toggle logic handles it)
-             renderCalibTable();
-          }
-       });
 
        const saveBtn = document.createElement('button');
        saveBtn.textContent = 'Save Categories';
@@ -456,10 +457,12 @@
 
        catBtn.addEventListener('click', () => {
           renderInputs();
+          renderCalibTable();
           document.querySelectorAll('.cx-workspace-panel').forEach(p => p.hidden = true);
           document.querySelectorAll('.cx-tool-menu button').forEach(b => b.setAttribute('aria-expanded', 'false'));
           catBtn.setAttribute('aria-expanded', 'true');
           catPanel.hidden = false;
+          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
        });
        
        window.addEventListener('connectify-open', e => {

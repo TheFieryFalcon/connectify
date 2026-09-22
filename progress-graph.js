@@ -121,7 +121,8 @@
             
             const prefsStr = localStorage.getItem('connectea:preferences');
             const savedPrefs = prefsStr ? JSON.parse(prefsStr) : {};
-            const calibration = savedPrefs[`sem1_calibration:${s.id}`] || {};
+            const courseId = s.name.replace(/\bATAR\b|\bYear\s*\d+\b/gi, '').trim().toLowerCase();
+            const calibration = savedPrefs[`sem1_calibration:${courseId}`] || {};
             
             if (window.ConnectifyMath && window.ConnectifyMath.calculateShiftedScaledScore) {
                return window.ConnectifyMath.calculateShiftedScaledScore(s.name, rawAvg, calibration.raw, calibration.scaled, 2025);
@@ -483,41 +484,96 @@
       let whenCell;
       if (isHistory) {
         whenCell = point.name;
-      } else if (Number.isFinite(point.order)) {
-        whenCell = formatTimestamp(point.order, point.caption);
       } else {
-        const wrapper = createElement('div');
-        wrapper.style.display = 'flex';
-        wrapper.style.flexDirection = 'column';
-        wrapper.style.gap = '4px';
-        const msg = createElement('small', 'No time detected, please input a time yourself');
-        msg.style.color = '#d32f2f';
-        const input = createElement('input');
-        input.type = 'number';
-        input.placeholder = 'e.g. 17 for T2 Wk7';
-        input.style.width = '140px';
-        
         const customKey = `connectea:time_override:${selectedSubject}:${point.name}`;
         const savedTime = localStorage.getItem(customKey);
-        if (savedTime !== null) {
-           input.value = savedTime;
+
+        const createInputField = (currentVal, showWarning = false) => {
+          const wrapper = createElement('div');
+          wrapper.style.display = 'flex';
+          wrapper.style.flexDirection = 'column';
+          wrapper.style.gap = '4px';
+
+          if (showWarning) {
+            const msg = createElement('small', 'No time detected, please input a time yourself');
+            msg.style.color = '#d32f2f';
+            wrapper.append(msg);
+          }
+
+          const inputRow = createElement('div');
+          inputRow.style.display = 'flex';
+          inputRow.style.gap = '4px';
+          inputRow.style.alignItems = 'center';
+
+          const input = createElement('input');
+          input.type = 'number';
+          input.min = '1';
+          input.max = '40';
+          input.placeholder = 'Week (e.g. 17)';
+          input.title = 'Single week number: 1-10 for Term 1, 11-20 for Term 2, 21-30 for Term 3, 31-40 for Term 4';
+          input.style.width = '110px';
+          if (currentVal) input.value = currentVal;
+
+          input.addEventListener('input', () => {
+            const val = input.value.trim();
+            if (val) localStorage.setItem(customKey, val);
+            else localStorage.removeItem(customKey);
+
+            clearTimeout(window._cxTimeRefresh);
+            window._cxTimeRefresh = setTimeout(() => {
+              lastDataSignature = '';
+              refresh();
+            }, 600);
+          });
+
+          inputRow.append(input);
+          if (currentVal) {
+            const clearBtn = createElement('button', '✕');
+            clearBtn.type = 'button';
+            clearBtn.title = 'Clear custom time override';
+            clearBtn.style.padding = '0 4px';
+            clearBtn.style.cursor = 'pointer';
+            clearBtn.onclick = () => {
+              localStorage.removeItem(customKey);
+              lastDataSignature = '';
+              refresh();
+            };
+            inputRow.append(clearBtn);
+          }
+
+          wrapper.append(inputRow);
+          return wrapper;
+        };
+
+        if (Number.isFinite(point.order)) {
+          const text = formatTimestamp(point.order, point.caption);
+          if (savedTime !== null) {
+            // Overridden: show formatted value with edit pencil
+            const container = createElement('span');
+            container.style.display = 'inline-flex';
+            container.style.alignItems = 'center';
+            container.style.gap = '6px';
+            container.append(createElement('span', text));
+
+            const editBtn = createElement('button', '✏️');
+            editBtn.type = 'button';
+            editBtn.title = `Custom week ${savedTime} (click to change)`;
+            editBtn.style.background = 'none';
+            editBtn.style.border = 'none';
+            editBtn.style.cursor = 'pointer';
+            editBtn.style.fontSize = '12px';
+            editBtn.style.padding = '0';
+            editBtn.onclick = () => {
+              container.replaceWith(createInputField(savedTime, false));
+            };
+            container.append(editBtn);
+            whenCell = container;
+          } else {
+            whenCell = text;
+          }
+        } else {
+          whenCell = createInputField(savedTime, true);
         }
-        
-        input.addEventListener('input', () => {
-           if (input.value) localStorage.setItem(customKey, input.value);
-           else localStorage.removeItem(customKey);
-           
-           // Reload graph with new data
-           clearTimeout(window._cxTimeRefresh);
-           window._cxTimeRefresh = setTimeout(() => {
-               // Must clear cached data to recalculate everything
-               lastDataSignature = '';
-               refresh();
-           }, 800);
-        });
-        
-        wrapper.append(msg, input);
-        whenCell = wrapper;
       }
 
       const cells = isHistory

@@ -131,8 +131,18 @@
             mean: cohortMean(row),
             semester: Math.min(parseSemester(card), existingTask?.semester ?? 2),
             order: (() => {
-               const customOrder = localStorage.getItem(`connectea:time_override:${title}:${taskName}`);
-               if (customOrder !== null && customOrder !== '') return Number(customOrder);
+               const customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
+                                   localStorage.getItem(`connectea:time_override:${title}:${taskName}`);
+               if (customOrder !== null && customOrder !== '') {
+                  const num = Number(customOrder);
+                  if (Number.isFinite(num) && num > 0) {
+                     // Teaching week N: 10 weeks per term (e.g. 17 -> Term 2 Week 7)
+                     const term = Math.floor((num - 1) / 10) + 1;
+                     const week = ((num - 1) % 10) + 1;
+                     // Convert to calendar order (10 weeks + 2-week break per term)
+                     return (term - 1) * 12 + week;
+                  }
+               }
                return orderHint(caption);
             })(),
             sequence: existingTask?.sequence ?? tasks.size
