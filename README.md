@@ -1,8 +1,15 @@
-# Connext 3.1.1
+# Connext 3.1.2
 
 **Connext** is the ultimate unofficial extension for Western Australia's Department of Education Connect portal. Built for ATAR students, it instantly upgrades the default Connect interface with powerful, real-time analytics to help you track your progress, identify weaknesses, and predict your final ATAR.
 
 ---
+
+## Installation instructions
+1. Click on the latest release.
+2. Download the file that corresponds to your browser, .xpi for Firefox (and forks) and .crx for everything else (except Safari).
+3. Drag the file from your downloads to the browser window.
+4. Confirm everything.
+5. Enjoy your newfound academic performance!
 
 ## 🌟 What's New in Version 3?
 
