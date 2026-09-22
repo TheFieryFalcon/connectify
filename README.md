@@ -1,4 +1,4 @@
-# Connectify 3.1.2
+# Connectify 3.1.7 - Making Study Rewarding with Data Visualization
 
 **Connectify** is the ultimate unofficial extension for Western Australia's Department of Education Connect portal. Built for ATAR students, it instantly upgrades the default Connect interface with powerful, real-time analytics to help you track your progress, identify weaknesses, and predict your final ATAR.
 
@@ -29,6 +29,9 @@ Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, scho
 ### 🎨 Total UI Overhaul
 - **Stunning Dark Mode**: A completely redesigned, elegant dark theme that instantly applies across the entire Connect portal, dramatically improving contrast and readability.
 - **Blazingly Fast**: Completely rewritten to be modular, efficient, and deeply integrated into Connect's native rendering engine, ensuring UI widgets instantly sync without lag.
+
+### ⚡ Seamless SSO Auto-Login
+- **Instant Authentication**: Automatically detects when you are redirected to the Department of Education Single Sign-On portal, reads your natively saved credentials, checks the terms box, and submits the login form in a fraction of a millisecond. It seamlessly bypasses manual logouts, and unlike some other alternatives, there is no slow updating!
 
 ---
 *For legacy release notes prior to 3.0.0, see [2.0.0_changelog.md](2.0.0_changelog.md).*
