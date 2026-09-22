@@ -24,6 +24,10 @@
       "js": [ "navigation.js" ],
       "matches": [ "https://connect.det.wa.edu.au/*" ],
       "run_at": "document_idle"
+   }, {
+      "js": [ "auto-login.js" ],
+      "matches": [ "https://login.det.wa.edu.au/*" ],
+      "run_at": "document_end"
    } ],
    "description": "Subject progress graphs, assessment statistics, grade planning and a site-wide Connect theme.",
    "icons": {
@@ -33,5 +37,5 @@
    "manifest_version": 3,
    "name": "Connectify",
    "update_url": "https://raw.githubusercontent.com/TheFieryFalcon/connectify/main/updates.xml",
-   "version": "3.1.4"
+   "version": "3.1.5"
 }
