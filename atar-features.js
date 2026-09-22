@@ -65,13 +65,33 @@
        if (!card) return;
        
        let totalWeight = 0;
-       const breakdowns = { Exam: 0, Test: 0, Application: 0, Essay: 0, 'Take-Home': 0 };
+       let overallCompleted = 0;
+       const breakdowns = { 
+          Exam: { completed: 0, remaining: 0 }, 
+          Test: { completed: 0, remaining: 0 }, 
+          Application: { completed: 0, remaining: 0 }, 
+          Essay: { completed: 0, remaining: 0 }, 
+          'Take-Home': { completed: 0, remaining: 0 } 
+       };
        
        subject.tasks.forEach(t => {
           if (t.weight === undefined || t.weight === null || isNaN(t.weight)) return;
           totalWeight += t.weight;
           const cat = categorizeTask(t.name);
-          breakdowns[cat] += t.weight;
+          
+          let isCompleted = false;
+          if (t.scoreText && t.scoreText.includes('Out of')) {
+             if (!t.scoreText.startsWith('-') && !t.scoreText.startsWith('–')) {
+                isCompleted = true;
+             }
+          }
+          
+          if (isCompleted) {
+             breakdowns[cat].completed += t.weight;
+             overallCompleted += t.weight;
+          } else {
+             breakdowns[cat].remaining += t.weight;
+          }
        });
 
        if (totalWeight <= 0) return;
@@ -86,78 +106,44 @@
 
        let tooltipParts = [];
 
-       for (const [cat, weight] of Object.entries(breakdowns)) {
-          if (weight <= 0) continue;
-          const pct = (weight / totalWeight) * 100;
-          const segment = document.createElement('div');
-          segment.style.width = `${pct}%`;
-          segment.style.backgroundColor = categories[cat].color;
-          segment.title = `${cat}: ${weight.toFixed(1)}%`;
-          bar.appendChild(segment);
-          tooltipParts.push(`${cat} ${Math.round(pct)}%`);
+       for (const [cat, data] of Object.entries(breakdowns)) {
+          const catTotal = data.completed + data.remaining;
+          if (catTotal <= 0) continue;
+          
+          if (data.completed > 0) {
+             const pctComp = (data.completed / totalWeight) * 100;
+             const segmentC = document.createElement('div');
+             segmentC.style.width = `${pctComp}%`;
+             segmentC.style.backgroundColor = categories[cat].color;
+             segmentC.title = `${cat} (Completed): ${data.completed.toFixed(1)}%`;
+             bar.appendChild(segmentC);
+          }
+          
+          if (data.remaining > 0) {
+             const pctRem = (data.remaining / totalWeight) * 100;
+             const segmentR = document.createElement('div');
+             segmentR.style.width = `${pctRem}%`;
+             segmentR.style.backgroundColor = categories[cat].color;
+             segmentR.style.opacity = '0.25'; // Lower opacity for unfinished tasks
+             segmentR.title = `${cat} (Remaining): ${data.remaining.toFixed(1)}%`;
+             bar.appendChild(segmentR);
+          }
+          
+          tooltipParts.push(`${cat} ${Math.round((catTotal / totalWeight) * 100)}%`);
        }
 
        const label = document.createElement('div');
        label.style.fontSize = '10px';
        label.style.color = '#999';
        label.style.textAlign = 'right';
-       label.textContent = tooltipParts.join(' • ');
+       
+       const totalRemaining = totalWeight - overallCompleted;
+       label.textContent = `${tooltipParts.join(' • ')} | ${Math.round((overallCompleted / totalWeight) * 100)}% Done`;
 
        const container = document.createElement('div');
        container.style.padding = '0 16px';
        container.appendChild(bar);
        container.appendChild(label);
-
-       // Assessment Weighting Tracker (Completed vs Remaining)
-       let completedWeight = 0;
-       let remainingWeight = 0;
-       subject.tasks.forEach(t => {
-          if (t.weight === undefined || t.weight === null || isNaN(t.weight)) return;
-          if (t.scoreText && t.scoreText.includes('Out of')) {
-             if (t.scoreText.startsWith('-') || t.scoreText.startsWith('–')) {
-                remainingWeight += t.weight;
-             } else {
-                completedWeight += t.weight;
-             }
-          } else {
-             remainingWeight += t.weight;
-          }
-       });
-
-       if (totalWeight > 0) {
-          const compBar = document.createElement('div');
-          compBar.style.display = 'flex';
-          compBar.style.height = '4px';
-          compBar.style.borderRadius = '2px';
-          compBar.style.overflow = 'hidden';
-          compBar.style.margin = '4px 0';
-          compBar.style.border = '1px solid #3a3a3a';
-
-          const pctComp = (completedWeight / totalWeight) * 100;
-          const pctRem = (remainingWeight / totalWeight) * 100;
-
-          const segComp = document.createElement('div');
-          segComp.style.width = `${pctComp}%`;
-          segComp.style.backgroundColor = '#93b640'; // green for completed
-          segComp.title = `Completed: ${completedWeight.toFixed(1)}%`;
-          
-          const segRem = document.createElement('div');
-          segRem.style.width = `${pctRem}%`;
-          segRem.style.backgroundColor = '#414954'; // grey for remaining
-          segRem.title = `Remaining: ${remainingWeight.toFixed(1)}%`;
-
-          compBar.appendChild(segComp);
-          compBar.appendChild(segRem);
-
-          const compLabel = document.createElement('div');
-          compLabel.style.fontSize = '10px';
-          compLabel.style.color = '#999';
-          compLabel.style.textAlign = 'right';
-          compLabel.textContent = `Completed: ${Math.round(pctComp)}% • Remaining: ${Math.round(pctRem)}%`;
-          
-          container.appendChild(compBar);
-          container.appendChild(compLabel);
-       }
 
        const header = card.querySelector('.eds-c-tile__header');
        if (header) header.after(container);
