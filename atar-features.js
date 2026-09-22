@@ -12,8 +12,12 @@
     if (!window.ConnextData) return;
     
     if (!hasAutoExpanded) {
-        window.ConnextData.expandAll(true);
-        hasAutoExpanded = true;
+        if (document.querySelectorAll('.eds-c-tile').length > 0) {
+            window.ConnextData.expandAll(true);
+            hasAutoExpanded = true;
+        } else {
+            return; // Wait for Vaadin to render the cards!
+        }
     }
 
     // --- Left Sidebar Expand/Collapse ---
