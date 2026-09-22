@@ -81,13 +81,7 @@
 
   // Intercept logout clicks to temporarily disable auto-login on the sign-in page
   document.addEventListener('click', (e) => {
-      const target = e.target.closest('a, button, [role="button"]');
-      if (!target) return;
-      
-      const text = (target.textContent || '').toLowerCase();
-      const href = (target.href || '').toLowerCase();
-      
-      if (text.includes('logout') || text.includes('sign out') || href.includes('logout')) {
+      if (e.target.closest('.cvr-c-primary-navigation__button--sign-out')) {
           localStorage.setItem('cx-manual-logout', 'true');
       }
   }, true);
