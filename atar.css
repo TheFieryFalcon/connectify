@@ -21,6 +21,11 @@
 #connectea-atar .cta-semesters:not(.cta-tabs){gap:8px;margin-bottom:8px}
 #connectea-atar .cta-semesters:not(.cta-tabs) .cta-semester{padding:8px;font-size:12px;border-width:1px}
 #connectea-atar .cta-semester:disabled{opacity:.5;cursor:default}
+.cta-semester.cta-non-button{cursor:default!important;box-shadow:none!important}
+.cta-semester.cta-semester-indicator{background:#edf4fa!important;border:1px solid #c8d9e8!important;border-left:4px solid #24618c!important;color:#1a3d5f!important;font-weight:600!important;cursor:default!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important}
+.cta-semester.cta-semester-closed{background:#f4f6f9!important;border:1px dashed #cad5e2!important;color:#7c8e9f!important;font-weight:500!important;cursor:not-allowed!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important;opacity:.85!important}
+.connectea-dark .cta-semester.cta-semester-indicator{background:#253342!important;border-color:#3b5066!important;border-left:4px solid #6ba5d6!important;color:#dceaf6!important}
+.connectea-dark .cta-semester.cta-semester-closed{background:#1e252e!important;border:1px dashed #3f4e5e!important;color:#6e8093!important}
 #connectea-atar .cta-course{padding:7px 0;gap:1px 10px;grid-template-columns:minmax(0,1fr) 72px;align-items:center}
 #connectea-atar .cta-course>.cta-score{grid-column:2;grid-row:1/3}
 #connectea-atar .cta-course>small{grid-column:1;margin-left:22px;font-size:10px}

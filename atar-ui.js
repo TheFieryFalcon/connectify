@@ -208,7 +208,7 @@
     btn.type = 'button';
     btn.addEventListener('click', () => {
       if (
-        (isGradingMode && hasSemesterTwoStarted() && semesterIdx === 0) ||
+        isGradingMode ||
         (isPlanningMode && isTargetClosed(semesterIdx))
       ) {
         return;
@@ -474,6 +474,8 @@
         const current = getCourseState(r, activeSemester);
         return {
           ...r,
+          include: current.include,
+          score: current.score,
           progress:
             current.score === undefined
               ? { error: 'Enter a valid scaled-score assumption in the ATAR estimate tab.' }
@@ -502,7 +504,7 @@
         createEl(
           'strong',
           '',
-          `Goal unattainable with remaining tasks. Maximum achievable ATAR: ${plan.maximum.atar} (assuming 100% on all remaining assessments).`
+          `Goal unattainable with remaining tasks. Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'} (assuming 100% on all remaining assessments).`
         )
       );
     } else {
@@ -513,7 +515,7 @@
           plan.required === 0
             ? 'Target secured under current assumptions.'
             : `Requires ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
-                plan.result.atar
+                plan.result?.atar ?? '—'
               }.`
         )
       );
@@ -523,7 +525,7 @@
       createEl(
         'p',
         'cta-note',
-        `Maximum achievable ATAR: ${plan.maximum.atar}. Assumes uniform performance across remaining tasks.`
+        `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}. Assumes uniform performance across remaining tasks.`
       )
     );
 
@@ -535,20 +537,21 @@
 
     rows.forEach((course, idx) => {
       const block = createEl('div', 'cta-course');
+      const projectedScore = plan.rows?.[idx]?.score ?? course.score ?? 0;
       block.append(
         createEl('strong', '', course.name),
         createEl(
           'small',
           '',
-          `Outline weight ${round(course.progress.total)}% · ${round(
-            course.progress.earned
-          )} normalized points earned · ${round(course.progress.remaining)}% of semester remaining · projected rounded score ${wholeScore(
-            plan.rows[idx].score
+          `Outline weight ${round(course.progress?.total ?? 0)}% · ${round(
+            course.progress?.earned ?? 0
+          )} normalized points earned · ${round(course.progress?.remaining ?? 0)}% of semester remaining · projected rounded score ${wholeScore(
+            projectedScore
           )}`
         )
       );
 
-      for (const task of course.progress.tasks) {
+      for (const task of course.progress?.tasks || []) {
         block.append(
           createEl(
             'small',
@@ -558,7 +561,7 @@
         );
       }
 
-      if (!course.progress.remaining) {
+      if (!course.progress?.remaining) {
         block.append(createEl('small', '', 'All weighted tasks completed.'));
       }
       taskDetails.append(block);
@@ -575,18 +578,29 @@
 
     for (let i = 0; i < 2; i++) {
       const result = calculate(courses[i].map(row => getCourseState(row, i)));
-      semesterButtons[i].textContent = isGradingMode
-        ? `Semester ${i + 1} Target Grade`
-        : isPlanningMode
-        ? (isTargetClosed(i) ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`)
-        : `Semester ${i + 1} ATAR\n${result.error ? '—' : result.atar}`;
+      const isClosed = isPlanningMode && isTargetClosed(i);
+
+      let semesterLabel = `Semester ${i + 1} ATAR\n${result.error ? '—' : result.atar}`;
+      if (isGradingMode) {
+        semesterLabel = `Semester ${i + 1} Target Grade`;
+      } else if (isPlanningMode) {
+        semesterLabel = isClosed ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`;
+      }
+      semesterButtons[i].textContent = semesterLabel;
 
       semesterButtons[i].hidden = isGradingMode && hasSemesterTwoStarted() && i === 0;
-      semesterButtons[i].disabled = semesterButtons[i].hidden || (isPlanningMode && isTargetClosed(i));
+      semesterButtons[i].disabled = semesterButtons[i].hidden || isClosed;
 
-      if (isPlanningMode && isTargetClosed(i)) {
-        semesterButtons[i].textContent = `Semester ${i + 1} Target ATAR (Closed)`;
+      if (isGradingMode) {
+        semesterButtons[i].className = 'cta-semester cta-non-button cta-semester-indicator';
+      } else if (isPlanningMode) {
+        semesterButtons[i].className = isClosed
+          ? 'cta-semester cta-non-button cta-semester-closed'
+          : 'cta-semester cta-non-button cta-semester-indicator';
+      } else {
+        semesterButtons[i].className = 'cta-semester';
       }
+
       semesterButtons[i].setAttribute('aria-pressed', String(i === activeSemester));
 
       if (i === activeSemester) {
@@ -597,11 +611,9 @@
         const finalTEA = Math.max(0, result.tea + teaAdjustment);
         const finalAtar = result.error ? '—' : convertTEAtoATAR(finalTEA);
         
-        semesterButtons[i].textContent = isGradingMode
-          ? `Semester ${i + 1} Target Grade`
-          : isPlanningMode
-          ? (isTargetClosed(i) ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`)
-          : `Semester ${i + 1} ATAR\n${finalAtar}`;
+        if (!isGradingMode && !isPlanningMode) {
+          semesterButtons[i].textContent = `Semester ${i + 1} ATAR\n${finalAtar}`;
+        }
 
         detailSummary.textContent =
           result.error ||

@@ -257,23 +257,52 @@
   function targetPlan(rows, target) {
     if (!Number.isFinite(target) || target < 30 || target > 99.95) return { error: 'Enter a target ATAR from 30 to 99.95.' };
     if (rows.length < 4) return { error: 'Include at least four ATAR subjects.' };
-    const projectedRows = (score) => rows.map(r => ({ ...r, score: r.include && scoreValue(r.score) === undefined ? score : r.score }));
-    const calculateAtPercentage = p => calculate(projectedRows(p));
-    const reachesTarget = result => !result.error && Number(result.atar) >= target;
-    const maximumResult = calculateAtPercentage(100);
-    if (!reachesTarget(maximumResult)) return { impossible: true, maximum: maximumResult.atar };
-    if (reachesTarget(calculateAtPercentage(0))) return { finished: true, final: calculateAtPercentage(0).atar };
-    let low = 0, high = 100, required = 100;
-    for (let i = 0; i < 15; i++) {
-      const mid = (low + high) / 2;
-      if (reachesTarget(calculateAtPercentage(mid))) { required = mid; high = mid; } else { low = mid; }
+
+    const missing = rows.filter(r => !r.progress || r.progress.error);
+    if (missing.length) {
+      return { error: missing.map(r => `${r.name}: ${r.progress.error}`).join('\n') };
     }
-    required = Math.ceil((required - 1e-9) * 10) / 10;
-    if (!reachesTarget(calculateAtPercentage(required))) required = Math.ceil(required);
+
+    const projectedRows = p =>
+      rows.map(r => ({
+        name: r.name,
+        include: true,
+        score: Math.max(0, Math.min(100, (r.progress?.earned ?? 0) + ((r.progress?.remaining ?? 0) * p) / 100 + (r.offset ?? 0)))
+      }));
+
+    const calculateAtPercentage = p => calculate(projectedRows(p));
+    const reachesTarget = r => !r.error && r.atar !== '<30' && Number(r.atar) >= target;
+
+    const maximumResult = calculateAtPercentage(100);
+    if (maximumResult.error) return { error: maximumResult.error };
+    if (!reachesTarget(maximumResult)) {
+      return { impossible: true, maximum: maximumResult, rows: projectedRows(100) };
+    }
+
+    let low = 0, high = 100;
+    if (reachesTarget(calculateAtPercentage(0))) {
+      high = 0;
+    } else {
+      for (let i = 0; i < 50; i++) {
+        const mid = (low + high) / 2;
+        if (reachesTarget(calculateAtPercentage(mid))) {
+          high = mid;
+        } else {
+          low = mid;
+        }
+      }
+    }
+
+    let required = Math.min(100, Math.ceil(high * 10) / 10);
+    if (!reachesTarget(calculateAtPercentage(required))) {
+      required = Math.min(100, required + 0.1);
+    }
+
     return {
       required,
+      maximum: maximumResult,
       result: calculateAtPercentage(required),
-      maximum: maximumResult.atar
+      rows: projectedRows(required)
     };
   }
 

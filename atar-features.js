@@ -242,7 +242,7 @@
                <option value="subject">Subject</option>
             </select>
          </div>
-         <div id="connectify-radar-chart" style="width:100%;height:320px;border-radius:8px;border:1px solid #d8e3ee;overflow:hidden;"></div>
+         <div id="connectify-radar-chart" style="width:100%;height:320px;background:#333333;border-radius:8px;border:1px solid #3a3a3a;overflow:hidden;"></div>
        `;
 
        if (toolMenu) toolMenu.append(toggleBtn);
@@ -321,36 +321,23 @@
        
        const catInner = document.createElement('div');
        catInner.innerHTML = `
-         <header><strong>Category Settings</strong></header>
-         <p style="font-size:12px;color:#999;margin-bottom:16px;">Configure task categorization keywords and ATAR calibration.</p>
+         <header style="margin-bottom:20px;">
+           <strong style="font-size:18px;">Settings</strong>
+         </header>
        `;
-       
-       // Populate inputs from window.cxCategories which was loaded async
-       const renderInputs = () => {
-           Array.from(catInner.querySelectorAll('.cx-cat-wrap')).forEach(e => e.remove());
-           for (const cat of Object.keys(defaultCategories)) {
-               const wrap = document.createElement('div');
-               wrap.className = 'cx-cat-wrap';
-               wrap.style.marginBottom = '10px';
-               const currentVal = (window.cxCategories[cat] || defaultCategories[cat]).keywords.join(', ');
-               wrap.innerHTML = `<label style="display:inline-block;width:90px;font-size:12px;font-weight:600;">${cat}</label>
-                                 <input type="text" id="cx-cat-${cat}" value="${currentVal}" style="width:200px; padding:6px 8px; border-radius:6px; border:1px solid #bacddd; font-size:12px;">`;
-               catInner.insertBefore(wrap, saveBtn);
-           }
-       };
-       
 
-       // === CALIBRATION TABLE ===
-       const calibContainer = document.createElement('div');
-       calibContainer.style.marginTop = '24px';
-       calibContainer.style.borderTop = '1px solid #d8e3ee';
-       calibContainer.style.paddingTop = '18px';
-       calibContainer.innerHTML = `<header><strong>Semester 1 Scaling Calibration</strong></header>
-         <p style="font-size:12px;color:#999;margin-bottom:14px;">Enter your school's Semester 1 scaled scores to calibrate the model to your cohort's historical distribution.</p>`;
+       // === CALIBRATION SECTION ===
+       const calibSection = document.createElement('section');
+       calibSection.className = 'cx-settings-section';
+       calibSection.style.marginBottom = '28px';
+       calibSection.innerHTML = `
+         <header style="margin-bottom:8px;"><strong>Semester 1 Scaling Calibration</strong></header>
+         <p style="font-size:12px;color:#788896;margin:0 0 14px 0;">Enter your school's Semester 1 scaled scores to calibrate the model to your cohort's historical distribution.</p>
+       `;
        
        const calibTable = document.createElement('div');
        calibTable.style.display = 'grid';
-       calibTable.style.gridTemplateColumns = 'minmax(140px, 1fr) 75px 75px';
+       calibTable.style.gridTemplateColumns = 'minmax(140px, 220px) 75px 75px';
        calibTable.style.gap = '10px 14px';
        calibTable.style.alignItems = 'center';
        calibTable.style.marginTop = '12px';
@@ -420,14 +407,44 @@
          }
        };
        
-       calibContainer.append(calibTable);
-       catInner.append(calibContainer);
+       calibSection.append(calibTable);
+
+       // === CATEGORIES SECTION ===
+       const catSection = document.createElement('section');
+       catSection.className = 'cx-settings-section';
+       catSection.style.marginTop = '36px';
+       catSection.style.borderTop = '1px solid #d8e3ee';
+       catSection.style.paddingTop = '24px';
+       catSection.innerHTML = `
+         <header style="margin-bottom:8px;"><strong>Assessment Categories</strong></header>
+         <p style="font-size:12px;color:#788896;margin:0 0 16px 0;">Configure task categorization keywords to customize subject breakdown analytics.</p>
+       `;
+
+       const catListContainer = document.createElement('div');
+       catListContainer.id = 'cx-categories-inputs';
+       catSection.append(catListContainer);
+
+       // Populate inputs from window.cxCategories which was loaded async
+       const renderInputs = () => {
+           catListContainer.innerHTML = '';
+           for (const cat of Object.keys(defaultCategories)) {
+               const wrap = document.createElement('div');
+               wrap.className = 'cx-cat-wrap';
+               wrap.style.marginBottom = '10px';
+               const currentVal = (window.cxCategories[cat] || defaultCategories[cat]).keywords.join(', ');
+               wrap.innerHTML = `<label style="display:inline-block;width:90px;font-size:12px;font-weight:600;">${cat}</label>
+                                 <input type="text" id="cx-cat-${cat}" value="${currentVal}" style="width:200px; padding:6px 8px; border-radius:6px; border:1px solid #bacddd; font-size:12px;">`;
+               catListContainer.append(wrap);
+           }
+       };
+
+       const btnRow = document.createElement('div');
+       btnRow.style.marginTop = '18px';
 
        const saveBtn = document.createElement('button');
        saveBtn.textContent = 'Save Categories';
        saveBtn.type = 'button';
        saveBtn.className = 'eds-c-button';
-       saveBtn.style.marginTop = '16px';
        saveBtn.onclick = () => {
            for (const cat of Object.keys(defaultCategories)) {
                const val = document.getElementById(`cx-cat-${cat}`).value;
@@ -447,7 +464,6 @@
        resetBtn.textContent = 'Reset to Defaults';
        resetBtn.type = 'button';
        resetBtn.className = 'eds-c-button';
-       resetBtn.style.marginTop = '16px';
        resetBtn.style.marginLeft = '8px';
        resetBtn.onclick = () => {
            window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
@@ -458,8 +474,11 @@
            renderInputs();
            alert('Categories reset to default.');
        };
-       
-       catInner.append(saveBtn, resetBtn);
+
+       btnRow.append(saveBtn, resetBtn);
+       catSection.append(btnRow);
+
+       catInner.append(calibSection, catSection);
        catPanel.appendChild(catInner);
 
        if (toolMenu) toolMenu.append(catBtn);

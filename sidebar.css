@@ -5,6 +5,7 @@
 #connectify-sidebar .cx-tool-menu{display:grid;gap:10px;padding:16px 20px 10px}#connectify-sidebar.cx-tool-active .cx-tool-menu{grid-template-columns:repeat(3,minmax(0,1fr))}
 #connectify-sidebar #connectea-atar-toggle,#connectify-sidebar #connectify-progress-toggle{position:static!important;inset:auto!important;z-index:auto;box-shadow:none;padding:13px;text-align:left;background:#e9f2fb;color:#245579}
 #connectify-sidebar .cx-outline-actions{display:flex;gap:8px;padding:0 20px 14px;border-bottom:1px solid #d8e3ee}#connectify-sidebar .cx-outline-actions button{flex:1;padding:7px}
+#connectify-sidebar .cx-workspace{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
 #connectify-sidebar :is(#connectea-atar,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel){position:static!important;inset:auto!important;width:100%!important;max-height:none!important;overflow:visible!important;border:0;border-radius:0;box-shadow:none;padding:24px;background:transparent;color:inherit;box-sizing:border-box}
 #connectify-sidebar :is(#connectify-weakness,#connectify-categories) header{margin-bottom:16px}
 #connectify-sidebar :is(#connectify-weakness,#connectify-categories) header strong{font-size:18px;font-weight:650;color:inherit}
@@ -36,3 +37,9 @@
 @media(max-width:650px){#connectify-sidebar.cx-tool-active .cx-tool-menu{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #connectify-sidebar.cx-tool-active>.cx-tool-menu,#connectify-sidebar.cx-tool-active>.cx-outline-actions{display:none!important}
 #connectify-sidebar:not(.cx-tool-active) .cx-back-menu{display:none!important}
+#connectify-sidebar .cta-semester.cta-non-button{cursor:default!important;box-shadow:none!important}
+#connectify-sidebar .cta-semester.cta-semester-indicator{background:#edf4fa!important;border:1px solid #c8d9e8!important;border-left:4px solid #24618c!important;color:#1a3d5f!important;font-weight:600!important;cursor:default!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important}
+#connectify-sidebar .cta-semester.cta-semester-closed{background:#f4f6f9!important;border:1px dashed #cad5e2!important;color:#7c8e9f!important;font-weight:500!important;cursor:not-allowed!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important;opacity:.85!important}
+.connectea-dark #connectify-sidebar .cta-semester.cta-semester-indicator{background:#253342!important;border-color:#3b5066!important;border-left:4px solid #6ba5d6!important;color:#dceaf6!important}
+.connectea-dark #connectify-sidebar .cta-semester.cta-semester-closed{background:#1e252e!important;border:1px dashed #3f4e5e!important;color:#6e8093!important}
+
