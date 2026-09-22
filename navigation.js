@@ -11,10 +11,7 @@
   const SHORTCUT_LABEL = 'Assessment Outlines';
 
   function addShortcut() {
-    if (location.pathname.includes('/assessment-outlines')) {
-      document.querySelectorAll('[data-connectea-shortcut]').forEach(e => e.remove());
-      return;
-    }
+    // Do not remove the shortcut on the assessment-outlines page.
 
     // Desktop greedy navigation bar
     for (const menu of document.querySelectorAll('.cvr-c-primary-navigation__links')) {
