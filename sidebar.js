@@ -66,21 +66,10 @@
   const workspace = createElement('div');
   workspace.className = 'cx-workspace';
 
-  const outlineActions = createElement('div');
-  outlineActions.className = 'cx-outline-actions';
-
-  const expandBtn = createElement('button', 'Expand all');
-  const collapseBtn = createElement('button', 'Unexpand all');
-  expandBtn.type = collapseBtn.type = 'button';
-
-  expandBtn.onclick = () => window.ConnextData.expandAll(true);
-  collapseBtn.onclick = () => window.ConnextData.expandAll(false);
-  outlineActions.append(expandBtn, collapseBtn);
-
   const introText = createElement('p', 'Choose a tool to explore your results.');
   introText.className = 'cx-tools-intro';
 
-  sidebar.append(header, introText, toolMenu, outlineActions, workspace);
+  sidebar.append(header, introText, toolMenu, workspace);
   document.body.append(sidebar, handle);
 
   /**
@@ -96,7 +85,7 @@
       }
     }
 
-    for (const panelId of ['connectea-atar', 'connext-progress']) {
+    for (const panelId of ['connectea-atar', 'connext-progress', 'connext-weakness']) {
       const panel = document.getElementById(panelId);
       if (panel && panel.parentElement !== workspace) {
         workspace.append(panel);
