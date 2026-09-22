@@ -755,4 +755,11 @@
   });
 
   schedule();
+  
+  window.ConnectifyCohort = {
+    percentile,
+    summary,
+    rankString,
+    estimatedSize
+  };
 })();

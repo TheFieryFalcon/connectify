@@ -11,7 +11,7 @@
    },
    "content_scripts": [ {
       "css": [ "atar.css", "progress.css", "sidebar.css" ],
-      "js": [ "assessment-data.js", "cohort-stats.js", "atar-calculator.js", "progress-graph.js", "atar-features.js", "sidebar.js" ],
+      "js": [ "assessment-data.js", "cohort-stats.js", "scaling-data.js", "atar-math.js", "atar-ui.js", "progress-graph.js", "atar-features.js", "sidebar.js" ],
       "matches": [ "https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*" ],
       "run_at": "document_idle",
       "world": "MAIN"
