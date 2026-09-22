@@ -14,7 +14,7 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white :is(.cvr-c-promo__tit
 html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button{background-color:#303e4e!important;color:#dbeeff!important;border-color:#6e849b!important}
 html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button:hover{background-color:#40536a!important}
 html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button:focus-visible{outline:2px solid #d4b483;outline-offset:3px}
-#connectea-theme-toggle{position:fixed;top:64px;right:16px;z-index:10000;border:1px solid #b6c1ca;border-radius:6px;background:#fff;color:#344451;padding:7px 11px;font:12px/1.4 system-ui,sans-serif;cursor:pointer;box-shadow:0 1px 3px #0001}
+#connectea-theme-toggle{position:absolute;top:64px;right:16px;z-index:10000;border:1px solid #b6c1ca;border-radius:6px;background:#fff;color:#344451;padding:7px 11px;font:12px/1.4 system-ui,sans-serif;cursor:pointer;box-shadow:0 1px 3px #0001}
 #connectea-theme-toggle:focus-visible{outline:2px solid #598fbd;outline-offset:3px}
 html.connectea-dark{color-scheme:dark;background:#1e1e1e!important;color:#cccccc!important}
 .connectea-dark body,.connectea-dark #main-content{background:#1e1e1e!important;color:#cccccc!important}
@@ -57,7 +57,7 @@ html.connectea-dark{color-scheme:dark;background:#1e1e1e!important;color:#cccccc
 /* The theme switch previews the destination theme, beside notifications. */
 #connectea-theme-toggle{background:#25313f!important;color:#f1f6fb!important;border-color:#526a81!important}
 .connectea-dark #connectea-theme-toggle{background:#f5f8fc!important;color:#25313f!important;border-color:#bdccda!important}
-#connectea-theme-toggle{position:fixed!important;top:8px!important;left:auto!important;width:104px;box-sizing:border-box;margin:0;white-space:nowrap}
+#connectea-theme-toggle{position:absolute!important;top:8px!important;left:auto!important;width:104px;box-sizing:border-box;margin:0;white-space:nowrap}
 
 /* Draw a separate arrow without filtering the native control or its background. */
 .connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow]{position:relative!important}
