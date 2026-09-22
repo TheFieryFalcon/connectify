@@ -25,6 +25,12 @@
     return el;
   };
 
+  const getMonthName = (week) => {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthIndex = 1 + Math.floor((week - 1) / 4.3);
+      return months[Math.max(0, Math.min(11, monthIndex))];
+  };
+
   // UI elements
   const toggleBtn = createElement('button', 'Progress Graph');
   toggleBtn.id = 'connectify-progress-toggle';
@@ -108,11 +114,6 @@
 
       const calculation = window.ConnectifyAtar.calculate(rows);
       if (!calculation.error) {
-        const getMonthName = (week) => {
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const monthIndex = 1 + Math.floor((week - 1) / 4.3);
-            return months[Math.max(0, Math.min(11, monthIndex))];
-        };
         points.push({
           name: byAssessment ? `Assessment round ${step}` : getMonthName(step),
           caption: '',

@@ -2,6 +2,8 @@
   'use strict';
   const { calculate, convertTEAtoATAR, wholeScore, scoreValue, estimateScaledScore, calculateShiftedScaledScore, normalizeSubject, parseAssessment, taskProgress, gradePlan, targetPlan, normalize, isAtarCourse } = window.ConnectifyMath;
 
+  window.ConnectifyAtar = window.ConnectifyAtar || {};
+  window.ConnectifyAtar.calculate = calculate;
   function readCourses(atarOnly = true) {
     const result = [[], []];
     const seen = [new Set(), new Set()];
@@ -596,9 +598,22 @@
     if (isGradingMode) renderGradeOutput();
   }
 
-  function renderCourseRows() {
-    controlsContainer.innerHTML = '';
-    
+    function renderCourseRows() {
+    const eligible = isAtarEligible();
+    estimateTab.hidden = targetTab.hidden = !eligible;
+    if (!eligible && !isGradingMode) {
+      selectTab('grade');
+      return;
+    }
+
+    courseListContainer.replaceChildren();
+
+    if (!courses[activeSemester].length) {
+      courseListContainer.append(
+        createEl('p', '', 'No ATAR subjects found for this semester. Show all classes in Connect.')
+      );
+    }
+
     // Create Semester 1 Calibration Table (only if there are courses)
     if (courses[0].length > 0 && !isGradingMode && !isPlanningMode) {
       const calibTitle = createEl('h3', 'cx-calculator-subtitle', 'Semester 1 Calibration (Improves Accuracy)');
@@ -607,10 +622,10 @@
       calibTitle.style.fontSize = '12px';
       calibTitle.style.fontWeight = 'bold';
       calibTitle.style.color = 'var(--cvr-color-text-secondary)';
-      controlsContainer.append(calibTitle);
+      courseListContainer.append(calibTitle);
       
       const calibTable = createEl('div', 'connectea-controls connectea-grid');
-      controlsContainer.append(calibTable);
+      courseListContainer.append(calibTable);
       
       for (const course of courses[0]) {
         const calibEntry = savedPreferences[`sem1_calibration:${course.id}`] || {};
@@ -660,53 +675,70 @@
       estTitle.style.fontSize = '12px';
       estTitle.style.fontWeight = 'bold';
       estTitle.style.color = 'var(--cvr-color-text-secondary)';
-      controlsContainer.append(estTitle);
+      courseListContainer.append(estTitle);
     }
-    
-    // Render standard active semester courses
+
     for (const course of courses[activeSemester]) {
       const entry = savedPreferences[`${activeSemester}:${course.id}`] || {};
-      const wrapper = createEl('label', 'connectea-controls connectea-grid');
+      const state = getCourseState(course, activeSemester);
+      
+      const wrapper = createEl('div', 'cta-course');
+      const label = createEl('label', 'cta-include');
 
       const checkbox = createEl('input');
       checkbox.type = 'checkbox';
       checkbox.className = 'connectea-subject-checkbox';
-      checkbox.checked = entry.include ?? course.mark !== undefined;
-
-      const nameSpan = createEl('span', 'connectea-course-name', course.name);
+      checkbox.checked = state.include;
       
-      // Calculate what the model estimates for this subject
-      const state = getCourseState(course, activeSemester);
+      label.append(checkbox, createEl('span', '', course.name));
+      
       const estMark = state.score !== undefined ? state.score : course.mark;
 
-      const input = createEl('input', 'connectea-subject-score-input');
+      const input = createEl('input', 'cta-score');
       input.type = 'number';
       input.min = '0';
       input.max = '100';
-      input.step = '1';
+      input.step = 'any';
       input.placeholder = isGradingMode ? 'Raw' : (estMark !== undefined ? String(estMark) : '');
       input.value = entry.score !== undefined ? entry.score : '';
       input.disabled = !checkbox.checked;
       input.setAttribute('aria-label', `${course.name} semester ${activeSemester + 1} estimated scaled score`);
 
+      const source = createEl(
+        'small',
+        '',
+        course.mark === undefined ? 'No school mark' : `School ${Math.round(course.mark * 10) / 10}%`
+      );
+
+      const updateCourse = () => {
+        savedPreferences[`${activeSemester}:${course.id}`] = {
+          include: checkbox.checked,
+          score: scoreValue(input.value)
+        };
+        input.setAttribute('aria-invalid', String(checkbox.checked && scoreValue(input.value) === undefined));
+        persistPreferences();
+        updateResults();
+      };
+
       checkbox.addEventListener('change', () => {
-        entry.include = checkbox.checked;
-        savedPreferences[`${activeSemester}:${course.id}`] = entry;
-        persistPreferences();
+        updateCourse();
         input.disabled = !checkbox.checked;
-        updateResults();
       });
 
-      input.addEventListener('input', () => {
-        entry.score = scoreValue(input.value);
-        savedPreferences[`${activeSemester}:${course.id}`] = entry;
-        persistPreferences();
-        updateResults();
+      input.addEventListener('input', updateCourse);
+      input.addEventListener('change', () => {
+        const score = wholeScore(input.value);
+        if (score !== undefined) {
+          input.value = score;
+          updateCourse();
+        }
       });
 
-      wrapper.append(checkbox, nameSpan, input);
-      controlsContainer.append(wrapper);
+      wrapper.append(label, input, source);
+      courseListContainer.append(wrapper);
     }
+    
+    updateResults();
   }
 
   function refreshData() {
