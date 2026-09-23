@@ -1,0 +1,181 @@
+/**
+ * Connectify Task Type Categorizer & Override Manager
+ *
+ * Handles automated assessment categorization (Exam, Test, Application, Essay, Take-Home),
+ * persistent student category overrides in localStorage, dynamic category colors,
+ * and the interactive assessment type selector dropdown.
+ */
+(() => {
+  'use strict';
+
+  if (window.ConnectifyTaskTypes) return;
+
+  const defaultCategories = {
+    Exam: { color: '#e74c3c', keywords: ['exam', 'semester'] },
+    Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
+    Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
+    Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
+    'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'extended', 'presentation', 'oral', 'creative'] }
+  };
+
+  const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+
+  function getCategories() {
+    return window.cxCategories || defaultCategories;
+  }
+
+  function getTaskTypeOverrides() {
+    try {
+      return JSON.parse(localStorage.getItem('connectea:task_type_overrides') || '{}');
+    } catch {
+      return {};
+    }
+  }
+
+  function getSavedTaskType(subjectName, taskName, labelsKey) {
+    const overrides = getTaskTypeOverrides();
+    const cleanSubj = (subjectName || '').replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+    if (labelsKey && overrides[`${cleanSubj}::${labelsKey}`]) {
+      return overrides[`${cleanSubj}::${labelsKey}`];
+    }
+    if (taskName && overrides[`${cleanSubj}::${taskName}`]) {
+      return overrides[`${cleanSubj}::${taskName}`];
+    }
+    return undefined;
+  }
+
+  function saveTaskTypeOverride(subjectName, taskName, labelsKey, type) {
+    const overrides = getTaskTypeOverrides();
+    const cleanSubj = (subjectName || '').replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+    const fullKey = labelsKey ? `${cleanSubj}::${labelsKey}` : null;
+    const nameKey = taskName ? `${cleanSubj}::${taskName}` : null;
+
+    if (type) {
+      if (fullKey) overrides[fullKey] = type;
+      if (nameKey) overrides[nameKey] = type;
+    } else {
+      if (fullKey) delete overrides[fullKey];
+      if (nameKey) delete overrides[nameKey];
+    }
+
+    try {
+      localStorage.setItem('connectea:task_type_overrides', JSON.stringify(overrides));
+    } catch {}
+
+    window.dispatchEvent(new CustomEvent('connectify-task-type-changed', {
+      detail: { subject: cleanSubj, task: taskName, type }
+    }));
+  }
+
+  function categorizeTask(taskName, allLabels = []) {
+    const combined = [taskName, ...allLabels].join(' ').toLowerCase();
+    if (combined.includes('exam')) return 'Exam';
+    const cats = getCategories();
+    for (const [cat, data] of Object.entries(cats)) {
+      if (data?.keywords?.some(k => combined.includes(k.toLowerCase()))) {
+        return cat;
+      }
+    }
+    return 'Take-Home';
+  }
+
+  function getEffectiveType(subjectName, task, labelsKey) {
+    const taskName = typeof task === 'string' ? task : task?.name;
+    let actualLabelsKey = labelsKey;
+    if (!actualLabelsKey && task && typeof task === 'object' && task.row) {
+      const labels = Array.from(task.row.querySelectorAll('.cvr-c-task__details .v-label'))
+        .map(e => (e.textContent || '').replace(/\s+/g, ' ').trim())
+        .filter(Boolean);
+      if (labels.length) actualLabelsKey = labels.join('::');
+    }
+    const saved = getSavedTaskType(subjectName, taskName, actualLabelsKey);
+    if (saved) return saved;
+    const labelsList = actualLabelsKey ? actualLabelsKey.split('::') : (task?.caption ? [task.caption] : []);
+    return categorizeTask(taskName, labelsList);
+  }
+
+  function getCategoryColor(cat) {
+    const cats = getCategories();
+    if (cats?.[cat]?.color) return cats[cat].color;
+    if (defaultCategories[cat]?.color) return defaultCategories[cat].color;
+    const palette = ['#1abc9c', '#e67e22', '#16a085', '#d35400', '#27ae60', '#8e44ad', '#2980b9'];
+    let hash = 0;
+    for (let i = 0; i < (cat || '').length; i++) hash = (hash << 5) - hash + cat.charCodeAt(i);
+    return palette[Math.abs(hash) % palette.length];
+  }
+
+  function getTaskMeta(row) {
+    const card = row.closest('.eds-c-tile');
+    const cardTitle = normalize(card?.querySelector('.eds-c-tile__title')?.textContent || '');
+    const subjectName = cardTitle.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+    const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
+      .map(e => normalize(e.textContent))
+      .filter(Boolean);
+    const taskName = (labels.length ? labels[labels.length - 1] : '') ||
+      normalize(row.querySelector('.cvr-c-task__details')?.childNodes[0]?.textContent) ||
+      'Assessment';
+    const labelsKey = labels.join('::');
+    return { subjectName, taskName, labels, labelsKey };
+  }
+
+  function updateTypeSelect(select, subjectName, taskName, labelsKey, allLabels) {
+    const autoType = categorizeTask(taskName, allLabels);
+    const savedOverride = getSavedTaskType(subjectName, taskName, labelsKey);
+    const categories = getCategories();
+
+    const currentSelection = savedOverride !== undefined ? savedOverride : '';
+
+    const catKeys = Object.keys(categories);
+    const optSignature = `${autoType}|${catKeys.join(',')}|${savedOverride || ''}`;
+    if (select.dataset.signature !== optSignature) {
+      select.dataset.signature = optSignature;
+      select.innerHTML = '';
+
+      const autoOpt = document.createElement('option');
+      autoOpt.value = '';
+      autoOpt.textContent = `Auto (${autoType})`;
+      select.appendChild(autoOpt);
+
+      for (const cat of catKeys) {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        select.appendChild(opt);
+      }
+
+      if (savedOverride && !catKeys.includes(savedOverride)) {
+        const customOpt = document.createElement('option');
+        customOpt.value = savedOverride;
+        customOpt.textContent = savedOverride;
+        select.appendChild(customOpt);
+      }
+
+      const addOpt = document.createElement('option');
+      addOpt.value = '__custom__';
+      addOpt.textContent = '+ Custom...';
+      select.appendChild(addOpt);
+    }
+
+    select.value = currentSelection;
+    if (currentSelection) {
+      select.classList.add('connectea-overridden');
+      select.title = `Assessment type manually set to "${currentSelection}". Click to change or reset to Auto.`;
+    } else {
+      select.classList.remove('connectea-overridden');
+      select.title = `Automatically detected as "${autoType}". Click to override.`;
+    }
+  }
+
+  window.ConnectifyTaskTypes = {
+    defaultCategories,
+    getCategories,
+    getOverrides: getTaskTypeOverrides,
+    getSavedTaskType,
+    saveTaskTypeOverride,
+    categorizeTask,
+    getEffectiveType,
+    getCategoryColor,
+    getTaskMeta,
+    updateTypeSelect
+  };
+})();

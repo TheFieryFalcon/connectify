@@ -179,6 +179,15 @@
     const host = row.querySelector('.cvr-c-task__chart [data-highcharts-chart]');
     if (!host) return null;
 
+    if (host.dataset.connectifyStats) {
+      try {
+        const stats = JSON.parse(host.dataset.connectifyStats);
+        if (Array.isArray(stats) && stats.length === 5 && stats.every(Number.isFinite)) {
+          return (stats[0] + 2 * stats[1] + 2 * stats[2] + 2 * stats[3] + stats[4]) / 8;
+        }
+      } catch {}
+    }
+
     const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
     const chart = window.Highcharts?.charts?.[chartIndex];
     if (!chart || (chart.container && !host.contains(chart.container))) return null;

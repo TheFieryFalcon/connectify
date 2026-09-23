@@ -1,3 +1,9 @@
+/**
+ * Connectify ATAR UI & Planner Interface
+ *
+ * Coordinates the ATAR estimate view, Target ATAR planner, and Target Grade planner modals.
+ * Delegates data scraping to ConnectifyAtarScraper and core calculation to ConnectifyAtarCalc.
+ */
 (() => {
   'use strict';
 
@@ -5,798 +11,594 @@
     if (window.__connectifyAtarUiInitialized) return;
     window.__connectifyAtarUiInitialized = true;
 
-  if (!Element.prototype.replaceChildren) {
-    Element.prototype.replaceChildren = function(...nodes) {
-      while (this.firstChild) this.removeChild(this.firstChild);
-      this.append(...nodes);
-    };
-  }
-  window.ConnectifyAtar = window.ConnectifyAtar || {};
-
-  let { calculate, convertTEAtoATAR, wholeScore, scoreValue, estimateScaledScore, calculateShiftedScaledScore, normalizeSubject, parseAssessment, taskProgress, gradePlan, targetPlan, normalize, isAtarCourse } = window.ConnectifyMath || {};
-
-  function syncMath() {
-    if (window.ConnectifyMath) {
-      calculate = window.ConnectifyMath.calculate || calculate;
-      convertTEAtoATAR = window.ConnectifyMath.convertTEAtoATAR || convertTEAtoATAR;
-      wholeScore = window.ConnectifyMath.wholeScore || wholeScore;
-      scoreValue = window.ConnectifyMath.scoreValue || scoreValue;
-      estimateScaledScore = window.ConnectifyMath.estimateScaledScore || estimateScaledScore;
-      calculateShiftedScaledScore = window.ConnectifyMath.calculateShiftedScaledScore || calculateShiftedScaledScore;
-      normalizeSubject = window.ConnectifyMath.normalizeSubject || normalizeSubject;
-      parseAssessment = window.ConnectifyMath.parseAssessment || parseAssessment;
-      taskProgress = window.ConnectifyMath.taskProgress || taskProgress;
-      gradePlan = window.ConnectifyMath.gradePlan || gradePlan;
-      targetPlan = window.ConnectifyMath.targetPlan || targetPlan;
-      normalize = window.ConnectifyMath.normalize || normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim());
-      isAtarCourse = window.ConnectifyMath.isAtarCourse || isAtarCourse || (t => /\bATAR\b/i.test(t));
-      if (window.ConnectifyAtar && calculate) {
-        window.ConnectifyAtar.calculate = calculate;
-      }
-    }
-  }
-  syncMath();
-
-  if (calculate) {
-    window.ConnectifyAtar.calculate = calculate;
-  }
-
-  function readCourses(atarOnly = true) {
-    syncMath();
-    const result = [[], []];
-    const seen = [new Set(), new Set()];
-
-    for (const card of document.querySelectorAll('.eds-c-tile')) {
-      const title = (normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim()))(card.querySelector('.eds-c-tile__title')?.textContent);
-      const semesterMatch = title.match(/\bSemester\s*([12])\b/i);
-      if (!semesterMatch || (atarOnly && isAtarCourse && !isAtarCourse(title))) continue;
-
-      const name = (normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim()))(
-        title
-          .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
-          .replace(/\bATAR\b/gi, '')
-          .replace(/\bYear\s*\d+\b/gi, '')
-      );
-      const index = Number(semesterMatch[1]) - 1;
-      const id = name.toLowerCase();
-
-      if (seen[index].has(id)) continue;
-      seen[index].add(id);
-
-      const summaryRow = Array.from(card.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.cvr-c-tasks'));
-      const summaryText = (normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim()))(summaryRow?.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
-      const markMatch = summaryText.match(/^(\d+(?:\.\d+)?)\s*%$/);
-
-      let tasks = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'))
-        .filter(r => r.closest('.eds-c-tile') === card)
-        .map((r, i) => {
-          const cells = r.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark');
-          const labels = Array.from(r.querySelectorAll('.cvr-c-task__details .v-label'))
-            .map(e => (normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim()))(e.textContent))
-            .filter(Boolean);
-          const taskLabel = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${i + 1}`;
-          return parseAssessment ? parseAssessment(cells[0]?.textContent, cells[1]?.textContent, taskLabel) : null;
-        }).filter(Boolean);
-
-      let markValue = markMatch ? scoreValue(markMatch[1]) : undefined;
-
-      const hasFinalLetter = Array.from(
-        summaryRow?.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark') || []
-      ).some(c => /^[ABCDE]$/i.test(normalize(c.textContent)));
-
-      result[index].push({
-        id,
-        name,
-        mark: markValue,
-        finalLetter: hasFinalLetter,
-        progress: taskProgress(tasks, markValue, index + 1)
-      });
+    if (!Element.prototype.replaceChildren) {
+      Element.prototype.replaceChildren = function(...nodes) {
+        while (this.firstChild) this.removeChild(this.firstChild);
+        this.append(...nodes);
+      };
     }
 
-    return result;
-  }
+    window.ConnectifyAtar = window.ConnectifyAtar || {};
 
-  // --- UI and State Management ---
+    const math = window.ConnectifyMath || {};
+    const scraper = window.ConnectifyAtarScraper;
+    const calc = window.ConnectifyAtarCalc;
 
-  const account = new URL(location.href).searchParams.get('coisp') || 'current';
-  const storageKey = `connectea:atar:2025:${account}:${new Date().getFullYear()}`;
-  let savedPreferences = {};
-
-  try {
-    const stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
-    if (stored && typeof stored === 'object' && !Array.isArray(stored)) {
-      savedPreferences = stored;
-    }
-  } catch {}
-
-  window.addEventListener('connectify-settings-updated', () => {
-    // Reload preferences since Settings might have changed calibration
-    const rawPrefs = localStorage.getItem('connectea:preferences');
-    if (rawPrefs) {
-        try {
-            const parsed = JSON.parse(rawPrefs);
-            // Since savedPreferences is a const, we can modify its keys
-            for (const key in parsed) savedPreferences[key] = parsed[key];
-        } catch(e){}
-    }
-    updateResults();
-  });
-
-  let courses = [[], []];
-  let gradeCourses = [[], []];
-  let activeSemester = 1;
-  let lastStateSignature = '';
-
-  function persistPreferences() {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(savedPreferences));
-    } catch {}
-  }
-
-  function getCourseState(row, semesterIdx) {
-    const entry = savedPreferences[`${semesterIdx}:${row.id}`];
-    const calibration = savedPreferences[`sem1_calibration:${row.id}`];
-    
-    // Instead of raw marks or manually entered final scores, use the shifted model!
-    let finalScore;
-    if (entry?.score !== undefined) {
-      finalScore = entry.score; // Fallback to manual override
-    } else if (row.mark !== undefined) {
-      const knownSem1Raw = calibration?.raw !== undefined ? calibration.raw : (semesterIdx === 1 ? courses[0].find(r => r.id === row.id)?.mark : undefined);
-      const knownSem1Scaled = calibration?.scaled;
-      finalScore = calculateShiftedScaledScore(row.name, row.mark, knownSem1Raw, knownSem1Scaled, 2025);
-    }
-    
-    return {
-      ...row,
-      include: entry?.include ?? row.mark !== undefined,
-      score: wholeScore(finalScore)
-    };
-  }
-
-  const createEl = (tag, className, text) => {
-    const el = document.createElement(tag);
-    if (className) el.className = className;
-    if (text) el.textContent = text;
-    return el;
-  };
-
-  const calculatorPanel = createEl('aside', '', '');
-  calculatorPanel.id = 'connectea-atar';
-  calculatorPanel.hidden = true;
-  calculatorPanel.setAttribute('aria-label', '2025 ATAR estimates');
-
-  const headingContainer = createEl('div', 'cta-heading');
-  const panelTitle = createEl('strong', '', 'Estimated ATAR');
-  panelTitle.tabIndex = -1;
-  headingContainer.append(panelTitle);
-
-  const estimateTab = createEl('button', 'cta-semester', 'ATAR Estimate');
-  const targetTab = createEl('button', 'cta-semester', 'Target ATAR');
-  const gradeTab = createEl('button', 'cta-semester', 'Target Grade');
-  estimateTab.type = targetTab.type = gradeTab.type = 'button';
-  estimateTab.id = 'connectify-estimate-toggle';
-  targetTab.id = 'connectify-target-toggle';
-  gradeTab.id = 'connectify-grade-toggle';
-
-  for (const button of [estimateTab, targetTab, gradeTab]) {
-    button.className = 'cx-calculator-tool';
-    button.setAttribute('aria-controls', 'connectea-atar');
-  }
-
-  window.ConnectifyAtar.calculatorButtons = [estimateTab, targetTab, gradeTab];
-  if (!window.ConnectifyAtar.toolButtons) {
-    window.ConnectifyAtar.toolButtons = [estimateTab, targetTab, gradeTab];
-  } else {
-    for (const b of [estimateTab, targetTab, gradeTab]) {
-      if (!window.ConnectifyAtar.toolButtons.includes(b)) {
-        window.ConnectifyAtar.toolButtons.unshift(b);
-      }
-    }
-  }
-
-  let isPlanningMode = false;
-  let isGradingMode = false;
-
-  const isAtarEligible = () => {
-    const tiles = document.querySelectorAll('.eds-c-tile__title, .eds-c-tile');
-    if (tiles.length === 0) return true;
-    const text = Array.from(tiles)
-      .map(c => c.textContent || '')
-      .join(' ');
-    return /\bYear\s*(?:11|12)\b/i.test(text) || /\bATAR\b/i.test(text);
-  };
-
-  const hasSemesterTwoStarted = () => (gradeCourses || []).flat().some(r => r?.finalLetter);
-  const isTargetClosed = semesterIdx =>
-    (gradeCourses?.[semesterIdx] || []).some(r => r?.finalLetter) ||
-    (semesterIdx === 1 && !(gradeCourses || []).flat().some(r => r?.finalLetter));
-
-  function selectTab(mode) {
-    if (!isAtarEligible()) mode = 'grade';
-
-    isPlanningMode = mode === 'target';
-    isGradingMode = mode === 'grade';
-
-    panelTitle.textContent = isPlanningMode
-      ? 'Target ATAR Planner'
-      : isGradingMode
-      ? 'Target Grade Planner'
-      : 'Estimated ATAR';
-
-    calculatorPanel.setAttribute('aria-label', panelTitle.textContent);
-
-    if (isGradingMode && hasSemesterTwoStarted()) {
-      activeSemester = 1;
-    }
-
-    estimateTab.setAttribute('aria-pressed', String(!isPlanningMode && !isGradingMode));
-    targetTab.setAttribute('aria-pressed', String(isPlanningMode));
-    gradeTab.setAttribute('aria-pressed', String(isGradingMode));
-
-    courseListContainer.hidden = detailSummary.hidden = resetBtn.hidden = calculationDetails.hidden =
-      isPlanningMode || isGradingMode;
-    plannerContainer.hidden = !isPlanningMode;
-    gradeContainer.hidden = !isGradingMode;
-
-    renderCourseRows();
-  }
-
-  function openCalculator(mode) {
-    window.ConnectifyData?.expandAll();
-    refreshData();
-    calculatorPanel.hidden = false;
-    window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
-    selectTab(mode);
-    panelTitle.focus();
-  }
-
-  estimateTab.addEventListener('click', () => openCalculator('estimate'));
-  targetTab.addEventListener('click', () => openCalculator('target'));
-  gradeTab.addEventListener('click', () => openCalculator('grade'));
-
-  const semesterCardsContainer = createEl('div', 'cta-semesters');
-  const semesterButtons = [0, 1].map(semesterIdx => {
-    const btn = createEl('button', 'cta-semester', `Semester ${semesterIdx + 1} ATAR`);
-    btn.type = 'button';
-    btn.addEventListener('click', () => {
-      if (
-        isGradingMode ||
-        (isPlanningMode && isTargetClosed(semesterIdx))
-      ) {
-        return;
-      }
-      activeSemester = semesterIdx;
-      renderCourseRows();
+    const round = v => (Number.isFinite(v) ? Math.round(v * 10) / 10 : '—');
+    const scoreValue = math.scoreValue || (v => {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : undefined;
     });
-    semesterCardsContainer.append(btn);
-    return btn;
-  });
+    const wholeScore = math.wholeScore || (v => (Number.isFinite(Number(v)) ? Math.round(Number(v)) : undefined));
 
-  const courseListContainer = createEl('div', 'cta-courses');
-  const detailSummary = createEl('p', 'cta-breakdown');
-  detailSummary.setAttribute('aria-live', 'polite');
-
-  const resetBtn = createEl('button', 'cta-reset', 'Reset to School Marks');
-  resetBtn.type = 'button';
-  resetBtn.addEventListener('click', () => {
-    for (const r of courses[activeSemester]) {
-      delete savedPreferences[`${activeSemester}:${r.id}`];
+    if (math.calculate) {
+      window.ConnectifyAtar.calculate = math.calculate;
     }
-    persistPreferences();
-    renderCourseRows();
-  });
 
-  const calculationDetails = createEl('details', 'cta-method');
-  calculationDetails.append(createEl('summary', '', 'Calculation Methodology & Sources'));
-  calculationDetails.append(
-    createEl(
-      'p',
-      '',
-      'Scores round to whole numbers before the best four and bonuses are calculated; exact .5 values round down (69.9 → 70; 69.5 → 69). Best four included scaled-score assumptions, plus 10% of Methods, 10% of Specialist and 10% of the best language score. General and other non-ATAR courses are excluded. Estimates interpolate the published 2025 TISC table. Below the table range, <30 is shown.'
-    )
-  );
-  calculationDetails.append(
-    createEl(
-      'p',
-      '',
-      'Semester 2 uses the cumulative percentage shown by Connect. This does not check WACE eligibility, English competency or unacceptable course combinations. Exclude an incompatible course before calculating. No marks are sent to another website.'
-    )
-  );
+    let courses = [[], []];
+    let gradeCourses = [[], []];
+    let activeSemester = 1;
+    let lastStateSignature = '';
+    let isPlanningMode = false;
+    let isGradingMode = false;
 
-  // Target ATAR Planner form
-  const plannerContainer = createEl('div', 'cta-planner');
-  const targetLabel = createEl('label', 'cta-target-label', 'Target ATAR ');
-  const targetInput = createEl('input', 'cta-score');
-  targetInput.type = 'number';
-  targetInput.min = '30';
-  targetInput.max = '99.95';
-  targetInput.step = '0.05';
-  targetInput.value = savedPreferences.target ?? '98';
-  targetLabel.append(targetInput);
+    const createEl = (tag, className, text) => {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      if (text) el.textContent = text;
+      return el;
+    };
 
-  const calculateTargetBtn = createEl('button', 'cta-reset', 'Recalculate');
-  calculateTargetBtn.type = 'button';
+    const calculatorPanel = createEl('aside', '', '');
+    calculatorPanel.id = 'connectea-atar';
+    calculatorPanel.hidden = true;
+    calculatorPanel.setAttribute('aria-label', '2025 ATAR estimates');
 
-  const targetOutputContainer = createEl('div', 'cta-target-output');
-  targetOutputContainer.setAttribute('aria-live', 'polite');
+    const headingContainer = createEl('div', 'cta-heading');
+    const panelTitle = createEl('strong', '', 'Estimated ATAR');
+    panelTitle.tabIndex = -1;
+    headingContainer.append(panelTitle);
 
-  const targetControls = createEl('div', 'cta-form-controls');
-  targetControls.append(targetLabel, calculateTargetBtn);
-  plannerContainer.append(targetControls, targetOutputContainer);
+    const estimateTab = createEl('button', 'cta-semester', 'ATAR Estimate');
+    const targetTab = createEl('button', 'cta-semester', 'Target ATAR');
+    const gradeTab = createEl('button', 'cta-semester', 'Target Grade');
+    estimateTab.type = targetTab.type = gradeTab.type = 'button';
+    estimateTab.id = 'connectify-estimate-toggle';
+    targetTab.id = 'connectify-target-toggle';
+    gradeTab.id = 'connectify-grade-toggle';
 
-  targetInput.addEventListener('input', () => {
-    savedPreferences.target = targetInput.value;
-    persistPreferences();
-    renderTargetOutput();
-  });
+    for (const button of [estimateTab, targetTab, gradeTab]) {
+      button.className = 'cx-calculator-tool';
+      button.setAttribute('aria-controls', 'connectea-atar');
+    }
 
-  function scanOutlineDetails(allSubjects = false) {
-    for (const card of document.querySelectorAll('.eds-c-tile')) {
-      const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
-      if (
-        (!allSubjects && !isAtarCourse(title)) ||
-        !new RegExp(`Semester\\s*${activeSemester + 1}\\b`, 'i').test(title)
-      ) {
-        continue;
-      }
-      for (const heading of card.querySelectorAll('.eds-c-accordion__section-heading')) {
-        if (/show details/i.test(heading.textContent)) {
-          const btn = heading.querySelector('button, .v-button, [role="button"]');
-          if (btn) btn.click();
+    window.ConnectifyAtar.calculatorButtons = [estimateTab, targetTab, gradeTab];
+    if (!window.ConnectifyAtar.toolButtons) {
+      window.ConnectifyAtar.toolButtons = [estimateTab, targetTab, gradeTab];
+    } else {
+      for (const b of [estimateTab, targetTab, gradeTab]) {
+        if (!window.ConnectifyAtar.toolButtons.includes(b)) {
+          window.ConnectifyAtar.toolButtons.unshift(b);
         }
       }
     }
-    refreshData();
-    if (isGradingMode) renderGradeOutput();
-    else renderTargetOutput();
-  }
 
-  calculateTargetBtn.addEventListener('click', () => scanOutlineDetails());
+    const hasSemesterTwoStarted = () => (gradeCourses || []).flat().some(r => r?.finalLetter);
+    const isTargetClosed = semesterIdx =>
+      (gradeCourses?.[semesterIdx] || []).some(r => r?.finalLetter) ||
+      (semesterIdx === 1 && !(gradeCourses || []).flat().some(r => r?.finalLetter));
 
-  // Grade Planner form
-  const gradeContainer = createEl('div', 'cta-planner');
-  const subjectLabel = createEl('label', 'cta-target-label', 'Subject ');
-  const subjectSelect = createEl('select', 'cta-subject-select');
-  subjectLabel.append(subjectSelect);
+    function selectTab(mode) {
+      const isEligible = scraper ? scraper.isAtarEligible() : true;
+      if (!isEligible) mode = 'grade';
 
-  const gradeTargetLabel = createEl('label', 'cta-target-label', 'Overall target (%) ');
-  const gradeTargetInput = createEl('input', 'cta-score');
-  gradeTargetInput.type = 'number';
-  gradeTargetInput.min = '0';
-  gradeTargetInput.max = '100';
-  gradeTargetInput.step = 'any';
-  gradeTargetInput.value = savedPreferences.gradeTarget ?? '80';
-  gradeTargetLabel.append(gradeTargetInput);
+      isPlanningMode = mode === 'target';
+      isGradingMode = mode === 'grade';
 
-  const calculateGradeBtn = createEl('button', 'cta-reset', 'Recalculate');
-  calculateGradeBtn.type = 'button';
-  calculateGradeBtn.addEventListener('click', () => scanOutlineDetails(true));
+      panelTitle.textContent = isPlanningMode
+        ? 'Target ATAR Planner'
+        : isGradingMode
+        ? 'Target Grade Planner'
+        : 'Estimated ATAR';
 
-  const gradeOutputContainer = createEl('div', 'cta-target-output');
-  gradeOutputContainer.setAttribute('aria-live', 'polite');
+      calculatorPanel.setAttribute('aria-label', panelTitle.textContent);
 
-  const gradeControls = createEl('div', 'cta-form-controls');
-  subjectLabel.classList.add('cta-subject-label');
-  gradeControls.append(subjectLabel, gradeTargetLabel, calculateGradeBtn);
-  gradeContainer.append(gradeControls, gradeOutputContainer);
-
-  const gradeSelectedSubjects = ['', ''];
-  subjectSelect.addEventListener('change', () => {
-    gradeSelectedSubjects[activeSemester] = subjectSelect.value;
-    renderGradeOutput();
-  });
-
-  gradeTargetInput.addEventListener('input', () => {
-    savedPreferences.gradeTarget = gradeTargetInput.value;
-    persistPreferences();
-    renderGradeOutput();
-  });
-
-  calculatorPanel.append(
-    headingContainer,
-    semesterCardsContainer,
-    courseListContainer,
-    detailSummary,
-    resetBtn,
-    calculationDetails,
-    plannerContainer,
-    gradeContainer
-  );
-  document.body.append(calculatorPanel);
-  selectTab('estimate');
-
-  function renderGradeOutput() {
-    const available = gradeCourses[activeSemester];
-    const wanted = gradeSelectedSubjects[activeSemester];
-    const selected = available.find(r => r.id === wanted) || available[0];
-
-    const optionSignature = JSON.stringify(available.map(r => [r.id, r.name]));
-    if (subjectSelect.dataset.options !== optionSignature) {
-      subjectSelect.replaceChildren();
-      for (const course of available) {
-        const option = createEl('option', '', course.name);
-        option.value = course.id;
-        subjectSelect.append(option);
+      if (isGradingMode && hasSemesterTwoStarted()) {
+        activeSemester = 1;
       }
-      subjectSelect.dataset.options = optionSignature;
+
+      estimateTab.setAttribute('aria-pressed', String(!isPlanningMode && !isGradingMode));
+      targetTab.setAttribute('aria-pressed', String(isPlanningMode));
+      gradeTab.setAttribute('aria-pressed', String(isGradingMode));
+
+      courseListContainer.hidden = detailSummary.hidden = resetBtn.hidden = calculationDetails.hidden =
+        isPlanningMode || isGradingMode;
+      plannerContainer.hidden = !isPlanningMode;
+      gradeContainer.hidden = !isGradingMode;
+
+      renderCourseRows();
     }
 
-    if (selected) {
-      subjectSelect.value = selected.id;
-      gradeSelectedSubjects[activeSemester] = selected.id;
+    function openCalculator(mode) {
+      if (window.ConnectifyData?.expandAll) window.ConnectifyData.expandAll();
+      refreshData();
+      calculatorPanel.hidden = false;
+      window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
+      selectTab(mode);
+      panelTitle.focus();
     }
 
-    gradeOutputContainer.replaceChildren();
+    estimateTab.addEventListener('click', () => openCalculator('estimate'));
+    targetTab.addEventListener('click', () => openCalculator('target'));
+    gradeTab.addEventListener('click', () => openCalculator('grade'));
 
-    if (!selected) {
-      gradeOutputContainer.append(
-        createEl('p', '', 'No subjects found for this semester. Show all classes in Connect.')
-      );
-      return;
-    }
+    const semesterCardsContainer = createEl('div', 'cta-semesters');
+    const semesterButtons = [0, 1].map(semesterIdx => {
+      const btn = createEl('button', 'cta-semester', `Semester ${semesterIdx + 1} ATAR`);
+      btn.type = 'button';
+      btn.addEventListener('click', () => {
+        if (
+          isGradingMode ||
+          (isPlanningMode && isTargetClosed(semesterIdx))
+        ) {
+          return;
+        }
+        activeSemester = semesterIdx;
+        renderCourseRows();
+      });
+      semesterCardsContainer.append(btn);
+      return btn;
+    });
 
-    const progress = selected.progress;
-    const plan = gradePlan(progress, scoreValue(gradeTargetInput.value));
+    const courseListContainer = createEl('div', 'cta-courses');
+    const detailSummary = createEl('p', 'cta-breakdown');
+    detailSummary.setAttribute('aria-live', 'polite');
 
-    if (plan.error) {
-      gradeOutputContainer.append(
-        createEl('p', '', plan.error),
-        createEl('p', 'cta-note', 'Expand assessment details in Connect, then recalculate. Ensure full outline is visible.')
-      );
-      return;
-    }
+    const resetBtn = createEl('button', 'cta-reset', 'Reset to School Marks');
+    resetBtn.type = 'button';
+    resetBtn.addEventListener('click', () => {
+      if (calc?.resetPreferencesForSemester) {
+        calc.resetPreferencesForSemester(courses[activeSemester], activeSemester);
+      }
+      renderCourseRows();
+    });
 
-    const summaryText = plan.impossible
-      ? `Goal unattainable. Maximum achievable mark: ${round(plan.maximum)}%.`
-      : plan.finished
-      ? `All weighted tasks completed. Final mark: ${round(plan.final)}%.`
-      : plan.required === 0
-      ? 'Target secured with remaining assessments at 0%.'
-      : `Requires ${plan.required}% on remaining assessments to achieve ${gradeTargetInput.value}% overall.`;
-
-    gradeOutputContainer.append(
-      createEl('strong', '', summaryText),
+    const calculationDetails = createEl('details', 'cta-method');
+    calculationDetails.append(createEl('summary', '', 'Calculation Methodology & Sources'));
+    calculationDetails.append(
       createEl(
         'p',
-        'cta-note',
-        `Outline total: ${round(progress.total)} annual-weight points. Completed: ${round(
-          progress.total - progress.rawRemaining
-        )}; remaining: ${round(progress.rawRemaining)} (${round(
-          progress.remaining
-        )}% of this semester). Current completed-task average: ${
-          progress.remaining < 100 ? `${round((progress.earned / (100 - progress.remaining)) * 100)}%` : 'not marked'
-        }.`
+        '',
+        'Scores round to whole numbers before the best four and bonuses are calculated; exact .5 values round down (69.9 → 70; 69.5 → 69). Best four included scaled-score assumptions, plus 10% of Methods, 10% of Specialist and 10% of the best language score. General and other non-ATAR courses are excluded. Estimates interpolate the published 2025 TISC table. Below the table range, <30 is shown.'
+      )
+    );
+    calculationDetails.append(
+      createEl(
+        'p',
+        '',
+        'Semester 2 uses the cumulative percentage shown by Connect. This does not check WACE eligibility, English competency or unacceptable course combinations. Exclude an incompatible course before calculating. No marks are sent to another website.'
       )
     );
 
-    const table = createEl('table', 'cta-grade-table');
-    const headerRow = createEl('tr');
-    ['Assessment', 'Score', 'Weight'].forEach(t => headerRow.append(createEl('th', '', t)));
-    table.append(headerRow);
+    // Target ATAR Planner form
+    const plannerContainer = createEl('div', 'cta-planner');
+    const targetLabel = createEl('label', 'cta-target-label', 'Target ATAR ');
+    const targetInput = createEl('input', 'cta-score');
+    targetInput.type = 'number';
+    targetInput.min = '30';
+    targetInput.max = '99.95';
+    targetInput.step = '0.05';
+    const prefs = calc?.getPreferences ? calc.getPreferences() : {};
+    targetInput.value = prefs.target ?? '98';
+    targetLabel.append(targetInput);
 
-    for (const task of progress.allTasks) {
-      const tr = createEl('tr');
-      tr.append(
-        createEl('td', '', task.name),
-        createEl(
-          'td',
-          '',
-          task.pending ? 'Pending' : `${round(task.score ?? (task.weight ? (task.earned / task.weight) * 100 : 0))}%`
-        ),
-        createEl('td', '', `${round(task.weight)}%`)
-      );
-      table.append(tr);
-    }
+    const calculateTargetBtn = createEl('button', 'cta-reset', 'Recalculate');
+    calculateTargetBtn.type = 'button';
 
-    const assessmentDetails = createEl('section', 'cta-assessment-details');
-    assessmentDetails.append(
-      createEl('strong', 'cta-breakdown-title', `Assessment breakdown (${progress.allTasks.length})`),
-      table
-    );
-    gradeOutputContainer.append(assessmentDetails);
+    const targetOutputContainer = createEl('div', 'cta-target-output');
+    targetOutputContainer.setAttribute('aria-live', 'polite');
 
-    if (!plan.impossible && !plan.finished) {
-      for (const task of progress.tasks) {
-        assessmentDetails.append(
-          createEl('p', 'cta-note', `${task.name}: requires ${plan.required}% (${round(task.weight)}% weight)`)
-        );
+    const targetControls = createEl('div', 'cta-form-controls');
+    targetControls.append(targetLabel, calculateTargetBtn);
+    plannerContainer.append(targetControls, targetOutputContainer);
+
+    targetInput.addEventListener('input', () => {
+      const p = calc?.getPreferences ? calc.getPreferences() : {};
+      p.target = targetInput.value;
+      if (calc?.persistPreferences) calc.persistPreferences();
+      renderTargetOutput();
+    });
+
+    function scanAndRefresh(allSubjects = false) {
+      if (scraper?.scanOutlineDetails) {
+        scraper.scanOutlineDetails(allSubjects, activeSemester);
       }
-    }
-  }
-
-  function renderTargetOutput() {
-    targetInput.disabled = calculateTargetBtn.disabled = isTargetClosed(activeSemester);
-
-    if (isTargetClosed(activeSemester)) {
-      targetOutputContainer.replaceChildren(
-        createEl(
-          'p',
-          '',
-          gradeCourses[activeSemester].some(r => r.finalLetter)
-            ? `Semester ${activeSemester + 1} Target ATAR is closed because overall A–E grades have been published.`
-            : 'Semester 2 Target ATAR is not open yet. Use semester 1 until overall A–E grades are published.'
-        )
-      );
-      return;
+      refreshData();
+      if (isGradingMode) renderGradeOutput();
+      else renderTargetOutput();
     }
 
-    const rows = courses[activeSemester]
-      .filter(r => getCourseState(r, activeSemester).include)
-      .map(r => {
-        const current = getCourseState(r, activeSemester);
-        return {
-          ...r,
-          include: current.include,
-          score: current.score,
-          progress:
-            current.score === undefined
-              ? { error: 'Enter a valid scaled-score assumption in the ATAR estimate tab.' }
-              : r.progress,
-          offset: current.score === undefined || r.mark === undefined ? 0 : current.score - wholeScore(r.mark)
-        };
-      });
+    calculateTargetBtn.addEventListener('click', () => scanAndRefresh(false));
 
-    const plan = targetPlan(rows, scoreValue(targetInput.value));
-    targetOutputContainer.replaceChildren();
+    // Grade Planner form
+    const gradeContainer = createEl('div', 'cta-planner');
+    const subjectLabel = createEl('label', 'cta-target-label', 'Subject ');
+    const subjectSelect = createEl('select', 'cta-subject-select');
+    subjectLabel.append(subjectSelect);
 
-    if (plan.error) {
-      targetOutputContainer.append(
-        createEl('p', '', plan.error),
+    const gradeTargetLabel = createEl('label', 'cta-target-label', 'Overall target (%) ');
+    const gradeTargetInput = createEl('input', 'cta-score');
+    gradeTargetInput.type = 'number';
+    gradeTargetInput.min = '0';
+    gradeTargetInput.max = '100';
+    gradeTargetInput.step = 'any';
+    gradeTargetInput.value = prefs.gradeTarget ?? '80';
+    gradeTargetLabel.append(gradeTargetInput);
+
+    const calculateGradeBtn = createEl('button', 'cta-reset', 'Recalculate');
+    calculateGradeBtn.type = 'button';
+    calculateGradeBtn.addEventListener('click', () => scanAndRefresh(true));
+
+    const gradeOutputContainer = createEl('div', 'cta-target-output');
+    gradeOutputContainer.setAttribute('aria-live', 'polite');
+
+    const gradeControls = createEl('div', 'cta-form-controls');
+    subjectLabel.classList.add('cta-subject-label');
+    gradeControls.append(subjectLabel, gradeTargetLabel, calculateGradeBtn);
+    gradeContainer.append(gradeControls, gradeOutputContainer);
+
+    const gradeSelectedSubjects = ['', ''];
+    subjectSelect.addEventListener('change', () => {
+      gradeSelectedSubjects[activeSemester] = subjectSelect.value;
+      renderGradeOutput();
+    });
+
+    gradeTargetInput.addEventListener('input', () => {
+      const p = calc?.getPreferences ? calc.getPreferences() : {};
+      p.gradeTarget = gradeTargetInput.value;
+      if (calc?.persistPreferences) calc.persistPreferences();
+      renderGradeOutput();
+    });
+
+    calculatorPanel.append(
+      headingContainer,
+      semesterCardsContainer,
+      courseListContainer,
+      detailSummary,
+      resetBtn,
+      calculationDetails,
+      plannerContainer,
+      gradeContainer
+    );
+    document.body.append(calculatorPanel);
+    selectTab('estimate');
+
+    function renderGradeOutput() {
+      const available = gradeCourses[activeSemester] || [];
+      const wanted = gradeSelectedSubjects[activeSemester];
+      const selected = available.find(r => r.id === wanted) || available[0];
+
+      const optionSignature = JSON.stringify(available.map(r => [r.id, r.name]));
+      if (subjectSelect.dataset.options !== optionSignature) {
+        subjectSelect.replaceChildren();
+        for (const course of available) {
+          const option = createEl('option', '', course.name);
+          option.value = course.id;
+          subjectSelect.append(option);
+        }
+        subjectSelect.dataset.options = optionSignature;
+      }
+
+      if (selected) {
+        subjectSelect.value = selected.id;
+        gradeSelectedSubjects[activeSemester] = selected.id;
+      }
+
+      gradeOutputContainer.replaceChildren();
+
+      if (!selected) {
+        gradeOutputContainer.append(
+          createEl('p', '', 'No subjects found for this semester. Show all classes in Connect.')
+        );
+        return;
+      }
+
+      const progress = selected.progress;
+      const gradePlanFn = window.ConnectifyMath?.gradePlan;
+      if (!gradePlanFn) return;
+
+      const plan = gradePlanFn(progress, scoreValue(gradeTargetInput.value));
+
+      if (plan.error) {
+        gradeOutputContainer.append(
+          createEl('p', '', plan.error),
+          createEl('p', 'cta-note', 'Expand assessment details in Connect, then recalculate. Ensure full outline is visible.')
+        );
+        return;
+      }
+
+      const summaryText = plan.impossible
+        ? `Goal unattainable. Maximum achievable mark: ${round(plan.maximum)}%.`
+        : plan.finished
+        ? `All weighted tasks completed. Final mark: ${round(plan.final)}%.`
+        : plan.required === 0
+        ? 'Target secured with remaining assessments at 0%.'
+        : `Requires ${plan.required}% on remaining assessments to achieve ${gradeTargetInput.value}% overall.`;
+
+      gradeOutputContainer.append(
+        createEl('strong', '', summaryText),
         createEl(
           'p',
           'cta-note',
-          'Expand assessment details in Connect, then recalculate. Missing task weights cannot be omitted.'
-        )
-      );
-      return;
-    }
-
-    if (plan.impossible) {
-      targetOutputContainer.append(
-        createEl(
-          'strong',
-          '',
-          `Goal unattainable with remaining tasks. Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'} (assuming 100% on all remaining assessments).`
-        )
-      );
-    } else {
-      targetOutputContainer.append(
-        createEl(
-          'strong',
-          '',
-          plan.required === 0
-            ? 'Target secured under current assumptions.'
-            : `Requires ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
-                plan.result?.atar ?? '—'
-              }.`
-        )
-      );
-    }
-
-    targetOutputContainer.append(
-      createEl(
-        'p',
-        'cta-note',
-        `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}. Assumes uniform performance across remaining tasks.`
-      )
-    );
-
-    const taskDetails = createEl('section', 'cta-assessment-details');
-    taskDetails.append(
-      createEl('strong', 'cta-breakdown-title', `Subject and assessment breakdown (${rows.length} subjects)`)
-    );
-    targetOutputContainer.append(taskDetails);
-
-    rows.forEach((course, idx) => {
-      const block = createEl('div', 'cta-course');
-      const projectedScore = plan.rows?.[idx]?.score ?? course.score ?? 0;
-      block.append(
-        createEl('strong', '', course.name),
-        createEl(
-          'small',
-          '',
-          `Outline weight ${round(course.progress?.total ?? 0)}% · ${round(
-            course.progress?.earned ?? 0
-          )} normalized points earned · ${round(course.progress?.remaining ?? 0)}% of semester remaining · projected rounded score ${wholeScore(
-            projectedScore
-          )}`
+          `Outline total: ${round(progress.total)} annual-weight points. Completed: ${round(
+            progress.total - progress.rawRemaining
+          )}; remaining: ${round(progress.rawRemaining)} (${round(
+            progress.remaining
+          )}% of this semester). Current completed-task average: ${
+            progress.remaining < 100 ? `${round((progress.earned / (100 - progress.remaining)) * 100)}%` : 'not marked'
+          }.`
         )
       );
 
-      for (const task of course.progress?.tasks || []) {
-        block.append(
+      const table = createEl('table', 'cta-grade-table');
+      const headerRow = createEl('tr');
+      ['Assessment', 'Score', 'Weight'].forEach(t => headerRow.append(createEl('th', '', t)));
+      table.append(headerRow);
+
+      for (const task of progress.allTasks || []) {
+        const tr = createEl('tr');
+        tr.append(
+          createEl('td', '', task.name),
           createEl(
-            'small',
+            'td',
             '',
-            `${task.name}: weight ${round(task.weight)}% · ${plan.impossible ? 'max 100%' : `required ${round(plan.required)}%`}`
+            task.pending ? 'Pending' : `${round(task.score ?? (task.weight ? (task.earned / task.weight) * 100 : 0))}%`
+          ),
+          createEl('td', '', `${round(task.weight)}%`)
+        );
+        table.append(tr);
+      }
+
+      const assessmentDetails = createEl('section', 'cta-assessment-details');
+      assessmentDetails.append(
+        createEl('strong', 'cta-breakdown-title', `Assessment breakdown (${(progress.allTasks || []).length})`),
+        table
+      );
+      gradeOutputContainer.append(assessmentDetails);
+
+      if (!plan.impossible && !plan.finished) {
+        for (const task of progress.tasks || []) {
+          assessmentDetails.append(
+            createEl('p', 'cta-note', `${task.name}: requires ${plan.required}% (${round(task.weight)}% weight)`)
+          );
+        }
+      }
+    }
+
+    function renderTargetOutput() {
+      targetInput.disabled = calculateTargetBtn.disabled = isTargetClosed(activeSemester);
+
+      if (isTargetClosed(activeSemester)) {
+        targetOutputContainer.replaceChildren(
+          createEl(
+            'p',
+            '',
+            (gradeCourses[activeSemester] || []).some(r => r.finalLetter)
+              ? `Semester ${activeSemester + 1} Target ATAR is closed because overall A–E grades have been published.`
+              : 'Semester 2 Target ATAR is not open yet. Use semester 1 until overall A–E grades are published.'
+          )
+        );
+        return;
+      }
+
+      const rows = (courses[activeSemester] || [])
+        .filter(r => (calc?.getCourseState ? calc.getCourseState(r, activeSemester, courses) : r).include)
+        .map(r => {
+          const current = calc?.getCourseState ? calc.getCourseState(r, activeSemester, courses) : r;
+          return {
+            ...r,
+            include: current.include,
+            score: current.score,
+            progress:
+              current.score === undefined
+                ? { error: 'Enter a valid scaled-score assumption in the ATAR estimate tab.' }
+                : r.progress,
+            offset: current.score === undefined || r.mark === undefined ? 0 : current.score - wholeScore(r.mark)
+          };
+        });
+
+      const targetPlanFn = window.ConnectifyMath?.targetPlan;
+      if (!targetPlanFn) return;
+
+      const plan = targetPlanFn(rows, scoreValue(targetInput.value));
+      targetOutputContainer.replaceChildren();
+
+      if (plan.error) {
+        targetOutputContainer.append(
+          createEl('p', '', plan.error),
+          createEl(
+            'p',
+            'cta-note',
+            'Expand assessment details in Connect, then recalculate. Missing task weights cannot be omitted.'
+          )
+        );
+        return;
+      }
+
+      if (plan.impossible) {
+        targetOutputContainer.append(
+          createEl(
+            'strong',
+            '',
+            `Goal unattainable with remaining tasks. Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'} (assuming 100% on all remaining assessments).`
+          )
+        );
+      } else {
+        targetOutputContainer.append(
+          createEl(
+            'strong',
+            '',
+            plan.required === 0
+              ? 'Target secured under current assumptions.'
+              : `Requires ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
+                  plan.result?.atar ?? '—'
+                }.`
           )
         );
       }
 
-      if (!course.progress?.remaining) {
-        block.append(createEl('small', '', 'All weighted tasks completed.'));
-      }
-      taskDetails.append(block);
-    });
-  }
+      targetOutputContainer.append(
+        createEl(
+          'p',
+          'cta-note',
+          `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}. Assumes uniform performance across remaining tasks.`
+        )
+      );
 
-  function updateResults() {
-    if (isGradingMode && hasSemesterTwoStarted()) {
-      activeSemester = 1;
-    }
-    if (isPlanningMode && isTargetClosed(activeSemester) && !isTargetClosed(1 - activeSemester)) {
-      activeSemester = 1 - activeSemester;
-    }
+      const taskDetails = createEl('section', 'cta-assessment-details');
+      taskDetails.append(
+        createEl('strong', 'cta-breakdown-title', `Subject and assessment breakdown (${rows.length} subjects)`)
+      );
+      targetOutputContainer.append(taskDetails);
 
-    for (let i = 0; i < 2; i++) {
-      const result = calculate(courses[i].map(row => getCourseState(row, i)));
-      const isClosed = isPlanningMode && isTargetClosed(i);
+      rows.forEach((course, idx) => {
+        const block = createEl('div', 'cta-course');
+        const projectedScore = plan.rows?.[idx]?.score ?? course.score ?? 0;
+        block.append(
+          createEl('strong', '', course.name),
+          createEl(
+            'small',
+            '',
+            `Outline weight ${round(course.progress?.total ?? 0)}% · ${round(
+              course.progress?.earned ?? 0
+            )} normalized points earned · ${round(course.progress?.remaining ?? 0)}% of semester remaining · projected rounded score ${wholeScore(
+              projectedScore
+            )}`
+          )
+        );
 
-      let semesterLabel = `Semester ${i + 1} ATAR\n${result.error ? '—' : result.atar}`;
-      if (isGradingMode) {
-        semesterLabel = `Semester ${i + 1} Target Grade`;
-      } else if (isPlanningMode) {
-        semesterLabel = isClosed ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`;
-      }
-      semesterButtons[i].textContent = semesterLabel;
-
-      semesterButtons[i].hidden = isGradingMode && hasSemesterTwoStarted() && i === 0;
-      semesterButtons[i].disabled = semesterButtons[i].hidden || isClosed;
-
-      if (isGradingMode) {
-        semesterButtons[i].className = 'cta-semester cta-non-button cta-semester-indicator';
-      } else if (isPlanningMode) {
-        semesterButtons[i].className = isClosed
-          ? 'cta-semester cta-non-button cta-semester-closed'
-          : 'cta-semester cta-non-button cta-semester-indicator';
-      } else {
-        semesterButtons[i].className = 'cta-semester';
-      }
-
-      semesterButtons[i].setAttribute('aria-pressed', String(i === activeSemester));
-
-      if (i === activeSemester) {
-        const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent);
-        const isYear12 = titles.some(t => /\b12\b/i.test(t) || /\bAT[A-Z]*\b/.test(t));
-        const yearLevel = isYear12 ? 12 : 11;
-        let teaAdjustment = yearLevel === 11 ? -15 : 0; // Penalize TEA by 15 points (roughly -5%) for Year 11 unscaled marks
-        const finalTEA = Math.max(0, result.tea + teaAdjustment);
-        const finalAtar = result.error ? '—' : convertTEAtoATAR(finalTEA);
-        
-        if (!isGradingMode && !isPlanningMode) {
-          semesterButtons[i].textContent = `Semester ${i + 1} ATAR\n${finalAtar}`;
+        for (const task of course.progress?.tasks || []) {
+          block.append(
+            createEl(
+              'small',
+              '',
+              `${task.name}: weight ${round(task.weight)}% · ${plan.impossible ? 'max 100%' : `required ${round(plan.required)}%`}`
+            )
+          );
         }
 
-        detailSummary.textContent =
-          result.error ||
-          `TEA ${round(finalTEA)} = best four ${round(result.base)} + bonuses ${round(
-            result.bonus
-          )}.` + (yearLevel === 11 ? ' (Year 11 TEA scaling adjustment applied).' : ` Best four: ${result.top.map(x => x.name).join(', ')}.`);
-      }
+        if (!course.progress?.remaining) {
+          block.append(createEl('small', '', 'All weighted tasks completed.'));
+        }
+        taskDetails.append(block);
+      });
     }
 
-    if (isPlanningMode) renderTargetOutput();
-    if (isGradingMode) renderGradeOutput();
-  }
+    function updateResults() {
+      if (isGradingMode && hasSemesterTwoStarted()) {
+        activeSemester = 1;
+      }
+      if (isPlanningMode && isTargetClosed(activeSemester) && !isTargetClosed(1 - activeSemester)) {
+        activeSemester = 1 - activeSemester;
+      }
+
+      const results = calc?.calculateResults ? calc.calculateResults(courses) : [{}, {}];
+
+      for (let i = 0; i < 2; i++) {
+        const res = results[i] || {};
+        const isClosed = isPlanningMode && isTargetClosed(i);
+
+        let semesterLabel = `Semester ${i + 1} ATAR\n${res.error ? '—' : (res.finalAtar || res.atar || '—')}`;
+        if (isGradingMode) {
+          semesterLabel = `Semester ${i + 1} Target Grade`;
+        } else if (isPlanningMode) {
+          semesterLabel = isClosed ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`;
+        }
+        semesterButtons[i].textContent = semesterLabel;
+
+        semesterButtons[i].hidden = isGradingMode && hasSemesterTwoStarted() && i === 0;
+        semesterButtons[i].disabled = semesterButtons[i].hidden || isClosed;
+
+        if (isGradingMode) {
+          semesterButtons[i].className = 'cta-semester cta-non-button cta-semester-indicator';
+        } else if (isPlanningMode) {
+          semesterButtons[i].className = isClosed
+            ? 'cta-semester cta-non-button cta-semester-closed'
+            : 'cta-semester cta-non-button cta-semester-indicator';
+        } else {
+          semesterButtons[i].className = 'cta-semester';
+        }
+
+        semesterButtons[i].setAttribute('aria-pressed', String(i === activeSemester));
+
+        if (i === activeSemester) {
+          detailSummary.textContent = res.detailText || res.error || 'Calculating ATAR...';
+        }
+      }
+
+      if (isPlanningMode) renderTargetOutput();
+      if (isGradingMode) renderGradeOutput();
+    }
 
     function renderCourseRows() {
-    const eligible = isAtarEligible();
-    estimateTab.hidden = targetTab.hidden = !eligible;
-    if (!eligible && !isGradingMode) {
-      selectTab('grade');
-      return;
+      const eligible = scraper ? scraper.isAtarEligible() : true;
+      estimateTab.hidden = targetTab.hidden = !eligible;
+      if (!eligible && !isGradingMode) {
+        selectTab('grade');
+        return;
+      }
+
+      if (calc?.renderCourseList) {
+        calc.renderCourseList(courseListContainer, courses, activeSemester, updateResults);
+      }
+      updateResults();
     }
 
-    courseListContainer.replaceChildren();
+    function refreshData() {
+      if (!scraper) return;
+      const nextCourses = scraper.readCourses(false);
+      const eligible = scraper.isAtarEligible();
+      const signature = JSON.stringify([eligible, nextCourses]);
 
-    if (!courses[activeSemester].length) {
-      courseListContainer.append(
-        createEl('p', '', 'No ATAR subjects found for this semester. Ensure classes are visible in Connect.')
-      );
+      estimateTab.hidden = targetTab.hidden = !eligible;
+
+      if (signature !== lastStateSignature) {
+        gradeCourses = nextCourses;
+        courses = scraper.readCourses(true);
+        lastStateSignature = signature;
+        if (!calculatorPanel.hidden) renderCourseRows();
+      }
     }
 
-    
+    window.addEventListener('connectify-settings-updated', () => {
+      if (calc?.reloadPreferences) calc.reloadPreferences();
+      updateResults();
+    });
 
-    for (const course of courses[activeSemester]) {
-      const entry = savedPreferences[`${activeSemester}:${course.id}`] || {};
-      const state = getCourseState(course, activeSemester);
-      
-      const wrapper = createEl('div', 'cta-course');
-      const label = createEl('label', 'cta-include');
+    window.addEventListener('connectify-open', e => {
+      if (e.detail !== 'calculator') {
+        calculatorPanel.hidden = true;
+        for (const b of [estimateTab, targetTab, gradeTab]) b.setAttribute('aria-pressed', 'false');
+      }
+    });
 
-      const checkbox = createEl('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'connectea-subject-checkbox';
-      checkbox.checked = state.include;
-      
-      label.append(checkbox, createEl('span', '', course.name));
-      
-      const estMark = state.score !== undefined ? state.score : course.mark;
-
-      const input = createEl('input', 'cta-score');
-      input.type = 'number';
-      input.min = '0';
-      input.max = '100';
-      input.step = 'any';
-      input.placeholder = isGradingMode ? 'Raw' : (estMark !== undefined ? String(estMark) : '');
-      input.value = entry.score !== undefined ? entry.score : '';
-      input.disabled = !checkbox.checked;
-      input.setAttribute('aria-label', `${course.name} semester ${activeSemester + 1} estimated scaled score`);
-
-      const source = createEl(
-        'small',
-        '',
-        course.mark === undefined ? 'No school mark' : `School ${Math.round(course.mark * 10) / 10}%`
-      );
-
-      const updateCourse = () => {
-        savedPreferences[`${activeSemester}:${course.id}`] = {
-          include: checkbox.checked,
-          score: scoreValue(input.value)
-        };
-        input.setAttribute('aria-invalid', String(checkbox.checked && scoreValue(input.value) === undefined));
-        persistPreferences();
-        updateResults();
-      };
-
-      checkbox.addEventListener('change', () => {
-        updateCourse();
-        input.disabled = !checkbox.checked;
-      });
-
-      input.addEventListener('input', updateCourse);
-      input.addEventListener('change', () => {
-        const score = wholeScore(input.value);
-        if (score !== undefined) {
-          input.value = score;
-          updateCourse();
-        }
-      });
-
-      wrapper.append(label, input, source);
-      courseListContainer.append(wrapper);
-    }
-    
-    updateResults();
-  }
-
-  function refreshData() {
-    const nextCourses = readCourses(false);
-    const eligible = isAtarEligible();
-    const signature = JSON.stringify([eligible, nextCourses]);
-
-    estimateTab.hidden = targetTab.hidden = !eligible;
-
-    if (signature !== lastStateSignature) {
-      gradeCourses = nextCourses;
-      courses = readCourses();
-      lastStateSignature = signature;
-      if (!calculatorPanel.hidden) renderCourseRows();
-    }
-  }
-
-  window.addEventListener('connectify-open', e => {
-    if (e.detail !== 'calculator') {
+    function closeCalculator() {
       calculatorPanel.hidden = true;
       for (const b of [estimateTab, targetTab, gradeTab]) b.setAttribute('aria-pressed', 'false');
+      (isGradingMode ? gradeTab : isPlanningMode ? targetTab : estimateTab).focus();
     }
-  });
 
-  function closeCalculator() {
-    calculatorPanel.hidden = true;
-    for (const b of [estimateTab, targetTab, gradeTab]) b.setAttribute('aria-pressed', 'false');
-    (isGradingMode ? gradeTab : isPlanningMode ? targetTab : estimateTab).focus();
-  }
+    calculatorPanel.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeCalculator();
+    });
 
-  calculatorPanel.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeCalculator();
-  });
+    window.ConnectifyAtar.openCalculator = openCalculator;
+    window.ConnectifyAtar.selectTab = selectTab;
+    window.ConnectifyAtar.refreshData = refreshData;
+    window.ConnectifyAtar.updateResults = updateResults;
 
-  window.ConnectifyAtar.readCourses = readCourses;
-
-  setInterval(refreshData, 1500);
-  refreshData();
+    setInterval(refreshData, 1500);
+    refreshData();
   } catch (err) {
     console.error('Connectify error in atar-ui.js:', err);
   }

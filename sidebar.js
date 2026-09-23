@@ -274,6 +274,7 @@
       }
     });
 
+    window.ConnectifyInitSidebar = syncState;
     setInterval(syncState, 1500);
     syncState();
   } catch (err) {

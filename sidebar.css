@@ -74,3 +74,107 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 .connectea-dark .connectea-type-select:focus{border-color:#6ba5d6;outline:2px solid #6ba5d6}
 .connectea-dark .connectea-type-select.connectea-overridden{border-color:#6ba5d6;background:#364e65;color:#fff}
 
+
+/* Health Sweeper Prompt */
+#connectify-health-prompt {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10060;
+  max-width: 420px;
+  background: #ffffff;
+  color: #1a2a3a;
+  border: 1px solid #c7d6e4;
+  border-left: 5px solid #eab308;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
+  padding: 14px 18px;
+  font: 13px/1.5 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+  animation: cx-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes cx-slide-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+#connectify-health-prompt .cx-health-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e3a5f;
+  margin-bottom: 6px;
+}
+#connectify-health-prompt .cx-health-body {
+  margin-bottom: 12px;
+  color: #4b647f;
+  font-size: 12.5px;
+}
+#connectify-health-prompt .cx-health-details {
+  margin: 6px 0 10px 0;
+  padding: 6px 10px 6px 24px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: #334155;
+}
+#connectify-health-prompt .cx-health-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+#connectify-health-prompt .cx-health-btn {
+  cursor: pointer;
+  font: 600 12px system-ui;
+  border-radius: 6px;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+#connectify-health-prompt .cx-health-reinject {
+  background: #185c8c;
+  color: #ffffff;
+}
+#connectify-health-prompt .cx-health-reinject:hover {
+  background: #13466a;
+}
+#connectify-health-prompt .cx-health-dismiss {
+  background: #edf2f7;
+  color: #4b647f;
+  border-color: #cbd5e1;
+}
+#connectify-health-prompt .cx-health-dismiss:hover {
+  background: #e2e8f0;
+}
+.connectea-dark #connectify-health-prompt {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #334155;
+  border-left-color: #facc15;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+.connectea-dark #connectify-health-prompt .cx-health-header {
+  color: #f8fafc;
+}
+.connectea-dark #connectify-health-prompt .cx-health-body {
+  color: #94a3b8;
+}
+.connectea-dark #connectify-health-prompt .cx-health-details {
+  background: #0f172a;
+  color: #cbd5e1;
+}
+.connectea-dark #connectify-health-prompt .cx-health-reinject {
+  background: #2563eb;
+}
+.connectea-dark #connectify-health-prompt .cx-health-reinject:hover {
+  background: #1d4ed8;
+}
+.connectea-dark #connectify-health-prompt .cx-health-dismiss {
+  background: #334155;
+  color: #cbd5e1;
+  border-color: #475569;
+}
+.connectea-dark #connectify-health-prompt .cx-health-dismiss:hover {
+  background: #475569;
+}

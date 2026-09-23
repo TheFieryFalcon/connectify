@@ -1,10 +1,9 @@
 /**
- * Connectify Cohort Statistics & Rank Estimator
+ * Connectify Cohort Statistics & Rank Estimator (View & Controller)
  *
- * Reads Highcharts 5-number boxplot statistics (min, Q1, median, Q3, max),
- * computes estimated cohort mean, standard deviation, z-score,
- * smooth PCHIP-interpolated percentile, and estimated rank.
- * Injects statistics panels directly into Connect assessment rows.
+ * Reads 5-number boxplot statistics, computes dynamic empirical cohort size estimates,
+ * and injects responsive statistics panels and assessment type controls directly
+ * into Connect assessment rows.
  */
 (() => {
   'use strict';
@@ -17,19 +16,21 @@
 
   const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
 
-  const toNumeric = value => {
-    if (value !== null && value !== undefined && value !== '') {
-      const num = Number(value);
-      if (Number.isFinite(num)) return num;
-    }
-    return undefined;
+  const math = () => window.ConnectifyCohortMath || {
+    toNumeric: v => (v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)) ? Number(v) : undefined),
+    formatPercentage: v => (Number.isFinite(v) ? String(Math.round(v * 100) / 100) : 'unavailable'),
+    validCohortSize: v => (Number.isSafeInteger(Number(v)) && Number(v) >= 1 ? Number(v) : undefined),
+    validStats: s => Array.isArray(s) && s.length === 5 && s.every(Number.isFinite),
+    summary: () => null,
+    percentile: () => undefined,
+    standing: () => '',
+    rankString: () => ''
   };
 
-  const formatPercentage = value => (Number.isFinite(value) ? String(Math.round(value * 100) / 100) : 'unavailable');
-
-  const validCohortSize = value => {
-    const num = toNumeric(value);
-    return Number.isSafeInteger(num) && num >= 1 ? num : undefined;
+  const types = () => window.ConnectifyTaskTypes || {
+    getTaskMeta: () => ({ subjectName: '', taskName: '', labels: [], labelsKey: '' }),
+    updateTypeSelect: () => {},
+    saveTaskTypeOverride: () => {}
   };
 
   function subjectKey(card) {
@@ -71,168 +72,57 @@
     } catch {}
   }
 
-  // --- Task Type Categorization & User Overrides ---
-  const defaultCategories = {
-    Exam: { color: '#e74c3c', keywords: ['exam', 'semester'] },
-    Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
-    Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
-    Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
-    'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'extended', 'presentation', 'oral', 'creative'] }
-  };
+  /**
+   * Reads raw assessment score percentage from the task row.
+   */
+  function readMark(row) {
+    const cell = row.querySelector('.cvr-c-task__marks .cvr-c-task__mark');
+    const text = normalize(cell?.textContent);
 
-  function getCategories() {
-    return window.cxCategories || defaultCategories;
+    let match = text.match(/^(-?\d+(?:\.\d+)?)\s*%$/);
+    if (match) return Number(match[1]);
+
+    match = text.match(/^(-?\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
+    return match && Number(match[2]) > 0 ? (100 * Number(match[1])) / Number(match[2]) : undefined;
   }
 
-  function getTaskTypeOverrides() {
-    try {
-      return JSON.parse(localStorage.getItem('connectea:task_type_overrides') || '{}');
-    } catch {
-      return {};
-    }
-  }
+  /**
+   * Reads 5-number boxplot summary from DOM bridge or Highcharts on the task row.
+   */
+  function readStats(row) {
+    const host = row.querySelector('.cvr-c-task__chart [data-highcharts-chart]');
+    if (!host) return null;
 
-  function getSavedTaskType(subjectName, taskName, labelsKey) {
-    const overrides = getTaskTypeOverrides();
-    const cleanSubj = (subjectName || '').replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
-    if (labelsKey && overrides[`${cleanSubj}::${labelsKey}`]) {
-      return overrides[`${cleanSubj}::${labelsKey}`];
-    }
-    if (taskName && overrides[`${cleanSubj}::${taskName}`]) {
-      return overrides[`${cleanSubj}::${taskName}`];
-    }
-    return undefined;
-  }
-
-  function saveTaskTypeOverride(subjectName, taskName, labelsKey, type) {
-    const overrides = getTaskTypeOverrides();
-    const cleanSubj = (subjectName || '').replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
-    const fullKey = labelsKey ? `${cleanSubj}::${labelsKey}` : null;
-    const nameKey = taskName ? `${cleanSubj}::${taskName}` : null;
-
-    if (type) {
-      if (fullKey) overrides[fullKey] = type;
-      if (nameKey) overrides[nameKey] = type;
-    } else {
-      if (fullKey) delete overrides[fullKey];
-      if (nameKey) delete overrides[nameKey];
+    // Check shared DOM dataset bridge first (fast & cross-world compatible)
+    if (host.dataset.connectifyStats) {
+      try {
+        const stats = JSON.parse(host.dataset.connectifyStats);
+        if (math().validStats(stats)) return stats;
+      } catch {}
     }
 
-    try {
-      localStorage.setItem('connectea:task_type_overrides', JSON.stringify(overrides));
-    } catch {}
+    // Direct Highcharts instance check if available
+    const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
+    const chart = window.Highcharts?.charts?.[chartIndex];
+    if (chart && (!chart.container || host.contains(chart.container))) {
+      for (const series of chart.series || []) {
+        const dataPoints = [...(series.points || []), ...(series.options?.data || [])];
+        for (const point of dataPoints) {
+          const pointData = point?.options || point;
+          const stats = Array.isArray(pointData)
+            ? pointData.slice(-5).map(math().toNumeric)
+            : [pointData?.low, pointData?.q1, pointData?.median, pointData?.q3, pointData?.high].map(math().toNumeric);
 
-    window.dispatchEvent(new CustomEvent('connectify-task-type-changed', {
-      detail: { subject: cleanSubj, task: taskName, type }
-    }));
-  }
-
-  function categorizeTask(taskName, allLabels = []) {
-    const combined = [taskName, ...allLabels].join(' ').toLowerCase();
-    if (combined.includes('exam')) return 'Exam';
-    const cats = getCategories();
-    for (const [cat, data] of Object.entries(cats)) {
-      if (data?.keywords?.some(k => combined.includes(k.toLowerCase()))) {
-        return cat;
+          if (math().validStats(stats)) return stats;
+        }
       }
     }
-    return 'Take-Home';
-  }
 
-  function getEffectiveType(subjectName, task, labelsKey) {
-    const taskName = typeof task === 'string' ? task : task?.name;
-    let actualLabelsKey = labelsKey;
-    if (!actualLabelsKey && task && typeof task === 'object' && task.row) {
-      const labels = Array.from(task.row.querySelectorAll('.cvr-c-task__details .v-label'))
-        .map(e => (e.textContent || '').replace(/\s+/g, ' ').trim())
-        .filter(Boolean);
-      if (labels.length) actualLabelsKey = labels.join('::');
-    }
-    const saved = getSavedTaskType(subjectName, taskName, actualLabelsKey);
-    if (saved) return saved;
-    const labelsList = actualLabelsKey ? actualLabelsKey.split('::') : (task?.caption ? [task.caption] : []);
-    return categorizeTask(taskName, labelsList);
-  }
-
-  window.ConnectifyTaskTypes = {
-    defaultCategories,
-    getCategories,
-    getOverrides: getTaskTypeOverrides,
-    getSavedTaskType,
-    saveTaskTypeOverride,
-    categorizeTask,
-    getEffectiveType
-  };
-
-  function getTaskMeta(row) {
-    const card = row.closest('.eds-c-tile');
-    const cardTitle = normalize(card?.querySelector('.eds-c-tile__title')?.textContent || '');
-    const subjectName = cardTitle.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
-    const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
-      .map(e => normalize(e.textContent))
-      .filter(Boolean);
-    const taskName = (labels.length ? labels[labels.length - 1] : '') ||
-      normalize(row.querySelector('.cvr-c-task__details')?.childNodes[0]?.textContent) ||
-      'Assessment';
-    const labelsKey = labels.join('::');
-    return { subjectName, taskName, labels, labelsKey };
-  }
-
-  function updateTypeSelect(select, subjectName, taskName, labelsKey, allLabels) {
-    const autoType = categorizeTask(taskName, allLabels);
-    const savedOverride = getSavedTaskType(subjectName, taskName, labelsKey);
-    const categories = getCategories();
-
-    const currentSelection = savedOverride !== undefined ? savedOverride : '';
-
-    const catKeys = Object.keys(categories);
-    const optSignature = `${autoType}|${catKeys.join(',')}|${savedOverride || ''}`;
-    if (select.dataset.signature !== optSignature) {
-      select.dataset.signature = optSignature;
-      select.innerHTML = '';
-
-      const autoOpt = document.createElement('option');
-      autoOpt.value = '';
-      autoOpt.textContent = `Auto (${autoType})`;
-      select.appendChild(autoOpt);
-
-      for (const cat of catKeys) {
-        const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
-        select.appendChild(opt);
-      }
-
-      if (savedOverride && !catKeys.includes(savedOverride)) {
-        const customOpt = document.createElement('option');
-        customOpt.value = savedOverride;
-        customOpt.textContent = savedOverride;
-        select.appendChild(customOpt);
-      }
-
-      const addOpt = document.createElement('option');
-      addOpt.value = '__custom__';
-      addOpt.textContent = '+ Custom...';
-      select.appendChild(addOpt);
-    }
-
-    select.value = currentSelection;
-    if (currentSelection) {
-      select.classList.add('connectea-overridden');
-      select.title = `Assessment type manually set to "${currentSelection}". Click to change or reset to Auto.`;
-    } else {
-      select.classList.remove('connectea-overridden');
-      select.title = `Automatically detected as "${autoType}". Click to override.`;
-    }
+    return null;
   }
 
   /**
    * Estimates cohort size dynamically from course characteristics and available boxplot data.
-   * Provides immediate baseline estimations across all secondary school subjects and refines
-   * them empirically if Highcharts distribution spread data is present.
-   *
-   * @param {Element} card - Subject tile DOM element
-   * @returns {number} Estimated cohort size
    */
   function estimateCohortSize(card) {
     const key = subjectKey(card);
@@ -251,19 +141,25 @@
     // 1. Check if any Highcharts series or data point explicitly carries sample count
     for (const row of rows) {
       const host = row.querySelector('.cvr-c-task__chart [data-highcharts-chart]');
-      if (!host) continue;
-      const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
-      const chart = window.Highcharts?.charts?.[chartIndex];
-      if (!chart) continue;
+      if (host?.dataset.connectifyN) {
+        const n = math().validCohortSize(host.dataset.connectifyN);
+        if (n) return n;
+      }
 
-      for (const series of chart.series || []) {
-        for (const k of ['n', 'count', 'total', 'sampleSize', 'cohortSize']) {
-          if (validCohortSize(series.options?.[k])) return series.options[k];
-        }
-        for (const pt of series.points || series.options?.data || []) {
-          const p = pt?.options || pt;
-          for (const k of ['n', 'count', 'total', 'sampleSize', 'cohortSize']) {
-            if (validCohortSize(p?.[k])) return p[k];
+      if (host) {
+        const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
+        const chart = window.Highcharts?.charts?.[chartIndex];
+        if (chart) {
+          for (const series of chart.series || []) {
+            for (const k of ['n', 'count', 'total', 'sampleSize', 'cohortSize']) {
+              if (math().validCohortSize(series.options?.[k])) return series.options[k];
+            }
+            for (const pt of series.points || series.options?.data || []) {
+              const p = pt?.options || pt;
+              for (const k of ['n', 'count', 'total', 'sampleSize', 'cohortSize']) {
+                if (math().validCohortSize(p?.[k])) return p[k];
+              }
+            }
           }
         }
       }
@@ -271,56 +167,56 @@
 
     // 2. Derive dynamic baseline estimate from subject category, course type, and year level
     let baseline = 50;
-    const isATAR = /\batar\b/i.test(cleanTitle);
-    const isYear12 = /\byear\s*12\b/i.test(cleanTitle);
+    const isATAR = /atar/i.test(cleanTitle);
+    const isYear12 = /year\s*12/i.test(cleanTitle);
 
-    if (/\b(methods|mathematics methods)\b/i.test(cleanTitle)) {
+    if (/(methods|mathematics methods)/i.test(cleanTitle)) {
       baseline = isYear12 ? 180 : 219;
-    } else if (/\bchemistry\b/i.test(cleanTitle)) {
+    } else if (/chemistry/i.test(cleanTitle)) {
       baseline = isYear12 ? 170 : 224;
-    } else if (/\bhuman biolog(y|ical)\b/i.test(cleanTitle)) {
+    } else if (/human biolog(y|ical)/i.test(cleanTitle)) {
       baseline = isYear12 ? 140 : 183;
-    } else if (/\b(mathematics applications?|applications?)\b/i.test(cleanTitle)) {
+    } else if (/(mathematics applications?|applications?)/i.test(cleanTitle)) {
       baseline = isYear12 ? 160 : 189;
-    } else if (/\b(english atar)\b/i.test(cleanTitle) || (/\benglish\b/i.test(cleanTitle) && isATAR && !/additional/i.test(cleanTitle))) {
+    } else if (/(english atar)/i.test(cleanTitle) || (/english/i.test(cleanTitle) && isATAR && !/additional/i.test(cleanTitle))) {
       baseline = isYear12 ? 180 : 220;
-    } else if (/\b(mathematics essentials?|essentials?)\b/i.test(cleanTitle)) {
+    } else if (/(mathematics essentials?|essentials?)/i.test(cleanTitle)) {
       baseline = 117;
-    } else if (/\bphysics\b/i.test(cleanTitle)) {
+    } else if (/physics/i.test(cleanTitle)) {
       baseline = isYear12 ? 90 : 111;
-    } else if (/\bmathematics specialist\b/i.test(cleanTitle)) {
+    } else if (/mathematics specialist/i.test(cleanTitle)) {
       baseline = isYear12 ? 45 : 64;
-    } else if (/\b(biology)\b/i.test(cleanTitle)) {
+    } else if (/(biology)/i.test(cleanTitle)) {
       baseline = 61;
-    } else if (/\bliterature\b/i.test(cleanTitle)) {
+    } else if (/literature/i.test(cleanTitle)) {
       baseline = 52;
-    } else if (/\beconomics\b/i.test(cleanTitle)) {
+    } else if (/economics/i.test(cleanTitle)) {
       baseline = 44;
-    } else if (/\b(accounting|accounting and finance)\b/i.test(cleanTitle)) {
+    } else if (/(accounting|accounting and finance)/i.test(cleanTitle)) {
       baseline = 36;
-    } else if (/\b(politics and law|politics & law)\b/i.test(cleanTitle)) {
+    } else if (/(politics and law|politics & law)/i.test(cleanTitle)) {
       baseline = 35;
-    } else if (/\b(psychology)\b/i.test(cleanTitle)) {
+    } else if (/(psychology)/i.test(cleanTitle)) {
       baseline = 45;
-    } else if (/\b(physical education studies|pes)\b/i.test(cleanTitle)) {
+    } else if (/(physical education studies|pes)/i.test(cleanTitle)) {
       baseline = 38;
-    } else if (/\b(business management|bme)\b/i.test(cleanTitle)) {
+    } else if (/(business management|bme)/i.test(cleanTitle)) {
       baseline = 24;
-    } else if (/\bmodern history\b/i.test(cleanTitle)) {
+    } else if (/modern history/i.test(cleanTitle)) {
       baseline = 15;
-    } else if (/\b(japanese)\b/i.test(cleanTitle)) {
+    } else if (/(japanese)/i.test(cleanTitle)) {
       baseline = 44;
-    } else if (/\b(french)\b/i.test(cleanTitle)) {
+    } else if (/(french)/i.test(cleanTitle)) {
       baseline = 21;
-    } else if (/\b(italian)\b/i.test(cleanTitle)) {
+    } else if (/(italian)/i.test(cleanTitle)) {
       baseline = 20;
-    } else if (/\b(german|chinese|indonesian)\b/i.test(cleanTitle)) {
+    } else if (/(german|chinese|indonesian)/i.test(cleanTitle)) {
       baseline = 22;
-    } else if (/\bcomputer science\b/i.test(cleanTitle)) {
+    } else if (/computer science/i.test(cleanTitle)) {
       baseline = 11;
-    } else if (/\bmusic\b/i.test(cleanTitle)) {
+    } else if (/music/i.test(cleanTitle)) {
       baseline = 10;
-    } else if (/\beald|english as an additional\b/i.test(cleanTitle)) {
+    } else if (/eald|english as an additional/i.test(cleanTitle)) {
       baseline = 9;
     } else if (isATAR) {
       baseline = 50;
@@ -332,7 +228,7 @@
     if (key) {
       for (const row of rows) {
         const stats = readStats(row);
-        if (!validStats(stats)) continue;
+        if (!math().validStats(stats)) continue;
         const [min, q1, , q3, max] = stats;
         const range = max - min;
         const iqr = q3 - q1;
@@ -361,184 +257,6 @@
     return baseline;
   }
 
-  /**
-   * Validate that an array forms an ordered 5-number summary [min, Q1, median, Q3, max].
-   */
-  function validStats(stats) {
-    return (
-      Array.isArray(stats) &&
-      stats.length === 5 &&
-      stats.every(Number.isFinite) &&
-      stats.every((v, i) => !i || v >= stats[i - 1])
-    );
-  }
-
-  /**
-   * Monotone Piecewise Cubic Hermite Interpolation (PCHIP) across the 5 published quantiles.
-   * Enforces zero slopes at the minimum and maximum observed cohort scores to realistically
-   * model bell-shaped score clustering and tail drop-off without overshooting or oscillation.
-   *
-   * @param {number[]} stats - [min, Q1, median, Q3, max]
-   * @param {number} mark - Student percentage score
-   * @param {number} [cohortSize] - Total students in subject
-   * @returns {number|undefined} Estimated cumulative percentile in [0, 1]
-   */
-  function percentile(stats, mark, cohortSize) {
-    if (!validStats(stats) || !Number.isFinite(mark)) return undefined;
-    if (mark <= stats[0]) return 0;
-    if (mark >= stats[4]) return 1;
-
-    // Direct anchor hits: if the mark matches one or more quantiles, return their average rank
-    const ties = [];
-    for (let i = 0; i < 5; i++) {
-      if (stats[i] === mark) ties.push(i);
-    }
-    if (ties.length > 0) {
-      const qValues = [0, 0.25, 0.5, 0.75, 1];
-      return (qValues[ties[0]] + qValues[ties[ties.length - 1]]) / 2;
-    }
-
-    const n = validCohortSize(cohortSize);
-    const p0 = n ? 0.5 / n : 0.005;
-    const p4 = n ? 1 - 0.5 / n : 0.995;
-    const x = [stats[0], stats[1], stats[2], stats[3], stats[4]];
-    const y = [p0, 0.25, 0.5, 0.75, p4];
-
-    // Compute interval spans and secant slopes
-    const h = [];
-    const delta = [];
-    for (let i = 0; i < 4; i++) {
-      h[i] = x[i + 1] - x[i];
-      delta[i] = h[i] > 0 ? (y[i + 1] - y[i]) / h[i] : 0;
-    }
-
-    // Compute interior slopes using Fritsch-Carlson harmonic means
-    const d = [0, 0, 0, 0, 0];
-    for (let i = 1; i < 4; i++) {
-      if (delta[i - 1] > 0 && delta[i] > 0) {
-        d[i] = 2 / (1 / delta[i - 1] + 1 / delta[i]);
-      } else {
-        d[i] = 0;
-      }
-    }
-    // Zero-slope boundary condition at observed extremes
-    d[0] = 0;
-    d[4] = 0;
-
-    // Evaluate cubic Hermite polynomial within the containing quantile interval
-    for (let i = 0; i < 4; i++) {
-      if (mark >= x[i] && mark <= x[i + 1]) {
-        if (h[i] === 0) return y[i];
-        const t = (mark - x[i]) / h[i];
-        const t2 = t * t;
-        const t3 = t2 * t;
-        const h00 = 2 * t3 - 3 * t2 + 1;
-        const h10 = t3 - 2 * t2 + t;
-        const h01 = -2 * t3 + 3 * t2;
-        const h11 = t3 - t2;
-
-        const val = y[i] * h00 + h[i] * d[i] * h10 + y[i + 1] * h01 + h[i] * d[i + 1] * h11;
-        return Math.max(0, Math.min(1, val));
-      }
-    }
-
-    return 0.5;
-  }
-
-  /**
-   * Computes sample statistics and estimated rank from the 5-number boxplot summary.
-   */
-  function summary(stats, mark, cohortSize) {
-    if (!validStats(stats)) return null;
-
-    // Weighted mean: (min + 2*Q1 + 2*Median + 2*Q3 + max) / 8
-    const mean = (stats[0] + 2 * stats[1] + 2 * stats[2] + 2 * stats[3] + stats[4]) / 8;
-
-    // Integrate variance across the estimated quantile intervals
-    let variance = 0;
-    for (let i = 0; i < 4; i++) {
-      const a = stats[i] - mean;
-      const b = stats[i + 1] - mean;
-      variance += (a * a + a * b + b * b) / 12;
-    }
-    const sd = Math.sqrt(Math.max(0, variance));
-
-    const p = percentile(stats, mark, cohortSize);
-    const n = validCohortSize(cohortSize);
-    const rank = Number.isFinite(p) && n ? Math.max(1, Math.min(n, Math.round(1 + (n - 1) * (1 - p)))) : undefined;
-
-    return {
-      mean,
-      sd,
-      p,
-      rank,
-      z: Number.isFinite(mark) && sd > 0 ? (mark - mean) / sd : undefined
-    };
-  }
-
-  /**
-   * Generates readable cohort standing text with decimal precision.
-   */
-  function standing(p) {
-    if (!Number.isFinite(p)) return '';
-    if (p >= 1) return "Top of cohort";
-    if (p <= 0) return "Bottom of cohort";
-
-    const side = p <= 0.5 ? 'Bottom' : 'Top';
-    const pct = 100 * (p <= 0.5 ? p : 1 - p);
-
-    let pctString;
-    if (pct < 0.1) {
-      pctString = '< 0.1%';
-    } else if (pct < 10) {
-      pctString = Number(pct.toFixed(1)) + '%';
-    } else {
-      pctString = Math.round(pct) + '%';
-    }
-
-    return `${side} ${pctString}`;
-  }
-
-  /**
-   * Reads raw assessment score percentage from the task row.
-   */
-  function readMark(row) {
-    const cell = row.querySelector('.cvr-c-task__marks .cvr-c-task__mark');
-    const text = normalize(cell?.textContent);
-
-    let match = text.match(/^(-?\d+(?:\.\d+)?)\s*%$/);
-    if (match) return Number(match[1]);
-
-    match = text.match(/^(-?\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
-    return match && Number(match[2]) > 0 ? (100 * Number(match[1])) / Number(match[2]) : undefined;
-  }
-
-  /**
-   * Reads 5-number boxplot summary from Highcharts on the task row.
-   */
-  function readStats(row) {
-    const host = row.querySelector('.cvr-c-task__chart [data-highcharts-chart]');
-    if (!host) return null;
-
-    const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
-    const chart = window.Highcharts?.charts?.[chartIndex];
-    if (!chart || (chart.container && !host.contains(chart.container))) return null;
-
-    for (const series of chart.series || []) {
-      const dataPoints = [...(series.points || []), ...(series.options?.data || [])];
-      for (const point of dataPoints) {
-        const pointData = point?.options || point;
-        const stats = Array.isArray(pointData)
-          ? pointData.slice(-5).map(toNumeric)
-          : [pointData?.low, pointData?.q1, pointData?.median, pointData?.q3, pointData?.high].map(toNumeric);
-
-        if (validStats(stats)) return stats;
-      }
-    }
-
-    return null;
-  }
-
   function loadCohortSize(key) {
     if (!key) return undefined;
     if (memory.has(key)) return memory.get(key);
@@ -546,11 +264,10 @@
     try {
       let stored = localStorage.getItem(key);
       if (stored === null) {
-        // Migrate v2 saved counts if available
         const oldKey = key.replace('connectea:cohort:v3:', 'connectea:cohort:v2:');
         const migrated =
-          validCohortSize(localStorage.getItem(`${oldKey} - Semester 2`)) ??
-          validCohortSize(localStorage.getItem(`${oldKey} - Semester 1`));
+          math().validCohortSize(localStorage.getItem(`${oldKey} - Semester 2`)) ??
+          math().validCohortSize(localStorage.getItem(`${oldKey} - Semester 1`));
 
         if (migrated !== undefined) {
           stored = String(migrated);
@@ -558,7 +275,7 @@
         }
       }
 
-      const size = validCohortSize(stored);
+      const size = math().validCohortSize(stored);
       memory.set(key, size);
       return size;
     } catch {
@@ -627,26 +344,25 @@
 
       wrapper.append(box, typeContainer);
 
-      const meta = getTaskMeta(row);
-      updateTypeSelect(typeSelect, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
+      const meta = types().getTaskMeta(row);
+      types().updateTypeSelect(typeSelect, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
 
       typeSelect.addEventListener('change', () => {
         const val = typeSelect.value;
-        const currentMeta = getTaskMeta(row);
+        const currentMeta = types().getTaskMeta(row);
 
         if (val === '__custom__') {
           const custom = prompt('Enter custom assessment type:');
           if (custom && custom.trim()) {
             const cleanCustom = custom.trim();
-            saveTaskTypeOverride(currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, cleanCustom);
-            updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
+            types().saveTaskTypeOverride(currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, cleanCustom);
+            types().updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
           } else {
-            // Revert back if cancelled
-            updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
+            types().updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
           }
         } else {
-          saveTaskTypeOverride(currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, val || undefined);
-          updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
+          types().saveTaskTypeOverride(currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, val || undefined);
+          types().updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
         }
       });
 
@@ -688,7 +404,7 @@
       box.append(controls);
 
       input.addEventListener('input', () => {
-        const size = validCohortSize(input.value);
+        const size = math().validCohortSize(input.value);
         const isInvalid = (input.value !== '' && !size) || input.validity.badInput;
         input.setAttribute('aria-invalid', String(Boolean(isInvalid)));
 
@@ -753,8 +469,8 @@
 
     // If assessment row, keep dropdown in sync
     if (!isOverall && ui.typeSelect) {
-      const meta = getTaskMeta(row);
-      updateTypeSelect(ui.typeSelect, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
+      const meta = types().getTaskMeta(row);
+      types().updateTypeSelect(ui.typeSelect, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
     }
 
     if (isOverall) {
@@ -780,11 +496,9 @@
     const stats = readStats(row);
     const userSize = loadCohortSize(key);
     const cohortSize = userSize ?? estimatedSize;
-    const data = summary(stats, mark, cohortSize);
+    const data = math().summary(stats, mark, cohortSize);
 
-    if (!isOverall && !Number.isFinite(mark) && !validStats(stats)) {
-      // Pending/unmarked assessment with no stats: hide the stats box so it doesn't clutter,
-      // but keep ui.typeContainer visible in that white space!
+    if (!isOverall && !Number.isFinite(mark) && !math().validStats(stats)) {
       ui.box.style.display = 'none';
       return;
     }
@@ -802,18 +516,18 @@
 
     setText(
       ui.distribution,
-      `Min ${formatPercentage(stats[0])}%  •  Q1 ${formatPercentage(stats[1])}%  •  Med ${formatPercentage(
+      `Min ${math().formatPercentage(stats[0])}%  •  Q1 ${math().formatPercentage(stats[1])}%  •  Med ${math().formatPercentage(
         stats[2]
-      )}%  •  Q3 ${formatPercentage(stats[3])}%  •  Max ${formatPercentage(stats[4])}%  •  Mean ${formatPercentage(
+      )}%  •  Q3 ${math().formatPercentage(stats[3])}%  •  Max ${math().formatPercentage(stats[4])}%  •  Mean ${math().formatPercentage(
         data.mean
-      )}%  •  SD ${formatPercentage(data.sd)}`
+      )}%  •  SD ${math().formatPercentage(data.sd)}`
     );
 
     const parts = [];
     if (Number.isFinite(mark)) {
-      if (!isOverall) parts.push(`Score: ${formatPercentage(mark)}%`);
+      if (!isOverall) parts.push(`Score: ${math().formatPercentage(mark)}%`);
       parts.push(`z ≈ ${Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A'}`);
-      parts.push(standing(data.p));
+      parts.push(math().standing(data.p));
 
       if (data.rank !== undefined) {
         const isEstimated = userSize === undefined && estimatedSize !== undefined;
@@ -968,7 +682,7 @@
       outline: 2px solid #3575b9;
       outline-offset: 2px;
     }
-    .connectea-controls input[aria-invalid="true"] {
+    .connectea-controls input[aria-invalid=true] {
       border-color: #b62727;
     }
     .connectea-notice {
@@ -1021,13 +735,11 @@
       const hasObservedSpreads = observedSpreadsBySubject.get(key)?.size > 0;
       const existingEstimate = persistentEstimates.get(key);
 
-      // Prioritize refined empirical estimates over unrefined baselines
       if (!(key in subjectEstimates)) {
         subjectEstimates[key] = estimatedSize;
       } else if (hasObservedSpreads && isSemester2) {
         subjectEstimates[key] = estimatedSize;
       } else if (!hasObservedSpreads && existingEstimate) {
-        // Collapsed card with only baseline: preserve known refined estimate
         subjectEstimates[key] = existingEstimate;
       }
 
@@ -1090,7 +802,7 @@
     subtree: true,
     characterData: true,
     attributes: true,
-    attributeFilter: ['data-highcharts-chart']
+    attributeFilter: ['data-highcharts-chart', 'data-connectify-stats']
   });
 
   window.addEventListener('hashchange', schedule);
@@ -1119,7 +831,7 @@
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['data-highcharts-chart']
+      attributeFilter: ['data-highcharts-chart', 'data-connectify-stats']
     });
     timer = setInterval(schedule, 1500);
     schedule();
@@ -1127,16 +839,13 @@
 
   schedule();
   
-  function rankString(rank, cohortSize) {
-    if (!rank || !cohortSize) return '';
-    return `${rank} / ${cohortSize}`;
-  }
-
   window.ConnectifyCohort = {
-    percentile,
-    summary,
-    rankString,
+    percentile: (...args) => math().percentile(...args),
+    summary: (...args) => math().summary(...args),
+    rankString: (...args) => math().rankString(...args),
     estimateCohortSize,
-    estimatedSize: estimateCohortSize
+    estimatedSize: estimateCohortSize,
+    pass,
+    schedule
   };
 })();

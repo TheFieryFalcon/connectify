@@ -1,44 +1,98 @@
 {
+   "manifest_version": 3,
+   "name": "Connectify",
+   "version": "3.1.11",
+   "description": "Subject progress graphs, assessment statistics, grade planning and a site-wide Connect theme.",
+   "icons": {
+      "128": "logo.png"
+   },
+   "permissions": [
+      "storage"
+   ],
    "browser_specific_settings": {
       "gecko": {
          "id": "connect-chart-tea@local",
          "strict_min_version": "140.0",
          "update_url": "https://raw.githubusercontent.com/TheFieryFalcon/connectify/updates/updates.json",
          "data_collection_permissions": {
-      			"required": ["none"]
-    		}
-        }
+            "required": [
+               "none"
+            ]
+         }
+      }
    },
-   "content_scripts": [ {
-      "css": [ "atar.css", "progress.css", "sidebar.css" ],
-      "js": [ "assessment-data.js", "cohort-stats.js", "scaling-data.js", "atar-math.js", "atar-ui.js", "progress-graph.js", "atar-features.js", "sidebar.js" ],
-      "matches": [ "https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*" ],
-      "run_at": "document_idle",
-      "world": "MAIN"
-   }, {
-      "css": [ "theme.css" ],
-      "js": [ "theme.js" ],
-      "matches": [ "https://connect.det.wa.edu.au/*" ],
-      "run_at": "document_idle"
-   }, {
-      "js": [ "navigation.js" ],
-      "matches": [ "https://connect.det.wa.edu.au/*" ],
-      "run_at": "document_idle"
-   }, {
-      "js": [ "auto-login.js" ],
-      "matches": [ "https://login.det.wa.edu.au/*" ],
-      "run_at": "document_end"
-   } ],
-   "description": "Subject progress graphs, assessment statistics, grade planning and a site-wide Connect theme.",
-   "icons": {
-      "128": "logo.png"
-   },
-   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwloUCzVE+Fw/IiHtROGdlXlOlCB0vM62SRRN62Nn0h8/yZJoNlz1MpjolldoN/NtuOMiUkplgz+/OOsbZS31T/5jg75k79yvBpzUTaLBBXIB3ps9ZrT2eC9RQ+z+OYiY1Sdl0t/3KGWOx2/1NnlEmTqMCB8OS59CcQaFmKNhV9M9XrkLXv74Yzlc7jy7+EfnbjTMOviTvQLvlmSSy1YHXbU/RsMsxn4s7O9D0lp4JveoWu53rR74QxWL3oXtiG2KUROlcelU/nHXUxZvso5+jOaCa7GLED0d6G4A7rdnNHcmzeoYaJrUE9xJvcBFOxp/kZjTc6AwxzdwqUW36F4kgwIDAQAB",
-   "manifest_version": 3,
-   "name": "Connectify",
-   "permissions": [
-      "storage"
+   "content_scripts": [
+      {
+         "matches": [
+            "https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*"
+         ],
+         "js": [
+            "data.js"
+         ],
+         "run_at": "document_idle",
+         "world": "MAIN"
+      },
+      {
+         "matches": [
+            "https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*"
+         ],
+         "css": [
+            "atar.css",
+            "progress.css",
+            "sidebar.css"
+         ],
+         "js": [
+            "assessment-data.js",
+            "cohort-math.js",
+            "task-types.js",
+            "cohort-stats.js",
+            "scaling-data.js",
+            "atar-math.js",
+            "atar-scraper.js",
+            "atar-calculator.js",
+            "atar-ui.js",
+            "progress-math.js",
+            "progress-chart.js",
+            "progress-graph.js",
+            "wace-countdown.js",
+            "compound-progress.js",
+            "atar-features.js",
+            "sidebar.js",
+            "dom-sweeper.js"
+         ],
+         "run_at": "document_idle"
+      },
+      {
+         "matches": [
+            "https://connect.det.wa.edu.au/*"
+         ],
+         "css": [
+            "theme.css"
+         ],
+         "js": [
+            "theme.js"
+         ],
+         "run_at": "document_idle"
+      },
+      {
+         "matches": [
+            "https://connect.det.wa.edu.au/*"
+         ],
+         "js": [
+            "navigation.js"
+         ],
+         "run_at": "document_idle"
+      },
+      {
+         "matches": [
+            "https://login.det.wa.edu.au/*"
+         ],
+         "js": [
+            "auto-login.js"
+         ],
+         "run_at": "document_end"
+      }
    ],
-   "update_url": "https://raw.githubusercontent.com/TheFieryFalcon/connectify/updates/updates.xml",
-   "version": "3.1.11"
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwloUCzVE+Fw/IiHtROGdlXlOlCB0vM62SRRN62Nn0h8/yZJoNlz1MpjolldoN/NtuOMiUkplgz+/OOsbZS31T/5jg75k79yvBpzUTaLBBXIB3ps9ZrT2eC9RQ+z+OYiY1Sdl0t/3KGWOx2/1NnlEmTqMCB8OS59CcQaFmKNhV9M9XrkLXv74Yzlc7jy7+EfnbjTMOviTvQLvlmSSy1YHXbU/RsMsxn4s7O9D0lp4JveoWu53rR74QxWL3oXtiG2KUROlcelU/nHXUxZvso5+jOaCa7GLED0d6G4A7rdnNHcmzeoYaJrUE9xJvcBFOxp/kZjTc6AwxzdwqUW36F4kgwIDAQAB",
+   "update_url": "https://raw.githubusercontent.com/TheFieryFalcon/connectify/updates/updates.xml"
 }
