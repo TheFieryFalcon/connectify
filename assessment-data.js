@@ -176,12 +176,24 @@
    * @returns {number|null} Estimated cohort mean percentage, or null
    */
   function cohortMean(row) {
-    const host = row.querySelector('.cvr-c-task__chart [data-highcharts-chart]');
+    const host = row.querySelector('[data-highcharts-chart]') ||
+                 row.querySelector('.cvr-c-task__chart [data-highcharts-chart]') ||
+                 row.querySelector('.cvr-c-task__chart');
     if (!host) return null;
 
-    if (host.dataset.connectifyStats) {
+    if (host.dataset?.connectifyStats) {
       try {
         const stats = JSON.parse(host.dataset.connectifyStats);
+        if (Array.isArray(stats) && stats.length === 5 && stats.every(Number.isFinite)) {
+          return (stats[0] + 2 * stats[1] + 2 * stats[2] + 2 * stats[3] + stats[4]) / 8;
+        }
+      } catch {}
+    }
+
+    const hostWithDataset = host.querySelector?.('[data-connectify-stats]') || host.closest?.('[data-connectify-stats]');
+    if (hostWithDataset?.dataset?.connectifyStats) {
+      try {
+        const stats = JSON.parse(hostWithDataset.dataset.connectifyStats);
         if (Array.isArray(stats) && stats.length === 5 && stats.every(Number.isFinite)) {
           return (stats[0] + 2 * stats[1] + 2 * stats[2] + 2 * stats[3] + stats[4]) / 8;
         }
