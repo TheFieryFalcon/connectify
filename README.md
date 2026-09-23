@@ -1,4 +1,4 @@
-# Connectify 3.1.13 - Making Study Rewarding with Data Visualization
+# Connectify 3.1.14 - Making Study Rewarding with Data Visualization
 
 **Connectify** is the ultimate unofficial extension for Western Australia's Department of Education Connect portal. Built for ATAR students, it instantly upgrades the default Connect interface with powerful, real-time analytics to help you track your progress, identify weaknesses, and predict your final ATAR.
 
