@@ -321,10 +321,15 @@
               const label = document.createElement('label');
               label.className = 'cx-weakness-checkbox-label';
               label.title = rawName || cleanName;
+              label.style.display = 'flex';
+              label.style.alignItems = 'center';
 
               const cb = document.createElement('input');
               cb.type = 'checkbox';
               cb.value = cleanName;
+              cb.style.margin = '0 8px 0 0';
+              cb.style.cursor = 'pointer';
+              cb.style.flexShrink = '0';
               cb.checked = !disabledWeaknessSubjects.has(cleanName) && (!rawName || !disabledWeaknessSubjects.has(rawName));
 
               cb.addEventListener('change', () => {
@@ -383,6 +388,33 @@
           renderSubjectCheckboxes();
           const chartDiv = document.getElementById('connectify-radar-chart');
           if (!window.Highcharts || !chartDiv) return;
+
+          const subjectMap = getSubjectList();
+          let selectedCount = 0;
+          for (const cleanName of subjectMap.keys()) {
+            const rawName = subjectMap.get(cleanName);
+            if (!disabledWeaknessSubjects.has(cleanName) && (!rawName || !disabledWeaknessSubjects.has(rawName))) {
+              selectedCount++;
+            }
+          }
+
+          if (subjectMap.size === 0) {
+            if (currentChart && currentChart.destroy) {
+              currentChart.destroy();
+            }
+            chartDiv.innerHTML = '<div style="padding:20px;color:#999;text-align:center;display:flex;align-items:center;justify-content:center;height:100%;">No subjects detected yet. Expand course outlines in Connect to load subjects.</div>';
+            currentChart = null;
+            return;
+          }
+
+          if (selectedCount < 3) {
+            if (currentChart && currentChart.destroy) {
+              currentChart.destroy();
+            }
+            chartDiv.innerHTML = '<div style="padding:30px 20px;color:#d4b483;text-align:center;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;box-sizing:border-box;"><span style="font-size:26px;margin-bottom:8px;">⚠️</span><span>At least 3 subjects must be selected for radar charts!</span></div>';
+            currentChart = null;
+            return;
+          }
           
           const perf = {};
           const mode = document.getElementById('cx-radar-mode')?.value || 'type';
@@ -410,7 +442,19 @@
           }
           
           if (labels.length === 0) {
-              chartDiv.innerHTML = '<div style="padding:20px;color:#999;text-align:center;">No completed assessments to plot for the selected subjects.</div>';
+              if (currentChart && currentChart.destroy) {
+                currentChart.destroy();
+              }
+              chartDiv.innerHTML = '<div style="padding:20px;color:#999;text-align:center;display:flex;align-items:center;justify-content:center;height:100%;">No completed assessments to plot for the selected subjects.</div>';
+              currentChart = null;
+              return;
+          }
+
+          if (labels.length < 3) {
+              if (currentChart && currentChart.destroy) {
+                currentChart.destroy();
+              }
+              chartDiv.innerHTML = '<div style="padding:30px 20px;color:#d4b483;text-align:center;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;box-sizing:border-box;"><span style="font-size:26px;margin-bottom:8px;">⚠️</span><span>At least 3 subjects must be selected for radar charts!</span></div>';
               currentChart = null;
               return;
           }
