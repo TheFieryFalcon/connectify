@@ -111,7 +111,7 @@
           const weightMatch = normalize(weightElement?.textContent).match(/Out\s+of\s+(\d+(?:\.\d+)?)/i);
           const weight = weightMatch ? Number(weightMatch[1]) : null;
 
-          const taskName = labels.at(-1) || `Assessment ${tasks.size + 1}`;
+          const taskName = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${tasks.size + 1}`;
           const caption = correctedCaption(title, taskName, labels[1] || '');
 
           const identityKey = JSON.stringify([labels, maxScore]);

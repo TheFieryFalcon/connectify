@@ -1,19 +1,52 @@
 (() => {
   'use strict';
-  const { calculate, convertTEAtoATAR, wholeScore, scoreValue, estimateScaledScore, calculateShiftedScaledScore, normalizeSubject, parseAssessment, taskProgress, gradePlan, targetPlan, normalize, isAtarCourse } = window.ConnectifyMath;
-
+  if (!Element.prototype.replaceChildren) {
+    Element.prototype.replaceChildren = function(...nodes) {
+      while (this.firstChild) this.removeChild(this.firstChild);
+      this.append(...nodes);
+    };
+  }
   window.ConnectifyAtar = window.ConnectifyAtar || {};
-  window.ConnectifyAtar.calculate = calculate;
+
+  let { calculate, convertTEAtoATAR, wholeScore, scoreValue, estimateScaledScore, calculateShiftedScaledScore, normalizeSubject, parseAssessment, taskProgress, gradePlan, targetPlan, normalize, isAtarCourse } = window.ConnectifyMath || {};
+
+  function syncMath() {
+    if (window.ConnectifyMath) {
+      calculate = window.ConnectifyMath.calculate || calculate;
+      convertTEAtoATAR = window.ConnectifyMath.convertTEAtoATAR || convertTEAtoATAR;
+      wholeScore = window.ConnectifyMath.wholeScore || wholeScore;
+      scoreValue = window.ConnectifyMath.scoreValue || scoreValue;
+      estimateScaledScore = window.ConnectifyMath.estimateScaledScore || estimateScaledScore;
+      calculateShiftedScaledScore = window.ConnectifyMath.calculateShiftedScaledScore || calculateShiftedScaledScore;
+      normalizeSubject = window.ConnectifyMath.normalizeSubject || normalizeSubject;
+      parseAssessment = window.ConnectifyMath.parseAssessment || parseAssessment;
+      taskProgress = window.ConnectifyMath.taskProgress || taskProgress;
+      gradePlan = window.ConnectifyMath.gradePlan || gradePlan;
+      targetPlan = window.ConnectifyMath.targetPlan || targetPlan;
+      normalize = window.ConnectifyMath.normalize || normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim());
+      isAtarCourse = window.ConnectifyMath.isAtarCourse || isAtarCourse || (t => /\bATAR\b/i.test(t));
+      if (window.ConnectifyAtar && calculate) {
+        window.ConnectifyAtar.calculate = calculate;
+      }
+    }
+  }
+  syncMath();
+
+  if (calculate) {
+    window.ConnectifyAtar.calculate = calculate;
+  }
+
   function readCourses(atarOnly = true) {
+    syncMath();
     const result = [[], []];
     const seen = [new Set(), new Set()];
 
     for (const card of document.querySelectorAll('.eds-c-tile')) {
-      const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
+      const title = (normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim()))(card.querySelector('.eds-c-tile__title')?.textContent);
       const semesterMatch = title.match(/\bSemester\s*([12])\b/i);
-      if (!semesterMatch || (atarOnly && !isAtarCourse(title))) continue;
+      if (!semesterMatch || (atarOnly && isAtarCourse && !isAtarCourse(title))) continue;
 
-      const name = normalize(
+      const name = (normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim()))(
         title
           .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
           .replace(/\bATAR\b/gi, '')
@@ -26,7 +59,7 @@
       seen[index].add(id);
 
       const summaryRow = Array.from(card.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.cvr-c-tasks'));
-      const summaryText = normalize(summaryRow?.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
+      const summaryText = (normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim()))(summaryRow?.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
       const markMatch = summaryText.match(/^(\d+(?:\.\d+)?)\s*%$/);
 
       let tasks = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'))
@@ -34,10 +67,11 @@
         .map((r, i) => {
           const cells = r.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark');
           const labels = Array.from(r.querySelectorAll('.cvr-c-task__details .v-label'))
-            .map(e => normalize(e.textContent))
+            .map(e => (normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim()))(e.textContent))
             .filter(Boolean);
-          return parseAssessment(cells[0]?.textContent, cells[1]?.textContent, labels.at(-1) || `Assessment ${i + 1}`);
-        });
+          const taskLabel = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${i + 1}`;
+          return parseAssessment ? parseAssessment(cells[0]?.textContent, cells[1]?.textContent, taskLabel) : null;
+        }).filter(Boolean);
 
       let markValue = markMatch ? scoreValue(markMatch[1]) : undefined;
 
@@ -136,23 +170,37 @@
   const targetTab = createEl('button', 'cta-semester', 'Target ATAR');
   const gradeTab = createEl('button', 'cta-semester', 'Target Grade');
   estimateTab.type = targetTab.type = gradeTab.type = 'button';
+  estimateTab.id = 'connectify-estimate-toggle';
+  targetTab.id = 'connectify-target-toggle';
+  gradeTab.id = 'connectify-grade-toggle';
 
   for (const button of [estimateTab, targetTab, gradeTab]) {
     button.className = 'cx-calculator-tool';
     button.setAttribute('aria-controls', 'connectea-atar');
   }
 
-  window.ConnectifyAtar.toolButtons = [estimateTab, targetTab, gradeTab];
+  window.ConnectifyAtar.calculatorButtons = [estimateTab, targetTab, gradeTab];
+  if (!window.ConnectifyAtar.toolButtons) {
+    window.ConnectifyAtar.toolButtons = [estimateTab, targetTab, gradeTab];
+  } else {
+    for (const b of [estimateTab, targetTab, gradeTab]) {
+      if (!window.ConnectifyAtar.toolButtons.includes(b)) {
+        window.ConnectifyAtar.toolButtons.unshift(b);
+      }
+    }
+  }
 
   let isPlanningMode = false;
   let isGradingMode = false;
 
-  const isAtarEligible = () =>
-    /\bYear\s*(?:11|12)\b/i.test(
-      Array.from(document.querySelectorAll('.eds-c-tile'))
-        .map(c => c.innerText)
-        .join(' ')
-    );
+  const isAtarEligible = () => {
+    const tiles = document.querySelectorAll('.eds-c-tile__title, .eds-c-tile');
+    if (tiles.length === 0) return true;
+    const text = Array.from(tiles)
+      .map(c => c.textContent || '')
+      .join(' ');
+    return /\bYear\s*(?:11|12)\b/i.test(text) || /\bATAR\b/i.test(text);
+  };
 
   const hasSemesterTwoStarted = () => gradeCourses.flat().some(r => r.finalLetter);
   const isTargetClosed = semesterIdx =>

@@ -30,7 +30,12 @@
   function updateHandleState(isOpen) {
     const icon = createElement('span', isOpen ? '❮' : '❯');
     icon.className = 'cx-handle-arrow';
-    handle.replaceChildren(icon);
+    if (typeof handle.replaceChildren === 'function') {
+      handle.replaceChildren(icon);
+    } else {
+      while (handle.firstChild) handle.removeChild(handle.firstChild);
+      handle.append(icon);
+    }
 
     if (!isOpen) {
       const label = createElement('span');
@@ -70,14 +75,40 @@
   introText.className = 'cx-tools-intro';
 
   sidebar.append(header, introText, toolMenu, workspace);
-  document.body.append(sidebar, handle);
+
+  function attachSidebar() {
+    const parent = document.body || document.documentElement;
+    if (parent && !sidebar.parentElement) {
+      parent.append(sidebar, handle);
+    }
+  }
+  attachSidebar();
+  if (!sidebar.parentElement) {
+    document.addEventListener('DOMContentLoaded', attachSidebar);
+    window.addEventListener('load', attachSidebar);
+  }
 
   /**
    * Mount tool launcher buttons into the sidebar menu and tool panels into the workspace.
    */
   function mountTools() {
     const progressToggle = document.getElementById('connectify-progress-toggle');
-    const toolButtons = [...(window.ConnectifyAtar.toolButtons || []), progressToggle];
+    const weaknessToggle = document.getElementById('connectify-weakness-toggle');
+    const categoriesToggle = document.getElementById('connectify-categories-toggle');
+    const estimateToggle = document.getElementById('connectify-estimate-toggle');
+    const targetToggle = document.getElementById('connectify-target-toggle');
+    const gradeToggle = document.getElementById('connectify-grade-toggle');
+
+    const atarButtons = window.ConnectifyAtar?.toolButtons || [];
+    const fallbackAtarButtons = [estimateToggle, targetToggle, gradeToggle].filter(Boolean);
+    const resolvedAtarButtons = atarButtons.length > 0 ? atarButtons : fallbackAtarButtons;
+
+    const toolButtons = [
+      ...resolvedAtarButtons,
+      progressToggle,
+      weaknessToggle,
+      categoriesToggle
+    ];
 
     for (const btn of toolButtons) {
       if (btn && btn.parentElement !== toolMenu) {
@@ -96,10 +127,16 @@
   function openSidebar() {
     sidebar.hidden = false;
     updateHandleState(true);
+    syncState();
   }
 
   function closeAllTools() {
     window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
+    for (const child of workspace.children) {
+      child.hidden = true;
+    }
+    sidebar.classList.remove('cx-tool-active');
+    introText.hidden = false;
   }
 
   handle.onclick = () => {

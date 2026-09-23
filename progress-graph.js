@@ -7,6 +7,12 @@
  */
 (() => {
   'use strict';
+  if (!Element.prototype.replaceChildren) {
+    Element.prototype.replaceChildren = function(...nodes) {
+      while (this.firstChild) this.removeChild(this.firstChild);
+      this.append(...nodes);
+    };
+  }
 
   const dataAPI = window.ConnectifyData;
 
@@ -350,7 +356,7 @@
     }
 
     const firstOrder = points[0].order;
-    const lastOrder = points.at(-1).order;
+    const lastOrder = points.length ? points[points.length - 1].order : 0;
 
     const xFor = index =>
       points.length === 1
@@ -633,10 +639,11 @@
    */
   function updateImprovementArrows() {
     const activeTasks = new Set();
-    const courses = window.ConnectifyAtar.readCourses(false);
+    const courses = window.ConnectifyAtar?.readCourses ? window.ConnectifyAtar.readCourses(false) : [[], []];
+    if (!courses || !courses[0] || !courses[1]) return;
 
     for (const subject of dataAPI.collect()) {
-      const latestTask = subject.tasks.at(-1);
+      const latestTask = subject.tasks?.length ? subject.tasks[subject.tasks.length - 1] : null;
       if (!latestTask?.row) continue;
 
       const subjectName = subject.name.replace(/\bATAR\b|\bYear\s*\d+\b/gi, '').trim();

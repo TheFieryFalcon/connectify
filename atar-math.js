@@ -69,7 +69,7 @@
 
   function convertTEAtoATAR(tea) {
     if (tea < TEA_ATAR_TABLE[0][0]) return '<30';
-    if (tea >= TEA_ATAR_TABLE.at(-1)[0]) return '99.95';
+    if (tea >= TEA_ATAR_TABLE[TEA_ATAR_TABLE.length - 1][0]) return '99.95';
     for (let i = 1; i < TEA_ATAR_TABLE.length; i++) {
       const [teaLower, atarLower] = TEA_ATAR_TABLE[i - 1];
       const [teaUpper, atarUpper] = TEA_ATAR_TABLE[i];
@@ -141,7 +141,7 @@
     const curve = getSubjectData(name, year)?.curve;
     if (!curve || !Number.isFinite(percentile)) return undefined;
     if (percentile <= 0) return curve[0][1];
-    if (percentile >= 1) return curve.at(-1)[1];
+    if (percentile >= 1) return curve[curve.length - 1][1];
     for (let i = 1; i < curve.length; i++) {
       const [a, x] = curve[i - 1], [b, z] = curve[i];
       if (percentile <= b) return x + (percentile - a) / (b - a) * (z - x);

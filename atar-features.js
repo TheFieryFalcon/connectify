@@ -8,6 +8,40 @@
   let hasInitializedSidebar = false;
   let hasAutoExpanded = false;
 
+  const defaultCategories = {
+     Exam: { color: '#e74c3c', keywords: ['exam', 'semester'] },
+     Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
+     Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
+     Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
+     'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'extended', 'presentation', 'oral', 'creative'] }
+  };
+  
+  if (!window.cxCategories) {
+      window.cxCategories = defaultCategories;
+  }
+
+  const resolveCategories = () => {
+      const isFirefox = typeof browser !== 'undefined';
+      const api = isFirefox ? browser : (typeof chrome !== 'undefined' ? chrome : null);
+      if (api && api.storage) {
+          const cb = (res) => {
+              if (res['cx-categories']) window.cxCategories = res['cx-categories'];
+          };
+          if (isFirefox) api.storage.local.get(['cx-categories']).then(cb);
+          else api.storage.local.get(['cx-categories'], cb);
+      }
+  };
+  resolveCategories();
+
+  function categorizeTask(taskName) {
+     const lower = (taskName || '').toLowerCase();
+     if (lower.includes('exam')) return 'Exam';
+     for (const [cat, data] of Object.entries(window.cxCategories)) {
+        if (data.keywords.some(k => lower.includes(k))) return cat;
+     }
+     return 'Take-Home';
+  }
+
   if (!document.getElementById('cx-compound-styles')) {
       const style = document.createElement('style');
       style.id = 'cx-compound-styles';
@@ -19,6 +53,7 @@
   }
 
   function syncFeatures() {
+    initSidebarTools();
     if (!window.ConnectifyData) return;
     
     if (!hasAutoExpanded) {
@@ -90,41 +125,7 @@
       }
     }
 
-    // --- Custom Categories Management ---
-    const defaultCategories = {
-       Exam: { color: '#e74c3c', keywords: ['exam', 'semester'] },
-       Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
-       Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
-       Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
-       'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'extended', 'presentation', 'oral', 'creative'] }
-    };
-    
-    if (!window.cxCategories) {
-        window.cxCategories = defaultCategories;
-    }
-
-    // Fallback if extension storage fails to load yet
-    const resolveCategories = () => {
-        const isFirefox = typeof browser !== 'undefined';
-        const api = isFirefox ? browser : (typeof chrome !== 'undefined' ? chrome : null);
-        if (api && api.storage) {
-            const cb = (res) => {
-                if (res['cx-categories']) window.cxCategories = res['cx-categories'];
-            };
-            if (isFirefox) api.storage.local.get(['cx-categories']).then(cb);
-            else api.storage.local.get(['cx-categories'], cb);
-        }
-    };
     resolveCategories();
-
-    function categorizeTask(taskName) {
-       const lower = (taskName || '').toLowerCase();
-       if (lower.includes('exam')) return 'Exam';
-       for (const [cat, data] of Object.entries(window.cxCategories)) {
-          if (data.keywords.some(k => lower.includes(k))) return cat;
-       }
-       return 'Take-Home';
-    }
 
     const subjects = window.ConnectifyData.collect(true);
 
@@ -213,22 +214,24 @@
            container.appendChild(bar);
            container.appendChild(label);
 
-           header.after(container);
-       });
-    });
+            header.after(container);
+        });
+     });
+  }
 
-    // --- Weakness Analyzer & Categories Panel ---
-    if (!hasInitializedSidebar && document.querySelector('#connectify-sidebar')) {
-       hasInitializedSidebar = true;
-       
-       const toolMenu = document.querySelector('.cx-tool-menu');
-       const workspace = document.querySelector('.cx-workspace');
+  // --- Weakness Analyzer & Categories Panel ---
+  function initSidebarTools() {
+    if (hasInitializedSidebar || !document.querySelector('#connectify-sidebar')) return;
+    hasInitializedSidebar = true;
+    
+    const toolMenu = document.querySelector('.cx-tool-menu');
+    const workspace = document.querySelector('.cx-workspace');
        
        const toggleBtn = document.createElement('button');
        toggleBtn.textContent = 'Weakness Analyzer';
        toggleBtn.type = 'button';
        toggleBtn.id = 'connectify-weakness-toggle';
-            let disabledWeaknessSubjects = new Set();
+        let disabledWeaknessSubjects = new Set();
         try {
           const stored = JSON.parse(localStorage.getItem('connectify:weakness_disabled_subjects') || '[]');
           if (Array.isArray(stored)) disabledWeaknessSubjects = new Set(stored);
@@ -240,6 +243,11 @@
           } catch (e) {}
         };
 
+        const cleanSubjectName = (name) => {
+          if (!name) return '';
+          return name.replace(/\bATAR\b|\bYear\s*\d+\b/gi, '').replace(/\s+/g, ' ').trim();
+        };
+
         const panel = document.createElement('section');
         panel.id = 'connectify-weakness';
         panel.hidden = true;
@@ -248,12 +256,13 @@
           <header><strong>Weakness Analyzer</strong></header>
           <div style="margin-bottom:14px; display:flex; gap:10px; align-items:center;">
              <label for="cx-radar-mode" style="font-weight:600; font-size:12px;">Group by:</label>
-             <select id="cx-radar-mode" style="padding:6px 10px; border-radius:6px; border:1px solid #bacddd; background:inherit; color:inherit; font:inherit;">
+             <select id="cx-radar-mode">
                 <option value="type">Assessment Type</option>
                 <option value="subject">Subject</option>
              </select>
           </div>
-          <div id="cx-weakness-filters" style="margin-bottom:16px; background:#edf4fa; border:1px solid #c8d9e8; border-radius:8px; padding:12px 14px;">
+          <div id="connectify-radar-chart" style="width:100%;height:350px;background:#333333;border-radius:8px;border:1px solid #3a3a3a;overflow:hidden;"></div>
+          <div id="cx-weakness-filters">
              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <span style="font-weight:600; font-size:12px;">Included Subjects</span>
                 <span style="display:flex; gap:8px; align-items:center;">
@@ -262,78 +271,85 @@
                    <button type="button" id="cx-weakness-deselect-all" class="cx-weakness-filter-btn">None</button>
                 </span>
              </div>
-             <div id="cx-weakness-checkboxes" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:8px 14px;"></div>
+             <div id="cx-weakness-checkboxes"></div>
           </div>
-          <div id="connectify-radar-chart" style="width:100%;height:320px;background:#333333;border-radius:8px;border:1px solid #3a3a3a;overflow:hidden;"></div>
         `;
 
         if (toolMenu) toolMenu.append(toggleBtn);
         if (workspace) workspace.append(panel);
 
+        const getSubjectList = () => {
+          const subjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+          let rawNames = subjects.map(s => s.name).filter(Boolean);
+          
+          if (rawNames.length === 0 && window.ConnectifyAtar?.readCourses) {
+            const rawCourses = window.ConnectifyAtar.readCourses(false);
+            if (rawCourses) {
+              rawNames = [...(rawCourses[0] || []), ...(rawCourses[1] || [])].map(c => c.name).filter(Boolean);
+            }
+          }
+
+          const map = new Map();
+          for (const raw of rawNames) {
+            const clean = cleanSubjectName(raw) || raw;
+            if (!map.has(clean)) {
+              map.set(clean, raw);
+            }
+          }
+          return map;
+        };
+
         const renderSubjectCheckboxes = () => {
           const container = document.getElementById('cx-weakness-checkboxes');
           if (!container) return;
 
-          const subjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
-          let subjectNames = Array.from(new Set(subjects.map(s => s.name).filter(Boolean)));
-          
-          if (subjectNames.length === 0 && window.ConnectifyAtar?.readCourses) {
-            const rawCourses = window.ConnectifyAtar.readCourses(false);
-            if (rawCourses) {
-              const fromAtar = [...(rawCourses[0] || []), ...(rawCourses[1] || [])].map(c => c.name);
-              subjectNames = Array.from(new Set(fromAtar.filter(Boolean)));
-            }
-          }
+          const subjectMap = getSubjectList();
+          const cleanNames = Array.from(subjectMap.keys()).sort();
 
-          if (subjectNames.length === 0) {
+          if (cleanNames.length === 0) {
             container.innerHTML = '<span style="font-size:11px;color:#8898aa;grid-column:1/-1;">No subjects detected yet. Expand course outlines in Connect to load subjects.</span>';
             return;
           }
 
-          const sig = subjectNames.slice().sort().join('|');
+          const sig = cleanNames.join('|');
           if (container.dataset.signature !== sig) {
             container.dataset.signature = sig;
             container.innerHTML = '';
 
-            for (const name of subjectNames) {
+            for (const cleanName of cleanNames) {
+              const rawName = subjectMap.get(cleanName);
               const label = document.createElement('label');
               label.className = 'cx-weakness-checkbox-label';
-              label.style.display = 'inline-flex';
-              label.style.alignItems = 'center';
-              label.style.gap = '7px';
-              label.style.fontSize = '12px';
-              label.style.cursor = 'pointer';
-              label.style.userSelect = 'none';
+              label.title = rawName || cleanName;
 
               const cb = document.createElement('input');
               cb.type = 'checkbox';
-              cb.value = name;
-              cb.checked = !disabledWeaknessSubjects.has(name);
-              cb.style.margin = '0';
-              cb.style.cursor = 'pointer';
-              cb.style.width = '14px';
-              cb.style.height = '14px';
+              cb.value = cleanName;
+              cb.checked = !disabledWeaknessSubjects.has(cleanName) && (!rawName || !disabledWeaknessSubjects.has(rawName));
 
               cb.addEventListener('change', () => {
                 if (cb.checked) {
-                  disabledWeaknessSubjects.delete(name);
+                  disabledWeaknessSubjects.delete(cleanName);
+                  if (rawName) disabledWeaknessSubjects.delete(rawName);
                 } else {
-                  disabledWeaknessSubjects.add(name);
+                  disabledWeaknessSubjects.add(cleanName);
+                  if (rawName) disabledWeaknessSubjects.add(rawName);
                 }
                 saveDisabledSubjects();
                 renderChart();
               });
 
               const span = document.createElement('span');
-              span.textContent = name;
-              span.style.fontWeight = '500';
+              span.textContent = cleanName;
 
               label.append(cb, span);
               container.append(label);
             }
           } else {
             container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-              cb.checked = !disabledWeaknessSubjects.has(cb.value);
+              const clean = cb.value;
+              const raw = subjectMap.get(clean);
+              cb.checked = !disabledWeaknessSubjects.has(clean) && (!raw || !disabledWeaknessSubjects.has(raw));
             });
           }
         };
@@ -350,15 +366,10 @@
         }
         if (deselectAllBtn) {
           deselectAllBtn.addEventListener('click', () => {
-            const subjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
-            subjects.forEach(s => { if (s.name) disabledWeaknessSubjects.add(s.name); });
-            if (window.ConnectifyAtar?.readCourses) {
-              const rawCourses = window.ConnectifyAtar.readCourses(false);
-              if (rawCourses) {
-                [...(rawCourses[0] || []), ...(rawCourses[1] || [])].forEach(c => {
-                  if (c.name) disabledWeaknessSubjects.add(c.name);
-                });
-              }
+            const subjectMap = getSubjectList();
+            for (const [clean, raw] of subjectMap.entries()) {
+              disabledWeaknessSubjects.add(clean);
+              if (raw) disabledWeaknessSubjects.add(raw);
             }
             saveDisabledSubjects();
             renderSubjectCheckboxes();
@@ -366,20 +377,24 @@
           });
         }
 
+        let currentChart = null;
+
         const renderChart = () => {
           renderSubjectCheckboxes();
           const chartDiv = document.getElementById('connectify-radar-chart');
-          if (!window.Highcharts) return;
+          if (!window.Highcharts || !chartDiv) return;
           
           const perf = {};
-          const mode = document.getElementById('cx-radar-mode').value;
+          const mode = document.getElementById('cx-radar-mode')?.value || 'type';
 
-          window.ConnectifyData.collect(true).forEach(subject => {
-              if (disabledWeaknessSubjects.has(subject.name)) return;
+          const collectedSubjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+          collectedSubjects.forEach(subject => {
+              const cleaned = cleanSubjectName(subject.name) || subject.name;
+              if (disabledWeaknessSubjects.has(cleaned) || disabledWeaknessSubjects.has(subject.name)) return;
               subject.tasks.forEach(t => {
                   if (t.weight > 0 && !t.pending && t.score !== null) {
                       const earned = (t.score / 100) * t.weight;
-                      const label = mode === 'subject' ? subject.name : categorizeTask(t.name);
+                      const label = mode === 'subject' ? cleaned : categorizeTask(t.name);
                       if (!perf[label]) perf[label] = { earned: 0, total: 0 };
                       perf[label].earned += earned;
                       perf[label].total += t.weight;
@@ -396,46 +411,106 @@
           
           if (labels.length === 0) {
               chartDiv.innerHTML = '<div style="padding:20px;color:#999;text-align:center;">No completed assessments to plot for the selected subjects.</div>';
+              currentChart = null;
               return;
           }
 
-          window.Highcharts.chart('connectify-radar-chart', {
-             chart: { polar: true, type: 'area', backgroundColor: 'transparent' },
+          currentChart = window.Highcharts.chart('connectify-radar-chart', {
+             chart: {
+               polar: true,
+               type: 'area',
+               backgroundColor: 'transparent',
+               spacing: [15, 15, 15, 15]
+             },
              title: { text: '' },
-             pane: { size: '80%' },
-             xAxis: { categories: labels, tickmarkPlacement: 'on', lineWidth: 0, labels: { style: { color: '#cccccc' } } },
-             yAxis: { gridLineInterpolation: 'polygon', lineWidth: 0, min: 0, max: 100, labels: { style: { color: '#999' } } },
-             tooltip: { shared: true, pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y}%</b><br/>' },
+             pane: {
+               size: '72%',
+               center: ['50%', '50%']
+             },
+             xAxis: {
+               categories: labels,
+               tickmarkPlacement: 'on',
+               lineWidth: 0,
+               labels: {
+                 style: { color: '#e1eaf3', fill: '#e1eaf3', fontSize: '11px' }
+               }
+             },
+             yAxis: {
+               gridLineInterpolation: 'polygon',
+               lineWidth: 0,
+               min: 0,
+               max: 100,
+               labels: { style: { color: '#8fa6bd', fill: '#8fa6bd' } }
+             },
+             tooltip: {
+               shared: true,
+               pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y}%</b><br/>'
+             },
              legend: { enabled: false },
-             series: [{ name: 'Performance', data: data, pointPlacement: 'on', color: '#d4b483', fillOpacity: 0.2 }],
+             series: [{
+               name: 'Performance',
+               data: data,
+               pointPlacement: 'on',
+               color: '#d4b483',
+               fillOpacity: 0.2
+             }],
              credits: { enabled: false }
           });
         };
 
         document.getElementById('cx-radar-mode').addEventListener('change', renderChart);
 
+        const openWeaknessTool = () => {
+          const sidebarEl = document.getElementById('connectify-sidebar');
+          if (sidebarEl) {
+            sidebarEl.classList.add('cx-tool-active');
+            sidebarEl.hidden = false;
+          }
+          document.querySelectorAll('.cx-workspace-panel').forEach(p => p.hidden = true);
+          document.querySelectorAll('.cx-tool-menu button').forEach(b => b.setAttribute('aria-expanded', 'false'));
+          toggleBtn.setAttribute('aria-expanded', 'true');
+          panel.hidden = false;
+          renderSubjectCheckboxes();
+          renderChart();
+          requestAnimationFrame(() => {
+            if (currentChart && currentChart.reflow) {
+              currentChart.reflow();
+            }
+            setTimeout(() => {
+              if (currentChart && currentChart.reflow) {
+                currentChart.reflow();
+              }
+            }, 100);
+          });
+        };
+
         toggleBtn.addEventListener('click', () => {
-           document.querySelectorAll('.cx-workspace-panel').forEach(p => p.hidden = true);
-           document.querySelectorAll('.cx-tool-menu button').forEach(b => b.setAttribute('aria-expanded', 'false'));
-           toggleBtn.setAttribute('aria-expanded', 'true');
-           panel.hidden = false;
-           renderSubjectCheckboxes();
-           renderChart();
+          openWeaknessTool();
+          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'weakness' }));
         });
        
-       window.addEventListener('connectify-open', e => {
-            if (e.detail !== 'weakness') {
-                panel.hidden = true;
-                toggleBtn.setAttribute('aria-expanded', 'false');
-            } else {
-                panel.hidden = false;
-                toggleBtn.setAttribute('aria-expanded', 'true');
-                renderSubjectCheckboxes();
-                renderChart();
-            }
+        window.addEventListener('connectify-open', e => {
+          if (e.detail !== 'weakness') {
+            panel.hidden = true;
+            toggleBtn.setAttribute('aria-expanded', 'false');
+          } else if (panel.hidden) {
+            openWeaknessTool();
+          }
         });
 
-       const catBtn = document.createElement('button');
+        if (window.ResizeObserver) {
+          const chartDiv = document.getElementById('connectify-radar-chart');
+          if (chartDiv) {
+            const ro = new ResizeObserver(() => {
+              if (currentChart && currentChart.reflow && !panel.hidden) {
+                currentChart.reflow();
+              }
+            });
+            ro.observe(chartDiv);
+          }
+        }
+
+        const catBtn = document.createElement('button');
        catBtn.textContent = 'Settings';
        catBtn.type = 'button';
        catBtn.id = 'connectify-categories-toggle';
@@ -626,13 +701,17 @@
                catBtn.setAttribute('aria-expanded', 'false');
            }
        });
-       
-       if (window.ConnectifyAtar) {
-          window.ConnectifyAtar.toolButtons = window.ConnectifyAtar.toolButtons || [];
-          window.ConnectifyAtar.toolButtons.push(toggleBtn, catBtn);
-       }
+              window.ConnectifyAtar = window.ConnectifyAtar || {};
+        window.ConnectifyAtar.toolButtons = window.ConnectifyAtar.toolButtons || [];
+        if (!window.ConnectifyAtar.toolButtons.includes(toggleBtn)) {
+          window.ConnectifyAtar.toolButtons.push(toggleBtn);
+        }
+        if (!window.ConnectifyAtar.toolButtons.includes(catBtn)) {
+          window.ConnectifyAtar.toolButtons.push(catBtn);
+        }
     }
-  }
 
+  initSidebarTools();
+  setInterval(initSidebarTools, 1000);
   setInterval(syncFeatures, 1500);
 })();
