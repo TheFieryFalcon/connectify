@@ -1,7 +1,7 @@
 {
    "manifest_version": 3,
    "name": "Connectify",
-   "version": "3.1.11",
+   "version": "3.1.12",
    "description": "Subject progress graphs, assessment statistics, grade planning and a site-wide Connect theme.",
    "icons": {
       "128": "logo.png"

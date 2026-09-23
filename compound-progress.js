@@ -18,7 +18,7 @@
       .cx-compound-progress-container {
         box-sizing: border-box !important;
         width: 100% !important;
-        padding: 2px 20px 8px 20px !important;
+        padding: 10px 20px 0 20px !important;
         margin: 0 !important;
       }
       .cx-compound-segment {
@@ -33,7 +33,7 @@
         height: 6px;
         border-radius: 3px;
         overflow: hidden;
-        margin: 4px 0 4px 0;
+        margin: 0 0 3px 0;
         border: 1px solid #cbd5e1;
         background: #e2e8f0;
         box-sizing: border-box;
@@ -41,9 +41,10 @@
       }
       .cx-compound-label {
         font-size: 11px;
+        line-height: 1.25;
         color: #64748b;
         text-align: right;
-        margin: 2px 0 0 0;
+        margin: 0;
         font-weight: 500;
       }
       .connectea-dark .cx-compound-bar {
