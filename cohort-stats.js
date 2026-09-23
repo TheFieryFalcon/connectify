@@ -314,7 +314,8 @@
           !r.target.parentElement?.closest('.connectea-row-wrapper') &&
           !r.target.closest?.('.connectea-row-wrapper') &&
           r.target.id !== 'connectea-style'
-      ) {
+      )
+    ) {
       schedule();
     }
   });

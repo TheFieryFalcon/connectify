@@ -11,7 +11,7 @@
 
   if (window.ConnectifyDomSweeper) return;
 
-  let promptElement = null;
+  const HEALTH_NOTIFICATION_ID = 'connectify-health-sweeper';
   let isDismissed = false;
   let sweepTimer = null;
   let lastDismissTime = 0;
@@ -45,10 +45,16 @@
     if (taskRows.length > 0) {
       let missingPanelCount = 0;
       taskRows.forEach(row => {
-        // Look for rows that have marks but lack connectea-panel
-        const hasMarks = row.querySelector('.cvr-c-task__marks');
-        const hasPanel = row.querySelector('.connectea-panel');
-        if (hasMarks && !hasPanel) {
+        const isOverall = !row.closest('.cvr-c-tasks');
+        const readMark = window.ConnectifyCohortView?.readMark;
+        const mark = typeof readMark === 'function' ? readMark(row) : undefined;
+        const isMarked = Number.isFinite(mark);
+
+        // Incomplete / pending tasks intentionally do not render statistics panels
+        if (!isOverall && !isMarked) return;
+
+        const hasPanel = row.querySelector('.connectea-panel') || row.querySelector('.connectea-row-wrapper');
+        if (!hasPanel) {
           missingPanelCount++;
         }
       });
@@ -60,9 +66,9 @@
     // 4. Year 12 Countdown & Progress check
     const tiles = Array.from(document.querySelectorAll('.eds-c-tile__title, .eds-c-tile'));
     const pageText = tiles.map(t => t.textContent || '').join(' ');
-    const isYear12 = /\bYear\s*12\b/i.test(pageText);
+    const isYear12 = /\b(?:Year\s*12|12)\b/i.test(pageText) || /\bAT[A-Z]{3}\b/.test(pageText);
 
-    if (isYear12 && !document.getElementById('connectify-countdown')) {
+    if (isYear12 && !document.getElementById('connectify-wace-countdown')) {
       const mainContainer = document.querySelector('.cvr-c-assessment__main, main, [role="main"], .cvr-c-overview');
       if (mainContainer) {
         missing.push('WACE Exam Countdown Banner');
@@ -80,14 +86,11 @@
       if (typeof window.ConnectifyInitSidebar === 'function') {
         window.ConnectifyInitSidebar();
       }
-      if (typeof window.ConnectifyPass === 'function') {
-        window.ConnectifyPass();
+      if (window.ConnectifyCohort && typeof window.ConnectifyCohort.pass === 'function') {
+        window.ConnectifyCohort.pass();
       }
-      if (typeof window.ConnectifySync === 'function') {
-        window.ConnectifySync();
-      }
-      if (window.ConnectifyCountdown && typeof window.ConnectifyCountdown.render === 'function') {
-        window.ConnectifyCountdown.render();
+      if (window.ConnectifyCountdown && typeof window.ConnectifyCountdown.update === 'function') {
+        window.ConnectifyCountdown.update();
       }
       if (window.ConnectifyCompoundProgress && typeof window.ConnectifyCompoundProgress.update === 'function') {
         window.ConnectifyCompoundProgress.update();
@@ -104,66 +107,51 @@
   function dismissPrompt() {
     isDismissed = true;
     lastDismissTime = Date.now();
-    if (promptElement) {
-      promptElement.remove();
-      promptElement = null;
+    if (window.ConnectifyNotifications?.dismiss) {
+      window.ConnectifyNotifications.dismiss(HEALTH_NOTIFICATION_ID);
     }
   }
 
   /**
-   * Renders the health prompt banner to notify the user.
+   * Renders the health prompt banner using ConnectifyNotifications.
    */
   function promptUser(missingItems) {
     if (isDismissed && (Date.now() - lastDismissTime < DISMISS_COOLDOWN_MS)) {
       return;
     }
 
-    if (!promptElement) {
-      promptElement = document.createElement('div');
-      promptElement.id = 'connectify-health-prompt';
-      promptElement.setAttribute('role', 'alert');
-      promptElement.setAttribute('aria-live', 'assertive');
-      document.body.append(promptElement);
+    if (window.ConnectifyNotifications?.show) {
+      window.ConnectifyNotifications.show({
+        id: HEALTH_NOTIFICATION_ID,
+        type: 'warning',
+        title: 'Connectify Component Notice',
+        message: 'Some Connectify features were not detected on this page or were removed during page transition:',
+        details: missingItems,
+        dismissible: true,
+        onDismiss: () => {
+          isDismissed = true;
+          lastDismissTime = Date.now();
+        },
+        actions: [
+          {
+            text: 'Dismiss',
+            type: 'secondary',
+            onClick: ({ close }) => {
+              dismissPrompt();
+              close();
+            }
+          },
+          {
+            text: 'Restore Components',
+            type: 'primary',
+            onClick: () => {
+              restoreComponents();
+              setTimeout(sweep, 500);
+            }
+          }
+        ]
+      });
     }
-
-    promptElement.replaceChildren();
-
-    const header = document.createElement('div');
-    header.className = 'cx-health-header';
-    header.innerHTML = '<span>⚠️</span> <span>Connectify Component Notice</span>';
-
-    const body = document.createElement('div');
-    body.className = 'cx-health-body';
-    body.textContent = 'Some Connectify features were not detected on this page or were removed during page transition:';
-
-    const list = document.createElement('ul');
-    list.className = 'cx-health-details';
-    missingItems.forEach(item => {
-      const li = document.createElement('li');
-      li.textContent = item;
-      list.append(li);
-    });
-
-    const actions = document.createElement('div');
-    actions.className = 'cx-health-actions';
-
-    const reinjectBtn = document.createElement('button');
-    reinjectBtn.type = 'button';
-    reinjectBtn.className = 'cx-health-btn cx-health-reinject';
-    reinjectBtn.textContent = 'Restore Components';
-    reinjectBtn.onclick = () => {
-      restoreComponents();
-      setTimeout(sweep, 500);
-    };
-
-    const dismissBtn = document.createElement('button');
-    dismissBtn.type = 'button';
-    dismissBtn.className = 'cx-health-btn cx-health-dismiss';
-    dismissBtn.textContent = 'Dismiss';
-    dismissBtn.onclick = dismissPrompt;
-
-    actions.append(dismissBtn, reinjectBtn);
-    promptElement.append(header, body, list, actions);
   }
 
   /**
@@ -178,9 +166,8 @@
     const missing = inspectDOM();
     if (missing.length > 0) {
       promptUser(missing);
-    } else if (promptElement) {
-      promptElement.remove();
-      promptElement = null;
+    } else if (window.ConnectifyNotifications?.dismiss) {
+      window.ConnectifyNotifications.dismiss(HEALTH_NOTIFICATION_ID);
     }
   }
 

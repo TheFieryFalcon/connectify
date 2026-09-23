@@ -67,6 +67,8 @@
             "category-settings.js",
             "atar-features.js",
             "sidebar.js",
+            "notifications.js",
+            "new-grade.js",
             "dom-sweeper.js"
          ],
          "run_at": "document_idle"

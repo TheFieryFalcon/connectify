@@ -76,43 +76,111 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 .connectea-dark .connectea-type-select.connectea-overridden{border-color:#6ba5d6;background:#364e65;color:#fff}
 
 
-/* Health Sweeper Prompt */
-#connectify-health-prompt {
+/* Notifications Engine & Stack Container */
+#connectify-notifications-container {
   position: fixed;
   bottom: 24px;
   right: 24px;
   z-index: 10060;
-  max-width: 420px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  max-width: 440px;
+  width: calc(100vw - 48px);
+  pointer-events: none;
+}
+
+.cx-notification {
+  pointer-events: auto;
+  position: relative;
   background: #ffffff;
   color: #1a2a3a;
   border: 1px solid #c7d6e4;
-  border-left: 5px solid #eab308;
+  border-left: 5px solid #185c8c;
   border-radius: 10px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
   padding: 14px 18px;
   font: 13px/1.5 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   box-sizing: border-box;
   animation: cx-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
+
+.cx-notification-dismissing {
+  opacity: 0 !important;
+  transform: translateX(40px) !important;
+}
+
+.cx-notification--warning {
+  border-left-color: #eab308;
+}
+
+.cx-notification--success {
+  border-left-color: #10b981;
+}
+
+.cx-notification--info {
+  border-left-color: #3b82f6;
+}
+
+.cx-notification--grade {
+  border-left-color: #8b5cf6;
+}
+
 @keyframes cx-slide-in {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-#connectify-health-prompt .cx-health-header {
+
+.cx-notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.cx-notification-title-group {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.cx-notification-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.cx-notification-title {
   font-weight: 700;
   font-size: 14px;
   color: #1e3a5f;
-  margin-bottom: 6px;
 }
-#connectify-health-prompt .cx-health-body {
-  margin-bottom: 12px;
+
+.cx-notification-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: #8fa3b7;
+  padding: 0 4px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.cx-notification-close:hover {
+  color: #1e3a5f;
+}
+
+.cx-notification-body {
+  margin-bottom: 8px;
   color: #4b647f;
   font-size: 12.5px;
+  line-height: 1.5;
 }
-#connectify-health-prompt .cx-health-details {
+
+.cx-notification-details {
   margin: 6px 0 10px 0;
   padding: 6px 10px 6px 24px;
   background: #f1f5f9;
@@ -120,12 +188,15 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   font-size: 11.5px;
   color: #334155;
 }
-#connectify-health-prompt .cx-health-actions {
+
+.cx-notification-actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+  margin-top: 8px;
 }
-#connectify-health-prompt .cx-health-btn {
+
+.cx-notification-btn {
   cursor: pointer;
   font: 600 12px system-ui;
   border-radius: 6px;
@@ -133,51 +204,114 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   border: 1px solid transparent;
   transition: all 0.2s;
 }
-#connectify-health-prompt .cx-health-reinject {
+
+.cx-notification-btn--primary {
   background: #185c8c;
   color: #ffffff;
 }
-#connectify-health-prompt .cx-health-reinject:hover {
+
+.cx-notification-btn--primary:hover {
   background: #13466a;
 }
-#connectify-health-prompt .cx-health-dismiss {
+
+.cx-notification-btn--secondary {
   background: #edf2f7;
   color: #4b647f;
   border-color: #cbd5e1;
 }
-#connectify-health-prompt .cx-health-dismiss:hover {
+
+.cx-notification-btn--secondary:hover {
   background: #e2e8f0;
 }
-.connectea-dark #connectify-health-prompt {
+
+.cx-notification-btn--accent {
+  background: #7c3aed;
+  color: #ffffff;
+}
+
+.cx-notification-btn--accent:hover {
+  background: #6d28d9;
+}
+
+/* Dark mode overrides for notifications */
+.connectea-dark .cx-notification {
   background: #1e293b;
   color: #e2e8f0;
   border-color: #334155;
-  border-left-color: #facc15;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
 }
-.connectea-dark #connectify-health-prompt .cx-health-header {
+
+.connectea-dark .cx-notification--warning {
+  border-left-color: #facc15;
+}
+
+.connectea-dark .cx-notification--success {
+  border-left-color: #34d399;
+}
+
+.connectea-dark .cx-notification--grade {
+  border-left-color: #a78bfa;
+}
+
+.connectea-dark .cx-notification-title {
   color: #f8fafc;
 }
-.connectea-dark #connectify-health-prompt .cx-health-body {
+
+.connectea-dark .cx-notification-close {
+  color: #64748b;
+}
+
+.connectea-dark .cx-notification-close:hover {
+  color: #f8fafc;
+}
+
+.connectea-dark .cx-notification-body {
   color: #94a3b8;
 }
-.connectea-dark #connectify-health-prompt .cx-health-details {
+
+.connectea-dark .cx-notification-details {
   background: #0f172a;
   color: #cbd5e1;
 }
-.connectea-dark #connectify-health-prompt .cx-health-reinject {
+
+.connectea-dark .cx-notification-btn--primary {
   background: #2563eb;
 }
-.connectea-dark #connectify-health-prompt .cx-health-reinject:hover {
+
+.connectea-dark .cx-notification-btn--primary:hover {
   background: #1d4ed8;
 }
-.connectea-dark #connectify-health-prompt .cx-health-dismiss {
+
+.connectea-dark .cx-notification-btn--secondary {
   background: #334155;
   color: #cbd5e1;
   border-color: #475569;
 }
-.connectea-dark #connectify-health-prompt .cx-health-dismiss:hover {
+
+.connectea-dark .cx-notification-btn--secondary:hover {
   background: #475569;
+}
+
+.connectea-dark .cx-notification-btn--accent {
+  background: #8b5cf6;
+}
+
+.connectea-dark .cx-notification-btn--accent:hover {
+  background: #7c3aed;
+}
+
+/* Card Jump / Flash Animation */
+.cx-card-jump-highlight {
+  animation: cx-highlight-pulse 2s ease-out;
+}
+
+@keyframes cx-highlight-pulse {
+  0% {
+    box-shadow: 0 0 0 4px #8b5cf6, 0 0 20px rgba(139, 92, 246, 0.5);
+  }
+  100% {
+    box-shadow: none;
+  }
 }
 
 #connectify-sidebar .cx-tools-intro{padding:14px 20px 4px 20px!important;margin:0!important;font-size:12.5px!important;line-height:1.5!important;color:#4b647f!important}
