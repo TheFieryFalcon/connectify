@@ -501,9 +501,14 @@
       const targetPlanFn = window.ConnectifyMath?.targetPlan;
       if (!targetPlanFn) return;
 
+      const currentCalcResult = calc?.calculateResults ? calc.calculateResults(courses)[activeSemester] : null;
+      const currentBonus = currentCalcResult && Number.isFinite(currentCalcResult.bonus)
+        ? currentCalcResult.bonus
+        : undefined;
+
       const plan = targetPlanFn(rows, scoreValue(targetInput.value), {
         difficultyWeighted: difficultyCheckbox.checked,
-        ignoreBonus: true
+        currentBonus: currentBonus
       });
       targetOutputContainer.replaceChildren();
 
@@ -542,13 +547,14 @@
         targetOutputContainer.append(createEl('strong', '', bannerText));
       }
 
+      const bonusNote = plan.bonus > 0 ? ` (assumes current TEA bonus of ${round(plan.bonus)} points)` : '';
       targetOutputContainer.append(
         createEl(
           'p',
           'cta-note',
           difficultyCheckbox.checked
-            ? `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}. Marks are scaled proportionally based on demonstrated subject and assessment type performance.`
-            : `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}. Assumes uniform performance across remaining tasks.`
+            ? `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}. Marks are scaled proportionally based on demonstrated subject and assessment type performance.`
+            : `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}. Assumes uniform performance across remaining tasks.`
         )
       );
 

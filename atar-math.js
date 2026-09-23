@@ -83,10 +83,14 @@
   const LANGUAGE_SUBJECTS = new Set(['arabic', 'auslan', 'bengali', 'bosnian', 'chinese', 'croatian', 'dutch', 'filipino', 'french', 'german', 'hebrew', 'hindi', 'hungarian', 'indonesian', 'italian', 'japanese', 'korean', 'modern greek', 'persian', 'polish', 'portuguese', 'punjabi', 'russian', 'serbian', 'sinhala', 'spanish', 'swedish', 'tamil', 'turkish', 'vietnamese']);
 
   function bonusType(name) {
-    const normalized = normalize(name).toLowerCase();
-    if (normalized === 'mathematics methods' || normalized === 'mathematics specialist') return normalized;
-    const language = normalized.split(':')[0].replace(/ (second|first|background) language$/, '').trim();
-    return LANGUAGE_SUBJECTS.has(language) ? 'language' : '';
+    const raw = String(name || '').toLowerCase();
+    if (/\b(mathematics methods|methods)\b/i.test(raw)) return 'mathematics methods';
+    if (/\b(mathematics specialist|specialist)\b/i.test(raw)) return 'mathematics specialist';
+    const cleanLang = raw.replace(/\batar\b|\byear\s*\d+\b|semester\s*\d+/gi, '').replace(/[:;/]/g, ' ').replace(/\s+/g, ' ').trim();
+    for (const lang of LANGUAGE_SUBJECTS) {
+      if (new RegExp(`\\b${lang}\\b`, 'i').test(cleanLang)) return 'language';
+    }
+    return '';
   }
 
   function calculate(rows, options = {}) {
@@ -98,7 +102,9 @@
     const topFour = sorted.slice(0, 4);
 
     let bonusTEA = 0;
-    if (!options?.ignoreBonus) {
+    if (options?.fixedBonus !== undefined && Number.isFinite(Number(options.fixedBonus))) {
+      bonusTEA = Number(options.fixedBonus);
+    } else if (!options?.ignoreBonus) {
       const bestLanguage = Math.max(0, ...used.filter(r => bonusType(r.name) === 'language').map(r => r.score));
       const methods = Math.max(0, ...used.filter(r => bonusType(r.name) === 'mathematics methods').map(r => r.score));
       const specialist = Math.max(0, ...used.filter(r => bonusType(r.name) === 'mathematics specialist').map(r => r.score));
@@ -211,12 +217,13 @@
     scoreValue,
     estimateScaledScore,
     calculateShiftedScaledScore,
-    normalizeSubject
+    normalizeSubject,
+    bonusType
   };
 })();
 
 (() => {
-  const { calculate, scoreValue } = window.ConnectifyMath;
+  const { calculate, scoreValue, wholeScore, bonusType } = window.ConnectifyMath;
   
   function parseAssessment(rawScore, weightedMark, name) {
     const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
@@ -275,6 +282,29 @@
     const missing = eligibleRows.filter(r => r.include !== false && (!r.progress || r.progress.error));
     if (missing.length) {
       return { error: missing.map(r => `${r.name}: ${r.progress.error}`).join('\n') };
+    }
+
+    // Determine current TEA bonus to hold fixed during target projections
+    let currentBonus = 0;
+    if (options.currentBonus !== undefined && Number.isFinite(Number(options.currentBonus))) {
+      currentBonus = Number(options.currentBonus);
+    } else if (options.fixedBonus !== undefined && Number.isFinite(Number(options.fixedBonus))) {
+      currentBonus = Number(options.fixedBonus);
+    } else {
+      const currentRowsForBonus = eligibleRows.map(r => ({
+        name: r.name,
+        include: true,
+        score: r.score !== undefined ? r.score : r.mark
+      }));
+      const bestLanguage = Math.max(0, ...currentRowsForBonus.filter(r => bonusType(r.name) === 'language').map(r => wholeScore(r.score) || 0));
+      const methods = Math.max(0, ...currentRowsForBonus.filter(r => bonusType(r.name) === 'mathematics methods').map(r => wholeScore(r.score) || 0));
+      const specialist = Math.max(0, ...currentRowsForBonus.filter(r => bonusType(r.name) === 'mathematics specialist').map(r => wholeScore(r.score) || 0));
+      const bonuses = [];
+      if (methods > 0) bonuses.push(methods * 0.1);
+      if (specialist > 0) bonuses.push(specialist * 0.1);
+      if (bestLanguage > 0) bonuses.push(bestLanguage * 0.1);
+      bonuses.sort((a, b) => b - a);
+      currentBonus = (bonuses[0] || 0) + (bonuses[1] || 0);
     }
 
     const difficultyWeighted = Boolean(options.difficultyWeighted);
@@ -386,7 +416,7 @@
         score: projectCourseScore(r, pOrT)
       }));
 
-    const calculateAtVal = pOrT => calculate(projectedRows(pOrT), { ignoreBonus: true });
+    const calculateAtVal = pOrT => calculate(projectedRows(pOrT), { fixedBonus: currentBonus });
     const reachesTarget = res => !res.error && res.atar !== '<30' && Number(res.atar) >= target;
 
     const maxVal = difficultyWeighted ? 1.0 : 100.0;
@@ -399,7 +429,8 @@
         impossible: true,
         maximum: maximumResult,
         rows: projectedRows(maxVal),
-        difficultyWeighted
+        difficultyWeighted,
+        bonus: currentBonus
       };
     }
 
@@ -419,7 +450,7 @@
 
     let finalT = high;
     let finalProjected = projectedRows(finalT);
-    let finalResult = calculate(finalProjected, { ignoreBonus: true });
+    let finalResult = calculate(finalProjected, { fixedBonus: currentBonus });
 
     const taskRequirements = {};
     let totalReqSum = 0;
@@ -444,7 +475,7 @@
       }
       finalT = req;
       finalProjected = projectedRows(finalT);
-      finalResult = calculate(finalProjected, { ignoreBonus: true });
+      finalResult = calculate(finalProjected, { fixedBonus: currentBonus });
     }
 
     const avgRequired = totalReqCount > 0 ? Math.round((totalReqSum / totalReqCount) * 10) / 10 : Math.round(finalT * 10) / 10;
@@ -456,7 +487,8 @@
       maximum: maximumResult,
       result: finalResult,
       rows: finalProjected,
-      taskRequirements
+      taskRequirements,
+      bonus: currentBonus
     };
   }
 
