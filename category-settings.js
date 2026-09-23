@@ -163,6 +163,39 @@
       </header>
 
       <section class="cx-settings-section" style="margin-bottom:28px;">
+        <header style="margin-bottom:8px;"><strong>General Preferences</strong></header>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;margin-top:8px;">
+          <input type="checkbox" id="cx-auto-expand-toggle" style="width:16px;height:16px;cursor:pointer;">
+          Auto-expand class tabs on page load
+        </label>
+        <p style="font-size:11px;color:#788896;margin:4px 0 0 24px;">When enabled, Connectify automatically expands course outlines on load to scrape assessment data.</p>
+
+        <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:14px;padding-top:12px;border-top:1px solid #d8e3ee;">
+          <div>
+            <label for="cx-general-cohort-input" style="display:block;font-size:12px;font-weight:600;color:#203c5e;margin-bottom:4px;">
+              General Cohort Size
+            </label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="number" id="cx-general-cohort-input" min="1" step="1" placeholder="500" style="box-sizing:border-box;width:80px;padding:3px 6px;border:1px solid #b9cbe1;border-radius:4px;font-size:12px;color:#203c5e;">
+              <span style="font-size:11px;color:#788896;">(default: 500)</span>
+            </div>
+            <p style="font-size:11px;color:#788896;margin:3px 0 0 0;">Estimated total students in this year level.</p>
+          </div>
+
+          <div>
+            <label for="cx-atar-percentage-input" style="display:block;font-size:12px;font-weight:600;color:#203c5e;margin-bottom:4px;">
+              ATAR Percentage
+            </label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="number" id="cx-atar-percentage-input" min="1" max="100" step="1" placeholder="60" style="box-sizing:border-box;width:75px;padding:3px 6px;border:1px solid #b9cbe1;border-radius:4px;font-size:12px;color:#203c5e;">
+              <span style="font-size:11px;color:#788896;">% (default: 60%)</span>
+            </div>
+            <p style="font-size:11px;color:#788896;margin:3px 0 0 0;">Proportion enrolled in the ATAR pathway.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="cx-settings-section" style="margin-bottom:28px;border-top:1px solid #d8e3ee;padding-top:20px;">
         <header style="margin-bottom:8px;"><strong>Semester 1 Scaling Calibration</strong></header>
         <p style="font-size:12px;color:#788896;margin:0 0 14px 0;">Enter your school's Semester 1 scaled scores to calibrate the model to your cohort's historical distribution.</p>
         <div id="cx-calibration-table" style="display:grid;grid-template-columns:minmax(140px, 220px) 85px 85px;gap:10px 14px;align-items:center;margin-top:12px;"></div>
@@ -210,6 +243,43 @@
       if (newInput) newInput.focus();
     };
 
+    const autoExpandToggle = catPanel.querySelector('#cx-auto-expand-toggle');
+    if (autoExpandToggle) {
+      autoExpandToggle.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
+      autoExpandToggle.addEventListener('change', () => {
+        try { localStorage.setItem('connectify:auto_expand', String(autoExpandToggle.checked)); } catch (e) {}
+        window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
+      });
+    }
+
+    const generalCohortInput = catPanel.querySelector('#cx-general-cohort-input');
+    if (generalCohortInput) {
+      const saved = localStorage.getItem('connectify:general_cohort_size');
+      if (saved) generalCohortInput.value = saved;
+      generalCohortInput.addEventListener('input', () => {
+        try {
+          const val = generalCohortInput.value.trim();
+          if (val && Number(val) > 0) localStorage.setItem('connectify:general_cohort_size', val);
+          else localStorage.removeItem('connectify:general_cohort_size');
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
+      });
+    }
+
+    const atarPctInput = catPanel.querySelector('#cx-atar-percentage-input');
+    if (atarPctInput) {
+      const saved = localStorage.getItem('connectify:atar_percentage');
+      if (saved) atarPctInput.value = saved;
+      atarPctInput.addEventListener('input', () => {
+        try {
+          const val = atarPctInput.value.trim();
+          if (val && Number(val) > 0 && Number(val) <= 100) localStorage.setItem('connectify:atar_percentage', val);
+          else localStorage.removeItem('connectify:atar_percentage');
+        } catch (e) {}
+        window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
+      });
+    }
+
     function renderCalib() {
       if (window.ConnectifyCalibration?.renderCalibTable) {
         window.ConnectifyCalibration.renderCalibTable(catPanel);
@@ -220,6 +290,15 @@
       catPanel.hidden = false;
       catBtn.setAttribute('aria-pressed', 'true');
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
+      if (autoExpandToggle) {
+        autoExpandToggle.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
+      }
+      if (generalCohortInput) {
+        generalCohortInput.value = localStorage.getItem('connectify:general_cohort_size') || '';
+      }
+      if (atarPctInput) {
+        atarPctInput.value = localStorage.getItem('connectify:atar_percentage') || '';
+      }
       resolveCategories();
       renderCategoryInputs(catPanel);
       renderCalib();

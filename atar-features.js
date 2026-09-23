@@ -17,12 +17,22 @@
     let weaknessInstance = null;
     let settingsInstance = null;
 
+    function isAutoExpandEnabled() {
+      try {
+        const val = localStorage.getItem('connectify:auto_expand');
+        if (val !== null) return val !== 'false';
+      } catch (e) {}
+      return true;
+    }
+
     function syncFeatures() {
       initSidebarTools();
       if (!window.ConnectifyData) return;
 
       if (!hasAutoExpanded) {
-        if (document.querySelectorAll('.eds-c-tile').length > 0) {
+        if (!isAutoExpandEnabled()) {
+          hasAutoExpanded = true;
+        } else if (document.querySelectorAll('.eds-c-tile').length > 0) {
           window.ConnectifyData.expandAll(true);
           hasAutoExpanded = true;
         } else {

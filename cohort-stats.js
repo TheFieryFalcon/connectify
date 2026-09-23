@@ -338,6 +338,10 @@
     }
   });
   window.addEventListener('connectify-task-type-changed', schedule);
+  window.addEventListener('connectify-settings-updated', () => {
+    persistentEstimates.clear();
+    schedule();
+  });
 
   let timer = setInterval(schedule, 1500);
 

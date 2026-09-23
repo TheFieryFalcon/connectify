@@ -11,8 +11,8 @@
   if (window.ConnectifyCountdown) return;
 
   function updateCountdown() {
-    const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent);
-    const isYear12 = titles.some(t => /12/i.test(t) || /AT[A-Z]{3}/.test(t));
+    const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent || '');
+    const isYear12 = titles.some(t => /\b(?:year\s*12|12)\b/i.test(t) || /\bAT[A-Z]{3}\b/.test(t));
     if (!isYear12) {
       document.getElementById('connectify-wace-countdown')?.remove();
       return;
@@ -38,16 +38,26 @@
     }
 
     const now = new Date();
-    // Typical WACE commencement: late October (~Oct 28)
-    const examDate = new Date(now.getFullYear(), 9, 28);
-    if (now > examDate && now.getMonth() > 10) examDate.setFullYear(now.getFullYear() + 1);
+    const currentYear = now.getFullYear();
+    // Typical WACE commencement: late October (~Oct 28) through ~Nov 20
+    const examStartDate = new Date(currentYear, 9, 28);
+    const examEndDate = new Date(currentYear, 10, 20);
 
-    const days = Math.ceil((examDate - now) / (1000 * 60 * 60 * 24));
-    if (days >= 0 && days <= 300) {
-      countdown.innerHTML = `⏳ <span>${days} days until WACE Exams</span>`;
+    if (now >= examStartDate && now <= examEndDate) {
+      countdown.innerHTML = `⏳ <span>WACE Examinations in progress! 🎓</span>`;
       countdown.style.display = '';
     } else {
-      countdown.style.display = 'none';
+      let targetDate = examStartDate;
+      if (now > examEndDate) {
+        targetDate = new Date(currentYear + 1, 9, 28);
+      }
+      const days = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+      if (days >= 0 && days <= 365) {
+        countdown.innerHTML = `⏳ <span>${days} days until WACE Exams</span>`;
+        countdown.style.display = '';
+      } else {
+        countdown.style.display = 'none';
+      }
     }
   }
 

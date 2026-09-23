@@ -81,9 +81,10 @@
       return calculate(courses[i].map(row => getCourseState(row, i, courses)));
     });
 
-    const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent);
-    const isYear12 = titles.some(t => /\b12\b/i.test(t) || /\bAT[A-Z]*\b/.test(t));
-    const yearLevel = isYear12 ? 12 : 11;
+    const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent || '');
+    const hasYear12 = titles.some(t => /\b(?:year\s*12|12)\b/i.test(t) || /\bAT[A-Z]{3}\b/.test(t));
+    const hasYear11 = titles.some(t => /\b(?:year\s*11|11)\b/i.test(t) || /\bAE[A-Z]{3}\b/.test(t));
+    const yearLevel = (hasYear11 && !hasYear12) ? 11 : 12;
     const teaAdjustment = yearLevel === 11 ? -15 : 0; // Penalize TEA by 15 points (roughly -5%) for Year 11 unscaled marks
 
     return results.map(result => {

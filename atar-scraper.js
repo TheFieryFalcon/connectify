@@ -51,7 +51,7 @@
 
       const summaryRow = Array.from(card.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.cvr-c-tasks'));
       const summaryText = normalize(summaryRow?.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
-      const markMatch = summaryText.match(/^(\d+(?:\.\d+)?)\s*%$/);
+      const markMatch = summaryText.match(/(-?\d+(?:\.\d+)?)\s*%/);
 
       let tasks = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'))
         .filter(r => r.closest('.eds-c-tile') === card)
@@ -91,7 +91,7 @@
       const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
       if (
         (!allSubjects && !isAtarCourse(title)) ||
-        !new RegExp(`Semester\s*${activeSemester + 1}\b`, 'i').test(title)
+        !new RegExp(`Semester\\s*${activeSemester + 1}\\b`, 'i').test(title)
       ) {
         continue;
       }

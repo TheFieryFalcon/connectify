@@ -153,60 +153,79 @@
     // 2. Derive dynamic baseline estimate from subject category, course type, and year level
     let baseline = 50;
     const isATAR = /\batar\b/i.test(cleanTitle);
-    const isYear12 = /\byear\s*12\b/i.test(cleanTitle);
+    const isYear11 = /\b(?:year\s*11|11)\b/i.test(cleanTitle) || /\bAE[A-Z]{3}\b/i.test(cleanTitle);
+    const isYear12Direct = /\b(?:year\s*12|12)\b/i.test(cleanTitle) || /\bAT[A-Z]{3}\b/i.test(cleanTitle);
+    const allTitles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent || '');
+    const pageHasYear11 = allTitles.some(t => /\b(?:year\s*11|11)\b/i.test(t) || /\bAE[A-Z]{3}\b/i.test(t));
+    const pageHasYear12 = allTitles.some(t => /\b(?:year\s*12|12)\b/i.test(t) || /\bAT[A-Z]{3}\b/i.test(t));
+    const isYear12 = isYear12Direct || (!isYear11 && pageHasYear12 && !pageHasYear11);
+
+    let totalStudents = 500;
+    let atarPct = 60;
+    try {
+      const storedTotal = Number(localStorage.getItem('connectify:general_cohort_size'));
+      if (Number.isSafeInteger(storedTotal) && storedTotal >= 1) totalStudents = storedTotal;
+      const storedAtar = Number(localStorage.getItem('connectify:atar_percentage'));
+      if (Number.isFinite(storedAtar) && storedAtar > 0 && storedAtar <= 100) atarPct = storedAtar;
+    } catch (e) {}
+
+    const atarPool = totalStudents * (atarPct / 100);
+    const nonAtarPool = totalStudents * (1 - atarPct / 100);
+    const atarScale = atarPool / 300;
+    const nonAtarScale = nonAtarPool / 200;
 
     if (/\b(methods|mathematics methods)\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? 180 : 219;
+      baseline = isYear12 ? Math.round(180 * atarScale) : Math.round(219 * atarScale);
     } else if (/\bchemistry\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? 170 : 224;
+      baseline = isYear12 ? Math.round(170 * atarScale) : Math.round(224 * atarScale);
     } else if (/\bhuman biolog(y|ical)\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? 140 : 183;
+      baseline = isYear12 ? Math.round(140 * atarScale) : Math.round(183 * atarScale);
     } else if (/\b(mathematics applications?|applications?)\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? 160 : 189;
+      baseline = isYear12 ? Math.round(160 * atarScale) : Math.round(189 * atarScale);
     } else if (/\benglish atar\b/i.test(cleanTitle) || (/\benglish\b/i.test(cleanTitle) && isATAR && !/\badditional\b/i.test(cleanTitle))) {
-      baseline = isYear12 ? 180 : 220;
+      baseline = isYear12 ? Math.round(180 * atarScale) : Math.round(220 * atarScale);
     } else if (/\b(mathematics essentials?|essentials?)\b/i.test(cleanTitle)) {
-      baseline = 117;
+      baseline = Math.round(117 * nonAtarScale);
     } else if (/\bphysics\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? 90 : 111;
+      baseline = isYear12 ? Math.round(90 * atarScale) : Math.round(111 * atarScale);
     } else if (/\bmathematics specialist\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? 45 : 64;
+      baseline = isYear12 ? Math.round(45 * atarScale) : Math.round(64 * atarScale);
     } else if (/\bbiology\b/i.test(cleanTitle)) {
-      baseline = 61;
+      baseline = Math.round(61 * atarScale);
     } else if (/\bliterature\b/i.test(cleanTitle)) {
-      baseline = 52;
+      baseline = Math.round(52 * atarScale);
     } else if (/\beconomics\b/i.test(cleanTitle)) {
-      baseline = 44;
+      baseline = Math.round(44 * atarScale);
     } else if (/\b(accounting|accounting and finance)\b/i.test(cleanTitle)) {
-      baseline = 36;
+      baseline = Math.round(36 * atarScale);
     } else if (/\b(politics and law|politics & law)\b/i.test(cleanTitle)) {
-      baseline = 35;
+      baseline = Math.round(35 * atarScale);
     } else if (/\bpsychology\b/i.test(cleanTitle)) {
-      baseline = 45;
+      baseline = Math.round(45 * atarScale);
     } else if (/\b(physical education studies|pes)\b/i.test(cleanTitle)) {
-      baseline = 38;
+      baseline = Math.round(38 * atarScale);
     } else if (/\b(business management|bme)\b/i.test(cleanTitle)) {
-      baseline = 24;
+      baseline = Math.round(24 * atarScale);
     } else if (/\bmodern history\b/i.test(cleanTitle)) {
-      baseline = 15;
+      baseline = Math.round(15 * atarScale);
     } else if (/\bjapanese\b/i.test(cleanTitle)) {
-      baseline = 44;
+      baseline = Math.round(44 * atarScale);
     } else if (/\bfrench\b/i.test(cleanTitle)) {
-      baseline = 21;
+      baseline = Math.round(21 * atarScale);
     } else if (/\bitalian\b/i.test(cleanTitle)) {
-      baseline = 20;
+      baseline = Math.round(20 * atarScale);
     } else if (/\b(german|chinese|indonesian)\b/i.test(cleanTitle)) {
-      baseline = 22;
+      baseline = Math.round(22 * atarScale);
     } else if (/\bcomputer science\b/i.test(cleanTitle)) {
-      baseline = 11;
+      baseline = Math.round(11 * atarScale);
     } else if (/\bmusic\b/i.test(cleanTitle)) {
-      baseline = 10;
+      baseline = Math.round(10 * atarScale);
     } else if (/\b(eald|english as an additional)\b/i.test(cleanTitle)) {
-      baseline = 9;
+      baseline = Math.round(9 * atarScale);
     } else if (isATAR) {
-      baseline = 50;
+      baseline = Math.round(50 * atarScale);
     } else {
-      baseline = 28;
+      baseline = Math.max(5, Math.round(28 * nonAtarScale));
     }
 
     // 3. Empirical refinement from Highcharts boxplot statistics if present
