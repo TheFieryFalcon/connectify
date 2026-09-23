@@ -165,6 +165,27 @@
    * emits notifications for any changes, auto-expands the changed cards,
    * and updates the grade cache.
    */
+  function parseCardSemester(rawTitle) {
+    const match = rawTitle.match(/\bSem(?:ester)?\s*([12])\b/i) || rawTitle.match(/Semester\s*([12])/i);
+    return match ? Number(match[1]) : 1;
+  }
+
+  function extractSubjectName(rawTitle) {
+    if (!rawTitle) return '';
+    return normalize(
+      rawTitle
+        .replace(/\s*[-–—]\s*Sem(?:ester)?\s*[12].*$/i, '')
+        .replace(/\s*[(]?\s*Sem(?:ester)?\s*[12][^)]*\)?/gi, '')
+        .replace(/\bATAR\b/gi, '')
+        .replace(/\bYear\s*\d+\b/gi, '')
+    ) || rawTitle;
+  }
+
+  /**
+   * Scans all subject cards in the DOM, compares running averages against cache,
+   * emits notifications for any changes, auto-expands the changed cards,
+   * and updates the grade cache.
+   */
   function checkGrades() {
     if (!document.body) return;
 
@@ -173,43 +194,70 @@
     );
     if (!cards.length) return;
 
-    const currentEntries = [];
+    // Group cards by normalized subject name, prioritizing Semester 2 when scores exist
+    const subjectMap = new Map();
 
     for (const card of cards) {
       const rawTitle = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
       if (!rawTitle) continue;
 
-      const subjectName = rawTitle
-        .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
-        .replace(/\bATAR\b/gi, '')
-        .replace(/\bYear\s*\d+\b/gi, '')
-        .trim() || rawTitle;
+      const semester = parseCardSemester(rawTitle);
+      const subjectName = extractSubjectName(rawTitle);
 
       const summaryRow = Array.from(card.querySelectorAll('.cvr-c-task')).find(
         row => !row.closest('.cvr-c-tasks')
       );
       const mark = readSubjectMark(summaryRow);
+      const hasScore = Number.isFinite(mark);
 
-      if (Number.isFinite(mark)) {
-        currentEntries.push({
-          card,
-          rawTitle,
-          subjectName,
-          mark: Math.round(mark * 100) / 100
-        });
+      const candidate = {
+        card,
+        rawTitle,
+        subjectName,
+        semester,
+        mark: hasScore ? Math.round(mark * 100) / 100 : undefined
+      };
+
+      if (!subjectMap.has(subjectName)) {
+        subjectMap.set(subjectName, candidate);
+      } else {
+        const existing = subjectMap.get(subjectName);
+        const candidateHasScore = Number.isFinite(candidate.mark);
+        const existingHasScore = Number.isFinite(existing.mark);
+
+        // Preference rules:
+        // 1. If candidate is Semester 2 with a valid score, it always takes precedence.
+        // 2. If existing is Semester 1 (even with a score) and candidate is Semester 2 with a score, replace.
+        // 3. If candidate has a score but existing has no score, candidate wins regardless of semester.
+        // 4. Do not let Semester 1 overwrite an existing Semester 2 with a score.
+        if (candidate.semester === 2 && candidateHasScore) {
+          subjectMap.set(subjectName, candidate);
+        } else if (!existingHasScore && candidateHasScore) {
+          subjectMap.set(subjectName, candidate);
+        } else if (candidate.semester > existing.semester && candidateHasScore) {
+          subjectMap.set(subjectName, candidate);
+        }
       }
     }
+
+    // Only consider subjects that have a valid running mark
+    const currentEntries = Array.from(subjectMap.values()).filter(
+      e => Number.isFinite(e.mark)
+    );
 
     if (!currentEntries.length) return;
 
     const prevCache = loadCachedGrades();
-    const isFirstRun = prevCache === null;
+    const isFirstRun = !prevCache || Object.keys(prevCache).length === 0;
 
+    // First-time users with an empty cache must NOT receive a barrage of notifications;
+    // only notify when an existing cached grade has changed by >= 0.05%
     if (!isFirstRun && prevCache) {
       for (const entry of currentEntries) {
         const prev = prevCache[entry.subjectName];
+        const hasPrev = prev && Number.isFinite(prev.mark);
 
-        if (prev && Number.isFinite(prev.mark)) {
+        if (hasPrev) {
           const delta = Math.round((entry.mark - prev.mark) * 100) / 100;
 
           if (Math.abs(delta) >= 0.05) {
@@ -251,40 +299,74 @@
       }
     }
 
-    // Always update the averages cache on page load with all latest subject averages
-    const updatedCache = prevCache ? { ...prevCache } : {};
-    for (const entry of currentEntries) {
-      updatedCache[entry.subjectName] = {
-        mark: entry.mark,
-        updatedAt: Date.now()
-      };
-    }
-    saveCachedGrades(updatedCache);
+    // Update the averages cache 1 second after the page has loaded / evaluated
+    setTimeout(() => {
+      const updatedCache = loadCachedGrades() || {};
+      for (const entry of currentEntries) {
+        updatedCache[entry.subjectName] = {
+          mark: entry.mark,
+          semester: entry.semester,
+          updatedAt: Date.now()
+        };
+      }
+      saveCachedGrades(updatedCache);
+    }, 1000);
   }
 
   let hasCheckedThisPage = false;
+  let checkTimer = null;
 
-  function triggerPageLoadCheck() {
+  function scheduleCheck(delay = 600) {
     if (hasCheckedThisPage) return;
-    if (document.querySelectorAll('.eds-c-tile').length > 0) {
-      hasCheckedThisPage = true;
-      checkGrades();
-    }
+    clearTimeout(checkTimer);
+    checkTimer = setTimeout(() => {
+      if (hasCheckedThisPage) return;
+      if (document.querySelectorAll('.eds-c-tile').length > 0) {
+        hasCheckedThisPage = true;
+        checkGrades();
+      }
+    }, delay);
   }
 
-  // Trigger once on page load after DOM tiles are present
-  setTimeout(triggerPageLoadCheck, 1200);
-  setTimeout(triggerPageLoadCheck, 2500);
-  setTimeout(triggerPageLoadCheck, 4000);
+  // Trigger on page load after DOM tiles are present
+  if (document.readyState === 'complete') {
+    scheduleCheck(300);
+  } else {
+    window.addEventListener('load', () => scheduleCheck(300));
+  }
+  setTimeout(() => scheduleCheck(600), 600);
+  setTimeout(() => scheduleCheck(1500), 1500);
+  setTimeout(() => scheduleCheck(3000), 3000);
+
+  // Observe DOM additions so check runs once tiles have settled
+  if (typeof MutationObserver !== 'undefined') {
+    const pageObserver = new MutationObserver(mutations => {
+      if (hasCheckedThisPage) return;
+      for (const m of mutations) {
+        if (m.addedNodes.length > 0) {
+          scheduleCheck(500);
+          break;
+        }
+      }
+    });
+
+    if (document.body) {
+      pageObserver.observe(document.body, { childList: true, subtree: true });
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        pageObserver.observe(document.body, { childList: true, subtree: true });
+      });
+    }
+  }
 
   // Reset page check guard on navigation
   window.addEventListener('hashchange', () => {
     hasCheckedThisPage = false;
-    setTimeout(triggerPageLoadCheck, 1000);
+    scheduleCheck(800);
   });
   window.addEventListener('popstate', () => {
     hasCheckedThisPage = false;
-    setTimeout(triggerPageLoadCheck, 1000);
+    scheduleCheck(800);
   });
 
   window.ConnectifyNewGrade = {

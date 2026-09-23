@@ -63,18 +63,6 @@
       }
     }
 
-    // 4. Year 12 Countdown & Progress check
-    const tiles = Array.from(document.querySelectorAll('.eds-c-tile__title, .eds-c-tile'));
-    const pageText = tiles.map(t => t.textContent || '').join(' ');
-    const isYear12 = /\b(?:Year\s*12|12)\b/i.test(pageText) || /\bAT[A-Z]{3}\b/.test(pageText);
-
-    if (isYear12 && !document.getElementById('connectify-wace-countdown')) {
-      const mainContainer = document.querySelector('.cvr-c-assessment__main, main, [role="main"], .cvr-c-overview');
-      if (mainContainer) {
-        missing.push('WACE Exam Countdown Banner');
-      }
-    }
-
     return missing;
   }
 
