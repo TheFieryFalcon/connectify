@@ -275,7 +275,10 @@
     });
 
     window.ConnectifyInitSidebar = syncState;
-    setInterval(syncState, 1500);
+    setInterval(() => {
+      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
+      syncState();
+    }, 1500);
     syncState();
   } catch (err) {
     console.error('Connectify error in sidebar.js:', err);

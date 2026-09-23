@@ -76,27 +76,42 @@
    * Reads raw assessment score percentage from the task row.
    */
   function readMark(row) {
-    const cell = row.querySelector('.cvr-c-task__marks .cvr-c-task__mark');
+    const cell = row.querySelector('.cvr-c-task__marks .cvr-c-task__mark') || row.querySelector('.cvr-c-task__mark');
     const text = normalize(cell?.textContent);
 
     let match = text.match(/^(-?\d+(?:\.\d+)?)\s*%$/);
     if (match) return Number(match[1]);
 
     match = text.match(/^(-?\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
-    return match && Number(match[2]) > 0 ? (100 * Number(match[1])) / Number(match[2]) : undefined;
+    if (match && Number(match[2]) > 0) return (100 * Number(match[1])) / Number(match[2]);
+
+    match = text.match(/(-?\d+(?:\.\d+)?)\s*%/);
+    if (match) return Number(match[1]);
+
+    return undefined;
   }
 
   /**
    * Reads 5-number boxplot summary from DOM bridge or Highcharts on the task row.
    */
   function readStats(row) {
-    const host = row.querySelector('.cvr-c-task__chart [data-highcharts-chart]');
+    const host = row.querySelector('[data-highcharts-chart]') ||
+                 row.querySelector('.cvr-c-task__chart [data-highcharts-chart]') ||
+                 row.querySelector('.cvr-c-task__chart');
     if (!host) return null;
 
     // Check shared DOM dataset bridge first (fast & cross-world compatible)
-    if (host.dataset.connectifyStats) {
+    if (host.dataset?.connectifyStats) {
       try {
         const stats = JSON.parse(host.dataset.connectifyStats);
+        if (math().validStats(stats)) return stats;
+      } catch {}
+    }
+
+    const hostWithDataset = host.querySelector?.('[data-connectify-stats]') || host.closest?.('[data-connectify-stats]');
+    if (hostWithDataset?.dataset?.connectifyStats) {
+      try {
+        const stats = JSON.parse(hostWithDataset.dataset.connectifyStats);
         if (math().validStats(stats)) return stats;
       } catch {}
     }
@@ -104,7 +119,7 @@
     // Direct Highcharts instance check if available
     const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
     const chart = window.Highcharts?.charts?.[chartIndex];
-    if (chart && (!chart.container || host.contains(chart.container))) {
+    if (chart) {
       for (const series of chart.series || []) {
         const dataPoints = [...(series.points || []), ...(series.options?.data || [])];
         for (const point of dataPoints) {
@@ -520,7 +535,7 @@
       ui.box.classList.add('connectea-hidden');
       ui.box.style.setProperty('display', 'none', 'important');
       if (ui.typeContainer) ui.typeContainer.style.setProperty('display', 'inline-flex', 'important');
-      if (ui.wrapper) ui.wrapper.style.setProperty('display', 'flex', 'important');
+      if (!isOverall && ui.wrapper) ui.wrapper.style.setProperty('display', 'flex', 'important');
       return;
     }
 
@@ -528,7 +543,7 @@
     ui.box.classList.remove('connectea-hidden');
     ui.box.style.setProperty('display', 'block', 'important');
     if (ui.typeContainer) ui.typeContainer.style.setProperty('display', 'inline-flex', 'important');
-    if (ui.wrapper) ui.wrapper.style.setProperty('display', 'flex', 'important');
+    if (!isOverall && ui.wrapper) ui.wrapper.style.setProperty('display', 'flex', 'important');
 
     if (!data) {
       setText(ui.distribution, 'Cohort statistics unavailable');
@@ -835,6 +850,7 @@
   }
 
   function schedule() {
+    if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
     if (queued) return;
     queued = true;
     requestAnimationFrame(() => {

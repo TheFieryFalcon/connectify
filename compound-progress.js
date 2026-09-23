@@ -217,7 +217,10 @@
     });
   }
 
-  setInterval(updateCompoundBars, 1500);
+  setInterval(() => {
+    if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
+    updateCompoundBars();
+  }, 1500);
   updateCompoundBars();
 
   window.ConnectifyCompoundProgress = {

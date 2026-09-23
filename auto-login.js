@@ -36,8 +36,24 @@
     } catch (e) {}
   };
 
-  storageGet(['cx-manual-logout', 'cx-autologin-enabled'], (result) => {
-      // 1. Inject the toggle UI
+  storageGet(['cx-manual-logout', 'cx-session-expired', 'cx-autologin-enabled', 'cx-last-autologin'], (result) => {
+      // 1. Detect if this page was reached due to session expiry or logout
+      const isManualLogout = result['cx-manual-logout'] === true;
+      const isStoredExpired = result['cx-session-expired'] === true;
+      const isTimeoutUrl = /timeout|expired|logout|inactivity|reason=/i.test(window.location.href);
+      const bodyText = (document.body?.innerText || '').toLowerCase();
+      const isTimeoutPage = /session\s*(has\s*)?(expired|timed\s*out)|logged\s*out\s*due\s*to\s*inactivity|inactivity\s*timeout|session\s*timeout/i.test(bodyText);
+      const lastLogin = Number(result['cx-last-autologin'] || 0);
+      const isRapidLoop = (Date.now() - lastLogin) < 30000; // prevent rapid looping within 30s
+
+      const isSessionExpired = isStoredExpired || isTimeoutUrl || isTimeoutPage;
+      const shouldBlockAutoLogin = isManualLogout || isSessionExpired || isRapidLoop;
+
+      // Clean up one-shot flags
+      if (isManualLogout) storageRemove('cx-manual-logout');
+      if (isStoredExpired) storageRemove('cx-session-expired');
+
+      // 2. Inject the toggle UI and status feedback
       const loginBtn = document.getElementById('login');
       if (loginBtn && loginBtn.parentElement) {
           const btnContainer = loginBtn.parentElement;
@@ -61,13 +77,33 @@
           
           toggleLabel.appendChild(toggleInput);
           toggleLabel.appendChild(document.createTextNode('Auto-login'));
-          btnContainer.appendChild(toggleLabel);
+
+          if (shouldBlockAutoLogin) {
+              const notice = document.createElement('span');
+              notice.style.marginLeft = '10px';
+              notice.style.fontSize = '11.5px';
+              notice.style.color = '#c0392b';
+              notice.style.fontWeight = '500';
+              notice.textContent = isSessionExpired
+                ? '(Paused: session expired)'
+                : isManualLogout
+                ? '(Paused: logged out)'
+                : '(Paused)';
+              btnContainer.appendChild(toggleLabel);
+              btnContainer.appendChild(notice);
+          } else {
+              btnContainer.appendChild(toggleLabel);
+          }
+
+          loginBtn.addEventListener('click', () => {
+              storageSet({ 'cx-last-autologin': Date.now() });
+              storageRemove('cx-manual-logout');
+              storageRemove('cx-session-expired');
+          });
       }
 
-      // 2. Check if we just manually logged out
-      if (result['cx-manual-logout'] === true) {
-          storageRemove('cx-manual-logout');
-          return; // Do not auto-login this time
+      if (shouldBlockAutoLogin) {
+          return; // Do not auto-login: let session expiry or manual logout take effect
       }
 
       const attemptLogin = () => {
@@ -85,6 +121,7 @@
                   termsBox.checked = true;
                 }
                 
+                storageSet({ 'cx-last-autologin': Date.now() });
                 loginBtn.value = 'Logging in...';
                 loginBtn.style.opacity = '0.8';
                 loginBtn.click();

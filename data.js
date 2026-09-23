@@ -78,17 +78,26 @@
       if (host.dataset.connectifyStats !== serialized) {
         host.dataset.connectifyStats = serialized;
       }
+      const parent = host.closest('.cvr-c-task__chart');
+      if (parent && parent !== host && parent.dataset.connectifyStats !== serialized) {
+        parent.dataset.connectifyStats = serialized;
+      }
     }
     if (foundN !== undefined) {
       const nStr = String(foundN);
       if (host.dataset.connectifyN !== nStr) {
         host.dataset.connectifyN = nStr;
       }
+      const parent = host.closest('.cvr-c-task__chart');
+      if (parent && parent !== host && parent.dataset.connectifyN !== nStr) {
+        parent.dataset.connectifyN = nStr;
+      }
     }
   }
 
   function syncAllCharts() {
-    const hosts = document.querySelectorAll('.cvr-c-task__chart [data-highcharts-chart]');
+    if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
+    const hosts = document.querySelectorAll('[data-highcharts-chart], .cvr-c-task__chart [data-highcharts-chart]');
     for (const host of hosts) {
       syncChartData(host);
     }

@@ -733,7 +733,10 @@
     window.ConnectifyAtar.refreshData = refreshData;
     window.ConnectifyAtar.updateResults = updateResults;
 
-    setInterval(refreshData, 1500);
+    setInterval(() => {
+      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
+      refreshData();
+    }, 1500);
     refreshData();
   } catch (err) {
     console.error('Connectify error in atar-ui.js:', err);

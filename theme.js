@@ -193,6 +193,7 @@
   });
 
   setInterval(() => {
+    if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
     if (!toggleButton.isConnected) updateTheme();
   }, 1000);
 

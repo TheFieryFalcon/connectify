@@ -82,18 +82,58 @@
 
   addShortcut();
 
+  // User activity tracking to allow quiet idle periods and detect session timeouts
+  window.__connectifyLastActive = Date.now();
+  window.ConnectifyIsUserActive = () => (Date.now() - (window.__connectifyLastActive || Date.now())) < 90000;
+
+  const onUserActivity = () => {
+    window.__connectifyLastActive = Date.now();
+  };
+  for (const evt of ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll']) {
+    window.addEventListener(evt, onUserActivity, { passive: true, capture: true });
+  }
+
+  const getStorageApi = () => {
+    return (typeof browser !== 'undefined' && browser?.storage)
+      ? browser
+      : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
+  };
+
   // Intercept logout clicks to temporarily disable auto-login on the sign-in page
   document.addEventListener('click', (e) => {
-      if (e.target.closest('.cvr-c-primary-navigation__button--sign-out')) {
-          try {
-            const api = (typeof browser !== 'undefined' && browser?.storage)
-              ? browser
-              : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
-            if (api?.storage?.local) {
-              const p = api.storage.local.set({'cx-manual-logout': true});
-              if (p && typeof p.catch === 'function') p.catch(() => {});
-            }
-          } catch (e) {}
-      }
+    if (e.target.closest('.cvr-c-primary-navigation__button--sign-out, a[href*="logout"], button[name*="logout"]')) {
+      try {
+        const api = getStorageApi();
+        if (api?.storage?.local) {
+          api.storage.local.set({ 'cx-manual-logout': true });
+        }
+      } catch (err) {}
+    }
   }, true);
+
+  // If page unloads or redirects while user was idle (> 5 mins), mark session as expired
+  window.addEventListener('beforeunload', () => {
+    if (Date.now() - (window.__connectifyLastActive || Date.now()) > 300000) {
+      try {
+        const api = getStorageApi();
+        if (api?.storage?.local) {
+          api.storage.local.set({ 'cx-session-expired': true });
+        }
+      } catch (err) {}
+    }
+  });
+
+  // Watch for session warning/expiry modal dialogs in Connect
+  const checkSessionStatus = () => {
+    const text = document.body ? document.body.innerText : '';
+    if (/session\s*(has\s*)?(expired|timed\s*out)|your\s*session\s*will\s*expire/i.test(text)) {
+      try {
+        const api = getStorageApi();
+        if (api?.storage?.local) {
+          api.storage.local.set({ 'cx-session-expired': true });
+        }
+      } catch (err) {}
+    }
+  };
+  setInterval(checkSessionStatus, 10000);
 })();

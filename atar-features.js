@@ -819,8 +819,14 @@
     });
 
     initSidebarTools();
-    setInterval(initSidebarTools, 1000);
-    setInterval(syncFeatures, 1500);
+    setInterval(() => {
+      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
+      initSidebarTools();
+    }, 1000);
+    setInterval(() => {
+      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
+      syncFeatures();
+    }, 1500);
 
     window.ConnectifySync = syncFeatures;
     window.ConnectifyInitSidebar = initSidebarTools;

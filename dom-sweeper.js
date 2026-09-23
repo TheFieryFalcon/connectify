@@ -216,7 +216,10 @@
   setTimeout(sweep, 5000);
 
   // Periodic health check
-  setInterval(sweep, 15000);
+  setInterval(() => {
+    if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
+    sweep();
+  }, 15000);
 
   window.ConnectifyDomSweeper = {
     sweep,
