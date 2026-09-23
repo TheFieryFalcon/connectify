@@ -1,5 +1,10 @@
 (() => {
   'use strict';
+
+  try {
+    if (window.__connectifyAtarUiInitialized) return;
+    window.__connectifyAtarUiInitialized = true;
+
   if (!Element.prototype.replaceChildren) {
     Element.prototype.replaceChildren = function(...nodes) {
       while (this.firstChild) this.removeChild(this.firstChild);
@@ -202,10 +207,10 @@
     return /\bYear\s*(?:11|12)\b/i.test(text) || /\bATAR\b/i.test(text);
   };
 
-  const hasSemesterTwoStarted = () => gradeCourses.flat().some(r => r.finalLetter);
+  const hasSemesterTwoStarted = () => (gradeCourses || []).flat().some(r => r?.finalLetter);
   const isTargetClosed = semesterIdx =>
-    gradeCourses[semesterIdx].some(r => r.finalLetter) ||
-    (semesterIdx === 1 && !gradeCourses.flat().some(r => r.finalLetter));
+    (gradeCourses?.[semesterIdx] || []).some(r => r?.finalLetter) ||
+    (semesterIdx === 1 && !(gradeCourses || []).flat().some(r => r?.finalLetter));
 
   function selectTab(mode) {
     if (!isAtarEligible()) mode = 'grade';
@@ -792,4 +797,7 @@
 
   setInterval(refreshData, 1500);
   refreshData();
+  } catch (err) {
+    console.error('Connectify error in atar-ui.js:', err);
+  }
 })();

@@ -7,6 +7,9 @@
 (() => {
   'use strict';
 
+  if (window.__connectifyNavInitialized) return;
+  window.__connectifyNavInitialized = true;
+
   const DESTINATION_URL = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
   const SHORTCUT_LABEL = 'Assessment Outlines';
 
@@ -82,10 +85,15 @@
   // Intercept logout clicks to temporarily disable auto-login on the sign-in page
   document.addEventListener('click', (e) => {
       if (e.target.closest('.cvr-c-primary-navigation__button--sign-out')) {
-          const api = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
-          if (api && api.storage) {
-              api.storage.local.set({'cx-manual-logout': true});
-          }
+          try {
+            const api = (typeof browser !== 'undefined' && browser?.storage)
+              ? browser
+              : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
+            if (api?.storage?.local) {
+              const p = api.storage.local.set({'cx-manual-logout': true});
+              if (p && typeof p.catch === 'function') p.catch(() => {});
+            }
+          } catch (e) {}
       }
   }, true);
 })();

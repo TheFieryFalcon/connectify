@@ -7,6 +7,11 @@
  */
 (() => {
   'use strict';
+
+  try {
+    if (window.__connectifyProgressInitialized || document.getElementById('connectify-progress-toggle')) return;
+    window.__connectifyProgressInitialized = true;
+
   if (!Element.prototype.replaceChildren) {
     Element.prototype.replaceChildren = function(...nodes) {
       while (this.firstChild) this.removeChild(this.firstChild);
@@ -642,7 +647,9 @@
     const courses = window.ConnectifyAtar?.readCourses ? window.ConnectifyAtar.readCourses(false) : [[], []];
     if (!courses || !courses[0] || !courses[1]) return;
 
-    for (const subject of dataAPI.collect()) {
+    const collectFn = dataAPI?.collect || window.ConnectifyData?.collect;
+    if (!collectFn) return;
+    for (const subject of collectFn()) {
       const latestTask = subject.tasks?.length ? subject.tasks[subject.tasks.length - 1] : null;
       if (!latestTask?.row) continue;
 
@@ -688,4 +695,7 @@
   }, 1500);
 
   updateImprovementArrows();
+  } catch (err) {
+    console.error('Connectify error in progress-graph.js:', err);
+  }
 })();

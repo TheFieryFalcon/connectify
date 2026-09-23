@@ -1,21 +1,39 @@
 (() => {
   'use strict';
 
-  const isFirefox = typeof browser !== 'undefined';
-  const api = isFirefox ? browser : (typeof chrome !== 'undefined' ? chrome : null);
-  if (!api || !api.storage) return;
+  if (window.__connectifyAutoLoginInitialized) return;
+  window.__connectifyAutoLoginInitialized = true;
+
+  const api = (typeof browser !== 'undefined' && browser?.storage)
+    ? browser
+    : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
+  if (!api || !api.storage || !api.storage.local) return;
 
   const storageGet = (keys, cb) => {
-      if (isFirefox) api.storage.local.get(keys).then(cb);
-      else api.storage.local.get(keys, cb);
+    try {
+      let handled = false;
+      const callback = res => {
+        if (handled) return;
+        handled = true;
+        if (res) cb(res);
+      };
+      const p = api.storage.local.get(keys, callback);
+      if (p && typeof p.then === 'function') {
+        p.then(callback).catch(() => {});
+      }
+    } catch (e) {}
   };
   const storageSet = (obj) => {
-      if (isFirefox) api.storage.local.set(obj);
-      else api.storage.local.set(obj);
+    try {
+      const p = api.storage.local.set(obj);
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } catch (e) {}
   };
   const storageRemove = (key) => {
-      if (isFirefox) api.storage.local.remove(key);
-      else api.storage.local.remove(key);
+    try {
+      const p = api.storage.local.remove(key);
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } catch (e) {}
   };
 
   storageGet(['cx-manual-logout', 'cx-autologin-enabled'], (result) => {

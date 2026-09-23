@@ -5,33 +5,78 @@
 (() => {
   'use strict';
 
-  let hasInitializedSidebar = false;
-  let hasAutoExpanded = false;
+  try {
+    if (window.__connectifyAtarFeaturesInitialized) return;
+    window.__connectifyAtarFeaturesInitialized = true;
 
-  const defaultCategories = {
-     Exam: { color: '#e74c3c', keywords: ['exam', 'semester'] },
-     Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
-     Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
-     Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
-     'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'extended', 'presentation', 'oral', 'creative'] }
-  };
-  
-  if (!window.cxCategories) {
-      window.cxCategories = defaultCategories;
-  }
+    let hasInitializedSidebar = false;
+    let hasAutoExpanded = false;
 
-  const resolveCategories = () => {
-      const isFirefox = typeof browser !== 'undefined';
-      const api = isFirefox ? browser : (typeof chrome !== 'undefined' ? chrome : null);
-      if (api && api.storage) {
-          const cb = (res) => {
-              if (res['cx-categories']) window.cxCategories = res['cx-categories'];
-          };
-          if (isFirefox) api.storage.local.get(['cx-categories']).then(cb);
-          else api.storage.local.get(['cx-categories'], cb);
-      }
-  };
-  resolveCategories();
+    const defaultCategories = {
+       Exam: { color: '#e74c3c', keywords: ['exam', 'semester'] },
+       Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
+       Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
+       Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
+       'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'extended', 'presentation', 'oral', 'creative'] }
+    };
+    
+    if (!window.cxCategories) {
+        window.cxCategories = defaultCategories;
+    }
+
+    const safeStorageGet = (keys, cb) => {
+      try {
+        const api = (typeof browser !== 'undefined' && browser?.storage)
+          ? browser
+          : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
+        if (!api?.storage?.local) return;
+        let handled = false;
+        const callback = res => {
+          if (handled) return;
+          handled = true;
+          if (res) cb(res);
+        };
+        const p = api.storage.local.get(keys, callback);
+        if (p && typeof p.then === 'function') {
+          p.then(callback).catch(() => {});
+        }
+      } catch (e) {}
+    };
+
+    const safeStorageSet = obj => {
+      try {
+        const api = (typeof browser !== 'undefined' && browser?.storage)
+          ? browser
+          : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
+        if (!api?.storage?.local) return;
+        const p = api.storage.local.set(obj);
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => {});
+        }
+      } catch (e) {}
+    };
+
+    const safeStorageRemove = key => {
+      try {
+        const api = (typeof browser !== 'undefined' && browser?.storage)
+          ? browser
+          : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
+        if (!api?.storage?.local) return;
+        const p = api.storage.local.remove(key);
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => {});
+        }
+      } catch (e) {}
+    };
+
+    const resolveCategories = () => {
+      safeStorageGet(['cx-categories'], res => {
+        if (res && res['cx-categories']) {
+          window.cxCategories = res['cx-categories'];
+        }
+      });
+    };
+    resolveCategories();
 
   function categorizeTask(taskName) {
      const lower = (taskName || '').toLowerCase();
@@ -221,7 +266,11 @@
 
   // --- Weakness Analyzer & Categories Panel ---
   function initSidebarTools() {
-    if (hasInitializedSidebar || !document.querySelector('#connectify-sidebar')) return;
+    if (hasInitializedSidebar || document.getElementById('connectify-weakness-toggle')) {
+      hasInitializedSidebar = true;
+      return;
+    }
+    if (!document.querySelector('#connectify-sidebar')) return;
     hasInitializedSidebar = true;
     
     const toolMenu = document.querySelector('.cx-tool-menu');
@@ -698,10 +747,7 @@
                    keywords: val.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
                };
            }
-           const api = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
-           if (api && api.storage) {
-               api.storage.local.set({ 'cx-categories': window.cxCategories });
-           }
+           safeStorageSet({ 'cx-categories': window.cxCategories });
            alert('Categories saved!');
        };
        
@@ -712,10 +758,7 @@
        resetBtn.style.marginLeft = '8px';
        resetBtn.onclick = () => {
            window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
-           const api = typeof browser !== 'undefined' ? browser : (typeof chrome !== 'undefined' ? chrome : null);
-           if (api && api.storage) {
-               api.storage.local.remove('cx-categories');
-           }
+           safeStorageRemove('cx-categories');
            renderInputs();
            alert('Categories reset to default.');
        };
@@ -745,12 +788,13 @@
                catBtn.setAttribute('aria-expanded', 'false');
            }
        });
-              window.ConnectifyAtar = window.ConnectifyAtar || {};
+        window.ConnectifyAtar = window.ConnectifyAtar || {};
         window.ConnectifyAtar.toolButtons = window.ConnectifyAtar.toolButtons || [];
-        if (!window.ConnectifyAtar.toolButtons.includes(toggleBtn)) {
+        const existingIds = new Set(window.ConnectifyAtar.toolButtons.map(b => b?.id).filter(Boolean));
+        if (!existingIds.has(toggleBtn.id) && !window.ConnectifyAtar.toolButtons.includes(toggleBtn)) {
           window.ConnectifyAtar.toolButtons.push(toggleBtn);
         }
-        if (!window.ConnectifyAtar.toolButtons.includes(catBtn)) {
+        if (!existingIds.has(catBtn.id) && !window.ConnectifyAtar.toolButtons.includes(catBtn)) {
           window.ConnectifyAtar.toolButtons.push(catBtn);
         }
     }
@@ -758,4 +802,7 @@
   initSidebarTools();
   setInterval(initSidebarTools, 1000);
   setInterval(syncFeatures, 1500);
+  } catch (err) {
+    console.error('Connectify error in atar-features.js:', err);
+  }
 })();

@@ -7,6 +7,10 @@
 (() => {
   'use strict';
 
+  try {
+    if (window.__connectifyDataInitialized && window.ConnectifyData) return;
+    window.__connectifyDataInitialized = true;
+
   const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
 
   /**
@@ -222,4 +226,7 @@
     correctedCaption,
     expandAll
   };
+  } catch (err) {
+    console.error('Connectify error in assessment-data.js:', err);
+  }
 })();
