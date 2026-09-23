@@ -195,12 +195,30 @@
     const calculateTargetBtn = createEl('button', 'cta-reset', 'Recalculate');
     calculateTargetBtn.type = 'button';
 
+    const difficultyLabel = createEl('label', 'cta-difficulty-label');
+    const difficultyCheckbox = createEl('input');
+    difficultyCheckbox.type = 'checkbox';
+    difficultyCheckbox.checked = Boolean(prefs.targetDifficultyWeighted);
+    difficultyLabel.append(
+      difficultyCheckbox,
+      document.createTextNode(' Adjust marks by subject & task type performance')
+    );
+
+    difficultyCheckbox.addEventListener('change', () => {
+      const p = calc?.getPreferences ? calc.getPreferences() : {};
+      p.targetDifficultyWeighted = difficultyCheckbox.checked;
+      if (calc?.persistPreferences) calc.persistPreferences();
+      renderTargetOutput();
+    });
+
+    const topFourContainer = createEl('div', 'cta-top-four-selector');
+
     const targetOutputContainer = createEl('div', 'cta-target-output');
     targetOutputContainer.setAttribute('aria-live', 'polite');
 
     const targetControls = createEl('div', 'cta-form-controls');
-    targetControls.append(targetLabel, calculateTargetBtn);
-    plannerContainer.append(targetControls, targetOutputContainer);
+    targetControls.append(targetLabel, calculateTargetBtn, difficultyLabel);
+    plannerContainer.append(targetControls, topFourContainer, targetOutputContainer);
 
     targetInput.addEventListener('input', () => {
       const p = calc?.getPreferences ? calc.getPreferences() : {};
@@ -379,6 +397,7 @@
       targetInput.disabled = calculateTargetBtn.disabled = isTargetClosed(activeSemester);
 
       if (isTargetClosed(activeSemester)) {
+        topFourContainer.replaceChildren();
         targetOutputContainer.replaceChildren(
           createEl(
             'p',
@@ -391,26 +410,101 @@
         return;
       }
 
-      const rows = (courses[activeSemester] || [])
-        .filter(r => (calc?.getCourseState ? calc.getCourseState(r, activeSemester, courses) : r).include)
-        .map(r => {
-          const current = calc?.getCourseState ? calc.getCourseState(r, activeSemester, courses) : r;
-          return {
-            ...r,
-            include: current.include,
-            score: current.score,
-            progress:
-              current.score === undefined
-                ? { error: 'Enter a valid scaled-score assumption in the ATAR estimate tab.' }
-                : r.progress,
-            offset: current.score === undefined || r.mark === undefined ? 0 : current.score - wholeScore(r.mark)
-          };
+      const eligibleCourses = (courses[activeSemester] || []).filter(
+        r => !/\bGeneral\b|\bmathematics essentials?\b/i.test(r.name)
+      );
+
+      const prefsNow = calc?.getPreferences ? calc.getPreferences() : {};
+      const excludedSubjects = new Set(
+        Array.isArray(prefsNow.targetExcludedSubjects) ? prefsNow.targetExcludedSubjects : []
+      );
+
+      topFourContainer.replaceChildren();
+      if (eligibleCourses.length > 0) {
+        const topHeader = createEl('div');
+        topHeader.style.display = 'flex';
+        topHeader.style.justifyContent = 'space-between';
+        topHeader.style.alignItems = 'center';
+        topHeader.style.marginBottom = '6px';
+
+        const topTitle = createEl('strong', '', 'Targeted Subjects for Top Four:');
+        topTitle.style.fontSize = '12px';
+
+        const selectedCount = eligibleCourses.filter(c => !excludedSubjects.has(c.id || c.name)).length;
+        const countSpan = createEl('span', '', `${selectedCount} of ${eligibleCourses.length} selected`);
+        countSpan.style.fontSize = '11px';
+        countSpan.style.color = '#788896';
+        countSpan.style.fontWeight = '500';
+
+        topHeader.append(topTitle, countSpan);
+        topFourContainer.append(topHeader);
+
+        const grid = createEl('div', 'cta-top-four-grid');
+        eligibleCourses.forEach(c => {
+          const key = c.id || c.name;
+          const isIncluded = !excludedSubjects.has(key);
+
+          const lbl = createEl('label', 'cta-checkbox-label');
+          const cb = createEl('input');
+          cb.type = 'checkbox';
+          cb.checked = isIncluded;
+          cb.addEventListener('change', () => {
+            if (cb.checked) {
+              excludedSubjects.delete(key);
+            } else {
+              excludedSubjects.add(key);
+            }
+            const p = calc?.getPreferences ? calc.getPreferences() : {};
+            p.targetExcludedSubjects = [...excludedSubjects];
+            if (calc?.persistPreferences) calc.persistPreferences();
+            renderTargetOutput();
+          });
+
+          const nameSpan = createEl('span', '', c.name);
+          nameSpan.style.whiteSpace = 'nowrap';
+          nameSpan.style.overflow = 'hidden';
+          nameSpan.style.textOverflow = 'ellipsis';
+          lbl.append(cb, nameSpan);
+          grid.append(lbl);
         });
+        topFourContainer.append(grid);
+      }
+
+      const rows = eligibleCourses.map(r => {
+        const key = r.id || r.name;
+        const isIncluded = !excludedSubjects.has(key);
+        const current = calc?.getCourseState ? calc.getCourseState(r, activeSemester, courses) : r;
+        return {
+          ...r,
+          include: isIncluded,
+          score: current.score,
+          progress:
+            current.score === undefined
+              ? { error: 'Enter a valid scaled-score assumption in the ATAR estimate tab.' }
+              : r.progress,
+          offset: current.score === undefined || r.mark === undefined ? 0 : current.score - wholeScore(r.mark)
+        };
+      });
+
+      const includedRowsCount = rows.filter(r => r.include).length;
+      if (includedRowsCount < 4) {
+        targetOutputContainer.replaceChildren(
+          createEl(
+            'p',
+            'cta-note',
+            'Please select at least 4 subjects above to target for your top four.'
+          )
+        );
+        return;
+      }
 
       const targetPlanFn = window.ConnectifyMath?.targetPlan;
       if (!targetPlanFn) return;
 
-      const plan = targetPlanFn(rows, scoreValue(targetInput.value));
+      const plan = targetPlanFn(rows, scoreValue(targetInput.value), {
+        difficultyWeighted: difficultyCheckbox.checked,
+        ignoreBonus: true
+      });
       targetOutputContainer.replaceChildren();
 
       if (plan.error) {
@@ -434,24 +528,27 @@
           )
         );
       } else {
-        targetOutputContainer.append(
-          createEl(
-            'strong',
-            '',
-            plan.required === 0
-              ? 'Target secured under current assumptions.'
-              : `Requires ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
-                  plan.result?.atar ?? '—'
-                }.`
-          )
-        );
+        const bannerText =
+          plan.required === 0
+            ? 'Target secured under current assumptions.'
+            : difficultyCheckbox.checked
+            ? `Requires performance-adjusted scores (averaging ${round(plan.required)}%) on remaining assessments for an estimated ATAR of ${
+                plan.result?.atar ?? '—'
+              }.`
+            : `Requires ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
+                plan.result?.atar ?? '—'
+              }.`;
+
+        targetOutputContainer.append(createEl('strong', '', bannerText));
       }
 
       targetOutputContainer.append(
         createEl(
           'p',
           'cta-note',
-          `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}. Assumes uniform performance across remaining tasks.`
+          difficultyCheckbox.checked
+            ? `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}. Marks are scaled proportionally based on demonstrated subject and assessment type performance.`
+            : `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}. Assumes uniform performance across remaining tasks.`
         )
       );
 
@@ -464,6 +561,27 @@
       rows.forEach((course, idx) => {
         const block = createEl('div', 'cta-course');
         const projectedScore = plan.rows?.[idx]?.score ?? course.score ?? 0;
+
+        if (!course.include) {
+          block.style.opacity = '0.65';
+          block.append(
+            createEl('strong', '', `${course.name} (Excluded from top four target)`),
+            createEl(
+              'small',
+              '',
+              `Current score: ${
+                course.score !== undefined
+                  ? wholeScore(course.score)
+                  : course.mark !== undefined
+                  ? wholeScore(course.mark)
+                  : '—'
+              }`
+            )
+          );
+          taskDetails.append(block);
+          return;
+        }
+
         block.append(
           createEl('strong', '', course.name),
           createEl(
@@ -478,11 +596,23 @@
         );
 
         for (const task of course.progress?.tasks || []) {
+          let reqText = '';
+          if (plan.impossible) {
+            reqText = 'max 100%';
+          } else if (difficultyCheckbox.checked) {
+            const meta = plan.taskRequirements?.[`${course.name}::${task.name}`];
+            const reqVal = meta ? meta.required : plan.required;
+            const baseVal = meta ? meta.baseline : null;
+            reqText = `required ${round(reqVal)}%${baseVal !== null ? ` (baseline: ${round(baseVal)}%)` : ''}`;
+          } else {
+            reqText = `required ${round(plan.required)}%`;
+          }
+
           block.append(
             createEl(
               'small',
               '',
-              `${task.name}: weight ${round(task.weight)}% · ${plan.impossible ? 'max 100%' : `required ${round(plan.required)}%`}`
+              `${task.name}: weight ${round(task.weight)}% · ${reqText}`
             )
           );
         }

@@ -285,56 +285,97 @@
             return;
         }
 
-        const chartConfig = {
-           chart: {
-             polar: true,
-             type: 'area',
-             backgroundColor: 'transparent',
-             spacing: [15, 15, 15, 15]
-           },
-           title: { text: '' },
-           pane: {
-             size: '72%',
-             center: ['50%', '50%']
-           },
-           xAxis: {
-             categories: labels,
-             tickmarkPlacement: 'on',
-             lineWidth: 0,
-             labels: {
-               style: { color: '#e1eaf3', fill: '#e1eaf3', fontSize: '11px' }
-             }
-           },
-           yAxis: {
-             gridLineInterpolation: 'polygon',
-             lineWidth: 0,
-             min: 0,
-             max: 100,
-             labels: { style: { color: '#8fa6bd', fill: '#8fa6bd' } }
-           },
-           tooltip: {
-             shared: true,
-             pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y}%</b><br/>'
-           },
-           legend: { enabled: false },
-           series: [{
-             name: 'Performance',
-             data: data,
-             pointPlacement: 'on',
-             color: '#2ecc71',
-             fillOpacity: 0.35
-           }]
-        };
+        const N = labels.length;
+        const width = 500;
+        const height = 350;
+        const cx = width / 2;
+        const cy = height / 2 + 5;
+        const R = 115;
 
-        if (window.Highcharts?.chart) {
-          try {
-            currentChart = window.Highcharts.chart('connectify-radar-chart', chartConfig);
-          } catch (e) {
-            document.dispatchEvent(new CustomEvent('connectify-render-radar', { detail: chartConfig }));
+        const angle = i => -Math.PI / 2 + (2 * Math.PI * i) / N;
+
+        // 1. Concentric grid polygons (20%, 40%, 60%, 80%, 100%)
+        const levels = [20, 40, 60, 80, 100];
+        let gridPolygons = '';
+        levels.forEach(lvl => {
+          const r = (R * lvl) / 100;
+          const pts = [];
+          for (let i = 0; i < N; i++) {
+            const a = angle(i);
+            pts.push(`${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`);
           }
-        } else {
-          document.dispatchEvent(new CustomEvent('connectify-render-radar', { detail: chartConfig }));
+          gridPolygons += `<polygon points="${pts.join(' ')}" fill="none" stroke="#485c70" stroke-width="1" stroke-dasharray="${lvl === 100 ? 'none' : '3,3'}" opacity="0.6"/>`;
+          gridPolygons += `<text x="${cx + 4}" y="${(cy - r + 3).toFixed(1)}" fill="#8fa6bd" font-size="9" font-family="system-ui" opacity="0.85">${lvl}%</text>`;
+        });
+
+        // 2. Radial spoke lines from center to outer ring
+        let spokes = '';
+        for (let i = 0; i < N; i++) {
+          const a = angle(i);
+          const x = (cx + R * Math.cos(a)).toFixed(1);
+          const y = (cy + R * Math.sin(a)).toFixed(1);
+          spokes += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#485c70" stroke-width="1" opacity="0.7"/>`;
         }
+
+        // 3. Data points and polygon
+        const dataPoints = [];
+        for (let i = 0; i < N; i++) {
+          const val = Math.max(0, Math.min(100, data[i]));
+          const r = (R * val) / 100;
+          const a = angle(i);
+          const x = (cx + r * Math.cos(a)).toFixed(1);
+          const y = (cy + r * Math.sin(a)).toFixed(1);
+          dataPoints.push({ x, y, val, label: labels[i] });
+        }
+        const polyPts = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
+
+        const dataPolygon = `
+          <polygon points="${polyPts}" fill="#2ecc71" fill-opacity="0.32" stroke="#2ecc71" stroke-width="2.5" stroke-linejoin="round"/>
+        `;
+
+        // 4. Data vertex markers
+        let markers = '';
+        dataPoints.forEach(p => {
+          markers += `
+            <circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#2ecc71" stroke="#ffffff" stroke-width="1.5" style="cursor:pointer;">
+              <title>${p.label}: ${p.val}%</title>
+            </circle>
+          `;
+        });
+
+        // 5. Category labels positioned outside the outer ring
+        let labelElements = '';
+        for (let i = 0; i < N; i++) {
+          const a = angle(i);
+          const labelR = R + 24;
+          const lx = cx + labelR * Math.cos(a);
+          const ly = cy + labelR * Math.sin(a);
+
+          const cosA = Math.cos(a);
+          let anchor = 'middle';
+          if (cosA > 0.3) anchor = 'start';
+          else if (cosA < -0.3) anchor = 'end';
+
+          const name = labels[i];
+          const val = data[i];
+          const displayName = name.length > 24 ? name.substring(0, 22) + '…' : name;
+
+          labelElements += `
+            <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="central" fill="#e1eaf3" font-size="11" font-weight="600" font-family="system-ui">
+              ${displayName} <tspan fill="#2ecc71" font-weight="700">(${val}%)</tspan>
+            </text>
+          `;
+        }
+
+        chartDiv.innerHTML = `
+          <svg viewBox="0 0 ${width} ${height}" style="width:100%;height:100%;display:block;user-select:none;" role="img" aria-label="Weakness Analyzer Radar Chart">
+            ${gridPolygons}
+            ${spokes}
+            ${dataPolygon}
+            ${markers}
+            ${labelElements}
+          </svg>
+        `;
       };
 
       const updateCheckboxes = () => {
@@ -415,7 +456,7 @@
 
       // --- Categories Settings View ---
       const catBtn = document.createElement('button');
-      catBtn.textContent = 'Category Settings';
+      catBtn.textContent = 'Settings';
       catBtn.type = 'button';
       catBtn.id = 'connectify-categories-toggle';
 
@@ -424,14 +465,135 @@
       catPanel.hidden = true;
       catPanel.className = 'cx-workspace-panel';
       catPanel.innerHTML = `
-        <header><strong>Assessment Categorization</strong></header>
-        <p style="font-size:12px;color:#777;margin-bottom:16px;">Customize the comma-separated keywords used to automatically detect your assessment types:</p>
-        <div id="cx-categories-inputs"></div>
-        <div style="margin-top:16px;display:flex;gap:10px;">
-           <button type="button" id="cx-cat-save" style="background:#2ecc71;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Save Changes</button>
-           <button type="button" id="cx-cat-reset" style="background:#95a5a6;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;">Reset Defaults</button>
-        </div>
+        <header style="margin-bottom:20px;">
+          <strong style="font-size:18px;">Settings</strong>
+        </header>
+
+        <section class="cx-settings-section" style="margin-bottom:28px;">
+          <header style="margin-bottom:8px;"><strong>Semester 1 Scaling Calibration</strong></header>
+          <p style="font-size:12px;color:#788896;margin:0 0 14px 0;">Enter your school's Semester 1 scaled scores to calibrate the model to your cohort's historical distribution.</p>
+          <div id="cx-calibration-table" style="display:grid;grid-template-columns:minmax(140px, 220px) 85px 85px;gap:10px 14px;align-items:center;margin-top:12px;"></div>
+        </section>
+
+        <section class="cx-settings-section" style="margin-top:36px;border-top:1px solid #d8e3ee;padding-top:24px;">
+          <header style="margin-bottom:8px;"><strong>Assessment Categories</strong></header>
+          <p style="font-size:12px;color:#788896;margin:0 0 16px 0;">Customize the comma-separated keywords used to automatically detect your assessment types:</p>
+          <div id="cx-categories-inputs"></div>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+             <button type="button" id="cx-cat-save" class="eds-c-button" style="background:#2ecc71;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Save Changes</button>
+             <button type="button" id="cx-cat-reset" class="eds-c-button" style="background:#95a5a6;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;">Reset Defaults</button>
+          </div>
+        </section>
       `;
+
+      const renderCalibTable = () => {
+         const table = catPanel.querySelector('#cx-calibration-table');
+         if (!table) return;
+         table.innerHTML = '';
+
+         const readCoursesFn = window.ConnectifyAtar?.readCourses;
+         let courses = null;
+         if (readCoursesFn) {
+           courses = readCoursesFn(false);
+         }
+
+         const courseList = new Map();
+         if (courses) {
+           for (const course of [...(courses[0] || []), ...(courses[1] || [])]) {
+             if (course.name && !courseList.has(course.id || course.name)) {
+               courseList.set(course.id || course.name, course);
+             }
+           }
+         }
+         if (courseList.size === 0 && window.ConnectifyData?.collect) {
+           const collected = window.ConnectifyData.collect(true);
+           collected.forEach(c => {
+             if (c.name && !courseList.has(c.name)) {
+               courseList.set(c.name, { id: c.name.toLowerCase(), name: c.name, mark: c.score });
+             }
+           });
+         }
+
+         if (courseList.size === 0) {
+           table.innerHTML = '<div style="font-size:12px;color:#8fa6bd;grid-column:1/-1;">Expand course outlines in Connect to load subjects for calibration.</div>';
+           return;
+         }
+
+         const hSubject = document.createElement('span');
+         hSubject.textContent = 'Subject';
+         hSubject.style.fontSize = '11px';
+         hSubject.style.fontWeight = '700';
+         hSubject.style.color = '#788896';
+
+         const hRaw = document.createElement('span');
+         hRaw.textContent = 'Sem 1 Raw (%)';
+         hRaw.style.fontSize = '11px';
+         hRaw.style.fontWeight = '700';
+         hRaw.style.color = '#788896';
+
+         const hScaled = document.createElement('span');
+         hScaled.textContent = 'Sem 1 Scaled';
+         hScaled.style.fontSize = '11px';
+         hScaled.style.fontWeight = '700';
+         hScaled.style.color = '#788896';
+
+         table.append(hSubject, hRaw, hScaled);
+
+         const prefsStr = localStorage.getItem('connectea:preferences');
+         const savedPrefs = prefsStr ? JSON.parse(prefsStr) : {};
+
+         for (const course of courseList.values()) {
+           const calibEntry = savedPrefs[`sem1_calibration:${course.id}`] || savedPrefs[`sem1_calibration:${course.name}`] || {};
+           const knownSem1Raw = calibEntry.raw !== undefined ? calibEntry.raw : (course.mark !== undefined ? Math.round(course.mark * 10) / 10 : '');
+
+           const nameLabel = document.createElement('span');
+           nameLabel.textContent = course.name;
+           nameLabel.style.fontSize = '12px';
+           nameLabel.style.fontWeight = '600';
+
+           const rawInput = document.createElement('input');
+           rawInput.type = 'number';
+           rawInput.placeholder = 'Raw';
+           rawInput.title = 'Semester 1 School Raw Mark (%)';
+           rawInput.value = knownSem1Raw !== undefined ? knownSem1Raw : '';
+           rawInput.style.width = '85px';
+           rawInput.style.padding = '5px 8px';
+           rawInput.style.borderRadius = '6px';
+           rawInput.style.border = '1px solid #bacddd';
+           rawInput.style.boxSizing = 'border-box';
+
+           const scaledInput = document.createElement('input');
+           scaledInput.type = 'number';
+           scaledInput.placeholder = 'Scaled';
+           scaledInput.title = 'Semester 1 School Scaled Mark';
+           scaledInput.value = calibEntry.scaled !== undefined ? calibEntry.scaled : '';
+           scaledInput.style.width = '85px';
+           scaledInput.style.padding = '5px 8px';
+           scaledInput.style.borderRadius = '6px';
+           scaledInput.style.border = '1px solid #bacddd';
+           scaledInput.style.boxSizing = 'border-box';
+
+           table.append(nameLabel, rawInput, scaledInput);
+
+           const updateCalib = () => {
+             const currentPrefsStr = localStorage.getItem('connectea:preferences');
+             const prefs = currentPrefsStr ? JSON.parse(currentPrefsStr) : {};
+             const key = `sem1_calibration:${course.id}`;
+             prefs[key] = {
+               raw: rawInput.value !== '' ? Number(rawInput.value) : undefined,
+               scaled: scaledInput.value !== '' ? Number(scaledInput.value) : undefined
+             };
+             if (course.name && course.name !== course.id) {
+               prefs[`sem1_calibration:${course.name}`] = prefs[key];
+             }
+             localStorage.setItem('connectea:preferences', JSON.stringify(prefs));
+             window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
+           };
+
+           rawInput.addEventListener('input', updateCalib);
+           scaledInput.addEventListener('input', updateCalib);
+         }
+      };
 
       const inputContainer = catPanel.querySelector('#cx-categories-inputs');
       for (const [cat, data] of Object.entries(defaultCategories)) {
@@ -478,6 +640,7 @@
          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
          resolveCategories();
          updateInputValues();
+         renderCalibTable();
       }
 
       function closeCategories() {

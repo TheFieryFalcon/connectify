@@ -156,12 +156,12 @@
       pctString = Math.round(pct) + '%';
     }
 
-    return ;
+    return `${side} ${pctString}`;
   }
 
   function rankString(rank, cohortSize) {
     if (!rank || !cohortSize) return '';
-    return ;
+    return `${rank} / ${cohortSize}`;
   }
 
   window.ConnectifyCohortMath = {

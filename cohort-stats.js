@@ -554,7 +554,7 @@
       parts.push('Not marked · Rank and z-score unavailable');
     }
 
-    setText(ui.result, parts.join('  •  '));
+    setText(ui.result, parts.filter(Boolean).join('  •  '));
   }
 
   const styles = `
@@ -578,20 +578,21 @@
       margin: 0 !important;
     }
     .connectea-panel {
-      box-sizing: border-box;
-      min-width: 0;
-      max-width: 100%;
-      width: 100%;
-      clear: both;
-      margin: 4px 0;
-      padding: 6px 10px;
-      border: 1px solid #b9cbe1;
-      border-radius: 6px;
-      background: #f3f7fc;
-      color: #253b53;
-      font: 12px/1.4 system-ui, sans-serif;
-      white-space: normal;
-      overflow-wrap: anywhere;
+      box-sizing: border-box !important;
+      display: block !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      clear: both !important;
+      margin: 8px 0 !important;
+      padding: 10px 14px !important;
+      border: 1px solid #b9cbe1 !important;
+      border-radius: 8px !important;
+      background: #f3f7fc !important;
+      color: #253b53 !important;
+      font: 12px/1.5 system-ui, -apple-system, sans-serif !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere !important;
     }
     .connectea-type-container {
       display: inline-flex;
@@ -660,12 +661,20 @@
       color: #ffffff;
     }
     .connectea-distribution {
-      font-weight: 600;
+      display: block !important;
+      width: 100% !important;
+      font-weight: 600 !important;
+      margin-bottom: 6px !important;
+      line-height: 1.5 !important;
+      clear: both !important;
     }
     .connectea-subject-controls {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid #d3dfed;
+      display: block !important;
+      width: 100% !important;
+      margin-top: 10px !important;
+      padding-top: 8px !important;
+      border-top: 1px solid #d3dfed !important;
+      clear: both !important;
     }
     .connectea-title {
       display: block;
@@ -673,23 +682,23 @@
       color: #203c5e;
     }
     .connectea-controls {
-      font-size: 10px;
-      display: inline-flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 4px 6px 3px 0;
-      font-weight: 400;
+      font-size: 11px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+      gap: 6px !important;
+      margin: 4px 6px 3px 0 !important;
+      font-weight: 500 !important;
     }
     .connectea-controls input {
       box-sizing: border-box;
-      width: 72px;
+      width: 76px;
       min-height: 24px;
       border: 1px solid #8599b1;
       border-radius: 5px;
       background: white;
       color: #203348;
-      padding: 2px 5px;
+      padding: 2px 6px;
       font: inherit;
     }
     .connectea-controls input:focus {
@@ -700,20 +709,41 @@
       border-color: #b62727;
     }
     .connectea-notice {
-      display: block;
-      color: #4e6076;
-      font-size: 11px;
+      display: block !important;
+      color: #4e6076 !important;
+      font-size: 11px !important;
+      margin-top: 3px !important;
     }
     .connectea-result-row {
-      display: flex;
-      align-items: baseline;
-      gap: 8px 14px;
-      flex-wrap: wrap;
-      margin-top: 5px;
+      display: flex !important;
+      align-items: baseline !important;
+      gap: 8px 14px !important;
+      flex-wrap: wrap !important;
+      width: 100% !important;
+      margin-top: 6px !important;
+      margin-bottom: 6px !important;
+      clear: both !important;
     }
     .connectea-result {
-      font-weight: 600;
-      flex: 1 1 260px;
+      font-weight: 600 !important;
+      line-height: 1.5 !important;
+      flex: 1 1 260px !important;
+    }
+    .connectea-dark .connectea-panel {
+      background: #333333 !important;
+      color: #cccccc !important;
+      border-color: #3a3a3a !important;
+    }
+    .connectea-dark .connectea-subject-controls {
+      border-top-color: #3a3a3a !important;
+    }
+    .connectea-dark .connectea-notice {
+      color: #999999 !important;
+    }
+    .connectea-dark .connectea-controls input {
+      background: #212121 !important;
+      color: #dddddd !important;
+      border-color: #4a4a4a !important;
     }
   `;
 
