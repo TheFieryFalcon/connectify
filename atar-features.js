@@ -72,9 +72,19 @@
     };
 
     const resolveCategories = () => {
+      try {
+        const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
+        if (stored) {
+          window.cxCategories = JSON.parse(stored);
+        }
+      } catch (e) {}
       safeStorageGet(['cx-categories'], res => {
         if (res && res['cx-categories']) {
           window.cxCategories = res['cx-categories'];
+          try {
+            localStorage.setItem('cx-categories', JSON.stringify(window.cxCategories));
+            localStorage.setItem('connectea:categories', JSON.stringify(window.cxCategories));
+          } catch (e) {}
         }
       });
     };
@@ -476,10 +486,13 @@
         </section>
 
         <section class="cx-settings-section" style="margin-top:36px;border-top:1px solid #d8e3ee;padding-top:24px;">
-          <header style="margin-bottom:8px;"><strong>Assessment Categories</strong></header>
+          <header style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+            <strong>Assessment Categories</strong>
+            <button type="button" id="cx-cat-add" class="eds-c-button" style="background:#3498db;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">+ Add Category</button>
+          </header>
           <p style="font-size:12px;color:#788896;margin:0 0 16px 0;">Customize the comma-separated keywords used to automatically detect your assessment types:</p>
           <div id="cx-categories-inputs"></div>
-          <div style="margin-top:16px;display:flex;gap:10px;">
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
              <button type="button" id="cx-cat-save" class="eds-c-button" style="background:#2ecc71;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Save Changes</button>
              <button type="button" id="cx-cat-reset" class="eds-c-button" style="background:#95a5a6;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;">Reset Defaults</button>
           </div>
@@ -595,10 +608,16 @@
          }
       };
 
-      const inputContainer = catPanel.querySelector('#cx-categories-inputs');
-      for (const [cat, data] of Object.entries(defaultCategories)) {
+      const renderCategoryInputs = () => {
+        const inputContainer = catPanel.querySelector('#cx-categories-inputs');
+        if (!inputContainer) return;
+        inputContainer.innerHTML = '';
+
+        const currentCats = window.cxCategories || defaultCategories;
+        for (const [cat, data] of Object.entries(currentCats)) {
           const wrap = document.createElement('div');
           wrap.className = 'cx-cat-wrap';
+          wrap.dataset.cat = cat;
           wrap.style.display = 'flex';
           wrap.style.alignItems = 'center';
           wrap.style.marginBottom = '10px';
@@ -609,29 +628,73 @@
           label.style.width = '90px';
           label.style.fontSize = '12px';
           label.style.fontWeight = '600';
-          label.style.color = data.color;
+          label.style.color = data.color || '#3498db';
+          label.style.overflow = 'hidden';
+          label.style.textOverflow = 'ellipsis';
+          label.style.whiteSpace = 'nowrap';
+          label.title = cat;
 
           const input = document.createElement('input');
           input.type = 'text';
-          input.id = `cx-cat-input-${cat}`;
-          input.value = data.keywords.join(', ');
+          input.className = 'cx-cat-keyword-input';
+          input.id = `cx-cat-input-${cat.replace(/\s+/g, '_')}`;
+          input.value = Array.isArray(data.keywords) ? data.keywords.join(', ') : '';
           input.style.flex = '1';
           input.style.padding = '4px 8px';
           input.style.border = '1px solid #ccc';
           input.style.borderRadius = '4px';
 
           wrap.append(label, input);
-          inputContainer.append(wrap);
-      }
 
-      const updateInputValues = () => {
-         for (const cat of Object.keys(defaultCategories)) {
-             const input = catPanel.querySelector(`#cx-cat-input-${cat}`);
-             if (input) {
-                 const currentVal = (window.cxCategories[cat] || defaultCategories[cat]).keywords.join(', ');
-                 input.value = currentVal;
-             }
-         }
+          if (!defaultCategories[cat]) {
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.textContent = '✕';
+            delBtn.title = `Delete category "${cat}"`;
+            delBtn.style.background = 'transparent';
+            delBtn.style.color = '#e74c3c';
+            delBtn.style.border = '1px solid #e74c3c';
+            delBtn.style.borderRadius = '4px';
+            delBtn.style.cursor = 'pointer';
+            delBtn.style.padding = '2px 7px';
+            delBtn.style.fontSize = '11px';
+            delBtn.onclick = () => {
+              delete window.cxCategories[cat];
+              wrap.remove();
+            };
+            wrap.append(delBtn);
+          }
+
+          inputContainer.append(wrap);
+        }
+      };
+
+      catPanel.querySelector('#cx-cat-add').onclick = () => {
+        const catName = prompt('Enter new assessment category name (e.g. Practical, Investigation):');
+        if (!catName || !catName.trim()) return;
+        const cleanName = catName.trim();
+        if (!window.cxCategories) {
+          window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
+        }
+        const currentCats = window.cxCategories;
+        const exists = Object.keys(currentCats).some(k => k.toLowerCase() === cleanName.toLowerCase());
+        if (exists) {
+          alert(`Category "${cleanName}" already exists!`);
+          return;
+        }
+
+        const color = window.ConnectifyTaskTypes?.getCategoryColor
+          ? window.ConnectifyTaskTypes.getCategoryColor(cleanName)
+          : '#3498db';
+
+        window.cxCategories[cleanName] = {
+          color,
+          keywords: [cleanName.toLowerCase()]
+        };
+
+        renderCategoryInputs();
+        const newInput = catPanel.querySelector(`#cx-cat-input-${cleanName.replace(/\s+/g, '_')}`);
+        if (newInput) newInput.focus();
       };
 
       function openCategories() {
@@ -639,7 +702,7 @@
          catBtn.setAttribute('aria-pressed', 'true');
          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
          resolveCategories();
-         updateInputValues();
+         renderCategoryInputs();
          renderCalibTable();
       }
 
@@ -667,27 +730,56 @@
       });
 
       catPanel.querySelector('#cx-cat-save').onclick = () => {
-         for (const [cat, data] of Object.entries(defaultCategories)) {
-             const input = catPanel.querySelector(`#cx-cat-input-${cat}`);
-             if (input) {
-                 const keywords = input.value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-                 window.cxCategories[cat] = {
-                     color: data.color,
-                     keywords: keywords.length ? keywords : data.keywords
-                 };
-             }
+         const wraps = catPanel.querySelectorAll('.cx-cat-wrap');
+         const updatedCats = {};
+
+         wraps.forEach(wrap => {
+           const cat = wrap.dataset.cat;
+           const input = wrap.querySelector('.cx-cat-keyword-input');
+           const oldData = (window.cxCategories && window.cxCategories[cat]) || defaultCategories[cat] || {};
+           const keywords = input?.value
+             ? input.value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+             : (oldData.keywords || [cat.toLowerCase()]);
+           updatedCats[cat] = {
+             color: oldData.color || '#3498db',
+             keywords: keywords.length ? keywords : [cat.toLowerCase()]
+           };
+         });
+
+         window.cxCategories = updatedCats;
+         try {
+           localStorage.setItem('cx-categories', JSON.stringify(updatedCats));
+           localStorage.setItem('connectea:categories', JSON.stringify(updatedCats));
+         } catch (e) {}
+         safeStorageSet({ 'cx-categories': updatedCats });
+
+         // Rescan every assessment set to Auto immediately!
+         if (window.ConnectifyTaskTypes?.rescanAllAutoAssessments) {
+           window.ConnectifyTaskTypes.rescanAllAutoAssessments();
+         } else {
+           window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
          }
-         safeStorageSet({ 'cx-categories': window.cxCategories });
-         window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
-         alert('Assessment category keywords saved!');
+
+         const saveBtn = catPanel.querySelector('#cx-cat-save');
+         const origText = saveBtn.textContent;
+         saveBtn.textContent = '✓ Saved & Rescanned!';
+         setTimeout(() => { saveBtn.textContent = origText; }, 2000);
       };
 
       catPanel.querySelector('#cx-cat-reset').onclick = () => {
          if (confirm('Reset assessment category keywords to factory defaults?')) {
              safeStorageRemove('cx-categories');
+             try {
+               localStorage.removeItem('cx-categories');
+               localStorage.removeItem('connectea:categories');
+             } catch (e) {}
              window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
-             updateInputValues();
-             window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
+             renderCategoryInputs();
+             if (window.ConnectifyTaskTypes?.rescanAllAutoAssessments) {
+               window.ConnectifyTaskTypes.rescanAllAutoAssessments();
+             } else {
+               window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
+             }
          }
       };
 

@@ -29,7 +29,17 @@
   }
 
   function getCategories() {
-    return window.cxCategories || defaultCategories;
+    if (window.cxCategories && Object.keys(window.cxCategories).length > 0) {
+      return window.cxCategories;
+    }
+    try {
+      const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
+      if (stored) {
+        window.cxCategories = JSON.parse(stored);
+        return window.cxCategories;
+      }
+    } catch {}
+    return defaultCategories;
   }
 
   function getCustomCategoriesForClass(subjectName) {
@@ -106,10 +116,9 @@
 
   function categorizeTask(taskName, allLabels = []) {
     const combined = [taskName, ...allLabels].join(' ').toLowerCase();
-    if (combined.includes('exam')) return 'Exam';
     const cats = getCategories();
     for (const [cat, data] of Object.entries(cats)) {
-      if (data?.keywords?.some(k => combined.includes(k.toLowerCase()))) {
+      if (data?.keywords?.some(k => k && combined.includes(k.toLowerCase()))) {
         return cat;
       }
     }
@@ -205,6 +214,36 @@
     }
   }
 
+  function rescanAllAutoAssessments() {
+    const selects = Array.from(document.querySelectorAll('.connectea-type-select'));
+    for (const select of selects) {
+      const row = select.closest('.cvr-c-task');
+      if (!row) continue;
+      const meta = getTaskMeta(row);
+      delete select.dataset.signature;
+      updateTypeSelect(select, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
+    }
+
+    if (window.ConnectifyCompoundProgress?.update) {
+      window.ConnectifyCompoundProgress.update();
+    }
+    if (window.ConnectifyWeakness?.renderChart) {
+      window.ConnectifyWeakness.renderChart();
+    }
+    window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
+  }
+
+  window.addEventListener('storage', e => {
+    if (e.key === 'cx-categories' || e.key === 'connectea:categories') {
+      try {
+        if (e.newValue) window.cxCategories = JSON.parse(e.newValue);
+      } catch {}
+      rescanAllAutoAssessments();
+    }
+  });
+
+  window.addEventListener('connectify-rescan-auto-types', rescanAllAutoAssessments);
+
   window.ConnectifyTaskTypes = {
     defaultCategories,
     getCategories,
@@ -217,6 +256,7 @@
     getEffectiveType,
     getCategoryColor,
     getTaskMeta,
-    updateTypeSelect
+    updateTypeSelect,
+    rescanAllAutoAssessments
   };
 })();

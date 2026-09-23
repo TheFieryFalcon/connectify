@@ -325,6 +325,13 @@
     resultRow.append(result);
     box.append(distribution, resultRow);
 
+    const isMarked = Number.isFinite(readMark(row));
+    if (!isOverall && !isMarked) {
+      box.hidden = true;
+      box.classList.add('connectea-hidden');
+      box.style.setProperty('display', 'none', 'important');
+    }
+
     let wrapper;
     let typeContainer;
     let typeSelect;
@@ -360,6 +367,9 @@
             }
             types().saveTaskTypeOverride(currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, cleanCustom);
             types().updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
+            if (types().rescanAllAutoAssessments) {
+              types().rescanAllAutoAssessments();
+            }
           } else {
             types().updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
           }
@@ -504,16 +514,21 @@
     const cohortSize = userSize ?? estimatedSize;
     const data = math().summary(stats, mark, cohortSize);
 
-    if (!isOverall && !Number.isFinite(mark) && !math().validStats(stats)) {
-      ui.box.style.display = 'none';
-      if (ui.typeContainer) ui.typeContainer.style.display = 'inline-flex';
-      if (ui.wrapper) ui.wrapper.style.display = 'flex';
+    const isIncomplete = !isOverall && !Number.isFinite(mark);
+    if (isIncomplete) {
+      ui.box.hidden = true;
+      ui.box.classList.add('connectea-hidden');
+      ui.box.style.setProperty('display', 'none', 'important');
+      if (ui.typeContainer) ui.typeContainer.style.setProperty('display', 'inline-flex', 'important');
+      if (ui.wrapper) ui.wrapper.style.setProperty('display', 'flex', 'important');
       return;
     }
 
-    ui.box.style.display = '';
-    if (ui.typeContainer) ui.typeContainer.style.display = 'inline-flex';
-    if (ui.wrapper) ui.wrapper.style.display = 'flex';
+    ui.box.hidden = false;
+    ui.box.classList.remove('connectea-hidden');
+    ui.box.style.setProperty('display', 'block', 'important');
+    if (ui.typeContainer) ui.typeContainer.style.setProperty('display', 'inline-flex', 'important');
+    if (ui.wrapper) ui.wrapper.style.setProperty('display', 'flex', 'important');
 
     if (!data) {
       setText(ui.distribution, 'Cohort statistics unavailable');
@@ -593,6 +608,10 @@
       font: 12px/1.5 system-ui, -apple-system, sans-serif !important;
       white-space: normal !important;
       overflow-wrap: anywhere !important;
+    }
+    .connectea-panel[hidden],
+    .connectea-panel.connectea-hidden {
+      display: none !important;
     }
     .connectea-type-container {
       display: inline-flex;
