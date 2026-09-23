@@ -79,12 +79,47 @@
     resolveCategories();
 
   function categorizeTask(taskName) {
+     if (window.ConnectifyTaskTypes?.categorizeTask) {
+       return window.ConnectifyTaskTypes.categorizeTask(taskName);
+     }
      const lower = (taskName || '').toLowerCase();
      if (lower.includes('exam')) return 'Exam';
-     for (const [cat, data] of Object.entries(window.cxCategories)) {
-        if (data.keywords.some(k => lower.includes(k))) return cat;
+     for (const [cat, data] of Object.entries(window.cxCategories || defaultCategories)) {
+        if (data.keywords && data.keywords.some(k => lower.includes(k))) return cat;
      }
      return 'Take-Home';
+  }
+
+  function getEffectiveTaskType(subjectName, task) {
+     if (window.ConnectifyTaskTypes?.getEffectiveType) {
+       return window.ConnectifyTaskTypes.getEffectiveType(subjectName, task);
+     }
+     const taskName = typeof task === 'string' ? task : task?.name;
+     try {
+       const overrides = JSON.parse(localStorage.getItem('connectea:task_type_overrides') || '{}');
+       const cleanSubj = (subjectName || '').replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+       if (task && typeof task === 'object' && task.row) {
+         const labels = Array.from(task.row.querySelectorAll('.cvr-c-task__details .v-label'))
+           .map(e => (e.textContent || '').replace(/\s+/g, ' ').trim())
+           .filter(Boolean);
+         if (labels.length && overrides[`${cleanSubj}::${labels.join('::')}`]) {
+           return overrides[`${cleanSubj}::${labels.join('::')}`];
+         }
+       }
+       if (overrides[`${cleanSubj}::${taskName}`]) {
+         return overrides[`${cleanSubj}::${taskName}`];
+       }
+     } catch {}
+     return categorizeTask(taskName);
+  }
+
+  function getCategoryColor(cat) {
+     if (window.cxCategories?.[cat]?.color) return window.cxCategories[cat].color;
+     if (defaultCategories[cat]?.color) return defaultCategories[cat].color;
+     const palette = ['#1abc9c', '#e67e22', '#16a085', '#d35400', '#27ae60', '#8e44ad', '#2980b9'];
+     let hash = 0;
+     for (let i = 0; i < (cat || '').length; i++) hash = (hash << 5) - hash + cat.charCodeAt(i);
+     return palette[Math.abs(hash) % palette.length];
   }
 
   if (!document.getElementById('cx-compound-styles')) {
@@ -184,7 +219,8 @@
            const header = card.querySelector('.eds-c-tile__header');
            if (!header) return;
 
-           const signature = JSON.stringify({ tasks: subject.tasks, cats: window.cxCategories });
+           const taskTypes = sortedTasks.map(t => getEffectiveTaskType(subject.name, t));
+           const signature = JSON.stringify({ tasks: subject.tasks, cats: window.cxCategories, types: taskTypes });
            
            if (header.nextElementSibling && header.nextElementSibling.classList.contains('cx-compound-progress-container')) {
               if (header.nextElementSibling.dataset.signature === signature) {
@@ -209,7 +245,7 @@
            sortedTasks.forEach(t => {
                totalWeight += t.weight;
                if (!t.pending) overallCompleted += t.weight;
-               const cat = categorizeTask(t.name);
+               const cat = getEffectiveTaskType(subject.name, t);
                if (!labelBreakdowns[cat]) labelBreakdowns[cat] = 0;
                labelBreakdowns[cat] += t.weight;
            });
@@ -225,19 +261,19 @@
            bar.style.border = '1px solid #3a3a3a';
 
            sortedTasks.forEach(t => {
-              const cat = categorizeTask(t.name);
+              const cat = getEffectiveTaskType(subject.name, t);
               const isCompleted = !t.pending;
               
               const pct = (t.weight / totalWeight) * 100;
               const segment = document.createElement('div');
               segment.className = 'cx-compound-segment';
               segment.style.width = `${pct}%`;
-              segment.style.backgroundColor = window.cxCategories[cat] ? window.cxCategories[cat].color : '#999';
+              segment.style.backgroundColor = getCategoryColor(cat);
               if (!isCompleted) {
                  segment.style.opacity = '0.25';
               }
               segment.style.borderRight = '1px solid #1e1e1e';
-              segment.title = `${t.name}: ${t.weight}% (${isCompleted ? 'Completed' : 'Remaining'})`;
+              segment.title = `${t.name} [${cat}]: ${t.weight}% (${isCompleted ? 'Completed' : 'Remaining'})`;
               bar.appendChild(segment);
            });
 
@@ -475,7 +511,7 @@
               subject.tasks.forEach(t => {
                   if (t.weight > 0 && !t.pending && t.score !== null) {
                       const earned = (t.score / 100) * t.weight;
-                      const label = mode === 'subject' ? cleaned : categorizeTask(t.name);
+                      const label = mode === 'subject' ? cleaned : getEffectiveTaskType(subject.name, t);
                       if (!perf[label]) perf[label] = { earned: 0, total: 0 };
                       perf[label].earned += earned;
                       perf[label].total += t.weight;
@@ -798,6 +834,13 @@
           window.ConnectifyAtar.toolButtons.push(catBtn);
         }
     }
+
+  window.addEventListener('connectify-task-type-changed', () => {
+    try {
+      updateCompoundBars();
+      renderChart();
+    } catch (e) {}
+  });
 
   initSidebarTools();
   setInterval(initSidebarTools, 1000);
