@@ -42,4 +42,12 @@
 #connectify-sidebar .cta-semester.cta-semester-closed{background:#f4f6f9!important;border:1px dashed #cad5e2!important;color:#7c8e9f!important;font-weight:500!important;cursor:not-allowed!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important;opacity:.85!important}
 .connectea-dark #connectify-sidebar .cta-semester.cta-semester-indicator{background:#253342!important;border-color:#3b5066!important;border-left:4px solid #6ba5d6!important;color:#dceaf6!important}
 .connectea-dark #connectify-sidebar .cta-semester.cta-semester-closed{background:#1e252e!important;border:1px dashed #3f4e5e!important;color:#6e8093!important}
+#cx-weakness-filters{margin-bottom:16px;background:#edf4fa;border:1px solid #c8d9e8;border-radius:8px;padding:12px 14px}
+#cx-weakness-checkboxes{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px 14px}
+.cx-weakness-checkbox-label{display:inline-flex;align-items:center;gap:7px;font-size:12px;cursor:pointer;user-select:none}
+.cx-weakness-checkbox-label input{margin:0;cursor:pointer;width:14px;height:14px}
+#connectify-sidebar .cx-weakness-filter-btn{background:transparent!important;border:none!important;color:#24618c!important;font-size:11px!important;padding:2px 4px!important;text-decoration:underline!important;border-radius:3px!important;font-weight:600}
+.connectea-dark #cx-weakness-filters{background:#253342!important;border-color:#3b5066!important}
+.connectea-dark #connectify-sidebar .cx-weakness-filter-btn{color:#83c3ff!important}
+
 

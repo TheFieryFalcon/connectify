@@ -228,86 +228,212 @@
        toggleBtn.textContent = 'Weakness Analyzer';
        toggleBtn.type = 'button';
        toggleBtn.id = 'connectify-weakness-toggle';
-       
-       const panel = document.createElement('section');
-       panel.id = 'connectify-weakness';
-       panel.hidden = true;
-       panel.className = 'cx-workspace-panel';
-       panel.innerHTML = `
-         <header><strong>Weakness Analyzer</strong></header>
-         <div style="margin-bottom:16px; display:flex; gap:10px; align-items:center;">
-            <label for="cx-radar-mode" style="font-weight:600; font-size:12px;">Group by:</label>
-            <select id="cx-radar-mode" style="padding:6px 10px; border-radius:6px; border:1px solid #bacddd; background:inherit; color:inherit; font:inherit;">
-               <option value="type">Assessment Type</option>
-               <option value="subject">Subject</option>
-            </select>
-         </div>
-         <div id="connectify-radar-chart" style="width:100%;height:320px;background:#333333;border-radius:8px;border:1px solid #3a3a3a;overflow:hidden;"></div>
-       `;
+            let disabledWeaknessSubjects = new Set();
+        try {
+          const stored = JSON.parse(localStorage.getItem('connectify:weakness_disabled_subjects') || '[]');
+          if (Array.isArray(stored)) disabledWeaknessSubjects = new Set(stored);
+        } catch (e) {}
 
-       if (toolMenu) toolMenu.append(toggleBtn);
-       if (workspace) workspace.append(panel);
+        const saveDisabledSubjects = () => {
+          try {
+            localStorage.setItem('connectify:weakness_disabled_subjects', JSON.stringify([...disabledWeaknessSubjects]));
+          } catch (e) {}
+        };
 
-       const renderChart = () => {
-         const chartDiv = document.getElementById('connectify-radar-chart');
-         if (!window.Highcharts) return;
-         
-         const perf = {};
-         const mode = document.getElementById('cx-radar-mode').value;
+        const panel = document.createElement('section');
+        panel.id = 'connectify-weakness';
+        panel.hidden = true;
+        panel.className = 'cx-workspace-panel';
+        panel.innerHTML = `
+          <header><strong>Weakness Analyzer</strong></header>
+          <div style="margin-bottom:14px; display:flex; gap:10px; align-items:center;">
+             <label for="cx-radar-mode" style="font-weight:600; font-size:12px;">Group by:</label>
+             <select id="cx-radar-mode" style="padding:6px 10px; border-radius:6px; border:1px solid #bacddd; background:inherit; color:inherit; font:inherit;">
+                <option value="type">Assessment Type</option>
+                <option value="subject">Subject</option>
+             </select>
+          </div>
+          <div id="cx-weakness-filters" style="margin-bottom:16px; background:#edf4fa; border:1px solid #c8d9e8; border-radius:8px; padding:12px 14px;">
+             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-weight:600; font-size:12px;">Included Subjects</span>
+                <span style="display:flex; gap:8px; align-items:center;">
+                   <button type="button" id="cx-weakness-select-all" class="cx-weakness-filter-btn">All</button>
+                   <span style="color:#a0b0c0; font-size:11px;">|</span>
+                   <button type="button" id="cx-weakness-deselect-all" class="cx-weakness-filter-btn">None</button>
+                </span>
+             </div>
+             <div id="cx-weakness-checkboxes" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:8px 14px;"></div>
+          </div>
+          <div id="connectify-radar-chart" style="width:100%;height:320px;background:#333333;border-radius:8px;border:1px solid #3a3a3a;overflow:hidden;"></div>
+        `;
 
-         window.ConnectifyData.collect(true).forEach(subject => {
-             subject.tasks.forEach(t => {
-                 if (t.weight > 0 && !t.pending && t.score !== null) {
-                     const earned = (t.score / 100) * t.weight;
-                     const label = mode === 'subject' ? subject.name : categorizeTask(t.name);
-                     if (!perf[label]) perf[label] = { earned: 0, total: 0 };
-                     perf[label].earned += earned;
-                     perf[label].total += t.weight;
-                 }
-             });
-         });
+        if (toolMenu) toolMenu.append(toggleBtn);
+        if (workspace) workspace.append(panel);
 
-         const labels = [];
-         const data = [];
-         for (const [label, stats] of Object.entries(perf)) {
-            labels.push(label);
-            data.push(stats.total > 0 ? Math.round((stats.earned / stats.total) * 100) : 0);
-         }
-         
-         if (labels.length === 0) {
-             chartDiv.innerHTML = '<div style="padding:20px;color:#999;">No completed assessments found to plot.</div>';
-             return;
-         }
+        const renderSubjectCheckboxes = () => {
+          const container = document.getElementById('cx-weakness-checkboxes');
+          if (!container) return;
 
-         window.Highcharts.chart('connectify-radar-chart', {
-            chart: { polar: true, type: 'area', backgroundColor: 'transparent' },
-            title: { text: '' },
-            pane: { size: '80%' },
-            xAxis: { categories: labels, tickmarkPlacement: 'on', lineWidth: 0, labels: { style: { color: '#cccccc' } } },
-            yAxis: { gridLineInterpolation: 'polygon', lineWidth: 0, min: 0, max: 100, labels: { style: { color: '#999' } } },
-            tooltip: { shared: true, pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y}%</b><br/>' },
-            legend: { enabled: false },
-            series: [{ name: 'Performance', data: data, pointPlacement: 'on', color: '#d4b483', fillOpacity: 0.2 }],
-            credits: { enabled: false }
-         });
-       };
+          const subjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+          let subjectNames = Array.from(new Set(subjects.map(s => s.name).filter(Boolean)));
+          
+          if (subjectNames.length === 0 && window.ConnectifyAtar?.readCourses) {
+            const rawCourses = window.ConnectifyAtar.readCourses(false);
+            if (rawCourses) {
+              const fromAtar = [...(rawCourses[0] || []), ...(rawCourses[1] || [])].map(c => c.name);
+              subjectNames = Array.from(new Set(fromAtar.filter(Boolean)));
+            }
+          }
 
-       document.getElementById('cx-radar-mode').addEventListener('change', renderChart);
+          if (subjectNames.length === 0) {
+            container.innerHTML = '<span style="font-size:11px;color:#8898aa;grid-column:1/-1;">No subjects detected yet. Expand course outlines in Connect to load subjects.</span>';
+            return;
+          }
 
-       toggleBtn.addEventListener('click', () => {
-          document.querySelectorAll('.cx-workspace-panel').forEach(p => p.hidden = true);
-          document.querySelectorAll('.cx-tool-menu button').forEach(b => b.setAttribute('aria-expanded', 'false'));
-          toggleBtn.setAttribute('aria-expanded', 'true');
-          panel.hidden = false;
-          renderChart();
-       });
+          const sig = subjectNames.slice().sort().join('|');
+          if (container.dataset.signature !== sig) {
+            container.dataset.signature = sig;
+            container.innerHTML = '';
+
+            for (const name of subjectNames) {
+              const label = document.createElement('label');
+              label.className = 'cx-weakness-checkbox-label';
+              label.style.display = 'inline-flex';
+              label.style.alignItems = 'center';
+              label.style.gap = '7px';
+              label.style.fontSize = '12px';
+              label.style.cursor = 'pointer';
+              label.style.userSelect = 'none';
+
+              const cb = document.createElement('input');
+              cb.type = 'checkbox';
+              cb.value = name;
+              cb.checked = !disabledWeaknessSubjects.has(name);
+              cb.style.margin = '0';
+              cb.style.cursor = 'pointer';
+              cb.style.width = '14px';
+              cb.style.height = '14px';
+
+              cb.addEventListener('change', () => {
+                if (cb.checked) {
+                  disabledWeaknessSubjects.delete(name);
+                } else {
+                  disabledWeaknessSubjects.add(name);
+                }
+                saveDisabledSubjects();
+                renderChart();
+              });
+
+              const span = document.createElement('span');
+              span.textContent = name;
+              span.style.fontWeight = '500';
+
+              label.append(cb, span);
+              container.append(label);
+            }
+          } else {
+            container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+              cb.checked = !disabledWeaknessSubjects.has(cb.value);
+            });
+          }
+        };
+
+        const selectAllBtn = panel.querySelector('#cx-weakness-select-all');
+        const deselectAllBtn = panel.querySelector('#cx-weakness-deselect-all');
+        if (selectAllBtn) {
+          selectAllBtn.addEventListener('click', () => {
+            disabledWeaknessSubjects.clear();
+            saveDisabledSubjects();
+            renderSubjectCheckboxes();
+            renderChart();
+          });
+        }
+        if (deselectAllBtn) {
+          deselectAllBtn.addEventListener('click', () => {
+            const subjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+            subjects.forEach(s => { if (s.name) disabledWeaknessSubjects.add(s.name); });
+            if (window.ConnectifyAtar?.readCourses) {
+              const rawCourses = window.ConnectifyAtar.readCourses(false);
+              if (rawCourses) {
+                [...(rawCourses[0] || []), ...(rawCourses[1] || [])].forEach(c => {
+                  if (c.name) disabledWeaknessSubjects.add(c.name);
+                });
+              }
+            }
+            saveDisabledSubjects();
+            renderSubjectCheckboxes();
+            renderChart();
+          });
+        }
+
+        const renderChart = () => {
+          renderSubjectCheckboxes();
+          const chartDiv = document.getElementById('connectify-radar-chart');
+          if (!window.Highcharts) return;
+          
+          const perf = {};
+          const mode = document.getElementById('cx-radar-mode').value;
+
+          window.ConnectifyData.collect(true).forEach(subject => {
+              if (disabledWeaknessSubjects.has(subject.name)) return;
+              subject.tasks.forEach(t => {
+                  if (t.weight > 0 && !t.pending && t.score !== null) {
+                      const earned = (t.score / 100) * t.weight;
+                      const label = mode === 'subject' ? subject.name : categorizeTask(t.name);
+                      if (!perf[label]) perf[label] = { earned: 0, total: 0 };
+                      perf[label].earned += earned;
+                      perf[label].total += t.weight;
+                  }
+              });
+          });
+
+          const labels = [];
+          const data = [];
+          for (const [label, stats] of Object.entries(perf)) {
+             labels.push(label);
+             data.push(stats.total > 0 ? Math.round((stats.earned / stats.total) * 100) : 0);
+          }
+          
+          if (labels.length === 0) {
+              chartDiv.innerHTML = '<div style="padding:20px;color:#999;text-align:center;">No completed assessments to plot for the selected subjects.</div>';
+              return;
+          }
+
+          window.Highcharts.chart('connectify-radar-chart', {
+             chart: { polar: true, type: 'area', backgroundColor: 'transparent' },
+             title: { text: '' },
+             pane: { size: '80%' },
+             xAxis: { categories: labels, tickmarkPlacement: 'on', lineWidth: 0, labels: { style: { color: '#cccccc' } } },
+             yAxis: { gridLineInterpolation: 'polygon', lineWidth: 0, min: 0, max: 100, labels: { style: { color: '#999' } } },
+             tooltip: { shared: true, pointFormat: '<span style="color:{series.color}">{series.name}: <b>{point.y}%</b><br/>' },
+             legend: { enabled: false },
+             series: [{ name: 'Performance', data: data, pointPlacement: 'on', color: '#d4b483', fillOpacity: 0.2 }],
+             credits: { enabled: false }
+          });
+        };
+
+        document.getElementById('cx-radar-mode').addEventListener('change', renderChart);
+
+        toggleBtn.addEventListener('click', () => {
+           document.querySelectorAll('.cx-workspace-panel').forEach(p => p.hidden = true);
+           document.querySelectorAll('.cx-tool-menu button').forEach(b => b.setAttribute('aria-expanded', 'false'));
+           toggleBtn.setAttribute('aria-expanded', 'true');
+           panel.hidden = false;
+           renderSubjectCheckboxes();
+           renderChart();
+        });
        
        window.addEventListener('connectify-open', e => {
-           if (e.detail !== 'weakness') {
-               panel.hidden = true;
-               toggleBtn.setAttribute('aria-expanded', 'false');
-           }
-       });
+            if (e.detail !== 'weakness') {
+                panel.hidden = true;
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            } else {
+                panel.hidden = false;
+                toggleBtn.setAttribute('aria-expanded', 'true');
+                renderSubjectCheckboxes();
+                renderChart();
+            }
+        });
 
        const catBtn = document.createElement('button');
        catBtn.textContent = 'Settings';
