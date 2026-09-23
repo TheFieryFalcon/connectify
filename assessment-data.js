@@ -65,6 +65,88 @@
 
   const subjectsCache = new Map();
 
+  function parseSemester(card) {
+    const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
+    const match = title.match(/Semester\s*([12])/i);
+    return match ? +match[1] : 1;
+  }
+
+  /**
+   * Scrapes tasks from a single subject card and updates subjectsCache.
+   */
+  function scrapeSubjectTasks(card) {
+    if (!card) return;
+    const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
+    if (!/Semester\s*[12]/i.test(title)) return;
+
+    const subjectName = title.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '');
+    const taskRows = card.querySelectorAll('.cvr-c-tasks .cvr-c-task');
+    if (taskRows.length === 0) return;
+
+    if (!subjectsCache.has(subjectName)) {
+      subjectsCache.set(subjectName, new Map());
+    }
+    const tasks = subjectsCache.get(subjectName);
+    const occurrences = new Map();
+
+    for (const row of taskRows) {
+      const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
+        .map(e => normalize(e.textContent))
+        .filter(Boolean);
+
+      const rawMarkText = normalize(row.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
+      const scoreMatch = rawMarkText.match(/^(\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
+      const isPending = /^[-–—]\s*Out\s+of\s+\d/i.test(rawMarkText);
+
+      if (!scoreMatch && !isPending) continue;
+      if (scoreMatch && (+scoreMatch[2] <= 0 || +scoreMatch[1] > +scoreMatch[2])) continue;
+
+      const maxScore = scoreMatch ? +scoreMatch[2] : Number(rawMarkText.match(/Out\s+of\s+(\d+(?:\.\d+)?)/i)?.[1]);
+
+      const weightElement = row.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark')[1];
+      const weightMatch = normalize(weightElement?.textContent).match(/Out\s+of\s+(\d+(?:\.\d+)?)/i);
+      const weight = weightMatch ? Number(weightMatch[1]) : null;
+
+      const taskName = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${tasks.size + 1}`;
+      const caption = correctedCaption(title, taskName, labels[1] || '');
+
+      const identityKey = JSON.stringify([labels, maxScore]);
+      const occurrenceCount = occurrences.get(identityKey) || 0;
+      occurrences.set(identityKey, occurrenceCount + 1);
+
+      const id = `${identityKey}:${occurrenceCount}`;
+      const existingTask = tasks.get(id);
+
+      const record = {
+        id,
+        name: taskName,
+        caption,
+        score: scoreMatch ? (+scoreMatch[1] / +scoreMatch[2]) * 100 : null,
+        pending: isPending,
+        weight,
+        mean: cohortMean(row),
+        semester: Math.min(parseSemester(card), existingTask?.semester ?? 2),
+        order: (() => {
+           const customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
+                               localStorage.getItem(`connectea:time_override:${title}:${taskName}`);
+           if (customOrder !== null && customOrder !== '') {
+              const num = Number(customOrder);
+              if (Number.isFinite(num) && num > 0) {
+                 const term = Math.floor((num - 1) / 10) + 1;
+                 const week = ((num - 1) % 10) + 1;
+                 return (term - 1) * 12 + week;
+              }
+           }
+           return orderHint(caption);
+        })(),
+        sequence: existingTask?.sequence ?? tasks.size
+      };
+
+      Object.defineProperty(record, 'row', { value: row });
+      tasks.set(id, record);
+    }
+  }
+
   /**
    * Scrape all subject assessment cards currently present in the DOM.
    * Caches results so data persists even when cards are collapsed by the user.
@@ -73,89 +155,11 @@
    * @returns {Array<{name: string, tasks: Array<Object>}>} Array of subject records
    */
   function collect(includePending = false) {
-    const parseSemester = card => {
-      const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
-      const match = title.match(/Semester\s*([12])/i);
-      return match ? +match[1] : 1;
-    };
-
     const cards = Array.from(document.querySelectorAll('.eds-c-tile'))
       .sort((a, b) => parseSemester(a) - parseSemester(b));
 
     for (const card of cards) {
-      const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
-      if (!/Semester\s*[12]/i.test(title)) continue;
-
-      const subjectName = title.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '');
-      const taskRows = card.querySelectorAll('.cvr-c-tasks .cvr-c-task');
-      
-      // Only update cache if tasks are actually rendered in the DOM right now
-      if (taskRows.length > 0) {
-        if (!subjectsCache.has(subjectName)) {
-          subjectsCache.set(subjectName, new Map());
-        }
-        const tasks = subjectsCache.get(subjectName);
-        const occurrences = new Map();
-
-        for (const row of taskRows) {
-          const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
-            .map(e => normalize(e.textContent))
-            .filter(Boolean);
-
-          const rawMarkText = normalize(row.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
-          const scoreMatch = rawMarkText.match(/^(\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
-          const isPending = /^[-–—]\s*Out\s+of\s+\d/i.test(rawMarkText);
-
-          if (!scoreMatch && !isPending) continue;
-          if (scoreMatch && (+scoreMatch[2] <= 0 || +scoreMatch[1] > +scoreMatch[2])) continue;
-
-          const maxScore = scoreMatch ? +scoreMatch[2] : Number(rawMarkText.match(/Out\s+of\s+(\d+(?:\.\d+)?)/i)?.[1]);
-
-          const weightElement = row.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark')[1];
-          const weightMatch = normalize(weightElement?.textContent).match(/Out\s+of\s+(\d+(?:\.\d+)?)/i);
-          const weight = weightMatch ? Number(weightMatch[1]) : null;
-
-          const taskName = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${tasks.size + 1}`;
-          const caption = correctedCaption(title, taskName, labels[1] || '');
-
-          const identityKey = JSON.stringify([labels, maxScore]);
-          const occurrenceCount = occurrences.get(identityKey) || 0;
-          occurrences.set(identityKey, occurrenceCount + 1);
-
-          const id = `${identityKey}:${occurrenceCount}`;
-          const existingTask = tasks.get(id);
-
-          const record = {
-            id,
-            name: taskName,
-            caption,
-            score: scoreMatch ? (+scoreMatch[1] / +scoreMatch[2]) * 100 : null,
-            pending: isPending,
-            weight,
-            mean: cohortMean(row),
-            semester: Math.min(parseSemester(card), existingTask?.semester ?? 2),
-            order: (() => {
-               const customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
-                                   localStorage.getItem(`connectea:time_override:${title}:${taskName}`);
-               if (customOrder !== null && customOrder !== '') {
-                  const num = Number(customOrder);
-                  if (Number.isFinite(num) && num > 0) {
-                     // Teaching week N: 10 weeks per term (e.g. 17 -> Term 2 Week 7)
-                     const term = Math.floor((num - 1) / 10) + 1;
-                     const week = ((num - 1) % 10) + 1;
-                     // Convert to calendar order (10 weeks + 2-week break per term)
-                     return (term - 1) * 12 + week;
-                  }
-               }
-               return orderHint(caption);
-            })(),
-            sequence: existingTask?.sequence ?? tasks.size
-          };
-
-          Object.defineProperty(record, 'row', { value: row });
-          tasks.set(id, record);
-        }
-      }
+      scrapeSubjectTasks(card);
     }
 
     return Array.from(subjectsCache, ([name, tasks]) => ({
@@ -167,6 +171,39 @@
           return a.sequence - b.sequence;
         })
     }));
+  }
+
+  /**
+   * Dispatches updates to dependent modules whenever a subject is expanded.
+   */
+  let notifyUpdateTimer = null;
+  function notifyResultsUpdated(card) {
+    clearTimeout(notifyUpdateTimer);
+    notifyUpdateTimer = setTimeout(() => {
+      if (card) {
+        scrapeSubjectTasks(card);
+      } else {
+        collect(true);
+      }
+
+      if (window.ConnectifyCompoundProgress?.update) {
+        window.ConnectifyCompoundProgress.update();
+      }
+      if (window.ConnectifyWeakness?.renderChart) {
+        window.ConnectifyWeakness.renderChart();
+      }
+      if (window.ConnectifyCohort?.schedule) {
+        window.ConnectifyCohort.schedule();
+      }
+      if (window.ConnectifyAtar?.refreshData) {
+        window.ConnectifyAtar.refreshData();
+      }
+      if (window.ConnectifyProgress?.update) {
+        window.ConnectifyProgress.update();
+      }
+
+      window.dispatchEvent(new CustomEvent('connectify-results-updated', { detail: { card } }));
+    }, 180);
   }
 
   /**
@@ -232,11 +269,59 @@
    */
   function expandAll(expand = true) {
     const pattern = expand ? /show details/i : /hide details/i;
+    let clickedAny = false;
     for (const heading of document.querySelectorAll('.eds-c-tile .eds-c-accordion__section-heading')) {
       if (pattern.test(heading.textContent)) {
         heading.querySelector('button, .v-button, [role="button"]')?.click();
+        clickedAny = true;
       }
     }
+    if (expand && clickedAny) {
+      setTimeout(() => notifyResultsUpdated(), 260);
+    }
+  }
+
+  // Listen for user clicks on subject accordion headers to update results cache immediately upon expansion
+  document.addEventListener('click', e => {
+    const heading = e.target.closest('.eds-c-accordion__section-heading');
+    if (!heading) return;
+    const card = heading.closest('.eds-c-tile');
+    if (!card) return;
+
+    setTimeout(() => {
+      if (card.querySelector('.cvr-c-tasks .cvr-c-task') || /hide details/i.test(heading.textContent)) {
+        notifyResultsUpdated(card);
+      }
+    }, 220);
+  }, true);
+
+  // Observe DOM additions inside subject tiles when expanded
+  const expandMutationObserver = new MutationObserver(mutations => {
+    let expandedCard = null;
+    for (const m of mutations) {
+      if (m.addedNodes.length > 0) {
+        for (const node of m.addedNodes) {
+          if (node.nodeType === 1) {
+            if (node.matches?.('.cvr-c-task') || node.querySelector?.('.cvr-c-task')) {
+              expandedCard = node.closest('.eds-c-tile');
+              if (expandedCard) break;
+            }
+          }
+        }
+      }
+      if (expandedCard) break;
+    }
+    if (expandedCard) {
+      notifyResultsUpdated(expandedCard);
+    }
+  });
+
+  if (document.body) {
+    expandMutationObserver.observe(document.body, { childList: true, subtree: true });
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      expandMutationObserver.observe(document.body, { childList: true, subtree: true });
+    });
   }
 
   // Publish public API
@@ -245,7 +330,9 @@
     cohortMean,
     orderHint,
     correctedCaption,
-    expandAll
+    expandAll,
+    scrapeSubjectTasks,
+    notifyResultsUpdated
   };
   } catch (err) {
     console.error('Connectify error in assessment-data.js:', err);

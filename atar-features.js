@@ -140,6 +140,17 @@
       } catch (e) {}
     });
 
+    window.addEventListener('hashchange', () => {
+      hasAutoExpanded = false;
+      hasInitializedSidebar = false;
+      setTimeout(syncFeatures, 500);
+    });
+    window.addEventListener('popstate', () => {
+      hasAutoExpanded = false;
+      hasInitializedSidebar = false;
+      setTimeout(syncFeatures, 500);
+    });
+
     initSidebarTools();
     setInterval(() => {
       if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;

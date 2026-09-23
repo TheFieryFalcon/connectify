@@ -83,6 +83,66 @@
   }
 
   /**
+   * For a subject whose average has changed:
+   * Ignores auto-expand / collapse preferences and ensures THAT SUBJECT ONLY
+   * is definitely expanded to reveal its tasks and update results,
+   * then if auto-expand is off, collapses it again.
+   */
+  function processChangedSubject(entry) {
+    const card = entry.card;
+    if (!card) return;
+
+    const heading = card.querySelector('.eds-c-accordion__section-heading');
+    const btn = heading?.querySelector('button, .v-button, [role="button"]');
+    if (!heading || !btn) return;
+
+    const isAutoExpandOff = (() => {
+      try {
+        return localStorage.getItem('connectify:auto_expand') === 'false';
+      } catch {
+        return false;
+      }
+    })();
+
+    const isCurrentlyCollapsed = /show details/i.test(heading.textContent);
+
+    if (isCurrentlyCollapsed) {
+      // 1. Ensure THAT SUBJECT ONLY is definitely expanded
+      btn.click();
+
+      // 2. Wait for tasks to render in DOM, scrape them, then if auto-expand is off, collapse it again
+      setTimeout(() => {
+        if (window.ConnectifyData?.scrapeSubjectTasks) {
+          window.ConnectifyData.scrapeSubjectTasks(card);
+        }
+        if (window.ConnectifyData?.notifyResultsUpdated) {
+          window.ConnectifyData.notifyResultsUpdated(card);
+        }
+
+        if (isAutoExpandOff) {
+          if (/hide details/i.test(heading.textContent)) {
+            btn.click();
+          }
+        }
+      }, 280);
+    } else {
+      // Already expanded: scrape tasks into cache
+      if (window.ConnectifyData?.scrapeSubjectTasks) {
+        window.ConnectifyData.scrapeSubjectTasks(card);
+      }
+      if (window.ConnectifyData?.notifyResultsUpdated) {
+        window.ConnectifyData.notifyResultsUpdated(card);
+      }
+
+      if (isAutoExpandOff) {
+        if (/hide details/i.test(heading.textContent)) {
+          btn.click();
+        }
+      }
+    }
+  }
+
+  /**
    * Smoothly scrolls to a subject card and plays a visual pulse highlight.
    */
   function jumpToSubject(card) {
@@ -113,12 +173,6 @@
     );
     if (!cards.length) return;
 
-    let cache = loadCachedGrades();
-    const isFirstRun = cache === null;
-    if (isFirstRun) {
-      cache = {};
-    }
-
     const currentEntries = [];
 
     for (const card of cards) {
@@ -148,90 +202,84 @@
 
     if (!currentEntries.length) return;
 
-    if (isFirstRun) {
-      // Seed cache on initial run without alerting
+    const prevCache = loadCachedGrades();
+    const isFirstRun = prevCache === null;
+
+    if (!isFirstRun && prevCache) {
       for (const entry of currentEntries) {
-        cache[entry.subjectName] = {
-          mark: entry.mark,
-          updatedAt: Date.now()
-        };
-      }
-      saveCachedGrades(cache);
-      return;
-    }
+        const prev = prevCache[entry.subjectName];
 
-    let cacheChanged = false;
+        if (prev && Number.isFinite(prev.mark)) {
+          const delta = Math.round((entry.mark - prev.mark) * 100) / 100;
 
-    for (const entry of currentEntries) {
-      const prev = cache[entry.subjectName];
+          if (Math.abs(delta) >= 0.05) {
+            // 1. Process targeted expansion, task results scraping, and collapse if auto-expand off
+            processChangedSubject(entry);
 
-      if (prev && Number.isFinite(prev.mark)) {
-        const delta = Math.round((entry.mark - prev.mark) * 100) / 100;
+            // 2. Dispatch stacked notification
+            const deltaSign = delta > 0 ? '+' : '';
+            const deltaStr = `${deltaSign}${delta.toFixed(1)}%`;
+            const currentMarkStr = `${entry.mark.toFixed(1)}%`;
 
-        if (Math.abs(delta) >= 0.05) {
-          cacheChanged = true;
-          cache[entry.subjectName] = {
-            mark: entry.mark,
-            updatedAt: Date.now()
-          };
-
-          // 1. Auto expand this subject card
-          expandSubjectCard(entry.card);
-
-          // 2. Dispatch stacked notification
-          const deltaSign = delta > 0 ? '+' : '';
-          const deltaStr = `${deltaSign}${delta.toFixed(1)}%`;
-          const currentMarkStr = `${entry.mark.toFixed(1)}%`;
-
-          if (window.ConnectifyNotifications?.show) {
-            window.ConnectifyNotifications.show({
-              id: `connectify-grade-${entry.subjectName.replace(/\s+/g, '-').toLowerCase()}`,
-              type: 'grade',
-              title: `Grade Update: ${entry.subjectName}`,
-              message: `Subject running average updated to ${currentMarkStr} (${deltaStr}).`,
-              duration: 12000,
-              dismissible: true,
-              actions: [
-                {
-                  text: `Jump to ${entry.subjectName.length > 18 ? 'Subject' : entry.subjectName}`,
-                  type: 'accent',
-                  onClick: () => {
-                    jumpToSubject(entry.card);
+            if (window.ConnectifyNotifications?.show) {
+              window.ConnectifyNotifications.show({
+                id: `connectify-grade-${entry.subjectName.replace(/\s+/g, '-').toLowerCase()}`,
+                type: 'grade',
+                title: `Grade Update: ${entry.subjectName}`,
+                message: `Subject running average updated to ${currentMarkStr} (${deltaStr}).`,
+                duration: 12000,
+                dismissible: true,
+                actions: [
+                  {
+                    text: `Jump to ${entry.subjectName.length > 18 ? 'Subject' : entry.subjectName}`,
+                    type: 'accent',
+                    onClick: () => {
+                      jumpToSubject(entry.card);
+                    }
                   }
-                }
-              ]
-            });
+                ]
+              });
+            }
           }
         }
-      } else {
-        // Newly appeared subject
-        cache[entry.subjectName] = {
-          mark: entry.mark,
-          updatedAt: Date.now()
-        };
-        cacheChanged = true;
       }
     }
 
-    if (cacheChanged) {
-      saveCachedGrades(cache);
+    // Always update the averages cache on page load with all latest subject averages
+    const updatedCache = prevCache ? { ...prevCache } : {};
+    for (const entry of currentEntries) {
+      updatedCache[entry.subjectName] = {
+        mark: entry.mark,
+        updatedAt: Date.now()
+      };
+    }
+    saveCachedGrades(updatedCache);
+  }
+
+  let hasCheckedThisPage = false;
+
+  function triggerPageLoadCheck() {
+    if (hasCheckedThisPage) return;
+    if (document.querySelectorAll('.eds-c-tile').length > 0) {
+      hasCheckedThisPage = true;
+      checkGrades();
     }
   }
 
-  // Initial checks
-  setTimeout(checkGrades, 1500);
-  setTimeout(checkGrades, 4000);
+  // Trigger once on page load after DOM tiles are present
+  setTimeout(triggerPageLoadCheck, 1200);
+  setTimeout(triggerPageLoadCheck, 2500);
+  setTimeout(triggerPageLoadCheck, 4000);
 
-  // Re-check periodically when active
-  setInterval(() => {
-    if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
-    checkGrades();
-  }, 10000);
-
-  // Listen to hash / navigation / settings events
-  window.addEventListener('hashchange', () => setTimeout(checkGrades, 1000));
-  window.addEventListener('popstate', () => setTimeout(checkGrades, 1000));
-  window.addEventListener('connectify-settings-updated', () => setTimeout(checkGrades, 500));
+  // Reset page check guard on navigation
+  window.addEventListener('hashchange', () => {
+    hasCheckedThisPage = false;
+    setTimeout(triggerPageLoadCheck, 1000);
+  });
+  window.addEventListener('popstate', () => {
+    hasCheckedThisPage = false;
+    setTimeout(triggerPageLoadCheck, 1000);
+  });
 
   window.ConnectifyNewGrade = {
     checkGrades,
@@ -247,6 +295,7 @@
       } catch {}
     },
     jumpToSubject,
-    expandSubjectCard
+    expandSubjectCard,
+    processChangedSubject
   };
 })();
