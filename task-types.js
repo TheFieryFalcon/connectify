@@ -3,6 +3,7 @@
  *
  * Handles automated assessment categorization (Exam, Test, Application, Essay, Take-Home),
  * persistent student category overrides in localStorage, dynamic category colors,
+ * class-level custom category sharing across Semesters 1 and 2,
  * and the interactive assessment type selector dropdown.
  */
 (() => {
@@ -20,8 +21,43 @@
 
   const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
 
+  function cleanSubject(subjectName) {
+    return (subjectName || '')
+      .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function getCategories() {
     return window.cxCategories || defaultCategories;
+  }
+
+  function getCustomCategoriesForClass(subjectName) {
+    const subjKey = cleanSubject(subjectName).toLowerCase();
+    if (!subjKey) return [];
+    try {
+      const stored = localStorage.getItem(`connectea:class_categories:${subjKey}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      }
+    } catch {}
+    return [];
+  }
+
+  function addCustomCategoryForClass(subjectName, categoryName) {
+    const cat = normalize(categoryName);
+    if (!cat) return;
+    const subjKey = cleanSubject(subjectName).toLowerCase();
+    if (!subjKey) return;
+
+    const existing = getCustomCategoriesForClass(subjKey);
+    if (!existing.some(c => c.toLowerCase() === cat.toLowerCase())) {
+      existing.push(cat);
+      try {
+        localStorage.setItem(`connectea:class_categories:${subjKey}`, JSON.stringify(existing));
+      } catch {}
+    }
   }
 
   function getTaskTypeOverrides() {
@@ -34,7 +70,7 @@
 
   function getSavedTaskType(subjectName, taskName, labelsKey) {
     const overrides = getTaskTypeOverrides();
-    const cleanSubj = (subjectName || '').replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+    const cleanSubj = cleanSubject(subjectName);
     if (labelsKey && overrides[`${cleanSubj}::${labelsKey}`]) {
       return overrides[`${cleanSubj}::${labelsKey}`];
     }
@@ -46,13 +82,14 @@
 
   function saveTaskTypeOverride(subjectName, taskName, labelsKey, type) {
     const overrides = getTaskTypeOverrides();
-    const cleanSubj = (subjectName || '').replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+    const cleanSubj = cleanSubject(subjectName);
     const fullKey = labelsKey ? `${cleanSubj}::${labelsKey}` : null;
     const nameKey = taskName ? `${cleanSubj}::${taskName}` : null;
 
     if (type) {
       if (fullKey) overrides[fullKey] = type;
       if (nameKey) overrides[nameKey] = type;
+      addCustomCategoryForClass(cleanSubj, type);
     } else {
       if (fullKey) delete overrides[fullKey];
       if (nameKey) delete overrides[nameKey];
@@ -98,7 +135,7 @@
     const cats = getCategories();
     if (cats?.[cat]?.color) return cats[cat].color;
     if (defaultCategories[cat]?.color) return defaultCategories[cat].color;
-    const palette = ['#1abc9c', '#e67e22', '#16a085', '#d35400', '#27ae60', '#8e44ad', '#2980b9'];
+    const palette = ['#1abc9c', '#e67e22', '#16a085', '#d35400', '#27ae60', '#8e44ad', '#2980b9', '#f39c12', '#9c27b0', '#009688'];
     let hash = 0;
     for (let i = 0; i < (cat || '').length; i++) hash = (hash << 5) - hash + cat.charCodeAt(i);
     return palette[Math.abs(hash) % palette.length];
@@ -107,7 +144,7 @@
   function getTaskMeta(row) {
     const card = row.closest('.eds-c-tile');
     const cardTitle = normalize(card?.querySelector('.eds-c-tile__title')?.textContent || '');
-    const subjectName = cardTitle.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+    const subjectName = cleanSubject(cardTitle);
     const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
       .map(e => normalize(e.textContent))
       .filter(Boolean);
@@ -122,11 +159,20 @@
     const autoType = categorizeTask(taskName, allLabels);
     const savedOverride = getSavedTaskType(subjectName, taskName, labelsKey);
     const categories = getCategories();
+    const classCustoms = getCustomCategoriesForClass(subjectName);
 
     const currentSelection = savedOverride !== undefined ? savedOverride : '';
 
-    const catKeys = Object.keys(categories);
-    const optSignature = `${autoType}|${catKeys.join(',')}|${savedOverride || ''}`;
+    // Merge standard categories and class custom categories
+    const allCatList = [...Object.keys(categories)];
+    for (const cc of classCustoms) {
+      if (!allCatList.includes(cc)) allCatList.push(cc);
+    }
+    if (savedOverride && !allCatList.includes(savedOverride)) {
+      allCatList.push(savedOverride);
+    }
+
+    const optSignature = `${autoType}|${allCatList.join(',')}|${savedOverride || ''}`;
     if (select.dataset.signature !== optSignature) {
       select.dataset.signature = optSignature;
       select.innerHTML = '';
@@ -136,18 +182,11 @@
       autoOpt.textContent = `Auto (${autoType})`;
       select.appendChild(autoOpt);
 
-      for (const cat of catKeys) {
+      for (const cat of allCatList) {
         const opt = document.createElement('option');
         opt.value = cat;
         opt.textContent = cat;
         select.appendChild(opt);
-      }
-
-      if (savedOverride && !catKeys.includes(savedOverride)) {
-        const customOpt = document.createElement('option');
-        customOpt.value = savedOverride;
-        customOpt.textContent = savedOverride;
-        select.appendChild(customOpt);
       }
 
       const addOpt = document.createElement('option');
@@ -172,6 +211,8 @@
     getOverrides: getTaskTypeOverrides,
     getSavedTaskType,
     saveTaskTypeOverride,
+    getCustomCategoriesForClass,
+    addCustomCategoryForClass,
     categorizeTask,
     getEffectiveType,
     getCategoryColor,

@@ -390,11 +390,26 @@
          renderChart();
       };
 
+      function openWeakness() {
+         panel.hidden = false;
+         toggleBtn.setAttribute('aria-pressed', 'true');
+         window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'weakness' }));
+         updateCheckboxes();
+         setTimeout(renderChart, 50);
+      }
+
+      function closeWeakness() {
+         panel.hidden = true;
+         toggleBtn.setAttribute('aria-pressed', 'false');
+         destroyChart();
+      }
+
       toggleBtn.onclick = () => {
-         const wasActive = toggleBtn.getAttribute('aria-pressed') === 'true';
-         if (!wasActive) {
-            updateCheckboxes();
-            setTimeout(renderChart, 50);
+         if (panel.hidden) {
+            openWeakness();
+         } else {
+            closeWeakness();
+            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
          }
       };
 
@@ -457,10 +472,36 @@
          }
       };
 
-      catBtn.onclick = () => {
+      function openCategories() {
+         catPanel.hidden = false;
+         catBtn.setAttribute('aria-pressed', 'true');
+         window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
          resolveCategories();
          updateInputValues();
+      }
+
+      function closeCategories() {
+         catPanel.hidden = true;
+         catBtn.setAttribute('aria-pressed', 'false');
+      }
+
+      catBtn.onclick = () => {
+         if (catPanel.hidden) {
+            openCategories();
+         } else {
+            closeCategories();
+            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
+         }
       };
+
+      window.addEventListener('connectify-open', e => {
+         if (e.detail !== 'weakness') {
+            closeWeakness();
+         }
+         if (e.detail !== 'categories') {
+            closeCategories();
+         }
+      });
 
       catPanel.querySelector('#cx-cat-save').onclick = () => {
          for (const [cat, data] of Object.entries(defaultCategories)) {

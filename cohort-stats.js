@@ -167,56 +167,56 @@
 
     // 2. Derive dynamic baseline estimate from subject category, course type, and year level
     let baseline = 50;
-    const isATAR = /atar/i.test(cleanTitle);
-    const isYear12 = /year\s*12/i.test(cleanTitle);
+    const isATAR = /\batar\b/i.test(cleanTitle);
+    const isYear12 = /\byear\s*12\b/i.test(cleanTitle);
 
-    if (/(methods|mathematics methods)/i.test(cleanTitle)) {
+    if (/\b(methods|mathematics methods)\b/i.test(cleanTitle)) {
       baseline = isYear12 ? 180 : 219;
-    } else if (/chemistry/i.test(cleanTitle)) {
+    } else if (/\bchemistry\b/i.test(cleanTitle)) {
       baseline = isYear12 ? 170 : 224;
-    } else if (/human biolog(y|ical)/i.test(cleanTitle)) {
+    } else if (/\bhuman biolog(y|ical)\b/i.test(cleanTitle)) {
       baseline = isYear12 ? 140 : 183;
-    } else if (/(mathematics applications?|applications?)/i.test(cleanTitle)) {
+    } else if (/\b(mathematics applications?|applications?)\b/i.test(cleanTitle)) {
       baseline = isYear12 ? 160 : 189;
-    } else if (/(english atar)/i.test(cleanTitle) || (/english/i.test(cleanTitle) && isATAR && !/additional/i.test(cleanTitle))) {
+    } else if (/\benglish atar\b/i.test(cleanTitle) || (/\benglish\b/i.test(cleanTitle) && isATAR && !/\badditional\b/i.test(cleanTitle))) {
       baseline = isYear12 ? 180 : 220;
-    } else if (/(mathematics essentials?|essentials?)/i.test(cleanTitle)) {
+    } else if (/\b(mathematics essentials?|essentials?)\b/i.test(cleanTitle)) {
       baseline = 117;
-    } else if (/physics/i.test(cleanTitle)) {
+    } else if (/\bphysics\b/i.test(cleanTitle)) {
       baseline = isYear12 ? 90 : 111;
-    } else if (/mathematics specialist/i.test(cleanTitle)) {
+    } else if (/\bmathematics specialist\b/i.test(cleanTitle)) {
       baseline = isYear12 ? 45 : 64;
-    } else if (/(biology)/i.test(cleanTitle)) {
+    } else if (/\bbiology\b/i.test(cleanTitle)) {
       baseline = 61;
-    } else if (/literature/i.test(cleanTitle)) {
+    } else if (/\bliterature\b/i.test(cleanTitle)) {
       baseline = 52;
-    } else if (/economics/i.test(cleanTitle)) {
+    } else if (/\beconomics\b/i.test(cleanTitle)) {
       baseline = 44;
-    } else if (/(accounting|accounting and finance)/i.test(cleanTitle)) {
+    } else if (/\b(accounting|accounting and finance)\b/i.test(cleanTitle)) {
       baseline = 36;
-    } else if (/(politics and law|politics & law)/i.test(cleanTitle)) {
+    } else if (/\b(politics and law|politics & law)\b/i.test(cleanTitle)) {
       baseline = 35;
-    } else if (/(psychology)/i.test(cleanTitle)) {
+    } else if (/\bpsychology\b/i.test(cleanTitle)) {
       baseline = 45;
-    } else if (/(physical education studies|pes)/i.test(cleanTitle)) {
+    } else if (/\b(physical education studies|pes)\b/i.test(cleanTitle)) {
       baseline = 38;
-    } else if (/(business management|bme)/i.test(cleanTitle)) {
+    } else if (/\b(business management|bme)\b/i.test(cleanTitle)) {
       baseline = 24;
-    } else if (/modern history/i.test(cleanTitle)) {
+    } else if (/\bmodern history\b/i.test(cleanTitle)) {
       baseline = 15;
-    } else if (/(japanese)/i.test(cleanTitle)) {
+    } else if (/\bjapanese\b/i.test(cleanTitle)) {
       baseline = 44;
-    } else if (/(french)/i.test(cleanTitle)) {
+    } else if (/\bfrench\b/i.test(cleanTitle)) {
       baseline = 21;
-    } else if (/(italian)/i.test(cleanTitle)) {
+    } else if (/\bitalian\b/i.test(cleanTitle)) {
       baseline = 20;
-    } else if (/(german|chinese|indonesian)/i.test(cleanTitle)) {
+    } else if (/\b(german|chinese|indonesian)\b/i.test(cleanTitle)) {
       baseline = 22;
-    } else if (/computer science/i.test(cleanTitle)) {
+    } else if (/\bcomputer science\b/i.test(cleanTitle)) {
       baseline = 11;
-    } else if (/music/i.test(cleanTitle)) {
+    } else if (/\bmusic\b/i.test(cleanTitle)) {
       baseline = 10;
-    } else if (/eald|english as an additional/i.test(cleanTitle)) {
+    } else if (/\b(eald|english as an additional)\b/i.test(cleanTitle)) {
       baseline = 9;
     } else if (isATAR) {
       baseline = 50;
@@ -355,6 +355,9 @@
           const custom = prompt('Enter custom assessment type:');
           if (custom && custom.trim()) {
             const cleanCustom = custom.trim();
+            if (types().addCustomCategoryForClass) {
+              types().addCustomCategoryForClass(currentMeta.subjectName, cleanCustom);
+            }
             types().saveTaskTypeOverride(currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, cleanCustom);
             types().updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
           } else {
@@ -429,6 +432,9 @@
     }
 
     const target = row.querySelector('.cvr-c-task__details') || row;
+    target.querySelectorAll('.connectea-panel, .connectea-row-wrapper').forEach(el => {
+      if (el !== wrapper && el !== box) el.remove();
+    });
     target.append(wrapper);
 
     const state = {
@@ -500,10 +506,14 @@
 
     if (!isOverall && !Number.isFinite(mark) && !math().validStats(stats)) {
       ui.box.style.display = 'none';
+      if (ui.typeContainer) ui.typeContainer.style.display = 'inline-flex';
+      if (ui.wrapper) ui.wrapper.style.display = 'flex';
       return;
     }
 
     ui.box.style.display = '';
+    if (ui.typeContainer) ui.typeContainer.style.display = 'inline-flex';
+    if (ui.wrapper) ui.wrapper.style.display = 'flex';
 
     if (!data) {
       setText(ui.distribution, 'Cohort statistics unavailable');
@@ -548,20 +558,24 @@
   }
 
   const styles = `
+    .cvr-c-task__details {
+      overflow: visible !important;
+    }
     .connectea-row-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin: 4px 0;
-      max-width: 100%;
-      clear: both;
+      display: flex !important;
+      align-items: center !important;
+      gap: 14px !important;
+      flex-wrap: nowrap !important;
+      margin: 4px 0 !important;
+      max-width: 100% !important;
+      clear: both !important;
+      overflow: visible !important;
     }
     .connectea-row-wrapper > .connectea-panel {
-      flex: 0 1 auto;
-      width: auto;
-      max-width: 100%;
-      margin: 0;
+      flex: 0 0 auto !important;
+      width: auto !important;
+      max-width: fit-content !important;
+      margin: 0 !important;
     }
     .connectea-panel {
       box-sizing: border-box;

@@ -4,6 +4,7 @@
  * Visualizes multi-category weighted completion per subject card.
  * Each segment reflects individual assessment weights color-coded by category
  * (Exam, Test, Application, Essay, Take-Home, or custom overrides).
+ * Semester 2 cards include Semester 1 assignments for full cumulative annual progress.
  */
 (() => {
   'use strict';
@@ -14,8 +15,44 @@
     const style = document.createElement('style');
     style.id = 'cx-compound-styles';
     style.textContent = `
-      .cx-compound-segment { transition: filter 0.2s; cursor: pointer; }
-      .cx-compound-segment:hover { filter: brightness(1.5); }
+      .cx-compound-progress-container {
+        box-sizing: border-box !important;
+        width: 100% !important;
+        padding: 2px 20px 8px 20px !important;
+        margin: 0 !important;
+      }
+      .cx-compound-segment {
+        transition: filter 0.2s;
+        cursor: pointer;
+      }
+      .cx-compound-segment:hover {
+        filter: brightness(1.3);
+      }
+      .cx-compound-bar {
+        display: flex;
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 4px 0 4px 0;
+        border: 1px solid #cbd5e1;
+        background: #e2e8f0;
+        box-sizing: border-box;
+        width: 100%;
+      }
+      .cx-compound-label {
+        font-size: 11px;
+        color: #64748b;
+        text-align: right;
+        margin: 2px 0 0 0;
+        font-weight: 500;
+      }
+      .connectea-dark .cx-compound-bar {
+        border-color: #475569 !important;
+        background: #1e293b !important;
+      }
+      .connectea-dark .cx-compound-label {
+        color: #94a3b8 !important;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -41,7 +78,7 @@
 
     const subjects = window.ConnectifyData.collect(true);
     subjects.forEach(subject => {
-      const matchingTitles = Array.from(document.querySelectorAll('.eds-c-tile__title')).filter(t => t.textContent.includes(subject.name));
+      const matchingTitles = Array.from(document.querySelectorAll('.eds-c-tile__title')).filter(t => (t.textContent || '').includes(subject.name));
       matchingTitles.forEach(cardTitle => {
         const card = cardTitle.closest('.eds-c-tile');
         if (!card) return;
@@ -49,23 +86,43 @@
         const header = card.querySelector('.eds-c-tile__header');
         if (!header) return;
 
-        const cardSemesterMatch = cardTitle.textContent.match(/Semester\s*([12])/i);
+        const cardSemesterMatch = (cardTitle.textContent || '').match(/Semester\s*([12])/i);
         const cardSemester = cardSemesterMatch ? +cardSemesterMatch[1] : null;
 
+        // For Semester 1 cards: include Semester 1 tasks.
+        // For Semester 2 cards: include BOTH Semester 1 and Semester 2 tasks for full annual weighting.
         const sortedTasks = [...subject.tasks]
-          .filter(t => t.weight > 0 && (!cardSemester || t.semester === cardSemester))
-          .sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
+          .filter(t => {
+            if (!t || t.weight <= 0) return false;
+            if (!cardSemester) return true;
+            if (cardSemester === 1) return t.semester === 1;
+            if (cardSemester === 2) return t.semester === 1 || t.semester === 2;
+            return true;
+          })
+          .sort((a, b) => ((a.semester || 1) - (b.semester || 1)) || ((a.sequence || 0) - (b.sequence || 0)));
 
         if (sortedTasks.length === 0) return;
 
-        const taskTypes = sortedTasks.map(t => getEffectiveType(subject.name, t));
-        const signature = JSON.stringify({ tasks: subject.tasks, cats: window.cxCategories, types: taskTypes });
+        // Clean signature using primitives only to avoid circular references
+        const taskSummary = sortedTasks.map(t => ({
+          name: t.name,
+          weight: t.weight,
+          pending: t.pending,
+          type: getEffectiveType(subject.name, t)
+        }));
 
-        if (header.nextElementSibling && header.nextElementSibling.classList.contains('cx-compound-progress-container')) {
-          if (header.nextElementSibling.dataset.signature === signature) {
-            return; // Unchanged, don't destroy DOM!
+        const signature = JSON.stringify({
+          card: cardTitle.textContent,
+          semester: cardSemester,
+          tasks: taskSummary
+        });
+
+        const existingContainer = card.querySelector('.cx-compound-progress-container');
+        if (existingContainer) {
+          if (existingContainer.dataset.signature === signature) {
+            return; // Unchanged, avoid DOM churn
           }
-          header.nextElementSibling.remove();
+          existingContainer.remove();
         }
 
         let totalWeight = 0;
@@ -83,12 +140,7 @@
         if (totalWeight <= 0) return;
 
         const bar = document.createElement('div');
-        bar.style.display = 'flex';
-        bar.style.height = '6px';
-        bar.style.borderRadius = '3px';
-        bar.style.overflow = 'hidden';
-        bar.style.margin = '8px 0 4px 0';
-        bar.style.border = '1px solid #3a3a3a';
+        bar.className = 'cx-compound-bar';
 
         sortedTasks.forEach(t => {
           const cat = getEffectiveType(subject.name, t);
@@ -100,10 +152,11 @@
           segment.style.width = `${pct}%`;
           segment.style.backgroundColor = getCategoryColor(cat);
           if (!isCompleted) {
-            segment.style.opacity = '0.25';
+            segment.style.opacity = '0.3';
           }
-          segment.style.borderRight = '1px solid #1e1e1e';
-          segment.title = `${t.name} [${cat}]: ${t.weight}% (${isCompleted ? 'Completed' : 'Remaining'})`;
+          segment.style.borderRight = '1px solid rgba(0, 0, 0, 0.15)';
+          const semTag = t.semester ? `Sem ${t.semester} · ` : '';
+          segment.title = `${semTag}${t.name} [${cat}]: ${t.weight}% (${isCompleted ? 'Completed' : 'Remaining'})`;
           bar.appendChild(segment);
         });
 
@@ -113,9 +166,7 @@
         }
 
         const label = document.createElement('div');
-        label.style.fontSize = '10px';
-        label.style.color = '#999';
-        label.style.textAlign = 'right';
+        label.className = 'cx-compound-label';
         label.textContent = `${tooltipParts.join(' • ')} | ${Math.round((overallCompleted / totalWeight) * 100)}% Done`;
 
         const container = document.createElement('div');
@@ -128,7 +179,48 @@
     });
   }
 
+  // Reactive updates without page reload
+  let updateTimer = null;
+  function scheduleUpdate() {
+    clearTimeout(updateTimer);
+    updateTimer = setTimeout(updateCompoundBars, 150);
+  }
+
+  window.addEventListener('connectify-task-type-changed', scheduleUpdate);
+  window.addEventListener('connectify-settings-updated', scheduleUpdate);
+  window.addEventListener('storage', e => {
+    if (e.key === 'connectea:task_type_overrides' || e.key?.startsWith('connectea:class_categories:')) {
+      scheduleUpdate();
+    }
+  });
+
+  const observer = new MutationObserver(records => {
+    let shouldRun = false;
+    for (const r of records) {
+      if (r.target?.classList?.contains('cx-compound-progress-container') || r.target?.closest?.('.cx-compound-progress-container')) {
+        continue;
+      }
+      if (r.addedNodes.length > 0 || r.removedNodes.length > 0) {
+        shouldRun = true;
+        break;
+      }
+    }
+    if (shouldRun) scheduleUpdate();
+  });
+
+  if (document.body) {
+    observer.observe(document.body, { childList: true, subtree: true });
+  } else {
+    document.addEventListener('DOMContentLoaded', () => {
+      observer.observe(document.body, { childList: true, subtree: true });
+    });
+  }
+
+  setInterval(updateCompoundBars, 1500);
+  updateCompoundBars();
+
   window.ConnectifyCompoundProgress = {
-    update: updateCompoundBars
+    update: updateCompoundBars,
+    scheduleUpdate
   };
 })();

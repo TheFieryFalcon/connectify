@@ -60,8 +60,9 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 #connectify-radar-chart .highcharts-yaxis-labels text{fill:#8fa6bd!important;color:#8fa6bd!important}
 .connectea-dark #connectify-radar-chart text,.connectea-dark #connectify-radar-chart .highcharts-axis-labels text{fill:#e1eaf3!important;color:#e1eaf3!important}
 .connectea-dark #connectify-radar-chart .highcharts-yaxis-labels text{fill:#8fa6bd!important;color:#8fa6bd!important}
-.connectea-row-wrapper{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:4px 0;max-width:100%;clear:both}
-.connectea-row-wrapper>.connectea-panel{flex:0 1 auto;width:auto;max-width:100%;margin:0}
+.cvr-c-task__details{overflow:visible!important}
+.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:nowrap!important;margin:4px 0!important;max-width:100%!important;clear:both!important;overflow:visible!important}
+.connectea-row-wrapper>.connectea-panel{flex:0 0 auto!important;width:auto!important;max-width:fit-content!important;margin:0!important}
 .connectea-type-container{display:inline-flex;align-items:center;flex:0 0 auto}
 .connectea-type-label{display:inline-flex;align-items:center;gap:6px;font:12px/1.4 system-ui,-apple-system,sans-serif;color:#4e6076;font-weight:500;cursor:pointer;user-select:none}
 .connectea-type-select{box-sizing:border-box;min-height:26px;padding:2px 8px;border:1px solid #b9cbe1;border-radius:6px;background:#f7f9fc;color:#203c5e;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;outline:none;transition:border-color .2s,background-color .2s}
@@ -178,3 +179,6 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 .connectea-dark #connectify-health-prompt .cx-health-dismiss:hover {
   background: #475569;
 }
+
+#connectify-sidebar .cx-tools-intro{padding:14px 20px 4px 20px!important;margin:0!important;font-size:12.5px!important;line-height:1.5!important;color:#4b647f!important}
+.connectea-dark #connectify-sidebar .cx-tools-intro{color:#94a3b8!important}
