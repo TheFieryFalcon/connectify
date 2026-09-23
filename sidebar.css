@@ -91,19 +91,20 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 }
 
 .cx-notification {
-  pointer-events: auto;
-  position: relative;
-  background: #ffffff;
-  color: #1a2a3a;
-  border: 1px solid #c7d6e4;
-  border-left: 5px solid #185c8c;
-  border-radius: 10px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
-  padding: 14px 18px;
-  font: 13px/1.5 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  box-sizing: border-box;
-  animation: cx-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: auto !important;
+  position: relative !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  border-left: 5px solid #185c8c !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+  padding: 14px 18px !important;
+  font: 13px/1.5 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  box-sizing: border-box !important;
+  animation: cx-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: opacity 0.25s ease, transform 0.25s ease !important;
 }
 
 .cx-notification-dismissing {
@@ -112,19 +113,19 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 }
 
 .cx-notification--warning {
-  border-left-color: #eab308;
+  border-left-color: #eab308 !important;
 }
 
 .cx-notification--success {
-  border-left-color: #10b981;
+  border-left-color: #10b981 !important;
 }
 
 .cx-notification--info {
-  border-left-color: #3b82f6;
+  border-left-color: #3b82f6 !important;
 }
 
 .cx-notification--grade {
-  border-left-color: #8b5cf6;
+  border-left-color: #7c3aed !important;
 }
 
 @keyframes cx-slide-in {
@@ -133,171 +134,185 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 }
 
 .cx-notification-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 6px !important;
 }
 
 .cx-notification-title-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
 }
 
 .cx-notification-icon {
-  font-size: 15px;
-  line-height: 1;
+  font-size: 15px !important;
+  line-height: 1 !important;
 }
 
 .cx-notification-title {
-  font-weight: 700;
-  font-size: 14px;
-  color: #1e3a5f;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  color: #0f172a !important;
 }
 
 .cx-notification-close {
-  background: transparent;
-  border: none;
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-  color: #8fa3b7;
-  padding: 0 4px;
-  border-radius: 4px;
-  transition: color 0.15s;
-}
-
-.cx-notification-close:hover {
-  color: #1e3a5f;
+  display: none !important;
 }
 
 .cx-notification-body {
-  margin-bottom: 8px;
-  color: #4b647f;
-  font-size: 12.5px;
-  line-height: 1.5;
+  margin-bottom: 8px !important;
+  color: #334155 !important;
+  font-size: 12.5px !important;
+  line-height: 1.5 !important;
 }
 
 .cx-notification-details {
-  margin: 6px 0 10px 0;
-  padding: 6px 10px 6px 24px;
-  background: #f1f5f9;
-  border-radius: 6px;
-  font-size: 11.5px;
-  color: #334155;
+  margin: 6px 0 10px 0 !important;
+  padding: 6px 10px 6px 24px !important;
+  background: #f1f5f9 !important;
+  border-radius: 6px !important;
+  font-size: 11.5px !important;
+  color: #334155 !important;
 }
 
 .cx-notification-actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  margin-top: 8px;
+  display: flex !important;
+  gap: 8px !important;
+  justify-content: flex-end !important;
+  margin-top: 10px !important;
 }
 
 .cx-notification-btn {
-  cursor: pointer;
-  font: 600 12px system-ui;
-  border-radius: 6px;
-  padding: 6px 12px;
-  border: 1px solid transparent;
-  transition: all 0.2s;
+  cursor: pointer !important;
+  font: 600 12px/1.3 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  border-radius: 6px !important;
+  padding: 6px 14px !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
 }
 
 .cx-notification-btn--primary {
-  background: #185c8c;
-  color: #ffffff;
+  background: #185c8c !important;
+  background-color: #185c8c !important;
+  color: #ffffff !important;
+  border-color: #13466a !important;
 }
 
 .cx-notification-btn--primary:hover {
-  background: #13466a;
+  background: #13466a !important;
+  background-color: #13466a !important;
+  color: #ffffff !important;
 }
 
 .cx-notification-btn--secondary {
-  background: #edf2f7;
-  color: #4b647f;
-  border-color: #cbd5e1;
+  background: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
 }
 
 .cx-notification-btn--secondary:hover {
-  background: #e2e8f0;
+  background: #e2e8f0 !important;
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
 }
 
 .cx-notification-btn--accent {
-  background: #7c3aed;
-  color: #ffffff;
+  background: #6d28d9 !important;
+  background-color: #6d28d9 !important;
+  color: #ffffff !important;
+  border-color: #5b21b6 !important;
 }
 
 .cx-notification-btn--accent:hover {
-  background: #6d28d9;
+  background: #5b21b6 !important;
+  background-color: #5b21b6 !important;
+  color: #ffffff !important;
 }
 
 /* Dark mode overrides for notifications */
 .connectea-dark .cx-notification {
-  background: #1e293b;
-  color: #e2e8f0;
-  border-color: #334155;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
 }
 
 .connectea-dark .cx-notification--warning {
-  border-left-color: #facc15;
+  border-left-color: #facc15 !important;
 }
 
 .connectea-dark .cx-notification--success {
-  border-left-color: #34d399;
+  border-left-color: #34d399 !important;
 }
 
 .connectea-dark .cx-notification--grade {
-  border-left-color: #a78bfa;
+  border-left-color: #a78bfa !important;
 }
 
 .connectea-dark .cx-notification-title {
-  color: #f8fafc;
+  color: #f8fafc !important;
 }
 
 .connectea-dark .cx-notification-close {
-  color: #64748b;
-}
-
-.connectea-dark .cx-notification-close:hover {
-  color: #f8fafc;
+  display: none !important;
 }
 
 .connectea-dark .cx-notification-body {
-  color: #94a3b8;
+  color: #cbd5e1 !important;
 }
 
 .connectea-dark .cx-notification-details {
-  background: #0f172a;
-  color: #cbd5e1;
+  background: #0f172a !important;
+  color: #cbd5e1 !important;
 }
 
 .connectea-dark .cx-notification-btn--primary {
-  background: #2563eb;
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #1d4ed8 !important;
 }
 
 .connectea-dark .cx-notification-btn--primary:hover {
-  background: #1d4ed8;
+  background: #1d4ed8 !important;
+  background-color: #1d4ed8 !important;
+  color: #ffffff !important;
 }
 
 .connectea-dark .cx-notification-btn--secondary {
-  background: #334155;
-  color: #cbd5e1;
-  border-color: #475569;
+  background: #334155 !important;
+  background-color: #334155 !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
 }
 
 .connectea-dark .cx-notification-btn--secondary:hover {
-  background: #475569;
+  background: #475569 !important;
+  background-color: #475569 !important;
+  color: #ffffff !important;
 }
 
 .connectea-dark .cx-notification-btn--accent {
-  background: #8b5cf6;
+  background: #8b5cf6 !important;
+  background-color: #8b5cf6 !important;
+  color: #ffffff !important;
+  border-color: #7c3aed !important;
 }
 
 .connectea-dark .cx-notification-btn--accent:hover {
-  background: #7c3aed;
+  background: #7c3aed !important;
+  background-color: #7c3aed !important;
+  color: #ffffff !important;
 }
 
 /* Card Jump / Flash Animation */

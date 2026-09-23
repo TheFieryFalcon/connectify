@@ -228,10 +228,16 @@
                 title: `Grade Update: ${entry.subjectName}`,
                 message: `Subject running average updated to ${currentMarkStr} (${deltaStr}).`,
                 duration: 12000,
-                dismissible: true,
                 actions: [
                   {
-                    text: `Jump to ${entry.subjectName.length > 18 ? 'Subject' : entry.subjectName}`,
+                    text: 'Dismiss',
+                    type: 'secondary',
+                    onClick: ({ close }) => {
+                      close();
+                    }
+                  },
+                  {
+                    text: 'Jump to Subject',
                     type: 'accent',
                     onClick: () => {
                       jumpToSubject(entry.card);

@@ -159,19 +159,6 @@
     titleGroup.append(iconSpan, titleSpan);
     header.append(titleGroup);
 
-    if (dismissible) {
-      const closeBtn = document.createElement('button');
-      closeBtn.type = 'button';
-      closeBtn.className = 'cx-notification-close';
-      closeBtn.setAttribute('aria-label', 'Dismiss notification');
-      closeBtn.innerHTML = '&times;';
-      closeBtn.onclick = (e) => {
-        e.stopPropagation();
-        dismiss(id);
-      };
-      header.append(closeBtn);
-    }
-
     el.append(header);
 
     // 2. Body
