@@ -338,10 +338,20 @@
       if (window.ConnectifyPredictorMath) {
         try {
           const meta = types().getTaskMeta(row);
-          const taskMock = { name: meta.taskName, caption: meta.labels?.[1] || '', row };
-          const pred = window.ConnectifyPredictorMath.predictTask(meta.subjectName, taskMock);
-          if (!pred.unpredicted) {
-            window.ConnectifyPredictorMath.cachePrediction(meta.subjectName, meta.labelsKey || meta.taskName, pred);
+          const taskMock = {
+            id: meta.labelsKey ? `${meta.labelsKey}:0` : undefined,
+            name: meta.taskName,
+            caption: meta.labels?.[1] || '',
+            labelsKey: meta.labelsKey,
+            row
+          };
+          if (window.ConnectifyPredictorMath.getOrComputeTaskPrediction) {
+            window.ConnectifyPredictorMath.getOrComputeTaskPrediction(meta.subjectName, taskMock);
+          } else {
+            const pred = window.ConnectifyPredictorMath.predictTask(meta.subjectName, taskMock);
+            if (!pred.unpredicted) {
+              window.ConnectifyPredictorMath.cachePrediction(meta.subjectName, meta.labelsKey || meta.taskName, pred);
+            }
           }
         } catch (e) {}
       }
@@ -363,17 +373,19 @@
         try {
           const meta = types().getTaskMeta(row);
           const predMath = window.ConnectifyPredictorMath;
-          let cached = predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName);
-          if (!cached) {
-            const taskMock = { name: meta.taskName, caption: meta.labels?.[1] || '', row };
-            const fresh = predMath.predictTask(meta.subjectName, taskMock);
-            if (!fresh.unpredicted) {
-              cached = fresh;
-              predMath.cachePrediction(meta.subjectName, meta.labelsKey || meta.taskName, fresh);
-            }
-          }
-          if (cached) {
-            const outcome = predMath.evaluateOutcome(mark, cached);
+          const taskMock = {
+            id: meta.labelsKey ? `${meta.labelsKey}:0` : undefined,
+            name: meta.taskName,
+            caption: meta.labels?.[1] || '',
+            labelsKey: meta.labelsKey,
+            row
+          };
+          const prediction = predMath.getOrComputeTaskPrediction
+            ? predMath.getOrComputeTaskPrediction(meta.subjectName, taskMock)
+            : (predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName) || predMath.predictTask(meta.subjectName, taskMock));
+
+          if (prediction && !prediction.unpredicted) {
+            const outcome = predMath.evaluateOutcome(mark, prediction);
             renderOutcomeBar(ui.outcomeBar, outcome);
           } else {
             ui.outcomeBar.hidden = true;
@@ -428,6 +440,50 @@
     setText(ui.result, parts.filter(Boolean).join('  •  '));
   }
 
+  let floatingTooltipEl = null;
+  function getFloatingTooltip() {
+    if (!floatingTooltipEl || !floatingTooltipEl.isConnected) {
+      floatingTooltipEl = document.getElementById('connectea-outcome-tooltip');
+      if (!floatingTooltipEl) {
+        floatingTooltipEl = createElement('div', '');
+        floatingTooltipEl.id = 'connectea-outcome-tooltip';
+        floatingTooltipEl.setAttribute('role', 'tooltip');
+        document.body.append(floatingTooltipEl);
+      }
+    }
+    return floatingTooltipEl;
+  }
+
+  function showFloatingTooltip(e, text) {
+    if (!text) return;
+    const tooltip = getFloatingTooltip();
+    tooltip.textContent = text;
+    tooltip.classList.add('connectea-tooltip-visible');
+
+    const pad = 14;
+    let left = e.clientX + pad;
+    let top = e.clientY - 12;
+
+    const width = 340;
+    const height = 180;
+    if (left + width > window.innerWidth - 10) {
+      left = Math.max(10, e.clientX - width - pad);
+    }
+    if (top + height > window.innerHeight - 10) {
+      top = Math.max(10, window.innerHeight - height - 10);
+    }
+    if (top < 10) top = 10;
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+
+  function hideFloatingTooltip() {
+    if (floatingTooltipEl) {
+      floatingTooltipEl.classList.remove('connectea-tooltip-visible');
+    }
+  }
+
   function renderOutcomeBar(bar, outcome) {
     if (!bar) return;
     if (!outcome || !Number.isFinite(outcome.segments)) {
@@ -436,10 +492,25 @@
       return;
     }
 
-    bar.title = outcome.details || outcome.label || '';
-    bar.setAttribute('aria-label', bar.title);
+    const tooltipText = outcome.details || outcome.label || '';
+    bar.dataset.connecteaTooltip = tooltipText;
+    bar.title = tooltipText;
+    bar.setAttribute('aria-label', tooltipText);
     bar.classList.toggle('connectea-outcome-broken', Boolean(outcome.broken));
     bar.classList.toggle('connectea-outcome-critical', Boolean(outcome.critical));
+
+    if (!bar._tooltipBound) {
+      bar._tooltipBound = true;
+      bar.addEventListener('mouseenter', (e) => {
+        showFloatingTooltip(e, bar.dataset.connecteaTooltip);
+      });
+      bar.addEventListener('mousemove', (e) => {
+        showFloatingTooltip(e, bar.dataset.connecteaTooltip);
+      });
+      bar.addEventListener('mouseleave', () => {
+        hideFloatingTooltip();
+      });
+    }
 
     while (bar.firstChild) bar.removeChild(bar.firstChild);
 

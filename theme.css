@@ -164,12 +164,37 @@ html.connectea-dark {
 }
 
 /* --------------------------------------------------------------------------
-   5. "All" Subheader Bar & Category Toolbars
+   5. Subheader Bars, Heading Bars & Page Headers (Classes, Preferences, etc.)
    -------------------------------------------------------------------------- */
-.connectea-dark :is(.cvr-c-category-toolbar, .cvr-c-service-bar, .cvr-c-service-bar__control-panel) {
+.connectea-dark :is(
+  .cvr-c-category-toolbar,
+  .cvr-c-service-bar,
+  .cvr-c-service-bar__control-panel,
+  .cvr-c-page-header,
+  .cvr-c-heading-bar,
+  .eds-c-heading-bar,
+  .cvr-c-sub-header,
+  .v-page-header,
+  .cvr-c-toolbar,
+  .v-slot-cvr-c-heading-bar,
+  .v-slot-cvr-c-page-header
+) {
   background-color: #18202b !important;
   border-bottom: 1px solid #36485e !important;
-  color: #cbd5e1 !important;
+  color: #f8fafc !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-category-toolbar,
+  .cvr-c-service-bar,
+  .cvr-c-page-header,
+  .cvr-c-heading-bar,
+  .eds-c-heading-bar,
+  .cvr-c-sub-header,
+  .v-page-header,
+  .cvr-c-toolbar
+) :is(h1, h2, h3, h4, span, div, .v-label, .eds-c-heading) {
+  color: #f8fafc !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -452,15 +477,40 @@ html.connectea-dark {
   outline: 2px solid #3b82f6 !important;
 }
 
-.connectea-dark :is(.v-button, .eds-c-button) {
+.connectea-dark :is(
+  .v-button,
+  .eds-c-button,
+  .eds-c-standard-button,
+  .eds-c-tile__action,
+  .eds-c-tile__action :is(a, button),
+  .eds-c-tile__actions :is(a, button),
+  .eds-c-tile .eds-c-button,
+  .eds-c-card__action,
+  .eds-c-card__action :is(a, button),
+  .cvr-c-preferences__reset,
+  .cvr-c-preferences :is(button, .v-button)
+) {
   background-color: #24303f !important;
   color: #e2e8f0 !important;
   border: 1px solid #4a617a !important;
   background-image: none !important;
+  text-decoration: none !important;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.connectea-dark :is(.v-button, .eds-c-button):hover {
+.connectea-dark :is(
+  .v-button,
+  .eds-c-button,
+  .eds-c-standard-button,
+  .eds-c-tile__action,
+  .eds-c-tile__action :is(a, button),
+  .eds-c-tile__actions :is(a, button),
+  .eds-c-tile .eds-c-button,
+  .eds-c-card__action,
+  .eds-c-card__action :is(a, button),
+  .cvr-c-preferences__reset,
+  .cvr-c-preferences :is(button, .v-button)
+):hover {
   background-color: #2e3c4e !important;
   border-color: #607996 !important;
   color: #ffffff !important;
@@ -512,4 +562,115 @@ html.connectea-dark {
 
 .connectea-dark #main-content .c-category-menu .mat-expansion-indicator::after {
   color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   15. Homepage Promos, Notices & Alerts (My Connect, etc.)
+   -------------------------------------------------------------------------- */
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white,
+.connectea-dark :is(.cvr-c-promo, .cvr-c-promo__body, .cvr-c-promo__content, .cvr-c-notice, .cvr-c-maintenance-notice, .eds-c-notice, .eds-c-alert, .eds-t-white) {
+  background-color: #1e2632 !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #3d5066 !important;
+  border-radius: 8px !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .cvr-c-promo__body,
+.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) :is(.cvr-c-promo__body, .cvr-c-promo__content, .eds-c-notice__content) {
+  background-color: #1e2632 !important;
+  color: #cbd5e1 !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white :is(.cvr-c-promo__title, p),
+.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) :is(p, span, div, .cvr-c-promo__title) {
+  color: #cbd5e1 !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white strong,
+.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) strong {
+  color: #f8fafc !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button {
+  background-color: #24303f !important;
+  color: #e2e8f0 !important;
+  border-color: #4a617a !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button:hover {
+  background-color: #2e3c4e !important;
+  border-color: #607996 !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   16. Preferences Page, Settings Cards & Form Layouts
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .cvr-c-preferences,
+  .cvr-c-preferences-section,
+  .cvr-c-preference-group,
+  .cvr-c-preferences__section,
+  .cvr-c-preferences__group,
+  .cvr-c-form-section,
+  .cvr-c-form-group,
+  .v-panel,
+  .v-panel-content,
+  .v-panel-caption,
+  .eds-c-card,
+  .eds-c-card__body,
+  .eds-c-card__header,
+  .cvr-c-dashboard-card,
+  .v-formlayout,
+  .v-formlayout-row
+) {
+  background-color: #1e2632 !important;
+  border-color: #3d5066 !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-preferences,
+  .cvr-c-preferences-section,
+  .cvr-c-preference-group,
+  .eds-c-card,
+  .v-panel
+) :is(h1, h2, h3, h4, .eds-c-heading, .v-panel-caption, .cvr-c-preference-group__title, .cvr-c-preferences-section__title, .eds-c-card__title) {
+  color: #f8fafc !important;
+  border-bottom-color: #36485e !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-preferences,
+  .cvr-c-preferences-section,
+  .cvr-c-preference-group,
+  .eds-c-card,
+  .v-panel
+) :is(p, span, label, .v-label, .cvr-c-form__label, .eds-c-caption) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .v-filterselect,
+  .v-filterselect-input,
+  .v-select-select,
+  .v-textfield,
+  .eds-c-select,
+  .eds-c-form-control
+) {
+  background-color: #141a22 !important;
+  border: 1px solid #42556d !important;
+  color: #f1f5f9 !important;
+}
+
+/* --------------------------------------------------------------------------
+   17. Dynamic Surface & Text Contrast Adaptation
+   -------------------------------------------------------------------------- */
+.connectea-dark [data-connectea-surface] {
+  background-color: #1e2632 !important;
+  border-color: #3d5066 !important;
+}
+
+.connectea-dark [data-connectea-ink] {
+  color: #f1f5f9 !important;
 }

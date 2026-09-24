@@ -283,6 +283,23 @@
   }
 
   // --- PREDICTION PERSISTENCE & CACHING ---
+  const PREDICTION_CACHE_VERSION_KEY = 'connectify:prediction_version';
+  const CURRENT_PREDICTION_VERSION = 'v3_chrono_20260924';
+
+  function isPredictionCacheCurrent() {
+    try {
+      return localStorage.getItem(PREDICTION_CACHE_VERSION_KEY) === CURRENT_PREDICTION_VERSION;
+    } catch {
+      return false;
+    }
+  }
+
+  function setPredictionCacheCurrent() {
+    try {
+      localStorage.setItem(PREDICTION_CACHE_VERSION_KEY, CURRENT_PREDICTION_VERSION);
+    } catch {}
+  }
+
   function getTaskPredictionKey(subjectName, taskId) {
     const account = getAccountKey();
     const cleanSubj = cleanSubject(subjectName).toLowerCase();
@@ -306,20 +323,33 @@
     } catch {}
   }
 
-  function getCachedPrediction(subjectName, taskId) {
-    if (!taskId) return null;
+  function cacheTaskPrediction(subjectName, task, prediction) {
+    if (!task || !prediction || prediction.unpredicted) return;
+    const identifiers = [task.id, task.labelsKey, task.name].filter(Boolean);
+    for (const id of identifiers) {
+      cachePrediction(subjectName, id, prediction);
+    }
+  }
+
+  function getCachedPrediction(subjectName, taskIdOrName) {
+    if (!taskIdOrName) return null;
     try {
-      const key = getTaskPredictionKey(subjectName, taskId);
-      const raw = localStorage.getItem(key);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Number.isFinite(parsed.low) && Number.isFinite(parsed.mid) && Number.isFinite(parsed.high)) {
-          if (!Number.isFinite(parsed.breakoutScore)) {
-            parsed.breakoutScore = round(1.10 * parsed.high, 2);
+      const candidates = [
+        getTaskPredictionKey(subjectName, taskIdOrName),
+        getTaskPredictionKey(subjectName, encodeURIComponent(taskIdOrName))
+      ];
+      for (const key of candidates) {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Number.isFinite(parsed.low) && Number.isFinite(parsed.mid) && Number.isFinite(parsed.high)) {
+            if (!Number.isFinite(parsed.breakoutScore)) {
+              parsed.breakoutScore = round(1.10 * parsed.high, 2);
+            }
+            if (!parsed.taskType && parsed.type) parsed.taskType = parsed.type;
+            if (!parsed.type && parsed.taskType) parsed.type = parsed.taskType;
+            return parsed;
           }
-          if (!parsed.taskType && parsed.type) parsed.taskType = parsed.type;
-          if (!parsed.type && parsed.taskType) parsed.type = parsed.taskType;
-          return parsed;
         }
       }
     } catch {}
@@ -405,6 +435,216 @@
     if (/^(?:week[s]?\s*)?(\d{1,2})(?:\s*[\/–-]\s*\d{1,2})?$/i.test(text.trim())) return true;
     if (/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(text)) return true;
     return false;
+  }
+
+  // --- CHRONOLOGICAL HISTORICAL PREDICTION ENGINE ---
+  function getTaskChronologicalStamp(task, subjectName) {
+    if (!task) return 0;
+    const semester = Number(task.semester) || 1;
+
+    let order = null;
+    if (subjectName && task.name) {
+      const customTime = resolveCustomDate(subjectName, task.name);
+      if (customTime !== null) {
+        const formatted = formatCustomWeek(customTime);
+        if (formatted && Number.isFinite(formatted.order)) {
+          order = formatted.order;
+        }
+      }
+    }
+
+    if (order === null && Number.isFinite(task.order) && task.order > 0) {
+      order = task.order;
+    }
+
+    if (order === null && task.caption) {
+      const formatted = formatCustomWeek(task.caption);
+      if (formatted && Number.isFinite(formatted.order)) {
+        order = formatted.order;
+      }
+    }
+
+    const seq = Number.isFinite(task.sequence) ? task.sequence : 0;
+    if (order !== null) {
+      return semester * 1000 + order * 10 + seq * 0.01;
+    }
+    return semester * 1000 + seq * 10;
+  }
+
+  /**
+   * Aggregates historical subject, type, and overall statistics strictly from tasks
+   * that took place chronologically BEFORE the target task.
+   */
+  function getHistoricalDataPriorTo(allSubjects, targetSubjectName, targetTask) {
+    const rawSubjects = allSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+    const targetStamp = getTaskChronologicalStamp(targetTask, targetSubjectName);
+    const targetSubjClean = cleanSubject(targetSubjectName);
+    const targetTaskName = (targetTask?.name || '').trim().toLowerCase();
+    const targetTaskId = targetTask?.id;
+
+    const priorCompletedTasks = [];
+    for (const subj of rawSubjects) {
+      const sName = subj.name;
+      const sClean = cleanSubject(sName);
+      for (const t of subj.tasks || []) {
+        if (t.pending || !Number.isFinite(t.score) || !(t.weight > 0)) continue;
+
+        // Strictly exclude the target task itself
+        const tName = (t.name || '').trim().toLowerCase();
+        if (
+          sClean === targetSubjClean &&
+          (t === targetTask ||
+            (targetTaskId && t.id === targetTaskId) ||
+            (tName && targetTaskName && tName === targetTaskName && t.sequence === targetTask.sequence))
+        ) {
+          continue;
+        }
+
+        const tStamp = getTaskChronologicalStamp(t, sName);
+        if (tStamp < targetStamp) {
+          priorCompletedTasks.push({ subjName: sName, task: t });
+        }
+      }
+    }
+
+    const subjectStats = {};
+    const typeStats = {};
+    const typeCounts = {};
+    let totalScoreWeight = 0;
+    let totalWeight = 0;
+    const allTaskScores = [];
+
+    for (const { subjName, task } of priorCompletedTasks) {
+      const cleanName = cleanSubject(subjName);
+      if (!subjectStats[cleanName]) {
+        subjectStats[cleanName] = { earned: 0, weight: 0, tasks: [] };
+      }
+      const earned = (task.score / 100) * task.weight;
+      subjectStats[cleanName].earned += earned;
+      subjectStats[cleanName].weight += task.weight;
+      subjectStats[cleanName].tasks.push(task.score);
+      allTaskScores.push(task.score);
+
+      const taskType = window.ConnectifyTaskTypes?.getEffectiveType
+        ? window.ConnectifyTaskTypes.getEffectiveType(subjName, task)
+        : 'Take-Home';
+
+      if (!typeStats[taskType]) {
+        typeStats[taskType] = { earned: 0, weight: 0 };
+        typeCounts[taskType] = 0;
+      }
+      typeStats[taskType].earned += earned;
+      typeStats[taskType].weight += task.weight;
+      typeCounts[taskType]++;
+
+      totalScoreWeight += earned;
+      totalWeight += task.weight;
+    }
+
+    const subjectAverages = {};
+    const subjectSpreads = {};
+    for (const [name, data] of Object.entries(subjectStats)) {
+      if (data.weight > 0) {
+        subjectAverages[name] = (data.earned / data.weight) * 100;
+      }
+      if (data.tasks.length >= 2 && subjectAverages[name] !== undefined) {
+        const mean = subjectAverages[name];
+        const sumSq = data.tasks.reduce((acc, s) => acc + Math.pow(s - mean, 2), 0);
+        subjectSpreads[name] = Math.sqrt(sumSq / (data.tasks.length - 1));
+      }
+    }
+
+    const typeAverages = {};
+    for (const [type, data] of Object.entries(typeStats)) {
+      if (data.weight > 0) {
+        typeAverages[type] = (data.earned / data.weight) * 100;
+      }
+    }
+
+    const overallAverage = totalWeight > 0 ? (totalScoreWeight / totalWeight) * 100 : null;
+
+    let scoreVariance = 0;
+    if (allTaskScores.length >= 3 && overallAverage !== null) {
+      const sumSq = allTaskScores.reduce((acc, s) => acc + Math.pow(s - overallAverage, 2), 0);
+      scoreVariance = Math.sqrt(sumSq / (allTaskScores.length - 1));
+    }
+    const spread = Math.min(9.0, Math.max(4.0, scoreVariance > 0 ? scoreVariance : 6.5));
+
+    return {
+      subjects: subjectAverages,
+      subjectSpreads,
+      types: typeAverages,
+      typeCounts,
+      overallAverage,
+      spread,
+      totalCompletedTasks: allTaskScores.length
+    };
+  }
+
+  /**
+   * Pre-populates the historical prediction cache for all tasks across all subjects
+   * in strict chronological order. Runs only once on first launch or when prediction
+   * calculation versions increment.
+   */
+  function populateChronologicalPredictions(subjectsList, force = false) {
+    if (!force && isPredictionCacheCurrent()) {
+      return;
+    }
+
+    const rawSubjects = subjectsList || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+    if (!rawSubjects || rawSubjects.length === 0) return;
+
+    const allTasks = [];
+    for (const subj of rawSubjects) {
+      for (const t of subj.tasks || []) {
+        allTasks.push({
+          subjectName: subj.name,
+          task: t,
+          stamp: getTaskChronologicalStamp(t, subj.name)
+        });
+      }
+    }
+
+    allTasks.sort((a, b) => a.stamp - b.stamp);
+
+    const baselines = getBaselines();
+    for (const item of allTasks) {
+      const priorHistorical = getHistoricalDataPriorTo(rawSubjects, item.subjectName, item.task);
+      const pred = predictTask(item.subjectName, item.task, priorHistorical, baselines);
+      if (!pred.unpredicted) {
+        cacheTaskPrediction(item.subjectName, item.task, pred);
+      }
+    }
+
+    setPredictionCacheCurrent();
+  }
+
+  /**
+   * Resolves prediction for a task: queries the cache first, and if missing,
+   * calculates prediction using only tasks chronologically prior to this task,
+   * caches the result, and returns it.
+   */
+  function getOrComputeTaskPrediction(subjectName, task, allSubjects) {
+    if (!task) return null;
+    const rawSubjects = allSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+
+    if (!isPredictionCacheCurrent()) {
+      populateChronologicalPredictions(rawSubjects, true);
+    }
+
+    const identifiers = [task.id, task.labelsKey, task.name].filter(Boolean);
+    for (const id of identifiers) {
+      const cached = getCachedPrediction(subjectName, id);
+      if (cached) return cached;
+    }
+
+    const priorHistorical = getHistoricalDataPriorTo(rawSubjects, subjectName, task);
+    const baselines = getBaselines();
+    const fresh = predictTask(subjectName, task, priorHistorical, baselines);
+    if (!fresh.unpredicted) {
+      cacheTaskPrediction(subjectName, task, fresh);
+    }
+    return fresh;
   }
 
   // --- OUTCOME EVALUATION (Vertical Bar Segments) ---
@@ -588,11 +828,7 @@
       const upcomingPredictions = [];
 
       for (const task of upcomingTasks) {
-        const pred = predictTask(subj.name, task, historical, baselines);
-        // Cache upcoming prediction so it persists when task gets graded later:
-        if (!pred.unpredicted && task.id) {
-          cachePrediction(subj.name, task.id, pred);
-        }
+        const pred = getOrComputeTaskPrediction(subj.name, task, rawSubjects);
 
         const taskWeight = task.weight || 0;
         if (!pred.unpredicted) {
@@ -765,12 +1001,30 @@
     getBaselines,
     saveBaselines,
     getHistoricalData,
+    getHistoricalDataPriorTo,
+    getTaskChronologicalStamp,
     predictTask,
     cachePrediction,
+    cacheTaskPrediction,
     getCachedPrediction,
     evaluateOutcome,
     projectSubjectGrades,
     projectATAR,
-    cleanSubject
+    cleanSubject,
+    populateChronologicalPredictions,
+    getOrComputeTaskPrediction,
+    isPredictionCacheCurrent,
+    PREDICTION_CACHE_VERSION: CURRENT_PREDICTION_VERSION
   };
+
+  // Populate chronological predictions when results are scraped/updated if cache is not current
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('connectify-results-updated', () => {
+      try {
+        if (!isPredictionCacheCurrent()) {
+          populateChronologicalPredictions();
+        }
+      } catch (e) {}
+    });
+  }
 })();
