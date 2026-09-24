@@ -164,7 +164,14 @@
 
       const resolvedButtons = [];
       for (const item of canonicalButtons) {
-        const matches = Array.from(document.querySelectorAll('#' + item.id));
+        let matches = Array.from(document.querySelectorAll('#' + item.id));
+        if (matches.length === 0) {
+          const atarBtns = window.ConnectifyAtar?.calculatorButtons || window.ConnectifyAtar?.toolButtons || [];
+          const found = atarBtns.find(b => b && b.id === item.id);
+          if (found) {
+            matches = [found];
+          }
+        }
         let btn = null;
         if (matches.length > 0) {
           const inMenu = matches.find(m => m.parentElement === toolMenu);
@@ -204,7 +211,10 @@
         'connectify-categories'
       ];
       for (const panelId of panelIds) {
-        const matches = Array.from(document.querySelectorAll('#' + panelId));
+        let matches = Array.from(document.querySelectorAll('#' + panelId));
+        if (matches.length === 0 && panelId === 'connectea-atar' && window.ConnectifyAtar?.calculatorPanel) {
+          matches = [window.ConnectifyAtar.calculatorPanel];
+        }
         if (matches.length > 0) {
           const inWorkspace = matches.find(m => m.parentElement === workspace);
           const panel = inWorkspace || matches[0];

@@ -334,6 +334,8 @@
    * - Middle: Score >= Middle -> 3 segments (Red, Orange, Yellow)
    * - Low: Score >= Low -> 2 segments (Red, Orange)
    * - Below Low: Score < Low -> 1 segment (Red)
+   * - Critical Shortfall: Score <= Low - 15 (additive) -> 0 segments (Empty glowing red bar)
+   * Note: The purple breakout threshold is secret and never revealed in advance or in the tooltip legend.
    */
   function evaluateOutcome(score, prediction) {
     if (!Number.isFinite(score) || !prediction || prediction.unpredicted) return null;
@@ -345,52 +347,83 @@
       ? prediction.breakoutScore
       : round(1.15 * high, 2);
 
+    const legend = [
+      'Target Tiers & Color Guide:',
+      `• Green: High Target (≥ ${high}%)`,
+      `• Yellow: Mid Momentum Target (≥ ${mid}%)`,
+      `• Orange: Low Boundary (≥ ${low}%)`,
+      `• Red: Below Low (< ${low}%)`,
+      `• Empty (Glowing Red): Critical Shortfall (≤ ${round(low - 15, 1)}%)`
+    ].join('\n');
+
+    // 1. Breakout (> 1.15 * High multiplicative) - secret purple segment
     if (score > breakoutThreshold) {
       return {
         segments: 5,
         broken: true,
+        critical: false,
         colors: ['red', 'orange', 'yellow', 'green', 'purple'],
-        label: `Breakout! Scored ${round(score, 1)}% (+15% over High ${high}%)`,
-        details: `Actual: ${round(score, 1)}% | Low: ${low}% · Mid: ${mid}% · High: ${high}% · Breakout: >${breakoutThreshold}%`
+        label: `Breakout! Scored ${round(score, 1)}% (Exceptional Achievement)`,
+        details: `Actual Score: ${round(score, 1)}%\nOutcome: Breakout! Surpassed High prediction.\n\n${legend}`
       };
     }
 
+    // 2. High (>= High)
     if (score >= high) {
       return {
         segments: 4,
         broken: false,
+        critical: false,
         colors: ['red', 'orange', 'yellow', 'green'],
-        label: `High! Scored ${round(score, 1)}% (met/exceeded High estimate ${high}%)`,
-        details: `Actual: ${round(score, 1)}% | Low: ${low}% · Mid: ${mid}% · High: ${high}%`
+        label: `High Target Met! Scored ${round(score, 1)}% (High: ${high}%)`,
+        details: `Actual Score: ${round(score, 1)}%\nOutcome: High Target Met (Green - 4 segments)\n\n${legend}`
       };
     }
 
+    // 3. Mid (>= Mid)
     if (score >= mid) {
       return {
         segments: 3,
         broken: false,
+        critical: false,
         colors: ['red', 'orange', 'yellow'],
-        label: `Middle! Scored ${round(score, 1)}% (met expected momentum ${mid}%)`,
-        details: `Actual: ${round(score, 1)}% | Low: ${low}% · Mid: ${mid}% · High: ${high}%`
+        label: `Mid Momentum Met! Scored ${round(score, 1)}% (Mid: ${mid}%)`,
+        details: `Actual Score: ${round(score, 1)}%\nOutcome: Mid Momentum Met (Yellow - 3 segments)\n\n${legend}`
       };
     }
 
+    // 4. Low (>= Low)
     if (score >= low) {
       return {
         segments: 2,
         broken: false,
+        critical: false,
         colors: ['red', 'orange'],
-        label: `Low! Scored ${round(score, 1)}% (within Low estimate ${low}%)`,
-        details: `Actual: ${round(score, 1)}% | Low: ${low}% · Mid: ${mid}% · High: ${high}%`
+        label: `Low Target Met! Scored ${round(score, 1)}% (Low: ${low}%)`,
+        details: `Actual Score: ${round(score, 1)}%\nOutcome: Low Target Met (Orange - 2 segments)\n\n${legend}`
       };
     }
 
+    // 5. Critical Shortfall: 15% (additive) lower than Low estimate
+    if (score <= round(low - 15, 2)) {
+      return {
+        segments: 0,
+        broken: false,
+        critical: true,
+        colors: [],
+        label: `Critical Shortfall! Scored ${round(score, 1)}% (≥15% below Low estimate ${low}%)`,
+        details: `Actual Score: ${round(score, 1)}%\nOutcome: Critical Shortfall (Empty Bar - Glowing Red)\nScore is ${round(low - score, 1)}% below Low estimate.\n\n${legend}`
+      };
+    }
+
+    // 6. Below Low (< Low, but not critical)
     return {
       segments: 1,
       broken: false,
+      critical: false,
       colors: ['red'],
       label: `Below Low! Scored ${round(score, 1)}% (under Low estimate ${low}%)`,
-      details: `Actual: ${round(score, 1)}% | Low: ${low}% · Mid: ${mid}% · High: ${high}%`
+      details: `Actual Score: ${round(score, 1)}%\nOutcome: Below Low (Red - 1 segment)\n\n${legend}`
     };
   }
 

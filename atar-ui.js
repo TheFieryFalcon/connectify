@@ -70,6 +70,8 @@
 
     window.ConnectifyAtar.calculatorButtons = [estimateTab, targetTab, gradeTab];
     window.ConnectifyAtar.toolButtons = [estimateTab, targetTab, gradeTab];
+    window.ConnectifyAtar.calculatorPanel = calculatorPanel;
+    if (window.ConnectifyInitSidebar) window.ConnectifyInitSidebar();
 
     const hasSemesterTwoStarted = () => (gradeCourses || []).flat().some(r => r?.finalLetter);
     const isTargetClosed = semesterIdx =>

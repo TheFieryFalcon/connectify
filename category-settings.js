@@ -107,11 +107,13 @@
       wrap.style.gap = '8px';
 
       const label = document.createElement('label');
+      label.className = 'cx-cat-name-label';
       label.textContent = cat;
       label.style.width = '90px';
       label.style.fontSize = '12px';
       label.style.fontWeight = '600';
       label.style.color = data.color || '#3498db';
+      label.style.setProperty('--cx-cat-color', data.color || '#3498db');
       label.style.overflow = 'hidden';
       label.style.textOverflow = 'ellipsis';
       label.style.whiteSpace = 'nowrap';

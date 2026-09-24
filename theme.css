@@ -38,9 +38,14 @@ html.connectea-dark {
 /* --------------------------------------------------------------------------
    2. Theme Toggle Switch
    -------------------------------------------------------------------------- */
+.cvr-c-primary-navigation {
+  position: relative !important;
+}
+
 #connectea-theme-toggle {
   position: absolute !important;
-  top: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
   right: 16px;
   z-index: 10020 !important;
   width: 104px;
@@ -48,7 +53,7 @@ html.connectea-dark {
   margin: 0;
   white-space: nowrap;
   border-radius: 6px;
-  padding: 7px 11px;
+  padding: 6px 11px;
   font: 12px/1.4 system-ui, -apple-system, sans-serif;
   cursor: pointer;
   background: #25313f !important;

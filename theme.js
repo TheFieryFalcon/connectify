@@ -72,29 +72,39 @@
     cleanupDuplicateButtons();
     if (forceReset) headerRightInset = null;
     const nav = document.querySelector('.cvr-c-primary-navigation');
-    const container = nav || document.body;
-    if (toggleButton.parentElement !== container) {
-      container.append(toggleButton);
+    if (!nav) {
+      // Navbar not in DOM yet on page load: do not show misplaced on body
+      if (toggleButton.parentElement) toggleButton.remove();
+      return;
+    }
+
+    if (toggleButton.parentElement !== nav) {
+      nav.append(toggleButton);
     }
 
     // Find notification bell icon whether hollow, solid, or with notification dot/badge
-    const bell = document
+    const bell = nav
       .querySelector(':is(.cvr-c-icon--notification-hollow, .cvr-c-icon--notification, .cvr-c-icon--notification-solid, [class*="notification"])')
       ?.closest('[role="button"], button') ||
-      document.querySelector('[aria-label*="notification" i], [data-automation-id="notifications"]');
-    const rect = bell?.getBoundingClientRect();
+      nav.querySelector('[aria-label*="notification" i], [data-automation-id="notifications"]');
+    const bellRect = bell?.getBoundingClientRect();
+    const navRect = nav.getBoundingClientRect();
 
-    if (rect?.width && rect.left > 120) {
-      headerRightInset = Math.max(8, window.innerWidth - rect.left + 12);
+    let computedInset = null;
+    if (bellRect?.width && bellRect.left > 60 && navRect.right >= bellRect.left) {
+      computedInset = Math.max(8, navRect.right - bellRect.left + 12);
     } else {
       // Fallback: position to the left of the avatar/user menu if bell is still loading
-      const avatar = document.querySelector('.cvr-c-primary-navigation__button--avatar, [class*="avatar"]')?.closest('[role="button"], button');
+      const avatar = nav.querySelector('.cvr-c-primary-navigation__button--avatar, [class*="avatar"]')?.closest('[role="button"], button');
       const avatarRect = avatar?.getBoundingClientRect();
-      if (avatarRect?.width && avatarRect.left > 120) {
-        headerRightInset = Math.max(8, window.innerWidth - avatarRect.left + 140);
+      if (avatarRect?.width && avatarRect.left > 60 && navRect.right >= avatarRect.left) {
+        computedInset = Math.max(8, navRect.right - avatarRect.left + 140);
       }
     }
 
+    if (computedInset !== null) {
+      headerRightInset = computedInset;
+    }
     toggleButton.style.right = `${headerRightInset ?? 90}px`;
   }
 
@@ -153,7 +163,12 @@
     requestAnimationFrame(() => {
       syncScheduled = false;
       cleanupDuplicateButtons();
-      if (!toggleButton.isConnected) updateTogglePosition();
+      const nav = document.querySelector('.cvr-c-primary-navigation');
+      if (!nav || toggleButton.parentElement !== nav || !toggleButton.isConnected) {
+        updateTogglePosition(true);
+      } else {
+        updateTogglePosition();
+      }
       updateDetailArrows();
     });
   };
@@ -170,13 +185,25 @@
     }
   });
 
-  // Initial mount
+  // Initial mount with fast polling during initial SPA render
   updateTogglePosition();
   updateDetailArrows();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      updateTogglePosition();
+      updateTogglePosition(true);
       updateDetailArrows();
     });
   }
+
+  let mountPollCount = 0;
+  const mountPollInterval = setInterval(() => {
+    mountPollCount++;
+    const nav = document.querySelector('.cvr-c-primary-navigation');
+    if (nav && toggleButton.parentElement !== nav) {
+      updateTogglePosition(true);
+    }
+    if (mountPollCount >= 30 || (nav && toggleButton.parentElement === nav)) {
+      clearInterval(mountPollInterval);
+    }
+  }, 100);
 })();
