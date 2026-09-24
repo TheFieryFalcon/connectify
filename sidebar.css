@@ -6,9 +6,9 @@
 #connectify-sidebar #connectea-atar-toggle,#connectify-sidebar #connectify-progress-toggle{position:static!important;inset:auto!important;z-index:auto;box-shadow:none;padding:13px;text-align:left;background:#e9f2fb;color:#245579}
 #connectify-sidebar .cx-outline-actions{display:flex;gap:8px;padding:0 20px 14px;border-bottom:1px solid #d8e3ee}#connectify-sidebar .cx-outline-actions button{flex:1;padding:7px}
 #connectify-sidebar .cx-workspace{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
-#connectify-sidebar :is(#connectea-atar,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel){position:static!important;inset:auto!important;width:100%!important;max-height:none!important;overflow:visible!important;border:0;border-radius:0;box-shadow:none;padding:24px;background:transparent;color:inherit;box-sizing:border-box}
-#connectify-sidebar :is(#connectify-weakness,#connectify-categories) header{margin-bottom:16px}
-#connectify-sidebar :is(#connectify-weakness,#connectify-categories) header strong{font-size:18px;font-weight:650;color:inherit}
+#connectify-sidebar :is(#connectea-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel){position:static!important;inset:auto!important;width:100%!important;max-height:none!important;overflow:visible!important;border:0;border-radius:0;box-shadow:none;padding:24px;background:transparent;color:inherit;box-sizing:border-box}
+#connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor) header{margin-bottom:16px}
+#connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor) header strong{font-size:18px;font-weight:650;color:inherit}
 #connectify-sidebar #connectify-weakness #cx-radar-mode{padding:6px 10px;border-radius:6px;border:1px solid #bacddd;background:#fff;color:inherit;font:inherit}
 .connectea-dark #connectify-sidebar #connectify-weakness #cx-radar-mode{background:#2a3b4c;color:#e1eaf3;border-color:#496178}
 #connectify-sidebar #connectify-categories .cx-cat-wrap{display:flex;align-items:center;margin-bottom:10px;gap:8px}
@@ -20,7 +20,7 @@
 #connectify-sidebar:not([hidden])~#connectify-sidebar-handle{left:min(310px,calc(100vw - 38px))}#connectify-sidebar.cx-tool-active:not([hidden])~#connectify-sidebar-handle{left:min(900px,calc(100vw - 38px))}
 #connectify-sidebar [hidden]{display:none!important}.cx-cohort{stroke:#d64b58;stroke-width:3}.cx-cohort-point{fill:#d64b58;stroke:#fff;stroke-width:1.5}.cx-line-point{fill:#368bd0;stroke:#fff;stroke-width:1.5}.cx-legend{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0;font-size:12px}.cx-red-key{color:#bd3344}.cx-blue-key{color:#2573b3}.cx-improved{display:inline-block;margin:6px 8px;color:#15803d;font:bold 24px system-ui}
 .connectea-dark #connectify-sidebar{background:#202933;color:#e1eaf3;border-color:#425567}.connectea-dark #connectify-sidebar :is(button,#connectea-atar-toggle,#connectify-progress-toggle){background:#2a3b4c;color:#e1eaf3;border-color:#496178}.connectea-dark #connectify-sidebar :is(header,.cx-outline-actions){border-color:#3b4d5e}.connectea-dark .cx-red-key{color:#ff8893}.connectea-dark .cx-blue-key{color:#83c3ff}.connectea-dark .cx-improved{color:#66df99}
-@media(max-width:650px){#connectify-sidebar .cta-courses{grid-template-columns:1fr}#connectify-sidebar.cx-tool-active .cx-tool-menu{grid-template-columns:1fr 1fr}#connectify-sidebar :is(#connectea-atar,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel){padding:15px!important}#connectify-sidebar>header{padding:12px}#connectify-sidebar .cx-tool-menu{padding:12px}#connectify-sidebar .cx-outline-actions{padding:0 12px 10px}}
+@media(max-width:650px){#connectify-sidebar .cta-courses{grid-template-columns:1fr}#connectify-sidebar.cx-tool-active .cx-tool-menu{grid-template-columns:1fr 1fr}#connectify-sidebar :is(#connectea-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel){padding:15px!important}#connectify-sidebar>header{padding:12px}#connectify-sidebar .cx-tool-menu{padding:12px}#connectify-sidebar .cx-outline-actions{padding:0 12px 10px}}
 @media print{#connectify-sidebar,#connectify-sidebar-handle{display:none!important}}
 #connectify-sidebar-handle[aria-expanded=false]{left:0;right:auto;top:clamp(120px,62vh,calc(100dvh - 120px));border-radius:0 12px 12px 0;width:205px;height:76px;display:flex;align-items:center;gap:12px;padding:12px 14px;text-align:left;background:#185c8c;box-shadow:0 4px 20px #153b5b55}
 #connectify-sidebar-handle[aria-expanded=true]{left:min(310px,calc(100vw - 38px));width:38px;height:74px;top:42%}
@@ -31,11 +31,13 @@
 .cx-performance-row{display:flex;align-items:center;gap:12px;max-width:100%;clear:both}.cx-performance-row>.connectea-panel{flex:0 1 auto;width:auto;min-width:0}.cx-performance-row>.cx-improved{flex:none;margin:0;font-size:26px}
 #connectify-sidebar .cta-tabs .cta-semester[aria-pressed=true]{background:#d9eafa;color:#174c75;border-color:#709fc4}
 .connectea-dark #connectify-sidebar .cta-tabs .cta-semester[aria-pressed=true]{background:#41627d;color:#fff;border-color:#81acca}
-#connectify-sidebar .cx-tool-menu>.cx-calculator-tool{padding:13px;text-align:left;background:#e9f2fb;color:#245579}
+#connectify-sidebar .cx-tool-menu>button,#connectify-sidebar .cx-tool-menu>.cx-calculator-tool{padding:13px;text-align:left;background:#e9f2fb;color:#245579;border:1px solid #bacddd;border-radius:8px;font:600 12px system-ui;transition:background 0.15s ease,border-color 0.15s ease}
+#connectify-sidebar .cx-tool-menu>button:hover,#connectify-sidebar .cx-tool-menu>.cx-calculator-tool:hover{background:#d9eafa;border-color:#709fc4;color:#174c75}
 #connectify-sidebar.cx-tool-active .cx-tool-menu{grid-template-columns:repeat(4,minmax(0,1fr))}
-#connectify-sidebar.cx-tool-active .cx-calculator-tool[aria-pressed=true]{background:#d9eafa;border-color:#709fc4;color:#174c75}
-.connectea-dark #connectify-sidebar .cx-tool-menu>.cx-calculator-tool{background:#2a3b4c;color:#e1eaf3;border-color:#496178}
-.connectea-dark #connectify-sidebar.cx-tool-active .cx-calculator-tool[aria-pressed=true]{background:#41627d;color:#fff;border-color:#81acca}
+#connectify-sidebar.cx-tool-active .cx-calculator-tool[aria-pressed=true],#connectify-sidebar.cx-tool-active .cx-tool-menu>button[aria-pressed=true]{background:#d9eafa;border-color:#709fc4;color:#174c75}
+.connectea-dark #connectify-sidebar .cx-tool-menu>button,.connectea-dark #connectify-sidebar .cx-tool-menu>.cx-calculator-tool{background:#2a3b4c;color:#e1eaf3;border-color:#496178}
+.connectea-dark #connectify-sidebar .cx-tool-menu>button:hover,.connectea-dark #connectify-sidebar .cx-tool-menu>.cx-calculator-tool:hover{background:#364e65;border-color:#6ba5d6;color:#ffffff}
+.connectea-dark #connectify-sidebar.cx-tool-active .cx-calculator-tool[aria-pressed=true],.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu>button[aria-pressed=true]{background:#41627d;color:#fff;border-color:#81acca}
 @media(max-width:650px){#connectify-sidebar.cx-tool-active .cx-tool-menu{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #connectify-sidebar.cx-tool-active>.cx-tool-menu,#connectify-sidebar.cx-tool-active>.cx-outline-actions{display:none!important}
 #connectify-sidebar:not(.cx-tool-active) .cx-back-menu{display:none!important}
@@ -404,94 +406,264 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 .connectea-dark #connectify-sidebar .cx-tools-intro{color:#94a3b8!important}
 
 /* Predictor Tool Panel Styles */
+#connectify-predictor .cx-pred-header {
+  margin-bottom: 16px;
+}
+#connectify-predictor .cx-pred-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+#connectify-predictor .cx-pred-title {
+  font-size: 18px;
+  font-weight: 650;
+  color: inherit;
+}
+#connectify-predictor .cx-pred-subtitle {
+  font-size: 11px;
+  color: #55667a;
+}
+.connectea-dark #connectify-predictor .cx-pred-subtitle {
+  color: #94a3b8;
+}
+
+/* Primary Tabs (matching .cta-tabs pill bar design language) */
+.cx-pred-main-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #edf2f7;
+  border-radius: 9px;
+  margin-bottom: 16px;
+}
+.connectea-dark .cx-pred-main-tabs {
+  background: #191f27;
+}
 .cx-pred-main-tab {
+  flex: 1;
   background: transparent;
-  border: none;
-  font-size: 13px;
+  border: 0;
+  padding: 8px 12px;
+  font-size: 12px;
   font-weight: 600;
-  color: #64748b;
-  padding: 6px 14px;
+  color: #55667a;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  text-align: center;
+  transition: all 0.15s ease;
 }
 .cx-pred-main-tab:hover {
-  color: #1e293b;
-  background: #f1f5f9;
+  color: #174c75;
 }
 .cx-pred-main-tab.active {
-  color: #2563eb;
-  background: #eff6ff;
+  background: #ffffff;
+  color: #215d90;
+  box-shadow: 0 1px 4px rgba(23, 57, 84, 0.15);
   font-weight: 700;
 }
+.connectea-dark .cx-pred-main-tab {
+  color: #a0b2c6;
+}
+.connectea-dark .cx-pred-main-tab:hover {
+  color: #e1eaf3;
+}
+.connectea-dark .cx-pred-main-tab.active {
+  background: #34485d;
+  color: #e0eefb;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Subject Sub-Tabs (Chips) */
+.cx-pred-subtabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
 .cx-pred-subtab {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: #edf4fa;
+  border: 1px solid #c8d9e8;
   border-radius: 6px;
   font-size: 11.5px;
   font-weight: 600;
-  color: #475569;
-  padding: 5px 10px;
+  color: #253b53;
+  padding: 6px 12px;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   flex: 0 0 auto;
 }
 .cx-pred-subtab:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: #d9eafa;
+  border-color: #709fc4;
+  color: #174c75;
 }
 .cx-pred-subtab.active {
-  background: #2563eb;
-  border-color: #1d4ed8;
+  background: #24618c;
+  border-color: #1b4b6d;
   color: #ffffff;
-  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
-}
-
-/* Dark Mode Predictor */
-.connectea-dark #connectify-predictor .cx-pred-title {
-  color: #f1f5f9 !important;
-}
-.connectea-dark .cx-pred-main-tabs {
-  border-bottom-color: #334155 !important;
-}
-.connectea-dark .cx-pred-main-tab {
-  color: #94a3b8 !important;
-}
-.connectea-dark .cx-pred-main-tab:hover {
-  color: #f8fafc !important;
-  background: #334155 !important;
-}
-.connectea-dark .cx-pred-main-tab.active {
-  color: #60a5fa !important;
-  background: rgba(37, 99, 235, 0.2) !important;
+  box-shadow: 0 1px 3px rgba(36, 97, 140, 0.3);
 }
 .connectea-dark .cx-pred-subtab {
-  background: #1e293b !important;
-  border-color: #334155 !important;
-  color: #cbd5e1 !important;
+  background: #253342;
+  border-color: #3b5066;
+  color: #dceaf6;
 }
 .connectea-dark .cx-pred-subtab:hover {
-  background: #334155 !important;
-  color: #ffffff !important;
+  background: #33485d;
+  color: #ffffff;
 }
 .connectea-dark .cx-pred-subtab.active {
-  background: #3b82f6 !important;
-  border-color: #2563eb !important;
-  color: #ffffff !important;
+  background: #3575b9;
+  border-color: #6ba5d6;
+  color: #ffffff;
 }
-.connectea-dark .cx-pred-subject-header {
-  background: #1e293b !important;
+
+/* Cards & Containers */
+.cx-pred-card {
+  background: #edf5fb;
+  border: 1px solid #c8d9e8;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+.connectea-dark .cx-pred-card {
+  background: #253342;
+  border-color: #3b5066;
+  color: #e1eaf3;
+}
+
+.cx-pred-scenario-card {
+  background: #ffffff;
+  border: 1px solid #c8d9e8;
+  border-radius: 6px;
+  padding: 8px 6px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.cx-pred-scenario-card--mid {
+  background: #e9f2fb;
+  border: 1.5px solid #709fc4;
+}
+.connectea-dark .cx-pred-scenario-card {
+  background: #1e252e;
+  border-color: #3b5066;
+  color: #dceaf6;
+}
+.connectea-dark .cx-pred-scenario-card--mid {
+  background: #293746;
+  border-color: #6ba5d6;
+  color: #e1eaf3;
+}
+
+/* Upcoming Tasks & Task Cards */
+.cx-pred-task-card {
+  background: #ffffff;
+  border: 1px solid #d9e2eb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
 }
 .connectea-dark .cx-pred-task-card {
-  background: #1e293b !important;
-  border-color: #334155 !important;
+  background: #222830;
+  border-color: #414954;
+  color: #dce2e8;
 }
-.connectea-dark .cx-pred-atar-hero {
-  background: #1e293b !important;
-  border-color: #334155 !important;
+
+/* Prediction Result Pills */
+.cx-pred-pill {
+  background: #f4f7fb;
+  border: 1px solid #c8d9e8;
+  border-radius: 5px;
+  padding: 6px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.cx-pred-pill--mid {
+  background: #d9eafa;
+  border-color: #709fc4;
+  color: #174c75;
+}
+.cx-pred-pill--high {
+  background: #e6f7ee;
+  border-color: #8cdab1;
+  color: #15803d;
+}
+.connectea-dark .cx-pred-pill {
+  background: #1e252e;
+  border-color: #3b5066;
+  color: #b4c5d5;
+}
+.connectea-dark .cx-pred-pill--mid {
+  background: #2c445c;
+  border-color: #527d9f;
+  color: #a2cbef;
+}
+.connectea-dark .cx-pred-pill--high {
+  background: #183324;
+  border-color: #2b6647;
+  color: #66df99;
+}
+
+/* Unpredicted Cold-Start Notice */
+.cx-pred-unpredicted-notice {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11.5px;
+  color: #92400e;
+  line-height: 1.45;
+}
+.connectea-dark .cx-pred-unpredicted-notice {
+  background: #332a18;
+  border-color: #5c471c;
+  color: #ffd56b;
+}
+
+/* Guidance / No-Average Card */
+.cx-pred-no-average-card {
+  background: #edf5fb;
+  border: 1px dashed #709fc4;
+  border-radius: 8px;
+  padding: 28px 20px;
+  text-align: center;
+  margin-top: 8px;
 }
 .connectea-dark .cx-pred-no-average-card {
-  background: #1e293b !important;
-  border-color: #475569 !important;
+  background: #253342;
+  border-color: #527d9f;
+  color: #dceaf6;
+}
+
+/* ATAR Contributing Courses Table */
+.cx-pred-courses-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+  text-align: left;
+  margin-top: 8px;
+}
+.cx-pred-courses-table th,
+.cx-pred-courses-table td {
+  padding: 7px 4px;
+  border-bottom: 1px solid #d9e2eb;
+}
+.connectea-dark .cx-pred-courses-table th,
+.connectea-dark .cx-pred-courses-table td {
+  border-color: #414954;
+  color: #dce2e8;
+}
+.cx-pred-courses-table th {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: #55667a;
+  font-weight: 700;
+}
+.connectea-dark .cx-pred-courses-table th {
+  color: #94a3b8;
 }

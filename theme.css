@@ -1,69 +1,497 @@
-/* Component colors, not an inversion filter. All overrides are opt-in. */
-html.connectea-dark input::placeholder,html.connectea-dark textarea::placeholder{color:#ffffff!important;opacity:1!important}
-html.connectea-dark #main-content :is(.mat-header-cell,.mat-footer-cell,.mat-mdc-header-cell,.mat-mdc-footer-cell){color:#ffffff!important}
-html.connectea-dark #main-content :is(.mat-header-cell,.mat-footer-cell,.mat-mdc-header-cell,.mat-mdc-footer-cell) :is(div,span,em){color:#ffffff!important}
-html.connectea-dark #main-content .c-category-menu{background:#2a2a2a!important;color:#ffffff!important}
-html.connectea-dark #main-content .c-category-menu :is(.mat-expansion-panel,.mat-expansion-panel-header,.mat-expansion-panel-body,.mat-list-item,.mat-mdc-list-item){background:#2a2a2a!important;color:#ffffff!important;border-color:#3a3a3a!important}
-html.connectea-dark #main-content .c-category-menu :is(.mat-expansion-panel-header,.mat-list-item,.mat-mdc-list-item):hover{background:#344353!important}
-html.connectea-dark #main-content .c-category-menu .mat-expansion-indicator::after{color:#ffffff!important}
-html.connectea-dark .connectea-panel .connectea-controls{color:#ffffff!important}
-/* Homepage journal promotions override the site's explicit white-theme rules. */
-html.connectea-dark #main-content .cvr-c-promo.eds-t-white{background-color:#333333!important;color:#cccccc!important}
-html.connectea-dark #main-content .cvr-c-promo.eds-t-white .cvr-c-promo__body{background-color:#333333!important;color:#cccccc!important}
-html.connectea-dark #main-content .cvr-c-promo.eds-t-white :is(.cvr-c-promo__title,p){color:#cccccc!important}
-html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button{background-color:#303e4e!important;color:#dbeeff!important;border-color:#6e849b!important}
-html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button:hover{background-color:#40536a!important}
-html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button:focus-visible{outline:2px solid #d4b483;outline-offset:3px}
-#connectea-theme-toggle{position:absolute;top:64px;right:16px;z-index:10000;border:1px solid #b6c1ca;border-radius:6px;background:#fff;color:#344451;padding:7px 11px;font:12px/1.4 system-ui,sans-serif;cursor:pointer;box-shadow:0 1px 3px #0001}
-#connectea-theme-toggle:focus-visible{outline:2px solid #598fbd;outline-offset:3px}
-html.connectea-dark{color-scheme:dark;background:#292929!important;color:#cccccc!important}
-.connectea-dark body,.connectea-dark #main-content{background:#292929!important;color:#cccccc!important}
-.connectea-dark [data-connectea-surface]{background-color:#333333!important}
-.connectea-dark [data-connectea-ink]{color:#cccccc!important}
-.connectea-dark :is(.cvr-c-task,.cvr-c-task__details,.cvr-c-task-group,.cvr-c-tasks,.eds-c-tile__body,.eds-c-accordion__panel,.v-panel-content,.v-window-contents,.mat-card,.mat-dialog-container){background-color:#333333!important;color:#cccccc!important;border-color:#3a3a3a!important}
-.connectea-dark :is(.cvr-c-primary-navigation,.cvr-c-primary-menu,.cvr-c-service-menu,.cvr-c-category-menu){background-color:#2a2a2a!important;color:#cccccc!important}
-.connectea-dark :is(input,textarea,select){background-color:#212121!important;color:#dddddd!important;border-color:#4a4a4a!important}
-.connectea-dark :is(th,td){border-color:#3a3a3a!important}
-.connectea-dark .cvr-c-service-bar,.connectea-dark .cvr-c-service-bar__control-panel,.connectea-dark .cvr-c-category-toolbar{background:#2a2a2a!important;color:#cccccc!important}
-.connectea-dark .eds-c-tile{background:#333333!important;color:#cccccc!important;box-shadow:0 1px 4px #0005!important}
-.connectea-dark .eds-c-tile__header{border-bottom-color:#93b640!important}
-.connectea-dark .eds-c-tile :is(.v-label,.eds-c-caption,.eds-c-heading,.eds-c-link,.v-button,.eds-c-accordion__section-heading){color:#cccccc!important}
-.connectea-dark .eds-c-tile :is(.cvr-c-task,.cvr-c-task-group,.cvr-c-task__mark,.eds-c-accordion__section-heading){border-color:#3a3a3a!important}
-.connectea-dark .eds-c-tile :is(.cvr-c-task__marks,.cvr-c-task__mark,.eds-c-accordion__section-heading){background:#333333!important}
-.connectea-dark .eds-c-tile a{color:#d4b483!important}
-.connectea-dark .eds-c-tile .cvr-c-task__chart{background:#333333!important}
-.connectea-dark .cvr-c-task__chart :is(svg,.highcharts-container){background:transparent!important}
-.connectea-dark .cvr-c-task__chart .highcharts-background{fill:#333333!important}
-.connectea-dark .cvr-c-task__chart [fill="#FFFFFF"]{fill:#333333!important}
-.connectea-dark .cvr-c-task__chart [stroke="#A9A9A9"]{stroke:#bac6d1!important}
-.connectea-dark .cvr-c-task__chart [fill="#000000"]{fill:#f3f6f9!important}
-.connectea-dark .cvr-c-task__chart text{fill:#cccccc!important}
-.connectea-dark .connectea-panel{background:#333333;color:#cccccc;border-color:#3a3a3a}
-.connectea-dark .connectea-subject-controls{border-color:#3a3a3a}
-.connectea-dark .connectea-notice{color:#999999}
-.connectea-dark .connectea-controls input{background:#212121;color:#dddddd;border-color:#4a4a4a}
-.connectea-dark #connectea-theme-toggle{background:#29333f;color:#dddddd;border-color:#53677d}
-@media(max-width:600px){#connectea-theme-toggle{right:8px;font-size:11px;padding:6px 8px}}
-@media print{#connectea-theme-toggle{display:none}}
-/* Native navigation surfaces keep distinct, soft hover and selected states. */
-.connectea-dark :is(.cvr-c-service-menu__wrapper,.cvr-c-service-menu__list,.cvr-c-primary-menu__body,.cvr-c-primary-menu__list,.cvr-c-category-menu__wrapper,.cvr-c-primary-navigation__container){background-color:#2a2a2a!important;color:#cccccc!important}
-.connectea-dark :is(.cvr-c-service-menu__item,.cvr-c-primary-menu__item,.cvr-c-category-menu .eds-u-interactive,.cvr-c-primary-navigation__links .v-link a,.cvr-c-primary-navigation__button--avatar){background-color:#2a2a2a!important;color:#cccccc!important;transition:background-color .15s ease}
-.connectea-dark :is(.cvr-c-service-menu__item,.cvr-c-primary-menu__item,.cvr-c-category-menu .eds-u-interactive,.cvr-c-primary-navigation__links .v-link a,.cvr-c-primary-navigation__button--avatar):hover{background-color:#303a45!important}
-.connectea-dark :is(.cvr-c-service-menu__item,.cvr-c-primary-menu__item,.cvr-c-category-menu .eds-u-interactive,.cvr-c-primary-navigation__links .v-link).eds-s-is-active,.connectea-dark .cvr-c-primary-navigation__links .eds-s-is-active a{background-color:#344353!important;color:#edf4fc!important;box-shadow:inset 3px 0 #82aacc}
-.connectea-dark :is(.cvr-c-service-menu__item,.cvr-c-primary-menu__item) :is(.v-label,.eds-o-media__body){color:inherit!important;background-color:transparent!important}
-.connectea-dark :is(.v-button,.eds-c-button){background-color:#303944!important;color:#cccccc!important;border-color:#4c5a69!important;background-image:none!important}
-.connectea-dark :is(.v-button,.eds-c-button):hover{background-color:#3b4857!important}
-#connectea-theme-toggle{visibility:visible!important;display:block!important;opacity:1!important;z-index:10020}
-/* The theme switch previews the destination theme, beside notifications. */
-#connectea-theme-toggle{background:#25313f!important;color:#f1f6fb!important;border-color:#526a81!important}
-.connectea-dark #connectea-theme-toggle{background:#f5f8fc!important;color:#25313f!important;border-color:#bdccda!important}
-#connectea-theme-toggle{position:absolute!important;top:8px!important;left:auto!important;width:104px;box-sizing:border-box;margin:0;white-space:nowrap}
+/* ==========================================================================
+   Connectify Site-Wide Dark Theme
+   Preserves every color difference, outline, hierarchy, and surface border.
+   ========================================================================== */
 
-/* Draw a separate arrow without filtering the native control or its background. */
-.connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow]{position:relative!important}
-.connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow]::after{content:attr(data-cx-details-arrow)!important;position:absolute!important;inset:0 0 0 auto!important;width:56px!important;height:auto!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;background:#34485c!important;color:#fff!important;border:1px solid #8ea9c2!important;border-radius:4px!important;font:700 28px/1 system-ui,sans-serif!important;opacity:1!important;filter:none!important;transform:none!important;z-index:2;pointer-events:none!important}
-.connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow]:hover::after{background:#49657e!important}
-.connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow]:focus-within::after{outline:2px solid #fff!important;outline-offset:-4px!important}
+/* --------------------------------------------------------------------------
+   1. Base Canvas, Typography & Global Root
+   -------------------------------------------------------------------------- */
+html.connectea-dark {
+  color-scheme: dark !important;
+  background-color: #12171f !important;
+  color: #e2e8f0 !important;
+}
 
-/* Restore borders that vanish in dark mode */
-.connectea-dark :is(.cvr-c-task, .cvr-c-task-group, .cvr-c-task__mark, .eds-c-accordion__section-heading, .mat-card, .eds-c-tile, th, td, input, select, textarea) { border-style: solid !important; border-width: 1px !important; }
+.connectea-dark body,
+.connectea-dark #main-content,
+.connectea-dark .v-app,
+.connectea-dark .v-ui,
+.connectea-dark .cvr-c-app-layout,
+.connectea-dark .cvr-c-app-layout__body {
+  background-color: #12171f !important;
+  color: #e2e8f0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Theme Toggle Switch
+   -------------------------------------------------------------------------- */
+#connectea-theme-toggle {
+  position: absolute !important;
+  top: 8px !important;
+  right: 16px;
+  z-index: 10020 !important;
+  width: 104px;
+  box-sizing: border-box;
+  margin: 0;
+  white-space: nowrap;
+  border-radius: 6px;
+  padding: 7px 11px;
+  font: 12px/1.4 system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  background: #25313f !important;
+  color: #f1f6fb !important;
+  border: 1px solid #526a81 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+#connectea-theme-toggle:hover {
+  background: #313f50 !important;
+  border-color: #6b88a5 !important;
+}
+
+#connectea-theme-toggle:focus-visible {
+  outline: 2px solid #598fbd;
+  outline-offset: 2px;
+}
+
+.connectea-dark #connectea-theme-toggle {
+  background: #24303f !important;
+  color: #f1f6fb !important;
+  border: 1px solid #485c72 !important;
+}
+
+.connectea-dark #connectea-theme-toggle:hover {
+  background: #2f3e52 !important;
+  border-color: #627b97 !important;
+}
+
+@media (max-width: 600px) {
+  #connectea-theme-toggle {
+    right: 8px !important;
+    font-size: 11px;
+    padding: 6px 8px;
+    width: auto;
+  }
+}
+
+@media print {
+  #connectea-theme-toggle {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Top Navigation Bar (.cvr-c-primary-navigation)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.cvr-c-primary-navigation, .cvr-c-primary-navigation__container, .cvr-c-primary-navigation__bar) {
+  background-color: #1a222d !important;
+  border-bottom: 1px solid #283546 !important;
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark .cvr-c-primary-navigation__links .v-link a,
+.connectea-dark .cvr-c-primary-navigation__button {
+  color: #cbd5e1 !important;
+  background-color: transparent !important;
+  border-radius: 4px;
+}
+
+.connectea-dark .cvr-c-primary-navigation__links .v-link a:hover,
+.connectea-dark .cvr-c-primary-navigation__button:hover {
+  background-color: #24303f !important;
+  color: #ffffff !important;
+}
+
+/* Active tab in top navigation (e.g. My Connect) */
+.connectea-dark .cvr-c-primary-navigation__links .v-link.eds-s-is-active a,
+.connectea-dark .cvr-c-primary-navigation__links .eds-s-is-active a {
+  background-color: #121820 !important;
+  color: #ffffff !important;
+  border: 1px solid #2d3b4d !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Left Sidebar / Navigation Drawer (.cvr-c-service-menu)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.cvr-c-service-menu, .cvr-c-service-menu__wrapper, .cvr-c-service-menu__list) {
+  background-color: #1a222d !important;
+  color: #cbd5e1 !important;
+  border-right: 1px solid #283546 !important;
+}
+
+.connectea-dark .cvr-c-service-menu__item {
+  background-color: transparent !important;
+  color: #cbd5e1 !important;
+  transition: background-color 0.15s ease;
+}
+
+.connectea-dark .cvr-c-service-menu__item:hover {
+  background-color: #24303f !important;
+  color: #ffffff !important;
+}
+
+/* Active item (e.g. Assessment Outlines) */
+.connectea-dark .cvr-c-service-menu__item.eds-s-is-active,
+.connectea-dark .cvr-c-service-menu__item.v-selected {
+  background-color: #121820 !important;
+  color: #ffffff !important;
+  box-shadow: inset 3px 0 #3b82f6 !important;
+  border-left-color: #3b82f6 !important;
+}
+
+.connectea-dark .cvr-c-service-menu__item :is(.v-label, .eds-o-media__body) {
+  color: inherit !important;
+  background-color: transparent !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. "All" Subheader Bar & Category Toolbars
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.cvr-c-category-toolbar, .cvr-c-service-bar, .cvr-c-service-bar__control-panel) {
+  background-color: #18202b !important;
+  border-bottom: 1px solid #283546 !important;
+  color: #cbd5e1 !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. Subject Course Card (.eds-c-tile)
+   -------------------------------------------------------------------------- */
+.connectea-dark .eds-c-tile {
+  background-color: #1e2632 !important;
+  border: 1px solid #2e3c4e !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+  color: #e2e8f0 !important;
+  margin-bottom: 20px !important;
+}
+
+.connectea-dark .eds-c-tile__header {
+  background-color: transparent !important;
+  border-bottom: 1px solid #283546 !important;
+}
+
+.connectea-dark .eds-c-tile :is(.eds-c-heading, .eds-c-tile__title, h2, h3, h4) {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+.connectea-dark .eds-c-tile :is(.eds-c-caption, .eds-c-tile__caption, small) {
+  color: #94a3b8 !important;
+}
+
+.connectea-dark .eds-c-tile__body,
+.connectea-dark .eds-c-accordion__panel {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. Compound Subject Progress Bars (Preserve category segment colors!)
+   -------------------------------------------------------------------------- */
+.connectea-dark .cx-compound-progress-container {
+  background: transparent !important;
+}
+
+.connectea-dark .cx-compound-progress-bar {
+  background-color: #151c26 !important;
+  border: 1px solid #2b394a !important;
+  border-radius: 4px !important;
+}
+
+.connectea-dark .cx-compound-progress-label {
+  color: #94a3b8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. Cohort Statistics Panel (.connectea-panel) - PRESERVE BLUE IDENTITY
+   -------------------------------------------------------------------------- */
+.connectea-dark .connectea-panel {
+  background-color: #15263a !important;
+  border: 1px solid #264669 !important;
+  border-radius: 8px !important;
+  color: #d6e8f8 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
+}
+
+.connectea-dark .connectea-panel-distribution {
+  color: #cfe2f5 !important;
+}
+
+.connectea-dark .connectea-panel-distribution strong,
+.connectea-dark .connectea-panel strong {
+  color: #90c6f5 !important;
+  font-weight: 600 !important;
+}
+
+.connectea-dark .connectea-panel-standing {
+  color: #e2effa !important;
+}
+
+.connectea-dark .connectea-controls {
+  color: #b0d0ed !important;
+}
+
+.connectea-dark .connectea-controls input {
+  background-color: #0f1c2b !important;
+  border: 1px solid #335985 !important;
+  color: #f1f5f9 !important;
+  border-radius: 4px !important;
+}
+
+.connectea-dark .connectea-controls input:focus {
+  border-color: #60a5fa !important;
+  outline: 2px solid #60a5fa !important;
+}
+
+.connectea-dark .connectea-notice {
+  color: #7da8cf !important;
+}
+
+.connectea-dark .connectea-subject-controls {
+  border-top: 1px solid #254467 !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. Summary Total Mark & Grade Box (.cvr-c-task__marks)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.cvr-c-task__marks, .cvr-c-task__mark) {
+  background-color: #161e29 !important;
+  border-color: #2d3b4d !important;
+  color: #f8fafc !important;
+}
+
+.connectea-dark .cvr-c-task__marks {
+  border: 1px solid #2d3b4d !important;
+  border-radius: 6px !important;
+}
+
+.connectea-dark .cvr-c-task__mark {
+  border-right: 1px solid #2d3b4d !important;
+}
+
+.connectea-dark .cvr-c-task__mark:last-child {
+  border-right: none !important;
+}
+
+.connectea-dark :is(.cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__mark-score) {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+.connectea-dark :is(.cvr-c-task__outof, .cvr-c-task__mark-out-of, .cvr-c-task__mark-label) {
+  color: #94a3b8 !important;
+  font-weight: 500 !important;
+}
+
+/* --------------------------------------------------------------------------
+   10. Accordion Section Header ("Hide Details" / "Show Details")
+   -------------------------------------------------------------------------- */
+.connectea-dark .eds-c-accordion__section-heading {
+  background-color: #222b39 !important;
+  border-top: 1px solid #2e3c4e !important;
+  border-bottom: 1px solid #2e3c4e !important;
+  color: #cbd5e1 !important;
+  transition: background-color 0.15s ease;
+}
+
+.connectea-dark .eds-c-accordion__section-heading:hover {
+  background-color: #293445 !important;
+  color: #f1f5f9 !important;
+}
+
+.connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow] {
+  position: relative !important;
+}
+
+.connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow]::after {
+  content: attr(data-cx-details-arrow) !important;
+  position: absolute !important;
+  inset: 0 0 0 auto !important;
+  width: 56px !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  background: #2d3c4e !important;
+  color: #ffffff !important;
+  border-left: 1px solid #3d4f66 !important;
+  font: 700 24px/1 system-ui, sans-serif !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+}
+
+.connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow]:hover::after {
+  background: #374a5f !important;
+}
+
+/* --------------------------------------------------------------------------
+   11. Assessment Task Rows (.cvr-c-task)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group) {
+  background-color: transparent !important;
+  border-bottom: 1px solid #283546 !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark .cvr-c-task__details {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {
+  color: #f8fafc !important;
+  font-weight: 650 !important;
+}
+
+.connectea-dark .cvr-c-task-group {
+  border-top: 1px solid #2e3c4e !important;
+}
+
+.connectea-dark :is(.cvr-c-task-group__title, .cvr-c-task__group-name) {
+  color: #f1f5f9 !important;
+  font-weight: 700 !important;
+}
+
+/* Assessment Type Dropdowns (.connectea-type-select) */
+.connectea-dark .connectea-type-label {
+  color: #94a3b8 !important;
+}
+
+.connectea-dark .connectea-type-select {
+  background-color: #182330 !important;
+  border: 1px solid #2c425c !important;
+  color: #dceaf7 !important;
+  border-radius: 6px !important;
+}
+
+.connectea-dark .connectea-type-select:hover {
+  background-color: #202d3e !important;
+  border-color: #4b6a8f !important;
+}
+
+.connectea-dark .connectea-type-select:focus {
+  border-color: #60a5fa !important;
+  outline: 2px solid #60a5fa !important;
+}
+
+.connectea-dark .connectea-type-select.connectea-overridden {
+  background-color: #22374e !important;
+  border-color: #43719e !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   12. Highcharts Boxplot Chart (.cvr-c-task__chart)
+   -------------------------------------------------------------------------- */
+.connectea-dark .cvr-c-task__chart {
+  background: transparent !important;
+}
+
+.connectea-dark .cvr-c-task__chart :is(svg, .highcharts-container) {
+  background: transparent !important;
+}
+
+.connectea-dark .cvr-c-task__chart .highcharts-background {
+  fill: transparent !important;
+}
+
+.connectea-dark .cvr-c-task__chart [fill="#FFFFFF"] {
+  fill: #161e29 !important;
+}
+
+.connectea-dark .cvr-c-task__chart [stroke="#A9A9A9"],
+.connectea-dark .cvr-c-task__chart [stroke="#000000"] {
+  stroke: #647b95 !important;
+}
+
+.connectea-dark .cvr-c-task__chart [fill="#000000"] {
+  fill: #f1f5f9 !important;
+}
+
+.connectea-dark .cvr-c-task__chart text {
+  fill: #94a3b8 !important;
+  color: #94a3b8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   13. Form Controls & General Buttons
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(input, textarea, select) {
+  background-color: #141a22 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #334356 !important;
+}
+
+.connectea-dark :is(input, textarea)::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+.connectea-dark :is(input, textarea, select):focus {
+  border-color: #3b82f6 !important;
+  outline: 2px solid #3b82f6 !important;
+}
+
+.connectea-dark :is(.v-button, .eds-c-button) {
+  background-color: #24303f !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #3b4d61 !important;
+  background-image: none !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.connectea-dark :is(.v-button, .eds-c-button):hover {
+  background-color: #2e3c4e !important;
+  border-color: #556c86 !important;
+  color: #ffffff !important;
+}
+
+/* Floating Expand / Collapse Buttons (#cx-expand-btn) */
+.connectea-dark #cx-expand-btn button {
+  background-color: #24303f !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #3b4d61 !important;
+}
+
+.connectea-dark #cx-expand-btn button:hover {
+  background-color: #2e3c4e !important;
+  border-color: #556c86 !important;
+}
+
+/* --------------------------------------------------------------------------
+   14. Cards, Popups, Modals & Material Panels
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.mat-card, .v-window, .v-window-contents, .v-panel-content, .mat-dialog-container) {
+  background-color: #1e2632 !important;
+  border: 1px solid #2e3c4e !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark :is(th, td) {
+  border-color: #283546 !important;
+}
+
+.connectea-dark #main-content :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell) {
+  color: #f1f5f9 !important;
+}
+
+.connectea-dark #main-content .c-category-menu {
+  background: #1a222d !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark #main-content .c-category-menu :is(.mat-expansion-panel, .mat-expansion-panel-header, .mat-expansion-panel-body, .mat-list-item, .mat-mdc-list-item) {
+  background: #1a222d !important;
+  color: #e2e8f0 !important;
+  border-color: #283546 !important;
+}
+
+.connectea-dark #main-content .c-category-menu :is(.mat-expansion-panel-header, .mat-list-item, .mat-mdc-list-item):hover {
+  background: #24303f !important;
+}
+
+.connectea-dark #main-content .c-category-menu .mat-expansion-indicator::after {
+  color: #ffffff !important;
+}

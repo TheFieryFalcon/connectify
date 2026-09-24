@@ -69,15 +69,7 @@
     }
 
     window.ConnectifyAtar.calculatorButtons = [estimateTab, targetTab, gradeTab];
-    if (!window.ConnectifyAtar.toolButtons) {
-      window.ConnectifyAtar.toolButtons = [estimateTab, targetTab, gradeTab];
-    } else {
-      for (const b of [estimateTab, targetTab, gradeTab]) {
-        if (!window.ConnectifyAtar.toolButtons.includes(b)) {
-          window.ConnectifyAtar.toolButtons.unshift(b);
-        }
-      }
-    }
+    window.ConnectifyAtar.toolButtons = [estimateTab, targetTab, gradeTab];
 
     const hasSemesterTwoStarted = () => (gradeCourses || []).flat().some(r => r?.finalLetter);
     const isTargetClosed = semesterIdx =>

@@ -147,47 +147,75 @@
      * Mount tool launcher buttons into the sidebar menu and tool panels into the workspace.
      */
     function mountTools() {
-      const progressToggle = document.getElementById('connectify-progress-toggle');
-      const weaknessToggle = document.getElementById('connectify-weakness-toggle');
-      const categoriesToggle = document.getElementById('connectify-categories-toggle');
-      const predictorToggle = document.getElementById('connectify-predictor-toggle');
-      const estimateToggle = document.getElementById('connectify-estimate-toggle');
-      const targetToggle = document.getElementById('connectify-target-toggle');
-      const gradeToggle = document.getElementById('connectify-grade-toggle');
+      // Ensure predictor instance exists
+      if (!document.getElementById('connectify-predictor-toggle') && window.ConnectifyPredictorUI?.ensurePredictorPanel) {
+        window.ConnectifyPredictorUI.ensurePredictorPanel();
+      }
 
-      const atarButtons = window.ConnectifyAtar?.toolButtons || [];
-      const fallbackAtarButtons = [estimateToggle, targetToggle, gradeToggle].filter(Boolean);
-      const resolvedAtarButtons = atarButtons.length > 0 ? atarButtons : fallbackAtarButtons;
+      const canonicalButtons = [
+        { id: 'connectify-estimate-toggle', label: 'ATAR Estimate' },
+        { id: 'connectify-target-toggle', label: 'Target ATAR' },
+        { id: 'connectify-grade-toggle', label: 'Target Grade' },
+        { id: 'connectify-predictor-toggle', label: 'Predictor' },
+        { id: 'connectify-progress-toggle', label: 'Progress Graph' },
+        { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' },
+        { id: 'connectify-categories-toggle', label: 'Settings' }
+      ];
 
-      const rawButtons = [
-        ...resolvedAtarButtons,
-        predictorToggle,
-        progressToggle,
-        weaknessToggle,
-        categoriesToggle
-      ].filter(Boolean);
-
-      // Deduplicate buttons by element and ID to prevent duplicates
-      const seenButtons = new Set();
-      const uniqueButtons = [];
-      for (const btn of rawButtons) {
-        const key = btn.id || btn;
-        if (!seenButtons.has(key)) {
-          seenButtons.add(key);
-          uniqueButtons.push(btn);
+      const resolvedButtons = [];
+      for (const item of canonicalButtons) {
+        const matches = Array.from(document.querySelectorAll('#' + item.id));
+        let btn = null;
+        if (matches.length > 0) {
+          const inMenu = matches.find(m => m.parentElement === toolMenu);
+          btn = inMenu || matches[0];
+          // Purge duplicate button nodes with same ID from DOM
+          for (const m of matches) {
+            if (m !== btn && m.parentElement) {
+              m.remove();
+            }
+          }
+        }
+        if (btn) {
+          btn.className = 'cx-calculator-tool';
+          resolvedButtons.push(btn);
         }
       }
 
-      for (const btn of uniqueButtons) {
-        if (btn && btn.parentElement !== toolMenu) {
-          toolMenu.append(btn);
+      // Purge any unknown, stray, or obsolete child buttons from toolMenu
+      const resolvedSet = new Set(resolvedButtons);
+      Array.from(toolMenu.children).forEach(child => {
+        if (!resolvedSet.has(child)) {
+          child.remove();
         }
+      });
+
+      // Append all resolved buttons in the canonical sequence
+      for (const btn of resolvedButtons) {
+        toolMenu.append(btn);
       }
 
-      for (const panelId of ['connectea-atar', 'connectify-predictor', 'connectify-progress', 'connectify-weakness', 'connectify-categories']) {
-        const panel = document.getElementById(panelId);
-        if (panel && panel.parentElement !== workspace) {
-          workspace.append(panel);
+      // Mount and deduplicate workspace panels
+      const panelIds = [
+        'connectea-atar',
+        'connectify-predictor',
+        'connectify-progress',
+        'connectify-weakness',
+        'connectify-categories'
+      ];
+      for (const panelId of panelIds) {
+        const matches = Array.from(document.querySelectorAll('#' + panelId));
+        if (matches.length > 0) {
+          const inWorkspace = matches.find(m => m.parentElement === workspace);
+          const panel = inWorkspace || matches[0];
+          for (const m of matches) {
+            if (m !== panel && m.parentElement) {
+              m.remove();
+            }
+          }
+          if (panel.parentElement !== workspace) {
+            workspace.append(panel);
+          }
         }
       }
     }
@@ -205,6 +233,7 @@
       }
       sidebar.classList.remove('cx-tool-active');
       introText.hidden = false;
+      toolMenu.querySelectorAll('button').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
     }
 
     function closeSidebar() {

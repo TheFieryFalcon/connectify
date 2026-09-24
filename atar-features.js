@@ -84,71 +84,60 @@
     }
 
     function initSidebarTools() {
-      if (hasInitializedSidebar || document.getElementById('connectify-weakness-toggle')) {
-        hasInitializedSidebar = true;
-        return;
-      }
-      if (!document.querySelector('#connectify-sidebar')) return;
-      hasInitializedSidebar = true;
+      const sidebar = document.querySelector('#connectify-sidebar');
+      if (!sidebar) return;
 
-      const toolMenu = document.querySelector('.cx-tool-menu');
-      const workspace = document.querySelector('.cx-workspace');
+      const toolMenu = sidebar.querySelector('.cx-tool-menu');
+      const workspace = sidebar.querySelector('.cx-workspace');
+      if (!toolMenu || !workspace) return;
 
-      if (window.ConnectifyPredictorUI?.createPredictorPanel && !predictorInstance) {
-        predictorInstance = window.ConnectifyPredictorUI.createPredictorPanel();
+      if (!predictorInstance) {
+        if (window.ConnectifyPredictorUI?.ensurePredictorPanel) {
+          predictorInstance = window.ConnectifyPredictorUI.ensurePredictorPanel();
+        } else if (window.ConnectifyPredictorUI?.createPredictorPanel) {
+          predictorInstance = window.ConnectifyPredictorUI.createPredictorPanel();
+        }
       }
-      if (window.ConnectifyWeakness?.createWeaknessPanel && !weaknessInstance) {
+
+      if (!weaknessInstance && window.ConnectifyWeakness?.createWeaknessPanel) {
         weaknessInstance = window.ConnectifyWeakness.createWeaknessPanel();
       }
-      if (window.ConnectifyCategorySettings?.createSettingsPanel && !settingsInstance) {
+
+      if (!settingsInstance && window.ConnectifyCategorySettings?.createSettingsPanel) {
         settingsInstance = window.ConnectifyCategorySettings.createSettingsPanel();
       }
 
-      if (predictorInstance && toolMenu && workspace) {
+      if (predictorInstance) {
         if (!toolMenu.contains(predictorInstance.toggleBtn)) toolMenu.append(predictorInstance.toggleBtn);
         if (!workspace.contains(predictorInstance.panel)) workspace.append(predictorInstance.panel);
       }
 
-      if (weaknessInstance && settingsInstance && toolMenu && workspace) {
+      if (weaknessInstance) {
         if (!toolMenu.contains(weaknessInstance.toggleBtn)) toolMenu.append(weaknessInstance.toggleBtn);
-        if (!toolMenu.contains(settingsInstance.catBtn)) toolMenu.append(settingsInstance.catBtn);
         if (!workspace.contains(weaknessInstance.panel)) workspace.append(weaknessInstance.panel);
+      }
+
+      if (settingsInstance) {
+        if (!toolMenu.contains(settingsInstance.catBtn)) toolMenu.append(settingsInstance.catBtn);
         if (!workspace.contains(settingsInstance.catPanel)) workspace.append(settingsInstance.catPanel);
       }
 
-      window.addEventListener('connectify-open', e => {
-        if (e.detail !== 'predictor' && predictorInstance) {
-          predictorInstance.closePredictor();
-        }
-        if (e.detail !== 'weakness' && weaknessInstance) {
-          weaknessInstance.closeWeakness();
-        }
-        if (e.detail !== 'categories' && settingsInstance) {
-          settingsInstance.closeCategories();
-        }
-      });
-
-      window.ConnectifyAtar = window.ConnectifyAtar || {};
-      window.ConnectifyAtar.toolPanels = window.ConnectifyAtar.toolPanels || [];
-      window.ConnectifyAtar.toolButtons = window.ConnectifyAtar.toolButtons || [];
-
-      if (predictorInstance) {
-        const existingPanels = new Set(window.ConnectifyAtar.toolPanels.map(p => p.id));
-        if (!existingPanels.has(predictorInstance.panel.id)) window.ConnectifyAtar.toolPanels.push(predictorInstance.panel);
-        const existingIds = new Set(window.ConnectifyAtar.toolButtons.map(b => b.id));
-        if (!existingIds.has(predictorInstance.toggleBtn.id)) window.ConnectifyAtar.toolButtons.push(predictorInstance.toggleBtn);
-      }
-
-      if (weaknessInstance && settingsInstance) {
-        const existingPanels = new Set(window.ConnectifyAtar.toolPanels.map(p => p.id));
-        if (!existingPanels.has(weaknessInstance.panel.id)) window.ConnectifyAtar.toolPanels.push(weaknessInstance.panel);
-        if (!existingPanels.has(settingsInstance.catPanel.id)) window.ConnectifyAtar.toolPanels.push(settingsInstance.catPanel);
-
-        const existingIds = new Set(window.ConnectifyAtar.toolButtons.map(b => b.id));
-        if (!existingIds.has(weaknessInstance.toggleBtn.id)) window.ConnectifyAtar.toolButtons.push(weaknessInstance.toggleBtn);
-        if (!existingIds.has(settingsInstance.catBtn.id)) window.ConnectifyAtar.toolButtons.push(settingsInstance.catBtn);
+      if (typeof window.ConnectifyInitSidebar === 'function') {
+        window.ConnectifyInitSidebar();
       }
     }
+
+    window.addEventListener('connectify-open', e => {
+      if (e.detail !== 'predictor' && predictorInstance) {
+        predictorInstance.closePredictor();
+      }
+      if (e.detail !== 'weakness' && weaknessInstance) {
+        weaknessInstance.closeWeakness();
+      }
+      if (e.detail !== 'categories' && settingsInstance) {
+        settingsInstance.closeCategories();
+      }
+    });
 
     window.addEventListener('connectify-task-type-changed', () => {
       try {

@@ -2,7 +2,8 @@
  * Connectify Grade & ATAR Predictor UI Panel
  *
  * Implements:
- * - Sidebar tool panel (`#connectify-predictor`) with launcher button
+ * - Sidebar tool panel (`#connectify-predictor`) with launcher button (`#connectify-predictor-toggle`)
+ * - Follows the exact design language of existing panels, expanding the sidebar drawer (.cx-tool-active)
  * - Dual primary tabs: Grade Predictor and ATAR Predictor
  * - Grade Predictor: Up to 6 subject sub-tabs with no-average guidance panel
  *   and individual upcoming task prediction sections (Low, Middle, High)
@@ -16,33 +17,41 @@
 
   if (window.ConnectifyPredictorUI) return;
 
+  let activeMainTab = 'grade'; // 'grade' | 'atar'
+  let activeSubjectIndex = 0;
+  let predictorInstance = null;
+
   function createPredictorPanel() {
-    // 1. Sidebar launcher button (strictly plain text, no emoji as requested)
-    const toggleBtn = document.createElement('button');
-    toggleBtn.textContent = 'Predictor';
-    toggleBtn.type = 'button';
-    toggleBtn.id = 'connectify-predictor-toggle';
-    toggleBtn.className = 'cx-calculator-tool';
-    toggleBtn.setAttribute('aria-controls', 'connectify-predictor');
-    toggleBtn.setAttribute('aria-pressed', 'false');
+    // 1. Sidebar launcher button (plain text "Predictor", no emoji)
+    let toggleBtn = document.getElementById('connectify-predictor-toggle');
+    if (!toggleBtn) {
+      toggleBtn = document.createElement('button');
+      toggleBtn.textContent = 'Predictor';
+      toggleBtn.type = 'button';
+      toggleBtn.id = 'connectify-predictor-toggle';
+      toggleBtn.className = 'cx-calculator-tool';
+      toggleBtn.setAttribute('aria-controls', 'connectify-predictor');
+      toggleBtn.setAttribute('aria-pressed', 'false');
+    }
 
     // 2. Workspace Panel
-    const panel = document.createElement('section');
-    panel.id = 'connectify-predictor';
-    panel.hidden = true;
-    panel.className = 'cx-workspace-panel';
-
-    let activeMainTab = 'grade'; // 'grade' | 'atar'
-    let activeSubjectIndex = 0;
+    let panel = document.getElementById('connectify-predictor');
+    if (!panel) {
+      panel = document.createElement('section');
+      panel.id = 'connectify-predictor';
+      panel.hidden = true;
+      panel.className = 'cx-workspace-panel';
+      panel.setAttribute('aria-label', 'Grade and ATAR Predictor');
+    }
 
     function renderPanel() {
       const predMath = window.ConnectifyPredictorMath;
       if (!predMath) {
         panel.innerHTML = `
-          <header style="margin-bottom:18px;">
-            <strong style="font-size:18px;">Predictor</strong>
+          <header class="cx-pred-header">
+            <strong class="cx-pred-title">Predictor</strong>
           </header>
-          <div style="padding:20px;color:#94a3b8;text-align:center;">Predictor mathematical engine loading...</div>
+          <div style="padding:24px; color:#55667a; text-align:center;">Predictor mathematical engine loading...</div>
         `;
         return;
       }
@@ -52,12 +61,12 @@
       const displaySubjects = allProjectedSubjects.slice(0, 6);
 
       panel.innerHTML = `
-        <header style="margin-bottom:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px;">
-            <strong style="font-size:18px; color:#1e293b;" class="cx-pred-title">Predictor</strong>
-            <span style="font-size:11px; color:#64748b;">Momentum & Assessment Modeling</span>
+        <header class="cx-pred-header">
+          <div class="cx-pred-header-row">
+            <strong class="cx-pred-title">Predictor</strong>
+            <span class="cx-pred-subtitle">Momentum & Assessment Modeling</span>
           </div>
-          <div class="cx-pred-main-tabs" style="display:flex; gap:6px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+          <div class="cx-pred-main-tabs">
             <button type="button" id="cx-pred-btn-grade" class="cx-pred-main-tab ${activeMainTab === 'grade' ? 'active' : ''}">Grade Predictor</button>
             <button type="button" id="cx-pred-btn-atar" class="cx-pred-main-tab ${activeMainTab === 'atar' ? 'active' : ''}">ATAR Predictor</button>
           </div>
@@ -66,16 +75,23 @@
       `;
 
       // Main tab listeners
-      panel.querySelector('#cx-pred-btn-grade').onclick = () => {
-        activeMainTab = 'grade';
-        renderPanel();
-      };
-      panel.querySelector('#cx-pred-btn-atar').onclick = () => {
-        activeMainTab = 'atar';
-        renderPanel();
-      };
+      const gradeTabBtn = panel.querySelector('#cx-pred-btn-grade');
+      if (gradeTabBtn) {
+        gradeTabBtn.onclick = () => {
+          activeMainTab = 'grade';
+          renderPanel();
+        };
+      }
+      const atarTabBtn = panel.querySelector('#cx-pred-btn-atar');
+      if (atarTabBtn) {
+        atarTabBtn.onclick = () => {
+          activeMainTab = 'atar';
+          renderPanel();
+        };
+      }
 
       const content = panel.querySelector('#cx-pred-content');
+      if (!content) return;
 
       if (activeMainTab === 'grade') {
         renderGradePredictor(content, displaySubjects);
@@ -87,8 +103,10 @@
     function renderGradePredictor(container, subjects) {
       if (subjects.length === 0) {
         container.innerHTML = `
-          <div style="padding:30px 16px; text-align:center; color:#94a3b8; font-size:12.5px;">
-            No enrolled subjects detected yet. Please expand your subject outlines on Connect to load course data.
+          <div class="cx-pred-card" style="text-align:center; padding:30px 16px;">
+            <p style="margin:0; font-size:12.5px; color:#55667a;">
+              No enrolled subjects detected yet. Please expand your subject outlines on Connect to load course data.
+            </p>
           </div>
         `;
         return;
@@ -101,11 +119,6 @@
       // Horizontal Sub-Tabs (Up to 6 subjects)
       const subTabsBar = document.createElement('div');
       subTabsBar.className = 'cx-pred-subtabs';
-      subTabsBar.style.display = 'flex';
-      subTabsBar.style.gap = '6px';
-      subTabsBar.style.overflowX = 'auto';
-      subTabsBar.style.paddingBottom = '10px';
-      subTabsBar.style.marginBottom = '14px';
 
       subjects.forEach((subj, idx) => {
         const tabBtn = document.createElement('button');
@@ -130,23 +143,26 @@
       if (!activeSubject.hasSubjectAverage) {
         // Guidance notice asking user to go to Settings or wait
         subjectView.innerHTML = `
-          <div class="cx-pred-no-average-card" style="padding:28px 20px; border:1px dashed #cbd5e1; border-radius:10px; text-align:center; background:#f8fafc; margin-top:8px;">
-            <div style="font-size:26px; margin-bottom:10px;">📋</div>
-            <strong style="display:block; font-size:14.5px; color:#1e293b; margin-bottom:8px;">No Grades or Baselines for ${activeSubject.cleanName}</strong>
-            <p style="font-size:12px; color:#64748b; line-height:1.55; max-width:380px; margin:0 auto 16px auto;">
+          <div class="cx-pred-no-average-card">
+            <div style="font-size:28px; margin-bottom:10px;">📋</div>
+            <strong style="display:block; font-size:15px; margin-bottom:8px;">No Grades or Baselines for ${activeSubject.cleanName}</strong>
+            <p style="font-size:12px; line-height:1.55; max-width:420px; margin:0 auto 18px auto; opacity:0.85;">
               Connectify needs either completed assessment marks or a previous year grade to project your final mark. Please go to <strong>Settings</strong> to enter your baseline grade, or wait for assessments to be returned.
             </p>
-            <button type="button" id="cx-pred-goto-settings" class="eds-c-button" style="background:#2563eb; color:#fff; border:none; padding:7px 16px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">
+            <button type="button" id="cx-pred-goto-settings" class="eds-c-button" style="background:#24618c; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">
               Go to Settings
             </button>
           </div>
         `;
 
-        subjectView.querySelector('#cx-pred-goto-settings').onclick = () => {
-          const settingsToggle = document.getElementById('connectify-categories-toggle');
-          if (settingsToggle) settingsToggle.click();
-          else window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
-        };
+        const gotoSettingsBtn = subjectView.querySelector('#cx-pred-goto-settings');
+        if (gotoSettingsBtn) {
+          gotoSettingsBtn.onclick = () => {
+            const settingsToggle = document.getElementById('connectify-categories-toggle');
+            if (settingsToggle) settingsToggle.click();
+            else window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
+          };
+        }
 
         container.append(subjectView);
         return;
@@ -154,40 +170,36 @@
 
       // Subject has an average or baseline: Render Projected Final Mark Header
       const headerCard = document.createElement('div');
-      headerCard.className = 'cx-pred-subject-header';
-      headerCard.style.padding = '14px 16px';
-      headerCard.style.background = '#f1f5f9';
-      headerCard.style.borderRadius = '8px';
-      headerCard.style.marginBottom = '18px';
+      headerCard.className = 'cx-pred-card';
 
       const currentScoreLabel = activeSubject.runningMark !== null
         ? `${activeSubject.runningMark}% (Current)`
         : `${activeSubject.baselineMark}% (Baseline)`;
 
       headerCard.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div>
-            <strong style="font-size:14px; color:#0f172a;">${activeSubject.cleanName}</strong>
-            <div style="font-size:11px; color:#64748b; margin-top:2px;">
+            <strong style="font-size:15px; font-weight:700;">${activeSubject.cleanName}</strong>
+            <div style="font-size:11px; opacity:0.8; margin-top:2px;">
               ${activeSubject.completedWeight}% completed (${activeSubject.completedCount} graded) • ${currentScoreLabel}
             </div>
           </div>
         </div>
-        <div style="display:grid; grid-template-columns: 1fr 1.2fr 1fr; gap:8px; text-align:center;">
-          <div style="background:#ffffff; padding:8px 6px; border-radius:6px; border:1px solid #e2e8f0;">
-            <div style="font-size:10px; color:#64748b; text-transform:uppercase; font-weight:600;">Low</div>
-            <div style="font-size:16px; font-weight:700; color:#475569; margin-top:2px;">${activeSubject.projected.low ?? '—'}%</div>
-            <div style="font-size:9.5px; color:#94a3b8;">Relaxed pace</div>
+        <div style="display:grid; grid-template-columns: 1fr 1.25fr 1fr; gap:8px; text-align:center;">
+          <div class="cx-pred-scenario-card">
+            <div style="font-size:10px; text-transform:uppercase; font-weight:600; opacity:0.75;">Low</div>
+            <div style="font-size:17px; font-weight:700; margin-top:3px;">${activeSubject.projected.low ?? '—'}%</div>
+            <div style="font-size:9.5px; opacity:0.7; margin-top:1px;">Relaxed pace</div>
           </div>
-          <div style="background:#eff6ff; padding:8px 6px; border-radius:6px; border:1px solid #bfdbfe;">
-            <div style="font-size:10px; color:#2563eb; text-transform:uppercase; font-weight:700;">Middle (Expected)</div>
-            <div style="font-size:18px; font-weight:800; color:#1d4ed8; margin-top:2px;">${activeSubject.projected.mid ?? '—'}%</div>
-            <div style="font-size:9.5px; color:#3b82f6;">Current momentum</div>
+          <div class="cx-pred-scenario-card cx-pred-scenario-card--mid">
+            <div style="font-size:10px; text-transform:uppercase; font-weight:700; color:#174c75;">Middle (Expected)</div>
+            <div style="font-size:20px; font-weight:800; color:#174c75; margin-top:2px;">${activeSubject.projected.mid ?? '—'}%</div>
+            <div style="font-size:9.5px; font-weight:500; color:#24618c; margin-top:1px;">Current momentum</div>
           </div>
-          <div style="background:#ffffff; padding:8px 6px; border-radius:6px; border:1px solid #e2e8f0;">
-            <div style="font-size:10px; color:#64748b; text-transform:uppercase; font-weight:600;">High</div>
-            <div style="font-size:16px; font-weight:700; color:#15803d; margin-top:2px;">${activeSubject.projected.high ?? '—'}%</div>
-            <div style="font-size:9.5px; color:#94a3b8;">Extra effort</div>
+          <div class="cx-pred-scenario-card">
+            <div style="font-size:10px; text-transform:uppercase; font-weight:600; opacity:0.75;">High</div>
+            <div style="font-size:17px; font-weight:700; color:#15803d; margin-top:3px;">${activeSubject.projected.high ?? '—'}%</div>
+            <div style="font-size:9.5px; opacity:0.7; margin-top:1px;">Extra effort</div>
           </div>
         </div>
       `;
@@ -200,8 +212,8 @@
 
       const upcomingTitle = document.createElement('strong');
       upcomingTitle.style.display = 'block';
-      upcomingTitle.style.fontSize = '12.5px';
-      upcomingTitle.style.color = '#334155';
+      upcomingTitle.style.fontSize = '13px';
+      upcomingTitle.style.fontWeight = '650';
       upcomingTitle.style.marginBottom = '10px';
       upcomingTitle.textContent = `Upcoming Assessments (${activeSubject.upcomingPredictions.length})`;
 
@@ -209,23 +221,16 @@
 
       if (activeSubject.upcomingPredictions.length === 0) {
         const doneNote = document.createElement('div');
-        doneNote.style.padding = '18px';
+        doneNote.className = 'cx-pred-card';
         doneNote.style.textAlign = 'center';
-        doneNote.style.color = '#64748b';
+        doneNote.style.padding = '18px';
         doneNote.style.fontSize = '12px';
-        doneNote.style.background = '#f8fafc';
-        doneNote.style.borderRadius = '6px';
         doneNote.textContent = 'All scheduled assessments for this subject have been graded!';
         upcomingContainer.append(doneNote);
       } else {
         activeSubject.upcomingPredictions.forEach(({ task, prediction }) => {
           const taskCard = document.createElement('div');
           taskCard.className = 'cx-pred-task-card';
-          taskCard.style.padding = '10px 12px';
-          taskCard.style.background = '#ffffff';
-          taskCard.style.border = '1px solid #e2e8f0';
-          taskCard.style.borderRadius = '6px';
-          taskCard.style.marginBottom = '8px';
 
           const taskType = prediction.taskType || 'Take-Home';
           const typeColor = window.ConnectifyTaskTypes?.getCategoryColor
@@ -240,12 +245,12 @@
 
           taskHeader.innerHTML = `
             <div>
-              <strong style="font-size:12.5px; color:#1e293b;">${task.name || 'Assessment'}</strong>
-              <div style="font-size:10.5px; color:#64748b; margin-top:1px;">
+              <strong style="font-size:13px; font-weight:650;">${task.name || 'Assessment'}</strong>
+              <div style="font-size:11px; opacity:0.75; margin-top:1px;">
                 ${task.caption || ''} • Weight: ${task.weight !== null ? task.weight + '%' : '—'}
               </div>
             </div>
-            <span style="font-size:10.5px; font-weight:700; color:#fff; background:${typeColor}; padding:2px 7px; border-radius:10px;">
+            <span style="font-size:10.5px; font-weight:700; color:#fff; background:${typeColor}; padding:2.5px 8px; border-radius:10px;">
               ${taskType}
             </span>
           `;
@@ -255,16 +260,10 @@
           if (prediction.unpredicted) {
             // Cold-start warning notice
             const notice = document.createElement('div');
-            notice.style.padding = '8px 10px';
-            notice.style.background = '#fffbeb';
-            notice.style.border = '1px solid #fef3c7';
-            notice.style.borderRadius = '6px';
-            notice.style.fontSize = '11.5px';
-            notice.style.color = '#92400e';
-            notice.style.lineHeight = '1.4';
+            notice.className = 'cx-pred-unpredicted-notice';
             notice.innerHTML = `
               <strong>No previous tasks of this type have been done, unable to make prediction</strong>
-              <div style="font-size:10.5px; color:#b45309; margin-top:3px;">
+              <div style="font-size:10.5px; opacity:0.9; margin-top:3px;">
                 Tip: Enter your previous year average for "${taskType}" in Settings to predict this task.
               </div>
             `;
@@ -274,21 +273,20 @@
             const predRow = document.createElement('div');
             predRow.style.display = 'grid';
             predRow.style.gridTemplateColumns = 'repeat(3, 1fr)';
-            predRow.style.gap = '6px';
-            predRow.style.textAlign = 'center';
+            predRow.style.gap = '8px';
 
             predRow.innerHTML = `
-              <div style="background:#f8fafc; padding:5px; border-radius:4px; border:1px solid #e2e8f0;">
-                <span style="font-size:9.5px; color:#64748b; display:block;">Low</span>
-                <strong style="font-size:13px; color:#475569;">${prediction.low}%</strong>
+              <div class="cx-pred-pill">
+                <span style="font-size:9.5px; opacity:0.75; display:block; text-transform:uppercase;">Low</span>
+                <strong style="font-size:13.5px;">${prediction.low}%</strong>
               </div>
-              <div style="background:#eff6ff; padding:5px; border-radius:4px; border:1px solid #bfdbfe;">
-                <span style="font-size:9.5px; color:#2563eb; display:block; font-weight:600;">Middle</span>
-                <strong style="font-size:13.5px; color:#1d4ed8;">${prediction.mid}%</strong>
+              <div class="cx-pred-pill cx-pred-pill--mid">
+                <span style="font-size:9.5px; font-weight:700; display:block; text-transform:uppercase;">Middle</span>
+                <strong style="font-size:14px;">${prediction.mid}%</strong>
               </div>
-              <div style="background:#f0fdf4; padding:5px; border-radius:4px; border:1px solid #bbf7d0;">
-                <span style="font-size:9.5px; color:#15803d; display:block;">High</span>
-                <strong style="font-size:13px; color:#16a34a;">${prediction.high}%</strong>
+              <div class="cx-pred-pill cx-pred-pill--high">
+                <span style="font-size:9.5px; font-weight:700; display:block; text-transform:uppercase;">High</span>
+                <strong style="font-size:13.5px;">${prediction.high}%</strong>
               </div>
             `;
 
@@ -296,11 +294,11 @@
 
             if (prediction.breakoutScore) {
               const breakoutNote = document.createElement('div');
-              breakoutNote.style.fontSize = '9.5px';
-              breakoutNote.style.color = '#7c3aed';
-              breakoutNote.style.marginTop = '5px';
+              breakoutNote.style.fontSize = '10px';
+              breakoutNote.style.color = '#9333ea';
+              breakoutNote.style.marginTop = '6px';
               breakoutNote.style.textAlign = 'right';
-              breakoutNote.style.fontStyle = 'italic';
+              breakoutNote.style.fontWeight = '600';
               if (prediction.breakoutScore > 100) {
                 breakoutNote.textContent = `⚡ Purple breakout threshold: >${prediction.breakoutScore}% (Unachievable)`;
               } else {
@@ -324,9 +322,9 @@
 
       if (atarProj.error) {
         container.innerHTML = `
-          <div style="padding:28px 16px; text-align:center; color:#94a3b8; font-size:12.5px; line-height:1.5;">
-            ${atarProj.error}
-            <div style="font-size:11px; margin-top:6px; color:#64748b;">
+          <div class="cx-pred-card" style="text-align:center; padding:28px 16px;">
+            <p style="margin:0; font-size:12.5px; color:#55667a; line-height:1.5;">${atarProj.error}</p>
+            <div style="font-size:11px; margin-top:6px; opacity:0.8;">
               Ensure at least four Year 11/12 ATAR course outlines are expanded on Connect.
             </div>
           </div>
@@ -335,56 +333,56 @@
       }
 
       container.innerHTML = `
-        <div class="cx-pred-atar-hero" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:18px;">
-          <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">
+        <div class="cx-pred-card">
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; opacity:0.8;">
             Predicted Final ATAR
           </div>
           <div style="display:grid; grid-template-columns:1fr 1.3fr 1fr; gap:8px; text-align:center; align-items:center;">
-            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:10px 6px;">
-              <div style="font-size:10px; color:#64748b; text-transform:uppercase;">Low Scenario</div>
-              <div style="font-size:18px; font-weight:700; color:#475569; margin-top:3px;">${atarProj.low.atar}</div>
-              <div style="font-size:10px; color:#94a3b8;">TEA ${atarProj.low.tea}</div>
+            <div class="cx-pred-scenario-card" style="padding:10px 6px;">
+              <div style="font-size:10px; text-transform:uppercase; opacity:0.75;">Low Scenario</div>
+              <div style="font-size:19px; font-weight:700; margin-top:3px;">${atarProj.low.atar}</div>
+              <div style="font-size:10px; opacity:0.7; margin-top:1px;">TEA ${atarProj.low.tea}</div>
             </div>
-            <div style="background:#eff6ff; border:1.5px solid #3b82f6; border-radius:8px; padding:12px 6px; box-shadow:0 2px 8px rgba(59,130,246,0.12);">
-              <div style="font-size:10.5px; color:#1d4ed8; text-transform:uppercase; font-weight:700;">Expected ATAR</div>
-              <div style="font-size:24px; font-weight:800; color:#1e40af; margin-top:2px;">${atarProj.mid.atar}</div>
-              <div style="font-size:10.5px; color:#3b82f6; font-weight:600;">TEA ${atarProj.mid.tea}</div>
+            <div class="cx-pred-scenario-card cx-pred-scenario-card--mid" style="padding:12px 6px; box-shadow:0 2px 8px rgba(36,97,140,0.18);">
+              <div style="font-size:10.5px; text-transform:uppercase; font-weight:700; color:#174c75;">Expected ATAR</div>
+              <div style="font-size:26px; font-weight:800; color:#174c75; margin-top:2px;">${atarProj.mid.atar}</div>
+              <div style="font-size:10.5px; color:#24618c; font-weight:600;">TEA ${atarProj.mid.tea}</div>
             </div>
-            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:10px 6px;">
-              <div style="font-size:10px; color:#64748b; text-transform:uppercase;">High Scenario</div>
-              <div style="font-size:18px; font-weight:700; color:#15803d; margin-top:3px;">${atarProj.high.atar}</div>
-              <div style="font-size:10px; color:#94a3b8;">TEA ${atarProj.high.tea}</div>
+            <div class="cx-pred-scenario-card" style="padding:10px 6px;">
+              <div style="font-size:10px; text-transform:uppercase; opacity:0.75;">High Scenario</div>
+              <div style="font-size:19px; font-weight:700; color:#15803d; margin-top:3px;">${atarProj.high.atar}</div>
+              <div style="font-size:10px; opacity:0.7; margin-top:1px;">TEA ${atarProj.high.tea}</div>
             </div>
           </div>
-          <div style="margin-top:12px; font-size:11px; color:#64748b; text-align:center; line-height:1.4;">
+          <div style="margin-top:12px; font-size:11px; opacity:0.8; text-align:center; line-height:1.4;">
             TEA ${atarProj.mid.tea} = best four ${atarProj.mid.baseTEA} + bonuses ${atarProj.mid.bonusTEA}
             ${atarProj.mid.yearAdjustment ? ' (Year 11 TEA scaling adjustment applied)' : ''}
           </div>
         </div>
 
-        <div class="cx-pred-atar-table-section">
-          <strong style="display:block; font-size:12.5px; color:#334155; margin-bottom:8px;">Contributing ATAR Courses</strong>
-          <table style="width:100%; border-collapse:collapse; font-size:11.5px; text-align:left;">
+        <div class="cx-pred-atar-table-section" style="margin-top:20px;">
+          <strong style="display:block; font-size:13px; font-weight:650; margin-bottom:8px;">Contributing ATAR Courses</strong>
+          <table class="cx-pred-courses-table">
             <thead>
-              <tr style="border-bottom:1.5px solid #e2e8f0; color:#64748b; font-size:10.5px; text-transform:uppercase;">
-                <th style="padding:6px 4px;">Course</th>
-                <th style="padding:6px 4px; text-align:right;">Projected</th>
-                <th style="padding:6px 4px; text-align:right;">Scaled</th>
-                <th style="padding:6px 4px; text-align:center;">Status</th>
+              <tr>
+                <th style="padding:7px 4px;">Course</th>
+                <th style="padding:7px 4px; text-align:right;">Projected</th>
+                <th style="padding:7px 4px; text-align:right;">Scaled</th>
+                <th style="padding:7px 4px; text-align:center;">Status</th>
               </tr>
             </thead>
             <tbody>
               ${atarProj.mid.courses.map(c => {
                 const isTop = atarProj.mid.topCourses.some(t => t.id === c.id);
                 return `
-                  <tr style="border-bottom:1px solid #f1f5f9; ${isTop ? 'background:rgba(34,197,94,0.04);' : ''}">
-                    <td style="padding:7px 4px; font-weight:600; color:#1e293b;">${c.name}</td>
-                    <td style="padding:7px 4px; text-align:right; color:#475569;">${c.mark !== undefined ? c.mark + '%' : '—'}</td>
-                    <td style="padding:7px 4px; text-align:right; font-weight:600; color:#0f172a;">${c.score !== undefined ? c.score : '—'}</td>
-                    <td style="padding:7px 4px; text-align:center;">
+                  <tr style="${isTop ? 'background:rgba(34,197,94,0.06);' : ''}">
+                    <td style="padding:8px 4px; font-weight:600;">${c.name}</td>
+                    <td style="padding:8px 4px; text-align:right; opacity:0.9;">${c.mark !== undefined ? c.mark + '%' : '—'}</td>
+                    <td style="padding:8px 4px; text-align:right; font-weight:700;">${c.score !== undefined ? c.score : '—'}</td>
+                    <td style="padding:8px 4px; text-align:center;">
                       ${isTop
-                        ? '<span style="font-size:10px; font-weight:700; color:#15803d; background:#dcfce7; padding:2px 6px; border-radius:8px;">Top 4</span>'
-                        : '<span style="font-size:10px; color:#94a3b8;">Reserve</span>'}
+                        ? '<span style="font-size:10px; font-weight:700; color:#15803d; background:#dcfce7; padding:2px 7px; border-radius:8px;">Top 4</span>'
+                        : '<span style="font-size:10px; opacity:0.65;">Reserve</span>'}
                     </td>
                   </tr>
                 `;
@@ -441,7 +439,33 @@
     };
   }
 
+  function ensurePredictorPanel() {
+    if (!predictorInstance) {
+      predictorInstance = createPredictorPanel();
+    }
+    const sidebar = document.getElementById('connectify-sidebar');
+    const toolMenu = sidebar?.querySelector('.cx-tool-menu');
+    const workspace = sidebar?.querySelector('.cx-workspace');
+
+    if (toolMenu && !toolMenu.contains(predictorInstance.toggleBtn)) {
+      toolMenu.append(predictorInstance.toggleBtn);
+    }
+    if (workspace && !workspace.contains(predictorInstance.panel)) {
+      workspace.append(predictorInstance.panel);
+    }
+    return predictorInstance;
+  }
+
   window.ConnectifyPredictorUI = {
-    createPredictorPanel
+    createPredictorPanel,
+    ensurePredictorPanel,
+    getInstance: () => ensurePredictorPanel()
   };
+
+  // Self-initialize immediately so elements exist as soon as content script loads
+  ensurePredictorPanel();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ensurePredictorPanel);
+  }
+  window.addEventListener('load', ensurePredictorPanel);
 })();
