@@ -78,14 +78,26 @@ class MockElement {
     this.children = [];
     this.childNodes = [];
     if (!html) return;
-    const idMatches = Array.from(html.matchAll(/id="([^"]+)"/g));
-    for (const match of idMatches) {
-      const child = new MockElement('div');
-      child.id = match[1];
-      child.parentElement = this;
-      child.parentNode = this;
-      this.children.push(child);
-      this.childNodes.push(child);
+    const tagMatches = Array.from(html.matchAll(/<([a-z0-9-]+)([^>]*)>/gi));
+    for (const match of tagMatches) {
+      const tag = match[1].toLowerCase();
+      if (['br', 'hr', 'img', 'input', 'meta', 'link'].includes(tag) || !tag.startsWith('/')) {
+        const attrs = match[2] || '';
+        const idMatch = attrs.match(/id="([^"]+)"/i);
+        const classMatch = attrs.match(/class="([^"]+)"/i);
+        if (idMatch || classMatch) {
+          const child = new MockElement(tag);
+          if (idMatch) child.id = idMatch[1];
+          if (classMatch) {
+            child.className = classMatch[1];
+            classMatch[1].split(/\s+/).filter(Boolean).forEach(c => child.classList.add(c));
+          }
+          child.parentElement = this;
+          child.parentNode = this;
+          this.children.push(child);
+          this.childNodes.push(child);
+        }
+      }
     }
   }
   get innerHTML() { return this._innerHTML || ''; }
@@ -400,6 +412,16 @@ runTest('White button styling for Settings and Weakness Analyzer in sidebar', ()
   assert.ok(sidebarCss.includes('.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)'), 'Must preserve dark mode style');
 });
 
+runTest('theme.css covers Classes accordion, Feed filter funnel, and Follow pills with >= 5:1 contrast', () => {
+  assert.ok(themeCss.includes('.mat-expansion-panel'), 'theme.css must style .mat-expansion-panel');
+  assert.ok(themeCss.includes('.mat-accordion'), 'theme.css must style .mat-accordion');
+  assert.ok(themeCss.includes('.cvr-c-classes'), 'theme.css must style .cvr-c-classes');
+  assert.ok(themeCss.includes('.cvr-c-filter-button'), 'theme.css must style feed filter button');
+  assert.ok(themeCss.includes('.cvr-c-feed-item__follow'), 'theme.css must style feed follow button');
+  assert.ok(themeCss.includes('.mat-expansion-panel-header'), 'theme.css must style expansion panel header');
+  assert.ok(themeCss.includes('.cvr-c-task,') && themeCss.includes('.mat-expansion-panel,'), 'theme.css must restore borders for tasks, cards, and expansion panels');
+});
+
 // ===========================================================================
 // SECTION 2: OUTCOME METER & HOVER TOOLTIP RELIABILITY
 // ===========================================================================
@@ -494,6 +516,54 @@ runTest('Outcome evaluation maps all performance tiers with secret purple breako
   assert.ok(!outLow.details.includes('purple'), 'Standard tooltip details must never mention purple segment');
   assert.ok(!outHigh.details.includes('Breakout'), 'High tooltip details must never mention Breakout threshold');
   assert.ok(!outCrit.details.includes('purple'), 'Critical shortfall tooltip must never mention purple');
+});
+
+runTest('Outcome meter persists and computes reliably for marked tasks without disappearing', () => {
+  const row = document.createElement('div');
+  row.className = 'cvr-c-task';
+  const details = document.createElement('div');
+  details.className = 'cvr-c-task__details';
+  const label1 = document.createElement('span');
+  label1.className = 'v-label';
+  label1.textContent = 'Assessment 1';
+  const label2 = document.createElement('span');
+  label2.className = 'v-label';
+  label2.textContent = 'Term 1, Week 4';
+  details.append(label1, label2);
+
+  const marks = document.createElement('div');
+  marks.className = 'cvr-c-task__marks';
+  const markCell = document.createElement('div');
+  markCell.className = 'cvr-c-task__mark';
+  markCell.textContent = '42 Out of 50'; // 84%
+  marks.append(markCell);
+  row.append(details, marks);
+
+  // Task mock with mark 84
+  const taskMock = {
+    id: 'task-phys-1:0',
+    name: 'Assessment 1',
+    caption: 'Term 1, Week 4',
+    labelsKey: 'task-phys-1',
+    row,
+    score: 84,
+    mark: 84,
+    pending: false
+  };
+
+  const prediction = predMath.getOrComputeTaskPrediction('Physics ATAR', taskMock);
+  assert.ok(prediction, 'Prediction must be resolved for marked task');
+  assert.strictEqual(prediction.unpredicted, false, 'Prediction for completed task must NOT be unpredicted');
+
+  const outcome = predMath.evaluateOutcome(84, prediction);
+  assert.ok(outcome, 'Outcome must be evaluated');
+  assert.ok(Number.isFinite(outcome.segments), 'Outcome segments must be a finite number');
+
+  // Verify cohort-view creates panel and outcomeBar
+  eval(cohortJs);
+  const panelState = window.ConnectifyCohortView.createPanel(row, false, 'phys-key', 50);
+  assert.ok(panelState, 'Panel state must exist');
+  assert.ok(panelState.outcomeBar, 'outcomeBar must exist in panel state');
 });
 
 // ===========================================================================
@@ -705,6 +775,33 @@ runTest('Year 11 TEA scaling adjustment removed and ATAR calculation aligned', (
   }
 });
 
+runTest('Completed tasks with zero prior type precedents never return unpredicted: true', () => {
+  const emptyHistorical = {
+    subjects: {},
+    subjectSpreads: {},
+    types: {},
+    typeCounts: {},
+    overallAverage: null,
+    spread: 6.5,
+    totalCompletedTasks: 0
+  };
+  const emptyBaselines = { types: {}, subjects: {} };
+
+  const completedTask = {
+    name: 'Investigation 1',
+    score: 88,
+    weight: 15,
+    pending: false
+  };
+
+  const result = predMath.predictTask('Chemistry ATAR', completedTask, emptyHistorical, emptyBaselines, true);
+  assert.strictEqual(result.unpredicted, false, 'Completed task must never be unpredicted even with 0 prior history');
+  assert.ok(Number.isFinite(result.mid), 'Middle prediction must be a finite number');
+  assert.ok(Number.isFinite(result.low), 'Low prediction must be a finite number');
+  assert.ok(Number.isFinite(result.high), 'High prediction must be a finite number');
+  assert.ok(Number.isFinite(result.breakoutScore), 'Breakout score must be a finite number');
+});
+
 // ===========================================================================
 // SECTION 4: SIDEBAR NAVIGATION, WORKSPACE & CATEGORY SETTINGS
 // ===========================================================================
@@ -723,12 +820,12 @@ runTest('Sidebar mounts launcher buttons in canonical order', () => {
     'connectify-grade-toggle',
     'connectify-predictor-toggle',
     'connectify-progress-toggle',
-    'connectify-weakness-toggle',
     'connectify-estimate-toggle',
+    'connectify-weakness-toggle',
     'connectify-categories-toggle'
   ];
 
-  assert.deepStrictEqual(buttonIds, expectedOrder, 'Sidebar button order must place ATAR Estimate just above Settings');
+  assert.deepStrictEqual(buttonIds, expectedOrder, 'Sidebar button order must place Weakness Analyzer below ATAR Estimate');
 });
 
 runTest('Target ATAR, Target Grade, and ATAR Estimate buttons and panel in sidebar', () => {
@@ -769,6 +866,32 @@ runTest('Category settings preserves colored text in dark mode and supports dyna
   typeInputs = baselineContainer.querySelectorAll('.cx-baseline-type-input');
   const updatedTypes = typeInputs.map(inp => inp.dataset.type);
   assert.ok(updatedTypes.includes('Fieldwork'), 'Dynamic baseline input box for "Fieldwork" must be added');
+});
+
+runTest('Predictor UI renders and handles empty/active states gracefully without crashing', () => {
+  const predUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-ui.js'), 'utf8');
+  eval(predUiJs);
+
+  const uiInstance = window.ConnectifyPredictorUI.ensurePredictorPanel();
+  assert.ok(uiInstance, 'ensurePredictorPanel should return instance');
+  assert.ok(uiInstance.toggleBtn, 'toggleBtn should exist');
+  assert.ok(uiInstance.panel, 'panel should exist');
+
+  // Open predictor: should set aria-pressed true and hidden false
+  uiInstance.openPredictor();
+  assert.strictEqual(uiInstance.toggleBtn.getAttribute('aria-pressed'), 'true');
+  assert.strictEqual(uiInstance.panel.hidden, false);
+
+  // Check that header and content exist
+  const header = uiInstance.panel.querySelector('.cx-pred-header');
+  const content = uiInstance.panel.querySelector('#cx-pred-content');
+  assert.ok(header, 'Predictor header must be rendered');
+  assert.ok(content, 'Predictor content container must be rendered');
+
+  // Test closePredictor
+  uiInstance.closePredictor();
+  assert.strictEqual(uiInstance.toggleBtn.getAttribute('aria-pressed'), 'false');
+  assert.strictEqual(uiInstance.panel.hidden, true);
 });
 
 // ===========================================================================

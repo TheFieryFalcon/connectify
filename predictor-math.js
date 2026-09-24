@@ -200,10 +200,17 @@
   }
 
   // --- TASK PREDICTION ENGINE ---
-  function predictTask(subjectName, task, customHistorical, customBaselines) {
+  function predictTask(subjectName, task, customHistorical, customBaselines, customIsCompleted = false) {
     const cleanSubj = cleanSubject(subjectName);
     const baselines = customBaselines || getBaselines();
     const historical = customHistorical || getHistoricalData();
+
+    const isCompleted = Boolean(
+      customIsCompleted ||
+      (task && Number.isFinite(task.score)) ||
+      (task && Number.isFinite(task.mark)) ||
+      (task && task.pending === false && Number.isFinite(task.weight) && task.weight > 0)
+    );
 
     const taskType = window.ConnectifyTaskTypes?.getEffectiveType
       ? window.ConnectifyTaskTypes.getEffectiveType(subjectName, task)
@@ -216,13 +223,32 @@
     }
 
     if (subjectAvg === undefined || !Number.isFinite(subjectAvg)) {
-      return {
-        unpredicted: true,
-        reason: 'missing_subject_baseline',
-        taskType,
-        type: taskType,
-        subjectName: cleanSubj
-      };
+      if (isCompleted) {
+        if (Number.isFinite(historical.overallAverage)) {
+          subjectAvg = historical.overallAverage;
+        } else {
+          const fullHistorical = getHistoricalData();
+          if (Number.isFinite(fullHistorical.subjects[cleanSubj])) {
+            subjectAvg = fullHistorical.subjects[cleanSubj];
+          } else if (Number.isFinite(fullHistorical.overallAverage)) {
+            subjectAvg = fullHistorical.overallAverage;
+          } else if (task && Number.isFinite(task.score)) {
+            subjectAvg = task.score;
+          } else if (task && Number.isFinite(task.mark)) {
+            subjectAvg = task.mark;
+          } else {
+            subjectAvg = 75;
+          }
+        }
+      } else {
+        return {
+          unpredicted: true,
+          reason: 'missing_subject_baseline',
+          taskType,
+          type: taskType,
+          subjectName: cleanSubj
+        };
+      }
     }
 
     // 2. Resolve assessment type performance:
@@ -233,15 +259,20 @@
       typeAvg = Number(baselines.types[taskType]);
     }
 
-    // Cold-start rule: Do not predict first assessment of a given type without precedent or baseline
+    // Cold-start rule: For upcoming tasks, do not predict first assessment of a given type without precedent or baseline
     if (typeAvg === undefined || !Number.isFinite(typeAvg) || (completedTypeCount === 0 && baselines.types[taskType] === undefined)) {
-      return {
-        unpredicted: true,
-        reason: 'No previous tasks of this type have been done, unable to make prediction',
-        taskType,
-        type: taskType,
-        subjectName: cleanSubj
-      };
+      if (isCompleted) {
+        // For completed tasks: neutral type modifier (type bias = 0)
+        typeAvg = subjectAvg;
+      } else {
+        return {
+          unpredicted: true,
+          reason: 'No previous tasks of this type have been done, unable to make prediction',
+          taskType,
+          type: taskType,
+          subjectName: cleanSubj
+        };
+      }
     }
 
     // 3. Overall student baseline anchor:
@@ -610,7 +641,8 @@
     const baselines = getBaselines();
     for (const item of allTasks) {
       const priorHistorical = getHistoricalDataPriorTo(rawSubjects, item.subjectName, item.task);
-      const pred = predictTask(item.subjectName, item.task, priorHistorical, baselines);
+      const isCompleted = Number.isFinite(item.task?.score) || Number.isFinite(item.task?.mark) || (item.task?.pending === false && item.task?.weight > 0);
+      const pred = predictTask(item.subjectName, item.task, priorHistorical, baselines, isCompleted);
       if (!pred.unpredicted) {
         cacheTaskPrediction(item.subjectName, item.task, pred);
       }
@@ -638,10 +670,16 @@
       if (cached) return cached;
     }
 
+    const isCompleted = Number.isFinite(task.score) || Number.isFinite(task.mark) || (task.pending === false && task.weight > 0);
     const priorHistorical = getHistoricalDataPriorTo(rawSubjects, subjectName, task);
     const baselines = getBaselines();
-    const fresh = predictTask(subjectName, task, priorHistorical, baselines);
-    if (!fresh.unpredicted) {
+    let fresh = predictTask(subjectName, task, priorHistorical, baselines, isCompleted);
+
+    if (fresh && fresh.unpredicted && isCompleted) {
+      fresh = predictTask(subjectName, task, priorHistorical, baselines, true);
+    }
+
+    if (fresh && !fresh.unpredicted) {
       cacheTaskPrediction(subjectName, task, fresh);
     }
     return fresh;
@@ -828,7 +866,11 @@
       const upcomingPredictions = [];
 
       for (const task of upcomingTasks) {
-        const pred = getOrComputeTaskPrediction(subj.name, task, rawSubjects);
+        const pred = getOrComputeTaskPrediction(subj.name, task, rawSubjects) || {
+          unpredicted: true,
+          reason: 'Prediction unavailable',
+          taskType: window.ConnectifyTaskTypes?.getEffectiveType ? window.ConnectifyTaskTypes.getEffectiveType(subj.name, task) : 'Take-Home'
+        };
 
         const taskWeight = task.weight || 0;
         if (!pred.unpredicted) {

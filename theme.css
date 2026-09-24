@@ -541,27 +541,209 @@ html.connectea-dark {
   border-color: #36485e !important;
 }
 
-.connectea-dark #main-content :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell) {
+.connectea-dark #main-content :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell),
+.connectea-dark :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell) {
   color: #f1f5f9 !important;
 }
 
-.connectea-dark #main-content .c-category-menu {
-  background: #1a222d !important;
-  color: #e2e8f0 !important;
+/* Angular Material Accordions, Expansion Panels & Tree Nodes (Site-Wide & Classes Page) */
+.connectea-dark :is(
+  .mat-accordion,
+  .mat-expansion-panel,
+  .mat-expansion-panel-header,
+  .mat-expansion-panel-body,
+  .mat-expansion-panel-content,
+  .mat-tree,
+  .mat-tree-node,
+  .mat-nested-tree-node
+) {
+  background-color: #1e2632 !important;
+  color: #f8fafc !important;
+  border-color: #3d5066 !important;
 }
 
-.connectea-dark #main-content .c-category-menu :is(.mat-expansion-panel, .mat-expansion-panel-header, .mat-expansion-panel-body, .mat-list-item, .mat-mdc-list-item) {
-  background: #1a222d !important;
-  color: #e2e8f0 !important;
+.connectea-dark .mat-expansion-panel {
+  border: 1px solid #3d5066 !important;
+  border-radius: 6px !important;
+  margin-bottom: 8px !important;
+}
+
+.connectea-dark :is(.mat-expansion-panel-header, .mat-tree-node):hover {
+  background-color: #24303f !important;
+}
+
+.connectea-dark :is(
+  .mat-expansion-panel-header-title,
+  .mat-expansion-panel-header-description,
+  .mat-panel-title,
+  .mat-panel-description
+) {
+  color: #f8fafc !important;
+}
+
+.connectea-dark .mat-expansion-indicator::after {
+  color: #cbd5e1 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Material Lists & Category Menus (Classes, Side Drawers, etc.) */
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-category-menu__wrapper,
+  .cvr-c-category-menu__list,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) {
+  background-color: #1a222d !important;
+  color: #f8fafc !important;
   border-color: #36485e !important;
 }
 
-.connectea-dark #main-content .c-category-menu :is(.mat-expansion-panel-header, .mat-list-item, .mat-mdc-list-item):hover {
-  background: #24303f !important;
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) :is(.mat-list-item, .mat-mdc-list-item) {
+  background-color: transparent !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid #2a3749 !important;
 }
 
-.connectea-dark #main-content .c-category-menu .mat-expansion-indicator::after {
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) :is(.mat-list-item, .mat-mdc-list-item):hover {
+  background-color: #24303f !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list
+) :is(.mat-list-item, .mat-mdc-list-item, a, div, span, .mat-line, .mat-list-text, p) {
+  color: #f8fafc !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list
+) svg,
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list
+) .mat-icon {
+  color: #cbd5e1 !important;
+  fill: #cbd5e1 !important;
+}
+
+/* Classes Page List Items, Status, Sort Dropdown & Action Controls */
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) {
+  border-bottom: 1px solid #36485e !important;
+  color: #f8fafc !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) :is(h1, h2, h3, h4, [class*="title"], strong) {
+  color: #f8fafc !important;
+  font-weight: 650 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) :is(span, p, small, [class*="subtitle"], [class*="code"], [class*="status"], [class*="badge"]) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) :is(button, a, .mat-icon-button, [class*="action"], [class*="btn"]) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) svg {
+  color: #cbd5e1 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) :is(button, a, .mat-icon-button):hover svg {
   color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes__sort,
+  .cvr-c-sort-by,
+  .eds-c-sort-by,
+  [class*="sort-by"],
+  .mat-form-field,
+  .mat-form-field-wrapper
+) :is(label, .mat-form-field-label, span) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .mat-select,
+  .mat-select-value,
+  .mat-select-value-text,
+  .mat-select-arrow
+) {
+  color: #f8fafc !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -673,4 +855,221 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 
 .connectea-dark [data-connectea-ink] {
   color: #f1f5f9 !important;
+}
+
+/* --------------------------------------------------------------------------
+   18. Feed Header Filter Button, Follow Pills & Feed Cards
+   -------------------------------------------------------------------------- */
+/* Feed Header Filter Button (Square funnel filter button override) */
+.connectea-dark :is(
+  .cvr-c-feed__filter,
+  .cvr-c-filter-button,
+  .eds-c-filter-button,
+  button[aria-label*="filter" i],
+  .cvr-c-feed-header button,
+  .cvr-c-feed-header :is(.v-button, .eds-c-button)
+) {
+  background-color: #24303f !important;
+  color: #f1f6fb !important;
+  border: 1px solid #4a617a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed__filter,
+  .cvr-c-filter-button,
+  .eds-c-filter-button,
+  button[aria-label*="filter" i],
+  .cvr-c-feed-header button,
+  .cvr-c-feed-header :is(.v-button, .eds-c-button)
+):hover {
+  background-color: #313f50 !important;
+  border-color: #6b88a5 !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed__filter,
+  .cvr-c-filter-button,
+  .eds-c-filter-button,
+  button[aria-label*="filter" i]
+) svg {
+  fill: #f1f6fb !important;
+  color: #f1f6fb !important;
+}
+
+/* Feed Follow Pill Buttons */
+.connectea-dark :is(
+  .eds-c-tag,
+  .cvr-c-tag,
+  .cvr-c-feed-item__follow,
+  [class*="feed"] [class*="follow"],
+  button[class*="follow" i],
+  a[class*="follow" i]
+) {
+  background-color: #24303f !important;
+  color: #f8fafc !important;
+  border: 1px solid #4a617a !important;
+  border-radius: 9999px !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.connectea-dark :is(
+  .eds-c-tag,
+  .cvr-c-tag,
+  .cvr-c-feed-item__follow,
+  [class*="feed"] [class*="follow"],
+  button[class*="follow" i],
+  a[class*="follow" i]
+):hover {
+  background-color: #313f50 !important;
+  border-color: #6b88a5 !important;
+  color: #ffffff !important;
+}
+
+/* Feed Cards & Author/Timestamp/Comment Metadata */
+.connectea-dark :is(
+  .cvr-c-feed-card,
+  .cvr-c-feed-item,
+  [class*="feed-card"],
+  [class*="feed-item"]
+) {
+  background-color: #1e2632 !important;
+  border: 1px solid #3d5066 !important;
+  border-radius: 8px !important;
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed-card,
+  .cvr-c-feed-item,
+  [class*="feed-card"],
+  [class*="feed-item"]
+) :is(h1, h2, h3, h4, strong, [class*="title"]) {
+  color: #f8fafc !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed-card,
+  .cvr-c-feed-item,
+  [class*="feed-card"],
+  [class*="feed-item"]
+) :is(
+  .cvr-c-feed-item__meta,
+  .cvr-c-feed-item__author,
+  .cvr-c-feed-item__date,
+  [class*="author"],
+  [class*="date"],
+  [class*="timestamp"],
+  [class*="meta"],
+  small,
+  em,
+  p
+) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed-card,
+  .cvr-c-feed-item,
+  [class*="feed-card"],
+  [class*="feed-item"]
+) svg {
+  color: #cbd5e1 !important;
+  fill: currentColor !important;
+}
+
+/* Feed Header Navigation Tabs (All, Classes, Read Later) */
+.connectea-dark :is(.cvr-c-feed-header__tabs, [class*="feed"] [class*="tabs"]) :is(button, a) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(.cvr-c-feed-header__tabs, [class*="feed"] [class*="tabs"]) :is(button, a):hover,
+.connectea-dark :is(.cvr-c-feed-header__tabs, [class*="feed"] [class*="tabs"]) :is(.active, [class*="active"], [aria-selected="true"]) {
+  color: #f8fafc !important;
+}
+
+/* --------------------------------------------------------------------------
+   19. General Menus, Interactive Elements & Links (3.1.14 Parity)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .cvr-c-primary-navigation,
+  .cvr-c-primary-menu,
+  .cvr-c-service-menu,
+  .cvr-c-category-menu
+) {
+  background-color: #1a222d !important;
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-service-menu__wrapper,
+  .cvr-c-service-menu__list,
+  .cvr-c-primary-menu__body,
+  .cvr-c-primary-menu__list,
+  .cvr-c-category-menu__wrapper,
+  .cvr-c-primary-navigation__container
+) {
+  background-color: #1a222d !important;
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-service-menu__item,
+  .cvr-c-primary-menu__item,
+  .cvr-c-category-menu .eds-u-interactive,
+  .cvr-c-primary-navigation__links .v-link a,
+  .cvr-c-primary-navigation__button--avatar
+) {
+  background-color: #1a222d !important;
+  color: #cbd5e1 !important;
+  transition: background-color 0.15s ease;
+}
+
+.connectea-dark :is(
+  .cvr-c-service-menu__item,
+  .cvr-c-primary-menu__item,
+  .cvr-c-category-menu .eds-u-interactive,
+  .cvr-c-primary-navigation__links .v-link a,
+  .cvr-c-primary-navigation__button--avatar
+):hover {
+  background-color: #24303f !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-service-menu__item,
+  .cvr-c-primary-menu__item,
+  .cvr-c-category-menu .eds-u-interactive,
+  .cvr-c-primary-navigation__links .v-link
+).eds-s-is-active,
+.connectea-dark .cvr-c-primary-navigation__links .eds-s-is-active a {
+  background-color: #121820 !important;
+  color: #edf4fc !important;
+  box-shadow: inset 3px 0 #3b82f6 !important;
+}
+
+.connectea-dark .eds-c-tile a {
+  color: #60a5fa !important;
+}
+
+/* --------------------------------------------------------------------------
+   20. Universal Border Restoration & Structural Integrity
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .cvr-c-task,
+  .cvr-c-task-group,
+  .cvr-c-task__mark,
+  .eds-c-accordion__section-heading,
+  .mat-card,
+  .eds-c-tile,
+  .mat-expansion-panel,
+  th,
+  td,
+  input,
+  select,
+  textarea
+) {
+  border-style: solid !important;
+  border-width: 1px !important;
 }

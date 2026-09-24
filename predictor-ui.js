@@ -45,9 +45,10 @@
     }
 
     function renderPanel() {
+      const livePanel = document.getElementById('connectify-predictor') || panel;
       const predMath = window.ConnectifyPredictorMath;
       if (!predMath) {
-        panel.innerHTML = `
+        livePanel.innerHTML = `
           <header class="cx-pred-header">
             <strong class="cx-pred-title">Predictor</strong>
           </header>
@@ -56,11 +57,17 @@
         return;
       }
 
-      const allProjectedSubjects = predMath.projectSubjectGrades();
+      let allProjectedSubjects = [];
+      try {
+        allProjectedSubjects = predMath.projectSubjectGrades() || [];
+      } catch (err) {
+        console.error('Error projecting subject grades in Predictor:', err);
+        allProjectedSubjects = [];
+      }
       // Cap at 6 subjects for sub-tabs as specified:
       const displaySubjects = allProjectedSubjects.slice(0, 6);
 
-      panel.innerHTML = `
+      livePanel.innerHTML = `
         <header class="cx-pred-header">
           <div class="cx-pred-header-row">
             <strong class="cx-pred-title">Predictor</strong>
@@ -75,14 +82,14 @@
       `;
 
       // Main tab listeners
-      const gradeTabBtn = panel.querySelector('#cx-pred-btn-grade');
+      const gradeTabBtn = livePanel.querySelector('#cx-pred-btn-grade');
       if (gradeTabBtn) {
         gradeTabBtn.onclick = () => {
           activeMainTab = 'grade';
           renderPanel();
         };
       }
-      const atarTabBtn = panel.querySelector('#cx-pred-btn-atar');
+      const atarTabBtn = livePanel.querySelector('#cx-pred-btn-atar');
       if (atarTabBtn) {
         atarTabBtn.onclick = () => {
           activeMainTab = 'atar';
@@ -90,7 +97,7 @@
         };
       }
 
-      const content = panel.querySelector('#cx-pred-content');
+      const content = livePanel.querySelector('#cx-pred-content');
       if (!content) return;
 
       if (activeMainTab === 'grade') {
@@ -104,11 +111,22 @@
       if (subjects.length === 0) {
         container.innerHTML = `
           <div class="cx-pred-card" style="text-align:center; padding:30px 16px;">
-            <p class="cx-pred-hint" style="margin:0; font-size:12.5px;">
+            <p class="cx-pred-hint" style="margin:0 0 14px 0; font-size:12.5px; line-height:1.5;">
               No enrolled subjects detected yet. Please expand your subject outlines on Connect to load course data.
             </p>
+            <button type="button" id="cx-pred-expand-outlines" class="eds-c-button" style="background:#24618c; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">
+              Expand Subject Outlines
+            </button>
           </div>
         `;
+        const expandBtn = container.querySelector('#cx-pred-expand-outlines');
+        if (expandBtn) {
+          expandBtn.onclick = () => {
+            if (window.ConnectifyData?.expandAll) {
+              window.ConnectifyData.expandAll(true);
+            }
+          };
+        }
         return;
       }
 
@@ -229,10 +247,11 @@
         upcomingContainer.append(doneNote);
       } else {
         activeSubject.upcomingPredictions.forEach(({ task, prediction }) => {
+          const pred = prediction || {};
           const taskCard = document.createElement('div');
           taskCard.className = 'cx-pred-task-card';
 
-          const taskType = prediction.taskType || prediction.type || 'Take-Home';
+          const taskType = pred.taskType || pred.type || 'Take-Home';
           const typeColor = window.ConnectifyTaskTypes?.getCategoryColor
             ? window.ConnectifyTaskTypes.getCategoryColor(taskType)
             : '#3498db';
@@ -245,9 +264,9 @@
 
           taskHeader.innerHTML = `
             <div>
-              <strong style="font-size:13px; font-weight:650;">${task.name || 'Assessment'}</strong>
+              <strong style="font-size:13px; font-weight:650;">${task?.name || 'Assessment'}</strong>
               <div style="font-size:11px; opacity:0.75; margin-top:1px;">
-                ${task.customDate || task.dateDisplay || task.caption || ''} • Weight: ${task.weight !== null ? task.weight + '%' : '—'}
+                ${task?.customDate || task?.dateDisplay || task?.caption || ''} • Weight: ${task?.weight !== null && task?.weight !== undefined ? task.weight + '%' : '—'}
               </div>
             </div>
             <span style="font-size:10.5px; font-weight:700; color:#fff; background:${typeColor}; padding:2.5px 8px; border-radius:10px;">
@@ -257,7 +276,7 @@
 
           taskCard.append(taskHeader);
 
-          if (prediction.unpredicted) {
+          if (pred.unpredicted) {
             // Cold-start warning notice
             const notice = document.createElement('div');
             notice.className = 'cx-pred-unpredicted-notice';
@@ -278,15 +297,15 @@
             predRow.innerHTML = `
               <div class="cx-pred-pill">
                 <span style="font-size:9.5px; opacity:0.75; display:block; text-transform:uppercase;">Low</span>
-                <strong style="font-size:13.5px;">${prediction.low}%</strong>
+                <strong style="font-size:13.5px;">${pred.low ?? '—'}%</strong>
               </div>
               <div class="cx-pred-pill cx-pred-pill--mid">
                 <span style="font-size:9.5px; font-weight:700; display:block; text-transform:uppercase;">Middle</span>
-                <strong style="font-size:14px;">${prediction.mid}%</strong>
+                <strong style="font-size:14px;">${pred.mid ?? '—'}%</strong>
               </div>
               <div class="cx-pred-pill cx-pred-pill--high">
                 <span style="font-size:9.5px; font-weight:700; display:block; text-transform:uppercase;">High</span>
-                <strong style="font-size:13.5px;">${prediction.high}%</strong>
+                <strong style="font-size:13.5px;">${pred.high ?? '—'}%</strong>
               </div>
             `;
 
@@ -379,19 +398,32 @@
     }
 
     function openPredictor() {
-      panel.hidden = false;
-      toggleBtn.setAttribute('aria-pressed', 'true');
+      const livePanel = document.getElementById('connectify-predictor') || panel;
+      const liveBtn = document.getElementById('connectify-predictor-toggle') || toggleBtn;
+      livePanel.hidden = false;
+      liveBtn.setAttribute('aria-pressed', 'true');
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'predictor' }));
+
+      // Auto-expand outlines if not yet loaded
+      if (window.ConnectifyData?.collect && window.ConnectifyData.collect(true).length === 0) {
+        if (window.ConnectifyData.expandAll) {
+          window.ConnectifyData.expandAll(true);
+        }
+      }
+
       renderPanel();
     }
 
     function closePredictor() {
-      panel.hidden = true;
-      toggleBtn.setAttribute('aria-pressed', 'false');
+      const livePanel = document.getElementById('connectify-predictor') || panel;
+      const liveBtn = document.getElementById('connectify-predictor-toggle') || toggleBtn;
+      livePanel.hidden = true;
+      liveBtn.setAttribute('aria-pressed', 'false');
     }
 
     toggleBtn.onclick = () => {
-      if (panel.hidden) {
+      const livePanel = document.getElementById('connectify-predictor') || panel;
+      if (livePanel.hidden) {
         openPredictor();
       } else {
         closePredictor();

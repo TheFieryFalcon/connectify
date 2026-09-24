@@ -157,8 +157,8 @@
         { id: 'connectify-grade-toggle', label: 'Target Grade' },
         { id: 'connectify-predictor-toggle', label: 'Predictor' },
         { id: 'connectify-progress-toggle', label: 'Progress Graph' },
-        { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' },
         { id: 'connectify-estimate-toggle', label: 'ATAR Estimate' },
+        { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' },
         { id: 'connectify-categories-toggle', label: 'Settings' }
       ];
 

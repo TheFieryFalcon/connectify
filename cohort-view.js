@@ -373,27 +373,74 @@
         try {
           const meta = types().getTaskMeta(row);
           const predMath = window.ConnectifyPredictorMath;
+
+          // Populate task mock with row's metadata, semester, sequence, and actual score
+          let taskSemester = 1;
+          const card = row.closest('.eds-c-tile');
+          if (card) {
+            const cardTitle = card.querySelector('.eds-c-tile__title, h2, h3')?.textContent || '';
+            const semMatch = cardTitle.match(/Semester\s*([12])/i);
+            if (semMatch) taskSemester = Number(semMatch[1]);
+          }
+          const allRows = card ? Array.from(card.querySelectorAll('.cvr-c-task')) : [];
+          const taskSeq = allRows.indexOf(row) >= 0 ? allRows.indexOf(row) : 0;
+
           const taskMock = {
             id: meta.labelsKey ? `${meta.labelsKey}:0` : undefined,
             name: meta.taskName,
             caption: meta.labels?.[1] || '',
             labelsKey: meta.labelsKey,
-            row
+            row,
+            score: mark,
+            mark: mark,
+            pending: false,
+            semester: taskSemester,
+            sequence: taskSeq
           };
-          const prediction = predMath.getOrComputeTaskPrediction
+
+          let prediction = predMath.getOrComputeTaskPrediction
             ? predMath.getOrComputeTaskPrediction(meta.subjectName, taskMock)
-            : (predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName) || predMath.predictTask(meta.subjectName, taskMock));
+            : (predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName) || predMath.predictTask(meta.subjectName, taskMock, null, null, true));
+
+          if (!prediction || prediction.unpredicted) {
+            prediction = predMath.predictTask(meta.subjectName, taskMock, null, null, true);
+          }
 
           if (prediction && !prediction.unpredicted) {
             const outcome = predMath.evaluateOutcome(mark, prediction);
             renderOutcomeBar(ui.outcomeBar, outcome);
           } else {
+            // Evaluated against mark baseline directly: outcome bar NEVER disappears on marked tasks
+            const fallbackPred = {
+              low: Math.max(0, Math.round(mark - 8)),
+              mid: Math.round(mark),
+              high: Math.min(100, Math.round(mark + 8)),
+              breakoutScore: Number((1.10 * Math.min(100, Math.round(mark + 8))).toFixed(2)),
+              taskType: meta.taskName || 'Assessment'
+            };
+            const outcome = predMath.evaluateOutcome(mark, fallbackPred);
+            renderOutcomeBar(ui.outcomeBar, outcome);
+          }
+        } catch (e) {
+          if (Number.isFinite(mark) && window.ConnectifyPredictorMath) {
+            try {
+              const fallbackPred = {
+                low: Math.max(0, Math.round(mark - 8)),
+                mid: Math.round(mark),
+                high: Math.min(100, Math.round(mark + 8)),
+                breakoutScore: Number((1.10 * Math.min(100, Math.round(mark + 8))).toFixed(2)),
+                taskType: 'Assessment'
+              };
+              const outcome = window.ConnectifyPredictorMath.evaluateOutcome(mark, fallbackPred);
+              renderOutcomeBar(ui.outcomeBar, outcome);
+            } catch (err) {
+              ui.outcomeBar.hidden = true;
+              ui.outcomeBar.style.setProperty('display', 'none', 'important');
+            }
+          } else {
             ui.outcomeBar.hidden = true;
             ui.outcomeBar.style.setProperty('display', 'none', 'important');
           }
-        } catch (e) {
-          ui.outcomeBar.hidden = true;
-          ui.outcomeBar.style.setProperty('display', 'none', 'important');
         }
       }
     }
