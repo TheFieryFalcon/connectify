@@ -247,7 +247,7 @@
             <div>
               <strong style="font-size:13px; font-weight:650;">${task.name || 'Assessment'}</strong>
               <div style="font-size:11px; opacity:0.75; margin-top:1px;">
-                ${task.caption || ''} • Weight: ${task.weight !== null ? task.weight + '%' : '—'}
+                ${task.customDate || task.dateDisplay || task.caption || ''} • Weight: ${task.weight !== null ? task.weight + '%' : '—'}
               </div>
             </div>
             <span style="font-size:10.5px; font-weight:700; color:#fff; background:${typeColor}; padding:2.5px 8px; border-radius:10px;">

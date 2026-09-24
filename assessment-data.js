@@ -110,6 +110,22 @@
       const taskName = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${tasks.size + 1}`;
       const caption = correctedCaption(title, taskName, labels[1] || '');
 
+      // Deduplicate tasks repeated across Semester 1 and Semester 2 outlines:
+      const existingSameName = Array.from(tasks.values()).find(
+        t => normalize(t.name).toLowerCase() === normalize(taskName).toLowerCase()
+      );
+      if (existingSameName) {
+        // If already completed in Sem 1 and current is pending, ignore the unfinished Sem 2 clone
+        if (existingSameName.score !== null && isPending) {
+          continue;
+        }
+        // If both are unfinished/pending, avoid duplicating the task in the list
+        if (existingSameName.pending && isPending) {
+          Object.defineProperty(existingSameName, 'row', { value: row });
+          continue;
+        }
+      }
+
       const identityKey = JSON.stringify([labels, maxScore]);
       const occurrenceCount = occurrences.get(identityKey) || 0;
       occurrences.set(identityKey, occurrenceCount + 1);

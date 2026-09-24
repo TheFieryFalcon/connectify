@@ -91,7 +91,7 @@
   };
   resolveCategories();
 
-  function renderCategoryInputs(panel) {
+  function renderCategoryInputs(panel, onCategoryChange) {
     const inputContainer = panel.querySelector('#cx-categories-inputs');
     if (!inputContainer) return;
     inputContainer.innerHTML = '';
@@ -145,7 +145,15 @@
         delBtn.style.fontSize = '11px';
         delBtn.onclick = () => {
           delete window.cxCategories[cat];
+          try {
+            localStorage.setItem('cx-categories', JSON.stringify(window.cxCategories));
+            localStorage.setItem('connectea:categories', JSON.stringify(window.cxCategories));
+          } catch {}
+          safeStorageSet({ 'cx-categories': window.cxCategories });
           wrap.remove();
+          if (typeof onCategoryChange === 'function') {
+            onCategoryChange();
+          }
         };
         wrap.append(delBtn);
       }
@@ -251,7 +259,14 @@
         keywords: [cleanName.toLowerCase()]
       };
 
-      renderCategoryInputs(catPanel);
+      try {
+        localStorage.setItem('cx-categories', JSON.stringify(window.cxCategories));
+        localStorage.setItem('connectea:categories', JSON.stringify(window.cxCategories));
+      } catch (e) {}
+      safeStorageSet({ 'cx-categories': window.cxCategories });
+
+      renderCategoryInputs(catPanel, () => renderBaselines());
+      renderBaselines();
       const newInput = catPanel.querySelector(`#cx-cat-input-${cleanName.replace(/\s+/g, '_')}`);
       if (newInput) newInput.focus();
     };
@@ -302,6 +317,21 @@
     function renderBaselines() {
       const container = catPanel.querySelector('#cx-baselines-container');
       if (!container) return;
+
+      // Preserve any currently typed input values before clearing
+      const currentTypeValues = {};
+      const currentSubjValues = {};
+      container.querySelectorAll('.cx-baseline-type-input').forEach(inp => {
+        if (inp.dataset.type && inp.value !== '') {
+          currentTypeValues[inp.dataset.type] = inp.value;
+        }
+      });
+      container.querySelectorAll('.cx-baseline-subj-input').forEach(inp => {
+        if (inp.dataset.subject && inp.value !== '') {
+          currentSubjValues[inp.dataset.subject] = inp.value;
+        }
+      });
+
       container.innerHTML = '';
 
       const baselines = window.ConnectifyPredictorMath?.getBaselines
@@ -324,8 +354,42 @@
       typeGrid.style.gap = '10px';
       typeGrid.style.marginBottom = '18px';
 
-      const categories = Object.keys(window.cxCategories || defaultCategories);
+      // Aggregate all categories: defaults + active custom + stored custom + baseline types + class custom categories
+      const allCatsSet = new Set(Object.keys(defaultCategories));
+      if (window.cxCategories) {
+        Object.keys(window.cxCategories).forEach(c => allCatsSet.add(c));
+      }
+      try {
+        const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object') {
+            Object.keys(parsed).forEach(c => allCatsSet.add(c));
+          }
+        }
+      } catch {}
+      if (baselines.types) {
+        Object.keys(baselines.types).forEach(c => allCatsSet.add(c));
+      }
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('connectea:class_categories:')) {
+            const arr = JSON.parse(localStorage.getItem(k));
+            if (Array.isArray(arr)) {
+              arr.forEach(c => {
+                if (c && typeof c === 'string' && c.trim()) allCatsSet.add(c.trim());
+              });
+            }
+          }
+        }
+      } catch {}
+
+      const categories = Array.from(allCatsSet);
       for (const cat of categories) {
+        const catColor = (window.cxCategories?.[cat]?.color) ||
+                         (window.ConnectifyTaskTypes?.getCategoryColor ? window.ConnectifyTaskTypes.getCategoryColor(cat) : '#3498db');
+
         const field = document.createElement('div');
         field.style.display = 'flex';
         field.style.flexDirection = 'column';
@@ -335,6 +399,11 @@
         label.className = 'cx-settings-label';
         label.style.fontSize = '11.5px';
         label.textContent = cat;
+        label.title = cat;
+        label.style.overflow = 'hidden';
+        label.style.textOverflow = 'ellipsis';
+        label.style.whiteSpace = 'nowrap';
+        label.style.color = catColor;
 
         const input = document.createElement('input');
         input.type = 'number';
@@ -350,7 +419,9 @@
         input.style.borderRadius = '4px';
         input.style.fontSize = '12px';
 
-        if (baselines.types && baselines.types[cat] !== undefined) {
+        if (currentTypeValues[cat] !== undefined) {
+          input.value = currentTypeValues[cat];
+        } else if (baselines.types && baselines.types[cat] !== undefined) {
           input.value = baselines.types[cat];
         }
 
@@ -423,7 +494,9 @@
           input.style.borderRadius = '4px';
           input.style.fontSize = '12px';
 
-          if (baselines.subjects && baselines.subjects[sName] !== undefined) {
+          if (currentSubjValues[sName] !== undefined) {
+            input.value = currentSubjValues[sName];
+          } else if (baselines.subjects && baselines.subjects[sName] !== undefined) {
             input.value = baselines.subjects[sName];
           }
 
@@ -474,6 +547,30 @@
           window.ConnectifyPredictorMath.saveBaselines({ types: newTypes, subjects: newSubjs });
         }
 
+        // Also ensure any custom categories in newTypes are registered in cxCategories
+        if (window.cxCategories) {
+          let updated = false;
+          for (const catName of Object.keys(newTypes)) {
+            if (!window.cxCategories[catName]) {
+              const color = window.ConnectifyTaskTypes?.getCategoryColor
+                ? window.ConnectifyTaskTypes.getCategoryColor(catName)
+                : '#3498db';
+              window.cxCategories[catName] = {
+                color,
+                keywords: [catName.toLowerCase()]
+              };
+              updated = true;
+            }
+          }
+          if (updated) {
+            try {
+              localStorage.setItem('cx-categories', JSON.stringify(window.cxCategories));
+              localStorage.setItem('connectea:categories', JSON.stringify(window.cxCategories));
+            } catch {}
+            renderCategoryInputs(catPanel, () => renderBaselines());
+          }
+        }
+
         const origText = saveBtn.textContent;
         saveBtn.textContent = '✓ Saved Baselines!';
         setTimeout(() => { saveBtn.textContent = origText; }, 2000);
@@ -497,7 +594,7 @@
         atarPctInput.value = localStorage.getItem('connectify:atar_percentage') || '';
       }
       resolveCategories();
-      renderCategoryInputs(catPanel);
+      renderCategoryInputs(catPanel, () => renderBaselines());
       renderCalib();
       renderBaselines();
     }
@@ -555,6 +652,8 @@
         window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
       }
 
+      renderBaselines();
+
       const saveBtn = catPanel.querySelector('#cx-cat-save');
       const origText = saveBtn.textContent;
       saveBtn.textContent = '✓ Saved & Rescanned!';
@@ -569,7 +668,8 @@
           localStorage.removeItem('connectea:categories');
         } catch (e) {}
         window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
-        renderCategoryInputs(catPanel);
+        renderCategoryInputs(catPanel, () => renderBaselines());
+        renderBaselines();
         if (window.ConnectifyTaskTypes?.rescanAllAutoAssessments) {
           window.ConnectifyTaskTypes.rescanAllAutoAssessments();
         } else {
@@ -578,13 +678,18 @@
       }
     };
 
+    window.addEventListener('connectify-task-type-changed', () => {
+      renderBaselines();
+    });
+
     return {
       catBtn,
       catPanel,
       openCategories,
       closeCategories,
-      renderCategoryInputs: () => renderCategoryInputs(catPanel),
-      renderCalibTable: renderCalib
+      renderCategoryInputs: () => renderCategoryInputs(catPanel, () => renderBaselines()),
+      renderCalibTable: renderCalib,
+      renderBaselines
     };
   }
 

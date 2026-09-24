@@ -266,8 +266,8 @@
     const low = Math.max(0, round(mid - lowDelta, 1));
     const high = Math.min(100, round(applyLogarithmicCeiling(mid, 1.25 * sigma), 1));
 
-    // 7. Multiplicative 15% Breakout Score threshold (Score > 1.15 * High):
-    const breakoutScore = round(1.15 * high, 2);
+    // 7. Multiplicative 10% Breakout Score threshold (Score > 1.10 * High):
+    const breakoutScore = round(1.10 * high, 2);
 
     return {
       unpredicted: false,
@@ -315,7 +315,7 @@
         const parsed = JSON.parse(raw);
         if (Number.isFinite(parsed.low) && Number.isFinite(parsed.mid) && Number.isFinite(parsed.high)) {
           if (!Number.isFinite(parsed.breakoutScore)) {
-            parsed.breakoutScore = round(1.15 * parsed.high, 2);
+            parsed.breakoutScore = round(1.10 * parsed.high, 2);
           }
           if (!parsed.taskType && parsed.type) parsed.taskType = parsed.type;
           if (!parsed.type && parsed.taskType) parsed.type = parsed.taskType;
@@ -326,15 +326,96 @@
     return null;
   }
 
+  // --- DATE RESOLUTION & PROGRESS GRAPH SYNC ---
+  function resolveCustomDate(subjectName, taskName) {
+    if (!taskName) return null;
+    const cleanSubj = cleanSubject(subjectName);
+    const candidates = [
+      `connectea:time_override:${subjectName}:${taskName}`,
+      `connectea:time_override:${cleanSubj}:${taskName}`
+    ];
+    for (const key of candidates) {
+      try {
+        const val = localStorage.getItem(key);
+        if (val !== null && val.trim() !== '') return val.trim();
+      } catch {}
+    }
+    try {
+      const lowerTask = taskName.toLowerCase().trim();
+      const lowerSubj = subjectName.toLowerCase().trim();
+      const lowerClean = cleanSubj.toLowerCase().trim();
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('connectea:time_override:')) {
+          const parts = k.split(':');
+          if (parts.length >= 4) {
+            const s = parts[2].toLowerCase().trim();
+            const t = parts.slice(3).join(':').toLowerCase().trim();
+            if ((s === lowerSubj || s === lowerClean) && t === lowerTask) {
+              const val = localStorage.getItem(k);
+              if (val !== null && val.trim() !== '') return val.trim();
+            }
+          }
+        }
+      }
+    } catch {}
+    return null;
+  }
+
+  function formatCustomWeek(val) {
+    if (!val) return null;
+    const str = String(val).trim();
+
+    // 1. Check for Term X Week Y format (e.g. "t3w5", "Term 3, Week 5", "t2 w7")
+    const twMatch = str.match(/t(?:erm)?\s*(\d+)\s*[,;]?\s*w(?:eek)?\s*(\d+)/i);
+    if (twMatch) {
+      const term = parseInt(twMatch[1], 10);
+      const week = parseInt(twMatch[2], 10);
+      return {
+        term,
+        week,
+        order: (term - 1) * 12 + week,
+        display: `Term ${term}, Week ${week}`
+      };
+    }
+
+    // 2. Check for numeric school week (e.g. 17 for Term 2 Week 7)
+    const num = Number(str.replace(/^[^\d]*/, '').replace(/[^\d]*$/, ''));
+    if (Number.isFinite(num) && num > 0) {
+      const term = Math.floor((num - 1) / 10) + 1;
+      const week = ((num - 1) % 10) + 1;
+      return {
+        term,
+        week,
+        order: (term - 1) * 12 + week,
+        display: `Term ${term}, Week ${week}`
+      };
+    }
+
+    return null;
+  }
+
+  function hasParsableDate(task) {
+    if (task.customDate) return true;
+    if (Number.isFinite(task.order) && task.order > 0) return true;
+    const text = task.caption || '';
+    if (!text) return false;
+    if (/term\s*\d.*?week[s]?\s*\d+/i.test(text)) return true;
+    if (/weeks?\s*\d+(?:\s*(?:&|and|[\/–-])\s*\d+)?\s*[,;]?\s*term\s*\d/i.test(text)) return true;
+    if (/^(?:week[s]?\s*)?(\d{1,2})(?:\s*[\/–-]\s*\d{1,2})?$/i.test(text.trim())) return true;
+    if (/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(text)) return true;
+    return false;
+  }
+
   // --- OUTCOME EVALUATION (Vertical Bar Segments) ---
   /**
    * Evaluates actual score against prediction:
-   * - Breakout: Score > 1.15 * High (multiplicative) -> 5 segments (Red, Orange, Yellow, Green, Purple double-height)
+   * - Breakout: Score > 1.10 * High (multiplicative) -> 5 segments (Red, Orange, Yellow, Green, Purple double-height)
    * - High: Score >= High -> 4 segments (Red, Orange, Yellow, Green)
    * - Middle: Score >= Middle -> 3 segments (Red, Orange, Yellow)
    * - Low: Score >= Low -> 2 segments (Red, Orange)
    * - Below Low: Score < Low -> 1 segment (Red)
-   * - Critical Shortfall: Score <= Low - 15 (additive) -> 0 segments (Empty glowing red bar)
+   * - Critical Shortfall: Score <= Low - 10 (additive) -> 0 segments (Empty glowing red bar)
    * Note: The purple breakout threshold is secret and never revealed in advance or in the tooltip legend.
    */
   function evaluateOutcome(score, prediction) {
@@ -345,7 +426,7 @@
     const high = prediction.high;
     const breakoutThreshold = Number.isFinite(prediction.breakoutScore)
       ? prediction.breakoutScore
-      : round(1.15 * high, 2);
+      : round(1.10 * high, 2);
 
     const legend = [
       'Target Tiers & Color Guide:',
@@ -353,10 +434,10 @@
       `• Yellow: Mid Momentum Target (≥ ${mid}%)`,
       `• Orange: Low Boundary (≥ ${low}%)`,
       `• Red: Below Low (< ${low}%)`,
-      `• Empty (Glowing Red): Critical Shortfall (≤ ${round(low - 15, 1)}%)`
+      `• Empty (Glowing Red): Critical Shortfall (≤ ${round(low - 10, 1)}%)`
     ].join('\n');
 
-    // 1. Breakout (> 1.15 * High multiplicative) - secret purple segment
+    // 1. Breakout (> 1.10 * High multiplicative) - secret purple segment
     if (score > breakoutThreshold) {
       return {
         segments: 5,
@@ -404,14 +485,14 @@
       };
     }
 
-    // 5. Critical Shortfall: 15% (additive) lower than Low estimate
-    if (score <= round(low - 15, 2)) {
+    // 5. Critical Shortfall: 10% (additive) lower than Low estimate
+    if (score <= round(low - 10, 2)) {
       return {
         segments: 0,
         broken: false,
         critical: true,
         colors: [],
-        label: `Critical Shortfall! Scored ${round(score, 1)}% (≥15% below Low estimate ${low}%)`,
+        label: `Critical Shortfall! Scored ${round(score, 1)}% (≥10% below Low estimate ${low}%)`,
         details: `Actual Score: ${round(score, 1)}%\nOutcome: Critical Shortfall (Empty Bar - Glowing Red)\nScore is ${round(low - score, 1)}% below Low estimate.\n\n${legend}`
       };
     }
@@ -429,17 +510,35 @@
 
   // --- SUBJECT GRADE PROJECTIONS ---
   function projectSubjectGrades(subjectsList) {
-    const subjects = subjectsList || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+    const rawSubjects = subjectsList || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
     const baselines = getBaselines();
-    const historical = getHistoricalData(subjects);
+    const historical = getHistoricalData(rawSubjects);
     const results = [];
 
+    // Group subjects by clean name so Semester 1 and Semester 2 outlines are unified per subject course
+    const subjectsMap = new Map();
+    for (const s of rawSubjects) {
+      const cleanName = cleanSubject(s.name);
+      if (!subjectsMap.has(cleanName)) {
+        subjectsMap.set(cleanName, {
+          name: cleanName,
+          tasks: []
+        });
+      }
+      const entry = subjectsMap.get(cleanName);
+      if (Array.isArray(s.tasks)) {
+        entry.tasks.push(...s.tasks);
+      }
+    }
+    const subjects = Array.from(subjectsMap.values());
+
     for (const subj of subjects) {
-      const cleanName = cleanSubject(subj.name);
+      const cleanName = subj.name;
       let completedEarned = 0;
       let completedWeight = 0;
       const completedTasks = [];
       const upcomingTasks = [];
+      const seenUpcomingTaskNames = new Set();
 
       for (const t of subj.tasks || []) {
         if (t.weight > 0 && !t.pending && Number.isFinite(t.score)) {
@@ -447,6 +546,31 @@
           completedWeight += t.weight;
           completedTasks.push(t);
         } else {
+          // Unfinished task candidate:
+          const normName = cleanSubject(t.name).toLowerCase();
+
+          // Deduplication: skip if already seen in upcoming or already completed in this subject
+          if (seenUpcomingTaskNames.has(normName)) continue;
+          if (completedTasks.some(ct => cleanSubject(ct.name).toLowerCase() === normName)) continue;
+
+          // Check if custom date is set in Progress Graph:
+          const customTime = resolveCustomDate(subj.name, t.name);
+          if (customTime !== null) {
+            const formatted = formatCustomWeek(customTime);
+            if (formatted) {
+              t.order = formatted.order;
+              t.caption = formatted.display;
+              t.customDate = formatted.display;
+              t.dateDisplay = formatted.display;
+            }
+          }
+
+          // If date cannot be parsed and no custom date set, do not predict in the predictor
+          if (!hasParsableDate(t)) {
+            continue;
+          }
+
+          seenUpcomingTaskNames.add(normName);
           upcomingTasks.push(t);
         }
       }

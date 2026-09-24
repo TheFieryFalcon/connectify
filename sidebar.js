@@ -153,12 +153,12 @@
       }
 
       const canonicalButtons = [
-        { id: 'connectify-estimate-toggle', label: 'ATAR Estimate' },
         { id: 'connectify-target-toggle', label: 'Target ATAR' },
         { id: 'connectify-grade-toggle', label: 'Target Grade' },
         { id: 'connectify-predictor-toggle', label: 'Predictor' },
         { id: 'connectify-progress-toggle', label: 'Progress Graph' },
         { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' },
+        { id: 'connectify-estimate-toggle', label: 'ATAR Estimate' },
         { id: 'connectify-categories-toggle', label: 'Settings' }
       ];
 
@@ -184,7 +184,11 @@
           }
         }
         if (btn) {
-          btn.className = 'cx-calculator-tool';
+          if (item.id === 'connectify-weakness-toggle' || item.id === 'connectify-categories-toggle') {
+            btn.className = 'cx-secondary-tool';
+          } else {
+            btn.className = 'cx-calculator-tool';
+          }
           resolvedButtons.push(btn);
         }
       }

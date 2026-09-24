@@ -38,6 +38,36 @@
 .connectea-dark #connectify-sidebar .cx-tool-menu>button,.connectea-dark #connectify-sidebar .cx-tool-menu>.cx-calculator-tool{background:#2a3b4c;color:#e1eaf3;border-color:#496178}
 .connectea-dark #connectify-sidebar .cx-tool-menu>button:hover,.connectea-dark #connectify-sidebar .cx-tool-menu>.cx-calculator-tool:hover{background:#364e65;border-color:#6ba5d6;color:#ffffff}
 .connectea-dark #connectify-sidebar.cx-tool-active .cx-calculator-tool[aria-pressed=true],.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu>button[aria-pressed=true]{background:#41627d;color:#fff;border-color:#81acca}
+#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle) {
+  background: #ffffff !important;
+  color: #245579 !important;
+  border: 1px solid #bacddd !important;
+}
+#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle):hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #174c75 !important;
+}
+#connectify-sidebar.cx-tool-active .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)[aria-pressed=true] {
+  background: #e2e8f0 !important;
+  border-color: #64748b !important;
+  color: #174c75 !important;
+}
+.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle) {
+  background: #2a3b4c !important;
+  color: #e1eaf3 !important;
+  border-color: #496178 !important;
+}
+.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle):hover {
+  background: #364e65 !important;
+  border-color: #6ba5d6 !important;
+  color: #ffffff !important;
+}
+.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)[aria-pressed=true] {
+  background: #41627d !important;
+  color: #fff !important;
+  border-color: #81acca !important;
+}
 @media(max-width:650px){#connectify-sidebar.cx-tool-active .cx-tool-menu{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #connectify-sidebar.cx-tool-active>.cx-tool-menu,#connectify-sidebar.cx-tool-active>.cx-outline-actions{display:none!important}
 #connectify-sidebar:not(.cx-tool-active) .cx-back-menu{display:none!important}
