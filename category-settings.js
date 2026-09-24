@@ -201,6 +201,12 @@
         <div id="cx-calibration-table" style="display:grid;grid-template-columns:minmax(140px, 220px) 85px 85px;gap:10px 14px;align-items:center;margin-top:12px;"></div>
       </section>
 
+      <section class="cx-settings-section" style="margin-bottom:28px;border-top:1px solid #d8e3ee;padding-top:20px;">
+        <header style="margin-bottom:8px;"><strong>Previous Year Baselines (Cold-Start)</strong></header>
+        <p style="font-size:12px;color:#788896;margin:0 0 14px 0;">Enter your previous year's assessment type averages and subject final marks to jumpstart the Grade and ATAR Predictors early in the year.</p>
+        <div id="cx-baselines-container"></div>
+      </section>
+
       <section class="cx-settings-section" style="margin-top:36px;border-top:1px solid #d8e3ee;padding-top:24px;">
         <header style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
           <strong>Assessment Categories</strong>
@@ -286,6 +292,202 @@
       }
     }
 
+    function renderBaselines() {
+      const container = catPanel.querySelector('#cx-baselines-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const baselines = window.ConnectifyPredictorMath?.getBaselines
+        ? window.ConnectifyPredictorMath.getBaselines()
+        : { types: {}, subjects: {} };
+
+      // 1. Assessment Type Baselines:
+      const typeHeading = document.createElement('strong');
+      typeHeading.style.display = 'block';
+      typeHeading.style.fontSize = '12px';
+      typeHeading.style.color = '#203c5e';
+      typeHeading.style.marginBottom = '4px';
+      typeHeading.textContent = 'Assessment Type Baselines (%)';
+
+      const typeDesc = document.createElement('p');
+      typeDesc.style.fontSize = '11px';
+      typeDesc.style.color = '#788896';
+      typeDesc.style.margin = '0 0 10px 0';
+      typeDesc.textContent = 'Your historical or expected percentage average for each assessment category:';
+
+      const typeGrid = document.createElement('div');
+      typeGrid.style.display = 'grid';
+      typeGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(130px, 1fr))';
+      typeGrid.style.gap = '10px';
+      typeGrid.style.marginBottom = '18px';
+
+      const categories = Object.keys(window.cxCategories || defaultCategories);
+      for (const cat of categories) {
+        const field = document.createElement('div');
+        field.style.display = 'flex';
+        field.style.flexDirection = 'column';
+        field.style.gap = '3px';
+
+        const label = document.createElement('label');
+        label.style.fontSize = '11.5px';
+        label.style.fontWeight = '600';
+        label.style.color = '#334155';
+        label.textContent = cat;
+
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = '0';
+        input.max = '100';
+        input.step = '0.5';
+        input.placeholder = 'e.g. 75';
+        input.className = 'cx-baseline-type-input';
+        input.dataset.type = cat;
+        input.style.boxSizing = 'border-box';
+        input.style.width = '100%';
+        input.style.padding = '4px 6px';
+        input.style.border = '1px solid #b9cbe1';
+        input.style.borderRadius = '4px';
+        input.style.fontSize = '12px';
+
+        if (baselines.types && baselines.types[cat] !== undefined) {
+          input.value = baselines.types[cat];
+        }
+
+        field.append(label, input);
+        typeGrid.append(field);
+      }
+
+      // 2. Subject Grade Baselines:
+      const subjHeading = document.createElement('strong');
+      subjHeading.style.display = 'block';
+      subjHeading.style.fontSize = '12px';
+      subjHeading.style.color = '#203c5e';
+      subjHeading.style.marginBottom = '4px';
+      subjHeading.textContent = 'Previous Year Subject Grade Baselines (%)';
+
+      const subjDesc = document.createElement('p');
+      subjDesc.style.fontSize = '11px';
+      subjDesc.style.color = '#788896';
+      subjDesc.style.margin = '0 0 10px 0';
+      subjDesc.textContent = 'Your final grade percentage from the previous year for enrolled subjects:';
+
+      const subjGrid = document.createElement('div');
+      subjGrid.style.display = 'grid';
+      subjGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))';
+      subjGrid.style.gap = '10px';
+      subjGrid.style.marginBottom = '16px';
+
+      const subjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+      const cleanNames = new Set();
+      for (const s of subjects) {
+        const clean = window.ConnectifyPredictorMath?.cleanSubject
+          ? window.ConnectifyPredictorMath.cleanSubject(s.name)
+          : s.name.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+        if (clean) cleanNames.add(clean);
+      }
+      for (const sName of Object.keys(baselines.subjects || {})) {
+        if (sName) cleanNames.add(sName);
+      }
+
+      if (cleanNames.size === 0) {
+        const emptyNote = document.createElement('div');
+        emptyNote.style.fontSize = '11.5px';
+        emptyNote.style.color = '#94a3b8';
+        emptyNote.style.gridColumn = '1 / -1';
+        emptyNote.textContent = 'No enrolled subjects detected yet. Expand course outlines on Connect to populate subject list.';
+        subjGrid.append(emptyNote);
+      } else {
+        for (const sName of cleanNames) {
+          const field = document.createElement('div');
+          field.style.display = 'flex';
+          field.style.flexDirection = 'column';
+          field.style.gap = '3px';
+
+          const label = document.createElement('label');
+          label.style.fontSize = '11.5px';
+          label.style.fontWeight = '600';
+          label.style.color = '#334155';
+          label.textContent = sName;
+          label.title = sName;
+          label.style.overflow = 'hidden';
+          label.style.textOverflow = 'ellipsis';
+          label.style.whiteSpace = 'nowrap';
+
+          const input = document.createElement('input');
+          input.type = 'number';
+          input.min = '0';
+          input.max = '100';
+          input.step = '0.5';
+          input.placeholder = 'e.g. 78';
+          input.className = 'cx-baseline-subj-input';
+          input.dataset.subject = sName;
+          input.style.boxSizing = 'border-box';
+          input.style.width = '100%';
+          input.style.padding = '4px 6px';
+          input.style.border = '1px solid #b9cbe1';
+          input.style.borderRadius = '4px';
+          input.style.fontSize = '12px';
+
+          if (baselines.subjects && baselines.subjects[sName] !== undefined) {
+            input.value = baselines.subjects[sName];
+          }
+
+          field.append(label, input);
+          subjGrid.append(field);
+        }
+      }
+
+      // Save button
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = '10px';
+      actions.style.alignItems = 'center';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.type = 'button';
+      saveBtn.className = 'eds-c-button';
+      saveBtn.style.background = '#2563eb';
+      saveBtn.style.color = '#fff';
+      saveBtn.style.border = 'none';
+      saveBtn.style.padding = '6px 14px';
+      saveBtn.style.borderRadius = '4px';
+      saveBtn.style.cursor = 'pointer';
+      saveBtn.style.fontWeight = '600';
+      saveBtn.textContent = 'Save Baselines';
+
+      saveBtn.onclick = () => {
+        const typeInputs = container.querySelectorAll('.cx-baseline-type-input');
+        const subjInputs = container.querySelectorAll('.cx-baseline-subj-input');
+        const newTypes = {};
+        const newSubjs = {};
+
+        typeInputs.forEach(inp => {
+          const val = inp.value.trim();
+          if (val !== '' && Number.isFinite(Number(val))) {
+            newTypes[inp.dataset.type] = Number(val);
+          }
+        });
+
+        subjInputs.forEach(inp => {
+          const val = inp.value.trim();
+          if (val !== '' && Number.isFinite(Number(val))) {
+            newSubjs[inp.dataset.subject] = Number(val);
+          }
+        });
+
+        if (window.ConnectifyPredictorMath?.saveBaselines) {
+          window.ConnectifyPredictorMath.saveBaselines({ types: newTypes, subjects: newSubjs });
+        }
+
+        const origText = saveBtn.textContent;
+        saveBtn.textContent = '✓ Saved Baselines!';
+        setTimeout(() => { saveBtn.textContent = origText; }, 2000);
+      };
+
+      actions.append(saveBtn);
+      container.append(typeHeading, typeDesc, typeGrid, subjHeading, subjDesc, subjGrid, actions);
+    }
+
     function openCategories() {
       catPanel.hidden = false;
       catBtn.setAttribute('aria-pressed', 'true');
@@ -302,6 +504,7 @@
       resolveCategories();
       renderCategoryInputs(catPanel);
       renderCalib();
+      renderBaselines();
     }
 
     function closeCategories() {

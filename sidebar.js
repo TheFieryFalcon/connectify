@@ -150,6 +150,7 @@
       const progressToggle = document.getElementById('connectify-progress-toggle');
       const weaknessToggle = document.getElementById('connectify-weakness-toggle');
       const categoriesToggle = document.getElementById('connectify-categories-toggle');
+      const predictorToggle = document.getElementById('connectify-predictor-toggle');
       const estimateToggle = document.getElementById('connectify-estimate-toggle');
       const targetToggle = document.getElementById('connectify-target-toggle');
       const gradeToggle = document.getElementById('connectify-grade-toggle');
@@ -160,6 +161,7 @@
 
       const rawButtons = [
         ...resolvedAtarButtons,
+        predictorToggle,
         progressToggle,
         weaknessToggle,
         categoriesToggle
@@ -182,7 +184,7 @@
         }
       }
 
-      for (const panelId of ['connectea-atar', 'connectify-progress', 'connectify-weakness', 'connectify-categories']) {
+      for (const panelId of ['connectea-atar', 'connectify-predictor', 'connectify-progress', 'connectify-weakness', 'connectify-categories']) {
         const panel = document.getElementById(panelId);
         if (panel && panel.parentElement !== workspace) {
           workspace.append(panel);

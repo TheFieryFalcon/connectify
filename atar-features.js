@@ -16,6 +16,7 @@
 
     let weaknessInstance = null;
     let settingsInstance = null;
+    let predictorInstance = null;
 
     function isAutoExpandEnabled() {
       try {
@@ -93,6 +94,9 @@
       const toolMenu = document.querySelector('.cx-tool-menu');
       const workspace = document.querySelector('.cx-workspace');
 
+      if (window.ConnectifyPredictorUI?.createPredictorPanel && !predictorInstance) {
+        predictorInstance = window.ConnectifyPredictorUI.createPredictorPanel();
+      }
       if (window.ConnectifyWeakness?.createWeaknessPanel && !weaknessInstance) {
         weaknessInstance = window.ConnectifyWeakness.createWeaknessPanel();
       }
@@ -100,12 +104,22 @@
         settingsInstance = window.ConnectifyCategorySettings.createSettingsPanel();
       }
 
+      if (predictorInstance && toolMenu && workspace) {
+        if (!toolMenu.contains(predictorInstance.toggleBtn)) toolMenu.append(predictorInstance.toggleBtn);
+        if (!workspace.contains(predictorInstance.panel)) workspace.append(predictorInstance.panel);
+      }
+
       if (weaknessInstance && settingsInstance && toolMenu && workspace) {
-        toolMenu.append(weaknessInstance.toggleBtn, settingsInstance.catBtn);
-        workspace.append(weaknessInstance.panel, settingsInstance.catPanel);
+        if (!toolMenu.contains(weaknessInstance.toggleBtn)) toolMenu.append(weaknessInstance.toggleBtn);
+        if (!toolMenu.contains(settingsInstance.catBtn)) toolMenu.append(settingsInstance.catBtn);
+        if (!workspace.contains(weaknessInstance.panel)) workspace.append(weaknessInstance.panel);
+        if (!workspace.contains(settingsInstance.catPanel)) workspace.append(settingsInstance.catPanel);
       }
 
       window.addEventListener('connectify-open', e => {
+        if (e.detail !== 'predictor' && predictorInstance) {
+          predictorInstance.closePredictor();
+        }
         if (e.detail !== 'weakness' && weaknessInstance) {
           weaknessInstance.closeWeakness();
         }
@@ -117,6 +131,13 @@
       window.ConnectifyAtar = window.ConnectifyAtar || {};
       window.ConnectifyAtar.toolPanels = window.ConnectifyAtar.toolPanels || [];
       window.ConnectifyAtar.toolButtons = window.ConnectifyAtar.toolButtons || [];
+
+      if (predictorInstance) {
+        const existingPanels = new Set(window.ConnectifyAtar.toolPanels.map(p => p.id));
+        if (!existingPanels.has(predictorInstance.panel.id)) window.ConnectifyAtar.toolPanels.push(predictorInstance.panel);
+        const existingIds = new Set(window.ConnectifyAtar.toolButtons.map(b => b.id));
+        if (!existingIds.has(predictorInstance.toggleBtn.id)) window.ConnectifyAtar.toolButtons.push(predictorInstance.toggleBtn);
+      }
 
       if (weaknessInstance && settingsInstance) {
         const existingPanels = new Set(window.ConnectifyAtar.toolPanels.map(p => p.id));

@@ -138,6 +138,7 @@
     let wrapper;
     let typeContainer;
     let typeSelect;
+    let outcomeBar;
 
     if (!isOverall) {
       wrapper = createElement('div', 'connectea-row-wrapper');
@@ -152,7 +153,11 @@
       typeLabel.append(typeTitle, typeSelect);
       typeContainer.append(typeLabel);
 
-      wrapper.append(box, typeContainer);
+      outcomeBar = createElement('div', 'connectea-outcome-bar');
+      outcomeBar.hidden = true;
+      outcomeBar.style.setProperty('display', 'none', 'important');
+
+      wrapper.append(box, typeContainer, outcomeBar);
 
       const meta = types().getTaskMeta(row);
       types().updateTypeSelect(typeSelect, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
@@ -261,7 +266,8 @@
       isOverall,
       estimatedSize,
       typeContainer,
-      typeSelect
+      typeSelect,
+      outcomeBar
     };
 
     if (isOverall && key) {
@@ -322,7 +328,23 @@
       ui.box.classList.add('connectea-hidden');
       ui.box.style.setProperty('display', 'none', 'important');
       if (ui.typeContainer) ui.typeContainer.style.setProperty('display', 'inline-flex', 'important');
+      if (ui.outcomeBar) {
+        ui.outcomeBar.hidden = true;
+        ui.outcomeBar.style.setProperty('display', 'none', 'important');
+      }
       if (!isOverall && ui.wrapper) ui.wrapper.style.setProperty('display', 'flex', 'important');
+
+      // Pre-cache prediction for upcoming task if possible:
+      if (window.ConnectifyPredictorMath) {
+        try {
+          const meta = types().getTaskMeta(row);
+          const taskMock = { name: meta.taskName, caption: meta.labels?.[1] || '', row };
+          const pred = window.ConnectifyPredictorMath.predictTask(meta.subjectName, taskMock);
+          if (!pred.unpredicted) {
+            window.ConnectifyPredictorMath.cachePrediction(meta.subjectName, meta.labelsKey || meta.taskName, pred);
+          }
+        } catch (e) {}
+      }
       return;
     }
 
@@ -331,6 +353,33 @@
     ui.box.style.setProperty('display', 'block', 'important');
     if (ui.typeContainer) ui.typeContainer.style.setProperty('display', 'inline-flex', 'important');
     if (!isOverall && ui.wrapper) ui.wrapper.style.setProperty('display', 'flex', 'important');
+
+    // Outcome Meter evaluation against cached prediction
+    if (!isOverall && ui.outcomeBar && window.ConnectifyPredictorMath) {
+      try {
+        const meta = types().getTaskMeta(row);
+        const predMath = window.ConnectifyPredictorMath;
+        let cached = predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName);
+        if (!cached) {
+          const taskMock = { name: meta.taskName, caption: meta.labels?.[1] || '', row };
+          const fresh = predMath.predictTask(meta.subjectName, taskMock);
+          if (!fresh.unpredicted) {
+            cached = fresh;
+            predMath.cachePrediction(meta.subjectName, meta.labelsKey || meta.taskName, fresh);
+          }
+        }
+        if (cached) {
+          const outcome = predMath.evaluateOutcome(mark, cached);
+          renderOutcomeBar(ui.outcomeBar, outcome);
+        } else {
+          ui.outcomeBar.hidden = true;
+          ui.outcomeBar.style.setProperty('display', 'none', 'important');
+        }
+      } catch (e) {
+        ui.outcomeBar.hidden = true;
+        ui.outcomeBar.style.setProperty('display', 'none', 'important');
+      }
+    }
 
     if (!data) {
       setText(ui.distribution, 'Cohort statistics unavailable');
@@ -372,6 +421,38 @@
     }
 
     setText(ui.result, parts.filter(Boolean).join('  •  '));
+  }
+
+  function renderOutcomeBar(bar, outcome) {
+    if (!bar) return;
+    if (!outcome) {
+      bar.hidden = true;
+      bar.style.setProperty('display', 'none', 'important');
+      return;
+    }
+
+    bar.title = outcome.details || outcome.label || '';
+    bar.setAttribute('aria-label', bar.title);
+    bar.classList.toggle('connectea-outcome-broken', Boolean(outcome.broken));
+
+    while (bar.firstChild) bar.removeChild(bar.firstChild);
+
+    const baseColors = ['red', 'orange', 'yellow', 'green'];
+    for (const colorName of baseColors) {
+      const seg = createElement('div', 'connectea-outcome-segment');
+      if (outcome.colors && outcome.colors.includes(colorName)) {
+        seg.classList.add(`connectea-active-${colorName}`);
+      }
+      bar.append(seg);
+    }
+
+    if (outcome.broken) {
+      const purpleSeg = createElement('div', 'connectea-outcome-segment connectea-active-purple');
+      bar.append(purpleSeg);
+    }
+
+    bar.hidden = false;
+    bar.style.setProperty('display', 'inline-flex', 'important');
   }
 
   window.ConnectifyCohortView = {

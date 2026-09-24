@@ -66,6 +66,8 @@
             "weakness-radar.js",
             "scaling-calibration.js",
             "category-settings.js",
+            "predictor-math.js",
+            "predictor-ui.js",
             "atar-features.js",
             "sidebar.js",
             "notifications.js",
