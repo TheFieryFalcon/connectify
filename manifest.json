@@ -4,16 +4,17 @@
    "version": "3.1.14",
    "description": "Subject progress graphs, assessment statistics, grade planning and a site-wide Connect theme.",
    "icons": {
-      "128": "logo.png"
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
    },
    "permissions": [
       "storage"
    ],
    "browser_specific_settings": {
       "gecko": {
-         "id": "connect-chart-tea@local",
+         "id": "connectify@local",
          "strict_min_version": "140.0",
-         "update_url": "https://raw.githubusercontent.com/TheFieryFalcon/connectify/updates/updates.json",
          "data_collection_permissions": {
             "required": [
                "none"

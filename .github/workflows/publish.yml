@@ -52,7 +52,9 @@ jobs:
           mkdir -p /tmp/chrome-build
           rsync -av --exclude='.git*' --exclude='.github*' --exclude='*.xpi' --exclude='*.zip' --exclude='*.crx' \
             --exclude='_metadata*' --exclude='.DS_Store' --exclude='README.md' \
-            --exclude='2.0.0_changelog.md' --exclude='ATAR-REFERENCE.md' ./ /tmp/chrome-build/
+            --exclude='2.0.0_changelog.md' --exclude='ATAR-REFERENCE.md' \
+            --exclude='overview.md' --exclude='CHROMEWEBSTORE.md' --exclude='PRIVACY.md' \
+            --exclude='Archive.zip' --exclude='updates.*' ./ /tmp/chrome-build/
 
           if [ -n "$CRX_KEY_SECRET" ]; then
             echo "$CRX_KEY_SECRET" > /tmp/key.pem
@@ -61,11 +63,16 @@ jobs:
           fi
 
           PUB_KEY=$(openssl rsa -in /tmp/key.pem -pubout -outform DER 2>/dev/null | base64 | tr -d '\r\n')
-          jq --arg k "$PUB_KEY" 'del(.browser_specific_settings) | .key = $k' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.clean.json
+          jq --arg k "$PUB_KEY" 'del(.browser_specific_settings) | del(.update_url) | .key = $k' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.clean.json
           mv /tmp/chrome-build/manifest.clean.json /tmp/chrome-build/manifest.json
 
+          # Build self-hosted CRX with private key
           npx -y crx3 -p /tmp/key.pem -o "connectify-${VERSION}.crx" /tmp/chrome-build
           
+          # Prepare clean ZIP for Chrome Web Store submission (no update_url, no key, no browser_specific_settings)
+          jq 'del(.key)' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.cws.json
+          mv /tmp/chrome-build/manifest.cws.json /tmp/chrome-build/manifest.json
+
           cd /tmp/chrome-build
           zip -r "$GITHUB_WORKSPACE/connectify-${VERSION}.zip" .
           cd $GITHUB_WORKSPACE
@@ -79,8 +86,18 @@ jobs:
             connectify-${{ steps.meta.outputs.version }}.crx
             connectify-${{ steps.meta.outputs.version }}.zip
 
+      - name: Publish to AMO (Version Create API)
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER || secrets.AMO_API_KEY }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET || secrets.AMO_API_SECRET }}
+          AMO_ADDON_SLUG: ${{ vars.AMO_ADDON_SLUG || secrets.AMO_ADDON_SLUG || 'connectify' }}
+          AMO_CHANNEL: 'listed'
+        run: |
+          node .github/scripts/publish-amo.js "connectify-${{ steps.meta.outputs.version }}.xpi"
+
       - name: Publish and Update Manifests
-        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -133,7 +150,7 @@ jobs:
           cat <<EOF > updates.json
           {
             "addons": {
-              "connect-chart-tea@local": {
+              "connectify@local": {
                 "updates": [
                   {
                     "version": "${VERSION}",
