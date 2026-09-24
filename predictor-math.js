@@ -159,9 +159,15 @@
     }
 
     const subjectAverages = {};
+    const subjectSpreads = {};
     for (const [name, data] of Object.entries(subjectStats)) {
       if (data.weight > 0) {
         subjectAverages[name] = (data.earned / data.weight) * 100;
+      }
+      if (data.tasks.length >= 2 && subjectAverages[name] !== undefined) {
+        const mean = subjectAverages[name];
+        const sumSq = data.tasks.reduce((acc, s) => acc + Math.pow(s - mean, 2), 0);
+        subjectSpreads[name] = Math.sqrt(sumSq / (data.tasks.length - 1));
       }
     }
 
@@ -184,6 +190,7 @@
 
     return {
       subjects: subjectAverages,
+      subjectSpreads,
       types: typeAverages,
       typeCounts,
       overallAverage,
@@ -213,6 +220,7 @@
         unpredicted: true,
         reason: 'missing_subject_baseline',
         taskType,
+        type: taskType,
         subjectName: cleanSubj
       };
     }
@@ -231,6 +239,7 @@
         unpredicted: true,
         reason: 'No previous tasks of this type have been done, unable to make prediction',
         taskType,
+        type: taskType,
         subjectName: cleanSubj
       };
     }
@@ -248,9 +257,13 @@
     const rawMid = applyLogarithmicCeiling(subjectAvg, 0.5 * typeModifier);
     const mid = Math.min(99.5, Math.max(10, round(rawMid, 1)));
 
-    // 6. Low & High Spreads:
-    const sigma = historical.spread || 6.5;
-    const low = Math.max(0, round(mid - 1.25 * sigma, 1));
+    // 6. Low & High Spreads (scaling Low more strongly with variance):
+    let sigma = historical.spread || 6.5;
+    if (historical.subjectSpreads && Number.isFinite(historical.subjectSpreads[cleanSubj])) {
+      sigma = historical.subjectSpreads[cleanSubj];
+    }
+    const lowDelta = Math.min(14.0, Math.max(2.0, (sigma * sigma) / 12 + 0.5 * sigma));
+    const low = Math.max(0, round(mid - lowDelta, 1));
     const high = Math.min(100, round(applyLogarithmicCeiling(mid, 1.25 * sigma), 1));
 
     // 7. Multiplicative 15% Breakout Score threshold (Score > 1.15 * High):
@@ -263,6 +276,7 @@
       mid: Math.round(mid),
       high: Math.round(high),
       breakoutScore,
+      taskType,
       type: taskType,
       subjectName: cleanSubj
     };
@@ -284,7 +298,8 @@
         mid: prediction.mid,
         high: prediction.high,
         breakoutScore: prediction.breakoutScore,
-        type: prediction.type,
+        taskType: prediction.taskType || prediction.type,
+        type: prediction.type || prediction.taskType,
         timestamp: Date.now()
       };
       localStorage.setItem(key, JSON.stringify(payload));
@@ -302,6 +317,8 @@
           if (!Number.isFinite(parsed.breakoutScore)) {
             parsed.breakoutScore = round(1.15 * parsed.high, 2);
           }
+          if (!parsed.taskType && parsed.type) parsed.taskType = parsed.type;
+          if (!parsed.type && parsed.taskType) parsed.type = parsed.taskType;
           return parsed;
         }
       }
@@ -498,33 +515,63 @@
       };
     }
 
+    let preferences = {};
+    try {
+      if (window.ConnectifyAtarCalc?.getPreferences) {
+        preferences = window.ConnectifyAtarCalc.getPreferences() || {};
+      } else {
+        const account = getAccountKey();
+        const storageKey = `connectea:atar:2025:${account}:${new Date().getFullYear()}`;
+        preferences = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        const rawPrefs = localStorage.getItem('connectea:preferences');
+        if (rawPrefs) {
+          preferences = { ...preferences, ...JSON.parse(rawPrefs) };
+        }
+      }
+    } catch {}
+
+    let sem1Courses = [];
+    if (window.ConnectifyAtarScraper?.readCourses) {
+      try {
+        const read = window.ConnectifyAtarScraper.readCourses(true);
+        sem1Courses = read[0] || [];
+      } catch {}
+    }
+
     const scenarios = ['low', 'mid', 'high'];
     const atarResults = {};
 
     for (const scenario of scenarios) {
       const coursesForCalc = eligibleCourses.map(course => {
         const rawScore = course.projected[scenario] ?? course.runningMark ?? course.baselineMark;
+        const courseId = course.cleanName.toLowerCase();
+        const calibration = preferences[`sem1_calibration:${courseId}`];
+        const knownSem1Raw = calibration?.raw !== undefined
+          ? calibration.raw
+          : sem1Courses.find(r => r.id === courseId)?.mark;
+        const knownSem1Scaled = calibration?.scaled;
+
         let scaledScore = rawScore;
         if (math.calculateShiftedScaledScore && Number.isFinite(rawScore)) {
-          const shifted = math.calculateShiftedScaledScore(course.cleanName, rawScore, undefined, undefined, 2025);
+          const shifted = math.calculateShiftedScaledScore(course.cleanName, rawScore, knownSem1Raw, knownSem1Scaled, 2025);
           if (Number.isFinite(shifted)) scaledScore = shifted;
         }
+
+        const roundedScore = math.wholeScore
+          ? math.wholeScore(scaledScore)
+          : (Number.isFinite(scaledScore) ? Math.round(scaledScore) : undefined);
+
         return {
           name: course.cleanName,
-          id: course.cleanName.toLowerCase(),
-          mark: rawScore,
-          score: scaledScore,
-          include: Number.isFinite(scaledScore)
+          id: courseId,
+          mark: rawScore !== null && Number.isFinite(rawScore) ? round(rawScore, 1) : rawScore,
+          score: roundedScore,
+          include: Number.isFinite(roundedScore)
         };
       });
 
       const res = math.calculate(coursesForCalc);
-
-      const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent || '');
-      const hasYear12 = titles.some(t => /\b(?:year\s*12|12)\b/i.test(t) || /\bAT[A-Z]{3}\b/.test(t));
-      const hasYear11 = titles.some(t => /\b(?:year\s*11|11)\b/i.test(t) || /\bAE[A-Z]{3}\b/.test(t));
-      const yearLevel = (hasYear11 && !hasYear12) ? 11 : 12;
-      const teaAdjustment = yearLevel === 11 ? -15 : 0;
+      const teaAdjustment = 0; // Year 11 TEA scaling adjustment penalty removed
 
       if (res && !res.error) {
         const finalTEA = Math.max(0, res.tea + teaAdjustment);
@@ -536,7 +583,7 @@
           bonusTEA: round(res.bonus, 1),
           topCourses: res.top || [],
           courses: coursesForCalc,
-          yearAdjustment: teaAdjustment
+          yearAdjustment: 0
         };
       } else {
         atarResults[scenario] = {

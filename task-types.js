@@ -16,7 +16,7 @@
     Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
     Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
     Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
-    'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'extended', 'presentation', 'oral', 'creative'] }
+    'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'presentation', 'oral', 'creative'] }
   };
 
   const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
@@ -29,17 +29,23 @@
   }
 
   function getCategories() {
+    let cats = defaultCategories;
     if (window.cxCategories && Object.keys(window.cxCategories).length > 0) {
-      return window.cxCategories;
+      cats = window.cxCategories;
+    } else {
+      try {
+        const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
+        if (stored) {
+          window.cxCategories = JSON.parse(stored);
+          cats = window.cxCategories;
+        }
+      } catch {}
     }
-    try {
-      const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
-      if (stored) {
-        window.cxCategories = JSON.parse(stored);
-        return window.cxCategories;
-      }
-    } catch {}
-    return defaultCategories;
+    // Safeguard: Ensure 'extended' is never in Take-Home keywords as WA ATAR Extended Response is an in-class test/essay
+    if (cats?.['Take-Home']?.keywords) {
+      cats['Take-Home'].keywords = cats['Take-Home'].keywords.filter(k => k.toLowerCase() !== 'extended');
+    }
+    return cats;
   }
 
   function getCustomCategoriesForClass(subjectName) {
@@ -115,13 +121,37 @@
   }
 
   function categorizeTask(taskName, allLabels = []) {
-    const combined = [taskName, ...allLabels].join(' ').toLowerCase();
+    const nameStr = (taskName || '').toLowerCase();
     const cats = getCategories();
+
+    // 1. Prioritize explicit keyword match on taskName itself
     for (const [cat, data] of Object.entries(cats)) {
-      if (data?.keywords?.some(k => k && combined.includes(k.toLowerCase()))) {
+      if (data?.keywords?.some(k => k && nameStr.includes(k.toLowerCase()))) {
         return cat;
       }
     }
+
+    // 2. Direct regex match on taskName for standard WA assessment types
+    if (/\b(?:exam|semester)\b/i.test(nameStr)) return 'Exam';
+    if (/\b(?:test|quiz)\b/i.test(nameStr)) return 'Test';
+    if (/\b(?:essay|short answer)\b/i.test(nameStr)) return 'Essay';
+    if (/\b(?:investigation|practical|experiment|validation|portfolio|speaking|listening|dictation)\b/i.test(nameStr)) return 'Application';
+    if (/\b(?:assignment|project|take[- ]home|oral|creative)\b/i.test(nameStr)) return 'Take-Home';
+
+    // 3. Match against labels
+    const labelsStr = (allLabels || []).join(' ').toLowerCase();
+    for (const [cat, data] of Object.entries(cats)) {
+      if (data?.keywords?.some(k => k && labelsStr.includes(k.toLowerCase()))) {
+        return cat;
+      }
+    }
+
+    // 4. Regex fallback on labels
+    if (/\b(?:exam|semester)\b/i.test(labelsStr)) return 'Exam';
+    if (/\b(?:test|quiz)\b/i.test(labelsStr)) return 'Test';
+    if (/\b(?:essay|short answer)\b/i.test(labelsStr)) return 'Essay';
+    if (/\b(?:investigation|practical|experiment|validation|portfolio)\b/i.test(labelsStr)) return 'Application';
+
     return 'Take-Home';
   }
 
@@ -136,6 +166,13 @@
     }
     const saved = getSavedTaskType(subjectName, taskName, actualLabelsKey);
     if (saved) return saved;
+
+    // Check if there is an active select dropdown in the DOM
+    if (task && typeof task === 'object' && task.row) {
+      const sel = task.row.querySelector('.connectea-type-select');
+      if (sel && sel.value) return sel.value;
+    }
+
     const labelsList = actualLabelsKey ? actualLabelsKey.split('::') : (task?.caption ? [task.caption] : []);
     return categorizeTask(taskName, labelsList);
   }

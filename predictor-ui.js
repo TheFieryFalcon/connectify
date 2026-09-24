@@ -232,7 +232,7 @@
           const taskCard = document.createElement('div');
           taskCard.className = 'cx-pred-task-card';
 
-          const taskType = prediction.taskType || 'Take-Home';
+          const taskType = prediction.taskType || prediction.type || 'Take-Home';
           const typeColor = window.ConnectifyTaskTypes?.getCategoryColor
             ? window.ConnectifyTaskTypes.getCategoryColor(taskType)
             : '#3498db';
@@ -291,21 +291,6 @@
             `;
 
             taskCard.append(predRow);
-
-            if (prediction.breakoutScore) {
-              const breakoutNote = document.createElement('div');
-              breakoutNote.style.fontSize = '10px';
-              breakoutNote.style.color = '#9333ea';
-              breakoutNote.style.marginTop = '6px';
-              breakoutNote.style.textAlign = 'right';
-              breakoutNote.style.fontWeight = '600';
-              if (prediction.breakoutScore > 100) {
-                breakoutNote.textContent = `⚡ Purple breakout threshold: >${prediction.breakoutScore}% (Unachievable)`;
-              } else {
-                breakoutNote.textContent = `⚡ Purple breakout threshold: >${prediction.breakoutScore}%`;
-              }
-              taskCard.append(breakoutNote);
-            }
           }
 
           upcomingContainer.append(taskCard);
@@ -356,7 +341,6 @@
           </div>
           <div style="margin-top:12px; font-size:11px; opacity:0.8; text-align:center; line-height:1.4;">
             TEA ${atarProj.mid.tea} = best four ${atarProj.mid.baseTEA} + bonuses ${atarProj.mid.bonusTEA}
-            ${atarProj.mid.yearAdjustment ? ' (Year 11 TEA scaling adjustment applied)' : ''}
           </div>
         </div>
 
@@ -374,11 +358,12 @@
             <tbody>
               ${atarProj.mid.courses.map(c => {
                 const isTop = atarProj.mid.topCourses.some(t => t.id === c.id);
+                const displayScore = c.score !== undefined ? (Number.isFinite(c.score) ? Math.round(c.score) : c.score) : '—';
                 return `
                   <tr style="${isTop ? 'background:rgba(34,197,94,0.06);' : ''}">
                     <td style="padding:8px 4px; font-weight:600;">${c.name}</td>
                     <td style="padding:8px 4px; text-align:right; opacity:0.9;">${c.mark !== undefined ? c.mark + '%' : '—'}</td>
-                    <td style="padding:8px 4px; text-align:right; font-weight:700;">${c.score !== undefined ? c.score : '—'}</td>
+                    <td style="padding:8px 4px; text-align:right; font-weight:700;">${displayScore}</td>
                     <td style="padding:8px 4px; text-align:center;">
                       ${isTop
                         ? '<span style="font-size:10px; font-weight:700; color:#15803d; background:#dcfce7; padding:2px 7px; border-radius:8px;">Top 4</span>'

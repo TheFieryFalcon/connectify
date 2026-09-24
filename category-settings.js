@@ -15,7 +15,7 @@
     Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
     Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
     Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
-    'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'extended', 'presentation', 'oral', 'creative'] }
+    'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'presentation', 'oral', 'creative'] }
   };
 
   if (!window.cxCategories) {
@@ -83,6 +83,11 @@
         } catch (e) {}
       }
     });
+    if (window.cxCategories?.['Take-Home']?.keywords) {
+      window.cxCategories['Take-Home'].keywords = window.cxCategories['Take-Home'].keywords.filter(
+        k => k.toLowerCase() !== 'extended'
+      );
+    }
   };
   resolveCategories();
 
@@ -520,6 +525,14 @@
         window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
       }
     };
+
+    window.addEventListener('connectify-open', e => {
+      if (e.detail === 'categories') {
+        if (catPanel.hidden) openCategories();
+      } else {
+        closeCategories();
+      }
+    });
 
     catPanel.querySelector('#cx-cat-save').onclick = () => {
       const wraps = catPanel.querySelectorAll('.cx-cat-wrap');

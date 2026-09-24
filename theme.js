@@ -7,6 +7,9 @@
 (() => {
   'use strict';
 
+  if (window.ConnectifyThemeLoaded) return;
+  window.ConnectifyThemeLoaded = true;
+
   const STORAGE_KEY = 'connectea:theme:v1';
   let isDarkMode = false;
 
@@ -17,9 +20,20 @@
   // Apply dark mode class immediately to avoid any initial page flash
   document.documentElement.classList.toggle('connectea-dark', isDarkMode);
 
-  const toggleButton = document.createElement('button');
-  toggleButton.id = 'connectea-theme-toggle';
-  toggleButton.type = 'button';
+  // Reuse existing button if already in DOM or create once
+  let toggleButton = document.getElementById('connectea-theme-toggle');
+  if (!toggleButton) {
+    toggleButton = document.createElement('button');
+    toggleButton.id = 'connectea-theme-toggle';
+    toggleButton.type = 'button';
+  }
+
+  // Purge duplicate buttons if any exist
+  const existingButtons = document.querySelectorAll('#connectea-theme-toggle');
+  for (let i = 1; i < existingButtons.length; i++) {
+    existingButtons[i].remove();
+  }
+
   toggleButton.setAttribute('aria-label', isDarkMode ? 'Light mode' : 'Dark mode');
   toggleButton.textContent = isDarkMode ? '☀ Light mode' : '☾ Dark mode';
   toggleButton.setAttribute('aria-pressed', String(isDarkMode));
@@ -74,13 +88,24 @@
     updateDetailArrows();
   }
 
-  toggleButton.addEventListener('click', () => {
-    const nextDark = !isDarkMode;
+  let lastToggleTime = 0;
+  toggleButton.onclick = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const now = Date.now();
+    if (now - lastToggleTime < 300) return; // 300ms debounce
+    lastToggleTime = now;
+
+    // Use current DOM state as ground truth to prevent any desync
+    const isCurrentlyDark = document.documentElement.classList.contains('connectea-dark');
+    const nextDark = !isCurrentlyDark;
     try {
       localStorage.setItem(STORAGE_KEY, nextDark ? 'dark' : 'light');
     } catch {}
     applyTheme(nextDark);
-  });
+  };
 
   // Re-attach toggle button and update arrows across client-side SPA route navigations
   let syncScheduled = false;
@@ -101,7 +126,7 @@
 
   window.addEventListener('resize', () => updateTogglePosition(true));
   window.addEventListener('storage', e => {
-    if (e.key === STORAGE_KEY) {
+    if (e.key === STORAGE_KEY && e.newValue) {
       applyTheme(e.newValue === 'dark');
     }
   });

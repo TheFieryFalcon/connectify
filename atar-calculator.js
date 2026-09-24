@@ -84,8 +84,7 @@
     const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent || '');
     const hasYear12 = titles.some(t => /\b(?:year\s*12|12)\b/i.test(t) || /\bAT[A-Z]{3}\b/.test(t));
     const hasYear11 = titles.some(t => /\b(?:year\s*11|11)\b/i.test(t) || /\bAE[A-Z]{3}\b/.test(t));
-    const yearLevel = (hasYear11 && !hasYear12) ? 11 : 12;
-    const teaAdjustment = yearLevel === 11 ? -15 : 0; // Penalize TEA by 15 points (roughly -5%) for Year 11 unscaled marks
+    const teaAdjustment = 0; // Year 11 TEA scaling adjustment penalty removed
 
     return results.map(result => {
       if (!result || result.error) {
@@ -96,7 +95,7 @@
       const detailText =
         `TEA ${round(finalTEA)} = best four ${round(result.base)} + bonuses ${round(
           result.bonus
-        )}.` + (yearLevel === 11 ? ' (Year 11 TEA scaling adjustment applied).' : ` Best four: ${result.top.map(x => x.name).join(', ')}.`);
+        )}. Best four: ${result.top.map(x => x.name).join(', ')}.`;
 
       return {
         ...result,
