@@ -162,7 +162,7 @@
     const subjectSpreads = {};
     for (const [name, data] of Object.entries(subjectStats)) {
       if (data.weight > 0) {
-        subjectAverages[name] = (data.earned / data.weight) * 100;
+        subjectAverages[name] = round((data.earned / data.weight) * 100, 2);
       }
       if (data.tasks.length >= 2 && subjectAverages[name] !== undefined) {
         const mean = subjectAverages[name];
@@ -174,11 +174,11 @@
     const typeAverages = {};
     for (const [type, data] of Object.entries(typeStats)) {
       if (data.weight > 0) {
-        typeAverages[type] = (data.earned / data.weight) * 100;
+        typeAverages[type] = round((data.earned / data.weight) * 100, 2);
       }
     }
 
-    const overallAverage = totalWeight > 0 ? (totalScoreWeight / totalWeight) * 100 : null;
+    const overallAverage = totalWeight > 0 ? round((totalScoreWeight / totalWeight) * 100, 2) : null;
 
     // Calculate empirical score standard deviation across completed tasks
     let scoreVariance = 0;
@@ -545,7 +545,7 @@
     const subjectSpreads = {};
     for (const [name, data] of Object.entries(subjectStats)) {
       if (data.weight > 0) {
-        subjectAverages[name] = (data.earned / data.weight) * 100;
+        subjectAverages[name] = round((data.earned / data.weight) * 100, 2);
       }
       if (data.tasks.length >= 2 && subjectAverages[name] !== undefined) {
         const mean = subjectAverages[name];
@@ -557,11 +557,11 @@
     const typeAverages = {};
     for (const [type, data] of Object.entries(typeStats)) {
       if (data.weight > 0) {
-        typeAverages[type] = (data.earned / data.weight) * 100;
+        typeAverages[type] = round((data.earned / data.weight) * 100, 2);
       }
     }
 
-    const overallAverage = totalWeight > 0 ? (totalScoreWeight / totalWeight) * 100 : null;
+    const overallAverage = totalWeight > 0 ? round((totalScoreWeight / totalWeight) * 100, 2) : null;
 
     let scoreVariance = 0;
     if (allTaskScores.length >= 3 && overallAverage !== null) {
