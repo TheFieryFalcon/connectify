@@ -40,27 +40,21 @@
     }
 
     if (courseList.size === 0) {
-      table.innerHTML = '<div style="font-size:12px;color:#8fa6bd;grid-column:1/-1;">Expand course outlines in Connect to load subjects for calibration.</div>';
+      table.innerHTML = '<div class="cx-settings-desc" style="grid-column:1/-1;">Expand course outlines in Connect to load subjects for calibration.</div>';
       return;
     }
 
     const hSubject = document.createElement('span');
     hSubject.textContent = 'Subject';
-    hSubject.style.fontSize = '11px';
-    hSubject.style.fontWeight = '700';
-    hSubject.style.color = '#788896';
+    hSubject.className = 'cx-settings-col-header';
 
     const hRaw = document.createElement('span');
     hRaw.textContent = 'Sem 1 Raw (%)';
-    hRaw.style.fontSize = '11px';
-    hRaw.style.fontWeight = '700';
-    hRaw.style.color = '#788896';
+    hRaw.className = 'cx-settings-col-header';
 
     const hScaled = document.createElement('span');
     hScaled.textContent = 'Sem 1 Scaled';
-    hScaled.style.fontSize = '11px';
-    hScaled.style.fontWeight = '700';
-    hScaled.style.color = '#788896';
+    hScaled.className = 'cx-settings-col-header';
 
     table.append(hSubject, hRaw, hScaled);
 
@@ -73,18 +67,17 @@
 
       const nameLabel = document.createElement('span');
       nameLabel.textContent = course.name;
-      nameLabel.style.fontSize = '12px';
-      nameLabel.style.fontWeight = '600';
+      nameLabel.className = 'cx-settings-label';
+      nameLabel.style.marginBottom = '0';
 
       const rawInput = document.createElement('input');
       rawInput.type = 'number';
       rawInput.placeholder = 'Raw';
       rawInput.title = 'Semester 1 School Raw Mark (%)';
       rawInput.value = knownSem1Raw !== undefined ? knownSem1Raw : '';
+      rawInput.className = 'cx-settings-number-input';
       rawInput.style.width = '85px';
       rawInput.style.padding = '5px 8px';
-      rawInput.style.borderRadius = '6px';
-      rawInput.style.border = '1px solid #bacddd';
       rawInput.style.boxSizing = 'border-box';
 
       const scaledInput = document.createElement('input');
@@ -92,10 +85,9 @@
       scaledInput.placeholder = 'Scaled';
       scaledInput.title = 'Semester 1 School Scaled Mark';
       scaledInput.value = calibEntry.scaled !== undefined ? calibEntry.scaled : '';
+      scaledInput.className = 'cx-settings-number-input';
       scaledInput.style.width = '85px';
       scaledInput.style.padding = '5px 8px';
-      scaledInput.style.borderRadius = '6px';
-      scaledInput.style.border = '1px solid #bacddd';
       scaledInput.style.boxSizing = 'border-box';
 
       table.append(nameLabel, rawInput, scaledInput);

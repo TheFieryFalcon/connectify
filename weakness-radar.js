@@ -24,7 +24,11 @@
 
   const cleanSubjectName = name => {
     if (!name) return '';
-    return name.replace(/ ATAR | Year\s*\d+ /gi, '').replace(/\s+/g, ' ').trim();
+    return name
+      .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
+      .replace(/\bATAR\b/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   };
 
   function getEffectiveTaskType(subjectName, task) {
@@ -261,7 +265,7 @@
     panel.innerHTML = `
       <header><strong>Weakness Analyzer</strong></header>
       <div style="margin-bottom:14px; display:flex; gap:10px; align-items:center;">
-         <label for="cx-radar-mode" style="font-weight:600; font-size:12px;">Group by:</label>
+         <label for="cx-radar-mode" class="cx-radar-mode-label" style="font-weight:600; font-size:12px; color:inherit;">Group by:</label>
          <select id="cx-radar-mode">
             <option value="type">Assessment Type</option>
             <option value="subject">Subject</option>

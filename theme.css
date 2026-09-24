@@ -22,6 +22,19 @@ html.connectea-dark {
   color: #e2e8f0 !important;
 }
 
+/* Universal High Contrast Typography Rules (WCAG AA Contrast >= 5:1) */
+.connectea-dark :is(label, .v-label, .cvr-c-form__label, .eds-c-label) {
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark :is(p, .v-caption) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(h1, h2, h3, h4, h5, h6, strong, .eds-c-heading) {
+  color: #f8fafc !important;
+}
+
 /* --------------------------------------------------------------------------
    2. Theme Toggle Switch
    -------------------------------------------------------------------------- */
@@ -86,7 +99,7 @@ html.connectea-dark {
    -------------------------------------------------------------------------- */
 .connectea-dark :is(.cvr-c-primary-navigation, .cvr-c-primary-navigation__container, .cvr-c-primary-navigation__bar) {
   background-color: #1a222d !important;
-  border-bottom: 1px solid #283546 !important;
+  border-bottom: 1px solid #36485e !important;
   color: #cbd5e1 !important;
 }
 
@@ -108,7 +121,7 @@ html.connectea-dark {
 .connectea-dark .cvr-c-primary-navigation__links .eds-s-is-active a {
   background-color: #121820 !important;
   color: #ffffff !important;
-  border: 1px solid #2d3b4d !important;
+  border: 1px solid #3d5066 !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -117,7 +130,7 @@ html.connectea-dark {
 .connectea-dark :is(.cvr-c-service-menu, .cvr-c-service-menu__wrapper, .cvr-c-service-menu__list) {
   background-color: #1a222d !important;
   color: #cbd5e1 !important;
-  border-right: 1px solid #283546 !important;
+  border-right: 1px solid #36485e !important;
 }
 
 .connectea-dark .cvr-c-service-menu__item {
@@ -150,7 +163,7 @@ html.connectea-dark {
    -------------------------------------------------------------------------- */
 .connectea-dark :is(.cvr-c-category-toolbar, .cvr-c-service-bar, .cvr-c-service-bar__control-panel) {
   background-color: #18202b !important;
-  border-bottom: 1px solid #283546 !important;
+  border-bottom: 1px solid #36485e !important;
   color: #cbd5e1 !important;
 }
 
@@ -159,7 +172,7 @@ html.connectea-dark {
    -------------------------------------------------------------------------- */
 .connectea-dark .eds-c-tile {
   background-color: #1e2632 !important;
-  border: 1px solid #2e3c4e !important;
+  border: 1px solid #3d5066 !important;
   border-radius: 8px !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
   color: #e2e8f0 !important;
@@ -168,7 +181,7 @@ html.connectea-dark {
 
 .connectea-dark .eds-c-tile__header {
   background-color: transparent !important;
-  border-bottom: 1px solid #283546 !important;
+  border-bottom: 1px solid #36485e !important;
 }
 
 .connectea-dark .eds-c-tile :is(.eds-c-heading, .eds-c-tile__title, h2, h3, h4) {
@@ -195,7 +208,7 @@ html.connectea-dark {
 
 .connectea-dark .cx-compound-progress-bar {
   background-color: #151c26 !important;
-  border: 1px solid #2b394a !important;
+  border: 1px solid #3d526b !important;
   border-radius: 4px !important;
 }
 
@@ -208,7 +221,7 @@ html.connectea-dark {
    -------------------------------------------------------------------------- */
 .connectea-dark .connectea-panel {
   background-color: #15263a !important;
-  border: 1px solid #264669 !important;
+  border: 1px solid #3b6088 !important;
   border-radius: 8px !important;
   color: #d6e8f8 !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
@@ -249,7 +262,7 @@ html.connectea-dark {
 }
 
 .connectea-dark .connectea-subject-controls {
-  border-top: 1px solid #254467 !important;
+  border-top: 1px solid #3b6088 !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -257,17 +270,17 @@ html.connectea-dark {
    -------------------------------------------------------------------------- */
 .connectea-dark :is(.cvr-c-task__marks, .cvr-c-task__mark) {
   background-color: #161e29 !important;
-  border-color: #2d3b4d !important;
+  border-color: #3d5066 !important;
   color: #f8fafc !important;
 }
 
 .connectea-dark .cvr-c-task__marks {
-  border: 1px solid #2d3b4d !important;
+  border: 1px solid #3d5066 !important;
   border-radius: 6px !important;
 }
 
 .connectea-dark .cvr-c-task__mark {
-  border-right: 1px solid #2d3b4d !important;
+  border-right: 1px solid #3d5066 !important;
 }
 
 .connectea-dark .cvr-c-task__mark:last-child {
@@ -289,8 +302,8 @@ html.connectea-dark {
    -------------------------------------------------------------------------- */
 .connectea-dark .eds-c-accordion__section-heading {
   background-color: #222b39 !important;
-  border-top: 1px solid #2e3c4e !important;
-  border-bottom: 1px solid #2e3c4e !important;
+  border-top: 1px solid #475a75 !important;
+  border-bottom: 1px solid #475a75 !important;
   color: #cbd5e1 !important;
   transition: background-color 0.15s ease;
 }
@@ -316,7 +329,7 @@ html.connectea-dark {
   box-sizing: border-box !important;
   background: #2d3c4e !important;
   color: #ffffff !important;
-  border-left: 1px solid #3d4f66 !important;
+  border-left: 1px solid #475a75 !important;
   font: 700 24px/1 system-ui, sans-serif !important;
   opacity: 1 !important;
   pointer-events: none !important;
@@ -331,7 +344,7 @@ html.connectea-dark {
    -------------------------------------------------------------------------- */
 .connectea-dark :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group) {
   background-color: transparent !important;
-  border-bottom: 1px solid #283546 !important;
+  border-bottom: 1px solid #36485e !important;
   color: #e2e8f0 !important;
 }
 
@@ -346,7 +359,7 @@ html.connectea-dark {
 }
 
 .connectea-dark .cvr-c-task-group {
-  border-top: 1px solid #2e3c4e !important;
+  border-top: 1px solid #475a75 !important;
 }
 
 .connectea-dark :is(.cvr-c-task-group__title, .cvr-c-task__group-name) {
@@ -361,7 +374,7 @@ html.connectea-dark {
 
 .connectea-dark .connectea-type-select {
   background-color: #182330 !important;
-  border: 1px solid #2c425c !important;
+  border: 1px solid #385170 !important;
   color: #dceaf7 !important;
   border-radius: 6px !important;
 }
@@ -421,7 +434,7 @@ html.connectea-dark {
 .connectea-dark :is(input, textarea, select) {
   background-color: #141a22 !important;
   color: #f1f5f9 !important;
-  border: 1px solid #334356 !important;
+  border: 1px solid #42556d !important;
 }
 
 .connectea-dark :is(input, textarea)::placeholder {
@@ -437,14 +450,14 @@ html.connectea-dark {
 .connectea-dark :is(.v-button, .eds-c-button) {
   background-color: #24303f !important;
   color: #e2e8f0 !important;
-  border: 1px solid #3b4d61 !important;
+  border: 1px solid #4a617a !important;
   background-image: none !important;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
 .connectea-dark :is(.v-button, .eds-c-button):hover {
   background-color: #2e3c4e !important;
-  border-color: #556c86 !important;
+  border-color: #607996 !important;
   color: #ffffff !important;
 }
 
@@ -452,12 +465,12 @@ html.connectea-dark {
 .connectea-dark #cx-expand-btn button {
   background-color: #24303f !important;
   color: #e2e8f0 !important;
-  border: 1px solid #3b4d61 !important;
+  border: 1px solid #4a617a !important;
 }
 
 .connectea-dark #cx-expand-btn button:hover {
   background-color: #2e3c4e !important;
-  border-color: #556c86 !important;
+  border-color: #607996 !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -465,12 +478,12 @@ html.connectea-dark {
    -------------------------------------------------------------------------- */
 .connectea-dark :is(.mat-card, .v-window, .v-window-contents, .v-panel-content, .mat-dialog-container) {
   background-color: #1e2632 !important;
-  border: 1px solid #2e3c4e !important;
+  border: 1px solid #3d5066 !important;
   color: #e2e8f0 !important;
 }
 
 .connectea-dark :is(th, td) {
-  border-color: #283546 !important;
+  border-color: #36485e !important;
 }
 
 .connectea-dark #main-content :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell) {
@@ -485,7 +498,7 @@ html.connectea-dark {
 .connectea-dark #main-content .c-category-menu :is(.mat-expansion-panel, .mat-expansion-panel-header, .mat-expansion-panel-body, .mat-list-item, .mat-mdc-list-item) {
   background: #1a222d !important;
   color: #e2e8f0 !important;
-  border-color: #283546 !important;
+  border-color: #36485e !important;
 }
 
 .connectea-dark #main-content .c-category-menu :is(.mat-expansion-panel-header, .mat-list-item, .mat-mdc-list-item):hover {

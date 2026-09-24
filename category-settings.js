@@ -173,42 +173,42 @@
           <input type="checkbox" id="cx-auto-expand-toggle" style="width:16px;height:16px;cursor:pointer;">
           Auto-expand class tabs on page load
         </label>
-        <p style="font-size:11px;color:#788896;margin:4px 0 0 24px;">When enabled, Connectify automatically expands course outlines on load to scrape assessment data.</p>
+        <p class="cx-settings-desc" style="margin:4px 0 0 24px;">When enabled, Connectify automatically expands course outlines on load to scrape assessment data.</p>
 
-        <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:14px;padding-top:12px;border-top:1px solid #d8e3ee;">
+        <div class="cx-settings-divider" style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:14px;padding-top:12px;">
           <div>
-            <label for="cx-general-cohort-input" style="display:block;font-size:12px;font-weight:600;color:#203c5e;margin-bottom:4px;">
+            <label for="cx-general-cohort-input" class="cx-settings-label">
               General Cohort Size
             </label>
             <div style="display:flex;align-items:center;gap:6px;">
-              <input type="number" id="cx-general-cohort-input" min="1" step="1" placeholder="500" style="box-sizing:border-box;width:80px;padding:3px 6px;border:1px solid #b9cbe1;border-radius:4px;font-size:12px;color:#203c5e;">
-              <span style="font-size:11px;color:#788896;">(default: 500)</span>
+              <input type="number" id="cx-general-cohort-input" class="cx-settings-number-input" min="1" step="1" placeholder="500" style="box-sizing:border-box;width:80px;padding:3px 6px;border-radius:4px;font-size:12px;">
+              <span class="cx-settings-hint">(default: 500)</span>
             </div>
-            <p style="font-size:11px;color:#788896;margin:3px 0 0 0;">Estimated total students in this year level.</p>
+            <p class="cx-settings-desc">Estimated total students in this year level.</p>
           </div>
 
           <div>
-            <label for="cx-atar-percentage-input" style="display:block;font-size:12px;font-weight:600;color:#203c5e;margin-bottom:4px;">
+            <label for="cx-atar-percentage-input" class="cx-settings-label">
               ATAR Percentage
             </label>
             <div style="display:flex;align-items:center;gap:6px;">
-              <input type="number" id="cx-atar-percentage-input" min="1" max="100" step="1" placeholder="60" style="box-sizing:border-box;width:75px;padding:3px 6px;border:1px solid #b9cbe1;border-radius:4px;font-size:12px;color:#203c5e;">
-              <span style="font-size:11px;color:#788896;">% (default: 60%)</span>
+              <input type="number" id="cx-atar-percentage-input" class="cx-settings-number-input" min="1" max="100" step="1" placeholder="60" style="box-sizing:border-box;width:75px;padding:3px 6px;border-radius:4px;font-size:12px;">
+              <span class="cx-settings-hint">% (default: 60%)</span>
             </div>
-            <p style="font-size:11px;color:#788896;margin:3px 0 0 0;">Proportion enrolled in the ATAR pathway.</p>
+            <p class="cx-settings-desc">Proportion enrolled in the ATAR pathway.</p>
           </div>
         </div>
       </section>
 
       <section class="cx-settings-section" style="margin-bottom:28px;border-top:1px solid #d8e3ee;padding-top:20px;">
         <header style="margin-bottom:8px;"><strong>Semester 1 Scaling Calibration</strong></header>
-        <p style="font-size:12px;color:#788896;margin:0 0 14px 0;">Enter your school's Semester 1 scaled scores to calibrate the model to your cohort's historical distribution.</p>
+        <p class="cx-settings-desc" style="font-size:12px;margin:0 0 14px 0;">Enter your school's Semester 1 scaled scores to calibrate the model to your cohort's historical distribution.</p>
         <div id="cx-calibration-table" style="display:grid;grid-template-columns:minmax(140px, 220px) 85px 85px;gap:10px 14px;align-items:center;margin-top:12px;"></div>
       </section>
 
       <section class="cx-settings-section" style="margin-bottom:28px;border-top:1px solid #d8e3ee;padding-top:20px;">
         <header style="margin-bottom:8px;"><strong>Previous Year Baselines (Cold-Start)</strong></header>
-        <p style="font-size:12px;color:#788896;margin:0 0 14px 0;">Enter your previous year's assessment type averages and subject final marks to jumpstart the Grade and ATAR Predictors early in the year.</p>
+        <p class="cx-settings-desc" style="font-size:12px;margin:0 0 14px 0;">Enter your previous year's assessment type averages and subject final marks to jumpstart the Grade and ATAR Predictors early in the year.</p>
         <div id="cx-baselines-container"></div>
       </section>
 
@@ -217,7 +217,7 @@
           <strong>Assessment Categories</strong>
           <button type="button" id="cx-cat-add" class="eds-c-button" style="background:#3498db;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">+ Add Category</button>
         </header>
-        <p style="font-size:12px;color:#788896;margin:0 0 16px 0;">Customize the comma-separated keywords used to automatically detect your assessment types:</p>
+        <p class="cx-settings-desc" style="font-size:12px;margin:0 0 16px 0;">Customize the comma-separated keywords used to automatically detect your assessment types:</p>
         <div id="cx-categories-inputs"></div>
         <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
            <button type="button" id="cx-cat-save" class="eds-c-button" style="background:#2ecc71;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Save Changes</button>
@@ -308,15 +308,11 @@
 
       // 1. Assessment Type Baselines:
       const typeHeading = document.createElement('strong');
-      typeHeading.style.display = 'block';
-      typeHeading.style.fontSize = '12px';
-      typeHeading.style.color = '#203c5e';
-      typeHeading.style.marginBottom = '4px';
+      typeHeading.className = 'cx-settings-heading';
       typeHeading.textContent = 'Assessment Type Baselines (%)';
 
       const typeDesc = document.createElement('p');
-      typeDesc.style.fontSize = '11px';
-      typeDesc.style.color = '#788896';
+      typeDesc.className = 'cx-settings-desc';
       typeDesc.style.margin = '0 0 10px 0';
       typeDesc.textContent = 'Your historical or expected percentage average for each assessment category:';
 
@@ -334,9 +330,8 @@
         field.style.gap = '3px';
 
         const label = document.createElement('label');
+        label.className = 'cx-settings-label';
         label.style.fontSize = '11.5px';
-        label.style.fontWeight = '600';
-        label.style.color = '#334155';
         label.textContent = cat;
 
         const input = document.createElement('input');
@@ -345,12 +340,11 @@
         input.max = '100';
         input.step = '0.5';
         input.placeholder = 'e.g. 75';
-        input.className = 'cx-baseline-type-input';
+        input.className = 'cx-baseline-type-input cx-settings-number-input';
         input.dataset.type = cat;
         input.style.boxSizing = 'border-box';
         input.style.width = '100%';
         input.style.padding = '4px 6px';
-        input.style.border = '1px solid #b9cbe1';
         input.style.borderRadius = '4px';
         input.style.fontSize = '12px';
 
@@ -364,15 +358,11 @@
 
       // 2. Subject Grade Baselines:
       const subjHeading = document.createElement('strong');
-      subjHeading.style.display = 'block';
-      subjHeading.style.fontSize = '12px';
-      subjHeading.style.color = '#203c5e';
-      subjHeading.style.marginBottom = '4px';
+      subjHeading.className = 'cx-settings-heading';
       subjHeading.textContent = 'Previous Year Subject Grade Baselines (%)';
 
       const subjDesc = document.createElement('p');
-      subjDesc.style.fontSize = '11px';
-      subjDesc.style.color = '#788896';
+      subjDesc.className = 'cx-settings-desc';
       subjDesc.style.margin = '0 0 10px 0';
       subjDesc.textContent = 'Your final grade percentage from the previous year for enrolled subjects:';
 
@@ -396,8 +386,8 @@
 
       if (cleanNames.size === 0) {
         const emptyNote = document.createElement('div');
+        emptyNote.className = 'cx-settings-desc';
         emptyNote.style.fontSize = '11.5px';
-        emptyNote.style.color = '#94a3b8';
         emptyNote.style.gridColumn = '1 / -1';
         emptyNote.textContent = 'No enrolled subjects detected yet. Expand course outlines on Connect to populate subject list.';
         subjGrid.append(emptyNote);
@@ -409,9 +399,8 @@
           field.style.gap = '3px';
 
           const label = document.createElement('label');
+          label.className = 'cx-settings-label';
           label.style.fontSize = '11.5px';
-          label.style.fontWeight = '600';
-          label.style.color = '#334155';
           label.textContent = sName;
           label.title = sName;
           label.style.overflow = 'hidden';
@@ -424,12 +413,11 @@
           input.max = '100';
           input.step = '0.5';
           input.placeholder = 'e.g. 78';
-          input.className = 'cx-baseline-subj-input';
+          input.className = 'cx-baseline-subj-input cx-settings-number-input';
           input.dataset.subject = sName;
           input.style.boxSizing = 'border-box';
           input.style.width = '100%';
           input.style.padding = '4px 6px';
-          input.style.border = '1px solid #b9cbe1';
           input.style.borderRadius = '4px';
           input.style.fontSize = '12px';
 

@@ -51,7 +51,7 @@
           <header class="cx-pred-header">
             <strong class="cx-pred-title">Predictor</strong>
           </header>
-          <div style="padding:24px; color:#55667a; text-align:center;">Predictor mathematical engine loading...</div>
+          <div class="cx-pred-hint" style="padding:24px; text-align:center;">Predictor mathematical engine loading...</div>
         `;
         return;
       }
@@ -104,7 +104,7 @@
       if (subjects.length === 0) {
         container.innerHTML = `
           <div class="cx-pred-card" style="text-align:center; padding:30px 16px;">
-            <p style="margin:0; font-size:12.5px; color:#55667a;">
+            <p class="cx-pred-hint" style="margin:0; font-size:12.5px;">
               No enrolled subjects detected yet. Please expand your subject outlines on Connect to load course data.
             </p>
           </div>
@@ -187,19 +187,19 @@
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1.25fr 1fr; gap:8px; text-align:center;">
           <div class="cx-pred-scenario-card">
-            <div style="font-size:10px; text-transform:uppercase; font-weight:600; opacity:0.75;">Low</div>
-            <div style="font-size:17px; font-weight:700; margin-top:3px;">${activeSubject.projected.low ?? '—'}%</div>
-            <div style="font-size:9.5px; opacity:0.7; margin-top:1px;">Relaxed pace</div>
+            <div class="cx-pred-scenario-label">Low</div>
+            <div class="cx-pred-scenario-value">${activeSubject.projected.low ?? '—'}%</div>
+            <div class="cx-pred-scenario-sub">Relaxed pace</div>
           </div>
           <div class="cx-pred-scenario-card cx-pred-scenario-card--mid">
-            <div style="font-size:10px; text-transform:uppercase; font-weight:700; color:#174c75;">Middle (Expected)</div>
-            <div style="font-size:20px; font-weight:800; color:#174c75; margin-top:2px;">${activeSubject.projected.mid ?? '—'}%</div>
-            <div style="font-size:9.5px; font-weight:500; color:#24618c; margin-top:1px;">Current momentum</div>
+            <div class="cx-pred-scenario-label cx-pred-scenario-label--mid">Middle (Expected)</div>
+            <div class="cx-pred-scenario-value cx-pred-scenario-value--mid">${activeSubject.projected.mid ?? '—'}%</div>
+            <div class="cx-pred-scenario-sub cx-pred-scenario-sub--mid">Current momentum</div>
           </div>
           <div class="cx-pred-scenario-card">
-            <div style="font-size:10px; text-transform:uppercase; font-weight:600; opacity:0.75;">High</div>
-            <div style="font-size:17px; font-weight:700; color:#15803d; margin-top:3px;">${activeSubject.projected.high ?? '—'}%</div>
-            <div style="font-size:9.5px; opacity:0.7; margin-top:1px;">Extra effort</div>
+            <div class="cx-pred-scenario-label">High</div>
+            <div class="cx-pred-scenario-value cx-pred-scenario-value--high">${activeSubject.projected.high ?? '—'}%</div>
+            <div class="cx-pred-scenario-sub">Extra effort</div>
           </div>
         </div>
       `;
@@ -308,7 +308,7 @@
       if (atarProj.error) {
         container.innerHTML = `
           <div class="cx-pred-card" style="text-align:center; padding:28px 16px;">
-            <p style="margin:0; font-size:12.5px; color:#55667a; line-height:1.5;">${atarProj.error}</p>
+            <p class="cx-pred-hint" style="margin:0; font-size:12.5px; line-height:1.5;">${atarProj.error}</p>
             <div style="font-size:11px; margin-top:6px; opacity:0.8;">
               Ensure at least four Year 11/12 ATAR course outlines are expanded on Connect.
             </div>
@@ -324,19 +324,19 @@
           </div>
           <div style="display:grid; grid-template-columns:1fr 1.3fr 1fr; gap:8px; text-align:center; align-items:center;">
             <div class="cx-pred-scenario-card" style="padding:10px 6px;">
-              <div style="font-size:10px; text-transform:uppercase; opacity:0.75;">Low Scenario</div>
-              <div style="font-size:19px; font-weight:700; margin-top:3px;">${atarProj.low.atar}</div>
-              <div style="font-size:10px; opacity:0.7; margin-top:1px;">TEA ${atarProj.low.tea}</div>
+              <div class="cx-pred-scenario-label">Low Scenario</div>
+              <div class="cx-pred-scenario-value" style="font-size:19px; margin-top:3px;">${atarProj.low.atar}</div>
+              <div class="cx-pred-scenario-sub">TEA ${atarProj.low.tea}</div>
             </div>
-            <div class="cx-pred-scenario-card cx-pred-scenario-card--mid" style="padding:12px 6px; box-shadow:0 2px 8px rgba(36,97,140,0.18);">
-              <div style="font-size:10.5px; text-transform:uppercase; font-weight:700; color:#174c75;">Expected ATAR</div>
-              <div style="font-size:26px; font-weight:800; color:#174c75; margin-top:2px;">${atarProj.mid.atar}</div>
-              <div style="font-size:10.5px; color:#24618c; font-weight:600;">TEA ${atarProj.mid.tea}</div>
+            <div class="cx-pred-scenario-card cx-pred-scenario-card--mid" style="padding:12px 6px;">
+              <div class="cx-pred-scenario-label cx-pred-scenario-label--mid">Expected ATAR</div>
+              <div class="cx-pred-scenario-value cx-pred-scenario-value--mid cx-pred-scenario-value--atar">${atarProj.mid.atar}</div>
+              <div class="cx-pred-scenario-sub cx-pred-scenario-sub--mid">TEA ${atarProj.mid.tea}</div>
             </div>
             <div class="cx-pred-scenario-card" style="padding:10px 6px;">
-              <div style="font-size:10px; text-transform:uppercase; opacity:0.75;">High Scenario</div>
-              <div style="font-size:19px; font-weight:700; color:#15803d; margin-top:3px;">${atarProj.high.atar}</div>
-              <div style="font-size:10px; opacity:0.7; margin-top:1px;">TEA ${atarProj.high.tea}</div>
+              <div class="cx-pred-scenario-label">High Scenario</div>
+              <div class="cx-pred-scenario-value cx-pred-scenario-value--high" style="font-size:19px; margin-top:3px;">${atarProj.high.atar}</div>
+              <div class="cx-pred-scenario-sub">TEA ${atarProj.high.tea}</div>
             </div>
           </div>
           <div style="margin-top:12px; font-size:11px; opacity:0.8; text-align:center; line-height:1.4;">
@@ -366,8 +366,8 @@
                     <td style="padding:8px 4px; text-align:right; font-weight:700;">${displayScore}</td>
                     <td style="padding:8px 4px; text-align:center;">
                       ${isTop
-                        ? '<span style="font-size:10px; font-weight:700; color:#15803d; background:#dcfce7; padding:2px 7px; border-radius:8px;">Top 4</span>'
-                        : '<span style="font-size:10px; opacity:0.65;">Reserve</span>'}
+                        ? '<span class="cx-pred-top4-badge">Top 4</span>'
+                        : '<span class="cx-pred-reserve-badge">Reserve</span>'}
                     </td>
                   </tr>
                 `;

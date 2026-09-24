@@ -548,15 +548,92 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   background: #e9f2fb;
   border: 1.5px solid #709fc4;
 }
+.cx-pred-scenario-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: 0.8;
+  color: inherit;
+}
+.cx-pred-scenario-label--mid {
+  font-weight: 700;
+  color: #174c75;
+}
+.cx-pred-scenario-value {
+  font-size: 17px;
+  font-weight: 700;
+  margin-top: 3px;
+  color: inherit;
+}
+.cx-pred-scenario-value--mid {
+  font-size: 20px;
+  font-weight: 800;
+  color: #174c75;
+  margin-top: 2px;
+}
+.cx-pred-scenario-value--atar {
+  font-size: 26px;
+}
+.cx-pred-scenario-value--high {
+  color: #15803d;
+  font-weight: 700;
+}
+.cx-pred-scenario-sub {
+  font-size: 9.5px;
+  opacity: 0.75;
+  margin-top: 1px;
+}
+.cx-pred-scenario-sub--mid {
+  font-weight: 600;
+  color: #24618c;
+  font-size: 10.5px;
+}
+.cx-pred-hint {
+  color: #55667a;
+}
+.cx-pred-top4-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 2px 7px;
+  border-radius: 8px;
+}
+.cx-pred-reserve-badge {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
 .connectea-dark .cx-pred-scenario-card {
   background: #1e252e;
   border-color: #3b5066;
   color: #dceaf6;
 }
 .connectea-dark .cx-pred-scenario-card--mid {
-  background: #293746;
-  border-color: #6ba5d6;
-  color: #e1eaf3;
+  background: #1e3a5f !important;
+  border: 1.5px solid #60a5fa !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(96, 165, 250, 0.2) !important;
+}
+.connectea-dark .cx-pred-scenario-label--mid {
+  color: #93c5fd !important;
+}
+.connectea-dark .cx-pred-scenario-value--mid {
+  color: #ffffff !important;
+}
+.connectea-dark .cx-pred-scenario-sub--mid {
+  color: #bfdbfe !important;
+}
+.connectea-dark .cx-pred-scenario-value--high {
+  color: #4ade80 !important;
+}
+.connectea-dark .cx-pred-hint {
+  color: #94a3b8 !important;
+}
+.connectea-dark .cx-pred-top4-badge {
+  color: #4ade80 !important;
+  background: #143522 !important;
+  border: 1px solid #2b6647 !important;
 }
 
 /* Upcoming Tasks & Task Cards */
@@ -599,14 +676,14 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   color: #b4c5d5;
 }
 .connectea-dark .cx-pred-pill--mid {
-  background: #2c445c;
-  border-color: #527d9f;
-  color: #a2cbef;
+  background: #1e3a5f;
+  border-color: #60a5fa;
+  color: #ffffff;
 }
 .connectea-dark .cx-pred-pill--high {
-  background: #183324;
+  background: #143522;
   border-color: #2b6647;
-  color: #66df99;
+  color: #4ade80;
 }
 
 /* Unpredicted Cold-Start Notice */
@@ -667,3 +744,115 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 .connectea-dark .cx-pred-courses-table th {
   color: #94a3b8;
 }
+
+/* ==========================================================================
+   Connectify Settings, Baselines & Calibration Form Elements
+   ========================================================================== */
+.cx-settings-section {
+  border-top: 1px solid #d8e3ee;
+}
+.cx-settings-divider {
+  border-top: 1px solid #d8e3ee;
+}
+.cx-settings-heading {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #203c5e;
+  margin-bottom: 4px;
+}
+.cx-settings-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #203c5e;
+  margin-bottom: 4px;
+}
+.cx-settings-desc {
+  font-size: 11px;
+  color: #55667a;
+  margin: 3px 0 0 0;
+  line-height: 1.4;
+}
+.cx-settings-hint {
+  font-size: 11px;
+  color: #55667a;
+}
+.cx-settings-col-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: #55667a;
+  text-transform: uppercase;
+}
+.cx-settings-number-input,
+.cx-baseline-type-input,
+.cx-baseline-subj-input {
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #203c5e;
+  border: 1px solid #b9cbe1;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+.cx-settings-number-input:focus,
+.cx-baseline-type-input:focus,
+.cx-baseline-subj-input:focus {
+  border-color: #3575b9;
+  outline: 2px solid #3575b9;
+  outline-offset: 1px;
+}
+
+/* Settings Dark Mode High Contrast Rules (>= 5:1 contrast) */
+.connectea-dark .cx-settings-section,
+.connectea-dark .cx-settings-divider {
+  border-top-color: #3b4d5e !important;
+}
+.connectea-dark .cx-settings-heading {
+  color: #f8fafc !important;
+}
+.connectea-dark .cx-settings-label {
+  color: #e2e8f0 !important;
+}
+.connectea-dark .cx-settings-desc,
+.connectea-dark .cx-settings-hint,
+.connectea-dark .cx-settings-col-header {
+  color: #94a3b8 !important;
+}
+.connectea-dark :is(.cx-settings-number-input, .cx-baseline-type-input, .cx-baseline-subj-input) {
+  background: #141a22 !important;
+  color: #f1f5f9 !important;
+  border-color: #496178 !important;
+}
+.connectea-dark :is(.cx-settings-number-input, .cx-baseline-type-input, .cx-baseline-subj-input):focus {
+  border-color: #60a5fa !important;
+  outline: 2px solid #60a5fa !important;
+}
+
+/* Weakness Mode Label */
+.cx-radar-mode-label {
+  color: inherit;
+}
+.connectea-dark .cx-radar-mode-label,
+.connectea-dark #connectify-sidebar .cx-radar-mode-label {
+  color: #e2e8f0 !important;
+}
+
+/* Global High Contrast Net for Connectify Sidebar in Dark Mode (>= 5:1) */
+.connectea-dark #connectify-sidebar {
+  background: #202933 !important;
+  color: #e1eaf3 !important;
+  border-color: #425567 !important;
+}
+.connectea-dark #connectify-sidebar label {
+  color: #e2e8f0 !important;
+}
+.connectea-dark #connectify-sidebar strong {
+  color: #f8fafc !important;
+}
+.connectea-dark #connectify-sidebar p {
+  color: #cbd5e1 !important;
+}
+
