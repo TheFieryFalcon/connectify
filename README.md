@@ -2,6 +2,7 @@
 
 **Connectify** is the ultimate unofficial extension for Western Australia's Department of Education Connect portal. Built for ATAR students, it instantly upgrades the default Connect interface with powerful, real-time analytics to help you track your progress, identify weaknesses, and predict your final ATAR.
 
+Thanks to Yanxi Li, Arya Byndoor, Hiruja Basnayaka, Lodinu Kalugalge, Oscar Ingram, Google Gemini, GPT-5.5, and Amrut Deshpande for making this extension possible. Thank you for all who crowdfunded our launch to the Chrome Web Store.
 ---
 
 ## Installation instructions
