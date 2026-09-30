@@ -174,13 +174,16 @@
     }
 
     // Toggle button interactions
-    toggleBtn.onclick = () => {
+    toggleBtn.onclick = e => {
+      if (e) e.stopPropagation();
       panel.hidden = !panel.hidden;
       toggleBtn.setAttribute('aria-expanded', String(!panel.hidden));
       if (!panel.hidden) {
         window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'progress' }));
         expandAndRefresh();
         title.focus();
+      } else {
+        window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
       }
     };
 

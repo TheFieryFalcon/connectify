@@ -281,6 +281,46 @@ html.connectea-dark {
   content: none !important;
 }
 
+/* Neutralize native Connect red card and tile borders, headers, and text (.eds-t-red) */
+.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red) :is(.eds-c-tile, .eds-c-card, .cvr-c-card),
+.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red).eds-c-tile,
+.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red).eds-c-card {
+  border-color: #3d5066 !important;
+}
+
+.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red) :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  .cvr-c-service-bar__title,
+  .cvr-c-statistic__value
+) {
+  color: #f8fafc !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-class__status-label--locked,
+  .cvr-c-attendance .eds-t-red.cvr-c-standard-label,
+  .eds-u-theme-multiplier.eds-t-red .cvr-c-standard-label,
+  .cvr-c-submission__status-label--overdue,
+  .cvr-c-entitystatus--reported,
+  .cvr-c-status-label--reported
+) {
+  background-color: #2b171a !important;
+  border: 1px solid #7f2329 !important;
+  color: #fca5a5 !important;
+}
+
+.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red) :is(
+  .cvr-u-border-bottom-sep--coloured,
+  .eds-c-tile__header,
+  .eds-c-message-container--current-theme
+),
+.connectea-dark .eds-c-tile--important .eds-c-tile__header {
+  border-color: #2e3c4e !important;
+}
+
 /* Tile Header Action Controls (e.g. "View All" button in Classes tile header) */
 .connectea-dark :is(
   .eds-c-tile,
@@ -751,8 +791,13 @@ html.connectea-dark {
   .eds-c-card__action,
   .eds-c-card__action :is(a, button),
   .cvr-c-preferences__reset,
-  .cvr-c-preferences :is(button, .v-button)
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.eds-c-accordion__section-heading) {
+  .cvr-c-preferences :is(button, .v-button),
+  button.mat-focus-indicator,
+  .mat-button,
+  .mat-stroked-button,
+  .mat-raised-button,
+  .mat-flat-button
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.eds-c-accordion__section-heading):not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced) {
   background-color: #202c3b !important;
   color: #f1f5f9 !important;
   border: 1px solid #455a73 !important;
@@ -783,7 +828,12 @@ html.connectea-dark {
   .eds-c-card__action,
   .eds-c-card__action :is(a, button),
   .cvr-c-preferences__reset,
-  .cvr-c-preferences :is(button, .v-button)
+  .cvr-c-preferences :is(button, .v-button),
+  button.mat-focus-indicator,
+  .mat-button,
+  .mat-stroked-button,
+  .mat-raised-button,
+  .mat-flat-button
 ):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.eds-c-accordion__section-heading):hover {
   background-color: #2c3b4e !important;
   border-color: #5b7594 !important;
@@ -798,7 +848,12 @@ html.connectea-dark {
   .cvr-c-button,
   .btn,
   input[type="button"],
-  input[type="submit"]
+  input[type="submit"],
+  button.mat-focus-indicator,
+  .mat-button,
+  .mat-stroked-button,
+  .mat-raised-button,
+  .mat-flat-button
 ):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.eds-c-accordion__section-heading):active {
   background-color: #192432 !important;
   transform: translateY(1px) !important;
@@ -811,11 +866,26 @@ html.connectea-dark {
   .cvr-c-button,
   .btn,
   input[type="button"],
-  input[type="submit"]
+  input[type="submit"],
+  button.mat-focus-indicator,
+  .mat-button,
+  .mat-stroked-button,
+  .mat-raised-button,
+  .mat-flat-button
 ):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.eds-c-accordion__section-heading):focus-visible {
   border-color: #3b82f6 !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
   outline: none !important;
+}
+
+.connectea-dark .mat-button-focus-overlay {
+  background: transparent !important;
+}
+
+/* Clay / Bootstrap Utility Flex Container Coverage */
+.connectea-dark div.w-100 {
+  background-color: transparent !important;
+  color: inherit !important;
 }
 
 /* Primary Action Buttons */
@@ -881,6 +951,21 @@ html.connectea-dark {
   border-color: #607996 !important;
 }
 
+/* Back to Top Button in Dark Mode (.cx-back-to-top-btn) */
+.connectea-dark .cx-back-to-top-btn {
+  background-color: #202c3b !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #455a73 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+.connectea-dark .cx-back-to-top-btn:hover {
+  background-color: #2c3b4e !important;
+  border-color: #5d7899 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+}
+
 /* --------------------------------------------------------------------------
    14. Cards, Popups, Modals & Material Panels
    -------------------------------------------------------------------------- */
@@ -918,7 +1003,6 @@ html.connectea-dark {
 .connectea-dark .mat-expansion-panel {
   border: 1px solid #3d5066 !important;
   border-radius: 6px !important;
-  margin-bottom: 8px !important;
 }
 
 .connectea-dark :is(.mat-expansion-panel-header, .mat-tree-node):hover {
@@ -1051,6 +1135,23 @@ html.connectea-dark {
   stroke: currentColor !important;
 }
 
+/* Connect Webfont Glyphs, Role/Student Switcher & Action Icons */
+.connectea-dark :is(
+  [class^="cvr-c-icon--"]:before,
+  [class*=" cvr-c-icon--"]:before,
+  .cvr-c-icon:before,
+  .cvr-c-icon--switch:before,
+  [class*="switch"]:before,
+  [class*="role"]:before,
+  .eds-c-icon:before,
+  [class^="cvr-c-icon--"],
+  [class*=" cvr-c-icon--"],
+  .cvr-c-icon
+) {
+  color: #cbd5e1 !important;
+  opacity: 1 !important;
+}
+
 .connectea-dark :is(
   .c-category-menu,
   .cvr-c-category-menu,
@@ -1070,7 +1171,24 @@ html.connectea-dark {
   .mat-nav-list,
   .v-icon
 ) :is(.mat-list-item:hover, a:hover, button:hover, div:hover, [class*="item"]:hover) :is(svg, path, circle, .mat-icon, .v-icon, .eds-c-icon),
-.connectea-dark :is([class*="switch"], [class*="role"]):hover :is(svg, path, circle, .mat-icon, .v-icon, .eds-c-icon) {
+.connectea-dark :is([class*="switch"], [class*="role"]):hover :is(svg, path, circle, .mat-icon, .v-icon, .eds-c-icon),
+.connectea-dark :is(
+  [class^="cvr-c-icon--"]:hover:before,
+  [class*=" cvr-c-icon--"]:hover:before,
+  .cvr-c-icon:hover:before,
+  .cvr-c-icon--switch:hover:before,
+  [class*="switch"]:hover:before,
+  [class*="role"]:hover:before,
+  .eds-c-icon:hover:before
+),
+.connectea-dark :is(button, a):hover :is(
+  [class^="cvr-c-icon--"]:before,
+  [class*=" cvr-c-icon--"]:before,
+  .cvr-c-icon:before,
+  .cvr-c-icon--switch:before,
+  [class*="switch"]:before,
+  [class*="role"]:before
+) {
   color: #ffffff !important;
   fill: #ffffff !important;
 }

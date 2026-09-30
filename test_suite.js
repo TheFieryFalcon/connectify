@@ -1729,6 +1729,52 @@ runTest('theme.css comprehensively styles tabsheets, breadcrumbs, speech boxes, 
   assert.ok(css.includes('.cvr-c-status-label') && css.includes('.cvr-c-switch'), 'theme.css must target status labels and switches');
 });
 
+runTest('sidebar tool panels prevent double-toggle bubbling via e.stopPropagation()', () => {
+  const catCode = fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8');
+  const progCode = fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8');
+  const weakCode = fs.readFileSync(path.resolve(BASE_DIR, 'weakness-radar.js'), 'utf8');
+
+  assert.ok(catCode.includes('catBtn.onclick = e =>') && catCode.includes('e.stopPropagation()'), 'category-settings.js must stop click propagation');
+  assert.ok(progCode.includes('toggleBtn.onclick = e =>') && progCode.includes('e.stopPropagation()'), 'progress-graph.js must stop click propagation');
+  assert.ok(weakCode.includes('toggleBtn.onclick = e =>') && weakCode.includes('e.stopPropagation()'), 'weakness-radar.js must stop click propagation');
+});
+
+runTest('theme.css normalizes native Connect red styling and eliminates bright outlines', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('.eds-t-red') && css.includes('border-color: #3d5066 !important;'), 'theme.css must normalize red card borders to dark neutral');
+  assert.ok(css.includes('.cvr-c-class__status-label--locked'), 'theme.css must style locked class status label');
+  assert.ok(css.includes('.cvr-c-attendance .eds-t-red.cvr-c-standard-label'), 'theme.css must style attendance red label');
+  assert.ok(css.includes('background-color: #2b171a !important;'), 'theme.css must render red status alerts as soft dark-theme badges');
+});
+
+runTest('theme.css styles Connect webfont glyphs and switcher icons with high contrast', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('.cvr-c-icon--switch:before') || css.includes('[class*="cvr-c-icon--switch"]:before'), 'theme.css must style switcher icon pseudo-element');
+  assert.ok(css.includes('[class^="cvr-c-icon--"]:before'), 'theme.css must style webfont icon before pseudo-elements');
+  assert.ok(css.includes('color: #cbd5e1 !important;'), 'theme.css must set high-contrast color for font glyphs');
+});
+
+runTest('theme.css covers Angular Material buttons, div.w-100, and aligns margins against base Connect CSS', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('button.mat-focus-indicator'), 'theme.css must style button.mat-focus-indicator');
+  assert.ok(css.includes('.mat-stroked-button'), 'theme.css must style .mat-stroked-button');
+  assert.ok(css.includes('div.w-100'), 'theme.css must style div.w-100');
+  assert.ok(!css.includes('.mat-expansion-panel {\n  border: 1px solid #3d5066 !important;\n  border-radius: 6px !important;\n  margin-bottom: 8px !important;'), 'theme.css must not have margin-bottom: 8px !important on mat-expansion-panel');
+  assert.ok(css.includes(':not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced)'), 'theme.css must exclude icon-only buttons from button padding');
+});
+
+runTest('atar-features.js injects and styles Back to top button at the bottom of assessment outlines', () => {
+  const atarFeaturesCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-features.js'), 'utf8');
+  const atarCss = fs.readFileSync(path.resolve(BASE_DIR, 'atar.css'), 'utf8');
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+
+  assert.ok(atarFeaturesCode.includes('cx-back-to-top-container'), 'atar-features.js must create cx-back-to-top-container');
+  assert.ok(atarFeaturesCode.includes('cx-back-to-top-btn'), 'atar-features.js must create cx-back-to-top-btn');
+  assert.ok(atarFeaturesCode.includes('Back to top'), 'atar-features.js button must have Back to top text');
+  assert.ok(atarCss.includes('.cx-back-to-top-container') && atarCss.includes('.cx-back-to-top-btn'), 'atar.css must style Back to top button');
+  assert.ok(themeCss.includes('.cx-back-to-top-btn'), 'theme.css must style Back to top button in dark mode');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

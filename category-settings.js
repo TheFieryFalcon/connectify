@@ -604,7 +604,8 @@
       catBtn.setAttribute('aria-pressed', 'false');
     }
 
-    catBtn.onclick = () => {
+    catBtn.onclick = e => {
+      if (e) e.stopPropagation();
       if (catPanel.hidden) {
         openCategories();
       } else {

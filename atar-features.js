@@ -81,6 +81,58 @@
       if (window.ConnectifyCompoundProgress?.update) {
         window.ConnectifyCompoundProgress.update();
       }
+
+      // --- Back to Top Button at the Bottom of Assessment Outlines ---
+      const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile');
+      const backToTopExisting = document.getElementById('cx-back-to-top-container');
+      if (tiles.length > 0) {
+        const lastTile = tiles[tiles.length - 1];
+        if (!backToTopExisting) {
+          const container = document.createElement('div');
+          container.id = 'cx-back-to-top-container';
+          container.className = 'cx-back-to-top-container';
+
+          const btn = document.createElement('button');
+          btn.id = 'cx-back-to-top-btn';
+          btn.type = 'button';
+          btn.className = 'cx-back-to-top-btn eds-c-button';
+          btn.textContent = '↑ Back to top';
+          btn.setAttribute('aria-label', 'Back to top of assessment outlines');
+
+          btn.onclick = () => {
+            const firstTile = document.querySelector('.eds-c-tile, .cvr-c-tile');
+            if (firstTile && typeof firstTile.scrollIntoView === 'function') {
+              firstTile.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            if (typeof window.scrollTo === 'function') {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            if (document.documentElement && typeof document.documentElement.scrollTo === 'function') {
+              document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            if (document.body && typeof document.body.scrollTo === 'function') {
+              document.body.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          };
+
+          container.appendChild(btn);
+          if (lastTile.parentNode) {
+            if (lastTile.nextSibling) {
+              lastTile.parentNode.insertBefore(container, lastTile.nextSibling);
+            } else {
+              lastTile.parentNode.appendChild(container);
+            }
+          }
+        } else if (backToTopExisting.previousElementSibling !== lastTile && lastTile.parentNode) {
+          if (lastTile.nextSibling) {
+            lastTile.parentNode.insertBefore(backToTopExisting, lastTile.nextSibling);
+          } else {
+            lastTile.parentNode.appendChild(backToTopExisting);
+          }
+        }
+      } else if (backToTopExisting) {
+        backToTopExisting.remove();
+      }
     }
 
     function initSidebarTools() {

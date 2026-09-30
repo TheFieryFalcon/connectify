@@ -323,7 +323,8 @@
       destroyChart();
     }
 
-    toggleBtn.onclick = () => {
+    toggleBtn.onclick = e => {
+      if (e) e.stopPropagation();
       if (panel.hidden) {
         openWeakness();
       } else {
