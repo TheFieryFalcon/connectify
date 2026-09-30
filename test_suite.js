@@ -1500,6 +1500,47 @@ runTest('design_rules.md mandates subsystem cache invalidation rules and continu
   assert.ok(content.includes('150') && content.includes('lines'), 'design_rules.md must enforce 150 lines constraint');
 });
 
+runTest('theme.css normalizes card and tile headers and suppresses colored accent stripes', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('.cvr-c-tile') && css.includes('.eds-c-tile'), 'theme.css must target both .cvr-c-tile and .eds-c-tile');
+  assert.ok(css.includes('border-bottom: 1px solid #2e3c4e !important;'), 'Tile headers must have normalized #2e3c4e bottom border');
+  assert.ok(css.includes('display: none !important;') && css.includes('content: none !important;'), 'Tile header pseudo-elements must be suppressed');
+});
+
+runTest('theme.css styles tile action buttons and View All controls with dark styling', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('.cvr-c-tile__action') && css.includes('.eds-c-tile__action'), 'theme.css must target .cvr-c-tile__action and .eds-c-tile__action');
+  assert.ok(css.includes('background-color: #24303f !important;'), 'Tile action buttons must have #24303f background');
+  assert.ok(css.includes('border: 1px solid #4a617a !important;'), 'Tile action buttons must have #4a617a border');
+  assert.ok(css.includes('color: #f1f5f9 !important;'), 'Tile action buttons must have #f1f5f9 high-contrast text');
+});
+
+runTest('theme.css ensures role/student switcher icon contrast and horizontal navbar indicator', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('[class*="switch"]') && css.includes('[class*="role"]'), 'theme.css must target switch and role icons');
+  assert.ok(css.includes('fill: #cbd5e1 !important;') && css.includes('stroke: currentColor !important;'), 'Icons must use #cbd5e1 contrast fill/stroke');
+  assert.ok(css.includes('border-bottom: 2px solid #3b82f6 !important;') && css.includes('box-shadow: none !important;'), 'Horizontal navbar active tab must use border-bottom instead of inset 3px 0');
+});
+
+runTest('theme.css provides custom dark styling for checkboxes, dropdowns, and buttons', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  // Checkbox tests
+  assert.ok(css.includes('input[type="checkbox"]'), 'theme.css must style input[type="checkbox"]');
+  assert.ok(css.includes('appearance: none !important;'), 'Checkbox must use appearance: none for custom rendering');
+  assert.ok(css.includes('background-color: #2563eb !important;') && css.includes("viewBox='0 0 16 16'"), 'Checked checkbox must use #2563eb with SVG checkmark');
+  
+  // Dropdown tests
+  assert.ok(css.includes('select') && css.includes('.cvr-c-classes__sort'), 'theme.css must style select and sort dropdowns');
+  assert.ok(css.includes("viewBox='0 0 20 20'"), 'Dropdown select must render custom SVG chevron');
+  assert.ok(css.includes('select option') && css.includes('background-color: #1a222d !important;'), 'Select options must use dark #1a222d background');
+
+  // Button tests
+  assert.ok(css.includes('.cvr-c-button') && css.includes('input[type="button"]'), 'theme.css must style all buttons and inputs');
+  assert.ok(css.includes('background-color: #202c3b !important;'), 'Default buttons must use #202c3b background');
+  assert.ok(css.includes('border: 1px solid #455a73 !important;'), 'Default buttons must use #455a73 border');
+  assert.ok(css.includes('.v-button--primary') && css.includes('background-color: #2563eb !important;'), 'Primary buttons must use #2563eb background');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');
