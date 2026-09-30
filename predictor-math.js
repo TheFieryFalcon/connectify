@@ -347,7 +347,7 @@
   }
 
   // --- PREDICTION PERSISTENCE & CACHING ---
-  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v4_20261001_pred';
+  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v5_20261001_pred';
   const PREDICTOR_CACHE_VERSION_KEY = window.ConnectifyCache?.KEYS?.PREDICTOR || 'connectify:cache_version:predictor';
   const LEGACY_PREDICTION_VERSION_KEY = 'connectify:prediction_version';
 
@@ -429,28 +429,30 @@
     const cleanSubj = cleanSubject(subjectName);
     const candidates = [
       `connectea:time_override:${subjectName}:${taskName}`,
-      `connectea:time_override:${cleanSubj}:${taskName}`
+      `connectea:time_override:${cleanSubj}:${taskName}`,
+      `connectify:time_override:${subjectName}:${taskName}`,
+      `connectify:time_override:${cleanSubj}:${taskName}`
     ];
     for (const key of candidates) {
       try {
         const val = localStorage.getItem(key);
-        if (val !== null && val.trim() !== '') return val.trim();
+        if (val !== null) return val.trim();
       } catch {}
     }
     try {
       const lowerTask = taskName.toLowerCase().trim();
-      const lowerSubj = subjectName.toLowerCase().trim();
-      const lowerClean = cleanSubj.toLowerCase().trim();
+      const lowerSubj = subjectName ? subjectName.toLowerCase().trim() : '';
+      const lowerClean = cleanSubj ? cleanSubj.toLowerCase().trim() : '';
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k && k.startsWith('connectea:time_override:')) {
+        if (k && (k.startsWith('connectea:time_override:') || k.startsWith('connectify:time_override:'))) {
           const parts = k.split(':');
           if (parts.length >= 4) {
             const s = parts[2].toLowerCase().trim();
             const t = parts.slice(3).join(':').toLowerCase().trim();
-            if ((s === lowerSubj || s === lowerClean) && t === lowerTask) {
+            if ((!lowerSubj || s === lowerSubj || s === lowerClean) && t === lowerTask) {
               const val = localStorage.getItem(k);
-              if (val !== null && val.trim() !== '') return val.trim();
+              if (val !== null) return val.trim();
             }
           }
         }
@@ -492,15 +494,23 @@
     return null;
   }
 
-  function hasParsableDate(task) {
+  function hasParsableDate(task, subjectName) {
+    if (!task) return false;
+    const sName = subjectName || task.subjectName;
+    const customTime = resolveCustomDate(sName, task.name);
+    if (customTime !== null) {
+      if (customTime === '') return false;
+      const formatted = formatCustomWeek(customTime);
+      return Boolean(formatted);
+    }
     if (task.customDate) return true;
-    if (Number.isFinite(task.order) && task.order > 0) return true;
+
     const text = task.caption || '';
     if (!text) return false;
     if (/term\s*\d.*?week[s]?\s*\d+/i.test(text)) return true;
     if (/weeks?\s*\d+(?:\s*(?:&|and|[\/–-])\s*\d+)?\s*[,;]?\s*term\s*\d/i.test(text)) return true;
-    if (/^(?:week[s]?\s*)?(\d{1,2})(?:\s*[\/–-]\s*\d{1,2})?$/i.test(text.trim())) return true;
-    if (/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(text)) return true;
+    if (/^week[s]?\s*(\d{1,2})(?:\s*[\/–-]\s*\d{1,2})?$/i.test(text.trim())) return true;
+    if (/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/i.test(text)) return true;
     return false;
   }
 
@@ -861,6 +871,11 @@
           completedTasks.push(t);
         } else {
           // Unfinished task candidate:
+          // Strictly exclude tasks with 0% weight, non-positive weight, or non-finite weight (e.g. NaN%):
+          if (!t.weight || t.weight <= 0 || !Number.isFinite(t.weight)) {
+            continue;
+          }
+
           const normName = cleanSubject(t.name).toLowerCase();
 
           // Deduplication: skip if already seen in upcoming or already completed in this subject
@@ -870,17 +885,24 @@
           // Check if custom date is set in Progress Graph:
           const customTime = resolveCustomDate(subj.name, t.name);
           if (customTime !== null) {
+            if (customTime === '') {
+              // Explicitly cleared or suppressed by user
+              continue;
+            }
             const formatted = formatCustomWeek(customTime);
             if (formatted) {
               t.order = formatted.order;
               t.caption = formatted.display;
               t.customDate = formatted.display;
               t.dateDisplay = formatted.display;
+            } else {
+              // Invalid custom date format
+              continue;
             }
           }
 
-          // If date cannot be parsed and no custom date set, do not predict in the predictor
-          if (!hasParsableDate(t)) {
+          // If date cannot be parsed and no valid custom date set, do not predict in the predictor
+          if (!hasParsableDate(t, subj.name)) {
             continue;
           }
 
@@ -902,13 +924,15 @@
       const upcomingPredictions = [];
 
       for (const task of upcomingTasks) {
+        const taskWeight = task.weight || 0;
+        if (taskWeight <= 0 || !Number.isFinite(taskWeight)) continue;
+
         const pred = getOrComputeTaskPrediction(subj.name, task, rawSubjects) || {
           unpredicted: true,
           reason: 'Prediction unavailable',
           taskType: window.ConnectifyTaskTypes?.getEffectiveType ? window.ConnectifyTaskTypes.getEffectiveType(subj.name, task) : 'Take-Home'
         };
 
-        const taskWeight = task.weight || 0;
         if (!pred.unpredicted) {
           upcomingLowEarned += (pred.low / 100) * taskWeight;
           upcomingMidEarned += (pred.mid / 100) * taskWeight;
@@ -1109,6 +1133,8 @@
     getOrComputeTaskPrediction,
     isPredictionCacheCurrent,
     clearPredictionCache: () => window.ConnectifyCache?.clearPredictorCache?.(),
+    hasParsableDate,
+    resolveCustomDate,
     PREDICTOR_ALGO_VERSION,
     PREDICTION_CACHE_VERSION: PREDICTOR_ALGO_VERSION
   };

@@ -19,6 +19,7 @@
 
   let activeMainTab = 'grade'; // 'grade' | 'atar'
   let activeSubjectIndex = 0;
+  let lastSavedSubTabsScroll = 0;
   let predictorInstance = null;
 
   function createPredictorPanel() {
@@ -46,6 +47,10 @@
 
     function renderPanel() {
       const livePanel = document.getElementById('connectify-predictor') || panel;
+      const prevSubtabs = livePanel.querySelector('.cx-pred-subtabs');
+      if (prevSubtabs) {
+        lastSavedSubTabsScroll = prevSubtabs.scrollLeft;
+      }
       const predMath = window.ConnectifyPredictorMath;
       if (!predMath) {
         livePanel.innerHTML = `
@@ -138,21 +143,36 @@
       const subTabsBar = document.createElement('div');
       subTabsBar.className = 'cx-pred-subtabs';
 
+      let activeTabBtn = null;
       subjects.forEach((subj, idx) => {
         const tabBtn = document.createElement('button');
         tabBtn.type = 'button';
-        tabBtn.className = `cx-pred-subtab ${idx === activeSubjectIndex ? 'active' : ''}`;
+        const isActive = idx === activeSubjectIndex;
+        tabBtn.className = `cx-pred-subtab ${isActive ? 'active' : ''}`;
         tabBtn.textContent = subj.cleanName;
         tabBtn.title = subj.cleanName;
         tabBtn.dataset.idx = String(idx);
         tabBtn.onclick = () => {
+          lastSavedSubTabsScroll = subTabsBar.scrollLeft;
           activeSubjectIndex = idx;
           renderPanel();
         };
+        if (isActive) activeTabBtn = tabBtn;
         subTabsBar.append(tabBtn);
       });
 
       container.append(subTabsBar);
+
+      // Restore horizontal scroll position across tab switches
+      if (lastSavedSubTabsScroll > 0) {
+        subTabsBar.scrollLeft = lastSavedSubTabsScroll;
+      }
+      if (activeTabBtn && typeof activeTabBtn.scrollIntoView === 'function') {
+        activeTabBtn.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+      }
+      subTabsBar.addEventListener('scroll', () => {
+        lastSavedSubTabsScroll = subTabsBar.scrollLeft;
+      }, { passive: true });
 
       const activeSubject = subjects[activeSubjectIndex];
       const subjectView = document.createElement('div');
@@ -234,11 +254,15 @@
       upcomingTitle.style.fontSize = '13px';
       upcomingTitle.style.fontWeight = '650';
       upcomingTitle.style.marginBottom = '10px';
-      upcomingTitle.textContent = `Upcoming Assessments (${activeSubject.upcomingPredictions.length})`;
+
+      const validUpcoming = (activeSubject.upcomingPredictions || []).filter(({ task }) => {
+        return task && task.weight > 0 && Number.isFinite(task.weight);
+      });
+      upcomingTitle.textContent = `Upcoming Assessments (${validUpcoming.length})`;
 
       upcomingContainer.append(upcomingTitle);
 
-      if (activeSubject.upcomingPredictions.length === 0) {
+      if (validUpcoming.length === 0) {
         const doneNote = document.createElement('div');
         doneNote.className = 'cx-pred-card';
         doneNote.style.textAlign = 'center';
@@ -247,7 +271,7 @@
         doneNote.textContent = 'All scheduled assessments for this subject have been graded!';
         upcomingContainer.append(doneNote);
       } else {
-        activeSubject.upcomingPredictions.forEach(({ task, prediction }) => {
+        validUpcoming.forEach(({ task, prediction }) => {
           const pred = prediction || {};
           const taskCard = document.createElement('div');
           taskCard.className = 'cx-pred-task-card';

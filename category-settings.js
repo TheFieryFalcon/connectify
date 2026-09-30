@@ -695,11 +695,24 @@
     return refs;
   }
 
+  function ensureSettingsPanel() {
+    if (!window.ConnectifyCategorySettings.panelRefs) {
+      return createSettingsPanel();
+    }
+    return window.ConnectifyCategorySettings.panelRefs;
+  }
+
   window.ConnectifyCategorySettings = {
     defaultCategories,
     resolveCategories,
     createSettingsPanel,
+    ensureSettingsPanel,
     clearSettingsCache: () => window.ConnectifyCache?.clearSettingsCache?.(),
     SETTINGS_ALGO_VERSION: window.ConnectifyCache?.VERSIONS?.SETTINGS || 'v4_20261001_settings'
   };
+
+  // Pre-initialize so buttons and panels are ready for sidebar mounting
+  try {
+    ensureSettingsPanel();
+  } catch {}
 })();

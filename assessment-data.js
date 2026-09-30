@@ -67,7 +67,7 @@
 
   // --- SUBSYSTEM CACHE INVALIDATION MANAGER ---
   const CACHE_VERSIONS = {
-    PREDICTOR: 'v4_20261001_pred',
+    PREDICTOR: 'v5_20261001_pred',
     RESULTS: 'v4_20261001_results',
     SETTINGS: 'v4_20261001_settings',
     COHORT: 'v4_20261001_cohort'

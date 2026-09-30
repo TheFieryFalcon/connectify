@@ -1541,6 +1541,194 @@ runTest('theme.css provides custom dark styling for checkboxes, dropdowns, and b
   assert.ok(css.includes('.v-button--primary') && css.includes('background-color: #2563eb !important;'), 'Primary buttons must use #2563eb background');
 });
 
+runTest('theme.css scopes buttons to avoid shrinking sidebar buttons and preserves container layout', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes(':not(#connectify-sidebar *)'), 'theme.css must explicitly exempt #connectify-sidebar * from button rules');
+  assert.ok(!css.includes('margin-bottom: 20px !important;'), 'theme.css must not force 20px margin-bottom on cards or tiles');
+  assert.ok(!css.includes('.eds-c-tile::after {\n  display: none !important;'), 'theme.css must not destroy clearfix on .eds-c-tile::after');
+});
+
+runTest('sidebar.js implements centralized delegation and automatic component instantiation', () => {
+  const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+  assert.ok(sidebarJs.includes('ensureWeaknessPanel') || sidebarJs.includes('createWeaknessPanel'), 'sidebar.js must ensure weakness panel instantiation');
+  assert.ok(sidebarJs.includes('ensureSettingsPanel') || sidebarJs.includes('createSettingsPanel'), 'sidebar.js must ensure settings panel instantiation');
+  assert.ok(sidebarJs.includes('#connectify-target-toggle'), 'sidebar.js must delegate Target ATAR toggle');
+  assert.ok(sidebarJs.includes('#connectify-progress-toggle'), 'sidebar.js must delegate Progress Graph toggle');
+  assert.ok(sidebarJs.includes('#connectify-weakness-toggle'), 'sidebar.js must delegate Weakness Analyzer toggle');
+  assert.ok(sidebarJs.includes('#connectify-categories-toggle'), 'sidebar.js must delegate Settings toggle');
+});
+
+runTest('predictor-math.js strictly hides 0% and NaN% weighted tasks from upcoming predictions', () => {
+  const code = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  const mockStorage = {};
+  const mockLocalStorage = {
+    getItem: k => (k in mockStorage ? mockStorage[k] : null),
+    setItem: (k, v) => { mockStorage[k] = String(v); },
+    removeItem: k => { delete mockStorage[k]; },
+    key: i => Object.keys(mockStorage)[i] || null,
+    get length() { return Object.keys(mockStorage).length; }
+  };
+
+  const sandbox = {
+    console,
+    Math,
+    Date,
+    Number,
+    parseInt,
+    parseFloat,
+    JSON,
+    Array,
+    Object,
+    Set,
+    Map,
+    encodeURIComponent,
+    localStorage: mockLocalStorage,
+    window: {
+      localStorage: mockLocalStorage,
+      ConnectifyCache: {
+        VERSIONS: { PREDICTOR: 'v5_20261001_pred' },
+        KEYS: { PREDICTOR: 'connectify:cache_version:predictor' }
+      },
+      ConnectifyTaskTypes: {
+        getEffectiveType: () => 'Test',
+        getCategoryColor: () => '#2563eb'
+      }
+    }
+  };
+
+  vm.createContext(sandbox);
+  vm.runInContext(code, sandbox);
+
+  const predMath = sandbox.window.ConnectifyPredictorMath;
+  assert.ok(predMath, 'PredictorMath must load in sandbox');
+
+  const testSubjects = [
+    {
+      name: 'Methods ATAR',
+      tasks: [
+        { id: 'm1', name: 'Assessment 1', score: 85, weight: 20, pending: false, caption: 'Term 1 Week 4' },
+        { id: 'm2', name: 'Formative Task', score: null, weight: 0, pending: true, caption: 'Term 2 Week 2' },
+        { id: 'm3', name: 'Zero Weight Test', score: null, weight: 0, pending: true, caption: 'Term 3 Week 1' },
+        { id: 'm4', name: 'Corrupt Weight Task', score: null, weight: NaN, pending: true, caption: 'Term 3 Week 3' },
+        { id: 'm5', name: 'Summative Task 2', score: null, weight: 25, pending: true, caption: 'Term 3 Week 5' }
+      ]
+    }
+  ];
+
+  const projections = predMath.projectSubjectGrades(testSubjects, testSubjects);
+  assert.ok(projections && projections.length === 1, 'Methods should be projected');
+
+  const upcoming = projections[0].upcomingPredictions;
+  assert.strictEqual(upcoming.length, 1, 'Only tasks with finite weight > 0 must be in upcoming predictions');
+  assert.strictEqual(upcoming[0].task.name, 'Summative Task 2', 'Summative Task 2 with 25% weight should be the sole upcoming task');
+});
+
+runTest('predictor-math.js strictly honors custom dates and suppresses unparsable dates', () => {
+  const code = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  const mockStorage = {};
+  const mockLocalStorage = {
+    getItem: k => (k in mockStorage ? mockStorage[k] : null),
+    setItem: (k, v) => { mockStorage[k] = String(v); },
+    removeItem: k => { delete mockStorage[k]; },
+    key: i => Object.keys(mockStorage)[i] || null,
+    get length() { return Object.keys(mockStorage).length; }
+  };
+
+  const sandbox = {
+    console,
+    Math,
+    Date,
+    Number,
+    parseInt,
+    parseFloat,
+    JSON,
+    Array,
+    Object,
+    Set,
+    Map,
+    encodeURIComponent,
+    localStorage: mockLocalStorage,
+    window: {
+      localStorage: mockLocalStorage,
+      ConnectifyCache: {
+        VERSIONS: { PREDICTOR: 'v5_20261001_pred' },
+        KEYS: { PREDICTOR: 'connectify:cache_version:predictor' }
+      },
+      ConnectifyTaskTypes: {
+        getEffectiveType: () => 'Test',
+        getCategoryColor: () => '#2563eb'
+      }
+    }
+  };
+
+  vm.createContext(sandbox);
+  vm.runInContext(code, sandbox);
+
+  const predMath = sandbox.window.ConnectifyPredictorMath;
+
+  // Task without native date
+  const noDateTask = { id: 'p1', name: 'Unscheduled Investigation', score: null, weight: 20, pending: true, caption: '' };
+  assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), false, 'Task with no date should not be parsable');
+
+  // Add custom date override via progress graph key
+  mockLocalStorage.setItem('connectea:time_override:Physics ATAR:Unscheduled Investigation', '17'); // Term 2 Week 7
+  assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), true, 'Task with custom date 17 must be parsable');
+
+  // Test custom date override with connectify: namespace
+  mockLocalStorage.removeItem('connectea:time_override:Physics ATAR:Unscheduled Investigation');
+  mockLocalStorage.setItem('connectify:time_override:Physics ATAR:Unscheduled Investigation', 'Term 3, Week 4');
+  assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), true, 'Task with connectify: time override must be parsable');
+
+  // Explicitly cleared custom date (empty string) must suppress task
+  mockLocalStorage.setItem('connectea:time_override:Physics ATAR:Unscheduled Investigation', '');
+  assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), false, 'Explicitly cleared custom date must suppress task');
+});
+
+runTest('predictor-ui.js preserves horizontal subtabs scroll position across renders', () => {
+  const uiCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-ui.js'), 'utf8');
+  assert.ok(uiCode.includes('lastSavedSubTabsScroll'), 'predictor-ui.js must maintain lastSavedSubTabsScroll');
+  assert.ok(uiCode.includes('subTabsBar.scrollLeft = lastSavedSubTabsScroll'), 'predictor-ui.js must restore subTabsBar scrollLeft');
+  assert.ok(uiCode.includes('scrollIntoView'), 'predictor-ui.js must scroll active tab into view');
+  assert.ok(uiCode.includes('validUpcoming'), 'predictor-ui.js must filter validUpcoming tasks with weight > 0');
+});
+
+runTest('theme.css comprehensively styles tables, submission marksbooks, and grids', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('.table') && css.includes('.table-striped') && css.includes('.table-hover'), 'theme.css must target standard and clay tables');
+  assert.ok(css.includes('.v-table') && css.includes('.v-grid'), 'theme.css must target Vaadin tables and grids');
+  assert.ok(css.includes('.cvr-c-table') && css.includes('.cvr-c-submission-students-table'), 'theme.css must target Connect submission marksbooks');
+});
+
+runTest('theme.css comprehensively styles modals, dialogs, popups, and dark curtains', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('.v-window') && css.includes('.ui-dialog') && css.includes('.modal-content'), 'theme.css must target Vaadin windows, jQuery UI dialogs, and Clay modals');
+  assert.ok(css.includes('.v-window-modalitycurtain') && css.includes('.modal-backdrop'), 'theme.css must darken modal backdrop curtains');
+  assert.ok(css.includes('.cvr-c-popup') && css.includes('.cvr-c-popup-action-button'), 'theme.css must target Connect popups and buttons');
+});
+
+runTest('theme.css comprehensively styles dropdown menus, menubars, and auto-suggest popups', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('.v-filterselect-suggestpopup'), 'theme.css must target Vaadin combobox auto-suggest popups');
+  assert.ok(css.includes('.dropdown-menu') && css.includes('.clay-dropdown-menu'), 'theme.css must target dropdown menus');
+  assert.ok(css.includes('.v-menubar-popup') && css.includes('.ui-menu'), 'theme.css must target Vaadin menubars and jQuery UI menus');
+});
+
+runTest('theme.css comprehensively styles calendars, datepickers, and time controls', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('.v-calendar') && css.includes('.v-calendar-month-day'), 'theme.css must target Vaadin calendar grid and days');
+  assert.ok(css.includes('.ui-datepicker') && css.includes('.ui-datepicker-header'), 'theme.css must target jQuery UI datepicker');
+  assert.ok(css.includes('.v-datefield-popup') && css.includes('.v-datefield-calendarpanel'), 'theme.css must target Vaadin datefield popups');
+});
+
+runTest('theme.css comprehensively styles tabsheets, breadcrumbs, speech boxes, and notifications', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('.v-tabsheet') && css.includes('.v-tabsheet-tabitem'), 'theme.css must target Vaadin tabsheets');
+  assert.ok(css.includes('.breadcrumb') && css.includes('.cvr-c-location-bar'), 'theme.css must target breadcrumbs and location bar');
+  assert.ok(css.includes('.cvr-c-speech-box'), 'theme.css must target discussion speech bubbles');
+  assert.ok(css.includes('.v-Notification') && css.includes('.cvr-c-notifications'), 'theme.css must target Vaadin and Connect notifications');
+  assert.ok(css.includes('.cvr-c-status-label') && css.includes('.cvr-c-switch'), 'theme.css must target status labels and switches');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

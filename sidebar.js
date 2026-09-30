@@ -147,7 +147,19 @@
      * Mount tool launcher buttons into the sidebar menu and tool panels into the workspace.
      */
     function mountTools() {
-      // Ensure predictor instance exists
+      // Ensure all tool components and panels are instantiated
+      if (!window.ConnectifyWeakness?.panelRefs && window.ConnectifyWeakness?.ensureWeaknessPanel) {
+        window.ConnectifyWeakness.ensureWeaknessPanel();
+      } else if (!window.ConnectifyWeakness?.panelRefs && window.ConnectifyWeakness?.createWeaknessPanel) {
+        window.ConnectifyWeakness.createWeaknessPanel();
+      }
+
+      if (!window.ConnectifyCategorySettings?.panelRefs && window.ConnectifyCategorySettings?.ensureSettingsPanel) {
+        window.ConnectifyCategorySettings.ensureSettingsPanel();
+      } else if (!window.ConnectifyCategorySettings?.panelRefs && window.ConnectifyCategorySettings?.createSettingsPanel) {
+        window.ConnectifyCategorySettings.createSettingsPanel();
+      }
+
       if (!document.getElementById('connectify-predictor-toggle') && window.ConnectifyPredictorUI?.ensurePredictorPanel) {
         window.ConnectifyPredictorUI.ensurePredictorPanel();
       }
@@ -173,6 +185,9 @@
           } else if (item.id === 'connectify-predictor-toggle') {
             const predBtn = window.ConnectifyPredictorUI?.panelRefs?.toggleBtn || window.ConnectifyPredictorUI?.getInstance?.()?.toggleBtn;
             if (predBtn) matches = [predBtn];
+          } else if (item.id === 'connectify-progress-toggle') {
+            const progBtn = document.getElementById('connectify-progress-toggle') || window.ConnectifyProgress?.panelRefs?.toggleBtn;
+            if (progBtn) matches = [progBtn];
           } else if (item.id === 'connectify-weakness-toggle' && window.ConnectifyWeakness?.panelRefs?.toggleBtn) {
             matches = [window.ConnectifyWeakness.panelRefs.toggleBtn];
           } else if (item.id === 'connectify-categories-toggle' && window.ConnectifyCategorySettings?.panelRefs?.catBtn) {
@@ -190,14 +205,17 @@
             }
           }
         }
-        if (btn) {
-          if (item.id === 'connectify-weakness-toggle' || item.id === 'connectify-categories-toggle') {
-            btn.className = 'cx-secondary-tool';
-          } else {
-            btn.className = 'cx-calculator-tool';
-          }
-          resolvedButtons.push(btn);
+        if (!btn) {
+          btn = createElement('button', item.label);
+          btn.id = item.id;
+          btn.type = 'button';
         }
+        if (item.id === 'connectify-weakness-toggle' || item.id === 'connectify-categories-toggle') {
+          btn.className = 'cx-secondary-tool';
+        } else {
+          btn.className = 'cx-calculator-tool';
+        }
+        resolvedButtons.push(btn);
       }
 
       // Purge any unknown, stray, or obsolete child buttons from toolMenu
@@ -228,10 +246,15 @@
         } else if (matches.length === 0 && panelId === 'connectify-predictor') {
           const pPanel = window.ConnectifyPredictorUI?.panelRefs?.panel || window.ConnectifyPredictorUI?.getInstance?.()?.panel;
           if (pPanel) matches = [pPanel];
-        } else if (matches.length === 0 && panelId === 'connectify-weakness' && window.ConnectifyWeakness?.panelRefs?.panel) {
-          matches = [window.ConnectifyWeakness.panelRefs.panel];
-        } else if (matches.length === 0 && panelId === 'connectify-categories' && window.ConnectifyCategorySettings?.panelRefs?.catPanel) {
-          matches = [window.ConnectifyCategorySettings.panelRefs.catPanel];
+        } else if (matches.length === 0 && panelId === 'connectify-progress') {
+          const progPanel = document.getElementById('connectify-progress') || window.ConnectifyProgress?.panelRefs?.panel;
+          if (progPanel) matches = [progPanel];
+        } else if (matches.length === 0 && panelId === 'connectify-weakness') {
+          const wPanel = window.ConnectifyWeakness?.panelRefs?.panel || (window.ConnectifyWeakness?.ensureWeaknessPanel && window.ConnectifyWeakness.ensureWeaknessPanel().panel);
+          if (wPanel) matches = [wPanel];
+        } else if (matches.length === 0 && panelId === 'connectify-categories') {
+          const cPanel = window.ConnectifyCategorySettings?.panelRefs?.catPanel || (window.ConnectifyCategorySettings?.ensureSettingsPanel && window.ConnectifyCategorySettings.ensureSettingsPanel().catPanel);
+          if (cPanel) matches = [cPanel];
         }
         if (matches.length > 0) {
           const inWorkspace = matches.find(m => m.parentElement === workspace);
@@ -288,8 +311,89 @@
       homeBtn.onclick = closeAllTools;
     }
 
+    // Central delegated tool launcher listener
+    sidebar.addEventListener('click', e => {
+      const toggle = e.target.closest('#connectify-target-toggle, #connectify-grade-toggle, #connectify-estimate-toggle, #connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle');
+      if (!toggle) return;
+
+      const id = toggle.id;
+      if (id === 'connectify-target-toggle') {
+        if (window.ConnectifyAtar?.openCalculator) {
+          window.ConnectifyAtar.openCalculator('target');
+        } else {
+          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
+        }
+      } else if (id === 'connectify-grade-toggle') {
+        if (window.ConnectifyAtar?.openCalculator) {
+          window.ConnectifyAtar.openCalculator('grade');
+        } else {
+          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
+        }
+      } else if (id === 'connectify-estimate-toggle') {
+        if (window.ConnectifyAtar?.openCalculator) {
+          window.ConnectifyAtar.openCalculator('estimate');
+        } else {
+          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
+        }
+      } else if (id === 'connectify-progress-toggle') {
+        const progPanel = document.getElementById('connectify-progress') || window.ConnectifyProgress?.panelRefs?.panel;
+        if (progPanel) {
+          const willShow = progPanel.hidden;
+          progPanel.hidden = !willShow;
+          toggle.setAttribute('aria-expanded', String(willShow));
+          toggle.setAttribute('aria-pressed', String(willShow));
+          if (willShow) {
+            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'progress' }));
+            if (window.ConnectifyProgress?.panelRefs?.expandAndRefresh) {
+              window.ConnectifyProgress.panelRefs.expandAndRefresh();
+            }
+          } else {
+            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
+          }
+        }
+      } else if (id === 'connectify-weakness-toggle') {
+        const refs = window.ConnectifyWeakness?.panelRefs || (window.ConnectifyWeakness?.ensureWeaknessPanel && window.ConnectifyWeakness.ensureWeaknessPanel());
+        if (refs?.openWeakness) {
+          const wPanel = refs.panel || document.getElementById('connectify-weakness');
+          if (wPanel && !wPanel.hidden) {
+            refs.closeWeakness();
+            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
+          } else {
+            refs.openWeakness();
+          }
+        } else {
+          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'weakness' }));
+        }
+      } else if (id === 'connectify-categories-toggle') {
+        const refs = window.ConnectifyCategorySettings?.panelRefs || (window.ConnectifyCategorySettings?.ensureSettingsPanel && window.ConnectifyCategorySettings.ensureSettingsPanel());
+        if (refs?.openCategories) {
+          const cPanel = refs.catPanel || document.getElementById('connectify-categories');
+          if (cPanel && !cPanel.hidden) {
+            refs.closeCategories();
+            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
+          } else {
+            refs.openCategories();
+          }
+        } else {
+          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
+        }
+      }
+    });
+
     window.addEventListener('connectify-open', e => {
       if (e.detail !== 'home') openSidebar();
+      const activeTool = e.detail;
+      const btnMap = {
+        calculator: ['connectify-target-toggle', 'connectify-grade-toggle', 'connectify-estimate-toggle'],
+        predictor: ['connectify-predictor-toggle'],
+        progress: ['connectify-progress-toggle'],
+        weakness: ['connectify-weakness-toggle'],
+        categories: ['connectify-categories-toggle']
+      };
+      toolMenu.querySelectorAll('button').forEach(btn => {
+        const isActive = btnMap[activeTool]?.includes(btn.id) || false;
+        btn.setAttribute('aria-pressed', String(isActive));
+      });
     });
 
     let isSyncing = false;

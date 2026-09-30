@@ -250,7 +250,13 @@
     }
 
     window.ConnectifyProgress = {
-      history: (...args) => (mathAPI?.history || window.ConnectifyProgressMath?.history)(...args)
+      history: (...args) => (mathAPI?.history || window.ConnectifyProgressMath?.history)(...args),
+      panelRefs: {
+        toggleBtn,
+        panel,
+        refresh,
+        expandAndRefresh
+      }
     };
 
     setInterval(() => {

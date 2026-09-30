@@ -332,6 +332,12 @@
       }
     };
 
+    window.addEventListener('connectify-open', e => {
+      if (e.detail !== 'weakness') {
+        closeWeakness();
+      }
+    });
+
     const refs = {
       toggleBtn,
       panel,
@@ -345,10 +351,23 @@
     return refs;
   }
 
+  function ensureWeaknessPanel() {
+    if (!window.ConnectifyWeakness.panelRefs) {
+      return createWeaknessPanel();
+    }
+    return window.ConnectifyWeakness.panelRefs;
+  }
+
   window.ConnectifyWeakness = {
     createWeaknessPanel,
+    ensureWeaknessPanel,
     renderChart,
     destroyChart,
     panelRefs: null
   };
+
+  // Pre-initialize so buttons and panels are ready for sidebar mounting
+  try {
+    ensureWeaknessPanel();
+  } catch {}
 })();
