@@ -277,6 +277,7 @@ global.document = {
 global.HTMLElement = MockElement;
 global.getComputedStyle = (el) => el._computedStyle || {};
 global.localStorage = mockLocalStorage;
+global.sessionStorage = mockLocalStorage;
 global.CustomEvent = MockEvent;
 global.Event = MockEvent;
 global.location = { href: 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines?coisp=12345' };
@@ -1400,6 +1401,103 @@ runTest('predictor-math.js provides distinct, widened scenario differences betwe
   assert.ok(physProj && physProj.projected, 'Physics projection must exist');
   assert.ok(physProj.projected.mid - physProj.projected.low >= 3, `Subject projected Low must differ by >= 3% from Mid (got ${physProj.projected.mid - physProj.projected.low})`);
   assert.ok(physProj.projected.high - physProj.projected.mid >= 3, `Subject projected High must differ by >= 3% from Mid (got ${physProj.projected.high - physProj.projected.mid})`);
+});
+
+runTest('ConnectifyCache manages independent subsystem versions and isolated clearing', () => {
+  const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  window.__connectifyDataInitialized = false;
+  eval(dataJs);
+
+  assert.ok(window.ConnectifyCache, 'ConnectifyCache must be exposed on window');
+  assert.ok(window.ConnectifyCache.VERSIONS.PREDICTOR, 'PREDICTOR version must exist');
+  assert.ok(window.ConnectifyCache.VERSIONS.RESULTS, 'RESULTS version must exist');
+  assert.ok(window.ConnectifyCache.VERSIONS.SETTINGS, 'SETTINGS version must exist');
+  assert.ok(window.ConnectifyCache.VERSIONS.COHORT, 'COHORT version must exist');
+
+  // Verify versions are distinct
+  const versions = Object.values(window.ConnectifyCache.VERSIONS);
+  const uniqueVersions = new Set(versions);
+  assert.strictEqual(uniqueVersions.size, 4, 'All 4 subsystem versions must be distinct');
+
+  // Verify isolated clearing: clearing predictor cache does NOT clear settings or cohort
+  localStorage.setItem('connectify:prediction:current:chem:t1', JSON.stringify({ mid: 75 }));
+  localStorage.setItem('connectea:categories', JSON.stringify({ test: {} }));
+  localStorage.setItem('connectea:cohort:v3:test', JSON.stringify({ size: 60 }));
+
+  window.ConnectifyCache.clearPredictorCache();
+  assert.strictEqual(localStorage.getItem('connectify:prediction:current:chem:t1'), null, 'Predictor cache must be cleared');
+  assert.ok(localStorage.getItem('connectea:categories'), 'Settings cache must NOT be wiped by predictor clear');
+  assert.ok(localStorage.getItem('connectea:cohort:v3:test'), 'Cohort cache must NOT be wiped by predictor clear');
+
+  // Invalidate cohort subsystem
+  window.ConnectifyCache.invalidateSubsystem('cohort');
+  assert.strictEqual(localStorage.getItem('connectea:cohort:v3:test'), null, 'Cohort cache must be cleared');
+  assert.ok(localStorage.getItem('connectea:categories'), 'Settings cache must remain intact');
+});
+
+runTest('cohort-view.js memoizes task row and outcome bar rendering to eliminate scroll lag', () => {
+  const cohortMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-math.js'), 'utf8');
+  eval(cohortMathJs);
+  const cohortViewJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+  eval(cohortViewJs);
+  const view = window.ConnectifyCohortView;
+
+  const row = new MockElement('div', 'cvr-c-task');
+  const details = new MockElement('div', 'cvr-c-task__details');
+  const label = new MockElement('span', 'v-label');
+  label.textContent = 'Topic Test 1';
+  details.appendChild(label);
+  row.appendChild(details);
+
+  const marks = new MockElement('div', 'cvr-c-task__marks');
+  const markCell = new MockElement('div', 'cvr-c-task__mark');
+  markCell.textContent = '85%';
+  marks.appendChild(markCell);
+  row.appendChild(marks);
+
+  // First render pass
+  view.render(row, false, 'math-key', 60);
+  const ui = view.panels.get(row);
+  assert.ok(ui && ui._memo, 'Row must have _memo attached after render');
+  assert.strictEqual(ui._memo.mark, 85, 'Memo must record mark');
+  const firstOutcomeKey = ui.outcomeBar?._renderedKey;
+
+  // Second render pass with identical inputs (simulating scroll pass)
+  let pchipEvaluated = false;
+  const originalSummary = window.ConnectifyCohortMath.summary;
+  window.ConnectifyCohortMath.summary = (...args) => {
+    pchipEvaluated = true;
+    return originalSummary(...args);
+  };
+
+  view.render(row, false, 'math-key', 60);
+  assert.strictEqual(pchipEvaluated, false, 'Unchanged row render must skip PCHIP math summary via memoization');
+  assert.strictEqual(ui.outcomeBar?._renderedKey, firstOutcomeKey, 'Outcome bar must retain memoized segments');
+  window.ConnectifyCohortMath.summary = originalSummary;
+});
+
+runTest('assessment-data.js mounts animated progress pill on bulk expand and pre-caches predictions', () => {
+  const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  window.__connectifyDataInitialized = false;
+  eval(dataJs);
+
+  sessionStorage.removeItem('connectify:first_expand_done');
+
+  // Verify sidebar.css styles for #cx-expand-progress
+  const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  assert.ok(sidebarCss.includes('#cx-expand-progress'), 'sidebar.css must style #cx-expand-progress');
+  assert.ok(sidebarCss.includes('cx-expand-spinner'), 'sidebar.css must style spinner animation');
+  assert.ok(sidebarCss.includes('cx-expand-bar'), 'sidebar.css must style progress bar');
+  assert.ok(sidebarCss.includes('#1e2632') && sidebarCss.includes('#ffffff'), 'progress pill must satisfy contrast standards');
+});
+
+runTest('design_rules.md mandates subsystem cache invalidation rules and continuous doc updates', () => {
+  const content = fs.readFileSync(path.resolve(BASE_DIR, 'design_rules.md'), 'utf8');
+  assert.ok(content.includes('Subsystem Cache Invalidation & Algorithm Versioning Standards'), 'design_rules.md must document Section 8');
+  assert.ok(content.includes('PREDICTOR_ALGO_VERSION') && content.includes('RESULTS_ALGO_VERSION'), 'design_rules.md must document independent subsystem version constants');
+  assert.ok(content.includes('Documentation Synchronization & Brevity Standards'), 'design_rules.md must document Section 9');
+  assert.ok(content.includes('docs/'), 'design_rules.md must mandate continuous docs/ updates');
+  assert.ok(content.includes('150') && content.includes('lines'), 'design_rules.md must enforce 150 lines constraint');
 });
 
 console.log('\n================================================================');

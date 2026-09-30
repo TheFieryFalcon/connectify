@@ -698,6 +698,8 @@
   window.ConnectifyCategorySettings = {
     defaultCategories,
     resolveCategories,
-    createSettingsPanel
+    createSettingsPanel,
+    clearSettingsCache: () => window.ConnectifyCache?.clearSettingsCache?.(),
+    SETTINGS_ALGO_VERSION: window.ConnectifyCache?.VERSIONS?.SETTINGS || 'v4_20261001_settings'
   };
 })();

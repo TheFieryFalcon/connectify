@@ -973,3 +973,56 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   color: #cbd5e1 !important;
 }
 
+/* Bulk Expansion Animated Loading Progress Pill */
+#cx-expand-progress,
+.cx-expand-progress-pill {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10060;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  background: #1e2632;
+  color: #ffffff;
+  border: 1px solid #2e3c4e;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  font: 600 13px system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.2px;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.cx-expand-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #3b82f6;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: cx-spin 0.75s linear infinite;
+  flex: none;
+}
+@keyframes cx-spin {
+  to { transform: rotate(360deg); }
+}
+.cx-expand-label {
+  white-space: nowrap;
+}
+.cx-expand-track {
+  width: 120px;
+  height: 6px;
+  border-radius: 3px;
+  background: #12171f;
+  overflow: hidden;
+  border: 1px solid #2e3c4e;
+  flex: none;
+}
+.cx-expand-bar {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+  transition: width 0.2s ease;
+}
+

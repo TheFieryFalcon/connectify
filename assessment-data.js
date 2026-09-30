@@ -65,6 +65,153 @@
 
   const subjectsCache = new Map();
 
+  // --- SUBSYSTEM CACHE INVALIDATION MANAGER ---
+  const CACHE_VERSIONS = {
+    PREDICTOR: 'v4_20261001_pred',
+    RESULTS: 'v4_20261001_results',
+    SETTINGS: 'v4_20261001_settings',
+    COHORT: 'v4_20261001_cohort'
+  };
+
+  const CACHE_KEYS = {
+    PREDICTOR: 'connectify:cache_version:predictor',
+    RESULTS: 'connectify:cache_version:results',
+    SETTINGS: 'connectify:cache_version:settings',
+    COHORT: 'connectify:cache_version:cohort'
+  };
+
+  const ConnectifyCache = {
+    VERSIONS: CACHE_VERSIONS,
+    KEYS: CACHE_KEYS,
+
+    clearPredictorCache() {
+      try {
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('connectify:prediction:') || k === 'connectify:prediction_version')) {
+            toRemove.push(k);
+          }
+        }
+        for (const k of toRemove) localStorage.removeItem(k);
+        localStorage.setItem(CACHE_KEYS.PREDICTOR, CACHE_VERSIONS.PREDICTOR);
+      } catch (e) {
+        console.warn('ConnectifyCache: failed to clear predictor cache', e);
+      }
+    },
+
+    clearResultsCache() {
+      try {
+        subjectsCache.clear();
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('connectify:grade_cache:')) {
+            toRemove.push(k);
+          }
+        }
+        for (const k of toRemove) localStorage.removeItem(k);
+        localStorage.setItem(CACHE_KEYS.RESULTS, CACHE_VERSIONS.RESULTS);
+        window.dispatchEvent(new CustomEvent('connectify-results-updated'));
+      } catch (e) {
+        console.warn('ConnectifyCache: failed to clear results cache', e);
+      }
+    },
+
+    clearSettingsCache() {
+      try {
+        const directKeys = [
+          'connectea:categories',
+          'cx-categories',
+          'connectea:task_type_overrides',
+          'connectea:preferences',
+          'connectify:preferences',
+          'connectify:general_cohort_size',
+          'connectify:atar_percentage',
+          'connectify:auto_expand'
+        ];
+        for (const k of directKeys) localStorage.removeItem(k);
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && (k.startsWith('connectify:baselines:') || k.startsWith('connectea:baselines:') || k.startsWith('connectea:class_categories:'))) {
+            toRemove.push(k);
+          }
+        }
+        for (const k of toRemove) localStorage.removeItem(k);
+        localStorage.setItem(CACHE_KEYS.SETTINGS, CACHE_VERSIONS.SETTINGS);
+        window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
+      } catch (e) {
+        console.warn('ConnectifyCache: failed to clear settings cache', e);
+      }
+    },
+
+    clearCohortCache() {
+      try {
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('connectea:cohort:v3:')) {
+            toRemove.push(k);
+          }
+        }
+        for (const k of toRemove) localStorage.removeItem(k);
+        if (window.ConnectifyCohortEstimator?.memory) {
+          window.ConnectifyCohortEstimator.memory.clear();
+        }
+        localStorage.setItem(CACHE_KEYS.COHORT, CACHE_VERSIONS.COHORT);
+        window.dispatchEvent(new CustomEvent('connectify-cohort-invalidated'));
+      } catch (e) {
+        console.warn('ConnectifyCache: failed to clear cohort cache', e);
+      }
+    },
+
+    clearAllCaches() {
+      this.clearPredictorCache();
+      this.clearResultsCache();
+      this.clearSettingsCache();
+      this.clearCohortCache();
+    },
+
+    invalidateSubsystem(name) {
+      const norm = String(name || '').toLowerCase().trim();
+      if (norm === 'predictor' || norm === 'pred') {
+        this.clearPredictorCache();
+      } else if (norm === 'results' || norm === 'result' || norm === 'grades') {
+        this.clearResultsCache();
+      } else if (norm === 'settings' || norm === 'categories') {
+        this.clearSettingsCache();
+      } else if (norm === 'cohort') {
+        this.clearCohortCache();
+      } else if (norm === 'all') {
+        this.clearAllCaches();
+      }
+    },
+
+    checkAndInvalidateAll() {
+      try {
+        if (localStorage.getItem(CACHE_KEYS.PREDICTOR) !== CACHE_VERSIONS.PREDICTOR) {
+          this.clearPredictorCache();
+        }
+        if (localStorage.getItem(CACHE_KEYS.RESULTS) !== CACHE_VERSIONS.RESULTS) {
+          this.clearResultsCache();
+        }
+        const storedSettingsVer = localStorage.getItem(CACHE_KEYS.SETTINGS);
+        if (storedSettingsVer === null) {
+          localStorage.setItem(CACHE_KEYS.SETTINGS, CACHE_VERSIONS.SETTINGS);
+        } else if (storedSettingsVer !== CACHE_VERSIONS.SETTINGS) {
+          this.clearSettingsCache();
+        }
+        if (localStorage.getItem(CACHE_KEYS.COHORT) !== CACHE_VERSIONS.COHORT) {
+          this.clearCohortCache();
+        }
+      } catch {}
+    }
+  };
+
+  window.ConnectifyCache = ConnectifyCache;
+  ConnectifyCache.checkAndInvalidateAll();
+
   function parseSemester(card) {
     const title = normalize(card.querySelector('.eds-c-tile__title, h2, h3, .c-tile__title')?.textContent);
     const match = title.match(/Semester\s*([12])/i) || title.match(/Sem\s*([12])/i);
@@ -244,10 +391,19 @@
   function notifyResultsUpdated(card) {
     clearTimeout(notifyUpdateTimer);
     notifyUpdateTimer = setTimeout(() => {
+      let subjects = null;
       if (card) {
         scrapeSubjectTasks(card);
       } else {
-        collect(true);
+        subjects = collect(true);
+      }
+
+      // Pre-cache predictions for newly revealed tasks so row renders hit cache in O(1)
+      if (window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
+        try {
+          const list = subjects || collect(true);
+          window.ConnectifyPredictorMath.populateChronologicalPredictions(list, false);
+        } catch (e) {}
       }
 
       if (window.ConnectifyCompoundProgress?.update) {
@@ -334,6 +490,8 @@
   /**
    * Programmatically click the accordion headers to expand or collapse details.
    * Staggered across animation frames to eliminate thread blocking and extreme lag.
+   * On first bulk expansion, mounts an animated progress pill (#cx-expand-progress)
+   * and pre-caches chronological predictions across all tasks.
    */
   function expandAll(expand = true) {
     if (isBulkExpanding) return;
@@ -346,20 +504,78 @@
     isBulkExpanding = true;
     let clickedAny = false;
     let index = 0;
+    const total = headings.length;
+
+    // Progress bar initialization for the first expand all
+    let progressPill = null;
+    let progressBar = null;
+    let progressText = null;
+    const isFirstExpand = expand && !sessionStorage.getItem('connectify:first_expand_done');
+
+    if (isFirstExpand) {
+      progressPill = document.getElementById('cx-expand-progress');
+      if (!progressPill) {
+        progressPill = document.createElement('div');
+        progressPill.id = 'cx-expand-progress';
+        progressPill.className = 'cx-expand-progress-pill';
+        progressPill.innerHTML = `
+          <div class="cx-expand-spinner"></div>
+          <span class="cx-expand-label">Expanding outlines... 0%</span>
+          <div class="cx-expand-track"><div class="cx-expand-bar" style="width: 0%"></div></div>
+        `;
+        document.body.appendChild(progressPill);
+      }
+      progressBar = progressPill.querySelector('.cx-expand-bar');
+      progressText = progressPill.querySelector('.cx-expand-label');
+    }
+
+    function updateProgress(pct, msg) {
+      if (!progressPill) return;
+      if (progressBar) progressBar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+      if (progressText && msg) progressText.textContent = msg;
+    }
+
+    function finishProgress() {
+      if (!progressPill) return;
+      sessionStorage.setItem('connectify:first_expand_done', 'true');
+      updateProgress(100, '✓ Outlines expanded & predictions cached');
+      setTimeout(() => {
+        if (progressPill) {
+          progressPill.style.opacity = '0';
+          progressPill.style.transform = 'translate(-50%, -10px)';
+          setTimeout(() => progressPill?.remove(), 350);
+        }
+      }, 600);
+    }
 
     function clickNext() {
-      if (index >= headings.length) {
+      if (index >= total) {
         clearTimeout(bulkExpandTimer);
         bulkExpandTimer = setTimeout(() => {
           isBulkExpanding = false;
           if (expand && clickedAny) {
+            updateProgress(90, 'Caching predictions...');
+            try {
+              const all = collect(true);
+              if (window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
+                window.ConnectifyPredictorMath.populateChronologicalPredictions(all, false);
+              }
+            } catch (e) {
+              console.warn('Prediction pre-cache error:', e);
+            }
             notifyResultsUpdated();
           }
+          finishProgress();
         }, 320);
         return;
       }
 
       const heading = headings[index++];
+      const pct = Math.round((index / total) * (expand ? 85 : 100));
+      if (isFirstExpand) {
+        updateProgress(pct, `Expanding outlines... ${index}/${total} (${pct}%)`);
+      }
+
       if (pattern.test(heading.textContent)) {
         const btn = heading.querySelector('button, .v-button, [role="button"]');
         if (btn) {
@@ -425,7 +641,9 @@
     correctedCaption,
     expandAll,
     scrapeSubjectTasks,
-    notifyResultsUpdated
+    notifyResultsUpdated,
+    clearCache: () => subjectsCache.clear(),
+    cache: ConnectifyCache
   };
   } catch (err) {
     console.error('Connectify error in assessment-data.js:', err);

@@ -294,14 +294,27 @@
     }
   }
 
-  function schedule() {
+  let scheduleDebounceTimer = null;
+  function schedule(immediate = false) {
     if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
-    if (queued) return;
-    queued = true;
-    requestAnimationFrame(() => {
-      queued = false;
-      pass();
-    });
+    if (immediate) {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        pass();
+      });
+      return;
+    }
+    clearTimeout(scheduleDebounceTimer);
+    scheduleDebounceTimer = setTimeout(() => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        pass();
+      });
+    }, 120);
   }
 
   const observer = new MutationObserver(records => {
@@ -334,15 +347,19 @@
   window.addEventListener('storage', e => {
     if (e.key?.startsWith('connectea:cohort:v3:')) {
       estimator().memory?.delete(e.key);
-      schedule();
+      schedule(true);
     } else if (e.key === 'connectea:task_type_overrides') {
-      schedule();
+      schedule(true);
     }
   });
-  window.addEventListener('connectify-task-type-changed', schedule);
+  window.addEventListener('connectify-task-type-changed', () => schedule(true));
   window.addEventListener('connectify-settings-updated', () => {
     persistentEstimates.clear();
-    schedule();
+    schedule(true);
+  });
+  window.addEventListener('connectify-cohort-invalidated', () => {
+    persistentEstimates.clear();
+    schedule(true);
   });
 
   let timer = setInterval(schedule, 1500);
@@ -365,7 +382,7 @@
     schedule();
   });
 
-  schedule();
+  schedule(true);
 
   window.ConnectifyCohort = {
     percentile: (...args) => math().percentile(...args),
@@ -374,6 +391,8 @@
     estimateCohortSize: (...args) => estimator().estimateCohortSize(...args),
     estimatedSize: (...args) => estimator().estimateCohortSize(...args),
     pass,
-    schedule
+    schedule,
+    clearCohortCache: () => window.ConnectifyCache?.clearCohortCache?.(),
+    COHORT_ALGO_VERSION: window.ConnectifyCache?.VERSIONS?.COHORT || 'v4_20261001_cohort'
   };
 })();

@@ -320,6 +320,31 @@
     const stats = readStats(row);
     const userSize = estimator().loadCohortSize(key);
     const cohortSize = userSize ?? estimatedSize;
+
+    let baselinesSig = 0;
+    if (window.ConnectifyPredictorMath?.getBaselines) {
+      try {
+        const b = window.ConnectifyPredictorMath.getBaselines();
+        baselinesSig = (Object.keys(b?.types || {}).length * 1000) + Object.keys(b?.subjects || {}).length;
+      } catch {}
+    }
+
+    // Row-level render memoization: skip entire evaluation if inputs are unchanged
+    const statsKey = stats ? stats.join(',') : null;
+    const memo = ui._memo;
+    if (
+      memo &&
+      memo.mark === mark &&
+      memo.statsKey === statsKey &&
+      memo.cohortSize === cohortSize &&
+      memo.key === key &&
+      memo.isOverall === isOverall &&
+      memo.baselinesSig === baselinesSig &&
+      ui.wrapper?.isConnected
+    ) {
+      return;
+    }
+
     const data = math().summary(stats, mark, cohortSize);
 
     const isIncomplete = !isOverall && !Number.isFinite(mark);
@@ -355,6 +380,7 @@
           }
         } catch (e) {}
       }
+      ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig };
       return;
     }
 
@@ -433,22 +459,32 @@
           const hasAnyBaselines = (Object.keys(baselines?.subjects || {}).length > 0) || (Object.keys(baselines?.types || {}).length > 0);
           const hasBaselines = Boolean(hasSubjectBaseline || hasTypeBaseline || hasAnyBaselines);
 
-          const allSubjects = precollectedSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
-          const priorHistorical = predMath.getHistoricalDataPriorTo
-            ? predMath.getHistoricalDataPriorTo(allSubjects, meta.subjectName, taskMock)
+          let prediction = predMath.getCachedPrediction
+            ? predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName)
             : null;
 
-          const hasPriorSubjectData = priorHistorical?.subjects?.[cleanSubj] !== undefined;
-          const priorTypeCount = priorHistorical?.typeCounts?.[taskType] || 0;
-          const isFirstOfSubjectOrType = (!hasPriorSubjectData || priorTypeCount === 0);
+          let isFirstOfSubjectOrType = false;
+          if (!hasBaselines && !prediction) {
+            const allSubjects = precollectedSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+            const priorHistorical = predMath.getHistoricalDataPriorTo
+              ? predMath.getHistoricalDataPriorTo(allSubjects, meta.subjectName, taskMock)
+              : null;
+
+            const hasPriorSubjectData = priorHistorical?.subjects?.[cleanSubj] !== undefined;
+            const priorTypeCount = priorHistorical?.typeCounts?.[taskType] || 0;
+            isFirstOfSubjectOrType = (!hasPriorSubjectData || priorTypeCount === 0);
+          }
 
           if (!hasBaselines && isFirstOfSubjectOrType) {
             ui.outcomeBar.hidden = true;
             ui.outcomeBar.style.setProperty('display', 'none', 'important');
           } else {
-            let prediction = predMath.getOrComputeTaskPrediction
-              ? predMath.getOrComputeTaskPrediction(meta.subjectName, taskMock)
-              : (predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName) || predMath.predictTask(meta.subjectName, taskMock, null, null, true));
+            if (!prediction || prediction.unpredicted) {
+              const allSubjects = precollectedSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+              prediction = predMath.getOrComputeTaskPrediction
+                ? predMath.getOrComputeTaskPrediction(meta.subjectName, taskMock, allSubjects)
+                : (predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName) || predMath.predictTask(meta.subjectName, taskMock, null, null, true));
+            }
 
             if (!prediction || prediction.unpredicted) {
               prediction = predMath.predictTask(meta.subjectName, taskMock, null, null, true);
@@ -481,6 +517,7 @@
         ui.result,
         Number.isFinite(mark) ? 'Rank and z-score unavailable' : 'Not marked · Rank and z-score unavailable'
       );
+      ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig };
       return;
     }
 
@@ -515,6 +552,7 @@
     }
 
     setText(ui.result, parts.filter(Boolean).join('  •  '));
+    ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig };
   }
 
   let floatingTooltipEl = null;
@@ -588,6 +626,15 @@
         hideFloatingTooltip();
       });
     }
+
+    // Memoize rendered outcome segments to avoid destroying and recreating DOM nodes on scroll
+    const outcomeKey = `${outcome.segments}:${outcome.colors ? outcome.colors.join(',') : ''}:${Boolean(outcome.broken)}:${Boolean(outcome.critical)}`;
+    if (bar._renderedKey === outcomeKey && bar.children.length > 0) {
+      bar.hidden = false;
+      bar.style.setProperty('display', 'inline-flex', 'important');
+      return;
+    }
+    bar._renderedKey = outcomeKey;
 
     while (bar.firstChild) bar.removeChild(bar.firstChild);
 

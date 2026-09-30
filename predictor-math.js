@@ -347,12 +347,14 @@
   }
 
   // --- PREDICTION PERSISTENCE & CACHING ---
-  const PREDICTION_CACHE_VERSION_KEY = 'connectify:prediction_version';
-  const CURRENT_PREDICTION_VERSION = 'v3_chrono_20260924';
+  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v4_20261001_pred';
+  const PREDICTOR_CACHE_VERSION_KEY = window.ConnectifyCache?.KEYS?.PREDICTOR || 'connectify:cache_version:predictor';
+  const LEGACY_PREDICTION_VERSION_KEY = 'connectify:prediction_version';
 
   function isPredictionCacheCurrent() {
     try {
-      return localStorage.getItem(PREDICTION_CACHE_VERSION_KEY) === CURRENT_PREDICTION_VERSION;
+      const stored = localStorage.getItem(PREDICTOR_CACHE_VERSION_KEY) || localStorage.getItem(LEGACY_PREDICTION_VERSION_KEY);
+      return stored === PREDICTOR_ALGO_VERSION;
     } catch {
       return false;
     }
@@ -360,7 +362,8 @@
 
   function setPredictionCacheCurrent() {
     try {
-      localStorage.setItem(PREDICTION_CACHE_VERSION_KEY, CURRENT_PREDICTION_VERSION);
+      localStorage.setItem(PREDICTOR_CACHE_VERSION_KEY, PREDICTOR_ALGO_VERSION);
+      localStorage.setItem(LEGACY_PREDICTION_VERSION_KEY, PREDICTOR_ALGO_VERSION);
     } catch {}
   }
 
@@ -1105,7 +1108,9 @@
     populateChronologicalPredictions,
     getOrComputeTaskPrediction,
     isPredictionCacheCurrent,
-    PREDICTION_CACHE_VERSION: CURRENT_PREDICTION_VERSION
+    clearPredictionCache: () => window.ConnectifyCache?.clearPredictorCache?.(),
+    PREDICTOR_ALGO_VERSION,
+    PREDICTION_CACHE_VERSION: PREDICTOR_ALGO_VERSION
   };
 
   // Populate chronological predictions when results are scraped/updated if cache is not current

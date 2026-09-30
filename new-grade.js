@@ -344,6 +344,7 @@
     },
     jumpToSubject,
     expandSubjectCard,
-    processChangedSubject
+    processChangedSubject,
+    RESULTS_ALGO_VERSION: window.ConnectifyCache?.VERSIONS?.RESULTS || 'v4_20261001_results'
   };
 })();
