@@ -66,8 +66,8 @@
   const subjectsCache = new Map();
 
   function parseSemester(card) {
-    const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
-    const match = title.match(/Semester\s*([12])/i);
+    const title = normalize(card.querySelector('.eds-c-tile__title, h2, h3, .c-tile__title')?.textContent);
+    const match = title.match(/Semester\s*([12])/i) || title.match(/Sem\s*([12])/i);
     return match ? +match[1] : 1;
   }
 
@@ -76,11 +76,21 @@
    */
   function scrapeSubjectTasks(card) {
     if (!card) return;
-    const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
-    if (!/Semester\s*[12]/i.test(title)) return;
+    const title = normalize(card.querySelector('.eds-c-tile__title, h2, h3, .c-tile__title')?.textContent);
+    if (!title) return;
 
-    const subjectName = title.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '');
-    const taskRows = card.querySelectorAll('.cvr-c-tasks .cvr-c-task');
+    const subjectName = title
+      .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
+      .replace(/\s*[-–—]\s*Sem\s*[12].*$/i, '')
+      .trim();
+    if (!subjectName) return;
+
+    let taskRows = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'));
+    if (taskRows.length === 0) {
+      taskRows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(row => {
+        return !row.closest('.eds-c-accordion__section-heading') && !row.classList.contains('cvr-c-task--summary');
+      });
+    }
     if (taskRows.length === 0) return;
 
     if (!subjectsCache.has(subjectName)) {
@@ -96,16 +106,54 @@
 
       const rawMarkText = normalize(row.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
       const scoreMatch = rawMarkText.match(/^(\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
-      const isPending = /^[-–—]\s*Out\s+of\s+\d/i.test(rawMarkText);
+      const slashMatch = rawMarkText.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/i);
+      const percentMatch = rawMarkText.match(/^(-?\d+(?:\.\d+)?)\s*%$/i) || rawMarkText.match(/(-?\d+(?:\.\d+)?)\s*%/i);
+      const isPending = /^[-–—]\s*(?:Out\s+of|\/)\s*\d/i.test(rawMarkText) ||
+                        /^[-–—\s]+$/i.test(rawMarkText) ||
+                        /pending|not\s*marked/i.test(rawMarkText);
 
-      if (!scoreMatch && !isPending) continue;
-      if (scoreMatch && (+scoreMatch[2] <= 0 || +scoreMatch[1] > +scoreMatch[2])) continue;
+      let score = null;
+      let maxScore = null;
+      let isCompleted = false;
 
-      const maxScore = scoreMatch ? +scoreMatch[2] : Number(rawMarkText.match(/Out\s+of\s+(\d+(?:\.\d+)?)/i)?.[1]);
+      if (scoreMatch && +scoreMatch[2] > 0) {
+        if (+scoreMatch[1] <= +scoreMatch[2]) {
+          score = (+scoreMatch[1] / +scoreMatch[2]) * 100;
+          maxScore = +scoreMatch[2];
+          isCompleted = true;
+        }
+      } else if (slashMatch && +slashMatch[2] > 0) {
+        if (+slashMatch[1] <= +slashMatch[2]) {
+          score = (+slashMatch[1] / +slashMatch[2]) * 100;
+          maxScore = +slashMatch[2];
+          isCompleted = true;
+        }
+      } else if (percentMatch) {
+        score = Number(percentMatch[1]);
+        maxScore = 100;
+        isCompleted = true;
+      }
+
+      if (!isCompleted && !isPending) continue;
+
+      if (!maxScore) {
+        maxScore = Number(rawMarkText.match(/(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)/i)?.[1]) || 100;
+      }
 
       const weightElement = row.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark')[1];
-      const weightMatch = normalize(weightElement?.textContent).match(/Out\s+of\s+(\d+(?:\.\d+)?)/i);
-      const weight = weightMatch ? Number(weightMatch[1]) : null;
+      const weightText = normalize(weightElement?.textContent);
+      let weight = null;
+      const weightFracMatch = weightText.match(/^(\d+(?:\.\d+)?)\s*(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)$/i);
+      if (weightFracMatch) {
+        const num = Number(weightFracMatch[1]);
+        const den = Number(weightFracMatch[2]);
+        weight = (den === 100) ? num : (den > 0 && den <= 100 && num === den ? num : (num / den) * 100);
+      } else {
+        const weightMatch = weightText.match(/(\d+(?:\.\d+)?)\s*%/i) ||
+                            weightText.match(/(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)/i) ||
+                            weightText.match(/^(\d+(?:\.\d+)?)$/i);
+        weight = weightMatch ? Number(weightMatch[1]) : null;
+      }
 
       const taskName = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${tasks.size + 1}`;
       const caption = correctedCaption(title, taskName, labels[1] || '');
@@ -116,11 +164,11 @@
       );
       if (existingSameName) {
         // If already completed in Sem 1 and current is pending, ignore the unfinished Sem 2 clone
-        if (existingSameName.score !== null && isPending) {
+        if (existingSameName.score !== null && !isCompleted) {
           continue;
         }
         // If both are unfinished/pending, avoid duplicating the task in the list
-        if (existingSameName.pending && isPending) {
+        if (existingSameName.pending && !isCompleted) {
           Object.defineProperty(existingSameName, 'row', { value: row });
           continue;
         }
@@ -137,8 +185,8 @@
         id,
         name: taskName,
         caption,
-        score: scoreMatch ? (+scoreMatch[1] / +scoreMatch[2]) * 100 : null,
-        pending: isPending,
+        score: isCompleted ? score : null,
+        pending: !isCompleted,
         weight,
         mean: cohortMean(row),
         semester: Math.min(parseSemester(card), existingTask?.semester ?? 2),
@@ -171,7 +219,7 @@
    * @returns {Array<{name: string, tasks: Array<Object>}>} Array of subject records
    */
   function collect(includePending = false) {
-    const cards = Array.from(document.querySelectorAll('.eds-c-tile'))
+    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card]'))
       .sort((a, b) => parseSemester(a) - parseSemester(b));
 
     for (const card of cards) {

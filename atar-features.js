@@ -107,23 +107,23 @@
         settingsInstance = window.ConnectifyCategorySettings.createSettingsPanel();
       }
 
-      if (predictorInstance) {
-        if (!toolMenu.contains(predictorInstance.toggleBtn)) toolMenu.append(predictorInstance.toggleBtn);
-        if (!workspace.contains(predictorInstance.panel)) workspace.append(predictorInstance.panel);
-      }
-
-      if (weaknessInstance) {
-        if (!toolMenu.contains(weaknessInstance.toggleBtn)) toolMenu.append(weaknessInstance.toggleBtn);
-        if (!workspace.contains(weaknessInstance.panel)) workspace.append(weaknessInstance.panel);
-      }
-
-      if (settingsInstance) {
-        if (!toolMenu.contains(settingsInstance.catBtn)) toolMenu.append(settingsInstance.catBtn);
-        if (!workspace.contains(settingsInstance.catPanel)) workspace.append(settingsInstance.catPanel);
-      }
-
-      if (typeof window.ConnectifyInitSidebar === 'function') {
+      if (typeof window.ConnectifyInitSidebar === 'function' && window.ConnectifyInitSidebar !== initSidebarTools) {
         window.ConnectifyInitSidebar();
+      } else {
+        if (predictorInstance) {
+          if (!toolMenu.contains(predictorInstance.toggleBtn)) toolMenu.append(predictorInstance.toggleBtn);
+          if (!workspace.contains(predictorInstance.panel)) workspace.append(predictorInstance.panel);
+        }
+
+        if (weaknessInstance) {
+          if (!toolMenu.contains(weaknessInstance.toggleBtn)) toolMenu.append(weaknessInstance.toggleBtn);
+          if (!workspace.contains(weaknessInstance.panel)) workspace.append(weaknessInstance.panel);
+        }
+
+        if (settingsInstance) {
+          if (!toolMenu.contains(settingsInstance.catBtn)) toolMenu.append(settingsInstance.catBtn);
+          if (!workspace.contains(settingsInstance.catPanel)) workspace.append(settingsInstance.catPanel);
+        }
       }
     }
 
@@ -172,7 +172,9 @@
     }, 1500);
 
     window.ConnectifySync = syncFeatures;
-    window.ConnectifyInitSidebar = initSidebarTools;
+    if (!window.ConnectifyInitSidebar) {
+      window.ConnectifyInitSidebar = initSidebarTools;
+    }
   } catch (err) {
     console.error('Connectify error in atar-features.js:', err);
   }

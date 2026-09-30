@@ -629,29 +629,75 @@ html.connectea-dark {
 .connectea-dark :is(
   .c-category-menu,
   .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .eds-c-nav-list,
   .mat-list,
   .mat-action-list,
-  .mat-nav-list
-) :is(.mat-list-item, .mat-mdc-list-item, a, div, span, .mat-line, .mat-list-text, p) {
-  color: #f8fafc !important;
+  .mat-nav-list,
+  .mat-selection-list,
+  .cvr-c-navigation,
+  .cvr-c-drawer
+) :is(
+  .mat-list-item,
+  .mat-mdc-list-item,
+  .mat-list-item-content,
+  .mat-list-text,
+  .mat-line,
+  .eds-c-nav-list__item,
+  .v-tree-node,
+  a,
+  span,
+  div,
+  p,
+  label
+) {
+  color: #cbd5e1 !important;
 }
 
 .connectea-dark :is(
   .c-category-menu,
   .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .eds-c-nav-list,
   .mat-list,
   .mat-action-list,
-  .mat-nav-list
-) svg,
+  .mat-nav-list,
+  .mat-selection-list
+) :is(
+  .mat-list-item,
+  .mat-mdc-list-item,
+  .eds-c-nav-list__item,
+  a
+):hover :is(span, div, p, label, .mat-line, .mat-list-text) {
+  color: #ffffff !important;
+}
+
 .connectea-dark :is(
   .c-category-menu,
   .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .eds-c-nav-list,
   .mat-list,
-  .mat-action-list,
   .mat-nav-list
-) .mat-icon {
-  color: #cbd5e1 !important;
-  fill: #cbd5e1 !important;
+) :is(svg, .mat-icon, .v-icon, .eds-c-icon) {
+  color: #94a3b8 !important;
+  fill: #94a3b8 !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-nav-list
+) :is(.mat-list-item:hover, a:hover) :is(svg, .mat-icon, .v-icon, .eds-c-icon) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
 }
 
 /* Classes Page List Items, Status, Sort Dropdown & Action Controls */
@@ -980,13 +1026,109 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 }
 
 /* Feed Header Navigation Tabs (All, Classes, Read Later) */
-.connectea-dark :is(.cvr-c-feed-header__tabs, [class*="feed"] [class*="tabs"]) :is(button, a) {
+.connectea-dark :is(
+  .cvr-c-feed,
+  .cvr-c-feed-header,
+  .cvr-c-feed-header__tabs,
+  .cvr-c-feed__tabs,
+  .eds-c-tabs,
+  .mat-tab-header,
+  .mat-tab-group,
+  .mat-tab-nav-bar,
+  [class*="feed"] [class*="tab"]
+) :is(
+  .mat-tab-label,
+  .mat-tab-link,
+  .eds-c-tabs__tab,
+  .cvr-c-feed-tab,
+  .cvr-c-feed__tab,
+  .mat-tab-label-content,
+  button,
+  a,
+  span,
+  div,
+  li
+) {
   color: #cbd5e1 !important;
 }
 
-.connectea-dark :is(.cvr-c-feed-header__tabs, [class*="feed"] [class*="tabs"]) :is(button, a):hover,
-.connectea-dark :is(.cvr-c-feed-header__tabs, [class*="feed"] [class*="tabs"]) :is(.active, [class*="active"], [aria-selected="true"]) {
+.connectea-dark :is(
+  .cvr-c-feed,
+  .cvr-c-feed-header,
+  .cvr-c-feed-header__tabs,
+  .cvr-c-feed__tabs,
+  .eds-c-tabs,
+  .mat-tab-header,
+  .mat-tab-group,
+  .mat-tab-nav-bar,
+  [class*="feed"] [class*="tab"]
+) :is(
+  .mat-tab-label,
+  .mat-tab-link,
+  .eds-c-tabs__tab,
+  .cvr-c-feed-tab,
+  .cvr-c-feed__tab,
+  button,
+  a
+):hover,
+.connectea-dark :is(
+  .mat-tab-label-active,
+  .mat-tab-link.mat-tab-label-active,
+  .mat-tab-label.mat-tab-label-active,
+  .eds-c-tabs__tab--active,
+  .eds-c-tabs__tab[aria-selected="true"],
+  .cvr-c-feed__tab--active,
+  .active,
+  [class*="active"],
+  [aria-selected="true"]
+) :is(span, div, a, button, li),
+.connectea-dark :is(
+  .mat-tab-label-active,
+  .mat-tab-link.mat-tab-label-active,
+  .mat-tab-label.mat-tab-label-active,
+  .eds-c-tabs__tab--active,
+  .eds-c-tabs__tab[aria-selected="true"],
+  .cvr-c-feed__tab--active,
+  .active,
+  [class*="active"],
+  [aria-selected="true"]
+) {
   color: #f8fafc !important;
+}
+
+/* Reports Page Year Selector Bar & Sub-Headers */
+.connectea-dark :is(
+  .cvr-c-reports,
+  .cvr-c-report,
+  .cvr-c-report-years,
+  .cvr-c-report-year,
+  .cvr-c-year-selector,
+  .cvr-c-reporting-period,
+  .cvr-c-report-header,
+  .cvr-c-sub-header,
+  .cvr-c-subheader,
+  .eds-c-sub-header,
+  .cvr-c-page-header + div,
+  .cvr-c-page-header + section
+) {
+  background-color: #1a222d !important;
+  color: #f8fafc !important;
+  border-color: #36485e !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-reports,
+  .cvr-c-report-years,
+  .cvr-c-report-year,
+  .cvr-c-year-selector,
+  .cvr-c-reporting-period,
+  .cvr-c-report-header,
+  .cvr-c-sub-header,
+  .cvr-c-subheader
+) :is(div, span, button, a, p, label, li) {
+  background-color: transparent !important;
+  color: #f8fafc !important;
+  border-color: #36485e !important;
 }
 
 /* --------------------------------------------------------------------------

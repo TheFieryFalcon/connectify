@@ -398,49 +398,53 @@
             sequence: taskSeq
           };
 
-          let prediction = predMath.getOrComputeTaskPrediction
-            ? predMath.getOrComputeTaskPrediction(meta.subjectName, taskMock)
-            : (predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName) || predMath.predictTask(meta.subjectName, taskMock, null, null, true));
+          const cleanSubj = predMath.cleanSubject ? predMath.cleanSubject(meta.subjectName) : meta.subjectName;
+          const taskType = types().getEffectiveType ? types().getEffectiveType(meta.subjectName, taskMock) : (meta.taskType || 'Take-Home');
+          const baselines = predMath.getBaselines ? predMath.getBaselines() : { subjects: {}, types: {} };
 
-          if (!prediction || prediction.unpredicted) {
-            prediction = predMath.predictTask(meta.subjectName, taskMock, null, null, true);
-          }
+          const hasSubjectBaseline = baselines?.subjects && (baselines.subjects[cleanSubj] !== undefined || baselines.subjects[meta.subjectName] !== undefined);
+          const hasTypeBaseline = baselines?.types && baselines.types[taskType] !== undefined;
+          const hasAnyBaselines = (Object.keys(baselines?.subjects || {}).length > 0) || (Object.keys(baselines?.types || {}).length > 0);
+          const hasBaselines = Boolean(hasSubjectBaseline || hasTypeBaseline || hasAnyBaselines);
 
-          if (prediction && !prediction.unpredicted) {
-            const outcome = predMath.evaluateOutcome(mark, prediction);
-            renderOutcomeBar(ui.outcomeBar, outcome);
+          const allSubjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+          const priorHistorical = predMath.getHistoricalDataPriorTo
+            ? predMath.getHistoricalDataPriorTo(allSubjects, meta.subjectName, taskMock)
+            : null;
+
+          const hasPriorSubjectData = priorHistorical?.subjects?.[cleanSubj] !== undefined;
+          const priorTypeCount = priorHistorical?.typeCounts?.[taskType] || 0;
+          const isFirstOfSubjectOrType = (!hasPriorSubjectData || priorTypeCount === 0);
+
+          if (!hasBaselines && isFirstOfSubjectOrType) {
+            ui.outcomeBar.hidden = true;
+            ui.outcomeBar.style.setProperty('display', 'none', 'important');
           } else {
-            // Evaluated against mark baseline directly: outcome bar NEVER disappears on marked tasks
-            const fallbackPred = {
-              low: Math.max(0, Math.round(mark - 8)),
-              mid: Math.round(mark),
-              high: Math.min(100, Math.round(mark + 8)),
-              breakoutScore: Number((1.10 * Math.min(100, Math.round(mark + 8))).toFixed(2)),
-              taskType: meta.taskName || 'Assessment'
-            };
-            const outcome = predMath.evaluateOutcome(mark, fallbackPred);
-            renderOutcomeBar(ui.outcomeBar, outcome);
-          }
-        } catch (e) {
-          if (Number.isFinite(mark) && window.ConnectifyPredictorMath) {
-            try {
-              const fallbackPred = {
+            let prediction = predMath.getOrComputeTaskPrediction
+              ? predMath.getOrComputeTaskPrediction(meta.subjectName, taskMock)
+              : (predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName) || predMath.predictTask(meta.subjectName, taskMock, null, null, true));
+
+            if (!prediction || prediction.unpredicted) {
+              prediction = predMath.predictTask(meta.subjectName, taskMock, null, null, true);
+            }
+
+            if (!prediction || prediction.unpredicted) {
+              prediction = {
                 low: Math.max(0, Math.round(mark - 8)),
                 mid: Math.round(mark),
                 high: Math.min(100, Math.round(mark + 8)),
                 breakoutScore: Number((1.10 * Math.min(100, Math.round(mark + 8))).toFixed(2)),
-                taskType: 'Assessment'
+                taskType: taskType
               };
-              const outcome = window.ConnectifyPredictorMath.evaluateOutcome(mark, fallbackPred);
-              renderOutcomeBar(ui.outcomeBar, outcome);
-            } catch (err) {
-              ui.outcomeBar.hidden = true;
-              ui.outcomeBar.style.setProperty('display', 'none', 'important');
             }
-          } else {
-            ui.outcomeBar.hidden = true;
-            ui.outcomeBar.style.setProperty('display', 'none', 'important');
+
+            const outcome = predMath.evaluateOutcome(mark, prediction);
+            renderOutcomeBar(ui.outcomeBar, outcome);
           }
+        } catch (e) {
+          console.error('cohort-view error in outcomeBar:', e);
+          ui.outcomeBar.hidden = true;
+          ui.outcomeBar.style.setProperty('display', 'none', 'important');
         }
       }
     }

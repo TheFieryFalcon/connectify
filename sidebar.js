@@ -170,6 +170,13 @@
           const found = atarBtns.find(b => b && b.id === item.id);
           if (found) {
             matches = [found];
+          } else if (item.id === 'connectify-predictor-toggle') {
+            const predBtn = window.ConnectifyPredictorUI?.panelRefs?.toggleBtn || window.ConnectifyPredictorUI?.getInstance?.()?.toggleBtn;
+            if (predBtn) matches = [predBtn];
+          } else if (item.id === 'connectify-weakness-toggle' && window.ConnectifyWeakness?.panelRefs?.toggleBtn) {
+            matches = [window.ConnectifyWeakness.panelRefs.toggleBtn];
+          } else if (item.id === 'connectify-categories-toggle' && window.ConnectifyCategorySettings?.panelRefs?.catBtn) {
+            matches = [window.ConnectifyCategorySettings.panelRefs.catBtn];
           }
         }
         let btn = null;
@@ -218,6 +225,13 @@
         let matches = Array.from(document.querySelectorAll('#' + panelId));
         if (matches.length === 0 && panelId === 'connectea-atar' && window.ConnectifyAtar?.calculatorPanel) {
           matches = [window.ConnectifyAtar.calculatorPanel];
+        } else if (matches.length === 0 && panelId === 'connectify-predictor') {
+          const pPanel = window.ConnectifyPredictorUI?.panelRefs?.panel || window.ConnectifyPredictorUI?.getInstance?.()?.panel;
+          if (pPanel) matches = [pPanel];
+        } else if (matches.length === 0 && panelId === 'connectify-weakness' && window.ConnectifyWeakness?.panelRefs?.panel) {
+          matches = [window.ConnectifyWeakness.panelRefs.panel];
+        } else if (matches.length === 0 && panelId === 'connectify-categories' && window.ConnectifyCategorySettings?.panelRefs?.catPanel) {
+          matches = [window.ConnectifyCategorySettings.panelRefs.catPanel];
         }
         if (matches.length > 0) {
           const inWorkspace = matches.find(m => m.parentElement === workspace);

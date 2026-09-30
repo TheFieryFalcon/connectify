@@ -64,7 +64,11 @@
     const chartDiv = document.getElementById('connectify-radar-chart');
     if (!chartDiv) return;
 
-    const subjectMap = getSubjectList();
+    let subjectMap = getSubjectList();
+    if (subjectMap.size === 0 && window.ConnectifyData?.collect) {
+      window.ConnectifyData.collect(true);
+      subjectMap = getSubjectList();
+    }
     let selectedCount = 0;
     for (const cleanName of subjectMap.keys()) {
       const rawName = subjectMap.get(cleanName);
@@ -306,6 +310,12 @@
       panel.hidden = false;
       toggleBtn.setAttribute('aria-pressed', 'true');
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'weakness' }));
+      if (window.ConnectifyData?.collect) {
+        window.ConnectifyData.collect(true);
+      }
+      if (getSubjectList().size === 0 && window.ConnectifyData?.expandAll) {
+        window.ConnectifyData.expandAll(true);
+      }
       updateCheckboxes(panel);
       setTimeout(renderChart, 50);
     }
@@ -325,7 +335,7 @@
       }
     };
 
-    return {
+    const refs = {
       toggleBtn,
       panel,
       openWeakness,
@@ -334,11 +344,14 @@
       updateCheckboxes: () => updateCheckboxes(panel),
       destroyChart
     };
+    window.ConnectifyWeakness.panelRefs = refs;
+    return refs;
   }
 
   window.ConnectifyWeakness = {
     createWeaknessPanel,
     renderChart,
-    destroyChart
+    destroyChart,
+    panelRefs: null
   };
 })();

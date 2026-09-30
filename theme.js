@@ -157,12 +157,13 @@
       }
 
       const inkCandidates = document.body.querySelectorAll(
-        '[data-connectea-surface] :is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong):not([data-connectea-ink]):not(#connectify-sidebar *)'
+        ':is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li):not([data-connectea-ink]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *)'
       );
       for (const el of inkCandidates) {
+        if (el.children.length > 2) continue;
         const style = window.getComputedStyle(el);
         const fgRgb = parseRgb(style.color, true);
-        if (isNeutralColor(fgRgb) && Math.max(...fgRgb) < 170) {
+        if (isNeutralColor(fgRgb) && Math.max(...fgRgb) < 140) {
           el.setAttribute('data-connectea-ink', '');
         }
       }

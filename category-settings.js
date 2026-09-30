@@ -682,7 +682,7 @@
       renderBaselines();
     });
 
-    return {
+    const refs = {
       catBtn,
       catPanel,
       openCategories,
@@ -691,6 +691,8 @@
       renderCalibTable: renderCalib,
       renderBaselines
     };
+    window.ConnectifyCategorySettings.panelRefs = refs;
+    return refs;
   }
 
   window.ConnectifyCategorySettings = {

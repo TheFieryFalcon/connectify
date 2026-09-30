@@ -38,10 +38,15 @@
 .connectea-dark #connectify-sidebar .cx-tool-menu>button,.connectea-dark #connectify-sidebar .cx-tool-menu>.cx-calculator-tool{background:#2a3b4c;color:#e1eaf3;border-color:#496178}
 .connectea-dark #connectify-sidebar .cx-tool-menu>button:hover,.connectea-dark #connectify-sidebar .cx-tool-menu>.cx-calculator-tool:hover{background:#364e65;border-color:#6ba5d6;color:#ffffff}
 .connectea-dark #connectify-sidebar.cx-tool-active .cx-calculator-tool[aria-pressed=true],.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu>button[aria-pressed=true]{background:#41627d;color:#fff;border-color:#81acca}
-#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle) {
+#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+#connectify-sidebar .cx-tool-menu > .cx-secondary-tool,
+#connectify-sidebar .cx-back-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+#connectify-sidebar .cx-back-menu > .cx-secondary-tool {
   background: #ffffff !important;
   color: #245579 !important;
   border: 1px solid #bacddd !important;
+  text-align: center !important;
+  justify-content: center !important;
 }
 #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle):hover {
   background: #f1f5f9 !important;

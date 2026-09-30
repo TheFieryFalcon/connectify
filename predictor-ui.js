@@ -144,6 +144,7 @@
         tabBtn.className = `cx-pred-subtab ${idx === activeSubjectIndex ? 'active' : ''}`;
         tabBtn.textContent = subj.cleanName;
         tabBtn.title = subj.cleanName;
+        tabBtn.dataset.idx = String(idx);
         tabBtn.onclick = () => {
           activeSubjectIndex = idx;
           renderPanel();
@@ -324,10 +325,10 @@
       const predMath = window.ConnectifyPredictorMath;
       const atarProj = predMath.projectATAR(allSubjects);
 
-      if (atarProj.error) {
+      if (atarProj.error || !atarProj.mid?.courses) {
         container.innerHTML = `
           <div class="cx-pred-card" style="text-align:center; padding:28px 16px;">
-            <p class="cx-pred-hint" style="margin:0; font-size:12.5px; line-height:1.5;">${atarProj.error}</p>
+            <p class="cx-pred-hint" style="margin:0; font-size:12.5px; line-height:1.5;">${atarProj.error || atarProj.mid?.error || 'At least four ATAR courses are required to project ATAR.'}</p>
             <div style="font-size:11px; margin-top:6px; opacity:0.8;">
               Ensure at least four Year 11/12 ATAR course outlines are expanded on Connect.
             </div>
@@ -344,22 +345,22 @@
           <div style="display:grid; grid-template-columns:1fr 1.3fr 1fr; gap:8px; text-align:center; align-items:center;">
             <div class="cx-pred-scenario-card" style="padding:10px 6px;">
               <div class="cx-pred-scenario-label">Low Scenario</div>
-              <div class="cx-pred-scenario-value" style="font-size:19px; margin-top:3px;">${atarProj.low.atar}</div>
-              <div class="cx-pred-scenario-sub">TEA ${atarProj.low.tea}</div>
+              <div class="cx-pred-scenario-value" style="font-size:19px; margin-top:3px;">${atarProj.low?.atar ?? '—'}</div>
+              <div class="cx-pred-scenario-sub">TEA ${atarProj.low?.tea ?? 0}</div>
             </div>
             <div class="cx-pred-scenario-card cx-pred-scenario-card--mid" style="padding:12px 6px;">
               <div class="cx-pred-scenario-label cx-pred-scenario-label--mid">Expected ATAR</div>
-              <div class="cx-pred-scenario-value cx-pred-scenario-value--mid cx-pred-scenario-value--atar">${atarProj.mid.atar}</div>
-              <div class="cx-pred-scenario-sub cx-pred-scenario-sub--mid">TEA ${atarProj.mid.tea}</div>
+              <div class="cx-pred-scenario-value cx-pred-scenario-value--mid cx-pred-scenario-value--atar">${atarProj.mid?.atar ?? '—'}</div>
+              <div class="cx-pred-scenario-sub cx-pred-scenario-sub--mid">TEA ${atarProj.mid?.tea ?? 0}</div>
             </div>
             <div class="cx-pred-scenario-card" style="padding:10px 6px;">
               <div class="cx-pred-scenario-label">High Scenario</div>
-              <div class="cx-pred-scenario-value cx-pred-scenario-value--high" style="font-size:19px; margin-top:3px;">${atarProj.high.atar}</div>
-              <div class="cx-pred-scenario-sub">TEA ${atarProj.high.tea}</div>
+              <div class="cx-pred-scenario-value cx-pred-scenario-value--high" style="font-size:19px; margin-top:3px;">${atarProj.high?.atar ?? '—'}</div>
+              <div class="cx-pred-scenario-sub">TEA ${atarProj.high?.tea ?? 0}</div>
             </div>
           </div>
           <div style="margin-top:12px; font-size:11px; opacity:0.8; text-align:center; line-height:1.4;">
-            TEA ${atarProj.mid.tea} = best four ${atarProj.mid.baseTEA} + bonuses ${atarProj.mid.bonusTEA}
+            TEA ${atarProj.mid?.tea ?? 0} = best four ${atarProj.mid?.baseTEA ?? 0} + bonuses ${atarProj.mid?.bonusTEA ?? 0}
           </div>
         </div>
 
@@ -375,8 +376,8 @@
               </tr>
             </thead>
             <tbody>
-              ${atarProj.mid.courses.map(c => {
-                const isTop = atarProj.mid.topCourses.some(t => t.id === c.id);
+              ${(atarProj.mid.courses || []).map(c => {
+                const isTop = (atarProj.mid.topCourses || []).some(t => t.id === c.id);
                 const displayScore = c.score !== undefined ? (Number.isFinite(c.score) ? Math.round(c.score) : c.score) : '—';
                 return `
                   <tr style="${isTop ? 'background:rgba(34,197,94,0.06);' : ''}">
@@ -421,7 +422,8 @@
       liveBtn.setAttribute('aria-pressed', 'false');
     }
 
-    toggleBtn.onclick = () => {
+    toggleBtn.onclick = (e) => {
+      if (e) e.stopPropagation();
       const livePanel = document.getElementById('connectify-predictor') || panel;
       if (livePanel.hidden) {
         openPredictor();
@@ -431,20 +433,79 @@
       }
     };
 
+    document.addEventListener('click', e => {
+      // 1. Predictor launcher toggle button
+      const toggle = e.target.closest('#connectify-predictor-toggle');
+      if (toggle) {
+        const livePanel = document.getElementById('connectify-predictor') || panel;
+        if (livePanel.hidden) {
+          openPredictor();
+        } else {
+          closePredictor();
+          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
+        }
+        return;
+      }
+
+      // 2. Predictor internal panel clicks
+      const livePanel = document.getElementById('connectify-predictor') || panel;
+      if (!livePanel.contains(e.target)) return;
+
+      const gradeTab = e.target.closest('#cx-pred-btn-grade');
+      if (gradeTab) {
+        activeMainTab = 'grade';
+        renderPanel();
+        return;
+      }
+
+      const atarTab = e.target.closest('#cx-pred-btn-atar');
+      if (atarTab) {
+        activeMainTab = 'atar';
+        renderPanel();
+        return;
+      }
+
+      const subtab = e.target.closest('.cx-pred-subtab');
+      if (subtab && subtab.dataset.idx !== undefined) {
+        activeSubjectIndex = Number(subtab.dataset.idx);
+        renderPanel();
+        return;
+      }
+
+      const expandBtn = e.target.closest('#cx-pred-expand-outlines');
+      if (expandBtn) {
+        if (window.ConnectifyData?.expandAll) {
+          window.ConnectifyData.expandAll(true);
+        }
+        return;
+      }
+
+      const gotoSettingsBtn = e.target.closest('#cx-pred-goto-settings');
+      if (gotoSettingsBtn) {
+        const settingsToggle = document.getElementById('connectify-categories-toggle');
+        if (settingsToggle) settingsToggle.click();
+        else window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
+        return;
+      }
+    });
+
     window.addEventListener('connectify-open', e => {
       if (e.detail !== 'predictor') closePredictor();
     });
 
     window.addEventListener('connectify-baselines-updated', () => {
-      if (!panel.hidden) renderPanel();
+      const livePanel = document.getElementById('connectify-predictor') || panel;
+      if (!livePanel.hidden) renderPanel();
     });
 
     window.addEventListener('connectify-results-updated', () => {
-      if (!panel.hidden) renderPanel();
+      const livePanel = document.getElementById('connectify-predictor') || panel;
+      if (!livePanel.hidden) renderPanel();
     });
 
     window.addEventListener('connectify-task-type-changed', () => {
-      if (!panel.hidden) renderPanel();
+      const livePanel = document.getElementById('connectify-predictor') || panel;
+      if (!livePanel.hidden) renderPanel();
     });
 
     return {
@@ -476,7 +537,17 @@
   window.ConnectifyPredictorUI = {
     createPredictorPanel,
     ensurePredictorPanel,
-    getInstance: () => ensurePredictorPanel()
+    getInstance: () => ensurePredictorPanel(),
+    get panelRefs() {
+      const inst = ensurePredictorPanel();
+      return {
+        toggleBtn: inst.toggleBtn,
+        panel: inst.panel,
+        openPredictor: inst.openPredictor,
+        closePredictor: inst.closePredictor,
+        renderPredictor: inst.renderPredictor
+      };
+    }
   };
 
   // Self-initialize immediately so elements exist as soon as content script loads
