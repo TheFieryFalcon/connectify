@@ -271,6 +271,7 @@
     }
 
     // Pass 2: Render using unified best estimates
+    const allSubjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
     for (const card of cards) {
       const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
         row => row.closest('.eds-c-tile') === card
@@ -285,7 +286,7 @@
       for (const row of rows) {
         const isOverall = !row.closest('.cvr-c-tasks');
         try {
-          view().render(row, isOverall, key, estimatedSize, schedule);
+          view().render(row, isOverall, key, estimatedSize, schedule, allSubjects);
         } catch (error) {
           console.debug('Connectify:', error);
         }

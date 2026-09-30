@@ -328,21 +328,49 @@
     return null;
   }
 
+  let isBulkExpanding = false;
+  let bulkExpandTimer = null;
+
   /**
    * Programmatically click the accordion headers to expand or collapse details.
+   * Staggered across animation frames to eliminate thread blocking and extreme lag.
    */
   function expandAll(expand = true) {
+    if (isBulkExpanding) return;
     const pattern = expand ? /show details/i : /hide details/i;
+    const headings = Array.from(document.querySelectorAll('.eds-c-tile .eds-c-accordion__section-heading'))
+      .filter(h => pattern.test(h.textContent));
+
+    if (headings.length === 0) return;
+
+    isBulkExpanding = true;
     let clickedAny = false;
-    for (const heading of document.querySelectorAll('.eds-c-tile .eds-c-accordion__section-heading')) {
-      if (pattern.test(heading.textContent)) {
-        heading.querySelector('button, .v-button, [role="button"]')?.click();
-        clickedAny = true;
+    let index = 0;
+
+    function clickNext() {
+      if (index >= headings.length) {
+        clearTimeout(bulkExpandTimer);
+        bulkExpandTimer = setTimeout(() => {
+          isBulkExpanding = false;
+          if (expand && clickedAny) {
+            notifyResultsUpdated();
+          }
+        }, 320);
+        return;
       }
+
+      const heading = headings[index++];
+      if (pattern.test(heading.textContent)) {
+        const btn = heading.querySelector('button, .v-button, [role="button"]');
+        if (btn) {
+          btn.click();
+          clickedAny = true;
+        }
+      }
+      requestAnimationFrame(clickNext);
     }
-    if (expand && clickedAny) {
-      setTimeout(() => notifyResultsUpdated(), 260);
-    }
+
+    clickNext();
   }
 
   // Listen for user clicks on subject accordion headers to update results cache immediately upon expansion
@@ -361,6 +389,7 @@
 
   // Observe DOM additions inside subject tiles when expanded
   const expandMutationObserver = new MutationObserver(mutations => {
+    if (isBulkExpanding) return;
     let expandedCard = null;
     for (const m of mutations) {
       if (m.addedNodes.length > 0) {

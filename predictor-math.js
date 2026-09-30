@@ -77,20 +77,52 @@
   // --- BASELINE STORAGE (Cold-Start Early in the Year) ---
   function getBaselines() {
     const account = getAccountKey();
-    const typeKey = `connectify:baseline:types:${account}`;
-    const subjectKey = `connectify:baseline:subjects:${account}`;
     let types = {};
     let subjects = {};
 
-    try {
-      const storedTypes = localStorage.getItem(typeKey);
-      if (storedTypes) types = JSON.parse(storedTypes) || {};
-    } catch {}
+    const candidateTypeKeys = [
+      'connectea:baseline:types',
+      'connectea:baselines:types',
+      'connectify:baseline:types',
+      'connectify:baselines:types',
+      `connectea:baseline:types:${account}`,
+      `connectea:baselines:types:${account}`,
+      `connectify:baselines:types:${account}`,
+      `connectify:baseline:types:${account}`
+    ];
+    for (const key of candidateTypeKeys) {
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object') {
+            types = { ...types, ...parsed };
+          }
+        }
+      } catch {}
+    }
 
-    try {
-      const storedSubj = localStorage.getItem(subjectKey);
-      if (storedSubj) subjects = JSON.parse(storedSubj) || {};
-    } catch {}
+    const candidateSubjKeys = [
+      'connectea:baseline:subjects',
+      'connectea:baselines:subjects',
+      'connectify:baseline:subjects',
+      'connectify:baselines:subjects',
+      `connectea:baseline:subjects:${account}`,
+      `connectea:baselines:subjects:${account}`,
+      `connectify:baselines:subjects:${account}`,
+      `connectify:baseline:subjects:${account}`
+    ];
+    for (const key of candidateSubjKeys) {
+      try {
+        const stored = localStorage.getItem(key);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object') {
+            subjects = { ...subjects, ...parsed };
+          }
+        }
+      } catch {}
+    }
 
     return { types, subjects };
   }
@@ -293,9 +325,10 @@
     if (historical.subjectSpreads && Number.isFinite(historical.subjectSpreads[cleanSubj])) {
       sigma = historical.subjectSpreads[cleanSubj];
     }
-    const lowDelta = Math.min(14.0, Math.max(2.0, (sigma * sigma) / 12 + 0.5 * sigma));
+    const lowDelta = Math.min(22.0, Math.max(1.5, (sigma * sigma) / 10 + 0.7 * sigma));
     const low = Math.max(0, round(mid - lowDelta, 1));
-    const high = Math.min(100, round(applyLogarithmicCeiling(mid, 1.25 * sigma), 1));
+    const highDelta = Math.min(22.0, Math.max(1.5, 1.35 * sigma));
+    const high = Math.min(100, round(applyLogarithmicCeiling(mid, highDelta), 1));
 
     // 7. Multiplicative 10% Breakout Score threshold (Score > 1.10 * High):
     const breakoutScore = round(1.10 * high, 2);
@@ -904,10 +937,26 @@
         projectedLow = round(((completedEarned + upcomingLowEarned) / totalSubjectWeight) * 100, 1);
         projectedMid = round(((completedEarned + upcomingMidEarned) / totalSubjectWeight) * 100, 1);
         projectedHigh = round(((completedEarned + upcomingHighEarned) / totalSubjectWeight) * 100, 1);
+
+        // Ensure distinct scenario bounds for subject projections
+        const remainingRatio = Math.max(0.15, (predictedUpcomingWeight + unpredictedUpcomingWeight) / totalSubjectWeight);
+        const minSubjectSpread = Math.max(3.0, round(12.0 * remainingRatio, 1));
+        if (projectedMid - projectedLow < minSubjectSpread) {
+          projectedLow = Math.max(0, round(projectedMid - minSubjectSpread, 1));
+        }
+        if (projectedHigh - projectedMid < minSubjectSpread) {
+          projectedHigh = Math.min(100, round(applyLogarithmicCeiling(projectedMid, minSubjectSpread), 1));
+        }
       } else if (hasSubjectAverage && completedWeight > 0) {
-        projectedLow = projectedMid = projectedHigh = round(runningMark, 1);
+        const midScore = round(runningMark, 1);
+        projectedMid = midScore;
+        projectedLow = Math.max(0, round(midScore - 4.0, 1));
+        projectedHigh = Math.min(100, round(applyLogarithmicCeiling(midScore, 4.0), 1));
       } else if (hasSubjectAverage && baselineMark !== null) {
-        projectedLow = projectedMid = projectedHigh = round(baselineMark, 1);
+        const baseScore = round(baselineMark, 1);
+        projectedMid = baseScore;
+        projectedLow = Math.max(0, round(baseScore - 6.0, 1));
+        projectedHigh = Math.min(100, round(applyLogarithmicCeiling(baseScore, 6.0), 1));
       }
 
       results.push({

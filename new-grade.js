@@ -92,52 +92,12 @@
     const card = entry.card;
     if (!card) return;
 
-    const heading = card.querySelector('.eds-c-accordion__section-heading');
-    const btn = heading?.querySelector('button, .v-button, [role="button"]');
-    if (!heading || !btn) return;
-
-    const isAutoExpandOff = (() => {
-      try {
-        return localStorage.getItem('connectify:auto_expand') === 'false';
-      } catch {
-        return false;
-      }
-    })();
-
-    const isCurrentlyCollapsed = /show details/i.test(heading.textContent);
-
-    if (isCurrentlyCollapsed) {
-      // 1. Ensure THAT SUBJECT ONLY is definitely expanded
-      btn.click();
-
-      // 2. Wait for tasks to render in DOM, scrape them, then if auto-expand is off, collapse it again
-      setTimeout(() => {
-        if (window.ConnectifyData?.scrapeSubjectTasks) {
-          window.ConnectifyData.scrapeSubjectTasks(card);
-        }
-        if (window.ConnectifyData?.notifyResultsUpdated) {
-          window.ConnectifyData.notifyResultsUpdated(card);
-        }
-
-        if (isAutoExpandOff) {
-          if (/hide details/i.test(heading.textContent)) {
-            btn.click();
-          }
-        }
-      }, 280);
-    } else {
-      // Already expanded: scrape tasks into cache
+    if (card.querySelector('.cvr-c-task')) {
       if (window.ConnectifyData?.scrapeSubjectTasks) {
         window.ConnectifyData.scrapeSubjectTasks(card);
       }
       if (window.ConnectifyData?.notifyResultsUpdated) {
         window.ConnectifyData.notifyResultsUpdated(card);
-      }
-
-      if (isAutoExpandOff) {
-        if (/hide details/i.test(heading.textContent)) {
-          btn.click();
-        }
       }
     }
   }

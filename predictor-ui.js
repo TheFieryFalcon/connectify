@@ -401,16 +401,16 @@
     function openPredictor() {
       const livePanel = document.getElementById('connectify-predictor') || panel;
       const liveBtn = document.getElementById('connectify-predictor-toggle') || toggleBtn;
+      const sidebar = document.getElementById('connectify-sidebar');
+      const workspace = sidebar?.querySelector('.cx-workspace');
+
+      if (workspace && !workspace.contains(livePanel)) {
+        workspace.append(livePanel);
+      }
+
       livePanel.hidden = false;
       liveBtn.setAttribute('aria-pressed', 'true');
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'predictor' }));
-
-      // Auto-expand outlines if not yet loaded
-      if (window.ConnectifyData?.collect && window.ConnectifyData.collect(true).length === 0) {
-        if (window.ConnectifyData.expandAll) {
-          window.ConnectifyData.expandAll(true);
-        }
-      }
 
       renderPanel();
     }

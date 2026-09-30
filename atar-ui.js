@@ -208,8 +208,6 @@
     }
 
     function openCalculator(mode) {
-      const isAuto = localStorage.getItem('connectify:auto_expand') !== 'false';
-      if (isAuto && window.ConnectifyData?.expandAll) window.ConnectifyData.expandAll();
       refreshData();
       calculatorPanel.hidden = false;
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));

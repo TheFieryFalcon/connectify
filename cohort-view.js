@@ -277,7 +277,7 @@
     return state;
   }
 
-  function render(row, isOverall, key, estimatedSize, onCohortChange) {
+  function render(row, isOverall, key, estimatedSize, onCohortChange, precollectedSubjects) {
     let ui = panels.get(row);
     const mark = readMark(row);
 
@@ -385,6 +385,30 @@
           const allRows = card ? Array.from(card.querySelectorAll('.cvr-c-task')) : [];
           const taskSeq = allRows.indexOf(row) >= 0 ? allRows.indexOf(row) : 0;
 
+          let taskOrder = null;
+          const taskName = meta.taskName || '';
+          const caption = meta.labels?.[1] || '';
+          const cardTitle = card ? (card.querySelector('.eds-c-tile__title, h2, h3')?.textContent || '') : '';
+          const customOrder = localStorage.getItem(`connectea:time_override:${meta.subjectName}:${taskName}`) ||
+                              localStorage.getItem(`connectea:time_override:${cardTitle}:${taskName}`);
+          if (customOrder !== null && customOrder !== '') {
+            const num = Number(customOrder);
+            if (Number.isFinite(num) && num > 0) {
+              const term = Math.floor((num - 1) / 10) + 1;
+              const week = ((num - 1) % 10) + 1;
+              taskOrder = (term - 1) * 12 + week;
+            }
+          }
+          if (taskOrder === null && window.ConnectifyData?.orderHint) {
+            taskOrder = window.ConnectifyData.orderHint(caption);
+          }
+
+          const weightElement = row.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark')[1];
+          const weightText = weightElement?.textContent?.trim() || '';
+          let rowWeight = 10;
+          const wMatch = weightText.match(/(\d+(?:\.\d+)?)\s*%/i) || weightText.match(/(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)/i);
+          if (wMatch) rowWeight = Number(wMatch[1]);
+
           const taskMock = {
             id: meta.labelsKey ? `${meta.labelsKey}:0` : undefined,
             name: meta.taskName,
@@ -395,7 +419,9 @@
             mark: mark,
             pending: false,
             semester: taskSemester,
-            sequence: taskSeq
+            sequence: taskSeq,
+            order: taskOrder,
+            weight: rowWeight
           };
 
           const cleanSubj = predMath.cleanSubject ? predMath.cleanSubject(meta.subjectName) : meta.subjectName;
@@ -407,7 +433,7 @@
           const hasAnyBaselines = (Object.keys(baselines?.subjects || {}).length > 0) || (Object.keys(baselines?.types || {}).length > 0);
           const hasBaselines = Boolean(hasSubjectBaseline || hasTypeBaseline || hasAnyBaselines);
 
-          const allSubjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+          const allSubjects = precollectedSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
           const priorHistorical = predMath.getHistoricalDataPriorTo
             ? predMath.getHistoricalDataPriorTo(allSubjects, meta.subjectName, taskMock)
             : null;
@@ -545,7 +571,7 @@
 
     const tooltipText = outcome.details || outcome.label || '';
     bar.dataset.connecteaTooltip = tooltipText;
-    bar.title = tooltipText;
+    bar.removeAttribute('title');
     bar.setAttribute('aria-label', tooltipText);
     bar.classList.toggle('connectea-outcome-broken', Boolean(outcome.broken));
     bar.classList.toggle('connectea-outcome-critical', Boolean(outcome.critical));

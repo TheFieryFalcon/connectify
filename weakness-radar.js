@@ -313,9 +313,6 @@
       if (window.ConnectifyData?.collect) {
         window.ConnectifyData.collect(true);
       }
-      if (getSubjectList().size === 0 && window.ConnectifyData?.expandAll) {
-        window.ConnectifyData.expandAll(true);
-      }
       updateCheckboxes(panel);
       setTimeout(renderChart, 50);
     }

@@ -1309,6 +1309,99 @@ runTest('assessment-data.js parses percentage marks, fractional scores, and pend
   document.body.removeChild(card);
 });
 
+runTest('design_rules.md mandates no unauthorized auto-expansion, backwards compatibility, and single floating tooltip', () => {
+  const content = fs.readFileSync(path.resolve(BASE_DIR, 'design_rules.md'), 'utf8');
+  assert.ok(content.includes('No Unauthorized Auto-Expansion') || content.includes('auto-expanded without user involvement'), 'design_rules.md must forbid unauthorized auto-expansion');
+  assert.ok(content.includes('Backwards Compatibility') || content.includes('backwards compatibility'), 'design_rules.md must enforce settings backwards compatibility');
+  assert.ok(content.includes('title'), 'design_rules.md must prohibit setting native title attribute on outcome bars');
+});
+
+runTest('cohort-view.js removes native title attribute from outcome bar and relies only on dataset.connecteaTooltip', () => {
+  delete window.ConnectifyCohortView;
+  const cohortJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+  eval(cohortJs);
+
+  assert.ok(!cohortJs.includes('bar.title = tooltipText'), 'cohort-view.js must not assign bar.title');
+  assert.ok(cohortJs.includes("bar.removeAttribute('title')"), 'cohort-view.js must remove title attribute');
+});
+
+runTest('Predictor, Weakness Analyzer, Calculator, and Grade Checker do not programmatically call expandAll without user action', () => {
+  const predUIJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-ui.js'), 'utf8');
+  const atarUIJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
+  const weaknessJs = fs.readFileSync(path.resolve(BASE_DIR, 'weakness-radar.js'), 'utf8');
+  const newGradeJs = fs.readFileSync(path.resolve(BASE_DIR, 'new-grade.js'), 'utf8');
+
+  // Verify openPredictor does not call expandAll
+  const openPredFnMatch = predUIJs.match(/function\s+openPredictor\s*\(\)\s*\{([\s\S]*?)\}/);
+  assert.ok(openPredFnMatch && !openPredFnMatch[1].includes('expandAll'), 'openPredictor must not call expandAll');
+
+  // Verify openCalculator does not call expandAll
+  const openCalcFnMatch = atarUIJs.match(/function\s+openCalculator\s*\([^)]*\)\s*\{([\s\S]*?)\}/);
+  assert.ok(openCalcFnMatch && !openCalcFnMatch[1].includes('expandAll'), 'openCalculator must not call expandAll');
+
+  // Verify openWeakness does not call expandAll
+  const openWeakMatch = weaknessJs.match(/function\s+openWeakness\s*\(\)\s*\{([\s\S]*?)\}/);
+  assert.ok(openWeakMatch && !openWeakMatch[1].includes('expandAll'), 'openWeakness must not call expandAll');
+
+  // Verify processChangedSubject does not automatically click buttons
+  const procSubjMatch = newGradeJs.match(/function\s+processChangedSubject\s*\([^)]*\)\s*\{([\s\S]*?)\}/);
+  assert.ok(procSubjMatch && !procSubjMatch[1].includes('.click()'), 'processChangedSubject must not automatically click buttons');
+});
+
+runTest('predictor-math.js getBaselines resolves legacy keys across connectea and connectify namespaces', () => {
+  delete window.ConnectifyPredictorMath;
+  const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  eval(predMathJs);
+
+  mockLocalStorage.clear();
+  mockLocalStorage.setItem('connectea:baseline:types', JSON.stringify({ Exam: 78, Test: 82 }));
+  mockLocalStorage.setItem('connectea:baseline:subjects', JSON.stringify({ Chemistry: 80 }));
+
+  const baselines = window.ConnectifyPredictorMath.getBaselines();
+  assert.strictEqual(baselines.types.Exam, 78, 'Legacy type baseline must be resolved');
+  assert.strictEqual(baselines.types.Test, 82, 'Legacy type baseline must be resolved');
+  assert.strictEqual(baselines.subjects.Chemistry, 80, 'Legacy subject baseline must be resolved');
+  mockLocalStorage.clear();
+});
+
+runTest('predictor-math.js provides distinct, widened scenario differences between Low, Mid, and High', () => {
+  delete window.ConnectifyPredictorMath;
+  const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  eval(predMathJs);
+
+  const task = { name: 'Investigation 2', score: null, pending: true, weight: 20, sequence: 2 };
+  const mockHistorical = {
+    subjects: { Physics: 80 },
+    types: { 'Application': 80, 'Test': 80, 'Take-Home': 80 },
+    typeCounts: { 'Application': 2, 'Test': 2, 'Take-Home': 2 },
+    spread: 6.0,
+    overallAverage: 80
+  };
+
+  const pred = window.ConnectifyPredictorMath.predictTask('Physics', task, mockHistorical, { types: {}, subjects: {} });
+  assert.ok(!pred.unpredicted, 'Task must be predicted');
+  assert.ok(pred.mid - pred.low >= 5, `Low prediction spread must be >= 5% (got ${pred.mid - pred.low})`);
+  assert.ok(pred.high - pred.mid >= 5, `High prediction spread must be >= 5% (got ${pred.high - pred.mid})`);
+
+  // Verify course-level projected grades maintain distinct scenario separation
+  const mockSubjects = [{
+    name: '12 Physics ATAR',
+    cleanName: 'Physics',
+    tasks: [
+      { name: 'Test 1', score: 82, weight: 30, pending: false, sequence: 0 },
+      { name: 'Investigation 2', score: null, weight: 30, pending: true, sequence: 1, caption: 'Term 2 Week 4' }
+    ]
+  }];
+
+  window.ConnectifyData = { collect: () => mockSubjects };
+  const projections = window.ConnectifyPredictorMath.projectSubjectGrades(mockSubjects);
+  assert.ok(projections.length > 0, 'Must project subject grades');
+  const physProj = projections.find(p => p.cleanName.includes('Physics'));
+  assert.ok(physProj && physProj.projected, 'Physics projection must exist');
+  assert.ok(physProj.projected.mid - physProj.projected.low >= 3, `Subject projected Low must differ by >= 3% from Mid (got ${physProj.projected.mid - physProj.projected.low})`);
+  assert.ok(physProj.projected.high - physProj.projected.mid >= 3, `Subject projected High must differ by >= 3% from Mid (got ${physProj.projected.high - physProj.projected.mid})`);
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');
