@@ -21,6 +21,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - High: High-contrast vibrant green `#4ade80` on dark card.
 - **Semantic Classes**: Use semantic classes (`.cx-settings-label`, `.cx-pred-scenario-value--mid`, `.cx-settings-col-header`) instead of hardcoded inline dark styles.
 - **Dynamic Surface Adaptation**: Use `data-connectea-surface` and `data-connectea-ink` on unstyled surfaces. Avoid inline style mutations.
+- **Typography Bolding Parity**: Dark and light modes enforce 1:1 bolding parity (`font-weight: 700 !important` on task titles `.cvr-c-task__details .v-label:first-child`, `.cvr-c-task__title`, group headers, task marks, and cohort stats `strong` tags; `font-weight: 400 !important` on secondary labels, out-of text, and subject summary marks).
 
 ## 3. Sidebar & Workspace Geometry
 - **Toggle Handle (`#connectify-sidebar-handle`)**: Viewport edge, width 38px, height 74px (expanded handle: 205px wide, 76px high).

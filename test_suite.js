@@ -2737,6 +2737,25 @@ runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, 
   assert.ok(assessJs.includes('clearTimeout(notifyUpdateTimer);'), 'assessment-data.js finalizeExpansion must clear notifyUpdateTimer to prevent delayed re-pass flash');
 });
 
+runTest('Test 113: Typography bolding parity between dark and light modes for task headers and details', () => {
+  const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+
+  // 1. Task titles and first details labels bolding in light and dark modes (font-weight: 700 !important)
+  assert.ok(sideCss.includes('.cvr-c-task__details .v-label:first-child'), 'sidebar.css must bold first details label');
+  assert.ok(sideCss.includes(':is(.connectea-dark, html.connectea-dark, body.connectea-dark)'), 'sidebar.css must enforce dark mode bolding parity');
+  assert.ok(themeCss.includes('.cvr-c-task__details .v-label:first-child'), 'theme.css must bold first details label in dark mode');
+  assert.ok(themeCss.includes(':is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is('), 'theme.css must override task details unbolding for task headers');
+
+  // 2. Summary mark and non-task score unbolding parity (font-weight: 400 !important)
+  assert.ok(sideCss.includes('.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'sidebar.css must unbold subject summary mark');
+  assert.ok(themeCss.includes('.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'theme.css must unbold subject summary mark');
+
+  // 3. Stats panel strong elements parity
+  assert.ok(sideCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold stats panel strong elements');
+  assert.ok(themeCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong'), 'theme.css must bold stats panel strong elements in dark mode');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

@@ -799,7 +799,7 @@ html.connectea-dark {
   border-top: 1px solid #2e3c4e !important;
 }
 
-:is(.connectea-dark, body, html) :is(
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(
   .cvr-c-task-group__title,
   .cvr-c-task__group-name,
   .cvr-c-task-group h2,
@@ -807,7 +807,15 @@ html.connectea-dark {
   .cvr-c-task-group h4,
   .cvr-c-task-group :is(.v-label, span, strong):first-child,
   [class*="task-group"] :is(h2, h3, h4, [class*="title"]),
-  .cvr-c-task__group-title
+  .cvr-c-task__group-title,
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is(
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
 ) {
   font-weight: 700 !important;
 }
@@ -820,7 +828,15 @@ html.connectea-dark {
   .cvr-c-task-group h4,
   .cvr-c-task-group :is(.v-label, span, strong):first-child,
   [class*="task-group"] :is(h2, h3, h4, [class*="title"]),
-  .cvr-c-task__group-title
+  .cvr-c-task__group-title,
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is(
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
 ) {
   color: #f1f5f9 !important;
 }

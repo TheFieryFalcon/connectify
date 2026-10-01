@@ -1136,7 +1136,22 @@ body.cx-freeze-scroll {
 :is(.connectea-panel, .connectea-distribution, .connectea-result) strong {
   font-weight: 700 !important;
 }
-:is(.cvr-c-task-group__title, .cvr-c-task__group-name, .cx-cat-name-label, .cvr-c-task__details .v-label:first-child) {
+:is(.cvr-c-task-group__title, .cvr-c-task__group-name, .cx-cat-name-label, .cvr-c-task__title, .cvr-c-task__details .v-label:first-child, .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child) {
+  font-weight: 700 !important;
+}
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(
+  .cvr-c-task-group__title,
+  .cvr-c-task__group-name,
+  .cx-cat-name-label,
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+),
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cvr-c-task :is(
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+) {
   font-weight: 700 !important;
 }
 .cvr-c-tasks :is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {
