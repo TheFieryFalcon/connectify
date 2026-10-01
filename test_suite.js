@@ -1861,6 +1861,48 @@ runTest('theme.css and theme.js normalize class page red outlines and headers wi
   assert.ok(js.includes("el.hasAttribute('data-connectea-surface')"), 'theme.js must not tag surface containers as ink');
 });
 
+runTest('assessment-data.js strictly ignores summary rows outside .cvr-c-tasks and never synthesizes phantom tasks', () => {
+  const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  assert.ok(!dataJs.includes('cvr-c-task--summary'), 'assessment-data.js must not have fallback query capturing summary rows');
+  assert.ok(dataJs.includes("if (!row.closest('.cvr-c-tasks')) continue;"), 'assessment-data.js must guard against tasks outside cvr-c-tasks');
+  assert.ok(dataJs.includes('if (labels.length === 0) continue;'), 'assessment-data.js must not invent tasks when labels are empty');
+
+  const card = new MockElement('div', 'eds-c-tile');
+  const title = new MockElement('div', 'eds-c-tile__title');
+  title.textContent = 'Chemistry ATAR Year 11 - Semester 2';
+  card.children.push(title);
+  title.parentElement = card;
+
+  const emptyTasks = new MockElement('div', 'cvr-c-tasks');
+  card.children.push(emptyTasks);
+  emptyTasks.parentElement = card;
+
+  const summaryRow = new MockElement('div', 'cvr-c-task');
+  const summaryMarks = new MockElement('div', 'cvr-c-task__marks');
+  const markVal = new MockElement('div', 'cvr-c-task__mark');
+  markVal.textContent = '83.5%';
+  summaryMarks.children.push(markVal);
+  summaryRow.children.push(summaryMarks);
+  card.children.push(summaryRow);
+  summaryRow.parentElement = card;
+
+  window.ConnectifyData.clearCache();
+  window.ConnectifyData.scrapeSubjectTasks(card);
+
+  const scraped = window.ConnectifyData.getSubjectTasks('Chemistry');
+  assert.strictEqual(scraped.length, 0, 'No phantom tasks must be scraped from summary row when cvr-c-tasks is empty');
+});
+
+runTest('atar-ui.js scanAndRefresh awaits DOM expansion and theme.css uses high-specificity chained selectors for .eds.cvr.ngm', () => {
+  const atarUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
+  assert.ok(atarUiJs.includes('setTimeout') && atarUiJs.includes('collect(true)'), 'atar-ui.js scanAndRefresh must await DOM expansion and re-collect tasks');
+
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  assert.ok(css.includes('.eds.cvr.ngm') && css.includes('.theme-multiplier.text-primary'), 'theme.css must use chained .theme-multiplier.text-primary');
+  assert.ok(css.includes('.eds.cvr.ngm') && css.includes('.mat-divider--primary'), 'theme.css must use chained .mat-divider--primary');
+  assert.ok(css.includes('.cvr-c-reports') && css.includes('#1a222d'), 'theme.css must style Reports container with solid #1a222d background');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

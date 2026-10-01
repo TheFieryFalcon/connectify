@@ -140,7 +140,8 @@
   function isDarkColor(rgb) {
     if (!rgb) return false;
     const lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
-    return lum < 135 || (isNeutralColor(rgb) && Math.max(...rgb) < 140);
+    const isConnectRed = Math.abs(rgb[0] - 127) < 15 && Math.abs(rgb[1] - 55) < 15 && Math.abs(rgb[2] - 92) < 15;
+    return lum < 135 || (isNeutralColor(rgb) && Math.max(...rgb) < 140) || isConnectRed;
   }
 
   /**

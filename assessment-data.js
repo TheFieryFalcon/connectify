@@ -126,7 +126,10 @@
         .replace(/\bYear\s*\d+\b/gi, '')
         .trim().toLowerCase();
       if (cleanS === norm || sName.toLowerCase().includes(norm) || norm.includes(cleanS)) {
-        return Array.from(tasksMap.values());
+        return Array.from(tasksMap.values()).filter(t => {
+          if (/^Assessment\s+\d+$/i.test(t.name) && !t.caption && (t.weight === null || t.weight === 0)) return false;
+          return true;
+        });
       }
     }
     return [];
@@ -300,12 +303,7 @@
       .trim();
     if (!subjectName) return;
 
-    let taskRows = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'));
-    if (taskRows.length === 0) {
-      taskRows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(row => {
-        return !row.closest('.eds-c-accordion__section-heading') && !row.classList.contains('cvr-c-task--summary');
-      });
-    }
+    const taskRows = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'));
     if (taskRows.length === 0) return;
 
     if (!subjectsCache.has(subjectName)) {
@@ -315,9 +313,12 @@
     const occurrences = new Map();
 
     for (const row of taskRows) {
+      if (!row.closest('.cvr-c-tasks')) continue;
+
       const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
         .map(e => normalize(e.textContent))
         .filter(Boolean);
+      if (labels.length === 0) continue;
 
       const rawMarkText = normalize(row.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
       const scoreMatch = rawMarkText.match(/^(\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
@@ -473,7 +474,10 @@
     return Array.from(subjectsCache, ([name, tasks]) => ({
       name,
       tasks: Array.from(tasks.values())
-        .filter(t => includePending || !t.pending)
+        .filter(t => {
+          if (/^Assessment\s+\d+$/i.test(t.name) && !t.caption && (t.weight === null || t.weight === 0)) return false;
+          return includePending || !t.pending;
+        })
         .sort((a, b) => {
           if (a.order !== null && b.order !== null) return a.order - b.order;
           return a.sequence - b.sequence;

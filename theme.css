@@ -1357,6 +1357,7 @@ html.connectea-dark {
 ) {
   color: #cbd5e1 !important;
   fill: #cbd5e1 !important;
+  stroke: currentColor !important;
   opacity: 1 !important;
 }
 
@@ -1821,17 +1822,40 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 
 .connectea-dark :is(
   .cvr-c-reports,
+  .cvr-c-reports *,
   .cvr-c-report-years,
+  .cvr-c-report-years *,
   .cvr-c-report-year,
   .cvr-c-year-selector,
+  .cvr-c-year-selector *,
   .cvr-c-reporting-period,
   .cvr-c-report-header,
   .cvr-c-sub-header,
   .cvr-c-subheader
-) :is(div, span, button, a, p, label, li) {
-  background-color: transparent !important;
+) {
+  background-color: #1a222d !important;
   color: #f8fafc !important;
   border-color: #36485e !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-reports,
+  .cvr-c-report-years,
+  .cvr-c-year-selector
+) :is(button, .v-button, a) {
+  background-color: #24303f !important;
+  color: #f8fafc !important;
+  border: 1px solid #3d5066 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-reports,
+  .cvr-c-report-years,
+  .cvr-c-year-selector
+) :is(button, .v-button, a):hover {
+  background-color: #313f50 !important;
+  color: #ffffff !important;
+  border-color: #5c7899 !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -2789,32 +2813,63 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 }
 
 /* Angular Material Class Pages (.eds.cvr.ngm) Contrast Normalization */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+  [class*="connect-"].theme-multiplier.text-primary,
+  [class*="connect-"].theme-multiplier .text-primary,
+  [class*="connect-"].text-primary,
+  [class*="connect-"] .text-primary,
+  .connect-purple.theme-multiplier.text-primary,
+  .connect-purple.theme-multiplier .text-primary,
+  .connect-purple.text-primary,
+  .connect-purple .text-primary,
+  .theme-multiplier.text-primary,
+  .theme-multiplier .text-primary,
+  .text-primary
+),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
-  [class*="connect-"],
-  .connect-purple,
-  .theme-multiplier
-) :is(.text-primary, [class*="text-primary"]) {
+  [class*="connect-"].theme-multiplier.text-primary,
+  [class*="connect-"].theme-multiplier .text-primary,
+  [class*="connect-"].text-primary,
+  [class*="connect-"] .text-primary,
+  .connect-purple.theme-multiplier.text-primary,
+  .connect-purple.theme-multiplier .text-primary,
+  .connect-purple.text-primary,
+  .connect-purple .text-primary,
+  .theme-multiplier.text-primary,
+  .theme-multiplier .text-primary,
+  .text-primary
+) {
   color: #f1f5f9 !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
-  [class*="connect-"],
-  .connect-purple,
-  .theme-multiplier
-) :is(.mat-divider--primary, [class*="mat-divider"]) {
-  border-top-color: #3d5066 !important;
-  border-color: #3d5066 !important;
-}
-
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
-  .mat-divider,
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+  [class*="connect-"].theme-multiplier .mat-divider--primary,
+  [class*="connect-"].theme-multiplier.mat-divider--primary,
+  [class*="connect-"] .mat-divider--primary,
+  [class*="connect-"].mat-divider--primary,
+  .connect-purple.theme-multiplier .mat-divider--primary,
+  .connect-purple.theme-multiplier.mat-divider--primary,
+  .connect-purple .mat-divider--primary,
+  .connect-purple.mat-divider--primary,
+  .theme-multiplier .mat-divider--primary,
+  .theme-multiplier.mat-divider--primary,
   .mat-divider--primary,
-  [class*="mat-divider"]
+  .mat-divider
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
+  [class*="connect-"].theme-multiplier .mat-divider--primary,
+  [class*="connect-"].theme-multiplier.mat-divider--primary,
+  [class*="connect-"] .mat-divider--primary,
+  [class*="connect-"].mat-divider--primary,
+  .connect-purple.theme-multiplier .mat-divider--primary,
+  .connect-purple.theme-multiplier.mat-divider--primary,
+  .connect-purple .mat-divider--primary,
+  .connect-purple.mat-divider--primary,
+  .theme-multiplier .mat-divider--primary,
+  .theme-multiplier.mat-divider--primary,
+  .mat-divider--primary,
+  .mat-divider
 ) {
   border-top-color: #3d5066 !important;
   border-color: #3d5066 !important;
-}
-
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm .text-primary {
-  color: #f1f5f9 !important;
 }

@@ -67,23 +67,33 @@
       if (tasks.length === 0 && window.ConnectifyData?.getSubjectTasks) {
         const cachedTasks = window.ConnectifyData.getSubjectTasks(title) || window.ConnectifyData.getSubjectTasks(name);
         if (cachedTasks && cachedTasks.length > 0) {
-          tasks = cachedTasks.map(t => {
-            const isPending = Boolean(t.pending || t.score === null || t.score === undefined);
-            const scorePct = isPending ? undefined : Number(t.score);
-            const weightVal = Number(t.weight) || 0;
-            const earnedWeight = (!isPending && Number.isFinite(scorePct)) ? (scorePct / 100) * weightVal : 0;
-            return {
-              name: t.name,
-              weight: weightVal,
-              pending: isPending,
-              score: scorePct,
-              earned: earnedWeight
-            };
-          });
+          tasks = cachedTasks
+            .filter(t => t && t.name && (t.weight > 0 || !/^Assessment\s+\d+$/i.test(t.name)))
+            .map(t => {
+              const isPending = Boolean(t.pending || t.score === null || t.score === undefined);
+              const scorePct = isPending ? undefined : Number(t.score);
+              const weightVal = Number(t.weight) || 0;
+              const earnedWeight = (!isPending && Number.isFinite(scorePct)) ? (scorePct / 100) * weightVal : 0;
+              return {
+                name: t.name,
+                weight: weightVal,
+                pending: isPending,
+                score: scorePct,
+                earned: earnedWeight
+              };
+            });
         }
       }
 
       let markValue = markMatch ? scoreValue(markMatch[1]) : undefined;
+      if (markValue === undefined && tasks.length > 0) {
+        const completedTasks = tasks.filter(t => !t.pending && Number.isFinite(t.score) && t.weight > 0);
+        const totalCompletedWeight = completedTasks.reduce((s, t) => s + t.weight, 0);
+        if (totalCompletedWeight > 0) {
+          const earnedWeight = completedTasks.reduce((s, t) => s + (t.score / 100) * t.weight, 0);
+          markValue = (earnedWeight / totalCompletedWeight) * 100;
+        }
+      }
 
       const hasFinalLetter = Array.from(
         summaryRow?.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark') || []

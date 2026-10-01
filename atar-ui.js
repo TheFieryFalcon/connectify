@@ -144,9 +144,15 @@
         if (scraper?.scanOutlineDetails) {
           scraper.scanOutlineDetails(allSubjects, activeSemester);
         }
-        refreshData();
-        if (isGradingMode) plannerContext.renderGradeOutput();
-        else plannerContext.renderTargetOutput();
+        setTimeout(() => {
+          if (window.ConnectifyData?.collect) {
+            window.ConnectifyData.collect(true);
+          }
+          lastStateSignature = '';
+          refreshData();
+          if (isGradingMode) plannerContext.renderGradeOutput();
+          else plannerContext.renderTargetOutput();
+        }, 300);
       }
     };
 
@@ -205,6 +211,7 @@
     }
 
     function openCalculator(mode) {
+      lastStateSignature = '';
       refreshData();
       calculatorPanel.hidden = false;
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
