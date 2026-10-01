@@ -200,7 +200,7 @@
       clear: both !important;
     }
     .connectea-result {
-      font-weight: 600 !important;
+      font-weight: 400 !important;
       line-height: 1.5 !important;
       flex: 1 1 260px !important;
     }
@@ -349,11 +349,22 @@
       ) {
         continue;
       }
-      if (
+      const isPanel =
         r.target.matches?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .eds-c-accordion, .cvr-c-accordion') ||
-        r.target.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel')
-      ) {
-        continue;
+        r.target.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel');
+      if (isPanel) {
+        let hasTaskNodes = false;
+        if (r.addedNodes && r.addedNodes.length > 0) {
+          for (const node of r.addedNodes) {
+            if (node.nodeType === 1 && (node.matches?.('.cvr-c-task') || node.querySelector?.('.cvr-c-task'))) {
+              hasTaskNodes = true;
+              break;
+            }
+          }
+        }
+        if (!hasTaskNodes) {
+          continue;
+        }
       }
       shouldRun = true;
       break;

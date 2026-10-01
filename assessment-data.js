@@ -518,11 +518,13 @@
         subjects = collect(true);
       }
 
-      // Pre-cache predictions for newly revealed tasks so row renders hit cache in O(1)
+      // Pre-cache predictions only if a valid cache is missing
       if (window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
         try {
-          const list = subjects || collect(true);
-          window.ConnectifyPredictorMath.populateChronologicalPredictions(list, false);
+          if (!window.ConnectifyPredictorMath.isPredictionCacheCurrent?.()) {
+            const list = subjects || collect(true);
+            window.ConnectifyPredictorMath.populateChronologicalPredictions(list, false);
+          }
         } catch (e) {}
       }
 
@@ -638,7 +640,15 @@
     let progressBar = null;
     let progressText = null;
 
+    function unlockScroll() {
+      document.documentElement.classList.remove('cx-freeze-scroll');
+      document.body.classList.remove('cx-freeze-scroll');
+    }
+
     if (expand) {
+      document.documentElement.classList.add('cx-freeze-scroll');
+      document.body.classList.add('cx-freeze-scroll');
+
       progressPill = document.getElementById('cx-expand-progress');
       if (!progressPill) {
         progressPill = document.createElement('div');
@@ -663,8 +673,9 @@
     }
 
     function finishProgress() {
+      unlockScroll();
       if (!progressPill) return;
-      updateProgress(100, '✓ Outlines expanded & predictions cached');
+      updateProgress(100, '✓ Outlines expanded & statistics updated');
       setTimeout(() => {
         if (progressPill) {
           progressPill.style.opacity = '0';
@@ -679,26 +690,37 @@
         clearTimeout(bulkExpandTimer);
 
         function finalizeExpansion() {
-          isBulkExpanding = false;
           if (expand && clickedAny) {
-            updateProgress(90, 'Caching predictions...');
-            try {
-              const all = collect(true);
-              if (window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
-                window.ConnectifyPredictorMath.populateChronologicalPredictions(all, false);
+            const hasValidCache = Boolean(window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.());
+            if (!hasValidCache) {
+              updateProgress(90, 'Caching predictions... 90%');
+              try {
+                const all = collect(true);
+                if (window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
+                  window.ConnectifyPredictorMath.populateChronologicalPredictions(all, true);
+                }
+              } catch (e) {
+                console.warn('Prediction pre-cache error:', e);
               }
-            } catch (e) {
-              console.warn('Prediction pre-cache error:', e);
             }
-            notifyResultsUpdated();
-            if (window.ConnectifyCohort?.schedule) {
-              window.ConnectifyCohort.schedule(true);
-            }
-            if (window.ConnectifyCompoundProgress?.update) {
-              window.ConnectifyCompoundProgress.update();
-            }
+
+            updateProgress(95, 'Refreshing statistics & outcome bars... 95%');
+
+            setTimeout(() => {
+              notifyResultsUpdated();
+              if (window.ConnectifyCohort?.schedule) {
+                window.ConnectifyCohort.schedule(true);
+              }
+              if (window.ConnectifyCompoundProgress?.update) {
+                window.ConnectifyCompoundProgress.update();
+              }
+              isBulkExpanding = false;
+              finishProgress();
+            }, 40);
+          } else {
+            isBulkExpanding = false;
+            finishProgress();
           }
-          finishProgress();
         }
 
         if (!clickedAny || !expand) {
@@ -749,11 +771,31 @@
   }
 
   let animGuardTimer = null;
-  function triggerAccordionAnimationGuard(duration = 380) {
+  const pendingCardsToUpdate = new Set();
+  function triggerAccordionAnimationGuard(duration = 380, cardToUpdate = null) {
     window.ConnectifyIsAccordionAnimating = true;
+    if (cardToUpdate) {
+      pendingCardsToUpdate.add(cardToUpdate);
+    }
     clearTimeout(animGuardTimer);
     animGuardTimer = setTimeout(() => {
       window.ConnectifyIsAccordionAnimating = false;
+      const cards = Array.from(pendingCardsToUpdate);
+      pendingCardsToUpdate.clear();
+      for (const card of cards) {
+        if (!isBulkExpanding) {
+          notifyResultsUpdated(card);
+        }
+      }
+      if (window.ConnectifyCohort?.schedule) {
+        window.ConnectifyCohort.schedule(true);
+      }
+      if (window.ConnectifyCompoundProgress?.update) {
+        window.ConnectifyCompoundProgress.update();
+      }
+      if (window.ConnectifyDataSyncCharts) {
+        window.ConnectifyDataSyncCharts();
+      }
     }, duration);
   }
   window.ConnectifyTriggerAccordionAnimationGuard = triggerAccordionAnimationGuard;
@@ -763,39 +805,30 @@
     const heading = e.target.closest('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading');
     if (!heading) return;
 
-    // Immediately trigger global animation guard so all background observers stay completely silent
-    triggerAccordionAnimationGuard(380);
-
     if (isBulkExpanding) return;
     const card = heading.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
-    if (!card) return;
 
     // Detect intent immediately at click time:
     const wasCollapsed = /show details/i.test(heading.textContent);
     if (!wasCollapsed) {
-      // User is collapsing the accordion, skip expensive rescrapes and re-renders
+      // User is collapsing the accordion, trigger guard to suppress background observer churn
+      triggerAccordionAnimationGuard(380, null);
       return;
     }
 
-    setTimeout(() => {
-      // If heading indicates collapsed state (or was collapsed), skip heavy whole-page updates
-      if (/show details/i.test(heading.textContent)) return;
-      if (card.querySelector('.cvr-c-tasks .cvr-c-task') || /hide details/i.test(heading.textContent)) {
-        notifyResultsUpdated(card);
-      }
-    }, 320);
-  }, true);
+    // User is expanding: register card for guaranteed update pass when animation completes
+    triggerAccordionAnimationGuard(380, card);
+  });
 
   // Observe DOM additions inside subject tiles when expanded
   const expandMutationObserver = new MutationObserver(mutations => {
-    if (isBulkExpanding || window.ConnectifyIsAccordionAnimating) return;
     let expandedCard = null;
     for (const m of mutations) {
       if (m.addedNodes.length > 0) {
         for (const node of m.addedNodes) {
           if (node.nodeType === 1) {
             if (node.matches?.('.cvr-c-task') || node.querySelector?.('.cvr-c-task')) {
-              expandedCard = node.closest('.eds-c-tile');
+              expandedCard = node.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
               if (expandedCard) break;
             }
           }
@@ -804,7 +837,11 @@
       if (expandedCard) break;
     }
     if (expandedCard) {
-      notifyResultsUpdated(expandedCard);
+      if (window.ConnectifyIsAccordionAnimating) {
+        pendingCardsToUpdate.add(expandedCard);
+      } else if (!isBulkExpanding) {
+        notifyResultsUpdated(expandedCard);
+      }
     }
   });
 

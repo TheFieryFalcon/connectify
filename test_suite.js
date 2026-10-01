@@ -2527,6 +2527,45 @@ runTest('Test 107: Outcome bar is strictly suppressed on first task of subject/t
   localStorage.clear();
 });
 
+runTest('Test 108: Accordion expansion multi-click fix, scroll freeze during bulk expand, arrow cleanup, dark mode font unbolding, and valid prediction cache skipping', () => {
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const cohortJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+  const progJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8');
+  const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const cohortViewJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+  const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+
+  // 1. Dark mode font unbolding and antialiasing
+  assert.ok(themeCss.includes('.connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {\n  color: #f8fafc !important;\n  font-weight: 400 !important;\n}'), 'theme.css must set task title font-weight to 400 in dark mode');
+  assert.ok(themeCss.includes('.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) {\n  font-weight: 400 !important;\n}'), 'theme.css must unbold connectea panel typography');
+  assert.ok(themeCss.includes('-webkit-font-smoothing: antialiased !important;'), 'theme.css must apply font antialiasing in dark mode');
+  assert.ok(cohortJs.includes('.connectea-result {\n      font-weight: 400 !important;'), 'cohort-stats.js must use font-weight: 400 for .connectea-result');
+
+  // 2. Removal and cleanup of improvement arrows
+  assert.ok(progJs.includes('cleanupImprovementArrows'), 'progress-graph.js must define and run cleanupImprovementArrows');
+  assert.ok(!progJs.includes('function updateImprovementArrows()'), 'progress-graph.js must not retain updateImprovementArrows');
+  assert.ok(sideCss.includes('.cx-improved{display:none!important}'), 'sidebar.css must suppress .cx-improved badges');
+  assert.ok(sideCss.includes('.cx-performance-row{display:contents!important}'), 'sidebar.css must neutralize .cx-performance-row wrappers');
+
+  // 3. Scroll freezing and expand-all progress lifecycle
+  assert.ok(sideCss.includes('html.cx-freeze-scroll,\nbody.cx-freeze-scroll {\n  overflow: hidden !important;'), 'sidebar.css must define cx-freeze-scroll');
+  assert.ok(assessJs.includes("classList.add('cx-freeze-scroll')"), 'assessment-data.js expandAll must add cx-freeze-scroll');
+  assert.ok(assessJs.includes("classList.remove('cx-freeze-scroll')"), 'assessment-data.js finishProgress must remove cx-freeze-scroll');
+  assert.ok(assessJs.includes("updateProgress(95, 'Refreshing statistics & outcome bars... 95%')"), 'expandAll must persist progress pill through 95% refresh phase');
+
+  // 4. Accordion animation guard flushing and multi-click fix
+  assert.ok(assessJs.includes('pendingCardsToUpdate'), 'assessment-data.js must track pendingCardsToUpdate');
+  assert.ok(assessJs.includes('window.ConnectifyCohort.schedule(true)'), 'triggerAccordionAnimationGuard must flush cohort schedule when animation settles');
+  assert.ok(cohortJs.includes('hasTaskNodes'), 'cohort-stats.js observer must detect task rows inserted into accordion panels');
+
+  // 5. Predictor calculation skipping when valid cache is present
+  assert.ok(assessJs.includes('if (!window.ConnectifyPredictorMath.isPredictionCacheCurrent?.())'), 'assessment-data.js must not pre-cache predictions when valid cache is present');
+  assert.ok(assessJs.includes('const hasValidCache = Boolean(window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.());'), 'expandAll must verify valid cache status');
+  assert.ok(predMathJs.includes('if (!force && isPredictionCacheCurrent()) {\n      return;\n    }'), 'predictor-math.js must exit early when valid cache is present and force is false');
+  assert.ok(cohortViewJs.includes('getCachedPrediction?.(meta.subjectName, meta.labelsKey)'), 'cohort-view.js must check cache before predicting');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

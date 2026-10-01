@@ -10,6 +10,8 @@ html.connectea-dark {
   color-scheme: dark !important;
   background-color: #12171f !important;
   color: #e2e8f0 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }
 
 .connectea-dark body,
@@ -20,11 +22,14 @@ html.connectea-dark {
 .connectea-dark .cvr-c-app-layout__body {
   background-color: #12171f !important;
   color: #e2e8f0 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
 }
 
 /* Universal High Contrast Typography Rules (WCAG AA Contrast >= 5:1) */
 .connectea-dark :is(label, .v-label, .cvr-c-form__label, .eds-c-label) {
   color: #e2e8f0 !important;
+  font-weight: 400 !important;
 }
 
 .connectea-dark :is(p, .v-caption) {
@@ -613,6 +618,10 @@ html.connectea-dark {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
 }
 
+.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) {
+  font-weight: 400 !important;
+}
+
 .connectea-dark .connectea-panel-distribution {
   color: #cfe2f5 !important;
 }
@@ -747,7 +756,7 @@ html.connectea-dark {
 
 .connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {
   color: #f8fafc !important;
-  font-weight: 650 !important;
+  font-weight: 400 !important;
 }
 
 .connectea-dark .cvr-c-task-group {

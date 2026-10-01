@@ -55,7 +55,7 @@ This document covers the user interface and analytics modules, including target 
 - **Key Functions**:
   - Builds subject selector chips and "ATAR Progression" selector.
   - `render(data)`: Delegates plotting to `progress-chart.js`.
-  - `updateImprovementArrows()`: Attaches visual improvement indicators (↑) to assessment rows where the student's latest score exceeds their overall course running average.
+  - `cleanupImprovementArrows()`: Purges obsolete improvement indicators and un-nests panels.
 - **Export**: `window.ConnectifyProgress`.
 
 #### [`compound-progress.js`](file:///Users/uwong/Downloads/2.1.14_0/compound-progress.js) (230 lines)

@@ -62,7 +62,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Source Modules**: [`atar-features.js`](file:///Users/uwong/Downloads/2.1.14_0/atar-features.js), [`assessment-data.js`](file:///Users/uwong/Downloads/2.1.14_0/assessment-data.js)
 - **DOM Insertion**: Floating pill button container (`#cx-expand-btn`) anchored to bottom-right; animated loading pill (`#cx-expand-progress`) on first expand.
 - **UI Appearance**: Compact buttons: `Expand All` and `Collapse All`. Progress pill shows animated spinner, percentage, and blue fill bar.
-- **Functionality**: Clicks accordion headings staggered across animation frames; mounts `#cx-expand-progress` on bulk expand and pre-caches predictions; silences background MutationObservers during animation (`window.ConnectifyIsAccordionAnimating`) and skips re-scrapes on collapse; respects `connectify:auto_expand` setting on load.
+- **Functionality**: Clicks accordion headings staggered across animation frames; mounts `#cx-expand-progress` on bulk expand, freezes scroll (`.cx-freeze-scroll`), skips calculations when cache is valid, and persists pill through DOM refresh; silences background MutationObservers during animation (`window.ConnectifyIsAccordionAnimating`) and flushes deferred passes on settle; respects `connectify:auto_expand` setting on load.
 - **Back to Top Button**: Injects a centered button (`#cx-back-to-top-btn` in `#cx-back-to-top-container`) at the bottom of the outlines list for smooth scrolling back to top.
 
 ### 6. Year 12 WACE Exam Countdown Banner

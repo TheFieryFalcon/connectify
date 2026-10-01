@@ -391,23 +391,27 @@
       }
       if (!isOverall && ui.wrapper) ui.wrapper.style.setProperty('display', 'flex', 'important');
 
-      // Pre-cache prediction for upcoming task if possible:
+      // Pre-cache prediction for upcoming task only if not already cached
       if (window.ConnectifyPredictorMath) {
         try {
           const meta = types().getTaskMeta(row);
-          const taskMock = {
-            id: meta.labelsKey ? `${meta.labelsKey}:0` : undefined,
-            name: meta.taskName,
-            caption: meta.labels?.[1] || '',
-            labelsKey: meta.labelsKey,
-            row
-          };
-          if (window.ConnectifyPredictorMath.getOrComputeTaskPrediction) {
-            window.ConnectifyPredictorMath.getOrComputeTaskPrediction(meta.subjectName, taskMock);
-          } else {
-            const pred = window.ConnectifyPredictorMath.predictTask(meta.subjectName, taskMock);
-            if (!pred.unpredicted) {
-              window.ConnectifyPredictorMath.cachePrediction(meta.subjectName, meta.labelsKey || meta.taskName, pred);
+          const cached = window.ConnectifyPredictorMath.getCachedPrediction?.(meta.subjectName, meta.labelsKey) ||
+                         window.ConnectifyPredictorMath.getCachedPrediction?.(meta.subjectName, meta.taskName);
+          if (!cached) {
+            const taskMock = {
+              id: meta.labelsKey ? `${meta.labelsKey}:0` : undefined,
+              name: meta.taskName,
+              caption: meta.labels?.[1] || '',
+              labelsKey: meta.labelsKey,
+              row
+            };
+            if (window.ConnectifyPredictorMath.getOrComputeTaskPrediction) {
+              window.ConnectifyPredictorMath.getOrComputeTaskPrediction(meta.subjectName, taskMock);
+            } else {
+              const pred = window.ConnectifyPredictorMath.predictTask(meta.subjectName, taskMock);
+              if (!pred.unpredicted) {
+                window.ConnectifyPredictorMath.cachePrediction(meta.subjectName, meta.labelsKey || meta.taskName, pred);
+              }
             }
           }
         } catch (e) {}
@@ -509,7 +513,9 @@
             ui.outcomeBar.style.setProperty('display', 'none', 'important');
           } else {
             let prediction = predMath.getCachedPrediction
-              ? predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName)
+              ? (predMath.getCachedPrediction(meta.subjectName, taskMock.id) ||
+                 predMath.getCachedPrediction(meta.subjectName, meta.labelsKey) ||
+                 predMath.getCachedPrediction(meta.subjectName, meta.taskName))
               : null;
 
             if (!prediction || prediction.unpredicted) {

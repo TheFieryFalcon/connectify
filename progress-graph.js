@@ -222,50 +222,17 @@
     });
 
     /**
-     * Attaches visual improvement indicators (↑) to task rows where the latest
-     * score exceeds the student's current overall running average.
+     * Purges any previously injected improvement indicators (↑) and un-nests panels.
      */
-    function updateImprovementArrows() {
-      const activeTasks = new Set();
-      const readCoursesFn = window.ConnectifyAtarScraper?.readCourses || window.ConnectifyAtar?.readCourses;
-      const courses = readCoursesFn ? readCoursesFn(false) : [[], []];
-      if (!courses || !courses[0] || !courses[1]) return;
-
-      const collectFn = dataAPI?.collect || window.ConnectifyData?.collect;
-      if (!collectFn) return;
-      for (const subject of collectFn()) {
-        const latestTask = subject.tasks?.length ? subject.tasks[subject.tasks.length - 1] : null;
-        if (!latestTask?.row) continue;
-
-        const subjectName = subject.name.replace(/\bATAR\b|\bYear\s*\d+\b/gi, '').trim();
-        const currentCourse =
-          courses[1].find(r => r.name === subjectName) || courses[0].find(r => r.name === subjectName);
-
-        if (!Number.isFinite(currentCourse?.mark) || latestTask.score <= currentCourse.mark) continue;
-
-        const row = latestTask.row;
-        const statsPanel = row.querySelector('.connectea-panel');
-        if (!statsPanel) continue;
-
-        activeTasks.add(row);
-
-        if (!row.querySelector('.cx-improved')) {
-          const badge = createElement('span', '↑', 'cx-improved');
-          badge.title = 'Latest assessment is above your current overall subject average';
-          badge.setAttribute('aria-label', badge.title);
-
-          const group = createElement('div', null, 'cx-performance-row');
-          statsPanel.before(group);
-          group.append(statsPanel, badge);
-        }
-      }
-
-      // Clean up outdated badges
+    function cleanupImprovementArrows() {
       for (const group of document.querySelectorAll('.cx-performance-row')) {
-        if (!activeTasks.has(group.closest('.cvr-c-task')) || !group.querySelector('.connectea-panel')) {
-          group.querySelector('.cx-improved')?.remove();
+        group.querySelector('.cx-improved')?.remove();
+        if (group.parentNode) {
           group.replaceWith(...group.childNodes);
         }
+      }
+      for (const badge of document.querySelectorAll('.cx-improved')) {
+        badge.remove();
       }
     }
 
@@ -283,10 +250,10 @@
 
     setInterval(() => {
       refresh();
-      updateImprovementArrows();
+      cleanupImprovementArrows();
     }, 1500);
 
-    updateImprovementArrows();
+    cleanupImprovementArrows();
   } catch (err) {
     console.error('Connectify error in progress-graph.js:', err);
   }

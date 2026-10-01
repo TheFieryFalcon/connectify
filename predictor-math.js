@@ -701,16 +701,22 @@
    */
   function getOrComputeTaskPrediction(subjectName, task, allSubjects) {
     if (!task) return null;
-    const rawSubjects = allSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
 
-    if (!isPredictionCacheCurrent()) {
-      populateChronologicalPredictions(rawSubjects, true);
-    }
-
+    // 1. Fast cache check FIRST before doing any calculation or DOM scraping
     const identifiers = [task.id, task.labelsKey, task.name].filter(Boolean);
     for (const id of identifiers) {
       const cached = getCachedPrediction(subjectName, id);
       if (cached) return cached;
+    }
+
+    const rawSubjects = allSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+
+    if (!isPredictionCacheCurrent()) {
+      populateChronologicalPredictions(rawSubjects, true);
+      for (const id of identifiers) {
+        const cached = getCachedPrediction(subjectName, id);
+        if (cached) return cached;
+      }
     }
 
     const isCompleted = Number.isFinite(task.score) || Number.isFinite(task.mark) || (task.pending === false && task.weight > 0);
