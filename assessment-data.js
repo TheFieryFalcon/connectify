@@ -677,7 +677,8 @@
     function clickNext() {
       if (index >= total) {
         clearTimeout(bulkExpandTimer);
-        bulkExpandTimer = setTimeout(() => {
+
+        function finalizeExpansion() {
           isBulkExpanding = false;
           if (expand && clickedAny) {
             updateProgress(90, 'Caching predictions...');
@@ -690,9 +691,37 @@
               console.warn('Prediction pre-cache error:', e);
             }
             notifyResultsUpdated();
+            if (window.ConnectifyCohort?.schedule) {
+              window.ConnectifyCohort.schedule(true);
+            }
+            if (window.ConnectifyCompoundProgress?.update) {
+              window.ConnectifyCompoundProgress.update();
+            }
           }
           finishProgress();
-        }, 320);
+        }
+
+        if (!clickedAny || !expand) {
+          bulkExpandTimer = setTimeout(finalizeExpansion, 150);
+          return;
+        }
+
+        // Active readiness polling: wait for all opened cards to mount their task rows
+        const startTime = Date.now();
+        const pollTimer = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          const allSettled = headings.every(h => {
+            const card = h.closest('.eds-c-tile, .cvr-c-tile') || h.parentElement;
+            if (!card) return true;
+            if (/show details/i.test(h.textContent)) return false;
+            return card.querySelectorAll('.cvr-c-task').length > 0 || elapsed > 2500;
+          });
+
+          if (allSettled || elapsed > 2500) {
+            clearInterval(pollTimer);
+            finalizeExpansion();
+          }
+        }, 60);
         return;
       }
 
@@ -727,8 +756,15 @@
     const card = heading.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
     if (!card) return;
 
+    // Detect intent immediately at click time:
+    const wasCollapsed = /show details/i.test(heading.textContent);
+    if (!wasCollapsed) {
+      // User is collapsing the accordion, skip expensive rescrapes and re-renders
+      return;
+    }
+
     setTimeout(() => {
-      // If heading now indicates collapsed state (or was collapsed), skip heavy whole-page updates
+      // If heading indicates collapsed state (or was collapsed), skip heavy whole-page updates
       if (/show details/i.test(heading.textContent)) return;
       if (card.querySelector('.cvr-c-tasks .cvr-c-task') || /hide details/i.test(heading.textContent)) {
         notifyResultsUpdated(card);

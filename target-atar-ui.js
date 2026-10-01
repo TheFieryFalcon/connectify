@@ -214,18 +214,38 @@
     }
 
     const targetPlanFn = window.ConnectifyTargetSolver?.targetPlan || window.ConnectifyMath?.targetPlan;
-    if (!targetPlanFn) return;
+    if (!targetPlanFn) {
+      targetOutputContainer.replaceChildren(createEl('p', 'cta-note', 'Target solver unavailable.'));
+      return;
+    }
 
-    const currentCalcResult = calc?.calculateResults ? calc.calculateResults(courses)[activeSemester] : null;
-    const currentBonus = currentCalcResult && Number.isFinite(currentCalcResult.bonus)
-      ? currentCalcResult.bonus
-      : undefined;
-
-    const plan = targetPlanFn(rows, scoreValue(targetInput.value), {
-      difficultyWeighted: difficultyCheckbox.checked,
-      currentBonus: currentBonus
-    });
     targetOutputContainer.replaceChildren();
+
+    let plan = null;
+    try {
+      let currentBonus = undefined;
+      try {
+        const currentCalcResult = calc?.calculateResults ? calc.calculateResults(courses)[activeSemester] : null;
+        if (currentCalcResult && Number.isFinite(currentCalcResult.bonus)) {
+          currentBonus = currentCalcResult.bonus;
+        }
+      } catch (e) {
+        console.warn('Error reading current bonus:', e);
+      }
+
+      plan = targetPlanFn(rows, scoreValue(targetInput.value), {
+        difficultyWeighted: difficultyCheckbox.checked,
+        currentBonus: currentBonus
+      });
+    } catch (err) {
+      console.warn('Target ATAR plan calculation error:', err);
+      targetOutputContainer.replaceChildren(
+        createEl('p', 'cta-note', 'Error calculating Target ATAR plan. Please expand all outlines and retry.')
+      );
+      return;
+    }
+
+    if (!plan) return;
 
     if (plan.error) {
       const expandBtn = createEl('button', 'cta-reset', 'Expand Subject Outlines');

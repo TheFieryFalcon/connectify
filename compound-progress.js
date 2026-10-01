@@ -55,7 +55,7 @@
         color: #94a3b8 !important;
       }
     `;
-    document.head.appendChild(style);
+    (document.head || document.body || document.documentElement)?.appendChild(style);
   }
 
   function getEffectiveType(subjectName, task) {
@@ -90,19 +90,29 @@
         const cardSemesterMatch = (cardTitle.textContent || '').match(/Semester\s*([12])/i);
         const cardSemester = cardSemesterMatch ? +cardSemesterMatch[1] : null;
 
-        // For Semester 1 cards: include Semester 1 tasks.
-        // For Semester 2 cards: include BOTH Semester 1 and Semester 2 tasks for full annual weighting.
+        // Isolate tasks strictly by semester to prevent Semester 2 adopting Semester 1 progress
         const sortedTasks = [...subject.tasks]
           .filter(t => {
             if (!t || !Number.isFinite(t.weight) || t.weight <= 0) return false;
             if (!cardSemester) return true;
             if (cardSemester === 1) return t.semester === 1;
-            if (cardSemester === 2) return t.semester === 1 || t.semester === 2;
+            if (cardSemester === 2) return t.semester === 2;
             return true;
           })
-          .sort((a, b) => ((a.semester || 1) - (b.semester || 1)) || ((a.sequence || 0) - (b.sequence || 0)));
+          .sort((a, b) => {
+            const semDiff = (a.semester || 1) - (b.semester || 1);
+            if (semDiff !== 0) return semDiff;
+            const oA = Number.isFinite(a.order) ? a.order : null;
+            const oB = Number.isFinite(b.order) ? b.order : null;
+            if (oA !== null && oB !== null && oA !== oB) return oA - oB;
+            return (a.sequence || 0) - (b.sequence || 0);
+          });
 
-        if (sortedTasks.length === 0) return;
+        const existingContainer = card.querySelector('.cx-compound-progress-container');
+        if (sortedTasks.length === 0) {
+          if (existingContainer) existingContainer.remove();
+          return;
+        }
 
         // Clean signature using primitives only to avoid circular references
         const taskSummary = sortedTasks.map(t => ({
@@ -118,7 +128,6 @@
           tasks: taskSummary
         });
 
-        const existingContainer = card.querySelector('.cx-compound-progress-container');
         if (existingContainer) {
           if (existingContainer.dataset.signature === signature) {
             return; // Unchanged, avoid DOM churn

@@ -220,6 +220,8 @@
       if (gradeRefs) gradeRefs.container.hidden = !isGradingMode;
 
       renderCourseRows();
+      if (isPlanningMode && plannerRefs) plannerContext.renderTargetOutput();
+      if (isGradingMode && gradeRefs) plannerContext.renderGradeOutput();
     }
 
     function openCalculator(mode) {
@@ -245,7 +247,13 @@
         activeSemester = 1 - activeSemester;
       }
 
-      const results = calc?.calculateResults ? calc.calculateResults(courses) : [{}, {}];
+      let results = [{}, {}];
+      try {
+        results = calc?.calculateResults ? calc.calculateResults(courses) : [{}, {}];
+      } catch (err) {
+        console.warn('Connectify atar-ui calculateResults error:', err);
+        results = [{ error: err.message }, { error: err.message }];
+      }
 
       for (let i = 0; i < 2; i++) {
         const res = results[i] || {};

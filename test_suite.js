@@ -140,6 +140,21 @@ class MockElement {
     }
   }
   appendChild(kid) { this.append(kid); return kid; }
+  insertAdjacentElement(position, el) {
+    if (position === 'afterend' && this.parentElement) {
+      const idx = this.parentElement.children.indexOf(this);
+      if (idx !== -1) {
+        this.parentElement.children.splice(idx + 1, 0, el);
+        this.parentElement.childNodes.splice(idx + 1, 0, el);
+        el.parentElement = this.parentElement;
+        el.parentNode = this.parentElement;
+        el.isConnected = true;
+        return el;
+      }
+    }
+    this.append(el);
+    return el;
+  }
   replaceChildren(...kids) {
     while (this.children.length > 0) {
       this.removeChild(this.children[0]);
@@ -260,7 +275,9 @@ const mockLocalStorage = {
 };
 
 const domRoot = new MockElement('html');
+const domHead = new MockElement('head');
 const domBody = new MockElement('body');
+domRoot.appendChild(domHead);
 domRoot.appendChild(domBody);
 
 global.window = global;
@@ -269,6 +286,7 @@ global.document = {
   getElementById: (id) => domRoot.querySelector(`#${id}`),
   querySelector: (sel) => domRoot.querySelector(sel),
   querySelectorAll: (sel) => domRoot.querySelectorAll(sel),
+  head: domHead,
   body: domBody,
   documentElement: domRoot,
   addEventListener: (event, fn) => domRoot.addEventListener(event, fn),
@@ -2086,6 +2104,162 @@ runTest('Test 95: Accordion expand/collapse optimizations suppress layout thrash
   assert.ok(themeCss.includes('contain: layout style;'), 'theme.css must apply CSS layout containment to subject cards and accordion panels');
   assert.ok(themeJs.includes('.eds-c-accordion'), 'theme.js MutationObserver must filter accordion mutations to eliminate getComputedStyle thrashing');
   assert.ok(assessJs.includes('show details'), 'assessment-data.js click listener must skip notify updates when collapsing accordion');
+});
+
+runTest('Test 96: atar-calculator.js defines yearLevel and target-atar-ui.js pre-clears output and wraps solver', () => {
+  const calcJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-calculator.js'), 'utf8');
+  const atarUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
+  const targetUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'target-atar-ui.js'), 'utf8');
+
+  assert.ok(calcJs.includes('const yearLevel = (hasYear11 && !hasYear12) ? 11 : 12;'), 'atar-calculator.js must define yearLevel');
+  assert.ok(calcJs.includes('try {') && calcJs.includes('catch (err) {'), 'calculateResults must have try-catch error boundary');
+  assert.ok(atarUiJs.includes('calc?.calculateResults ? calc.calculateResults(courses) : [{}, {}]'), 'atar-ui.js must safely invoke calculateResults');
+  assert.ok(targetUiJs.includes('targetOutputContainer.replaceChildren();'), 'target-atar-ui.js must pre-clear container before calculating');
+  assert.ok(targetUiJs.includes('catch (err) {') && targetUiJs.includes('Error calculating Target ATAR plan'), 'target-atar-ui.js must handle calculation errors cleanly');
+
+  // Functional test of calculateResults
+  delete window.ConnectifyAtarCalc;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8'));
+  eval(calcJs);
+  const calc = window.ConnectifyAtarCalc;
+  const mockCourses = [
+    [
+      { id: 'c1', name: 'Mathematics Methods', mark: 85, progress: {} },
+      { id: 'c2', name: 'Mathematics Specialist', mark: 80, progress: {} },
+      { id: 'c3', name: 'Chemistry', mark: 75, progress: {} },
+      { id: 'c4', name: 'Physics', mark: 82, progress: {} }
+    ],
+    []
+  ];
+  const res = calc.calculateResults(mockCourses);
+  assert.ok(Array.isArray(res) && res.length === 2, 'calculateResults must return an array of 2 results');
+  assert.strictEqual(res[0].yearLevel, 12, 'Year level must resolve cleanly to 12');
+  assert.ok(Number.isFinite(res[0].finalTEA) && res[0].finalTEA > 0, 'finalTEA must be calculated');
+  assert.ok(typeof res[0].finalAtar === 'string' && res[0].finalAtar !== '—', 'finalAtar must be calculated');
+});
+
+runTest('Test 97: compound-progress.js isolates Semester 1 and Semester 2 and sorts segments chronologically', () => {
+  const compJs = fs.readFileSync(path.resolve(BASE_DIR, 'compound-progress.js'), 'utf8');
+
+  assert.ok(compJs.includes('if (cardSemester === 2) return t.semester === 2;'), 'compound-progress.js must isolate Semester 2 strictly to Semester 2 tasks');
+  assert.ok(compJs.includes('oA - oB'), 'compound-progress.js must sort segments chronologically by order');
+
+  // Functional DOM test
+  const sem1Card = document.createElement('div');
+  sem1Card.className = 'eds-c-tile';
+  const h1 = document.createElement('div');
+  h1.className = 'eds-c-tile__header';
+  const t1 = document.createElement('span');
+  t1.className = 'eds-c-tile__title';
+  t1.textContent = 'Chemistry - Semester 1';
+  h1.appendChild(t1);
+  sem1Card.appendChild(h1);
+
+  const sem2Card = document.createElement('div');
+  sem2Card.className = 'eds-c-tile';
+  const h2 = document.createElement('div');
+  h2.className = 'eds-c-tile__header';
+  const t2 = document.createElement('span');
+  t2.className = 'eds-c-tile__title';
+  t2.textContent = 'Chemistry - Semester 2';
+  h2.appendChild(t2);
+  sem2Card.appendChild(h2);
+
+  document.body.appendChild(sem1Card);
+  document.body.appendChild(sem2Card);
+
+  window.ConnectifyData = {
+    collect: () => [
+      {
+        name: 'Chemistry',
+        tasks: [
+          { name: 'Investigation 2', semester: 1, weight: 10, pending: false, order: 15, sequence: 2 },
+          { name: 'Investigation 1', semester: 1, weight: 10, pending: false, order: 5, sequence: 1 }
+        ]
+      }
+    ]
+  };
+
+  delete window.ConnectifyCompoundProgress;
+  eval(compJs);
+
+  window.ConnectifyCompoundProgress.update();
+
+  const sem1Progress = sem1Card.querySelector('.cx-compound-progress-container');
+  const sem2Progress = sem2Card.querySelector('.cx-compound-progress-container');
+
+  assert.ok(sem1Progress, 'Semester 1 card must render compound progress container');
+  assert.strictEqual(sem2Progress, null, 'Semester 2 card must NOT adopt Semester 1 compound progress container');
+
+  // Verify chronological segment order (order 5 then order 15)
+  const segments = sem1Progress.querySelectorAll('.cx-compound-segment');
+  assert.strictEqual(segments.length, 2, 'Semester 1 progress bar must contain 2 segments');
+  assert.ok(segments[0].title.includes('Investigation 1'), 'Segment with order 5 must be first chronologically');
+  assert.ok(segments[1].title.includes('Investigation 2'), 'Segment with order 15 must be second chronologically');
+
+  sem1Card.remove();
+  sem2Card.remove();
+});
+
+runTest('Test 98: theme.css and theme.js protect Highcharts box plots on first class from containment and dark surface overrides', () => {
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+
+  // Verify containment is restricted to accordion panels, not top-level tiles
+  const containmentBlock = themeCss.match(/([^{}]+)\{\s*contain:\s*layout\s*style;\s*\}/);
+  assert.ok(containmentBlock, 'Containment rule must exist in theme.css');
+  assert.ok(!containmentBlock[1].includes('.eds-c-tile,'), 'Containment rule must NOT contain .eds-c-tile');
+  assert.ok(!containmentBlock[1].includes('.cvr-c-tile,'), 'Containment rule must NOT contain .cvr-c-tile');
+  assert.ok(containmentBlock[1].includes('.eds-c-accordion__panel'), 'Containment rule must target .eds-c-accordion__panel');
+
+  // Verify task chart transparency
+  assert.ok(themeCss.includes('.cvr-c-task__chart'), 'theme.css must target cvr-c-task__chart');
+  assert.ok(themeCss.includes('background: transparent !important;'), 'theme.css must enforce transparent background on task chart');
+
+  // Verify theme.js excludes tiles and charts from surfaceCandidates and inkCandidates
+  assert.ok(themeJs.includes(':not(.eds-c-tile *):not(.cvr-c-tile *):not(.cvr-c-task__chart *):not(.highcharts-container *)'), 'theme.js must exclude subject tiles and Highcharts from surfaceCandidates and inkCandidates');
+});
+
+runTest('Test 99: assessment-data.js readiness polling and cohort-stats.js rePassPending guarantee robust Expand All execution', () => {
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const cohortJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+
+  assert.ok(assessJs.includes('pollTimer = setInterval('), 'expandAll must poll for readiness after clicking headings');
+  assert.ok(assessJs.includes('allSettled = headings.every('), 'expandAll must check that all clicked cards have settled');
+  assert.ok(assessJs.includes('wasCollapsed = /show details/i.test(heading.textContent)'), 'assessment-data.js must detect collapse intent immediately on click');
+
+  assert.ok(cohortJs.includes('rePassPending = true;'), 'cohort-stats.js must track rePassPending when passes are queued or executing');
+  assert.ok(cohortJs.includes('function runPass()'), 'cohort-stats.js must use runPass with try/finally to drain rePassPending');
+});
+
+runTest('Test 100: weakness-radar.js renders Expand All Outlines button and sidebar.css provides responsive styling', () => {
+  const weaknessJs = fs.readFileSync(path.resolve(BASE_DIR, 'weakness-radar.js'), 'utf8');
+  const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+
+  assert.ok(weaknessJs.includes('id="cx-weakness-expand-all"'), 'weakness-radar.js must define #cx-weakness-expand-all');
+  assert.ok(weaknessJs.includes('window.ConnectifyData.expandAll(true)'), 'weakness-radar.js must wire button to ConnectifyData.expandAll(true)');
+  assert.ok(sidebarCss.includes('.cx-weakness-expand-btn'), 'sidebar.css must style .cx-weakness-expand-btn');
+  assert.ok(sidebarCss.includes('.connectea-dark #connectify-sidebar .cx-weakness-expand-btn'), 'sidebar.css must style button in dark mode');
+});
+
+runTest('Test 101: Expand all progress pill adapts correctly across light and dark themes', () => {
+  const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+
+  // Verify light theme base styles
+  assert.ok(sidebarCss.includes('background: #ffffff;'), 'sidebar.css must specify light background #ffffff for light mode progress pill');
+  assert.ok(sidebarCss.includes('color: #1e293b;'), 'sidebar.css must specify dark text #1e293b for light mode progress pill');
+  assert.ok(sidebarCss.includes('background: #e2e8f0;'), 'sidebar.css must style progress track with #e2e8f0 in light mode');
+
+  // Verify dark theme overrides in sidebar.css and theme.css
+  assert.ok(sidebarCss.includes('.connectea-dark') && sidebarCss.includes('#cx-expand-progress'), 'sidebar.css must provide dark mode overrides for #cx-expand-progress');
+  assert.ok(themeCss.includes('.connectea-dark') && themeCss.includes('#cx-expand-progress'), 'theme.css must provide dark mode overrides for #cx-expand-progress');
+  assert.ok(themeCss.includes('background: #1e2632 !important;'), 'theme.css must use #1e2632 dark background for progress pill');
+  assert.ok(themeCss.includes('color: #f8fafc !important;'), 'theme.css must use #f8fafc text for progress pill in dark mode');
+
+  // Verify theme.js surface/ink exclusion
+  assert.ok(themeJs.includes(':not(#cx-expand-progress):not(#cx-expand-progress *)'), 'theme.js must exclude #cx-expand-progress from adaptSurfaces');
 });
 
 console.log('\n================================================================');

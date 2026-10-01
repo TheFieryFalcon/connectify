@@ -141,11 +141,12 @@
 
     try {
       const surfaceCandidates = document.body.querySelectorAll(
-        ':is(div, section, article, header, nav, main, aside, form, table, tr, td, th, ul, li, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button):not([data-connectea-surface]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *)'
+        ':is(div, section, article, header, nav, main, aside, form, table, tr, td, th, ul, li, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button):not([data-connectea-surface]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.eds-c-tile *):not(.cvr-c-tile *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
       );
 
       for (const el of surfaceCandidates) {
         if (['SCRIPT', 'STYLE', 'LINK', 'CANVAS', 'VIDEO', 'IFRAME', 'SVG'].includes(el.tagName)) continue;
+        if (el.closest('.eds-c-tile, .cvr-c-tile, .cvr-c-task__chart, .highcharts-container, #cx-expand-progress')) continue;
         const style = window.getComputedStyle(el);
         const bgRgb = parseRgb(style.backgroundColor);
         if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) {
@@ -154,11 +155,12 @@
       }
 
       const inkCandidates = document.body.querySelectorAll(
-        ':is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *)'
+        ':is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.eds-c-tile *):not(.cvr-c-tile *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
       );
       for (const el of inkCandidates) {
         if (el.children.length > 2) continue;
         if (el.hasAttribute('data-connectea-surface')) continue;
+        if (el.closest('.eds-c-tile, .cvr-c-tile, .cvr-c-task__chart, .highcharts-container, #cx-expand-progress')) continue;
         const style = window.getComputedStyle(el);
         const fgRgb = parseRgb(style.color, true);
         if (isDarkColor(fgRgb)) {

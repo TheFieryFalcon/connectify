@@ -268,12 +268,13 @@
     panel.className = 'cx-workspace-panel';
     panel.innerHTML = `
       <header><strong>Weakness Analyzer</strong></header>
-      <div style="margin-bottom:14px; display:flex; gap:10px; align-items:center;">
+      <div style="margin-bottom:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
          <label for="cx-radar-mode" class="cx-radar-mode-label" style="font-weight:600; font-size:12px; color:inherit;">Group by:</label>
          <select id="cx-radar-mode">
             <option value="type">Assessment Type</option>
             <option value="subject">Subject</option>
          </select>
+         <button type="button" id="cx-weakness-expand-all" class="cx-weakness-expand-btn" style="margin-left:auto;">Expand All Outlines</button>
       </div>
       <div id="connectify-radar-chart" style="width:100%;height:350px;background:#333333;border-radius:8px;border:1px solid #3a3a3a;overflow:hidden;"></div>
       <div id="cx-weakness-filters">
@@ -288,6 +289,15 @@
          <div id="cx-weakness-checkboxes"></div>
       </div>
     `;
+
+    const expandAllBtn = panel.querySelector('#cx-weakness-expand-all');
+    if (expandAllBtn) {
+      expandAllBtn.onclick = () => {
+        if (window.ConnectifyData?.expandAll) {
+          window.ConnectifyData.expandAll(true);
+        }
+      };
+    }
 
     panel.querySelector('#cx-radar-mode').onchange = renderChart;
     panel.querySelector('#cx-weakness-all').onclick = () => {

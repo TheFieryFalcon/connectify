@@ -89,8 +89,12 @@
 #connectify-sidebar .cx-weakness-checkbox-label input,.cx-weakness-checkbox-label input{margin:0 8px 0 0!important;cursor:pointer!important;width:15px!important;height:15px!important;flex-shrink:0!important}
 #connectify-sidebar .cx-weakness-checkbox-label span,.cx-weakness-checkbox-label span{overflow:hidden!important;text-overflow:ellipsis!important;font-weight:500!important}
 #connectify-sidebar .cx-weakness-filter-btn{background:transparent!important;border:none!important;color:#24618c!important;font-size:11px!important;padding:2px 4px!important;text-decoration:underline!important;border-radius:3px!important;font-weight:600}
+#connectify-sidebar .cx-weakness-expand-btn,.cx-weakness-expand-btn{background:#edf4fa!important;border:1px solid #c8d9e8!important;color:#24618c!important;font-size:11px!important;padding:4px 8px!important;border-radius:4px!important;font-weight:600!important;cursor:pointer!important;transition:background-color .15s,border-color .15s}
+#connectify-sidebar .cx-weakness-expand-btn:hover,.cx-weakness-expand-btn:hover{background:#e2eef7!important;border-color:#a9c5df!important}
 .connectea-dark #cx-weakness-filters{background:#253342!important;border-color:#3b5066!important}
 .connectea-dark #connectify-sidebar .cx-weakness-filter-btn{color:#83c3ff!important}
+.connectea-dark #connectify-sidebar .cx-weakness-expand-btn,.connectea-dark .cx-weakness-expand-btn{background:#253342!important;border-color:#3b5066!important;color:#83c3ff!important}
+.connectea-dark #connectify-sidebar .cx-weakness-expand-btn:hover,.connectea-dark .cx-weakness-expand-btn:hover{background:#2d3e50!important;border-color:#4f6b88!important}
 .connectea-dark #connectify-weakness label,.connectea-dark #cx-weakness-filters,.connectea-dark #cx-weakness-filters span,.connectea-dark .cx-weakness-checkbox-label,.connectea-dark .cx-weakness-checkbox-label span,html.connectea-dark #connectify-weakness label,html.connectea-dark #cx-weakness-filters,html.connectea-dark #cx-weakness-filters span,html.connectea-dark .cx-weakness-checkbox-label,html.connectea-dark .cx-weakness-checkbox-label span,html.connectea-dark #connectify-weakness{color:#e1eaf3!important}
 html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mode{background:#2a3b4c!important;color:#e1eaf3!important;border-color:#496178!important}
 #connectify-radar-chart text,#connectify-radar-chart .highcharts-axis-labels text{fill:#e1eaf3!important;color:#e1eaf3!important}
@@ -1057,10 +1061,10 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   gap: 12px;
   padding: 8px 18px;
   border-radius: 9999px;
-  background: #1e2632;
-  color: #ffffff;
-  border: 1px solid #2e3c4e;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
   font: 600 13px system-ui, -apple-system, sans-serif;
   letter-spacing: -0.2px;
   pointer-events: none;
@@ -1069,7 +1073,7 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 .cx-expand-spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid #3b82f6;
+  border: 2px solid #2563eb;
   border-top-color: transparent;
   border-radius: 50%;
   animation: cx-spin 0.75s linear infinite;
@@ -1080,14 +1084,15 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 }
 .cx-expand-label {
   white-space: nowrap;
+  color: inherit;
 }
 .cx-expand-track {
   width: 120px;
   height: 6px;
   border-radius: 3px;
-  background: #12171f;
+  background: #e2e8f0;
   overflow: hidden;
-  border: 1px solid #2e3c4e;
+  border: 1px solid #cbd5e1;
   flex: none;
 }
 .cx-expand-bar {
@@ -1095,5 +1100,27 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   border-radius: 3px;
   background: linear-gradient(90deg, #2563eb, #38bdf8);
   transition: width 0.2s ease;
+}
+
+/* Dark Mode Progress Pill */
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(#cx-expand-progress, .cx-expand-progress-pill) {
+  background: #1e2632 !important;
+  color: #f8fafc !important;
+  border-color: #2e3c4e !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38) !important;
+}
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-spinner {
+  border-color: #3b82f6 !important;
+  border-top-color: transparent !important;
+}
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-label {
+  color: #f8fafc !important;
+}
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-track {
+  background: #12171f !important;
+  border-color: #2e3c4e !important;
+}
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-bar {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa) !important;
 }
 

@@ -621,9 +621,8 @@ html.connectea-dark {
 }
 
 /* CSS Containment for Smooth Accordion Expansion & Layout Isolation */
-.eds-c-tile,
-.cvr-c-tile,
-.eds-c-accordion__panel {
+.eds-c-accordion__panel,
+.cvr-c-accordion__panel {
   contain: layout style;
 }
 
@@ -706,12 +705,14 @@ html.connectea-dark {
 /* --------------------------------------------------------------------------
    12. Highcharts Boxplot Chart (.cvr-c-task__chart)
    -------------------------------------------------------------------------- */
-.connectea-dark .cvr-c-task__chart {
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__chart, .cvr-c-task__chart *, .highcharts-container, .highcharts-container *) {
   background: transparent !important;
+  background-color: transparent !important;
 }
 
 .connectea-dark .cvr-c-task__chart :is(svg, .highcharts-container) {
   background: transparent !important;
+  background-color: transparent !important;
 }
 
 .connectea-dark .cvr-c-task__chart .highcharts-background {
@@ -1131,6 +1132,32 @@ html.connectea-dark {
 .connectea-dark #cx-expand-btn button:hover {
   background-color: #2e3c4e !important;
   border-color: #607996 !important;
+}
+
+/* Bulk Expansion Animated Loading Progress Pill in Dark Mode */
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(#cx-expand-progress, .cx-expand-progress-pill) {
+  background: #1e2632 !important;
+  color: #f8fafc !important;
+  border-color: #2e3c4e !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38) !important;
+}
+
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-spinner {
+  border-color: #3b82f6 !important;
+  border-top-color: transparent !important;
+}
+
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-label {
+  color: #f8fafc !important;
+}
+
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-track {
+  background: #12171f !important;
+  border-color: #2e3c4e !important;
+}
+
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-bar {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa) !important;
 }
 
 /* Back to Top Button in Dark Mode (.cx-back-to-top-btn) */

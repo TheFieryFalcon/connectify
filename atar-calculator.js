@@ -84,27 +84,36 @@
     const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent || '');
     const hasYear12 = titles.some(t => /\b(?:year\s*12|12)\b/i.test(t) || /\bAT[A-Z]{3}\b/.test(t));
     const hasYear11 = titles.some(t => /\b(?:year\s*11|11)\b/i.test(t) || /\bAE[A-Z]{3}\b/.test(t));
+    const yearLevel = (hasYear11 && !hasYear12) ? 11 : 12;
     const teaAdjustment = 0; // Year 11 TEA scaling adjustment penalty removed
 
-    return results.map(result => {
-      if (!result || result.error) {
-        return { ...result, finalTEA: 0, finalAtar: '—', detailText: result?.error || 'Unavailable' };
-      }
-      const finalTEA = Math.max(0, result.tea + teaAdjustment);
-      const finalAtar = convertTEAtoATAR ? convertTEAtoATAR(finalTEA) : '—';
-      const detailText =
-        `TEA ${round(finalTEA)} = best four ${round(result.base)} + bonuses ${round(
-          result.bonus
-        )}. Best four: ${result.top.map(x => x.name).join(', ')}.`;
+    try {
+      return results.map(result => {
+        if (!result || result.error) {
+          return { ...result, finalTEA: 0, finalAtar: '—', detailText: result?.error || 'Unavailable', yearLevel };
+        }
+        const finalTEA = Math.max(0, (result.tea || 0) + teaAdjustment);
+        const finalAtar = convertTEAtoATAR ? convertTEAtoATAR(finalTEA) : '—';
+        const detailText =
+          `TEA ${round(finalTEA)} = best four ${round(result.base)} + bonuses ${round(
+            result.bonus
+          )}. Best four: ${result.top.map(x => x.name).join(', ')}.`;
 
-      return {
-        ...result,
-        finalTEA,
-        finalAtar,
-        detailText,
-        yearLevel
-      };
-    });
+        return {
+          ...result,
+          finalTEA,
+          finalAtar,
+          detailText,
+          yearLevel
+        };
+      });
+    } catch (err) {
+      console.warn('Connectify calculateResults error:', err);
+      return [
+        { error: 'Calculation failed', finalAtar: '—', detailText: 'Calculation failed', yearLevel },
+        { error: 'Calculation failed', finalAtar: '—', detailText: 'Calculation failed', yearLevel }
+      ];
+    }
   }
 
   function renderCourseList(container, courses, activeSemester, onChange) {

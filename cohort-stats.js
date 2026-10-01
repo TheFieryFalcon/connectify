@@ -294,42 +294,72 @@
     }
   }
 
+  let queued = false;
+  let isExecutingPass = false;
+  let rePassPending = false;
   let scheduleDebounceTimer = null;
+
+  function runPass() {
+    queued = false;
+    isExecutingPass = true;
+    try {
+      pass();
+    } finally {
+      isExecutingPass = false;
+      if (rePassPending) {
+        rePassPending = false;
+        schedule(true);
+      }
+    }
+  }
+
   function schedule(immediate = false) {
     if (!immediate && window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
     if (immediate) {
-      if (queued) return;
+      if (queued || isExecutingPass) {
+        rePassPending = true;
+        return;
+      }
       queued = true;
-      requestAnimationFrame(() => {
-        queued = false;
-        pass();
-      });
+      requestAnimationFrame(runPass);
       return;
     }
     clearTimeout(scheduleDebounceTimer);
     scheduleDebounceTimer = setTimeout(() => {
-      if (queued) return;
+      if (queued || isExecutingPass) {
+        rePassPending = true;
+        return;
+      }
       queued = true;
-      requestAnimationFrame(() => {
-        queued = false;
-        pass();
-      });
+      requestAnimationFrame(runPass);
     }, 250);
   }
 
   const observer = new MutationObserver(records => {
-    if (
-      records.some(
-        r =>
-          !r.target.parentElement?.closest('.connectea-panel') &&
-          !r.target.closest?.('.connectea-panel') &&
-          !r.target.parentElement?.closest('.connectea-type-container') &&
-          !r.target.closest?.('.connectea-type-container') &&
-          !r.target.parentElement?.closest('.connectea-row-wrapper') &&
-          !r.target.closest?.('.connectea-row-wrapper') &&
-          r.target.id !== 'connectea-style'
-      )
-    ) {
+    let shouldRun = false;
+    for (const r of records) {
+      if (
+        r.target.parentElement?.closest('.connectea-panel') ||
+        r.target.closest?.('.connectea-panel') ||
+        r.target.parentElement?.closest('.connectea-type-container') ||
+        r.target.closest?.('.connectea-type-container') ||
+        r.target.parentElement?.closest('.connectea-row-wrapper') ||
+        r.target.closest?.('.connectea-row-wrapper') ||
+        r.target.id === 'connectea-style'
+      ) {
+        continue;
+      }
+      if (
+        r.type === 'attributes' &&
+        (r.target.matches?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .eds-c-accordion, .cvr-c-accordion') ||
+         r.target.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel'))
+      ) {
+        continue;
+      }
+      shouldRun = true;
+      break;
+    }
+    if (shouldRun) {
       schedule();
     }
   });
