@@ -528,6 +528,48 @@
     return { title, subjectName, tasks: parsedTasks };
   }
 
+  const STALE_SUBJECTS_KEY = 'connectify:stale_subjects';
+
+  function getStaleSubjects() {
+    try {
+      const raw = localStorage.getItem(STALE_SUBJECTS_KEY);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) return new Set(arr.map(s => normalize(s).toLowerCase()));
+      }
+    } catch {}
+    return new Set();
+  }
+
+  function saveStaleSubjects(staleSet) {
+    try {
+      localStorage.setItem(STALE_SUBJECTS_KEY, JSON.stringify(Array.from(staleSet)));
+    } catch {}
+  }
+
+  function markSubjectStale(subjectName) {
+    if (!subjectName) return;
+    const staleSet = getStaleSubjects();
+    staleSet.add(normalize(subjectName).toLowerCase());
+    saveStaleSubjects(staleSet);
+  }
+
+  function unmarkSubjectStale(subjectName) {
+    if (!subjectName) return;
+    const staleSet = getStaleSubjects();
+    const key = normalize(subjectName).toLowerCase();
+    if (staleSet.has(key)) {
+      staleSet.delete(key);
+      saveStaleSubjects(staleSet);
+    }
+  }
+
+  function isSubjectStale(subjectName) {
+    if (!subjectName) return false;
+    const staleSet = getStaleSubjects();
+    return staleSet.has(normalize(subjectName).toLowerCase());
+  }
+
   /**
    * Scrapes tasks from a single subject card and updates subjectsCache.
    */
@@ -537,9 +579,22 @@
     if (!parsed) return;
     const { title, subjectName, tasks: parsedTasks } = parsed;
 
-    // Use the cache if there is a cache and just stop the scrape if a cache exists instead
-    if (!forceRefresh && subjectsCache.has(subjectName) && subjectsCache.get(subjectName).size > 0) {
-      return;
+    const isStale = isSubjectStale(subjectName);
+    const hasCache = subjectsCache.has(subjectName) && subjectsCache.get(subjectName).size > 0;
+
+    // If cache exists and card is not stale, check if all parsed tasks from this card are already in cache
+    if (!forceRefresh && !isStale && hasCache) {
+      const existingMap = subjectsCache.get(subjectName);
+      const allTasksPresent = parsedTasks.every(t => existingMap.has(t.id));
+      if (allTasksPresent) {
+        for (const t of parsedTasks) {
+          const cached = existingMap.get(t.id);
+          if (cached && t.row && !cached.row) {
+            setTaskRow(cached, t.row);
+          }
+        }
+        return;
+      }
     }
 
     if (!subjectsCache.has(subjectName)) {
@@ -583,6 +638,10 @@
       tasks.set(record.id, record);
     }
 
+    if (isStale) {
+      unmarkSubjectStale(subjectName);
+    }
+
     saveSubjectsCache();
   }
 
@@ -619,8 +678,9 @@
    * @returns {Array<{name: string, tasks: Array<Object>}>} Array of subject records
    */
   function collect(includePending = false, forceRefresh = false) {
-    // Use the cache if there is a cache and just stop the scrape if a cache exists instead
-    if (!forceRefresh && hasCachedSubjects()) {
+    const staleSet = getStaleSubjects();
+    // Use the cache if there is a cache, no forced refresh, and no subjects are marked stale
+    if (!forceRefresh && staleSet.size === 0 && hasCachedSubjects()) {
       return formatCollectedSubjects(includePending);
     }
 
@@ -634,164 +694,6 @@
     return formatCollectedSubjects(includePending);
   }
 
-  let isPromptingCacheUpdate = false;
-  let silentCheckDebounce = null;
-
-  function scheduleSilentDifferenceCheck() {
-    if (isPromptingCacheUpdate) return;
-    clearTimeout(silentCheckDebounce);
-    silentCheckDebounce = setTimeout(() => {
-      checkSilentDifferences();
-    }, 250);
-  }
-
-  function promptCacheOutOfDate(updatedCacheMap) {
-    if (isPromptingCacheUpdate) return;
-    isPromptingCacheUpdate = true;
-
-    if (window.ConnectifyNotifications?.show) {
-      window.ConnectifyNotifications.show({
-        id: 'connectify-cache-out-of-date',
-        type: 'warning',
-        title: 'Assessment Cache Out of Date',
-        message: 'New or updated assessment results were detected. Would you like to refresh the page with the new cache?',
-        duration: 0,
-        dismissible: true,
-        onDismiss: () => {
-          isPromptingCacheUpdate = false;
-        },
-        actions: [
-          {
-            text: 'Refresh with New Cache',
-            type: 'primary',
-            onClick: ({ close }) => {
-              close();
-              try {
-                saveSubjectsCache(updatedCacheMap);
-                if (window.ConnectifyCache?.clearPredictorCache) {
-                  window.ConnectifyCache.clearPredictorCache();
-                }
-                sessionStorage.setItem('connectify:one_time_auto_expand', 'true');
-              } catch (e) {
-                console.warn('Failed saving cache before reload:', e);
-              }
-              window.location.reload();
-            }
-          },
-          {
-            text: 'Later',
-            type: 'secondary',
-            onClick: ({ close }) => {
-              close();
-              isPromptingCacheUpdate = false;
-            }
-          }
-        ]
-      });
-    }
-  }
-
-  function checkSilentDifferences() {
-    if (isPromptingCacheUpdate) return;
-    if (!hasCachedSubjects()) {
-      collect(true);
-      return;
-    }
-
-    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card]'))
-      .filter(card => {
-        const heading = card.querySelector('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading');
-        return heading ? /hide details/i.test(heading.textContent) : true;
-      });
-    let hasDifference = false;
-    const freshlyScrapedBySubject = new Map();
-
-    for (const card of cards) {
-      const parsed = parseCardSubjectTasks(card);
-      if (!parsed || parsed.tasks.length === 0) continue;
-      const { subjectName, tasks: scrapedTasks } = parsed;
-
-      if (!freshlyScrapedBySubject.has(subjectName)) {
-        freshlyScrapedBySubject.set(subjectName, []);
-      }
-      freshlyScrapedBySubject.get(subjectName).push(...scrapedTasks);
-
-      const cachedMap = subjectsCache.get(subjectName);
-      if (!cachedMap || cachedMap.size === 0) {
-        hasDifference = true;
-        continue;
-      }
-
-      for (const sTask of scrapedTasks) {
-        let matched = cachedMap.get(sTask.id);
-        if (!matched) {
-          matched = Array.from(cachedMap.values()).find(
-            t => normalize(t.name).toLowerCase() === normalize(sTask.name).toLowerCase()
-          );
-        }
-
-        // Deduplicate tasks repeated across Semester 1 and Semester 2:
-        // If matched is completed in Sem 1 (matched.score !== null) and sTask is pending (in Sem 2),
-        // ignore the unfinished Sem 2 clone, matching scrapeSubjectTasks() heuristic.
-        if (matched && matched.score !== null && sTask.pending) {
-          continue;
-        }
-        if (matched && matched.pending && sTask.pending) {
-          continue;
-        }
-
-        if (!matched) {
-          hasDifference = true;
-          break;
-        }
-
-        if (Boolean(matched.pending) !== Boolean(sTask.pending)) {
-          hasDifference = true;
-          break;
-        }
-
-        if (sTask.score !== null || matched.score !== null) {
-          if (sTask.score === null || matched.score === null || Math.abs(sTask.score - matched.score) > 0.01) {
-            hasDifference = true;
-            break;
-          }
-        }
-
-        if (sTask.weight !== null || matched.weight !== null) {
-          if (sTask.weight === null || matched.weight === null || Math.abs(sTask.weight - matched.weight) > 0.01) {
-            hasDifference = true;
-            break;
-          }
-        }
-
-        if (sTask.mean !== null && matched.mean !== null) {
-          if (Math.abs(sTask.mean - matched.mean) > 0.05) {
-            hasDifference = true;
-            break;
-          }
-        }
-      }
-
-      if (hasDifference) break;
-    }
-
-    if (hasDifference && !isPromptingCacheUpdate) {
-      const updatedCacheMap = new Map();
-      for (const [sName, tasksMap] of subjectsCache.entries()) {
-        updatedCacheMap.set(sName, new Map(tasksMap));
-      }
-      for (const [sName, sTasks] of freshlyScrapedBySubject.entries()) {
-        const targetMap = updatedCacheMap.get(sName) || new Map();
-        for (const st of sTasks) {
-          targetMap.set(st.id, st);
-        }
-        updatedCacheMap.set(sName, targetMap);
-      }
-
-      promptCacheOutOfDate(updatedCacheMap);
-    }
-  }
-
   /**
    * Dispatches updates to dependent modules whenever a subject is expanded.
    */
@@ -801,15 +703,19 @@
     notifyUpdateTimer = setTimeout(() => {
       let subjects = null;
       if (card) {
-        if (!hasCachedSubjects()) {
-          scrapeSubjectTasks(card, false);
-        }
         const cardTitle = normalize(
           card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent ||
           card.getAttribute('data-subject-title') ||
           card.getAttribute('aria-label') ||
           ''
         ).replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+
+        if (!subjectsCache.has(cardTitle) || isSubjectStale(cardTitle)) {
+          scrapeSubjectTasks(card, isSubjectStale(cardTitle));
+        } else {
+          scrapeSubjectTasks(card, false);
+        }
+
         if (cardTitle && subjectsCache.has(cardTitle)) {
           subjects = [{ name: cardTitle, tasks: Array.from(subjectsCache.get(cardTitle).values()) }];
         }
@@ -833,12 +739,12 @@
 
       // Only run visual updates on open/active tool views to prevent layout thrashing
       const weaknessOpen = !document.getElementById('connectea-radar')?.hidden;
-      if (weaknessOpen && window.ConnectifyWeakness?.renderChart) {
-        window.ConnectifyWeakness.renderChart();
+      const progressOpen = !document.getElementById('connectify-progress-graph-container')?.hidden;
+      if (weaknessOpen && window.ConnectifyWeakness?.render) {
+        window.ConnectifyWeakness.render();
       }
-      const progressOpen = !document.getElementById('connectea-progress')?.hidden;
-      if (progressOpen && window.ConnectifyProgress?.update) {
-        window.ConnectifyProgress.update();
+      if (progressOpen && window.ConnectifyProgressGraph?.render) {
+        window.ConnectifyProgressGraph.render();
       }
       if (window.ConnectifyCompoundProgress?.update) {
         window.ConnectifyCompoundProgress.update();
@@ -848,7 +754,7 @@
       }
 
       window.dispatchEvent(new CustomEvent('connectify-results-updated', { detail: { card } }));
-    }, 250);
+    }, 40);
   }
 
   /**
@@ -1020,7 +926,18 @@
                   if (window.ConnectifyDataSyncCharts) {
                     window.ConnectifyDataSyncCharts();
                   }
-                  scheduleSilentDifferenceCheck();
+                  const staleSet = getStaleSubjects();
+                  if (staleSet.size > 0) {
+                    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card]'));
+                    for (const c of cards) {
+                      const cName = normalize(
+                        c.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent || ''
+                      ).replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+                      if (isSubjectStale(cName)) {
+                        scrapeSubjectTasks(c, true);
+                      }
+                    }
+                  }
 
                   const completeFinalize = () => {
                     try {
@@ -1127,9 +1044,6 @@
       if (window.ConnectifyDataSyncCharts) {
         window.ConnectifyDataSyncCharts();
       }
-      if (cards.length > 0) {
-        scheduleSilentDifferenceCheck();
-      }
     }, duration);
   }
   window.ConnectifyTriggerAccordionAnimationGuard = triggerAccordionAnimationGuard;
@@ -1196,8 +1110,6 @@
     expandAll,
     scrapeSubjectTasks,
     parseCardSubjectTasks,
-    checkSilentDifferences,
-    promptCacheOutOfDate,
     hasCachedSubjects,
     saveSubjectsCache,
     loadSubjectsCache,
@@ -1205,12 +1117,17 @@
     getTaskStats,
     setTaskStats,
     getSubjectTasks,
+    markSubjectStale,
+    unmarkSubjectStale,
+    isSubjectStale,
+    getStaleSubjects,
     clearCache: () => {
       subjectsCache.clear();
       statsCache.clear();
       try {
         localStorage.removeItem(getSubjectsCacheKey());
         localStorage.removeItem('connectify:subjects_cache:current');
+        localStorage.removeItem('connectify:stale_subjects');
       } catch {}
     },
     cache: ConnectifyCache

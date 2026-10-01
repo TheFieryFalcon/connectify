@@ -1872,7 +1872,7 @@ runTest('target-solver.js and target-grade-ui.js support dynamic prior performan
 
 runTest('atar-ui.js eliminates ATAR text from grade panel buttons and applies canonical tab styling', () => {
   const uiCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
-  assert.ok(uiCode.includes("semesterLabel = `Semester ${i + 1}`;") || uiCode.includes("semesterLabel = 'Semester ' + (i + 1);"), 'atar-ui.js updateResults must set plain Semester label without ATAR in grading mode');
+  assert.ok(uiCode.includes("semesterLabel = isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;") || uiCode.includes("semesterLabel = `Semester ${i + 1}`;"), 'atar-ui.js updateResults must set plain Semester label without ATAR in grading mode and append (Closed) when closed');
   assert.ok(!uiCode.includes("Semester ${i + 1} Target Grade"), 'atar-ui.js must not append extra redundant text to semester buttons');
   assert.ok(uiCode.includes('cta-semester-closed'), 'atar-ui.js must style closed semester tabs with cta-semester-closed');
   assert.ok(uiCode.includes('cta-semester-indicator'), 'atar-ui.js must style active semester tabs with cta-semester-indicator');
@@ -2631,70 +2631,45 @@ runTest('Test 110: Silent difference check, out-of-date cache prompt with one-ti
   assert.strictEqual(defineError, null, 'setTaskRow property definition must be re-configurable without throwing TypeError');
   assert.strictEqual(testTask.row, mockRow2, 'Task row must be updated to new row element');
 
-  // 3. collect() stops scrape when valid cache exists
-  assert.ok(assessJs.includes('if (!forceRefresh && hasCachedSubjects())'), 'collect must check hasCachedSubjects and exit early if !forceRefresh');
+  // 3. collect() stops scrape when valid cache exists and no subjects are stale
+  assert.ok(assessJs.includes('if (!forceRefresh && staleSet.size === 0 && hasCachedSubjects())'), 'collect must check hasCachedSubjects and staleSet');
   assert.ok(assessJs.includes('function hasCachedSubjects()'), 'assessment-data.js must define hasCachedSubjects');
   assert.ok(assessJs.includes('parseCardSubjectTasks'), 'assessment-data.js must separate card task parsing into parseCardSubjectTasks');
 
-  // 4. Silent background difference detection and popup notification
-  assert.ok(assessJs.includes('checkSilentDifferences'), 'assessment-data.js must define checkSilentDifferences');
-  assert.ok(assessJs.includes('promptCacheOutOfDate'), 'assessment-data.js must define promptCacheOutOfDate');
-  assert.ok(assessJs.includes('scheduleSilentDifferenceCheck'), 'assessment-data.js must define scheduleSilentDifferenceCheck');
-  assert.ok(assessJs.includes('Assessment Cache Out of Date'), 'promptCacheOutOfDate must notify that cache is out of date');
-  assert.ok(assessJs.includes('Refresh with New Cache'), 'promptCacheOutOfDate must provide Refresh with New Cache action button');
-  assert.ok(assessJs.includes("sessionStorage.setItem('connectify:one_time_auto_expand', 'true')"), 'Refresh with New Cache must set connectify:one_time_auto_expand');
+  // 4. Removal of reload-upon-cache-change and silent difference checking
+  assert.ok(!assessJs.includes('checkSilentDifferences'), 'assessment-data.js must not define checkSilentDifferences');
+  assert.ok(!assessJs.includes('promptCacheOutOfDate'), 'assessment-data.js must not define promptCacheOutOfDate');
+  assert.ok(!assessJs.includes('scheduleSilentDifferenceCheck'), 'assessment-data.js must not define scheduleSilentDifferenceCheck');
+  assert.ok(!atarFeatJs.includes('one_time_auto_expand'), 'atar-features.js must not inspect one_time_auto_expand');
 
-  // Verify notification emission when difference is detected
-  let shownNotification = null;
-  window.ConnectifyNotifications = {
-    show: opts => {
-      shownNotification = opts;
-      return { id: opts.id, close: () => {} };
-    }
-  };
+  // 5. Encapsulate summary box plot in new-grade.js & targeted invalidation
+  const newGradeJs = fs.readFileSync(path.resolve(BASE_DIR, 'new-grade.js'), 'utf8');
+  assert.ok(newGradeJs.includes('function readSubjectStats(row)'), 'new-grade.js must define readSubjectStats');
+  assert.ok(newGradeJs.includes('readSubjectStats(summaryRow)'), 'new-grade.js checkGrades must extract stats from summaryRow');
+  assert.ok(newGradeJs.includes('window.ConnectifyData?.markSubjectStale'), 'new-grade.js processChangedSubject must mark subject stale');
+  assert.ok(assessJs.includes('markSubjectStale') && assessJs.includes('unmarkSubjectStale') && assessJs.includes('isSubjectStale'), 'assessment-data.js must export markSubjectStale, unmarkSubjectStale, isSubjectStale');
 
-  const dummyUpdatedCache = new Map();
-  dummyUpdatedCache.set('Math', new Map([['task1', { id: 'task1', name: 'Test 1', score: 95 }]]));
-  window.ConnectifyData.promptCacheOutOfDate(dummyUpdatedCache);
-  assert.ok(shownNotification, 'promptCacheOutOfDate must call ConnectifyNotifications.show');
-  assert.strictEqual(shownNotification.title, 'Assessment Cache Out of Date', 'Notification title must match');
-  const refreshAction = shownNotification.actions?.find(a => a.text === 'Refresh with New Cache');
-  assert.ok(refreshAction, 'Notification must contain Refresh with New Cache action');
+  // Functional test for stale subject marking and unmarking
+  window.ConnectifyData.markSubjectStale('Chemistry');
+  assert.strictEqual(window.ConnectifyData.isSubjectStale('Chemistry'), true, 'Chemistry must be marked stale');
+  window.ConnectifyData.unmarkSubjectStale('Chemistry');
+  assert.strictEqual(window.ConnectifyData.isSubjectStale('Chemistry'), false, 'Chemistry must be unmarked stale');
 
-  // Simulate clicking Refresh with New Cache
-  let reloadCalled = false;
-  const originalReload = window.location.reload;
-  window.location.reload = () => { reloadCalled = true; };
-  try {
-    refreshAction.onClick({ close: () => {} });
-    assert.strictEqual(sessionStorage.getItem('connectify:one_time_auto_expand'), 'true', 'Clicking refresh must set connectify:one_time_auto_expand');
-    assert.strictEqual(reloadCalled, true, 'Clicking refresh must trigger window.location.reload()');
-  } finally {
-    window.location.reload = originalReload;
-  }
+  // 6. Developer Settings and Red Clear Cache button
+  const catSetJs = fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8');
+  const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  assert.ok(catSetJs.includes('Developer Settings'), 'category-settings.js must render Developer Settings heading');
+  assert.ok(catSetJs.includes('cx-clear-cache-btn'), 'category-settings.js must render Clear Cache button');
+  assert.ok(sideCss.includes('.cx-clear-cache-btn'), 'sidebar.css must style .cx-clear-cache-btn');
+  assert.ok(sideCss.includes('background: #e74c3c !important'), 'sidebar.css must style Clear Cache button in red');
 
-  // 5. One-time auto expand consumption in atar-features.js
-  assert.ok(atarFeatJs.includes("sessionStorage.getItem('connectify:one_time_auto_expand')"), 'atar-features.js must inspect connectify:one_time_auto_expand');
-  assert.ok(atarFeatJs.includes("sessionStorage.removeItem('connectify:one_time_auto_expand')"), 'atar-features.js must consume and remove connectify:one_time_auto_expand');
-
-  // Test functional behavior of isAutoExpandEnabled
-  localStorage.setItem('connectify:auto_expand', 'false');
-  sessionStorage.removeItem('connectify:one_time_auto_expand');
-
-  assert.strictEqual(window.ConnectifyIsAutoExpandEnabled(), false, 'isAutoExpandEnabled must return false when auto_expand is false and no one-time flag exists');
-
-  // Set one-time flag
-  sessionStorage.setItem('connectify:one_time_auto_expand', 'true');
-  assert.strictEqual(window.ConnectifyIsAutoExpandEnabled(), true, 'isAutoExpandEnabled must return true ignoring auto_expand ONLY THIS ONCE');
-  assert.strictEqual(sessionStorage.getItem('connectify:one_time_auto_expand'), null, 'connectify:one_time_auto_expand must be removed from sessionStorage after being consumed');
-
-  // Second call must return false again
-  assert.strictEqual(window.ConnectifyIsAutoExpandEnabled(), false, 'Subsequent isAutoExpandEnabled calls must revert to user preference');
-
-  localStorage.removeItem('connectify:auto_expand');
+  // 7. Target Grade panel Semester 1 (Closed) parity
+  const atarUiCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
+  assert.ok(atarUiCode.includes('isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;'), 'atar-ui.js must append (Closed) to Semester 1 in Target Grade mode');
+  assert.ok(atarUiCode.includes('isClosed = (isPlanningMode || isGradingMode) && isTargetClosed(i);'), 'atar-ui.js must close Semester 1 in Target Grade mode when completed');
 });
 
-runTest('Test 111: Typography parity (unbolded overall % and letter grade), startup auto-expand, deduplicated silent cache diffs, outcome bar for first task of type, and complete render finalization', () => {
+runTest('Test 111: Typography parity (unbolded overall % and letter grade), startup auto-expand, outcome bar for first task of type, and complete render finalization', () => {
   const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   const atarFeatJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-features.js'), 'utf8');
@@ -2713,10 +2688,10 @@ runTest('Test 111: Typography parity (unbolded overall % and letter grade), star
   assert.ok(atarFeatJs.includes('startupPollInterval = setInterval'), 'atar-features.js must provide startup polling loop for tiles');
   assert.ok(atarFeatJs.includes('DOMContentLoaded'), 'atar-features.js must listen on DOMContentLoaded for startup auto-expand');
 
-  // 3. Silent difference check: skip collapse, skip collapsed cards, deduplicate Sem 1/2 clones
-  assert.ok(assessJs.includes('if (cards.length > 0) {\n        scheduleSilentDifferenceCheck();\n      }'), 'triggerAccordionAnimationGuard must only schedule silent diff when cards were expanded, never on collapse');
-  assert.ok(assessJs.includes('/hide details/i.test(heading.textContent)'), 'checkSilentDifferences must filter out collapsed cards');
-  assert.ok(assessJs.includes('matched.score !== null && sTask.pending'), 'checkSilentDifferences must ignore pending Sem 2 clone of completed Sem 1 task');
+  // 3. Silent difference check removal verification
+  assert.ok(!assessJs.includes('checkSilentDifferences'), 'assessment-data.js must not include checkSilentDifferences');
+  assert.ok(!assessJs.includes('scheduleSilentDifferenceCheck'), 'assessment-data.js must not include scheduleSilentDifferenceCheck');
+  assert.ok(!assessJs.includes('promptCacheOutOfDate'), 'assessment-data.js must not include promptCacheOutOfDate');
 
   // 4. Four-segment outcome bar: renders for first task of type, fast O(1) prediction lookup
   assert.ok(!cohortViewJs.includes('const isFirstOfType ='), 'cohort-view.js must not suppress outcome bar for first task of type');

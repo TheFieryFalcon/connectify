@@ -87,7 +87,7 @@
       const btn = createEl('button', 'cta-semester', `Semester ${semesterIdx + 1}`);
       btn.type = 'button';
       btn.addEventListener('click', () => {
-        if (isPlanningMode && isTargetClosed(semesterIdx)) {
+        if ((isPlanningMode || isGradingMode) && isTargetClosed(semesterIdx)) {
           return;
         }
         activeSemester = semesterIdx;
@@ -205,7 +205,7 @@
 
       calculatorPanel.setAttribute('aria-label', panelTitle.textContent);
 
-      if (isGradingMode && hasSemesterTwoStarted()) {
+      if (isGradingMode && (hasSemesterTwoStarted() || isTargetClosed(0))) {
         activeSemester = 1;
       }
 
@@ -240,10 +240,10 @@
     selectTab('estimate');
 
     function updateResults() {
-      if (isGradingMode && hasSemesterTwoStarted()) {
+      if (isGradingMode && (hasSemesterTwoStarted() || isTargetClosed(0))) {
         activeSemester = 1;
       }
-      if (isPlanningMode && isTargetClosed(activeSemester) && !isTargetClosed(1 - activeSemester)) {
+      if ((isPlanningMode || isGradingMode) && isTargetClosed(activeSemester) && !isTargetClosed(1 - activeSemester)) {
         activeSemester = 1 - activeSemester;
       }
 
@@ -257,11 +257,11 @@
 
       for (let i = 0; i < 2; i++) {
         const res = results[i] || {};
-        const isClosed = isPlanningMode && isTargetClosed(i);
+        const isClosed = (isPlanningMode || isGradingMode) && isTargetClosed(i);
 
         let semesterLabel = '';
         if (isGradingMode) {
-          semesterLabel = `Semester ${i + 1}`;
+          semesterLabel = isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;
         } else if (isPlanningMode) {
           semesterLabel = isClosed ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`;
         } else {
@@ -270,9 +270,9 @@
         semesterButtons[i].textContent = semesterLabel;
 
         semesterButtons[i].hidden = false;
-        semesterButtons[i].disabled = Boolean(semesterButtons[i].hidden || (isPlanningMode && isClosed));
+        semesterButtons[i].disabled = Boolean(semesterButtons[i].hidden || isClosed);
 
-        if (isPlanningMode && isClosed) {
+        if (isClosed) {
           semesterButtons[i].className = 'cta-semester cta-semester-closed';
         } else if (i === activeSemester) {
           semesterButtons[i].className = 'cta-semester cta-semester-indicator';

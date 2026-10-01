@@ -56,7 +56,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify:weakness_disabled_subjects` | `localStorage` | `weakness-radar.js` | Array of subjects excluded from Weakness Analyzer |
 | `connectea:time_override:<subject>:<task>` | `localStorage` | `progress-chart.js` | Manual school week overrides for assessments |
 | `connectify:auto_expand` | `localStorage` | `category-settings.js` / `atar-features.js` | Boolean setting to auto-expand course outlines on load |
-| `connectify:one_time_auto_expand` | `sessionStorage` | `atar-features.js` / `assessment-data.js` | One-time auto-expansion flag consumed upon cache update reload |
+| `connectify:stale_subjects` | `localStorage` | `assessment-data.js` / `new-grade.js` | Set of subjects whose collapsed grade/stats changed, awaiting targeted re-scrape upon expansion |
 | `connectify:subjects_cache:<student>` | `localStorage` | `assessment-data.js` | Persisted scraped subjects and tasks for instant collection without DOM rescrape |
 | `connectify:general_cohort_size` | `localStorage` | `category-settings.js` / `cohort-estimator.js` | Estimated year level cohort size (default: 500) |
 | `connectify:atar_percentage` | `localStorage` | `category-settings.js` / `cohort-estimator.js` | Estimated ATAR pathway participation percentage (default: 60) |

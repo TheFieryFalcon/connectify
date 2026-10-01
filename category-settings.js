@@ -238,7 +238,50 @@
            <button type="button" id="cx-cat-reset" class="eds-c-button" style="background:#95a5a6;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;">Reset Defaults</button>
         </div>
       </section>
+
+      <section class="cx-settings-section" style="margin-top:36px;border-top:1px solid #d8e3ee;padding-top:24px;">
+        <header style="margin-bottom:8px;">
+          <strong>Developer Settings</strong>
+        </header>
+        <p class="cx-settings-desc" style="font-size:12px;margin:0 0 16px 0;">Reset local caches and saved student assessment data.</p>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button type="button" id="cx-clear-cache-btn" class="eds-c-button cx-clear-cache-btn" style="background:#e74c3c;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Clear Cache</button>
+          <span id="cx-clear-cache-feedback" style="display:none;font-size:12px;color:#27ae60;font-weight:600;">Cache cleared!</span>
+        </div>
+      </section>
     `;
+
+    const clearCacheBtn = catPanel.querySelector('#cx-clear-cache-btn');
+    if (clearCacheBtn) {
+      clearCacheBtn.addEventListener('click', () => {
+        try {
+          if (window.ConnectifyCache?.clearResultsCache) {
+            window.ConnectifyCache.clearResultsCache();
+          }
+          if (window.ConnectifyCache?.clearCohortCache) {
+            window.ConnectifyCache.clearCohortCache();
+          }
+          if (window.ConnectifyCache?.clearPredictorCache) {
+            window.ConnectifyCache.clearPredictorCache();
+          }
+          if (window.ConnectifyData?.clearCache) {
+            window.ConnectifyData.clearCache();
+          }
+          try {
+            localStorage.removeItem('connectify:stale_subjects');
+          } catch {}
+          const feedback = catPanel.querySelector('#cx-clear-cache-feedback');
+          if (feedback) {
+            feedback.style.display = 'inline';
+            setTimeout(() => {
+              feedback.style.display = 'none';
+            }, 3000);
+          }
+        } catch (e) {
+          console.warn('Failed to clear cache:', e);
+        }
+      });
+    }
 
     catPanel.querySelector('#cx-cat-add').onclick = () => {
       const catName = prompt('Enter new assessment category name (e.g. Practical, Investigation):');

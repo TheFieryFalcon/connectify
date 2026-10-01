@@ -18,16 +18,7 @@
     let settingsInstance = null;
     let predictorInstance = null;
 
-    function isAutoExpandEnabled(consume = true) {
-      try {
-        const oneTime = sessionStorage.getItem('connectify:one_time_auto_expand');
-        if (oneTime === 'true') {
-          if (consume) {
-            sessionStorage.removeItem('connectify:one_time_auto_expand');
-          }
-          return true;
-        }
-      } catch (e) {}
+    function isAutoExpandEnabled() {
       try {
         const val = localStorage.getItem('connectify:auto_expand');
         if (val !== null) return val !== 'false';
@@ -37,14 +28,13 @@
 
     function checkStartupAutoExpand() {
       if (hasAutoExpanded) return;
-      if (!isAutoExpandEnabled(false)) {
+      if (!isAutoExpandEnabled()) {
         hasAutoExpanded = true;
         return;
       }
       const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile');
       if (tiles.length > 0 && window.ConnectifyData?.expandAll) {
         hasAutoExpanded = true;
-        isAutoExpandEnabled(true); // consume one-time flag
         window.ConnectifyData.expandAll(true);
       }
     }

@@ -48,6 +48,9 @@
   /**
    * Reads raw score percentage from task row (supports % and X Out of Y).
    */
+  /**
+   * Reads raw score percentage from task row (supports % and X Out of Y).
+   */
   function readSubjectMark(row) {
     if (!row) return undefined;
     if (window.ConnectifyCohortView?.readMark) {
@@ -71,6 +74,50 @@
   }
 
   /**
+   * Reads 5-number boxplot summary from DOM dataset or Highcharts on the summary row.
+   */
+  function readSubjectStats(row) {
+    if (!row) return undefined;
+    if (window.ConnectifyCohortView?.readStats) {
+      const s = window.ConnectifyCohortView.readStats(row);
+      if (Array.isArray(s) && s.length === 5 && s.every(Number.isFinite)) return s;
+    }
+    const host = row.querySelector('[data-highcharts-chart]') ||
+                 row.querySelector('.cvr-c-task__chart [data-highcharts-chart]') ||
+                 row.querySelector('.cvr-c-task__chart');
+    if (host) {
+      if (host.dataset?.connectifyStats) {
+        try {
+          const stats = JSON.parse(host.dataset.connectifyStats);
+          if (Array.isArray(stats) && stats.length === 5 && stats.every(Number.isFinite)) return stats;
+        } catch {}
+      }
+      const hostWithDataset = host.querySelector?.('[data-connectify-stats]') || host.closest?.('[data-connectify-stats]');
+      if (hostWithDataset?.dataset?.connectifyStats) {
+        try {
+          const stats = JSON.parse(hostWithDataset.dataset.connectifyStats);
+          if (Array.isArray(stats) && stats.length === 5 && stats.every(Number.isFinite)) return stats;
+        } catch {}
+      }
+      const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
+      const chart = window.Highcharts?.charts?.[chartIndex];
+      if (chart) {
+        for (const series of chart.series || []) {
+          const dataPoints = [...(series.points || []), ...(series.options?.data || [])];
+          for (const point of dataPoints) {
+            const pointData = point?.options || point;
+            const stats = Array.isArray(pointData)
+              ? pointData.slice(-5).map(Number)
+              : [pointData?.low, pointData?.q1, pointData?.median, pointData?.q3, pointData?.high].map(Number);
+            if (Array.isArray(stats) && stats.length === 5 && stats.every(Number.isFinite)) return stats;
+          }
+        }
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Expands an individual subject tile card if collapsed.
    */
   function expandSubjectCard(card) {
@@ -83,32 +130,38 @@
   }
 
   /**
-   * For a subject whose average has changed:
-   * Ignores auto-expand / collapse preferences and ensures THAT SUBJECT ONLY
-   * is definitely expanded to reveal its tasks and update results,
-   * then if auto-expand is off, collapses it again.
+   * For a subject whose average or box plot has changed:
+   * Marks that subject stale so that when it is expanded,
+   * its portion of the cache is refreshed and unstored from stale tracking.
    */
   function processChangedSubject(entry) {
-    const card = entry.card;
-    if (!card) return;
-
-    if (card.querySelector('.cvr-c-task')) {
-      if (window.ConnectifyData?.scrapeSubjectTasks) {
-        window.ConnectifyData.scrapeSubjectTasks(card);
-      }
-      if (window.ConnectifyData?.notifyResultsUpdated) {
-        window.ConnectifyData.notifyResultsUpdated(card);
-      }
+    if (!entry) return;
+    if (window.ConnectifyData?.markSubjectStale) {
+      window.ConnectifyData.markSubjectStale(entry.subjectName);
     }
   }
 
   /**
-   * Smoothly scrolls to a subject card and plays a visual pulse highlight.
+   * Smoothly scrolls to a subject card, expands it, scrapes tasks,
+   * unstores it from stale cache, and plays a visual pulse highlight.
    */
   function jumpToSubject(card) {
     if (!card) return;
     expandSubjectCard(card);
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    const rawTitle = normalize(card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, h1, h2, h3, h4')?.textContent);
+    const subjectName = extractSubjectName(rawTitle);
+
+    if (window.ConnectifyData?.scrapeSubjectTasks) {
+      window.ConnectifyData.scrapeSubjectTasks(card, true);
+    }
+    if (subjectName && window.ConnectifyData?.unmarkSubjectStale) {
+      window.ConnectifyData.unmarkSubjectStale(subjectName);
+    }
+    if (window.ConnectifyData?.notifyResultsUpdated) {
+      window.ConnectifyData.notifyResultsUpdated(card);
+    }
 
     card.classList.remove('cx-card-jump-highlight');
     // Force DOM reflow to restart CSS keyframe animation
@@ -168,14 +221,17 @@
         row => !row.closest('.cvr-c-tasks')
       );
       const mark = readSubjectMark(summaryRow);
+      const stats = readSubjectStats(summaryRow);
       const hasScore = Number.isFinite(mark);
+      const hasStats = Array.isArray(stats) && stats.length === 5;
 
       const candidate = {
         card,
         rawTitle,
         subjectName,
         semester,
-        mark: hasScore ? Math.round(mark * 100) / 100 : undefined
+        mark: hasScore ? Math.round(mark * 100) / 100 : undefined,
+        stats: hasStats ? stats.map(v => Math.round(v * 100) / 100) : undefined
       };
 
       if (!subjectMap.has(subjectName)) {
@@ -184,25 +240,27 @@
         const existing = subjectMap.get(subjectName);
         const candidateHasScore = Number.isFinite(candidate.mark);
         const existingHasScore = Number.isFinite(existing.mark);
+        const candidateHasStats = Array.isArray(candidate.stats) && candidate.stats.length === 5;
+        const existingHasStats = Array.isArray(existing.stats) && existing.stats.length === 5;
 
         // Preference rules:
-        // 1. If candidate is Semester 2 with a valid score, it always takes precedence.
-        // 2. If existing is Semester 1 (even with a score) and candidate is Semester 2 with a score, replace.
-        // 3. If candidate has a score but existing has no score, candidate wins regardless of semester.
-        // 4. Do not let Semester 1 overwrite an existing Semester 2 with a score.
-        if (candidate.semester === 2 && candidateHasScore) {
+        // 1. If candidate is Semester 2 with a valid score or stats, it always takes precedence.
+        // 2. If existing is Semester 1 (even with score/stats) and candidate is Semester 2 with score/stats, replace.
+        // 3. If candidate has score/stats but existing has none, candidate wins regardless of semester.
+        // 4. Do not let Semester 1 overwrite an existing Semester 2 with score/stats.
+        if (candidate.semester === 2 && (candidateHasScore || candidateHasStats)) {
           subjectMap.set(subjectName, candidate);
-        } else if (!existingHasScore && candidateHasScore) {
+        } else if (!existingHasScore && !existingHasStats && (candidateHasScore || candidateHasStats)) {
           subjectMap.set(subjectName, candidate);
-        } else if (candidate.semester > existing.semester && candidateHasScore) {
+        } else if (candidate.semester > existing.semester && (candidateHasScore || candidateHasStats)) {
           subjectMap.set(subjectName, candidate);
         }
       }
     }
 
-    // Only consider subjects that have a valid running mark
+    // Only consider subjects that have a valid running mark or valid boxplot stats
     const currentEntries = Array.from(subjectMap.values()).filter(
-      e => Number.isFinite(e.mark)
+      e => Number.isFinite(e.mark) || (Array.isArray(e.stats) && e.stats.length === 5)
     );
 
     if (!currentEntries.length) return;
@@ -211,60 +269,86 @@
     const isFirstRun = !prevCache || Object.keys(prevCache).length === 0;
 
     // First-time users with an empty cache must NOT receive a barrage of notifications;
-    // only notify when an existing cached grade has changed by >= 0.05%
+    // only notify when an existing cached grade or stats has changed by >= 0.05
     if (!isFirstRun && prevCache) {
       for (const entry of currentEntries) {
         const prev = prevCache[entry.subjectName];
-        const hasPrev = prev && Number.isFinite(prev.mark);
+        const hasPrevMark = prev && Number.isFinite(prev.mark);
+        const hasPrevStats = prev && Array.isArray(prev.stats) && prev.stats.length === 5;
 
-        if (hasPrev) {
-          const delta = Math.round((entry.mark - prev.mark) * 100) / 100;
-
+        let markChanged = false;
+        let delta = 0;
+        if (hasPrevMark && Number.isFinite(entry.mark)) {
+          delta = Math.round((entry.mark - prev.mark) * 100) / 100;
           if (Math.abs(delta) >= 0.05) {
-            // 1. Process targeted expansion, task results scraping, and collapse if auto-expand off
-            processChangedSubject(entry);
+            markChanged = true;
+          }
+        }
 
-            // 2. Dispatch stacked notification
-            const deltaSign = delta > 0 ? '+' : '';
-            const deltaStr = `${deltaSign}${delta.toFixed(1)}%`;
-            const currentMarkStr = `${entry.mark.toFixed(1)}%`;
+        let statsChanged = false;
+        if (hasPrevStats && Array.isArray(entry.stats) && entry.stats.length === 5) {
+          statsChanged = entry.stats.some((val, idx) => Math.abs(val - prev.stats[idx]) >= 0.05);
+        } else if (!hasPrevStats && Array.isArray(entry.stats) && entry.stats.length === 5 && prev) {
+          statsChanged = true;
+        }
 
-            if (window.ConnectifyNotifications?.show) {
-              window.ConnectifyNotifications.show({
-                id: `connectify-grade-${entry.subjectName.replace(/\s+/g, '-').toLowerCase()}`,
-                type: 'grade',
-                title: `Grade Update: ${entry.subjectName}`,
-                message: `Subject running average updated to ${currentMarkStr} (${deltaStr}).`,
-                duration: 12000,
-                actions: [
-                  {
-                    text: 'Dismiss',
-                    type: 'secondary',
-                    onClick: ({ close }) => {
-                      close();
-                    }
-                  },
-                  {
-                    text: 'Jump to Subject',
-                    type: 'accent',
-                    onClick: () => {
-                      jumpToSubject(entry.card);
-                    }
+        if (markChanged || statsChanged) {
+          // 1. Process targeted invalidation: store as stale subject
+          processChangedSubject(entry);
+
+          // 2. Dispatch stacked notification
+          let notifTitle = `Grade Update: ${entry.subjectName}`;
+          let notifMsg = '';
+          const deltaSign = delta > 0 ? '+' : '';
+          const deltaStr = `${deltaSign}${delta.toFixed(1)}%`;
+          const currentMarkStr = Number.isFinite(entry.mark) ? `${entry.mark.toFixed(1)}%` : '';
+
+          if (markChanged && statsChanged) {
+            notifMsg = `Subject running average updated to ${currentMarkStr} (${deltaStr}) and cohort statistics updated.`;
+          } else if (markChanged) {
+            notifMsg = `Subject running average updated to ${currentMarkStr} (${deltaStr}).`;
+          } else {
+            notifTitle = `Cohort Statistics Update: ${entry.subjectName}`;
+            const medStr = entry.stats?.[2] !== undefined ? ` (Median: ${entry.stats[2]}%)` : '';
+            notifMsg = `Cohort distribution box plot updated for ${entry.subjectName}${medStr}.`;
+          }
+
+          if (window.ConnectifyNotifications?.show) {
+            window.ConnectifyNotifications.show({
+              id: `connectify-grade-${entry.subjectName.replace(/\s+/g, '-').toLowerCase()}`,
+              type: 'grade',
+              title: notifTitle,
+              message: notifMsg,
+              duration: 12000,
+              actions: [
+                {
+                  text: 'Dismiss',
+                  type: 'secondary',
+                  onClick: ({ close }) => {
+                    close();
                   }
-                ]
-              });
-            }
+                },
+                {
+                  text: 'Jump to Subject',
+                  type: 'accent',
+                  onClick: () => {
+                    jumpToSubject(entry.card);
+                  }
+                }
+              ]
+            });
           }
         }
       }
     }
 
-    // Update the averages cache 1 second after the page has loaded / evaluated
+    // Update the averages and stats cache 1 second after the page has loaded / evaluated
     setTimeout(() => {
       const updatedCache = loadCachedGrades() || {};
       for (const entry of currentEntries) {
         updatedCache[entry.subjectName] = {
           mark: entry.mark,
+          stats: entry.stats,
           semester: entry.semester,
           updatedAt: Date.now()
         };
@@ -331,10 +415,15 @@
 
   window.ConnectifyNewGrade = {
     checkGrades,
+    readSubjectStats,
     getCachedGrades: loadCachedGrades,
-    setCachedGrade: (subjectName, mark) => {
+    setCachedGrade: (subjectName, mark, stats) => {
       const c = loadCachedGrades() || {};
-      c[subjectName] = { mark: Number(mark), updatedAt: Date.now() };
+      c[subjectName] = {
+        mark: Number(mark),
+        stats: Array.isArray(stats) ? stats : undefined,
+        updatedAt: Date.now()
+      };
       saveCachedGrades(c);
     },
     clearGradeCache: () => {
