@@ -222,7 +222,6 @@
     }
   `;
 
-  let queued = false;
   const persistentEstimates = new Map();
 
   function pass() {

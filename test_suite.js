@@ -2262,6 +2262,17 @@ runTest('Test 101: Expand all progress pill adapts correctly across light and da
   assert.ok(themeJs.includes(':not(#cx-expand-progress):not(#cx-expand-progress *)'), 'theme.js must exclude #cx-expand-progress from adaptSurfaces');
 });
 
+runTest('Test 102: All project JS files pass strict JavaScript syntax validation', () => {
+  const jsFiles = fs.readdirSync(BASE_DIR).filter(f => f.endsWith('.js') && f !== 'test_suite.js');
+  assert.ok(jsFiles.length > 10, 'Must validate all extension JS files');
+  for (const f of jsFiles) {
+    const code = fs.readFileSync(path.resolve(BASE_DIR, f), 'utf8');
+    assert.doesNotThrow(() => {
+      new vm.Script(code, { filename: f });
+    }, `File ${f} must have valid JavaScript syntax without duplicate declarations`);
+  }
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');
