@@ -605,9 +605,12 @@ runTest('Outcome meter persists and computes reliably for marked tasks without d
     pending: false
   };
 
+  // Provide baselines so prediction resolves for this assessment
+  predMath.saveBaselines({ subjects: { 'Physics ATAR': 82 }, types: { 'Take-Home': 80 } });
+
   const prediction = predMath.getOrComputeTaskPrediction('Physics ATAR', taskMock);
   assert.ok(prediction, 'Prediction must be resolved for marked task');
-  assert.strictEqual(prediction.unpredicted, false, 'Prediction for completed task must NOT be unpredicted');
+  assert.strictEqual(prediction.unpredicted, false, 'Prediction for completed task must NOT be unpredicted when baseline exists');
 
   const outcome = predMath.evaluateOutcome(84, prediction);
   assert.ok(outcome, 'Outcome must be evaluated');
@@ -618,6 +621,8 @@ runTest('Outcome meter persists and computes reliably for marked tasks without d
   const panelState = window.ConnectifyCohortView.createPanel(row, false, 'phys-key', 50);
   assert.ok(panelState, 'Panel state must exist');
   assert.ok(panelState.outcomeBar, 'outcomeBar must exist in panel state');
+
+  localStorage.clear();
 });
 
 // ===========================================================================
@@ -829,7 +834,7 @@ runTest('Year 11 TEA scaling adjustment removed and ATAR calculation aligned', (
   }
 });
 
-runTest('Completed tasks with zero prior type precedents never return unpredicted: true', () => {
+runTest('Completed tasks with zero prior history or type precedents return unpredicted: true when baselines are absent', () => {
   const emptyHistorical = {
     subjects: {},
     subjectSpreads: {},
@@ -849,11 +854,16 @@ runTest('Completed tasks with zero prior type precedents never return unpredicte
   };
 
   const result = predMath.predictTask('Chemistry ATAR', completedTask, emptyHistorical, emptyBaselines, true);
-  assert.strictEqual(result.unpredicted, false, 'Completed task must never be unpredicted even with 0 prior history');
-  assert.ok(Number.isFinite(result.mid), 'Middle prediction must be a finite number');
-  assert.ok(Number.isFinite(result.low), 'Low prediction must be a finite number');
-  assert.ok(Number.isFinite(result.high), 'High prediction must be a finite number');
-  assert.ok(Number.isFinite(result.breakoutScore), 'Breakout score must be a finite number');
+  assert.strictEqual(result.unpredicted, true, 'First completed task without baselines must be unpredicted');
+
+  // When baselines are provided, prediction must succeed
+  const withBaselines = { subjects: { 'Chemistry ATAR': 85 }, types: { 'Test': 80, 'Investigation': 80 } };
+  const predictedResult = predMath.predictTask('Chemistry ATAR', completedTask, emptyHistorical, withBaselines, true);
+  assert.strictEqual(predictedResult.unpredicted, false, 'Completed task with baselines must be predicted');
+  assert.ok(Number.isFinite(predictedResult.mid), 'Middle prediction must be a finite number');
+  assert.ok(Number.isFinite(predictedResult.low), 'Low prediction must be a finite number');
+  assert.ok(Number.isFinite(predictedResult.high), 'High prediction must be a finite number');
+  assert.ok(Number.isFinite(predictedResult.breakoutScore), 'Breakout score must be a finite number');
 });
 
 // ===========================================================================
@@ -1971,8 +1981,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v8_20261001_pred'"), 'predictor-math.js must use v8_20261001_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v8_20261001_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v8_20261001_pred');
+  assert.ok(predMathCode.includes("'v9_20261001_pred'"), 'predictor-math.js must use v9_20261001_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v9_20261001_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v9_20261001_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2065,9 +2075,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v8_20261001_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v9_20261001_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v8_20261001_pred'), 'predictor-math.js must bump version to v8_20261001_pred');
+  assert.ok(predMathJs.includes('v9_20261001_pred'), 'predictor-math.js must bump version to v9_20261001_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -2141,7 +2151,7 @@ runTest('Test 96: atar-calculator.js defines yearLevel and target-atar-ui.js pre
 runTest('Test 97: compound-progress.js isolates Semester 1 and Semester 2 and sorts segments chronologically', () => {
   const compJs = fs.readFileSync(path.resolve(BASE_DIR, 'compound-progress.js'), 'utf8');
 
-  assert.ok(compJs.includes('if (cardSemester === 2) return t.semester === 2;'), 'compound-progress.js must isolate Semester 2 strictly to Semester 2 tasks');
+  assert.ok(compJs.includes('t.semester === 1 || t.semester === 2'), 'compound-progress.js must encapsulate Semester 1 and Semester 2 for Semester 2 cards');
   assert.ok(compJs.includes('oA - oB'), 'compound-progress.js must sort segments chronologically by order');
 
   // Functional DOM test
@@ -2196,6 +2206,35 @@ runTest('Test 97: compound-progress.js isolates Semester 1 and Semester 2 and so
   assert.strictEqual(segments.length, 2, 'Semester 1 progress bar must contain 2 segments');
   assert.ok(segments[0].title.includes('Investigation 1'), 'Segment with order 5 must be first chronologically');
   assert.ok(segments[1].title.includes('Investigation 2'), 'Segment with order 15 must be second chronologically');
+
+  // When Semester 2 tasks are present, verify Semester 2 encapsulates both semesters
+  window.ConnectifyData = {
+    collect: () => [
+      {
+        name: 'Chemistry',
+        tasks: [
+          { name: 'Investigation 1', semester: 1, weight: 10, pending: false, order: 5, sequence: 1 },
+          { name: 'Investigation 2', semester: 1, weight: 10, pending: false, order: 15, sequence: 2 },
+          { name: 'Test 1', semester: 2, weight: 15, pending: false, order: 25, sequence: 3 },
+          { name: 'Final Exam', semester: 2, weight: 35, pending: true, order: 35, sequence: 4 }
+        ]
+      }
+    ]
+  };
+
+  window.ConnectifyCompoundProgress.update();
+
+  const sem1ProgUpdated = sem1Card.querySelector('.cx-compound-progress-container');
+  const sem2ProgUpdated = sem2Card.querySelector('.cx-compound-progress-container');
+
+  assert.ok(sem1ProgUpdated, 'Semester 1 card must render progress container');
+  assert.ok(sem2ProgUpdated, 'Semester 2 card must render progress container when Semester 2 tasks exist');
+
+  const sem1Segs = sem1ProgUpdated.querySelectorAll('.cx-compound-segment');
+  const sem2Segs = sem2ProgUpdated.querySelectorAll('.cx-compound-segment');
+
+  assert.strictEqual(sem1Segs.length, 2, 'Semester 1 card must only contain Semester 1 tasks');
+  assert.strictEqual(sem2Segs.length, 4, 'Semester 2 card must encapsulate tasks from both Semester 1 and Semester 2');
 
   sem1Card.remove();
   sem2Card.remove();
@@ -2329,6 +2368,163 @@ runTest('Test 106: All project JS files pass strict JavaScript syntax validation
       new vm.Script(code, { filename: f });
     }, `File ${f} must have valid JavaScript syntax without duplicate declarations`);
   }
+});
+
+runTest('Test 107: Outcome bar is strictly suppressed on first task of subject/type without baseline, and Semester 2 compound progress encapsulates both semesters', () => {
+  // 1. Setup subjects for outcome bar test
+  const subjectName = 'Chemistry ATAR';
+  const cleanSubj = predMath.cleanSubject(subjectName);
+
+  // Clear any existing baselines and predictions
+  localStorage.clear();
+  delete window.ConnectifyTaskTypes;
+  delete window.ConnectifyCohortView;
+
+  const taskTypesCode = fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8');
+  eval(taskTypesCode);
+
+  const task1 = { id: 'chem-t1', name: 'Test 1', order: 1, sequence: 0, score: 90, mark: 90, weight: 10, pending: false };
+  const task2 = { id: 'chem-t2', name: 'Investigation 1', order: 2, sequence: 1, score: 85, mark: 85, weight: 10, pending: false };
+  const task3 = { id: 'chem-t3', name: 'Test 2', order: 3, sequence: 2, score: 88, mark: 88, weight: 15, pending: false };
+
+  const subjectsList = [
+    {
+      name: 'Chemistry ATAR - Semester 1',
+      tasks: [task1, task2, task3]
+    }
+  ];
+
+  // Load cohort-view.js
+  const cohortJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+  eval(cohortJsCode);
+
+  const card = document.createElement('div');
+  card.className = 'eds-c-tile';
+  const cTitle = document.createElement('div');
+  cTitle.className = 'eds-c-tile__title';
+  cTitle.textContent = 'Chemistry ATAR - Semester 1';
+  card.appendChild(cTitle);
+
+  function makeTaskRow(taskName, termWeek, markStr) {
+    const row = document.createElement('div');
+    row.className = 'cvr-c-task';
+    row.closest = (sel) => sel.includes('eds-c-tile') ? card : null;
+
+    const details = document.createElement('div');
+    details.className = 'cvr-c-task__details';
+    const l1 = document.createElement('span');
+    l1.className = 'v-label';
+    l1.textContent = 'Chemistry';
+    const l2 = document.createElement('span');
+    l2.className = 'v-label';
+    l2.textContent = termWeek;
+    const l3 = document.createElement('span');
+    l3.className = 'v-label';
+    l3.textContent = taskName;
+    details.append(l1, l2, l3);
+    row.append(details);
+
+    const marks = document.createElement('div');
+    marks.className = 'cvr-c-task__marks';
+    const m = document.createElement('div');
+    m.className = 'cvr-c-task__mark';
+    m.textContent = markStr;
+    marks.append(m);
+    row.append(marks);
+
+    card.appendChild(row);
+    return row;
+  }
+
+  // Row for task 1 (first of subject and first of type)
+  const row1 = makeTaskRow('Test 1', 'Term 1, Week 2', '45 Out of 50');
+  window.ConnectifyCohortView.render(row1, false, 'chem-k1', 50, null, subjectsList);
+  const panel1 = window.ConnectifyCohortView.panels.get(row1);
+  assert.ok(panel1, 'Panel 1 must exist');
+  assert.strictEqual(panel1.outcomeBar.hidden, true, 'Task 1 (first task of subject) outcome bar must be hidden when baselines absent');
+
+  // Row for task 2 (has prior subject data, but is first of type 'Investigation')
+  const row2 = makeTaskRow('Investigation 1', 'Term 1, Week 5', '42.5 Out of 50');
+  window.ConnectifyCohortView.render(row2, false, 'chem-k2', 50, null, subjectsList);
+  const panel2 = window.ConnectifyCohortView.panels.get(row2);
+  assert.ok(panel2, 'Panel 2 must exist');
+  assert.strictEqual(panel2.outcomeBar.hidden, true, 'Task 2 (first task of type Investigation) outcome bar must be hidden when type baseline absent');
+
+  // Row for task 3 (second of type 'Test', has prior subject data)
+  const row3 = makeTaskRow('Test 2', 'Term 2, Week 3', '44 Out of 50');
+  window.ConnectifyCohortView.render(row3, false, 'chem-k3', 50, null, subjectsList);
+  const panel3 = window.ConnectifyCohortView.panels.get(row3);
+  assert.ok(panel3, 'Panel 3 must exist');
+  assert.strictEqual(panel3.outcomeBar.hidden, false, 'Task 3 (second task of type Test) outcome bar must NOT be hidden');
+
+  // Now set cold-start baseline for subject and type, and verify Task 1 renders outcome bar
+  predMath.saveBaselines({
+    subjects: { '12 Chemistry ATAR - Semester 1': 85, [cleanSubj]: 85 },
+    types: { 'Test': 80 }
+  });
+
+  // Re-render task 1 with baselines active
+  delete panel1._lastBaselinesSig; // ensure re-evaluation
+  window.ConnectifyCohortView.render(row1, false, 'chem-k1', 50, null, subjectsList);
+  assert.strictEqual(panel1.outcomeBar.hidden, false, 'Task 1 with explicit cold-start baseline must render outcome bar');
+
+  // 2. Test Semester 2 compound progress bar dual-semester encapsulation
+  const sem1Tile = document.createElement('div');
+  sem1Tile.className = 'eds-c-tile';
+  const hSem1 = document.createElement('div');
+  hSem1.className = 'eds-c-tile__header';
+  const tSem1 = document.createElement('span');
+  tSem1.className = 'eds-c-tile__title';
+  tSem1.textContent = 'Physics - Semester 1';
+  hSem1.appendChild(tSem1);
+  sem1Tile.appendChild(hSem1);
+
+  const sem2Tile = document.createElement('div');
+  sem2Tile.className = 'eds-c-tile';
+  const hSem2 = document.createElement('div');
+  hSem2.className = 'eds-c-tile__header';
+  const tSem2 = document.createElement('span');
+  tSem2.className = 'eds-c-tile__title';
+  tSem2.textContent = 'Physics - Semester 2';
+  hSem2.appendChild(tSem2);
+  sem2Tile.appendChild(hSem2);
+
+  document.body.appendChild(sem1Tile);
+  document.body.appendChild(sem2Tile);
+
+  window.ConnectifyData = {
+    collect: () => [
+      {
+        name: 'Physics',
+        tasks: [
+          { name: 'Investigation 1', semester: 1, weight: 10, pending: false, order: 1 },
+          { name: 'Investigation 2', semester: 1, weight: 10, pending: false, order: 2 },
+          { name: 'Test 1', semester: 2, weight: 15, pending: false, order: 3 },
+          { name: 'Exam', semester: 2, weight: 40, pending: true, order: 4 }
+        ]
+      }
+    ]
+  };
+
+  const compJs = fs.readFileSync(path.resolve(BASE_DIR, 'compound-progress.js'), 'utf8');
+  eval(compJs);
+  window.ConnectifyCompoundProgress.update();
+
+  const sem1Bar = sem1Tile.querySelector('.cx-compound-progress-container');
+  const sem2Bar = sem2Tile.querySelector('.cx-compound-progress-container');
+
+  assert.ok(sem1Bar, 'Semester 1 progress container should exist');
+  assert.ok(sem2Bar, 'Semester 2 progress container should exist');
+
+  const s1Segs = sem1Bar.querySelectorAll('.cx-compound-segment');
+  const s2Segs = sem2Bar.querySelectorAll('.cx-compound-segment');
+
+  assert.strictEqual(s1Segs.length, 2, 'Semester 1 card must only include Semester 1 tasks');
+  assert.strictEqual(s2Segs.length, 4, 'Semester 2 card must encapsulate both Semester 1 and Semester 2 tasks');
+
+  sem1Tile.remove();
+  sem2Tile.remove();
+  localStorage.clear();
 });
 
 console.log('\n================================================================');

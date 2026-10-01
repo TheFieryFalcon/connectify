@@ -90,13 +90,19 @@
         const cardSemesterMatch = (cardTitle.textContent || '').match(/Semester\s*([12])/i);
         const cardSemester = cardSemesterMatch ? +cardSemesterMatch[1] : null;
 
-        // Isolate tasks strictly by semester to prevent Semester 2 adopting Semester 1 progress
+        const hasSem2Tasks = subject.tasks.some(t => t.semester === 2);
+
+        // Semester 1 cards display only Semester 1 tasks.
+        // Semester 2 cards encapsulate tasks of BOTH semesters for cumulative annual progress,
+        // motivating students by visualizing full progress to date.
         const sortedTasks = [...subject.tasks]
           .filter(t => {
             if (!t || !Number.isFinite(t.weight) || t.weight <= 0) return false;
-            if (!cardSemester) return true;
-            if (cardSemester === 1) return t.semester === 1;
-            if (cardSemester === 2) return t.semester === 2;
+            if (cardSemester === 1) return (t.semester || 1) === 1;
+            if (cardSemester === 2) {
+              if (!hasSem2Tasks) return false;
+              return t.semester === 1 || t.semester === 2;
+            }
             return true;
           })
           .sort((a, b) => {

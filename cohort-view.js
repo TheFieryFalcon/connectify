@@ -486,54 +486,45 @@
           const taskType = types().getEffectiveType ? types().getEffectiveType(meta.subjectName, taskMock) : (meta.taskType || 'Take-Home');
           const baselines = predMath.getBaselines ? predMath.getBaselines() : { subjects: {}, types: {} };
 
-          const hasSubjectBaseline = baselines?.subjects && (baselines.subjects[cleanSubj] !== undefined || baselines.subjects[meta.subjectName] !== undefined);
-          const hasTypeBaseline = baselines?.types && baselines.types[taskType] !== undefined;
-          const hasAnyBaselines = (Object.keys(baselines?.subjects || {}).length > 0) || (Object.keys(baselines?.types || {}).length > 0);
-          const hasBaselines = Boolean(hasSubjectBaseline || hasTypeBaseline || hasAnyBaselines);
+          const hasSubjectBaseline = Boolean(baselines?.subjects && (baselines.subjects[cleanSubj] !== undefined || baselines.subjects[meta.subjectName] !== undefined));
+          const hasTypeBaseline = Boolean(baselines?.types && baselines.types[taskType] !== undefined);
 
-          let prediction = predMath.getCachedPrediction
-            ? predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName)
+          // Get historical data strictly prior to this task
+          const allSubjects = precollectedSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+          const priorHistorical = predMath.getHistoricalDataPriorTo
+            ? predMath.getHistoricalDataPriorTo(allSubjects, meta.subjectName, taskMock)
             : null;
 
-          let isFirstOfSubjectOrType = false;
-          if (!hasBaselines && !prediction) {
-            const allSubjects = precollectedSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
-            const priorHistorical = predMath.getHistoricalDataPriorTo
-              ? predMath.getHistoricalDataPriorTo(allSubjects, meta.subjectName, taskMock)
-              : null;
+          const hasPriorSubjectData = Boolean(priorHistorical?.subjects && Number.isFinite(priorHistorical.subjects[cleanSubj]));
+          const priorTypeCount = priorHistorical?.typeCounts?.[taskType] || 0;
+          const hasPriorTypeData = priorTypeCount > 0;
 
-            const hasPriorSubjectData = priorHistorical?.subjects?.[cleanSubj] !== undefined;
-            const priorTypeCount = priorHistorical?.typeCounts?.[taskType] || 0;
-            isFirstOfSubjectOrType = (!hasPriorSubjectData || priorTypeCount === 0);
-          }
+          // Intended behavior: four segment bars do NOT render for the first task of each subject and/or type,
+          // unless cold-start baselines exist for that specific subject and type.
+          const isFirstOfSubject = !hasPriorSubjectData && !hasSubjectBaseline;
+          const isFirstOfType = !hasPriorTypeData && !hasTypeBaseline;
 
-          if (!hasBaselines && isFirstOfSubjectOrType) {
+          if (isFirstOfSubject || isFirstOfType) {
             ui.outcomeBar.hidden = true;
             ui.outcomeBar.style.setProperty('display', 'none', 'important');
           } else {
+            let prediction = predMath.getCachedPrediction
+              ? predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName)
+              : null;
+
             if (!prediction || prediction.unpredicted) {
-              const allSubjects = precollectedSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
               prediction = predMath.getOrComputeTaskPrediction
                 ? predMath.getOrComputeTaskPrediction(meta.subjectName, taskMock, allSubjects)
-                : (predMath.getCachedPrediction(meta.subjectName, meta.labelsKey || meta.taskName) || predMath.predictTask(meta.subjectName, taskMock, null, null, true));
+                : predMath.predictTask(meta.subjectName, taskMock, priorHistorical, baselines, true);
             }
 
             if (!prediction || prediction.unpredicted) {
-              prediction = predMath.predictTask(meta.subjectName, taskMock, null, null, true);
+              ui.outcomeBar.hidden = true;
+              ui.outcomeBar.style.setProperty('display', 'none', 'important');
+            } else {
+              const outcome = predMath.evaluateOutcome(mark, prediction);
+              renderOutcomeBar(ui.outcomeBar, outcome);
             }
-
-            if (!prediction || prediction.unpredicted) {
-              prediction = {
-                low: Math.max(0, Math.round(mark - 8)),
-                mid: Math.round(mark),
-                high: Math.min(100, Math.round(mark + 8)),
-                breakoutScore: Number((1.10 * Math.min(100, Math.round(mark + 8))).toFixed(2)),
-                taskType: taskType
-              };
-            }
-
-            const outcome = predMath.evaluateOutcome(mark, prediction);
-            renderOutcomeBar(ui.outcomeBar, outcome);
           }
         } catch (e) {
           console.error('cohort-view error in outcomeBar:', e);

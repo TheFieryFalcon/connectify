@@ -249,62 +249,42 @@
       : 'Take-Home';
 
     // 1. Resolve subject performance:
-    let subjectAvg = historical.subjects[cleanSubj];
-    if (subjectAvg === undefined && baselines.subjects[cleanSubj] !== undefined) {
-      subjectAvg = Number(baselines.subjects[cleanSubj]);
+    let subjectAvg = historical?.subjects?.[cleanSubj];
+    if (subjectAvg === undefined && baselines?.subjects) {
+      if (baselines.subjects[cleanSubj] !== undefined) {
+        subjectAvg = Number(baselines.subjects[cleanSubj]);
+      } else if (baselines.subjects[subjectName] !== undefined) {
+        subjectAvg = Number(baselines.subjects[subjectName]);
+      }
     }
 
     if (subjectAvg === undefined || !Number.isFinite(subjectAvg)) {
-      if (isCompleted) {
-        if (Number.isFinite(historical.overallAverage)) {
-          subjectAvg = historical.overallAverage;
-        } else {
-          const fullHistorical = getHistoricalData();
-          if (Number.isFinite(fullHistorical.subjects[cleanSubj])) {
-            subjectAvg = fullHistorical.subjects[cleanSubj];
-          } else if (Number.isFinite(fullHistorical.overallAverage)) {
-            subjectAvg = fullHistorical.overallAverage;
-          } else if (task && Number.isFinite(task.score)) {
-            subjectAvg = task.score;
-          } else if (task && Number.isFinite(task.mark)) {
-            subjectAvg = task.mark;
-          } else {
-            subjectAvg = 75;
-          }
-        }
-      } else {
-        return {
-          unpredicted: true,
-          reason: 'missing_subject_baseline',
-          taskType,
-          type: taskType,
-          subjectName: cleanSubj
-        };
-      }
+      return {
+        unpredicted: true,
+        reason: 'missing_subject_baseline',
+        taskType,
+        type: taskType,
+        subjectName: cleanSubj
+      };
     }
 
     // 2. Resolve assessment type performance:
-    const completedTypeCount = historical.typeCounts[taskType] || 0;
-    let typeAvg = historical.types[taskType];
+    const completedTypeCount = historical?.typeCounts?.[taskType] || 0;
+    let typeAvg = historical?.types?.[taskType];
 
-    if (completedTypeCount === 0 && baselines.types[taskType] !== undefined) {
+    if (completedTypeCount === 0 && baselines?.types?.[taskType] !== undefined) {
       typeAvg = Number(baselines.types[taskType]);
     }
 
-    // Cold-start rule: For upcoming tasks, do not predict first assessment of a given type without precedent or baseline
-    if (typeAvg === undefined || !Number.isFinite(typeAvg) || (completedTypeCount === 0 && baselines.types[taskType] === undefined)) {
-      if (isCompleted) {
-        // For completed tasks: neutral type modifier (type bias = 0)
-        typeAvg = subjectAvg;
-      } else {
-        return {
-          unpredicted: true,
-          reason: 'No previous tasks of this type have been done, unable to make prediction',
-          taskType,
-          type: taskType,
-          subjectName: cleanSubj
-        };
-      }
+    // Cold-start rule: Do not predict first assessment of a given type without precedent or baseline
+    if (typeAvg === undefined || !Number.isFinite(typeAvg) || (completedTypeCount === 0 && (!baselines?.types || baselines.types[taskType] === undefined))) {
+      return {
+        unpredicted: true,
+        reason: 'No previous tasks of this type have been done, unable to make prediction',
+        taskType,
+        type: taskType,
+        subjectName: cleanSubj
+      };
     }
 
     // 3. Overall student baseline anchor:
@@ -357,7 +337,7 @@
   }
 
   // --- PREDICTION PERSISTENCE & CACHING ---
-  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v8_20261001_pred';
+  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v9_20261001_pred';
   const PREDICTOR_CACHE_VERSION_KEY = window.ConnectifyCache?.KEYS?.PREDICTOR || 'connectify:cache_version:predictor';
   const LEGACY_PREDICTION_VERSION_KEY = 'connectify:prediction_version';
 
