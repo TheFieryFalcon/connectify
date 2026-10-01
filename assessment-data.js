@@ -1008,7 +1008,7 @@
 
               setTimeout(() => {
                 try {
-                  notifyResultsUpdated();
+                  clearTimeout(notifyUpdateTimer);
                   if (window.ConnectifyCohort?.pass) {
                     window.ConnectifyCohort.pass();
                   } else if (window.ConnectifyCohort?.schedule) {

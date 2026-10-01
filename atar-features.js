@@ -252,10 +252,10 @@
     const startupPollInterval = setInterval(() => {
       startupPollTicks++;
       checkStartupAutoExpand();
-      if (hasAutoExpanded || startupPollTicks >= 30) {
+      if (hasAutoExpanded || startupPollTicks >= 60) {
         clearInterval(startupPollInterval);
       }
-    }, 100);
+    }, 25);
 
     let bttTimer = null;
     const debouncedSyncBackToTop = () => {
@@ -268,6 +268,9 @@
 
     if (typeof MutationObserver !== 'undefined' && document.body) {
       new MutationObserver(() => {
+        if (!hasAutoExpanded) {
+          checkStartupAutoExpand();
+        }
         debouncedSyncBackToTop();
       }).observe(document.body, { childList: true, subtree: true });
     }

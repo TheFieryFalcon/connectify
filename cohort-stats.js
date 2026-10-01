@@ -237,8 +237,8 @@
       document.head.append(styleEl);
     }
 
-    const cards = Array.from(document.querySelectorAll('.eds-c-tile')).filter(
-      card => card.querySelector('.eds-c-tile__title')
+    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile')).filter(
+      card => card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')
     );
 
     const est = estimator();

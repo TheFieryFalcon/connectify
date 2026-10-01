@@ -183,7 +183,7 @@
       typeContainer = createElement('div', 'connectea-type-container');
 
       const typeLabel = createElement('label', 'connectea-type-label');
-      const typeTitle = createElement('span', 'connectea-type-title', 'Type:');
+      const typeTitle = createElement('span', 'connectea-type-title', 'Type');
 
       typeSelect = createElement('select', 'connectea-type-select');
       typeSelect.setAttribute('aria-label', 'Assessment type override');
@@ -237,7 +237,7 @@
     const stateRef = {};
 
     if (isOverall && key) {
-      const label = createElement('label', 'connectea-controls', 'Cohort Size: ');
+      const label = createElement('label', 'connectea-controls', 'Cohort Size ');
       input = createElement('input', 'connectea-subject-cohort-input');
       input.type = 'number';
       input.min = '1';
@@ -253,7 +253,7 @@
         'span',
         'connectea-notice',
         saved !== undefined
-          ? `Original Estimate: ~${estimatedSize}${warningText} • Saved.`
+          ? `Original Estimate ~${estimatedSize}${warningText} • Saved.`
           : warningText ? warningText.trim() : 'Enter custom size to override.'
       );
       notice.setAttribute('aria-live', 'polite');
@@ -276,7 +276,7 @@
           isInvalid
             ? 'Enter a whole number of students, at least 1.'
             : size !== undefined
-            ? `Original Estimate: ~${currentEstimate}${currentWarning} • ${persisted ? 'Saved.' : 'Browser storage unavailable.'}`
+            ? `Original Estimate ~${currentEstimate}${currentWarning} • ${persisted ? 'Saved.' : 'Browser storage unavailable.'}`
             : currentWarning ? currentWarning.trim() : 'Enter custom size to override.'
         );
         if (typeof onCohortChange === 'function') onCohortChange();
@@ -355,7 +355,7 @@
           if (userSize === undefined) {
             setText(ui.notice, currentWarning ? currentWarning.trim() : 'Enter custom size to override.');
           } else {
-            setText(ui.notice, `Original Estimate: ~${estimatedSize}${currentWarning} • Saved.`);
+            setText(ui.notice, `Original Estimate ~${estimatedSize}${currentWarning} • Saved.`);
           }
         }
       }
@@ -456,7 +456,11 @@
             const semMatch = cardTitle.match(/Semester\s*([12])/i);
             if (semMatch) taskSemester = Number(semMatch[1]);
           }
-          const allRows = card ? (card._cxTaskRows || (card._cxTaskRows = Array.from(card.querySelectorAll('.cvr-c-task')))) : [];
+          const allRows = card ? ((card._cxTaskRows && card._cxTaskRows.includes(row)) ? card._cxTaskRows : (card._cxTaskRows = (function() {
+            const insideTasks = card.querySelectorAll('.cvr-c-tasks .cvr-c-task');
+            if (insideTasks.length > 0) return Array.from(insideTasks);
+            return Array.from(card.querySelectorAll('.cvr-c-task'));
+          })())) : [];
           const taskSeq = allRows.indexOf(row) >= 0 ? allRows.indexOf(row) : 0;
 
           let taskOrder = null;
@@ -509,7 +513,15 @@
           } else {
             const subjObj = (precollectedSubjects || []).find(s => s.name === meta.subjectName || (predMath.cleanSubject && predMath.cleanSubject(s.name) === cleanSubj));
             if (subjObj && Array.isArray(subjObj.tasks)) {
-              hasPriorSubjectData = subjObj.tasks.some(t => t !== taskMock && !t.pending && Number.isFinite(t.score));
+              hasPriorSubjectData = subjObj.tasks.some(t => {
+                if (t.pending || !Number.isFinite(t.score)) return false;
+                if (t.row && t.row === row) return false;
+                if (t.id && taskMock.id && t.id === taskMock.id) return false;
+                if (t.name && meta.taskName && t.name.toLowerCase().trim() === meta.taskName.toLowerCase().trim()) return false;
+                const tSem = t.semester || 1;
+                const tSeq = t.sequence !== undefined ? t.sequence : 0;
+                return tSem < taskSemester || (tSem === taskSemester && tSeq < taskSeq);
+              });
             }
           }
 
@@ -571,9 +583,9 @@
 
     const parts = [];
     if (Number.isFinite(mark)) {
-      if (!isOverall) parts.push(`Score: ${math().formatPercentage(mark)}%`);
+      if (!isOverall) parts.push(`<strong>Score ${math().formatPercentage(mark)}%</strong>`);
       const zStr = Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A';
-      parts.push(`<strong>z ≈ ${zStr}</strong>`);
+      parts.push(`<strong>Z-Score ${zStr}</strong>`);
       const standingText = math().standing(data.p);
       if (standingText) {
         parts.push(`<strong>${standingText}</strong>`);
@@ -584,13 +596,13 @@
         const totalDisplay = isEstimated ? `~${cohortSize}` : `${cohortSize}`;
         const rankStr = data.rank === 1
           ? `Top of ${isOverall ? 'subject' : 'assessment'}`
-          : `Rank: ${data.rank} / ${totalDisplay}`;
+          : `${data.rank} / ${totalDisplay}`;
         parts.push(`<strong>${rankStr}</strong>`);
       } else {
-        parts.push('Cohort size needed for rank');
+        parts.push('Cohort size needed');
       }
     } else {
-      parts.push('Not marked · Rank and z-score unavailable');
+      parts.push('Not marked · Stats unavailable');
     }
 
     setHTML(ui.result, parts.filter(Boolean).join('  •  '));

@@ -1139,10 +1139,10 @@ body.cx-freeze-scroll {
 :is(.cvr-c-task-group__title, .cvr-c-task__group-name, .cx-cat-name-label, .cvr-c-task__details .v-label:first-child) {
   font-weight: 700 !important;
 }
-:is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {
+.cvr-c-tasks :is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {
   font-weight: 700 !important;
 }
-:is(.cvr-c-task__score, .cvr-c-task__grade) {
+:is(.cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark, .cvr-c-task__mark *, .cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__marks, .cvr-c-task__marks *)) {
   font-weight: 400 !important;
 }
 

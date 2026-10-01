@@ -2572,11 +2572,12 @@ runTest('Test 109: Text bolding parity across light and dark modes for Test head
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
 
-  // 1. Verify cohort-view.js wraps Med, Max, Mean, z, Top standing, and Rank in strong tags
+  // 1. Verify cohort-view.js wraps Med, Max, Mean, Z-Score, Top standing, Score, and Rank in strong tags
   assert.ok(cohortViewJs.includes('<strong>Med ${math().formatPercentage('), 'cohort-view.js must wrap Med in strong tag');
   assert.ok(cohortViewJs.includes('<strong>Max ${math().formatPercentage('), 'cohort-view.js must wrap Max in strong tag');
   assert.ok(cohortViewJs.includes('<strong>Mean ${math().formatPercentage('), 'cohort-view.js must wrap Mean in strong tag');
-  assert.ok(cohortViewJs.includes('<strong>z ≈ ${zStr}</strong>'), 'cohort-view.js must wrap z-score in strong tag');
+  assert.ok(cohortViewJs.includes('<strong>Z-Score ${zStr}</strong>'), 'cohort-view.js must format Z-Score in strong tag');
+  assert.ok(cohortViewJs.includes('<strong>Score ${math().formatPercentage(mark)}%</strong>'), 'cohort-view.js must bold entire score display');
   assert.ok(cohortViewJs.includes('<strong>${standingText}</strong>'), 'cohort-view.js must wrap Top standing in strong tag');
   assert.ok(cohortViewJs.includes('<strong>${rankStr}</strong>'), 'cohort-view.js must wrap Rank in strong tag');
 
@@ -2588,9 +2589,9 @@ runTest('Test 109: Text bolding parity across light and dark modes for Test head
   assert.ok(themeCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong'), 'theme.css must bold panel strong tags in light and dark modes');
   assert.ok(sidebarCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold panel strong tags');
   assert.ok(sidebarCss.includes(':is(.cvr-c-task-group__title, .cvr-c-task__group-name'), 'sidebar.css must bold task group titles');
-  assert.ok(sidebarCss.includes(':is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child)'), 'sidebar.css must bold task mark scores');
-  assert.ok(sidebarCss.includes(':is(.cvr-c-task__score, .cvr-c-task__grade) {\n  font-weight: 400 !important;\n}'), 'sidebar.css must explicitly unbold overall percent and letter grades');
-  assert.ok(themeCss.includes(':is(.connectea-dark, body, html) :is(\n  .cvr-c-task__score,\n  .cvr-c-task__grade\n) {\n  font-weight: 400 !important;\n}'), 'theme.css must explicitly unbold overall percent and letter grades');
+  assert.ok(sidebarCss.includes('.cvr-c-tasks :is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child)'), 'sidebar.css must bold task mark scores inside .cvr-c-tasks');
+  assert.ok(sidebarCss.includes('.cvr-c-task:not(.cvr-c-tasks *)'), 'sidebar.css must explicitly unbold summary marks outside cvr-c-tasks');
+  assert.ok(themeCss.includes('.cvr-c-task:not(.cvr-c-tasks *)'), 'theme.css must explicitly unbold summary marks outside cvr-c-tasks');
 });
 
 runTest('Test 110: Silent difference check, out-of-date cache prompt with one-time auto-expand, and chart 0 / non-configurable row stability', () => {
@@ -2702,9 +2703,9 @@ runTest('Test 111: Typography parity (unbolded overall % and letter grade), star
   const cohortStatsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
 
   // 1. Typography rules: overall % and letter grades are unbolded (400), task marks and stats strong are bold (700)
-  assert.ok(sideCss.includes(':is(.cvr-c-task__score, .cvr-c-task__grade) {\n  font-weight: 400 !important;\n}'), 'sidebar.css must set font-weight 400 for overall percent and letter grades');
-  assert.ok(themeCss.includes(':is(.connectea-dark, body, html) :is(\n  .cvr-c-task__score,\n  .cvr-c-task__grade\n) {\n  font-weight: 400 !important;\n}'), 'theme.css must set font-weight 400 for overall percent and letter grades');
-  assert.ok(sideCss.includes(':is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold task marks');
+  assert.ok(sideCss.includes(':is(.cvr-c-task__score, .cvr-c-task__grade'), 'sidebar.css must set font-weight 400 for overall percent and letter grades');
+  assert.ok(themeCss.includes(':is(.connectea-dark, body, html) :is(\n  .cvr-c-task__score,\n  .cvr-c-task__grade'), 'theme.css must set font-weight 400 for overall percent and letter grades');
+  assert.ok(sideCss.includes('.cvr-c-tasks :is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold task marks');
   assert.ok(sideCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result) strong {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold stats panel strong elements');
 
   // 2. Startup auto-expand: decoupled from user activity, runs immediately on page load
@@ -2730,6 +2731,35 @@ runTest('Test 111: Typography parity (unbolded overall % and letter grade), star
   // 6. Complete render finalization: synchronous pass and double requestAnimationFrame before scroll unlock
   assert.ok(assessJs.includes('window.ConnectifyCohort.pass()'), 'finalizeExpansion must synchronously run ConnectifyCohort.pass()');
   assert.ok(assessJs.includes('requestAnimationFrame(completeFinalize)'), 'finalizeExpansion must wait for double requestAnimationFrame before finishProgress and scroll unlock');
+});
+
+runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, colon/equals/Rank removal, and flash prevention', () => {
+  const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const cohortViewJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+  const atarFeatJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-features.js'), 'utf8');
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+
+  // 1. Subject grade and summary mark text unbolding (font-weight: 400 !important)
+  assert.ok(sideCss.includes('.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'sidebar.css must explicitly set font-weight 400 for summary marks outside cvr-c-tasks');
+  assert.ok(themeCss.includes('.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'theme.css must explicitly set font-weight 400 for summary marks outside cvr-c-tasks');
+
+  // 2. First task outcome bar suppression via .cvr-c-tasks .cvr-c-task query
+  assert.ok(cohortViewJs.includes("card.querySelectorAll('.cvr-c-tasks .cvr-c-task')"), 'cohort-view.js must index tasks inside .cvr-c-tasks');
+  assert.ok(cohortViewJs.includes('tSem < taskSemester || (tSem === taskSemester && tSeq < taskSeq)'), 'cohort-view.js must strictly check prior sequence for prior subject data');
+
+  // 3. Panel formatting: entire score display bolded, Z-Score formatted, colons and equals and Rank removed
+  assert.ok(cohortViewJs.includes('<strong>Score ${math().formatPercentage(mark)}%</strong>'), 'cohort-view.js must bold entire score display without colon');
+  assert.ok(cohortViewJs.includes('<strong>Z-Score ${zStr}</strong>'), 'cohort-view.js must format Z-Score without colon or equals sign');
+  assert.ok(!cohortViewJs.includes('z ≈'), 'cohort-view.js must not contain z ≈');
+  assert.ok(cohortViewJs.includes('${data.rank} / ${totalDisplay}'), 'cohort-view.js must format rank without word Rank or colon');
+  assert.ok(cohortViewJs.includes("'connectea-type-title', 'Type'"), 'cohort-view.js must remove colon from Type');
+  assert.ok(cohortViewJs.includes("'connectea-controls', 'Cohort Size '"), 'cohort-view.js must remove colon from Cohort Size');
+  assert.ok(cohortViewJs.includes('Original Estimate ~'), 'cohort-view.js must remove colon from Original Estimate');
+
+  // 4. Fast auto-expansion without collapsed flash
+  assert.ok(atarFeatJs.includes('if (!hasAutoExpanded) {\n          checkStartupAutoExpand();\n        }'), 'atar-features.js MutationObserver must trigger checkStartupAutoExpand immediately on tile insertion');
+  assert.ok(assessJs.includes('clearTimeout(notifyUpdateTimer);'), 'assessment-data.js finalizeExpansion must clear notifyUpdateTimer to prevent delayed re-pass flash');
 });
 
 console.log('\n================================================================');

@@ -274,10 +274,11 @@
 
     if (completedTypeCount === 0 && baselines?.types?.[taskType] !== undefined) {
       typeAvg = Number(baselines.types[taskType]);
+    } else if (typeAvg === undefined || !Number.isFinite(typeAvg) || completedTypeCount === 0) {
+      typeAvg = subjectAvg;
     }
 
-    // Cold-start rule: Do not predict first assessment of a given type without precedent or baseline
-    if (typeAvg === undefined || !Number.isFinite(typeAvg) || (completedTypeCount === 0 && (!baselines?.types || baselines.types[taskType] === undefined))) {
+    if (typeAvg === undefined || !Number.isFinite(typeAvg)) {
       return {
         unpredicted: true,
         reason: 'No previous tasks of this type have been done, unable to make prediction',

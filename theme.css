@@ -684,7 +684,7 @@ html.connectea-dark {
   border-right: none !important;
 }
 
-:is(.connectea-dark, body, html) :is(
+:is(.connectea-dark, body, html) .cvr-c-tasks :is(
   .cvr-c-task__mark-score,
   .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
   .cvr-c-task__mark > :is(.v-label, span, div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)
@@ -694,7 +694,8 @@ html.connectea-dark {
 
 :is(.connectea-dark, body, html) :is(
   .cvr-c-task__score,
-  .cvr-c-task__grade
+  .cvr-c-task__grade,
+  .cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark, .cvr-c-task__mark *, .cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__marks, .cvr-c-task__marks *)
 ) {
   font-weight: 400 !important;
 }
