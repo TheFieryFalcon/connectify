@@ -1005,8 +1005,12 @@ html.connectea-dark {
 
 /* Clay / Bootstrap Utility Flex Container Coverage */
 .connectea-dark div.w-100 {
-  background-color: transparent !important;
-  color: inherit !important;
+  border-color: #36485e !important;
+}
+
+.connectea-dark div.w-100:has([class*="year"], [class*="report"]) {
+  background-color: #1e2632 !important;
+  color: #f8fafc !important;
 }
 
 /* Circular & Icon Action Buttons (e.g. trash/delete, icon-only controls) */
@@ -1591,12 +1595,14 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 /* --------------------------------------------------------------------------
    17. Dynamic Surface & Text Contrast Adaptation
    -------------------------------------------------------------------------- */
-.connectea-dark [data-connectea-surface] {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-surface],
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(div, section, article, header, nav, table, tr, td, th, ul, li)[data-connectea-surface] {
   background-color: #1e2632 !important;
   border-color: #3d5066 !important;
 }
 
-.connectea-dark [data-connectea-ink] {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-ink],
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(div, span, p, a, label, strong, h1, h2, h3, h4, h5, h6, li, button, i)[data-connectea-ink] {
   color: #f1f5f9 !important;
 }
 
@@ -2780,4 +2786,35 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 
 .connectea-dark :is(.katex, .katex-display, .katex-html) {
   color: inherit !important;
+}
+
+/* Angular Material Class Pages (.eds.cvr.ngm) Contrast Normalization */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
+  [class*="connect-"],
+  .connect-purple,
+  .theme-multiplier
+) :is(.text-primary, [class*="text-primary"]) {
+  color: #f1f5f9 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
+  [class*="connect-"],
+  .connect-purple,
+  .theme-multiplier
+) :is(.mat-divider--primary, [class*="mat-divider"]) {
+  border-top-color: #3d5066 !important;
+  border-color: #3d5066 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
+  .mat-divider,
+  .mat-divider--primary,
+  [class*="mat-divider"]
+) {
+  border-top-color: #3d5066 !important;
+  border-color: #3d5066 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm .text-primary {
+  color: #f1f5f9 !important;
 }

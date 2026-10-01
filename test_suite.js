@@ -1809,6 +1809,58 @@ runTest('theme.css covers circular trash buttons, View All buttons, Clay/Materia
   assert.ok(css.includes('border-top: 1px solid #2e3c4e !important;') && css.includes('border-bottom: 1px solid #2e3c4e !important;'), 'theme.css must set dark borders on task rows to eliminate light #888 lines');
 });
 
+runTest('assessment-data.js and cohort-view.js implement robust 5-number stats cache fallback', () => {
+  const dataCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const viewCode = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+
+  assert.ok(dataCode.includes('getTaskStats') && dataCode.includes('setTaskStats'), 'assessment-data.js must export getTaskStats and setTaskStats');
+  assert.ok(dataCode.includes('getSubjectTasks'), 'assessment-data.js must export getSubjectTasks');
+  assert.ok(dataCode.includes('stats_cache'), 'assessment-data.js must persist stats cache under connectify:stats_cache:');
+  assert.ok(viewCode.includes('getTaskStats'), 'cohort-view.js readStats must fall back to getTaskStats when host lacks stats');
+  assert.ok(viewCode.includes('setTaskStats'), 'cohort-view.js readStats must store parsed stats in setTaskStats');
+});
+
+runTest('atar-scraper.js readCourses falls back to cached subject tasks when accordion is collapsed', () => {
+  const scraperCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-scraper.js'), 'utf8');
+  assert.ok(scraperCode.includes('tasks.length === 0') && scraperCode.includes('getSubjectTasks'), 'atar-scraper.js must query getSubjectTasks when live tasks are empty');
+  assert.ok(scraperCode.includes('pending: isPending'), 'atar-scraper.js must map cached tasks with pending status');
+});
+
+runTest('cohort-stats.js schedule does not block immediate execution when user is inactive', () => {
+  const statsCode = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+  assert.ok(statsCode.includes('!immediate && window.ConnectifyIsUserActive'), 'cohort-stats.js schedule must only gate non-immediate execution by user active check');
+});
+
+runTest('target-solver.js and target-grade-ui.js support dynamic prior performance difficulty weighting', () => {
+  const solverCode = fs.readFileSync(path.resolve(BASE_DIR, 'target-solver.js'), 'utf8');
+  const gradeUiCode = fs.readFileSync(path.resolve(BASE_DIR, 'target-grade-ui.js'), 'utf8');
+
+  assert.ok(solverCode.includes('options.difficultyWeighted') || solverCode.includes('difficultyWeighted = Boolean(options.difficultyWeighted)'), 'target-solver.js gradePlan must accept options.difficultyWeighted');
+  assert.ok(solverCode.includes('taskMetaList') && solverCode.includes('calcTaskScore'), 'target-solver.js gradePlan must calculate category baselines and adjust task requirements');
+  assert.ok(gradeUiCode.includes('cta-difficulty-label'), 'target-grade-ui.js must mount difficulty label');
+  assert.ok(gradeUiCode.includes('Dynamically adjust required grade based on prior performance'), 'target-grade-ui.js must contain prior performance adjustment checkbox text');
+  assert.ok(gradeUiCode.includes('gradeDifficultyWeighted'), 'target-grade-ui.js must persist gradeDifficultyWeighted preference');
+});
+
+runTest('atar-ui.js eliminates ATAR text from grade panel buttons and applies canonical tab styling', () => {
+  const uiCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
+  assert.ok(uiCode.includes("semesterLabel = `Semester ${i + 1}`;") || uiCode.includes("semesterLabel = 'Semester ' + (i + 1);"), 'atar-ui.js updateResults must set plain Semester label without ATAR in grading mode');
+  assert.ok(!uiCode.includes("Semester ${i + 1} Target Grade"), 'atar-ui.js must not append extra redundant text to semester buttons');
+  assert.ok(uiCode.includes('cta-semester-closed'), 'atar-ui.js must style closed semester tabs with cta-semester-closed');
+  assert.ok(uiCode.includes('cta-semester-indicator'), 'atar-ui.js must style active semester tabs with cta-semester-indicator');
+});
+
+runTest('theme.css and theme.js normalize class page red outlines and headers without transparent overrides', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const js = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+
+  assert.ok(css.includes('.eds.cvr.ngm') && css.includes('.text-primary'), 'theme.css must normalize .text-primary in .eds.cvr.ngm');
+  assert.ok(css.includes('.eds.cvr.ngm') && css.includes('.mat-divider--primary'), 'theme.css must normalize .mat-divider--primary in .eds.cvr.ngm');
+  assert.ok(!css.includes('background-color: transparent !important;\n  color: inherit !important;'), 'theme.css must not have generic transparent div.w-100 rule');
+  assert.ok(js.includes('isDarkColor'), 'theme.js must implement isDarkColor helper');
+  assert.ok(js.includes("el.hasAttribute('data-connectea-surface')"), 'theme.js must not tag surface containers as ink');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

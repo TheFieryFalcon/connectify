@@ -64,6 +64,25 @@
           return parseAssessment ? parseAssessment(cells[0]?.textContent, cells[1]?.textContent, taskLabel) : null;
         }).filter(Boolean);
 
+      if (tasks.length === 0 && window.ConnectifyData?.getSubjectTasks) {
+        const cachedTasks = window.ConnectifyData.getSubjectTasks(title) || window.ConnectifyData.getSubjectTasks(name);
+        if (cachedTasks && cachedTasks.length > 0) {
+          tasks = cachedTasks.map(t => {
+            const isPending = Boolean(t.pending || t.score === null || t.score === undefined);
+            const scorePct = isPending ? undefined : Number(t.score);
+            const weightVal = Number(t.weight) || 0;
+            const earnedWeight = (!isPending && Number.isFinite(scorePct)) ? (scorePct / 100) * weightVal : 0;
+            return {
+              name: t.name,
+              weight: weightVal,
+              pending: isPending,
+              score: scorePct,
+              earned: earnedWeight
+            };
+          });
+        }
+      }
+
       let markValue = markMatch ? scoreValue(markMatch[1]) : undefined;
 
       const hasFinalLetter = Array.from(

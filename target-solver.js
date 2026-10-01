@@ -51,15 +51,118 @@
     };
   }
 
-  function gradePlan(progress, target) {
+  function gradePlan(progress, target, options = {}) {
     if (progress.error) return { error: progress.error };
     const scoreVal = math().scoreValue || (v => (Number.isFinite(Number(v)) ? Number(v) : undefined));
     if (scoreVal(target) === undefined) return { error: 'Enter an overall target percentage from 0 to 100.' };
     const maximum = progress.earned + progress.remaining;
     if (target > maximum + 1e-9) return { impossible: true, maximum };
     if (progress.remaining <= 1e-9) return { finished: true, maximum, final: progress.earned };
-    const exactRequired = Math.max(0, ((target - progress.earned) / progress.remaining) * 100);
-    return { required: Math.min(100, Math.ceil((exactRequired - 1e-9) * 10) / 10), maximum };
+
+    const difficultyWeighted = Boolean(options.difficultyWeighted);
+
+    if (!difficultyWeighted) {
+      const exactRequired = Math.max(0, ((target - progress.earned) / progress.remaining) * 100);
+      return { required: Math.min(100, Math.ceil((exactRequired - 1e-9) * 10) / 10), maximum };
+    }
+
+    const getTaskType = (task) => {
+      if (window.ConnectifyTaskTypes?.getEffectiveType) {
+        return window.ConnectifyTaskTypes.getEffectiveType('', task);
+      }
+      const lower = (task?.name || '').toLowerCase();
+      if (lower.includes('exam') || lower.includes('semester')) return 'Exam';
+      if (lower.includes('test') || lower.includes('quiz') || lower.includes('in-class') || lower.includes('in class')) return 'Test';
+      if (lower.includes('essay') || lower.includes('short answer') || lower.includes('written response') || lower.includes('close reading')) return 'Essay';
+      if (lower.includes('application') || lower.includes('investigation') || lower.includes('portfolio') || lower.includes('validation') || lower.includes('practical') || lower.includes('speaking') || lower.includes('listening')) return 'Application';
+      return 'Take-Home';
+    };
+
+    const completed = (progress.allTasks || []).filter(t => !t.pending && Number.isFinite(t.score));
+    const courseAvg = completed.length && completed.reduce((s, t) => s + t.weight, 0) > 0
+      ? (completed.reduce((s, t) => s + (t.score / 100) * t.weight, 0) / completed.reduce((s, t) => s + t.weight, 0)) * 100
+      : 75;
+
+    const catTotals = {};
+    completed.forEach(t => {
+      const cat = getTaskType(t);
+      if (!catTotals[cat]) catTotals[cat] = { earned: 0, weight: 0 };
+      catTotals[cat].earned += (t.score / 100) * t.weight;
+      catTotals[cat].weight += t.weight;
+    });
+
+    const pendingTasks = progress.tasks || [];
+    const taskMetaList = pendingTasks.map(task => {
+      const cat = getTaskType(task);
+      let baseline = courseAvg;
+      if (catTotals[cat] && catTotals[cat].weight > 0) {
+        baseline = (catTotals[cat].earned / catTotals[cat].weight) * 100;
+      }
+      baseline = Math.max(30, Math.min(99.5, baseline));
+      return { task, baseline, category: cat, weight: task.weight };
+    });
+
+    const calcTaskScore = (meta, t) => {
+      const b = meta.baseline;
+      if (t >= 0) {
+        return Math.max(0, Math.min(100, b + t * (100 - b)));
+      } else {
+        return Math.max(0, Math.min(100, b * (1 + t)));
+      }
+    };
+
+    const projectScoreAtT = (t) => {
+      let earnedRemaining = 0;
+      taskMetaList.forEach(m => {
+        earnedRemaining += (calcTaskScore(m, t) / 100) * m.weight;
+      });
+      const totalWeight = progress.total || 100;
+      return ((progress.rawEarned || 0) + earnedRemaining) / totalWeight * 100;
+    };
+
+    if (projectScoreAtT(1.0) < target - 1e-9) {
+      return { impossible: true, maximum, difficultyWeighted: true };
+    }
+
+    let low = -1.0, high = 1.0;
+    if (projectScoreAtT(-1.0) >= target) {
+      high = -1.0;
+    } else {
+      for (let i = 0; i < 50; i++) {
+        const mid = (low + high) / 2;
+        if (projectScoreAtT(mid) >= target) {
+          high = mid;
+        } else {
+          low = mid;
+        }
+      }
+    }
+
+    const finalT = high;
+    const taskRequirements = {};
+    let totalReqSum = 0;
+    taskMetaList.forEach(m => {
+      let score = Math.round(calcTaskScore(m, finalT) * 10) / 10;
+      score = Math.min(100, Math.max(0, score));
+      taskRequirements[m.task.name] = {
+        required: score,
+        baseline: Math.round(m.baseline * 10) / 10,
+        category: m.category
+      };
+      totalReqSum += score;
+    });
+
+    const avgRequired = taskMetaList.length > 0
+      ? Math.round((totalReqSum / taskMetaList.length) * 10) / 10
+      : Math.round(finalT * 10) / 10;
+
+    return {
+      required: avgRequired,
+      parameter: finalT,
+      difficultyWeighted: true,
+      maximum,
+      taskRequirements
+    };
   }
 
   function targetPlan(rows, target, options = {}) {

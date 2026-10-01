@@ -137,6 +137,12 @@
     return rgb && Math.max(...rgb) - Math.min(...rgb) < 24;
   }
 
+  function isDarkColor(rgb) {
+    if (!rgb) return false;
+    const lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+    return lum < 135 || (isNeutralColor(rgb) && Math.max(...rgb) < 140);
+  }
+
   /**
    * Identifies unstyled bright neutral surfaces and dark text outside Assessment Outlines
    * and tags them with [data-connectea-surface] and [data-connectea-ink].
@@ -160,13 +166,14 @@
       }
 
       const inkCandidates = document.body.querySelectorAll(
-        ':is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li):not([data-connectea-ink]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *)'
+        ':is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *)'
       );
       for (const el of inkCandidates) {
         if (el.children.length > 2) continue;
+        if (el.hasAttribute('data-connectea-surface')) continue;
         const style = window.getComputedStyle(el);
         const fgRgb = parseRgb(style.color, true);
-        if (isNeutralColor(fgRgb) && Math.max(...fgRgb) < 140) {
+        if (isDarkColor(fgRgb)) {
           el.setAttribute('data-connectea-ink', '');
         }
       }

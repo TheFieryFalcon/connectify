@@ -80,13 +80,10 @@
 
     const semesterCardsContainer = createEl('div', 'cta-semesters');
     const semesterButtons = [0, 1].map(semesterIdx => {
-      const btn = createEl('button', 'cta-semester', `Semester ${semesterIdx + 1} ATAR`);
+      const btn = createEl('button', 'cta-semester', `Semester ${semesterIdx + 1}`);
       btn.type = 'button';
       btn.addEventListener('click', () => {
-        if (
-          isGradingMode ||
-          (isPlanningMode && isTargetClosed(semesterIdx))
-        ) {
+        if (isPlanningMode && isTargetClosed(semesterIdx)) {
           return;
         }
         activeSemester = semesterIdx;
@@ -235,23 +232,23 @@
         const res = results[i] || {};
         const isClosed = isPlanningMode && isTargetClosed(i);
 
-        let semesterLabel = `Semester ${i + 1} ATAR\n${res.error ? '—' : (res.finalAtar || res.atar || '—')}`;
+        let semesterLabel = '';
         if (isGradingMode) {
-          semesterLabel = `Semester ${i + 1} Target Grade`;
+          semesterLabel = `Semester ${i + 1}`;
         } else if (isPlanningMode) {
           semesterLabel = isClosed ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`;
+        } else {
+          semesterLabel = `Semester ${i + 1} ATAR\n${res.error ? '—' : (res.finalAtar || res.atar || '—')}`;
         }
         semesterButtons[i].textContent = semesterLabel;
 
-        semesterButtons[i].hidden = isGradingMode && hasSemesterTwoStarted() && i === 0;
-        semesterButtons[i].disabled = semesterButtons[i].hidden || isClosed;
+        semesterButtons[i].hidden = false;
+        semesterButtons[i].disabled = Boolean(semesterButtons[i].hidden || (isPlanningMode && isClosed));
 
-        if (isGradingMode) {
-          semesterButtons[i].className = 'cta-semester cta-non-button cta-semester-indicator';
-        } else if (isPlanningMode) {
-          semesterButtons[i].className = isClosed
-            ? 'cta-semester cta-non-button cta-semester-closed'
-            : 'cta-semester cta-non-button cta-semester-indicator';
+        if (isPlanningMode && isClosed) {
+          semesterButtons[i].className = 'cta-semester cta-semester-closed';
+        } else if (i === activeSemester) {
+          semesterButtons[i].className = 'cta-semester cta-semester-indicator';
         } else {
           semesterButtons[i].className = 'cta-semester';
         }

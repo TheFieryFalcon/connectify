@@ -64,13 +64,80 @@
   }
 
   const subjectsCache = new Map();
+  const statsCache = new Map();
+
+  function getStudentId() {
+    try {
+      return new URL(location.href).searchParams.get('coisp') || 'current';
+    } catch {
+      return 'current';
+    }
+  }
+
+  function statsCacheKey(subjectName, taskName) {
+    const s = normalize(subjectName).toLowerCase();
+    const t = normalize(taskName).toLowerCase();
+    return `connectify:stats_cache:${getStudentId()}:${s}:${t}`;
+  }
+
+  function getTaskStats(subjectName, taskName) {
+    if (!subjectName || !taskName) return null;
+    const memKey = `${normalize(subjectName).toLowerCase()}::${normalize(taskName).toLowerCase()}`;
+    if (statsCache.has(memKey)) return statsCache.get(memKey);
+
+    try {
+      const raw = localStorage.getItem(statsCacheKey(subjectName, taskName));
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed?.stats) && parsed.stats.length === 5) {
+          statsCache.set(memKey, parsed.stats);
+          return parsed.stats;
+        }
+      }
+    } catch {}
+    return null;
+  }
+
+  function setTaskStats(subjectName, taskName, stats, n) {
+    if (!subjectName || !taskName || !Array.isArray(stats) || stats.length !== 5) return;
+    const memKey = `${normalize(subjectName).toLowerCase()}::${normalize(taskName).toLowerCase()}`;
+    statsCache.set(memKey, stats);
+
+    try {
+      const payload = { stats, n, timestamp: Date.now() };
+      localStorage.setItem(statsCacheKey(subjectName, taskName), JSON.stringify(payload));
+    } catch {}
+  }
+
+  function getSubjectTasks(subjectName) {
+    if (!subjectName) return [];
+    const norm = normalize(subjectName)
+      .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
+      .replace(/\s*[-–—]\s*Sem\s*[12].*$/i, '')
+      .replace(/\bATAR\b/gi, '')
+      .replace(/\bYear\s*\d+\b/gi, '')
+      .trim().toLowerCase();
+
+    for (const [sName, tasksMap] of subjectsCache.entries()) {
+      const cleanS = normalize(sName)
+        .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
+        .replace(/\s*[-–—]\s*Sem\s*[12].*$/i, '')
+        .replace(/\bATAR\b/gi, '')
+        .replace(/\bYear\s*\d+\b/gi, '')
+        .trim().toLowerCase();
+      if (cleanS === norm || sName.toLowerCase().includes(norm) || norm.includes(cleanS)) {
+        return Array.from(tasksMap.values());
+      }
+    }
+    return [];
+  }
 
   // --- SUBSYSTEM CACHE INVALIDATION MANAGER ---
   const CACHE_VERSIONS = {
     PREDICTOR: 'v6_20261001_pred',
-    RESULTS: 'v5_20261001_results',
+    RESULTS: 'v6_20261001_results',
     SETTINGS: 'v4_20261001_settings',
-    COHORT: 'v4_20261001_cohort'
+    COHORT: 'v5_20261001_cohort'
   };
 
   const CACHE_KEYS = {
@@ -148,10 +215,11 @@
 
     clearCohortCache() {
       try {
+        statsCache.clear();
         const toRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
-          if (k && k.startsWith('connectea:cohort:v3:')) {
+          if (k && (k.startsWith('connectea:cohort:v3:') || k.startsWith('connectify:stats_cache:'))) {
             toRemove.push(k);
           }
         }
@@ -365,6 +433,22 @@
         })(),
         sequence: existingTask?.sequence ?? tasks.size
       };
+
+      // Extract and cache 5-number boxplot statistics if present on the row
+      const chartHost = row.querySelector('[data-highcharts-chart], .cvr-c-task__chart');
+      if (chartHost?.dataset?.connectifyStats) {
+        try {
+          const parsed = JSON.parse(chartHost.dataset.connectifyStats);
+          if (Array.isArray(parsed) && parsed.length === 5) {
+            setTaskStats(subjectName, taskName, parsed, chartHost.dataset.connectifyN);
+            record.stats = parsed;
+          }
+        } catch {}
+      }
+      if (!record.stats) {
+        const cached = getTaskStats(subjectName, taskName);
+        if (cached) record.stats = cached;
+      }
 
       Object.defineProperty(record, 'row', { value: row });
       tasks.set(id, record);
@@ -655,7 +739,13 @@
     expandAll,
     scrapeSubjectTasks,
     notifyResultsUpdated,
-    clearCache: () => subjectsCache.clear(),
+    getTaskStats,
+    setTaskStats,
+    getSubjectTasks,
+    clearCache: () => {
+      subjectsCache.clear();
+      statsCache.clear();
+    },
     cache: ConnectifyCache
   };
   } catch (err) {

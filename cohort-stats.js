@@ -296,7 +296,7 @@
 
   let scheduleDebounceTimer = null;
   function schedule(immediate = false) {
-    if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
+    if (!immediate && window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
     if (immediate) {
       if (queued) return;
       queued = true;

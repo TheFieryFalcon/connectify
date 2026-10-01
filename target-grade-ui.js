@@ -40,12 +40,28 @@
     calculateGradeBtn.type = 'button';
     calculateGradeBtn.addEventListener('click', () => ctx.scanAndRefresh(true));
 
+    const difficultyLabel = createEl('label', 'cta-difficulty-label');
+    const difficultyCheckbox = createEl('input');
+    difficultyCheckbox.type = 'checkbox';
+    difficultyCheckbox.checked = Boolean(prefs.gradeDifficultyWeighted);
+    difficultyLabel.append(
+      difficultyCheckbox,
+      document.createTextNode(' Dynamically adjust required grade based on prior performance')
+    );
+
+    difficultyCheckbox.addEventListener('change', () => {
+      const p = calc?.getPreferences ? calc.getPreferences() : {};
+      p.gradeDifficultyWeighted = difficultyCheckbox.checked;
+      if (calc?.persistPreferences) calc.persistPreferences();
+      ctx.renderGradeOutput();
+    });
+
     const gradeOutputContainer = createEl('div', 'cta-target-output');
     gradeOutputContainer.setAttribute('aria-live', 'polite');
 
     const gradeControls = createEl('div', 'cta-form-controls');
     subjectLabel.classList.add('cta-subject-label');
-    gradeControls.append(subjectLabel, gradeTargetLabel, calculateGradeBtn);
+    gradeControls.append(subjectLabel, gradeTargetLabel, calculateGradeBtn, difficultyLabel);
     gradeContainer.append(gradeControls, gradeOutputContainer);
 
     const gradeSelectedSubjects = ['', ''];
@@ -65,6 +81,7 @@
       container: gradeContainer,
       subjectSelect,
       gradeTargetInput,
+      difficultyCheckbox,
       calculateGradeBtn,
       gradeOutputContainer,
       gradeSelectedSubjects
@@ -72,7 +89,7 @@
   }
 
   function renderGradeOutput(viewRefs, ctx) {
-    const { subjectSelect, gradeTargetInput, gradeOutputContainer, gradeSelectedSubjects } = viewRefs;
+    const { subjectSelect, gradeTargetInput, difficultyCheckbox, gradeOutputContainer, gradeSelectedSubjects } = viewRefs;
     const activeSemester = ctx.getActiveSemester();
     const gradeCourses = ctx.getGradeCourses();
     const available = gradeCourses[activeSemester] || [];
@@ -108,8 +125,11 @@
     const gradePlanFn = window.ConnectifyTargetSolver?.gradePlan || window.ConnectifyMath?.gradePlan;
     if (!gradePlanFn) return;
 
+    const isDifficulty = Boolean(difficultyCheckbox?.checked);
     const scoreValue = window.ConnectifyMath?.scoreValue || (v => (Number.isFinite(Number(v)) ? Number(v) : undefined));
-    const plan = gradePlanFn(progress, scoreValue(gradeTargetInput.value));
+    const plan = gradePlanFn(progress, scoreValue(gradeTargetInput.value), {
+      difficultyWeighted: isDifficulty
+    });
 
     if (plan.error) {
       gradeOutputContainer.append(
@@ -125,6 +145,8 @@
       ? `All weighted tasks completed. Final mark: ${round(plan.final)}%.`
       : plan.required === 0
       ? 'Target secured with remaining assessments at 0%.'
+      : isDifficulty
+      ? `Requires performance-adjusted scores (averaging ${round(plan.required)}%) on remaining assessments to achieve ${gradeTargetInput.value}% overall.`
       : `Requires ${plan.required}% on remaining assessments to achieve ${gradeTargetInput.value}% overall.`;
 
     gradeOutputContainer.append(
@@ -170,8 +192,15 @@
 
     if (!plan.impossible && !plan.finished) {
       for (const task of progress.tasks || []) {
+        let reqText = '';
+        if (isDifficulty && plan.taskRequirements?.[task.name]) {
+          const meta = plan.taskRequirements[task.name];
+          reqText = `requires ${round(meta.required)}% (baseline: ${round(meta.baseline)}%)`;
+        } else {
+          reqText = `requires ${round(plan.required)}%`;
+        }
         assessmentDetails.append(
-          createEl('p', 'cta-note', `${task.name}: requires ${plan.required}% (${round(task.weight)}% weight)`)
+          createEl('p', 'cta-note', `${task.name}: ${reqText} (${round(task.weight)}% weight)`)
         );
       }
     }

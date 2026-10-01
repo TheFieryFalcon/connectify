@@ -59,42 +59,74 @@
    * Reads 5-number boxplot summary from DOM bridge or Highcharts on the task row.
    */
   function readStats(row) {
+    const meta = types().getTaskMeta(row);
     const host = row.querySelector('[data-highcharts-chart]') ||
                  row.querySelector('.cvr-c-task__chart [data-highcharts-chart]') ||
                  row.querySelector('.cvr-c-task__chart');
-    if (!host) return null;
 
-    // Check shared DOM dataset bridge first (fast & cross-world compatible)
-    if (host.dataset?.connectifyStats) {
-      try {
-        const stats = JSON.parse(host.dataset.connectifyStats);
-        if (math().validStats(stats)) return stats;
-      } catch {}
-    }
+    let foundStats = null;
+    let foundN = undefined;
 
-    const hostWithDataset = host.querySelector?.('[data-connectify-stats]') || host.closest?.('[data-connectify-stats]');
-    if (hostWithDataset?.dataset?.connectifyStats) {
-      try {
-        const stats = JSON.parse(hostWithDataset.dataset.connectifyStats);
-        if (math().validStats(stats)) return stats;
-      } catch {}
-    }
+    if (host) {
+      // Check shared DOM dataset bridge first (fast & cross-world compatible)
+      if (host.dataset?.connectifyStats) {
+        try {
+          const stats = JSON.parse(host.dataset.connectifyStats);
+          if (math().validStats(stats)) {
+            foundStats = stats;
+            foundN = host.dataset.connectifyN;
+          }
+        } catch {}
+      }
 
-    // Direct Highcharts instance check if available
-    const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
-    const chart = window.Highcharts?.charts?.[chartIndex];
-    if (chart) {
-      for (const series of chart.series || []) {
-        const dataPoints = [...(series.points || []), ...(series.options?.data || [])];
-        for (const point of dataPoints) {
-          const pointData = point?.options || point;
-          const stats = Array.isArray(pointData)
-            ? pointData.slice(-5).map(math().toNumeric)
-            : [pointData?.low, pointData?.q1, pointData?.median, pointData?.q3, pointData?.high].map(math().toNumeric);
-
-          if (math().validStats(stats)) return stats;
+      if (!foundStats) {
+        const hostWithDataset = host.querySelector?.('[data-connectify-stats]') || host.closest?.('[data-connectify-stats]');
+        if (hostWithDataset?.dataset?.connectifyStats) {
+          try {
+            const stats = JSON.parse(hostWithDataset.dataset.connectifyStats);
+            if (math().validStats(stats)) {
+              foundStats = stats;
+              foundN = hostWithDataset.dataset.connectifyN;
+            }
+          } catch {}
         }
       }
+
+      // Direct Highcharts instance check if available
+      if (!foundStats) {
+        const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
+        const chart = window.Highcharts?.charts?.[chartIndex];
+        if (chart) {
+          for (const series of chart.series || []) {
+            const dataPoints = [...(series.points || []), ...(series.options?.data || [])];
+            for (const point of dataPoints) {
+              const pointData = point?.options || point;
+              const stats = Array.isArray(pointData)
+                ? pointData.slice(-5).map(math().toNumeric)
+                : [pointData?.low, pointData?.q1, pointData?.median, pointData?.q3, pointData?.high].map(math().toNumeric);
+
+              if (math().validStats(stats)) {
+                foundStats = stats;
+                break;
+              }
+            }
+            if (foundStats) break;
+          }
+        }
+      }
+    }
+
+    if (foundStats) {
+      if (meta?.subjectName && meta?.taskName && window.ConnectifyData?.setTaskStats) {
+        window.ConnectifyData.setTaskStats(meta.subjectName, meta.taskName, foundStats, foundN);
+      }
+      return foundStats;
+    }
+
+    // Fall back to persistent stats cache
+    if (meta?.subjectName && meta?.taskName && window.ConnectifyData?.getTaskStats) {
+      const cached = window.ConnectifyData.getTaskStats(meta.subjectName, meta.taskName);
+      if (math().validStats(cached)) return cached;
     }
 
     return null;
