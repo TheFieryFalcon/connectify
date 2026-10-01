@@ -26,46 +26,103 @@
       return true;
     }
 
+    function syncBackToTop() {
+      try {
+        const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile');
+        const backToTopExisting = document.getElementById('cx-back-to-top-container');
+        if (tiles.length > 0) {
+          const lastTile = tiles[tiles.length - 1];
+          if (!backToTopExisting) {
+            const container = document.createElement('div');
+            container.id = 'cx-back-to-top-container';
+            container.className = 'cx-back-to-top-container';
+
+            const btn = document.createElement('button');
+            btn.id = 'cx-back-to-top-btn';
+            btn.type = 'button';
+            btn.className = 'cx-back-to-top-btn eds-c-button';
+            btn.textContent = '↑ Back to top';
+            btn.setAttribute('aria-label', 'Back to top of assessment outlines');
+
+            btn.onclick = () => {
+              const firstTile = document.querySelector('.eds-c-tile, .cvr-c-tile');
+              if (firstTile && typeof firstTile.scrollIntoView === 'function') {
+                firstTile.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+              if (typeof window.scrollTo === 'function') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+              if (document.documentElement && typeof document.documentElement.scrollTo === 'function') {
+                document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+              if (document.body && typeof document.body.scrollTo === 'function') {
+                document.body.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            };
+
+            container.appendChild(btn);
+            if (lastTile.parentNode) {
+              if (lastTile.nextSibling) {
+                lastTile.parentNode.insertBefore(container, lastTile.nextSibling);
+              } else {
+                lastTile.parentNode.appendChild(container);
+              }
+            }
+          } else if (backToTopExisting.previousElementSibling !== lastTile && lastTile.parentNode) {
+            if (lastTile.nextSibling) {
+              lastTile.parentNode.insertBefore(backToTopExisting, lastTile.nextSibling);
+            } else {
+              lastTile.parentNode.appendChild(backToTopExisting);
+            }
+          }
+        } else if (backToTopExisting) {
+          backToTopExisting.remove();
+        }
+      } catch (err) {
+        console.error('Error syncing back to top button:', err);
+      }
+    }
+
     function syncFeatures() {
       initSidebarTools();
-      if (!window.ConnectifyData) return;
+      syncBackToTop();
 
-      if (!hasAutoExpanded) {
-        if (!isAutoExpandEnabled()) {
-          hasAutoExpanded = true;
-        } else if (document.querySelectorAll('.eds-c-tile').length > 0) {
-          window.ConnectifyData.expandAll(true);
-          hasAutoExpanded = true;
-        } else {
-          return;
+      if (window.ConnectifyData) {
+        if (!hasAutoExpanded) {
+          if (!isAutoExpandEnabled()) {
+            hasAutoExpanded = true;
+          } else if (document.querySelectorAll('.eds-c-tile, .cvr-c-tile').length > 0) {
+            window.ConnectifyData.expandAll(true);
+            hasAutoExpanded = true;
+          }
         }
-      }
 
-      // --- Expand/Collapse Floating Buttons ---
-      if (!document.getElementById('cx-expand-btn')) {
-        const btnContainer = document.createElement('div');
-        btnContainer.id = 'cx-expand-btn';
-        btnContainer.style.position = 'fixed';
-        btnContainer.style.bottom = '16px';
-        btnContainer.style.left = '16px';
-        btnContainer.style.display = 'flex';
-        btnContainer.style.flexDirection = 'column';
-        btnContainer.style.gap = '8px';
-        btnContainer.style.zIndex = '10000';
+        // --- Expand/Collapse Floating Buttons ---
+        if (!document.getElementById('cx-expand-btn')) {
+          const btnContainer = document.createElement('div');
+          btnContainer.id = 'cx-expand-btn';
+          btnContainer.style.position = 'fixed';
+          btnContainer.style.bottom = '16px';
+          btnContainer.style.left = '16px';
+          btnContainer.style.display = 'flex';
+          btnContainer.style.flexDirection = 'column';
+          btnContainer.style.gap = '8px';
+          btnContainer.style.zIndex = '10000';
 
-        const createBtn = (text, isExpand) => {
-          const btn = document.createElement('button');
-          btn.textContent = text;
-          btn.type = 'button';
-          btn.className = 'eds-c-button';
-          btn.style.padding = '6px';
-          btn.style.fontSize = '11px';
-          btn.style.width = '100%';
-          btn.onclick = () => window.ConnectifyData.expandAll(isExpand);
-          return btn;
-        };
-        btnContainer.append(createBtn('Expand All', true), createBtn('Collapse All', false));
-        document.body.appendChild(btnContainer);
+          const createBtn = (text, isExpand) => {
+            const btn = document.createElement('button');
+            btn.textContent = text;
+            btn.type = 'button';
+            btn.className = 'eds-c-button';
+            btn.style.padding = '6px';
+            btn.style.fontSize = '11px';
+            btn.style.width = '100%';
+            btn.onclick = () => window.ConnectifyData.expandAll(isExpand);
+            return btn;
+          };
+          btnContainer.append(createBtn('Expand All', true), createBtn('Collapse All', false));
+          document.body.appendChild(btnContainer);
+        }
       }
 
       // --- WACE Countdown Timer ---
@@ -80,58 +137,6 @@
       // --- Compound Progress Bars ---
       if (window.ConnectifyCompoundProgress?.update) {
         window.ConnectifyCompoundProgress.update();
-      }
-
-      // --- Back to Top Button at the Bottom of Assessment Outlines ---
-      const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile');
-      const backToTopExisting = document.getElementById('cx-back-to-top-container');
-      if (tiles.length > 0) {
-        const lastTile = tiles[tiles.length - 1];
-        if (!backToTopExisting) {
-          const container = document.createElement('div');
-          container.id = 'cx-back-to-top-container';
-          container.className = 'cx-back-to-top-container';
-
-          const btn = document.createElement('button');
-          btn.id = 'cx-back-to-top-btn';
-          btn.type = 'button';
-          btn.className = 'cx-back-to-top-btn eds-c-button';
-          btn.textContent = '↑ Back to top';
-          btn.setAttribute('aria-label', 'Back to top of assessment outlines');
-
-          btn.onclick = () => {
-            const firstTile = document.querySelector('.eds-c-tile, .cvr-c-tile');
-            if (firstTile && typeof firstTile.scrollIntoView === 'function') {
-              firstTile.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            if (typeof window.scrollTo === 'function') {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-            if (document.documentElement && typeof document.documentElement.scrollTo === 'function') {
-              document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-            if (document.body && typeof document.body.scrollTo === 'function') {
-              document.body.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-          };
-
-          container.appendChild(btn);
-          if (lastTile.parentNode) {
-            if (lastTile.nextSibling) {
-              lastTile.parentNode.insertBefore(container, lastTile.nextSibling);
-            } else {
-              lastTile.parentNode.appendChild(container);
-            }
-          }
-        } else if (backToTopExisting.previousElementSibling !== lastTile && lastTile.parentNode) {
-          if (lastTile.nextSibling) {
-            lastTile.parentNode.insertBefore(backToTopExisting, lastTile.nextSibling);
-          } else {
-            lastTile.parentNode.appendChild(backToTopExisting);
-          }
-        }
-      } else if (backToTopExisting) {
-        backToTopExisting.remove();
       }
     }
 
@@ -214,6 +219,23 @@
     });
 
     initSidebarTools();
+    syncBackToTop();
+
+    let bttTimer = null;
+    const debouncedSyncBackToTop = () => {
+      if (bttTimer) return;
+      bttTimer = requestAnimationFrame(() => {
+        bttTimer = null;
+        syncBackToTop();
+      });
+    };
+
+    if (typeof MutationObserver !== 'undefined' && document.body) {
+      new MutationObserver(() => {
+        debouncedSyncBackToTop();
+      }).observe(document.body, { childList: true, subtree: true });
+    }
+
     setInterval(() => {
       if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
       initSidebarTools();

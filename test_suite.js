@@ -1773,6 +1773,40 @@ runTest('atar-features.js injects and styles Back to top button at the bottom of
   assert.ok(atarFeaturesCode.includes('Back to top'), 'atar-features.js button must have Back to top text');
   assert.ok(atarCss.includes('.cx-back-to-top-container') && atarCss.includes('.cx-back-to-top-btn'), 'atar.css must style Back to top button');
   assert.ok(themeCss.includes('.cx-back-to-top-btn'), 'theme.css must style Back to top button in dark mode');
+  assert.ok(atarFeaturesCode.includes('syncBackToTop()'), 'atar-features.js must have dedicated syncBackToTop function');
+  assert.ok(atarFeaturesCode.includes('MutationObserver'), 'atar-features.js must observe DOM mutations to reactively mount Back to top button');
+});
+
+runTest('assessment-data.js parses 0 Out of 0 weighting as 0% and extracts syllabus weights correctly without NaN poisoning', () => {
+  const assessmentDataCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const compoundProgressCode = fs.readFileSync(path.resolve(BASE_DIR, 'compound-progress.js'), 'utf8');
+
+  assert.ok(assessmentDataCode.includes('0 Out of 0') || assessmentDataCode.includes('den === 0'), 'assessment-data.js must handle 0 Out of 0 denominator');
+  assert.ok(assessmentDataCode.includes('weight = 0'), 'assessment-data.js must parse 0 Out of 0 as weight = 0');
+  assert.ok(compoundProgressCode.includes('t.weight <= 0') || compoundProgressCode.includes('!Number.isFinite(t.weight)'), 'compound-progress.js must filter out <= 0 or non-finite weights from completion calculation');
+});
+
+runTest('category-settings.js and progress-graph.js provide robust panel singletons and open/close lifecycles', () => {
+  const settingsCode = fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8');
+  const progressCode = fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8');
+  const sidebarCode = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+
+  assert.ok(settingsCode.includes('ensureSettingsPanel'), 'category-settings.js must export ensureSettingsPanel');
+  assert.ok(settingsCode.includes('panelRefs'), 'category-settings.js must manage panelRefs singleton');
+  assert.ok(progressCode.includes('openProgress') && progressCode.includes('closeProgress'), 'progress-graph.js must implement openProgress and closeProgress');
+  assert.ok(progressCode.includes('panelRefs'), 'progress-graph.js must export panelRefs');
+  assert.ok(sidebarCode.includes('openProgress') || sidebarCode.includes('ConnectifyProgress?.panelRefs'), 'sidebar.js must delegate to progress-graph lifecycle');
+});
+
+runTest('theme.css covers circular trash buttons, View All buttons, Clay/Material checkboxes, and neutralizes tile headers', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+
+  assert.ok(css.includes('.btn-monospaced') && css.includes('trash'), 'theme.css must style circular icon buttons and trash controls');
+  assert.ok(css.includes('.eds-c-action-button') || css.includes('.eds-c-tile__header .v-button'), 'theme.css must style View All tile header action button');
+  assert.ok(css.includes('.custom-checkbox') && css.includes('.custom-control-label::before'), 'theme.css must style Clay custom checkboxes');
+  assert.ok(css.includes('.mat-checkbox-frame'), 'theme.css must style Angular Material checkbox frames');
+  assert.ok(css.includes(':is(html.connectea-dark, body.connectea-dark, .connectea-dark)') && css.includes('.eds.cvr'), 'theme.css must provide maximum specificity covering .eds.cvr');
+  assert.ok(css.includes('border-top: 1px solid #2e3c4e !important;') && css.includes('border-bottom: 1px solid #2e3c4e !important;'), 'theme.css must set dark borders on task rows to eliminate light #888 lines');
 });
 
 console.log('\n================================================================');

@@ -19,6 +19,9 @@
 
   // Apply dark mode class immediately to avoid any initial page flash
   document.documentElement.classList.toggle('connectea-dark', isDarkMode);
+  if (document.body) {
+    document.body.classList.toggle('connectea-dark', isDarkMode);
+  }
 
   // Reuse existing button if already in DOM or create once
   let toggleButton = document.getElementById('connectea-theme-toggle');
@@ -173,6 +176,9 @@
   function applyTheme(isDark) {
     isDarkMode = isDark;
     document.documentElement.classList.toggle('connectea-dark', isDarkMode);
+    if (document.body) {
+      document.body.classList.toggle('connectea-dark', isDarkMode);
+    }
 
     const label = isDarkMode ? '☀ Light mode' : '☾ Dark mode';
     if (toggleButton.textContent !== label) {
@@ -259,6 +265,9 @@
   if (isDarkMode) adaptSurfaces();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+      if (document.body) {
+        document.body.classList.toggle('connectea-dark', isDarkMode);
+      }
       updateTogglePosition(true);
       updateDetailArrows();
       if (isDarkMode) adaptSurfaces();

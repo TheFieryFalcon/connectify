@@ -336,19 +336,30 @@
           window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
         }
       } else if (id === 'connectify-progress-toggle') {
-        const progPanel = document.getElementById('connectify-progress') || window.ConnectifyProgress?.panelRefs?.panel;
-        if (progPanel) {
-          const willShow = progPanel.hidden;
-          progPanel.hidden = !willShow;
-          toggle.setAttribute('aria-expanded', String(willShow));
-          toggle.setAttribute('aria-pressed', String(willShow));
-          if (willShow) {
-            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'progress' }));
-            if (window.ConnectifyProgress?.panelRefs?.expandAndRefresh) {
-              window.ConnectifyProgress.panelRefs.expandAndRefresh();
-            }
-          } else {
+        const refs = window.ConnectifyProgress?.panelRefs;
+        if (refs?.openProgress) {
+          const progPanel = refs.panel || document.getElementById('connectify-progress');
+          if (progPanel && !progPanel.hidden) {
+            refs.closeProgress();
             window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
+          } else {
+            refs.openProgress();
+          }
+        } else {
+          const progPanel = document.getElementById('connectify-progress');
+          if (progPanel) {
+            const willShow = progPanel.hidden;
+            progPanel.hidden = !willShow;
+            toggle.setAttribute('aria-expanded', String(willShow));
+            toggle.setAttribute('aria-pressed', String(willShow));
+            if (willShow) {
+              window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'progress' }));
+              if (window.ConnectifyProgress?.panelRefs?.refresh) {
+                window.ConnectifyProgress.panelRefs.refresh();
+              }
+            } else {
+              window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
+            }
           }
         }
       } else if (id === 'connectify-weakness-toggle') {

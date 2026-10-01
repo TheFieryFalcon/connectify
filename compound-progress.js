@@ -94,7 +94,7 @@
         // For Semester 2 cards: include BOTH Semester 1 and Semester 2 tasks for full annual weighting.
         const sortedTasks = [...subject.tasks]
           .filter(t => {
-            if (!t || t.weight <= 0) return false;
+            if (!t || !Number.isFinite(t.weight) || t.weight <= 0) return false;
             if (!cardSemester) return true;
             if (cardSemester === 1) return t.semester === 1;
             if (cardSemester === 2) return t.semester === 1 || t.semester === 2;
@@ -131,6 +131,7 @@
         let labelBreakdowns = {};
 
         sortedTasks.forEach(t => {
+          if (!Number.isFinite(t.weight) || t.weight <= 0) return;
           totalWeight += t.weight;
           if (!t.pending) overallCompleted += t.weight;
           const cat = getEffectiveType(subject.name, t);
@@ -138,7 +139,7 @@
           labelBreakdowns[cat] += t.weight;
         });
 
-        if (totalWeight <= 0) return;
+        if (!Number.isFinite(totalWeight) || totalWeight <= 0) return;
 
         const bar = document.createElement('div');
         bar.className = 'cx-compound-bar';

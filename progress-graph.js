@@ -74,6 +74,11 @@
       choicesContainer.replaceChildren();
       chartContainer.replaceChildren();
 
+      if (!data || data.length === 0) {
+        chartContainer.append(createElement('p', 'No assessments found. Expand subjects in Connect to load data.'));
+        return;
+      }
+
       const isHistory = selectedSubject === '__atar';
       const current = data.find(s => s.name === selectedSubject) || data[0];
 
@@ -174,23 +179,34 @@
     }
 
     // Toggle button interactions
+    function openProgress() {
+      panel.hidden = false;
+      toggleBtn.setAttribute('aria-expanded', 'true');
+      toggleBtn.setAttribute('aria-pressed', 'true');
+      window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'progress' }));
+      refresh();
+      title.focus();
+    }
+
+    function closeProgress() {
+      panel.hidden = true;
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      toggleBtn.setAttribute('aria-pressed', 'false');
+    }
+
     toggleBtn.onclick = e => {
       if (e) e.stopPropagation();
-      panel.hidden = !panel.hidden;
-      toggleBtn.setAttribute('aria-expanded', String(!panel.hidden));
-      if (!panel.hidden) {
-        window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'progress' }));
-        expandAndRefresh();
-        title.focus();
+      if (panel.hidden) {
+        openProgress();
       } else {
+        closeProgress();
         window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
       }
     };
 
     panel.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
-        panel.hidden = true;
-        toggleBtn.setAttribute('aria-expanded', 'false');
+        closeProgress();
         toggleBtn.focus();
       }
     });
@@ -198,9 +214,10 @@
     scanBtn.onclick = expandAndRefresh;
 
     window.addEventListener('connectify-open', e => {
-      if (e.detail !== 'progress') {
-        panel.hidden = true;
-        toggleBtn.setAttribute('aria-expanded', 'false');
+      if (e.detail === 'progress') {
+        if (panel.hidden) openProgress();
+      } else {
+        closeProgress();
       }
     });
 
@@ -257,6 +274,8 @@
       panelRefs: {
         toggleBtn,
         panel,
+        openProgress,
+        closeProgress,
         refresh,
         expandAndRefresh
       }

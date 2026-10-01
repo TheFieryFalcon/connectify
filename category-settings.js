@@ -163,12 +163,16 @@
   }
 
   function createSettingsPanel() {
-    const catBtn = document.createElement('button');
+    if (window.ConnectifyCategorySettings?.panelRefs) {
+      return window.ConnectifyCategorySettings.panelRefs;
+    }
+
+    const catBtn = document.getElementById('connectify-categories-toggle') || document.createElement('button');
     catBtn.textContent = 'Settings';
     catBtn.type = 'button';
     catBtn.id = 'connectify-categories-toggle';
 
-    const catPanel = document.createElement('section');
+    const catPanel = document.getElementById('connectify-categories') || document.createElement('section');
     catPanel.id = 'connectify-categories';
     catPanel.hidden = true;
     catPanel.className = 'cx-workspace-panel';
@@ -584,19 +588,23 @@
       catPanel.hidden = false;
       catBtn.setAttribute('aria-pressed', 'true');
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
-      if (autoExpandToggle) {
-        autoExpandToggle.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
+      try {
+        if (autoExpandToggle) {
+          autoExpandToggle.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
+        }
+        if (generalCohortInput) {
+          generalCohortInput.value = localStorage.getItem('connectify:general_cohort_size') || '';
+        }
+        if (atarPctInput) {
+          atarPctInput.value = localStorage.getItem('connectify:atar_percentage') || '';
+        }
+        resolveCategories();
+      } catch (e) {
+        console.warn('Connectify settings preferences error:', e);
       }
-      if (generalCohortInput) {
-        generalCohortInput.value = localStorage.getItem('connectify:general_cohort_size') || '';
-      }
-      if (atarPctInput) {
-        atarPctInput.value = localStorage.getItem('connectify:atar_percentage') || '';
-      }
-      resolveCategories();
-      renderCategoryInputs(catPanel, () => renderBaselines());
-      renderCalib();
-      renderBaselines();
+      try { renderCategoryInputs(catPanel, () => renderBaselines()); } catch (e) { console.warn('renderCategoryInputs error:', e); }
+      try { renderCalib(); } catch (e) { console.warn('renderCalib error:', e); }
+      try { renderBaselines(); } catch (e) { console.warn('renderBaselines error:', e); }
     }
 
     function closeCategories() {

@@ -67,8 +67,8 @@
 
   // --- SUBSYSTEM CACHE INVALIDATION MANAGER ---
   const CACHE_VERSIONS = {
-    PREDICTOR: 'v5_20261001_pred',
-    RESULTS: 'v4_20261001_results',
+    PREDICTOR: 'v6_20261001_pred',
+    RESULTS: 'v5_20261001_results',
     SETTINGS: 'v4_20261001_settings',
     COHORT: 'v4_20261001_cohort'
   };
@@ -290,16 +290,29 @@
       const weightElement = row.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark')[1];
       const weightText = normalize(weightElement?.textContent);
       let weight = null;
-      const weightFracMatch = weightText.match(/^(\d+(?:\.\d+)?)\s*(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)$/i);
+      const weightFracMatch = weightText.match(/^(\d+(?:\.\d+)?|[-–—])\s*(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)$/i);
       if (weightFracMatch) {
-        const num = Number(weightFracMatch[1]);
         const den = Number(weightFracMatch[2]);
-        weight = (den === 100) ? num : (den > 0 && den <= 100 && num === den ? num : (num / den) * 100);
+        const num = (weightFracMatch[1] === '-' || weightFracMatch[1] === '–' || weightFracMatch[1] === '—')
+          ? null
+          : Number(weightFracMatch[1]);
+        if (den === 0) {
+          weight = 0;
+        } else if (den === 100) {
+          weight = num !== null ? num : 100;
+        } else if (den > 0 && den < 100) {
+          weight = den;
+        } else {
+          weight = (num !== null && den > 0) ? (num / den) * 100 : den;
+        }
       } else {
         const weightMatch = weightText.match(/(\d+(?:\.\d+)?)\s*%/i) ||
                             weightText.match(/(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)/i) ||
                             weightText.match(/^(\d+(?:\.\d+)?)$/i);
         weight = weightMatch ? Number(weightMatch[1]) : null;
+      }
+      if (weight !== null && !Number.isFinite(weight)) {
+        weight = null;
       }
 
       const taskName = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${tasks.size + 1}`;
