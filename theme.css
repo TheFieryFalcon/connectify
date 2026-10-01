@@ -658,10 +658,20 @@ html.connectea-dark {
   color: #e2e8f0 !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-accordion__panel,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr .eds-c-accordion__panel {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-accordion__panel,
+  .cvr-c-accordion__panel,
+  .eds-c-accordion__section-body
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .eds-c-accordion__panel,
+  .cvr-c-accordion__panel,
+  .eds-c-accordion__section-body
+) {
   border-bottom: 1px solid #2e3c4e !important;
   border-color: #2e3c4e !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-accordion__panel:before,

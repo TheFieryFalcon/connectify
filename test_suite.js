@@ -1929,6 +1929,73 @@ runTest('theme.css styles mat-toolbar, mat-tab-header, and eliminates stroke fro
   assert.ok(themeJs.includes('mat-toolbar') && themeJs.includes('mat-tab-header'), 'theme.js adaptSurfaces must include mat-toolbar and mat-tab-header');
 });
 
+runTest('assessment-data.js expandAll defines pattern, supports heading fallback, and dispatches clicks safely', () => {
+  const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  assert.ok(dataJs.includes('const pattern = expand ? /show details/i : /hide details/i;'), 'expandAll must define pattern before matching headings');
+  assert.ok(dataJs.includes('heading.click()'), 'expandAll must fallback to clicking heading if no child button is found');
+
+  let clicked = false;
+  const mockHeading = {
+    textContent: 'Show details',
+    querySelector: () => null,
+    matches: () => false,
+    click: () => { clicked = true; }
+  };
+  const origQSA = document.querySelectorAll.bind(document);
+  document.querySelectorAll = () => [mockHeading];
+  assert.doesNotThrow(() => {
+    window.ConnectifyData.expandAll(true);
+  }, 'expandAll must execute without throwing ReferenceError');
+  document.querySelectorAll = origQSA;
+});
+
+runTest('predictor-math.js dampens high score leverage on mid and scales low penalty with variance, with version bump', () => {
+  const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+
+  assert.ok(predMathCode.includes("'v7_20261001_pred'"), 'predictor-math.js must use v7_20261001_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v7_20261001_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v7_20261001_pred');
+
+  const historicalElevated = {
+    subjects: { 'Chemistry': 90 },
+    subjectSpreads: { 'Chemistry': 6.5 },
+    types: { 'Test': 90 },
+    typeCounts: { 'Test': 3 },
+    overallAverage: 90,
+    spread: 6.5
+  };
+  const pred = predMath.predictTask('Chemistry', { name: 'Test 4' }, historicalElevated);
+  assert.ok(pred.mid < 90, `Mid prediction (${pred.mid}%) must be dampened below elevated 90% average`);
+  assert.ok(pred.low <= 76, `Low prediction (${pred.low}%) must reflect asymmetric downside risk from peak score leverage`);
+});
+
+runTest('predictor-ui.js and atar-ui.js render user-prompted Expand All buttons', () => {
+  const predUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-ui.js'), 'utf8');
+  const atarUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
+
+  assert.ok(predUiJs.includes('cx-pred-expand-outlines-btn'), 'predictor-ui.js must include cx-pred-expand-outlines-btn in ATAR Predictor');
+  assert.ok(predUiJs.includes("closest('#cx-pred-expand-outlines, .cx-pred-expand-outlines-btn')"), 'predictor-ui.js click delegation must handle cx-pred-expand-outlines-btn');
+  assert.ok(atarUiJs.includes('cta-expand-outlines') || atarUiJs.includes('Expand All Outlines'), 'atar-ui.js must include Expand All Outlines button');
+  assert.ok(atarUiJs.includes('expandAllBtn.hidden'), 'atar-ui.js must manage expandAllBtn visibility in selectTab');
+});
+
+runTest('theme.css applies 16px accordion panel padding and sidebar.css enforces distinct Low/Mid/High predictor text colors', () => {
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+
+  assert.ok(
+    themeCss.includes('.eds-c-accordion__panel') &&
+    themeCss.includes('padding-left: 16px !important;') &&
+    themeCss.includes('padding-right: 16px !important;'),
+    'theme.css must apply 16px horizontal padding to accordion panels in dark mode'
+  );
+
+  assert.ok(sidebarCss.includes('.connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) strong'), 'sidebar.css must style low pill numbers');
+  assert.ok(sidebarCss.includes('.connectea-dark .cx-pred-pill--mid strong'), 'sidebar.css must style mid pill numbers');
+  assert.ok(sidebarCss.includes('.connectea-dark .cx-pred-pill--high strong'), 'sidebar.css must style high pill numbers');
+  assert.ok(sidebarCss.includes('#cbd5e1 !important') && sidebarCss.includes('#4ade80 !important'), 'sidebar.css must define #cbd5e1 for low and #4ade80 for high with !important');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

@@ -225,20 +225,20 @@
           </div>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1.25fr 1fr; gap:8px; text-align:center;">
-          <div class="cx-pred-scenario-card">
-            <div class="cx-pred-scenario-label">Low</div>
-            <div class="cx-pred-scenario-value">${activeSubject.projected.low ?? '—'}%</div>
-            <div class="cx-pred-scenario-sub">Relaxed pace</div>
+          <div class="cx-pred-scenario-card cx-pred-scenario-card--low">
+            <div class="cx-pred-scenario-label cx-pred-scenario-label--low">Low</div>
+            <div class="cx-pred-scenario-value cx-pred-scenario-value--low">${activeSubject.projected.low ?? '—'}%</div>
+            <div class="cx-pred-scenario-sub cx-pred-scenario-sub--low">Relaxed pace</div>
           </div>
           <div class="cx-pred-scenario-card cx-pred-scenario-card--mid">
             <div class="cx-pred-scenario-label cx-pred-scenario-label--mid">Middle (Expected)</div>
             <div class="cx-pred-scenario-value cx-pred-scenario-value--mid">${activeSubject.projected.mid ?? '—'}%</div>
             <div class="cx-pred-scenario-sub cx-pred-scenario-sub--mid">Current momentum</div>
           </div>
-          <div class="cx-pred-scenario-card">
-            <div class="cx-pred-scenario-label">High</div>
+          <div class="cx-pred-scenario-card cx-pred-scenario-card--high">
+            <div class="cx-pred-scenario-label cx-pred-scenario-label--high">High</div>
             <div class="cx-pred-scenario-value cx-pred-scenario-value--high">${activeSubject.projected.high ?? '—'}%</div>
-            <div class="cx-pred-scenario-sub">Extra effort</div>
+            <div class="cx-pred-scenario-sub cx-pred-scenario-sub--high">Extra effort</div>
           </div>
         </div>
       `;
@@ -320,7 +320,7 @@
             predRow.style.gap = '8px';
 
             predRow.innerHTML = `
-              <div class="cx-pred-pill">
+              <div class="cx-pred-pill cx-pred-pill--low">
                 <span style="font-size:9.5px; opacity:0.75; display:block; text-transform:uppercase;">Low</span>
                 <strong style="font-size:13.5px;">${pred.low ?? '—'}%</strong>
               </div>
@@ -356,6 +356,11 @@
             <div style="font-size:11px; margin-top:6px; opacity:0.8;">
               Ensure at least four Year 11/12 ATAR course outlines are expanded on Connect.
             </div>
+            <div style="margin-top:14px;">
+              <button type="button" class="cx-pred-expand-outlines-btn" style="background:#24618c; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">
+                Expand All Outlines
+              </button>
+            </div>
           </div>
         `;
         return;
@@ -363,24 +368,29 @@
 
       container.innerHTML = `
         <div class="cx-pred-card">
-          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; opacity:0.8;">
-            Predicted Final ATAR
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;">
+              Predicted Final ATAR
+            </div>
+            <button type="button" class="cx-pred-expand-outlines-btn" style="background:transparent; border:1px solid #3b82f6; color:#60a5fa; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer; font-weight:600;">
+              Expand All Outlines
+            </button>
           </div>
           <div style="display:grid; grid-template-columns:1fr 1.3fr 1fr; gap:8px; text-align:center; align-items:center;">
-            <div class="cx-pred-scenario-card" style="padding:10px 6px;">
-              <div class="cx-pred-scenario-label">Low Scenario</div>
-              <div class="cx-pred-scenario-value" style="font-size:19px; margin-top:3px;">${atarProj.low?.atar ?? '—'}</div>
-              <div class="cx-pred-scenario-sub">TEA ${atarProj.low?.tea ?? 0}</div>
+            <div class="cx-pred-scenario-card cx-pred-scenario-card--low" style="padding:10px 6px;">
+              <div class="cx-pred-scenario-label cx-pred-scenario-label--low">Low Scenario</div>
+              <div class="cx-pred-scenario-value cx-pred-scenario-value--low" style="font-size:19px; margin-top:3px;">${atarProj.low?.atar ?? '—'}</div>
+              <div class="cx-pred-scenario-sub cx-pred-scenario-sub--low">TEA ${atarProj.low?.tea ?? 0}</div>
             </div>
             <div class="cx-pred-scenario-card cx-pred-scenario-card--mid" style="padding:12px 6px;">
               <div class="cx-pred-scenario-label cx-pred-scenario-label--mid">Expected ATAR</div>
               <div class="cx-pred-scenario-value cx-pred-scenario-value--mid cx-pred-scenario-value--atar">${atarProj.mid?.atar ?? '—'}</div>
               <div class="cx-pred-scenario-sub cx-pred-scenario-sub--mid">TEA ${atarProj.mid?.tea ?? 0}</div>
             </div>
-            <div class="cx-pred-scenario-card" style="padding:10px 6px;">
-              <div class="cx-pred-scenario-label">High Scenario</div>
+            <div class="cx-pred-scenario-card cx-pred-scenario-card--high" style="padding:10px 6px;">
+              <div class="cx-pred-scenario-label cx-pred-scenario-label--high">High Scenario</div>
               <div class="cx-pred-scenario-value cx-pred-scenario-value--high" style="font-size:19px; margin-top:3px;">${atarProj.high?.atar ?? '—'}</div>
-              <div class="cx-pred-scenario-sub">TEA ${atarProj.high?.tea ?? 0}</div>
+              <div class="cx-pred-scenario-sub cx-pred-scenario-sub--high">TEA ${atarProj.high?.tea ?? 0}</div>
             </div>
           </div>
           <div style="margin-top:12px; font-size:11px; opacity:0.8; text-align:center; line-height:1.4;">
@@ -496,7 +506,7 @@
         return;
       }
 
-      const expandBtn = e.target.closest('#cx-pred-expand-outlines');
+      const expandBtn = e.target.closest('#cx-pred-expand-outlines, .cx-pred-expand-outlines-btn');
       if (expandBtn) {
         if (window.ConnectifyData?.expandAll) {
           window.ConnectifyData.expandAll(true);

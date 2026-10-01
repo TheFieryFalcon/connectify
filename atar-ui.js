@@ -110,6 +110,16 @@
       renderCourseRows();
     });
 
+    const expandAllBtn = createEl('button', 'cta-reset cta-expand-outlines', 'Expand All Outlines');
+    expandAllBtn.type = 'button';
+    expandAllBtn.style.marginLeft = '8px';
+    expandAllBtn.addEventListener('click', () => {
+      if (window.ConnectifyData?.expandAll) {
+        window.ConnectifyData.expandAll(true);
+      }
+      plannerContext.scanAndRefresh();
+    });
+
     const calculationDetails = createEl('details', 'cta-method');
     calculationDetails.append(createEl('summary', '', 'Calculation Methodology & Sources'));
     calculationDetails.append(
@@ -171,6 +181,7 @@
       courseListContainer,
       detailSummary,
       resetBtn,
+      expandAllBtn,
       calculationDetails
     );
 
@@ -202,7 +213,7 @@
       targetTab.setAttribute('aria-pressed', String(isPlanningMode));
       gradeTab.setAttribute('aria-pressed', String(isGradingMode));
 
-      courseListContainer.hidden = detailSummary.hidden = resetBtn.hidden = calculationDetails.hidden =
+      courseListContainer.hidden = detailSummary.hidden = resetBtn.hidden = expandAllBtn.hidden = calculationDetails.hidden =
         isPlanningMode || isGradingMode;
 
       if (plannerRefs) plannerRefs.container.hidden = !isPlanningMode;

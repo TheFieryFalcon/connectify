@@ -137,7 +137,7 @@
 
   // --- SUBSYSTEM CACHE INVALIDATION MANAGER ---
   const CACHE_VERSIONS = {
-    PREDICTOR: 'v6_20261001_pred',
+    PREDICTOR: 'v7_20261001_pred',
     RESULTS: 'v6_20261001_results',
     SETTINGS: 'v4_20261001_settings',
     COHORT: 'v5_20261001_cohort'
@@ -606,6 +606,7 @@
    */
   function expandAll(expand = true) {
     if (isBulkExpanding) return;
+    const pattern = expand ? /show details/i : /hide details/i;
     const headings = Array.from(
       document.querySelectorAll(
         '.eds-c-tile .eds-c-accordion__section-heading, .cvr-c-tile .eds-c-accordion__section-heading, .cvr-c-tile .cvr-c-accordion__section-heading, .eds-c-accordion__section-heading, .cvr-c-accordion__section-heading'
@@ -690,9 +691,13 @@
       }
 
       if (pattern.test(heading.textContent)) {
-        const btn = heading.querySelector('button, .v-button, [role="button"]');
+        const btn = heading.querySelector('button, .v-button, [role="button"]') ||
+          (heading.matches('button, [role="button"]') ? heading : null);
         if (btn) {
           btn.click();
+          clickedAny = true;
+        } else {
+          heading.click();
           clickedAny = true;
         }
       }
@@ -704,9 +709,9 @@
 
   // Listen for user clicks on subject accordion headers to update results cache immediately upon expansion
   document.addEventListener('click', e => {
-    const heading = e.target.closest('.eds-c-accordion__section-heading');
+    const heading = e.target.closest('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading');
     if (!heading) return;
-    const card = heading.closest('.eds-c-tile');
+    const card = heading.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
     if (!card) return;
 
     setTimeout(() => {

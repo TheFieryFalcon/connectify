@@ -658,9 +658,17 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   text-align: center;
   box-sizing: border-box;
 }
+.cx-pred-scenario-card--low {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
 .cx-pred-scenario-card--mid {
   background: #e9f2fb;
   border: 1.5px solid #709fc4;
+}
+.cx-pred-scenario-card--high {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
 }
 .cx-pred-scenario-label {
   font-size: 10px;
@@ -669,15 +677,25 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   opacity: 0.8;
   color: inherit;
 }
+.cx-pred-scenario-label--low {
+  color: #64748b;
+}
 .cx-pred-scenario-label--mid {
   font-weight: 700;
   color: #174c75;
+}
+.cx-pred-scenario-label--high {
+  font-weight: 700;
+  color: #15803d;
 }
 .cx-pred-scenario-value {
   font-size: 17px;
   font-weight: 700;
   margin-top: 3px;
   color: inherit;
+}
+.cx-pred-scenario-value--low {
+  color: #475569;
 }
 .cx-pred-scenario-value--mid {
   font-size: 20px;
@@ -697,10 +715,17 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   opacity: 0.75;
   margin-top: 1px;
 }
+.cx-pred-scenario-sub--low {
+  color: #64748b;
+}
 .cx-pred-scenario-sub--mid {
   font-weight: 600;
   color: #24618c;
   font-size: 10.5px;
+}
+.cx-pred-scenario-sub--high {
+  font-weight: 600;
+  color: #15803d;
 }
 .cx-pred-hint {
   color: #55667a;
@@ -723,6 +748,19 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   border-color: #3b5066;
   color: #dceaf6;
 }
+.connectea-dark .cx-pred-scenario-card--low {
+  background: #1e252e !important;
+  border-color: #3b5066 !important;
+}
+.connectea-dark .cx-pred-scenario-label--low {
+  color: #94a3b8 !important;
+}
+.connectea-dark .cx-pred-scenario-value--low {
+  color: #cbd5e1 !important;
+}
+.connectea-dark .cx-pred-scenario-sub--low {
+  color: #94a3b8 !important;
+}
 .connectea-dark .cx-pred-scenario-card--mid {
   background: #1e3a5f !important;
   border: 1.5px solid #60a5fa !important;
@@ -738,8 +776,18 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 .connectea-dark .cx-pred-scenario-sub--mid {
   color: #bfdbfe !important;
 }
+.connectea-dark .cx-pred-scenario-card--high {
+  background: #143522 !important;
+  border-color: #2b6647 !important;
+}
+.connectea-dark .cx-pred-scenario-label--high {
+  color: #86efac !important;
+}
 .connectea-dark .cx-pred-scenario-value--high {
   color: #4ade80 !important;
+}
+.connectea-dark .cx-pred-scenario-sub--high {
+  color: #86efac !important;
 }
 .connectea-dark .cx-pred-hint {
   color: #94a3b8 !important;
@@ -774,9 +822,20 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   text-align: center;
   box-sizing: border-box;
 }
+.cx-pred-pill--low {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+.cx-pred-pill--low strong {
+  color: #334155;
+}
 .cx-pred-pill--mid {
   background: #d9eafa;
   border-color: #709fc4;
+  color: #174c75;
+}
+.cx-pred-pill--mid strong {
   color: #174c75;
 }
 .cx-pred-pill--high {
@@ -784,20 +843,32 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   border-color: #8cdab1;
   color: #15803d;
 }
-.connectea-dark .cx-pred-pill {
-  background: #1e252e;
-  border-color: #3b5066;
-  color: #b4c5d5;
+.cx-pred-pill--high strong {
+  color: #15803d;
+}
+.connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) {
+  background: #1e252e !important;
+  border-color: #3b5066 !important;
+  color: #b4c5d5 !important;
+}
+.connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) strong {
+  color: #cbd5e1 !important;
 }
 .connectea-dark .cx-pred-pill--mid {
-  background: #1e3a5f;
-  border-color: #60a5fa;
-  color: #ffffff;
+  background: #1e3a5f !important;
+  border-color: #60a5fa !important;
+  color: #ffffff !important;
+}
+.connectea-dark .cx-pred-pill--mid strong {
+  color: #ffffff !important;
 }
 .connectea-dark .cx-pred-pill--high {
-  background: #143522;
-  border-color: #2b6647;
-  color: #4ade80;
+  background: #143522 !important;
+  border-color: #2b6647 !important;
+  color: #4ade80 !important;
+}
+.connectea-dark .cx-pred-pill--high strong {
+  color: #4ade80 !important;
 }
 
 /* Unpredicted Cold-Start Notice */

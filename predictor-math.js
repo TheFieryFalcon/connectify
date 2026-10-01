@@ -316,16 +316,26 @@
     const typeModifier = typeAvg - overallAnchor;
 
     // 5. Middle Prediction (Expected Momentum):
-    // Blend subject ability with half of type bias, passed through logarithmic ceiling:
-    const rawMid = applyLogarithmicCeiling(subjectAvg, 0.5 * typeModifier);
-    const mid = Math.min(99.5, Math.max(10, round(rawMid, 1)));
-
-    // 6. Low & High Spreads (scaling Low more strongly with variance):
+    // High scores have an outsized upward leverage on arithmetic averages.
+    // When variance is present, taper the elevated average above 75% to account for regression
+    // to typical performance on upcoming high-stakes tasks:
     let sigma = historical.spread || 6.5;
     if (historical.subjectSpreads && Number.isFinite(historical.subjectSpreads[cleanSubj])) {
       sigma = historical.subjectSpreads[cleanSubj];
     }
-    const lowDelta = Math.min(22.0, Math.max(1.5, (sigma * sigma) / 10 + 0.7 * sigma));
+    const varianceDampener = Math.min(1.0, Math.max(0, (sigma - 1.0) / 4.0));
+    const highScoreElevation = Math.max(0, subjectAvg - 75);
+    const effectiveSubjectAvg = subjectAvg - (highScoreElevation * 0.35 * varianceDampener);
+
+    // Blend subject ability with half of type bias, passed through logarithmic ceiling:
+    const rawMid = applyLogarithmicCeiling(effectiveSubjectAvg, 0.5 * typeModifier);
+    const mid = Math.min(99.5, Math.max(10, round(rawMid, 1)));
+
+    // 6. Low & High Spreads:
+    // Scale Low more strongly when averages are high and variance is present, as downside risk
+    // on difficult assessments is substantially wider than upward gain when averages have been pulled up by peak scores:
+    const lowHighScorePenalty = Math.max(0, mid - 75) * 0.35 * varianceDampener;
+    const lowDelta = Math.min(26.0, Math.max(1.5, (sigma * sigma) / 10 + 0.7 * sigma + lowHighScorePenalty));
     const low = Math.max(0, round(mid - lowDelta, 1));
     const highDelta = Math.min(22.0, Math.max(1.5, 1.35 * sigma));
     const high = Math.min(100, round(applyLogarithmicCeiling(mid, highDelta), 1));
@@ -347,7 +357,7 @@
   }
 
   // --- PREDICTION PERSISTENCE & CACHING ---
-  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v5_20261001_pred';
+  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v7_20261001_pred';
   const PREDICTOR_CACHE_VERSION_KEY = window.ConnectifyCache?.KEYS?.PREDICTOR || 'connectify:cache_version:predictor';
   const LEGACY_PREDICTION_VERSION_KEY = 'connectify:prediction_version';
 
