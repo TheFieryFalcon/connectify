@@ -27,7 +27,7 @@ This document details user-facing visual features 1 through 10, covering direct 
     - Compound progress bars: Preserves distinct category colors (teal, blue, purple, red)
     - Assessment type dropdowns: `#182330` with border `#2c425c`
     - Highcharts boxplots: `#161e29` box fill, `#647b95` whiskers, transparent canvas.
-    - Card/tile headers: Unified `#2e3c4e` border, suppressing native colored accent stripes; dark "View All" tile actions (`#24303f`); high-contrast role switch and webfont icons (`[class*="cvr-c-icon"]:before`, `.cvr-c-icon--switch:before`, `#cbd5e1`, hover `#ffffff`).
+    - Card/tile headers & bodies: Unified `#2e3c4e` border, suppressing native colored accent stripes; dark "View All" tile actions (`#24303f`); Connect Help, nav lists (`.eds-c-nav-list`, `.eds-c-nav-list__item`), and resource cards (`.cvr-c-resource`) styled with `#1e2632` surfaces, `#2e3c4e` borders, `#263344` hover, and `#e2e8f0` text; high-contrast role switch and webfont icons (`[class*="cvr-c-icon"]:before`, `.cvr-c-icon--switch:before`, `#cbd5e1`, hover `#ffffff`).
     - Red outline normalization: Neutralizes `.eds-t-red` card borders to `#3d5066`, headings to `#f8fafc`, and renders attendance/locked alerts as soft dark-theme badges (`#2b171a`, border `#7f2329`, text `#fca5a5`).
     - Material & utility components: Scopes `button.mat-focus-indicator`, `.mat-button`, `.mat-stroked-button` (`#202c3b` surface, `#455a73` border) and `div.w-100` flex wrappers.
     - Base Connect margin alignment: Aligns with native Connect CSS by removing `.mat-expansion-panel` bottom margin override and excluding icon buttons from button padding.
@@ -62,7 +62,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Source Modules**: [`atar-features.js`](file:///Users/uwong/Downloads/2.1.14_0/atar-features.js), [`assessment-data.js`](file:///Users/uwong/Downloads/2.1.14_0/assessment-data.js)
 - **DOM Insertion**: Floating pill button container (`#cx-expand-btn`) anchored to bottom-right; animated loading pill (`#cx-expand-progress`) on first expand.
 - **UI Appearance**: Compact buttons: `Expand All` and `Collapse All`. Progress pill shows animated spinner, percentage, and blue fill bar.
-- **Functionality**: Clicks accordion headings staggered across animation frames; mounts `#cx-expand-progress` on first bulk expand and pre-caches predictions; respects `connectify:auto_expand` setting on load.
+- **Functionality**: Clicks accordion headings staggered across animation frames; mounts `#cx-expand-progress` on bulk expand and pre-caches predictions; silences background MutationObservers during animation (`window.ConnectifyIsAccordionAnimating`) and skips re-scrapes on collapse; respects `connectify:auto_expand` setting on load.
 - **Back to Top Button**: Injects a centered button (`#cx-back-to-top-btn` in `#cx-back-to-top-container`) at the bottom of the outlines list for smooth scrolling back to top.
 
 ### 6. Year 12 WACE Exam Countdown Banner

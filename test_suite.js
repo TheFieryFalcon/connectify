@@ -2216,8 +2216,8 @@ runTest('Test 98: theme.css and theme.js protect Highcharts box plots on first c
   assert.ok(themeCss.includes('.cvr-c-task__chart'), 'theme.css must target cvr-c-task__chart');
   assert.ok(themeCss.includes('background: transparent !important;'), 'theme.css must enforce transparent background on task chart');
 
-  // Verify theme.js excludes tiles and charts from surfaceCandidates and inkCandidates
-  assert.ok(themeJs.includes(':not(.eds-c-tile *):not(.cvr-c-tile *):not(.cvr-c-task__chart *):not(.highcharts-container *)'), 'theme.js must exclude subject tiles and Highcharts from surfaceCandidates and inkCandidates');
+  // Verify theme.js excludes Highcharts and progress pill from surfaceCandidates and inkCandidates
+  assert.ok(themeJs.includes(':not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'), 'theme.js must exclude Highcharts from surfaceCandidates and inkCandidates');
 });
 
 runTest('Test 99: assessment-data.js readiness polling and cohort-stats.js rePassPending guarantee robust Expand All execution', () => {
@@ -2262,7 +2262,65 @@ runTest('Test 101: Expand all progress pill adapts correctly across light and da
   assert.ok(themeJs.includes(':not(#cx-expand-progress):not(#cx-expand-progress *)'), 'theme.js must exclude #cx-expand-progress from adaptSurfaces');
 });
 
-runTest('Test 102: All project JS files pass strict JavaScript syntax validation', () => {
+runTest('Test 103: Semester buttons maintain uniform left alignment and reserved 4px border geometry across states', () => {
+  const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  const atarCss = fs.readFileSync(path.resolve(BASE_DIR, 'atar.css'), 'utf8');
+
+  // Verify sidebar.css enforces left alignment, 10px 14px padding, and 4px transparent border on all semester buttons
+  assert.ok(sidebarCss.includes('#connectify-sidebar .cta-semesters:not(.cta-tabs) .cta-semester{text-align:left!important;padding:10px 14px!important;border-left:4px solid transparent!important;border-radius:6px!important}'), 'sidebar.css must enforce stable left alignment and 4px transparent border geometry');
+
+  // Verify atar.css enforces left alignment, 10px 14px padding, and 4px transparent border
+  assert.ok(atarCss.includes('.cta-semesters:not(.cta-tabs) .cta-semester{padding:10px 14px!important;') && atarCss.includes('border-left:4px solid transparent!important;text-align:left!important;'), 'atar.css must enforce stable left alignment and 4px transparent border geometry');
+
+  // Verify active state retains matching padding and left alignment
+  assert.ok(sidebarCss.includes('.cta-semester.cta-semester-indicator{background:#edf4fa!important;border:1px solid #c8d9e8!important;border-left:4px solid #24618c!important;color:#1a3d5f!important;font-weight:600!important;cursor:default!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important}'), 'sidebar.css active semester must maintain 10px 14px padding and left text alignment');
+  assert.ok(atarCss.includes('.cta-semester.cta-semester-indicator{background:#edf4fa!important;border:1px solid #c8d9e8!important;border-left:4px solid #24618c!important;color:#1a3d5f!important;font-weight:600!important;cursor:default!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important}'), 'atar.css active semester must maintain 10px 14px padding and left text alignment');
+});
+
+runTest('Test 104: theme.css and theme.js comprehensively adapt Connect Help, nav lists, and generic dashboard tile bodies', () => {
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+
+  // Verify dark theme styling for tile bodies, nav lists, and resources
+  assert.ok(themeCss.includes('.eds-c-nav-list') && themeCss.includes('.eds-c-nav-list__item'), 'theme.css must target .eds-c-nav-list and .eds-c-nav-list__item');
+  assert.ok(themeCss.includes('background-color: #1e2632 !important;') && themeCss.includes('border-color: #2e3c4e !important;'), 'theme.css must enforce dark background and border on tile bodies and nav lists');
+  assert.ok(themeCss.includes('background-color: #263344 !important;'), 'theme.css must provide hover highlight for nav list items');
+
+  // Verify SVG icon styling
+  assert.ok(themeCss.includes('color: #94a3b8 !important;') && themeCss.includes('fill: currentColor !important;'), 'theme.css must style list icons with proper high contrast');
+
+  // Verify theme.js allows generic tiles to adapt surfaces
+  assert.ok(!themeJs.includes(':not(.eds-c-tile *)'), 'theme.js must not exclude .eds-c-tile * from surfaceCandidates');
+  assert.ok(!themeJs.includes(':not(.cvr-c-tile *)'), 'theme.js must not exclude .cvr-c-tile * from surfaceCandidates');
+});
+
+runTest('Test 105: Aggressive accordion expand/collapse performance optimizations eliminate layout thrashing and mute background observers', () => {
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const compoundJs = fs.readFileSync(path.resolve(BASE_DIR, 'compound-progress.js'), 'utf8');
+  const cohortJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+  const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'data.js'), 'utf8');
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+
+  // Verify global animation guard in assessment-data.js
+  assert.ok(assessJs.includes('triggerAccordionAnimationGuard'), 'assessment-data.js must define triggerAccordionAnimationGuard');
+  assert.ok(assessJs.includes('window.ConnectifyIsAccordionAnimating = true'), 'assessment-data.js must set window.ConnectifyIsAccordionAnimating');
+
+  // Verify compound-progress.js mutes during animation and filters panel mutations
+  assert.ok(compoundJs.includes('if (window.ConnectifyIsAccordionAnimating) return;'), 'compound-progress.js MutationObserver must mute during accordion animation');
+  assert.ok(compoundJs.includes('.eds-c-accordion__panel'), 'compound-progress.js must ignore mutations inside accordion panels');
+
+  // Verify cohort-stats.js mutes during animation and filters panel mutations
+  assert.ok(cohortJs.includes('if (window.ConnectifyIsAccordionAnimating) return;'), 'cohort-stats.js MutationObserver must mute during accordion animation');
+
+  // Verify data.js debounces syncAllCharts and mutes during animation
+  assert.ok(dataJs.includes('if (window.ConnectifyIsAccordionAnimating) return;'), 'data.js MutationObserver must mute during accordion animation');
+  assert.ok(dataJs.includes('requestAnimationFrame'), 'data.js must debounce syncAllCharts with requestAnimationFrame');
+
+  // Verify CSS compositor optimization
+  assert.ok(themeCss.includes('will-change: height, max-height;'), 'theme.css must include will-change on accordion panels');
+});
+
+runTest('Test 106: All project JS files pass strict JavaScript syntax validation', () => {
   const jsFiles = fs.readdirSync(BASE_DIR).filter(f => f.endsWith('.js') && f !== 'test_suite.js');
   assert.ok(jsFiles.length > 10, 'Must validate all extension JS files');
   for (const f of jsFiles) {

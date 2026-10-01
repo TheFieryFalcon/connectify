@@ -76,11 +76,12 @@
 @media(max-width:650px){#connectify-sidebar.cx-tool-active .cx-tool-menu{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #connectify-sidebar.cx-tool-active>.cx-tool-menu,#connectify-sidebar.cx-tool-active>.cx-outline-actions{display:none!important}
 #connectify-sidebar:not(.cx-tool-active) .cx-back-menu{display:none!important}
+#connectify-sidebar .cta-semesters:not(.cta-tabs) .cta-semester{text-align:left!important;padding:10px 14px!important;border-left:4px solid transparent!important;border-radius:6px!important}
 #connectify-sidebar .cta-semester.cta-non-button{cursor:default!important;box-shadow:none!important}
 #connectify-sidebar .cta-semester.cta-semester-indicator{background:#edf4fa!important;border:1px solid #c8d9e8!important;border-left:4px solid #24618c!important;color:#1a3d5f!important;font-weight:600!important;cursor:default!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important}
-#connectify-sidebar .cta-semester.cta-semester-closed{background:#f4f6f9!important;border:1px dashed #cad5e2!important;color:#7c8e9f!important;font-weight:500!important;cursor:not-allowed!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important;opacity:.85!important}
+#connectify-sidebar .cta-semester.cta-semester-closed{background:#f4f6f9!important;border:1px dashed #cad5e2!important;border-left:4px solid transparent!important;color:#7c8e9f!important;font-weight:500!important;cursor:not-allowed!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important;opacity:.85!important}
 .connectea-dark #connectify-sidebar .cta-semester.cta-semester-indicator{background:#253342!important;border-color:#3b5066!important;border-left:4px solid #6ba5d6!important;color:#dceaf6!important}
-.connectea-dark #connectify-sidebar .cta-semester.cta-semester-closed{background:#1e252e!important;border:1px dashed #3f4e5e!important;color:#6e8093!important}
+.connectea-dark #connectify-sidebar .cta-semester.cta-semester-closed{background:#1e252e!important;border:1px dashed #3f4e5e!important;border-left:4px solid transparent!important;color:#6e8093!important}
 #cx-weakness-filters{margin-top:16px;background:#edf4fa;border:1px solid #c8d9e8;border-radius:8px;padding:12px 16px}
 #cx-weakness-checkboxes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 18px}
 @media(max-width:650px){#cx-weakness-checkboxes{grid-template-columns:repeat(2,minmax(0,1fr))}}

@@ -748,11 +748,25 @@
     clickNext();
   }
 
+  let animGuardTimer = null;
+  function triggerAccordionAnimationGuard(duration = 380) {
+    window.ConnectifyIsAccordionAnimating = true;
+    clearTimeout(animGuardTimer);
+    animGuardTimer = setTimeout(() => {
+      window.ConnectifyIsAccordionAnimating = false;
+    }, duration);
+  }
+  window.ConnectifyTriggerAccordionAnimationGuard = triggerAccordionAnimationGuard;
+
   // Listen for user clicks on subject accordion headers to update results cache immediately upon expansion
   document.addEventListener('click', e => {
-    if (isBulkExpanding) return;
     const heading = e.target.closest('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading');
     if (!heading) return;
+
+    // Immediately trigger global animation guard so all background observers stay completely silent
+    triggerAccordionAnimationGuard(380);
+
+    if (isBulkExpanding) return;
     const card = heading.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
     if (!card) return;
 
@@ -769,12 +783,12 @@
       if (card.querySelector('.cvr-c-tasks .cvr-c-task') || /hide details/i.test(heading.textContent)) {
         notifyResultsUpdated(card);
       }
-    }, 220);
+    }, 320);
   }, true);
 
   // Observe DOM additions inside subject tiles when expanded
   const expandMutationObserver = new MutationObserver(mutations => {
-    if (isBulkExpanding) return;
+    if (isBulkExpanding || window.ConnectifyIsAccordionAnimating) return;
     let expandedCard = null;
     for (const m of mutations) {
       if (m.addedNodes.length > 0) {

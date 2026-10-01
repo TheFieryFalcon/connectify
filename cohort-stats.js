@@ -335,6 +335,7 @@
   }
 
   const observer = new MutationObserver(records => {
+    if (window.ConnectifyIsAccordionAnimating) return;
     let shouldRun = false;
     for (const r of records) {
       if (
@@ -349,9 +350,8 @@
         continue;
       }
       if (
-        r.type === 'attributes' &&
-        (r.target.matches?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .eds-c-accordion, .cvr-c-accordion') ||
-         r.target.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel'))
+        r.target.matches?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .eds-c-accordion, .cvr-c-accordion') ||
+        r.target.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel')
       ) {
         continue;
       }

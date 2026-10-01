@@ -128,21 +128,43 @@
     }
   });
 
+  let syncRaf = null;
+  function debouncedSync() {
+    if (syncRaf) cancelAnimationFrame(syncRaf);
+    syncRaf = requestAnimationFrame(() => {
+      syncRaf = null;
+      syncAllCharts();
+    });
+  }
+
   // Watch for dynamic Highcharts chart creation in Connect
   const observer = new MutationObserver(records => {
+    if (window.ConnectifyIsAccordionAnimating) return;
     let shouldSync = false;
     for (const record of records) {
       if (
         record.attributeName === 'data-highcharts-chart' ||
-        record.target.hasAttribute?.('data-highcharts-chart') ||
-        record.addedNodes.length > 0
+        record.target.hasAttribute?.('data-highcharts-chart')
       ) {
         shouldSync = true;
         break;
       }
+      for (let i = 0; i < record.addedNodes.length; i++) {
+        const node = record.addedNodes[i];
+        if (node.nodeType === 1 && (
+          node.hasAttribute?.('data-highcharts-chart') ||
+          node.classList?.contains('highcharts-container') ||
+          node.classList?.contains('cvr-c-task__chart') ||
+          node.querySelector?.('[data-highcharts-chart], .highcharts-container, .cvr-c-task__chart')
+        )) {
+          shouldSync = true;
+          break;
+        }
+      }
+      if (shouldSync) break;
     }
     if (shouldSync) {
-      syncAllCharts();
+      debouncedSync();
     }
   });
 
@@ -157,5 +179,8 @@
   document.documentElement.dataset.connectifyMainBridge = 'ready';
 
   syncAllCharts();
-  setInterval(syncAllCharts, 2000);
+  setInterval(() => {
+    if (window.ConnectifyIsAccordionAnimating) return;
+    syncAllCharts();
+  }, 2500);
 })();

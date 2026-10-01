@@ -505,6 +505,86 @@ html.connectea-dark {
   color: #e2e8f0 !important;
 }
 
+/* Generic Tile Bodies, Inner Containers, Nav Lists & Resource Rows (Connect Help, Resources) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card,
+  .mat-card,
+  .cvr-c-dashboard-card
+) :is(
+  .eds-c-tile__body,
+  .cvr-c-tile__body,
+  .eds-c-tile__content,
+  .cvr-c-tile__content,
+  .eds-c-card__body,
+  .cvr-c-card__body,
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .eds-c-nav-list__link,
+  .eds-c-list,
+  .eds-c-list__item,
+  .eds-c-tile-list,
+  .eds-c-tile-list__item,
+  .cvr-c-resource,
+  .cvr-c-resource-item,
+  .cvr-c-resource-card,
+  .eds-c-resource,
+  .cvr-c-notice,
+  .cvr-c-notice-card,
+  .cvr-c-feed-item
+) {
+  background-color: #1e2632 !important;
+  border-color: #2e3c4e !important;
+  color: #e2e8f0 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .eds-c-nav-list__link,
+  .cvr-c-resource,
+  .cvr-c-resource-item,
+  .eds-c-resource
+) {
+  background-color: #1e2632 !important;
+  border-color: #2e3c4e !important;
+  color: #e2e8f0 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list__item,
+  .eds-c-nav-list__link,
+  .eds-c-list__item,
+  .eds-c-tile-list__item,
+  .cvr-c-resource-item
+):hover {
+  background-color: #263344 !important;
+  color: #ffffff !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .cvr-c-resource,
+  .eds-c-resource
+) :is(a, span, p, div, label, strong) {
+  color: #e2e8f0 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .cvr-c-resource,
+  .eds-c-resource
+) :is(.eds-c-icon, svg, path, circle) {
+  color: #94a3b8 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
 /* --------------------------------------------------------------------------
    7. Compound Subject Progress Bars (Preserve category segment colors!)
    -------------------------------------------------------------------------- */
@@ -624,6 +704,11 @@ html.connectea-dark {
 .eds-c-accordion__panel,
 .cvr-c-accordion__panel {
   contain: layout style;
+}
+
+.eds-c-accordion__panel,
+.cvr-c-accordion__panel {
+  will-change: height, max-height;
 }
 
 /* --------------------------------------------------------------------------

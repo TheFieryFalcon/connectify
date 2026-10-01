@@ -194,11 +194,16 @@
   let updateTimer = null;
   function scheduleUpdate() {
     clearTimeout(updateTimer);
+    if (window.ConnectifyIsAccordionAnimating) {
+      updateTimer = setTimeout(scheduleUpdate, 200);
+      return;
+    }
     updateTimer = setTimeout(updateCompoundBars, 150);
   }
 
   window.addEventListener('connectify-task-type-changed', scheduleUpdate);
   window.addEventListener('connectify-settings-updated', scheduleUpdate);
+  window.addEventListener('connectify-results-updated', scheduleUpdate);
   window.addEventListener('storage', e => {
     if (e.key === 'connectea:task_type_overrides' || e.key?.startsWith('connectea:class_categories:')) {
       scheduleUpdate();
@@ -206,15 +211,24 @@
   });
 
   const observer = new MutationObserver(records => {
+    if (window.ConnectifyIsAccordionAnimating) return;
     let shouldRun = false;
     for (const r of records) {
       if (r.target?.classList?.contains('cx-compound-progress-container') || r.target?.closest?.('.cx-compound-progress-container')) {
         continue;
       }
-      if (r.addedNodes.length > 0 || r.removedNodes.length > 0) {
-        shouldRun = true;
-        break;
+      // Strictly ignore task row additions/removals inside accordion panels
+      if (r.target?.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .eds-c-accordion, .cvr-c-accordion')) {
+        continue;
       }
+      for (let i = 0; i < r.addedNodes.length; i++) {
+        const node = r.addedNodes[i];
+        if (node.nodeType === 1 && (node.matches?.('.eds-c-tile, .cvr-c-tile') || node.querySelector?.('.eds-c-tile, .cvr-c-tile'))) {
+          shouldRun = true;
+          break;
+        }
+      }
+      if (shouldRun) break;
     }
     if (shouldRun) scheduleUpdate();
   });
@@ -228,9 +242,10 @@
   }
 
   setInterval(() => {
+    if (window.ConnectifyIsAccordionAnimating) return;
     if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
     updateCompoundBars();
-  }, 1500);
+  }, 2500);
   updateCompoundBars();
 
   window.ConnectifyCompoundProgress = {

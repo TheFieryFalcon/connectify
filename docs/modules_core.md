@@ -14,7 +14,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `syncChartData(host)`: Extracts 5-number boxplot quantiles (`[min, q1, median, q3, max]`) and sample size `n` from `Highcharts.charts[chartIndex]`.
   - Serializes data onto `host.dataset.connectifyStats` and `host.dataset.connectifyN`.
   - Listens for `'connectify-render-radar'` and `'connectify-destroy-radar'` custom events.
-- **DOM Bindings**: `document.documentElement.dataset.connectifyMainBridge = 'ready'`.
+- **DOM Bindings**: `document.documentElement.dataset.connectifyMainBridge = 'ready'`. Debounces `syncAllCharts` via `requestAnimationFrame` and filters chart node additions.
 
 #### [`assessment-data.js`](file:///Users/uwong/Downloads/2.1.14_0/assessment-data.js) (585 lines)
 - **Role**: Scrapes assessment task rows, scores, weights, dates, order hints from Connect DOM cards (`.eds-c-tile`), and manages persistent stats and subsystem cache invalidations.
@@ -24,7 +24,8 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `getSubjectTasks(subject)`: Returns cached tasks even when outline accordion is collapsed.
   - `cohortMean(row)`: Extracts cohort mean from `dataset.connectifyStats` or `Highcharts` instance with fallback to 5-number weighted mean.
   - `orderHint(text)`: Converts Term/Week strings into chronological numeric sequences.
-  - `expandAll(expand)`: Staggered accordion expander across animation frames. Shows `#cx-expand-progress` progress pill on first expand and pre-caches chronological predictions across all tasks.
+  - `triggerAccordionAnimationGuard(duration)`: Sets `window.ConnectifyIsAccordionAnimating` during accordion transitions, muting background observers.
+  - `expandAll(expand)`: Staggered accordion expander across animation frames. Shows `#cx-expand-progress` progress pill on bulk expand and pre-caches chronological predictions across all tasks.
   - `ConnectifyCache`: Subsystem cache manager (`VERSIONS`, `KEYS`, `clearPredictorCache`, `clearResultsCache`, `clearSettingsCache`, `clearCohortCache`, `checkAndInvalidateAll`).
 - **Export**: `window.ConnectifyData`, `window.ConnectifyCache`.
 
