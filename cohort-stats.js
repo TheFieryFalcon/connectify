@@ -314,7 +314,7 @@
         queued = false;
         pass();
       });
-    }, 120);
+    }, 250);
   }
 
   const observer = new MutationObserver(records => {

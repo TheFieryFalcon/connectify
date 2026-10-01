@@ -115,6 +115,80 @@
       });
     }
 
+    // Ingest grade cache (e.g. connectify:grade_cache:current and connectify:grade_cache:<studentId>)
+    try {
+      const studentId = new URL(location.href).searchParams.get('coisp') || 'current';
+      const cacheKeys = [
+        'connectify:grade_cache:current',
+        `connectify:grade_cache:${studentId}`
+      ];
+      for (const k of cacheKeys) {
+        const raw = localStorage.getItem(k);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') continue;
+
+        for (const [subjName, entry] of Object.entries(parsed)) {
+          if (!entry || typeof entry !== 'object') continue;
+          if (atarOnly && !isAtarCourse(subjName)) continue;
+
+          const semNumber = Number(entry.semester) === 1 ? 1 : 2;
+          const semIdx = semNumber - 1;
+          const cleanName = normalize(
+            subjName
+              .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
+              .replace(/\bATAR\b/gi, '')
+              .replace(/\bYear\s*\d+\b/gi, '')
+          );
+          const id = cleanName.toLowerCase();
+
+          if (seen[semIdx].has(id)) {
+            // Complement mark if DOM record lacked one
+            const existing = result[semIdx].find(r => r.id === id);
+            if (existing && existing.mark === undefined && Number.isFinite(entry.mark)) {
+              existing.mark = entry.mark;
+            }
+            continue;
+          }
+
+          seen[semIdx].add(id);
+
+          const markVal = Number.isFinite(entry.mark) ? entry.mark : undefined;
+          let tasks = [];
+          if (window.ConnectifyData?.getSubjectTasks) {
+            const cachedTasks = window.ConnectifyData.getSubjectTasks(subjName) || window.ConnectifyData.getSubjectTasks(cleanName);
+            if (cachedTasks && cachedTasks.length > 0) {
+              tasks = cachedTasks
+                .filter(t => t && t.name && (t.weight > 0 || !/^Assessment\s+\d+$/i.test(t.name)))
+                .map(t => {
+                  const isPending = Boolean(t.pending || t.score === null || t.score === undefined);
+                  const scorePct = isPending ? undefined : Number(t.score);
+                  const weightVal = Number(t.weight) || 0;
+                  const earnedWeight = (!isPending && Number.isFinite(scorePct)) ? (scorePct / 100) * weightVal : 0;
+                  return {
+                    name: t.name,
+                    weight: weightVal,
+                    pending: isPending,
+                    score: scorePct,
+                    earned: earnedWeight
+                  };
+                });
+            }
+          }
+
+          result[semIdx].push({
+            id,
+            name: cleanName,
+            mark: markVal,
+            finalLetter: false,
+            progress: taskProgress(tasks, markVal, semNumber)
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Connectify failed to ingest grade cache into courses:', e);
+    }
+
     return result;
   }
 

@@ -317,15 +317,15 @@
 
     // 5. Middle Prediction (Expected Momentum):
     // High scores have an outsized upward leverage on arithmetic averages.
-    // When variance is present, taper the elevated average above 75% to account for regression
-    // to typical performance on upcoming high-stakes tasks:
+    // When variance is present, apply a gentle regression adjustment above 82% to protect student momentum
+    // while accounting for regression to typical performance on upcoming high-stakes tasks:
     let sigma = historical.spread || 6.5;
     if (historical.subjectSpreads && Number.isFinite(historical.subjectSpreads[cleanSubj])) {
       sigma = historical.subjectSpreads[cleanSubj];
     }
     const varianceDampener = Math.min(1.0, Math.max(0, (sigma - 1.0) / 4.0));
-    const highScoreElevation = Math.max(0, subjectAvg - 75);
-    const effectiveSubjectAvg = subjectAvg - (highScoreElevation * 0.35 * varianceDampener);
+    const highScoreElevation = Math.max(0, subjectAvg - 82);
+    const effectiveSubjectAvg = subjectAvg - (highScoreElevation * 0.10 * varianceDampener);
 
     // Blend subject ability with half of type bias, passed through logarithmic ceiling:
     const rawMid = applyLogarithmicCeiling(effectiveSubjectAvg, 0.5 * typeModifier);
@@ -357,7 +357,7 @@
   }
 
   // --- PREDICTION PERSISTENCE & CACHING ---
-  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v7_20261001_pred';
+  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v8_20261001_pred';
   const PREDICTOR_CACHE_VERSION_KEY = window.ConnectifyCache?.KEYS?.PREDICTOR || 'connectify:cache_version:predictor';
   const LEGACY_PREDICTION_VERSION_KEY = 'connectify:prediction_version';
 
@@ -488,15 +488,21 @@
       };
     }
 
-    // 2. Check for numeric school week (e.g. 17 for Term 2 Week 7)
+    // 2. Check for numeric school week (e.g. 17 for Term 2 Week 5, matching Progress Graph schedule)
     const num = Number(str.replace(/^[^\d]*/, '').replace(/[^\d]*$/, ''));
     if (Number.isFinite(num) && num > 0) {
-      const term = Math.floor((num - 1) / 10) + 1;
-      const week = ((num - 1) % 10) + 1;
+      if (window.ConnectifyProgressMath?.formatTimestamp) {
+        return {
+          order: num,
+          display: window.ConnectifyProgressMath.formatTimestamp(num)
+        };
+      }
+      const term = Math.floor((num - 1) / 12) + 1;
+      const week = Math.floor((num - 1) % 12) + 1;
       return {
         term,
         week,
-        order: (term - 1) * 12 + week,
+        order: num,
         display: `Term ${term}, Week ${week}`
       };
     }
@@ -514,12 +520,13 @@
       return Boolean(formatted);
     }
     if (task.customDate) return true;
+    if (Number.isFinite(task.order) && task.order > 0) return true;
 
     const text = task.caption || '';
     if (!text) return false;
     if (/term\s*\d.*?week[s]?\s*\d+/i.test(text)) return true;
     if (/weeks?\s*\d+(?:\s*(?:&|and|[\/–-])\s*\d+)?\s*[,;]?\s*term\s*\d/i.test(text)) return true;
-    if (/^week[s]?\s*(\d{1,2})(?:\s*[\/–-]\s*\d{1,2})?$/i.test(text.trim())) return true;
+    if (/^(?:week[s]?\s*)?(\d{1,2})(?:\s*[\/–-]\s*\d{1,2})?$/i.test(text.trim())) return true;
     if (/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/i.test(text)) return true;
     return false;
   }
@@ -914,6 +921,16 @@
           // If date cannot be parsed and no valid custom date set, do not predict in the predictor
           if (!hasParsableDate(t, subj.name)) {
             continue;
+          }
+
+          if (!Number.isFinite(t.order)) {
+            const parsed = formatCustomWeek(t.caption);
+            if (parsed && Number.isFinite(parsed.order)) {
+              t.order = parsed.order;
+            }
+          }
+          if (!t.dateDisplay && Number.isFinite(t.order) && window.ConnectifyProgressMath?.formatTimestamp) {
+            t.dateDisplay = window.ConnectifyProgressMath.formatTimestamp(t.order, t.caption);
           }
 
           seenUpcomingTaskNames.add(normName);

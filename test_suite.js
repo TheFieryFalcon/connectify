@@ -396,7 +396,7 @@ runTest('Hardcoded inline colors replaced with semantic classes in settings and 
 
 runTest('Brighter dark mode borders in theme.css and sidebar.css', () => {
   assert.ok(themeCss.includes('border: 1px solid #3d5066 !important'), 'eds-c-tile must use brighter border #3d5066');
-  assert.ok(themeCss.includes('border-top: 1px solid #475a75 !important'), 'accordion header must use brighter border #475a75');
+  assert.ok(themeCss.includes('.connectea-dark .eds-c-accordion__section-heading'), 'accordion header must be styled');
   assert.ok(themeCss.includes('border-bottom: 1px solid #36485e !important'), 'navigation & tasks must use brighter border #36485e');
   assert.ok(sidebarCss.includes('.connectea-dark .cx-pred-scenario-card--mid'), 'sidebar.css must style dark mode scenario mid');
 });
@@ -1953,8 +1953,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v7_20261001_pred'"), 'predictor-math.js must use v7_20261001_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v7_20261001_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v7_20261001_pred');
+  assert.ok(predMathCode.includes("'v8_20261001_pred'"), 'predictor-math.js must use v8_20261001_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v8_20261001_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v8_20261001_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -1979,21 +1979,113 @@ runTest('predictor-ui.js and atar-ui.js render user-prompted Expand All buttons'
   assert.ok(atarUiJs.includes('expandAllBtn.hidden'), 'atar-ui.js must manage expandAllBtn visibility in selectTab');
 });
 
-runTest('theme.css applies 16px accordion panel padding and sidebar.css enforces distinct Low/Mid/High predictor text colors', () => {
+runTest('theme.css normalizes accordion panels and sidebar.css enforces distinct Low/Mid/High predictor text colors', () => {
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
 
   assert.ok(
-    themeCss.includes('.eds-c-accordion__panel') &&
-    themeCss.includes('padding-left: 16px !important;') &&
-    themeCss.includes('padding-right: 16px !important;'),
-    'theme.css must apply 16px horizontal padding to accordion panels in dark mode'
+    themeCss.includes('.connectea-dark .eds-c-accordion__section-heading') &&
+    themeCss.includes('background-color: transparent !important;') &&
+    themeCss.includes('border: none !important;'),
+    'theme.css must make accordion section headings flat and transparent with no borders'
   );
 
   assert.ok(sidebarCss.includes('.connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) strong'), 'sidebar.css must style low pill numbers');
   assert.ok(sidebarCss.includes('.connectea-dark .cx-pred-pill--mid strong'), 'sidebar.css must style mid pill numbers');
   assert.ok(sidebarCss.includes('.connectea-dark .cx-pred-pill--high strong'), 'sidebar.css must style high pill numbers');
   assert.ok(sidebarCss.includes('#cbd5e1 !important') && sidebarCss.includes('#4ade80 !important'), 'sidebar.css must define #cbd5e1 for low and #4ade80 for high with !important');
+});
+
+runTest('Test 90: Accordion section heading is transparent with no borders and pseudo-element arrows/stripes removed', () => {
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+
+  assert.ok(!themeCss.includes('data-cx-details-arrow'), 'theme.css must not contain data-cx-details-arrow pseudo-elements');
+  assert.ok(!themeJs.includes('updateDetailArrows'), 'theme.js must not contain updateDetailArrows');
+  assert.ok(themeCss.includes('.eds-c-accordion__panel:before'), 'theme.css must target panel pseudo-element');
+  assert.ok(themeCss.includes('display: none !important;'), 'theme.css must hide accordion panel left vertical stripe');
+});
+
+runTest('Test 91: expandAll() displays progress bar on repeated expansions and paces click dispatch', () => {
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+
+  assert.ok(!assessJs.includes("!sessionStorage.getItem('connectify:first_expand_done')"), 'expandAll must not suppress progress bar on repeated calls');
+  assert.ok(assessJs.includes('setTimeout(clickNext, 65)'), 'expandAll must pace clicks with 65ms setTimeout to eliminate lag');
+  assert.ok(assessJs.includes('if (isBulkExpanding) return;'), 'assessment-data.js must guard click listeners during bulk expand');
+});
+
+runTest('Test 92: readCourses() ingests connectify:grade_cache data and populates subjects across semesters', () => {
+  const scraperJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-scraper.js'), 'utf8');
+  const atarMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8');
+
+  assert.ok(scraperJs.includes('connectify:grade_cache:current'), 'atar-scraper.js must read connectify:grade_cache:current');
+  assert.ok(atarMathJs.includes('mathematics methods') && atarMathJs.includes('philosophy and ethics'), 'atar-math.js isAtarCourse must recognize Methods and Philosophy');
+
+  // Test functional cache ingestion
+  const mockCache = {
+    'Chemistry': { mark: 83.5, semester: 2 },
+    'Literature': { mark: 59.6, semester: 2 },
+    'Mathematics Methods': { mark: 93.5, semester: 2 },
+    'Mathematics Specialist': { mark: 82.7, semester: 2 },
+    'Philosophy and Ethics': { mark: 77, semester: 2 },
+    'Physics': { mark: 87.7, semester: 2 }
+  };
+  localStorage.setItem('connectify:grade_cache:current', JSON.stringify(mockCache));
+
+  delete window.ConnectifyAtarScraper;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-scraper.js'), 'utf8'));
+  const atarScraper = window.ConnectifyAtarScraper;
+
+  const courses = atarScraper.readCourses(true);
+  assert.ok(courses[1].length >= 6, `readCourses(true) must ingest all 6 cached ATAR courses into Semester 2, got ${courses[1].length}`);
+  const names = courses[1].map(c => c.name.toLowerCase());
+  assert.ok(names.includes('chemistry'), 'Semester 2 must contain Chemistry');
+  assert.ok(names.includes('mathematics methods'), 'Semester 2 must contain Mathematics Methods');
+  assert.ok(names.includes('physics'), 'Semester 2 must contain Physics');
+  assert.ok(names.includes('literature'), 'Semester 2 must contain Literature');
+  assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
+});
+
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v8_20261001_pred', () => {
+  const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  assert.ok(predMathJs.includes('v8_20261001_pred'), 'predictor-math.js must bump version to v8_20261001_pred');
+
+  const historicalHigh = {
+    subjects: { 'Mathematics Methods': 93.5 },
+    subjectSpreads: { 'Mathematics Methods': 4.0 },
+    types: { 'Test': 93.5 },
+    typeCounts: { 'Test': 3 },
+    overallAverage: 90,
+    spread: 4.0
+  };
+  const pred = predMath.predictTask('Mathematics Methods', { name: 'Test 4' }, historicalHigh);
+  assert.ok(pred.mid >= 90, `Mid prediction (${pred.mid}%) for a 93.5% student must preserve momentum and stay >= 90%`);
+  assert.ok(pred.low <= 85, `Low prediction (${pred.low}%) must reflect downside spread`);
+});
+
+runTest('Test 94: Chemistry integer weeks parse as valid dates and format via Progress Graph formatTimestamp', () => {
+  const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  assert.ok(predMathJs.includes('ConnectifyProgressMath.formatTimestamp'), 'predictor-math.js must integrate Progress Graph formatTimestamp');
+
+  const chemTaskInt = { caption: '17', name: 'Research Validation 1' };
+  assert.ok(predMath.hasParsableDate(chemTaskInt, 'Chemistry'), 'Bare integer week 17 must be parsable');
+
+  delete window.ConnectifyProgressMath;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'progress-math.js'), 'utf8'));
+
+  const formatted = window.ConnectifyProgressMath.formatTimestamp(17);
+  assert.strictEqual(formatted, 'Term 2, Week 5', 'Week 17 must format to Term 2, Week 5');
+});
+
+runTest('Test 95: Accordion expand/collapse optimizations suppress layout thrashing and enforce CSS containment', () => {
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+
+  assert.ok(themeCss.includes('contain: layout style;'), 'theme.css must apply CSS layout containment to subject cards and accordion panels');
+  assert.ok(themeJs.includes('.eds-c-accordion'), 'theme.js MutationObserver must filter accordion mutations to eliminate getComputedStyle thrashing');
+  assert.ok(assessJs.includes('show details'), 'assessment-data.js click listener must skip notify updates when collapsing accordion');
 });
 
 console.log('\n================================================================');

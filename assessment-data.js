@@ -137,7 +137,7 @@
 
   // --- SUBSYSTEM CACHE INVALIDATION MANAGER ---
   const CACHE_VERSIONS = {
-    PREDICTOR: 'v7_20261001_pred',
+    PREDICTOR: 'v8_20261001_pred',
     RESULTS: 'v6_20261001_results',
     SETTINGS: 'v4_20261001_settings',
     COHORT: 'v5_20261001_cohort'
@@ -505,6 +505,15 @@
       let subjects = null;
       if (card) {
         scrapeSubjectTasks(card);
+        const cardTitle = normalize(
+          card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent ||
+          card.getAttribute('data-subject-title') ||
+          card.getAttribute('aria-label') ||
+          ''
+        ).replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+        if (cardTitle && subjectsCache.has(cardTitle)) {
+          subjects = [{ name: cardTitle, tasks: Array.from(subjectsCache.get(cardTitle).values()) }];
+        }
       } else {
         subjects = collect(true);
       }
@@ -517,24 +526,28 @@
         } catch (e) {}
       }
 
-      if (window.ConnectifyCompoundProgress?.update) {
-        window.ConnectifyCompoundProgress.update();
-      }
-      if (window.ConnectifyWeakness?.renderChart) {
-        window.ConnectifyWeakness.renderChart();
-      }
       if (window.ConnectifyCohort?.schedule) {
         window.ConnectifyCohort.schedule();
+      }
+
+      // Only run visual updates on open/active tool views to prevent layout thrashing
+      const weaknessOpen = !document.getElementById('connectea-radar')?.hidden;
+      if (weaknessOpen && window.ConnectifyWeakness?.renderChart) {
+        window.ConnectifyWeakness.renderChart();
+      }
+      const progressOpen = !document.getElementById('connectea-progress')?.hidden;
+      if (progressOpen && window.ConnectifyProgress?.update) {
+        window.ConnectifyProgress.update();
+      }
+      if (window.ConnectifyCompoundProgress?.update) {
+        window.ConnectifyCompoundProgress.update();
       }
       if (window.ConnectifyAtar?.refreshData) {
         window.ConnectifyAtar.refreshData();
       }
-      if (window.ConnectifyProgress?.update) {
-        window.ConnectifyProgress.update();
-      }
 
       window.dispatchEvent(new CustomEvent('connectify-results-updated', { detail: { card } }));
-    }, 180);
+    }, 250);
   }
 
   /**
@@ -620,13 +633,12 @@
     let index = 0;
     const total = headings.length;
 
-    // Progress bar initialization for the first expand all
+    // Progress bar initialization for expanding outlines
     let progressPill = null;
     let progressBar = null;
     let progressText = null;
-    const isFirstExpand = expand && !sessionStorage.getItem('connectify:first_expand_done');
 
-    if (isFirstExpand) {
+    if (expand) {
       progressPill = document.getElementById('cx-expand-progress');
       if (!progressPill) {
         progressPill = document.createElement('div');
@@ -641,6 +653,7 @@
       }
       progressBar = progressPill.querySelector('.cx-expand-bar');
       progressText = progressPill.querySelector('.cx-expand-label');
+      updateProgress(0, 'Expanding outlines... 0%');
     }
 
     function updateProgress(pct, msg) {
@@ -651,7 +664,6 @@
 
     function finishProgress() {
       if (!progressPill) return;
-      sessionStorage.setItem('connectify:first_expand_done', 'true');
       updateProgress(100, '✓ Outlines expanded & predictions cached');
       setTimeout(() => {
         if (progressPill) {
@@ -686,7 +698,7 @@
 
       const heading = headings[index++];
       const pct = Math.round((index / total) * (expand ? 85 : 100));
-      if (isFirstExpand) {
+      if (progressPill) {
         updateProgress(pct, `Expanding outlines... ${index}/${total} (${pct}%)`);
       }
 
@@ -701,7 +713,7 @@
           clickedAny = true;
         }
       }
-      requestAnimationFrame(clickNext);
+      setTimeout(clickNext, 65);
     }
 
     clickNext();
@@ -709,12 +721,15 @@
 
   // Listen for user clicks on subject accordion headers to update results cache immediately upon expansion
   document.addEventListener('click', e => {
+    if (isBulkExpanding) return;
     const heading = e.target.closest('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading');
     if (!heading) return;
     const card = heading.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
     if (!card) return;
 
     setTimeout(() => {
+      // If heading now indicates collapsed state (or was collapsed), skip heavy whole-page updates
+      if (/show details/i.test(heading.textContent)) return;
       if (card.querySelector('.cvr-c-tasks .cvr-c-task') || /hide details/i.test(heading.textContent)) {
         notifyResultsUpdated(card);
       }

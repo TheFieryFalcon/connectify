@@ -111,19 +111,6 @@
     toggleButton.style.right = `${headerRightInset ?? 90}px`;
   }
 
-  function updateDetailArrows() {
-    for (const heading of document.querySelectorAll('.eds-c-tile .eds-c-accordion__section-heading')) {
-      const text = heading.textContent.replace(/\s+/g, ' ').trim();
-      const arrow = /hide details/i.test(text) ? '▴' : /show details/i.test(text) ? '▾' : null;
-
-      if (arrow && heading.getAttribute('data-cx-details-arrow') !== arrow) {
-        heading.setAttribute('data-cx-details-arrow', arrow);
-      } else if (!arrow && heading.hasAttribute('data-cx-details-arrow')) {
-        heading.removeAttribute('data-cx-details-arrow');
-      }
-    }
-  }
-
   function parseRgb(value, allowTranslucent = false) {
     if (!value) return null;
     const match = value.match(/^rgba?\(([^)]+)\)/);
@@ -196,9 +183,8 @@
     toggleButton.setAttribute('aria-pressed', String(isDarkMode));
 
     updateTogglePosition();
-    updateDetailArrows();
     if (isDarkMode) {
-      adaptSurfaces();
+      scheduleAdaptSurfaces();
     }
   }
 
@@ -221,7 +207,15 @@
     applyTheme(nextDark);
   };
 
-  // Re-attach toggle button, adapt surfaces, and update arrows across client-side SPA route navigations
+  let adaptTimer = null;
+  function scheduleAdaptSurfaces() {
+    clearTimeout(adaptTimer);
+    adaptTimer = setTimeout(() => {
+      if (isDarkMode) adaptSurfaces();
+    }, 400);
+  }
+
+  // Re-attach toggle button and adapt surfaces across client-side SPA route navigations
   let syncScheduled = false;
   const debouncedSync = () => {
     if (syncScheduled) return;
@@ -235,9 +229,8 @@
       } else {
         updateTogglePosition();
       }
-      updateDetailArrows();
       if (isDarkMode) {
-        adaptSurfaces();
+        scheduleAdaptSurfaces();
       }
     });
   };
@@ -248,6 +241,9 @@
         return false;
       }
       if (record.type === 'attributes' && (record.attributeName === 'data-connectea-surface' || record.attributeName === 'data-connectea-ink')) {
+        return false;
+      }
+      if (record.target?.closest?.('.eds-c-tile, .cvr-c-tile, .eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectea-panel')) {
         return false;
       }
       return true;
@@ -269,7 +265,6 @@
 
   // Initial mount with fast polling during initial SPA render
   updateTogglePosition();
-  updateDetailArrows();
   if (isDarkMode) adaptSurfaces();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
@@ -277,7 +272,6 @@
         document.body.classList.toggle('connectea-dark', isDarkMode);
       }
       updateTogglePosition(true);
-      updateDetailArrows();
       if (isDarkMode) adaptSurfaces();
     });
   }

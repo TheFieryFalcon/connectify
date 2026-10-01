@@ -607,42 +607,24 @@ html.connectea-dark {
    10. Accordion Section Header ("Hide Details" / "Show Details")
    -------------------------------------------------------------------------- */
 .connectea-dark .eds-c-accordion__section-heading {
-  background-color: #222b39 !important;
-  border-top: 1px solid #475a75 !important;
-  border-bottom: 1px solid #475a75 !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
   color: #cbd5e1 !important;
-  transition: background-color 0.15s ease;
+  transition: color 0.15s ease;
 }
 
 .connectea-dark .eds-c-accordion__section-heading:hover {
-  background-color: #293445 !important;
+  background-color: transparent !important;
   color: #f1f5f9 !important;
 }
 
-.connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow] {
-  position: relative !important;
-}
-
-.connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow]::after {
-  content: attr(data-cx-details-arrow) !important;
-  position: absolute !important;
-  inset: 0 0 0 auto !important;
-  width: 56px !important;
-  height: auto !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
-  background: #2d3c4e !important;
-  color: #ffffff !important;
-  border-left: 1px solid #475a75 !important;
-  font: 700 24px/1 system-ui, sans-serif !important;
-  opacity: 1 !important;
-  pointer-events: none !important;
-}
-
-.connectea-dark .eds-c-tile .eds-c-accordion__section-heading[data-cx-details-arrow]:hover::after {
-  background: #374a5f !important;
+/* CSS Containment for Smooth Accordion Expansion & Layout Isolation */
+.eds-c-tile,
+.cvr-c-tile,
+.eds-c-accordion__panel {
+  contain: layout style;
 }
 
 /* --------------------------------------------------------------------------
@@ -652,9 +634,6 @@ html.connectea-dark {
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group) {
   background-color: transparent !important;
-  border-top: 1px solid #2e3c4e !important;
-  border-bottom: 1px solid #2e3c4e !important;
-  border-color: #2e3c4e !important;
   color: #e2e8f0 !important;
 }
 
@@ -668,15 +647,13 @@ html.connectea-dark {
   .cvr-c-accordion__panel,
   .eds-c-accordion__section-body
 ) {
-  border-bottom: 1px solid #2e3c4e !important;
-  border-color: #2e3c4e !important;
-  padding-left: 16px !important;
-  padding-right: 16px !important;
+  border-bottom: none !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-accordion__panel:before,
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr .eds-c-accordion__panel:before {
-  background-color: #2e3c4e !important;
+  display: none !important;
+  content: none !important;
 }
 
 .connectea-dark .cvr-c-task__details {
@@ -2069,10 +2046,7 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
    20. Universal Border Restoration & Structural Integrity
    -------------------------------------------------------------------------- */
 .connectea-dark :is(
-  .cvr-c-task,
-  .cvr-c-task-group,
   .cvr-c-task__mark,
-  .eds-c-accordion__section-heading,
   .mat-card,
   .eds-c-tile,
   .mat-expansion-panel,

@@ -227,8 +227,19 @@
     estimateScaledScore,
     calculateShiftedScaledScore,
     normalizeSubject,
-    normalize,
-    isAtarCourse: title => /\bATAR\b/i.test(title) && !/\bGeneral\b|\bmathematics essentials?\b/i.test(title),
+    isAtarCourse: title => {
+      if (/\bGeneral\b|\bmathematics essentials?\b|\bFoundation\b/i.test(title)) return false;
+      if (/\bATAR\b/i.test(title)) return true;
+      const clean = String(title || '').toLowerCase().replace(/\b(year\s*\d+|semester\s*[12]|sem\s*[12])\b/gi, '').trim();
+      const knownAtar = [
+        'chemistry', 'physics', 'biology', 'human biology',
+        'mathematics methods', 'mathematics specialist', 'mathematics applications',
+        'literature', 'english', 'philosophy and ethics', 'philosophy', 'ethics',
+        'economics', 'accounting and finance', 'accounting',
+        'modern history', 'ancient history', 'politics and law', 'psychology', 'geography'
+      ];
+      return knownAtar.some(sub => clean.includes(sub));
+    },
     bonusType
   });
 })();
