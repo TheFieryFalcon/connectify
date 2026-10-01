@@ -2592,6 +2592,106 @@ runTest('Test 109: Text bolding parity across light and dark modes for Test head
   assert.ok(sidebarCss.includes(':is(.cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__mark-score'), 'sidebar.css must bold task mark scores');
 });
 
+runTest('Test 110: Silent difference check, out-of-date cache prompt with one-time auto-expand, and chart 0 / non-configurable row stability', () => {
+  const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'data.js'), 'utf8');
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const atarFeatJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-features.js'), 'utf8');
+
+  delete window.ConnectifyData;
+  window.__connectifyDataInitialized = false;
+  eval(assessJs);
+
+  window.__connectifyAtarFeaturesInitialized = false;
+  eval(atarFeatJs);
+
+  // 1. Chart 0 destruction prevention in data.js
+  assert.ok(dataJs.includes("attr !== null && attr !== ''"), 'data.js must verify chart attribute is not null or empty before converting to Number');
+  assert.ok(dataJs.includes('const attr = chartEl.getAttribute'), 'data.js must getAttribute data-highcharts-chart');
+
+  // 2. Non-configurable property "row" fix via setTaskRow
+  assert.ok(assessJs.includes('function setTaskRow(task, rowEl)'), 'assessment-data.js must define setTaskRow');
+  assert.ok(assessJs.includes('configurable: true'), 'setTaskRow must configure property with configurable: true');
+  assert.ok(assessJs.includes('writable: true'), 'setTaskRow must configure property with writable: true');
+  assert.ok(assessJs.includes('enumerable: false'), 'setTaskRow must configure property with enumerable: false');
+
+  const testTask = { id: 'test-1', name: 'Task 1' };
+  const mockRow1 = document.createElement('div');
+  const mockRow2 = document.createElement('div');
+  window.ConnectifyData.setTaskStats = window.ConnectifyData.setTaskStats || (() => {});
+  // Calling setTaskRow multiple times on same object must succeed without throwing
+  let defineError = null;
+  try {
+    Object.defineProperty(testTask, 'row', { value: mockRow1, writable: true, configurable: true, enumerable: false });
+    Object.defineProperty(testTask, 'row', { value: mockRow2, writable: true, configurable: true, enumerable: false });
+  } catch (err) {
+    defineError = err;
+  }
+  assert.strictEqual(defineError, null, 'setTaskRow property definition must be re-configurable without throwing TypeError');
+  assert.strictEqual(testTask.row, mockRow2, 'Task row must be updated to new row element');
+
+  // 3. collect() stops scrape when valid cache exists
+  assert.ok(assessJs.includes('if (!forceRefresh && hasCachedSubjects())'), 'collect must check hasCachedSubjects and exit early if !forceRefresh');
+  assert.ok(assessJs.includes('function hasCachedSubjects()'), 'assessment-data.js must define hasCachedSubjects');
+  assert.ok(assessJs.includes('parseCardSubjectTasks'), 'assessment-data.js must separate card task parsing into parseCardSubjectTasks');
+
+  // 4. Silent background difference detection and popup notification
+  assert.ok(assessJs.includes('checkSilentDifferences'), 'assessment-data.js must define checkSilentDifferences');
+  assert.ok(assessJs.includes('promptCacheOutOfDate'), 'assessment-data.js must define promptCacheOutOfDate');
+  assert.ok(assessJs.includes('scheduleSilentDifferenceCheck'), 'assessment-data.js must define scheduleSilentDifferenceCheck');
+  assert.ok(assessJs.includes('Assessment Cache Out of Date'), 'promptCacheOutOfDate must notify that cache is out of date');
+  assert.ok(assessJs.includes('Refresh with New Cache'), 'promptCacheOutOfDate must provide Refresh with New Cache action button');
+  assert.ok(assessJs.includes("sessionStorage.setItem('connectify:one_time_auto_expand', 'true')"), 'Refresh with New Cache must set connectify:one_time_auto_expand');
+
+  // Verify notification emission when difference is detected
+  let shownNotification = null;
+  window.ConnectifyNotifications = {
+    show: opts => {
+      shownNotification = opts;
+      return { id: opts.id, close: () => {} };
+    }
+  };
+
+  const dummyUpdatedCache = new Map();
+  dummyUpdatedCache.set('Math', new Map([['task1', { id: 'task1', name: 'Test 1', score: 95 }]]));
+  window.ConnectifyData.promptCacheOutOfDate(dummyUpdatedCache);
+  assert.ok(shownNotification, 'promptCacheOutOfDate must call ConnectifyNotifications.show');
+  assert.strictEqual(shownNotification.title, 'Assessment Cache Out of Date', 'Notification title must match');
+  const refreshAction = shownNotification.actions?.find(a => a.text === 'Refresh with New Cache');
+  assert.ok(refreshAction, 'Notification must contain Refresh with New Cache action');
+
+  // Simulate clicking Refresh with New Cache
+  let reloadCalled = false;
+  const originalReload = window.location.reload;
+  window.location.reload = () => { reloadCalled = true; };
+  try {
+    refreshAction.onClick({ close: () => {} });
+    assert.strictEqual(sessionStorage.getItem('connectify:one_time_auto_expand'), 'true', 'Clicking refresh must set connectify:one_time_auto_expand');
+    assert.strictEqual(reloadCalled, true, 'Clicking refresh must trigger window.location.reload()');
+  } finally {
+    window.location.reload = originalReload;
+  }
+
+  // 5. One-time auto expand consumption in atar-features.js
+  assert.ok(atarFeatJs.includes("sessionStorage.getItem('connectify:one_time_auto_expand')"), 'atar-features.js must inspect connectify:one_time_auto_expand');
+  assert.ok(atarFeatJs.includes("sessionStorage.removeItem('connectify:one_time_auto_expand')"), 'atar-features.js must consume and remove connectify:one_time_auto_expand');
+
+  // Test functional behavior of isAutoExpandEnabled
+  localStorage.setItem('connectify:auto_expand', 'false');
+  sessionStorage.removeItem('connectify:one_time_auto_expand');
+
+  assert.strictEqual(window.ConnectifyIsAutoExpandEnabled(), false, 'isAutoExpandEnabled must return false when auto_expand is false and no one-time flag exists');
+
+  // Set one-time flag
+  sessionStorage.setItem('connectify:one_time_auto_expand', 'true');
+  assert.strictEqual(window.ConnectifyIsAutoExpandEnabled(), true, 'isAutoExpandEnabled must return true ignoring auto_expand ONLY THIS ONCE');
+  assert.strictEqual(sessionStorage.getItem('connectify:one_time_auto_expand'), null, 'connectify:one_time_auto_expand must be removed from sessionStorage after being consumed');
+
+  // Second call must return false again
+  assert.strictEqual(window.ConnectifyIsAutoExpandEnabled(), false, 'Subsequent isAutoExpandEnabled calls must revert to user preference');
+
+  localStorage.removeItem('connectify:auto_expand');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

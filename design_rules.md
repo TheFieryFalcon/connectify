@@ -60,7 +60,7 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Strict Deduplication**: Purge redundant DOM elements on SPA transitions. Ensure all tool launchers and panels export standard `panelRefs` (`toggleBtn`, `panel`).
 
 ## 7. Panel Lifecycle & Backwards Compatibility
-- **No Unauthorized Auto-Expansion**: Panels and subject outlines are **not allowed to be automatically expanded without user involvement** (e.g. clicking a button such as "Expand All", "Expand Subject Outlines", or an individual subject accordion). The **sole exception** is initial expansion of all panels on page load if auto expand all is checked (`connectify:auto_expand`).
+- **No Unauthorized Auto-Expansion**: Panels and subject outlines are **not allowed to be automatically expanded without user involvement** (e.g. clicking a button such as "Expand All", "Expand Subject Outlines", or an individual subject accordion). The **sole exceptions** are initial expansion on page load if auto expand all is checked (`connectify:auto_expand`), or a one-time auto-expansion when user confirms a cache update (`connectify:one_time_auto_expand`).
 - **Settings Cache Backwards Compatibility**: Backwards compatibility must be maintained with cached data from previous versions. Stored user preferences, baselines, category configurations, and scaling calibrations must gracefully resolve legacy keys (`connectea:`, `cx-`, `connectify:`) without data loss.
 
 ## 8. Subsystem Cache Invalidation & Algorithm Versioning Standards

@@ -119,11 +119,14 @@
   document.addEventListener('connectify-destroy-radar', () => {
     const chartEl = document.getElementById('connectify-radar-chart');
     if (chartEl && window.Highcharts?.charts) {
-      const chartIndex = Number(chartEl.getAttribute('data-highcharts-chart'));
-      if (Number.isFinite(chartIndex) && window.Highcharts.charts[chartIndex]) {
-        try {
-          window.Highcharts.charts[chartIndex].destroy();
-        } catch (e) {}
+      const attr = chartEl.getAttribute('data-highcharts-chart');
+      if (attr !== null && attr !== '') {
+        const chartIndex = Number(attr);
+        if (Number.isFinite(chartIndex) && window.Highcharts.charts[chartIndex]) {
+          try {
+            window.Highcharts.charts[chartIndex].destroy();
+          } catch (e) {}
+        }
       }
     }
   });

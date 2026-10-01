@@ -176,7 +176,7 @@
         const toRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
-          if (k && k.startsWith('connectify:grade_cache:')) {
+          if (k && (k.startsWith('connectify:grade_cache:') || k.startsWith('connectify:subjects_cache'))) {
             toRemove.push(k);
           }
         }
@@ -283,6 +283,74 @@
   window.ConnectifyCache = ConnectifyCache;
   ConnectifyCache.checkAndInvalidateAll();
 
+  function getSubjectsCacheKey() {
+    return `connectify:subjects_cache:${getStudentId()}`;
+  }
+
+  function serializeSubjects(sourceMapOrArray) {
+    const out = {};
+    if (sourceMapOrArray instanceof Map) {
+      for (const [sName, tasksMap] of sourceMapOrArray.entries()) {
+        const list = tasksMap instanceof Map ? Array.from(tasksMap.values()) : (Array.isArray(tasksMap) ? tasksMap : []);
+        out[sName] = list.map(t => {
+          const copy = { ...t };
+          delete copy.row;
+          return copy;
+        });
+      }
+    } else if (Array.isArray(sourceMapOrArray)) {
+      for (const item of sourceMapOrArray) {
+        if (item && item.name) {
+          out[item.name] = (item.tasks || []).map(t => {
+            const copy = { ...t };
+            delete copy.row;
+            return copy;
+          });
+        }
+      }
+    }
+    return out;
+  }
+
+  function saveSubjectsCache(source) {
+    try {
+      const serialized = serializeSubjects(source || subjectsCache);
+      const json = JSON.stringify(serialized);
+      localStorage.setItem(getSubjectsCacheKey(), json);
+      localStorage.setItem('connectify:subjects_cache:current', json);
+    } catch (e) {
+      console.warn('Connectify failed to save subjects cache:', e);
+    }
+  }
+
+  function loadSubjectsCache() {
+    try {
+      const raw = localStorage.getItem(getSubjectsCacheKey()) || localStorage.getItem('connectify:subjects_cache:current');
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return false;
+
+      subjectsCache.clear();
+      for (const [subjName, tasksList] of Object.entries(parsed)) {
+        const tasksMap = new Map();
+        if (Array.isArray(tasksList)) {
+          for (const t of tasksList) {
+            if (t && t.id) tasksMap.set(t.id, t);
+          }
+        }
+        if (tasksMap.size > 0) {
+          subjectsCache.set(subjName, tasksMap);
+        }
+      }
+      return subjectsCache.size > 0;
+    } catch (e) {
+      console.warn('Connectify failed to load subjects cache:', e);
+      return false;
+    }
+  }
+
+  loadSubjectsCache();
+
   function parseSemester(card) {
     const title = normalize(
       card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent ||
@@ -294,32 +362,43 @@
     return match ? +match[1] : 1;
   }
 
+  function setTaskRow(task, rowEl) {
+    if (!task) return;
+    try {
+      Object.defineProperty(task, 'row', {
+        value: rowEl,
+        writable: true,
+        configurable: true,
+        enumerable: false
+      });
+    } catch {
+      task.row = rowEl;
+    }
+  }
+
   /**
-   * Scrapes tasks from a single subject card and updates subjectsCache.
+   * Parses tasks from a single subject card into records without modifying cache or DOM.
    */
-  function scrapeSubjectTasks(card) {
-    if (!card) return;
+  function parseCardSubjectTasks(card) {
+    if (!card) return null;
     const title = normalize(
       card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent ||
       card.getAttribute('data-subject-title') ||
       card.getAttribute('aria-label') ||
       ''
     );
-    if (!title) return;
+    if (!title) return null;
 
     const subjectName = title
       .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
       .replace(/\s*[-–—]\s*Sem\s*[12].*$/i, '')
       .trim();
-    if (!subjectName) return;
+    if (!subjectName) return null;
 
     const taskRows = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'));
-    if (taskRows.length === 0) return;
+    if (taskRows.length === 0) return null;
 
-    if (!subjectsCache.has(subjectName)) {
-      subjectsCache.set(subjectName, new Map());
-    }
-    const tasks = subjectsCache.get(subjectName);
+    const parsedTasks = [];
     const occurrences = new Map();
 
     for (const row of taskRows) {
@@ -394,31 +473,14 @@
         weight = null;
       }
 
-      const taskName = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${tasks.size + 1}`;
+      const taskName = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${parsedTasks.length + 1}`;
       const caption = correctedCaption(title, taskName, labels[1] || '');
-
-      // Deduplicate tasks repeated across Semester 1 and Semester 2 outlines:
-      const existingSameName = Array.from(tasks.values()).find(
-        t => normalize(t.name).toLowerCase() === normalize(taskName).toLowerCase()
-      );
-      if (existingSameName) {
-        // If already completed in Sem 1 and current is pending, ignore the unfinished Sem 2 clone
-        if (existingSameName.score !== null && !isCompleted) {
-          continue;
-        }
-        // If both are unfinished/pending, avoid duplicating the task in the list
-        if (existingSameName.pending && !isCompleted) {
-          Object.defineProperty(existingSameName, 'row', { value: row });
-          continue;
-        }
-      }
 
       const identityKey = JSON.stringify([labels, maxScore]);
       const occurrenceCount = occurrences.get(identityKey) || 0;
       occurrences.set(identityKey, occurrenceCount + 1);
 
       const id = `${identityKey}:${occurrenceCount}`;
-      const existingTask = tasks.get(id);
 
       const record = {
         id,
@@ -428,7 +490,7 @@
         pending: !isCompleted,
         weight,
         mean: cohortMean(row),
-        semester: Math.min(parseSemester(card), existingTask?.semester ?? 2),
+        semester: parseSemester(card),
         order: (() => {
            const customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
                                localStorage.getItem(`connectea:time_override:${title}:${taskName}`);
@@ -442,16 +504,14 @@
            }
            return orderHint(caption);
         })(),
-        sequence: existingTask?.sequence ?? tasks.size
+        sequence: parsedTasks.length
       };
 
-      // Extract and cache 5-number boxplot statistics if present on the row
       const chartHost = row.querySelector('[data-highcharts-chart], .cvr-c-task__chart');
       if (chartHost?.dataset?.connectifyStats) {
         try {
           const parsed = JSON.parse(chartHost.dataset.connectifyStats);
           if (Array.isArray(parsed) && parsed.length === 5) {
-            setTaskStats(subjectName, taskName, parsed, chartHost.dataset.connectifyN);
             record.stats = parsed;
           }
         } catch {}
@@ -461,26 +521,80 @@
         if (cached) record.stats = cached;
       }
 
-      Object.defineProperty(record, 'row', { value: row });
-      tasks.set(id, record);
+      setTaskRow(record, row);
+      parsedTasks.push(record);
     }
+
+    return { title, subjectName, tasks: parsedTasks };
   }
 
   /**
-   * Scrape all subject assessment cards currently present in the DOM.
-   * Caches results so data persists even when cards are collapsed by the user.
-   *
-   * @param {boolean} includePending - Whether to include pending/unmarked assessments
-   * @returns {Array<{name: string, tasks: Array<Object>}>} Array of subject records
+   * Scrapes tasks from a single subject card and updates subjectsCache.
    */
-  function collect(includePending = false) {
-    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card]'))
-      .sort((a, b) => parseSemester(a) - parseSemester(b));
+  function scrapeSubjectTasks(card, forceRefresh = false) {
+    if (!card) return;
+    const parsed = parseCardSubjectTasks(card);
+    if (!parsed) return;
+    const { title, subjectName, tasks: parsedTasks } = parsed;
 
-    for (const card of cards) {
-      scrapeSubjectTasks(card);
+    // Use the cache if there is a cache and just stop the scrape if a cache exists instead
+    if (!forceRefresh && subjectsCache.has(subjectName) && subjectsCache.get(subjectName).size > 0) {
+      return;
     }
 
+    if (!subjectsCache.has(subjectName)) {
+      subjectsCache.set(subjectName, new Map());
+    }
+    const tasks = subjectsCache.get(subjectName);
+
+    for (const record of parsedTasks) {
+      const taskName = record.name;
+      const isCompleted = !record.pending;
+
+      // Deduplicate tasks repeated across Semester 1 and Semester 2 outlines:
+      const existingSameName = Array.from(tasks.values()).find(
+        t => normalize(t.name).toLowerCase() === normalize(taskName).toLowerCase()
+      );
+      if (existingSameName) {
+        // If already completed in Sem 1 and current is pending, ignore the unfinished Sem 2 clone
+        if (existingSameName.score !== null && !isCompleted) {
+          continue;
+        }
+        // If both are unfinished/pending, avoid duplicating the task in the list
+        if (existingSameName.pending && !isCompleted) {
+          if (record.row) setTaskRow(existingSameName, record.row);
+          continue;
+        }
+      }
+
+      const existingTask = tasks.get(record.id);
+      if (existingTask) {
+        record.semester = Math.min(record.semester, existingTask.semester ?? 2);
+        record.sequence = existingTask.sequence ?? tasks.size;
+      }
+
+      if (record.stats && record.row) {
+        const chartHost = record.row.querySelector('[data-highcharts-chart], .cvr-c-task__chart');
+        if (chartHost?.dataset?.connectifyStats) {
+          setTaskStats(subjectName, taskName, record.stats, chartHost.dataset.connectifyN);
+        }
+      }
+
+      tasks.set(record.id, record);
+    }
+
+    saveSubjectsCache();
+  }
+
+  function hasCachedSubjects() {
+    if (subjectsCache.size === 0) return false;
+    for (const tasks of subjectsCache.values()) {
+      if (tasks && tasks.size > 0) return true;
+    }
+    return false;
+  }
+
+  function formatCollectedSubjects(includePending) {
     return Array.from(subjectsCache, ([name, tasks]) => ({
       name,
       tasks: Array.from(tasks.values())
@@ -496,6 +610,175 @@
   }
 
   /**
+   * Scrape all subject assessment cards currently present in the DOM.
+   * Caches results so data persists even when cards are collapsed by the user.
+   * Uses cache and stops DOM scraping if a valid cache exists.
+   *
+   * @param {boolean} includePending - Whether to include pending/unmarked assessments
+   * @param {boolean} forceRefresh - Whether to force re-scraping from the DOM
+   * @returns {Array<{name: string, tasks: Array<Object>}>} Array of subject records
+   */
+  function collect(includePending = false, forceRefresh = false) {
+    // Use the cache if there is a cache and just stop the scrape if a cache exists instead
+    if (!forceRefresh && hasCachedSubjects()) {
+      return formatCollectedSubjects(includePending);
+    }
+
+    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card]'))
+      .sort((a, b) => parseSemester(a) - parseSemester(b));
+
+    for (const card of cards) {
+      scrapeSubjectTasks(card, forceRefresh);
+    }
+
+    return formatCollectedSubjects(includePending);
+  }
+
+  let isPromptingCacheUpdate = false;
+  let silentCheckDebounce = null;
+
+  function scheduleSilentDifferenceCheck() {
+    if (isPromptingCacheUpdate) return;
+    clearTimeout(silentCheckDebounce);
+    silentCheckDebounce = setTimeout(() => {
+      checkSilentDifferences();
+    }, 250);
+  }
+
+  function promptCacheOutOfDate(updatedCacheMap) {
+    if (isPromptingCacheUpdate) return;
+    isPromptingCacheUpdate = true;
+
+    if (window.ConnectifyNotifications?.show) {
+      window.ConnectifyNotifications.show({
+        id: 'connectify-cache-out-of-date',
+        type: 'warning',
+        title: 'Assessment Cache Out of Date',
+        message: 'New or updated assessment results were detected. Would you like to refresh the page with the new cache?',
+        duration: 0,
+        dismissible: true,
+        onDismiss: () => {
+          isPromptingCacheUpdate = false;
+        },
+        actions: [
+          {
+            text: 'Refresh with New Cache',
+            type: 'primary',
+            onClick: ({ close }) => {
+              close();
+              try {
+                saveSubjectsCache(updatedCacheMap);
+                if (window.ConnectifyCache?.clearPredictorCache) {
+                  window.ConnectifyCache.clearPredictorCache();
+                }
+                sessionStorage.setItem('connectify:one_time_auto_expand', 'true');
+              } catch (e) {
+                console.warn('Failed saving cache before reload:', e);
+              }
+              window.location.reload();
+            }
+          },
+          {
+            text: 'Later',
+            type: 'secondary',
+            onClick: ({ close }) => {
+              close();
+              isPromptingCacheUpdate = false;
+            }
+          }
+        ]
+      });
+    }
+  }
+
+  function checkSilentDifferences() {
+    if (isPromptingCacheUpdate) return;
+    if (!hasCachedSubjects()) {
+      collect(true);
+      return;
+    }
+
+    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card]'));
+    let hasDifference = false;
+    const freshlyScrapedBySubject = new Map();
+
+    for (const card of cards) {
+      const parsed = parseCardSubjectTasks(card);
+      if (!parsed || parsed.tasks.length === 0) continue;
+      const { subjectName, tasks: scrapedTasks } = parsed;
+
+      if (!freshlyScrapedBySubject.has(subjectName)) {
+        freshlyScrapedBySubject.set(subjectName, []);
+      }
+      freshlyScrapedBySubject.get(subjectName).push(...scrapedTasks);
+
+      const cachedMap = subjectsCache.get(subjectName);
+      if (!cachedMap || cachedMap.size === 0) {
+        hasDifference = true;
+        continue;
+      }
+
+      for (const sTask of scrapedTasks) {
+        let matched = cachedMap.get(sTask.id);
+        if (!matched) {
+          matched = Array.from(cachedMap.values()).find(
+            t => normalize(t.name).toLowerCase() === normalize(sTask.name).toLowerCase()
+          );
+        }
+
+        if (!matched) {
+          hasDifference = true;
+          break;
+        }
+
+        if (Boolean(matched.pending) !== Boolean(sTask.pending)) {
+          hasDifference = true;
+          break;
+        }
+
+        if (sTask.score !== null || matched.score !== null) {
+          if (sTask.score === null || matched.score === null || Math.abs(sTask.score - matched.score) > 0.01) {
+            hasDifference = true;
+            break;
+          }
+        }
+
+        if (sTask.weight !== null || matched.weight !== null) {
+          if (sTask.weight === null || matched.weight === null || Math.abs(sTask.weight - matched.weight) > 0.01) {
+            hasDifference = true;
+            break;
+          }
+        }
+
+        if (sTask.mean !== null && matched.mean !== null) {
+          if (Math.abs(sTask.mean - matched.mean) > 0.05) {
+            hasDifference = true;
+            break;
+          }
+        }
+      }
+
+      if (hasDifference) break;
+    }
+
+    if (hasDifference && !isPromptingCacheUpdate) {
+      const updatedCacheMap = new Map();
+      for (const [sName, tasksMap] of subjectsCache.entries()) {
+        updatedCacheMap.set(sName, new Map(tasksMap));
+      }
+      for (const [sName, sTasks] of freshlyScrapedBySubject.entries()) {
+        const targetMap = updatedCacheMap.get(sName) || new Map();
+        for (const st of sTasks) {
+          targetMap.set(st.id, st);
+        }
+        updatedCacheMap.set(sName, targetMap);
+      }
+
+      promptCacheOutOfDate(updatedCacheMap);
+    }
+  }
+
+  /**
    * Dispatches updates to dependent modules whenever a subject is expanded.
    */
   let notifyUpdateTimer = null;
@@ -504,7 +787,9 @@
     notifyUpdateTimer = setTimeout(() => {
       let subjects = null;
       if (card) {
-        scrapeSubjectTasks(card);
+        if (!hasCachedSubjects()) {
+          scrapeSubjectTasks(card, false);
+        }
         const cardTitle = normalize(
           card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent ||
           card.getAttribute('data-subject-title') ||
@@ -690,34 +975,44 @@
         clearTimeout(bulkExpandTimer);
 
         function finalizeExpansion() {
-          if (expand && clickedAny) {
-            const hasValidCache = Boolean(window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.());
-            if (!hasValidCache) {
-              updateProgress(90, 'Caching predictions... 90%');
-              try {
-                const all = collect(true);
-                if (window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
-                  window.ConnectifyPredictorMath.populateChronologicalPredictions(all, true);
+          try {
+            if (expand && clickedAny) {
+              const hasValidCache = Boolean(window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.());
+              if (!hasValidCache) {
+                updateProgress(90, 'Caching predictions... 90%');
+                try {
+                  const all = collect(true);
+                  if (window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
+                    window.ConnectifyPredictorMath.populateChronologicalPredictions(all, true);
+                  }
+                } catch (e) {
+                  console.warn('Prediction pre-cache error:', e);
                 }
-              } catch (e) {
-                console.warn('Prediction pre-cache error:', e);
               }
-            }
 
-            updateProgress(95, 'Refreshing statistics & outcome bars... 95%');
+              updateProgress(95, 'Refreshing statistics & outcome bars... 95%');
 
-            setTimeout(() => {
-              notifyResultsUpdated();
-              if (window.ConnectifyCohort?.schedule) {
-                window.ConnectifyCohort.schedule(true);
-              }
-              if (window.ConnectifyCompoundProgress?.update) {
-                window.ConnectifyCompoundProgress.update();
-              }
+              setTimeout(() => {
+                try {
+                  notifyResultsUpdated();
+                  if (window.ConnectifyCohort?.schedule) {
+                    window.ConnectifyCohort.schedule(true);
+                  }
+                  if (window.ConnectifyCompoundProgress?.update) {
+                    window.ConnectifyCompoundProgress.update();
+                  }
+                  scheduleSilentDifferenceCheck();
+                } finally {
+                  isBulkExpanding = false;
+                  finishProgress();
+                }
+              }, 40);
+            } else {
               isBulkExpanding = false;
               finishProgress();
-            }, 40);
-          } else {
+            }
+          } catch (err) {
+            console.error('finalizeExpansion error:', err);
             isBulkExpanding = false;
             finishProgress();
           }
@@ -796,6 +1091,7 @@
       if (window.ConnectifyDataSyncCharts) {
         window.ConnectifyDataSyncCharts();
       }
+      scheduleSilentDifferenceCheck();
     }, duration);
   }
   window.ConnectifyTriggerAccordionAnimationGuard = triggerAccordionAnimationGuard;
@@ -861,6 +1157,12 @@
     correctedCaption,
     expandAll,
     scrapeSubjectTasks,
+    parseCardSubjectTasks,
+    checkSilentDifferences,
+    promptCacheOutOfDate,
+    hasCachedSubjects,
+    saveSubjectsCache,
+    loadSubjectsCache,
     notifyResultsUpdated,
     getTaskStats,
     setTaskStats,
@@ -868,6 +1170,10 @@
     clearCache: () => {
       subjectsCache.clear();
       statsCache.clear();
+      try {
+        localStorage.removeItem(getSubjectsCacheKey());
+        localStorage.removeItem('connectify:subjects_cache:current');
+      } catch {}
     },
     cache: ConnectifyCache
   };

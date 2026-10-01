@@ -20,6 +20,13 @@
 
     function isAutoExpandEnabled() {
       try {
+        const oneTime = sessionStorage.getItem('connectify:one_time_auto_expand');
+        if (oneTime === 'true') {
+          sessionStorage.removeItem('connectify:one_time_auto_expand');
+          return true;
+        }
+      } catch (e) {}
+      try {
         const val = localStorage.getItem('connectify:auto_expand');
         if (val !== null) return val !== 'false';
       } catch (e) {}
@@ -246,6 +253,7 @@
     }, 1500);
 
     window.ConnectifySync = syncFeatures;
+    window.ConnectifyIsAutoExpandEnabled = isAutoExpandEnabled;
     if (!window.ConnectifyInitSidebar) {
       window.ConnectifyInitSidebar = initSidebarTools;
     }
