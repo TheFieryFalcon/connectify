@@ -38,7 +38,7 @@
 
     const calculateGradeBtn = createEl('button', 'cta-reset', 'Recalculate');
     calculateGradeBtn.type = 'button';
-    calculateGradeBtn.addEventListener('click', () => ctx.scanAndRefresh(true));
+    calculateGradeBtn.addEventListener('click', () => ctx.scanAndRefresh());
 
     const difficultyLabel = createEl('label', 'cta-difficulty-label');
     const difficultyCheckbox = createEl('input');
@@ -115,8 +115,18 @@
     gradeOutputContainer.replaceChildren();
 
     if (!selected) {
+      const expandBtn = createEl('button', 'cta-reset', 'Expand Subject Outlines');
+      expandBtn.type = 'button';
+      expandBtn.style.marginTop = '8px';
+      expandBtn.addEventListener('click', () => {
+        if (window.ConnectifyData?.expandAll) {
+          window.ConnectifyData.expandAll(true);
+        }
+        ctx.scanAndRefresh();
+      });
       gradeOutputContainer.append(
-        createEl('p', '', 'No subjects found for this semester. Show all classes in Connect.')
+        createEl('p', '', 'No subjects found for this semester. Show all classes in Connect.'),
+        expandBtn
       );
       return;
     }
@@ -132,9 +142,20 @@
     });
 
     if (plan.error) {
+      const expandBtn = createEl('button', 'cta-reset', 'Expand Subject Outlines');
+      expandBtn.type = 'button';
+      expandBtn.style.marginTop = '8px';
+      expandBtn.addEventListener('click', () => {
+        if (window.ConnectifyData?.expandAll) {
+          window.ConnectifyData.expandAll(true);
+        }
+        ctx.scanAndRefresh();
+      });
+
       gradeOutputContainer.append(
         createEl('p', '', plan.error),
-        createEl('p', 'cta-note', 'Expand assessment details in Connect, then recalculate. Ensure full outline is visible.')
+        createEl('p', 'cta-note', 'Expand assessment details in Connect, then recalculate. Ensure full outline is visible.'),
+        expandBtn
       );
       return;
     }

@@ -284,7 +284,12 @@
   ConnectifyCache.checkAndInvalidateAll();
 
   function parseSemester(card) {
-    const title = normalize(card.querySelector('.eds-c-tile__title, h2, h3, .c-tile__title')?.textContent);
+    const title = normalize(
+      card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent ||
+      card.getAttribute('data-subject-title') ||
+      card.getAttribute('aria-label') ||
+      ''
+    );
     const match = title.match(/Semester\s*([12])/i) || title.match(/Sem\s*([12])/i);
     return match ? +match[1] : 1;
   }
@@ -294,7 +299,12 @@
    */
   function scrapeSubjectTasks(card) {
     if (!card) return;
-    const title = normalize(card.querySelector('.eds-c-tile__title, h2, h3, .c-tile__title')?.textContent);
+    const title = normalize(
+      card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent ||
+      card.getAttribute('data-subject-title') ||
+      card.getAttribute('aria-label') ||
+      ''
+    );
     if (!title) return;
 
     const subjectName = title
@@ -596,9 +606,11 @@
    */
   function expandAll(expand = true) {
     if (isBulkExpanding) return;
-    const pattern = expand ? /show details/i : /hide details/i;
-    const headings = Array.from(document.querySelectorAll('.eds-c-tile .eds-c-accordion__section-heading'))
-      .filter(h => pattern.test(h.textContent));
+    const headings = Array.from(
+      document.querySelectorAll(
+        '.eds-c-tile .eds-c-accordion__section-heading, .cvr-c-tile .eds-c-accordion__section-heading, .cvr-c-tile .cvr-c-accordion__section-heading, .eds-c-accordion__section-heading, .cvr-c-accordion__section-heading'
+      )
+    ).filter(h => pattern.test(h.textContent));
 
     if (headings.length === 0) return;
 

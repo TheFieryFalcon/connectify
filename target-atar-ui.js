@@ -179,6 +179,28 @@
       };
     });
 
+    if (eligibleCourses.length === 0) {
+      topFourContainer.replaceChildren();
+      const expandBtn = createEl('button', 'cta-reset', 'Expand Subject Outlines');
+      expandBtn.type = 'button';
+      expandBtn.style.marginTop = '8px';
+      expandBtn.addEventListener('click', () => {
+        if (window.ConnectifyData?.expandAll) {
+          window.ConnectifyData.expandAll(true);
+        }
+        ctx.scanAndRefresh();
+      });
+      targetOutputContainer.replaceChildren(
+        createEl(
+          'p',
+          '',
+          `No ATAR subjects found for Semester ${activeSemester + 1}. Show all classes in Connect.`
+        ),
+        expandBtn
+      );
+      return;
+    }
+
     const includedRowsCount = rows.filter(r => r.include).length;
     if (includedRowsCount < 4) {
       targetOutputContainer.replaceChildren(
@@ -206,13 +228,24 @@
     targetOutputContainer.replaceChildren();
 
     if (plan.error) {
+      const expandBtn = createEl('button', 'cta-reset', 'Expand Subject Outlines');
+      expandBtn.type = 'button';
+      expandBtn.style.marginTop = '8px';
+      expandBtn.addEventListener('click', () => {
+        if (window.ConnectifyData?.expandAll) {
+          window.ConnectifyData.expandAll(true);
+        }
+        ctx.scanAndRefresh();
+      });
+
       targetOutputContainer.append(
         createEl('p', '', plan.error),
         createEl(
           'p',
           'cta-note',
           'Expand assessment details in Connect, then recalculate. Missing task weights cannot be omitted.'
-        )
+        ),
+        expandBtn
       );
       return;
     }

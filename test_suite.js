@@ -1903,6 +1903,32 @@ runTest('atar-ui.js scanAndRefresh awaits DOM expansion and theme.css uses high-
   assert.ok(css.includes('.cvr-c-reports') && css.includes('#1a222d'), 'theme.css must style Reports container with solid #1a222d background');
 });
 
+runTest('atar-scraper.js readCourses supports cvr-c-tile and semester parsing across both semesters', () => {
+  const scraperJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-scraper.js'), 'utf8');
+  assert.ok(scraperJs.includes('.cvr-c-tile'), 'atar-scraper.js must query .cvr-c-tile');
+  assert.ok(scraperJs.includes('.cvr-c-tile__title') || scraperJs.includes('[class*="tile__title"]'), 'atar-scraper.js must extract titles from .cvr-c-tile__title');
+  assert.ok(scraperJs.includes('isAtarEligible'), 'atar-scraper.js must define isAtarEligible');
+  assert.ok(!scraperJs.includes('btn.click()'), 'atar-scraper.js scanOutlineDetails must not programmatically click buttons without user action');
+});
+
+runTest('target-atar-ui.js and target-grade-ui.js prompt user with Expand Subject Outlines button and do not auto-click', () => {
+  const atarUI = fs.readFileSync(path.resolve(BASE_DIR, 'target-atar-ui.js'), 'utf8');
+  const gradeUI = fs.readFileSync(path.resolve(BASE_DIR, 'target-grade-ui.js'), 'utf8');
+  assert.ok(atarUI.includes('Expand Subject Outlines'), 'target-atar-ui.js must offer Expand Subject Outlines button when outline is collapsed or missing');
+  assert.ok(gradeUI.includes('Expand Subject Outlines'), 'target-grade-ui.js must offer Expand Subject Outlines button when outline is collapsed or missing');
+  assert.ok(atarUI.includes('window.ConnectifyData.expandAll'), 'target-atar-ui.js button must invoke window.ConnectifyData.expandAll');
+  assert.ok(gradeUI.includes('window.ConnectifyData.expandAll'), 'target-grade-ui.js button must invoke window.ConnectifyData.expandAll');
+});
+
+runTest('theme.css styles mat-toolbar, mat-tab-header, and eliminates stroke from webfont pseudo-elements', () => {
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  assert.ok(themeCss.includes('mat-toolbar') && themeCss.includes('mat-tab-header'), 'theme.css must explicitly style mat-toolbar and mat-tab-header');
+  assert.ok(themeCss.includes('background-color: #1a222d !important'), 'theme.css must use solid #1a222d background for headers and toolbars');
+  assert.ok(!themeCss.includes('[class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before,\n  .cvr-c-icon:before,\n  .cvr-c-icon--switch:before,\n  [class*="switch"]:before,\n  [class*="role"]:before,\n  .eds-c-icon:before,\n  [class^="cvr-c-icon--"],\n  [class*=" cvr-c-icon--"],\n  .cvr-c-icon,\n  .cvr-c-icon--switch\n),\n:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n),\n:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n) {\n  color: #cbd5e1 !important;\n  fill: #cbd5e1 !important;\n  stroke: currentColor !important;'), 'theme.css must not apply stroke: currentColor to font icon :before selectors');
+  assert.ok(themeJs.includes('mat-toolbar') && themeJs.includes('mat-tab-header'), 'theme.js adaptSurfaces must include mat-toolbar and mat-tab-header');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

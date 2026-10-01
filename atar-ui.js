@@ -73,10 +73,14 @@
     window.ConnectifyAtar.calculatorPanel = calculatorPanel;
     if (window.ConnectifyInitSidebar) window.ConnectifyInitSidebar();
 
-    const hasSemesterTwoStarted = () => (gradeCourses || []).flat().some(r => r?.finalLetter);
-    const isTargetClosed = semesterIdx =>
-      (gradeCourses?.[semesterIdx] || []).some(r => r?.finalLetter) ||
-      (semesterIdx === 1 && !(gradeCourses || []).flat().some(r => r?.finalLetter));
+    const hasSemesterTwoStarted = () =>
+      (gradeCourses?.[0] || []).some(r => r?.finalLetter) ||
+      (gradeCourses?.[1] || []).some(r => r?.mark !== undefined && r?.mark > 0);
+    const isTargetClosed = semesterIdx => {
+      if ((gradeCourses?.[semesterIdx] || []).some(r => r?.finalLetter)) return true;
+      if (semesterIdx === 1 && (gradeCourses?.[1] || []).length === 0) return true;
+      return false;
+    };
 
     const semesterCardsContainer = createEl('div', 'cta-semesters');
     const semesterButtons = [0, 1].map(semesterIdx => {
@@ -140,10 +144,7 @@
           plannerUI().renderGradeOutput(gradeRefs, plannerContext);
         }
       },
-      scanAndRefresh: (allSubjects = false) => {
-        if (scraper?.scanOutlineDetails) {
-          scraper.scanOutlineDetails(allSubjects, activeSemester);
-        }
+      scanAndRefresh: () => {
         setTimeout(() => {
           if (window.ConnectifyData?.collect) {
             window.ConnectifyData.collect(true);

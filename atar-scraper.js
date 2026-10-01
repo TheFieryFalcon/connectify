@@ -10,12 +10,14 @@
   if (window.ConnectifyAtarScraper) return;
 
   function isAtarEligible() {
-    const tiles = document.querySelectorAll('.eds-c-tile__title, .eds-c-tile');
+    const tiles = document.querySelectorAll(
+      '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], .eds-c-tile, .cvr-c-tile, h1, h2, h3, h4, [data-subject-card], .c-tile'
+    );
     if (tiles.length === 0) return true;
     const text = Array.from(tiles)
       .map(c => c.textContent || '')
       .join(' ');
-    return /\bYear\s*(?:11|12)\b/i.test(text) || /\bATAR\b/i.test(text);
+    return /\bYear\s*(?:11|12)\b/i.test(text) || /\bATAR\b/i.test(text) || /\bYear\s*(?:11|12)\b/i.test(document.body?.textContent || '') || /\bATAR\b/i.test(document.body?.textContent || '');
   }
 
   function readCourses(atarOnly = true) {
@@ -32,9 +34,14 @@
     const result = [[], []];
     const seen = [new Set(), new Set()];
 
-    for (const card of document.querySelectorAll('.eds-c-tile')) {
-      const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
-      const semesterMatch = title.match(/\bSemester\s*([12])\b/i);
+    for (const card of document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, [class*="subject-card"]')) {
+      const title = normalize(
+        card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent ||
+        card.getAttribute('data-subject-title') ||
+        card.getAttribute('aria-label') ||
+        ''
+      );
+      const semesterMatch = title.match(/\bSemester\s*([12])\b/i) || title.match(/\bSem\s*([12])\b/i);
       if (!semesterMatch || (atarOnly && !isAtarCourse(title))) continue;
 
       const name = normalize(
@@ -54,7 +61,7 @@
       const markMatch = summaryText.match(/(-?\d+(?:\.\d+)?)\s*%/);
 
       let tasks = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'))
-        .filter(r => r.closest('.eds-c-tile') === card)
+        .filter(r => r.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card)
         .map((r, i) => {
           const cells = r.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark');
           const labels = Array.from(r.querySelectorAll('.cvr-c-task__details .v-label'))
@@ -111,26 +118,10 @@
     return result;
   }
 
-  function scanOutlineDetails(allSubjects = false, activeSemester = 0) {
-    const math = window.ConnectifyMath || {};
-    const normalize = math.normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim());
-    const isAtarCourse = math.isAtarCourse || (t => /\bATAR\b/i.test(t));
-
-    for (const card of document.querySelectorAll('.eds-c-tile')) {
-      const title = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
-      if (
-        (!allSubjects && !isAtarCourse(title)) ||
-        !new RegExp(`Semester\\s*${activeSemester + 1}\\b`, 'i').test(title)
-      ) {
-        continue;
-      }
-      for (const heading of card.querySelectorAll('.eds-c-accordion__section-heading')) {
-        if (/show details/i.test(heading.textContent)) {
-          const btn = heading.querySelector('button, .v-button, [role="button"]');
-          if (btn) btn.click();
-        }
-      }
-    }
+  function scanOutlineDetails() {
+    // Comply with Rule 7 (No Unauthorized Auto-Expansion):
+    // Programmatic accordion clicking without user action is strictly disallowed.
+    // User expansion must be triggered explicitly via the "Expand Subject Outlines" button.
   }
 
   window.ConnectifyAtarScraper = {

@@ -154,7 +154,7 @@
 
     try {
       const surfaceCandidates = document.body.querySelectorAll(
-        ':is(div, section, article, header, nav, main, aside, form, table, tr, td, th, ul, li, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .eds-c-tile__action, .eds-c-standard-button):not([data-connectea-surface]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *)'
+        ':is(div, section, article, header, nav, main, aside, form, table, tr, td, th, ul, li, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button):not([data-connectea-surface]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *)'
       );
 
       for (const el of surfaceCandidates) {
