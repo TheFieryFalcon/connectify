@@ -27,9 +27,8 @@ html.connectea-dark {
 }
 
 /* Universal High Contrast Typography Rules (WCAG AA Contrast >= 5:1) */
-.connectea-dark :is(label, .v-label, .cvr-c-form__label, .eds-c-label) {
+.connectea-dark :is(label, .cvr-c-form__label, .eds-c-label) {
   color: #e2e8f0 !important;
-  font-weight: 400 !important;
 }
 
 .connectea-dark :is(p, .v-caption) {
@@ -626,10 +625,13 @@ html.connectea-dark {
   color: #cfe2f5 !important;
 }
 
-.connectea-dark .connectea-panel-distribution strong,
-.connectea-dark .connectea-panel strong {
+:is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong,
+.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong {
+  font-weight: 700 !important;
+}
+
+.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong {
   color: #90c6f5 !important;
-  font-weight: 600 !important;
 }
 
 .connectea-dark .connectea-panel-standing {
@@ -682,14 +684,42 @@ html.connectea-dark {
   border-right: none !important;
 }
 
-.connectea-dark :is(.cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__mark-score) {
-  color: #f8fafc !important;
+:is(.connectea-dark, body, html) :is(
+  .cvr-c-task__score,
+  .cvr-c-task__grade,
+  .cvr-c-task__mark-score,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
+  .cvr-c-task__mark > :is(.v-label, span, div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)
+) {
   font-weight: 700 !important;
 }
 
-.connectea-dark :is(.cvr-c-task__outof, .cvr-c-task__mark-out-of, .cvr-c-task__mark-label) {
+.connectea-dark :is(
+  .cvr-c-task__score,
+  .cvr-c-task__grade,
+  .cvr-c-task__mark-score,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
+  .cvr-c-task__mark > :is(.v-label, span, div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)
+) {
+  color: #f8fafc !important;
+}
+
+:is(.connectea-dark, body, html) :is(
+  .cvr-c-task__outof,
+  .cvr-c-task__mark-out-of,
+  .cvr-c-task__mark-label,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):nth-child(2)
+) {
+  font-weight: 400 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-task__outof,
+  .cvr-c-task__mark-out-of,
+  .cvr-c-task__mark-label,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):nth-child(2)
+) {
   color: #94a3b8 !important;
-  font-weight: 500 !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -763,9 +793,30 @@ html.connectea-dark {
   border-top: 1px solid #2e3c4e !important;
 }
 
-.connectea-dark :is(.cvr-c-task-group__title, .cvr-c-task__group-name) {
-  color: #f1f5f9 !important;
+:is(.connectea-dark, body, html) :is(
+  .cvr-c-task-group__title,
+  .cvr-c-task__group-name,
+  .cvr-c-task-group h2,
+  .cvr-c-task-group h3,
+  .cvr-c-task-group h4,
+  .cvr-c-task-group :is(.v-label, span, strong):first-child,
+  [class*="task-group"] :is(h2, h3, h4, [class*="title"]),
+  .cvr-c-task__group-title
+) {
   font-weight: 700 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-task-group__title,
+  .cvr-c-task__group-name,
+  .cvr-c-task-group h2,
+  .cvr-c-task-group h3,
+  .cvr-c-task-group h4,
+  .cvr-c-task-group :is(.v-label, span, strong):first-child,
+  [class*="task-group"] :is(h2, h3, h4, [class*="title"]),
+  .cvr-c-task__group-title
+) {
+  color: #f1f5f9 !important;
 }
 
 /* Assessment Type Dropdowns (.connectea-type-select) */

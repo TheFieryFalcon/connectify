@@ -2566,6 +2566,32 @@ runTest('Test 108: Accordion expansion multi-click fix, scroll freeze during bul
   assert.ok(cohortViewJs.includes('getCachedPrediction?.(meta.subjectName, meta.labelsKey)'), 'cohort-view.js must check cache before predicting');
 });
 
+runTest('Test 109: Text bolding parity across light and dark modes for Test headers, marks 20 and 5, Med, Max, Mean, z, Top, and Rank', () => {
+  const cohortViewJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+  const cohortStatsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+
+  // 1. Verify cohort-view.js wraps Med, Max, Mean, z, Top standing, and Rank in strong tags
+  assert.ok(cohortViewJs.includes('<strong>Med ${math().formatPercentage('), 'cohort-view.js must wrap Med in strong tag');
+  assert.ok(cohortViewJs.includes('<strong>Max ${math().formatPercentage('), 'cohort-view.js must wrap Max in strong tag');
+  assert.ok(cohortViewJs.includes('<strong>Mean ${math().formatPercentage('), 'cohort-view.js must wrap Mean in strong tag');
+  assert.ok(cohortViewJs.includes('<strong>z ≈ ${zStr}</strong>'), 'cohort-view.js must wrap z-score in strong tag');
+  assert.ok(cohortViewJs.includes('<strong>${standingText}</strong>'), 'cohort-view.js must wrap Top standing in strong tag');
+  assert.ok(cohortViewJs.includes('<strong>${rankStr}</strong>'), 'cohort-view.js must wrap Rank in strong tag');
+
+  // 2. Verify cohort-stats.js styles panel strong tags with font-weight 700
+  assert.ok(cohortStatsJs.includes('.connectea-distribution strong,\n    .connectea-result strong,\n    .connectea-panel strong {\n      font-weight: 700 !important;'), 'cohort-stats.js must style strong tags with font-weight 700');
+
+  // 3. Verify theme.css and sidebar.css enforce bolding for Test headers, mark numbers, and stats strong tags
+  assert.ok(themeCss.includes('.cvr-c-task-group__title'), 'theme.css must target task group title');
+  assert.ok(themeCss.includes('.cvr-c-task__score'), 'theme.css must target task scores');
+  assert.ok(themeCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong'), 'theme.css must bold panel strong tags in light and dark modes');
+  assert.ok(sidebarCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold panel strong tags');
+  assert.ok(sidebarCss.includes(':is(.cvr-c-task-group__title, .cvr-c-task__group-name)'), 'sidebar.css must bold task group titles');
+  assert.ok(sidebarCss.includes(':is(.cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__mark-score'), 'sidebar.css must bold task mark scores');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

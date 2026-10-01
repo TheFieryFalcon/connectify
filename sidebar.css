@@ -1132,3 +1132,14 @@ body.cx-freeze-scroll {
   background: linear-gradient(90deg, #3b82f6, #60a5fa) !important;
 }
 
+/* Typography parity across light and dark modes */
+:is(.connectea-panel, .connectea-distribution, .connectea-result) strong {
+  font-weight: 700 !important;
+}
+:is(.cvr-c-task-group__title, .cvr-c-task__group-name) {
+  font-weight: 700 !important;
+}
+:is(.cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {
+  font-weight: 700 !important;
+}
+

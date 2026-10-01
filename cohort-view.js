@@ -138,6 +138,12 @@
     }
   }
 
+  function setHTML(element, html) {
+    if (element.innerHTML !== html) {
+      element.innerHTML = html;
+    }
+  }
+
   function createElement(tag, className, textContent) {
     const el = document.createElement(tag);
     if (className) el.className = className;
@@ -550,29 +556,32 @@
       return;
     }
 
-    setText(
+    setHTML(
       ui.distribution,
-      `Min ${math().formatPercentage(stats[0])}%  •  Q1 ${math().formatPercentage(stats[1])}%  •  Med ${math().formatPercentage(
+      `Min ${math().formatPercentage(stats[0])}%  •  Q1 ${math().formatPercentage(stats[1])}%  •  <strong>Med ${math().formatPercentage(
         stats[2]
-      )}%  •  Q3 ${math().formatPercentage(stats[3])}%  •  Max ${math().formatPercentage(stats[4])}%  •  Mean ${math().formatPercentage(
+      )}%</strong>  •  Q3 ${math().formatPercentage(stats[3])}%  •  <strong>Max ${math().formatPercentage(stats[4])}%</strong>  •  <strong>Mean ${math().formatPercentage(
         data.mean
-      )}%  •  SD ${math().formatPercentage(data.sd)}`
+      )}%</strong>  •  SD ${math().formatPercentage(data.sd)}`
     );
 
     const parts = [];
     if (Number.isFinite(mark)) {
       if (!isOverall) parts.push(`Score: ${math().formatPercentage(mark)}%`);
-      parts.push(`z ≈ ${Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A'}`);
-      parts.push(math().standing(data.p));
+      const zStr = Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A';
+      parts.push(`<strong>z ≈ ${zStr}</strong>`);
+      const standingText = math().standing(data.p);
+      if (standingText) {
+        parts.push(`<strong>${standingText}</strong>`);
+      }
 
       if (data.rank !== undefined) {
         const isEstimated = userSize === undefined && estimatedSize !== undefined;
         const totalDisplay = isEstimated ? `~${cohortSize}` : `${cohortSize}`;
-        parts.push(
-          data.rank === 1
-            ? `Top of ${isOverall ? 'subject' : 'assessment'}`
-            : `Rank: ${data.rank} / ${totalDisplay}`
-        );
+        const rankStr = data.rank === 1
+          ? `Top of ${isOverall ? 'subject' : 'assessment'}`
+          : `Rank: ${data.rank} / ${totalDisplay}`;
+        parts.push(`<strong>${rankStr}</strong>`);
       } else {
         parts.push('Cohort size needed for rank');
       }
@@ -580,7 +589,7 @@
       parts.push('Not marked · Rank and z-score unavailable');
     }
 
-    setText(ui.result, parts.filter(Boolean).join('  •  '));
+    setHTML(ui.result, parts.filter(Boolean).join('  •  '));
     ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig };
   }
 

@@ -138,10 +138,15 @@
     .connectea-distribution {
       display: block !important;
       width: 100% !important;
-      font-weight: 600 !important;
+      font-weight: 400 !important;
       margin-bottom: 6px !important;
       line-height: 1.5 !important;
       clear: both !important;
+    }
+    .connectea-distribution strong,
+    .connectea-result strong,
+    .connectea-panel strong {
+      font-weight: 700 !important;
     }
     .connectea-subject-controls {
       display: block !important;
