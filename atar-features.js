@@ -18,11 +18,13 @@
     let settingsInstance = null;
     let predictorInstance = null;
 
-    function isAutoExpandEnabled() {
+    function isAutoExpandEnabled(consume = true) {
       try {
         const oneTime = sessionStorage.getItem('connectify:one_time_auto_expand');
         if (oneTime === 'true') {
-          sessionStorage.removeItem('connectify:one_time_auto_expand');
+          if (consume) {
+            sessionStorage.removeItem('connectify:one_time_auto_expand');
+          }
           return true;
         }
       } catch (e) {}
@@ -31,6 +33,20 @@
         if (val !== null) return val !== 'false';
       } catch (e) {}
       return true;
+    }
+
+    function checkStartupAutoExpand() {
+      if (hasAutoExpanded) return;
+      if (!isAutoExpandEnabled(false)) {
+        hasAutoExpanded = true;
+        return;
+      }
+      const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile');
+      if (tiles.length > 0 && window.ConnectifyData?.expandAll) {
+        hasAutoExpanded = true;
+        isAutoExpandEnabled(true); // consume one-time flag
+        window.ConnectifyData.expandAll(true);
+      }
     }
 
     function syncBackToTop() {
@@ -96,12 +112,7 @@
 
       if (window.ConnectifyData) {
         if (!hasAutoExpanded) {
-          if (!isAutoExpandEnabled()) {
-            hasAutoExpanded = true;
-          } else if (document.querySelectorAll('.eds-c-tile, .cvr-c-tile').length > 0) {
-            window.ConnectifyData.expandAll(true);
-            hasAutoExpanded = true;
-          }
+          checkStartupAutoExpand();
         }
 
         // --- Expand/Collapse Floating Buttons ---
@@ -227,6 +238,24 @@
 
     initSidebarTools();
     syncBackToTop();
+    syncFeatures();
+    checkStartupAutoExpand();
+
+    if (typeof document !== 'undefined' && document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        syncFeatures();
+        checkStartupAutoExpand();
+      });
+    }
+
+    let startupPollTicks = 0;
+    const startupPollInterval = setInterval(() => {
+      startupPollTicks++;
+      checkStartupAutoExpand();
+      if (hasAutoExpanded || startupPollTicks >= 30) {
+        clearInterval(startupPollInterval);
+      }
+    }, 100);
 
     let bttTimer = null;
     const debouncedSyncBackToTop = () => {

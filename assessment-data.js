@@ -698,7 +698,11 @@
       return;
     }
 
-    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card]'));
+    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card]'))
+      .filter(card => {
+        const heading = card.querySelector('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading');
+        return heading ? /hide details/i.test(heading.textContent) : true;
+      });
     let hasDifference = false;
     const freshlyScrapedBySubject = new Map();
 
@@ -724,6 +728,16 @@
           matched = Array.from(cachedMap.values()).find(
             t => normalize(t.name).toLowerCase() === normalize(sTask.name).toLowerCase()
           );
+        }
+
+        // Deduplicate tasks repeated across Semester 1 and Semester 2:
+        // If matched is completed in Sem 1 (matched.score !== null) and sTask is pending (in Sem 2),
+        // ignore the unfinished Sem 2 clone, matching scrapeSubjectTasks() heuristic.
+        if (matched && matched.score !== null && sTask.pending) {
+          continue;
+        }
+        if (matched && matched.pending && sTask.pending) {
+          continue;
         }
 
         if (!matched) {
@@ -990,19 +1004,41 @@
                 }
               }
 
-              updateProgress(95, 'Refreshing statistics & outcome bars... 95%');
+              updateProgress(95, 'Rendering statistics & outcome bars... 95%');
 
               setTimeout(() => {
                 try {
                   notifyResultsUpdated();
-                  if (window.ConnectifyCohort?.schedule) {
+                  if (window.ConnectifyCohort?.pass) {
+                    window.ConnectifyCohort.pass();
+                  } else if (window.ConnectifyCohort?.schedule) {
                     window.ConnectifyCohort.schedule(true);
                   }
                   if (window.ConnectifyCompoundProgress?.update) {
                     window.ConnectifyCompoundProgress.update();
                   }
+                  if (window.ConnectifyDataSyncCharts) {
+                    window.ConnectifyDataSyncCharts();
+                  }
                   scheduleSilentDifferenceCheck();
-                } finally {
+
+                  const completeFinalize = () => {
+                    try {
+                      updateProgress(100, 'Ready! 100%');
+                    } finally {
+                      isBulkExpanding = false;
+                      finishProgress();
+                    }
+                  };
+
+                  if (typeof requestAnimationFrame === 'function') {
+                    requestAnimationFrame(() => {
+                      requestAnimationFrame(completeFinalize);
+                    });
+                  } else {
+                    completeFinalize();
+                  }
+                } catch (e) {
                   isBulkExpanding = false;
                   finishProgress();
                 }
@@ -1091,7 +1127,9 @@
       if (window.ConnectifyDataSyncCharts) {
         window.ConnectifyDataSyncCharts();
       }
-      scheduleSilentDifferenceCheck();
+      if (cards.length > 0) {
+        scheduleSilentDifferenceCheck();
+      }
     }, duration);
   }
   window.ConnectifyTriggerAccordionAnimationGuard = triggerAccordionAnimationGuard;

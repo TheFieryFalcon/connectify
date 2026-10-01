@@ -2443,12 +2443,12 @@ runTest('Test 107: Outcome bar is strictly suppressed on first task of subject/t
   assert.ok(panel1, 'Panel 1 must exist');
   assert.strictEqual(panel1.outcomeBar.hidden, true, 'Task 1 (first task of subject) outcome bar must be hidden when baselines absent');
 
-  // Row for task 2 (has prior subject data, but is first of type 'Investigation')
+  // Row for task 2 (has prior subject data, and is first of type 'Investigation')
   const row2 = makeTaskRow('Investigation 1', 'Term 1, Week 5', '42.5 Out of 50');
   window.ConnectifyCohortView.render(row2, false, 'chem-k2', 50, null, subjectsList);
   const panel2 = window.ConnectifyCohortView.panels.get(row2);
   assert.ok(panel2, 'Panel 2 must exist');
-  assert.strictEqual(panel2.outcomeBar.hidden, true, 'Task 2 (first task of type Investigation) outcome bar must be hidden when type baseline absent');
+  assert.strictEqual(panel2.outcomeBar.hidden, false, 'Task 2 (first task of type Investigation with prior subject data) outcome bar must NOT be hidden');
 
   // Row for task 3 (second of type 'Test', has prior subject data)
   const row3 = makeTaskRow('Test 2', 'Term 2, Week 3', '44 Out of 50');
@@ -2552,7 +2552,7 @@ runTest('Test 108: Accordion expansion multi-click fix, scroll freeze during bul
   assert.ok(sideCss.includes('html.cx-freeze-scroll,\nbody.cx-freeze-scroll {\n  overflow: hidden !important;'), 'sidebar.css must define cx-freeze-scroll');
   assert.ok(assessJs.includes("classList.add('cx-freeze-scroll')"), 'assessment-data.js expandAll must add cx-freeze-scroll');
   assert.ok(assessJs.includes("classList.remove('cx-freeze-scroll')"), 'assessment-data.js finishProgress must remove cx-freeze-scroll');
-  assert.ok(assessJs.includes("updateProgress(95, 'Refreshing statistics & outcome bars... 95%')"), 'expandAll must persist progress pill through 95% refresh phase');
+  assert.ok(assessJs.includes("updateProgress(95, 'Rendering statistics & outcome bars... 95%')") || assessJs.includes("updateProgress(95, 'Refreshing statistics & outcome bars... 95%')"), 'expandAll must persist progress pill through 95% refresh phase');
 
   // 4. Accordion animation guard flushing and multi-click fix
   assert.ok(assessJs.includes('pendingCardsToUpdate'), 'assessment-data.js must track pendingCardsToUpdate');
@@ -2585,11 +2585,12 @@ runTest('Test 109: Text bolding parity across light and dark modes for Test head
 
   // 3. Verify theme.css and sidebar.css enforce bolding for Test headers, mark numbers, and stats strong tags
   assert.ok(themeCss.includes('.cvr-c-task-group__title'), 'theme.css must target task group title');
-  assert.ok(themeCss.includes('.cvr-c-task__score'), 'theme.css must target task scores');
   assert.ok(themeCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong'), 'theme.css must bold panel strong tags in light and dark modes');
   assert.ok(sidebarCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold panel strong tags');
-  assert.ok(sidebarCss.includes(':is(.cvr-c-task-group__title, .cvr-c-task__group-name)'), 'sidebar.css must bold task group titles');
-  assert.ok(sidebarCss.includes(':is(.cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__mark-score'), 'sidebar.css must bold task mark scores');
+  assert.ok(sidebarCss.includes(':is(.cvr-c-task-group__title, .cvr-c-task__group-name'), 'sidebar.css must bold task group titles');
+  assert.ok(sidebarCss.includes(':is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child)'), 'sidebar.css must bold task mark scores');
+  assert.ok(sidebarCss.includes(':is(.cvr-c-task__score, .cvr-c-task__grade) {\n  font-weight: 400 !important;\n}'), 'sidebar.css must explicitly unbold overall percent and letter grades');
+  assert.ok(themeCss.includes(':is(.connectea-dark, body, html) :is(\n  .cvr-c-task__score,\n  .cvr-c-task__grade\n) {\n  font-weight: 400 !important;\n}'), 'theme.css must explicitly unbold overall percent and letter grades');
 });
 
 runTest('Test 110: Silent difference check, out-of-date cache prompt with one-time auto-expand, and chart 0 / non-configurable row stability', () => {
@@ -2690,6 +2691,45 @@ runTest('Test 110: Silent difference check, out-of-date cache prompt with one-ti
   assert.strictEqual(window.ConnectifyIsAutoExpandEnabled(), false, 'Subsequent isAutoExpandEnabled calls must revert to user preference');
 
   localStorage.removeItem('connectify:auto_expand');
+});
+
+runTest('Test 111: Typography parity (unbolded overall % and letter grade), startup auto-expand, deduplicated silent cache diffs, outcome bar for first task of type, and complete render finalization', () => {
+  const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const atarFeatJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-features.js'), 'utf8');
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const cohortViewJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+  const cohortStatsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+
+  // 1. Typography rules: overall % and letter grades are unbolded (400), task marks and stats strong are bold (700)
+  assert.ok(sideCss.includes(':is(.cvr-c-task__score, .cvr-c-task__grade) {\n  font-weight: 400 !important;\n}'), 'sidebar.css must set font-weight 400 for overall percent and letter grades');
+  assert.ok(themeCss.includes(':is(.connectea-dark, body, html) :is(\n  .cvr-c-task__score,\n  .cvr-c-task__grade\n) {\n  font-weight: 400 !important;\n}'), 'theme.css must set font-weight 400 for overall percent and letter grades');
+  assert.ok(sideCss.includes(':is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold task marks');
+  assert.ok(sideCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result) strong {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold stats panel strong elements');
+
+  // 2. Startup auto-expand: decoupled from user activity, runs immediately on page load
+  assert.ok(atarFeatJs.includes('function checkStartupAutoExpand()'), 'atar-features.js must define checkStartupAutoExpand');
+  assert.ok(atarFeatJs.includes('startupPollInterval = setInterval'), 'atar-features.js must provide startup polling loop for tiles');
+  assert.ok(atarFeatJs.includes('DOMContentLoaded'), 'atar-features.js must listen on DOMContentLoaded for startup auto-expand');
+
+  // 3. Silent difference check: skip collapse, skip collapsed cards, deduplicate Sem 1/2 clones
+  assert.ok(assessJs.includes('if (cards.length > 0) {\n        scheduleSilentDifferenceCheck();\n      }'), 'triggerAccordionAnimationGuard must only schedule silent diff when cards were expanded, never on collapse');
+  assert.ok(assessJs.includes('/hide details/i.test(heading.textContent)'), 'checkSilentDifferences must filter out collapsed cards');
+  assert.ok(assessJs.includes('matched.score !== null && sTask.pending'), 'checkSilentDifferences must ignore pending Sem 2 clone of completed Sem 1 task');
+
+  // 4. Four-segment outcome bar: renders for first task of type, fast O(1) prediction lookup
+  assert.ok(!cohortViewJs.includes('const isFirstOfType ='), 'cohort-view.js must not suppress outcome bar for first task of type');
+  assert.ok(cohortViewJs.includes('const isFirstOfSubject = !hasPriorSubjectData && !hasSubjectBaseline;'), 'cohort-view.js must suppress outcome bar only on first task of subject without baseline');
+  assert.ok(cohortViewJs.includes('card._cxTaskRows'), 'cohort-view.js must memoize card task rows to eliminate quadratic scans');
+
+  // 5. Overall stats panel stability and MutationObserver loop elimination
+  assert.ok(cohortViewJs.includes('if (!target.contains(wrapper)) {\n      target.append(wrapper);\n    }'), 'cohort-view.js must not repeatedly re-append existing wrapper');
+  assert.ok(cohortViewJs.includes('} else if (ui.key !== key) {\n      ui.key = key;\n    }'), 'cohort-view.js must update ui.key in-place without destroying wrapper');
+  assert.ok(cohortStatsJs.includes('isConnectifyNode'), 'cohort-stats.js observer must ignore Connectify internal UI elements');
+
+  // 6. Complete render finalization: synchronous pass and double requestAnimationFrame before scroll unlock
+  assert.ok(assessJs.includes('window.ConnectifyCohort.pass()'), 'finalizeExpansion must synchronously run ConnectifyCohort.pass()');
+  assert.ok(assessJs.includes('requestAnimationFrame(completeFinalize)'), 'finalizeExpansion must wait for double requestAnimationFrame before finishProgress and scroll unlock');
 });
 
 console.log('\n================================================================');

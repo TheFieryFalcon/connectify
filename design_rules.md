@@ -46,7 +46,7 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Critical Shortfall**: When score $\le \text{Low} - 10\%$ (additive), bar renders 0 segments (empty) with pulsing red alarm glow (`.connectea-outcome-critical`).
 - **Suppression Rules**:
   - Suppress outcome bars on incomplete or unmarked assessments (`Number.isFinite(mark)` check).
-  - Suppress on first assessment of a subject or type unless cold-start baselines exist.
+  - Suppress on first assessment of a subject unless cold-start baselines exist (first tasks of a type render normally when prior subject data exists).
 - **Interaction**: Segments must have `pointer-events: none !important;` to eliminate hover boundary thrashing. Handled via singleton floating tooltip (`#connectea-outcome-tooltip`) using viewport-fixed coordinates. Outcome bars and segments must **never** set the native HTML `title` attribute to prevent overlapping dual tooltips.
 
 ## 5. Cold-Start & Mathematical Modeling

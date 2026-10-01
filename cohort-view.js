@@ -291,7 +291,9 @@
     target.querySelectorAll('.connectea-panel, .connectea-row-wrapper').forEach(el => {
       if (el !== wrapper && el !== box) el.remove();
     });
-    target.append(wrapper);
+    if (!target.contains(wrapper)) {
+      target.append(wrapper);
+    }
 
     const state = {
       wrapper,
@@ -321,13 +323,17 @@
 
     if (
       ui &&
-      (!ui.wrapper.isConnected || ui.key !== key || ui.isOverall !== isOverall)
+      (!ui.wrapper.isConnected || ui.isOverall !== isOverall)
     ) {
       ui.wrapper.remove();
       ui = null;
     }
 
-    if (!ui) ui = createPanel(row, isOverall, key, estimatedSize, onCohortChange);
+    if (!ui) {
+      ui = createPanel(row, isOverall, key, estimatedSize, onCohortChange);
+    } else if (ui.key !== key) {
+      ui.key = key;
+    }
     ui.estimatedSize = estimatedSize;
 
     // If assessment row, keep dropdown in sync
@@ -444,19 +450,19 @@
 
           // Populate task mock with row's metadata, semester, sequence, and actual score
           let taskSemester = 1;
-          const card = row.closest('.eds-c-tile');
+          const card = row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
           if (card) {
-            const cardTitle = card.querySelector('.eds-c-tile__title, h2, h3')?.textContent || '';
+            const cardTitle = card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent || '';
             const semMatch = cardTitle.match(/Semester\s*([12])/i);
             if (semMatch) taskSemester = Number(semMatch[1]);
           }
-          const allRows = card ? Array.from(card.querySelectorAll('.cvr-c-task')) : [];
+          const allRows = card ? (card._cxTaskRows || (card._cxTaskRows = Array.from(card.querySelectorAll('.cvr-c-task')))) : [];
           const taskSeq = allRows.indexOf(row) >= 0 ? allRows.indexOf(row) : 0;
 
           let taskOrder = null;
           const taskName = meta.taskName || '';
           const caption = meta.labels?.[1] || '';
-          const cardTitle = card ? (card.querySelector('.eds-c-tile__title, h2, h3')?.textContent || '') : '';
+          const cardTitle = card ? (card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, h2, h3')?.textContent || '') : '';
           const customOrder = localStorage.getItem(`connectea:time_override:${meta.subjectName}:${taskName}`) ||
                               localStorage.getItem(`connectea:time_override:${cardTitle}:${taskName}`);
           if (customOrder !== null && customOrder !== '') {
@@ -493,28 +499,25 @@
           };
 
           const cleanSubj = predMath.cleanSubject ? predMath.cleanSubject(meta.subjectName) : meta.subjectName;
-          const taskType = types().getEffectiveType ? types().getEffectiveType(meta.subjectName, taskMock) : (meta.taskType || 'Take-Home');
           const baselines = predMath.getBaselines ? predMath.getBaselines() : { subjects: {}, types: {} };
-
           const hasSubjectBaseline = Boolean(baselines?.subjects && (baselines.subjects[cleanSubj] !== undefined || baselines.subjects[meta.subjectName] !== undefined));
-          const hasTypeBaseline = Boolean(baselines?.types && baselines.types[taskType] !== undefined);
 
-          // Get historical data strictly prior to this task
-          const allSubjects = precollectedSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
-          const priorHistorical = predMath.getHistoricalDataPriorTo
-            ? predMath.getHistoricalDataPriorTo(allSubjects, meta.subjectName, taskMock)
-            : null;
+          // Determine if there is prior subject data (fast O(1) check)
+          let hasPriorSubjectData = false;
+          if (taskSemester > 1 || taskSeq > 0) {
+            hasPriorSubjectData = true;
+          } else {
+            const subjObj = (precollectedSubjects || []).find(s => s.name === meta.subjectName || (predMath.cleanSubject && predMath.cleanSubject(s.name) === cleanSubj));
+            if (subjObj && Array.isArray(subjObj.tasks)) {
+              hasPriorSubjectData = subjObj.tasks.some(t => t !== taskMock && !t.pending && Number.isFinite(t.score));
+            }
+          }
 
-          const hasPriorSubjectData = Boolean(priorHistorical?.subjects && Number.isFinite(priorHistorical.subjects[cleanSubj]));
-          const priorTypeCount = priorHistorical?.typeCounts?.[taskType] || 0;
-          const hasPriorTypeData = priorTypeCount > 0;
-
-          // Intended behavior: four segment bars do NOT render for the first task of each subject and/or type,
-          // unless cold-start baselines exist for that specific subject and type.
+          // Four segment bars render for the first task of a type, but are suppressed
+          // if it's the very first task of the entire subject without subject baseline.
           const isFirstOfSubject = !hasPriorSubjectData && !hasSubjectBaseline;
-          const isFirstOfType = !hasPriorTypeData && !hasTypeBaseline;
 
-          if (isFirstOfSubject || isFirstOfType) {
+          if (isFirstOfSubject) {
             ui.outcomeBar.hidden = true;
             ui.outcomeBar.style.setProperty('display', 'none', 'important');
           } else {
@@ -525,9 +528,10 @@
               : null;
 
             if (!prediction || prediction.unpredicted) {
+              const allSubjects = precollectedSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
               prediction = predMath.getOrComputeTaskPrediction
                 ? predMath.getOrComputeTaskPrediction(meta.subjectName, taskMock, allSubjects)
-                : predMath.predictTask(meta.subjectName, taskMock, priorHistorical, baselines, true);
+                : predMath.predictTask(meta.subjectName, taskMock, null, baselines, true);
             }
 
             if (!prediction || prediction.unpredicted) {

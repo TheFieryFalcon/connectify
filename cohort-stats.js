@@ -247,7 +247,7 @@
     const subjectEstimates = {};
     for (const card of cards) {
       const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
-        row => row.closest('.eds-c-tile') === card
+        row => row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card
       );
       if (!rows.length) continue;
 
@@ -255,7 +255,7 @@
       if (!key) continue;
 
       const estimatedSize = est.estimateCohortSize(card);
-      const titleEl = card.querySelector('.eds-c-tile__title');
+      const titleEl = card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading');
       const isSemester2 = titleEl && titleEl.textContent.match(/Semester\s+2/i);
 
       const hasObservedSpreads = est.observedSpreadsBySubject?.get(key)?.size > 0;
@@ -278,7 +278,7 @@
     const allSubjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
     for (const card of cards) {
       const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
-        row => row.closest('.eds-c-tile') === card
+        row => row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card
       );
       if (!rows.length) continue;
 
@@ -352,6 +352,28 @@
         r.target.closest?.('.connectea-row-wrapper') ||
         r.target.id === 'connectea-style'
       ) {
+        continue;
+      }
+
+      // Check if all added or removed nodes are internal Connectify UI nodes
+      const isConnectifyNode = node => (
+        node.nodeType === 1 && (
+          node.matches?.('.connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-outcome-bar, .connectea-subject-controls') ||
+          node.classList?.contains('connectea-panel') ||
+          node.classList?.contains('connectea-row-wrapper') ||
+          node.classList?.contains('connectea-type-container')
+        )
+      );
+
+      const hasOnlyConnectifyNodes = nodes => {
+        if (!nodes || nodes.length === 0) return true;
+        for (let i = 0; i < nodes.length; i++) {
+          if (!isConnectifyNode(nodes[i])) return false;
+        }
+        return true;
+      };
+
+      if (hasOnlyConnectifyNodes(r.addedNodes) && hasOnlyConnectifyNodes(r.removedNodes)) {
         continue;
       }
       const isPanel =

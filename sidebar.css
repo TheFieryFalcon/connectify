@@ -1136,10 +1136,13 @@ body.cx-freeze-scroll {
 :is(.connectea-panel, .connectea-distribution, .connectea-result) strong {
   font-weight: 700 !important;
 }
-:is(.cvr-c-task-group__title, .cvr-c-task__group-name) {
+:is(.cvr-c-task-group__title, .cvr-c-task__group-name, .cx-cat-name-label, .cvr-c-task__details .v-label:first-child) {
   font-weight: 700 !important;
 }
-:is(.cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {
+:is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {
   font-weight: 700 !important;
+}
+:is(.cvr-c-task__score, .cvr-c-task__grade) {
+  font-weight: 400 !important;
 }
 

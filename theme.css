@@ -685,13 +685,18 @@ html.connectea-dark {
 }
 
 :is(.connectea-dark, body, html) :is(
-  .cvr-c-task__score,
-  .cvr-c-task__grade,
   .cvr-c-task__mark-score,
   .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
   .cvr-c-task__mark > :is(.v-label, span, div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)
 ) {
   font-weight: 700 !important;
+}
+
+:is(.connectea-dark, body, html) :is(
+  .cvr-c-task__score,
+  .cvr-c-task__grade
+) {
+  font-weight: 400 !important;
 }
 
 .connectea-dark :is(

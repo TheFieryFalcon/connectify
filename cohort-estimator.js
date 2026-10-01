@@ -25,7 +25,7 @@
    * Generates a storage key scoped to current student and subject title.
    */
   function subjectKey(card) {
-    const title = normalize(card?.querySelector?.('.eds-c-tile__title')?.textContent);
+    const title = normalize(card?.querySelector?.('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent);
     if (!title) return null;
 
     const student = new URL(location.href).searchParams.get('coisp') || 'current';
@@ -111,7 +111,7 @@
    */
   function estimateCohortSize(card) {
     const key = subjectKey(card);
-    const titleEl = card.querySelector('.eds-c-tile__title');
+    const titleEl = card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading');
     const rawTitle = normalize(titleEl?.textContent || '');
     const cleanTitle = rawTitle
       .toLowerCase()
@@ -120,7 +120,7 @@
       .trim();
 
     const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
-      row => row.closest('.eds-c-tile') === card
+      row => row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card
     );
 
     // 1. Check if any Highcharts series or data point explicitly carries sample count
