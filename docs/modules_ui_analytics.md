@@ -47,7 +47,7 @@ This document covers the user interface and analytics modules, including target 
 - **Role**: Native SVG polyline chart generator.
 - **Key Functions**:
   - `renderChart(container, options)`: Generates responsive SVG line chart with dual polylines (blue: student score, red: cohort mean), grid lines, value ticks, interactive data points with hover tooltips, and plotted data detail table.
-  - Supports custom week timestamp overrides directly within the plotted data table.
+  - Supports custom week timestamp overrides and uncompleted task display directly within the plotted data table.
 - **Export**: `window.ConnectifyProgressChart`.
 
 #### [`progress-graph.js`](file:///Users/uwong/Downloads/2.1.14_0/progress-graph.js) (265 lines)

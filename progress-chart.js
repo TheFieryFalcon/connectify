@@ -12,13 +12,15 @@
   const createElement = (tag, text, className) => {
     const el = document.createElement(tag);
     if (className) el.className = className;
-    if (text instanceof Node) el.append(text);
+    if ((typeof Node !== 'undefined' && text instanceof Node) || (text && typeof text === 'object' && (text.tagName || text.nodeType))) el.append(text);
     else if (text !== undefined && text !== null) el.textContent = text;
     return el;
   };
 
   const createSvgElement = (tag, attrs, text) => {
-    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    const el = typeof document.createElementNS === 'function'
+      ? document.createElementNS('http://www.w3.org/2000/svg', tag)
+      : document.createElement(tag);
     for (const [key, val] of Object.entries(attrs || {})) {
       el.setAttribute(key, val);
     }
@@ -223,6 +225,11 @@
 
     points.forEach((point, idx) => {
       const row = createElement('tr');
+      const isPending = !isHistory && (Boolean(point.pending) || !Number.isFinite(point.score));
+      if (isPending) {
+        row.className = 'cx-task-pending';
+      }
+
       let whenCell;
       if (isHistory) {
         whenCell = point.name;
@@ -237,8 +244,7 @@
           wrapper.style.gap = '4px';
 
           if (showWarning) {
-            const msg = createElement('small', 'No date detected. Enter school week (e.g. 17 for Term 2 Week 7):');
-            msg.style.color = '#d32f2f';
+            const msg = createElement('small', 'No date detected. Enter school week (e.g. 17 for Term 2 Week 7):', 'cx-date-warning');
             wrapper.append(msg);
           }
 
@@ -269,7 +275,7 @@
 
           inputRow.append(input);
           if (currentVal) {
-            const clearBtn = createElement('button', '✕');
+            const clearBtn = createElement('button', '✕', 'cx-time-clear-btn');
             clearBtn.type = 'button';
             clearBtn.title = 'Clear custom time override';
             clearBtn.style.padding = '0 4px';
@@ -287,29 +293,26 @@
 
         if (Number.isFinite(point.order)) {
           const text = math.formatTimestamp(point.order, point.caption);
-          if (savedTime !== null) {
-            const containerSpan = createElement('span');
-            containerSpan.style.display = 'inline-flex';
-            containerSpan.style.alignItems = 'center';
-            containerSpan.style.gap = '6px';
-            containerSpan.append(createElement('span', text));
+          const containerSpan = createElement('span');
+          containerSpan.style.display = 'inline-flex';
+          containerSpan.style.alignItems = 'center';
+          containerSpan.style.gap = '6px';
+          containerSpan.append(createElement('span', text));
 
-            const editBtn = createElement('button', '✏️');
-            editBtn.type = 'button';
-            editBtn.title = `Custom week ${savedTime} (click to change)`;
-            editBtn.style.background = 'none';
-            editBtn.style.border = 'none';
-            editBtn.style.cursor = 'pointer';
-            editBtn.style.fontSize = '12px';
-            editBtn.style.padding = '0';
-            editBtn.onclick = () => {
-              containerSpan.replaceWith(createInputField(savedTime, false));
-            };
-            containerSpan.append(editBtn);
-            whenCell = containerSpan;
-          } else {
-            whenCell = text;
-          }
+          const editBtn = createElement('button', '✏️', savedTime !== null ? 'cx-time-edit-btn' : 'cx-time-edit-btn cx-time-edit-btn--unconfigured');
+          editBtn.type = 'button';
+          editBtn.setAttribute('aria-label', savedTime !== null ? `Custom week ${savedTime} (click to change)` : 'Edit date (set custom week)');
+          editBtn.title = savedTime !== null ? `Custom week ${savedTime} (click to change)` : 'Edit date (set custom week)';
+          editBtn.style.background = 'none';
+          editBtn.style.border = 'none';
+          editBtn.style.cursor = 'pointer';
+          editBtn.style.fontSize = '12px';
+          editBtn.style.padding = '0';
+          editBtn.onclick = () => {
+            containerSpan.replaceWith(createInputField(savedTime || '', false));
+          };
+          containerSpan.append(editBtn);
+          whenCell = containerSpan;
         } else {
           whenCell = createInputField(savedTime, true);
         }
@@ -321,11 +324,17 @@
             String(idx + 1),
             point.name,
             whenCell,
-            `${Number(point.score.toFixed(2))}%`,
+            Number.isFinite(point.score) ? `${Number(point.score.toFixed(2))}%` : '—',
             Number.isFinite(point.mean) ? `${Number(point.mean.toFixed(2))}%` : 'Unavailable'
           ];
 
-      cells.forEach(c => row.append(createElement('td', c)));
+      cells.forEach((c, cIdx) => {
+        const td = createElement('td', c);
+        if (!isHistory && cIdx === 3 && !Number.isFinite(point.score)) {
+          td.title = 'Not yet completed';
+        }
+        row.append(td);
+      });
       table.append(row);
     });
 

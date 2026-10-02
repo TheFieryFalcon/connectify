@@ -18,8 +18,8 @@ This document details user-facing features 11 through 20, covering Target ATAR a
 ### 12. ATAR Progression & Historical Graphs
 - **Source Modules**: [`progress-chart.js`](file:///Users/uwong/Downloads/2.1.14_0/progress-chart.js), [`progress-graph.js`](file:///Users/uwong/Downloads/2.1.14_0/progress-graph.js)
 - **DOM Insertion**: Full-screen modal overlay (`#connectify-progress`).
-- **UI Appearance**: Responsive SVG line chart plotting student marks (blue polyline) vs cohort mean (red polyline) over school weeks with detailed task data table.
-- **Functionality**: Interactive hover tooltips; chronological week override inputs in table; running course average tracking.
+- **UI Appearance**: Responsive SVG line chart plotting student marks (blue polyline) vs cohort mean (red polyline) over school weeks with detailed task data table listing completed and pending tasks (grayed out with $\ge 5:1$ contrast).
+- **Functionality**: Interactive hover tooltips; chronological week override inputs in table for all tasks (with `.cx-date-warning` on unparsable dates); running course average tracking.
 
 ### 13. Weakness Analyzer Radar Chart
 - **Source Module**: [`weakness-radar.js`](file:///Users/uwong/Downloads/2.1.14_0/weakness-radar.js)

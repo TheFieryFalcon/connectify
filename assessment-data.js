@@ -685,10 +685,34 @@
     return false;
   }
 
+  function resolveTaskOrder(subjectName, task) {
+    const customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${task.name}`) ||
+                        localStorage.getItem(`connectify:time_override:${subjectName}:${task.name}`);
+    if (customOrder !== null && customOrder !== '') {
+      const num = Number(customOrder);
+      if (Number.isFinite(num) && num > 0) {
+        const term = Math.floor((num - 1) / 10) + 1;
+        const week = ((num - 1) % 10) + 1;
+        return (term - 1) * 12 + week;
+      }
+      const twMatch = String(customOrder).match(/t(?:erm)?\s*(\d+)\s*[,;]?\s*w(?:eek)?\s*(\d+)/i);
+      if (twMatch) {
+        const term = parseInt(twMatch[1], 10);
+        const week = parseInt(twMatch[2], 10);
+        return (term - 1) * 12 + week;
+      }
+    }
+    return (task.caption && typeof orderHint === 'function') ? orderHint(task.caption) : task.order;
+  }
+
   function formatCollectedSubjects(includePending) {
     return Array.from(subjectsCache, ([name, tasks]) => ({
       name,
       tasks: Array.from(tasks.values())
+        .map(t => {
+          const resolvedOrder = resolveTaskOrder(name, t);
+          return resolvedOrder !== t.order ? { ...t, order: resolvedOrder } : t;
+        })
         .filter(t => {
           if (/^Assessment\s+\d+$/i.test(t.name) && !t.caption && (t.weight === null || t.weight === 0)) return false;
           return includePending || !t.pending;

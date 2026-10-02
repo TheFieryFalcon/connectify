@@ -38,7 +38,7 @@
       .filter(s => /\bATAR\b/i.test(s.name) && !/\bGeneral\b/i.test(s.name))
       .map(s => ({
         ...s,
-        tasks: s.tasks.filter(t => t.weight !== 0)
+        tasks: s.tasks.filter(t => !t.pending && Number.isFinite(t.score) && t.weight !== 0)
       }));
 
     const invalid = eligible.flatMap(s =>

@@ -25,7 +25,7 @@
     const createElement = (tag, text, className) => {
       const el = document.createElement(tag);
       if (className) el.className = className;
-      if (text instanceof Node) el.append(text);
+      if ((typeof Node !== 'undefined' && text instanceof Node) || (text && typeof text === 'object' && (text.tagName || text.nodeType))) el.append(text);
       else if (text !== undefined && text !== null) el.textContent = text;
       return el;
     };
@@ -60,7 +60,7 @@
 
     function refresh() {
       if (panel.hidden) return;
-      const data = dataAPI ? dataAPI.collect() : [];
+      const data = dataAPI ? dataAPI.collect(true) : [];
       const sig = JSON.stringify(data);
       if (sig === lastDataSignature) return;
       lastDataSignature = sig;

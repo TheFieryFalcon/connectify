@@ -3161,6 +3161,84 @@ runTest('Test 120: In-memory prediction and category caching, chunked 95% bulk e
   assert.strictEqual(window.ConnectifyPredictorMath.getCachedPrediction(testSubj, testTaskId), null, 'Prediction must be cleared from memory');
 });
 
+runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, grays them out, flags invalid dates, and satisfies design rules', () => {
+  const progressGraphJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8');
+  const progressChartJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-chart.js'), 'utf8');
+  const progressMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-math.js'), 'utf8');
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const progressCss = fs.readFileSync(path.resolve(BASE_DIR, 'progress.css'), 'utf8');
+
+  // 1. Verify progress-graph.js calls collect(true) to include uncompleted tasks
+  assert.ok(progressGraphJs.includes('dataAPI ? dataAPI.collect(true) : []'), 'progress-graph.js refresh must call collect(true)');
+
+  // 2. Verify progress-chart.js handles pending tasks, edit button for valid dates, and dash score
+  assert.ok(progressChartJs.includes("row.className = 'cx-task-pending'"), 'progress-chart.js must assign cx-task-pending to uncompleted rows');
+  assert.ok(progressChartJs.includes("cx-time-edit-btn cx-time-edit-btn--unconfigured"), 'progress-chart.js must support unconfigured edit buttons');
+  assert.ok(progressChartJs.includes("Number.isFinite(point.score) ? `${Number(point.score.toFixed(2))}%` : '—'"), 'progress-chart.js must display em-dash for uncompleted tasks without throwing TypeError');
+  assert.ok(progressChartJs.includes('cx-date-warning'), 'progress-chart.js must use semantic class cx-date-warning for missing dates');
+
+  // 3. Verify progress-math.js history filters out pending tasks
+  assert.ok(progressMathJs.includes('!t.pending && Number.isFinite(t.score) && t.weight !== 0'), 'progress-math.js history must ignore pending tasks');
+
+  // 4. Verify assessment-data.js resolves task order dynamically
+  assert.ok(assessJs.includes('function resolveTaskOrder(subjectName, task)'), 'assessment-data.js must define resolveTaskOrder');
+  assert.ok(assessJs.includes('const resolvedOrder = resolveTaskOrder(name, t)'), 'assessment-data.js formatCollectedSubjects must dynamically resolve order');
+
+  // 5. Verify progress.css provides dark/light styling with >= 5:1 contrast
+  assert.ok(progressCss.includes('.cx-task-pending'), 'progress.css must define .cx-task-pending');
+  assert.ok(progressCss.includes('.cx-date-warning'), 'progress.css must define .cx-date-warning');
+  assert.ok(progressCss.includes('#connectify-progress input[type="number"]'), 'progress.css must style number inputs');
+
+  // 6. Functional test: renderChart with completed and uncompleted tasks
+  delete window.ConnectifyProgressMath;
+  eval(progressMathJs);
+  delete window.ConnectifyProgressChart;
+  eval(progressChartJs);
+
+  const container = document.createElement('div');
+  const mockPoints = [
+    { name: 'Completed Task', score: 85, mean: 70, order: 5, pending: false },
+    { name: 'Uncompleted Valid Date', score: null, mean: null, order: 15, pending: true },
+    { name: 'Uncompleted Invalid Date', score: null, mean: null, order: null, pending: true }
+  ];
+
+  window.ConnectifyProgressChart.renderChart(container, {
+    points: mockPoints,
+    isHistory: false,
+    byAssessment: false,
+    subjectName: 'English ATAR'
+  });
+
+  const table = container.querySelector('table');
+  assert.ok(table, 'renderChart must generate a table');
+  const rows = table.querySelectorAll('tr');
+  // Header row + 3 task rows = 4 rows
+  assert.strictEqual(rows.length, 4, 'Table must render header row + 3 task rows');
+
+  // Completed row
+  const row1 = rows[1];
+  assert.ok(!row1.className.includes('cx-task-pending'), 'Completed task row must not be cx-task-pending');
+  const r1Tds = row1.querySelectorAll('td');
+  assert.strictEqual(r1Tds[3].textContent, '85%', 'Completed score must be 85%');
+
+  // Uncompleted valid date row
+  const row2 = rows[2];
+  assert.ok(row2.className.includes('cx-task-pending'), 'Uncompleted task row must have cx-task-pending class');
+  const r2Tds = row2.querySelectorAll('td');
+  assert.strictEqual(r2Tds[3].textContent, '—', 'Uncompleted score must display em-dash');
+  assert.ok(r2Tds[2].querySelector('.cx-time-edit-btn'), 'Valid date row must provide time edit button');
+
+  // Uncompleted invalid date row
+  const row3 = rows[3];
+  assert.ok(row3.className.includes('cx-task-pending'), 'Invalid date task row must have cx-task-pending class');
+  const r3Tds = row3.querySelectorAll('td');
+  assert.strictEqual(r3Tds[3].textContent, '—', 'Invalid date score must display em-dash');
+  assert.ok(r3Tds[2].querySelector('.cx-date-warning'), 'Invalid date row must show cx-date-warning message');
+  const inputEl = r3Tds[2].querySelector('input');
+  assert.ok(inputEl, 'Invalid date row must provide week input field');
+  assert.strictEqual(inputEl.type, 'number', 'Week input must have type number');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');
