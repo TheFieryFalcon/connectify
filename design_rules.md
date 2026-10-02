@@ -31,7 +31,7 @@ Extremely concise summary of the core visual design language, contrast standards
   1. `connectify-target-toggle` (Target ATAR)
   2. `connectify-grade-toggle` (Target Grade)
   3. `connectify-predictor-toggle` (Predictor)
-  4. `connectify-progress-toggle` (Progress Graph)
+  4. `connectify-progress-toggle` (Year in Progress)
   5. `connectify-estimate-toggle` (ATAR Estimate)
   6. `connectify-weakness-toggle` (Weakness Analyzer)
   7. `connectify-categories-toggle` (Settings)

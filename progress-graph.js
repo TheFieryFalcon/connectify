@@ -31,7 +31,7 @@
     };
 
     // UI elements
-    const toggleBtn = createElement('button', 'Progress Graph');
+    const toggleBtn = createElement('button', 'Year in Progress');
     toggleBtn.id = 'connectify-progress-toggle';
     toggleBtn.type = 'button';
     toggleBtn.setAttribute('aria-expanded', 'false');
@@ -42,7 +42,7 @@
     panel.setAttribute('aria-label', 'Assessment progress');
 
     const head = createElement('header');
-    const title = createElement('strong', 'Progress Graph');
+    const title = createElement('strong', 'Year in Progress');
     title.tabIndex = -1;
     head.append(title);
 

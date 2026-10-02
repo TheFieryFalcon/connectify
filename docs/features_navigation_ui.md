@@ -52,7 +52,7 @@ This document details user-facing visual features 1 through 10, covering direct 
   - **Target ATAR** (`#connectify-target-toggle`)
   - **Target Grade** (`#connectify-grade-toggle`)
   - **Predictor** (`#connectify-predictor-toggle`)
-  - **Progress Graph** (`#connectify-progress-toggle`)
+  - **Year in Progress** (`#connectify-progress-toggle`)
   - **ATAR Estimate** (`#connectify-estimate-toggle`)
   - **Weakness Analyzer** (`#connectify-weakness-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
   - **Settings & Calibration** (`#connectify-categories-toggle`): Clean white button (`#ffffff`) in light mode with centered text.

@@ -3189,6 +3189,11 @@ runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, g
   assert.ok(progressCss.includes('.cx-date-warning'), 'progress.css must define .cx-date-warning');
   assert.ok(progressCss.includes('#connectify-progress input[type="number"]'), 'progress.css must style number inputs');
 
+  // 6. Verify sidebar and progress-graph.js use 'Year in Progress'
+  const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+  assert.ok(sidebarJs.includes("{ id: 'connectify-progress-toggle', label: 'Year in Progress' }"), 'sidebar.js canonicalButtons must name button Year in Progress');
+  assert.ok(progressGraphJs.includes("createElement('button', 'Year in Progress')"), 'progress-graph.js must create Year in Progress toggle button');
+
   // 6. Functional test: renderChart with completed and uncompleted tasks
   delete window.ConnectifyProgressMath;
   eval(progressMathJs);

@@ -168,7 +168,7 @@
         { id: 'connectify-target-toggle', label: 'Target ATAR' },
         { id: 'connectify-grade-toggle', label: 'Target Grade' },
         { id: 'connectify-predictor-toggle', label: 'Predictor' },
-        { id: 'connectify-progress-toggle', label: 'Progress Graph' },
+        { id: 'connectify-progress-toggle', label: 'Year in Progress' },
         { id: 'connectify-estimate-toggle', label: 'ATAR Estimate' },
         { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' },
         { id: 'connectify-categories-toggle', label: 'Settings' }
@@ -209,6 +209,8 @@
           btn = createElement('button', item.label);
           btn.id = item.id;
           btn.type = 'button';
+        } else if (item.label) {
+          btn.textContent = item.label;
         }
         if (item.id === 'connectify-weakness-toggle' || item.id === 'connectify-categories-toggle') {
           btn.className = 'cx-secondary-tool';

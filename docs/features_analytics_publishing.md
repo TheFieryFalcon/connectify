@@ -60,7 +60,7 @@ This document details user-facing features 11 through 20, covering Target ATAR a
   - **Dynamic Breakout Performance Meter**: 18px wide, 56px tall; 4 baseline segments: Red ($< \text{Low}$), Orange ($\text{Low} \le S < \text{Mid}$), Yellow ($\text{Mid} \le S < \text{High}$), Green ($S \ge \text{High}$). Suppressed on incomplete tasks and on first tasks lacking precedent/baseline. Secret double-height Purple breakout segment (height 20px) appears when $S > 1.10 \times \text{High}$. Critical shortfall ($S \le \text{Low} - 10\%$ additive) renders 0 segments with pulsing red alarm glow (`.connectea-outcome-critical`).
 
 ### 19. Sidebar Integration & Theme Navigation Stabilization
-- **Canonical Sequence**: Target ATAR, Target Grade, Predictor, Progress Graph, ATAR Estimate, Weakness Analyzer, Settings.
+- **Canonical Sequence**: Target ATAR, Target Grade, Predictor, Year in Progress, ATAR Estimate, Weakness Analyzer, Settings.
 - **Button Styling**: Settings (`#connectify-categories-toggle`) and Weakness Analyzer (`#connectify-weakness-toggle`) feature white buttons (`#ffffff`) in light mode with centered text.
 - **Category Colors**: Category labels bind to `--cx-cat-color` via `.cx-cat-name-label` for vibrant visibility in dark mode.
 - **Theme Button Mount**: `#connectea-theme-toggle` auto-discovers `.cvr-c-primary-navigation` and centers at `top: 50%; transform: translateY(-50%)`.
