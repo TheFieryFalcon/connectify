@@ -22,6 +22,7 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Semantic Classes**: Use semantic classes (`.cx-settings-label`, `.cx-pred-scenario-value--mid`, `.cx-settings-col-header`) instead of hardcoded inline dark styles.
 - **Dynamic Surface Adaptation**: Use `data-connectea-surface` and `data-connectea-ink` on unstyled surfaces. Avoid inline style mutations.
 - **Typography Bolding Parity**: Dark and light modes enforce 1:1 bolding parity (`font-weight: 700 !important` on task titles `.cvr-c-task__details .v-label:first-child`, `.cvr-c-task__title`, group headers, task marks, and cohort stats `strong` tags; `font-weight: 400 !important` on secondary labels, out-of text, and subject summary marks).
+- **Login Screen Dark Mode Suppression**: Dark mode is strictly toggled off on `https://connect.det.wa.edu.au/login` (removing `.connectea-dark` and updating storage to `light`) to prevent broken styles on the account selector.
 
 ## 3. Sidebar & Workspace Geometry
 - **Toggle Handle (`#connectify-sidebar-handle`)**: Viewport edge, width 38px, height 74px (expanded handle: 205px wide, 76px high).

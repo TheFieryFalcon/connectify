@@ -2756,6 +2756,35 @@ runTest('Test 113: Typography bolding parity between dark and light modes for ta
   assert.ok(themeCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong'), 'theme.css must bold stats panel strong elements in dark mode');
 });
 
+runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.edu.au/login', () => {
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+
+  // 1. Static checks: theme.js must check isLoginUrl and toggle off dark mode on the login page
+  assert.ok(themeJs.includes('const isLoginUrl ='), 'theme.js must define isLoginUrl');
+  assert.ok(themeJs.includes("url === 'https://connect.det.wa.edu.au/login'") || themeJs.includes("startsWith('https://connect.det.wa.edu.au/login')"), 'theme.js must verify connect login url');
+  assert.ok(themeJs.includes("if (isLoginUrl()) {\n    isDarkMode = false;\n    try {\n      localStorage.setItem(STORAGE_KEY, 'light');"), 'theme.js must toggle off dark mode on login URL');
+  assert.ok(themeJs.includes('window.ConnectifyTheme = {'), 'theme.js must export ConnectifyTheme helper');
+
+  // 2. Functional evaluation of isLoginUrl across login and normal URLs
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/login';
+  window.localStorage.setItem('connectea:theme:v1', 'dark');
+
+  eval(themeJs);
+
+  assert.strictEqual(window.ConnectifyTheme.isLoginUrl('https://connect.det.wa.edu.au/login'), true, 'https://connect.det.wa.edu.au/login must be recognized as login URL');
+  assert.strictEqual(window.ConnectifyTheme.isLoginUrl('https://connect.det.wa.edu.au/login/'), true, 'https://connect.det.wa.edu.au/login/ must be recognized as login URL');
+  assert.strictEqual(window.ConnectifyTheme.isLoginUrl('https://connect.det.wa.edu.au/login?dest=home'), true, 'login URL with query params must be recognized as login URL');
+  assert.strictEqual(window.ConnectifyTheme.isLoginUrl('https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines'), false, 'assessment-outlines must not be login URL');
+  assert.strictEqual(window.ConnectifyTheme.isLoginUrl('https://connect.det.wa.edu.au/classes'), false, 'classes must not be login URL');
+
+  // 3. Functional verification of dark mode suppression and storage toggle off on login page
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'light', 'storage must be toggled to light on login page');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'connectea-dark must not be on documentElement on login page');
+  assert.strictEqual(document.body?.classList.contains('connectea-dark'), false, 'connectea-dark must not be on body on login page');
+  assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false on login page');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

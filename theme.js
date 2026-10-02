@@ -13,9 +13,32 @@
   const STORAGE_KEY = 'connectea:theme:v1';
   let isDarkMode = false;
 
+  const isLoginUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
+    try {
+      const loc = new URL(url);
+      return loc.hostname === 'connect.det.wa.edu.au' && (
+        loc.pathname === '/login' ||
+        loc.pathname.startsWith('/login/')
+      );
+    } catch {
+      return typeof url === 'string' && (
+        url === 'https://connect.det.wa.edu.au/login' ||
+        url.startsWith('https://connect.det.wa.edu.au/login')
+      );
+    }
+  };
+
   try {
     isDarkMode = localStorage.getItem(STORAGE_KEY) === 'dark';
   } catch {}
+
+  // Toggle off dark mode immediately if the URL is https://connect.det.wa.edu.au/login
+  if (isLoginUrl()) {
+    isDarkMode = false;
+    try {
+      localStorage.setItem(STORAGE_KEY, 'light');
+    } catch {}
+  }
 
   // Apply dark mode class immediately to avoid any initial page flash
   document.documentElement.classList.toggle('connectea-dark', isDarkMode);
@@ -73,6 +96,10 @@
 
   function updateTogglePosition(forceReset = false) {
     cleanupDuplicateButtons();
+    if (isLoginUrl()) {
+      if (toggleButton.parentElement) toggleButton.remove();
+      return;
+    }
     if (forceReset) headerRightInset = null;
     const nav = document.querySelector('.cvr-c-primary-navigation');
     if (!nav) {
@@ -137,7 +164,7 @@
    * Does NOT touch el.style directly, ensuring zero flickering and zero MutationObserver feedback loops.
    */
   function adaptSurfaces() {
-    if (!isDarkMode) return;
+    if (!isDarkMode || isLoginUrl()) return;
 
     try {
       const surfaceCandidates = document.body.querySelectorAll(
@@ -171,6 +198,12 @@
   }
 
   function applyTheme(isDark) {
+    if (isLoginUrl()) {
+      isDark = false;
+      try {
+        localStorage.setItem(STORAGE_KEY, 'light');
+      } catch {}
+    }
     isDarkMode = isDark;
     document.documentElement.classList.toggle('connectea-dark', isDarkMode);
     if (document.body) {
@@ -200,6 +233,11 @@
     if (now - lastToggleTime < 300) return; // 300ms debounce
     lastToggleTime = now;
 
+    if (isLoginUrl()) {
+      applyTheme(false);
+      return;
+    }
+
     // Use current DOM state as ground truth to prevent any desync
     const isCurrentlyDark = document.documentElement.classList.contains('connectea-dark');
     const nextDark = !isCurrentlyDark;
@@ -213,7 +251,7 @@
   function scheduleAdaptSurfaces() {
     clearTimeout(adaptTimer);
     adaptTimer = setTimeout(() => {
-      if (isDarkMode) adaptSurfaces();
+      if (isDarkMode && !isLoginUrl()) adaptSurfaces();
     }, 400);
   }
 
@@ -224,6 +262,13 @@
     syncScheduled = true;
     requestAnimationFrame(() => {
       syncScheduled = false;
+      if (isLoginUrl()) {
+        if (isDarkMode || document.documentElement.classList.contains('connectea-dark')) {
+          applyTheme(false);
+        }
+        if (toggleButton.parentElement) toggleButton.remove();
+        return;
+      }
       cleanupDuplicateButtons();
       const nav = document.querySelector('.cvr-c-primary-navigation');
       if (!nav || toggleButton.parentElement !== nav || !toggleButton.isConnected) {
@@ -261,7 +306,11 @@
   window.addEventListener('resize', () => updateTogglePosition(true));
   window.addEventListener('storage', e => {
     if (e.key === STORAGE_KEY && e.newValue) {
-      applyTheme(e.newValue === 'dark');
+      if (isLoginUrl()) {
+        applyTheme(false);
+      } else {
+        applyTheme(e.newValue === 'dark');
+      }
     }
   });
 
@@ -270,6 +319,12 @@
   if (isDarkMode) adaptSurfaces();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
+      if (isLoginUrl()) {
+        isDarkMode = false;
+        try {
+          localStorage.setItem(STORAGE_KEY, 'light');
+        } catch {}
+      }
       if (document.body) {
         document.body.classList.toggle('connectea-dark', isDarkMode);
       }
@@ -281,6 +336,11 @@
   let mountPollCount = 0;
   const mountPollInterval = setInterval(() => {
     mountPollCount++;
+    if (isLoginUrl()) {
+      if (toggleButton.parentElement) toggleButton.remove();
+      clearInterval(mountPollInterval);
+      return;
+    }
     const nav = document.querySelector('.cvr-c-primary-navigation');
     if (nav && toggleButton.parentElement !== nav) {
       updateTogglePosition(true);
@@ -289,4 +349,10 @@
       clearInterval(mountPollInterval);
     }
   }, 100);
+
+  window.ConnectifyTheme = {
+    isLoginUrl,
+    isDarkMode: () => isDarkMode,
+    applyTheme
+  };
 })();
