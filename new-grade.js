@@ -159,6 +159,11 @@
     if (subjectName && window.ConnectifyData?.unmarkSubjectStale) {
       window.ConnectifyData.unmarkSubjectStale(subjectName);
     }
+    if (subjectName && window.ConnectifyPredictorMath?.updatePredictionCache) {
+      try {
+        window.ConnectifyPredictorMath.updatePredictionCache(subjectName);
+      } catch {}
+    }
     if (window.ConnectifyData?.notifyResultsUpdated) {
       window.ConnectifyData.notifyResultsUpdated(card);
     }

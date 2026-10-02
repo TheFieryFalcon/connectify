@@ -115,6 +115,12 @@
       localStorage.setItem('connectea:task_type_overrides', JSON.stringify(overrides));
     } catch {}
 
+    if (window.ConnectifyPredictorMath?.updatePredictionCache) {
+      try {
+        window.ConnectifyPredictorMath.updatePredictionCache(cleanSubj);
+      } catch {}
+    }
+
     window.dispatchEvent(new CustomEvent('connectify-task-type-changed', {
       detail: { subject: cleanSubj, task: taskName, type }
     }));
@@ -266,6 +272,11 @@
     }
     if (window.ConnectifyWeakness?.renderChart) {
       window.ConnectifyWeakness.renderChart();
+    }
+    if (window.ConnectifyPredictorMath?.updatePredictionCache) {
+      try {
+        window.ConnectifyPredictorMath.updatePredictionCache();
+      } catch {}
     }
     window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
   }

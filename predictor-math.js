@@ -143,6 +143,12 @@
       } catch {}
     }
 
+    if (window.ConnectifyPredictorMath?.updatePredictionCache) {
+      window.ConnectifyPredictorMath.updatePredictionCache();
+    } else {
+      updatePredictionCache();
+    }
+
     window.dispatchEvent(new CustomEvent('connectify-baselines-updated', {
       detail: updatedBaselines
     }));
@@ -735,6 +741,62 @@
     return fresh;
   }
 
+  function clearSubjectPredictionCache(subjectName) {
+    if (!subjectName) return;
+    const cleanSubj = cleanSubject(subjectName).toLowerCase();
+    try {
+      const toRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('connectify:prediction:')) {
+          const lowerKey = k.toLowerCase();
+          if (lowerKey.includes(`:${cleanSubj}:`)) {
+            toRemove.push(k);
+          }
+        }
+      }
+      for (const k of toRemove) localStorage.removeItem(k);
+    } catch (e) {
+      console.warn('ConnectifyPredictorMath: failed to clear subject prediction cache', e);
+    }
+  }
+
+  function updatePredictionCache(subjectName = null) {
+    if (subjectName) {
+      clearSubjectPredictionCache(subjectName);
+    } else {
+      if (window.ConnectifyCache?.clearPredictorCache) {
+        window.ConnectifyCache.clearPredictorCache();
+      } else {
+        try {
+          const toRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && (k.startsWith('connectify:prediction:') || k === LEGACY_PREDICTION_VERSION_KEY)) {
+              toRemove.push(k);
+            }
+          }
+          for (const k of toRemove) localStorage.removeItem(k);
+        } catch {}
+      }
+    }
+
+    try {
+      const rawSubjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+      if (rawSubjects && rawSubjects.length > 0) {
+        populateChronologicalPredictions(rawSubjects, true);
+      }
+    } catch (e) {
+      console.warn('ConnectifyPredictorMath: failed to re-populate predictions', e);
+    }
+
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent('connectify-predictions-updated', {
+        detail: { subject: subjectName }
+      }));
+    }
+  }
+
   // --- OUTCOME EVALUATION (Vertical Bar Segments) ---
   /**
    * Evaluates actual score against prediction:
@@ -1147,6 +1209,8 @@
     getOrComputeTaskPrediction,
     isPredictionCacheCurrent,
     clearPredictionCache: () => window.ConnectifyCache?.clearPredictorCache?.(),
+    clearSubjectPredictionCache,
+    updatePredictionCache,
     hasParsableDate,
     resolveCustomDate,
     PREDICTOR_ALGO_VERSION,
@@ -1160,6 +1224,12 @@
         if (!isPredictionCacheCurrent()) {
           populateChronologicalPredictions();
         }
+      } catch (e) {}
+    });
+
+    window.addEventListener('connectify-task-type-changed', e => {
+      try {
+        updatePredictionCache(e?.detail?.subject);
       } catch (e) {}
     });
   }

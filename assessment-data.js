@@ -552,6 +552,12 @@
     const staleSet = getStaleSubjects();
     staleSet.add(normalize(subjectName).toLowerCase());
     saveStaleSubjects(staleSet);
+
+    if (window.ConnectifyPredictorMath?.clearSubjectPredictionCache) {
+      try {
+        window.ConnectifyPredictorMath.clearSubjectPredictionCache(subjectName);
+      } catch {}
+    }
   }
 
   function unmarkSubjectStale(subjectName) {
@@ -560,14 +566,24 @@
     const key = normalize(subjectName).toLowerCase();
     if (staleSet.has(key)) {
       staleSet.delete(key);
-      saveStaleSubjects(staleSet);
     }
+    for (const item of Array.from(staleSet)) {
+      if (key.includes(item) || item.includes(key)) {
+        staleSet.delete(item);
+      }
+    }
+    saveStaleSubjects(staleSet);
   }
 
   function isSubjectStale(subjectName) {
     if (!subjectName) return false;
     const staleSet = getStaleSubjects();
-    return staleSet.has(normalize(subjectName).toLowerCase());
+    const norm = normalize(subjectName).toLowerCase();
+    if (staleSet.has(norm)) return true;
+    for (const item of staleSet) {
+      if (norm.includes(item) || item.includes(norm)) return true;
+    }
+    return false;
   }
 
   /**
@@ -640,6 +656,11 @@
 
     if (isStale) {
       unmarkSubjectStale(subjectName);
+      if (window.ConnectifyPredictorMath?.updatePredictionCache) {
+        try {
+          window.ConnectifyPredictorMath.updatePredictionCache(subjectName);
+        } catch {}
+      }
     }
 
     saveSubjectsCache();

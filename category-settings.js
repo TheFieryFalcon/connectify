@@ -234,7 +234,7 @@
         <p class="cx-settings-desc" style="font-size:12px;margin:0 0 16px 0;">Customize the comma-separated keywords used to automatically detect your assessment types:</p>
         <div id="cx-categories-inputs"></div>
         <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
-           <button type="button" id="cx-cat-save" class="eds-c-button" style="background:#2ecc71;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Save Changes</button>
+           <button type="button" id="cx-cat-save" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Save Changes</button>
            <button type="button" id="cx-cat-reset" class="eds-c-button" style="background:#95a5a6;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;">Reset Defaults</button>
         </div>
       </section>
@@ -702,6 +702,12 @@
         window.ConnectifyTaskTypes.rescanAllAutoAssessments();
       } else {
         window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
+      }
+
+      if (window.ConnectifyPredictorMath?.updatePredictionCache) {
+        try {
+          window.ConnectifyPredictorMath.updatePredictionCache();
+        } catch {}
       }
 
       renderBaselines();

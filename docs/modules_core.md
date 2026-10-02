@@ -55,7 +55,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `readMark(row)`: Parses raw percentage score from `.cvr-c-task__mark` (supporting `%` and `X Out of Y`).
   - `readStats(row)`: Reads boxplot quantiles from DOM dataset bridge or Highcharts instance.
   - `createPanel(row, isOverall, key, estimatedSize, onCohortChange)`: Injects `.connectea-panel`, `.connectea-row-wrapper`, and `.connectea-type-select`.
-  - `render(...)`: Renders distribution text, $z$-score, standing, rank, and outcome bar. Memoizes row render state (`ui._memo`) and outcome segments (`bar._renderedKey`) to eliminate scroll jank.
+  - `render(...)`: Renders distribution text, $z$-score, standing, rank, and outcome bar. Memoizes row render state (`ui._memo` tracking `taskType` and baselines) and outcome segments (`bar._renderedKey`) to eliminate scroll jank.
 - **Export**: `window.ConnectifyCohortView`.
 
 #### [`cohort-stats.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-stats.js) (400 lines)
@@ -75,10 +75,11 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Role**: Manages assessment categories (Exam, Test, Application, Essay, Take-Home), student overrides, dynamic category colors, and cross-semester class custom categories.
 - **Key Functions**:
   - `categorizeTask(taskName, allLabels)`: Matches keywords against category definitions. Defaults to `'Take-Home'`.
+  - `saveTaskTypeOverride(subjectName, taskName, labelsKey, type)`: Updates task category override and synchronizes prediction cache.
   - `getEffectiveType(subjectName, task, labelsKey)`: Returns student manual override if set, otherwise returns automated categorization.
   - `getCustomCategoriesForClass(subjectName)` / `addCustomCategoryForClass(subjectName, categoryName)`: Persists custom categories per class so they appear in all assessment dropdowns in that class across Semesters 1 and 2.
   - `updateTypeSelect(select, ...)`: Updates the `<select class="connectea-type-select">` options and marks overridden selections.
-  - `rescanAllAutoAssessments()`: Re-categorizes all assessments set to Auto when categories or keywords change.
+  - `rescanAllAutoAssessments()`: Re-categorizes all assessments set to Auto when categories or keywords change and updates the prediction cache.
 - **Export**: `window.ConnectifyTaskTypes`.
 
 ---

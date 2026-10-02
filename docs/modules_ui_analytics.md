@@ -90,7 +90,7 @@ This document covers the user interface and analytics modules, including target 
   - General Preferences: "Auto-expand class tabs on page load" toggle (`connectify:auto_expand`), "General Cohort Size" input (default 500), and "ATAR Percentage" input (default 60%).
   - Renders category keyword inputs, `+ Add Category` button, and custom category deletion.
   - Synchronizes custom categories with `browser.storage.local` and `localStorage` (`cx-categories`).
-  - Automatically triggers `rescanAllAutoAssessments()` upon saving.
+  - Automatically triggers `rescanAllAutoAssessments()` and updates prediction cache upon saving. Save Changes matches Baselines in `#2563eb`.
 - **Export**: `window.ConnectifyCategorySettings`.
 
 #### [`predictor-math.js`](file:///Users/uwong/Downloads/2.1.14_0/predictor-math.js)
@@ -98,7 +98,7 @@ This document covers the user interface and analytics modules, including target 
 - **Key Functions**:
   - `applyLogarithmicCeiling(baseScore, delta)`: Tapers gains above 80% proportionally to headroom $\frac{100 - \text{Score}}{20}$.
   - `predictTask(subjectName, task, historical, baselines)`: Predicts Low/Mid/High and 10% breakout threshold ($1.10 \times \text{High}$).
-  - `populateChronologicalPredictions(subjects, force)`: Pre-populates prediction cache using version key `connectify:prediction_version`.
+  - `populateChronologicalPredictions(subjects, force)` / `updatePredictionCache(subject)`: Pre-populates and synchronizes prediction cache across category, baseline, and grade updates.
   - `getOrComputeTaskPrediction(subjectName, task, allSubjects)`: On-demand chronological computation for newly arrived tasks.
   - `evaluateOutcome(score, prediction)`: Maps score against predictions ($0..5$ segments). $>1.10\times\text{High}$ triggers secret Purple breakout.
   - `projectSubjectGrades(subjects)`: Deduplicates tasks, strictly hides 0% and NaN% tasks, prioritizes custom dates (`connectea:`, `connectify:`), suppresses unparsable dates, and projects marks.

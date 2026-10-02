@@ -2816,6 +2816,95 @@ runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.
   assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false for light mode user');
 });
 
+runTest('Test 115: Prediction cache updates on task category change, category settings save, baselines save, button color parity, and post-grade expansion sync', () => {
+  const catCode = fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8');
+  const typesCode = fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8');
+  const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  const assessCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const newGradeCode = fs.readFileSync(path.resolve(BASE_DIR, 'new-grade.js'), 'utf8');
+  const cohortViewCode = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+
+  // 1. Static checks:
+  // Button color parity: #cx-cat-save and baselines saveBtn must both use #2563eb
+  assert.ok(catCode.includes('id="cx-cat-save" class="eds-c-button" style="background:#2563eb;color:#fff;'), 'Category settings Save Changes button must use #2563eb background');
+  assert.ok(catCode.includes("saveBtn.style.background = '#2563eb'"), 'Baselines save button must use #2563eb background');
+
+  // Prediction cache update hooks:
+  assert.ok(predMathCode.includes('clearSubjectPredictionCache') && predMathCode.includes('updatePredictionCache'), 'predictor-math.js must export clearSubjectPredictionCache and updatePredictionCache');
+  assert.ok(predMathCode.includes("window.addEventListener('connectify-task-type-changed'"), 'predictor-math.js must listen for connectify-task-type-changed');
+  assert.ok(typesCode.includes('updatePredictionCache'), 'task-types.js must call updatePredictionCache');
+  assert.ok(catCode.includes('updatePredictionCache'), 'category-settings.js must call updatePredictionCache');
+  assert.ok(assessCode.includes('updatePredictionCache'), 'assessment-data.js must call updatePredictionCache upon stale expansion');
+  assert.ok(cohortViewCode.includes('memo.taskType === taskType'), 'cohort-view.js must include taskType in memoization check');
+
+  // 2. Functional evaluation of predictor-math.js updatePredictionCache & clearSubjectPredictionCache
+  eval(predMathCode);
+  assert.ok(typeof window.ConnectifyPredictorMath.clearSubjectPredictionCache === 'function', 'clearSubjectPredictionCache must be a function');
+  assert.ok(typeof window.ConnectifyPredictorMath.updatePredictionCache === 'function', 'updatePredictionCache must be a function');
+
+  // Set mock predictions in localStorage
+  localStorage.setItem('connectify:prediction:current:chemistry:t1', JSON.stringify({ mid: 70 }));
+  localStorage.setItem('connectify:prediction:current:physics:t1', JSON.stringify({ mid: 85 }));
+
+  // Clear single subject prediction cache
+  window.ConnectifyPredictorMath.clearSubjectPredictionCache('Chemistry');
+  assert.strictEqual(localStorage.getItem('connectify:prediction:current:chemistry:t1'), null, 'Chemistry prediction must be cleared');
+  assert.ok(localStorage.getItem('connectify:prediction:current:physics:t1'), 'Physics prediction must remain intact');
+
+  // 3. Functional verification: saving baselines updates prediction cache
+  let cacheUpdated = false;
+  const originalUpdate = window.ConnectifyPredictorMath.updatePredictionCache;
+  window.ConnectifyPredictorMath.updatePredictionCache = () => { cacheUpdated = true; };
+
+  window.ConnectifyPredictorMath.saveBaselines({ types: { Exam: 80 } });
+  assert.strictEqual(cacheUpdated, true, 'saveBaselines must trigger updatePredictionCache');
+
+  // 4. Functional verification: category change triggers updatePredictionCache
+  cacheUpdated = false;
+  eval(typesCode);
+  window.ConnectifyTaskTypes.saveTaskTypeOverride('Chemistry', 'Investigation 1', null, 'Exam');
+  assert.strictEqual(cacheUpdated, true, 'saveTaskTypeOverride must trigger updatePredictionCache');
+
+  cacheUpdated = false;
+  window.ConnectifyTaskTypes.rescanAllAutoAssessments();
+  assert.strictEqual(cacheUpdated, true, 'rescanAllAutoAssessments must trigger updatePredictionCache');
+
+  window.ConnectifyPredictorMath.updatePredictionCache = originalUpdate;
+
+  // 5. Functional verification: subject grade update marks subject stale and subsequent expansion refreshes cache
+  eval(assessCode);
+  eval(newGradeCode);
+
+  window.ConnectifyData.markSubjectStale('Methods');
+  assert.ok(window.ConnectifyData.isSubjectStale('Methods'), 'Methods must be marked stale');
+
+  let predUpdatedSubject = null;
+  window.ConnectifyPredictorMath.updatePredictionCache = (subj) => { predUpdatedSubject = subj; };
+
+  // Simulate expansion of stale card via scrapeSubjectTasks
+  const mockTile = new MockElement('div', 'eds-c-tile');
+  const mockTitle = new MockElement('div', 'eds-c-tile__title');
+  mockTitle.textContent = '12 Methods ATAR - Semester 1';
+  mockTile.appendChild(mockTitle);
+  const taskList = new MockElement('div', 'cvr-c-tasks');
+  const taskRow = new MockElement('div', 'cvr-c-task');
+  const d = new MockElement('div', 'cvr-c-task__details');
+  const l = new MockElement('span', 'v-label'); l.textContent = 'Topic Test 1';
+  d.appendChild(l);
+  const m = new MockElement('div', 'cvr-c-task__marks');
+  const mk = new MockElement('div', 'cvr-c-task__mark'); mk.textContent = '88%';
+  m.appendChild(mk);
+  taskRow.appendChild(d); taskRow.appendChild(m);
+  taskList.appendChild(taskRow);
+  mockTile.appendChild(taskList);
+
+  window.ConnectifyData.scrapeSubjectTasks(mockTile, true);
+  assert.strictEqual(window.ConnectifyData.isSubjectStale('Methods'), false, 'Methods must be unmarked from stale after expansion');
+  assert.ok(predUpdatedSubject && predUpdatedSubject.includes('Methods'), 'Expansion of stale subject must update prediction cache for that subject');
+
+  window.ConnectifyPredictorMath.updatePredictionCache = originalUpdate;
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

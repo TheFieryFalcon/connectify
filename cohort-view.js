@@ -337,9 +337,13 @@
     ui.estimatedSize = estimatedSize;
 
     // If assessment row, keep dropdown in sync
-    if (!isOverall && ui.typeSelect) {
+    let taskType = null;
+    if (!isOverall) {
       const meta = types().getTaskMeta(row);
-      types().updateTypeSelect(ui.typeSelect, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
+      taskType = types().getEffectiveType(meta.subjectName, meta.taskName, meta.labelsKey);
+      if (ui.typeSelect) {
+        types().updateTypeSelect(ui.typeSelect, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
+      }
     }
 
     if (isOverall) {
@@ -365,11 +369,11 @@
     const userSize = estimator().loadCohortSize(key);
     const cohortSize = userSize ?? estimatedSize;
 
-    let baselinesSig = 0;
+    let baselinesSig = '';
     if (window.ConnectifyPredictorMath?.getBaselines) {
       try {
         const b = window.ConnectifyPredictorMath.getBaselines();
-        baselinesSig = (Object.keys(b?.types || {}).length * 1000) + Object.keys(b?.subjects || {}).length;
+        baselinesSig = JSON.stringify(b || {});
       } catch {}
     }
 
@@ -384,6 +388,7 @@
       memo.key === key &&
       memo.isOverall === isOverall &&
       memo.baselinesSig === baselinesSig &&
+      memo.taskType === taskType &&
       ui.wrapper?.isConnected
     ) {
       return;
@@ -428,7 +433,7 @@
           }
         } catch (e) {}
       }
-      ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig };
+      ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType };
       return;
     }
 
@@ -568,7 +573,7 @@
         ui.result,
         Number.isFinite(mark) ? 'Rank and z-score unavailable' : 'Not marked · Rank and z-score unavailable'
       );
-      ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig };
+      ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType };
       return;
     }
 
@@ -606,7 +611,7 @@
     }
 
     setHTML(ui.result, parts.filter(Boolean).join('  •  '));
-    ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig };
+    ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType };
   }
 
   let floatingTooltipEl = null;
