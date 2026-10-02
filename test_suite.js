@@ -2905,6 +2905,66 @@ runTest('Test 115: Prediction cache updates on task category change, category se
   window.ConnectifyPredictorMath.updatePredictionCache = originalUpdate;
 });
 
+runTest('Test 116: Accordion collapse performance guards, observer muting, cards.length check, and class 1-3 compound bar and task meta resolution', () => {
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  const atarFeatJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-features.js'), 'utf8');
+  const domSweepJs = fs.readFileSync(path.resolve(BASE_DIR, 'dom-sweeper.js'), 'utf8');
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const compJs = fs.readFileSync(path.resolve(BASE_DIR, 'compound-progress.js'), 'utf8');
+  const typesJs = fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8');
+
+  // 1. Verify theme.js mutes during accordion animations and bulk expanding
+  assert.ok(themeJs.includes('if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;'), 'theme.js MutationObserver and scheduleAdaptSurfaces must mute during accordion animation');
+
+  // 2. Verify atar-features.js mutes during accordion animation and bulk expand
+  assert.ok(atarFeatJs.includes('if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;'), 'atar-features.js MutationObserver must mute during accordion animation');
+
+  // 3. Verify dom-sweeper.js mutes during accordion animation and bulk expand
+  assert.ok(domSweepJs.includes('if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;'), 'dom-sweeper.js MutationObserver must mute during accordion animation');
+
+  // 4. Verify assessment-data.js expandMutationObserver mutes during animation and bulk expand
+  assert.ok(assessJs.includes('if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;'), 'assessment-data.js expandMutationObserver must mute during accordion animation');
+
+  // 5. Verify triggerAccordionAnimationGuard only invokes cohort, compound, and chart updates when cards.length > 0
+  assert.ok(assessJs.includes('if (cards.length > 0)'), 'triggerAccordionAnimationGuard must guard updates behind cards.length > 0 check');
+
+  // 6. Verify task-types.js getTaskMeta supports .cvr-c-tile and generic card containers
+  assert.ok(typesJs.includes('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'), 'task-types.js getTaskMeta must support .cvr-c-tile containers');
+
+  // 7. Verify compound-progress.js queries generic card and title elements
+  assert.ok(compJs.includes('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'), 'compound-progress.js must query generic card containers');
+  assert.ok(compJs.includes('.cvr-c-tile__title'), 'compound-progress.js must search cvr-c-tile__title');
+
+  // 8. Functional test: task-types.js getTaskMeta extracts subject name from .cvr-c-tile
+  eval(typesJs);
+  const cvrTile = document.createElement('div');
+  cvrTile.className = 'cvr-c-tile';
+  const cvrHeader = document.createElement('div');
+  cvrHeader.className = 'cvr-c-tile__header';
+  const cvrTitle = document.createElement('span');
+  cvrTitle.className = 'cvr-c-tile__title';
+  cvrTitle.textContent = 'Chemistry ATAR Year 12 - Semester 1';
+  cvrHeader.appendChild(cvrTitle);
+  cvrTile.appendChild(cvrHeader);
+  const row = document.createElement('div');
+  row.className = 'cvr-c-task';
+  const details = document.createElement('div');
+  details.className = 'cvr-c-task__details';
+  const label = document.createElement('span');
+  label.className = 'v-label';
+  label.textContent = 'Experiment 1';
+  details.appendChild(label);
+  row.appendChild(details);
+  cvrTile.appendChild(row);
+  document.body.appendChild(cvrTile);
+
+  const meta = window.ConnectifyTaskTypes.getTaskMeta(row);
+  assert.ok(meta, 'getTaskMeta should return metadata for cvr-c-tile row');
+  assert.ok(meta.subjectName.includes('Chemistry'), 'getTaskMeta must extract subject name from cvr-c-tile');
+
+  cvrTile.remove();
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

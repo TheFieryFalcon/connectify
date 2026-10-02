@@ -258,6 +258,7 @@
 
     if (typeof MutationObserver !== 'undefined' && document.body) {
       new MutationObserver(() => {
+        if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
         if (!hasAutoExpanded) {
           checkStartupAutoExpand();
         }

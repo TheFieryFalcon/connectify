@@ -166,6 +166,7 @@
 
   // Observe SPA navigation mutations
   const observer = new MutationObserver(mutations => {
+    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
     let relevantChange = false;
     for (const m of mutations) {
       if (m.addedNodes.length > 0 || m.removedNodes.length > 0) {

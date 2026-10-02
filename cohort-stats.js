@@ -341,6 +341,7 @@
 
   const observer = new MutationObserver(records => {
     if (window.ConnectifyIsAccordionAnimating) return;
+    if (window.ConnectifyIsBulkExpanding) return;
     let shouldRun = false;
     for (const r of records) {
       if (

@@ -74,31 +74,66 @@
     return '#999';
   }
 
+  const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+
+  function cleanSubject(subjectName) {
+    return (subjectName || '')
+      .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
+      .replace(/\s*[-–—]\s*Sem\s*[12].*$/i, '')
+      .replace(/\bATAR\b/gi, '')
+      .replace(/\bYear\s*\d+\b/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function updateCompoundBars() {
     if (!window.ConnectifyData?.collect) return;
 
     const subjects = window.ConnectifyData.collect(true);
     subjects.forEach(subject => {
-      const matchingTitles = Array.from(document.querySelectorAll('.eds-c-tile__title')).filter(t => (t.textContent || '').includes(subject.name));
+      const allTitleEls = Array.from(
+        document.querySelectorAll(
+          '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading'
+        )
+      );
+      const subjNorm = cleanSubject(subject.name).toLowerCase();
+      const matchingTitles = allTitleEls.filter(t => {
+        const text = normalize(t.textContent);
+        const tNorm = cleanSubject(text).toLowerCase();
+        return text.includes(subject.name) || tNorm === subjNorm || (subjNorm && tNorm.includes(subjNorm)) || (tNorm && subjNorm.includes(tNorm));
+      });
       matchingTitles.forEach(cardTitle => {
-        const card = cardTitle.closest('.eds-c-tile');
+        const card = cardTitle.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
         if (!card) return;
 
-        const header = card.querySelector('.eds-c-tile__header');
+        const header = card.querySelector(
+          '.eds-c-tile__header, .cvr-c-tile__header, .c-tile__header, [class*="tile__header"], [class*="card-header"]'
+        ) || cardTitle.parentElement;
         if (!header) return;
 
-        const cardSemesterMatch = (cardTitle.textContent || '').match(/Semester\s*([12])/i);
+        const normTitle = normalize(cardTitle.textContent || '');
+        const cardSemesterMatch = normTitle.match(/\bSemester\s*([12])\b/i) || normTitle.match(/\bSem\s*([12])\b/i);
         const cardSemester = cardSemesterMatch ? +cardSemesterMatch[1] : null;
 
-        const hasSem2Tasks = subject.tasks.some(t => t.semester === 2);
+        const hasSem2Tasks = subject.tasks.some(
+          t => t.semester === 2 || (t.caption && /Term\s*[34]/i.test(t.caption)) || (t.order !== null && t.order > 24)
+        );
 
         // Semester 1 cards display only Semester 1 tasks.
         // Semester 2 cards encapsulate tasks of BOTH semesters for cumulative annual progress,
         // motivating students by visualizing full progress to date.
+        const isSem1Task = t => {
+          if (t.semester === 2) return false;
+          if (t.semester === 1) return true;
+          if (t.caption && /Term\s*[34]/i.test(t.caption)) return false;
+          if (t.caption && /Term\s*[12]/i.test(t.caption)) return true;
+          return (t.semester || 1) === 1;
+        };
+
         const sortedTasks = [...subject.tasks]
           .filter(t => {
             if (!t || !Number.isFinite(t.weight) || t.weight <= 0) return false;
-            if (cardSemester === 1) return (t.semester || 1) === 1;
+            if (cardSemester === 1) return isSem1Task(t);
             if (cardSemester === 2) {
               if (!hasSem2Tasks) return false;
               return t.semester === 1 || t.semester === 2;
@@ -200,7 +235,7 @@
   let updateTimer = null;
   function scheduleUpdate() {
     clearTimeout(updateTimer);
-    if (window.ConnectifyIsAccordionAnimating) {
+    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) {
       updateTimer = setTimeout(scheduleUpdate, 200);
       return;
     }
@@ -218,6 +253,7 @@
 
   const observer = new MutationObserver(records => {
     if (window.ConnectifyIsAccordionAnimating) return;
+    if (window.ConnectifyIsBulkExpanding) return;
     let shouldRun = false;
     for (const r of records) {
       if (r.target?.classList?.contains('cx-compound-progress-container') || r.target?.closest?.('.cx-compound-progress-container')) {
@@ -248,7 +284,7 @@
   }
 
   setInterval(() => {
-    if (window.ConnectifyIsAccordionAnimating) return;
+    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
     if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
     updateCompoundBars();
   }, 2500);

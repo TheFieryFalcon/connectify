@@ -143,6 +143,7 @@
   // Watch for dynamic Highcharts chart creation in Connect
   const observer = new MutationObserver(records => {
     if (window.ConnectifyIsAccordionAnimating) return;
+    if (window.ConnectifyIsBulkExpanding) return;
     let shouldSync = false;
     for (const record of records) {
       if (

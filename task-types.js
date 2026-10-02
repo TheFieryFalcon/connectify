@@ -194,8 +194,9 @@
   }
 
   function getTaskMeta(row) {
-    const card = row.closest('.eds-c-tile');
-    const cardTitle = normalize(card?.querySelector('.eds-c-tile__title')?.textContent || '');
+    const card = row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
+    const titleEl = card?.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading');
+    const cardTitle = normalize(titleEl?.textContent || '');
     const subjectName = cleanSubject(cardTitle);
     const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
       .map(e => normalize(e.textContent))

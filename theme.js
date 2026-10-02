@@ -275,8 +275,10 @@
 
   let adaptTimer = null;
   function scheduleAdaptSurfaces() {
+    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
     clearTimeout(adaptTimer);
     adaptTimer = setTimeout(() => {
+      if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
       if (isDarkMode && !isLoginUrl()) adaptSurfaces();
     }, 400);
   }
@@ -320,6 +322,7 @@
   };
 
   new MutationObserver(records => {
+    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
     const shouldUpdate = records.some(record => {
       if (record.target === toggleButton || record.target.parentElement?.closest('#connectea-theme-toggle') || record.target.closest?.('#connectify-sidebar')) {
         return false;

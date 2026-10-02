@@ -857,6 +857,8 @@
     if (headings.length === 0) return;
 
     isBulkExpanding = true;
+    window.ConnectifyIsBulkExpanding = true;
+    window.ConnectifyIsAccordionAnimating = true;
     let clickedAny = false;
     let index = 0;
     const total = headings.length;
@@ -965,6 +967,8 @@
                       updateProgress(100, 'Ready! 100%');
                     } finally {
                       isBulkExpanding = false;
+                      window.ConnectifyIsBulkExpanding = false;
+                      window.ConnectifyIsAccordionAnimating = false;
                       finishProgress();
                     }
                   };
@@ -978,16 +982,24 @@
                   }
                 } catch (e) {
                   isBulkExpanding = false;
+                  window.ConnectifyIsBulkExpanding = false;
+                  window.ConnectifyIsAccordionAnimating = false;
                   finishProgress();
                 }
               }, 40);
             } else {
               isBulkExpanding = false;
+              window.ConnectifyIsBulkExpanding = false;
               finishProgress();
+              setTimeout(() => {
+                window.ConnectifyIsAccordionAnimating = false;
+              }, 250);
             }
           } catch (err) {
             console.error('finalizeExpansion error:', err);
             isBulkExpanding = false;
+            window.ConnectifyIsBulkExpanding = false;
+            window.ConnectifyIsAccordionAnimating = false;
             finishProgress();
           }
         }
@@ -1056,14 +1068,16 @@
           notifyResultsUpdated(card);
         }
       }
-      if (window.ConnectifyCohort?.schedule) {
-        window.ConnectifyCohort.schedule(true);
-      }
-      if (window.ConnectifyCompoundProgress?.update) {
-        window.ConnectifyCompoundProgress.update();
-      }
-      if (window.ConnectifyDataSyncCharts) {
-        window.ConnectifyDataSyncCharts();
+      if (cards.length > 0) {
+        if (window.ConnectifyCohort?.schedule) {
+          window.ConnectifyCohort.schedule(true);
+        }
+        if (window.ConnectifyCompoundProgress?.update) {
+          window.ConnectifyCompoundProgress.update();
+        }
+        if (window.ConnectifyDataSyncCharts) {
+          window.ConnectifyDataSyncCharts();
+        }
       }
     }, duration);
   }
@@ -1091,6 +1105,7 @@
 
   // Observe DOM additions inside subject tiles when expanded
   const expandMutationObserver = new MutationObserver(mutations => {
+    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
     let expandedCard = null;
     for (const m of mutations) {
       if (m.addedNodes.length > 0) {

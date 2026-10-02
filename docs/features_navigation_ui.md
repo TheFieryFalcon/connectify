@@ -73,7 +73,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 
 ### 7. Compound Subject Progress Bars
 - **Source Module**: [`compound-progress.js`](file:///Users/uwong/Downloads/2.1.14_0/compound-progress.js)
-- **DOM Insertion**: Embedded in subject card headers (`.eds-c-tile__header`), below title (`.cx-compound-progress-container`).
+- **DOM Insertion**: Embedded in subject card headers (`.eds-c-tile__header`, `.cvr-c-tile__header`, `.c-tile__header`), below title (`.cx-compound-progress-container`).
 - **UI Appearance**: Multi-segmented horizontal bar (`height: 6px; border-radius: 3px;`) color-coded by category with completion status text.
 - **Functionality**: Proportional task weights; completed assessments opaque, pending translucent; hover tooltips; Semester 1 cards display Semester 1 tasks, while Semester 2 cards encapsulate tasks from both semesters for cumulative annual progress tracking; reactive to category changes.
 

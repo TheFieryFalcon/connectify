@@ -58,10 +58,10 @@ This document covers the user interface and analytics modules, including target 
   - `cleanupImprovementArrows()`: Purges obsolete improvement indicators and un-nests panels.
 - **Export**: `window.ConnectifyProgress`.
 
-#### [`compound-progress.js`](file:///Users/uwong/Downloads/2.1.14_0/compound-progress.js) (230 lines)
+#### [`compound-progress.js`](file:///Users/uwong/Downloads/2.1.14_0/compound-progress.js) (292 lines)
 - **Role**: Injects multi-category weighted completion progress bars into each subject card header.
 - **Key Functions**:
-  - Renders horizontal segmented bar (`.cx-compound-bar`) where each segment represents a task weight color-coded by category. Isolates Semester 1 and Semester 2 tasks, with segments ordered chronologically.
+  - Renders horizontal segmented bar (`.cx-compound-bar`) across generic tile containers (`.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile`). Partitions Semester 1 vs Semester 2 chronologically and mutes during accordion animations.
   - Reactive updates on `connectify-task-type-changed` and `connectify-settings-updated` without page reloads.
 - **Export**: `window.ConnectifyCompoundProgress`.
 
