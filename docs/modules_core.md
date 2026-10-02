@@ -25,7 +25,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `cohortMean(row)`: Extracts cohort mean from `dataset.connectifyStats` or `Highcharts` instance with fallback to 5-number weighted mean.
   - `orderHint(text)`: Converts Term/Week strings into chronological numeric sequences.
   - `triggerAccordionAnimationGuard(duration)`: Sets `window.ConnectifyIsAccordionAnimating` during accordion transitions, muting background observers.
-  - `expandAll(expand)`: Staggered accordion expander across animation frames. Shows `#cx-expand-progress` progress pill on bulk expand and pre-caches chronological predictions across all tasks.
+  - `expandAll(expand)`: Staggered accordion expander deduplicating headings by card container. Paces clicks across frames, guards against re-entrant scraping loops, memoizes baselines, and pre-caches chronological predictions.
   - `ConnectifyCache`: Subsystem cache manager (`VERSIONS`, `KEYS`, `clearPredictorCache`, `clearResultsCache`, `clearSettingsCache`, `clearCohortCache`, `checkAndInvalidateAll`).
 - **Export**: `window.ConnectifyData`, `window.ConnectifyCache`.
 

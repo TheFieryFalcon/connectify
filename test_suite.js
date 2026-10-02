@@ -2965,6 +2965,68 @@ runTest('Test 116: Accordion collapse performance guards, observer muting, cards
   cvrTile.remove();
 });
 
+runTest('Test 117: Expand all deduplication, re-entrancy protection, baseline memoization, and non-blocking bulk expand', () => {
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+
+  // 1. Verify expandAll deduplicates headings by card container
+  assert.ok(assessJs.includes('const seenCards = new Set()'), 'expandAll must deduplicate headings by card container');
+  assert.ok(assessJs.includes('if (card && seenCards.has(card)) continue;'), 'expandAll must skip duplicate headings from the same card container');
+
+  // 2. Verify re-entrancy locks and batching to prevent mutual recursion/freeze at 95%
+  assert.ok(predMathJs.includes('let isUpdatingPredictionCache = false;'), 'predictor-math.js must maintain isUpdatingPredictionCache re-entrancy lock');
+  assert.ok(assessJs.includes('let isCollecting = false;'), 'assessment-data.js must maintain isCollecting re-entrancy lock');
+  assert.ok(assessJs.includes('const updatedStaleSubjects = new Set();'), 'collect must batch stale subjects during scrape passes');
+  assert.ok(assessJs.includes('if (updatedStaleSubjects.size > 0 && window.ConnectifyPredictorMath?.updatePredictionCache)'), 'collect must update prediction cache once after all cards are processed');
+
+  // 3. Verify getBaselines memoization and cache busting
+  assert.ok(predMathJs.includes('let cachedBaselines = null;'), 'predictor-math.js must cache baselines');
+  assert.ok(predMathJs.includes('if (cachedBaselines) return cachedBaselines;'), 'getBaselines must return cachedBaselines when available');
+  assert.ok(predMathJs.includes("window.addEventListener('connectify-baselines-updated'"), 'predictor-math.js must invalidate cachedBaselines on connectify-baselines-updated event');
+
+  // 4. Verify stale normalization guards against empty strings
+  assert.ok(assessJs.includes('if (cleanItem &&'), 'isSubjectStale must guard against matching empty string item');
+
+  // 5. Functional test: expandAll deduplicates cards so each card accordion is clicked once
+  eval(assessJs);
+  const container = document.createElement('div');
+  container.id = 'test-expand-container';
+
+  for (let i = 1; i <= 3; i++) {
+    const card = document.createElement('div');
+    card.className = 'cvr-c-tile';
+    const h1 = document.createElement('div');
+    h1.className = 'cvr-c-accordion__section-heading';
+    h1.textContent = 'Show details';
+    const h2 = document.createElement('div');
+    h2.className = 'eds-c-accordion__section-heading';
+    h2.textContent = 'Show details';
+    card.appendChild(h1);
+    card.appendChild(h2);
+    container.appendChild(card);
+  }
+  document.body.appendChild(container);
+
+  let clickedCount = 0;
+  const originalClick = HTMLElement.prototype.click;
+  HTMLElement.prototype.click = function() {
+    if (this.textContent === 'Show details') {
+      clickedCount++;
+    }
+  };
+
+  try {
+    window.ConnectifyIsBulkExpanding = false;
+    window.ConnectifyData.expandAll(true);
+    assert.strictEqual(clickedCount, 1, 'First card heading clicked immediately');
+  } finally {
+    HTMLElement.prototype.click = originalClick;
+    container.remove();
+    window.ConnectifyIsBulkExpanding = false;
+    window.ConnectifyIsAccordionAnimating = false;
+  }
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

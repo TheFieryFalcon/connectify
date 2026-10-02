@@ -80,6 +80,8 @@
     let types = {};
     let subjects = {};
 
+    if (cachedBaselines) return cachedBaselines;
+
     const candidateTypeKeys = [
       'connectea:baseline:types',
       'connectea:baselines:types',
@@ -124,10 +126,14 @@
       } catch {}
     }
 
-    return { types, subjects };
+    cachedBaselines = { types, subjects };
+    return cachedBaselines;
   }
 
+  let cachedBaselines = null;
+
   function saveBaselines(updatedBaselines = {}) {
+    cachedBaselines = null;
     const account = getAccountKey();
     const typeKey = `connectify:baseline:types:${account}`;
     const subjectKey = `connectify:baseline:subjects:${account}`;
@@ -761,39 +767,47 @@
     }
   }
 
+  let isUpdatingPredictionCache = false;
+
   function updatePredictionCache(subjectName = null) {
-    if (subjectName) {
-      clearSubjectPredictionCache(subjectName);
-    } else {
-      if (window.ConnectifyCache?.clearPredictorCache) {
-        window.ConnectifyCache.clearPredictorCache();
-      } else {
-        try {
-          const toRemove = [];
-          for (let i = 0; i < localStorage.length; i++) {
-            const k = localStorage.key(i);
-            if (k && (k.startsWith('connectify:prediction:') || k === LEGACY_PREDICTION_VERSION_KEY)) {
-              toRemove.push(k);
-            }
-          }
-          for (const k of toRemove) localStorage.removeItem(k);
-        } catch {}
-      }
-    }
-
+    if (isUpdatingPredictionCache) return;
+    isUpdatingPredictionCache = true;
     try {
-      const rawSubjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
-      if (rawSubjects && rawSubjects.length > 0) {
-        populateChronologicalPredictions(rawSubjects, true);
+      if (subjectName) {
+        clearSubjectPredictionCache(subjectName);
+      } else {
+        if (window.ConnectifyCache?.clearPredictorCache) {
+          window.ConnectifyCache.clearPredictorCache();
+        } else {
+          try {
+            const toRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i);
+              if (k && (k.startsWith('connectify:prediction:') || k === LEGACY_PREDICTION_VERSION_KEY)) {
+                toRemove.push(k);
+              }
+            }
+            for (const k of toRemove) localStorage.removeItem(k);
+          } catch {}
+        }
       }
-    } catch (e) {
-      console.warn('ConnectifyPredictorMath: failed to re-populate predictions', e);
-    }
 
-    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
-      window.dispatchEvent(new CustomEvent('connectify-predictions-updated', {
-        detail: { subject: subjectName }
-      }));
+      try {
+        const rawSubjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+        if (rawSubjects && rawSubjects.length > 0) {
+          populateChronologicalPredictions(rawSubjects, true);
+        }
+      } catch (e) {
+        console.warn('ConnectifyPredictorMath: failed to re-populate predictions', e);
+      }
+
+      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+        window.dispatchEvent(new CustomEvent('connectify-predictions-updated', {
+          detail: { subject: subjectName }
+        }));
+      }
+    } finally {
+      isUpdatingPredictionCache = false;
     }
   }
 
@@ -1225,6 +1239,16 @@
           populateChronologicalPredictions();
         }
       } catch (e) {}
+    });
+
+    window.addEventListener('connectify-baselines-updated', () => {
+      cachedBaselines = null;
+    });
+
+    window.addEventListener('storage', e => {
+      if (e.key && (e.key.includes('baseline') || e.key.includes('prediction'))) {
+        cachedBaselines = null;
+      }
     });
 
     window.addEventListener('connectify-task-type-changed', e => {

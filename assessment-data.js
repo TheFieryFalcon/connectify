@@ -563,12 +563,13 @@
   function unmarkSubjectStale(subjectName) {
     if (!subjectName) return;
     const staleSet = getStaleSubjects();
-    const key = normalize(subjectName).toLowerCase();
+    const key = normalize(subjectName).toLowerCase().replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
     if (staleSet.has(key)) {
       staleSet.delete(key);
     }
     for (const item of Array.from(staleSet)) {
-      if (key.includes(item) || item.includes(key)) {
+      const cleanItem = normalize(item).toLowerCase().replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+      if (cleanItem && (key === cleanItem || key.includes(cleanItem) || cleanItem.includes(key))) {
         staleSet.delete(item);
       }
     }
@@ -578,10 +579,15 @@
   function isSubjectStale(subjectName) {
     if (!subjectName) return false;
     const staleSet = getStaleSubjects();
-    const norm = normalize(subjectName).toLowerCase();
+    if (staleSet.size === 0) return false;
+    const norm = normalize(subjectName).toLowerCase().replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+    if (!norm) return false;
     if (staleSet.has(norm)) return true;
     for (const item of staleSet) {
-      if (norm.includes(item) || item.includes(norm)) return true;
+      const cleanItem = normalize(item).toLowerCase().replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
+      if (cleanItem && (norm === cleanItem || norm.includes(cleanItem) || cleanItem.includes(norm))) {
+        return true;
+      }
     }
     return false;
   }
@@ -589,7 +595,7 @@
   /**
    * Scrapes tasks from a single subject card and updates subjectsCache.
    */
-  function scrapeSubjectTasks(card, forceRefresh = false) {
+  function scrapeSubjectTasks(card, forceRefresh = false, updatedStaleSubjects = null) {
     if (!card) return;
     const parsed = parseCardSubjectTasks(card);
     if (!parsed) return;
@@ -656,7 +662,9 @@
 
     if (isStale) {
       unmarkSubjectStale(subjectName);
-      if (window.ConnectifyPredictorMath?.updatePredictionCache) {
+      if (updatedStaleSubjects) {
+        updatedStaleSubjects.add(subjectName);
+      } else if (window.ConnectifyPredictorMath?.updatePredictionCache) {
         try {
           window.ConnectifyPredictorMath.updatePredictionCache(subjectName);
         } catch {}
@@ -698,18 +706,34 @@
    * @param {boolean} forceRefresh - Whether to force re-scraping from the DOM
    * @returns {Array<{name: string, tasks: Array<Object>}>} Array of subject records
    */
+  let isCollecting = false;
   function collect(includePending = false, forceRefresh = false) {
+    if (isCollecting) {
+      return formatCollectedSubjects(includePending);
+    }
     const staleSet = getStaleSubjects();
     // Use the cache if there is a cache, no forced refresh, and no subjects are marked stale
     if (!forceRefresh && staleSet.size === 0 && hasCachedSubjects()) {
       return formatCollectedSubjects(includePending);
     }
 
-    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card]'))
-      .sort((a, b) => parseSemester(a) - parseSemester(b));
+    isCollecting = true;
+    const updatedStaleSubjects = new Set();
+    try {
+      const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'))
+        .sort((a, b) => parseSemester(a) - parseSemester(b));
 
-    for (const card of cards) {
-      scrapeSubjectTasks(card, forceRefresh);
+      for (const card of cards) {
+        scrapeSubjectTasks(card, forceRefresh, updatedStaleSubjects);
+      }
+    } finally {
+      isCollecting = false;
+    }
+
+    if (updatedStaleSubjects.size > 0 && window.ConnectifyPredictorMath?.updatePredictionCache) {
+      try {
+        window.ConnectifyPredictorMath.updatePredictionCache();
+      } catch {}
     }
 
     return formatCollectedSubjects(includePending);
@@ -848,11 +872,21 @@
   function expandAll(expand = true) {
     if (isBulkExpanding) return;
     const pattern = expand ? /show details/i : /hide details/i;
-    const headings = Array.from(
+    const rawHeadings = Array.from(
       document.querySelectorAll(
         '.eds-c-tile .eds-c-accordion__section-heading, .cvr-c-tile .eds-c-accordion__section-heading, .cvr-c-tile .cvr-c-accordion__section-heading, .eds-c-accordion__section-heading, .cvr-c-accordion__section-heading'
       )
     ).filter(h => pattern.test(h.textContent));
+
+    // Deduplicate by card: each card must only have its single canonical accordion heading clicked once
+    const seenCards = new Set();
+    const headings = [];
+    for (const h of rawHeadings) {
+      const card = (typeof h.closest === 'function' ? h.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') : null) || h.parentElement;
+      if (card && seenCards.has(card)) continue;
+      if (card) seenCards.add(card);
+      headings.push(h);
+    }
 
     if (headings.length === 0) return;
 
@@ -951,15 +985,7 @@
                   }
                   const staleSet = getStaleSubjects();
                   if (staleSet.size > 0) {
-                    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card]'));
-                    for (const c of cards) {
-                      const cName = normalize(
-                        c.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent || ''
-                      ).replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
-                      if (isSubjectStale(cName)) {
-                        scrapeSubjectTasks(c, true);
-                      }
-                    }
+                    collect(true, true);
                   }
 
                   const completeFinalize = () => {
@@ -1014,17 +1040,17 @@
         const pollTimer = setInterval(() => {
           const elapsed = Date.now() - startTime;
           const allSettled = headings.every(h => {
-            const card = h.closest('.eds-c-tile, .cvr-c-tile') || h.parentElement;
+            const card = (typeof h.closest === 'function' ? h.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') : null) || h.parentElement;
             if (!card) return true;
             if (/show details/i.test(h.textContent)) return false;
-            return card.querySelectorAll('.cvr-c-task').length > 0 || elapsed > 2500;
+            return (typeof card.querySelectorAll === 'function' && card.querySelectorAll('.cvr-c-task').length > 0) || elapsed > 1500;
           });
 
-          if (allSettled || elapsed > 2500) {
+          if (allSettled || elapsed > 1500) {
             clearInterval(pollTimer);
             finalizeExpansion();
           }
-        }, 60);
+        }, 50);
         return;
       }
 
@@ -1035,13 +1061,20 @@
       }
 
       if (pattern.test(heading.textContent)) {
-        const btn = heading.querySelector('button, .v-button, [role="button"]') ||
-          (heading.matches('button, [role="button"]') ? heading : null);
+        const btn = (typeof heading.querySelector === 'function' ? heading.querySelector('button, .v-button, [role="button"]') : null) ||
+          (typeof heading.closest === 'function' ? heading.closest('button, [role="button"]') : null) ||
+          (typeof heading.matches === 'function' && heading.matches('button, [role="button"]') ? heading : null);
         if (btn) {
           btn.click();
+          try {
+            btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+          } catch {}
           clickedAny = true;
         } else {
           heading.click();
+          try {
+            heading.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+          } catch {}
           clickedAny = true;
         }
       }
