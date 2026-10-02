@@ -27,28 +27,16 @@ class MockElement {
       removeProperty: (prop) => { delete this.style[prop]; },
       getPropertyValue: (prop) => this.style[prop] || ''
     };
-    this.className = className;
-    this.id = '';
-    this.dataset = {};
-    this._attrs = {};
-    this.value = '';
-    this.textContent = '';
-    this.hidden = false;
-    this.isConnected = true;
-    this.clickCount = 0;
-    this.scrollCount = 0;
-    this._innerHTML = '';
+    this._classes = new Set(className ? className.split(/\s+/).filter(Boolean) : []);
     this.classList = {
-      _classes: new Set(className ? className.split(/\s+/).filter(Boolean) : []),
+      _classes: this._classes,
       add: (...classes) => {
-        classes.forEach(c => this.classList._classes.add(c));
-        this.className = Array.from(this.classList._classes).join(' ');
+        classes.forEach(c => this._classes.add(c));
       },
       remove: (...classes) => {
-        classes.forEach(c => this.classList._classes.delete(c));
-        this.className = Array.from(this.classList._classes).join(' ');
+        classes.forEach(c => this._classes.delete(c));
       },
-      contains: (c) => this.classList._classes.has(c),
+      contains: (c) => this._classes.has(c),
       toggle: (c, force) => {
         if (force === true || (force === undefined && !this.classList.contains(c))) {
           this.classList.add(c);
@@ -59,6 +47,24 @@ class MockElement {
         }
       }
     };
+    Object.defineProperty(this, 'className', {
+      get: () => Array.from(this._classes).join(' '),
+      set: (val) => {
+        this._classes.clear();
+        (val || '').split(/\s+/).filter(Boolean).forEach(c => this._classes.add(c));
+      },
+      configurable: true
+    });
+    this.id = '';
+    this.dataset = {};
+    this._attrs = {};
+    this.value = '';
+    this.textContent = '';
+    this.hidden = false;
+    this.isConnected = true;
+    this.clickCount = 0;
+    this.scrollCount = 0;
+    this._innerHTML = '';
     this._computedStyle = {
       backgroundColor: 'rgba(0, 0, 0, 0)',
       color: 'rgb(0, 0, 0)',
@@ -3038,6 +3044,67 @@ runTest('Test 118: Subject cache invalidation notification wording and single cl
   // 2. Verify expandAll does not double-dispatch clicks via dispatchEvent
   assert.ok(!assessJs.includes('btn.dispatchEvent'), 'expandAll must not call btn.dispatchEvent after btn.click()');
   assert.ok(!assessJs.includes('heading.dispatchEvent'), 'expandAll must not call heading.dispatchEvent after heading.click()');
+});
+
+runTest('Test 119: Immediate summary panel recovery, scoped surface adaptation, and collapsed state GC elimination', () => {
+  const cohortStatsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+  const cohortViewJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  const atarFeatJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-features.js'), 'utf8');
+
+  // 1. Verify immediate recovery of missing summary row panels in cohort-stats.js
+  assert.ok(cohortStatsJs.includes('hasMissingSummaryPanel'), 'cohort-stats.js observer must check for missing summary row panels');
+  assert.ok(cohortStatsJs.includes('if (hasMissingSummaryPanel) {\n        runPass();\n      }'), 'cohort-stats.js must invoke runPass immediately when a summary panel is missing');
+
+  // 2. Verify collapsed state suppresses collect(true) in cohort-stats.js
+  assert.ok(cohortStatsJs.includes('hasDetailTasks = document.querySelector'), 'cohort-stats.js must check for detail tasks');
+  assert.ok(cohortStatsJs.includes('allSubjects = hasDetailTasks && window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];'), 'cohort-stats.js must skip collect when only summary rows exist');
+
+  // 3. Verify baseline signature memoization in cohort-view.js
+  assert.ok(cohortViewJs.includes('function getBaselinesSig()'), 'cohort-view.js must define getBaselinesSig');
+  assert.ok(cohortViewJs.includes('cachedBaselinesSig = null;'), 'cohort-view.js must invalidate cachedBaselinesSig on events');
+  assert.ok(cohortViewJs.includes('const baselinesSig = getBaselinesSig();'), 'cohort-view.js render must use memoized getBaselinesSig');
+
+  // 4. Verify scoped surface/ink candidate queries in theme.js
+  assert.ok(themeJs.includes('[data-connectea-surface] :is('), 'theme.js must scope ink candidates to elements inside data-connectea-surface');
+  assert.ok(themeJs.includes('const pageStartTime = Date.now();'), 'theme.js must track pageStartTime for startup cooldown');
+  assert.ok(themeJs.includes('scheduleAdaptSurfaces(600)'), 'theme.js must schedule startup surface adaptation without blocking render');
+
+  // 5. Verify relaxed polling cadence in atar-features.js
+  assert.ok(atarFeatJs.includes('setInterval(() => {\n      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;\n      syncFeatures();\n    }, 5000);'), 'atar-features.js must use 5000ms cadence for periodic syncFeatures');
+
+  // 6. Functional test: immediate summary panel restoration
+  const card = document.createElement('div');
+  card.className = 'eds-c-tile';
+  const title = document.createElement('div');
+  title.className = 'eds-c-tile__title';
+  title.textContent = 'Physics ATAR';
+  card.appendChild(title);
+
+  const summaryRow = document.createElement('div');
+  summaryRow.className = 'cvr-c-task';
+  const details = document.createElement('div');
+  details.className = 'cvr-c-task__details';
+  summaryRow.appendChild(details);
+  card.appendChild(summaryRow);
+  document.body.appendChild(card);
+
+  window.location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines?coisp=12345';
+  const estJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-estimator.js'), 'utf8');
+  eval(estJs);
+  eval(cohortViewJs);
+  delete window.__connectTea141;
+  delete window.ConnectifyCohort;
+  eval(cohortStatsJs);
+
+  try {
+    assert.strictEqual(summaryRow.querySelector('.connectea-panel'), null, 'Panel not initially present on newly inserted row');
+    // Calling runPass attaches panel synchronously
+    window.ConnectifyCohort.pass();
+    assert.ok(summaryRow.querySelector('.connectea-panel'), 'Panel immediately attached to summary row');
+  } finally {
+    card.remove();
+  }
 });
 
 console.log('\n================================================================');

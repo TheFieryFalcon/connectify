@@ -275,7 +275,8 @@
     }
 
     // Pass 2: Render using unified best estimates
-    const allSubjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+    const hasDetailTasks = document.querySelector('.cvr-c-tasks .cvr-c-task') !== null;
+    const allSubjects = hasDetailTasks && window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
     for (const card of cards) {
       const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
         row => row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card
@@ -398,7 +399,22 @@
       break;
     }
     if (shouldRun) {
-      schedule();
+      let hasMissingSummaryPanel = false;
+      const allCards = document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
+      for (const card of allCards) {
+        const summaryRow = Array.from(card.querySelectorAll('.cvr-c-task')).find(
+          row => !row.closest('.cvr-c-tasks')
+        );
+        if (summaryRow && !summaryRow.querySelector('.connectea-panel')) {
+          hasMissingSummaryPanel = true;
+          break;
+        }
+      }
+      if (hasMissingSummaryPanel) {
+        runPass();
+      } else {
+        schedule();
+      }
     }
   });
 
@@ -430,7 +446,7 @@
     schedule(true);
   });
 
-  let timer = setInterval(schedule, 1500);
+  let timer = setInterval(schedule, 8000);
 
   window.addEventListener('pagehide', () => {
     clearInterval(timer);
@@ -446,7 +462,7 @@
       attributes: true,
       attributeFilter: ['data-highcharts-chart', 'data-connectify-stats']
     });
-    timer = setInterval(schedule, 1500);
+    timer = setInterval(schedule, 8000);
     schedule();
   });
 

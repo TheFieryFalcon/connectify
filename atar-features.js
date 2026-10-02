@@ -269,11 +269,11 @@
     setInterval(() => {
       if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
       initSidebarTools();
-    }, 1000);
+    }, 2000);
     setInterval(() => {
       if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
       syncFeatures();
-    }, 1500);
+    }, 5000);
 
     window.ConnectifySync = syncFeatures;
     window.ConnectifyIsAutoExpandEnabled = isAutoExpandEnabled;

@@ -36,6 +36,36 @@
     saveCohortSize: () => false
   };
 
+  let cachedBaselinesSig = null;
+  function getBaselinesSig() {
+    if (cachedBaselinesSig !== null) return cachedBaselinesSig;
+    if (window.ConnectifyPredictorMath?.getBaselines) {
+      try {
+        const b = window.ConnectifyPredictorMath.getBaselines();
+        cachedBaselinesSig = JSON.stringify(b || {});
+      } catch {
+        cachedBaselinesSig = '';
+      }
+    } else {
+      cachedBaselinesSig = '';
+    }
+    return cachedBaselinesSig;
+  }
+
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('connectify-baselines-updated', () => {
+      cachedBaselinesSig = null;
+    });
+    window.addEventListener('storage', e => {
+      if (e.key && (e.key.includes('baseline') || e.key.includes('prediction'))) {
+        cachedBaselinesSig = null;
+      }
+    });
+    window.addEventListener('connectify-task-type-changed', () => {
+      cachedBaselinesSig = null;
+    });
+  }
+
   /**
    * Reads raw assessment score percentage from the task row.
    */
@@ -369,13 +399,7 @@
     const userSize = estimator().loadCohortSize(key);
     const cohortSize = userSize ?? estimatedSize;
 
-    let baselinesSig = '';
-    if (window.ConnectifyPredictorMath?.getBaselines) {
-      try {
-        const b = window.ConnectifyPredictorMath.getBaselines();
-        baselinesSig = JSON.stringify(b || {});
-      } catch {}
-    }
+    const baselinesSig = getBaselinesSig();
 
     // Row-level render memoization: skip entire evaluation if inputs are unchanged
     const statsKey = stats ? stats.join(',') : null;

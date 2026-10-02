@@ -177,7 +177,7 @@
 
     try {
       const surfaceCandidates = document.body.querySelectorAll(
-        ':is(div, section, article, header, nav, main, aside, form, table, tr, td, th, ul, li, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button):not([data-connectea-surface]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
+        ':is(header, nav, aside, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .eds-c-nav-list, .eds-c-nav-list__item, .portlet-content, .portlet-body):not([data-connectea-surface]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
       );
 
       for (const el of surfaceCandidates) {
@@ -190,8 +190,8 @@
         }
       }
 
-      const inkCandidates = document.body.querySelectorAll(
-        ':is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
+      const inkCandidates = document.querySelectorAll(
+        '[data-connectea-surface] :is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
       );
       for (const el of inkCandidates) {
         if (el.children.length > 2) continue;
@@ -274,13 +274,15 @@
   };
 
   let adaptTimer = null;
-  function scheduleAdaptSurfaces() {
+  const pageStartTime = Date.now();
+  function scheduleAdaptSurfaces(delay) {
     if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
     clearTimeout(adaptTimer);
+    const effectiveDelay = delay ?? (Date.now() - pageStartTime < 2500 ? 1200 : 400);
     adaptTimer = setTimeout(() => {
       if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
       if (isDarkMode && !isLoginUrl()) adaptSurfaces();
-    }, 400);
+    }, effectiveDelay);
   }
 
   // Re-attach toggle button and adapt surfaces across client-side SPA route navigations
@@ -356,7 +358,7 @@
 
   // Initial mount with fast polling during initial SPA render
   updateTogglePosition();
-  if (isDarkMode) adaptSurfaces();
+  if (isDarkMode) scheduleAdaptSurfaces(600);
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       try {
@@ -376,7 +378,7 @@
         document.body.classList.toggle('connectea-dark', isDarkMode);
       }
       updateTogglePosition(true);
-      if (isDarkMode) adaptSurfaces();
+      if (isDarkMode) scheduleAdaptSurfaces(800);
     });
   }
 
