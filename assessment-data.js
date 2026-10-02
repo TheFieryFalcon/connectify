@@ -882,7 +882,7 @@
     const seenCards = new Set();
     const headings = [];
     for (const h of rawHeadings) {
-      const card = (typeof h.closest === 'function' ? h.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') : null) || h.parentElement;
+      const card = typeof h.closest === 'function' ? h.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, [class*="tile"], [class*="card"]') : null;
       if (card && seenCards.has(card)) continue;
       if (card) seenCards.add(card);
       headings.push(h);
@@ -1066,15 +1066,9 @@
           (typeof heading.matches === 'function' && heading.matches('button, [role="button"]') ? heading : null);
         if (btn) {
           btn.click();
-          try {
-            btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-          } catch {}
           clickedAny = true;
         } else {
           heading.click();
-          try {
-            heading.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-          } catch {}
           clickedAny = true;
         }
       }

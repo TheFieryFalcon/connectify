@@ -302,21 +302,8 @@
           processChangedSubject(entry);
 
           // 2. Dispatch stacked notification
-          let notifTitle = `Grade Update: ${entry.subjectName}`;
-          let notifMsg = '';
-          const deltaSign = delta > 0 ? '+' : '';
-          const deltaStr = `${deltaSign}${delta.toFixed(1)}%`;
-          const currentMarkStr = Number.isFinite(entry.mark) ? `${entry.mark.toFixed(1)}%` : '';
-
-          if (markChanged && statsChanged) {
-            notifMsg = `Subject running average updated to ${currentMarkStr} (${deltaStr}) and cohort statistics updated.`;
-          } else if (markChanged) {
-            notifMsg = `Subject running average updated to ${currentMarkStr} (${deltaStr}).`;
-          } else {
-            notifTitle = `Cohort Statistics Update: ${entry.subjectName}`;
-            const medStr = entry.stats?.[2] !== undefined ? ` (Median: ${entry.stats[2]}%)` : '';
-            notifMsg = `Cohort distribution box plot updated for ${entry.subjectName}${medStr}.`;
-          }
+          let notifTitle = 'Class Updated';
+          let notifMsg = `${entry.subjectName} scores have been updated.`;
 
           if (window.ConnectifyNotifications?.show) {
             window.ConnectifyNotifications.show({

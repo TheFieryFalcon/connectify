@@ -3027,6 +3027,19 @@ runTest('Test 117: Expand all deduplication, re-entrancy protection, baseline me
   }
 });
 
+runTest('Test 118: Subject cache invalidation notification wording and single click dispatch', () => {
+  const newGradeJs = fs.readFileSync(path.resolve(BASE_DIR, 'new-grade.js'), 'utf8');
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+
+  // 1. Verify notification title and message formatting
+  assert.ok(newGradeJs.includes("let notifTitle = 'Class Updated';"), "new-grade.js notification title must be 'Class Updated'");
+  assert.ok(newGradeJs.includes("let notifMsg = `${entry.subjectName} scores have been updated.`;"), "new-grade.js notification message must be '[Subject name] scores have been updated.'");
+
+  // 2. Verify expandAll does not double-dispatch clicks via dispatchEvent
+  assert.ok(!assessJs.includes('btn.dispatchEvent'), 'expandAll must not call btn.dispatchEvent after btn.click()');
+  assert.ok(!assessJs.includes('heading.dispatchEvent'), 'expandAll must not call heading.dispatchEvent after heading.click()');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

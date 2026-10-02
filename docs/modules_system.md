@@ -26,7 +26,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
   - Upon grade delta detection ($\ge 0.05\%$):
     1. Ignores auto-expand / collapse preferences to ensure **THAT SUBJECT ONLY** is definitely expanded, scraping and updating its task results into the results cache.
     2. If auto-expand is off, collapses that subject card again after scraping.
-    3. Emits a stacked toast notification displaying updated running average with signed difference percentage (e.g., `+1.8%`).
+    3. Emits a stacked toast notification with title "Class Updated" and message "[Subject name] scores have been updated."
     4. Provides an interactive "Jump to Subject" action button that expands the card (if collapsed), smoothly scrolls to the course card (prioritizing Semester 2), and triggers an outline glow pulse (`.cx-card-jump-highlight`).
   - Updates the running averages cache 1 second after page load/evaluation.
 - **Export**: `window.ConnectifyNewGrade`.
