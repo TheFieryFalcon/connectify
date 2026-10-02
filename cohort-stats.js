@@ -229,7 +229,7 @@
 
   const persistentEstimates = new Map();
 
-  function pass() {
+  function pass(precollectedAllSubjects = null) {
     if (!document.getElementById('connectea-style')) {
       const styleEl = document.createElement('style');
       styleEl.id = 'connectea-style';
@@ -250,6 +250,7 @@
         row => row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card
       );
       if (!rows.length) continue;
+      card._cxTaskRows = rows;
 
       const key = est.subjectKey(card);
       if (!key) continue;
@@ -278,7 +279,7 @@
     const hasDetailTasks = document.querySelector('.cvr-c-tasks .cvr-c-task') !== null;
     const allSubjects = hasDetailTasks && window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
     for (const card of cards) {
-      const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
+      const rows = card._cxTaskRows || Array.from(card.querySelectorAll('.cvr-c-task')).filter(
         row => row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card
       );
       if (!rows.length) continue;

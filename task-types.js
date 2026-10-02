@@ -28,7 +28,18 @@
       .trim();
   }
 
+  let cachedOverrides = null;
+  let cachedCategories = null;
+  const cachedClassCategories = new Map();
+
+  function invalidateTypesMemoryCache() {
+    cachedOverrides = null;
+    cachedCategories = null;
+    cachedClassCategories.clear();
+  }
+
   function getCategories() {
+    if (cachedCategories) return cachedCategories;
     let cats = defaultCategories;
     if (window.cxCategories && Object.keys(window.cxCategories).length > 0) {
       cats = window.cxCategories;
@@ -45,19 +56,28 @@
     if (cats?.['Take-Home']?.keywords) {
       cats['Take-Home'].keywords = cats['Take-Home'].keywords.filter(k => k.toLowerCase() !== 'extended');
     }
+    cachedCategories = cats;
     return cats;
   }
 
   function getCustomCategoriesForClass(subjectName) {
     const subjKey = cleanSubject(subjectName).toLowerCase();
     if (!subjKey) return [];
+    if (cachedClassCategories.has(subjKey)) {
+      return cachedClassCategories.get(subjKey);
+    }
     try {
       const stored = localStorage.getItem(`connectea:class_categories:${subjKey}`);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) return parsed.filter(Boolean);
+        if (Array.isArray(parsed)) {
+          const res = parsed.filter(Boolean);
+          cachedClassCategories.set(subjKey, res);
+          return res;
+        }
       }
     } catch {}
+    cachedClassCategories.set(subjKey, []);
     return [];
   }
 
@@ -67,9 +87,10 @@
     const subjKey = cleanSubject(subjectName).toLowerCase();
     if (!subjKey) return;
 
-    const existing = getCustomCategoriesForClass(subjKey);
+    const existing = [...getCustomCategoriesForClass(subjKey)];
     if (!existing.some(c => c.toLowerCase() === cat.toLowerCase())) {
       existing.push(cat);
+      cachedClassCategories.set(subjKey, existing);
       try {
         localStorage.setItem(`connectea:class_categories:${subjKey}`, JSON.stringify(existing));
       } catch {}
@@ -77,10 +98,13 @@
   }
 
   function getTaskTypeOverrides() {
+    if (cachedOverrides !== null) return cachedOverrides;
     try {
-      return JSON.parse(localStorage.getItem('connectea:task_type_overrides') || '{}');
+      cachedOverrides = JSON.parse(localStorage.getItem('connectea:task_type_overrides') || '{}');
+      return cachedOverrides;
     } catch {
-      return {};
+      cachedOverrides = {};
+      return cachedOverrides;
     }
   }
 
@@ -164,11 +188,15 @@
   function getEffectiveType(subjectName, task, labelsKey) {
     const taskName = typeof task === 'string' ? task : task?.name;
     let actualLabelsKey = labelsKey;
-    if (!actualLabelsKey && task && typeof task === 'object' && task.row) {
-      const labels = Array.from(task.row.querySelectorAll('.cvr-c-task__details .v-label'))
-        .map(e => (e.textContent || '').replace(/\s+/g, ' ').trim())
-        .filter(Boolean);
-      if (labels.length) actualLabelsKey = labels.join('::');
+    if (!actualLabelsKey && task && typeof task === 'object') {
+      if (task.labelsKey) {
+        actualLabelsKey = task.labelsKey;
+      } else if (task.row) {
+        const labels = Array.from(task.row.querySelectorAll('.cvr-c-task__details .v-label'))
+          .map(e => (e.textContent || '').replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
+        if (labels.length) actualLabelsKey = labels.join('::');
+      }
     }
     const saved = getSavedTaskType(subjectName, taskName, actualLabelsKey);
     if (saved) return saved;
@@ -287,8 +315,15 @@
       try {
         if (e.newValue) window.cxCategories = JSON.parse(e.newValue);
       } catch {}
+      invalidateTypesMemoryCache();
       rescanAllAutoAssessments();
+    } else if (e.key === 'connectea:task_type_overrides' || e.key?.startsWith('connectea:class_categories:')) {
+      invalidateTypesMemoryCache();
     }
+  });
+
+  window.addEventListener('connectify-settings-updated', () => {
+    invalidateTypesMemoryCache();
   });
 
   window.addEventListener('connectify-rescan-auto-types', rescanAllAutoAssessments);

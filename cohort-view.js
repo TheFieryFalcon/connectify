@@ -52,17 +52,25 @@
     return cachedBaselinesSig;
   }
 
+  let typesVersion = 0;
   if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
     window.addEventListener('connectify-baselines-updated', () => {
       cachedBaselinesSig = null;
+      typesVersion++;
     });
     window.addEventListener('storage', e => {
-      if (e.key && (e.key.includes('baseline') || e.key.includes('prediction'))) {
+      if (e.key && (e.key.includes('baseline') || e.key.includes('prediction') || e.key.includes('categories') || e.key.includes('overrides'))) {
         cachedBaselinesSig = null;
+        typesVersion++;
       }
     });
     window.addEventListener('connectify-task-type-changed', () => {
       cachedBaselinesSig = null;
+      typesVersion++;
+    });
+    window.addEventListener('connectify-settings-updated', () => {
+      cachedBaselinesSig = null;
+      typesVersion++;
     });
   }
 
@@ -359,6 +367,30 @@
       ui = null;
     }
 
+    const stats = readStats(row);
+    const statsKey = stats ? stats.join(',') : null;
+    const baselinesSig = getBaselinesSig();
+    const userSize = estimator().loadCohortSize(key);
+    const cohortSize = userSize ?? estimatedSize;
+
+    // Fast-path memoization: skip entire DOM query and type select overhead if inputs are unchanged
+    const memo = ui?._memo;
+    const taskType = memo?.taskType;
+    if (
+      memo &&
+      memo.typesVersion === typesVersion &&
+      memo.mark === mark &&
+      memo.statsKey === statsKey &&
+      memo.cohortSize === cohortSize &&
+      memo.key === key &&
+      memo.isOverall === isOverall &&
+      memo.baselinesSig === baselinesSig &&
+      memo.taskType === taskType &&
+      ui.wrapper?.isConnected
+    ) {
+      return;
+    }
+
     if (!ui) {
       ui = createPanel(row, isOverall, key, estimatedSize, onCohortChange);
     } else if (ui.key !== key) {
@@ -367,17 +399,17 @@
     ui.estimatedSize = estimatedSize;
 
     // If assessment row, keep dropdown in sync
-    let taskType = null;
+    let currentTaskType = null;
+    let cachedMeta = null;
     if (!isOverall) {
-      const meta = types().getTaskMeta(row);
-      taskType = types().getEffectiveType(meta.subjectName, meta.taskName, meta.labelsKey);
+      cachedMeta = types().getTaskMeta(row);
+      currentTaskType = types().getEffectiveType(cachedMeta.subjectName, cachedMeta.taskName, cachedMeta.labelsKey);
       if (ui.typeSelect) {
-        types().updateTypeSelect(ui.typeSelect, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
+        types().updateTypeSelect(ui.typeSelect, cachedMeta.subjectName, cachedMeta.taskName, cachedMeta.labelsKey, cachedMeta.labels);
       }
     }
 
     if (isOverall) {
-      const userSize = estimator().loadCohortSize(key);
       if (ui.input && document.activeElement !== ui.input && ui.input.getAttribute('aria-invalid') !== 'true') {
         const valStr = userSize === undefined ? '' : String(userSize);
         if (ui.input.value !== valStr) ui.input.value = valStr;
@@ -393,29 +425,6 @@
           }
         }
       }
-    }
-
-    const stats = readStats(row);
-    const userSize = estimator().loadCohortSize(key);
-    const cohortSize = userSize ?? estimatedSize;
-
-    const baselinesSig = getBaselinesSig();
-
-    // Row-level render memoization: skip entire evaluation if inputs are unchanged
-    const statsKey = stats ? stats.join(',') : null;
-    const memo = ui._memo;
-    if (
-      memo &&
-      memo.mark === mark &&
-      memo.statsKey === statsKey &&
-      memo.cohortSize === cohortSize &&
-      memo.key === key &&
-      memo.isOverall === isOverall &&
-      memo.baselinesSig === baselinesSig &&
-      memo.taskType === taskType &&
-      ui.wrapper?.isConnected
-    ) {
-      return;
     }
 
     const data = math().summary(stats, mark, cohortSize);
@@ -435,7 +444,7 @@
       // Pre-cache prediction for upcoming task only if not already cached
       if (window.ConnectifyPredictorMath) {
         try {
-          const meta = types().getTaskMeta(row);
+          const meta = cachedMeta || types().getTaskMeta(row);
           const cached = window.ConnectifyPredictorMath.getCachedPrediction?.(meta.subjectName, meta.labelsKey) ||
                          window.ConnectifyPredictorMath.getCachedPrediction?.(meta.subjectName, meta.taskName);
           if (!cached) {
@@ -447,7 +456,7 @@
               row
             };
             if (window.ConnectifyPredictorMath.getOrComputeTaskPrediction) {
-              window.ConnectifyPredictorMath.getOrComputeTaskPrediction(meta.subjectName, taskMock);
+              window.ConnectifyPredictorMath.getOrComputeTaskPrediction(meta.subjectName, taskMock, precollectedSubjects);
             } else {
               const pred = window.ConnectifyPredictorMath.predictTask(meta.subjectName, taskMock);
               if (!pred.unpredicted) {
@@ -457,7 +466,7 @@
           }
         } catch (e) {}
       }
-      ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType };
+      ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType: currentTaskType, typesVersion };
       return;
     }
 
@@ -569,7 +578,7 @@
               : null;
 
             if (!prediction || prediction.unpredicted) {
-              const allSubjects = precollectedSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+              const allSubjects = precollectedSubjects || (window.ConnectifyData?.hasCachedSubjects?.() ? window.ConnectifyData.collect(true) : []);
               prediction = predMath.getOrComputeTaskPrediction
                 ? predMath.getOrComputeTaskPrediction(meta.subjectName, taskMock, allSubjects)
                 : predMath.predictTask(meta.subjectName, taskMock, null, baselines, true);
@@ -597,7 +606,7 @@
         ui.result,
         Number.isFinite(mark) ? 'Rank and z-score unavailable' : 'Not marked · Rank and z-score unavailable'
       );
-      ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType };
+      ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType: currentTaskType, typesVersion };
       return;
     }
 
@@ -635,7 +644,7 @@
     }
 
     setHTML(ui.result, parts.filter(Boolean).join('  •  '));
-    ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType };
+    ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType: currentTaskType, typesVersion };
   }
 
   let floatingTooltipEl = null;

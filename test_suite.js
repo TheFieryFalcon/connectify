@@ -3107,6 +3107,60 @@ runTest('Test 119: Immediate summary panel recovery, scoped surface adaptation, 
   }
 });
 
+runTest('Test 120: In-memory prediction and category caching, chunked 95% bulk expand, 450ms collapse guard, and ATAR panel gating', () => {
+  const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  const taskTypesJs = fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8');
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const atarUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
+  const domSweepJs = fs.readFileSync(path.resolve(BASE_DIR, 'dom-sweeper.js'), 'utf8');
+
+  // 1. Verify in-memory prediction cache in predictor-math.js
+  assert.ok(predMathJs.includes('const predictionMemoryCache = new Map();'), 'predictor-math.js must define predictionMemoryCache');
+  assert.ok(predMathJs.includes('predictionMemoryCache.set(key, payload);'), 'cachePrediction must populate predictionMemoryCache');
+  assert.ok(predMathJs.includes('if (predictionMemoryCache.has(key))'), 'getCachedPrediction must check predictionMemoryCache first');
+  assert.ok(predMathJs.includes('predictionMemoryCache.delete(k)'), 'clearSubjectPredictionCache must delete entries from predictionMemoryCache');
+
+  // 2. Verify in-memory category and overrides cache in task-types.js
+  assert.ok(taskTypesJs.includes('let cachedOverrides = null;'), 'task-types.js must define cachedOverrides');
+  assert.ok(taskTypesJs.includes('let cachedCategories = null;'), 'task-types.js must define cachedCategories');
+  assert.ok(taskTypesJs.includes('const cachedClassCategories = new Map();'), 'task-types.js must define cachedClassCategories Map');
+
+  // 3. Verify chunked bulk expansion across 90%, 95%, 98%, and 100% in assessment-data.js
+  assert.ok(assessJs.includes("updateProgress(90, 'Caching predictions... 90%')"), 'assessment-data.js must yield at 90% prediction caching');
+  assert.ok(assessJs.includes("updateProgress(95, 'Rendering statistics & outcome bars... 95%')"), 'assessment-data.js must yield at 95% statistics rendering');
+  assert.ok(assessJs.includes("updateProgress(98, 'Updating progress bars... 98%')"), 'assessment-data.js must yield at 98% compound progress');
+  assert.ok(assessJs.includes("updateProgress(100, 'Ready! 100%')"), 'assessment-data.js must reach 100% completion');
+
+  // 4. Verify 450ms collapse animation guard
+  assert.ok(assessJs.includes('triggerAccordionAnimationGuard(450, null);'), 'assessment-data.js must use 450ms guard on collapse click');
+  assert.ok(assessJs.includes('Math.max(duration, 450)'), 'triggerAccordionAnimationGuard must enforce at least 450ms for collapse animations');
+
+  // 5. Verify atar-ui.js skips courses scrape when calculatorPanel is hidden
+  assert.ok(atarUiJs.includes('if (calculatorPanel.hidden) {\n        lastStateSignature = \'\';\n        return;\n      }'), 'atar-ui.js refreshData must exit early when calculatorPanel is hidden');
+
+  // 6. Verify dom-sweeper.js skips accordion panel mutations
+  assert.ok(domSweepJs.includes('.eds-c-accordion__panel, .cvr-c-accordion__panel'), 'dom-sweeper.js must ignore panel mutations');
+
+  // 7. Functional test: prediction memory cache fast-path
+  eval(predMathJs);
+  const testSubj = 'Test Subject';
+  const testTaskId = 'task-mem-1';
+  const mockPred = { low: 65, mid: 75, high: 85, breakoutScore: 93.5, type: 'Test' };
+
+  window.ConnectifyPredictorMath.cachePrediction(testSubj, testTaskId, mockPred);
+  assert.ok(window.ConnectifyPredictorMath.predictionMemoryCache.size > 0, 'predictionMemoryCache must contain cached item');
+
+  // Clear localStorage to prove getCachedPrediction reads from memory without disk
+  localStorage.clear();
+  const cachedFromMem = window.ConnectifyPredictorMath.getCachedPrediction(testSubj, testTaskId);
+  assert.ok(cachedFromMem, 'getCachedPrediction must return prediction from memory even if localStorage was emptied');
+  assert.strictEqual(cachedFromMem.mid, 75, 'Cached mid prediction must match');
+
+  // clearSubjectPredictionCache clears memory cache
+  window.ConnectifyPredictorMath.clearSubjectPredictionCache(testSubj);
+  assert.strictEqual(window.ConnectifyPredictorMath.getCachedPrediction(testSubj, testTaskId), null, 'Prediction must be cleared from memory');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

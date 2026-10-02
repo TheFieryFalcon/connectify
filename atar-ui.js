@@ -225,9 +225,9 @@
     }
 
     function openCalculator(mode) {
+      calculatorPanel.hidden = false;
       lastStateSignature = '';
       refreshData();
-      calculatorPanel.hidden = false;
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
       selectTab(mode);
       panelTitle.focus();
@@ -307,6 +307,10 @@
 
     function refreshData() {
       if (!scraper) return;
+      if (calculatorPanel.hidden) {
+        lastStateSignature = '';
+        return;
+      }
       const nextCourses = scraper.readCourses(false);
       const eligible = scraper.isAtarEligible();
       const signature = JSON.stringify([eligible, nextCourses]);

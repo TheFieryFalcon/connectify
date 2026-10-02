@@ -156,6 +156,9 @@
 
     clearPredictorCache() {
       try {
+        if (window.ConnectifyPredictorMath?.predictionMemoryCache?.clear) {
+          window.ConnectifyPredictorMath.predictionMemoryCache.clear();
+        }
         const toRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
           const k = localStorage.key(i);
@@ -954,72 +957,75 @@
         function finalizeExpansion() {
           try {
             if (expand && clickedAny) {
-              const hasValidCache = Boolean(window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.());
-              if (!hasValidCache) {
-                updateProgress(90, 'Caching predictions... 90%');
+              updateProgress(90, 'Caching predictions... 90%');
+              setTimeout(() => {
+                let all = null;
                 try {
-                  const all = collect(true);
-                  if (window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
+                  all = collect(true);
+                  const hasValidCache = Boolean(window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.());
+                  if (!hasValidCache && window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
                     window.ConnectifyPredictorMath.populateChronologicalPredictions(all, true);
                   }
                 } catch (e) {
                   console.warn('Prediction pre-cache error:', e);
                 }
-              }
 
-              updateProgress(95, 'Rendering statistics & outcome bars... 95%');
-
-              setTimeout(() => {
-                try {
-                  clearTimeout(notifyUpdateTimer);
-                  if (window.ConnectifyCohort?.pass) {
-                    window.ConnectifyCohort.pass();
-                  } else if (window.ConnectifyCohort?.schedule) {
-                    window.ConnectifyCohort.schedule(true);
-                  }
-                  if (window.ConnectifyCompoundProgress?.update) {
-                    window.ConnectifyCompoundProgress.update();
-                  }
-                  if (window.ConnectifyDataSyncCharts) {
-                    window.ConnectifyDataSyncCharts();
-                  }
-                  const staleSet = getStaleSubjects();
-                  if (staleSet.size > 0) {
-                    collect(true, true);
-                  }
-
-                  const completeFinalize = () => {
-                    try {
-                      updateProgress(100, 'Ready! 100%');
-                    } finally {
-                      isBulkExpanding = false;
-                      window.ConnectifyIsBulkExpanding = false;
-                      window.ConnectifyIsAccordionAnimating = false;
-                      finishProgress();
+                updateProgress(95, 'Rendering statistics & outcome bars... 95%');
+                setTimeout(() => {
+                  try {
+                    clearTimeout(notifyUpdateTimer);
+                    if (window.ConnectifyCohort?.pass) {
+                      window.ConnectifyCohort.pass();
+                    } else if (window.ConnectifyCohort?.schedule) {
+                      window.ConnectifyCohort.schedule(true);
                     }
-                  };
-
-                  if (typeof requestAnimationFrame === 'function') {
-                    requestAnimationFrame(() => {
-                      requestAnimationFrame(completeFinalize);
-                    });
-                  } else {
-                    completeFinalize();
+                  } catch (e) {
+                    console.warn('Cohort pass error:', e);
                   }
-                } catch (e) {
-                  isBulkExpanding = false;
-                  window.ConnectifyIsBulkExpanding = false;
-                  window.ConnectifyIsAccordionAnimating = false;
-                  finishProgress();
-                }
-              }, 40);
+
+                  updateProgress(98, 'Updating progress bars... 98%');
+                  setTimeout(() => {
+                    try {
+                      if (window.ConnectifyCompoundProgress?.update) {
+                        window.ConnectifyCompoundProgress.update();
+                      }
+                      if (window.ConnectifyDataSyncCharts) {
+                        window.ConnectifyDataSyncCharts();
+                      }
+                      const staleSet = getStaleSubjects();
+                      if (staleSet.size > 0) {
+                        collect(true, true);
+                      }
+                    } catch (e) {}
+
+                    const completeFinalize = () => {
+                      try {
+                        updateProgress(100, 'Ready! 100%');
+                      } finally {
+                        isBulkExpanding = false;
+                        window.ConnectifyIsBulkExpanding = false;
+                        window.ConnectifyIsAccordionAnimating = false;
+                        finishProgress();
+                      }
+                    };
+
+                    if (typeof requestAnimationFrame === 'function') {
+                      requestAnimationFrame(() => {
+                        requestAnimationFrame(completeFinalize);
+                      });
+                    } else {
+                      completeFinalize();
+                    }
+                  }, 20);
+                }, 20);
+              }, 20);
             } else {
               isBulkExpanding = false;
               window.ConnectifyIsBulkExpanding = false;
               finishProgress();
               setTimeout(() => {
                 window.ConnectifyIsAccordionAnimating = false;
-              }, 250);
+              }, 350);
             }
           } catch (err) {
             console.error('finalizeExpansion error:', err);
@@ -1085,6 +1091,7 @@
     if (cardToUpdate) {
       pendingCardsToUpdate.add(cardToUpdate);
     }
+    const effectiveDuration = cardToUpdate ? duration : Math.max(duration, 450);
     clearTimeout(animGuardTimer);
     animGuardTimer = setTimeout(() => {
       window.ConnectifyIsAccordionAnimating = false;
@@ -1106,7 +1113,7 @@
           window.ConnectifyDataSyncCharts();
         }
       }
-    }, duration);
+    }, effectiveDuration);
   }
   window.ConnectifyTriggerAccordionAnimationGuard = triggerAccordionAnimationGuard;
 
@@ -1122,7 +1129,7 @@
     const wasCollapsed = /show details/i.test(heading.textContent);
     if (!wasCollapsed) {
       // User is collapsing the accordion, trigger guard to suppress background observer churn
-      triggerAccordionAnimationGuard(380, null);
+      triggerAccordionAnimationGuard(450, null);
       return;
     }
 

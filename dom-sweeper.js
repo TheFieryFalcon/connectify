@@ -170,6 +170,9 @@
     let relevantChange = false;
     for (const m of mutations) {
       if (m.addedNodes.length > 0 || m.removedNodes.length > 0) {
+        if (m.target?.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .connectea-panel, .connectea-row-wrapper, #connectify-sidebar')) {
+          continue;
+        }
         relevantChange = true;
         break;
       }

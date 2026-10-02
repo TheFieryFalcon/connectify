@@ -376,6 +376,8 @@
     return `connectify:prediction:${account}:${cleanSubj}:${taskId}`;
   }
 
+  const predictionMemoryCache = new Map();
+
   function cachePrediction(subjectName, taskId, prediction) {
     if (!taskId || !prediction || prediction.unpredicted) return;
     try {
@@ -384,11 +386,12 @@
         low: prediction.low,
         mid: prediction.mid,
         high: prediction.high,
-        breakoutScore: prediction.breakoutScore,
+        breakoutScore: prediction.breakoutScore || round(1.10 * prediction.high, 2),
         taskType: prediction.taskType || prediction.type,
         type: prediction.type || prediction.taskType,
         timestamp: Date.now()
       };
+      predictionMemoryCache.set(key, payload);
       localStorage.setItem(key, JSON.stringify(payload));
     } catch {}
   }
@@ -409,6 +412,9 @@
         getTaskPredictionKey(subjectName, encodeURIComponent(taskIdOrName))
       ];
       for (const key of candidates) {
+        if (predictionMemoryCache.has(key)) {
+          return predictionMemoryCache.get(key);
+        }
         const raw = localStorage.getItem(key);
         if (raw) {
           const parsed = JSON.parse(raw);
@@ -418,6 +424,7 @@
             }
             if (!parsed.taskType && parsed.type) parsed.taskType = parsed.type;
             if (!parsed.type && parsed.taskType) parsed.type = parsed.taskType;
+            predictionMemoryCache.set(key, parsed);
             return parsed;
           }
         }
@@ -750,6 +757,11 @@
   function clearSubjectPredictionCache(subjectName) {
     if (!subjectName) return;
     const cleanSubj = cleanSubject(subjectName).toLowerCase();
+    for (const k of Array.from(predictionMemoryCache.keys())) {
+      if (k.toLowerCase().includes(`:${cleanSubj}:`)) {
+        predictionMemoryCache.delete(k);
+      }
+    }
     try {
       const toRemove = [];
       for (let i = 0; i < localStorage.length; i++) {
@@ -776,6 +788,7 @@
       if (subjectName) {
         clearSubjectPredictionCache(subjectName);
       } else {
+        predictionMemoryCache.clear();
         if (window.ConnectifyCache?.clearPredictorCache) {
           window.ConnectifyCache.clearPredictorCache();
         } else {
@@ -1222,13 +1235,17 @@
     populateChronologicalPredictions,
     getOrComputeTaskPrediction,
     isPredictionCacheCurrent,
-    clearPredictionCache: () => window.ConnectifyCache?.clearPredictorCache?.(),
+    clearPredictionCache: () => {
+      predictionMemoryCache.clear();
+      window.ConnectifyCache?.clearPredictorCache?.();
+    },
     clearSubjectPredictionCache,
     updatePredictionCache,
     hasParsableDate,
     resolveCustomDate,
     PREDICTOR_ALGO_VERSION,
-    PREDICTION_CACHE_VERSION: PREDICTOR_ALGO_VERSION
+    PREDICTION_CACHE_VERSION: PREDICTOR_ALGO_VERSION,
+    predictionMemoryCache
   };
 
   // Populate chronological predictions when results are scraped/updated if cache is not current
@@ -1248,6 +1265,7 @@
     window.addEventListener('storage', e => {
       if (e.key && (e.key.includes('baseline') || e.key.includes('prediction'))) {
         cachedBaselines = null;
+        predictionMemoryCache.clear();
       }
     });
 
