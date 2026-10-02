@@ -55,7 +55,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
   - Instantly toggles `.connectea-dark` on `document.documentElement` without DOM traversal or layout thrashing.
   - `adaptSurfaces()`: Safely identifies unstyled neutral surfaces and dark colored text (e.g. red/purple `#7f375c`) across My Connect, Classes, and Preferences pages, tagging them with `data-connectea-surface` and `data-connectea-ink` without inline style mutations or observer feedback loops.
   - Efficient debounced `MutationObserver` ensures button persistence across client-side SPA route navigations.
-  - Automatically toggles off dark mode on `https://connect.det.wa.edu.au/login` to prevent broken styles on the login selector card.
+  - Automatically toggles off dark mode on `https://connect.det.wa.edu.au/login` to prevent broken styles on the login selector card, and automatically toggles it back on upon successful login.
   - Enhances accordion header arrows (`▴` / `▾`).
 
 #### [`auto-login.js`](file:///Users/uwong/Downloads/2.1.14_0/auto-login.js) (155 lines)

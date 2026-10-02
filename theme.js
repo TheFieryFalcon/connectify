@@ -11,6 +11,7 @@
   window.ConnectifyThemeLoaded = true;
 
   const STORAGE_KEY = 'connectea:theme:v1';
+  const RESTORE_KEY = 'connectea:theme:restore_dark';
   let isDarkMode = false;
 
   const isLoginUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
@@ -29,16 +30,24 @@
   };
 
   try {
-    isDarkMode = localStorage.getItem(STORAGE_KEY) === 'dark';
-  } catch {}
-
-  // Toggle off dark mode immediately if the URL is https://connect.det.wa.edu.au/login
-  if (isLoginUrl()) {
-    isDarkMode = false;
-    try {
+    if (isLoginUrl()) {
+      // If user had dark mode enabled, remember to restore it after login
+      if (localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true') {
+        localStorage.setItem(RESTORE_KEY, 'true');
+      }
       localStorage.setItem(STORAGE_KEY, 'light');
-    } catch {}
-  }
+      isDarkMode = false;
+    } else {
+      // If returning to a logged-in page after login, restore dark mode if previously active
+      if (localStorage.getItem(RESTORE_KEY) === 'true') {
+        localStorage.removeItem(RESTORE_KEY);
+        localStorage.setItem(STORAGE_KEY, 'dark');
+        isDarkMode = true;
+      } else {
+        isDarkMode = localStorage.getItem(STORAGE_KEY) === 'dark';
+      }
+    }
+  } catch {}
 
   // Apply dark mode class immediately to avoid any initial page flash
   document.documentElement.classList.toggle('connectea-dark', isDarkMode);
@@ -199,9 +208,22 @@
 
   function applyTheme(isDark) {
     if (isLoginUrl()) {
+      if (isDark || isDarkMode) {
+        try {
+          localStorage.setItem(RESTORE_KEY, 'true');
+        } catch {}
+      }
       isDark = false;
       try {
         localStorage.setItem(STORAGE_KEY, 'light');
+      } catch {}
+    } else {
+      try {
+        if (localStorage.getItem(RESTORE_KEY) === 'true') {
+          localStorage.removeItem(RESTORE_KEY);
+          isDark = true;
+          localStorage.setItem(STORAGE_KEY, 'dark');
+        }
       } catch {}
     }
     isDarkMode = isDark;
@@ -238,6 +260,10 @@
       return;
     }
 
+    try {
+      localStorage.removeItem(RESTORE_KEY);
+    } catch {}
+
     // Use current DOM state as ground truth to prevent any desync
     const isCurrentlyDark = document.documentElement.classList.contains('connectea-dark');
     const nextDark = !isCurrentlyDark;
@@ -264,11 +290,22 @@
       syncScheduled = false;
       if (isLoginUrl()) {
         if (isDarkMode || document.documentElement.classList.contains('connectea-dark')) {
+          try {
+            localStorage.setItem(RESTORE_KEY, 'true');
+          } catch {}
           applyTheme(false);
         }
         if (toggleButton.parentElement) toggleButton.remove();
         return;
       }
+      try {
+        if (localStorage.getItem(RESTORE_KEY) === 'true') {
+          localStorage.removeItem(RESTORE_KEY);
+          localStorage.setItem(STORAGE_KEY, 'dark');
+          applyTheme(true);
+          return;
+        }
+      } catch {}
       cleanupDuplicateButtons();
       const nav = document.querySelector('.cvr-c-primary-navigation');
       if (!nav || toggleButton.parentElement !== nav || !toggleButton.isConnected) {
@@ -319,12 +356,19 @@
   if (isDarkMode) adaptSurfaces();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      if (isLoginUrl()) {
-        isDarkMode = false;
-        try {
+      try {
+        if (isLoginUrl()) {
+          if (isDarkMode || localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true') {
+            localStorage.setItem(RESTORE_KEY, 'true');
+          }
           localStorage.setItem(STORAGE_KEY, 'light');
-        } catch {}
-      }
+          isDarkMode = false;
+        } else if (localStorage.getItem(RESTORE_KEY) === 'true') {
+          localStorage.removeItem(RESTORE_KEY);
+          localStorage.setItem(STORAGE_KEY, 'dark');
+          isDarkMode = true;
+        }
+      } catch {}
       if (document.body) {
         document.body.classList.toggle('connectea-dark', isDarkMode);
       }
@@ -341,6 +385,13 @@
       clearInterval(mountPollInterval);
       return;
     }
+    try {
+      if (localStorage.getItem(RESTORE_KEY) === 'true') {
+        localStorage.removeItem(RESTORE_KEY);
+        localStorage.setItem(STORAGE_KEY, 'dark');
+        applyTheme(true);
+      }
+    } catch {}
     const nav = document.querySelector('.cvr-c-primary-navigation');
     if (nav && toggleButton.parentElement !== nav) {
       updateTogglePosition(true);

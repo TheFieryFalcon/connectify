@@ -2756,19 +2756,22 @@ runTest('Test 113: Typography bolding parity between dark and light modes for ta
   assert.ok(themeCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong'), 'theme.css must bold stats panel strong elements in dark mode');
 });
 
-runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.edu.au/login', () => {
+runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.edu.au/login and restored after login', () => {
   const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
 
-  // 1. Static checks: theme.js must check isLoginUrl and toggle off dark mode on the login page
+  // 1. Static checks: theme.js must check isLoginUrl, set RESTORE_KEY, and restore dark mode post-login
   assert.ok(themeJs.includes('const isLoginUrl ='), 'theme.js must define isLoginUrl');
+  assert.ok(themeJs.includes('connectea:theme:restore_dark'), 'theme.js must define RESTORE_KEY for post-login restoration');
   assert.ok(themeJs.includes("url === 'https://connect.det.wa.edu.au/login'") || themeJs.includes("startsWith('https://connect.det.wa.edu.au/login')"), 'theme.js must verify connect login url');
-  assert.ok(themeJs.includes("if (isLoginUrl()) {\n    isDarkMode = false;\n    try {\n      localStorage.setItem(STORAGE_KEY, 'light');"), 'theme.js must toggle off dark mode on login URL');
+  assert.ok(themeJs.includes("localStorage.setItem(RESTORE_KEY, 'true')"), 'theme.js must record restore flag on login URL');
+  assert.ok(themeJs.includes('localStorage.removeItem(RESTORE_KEY)'), 'theme.js must clear restore flag when restored');
   assert.ok(themeJs.includes('window.ConnectifyTheme = {'), 'theme.js must export ConnectifyTheme helper');
 
   // 2. Functional evaluation of isLoginUrl across login and normal URLs
   delete window.ConnectifyThemeLoaded;
   window.location.href = 'https://connect.det.wa.edu.au/login';
   window.localStorage.setItem('connectea:theme:v1', 'dark');
+  window.localStorage.removeItem('connectea:theme:restore_dark');
 
   eval(themeJs);
 
@@ -2780,9 +2783,37 @@ runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.
 
   // 3. Functional verification of dark mode suppression and storage toggle off on login page
   assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'light', 'storage must be toggled to light on login page');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), 'true', 'restore flag must be saved on login page');
   assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'connectea-dark must not be on documentElement on login page');
   assert.strictEqual(document.body?.classList.contains('connectea-dark'), false, 'connectea-dark must not be on body on login page');
   assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false on login page');
+
+  // 4. Functional verification of dark mode restoration after logging in and navigating to normal Connect page
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  eval(themeJs);
+
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'dark', 'storage must be restored to dark after login');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), null, 'restore flag must be cleared after restoration');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true, 'connectea-dark must be restored on documentElement');
+  assert.strictEqual(window.ConnectifyTheme.isDarkMode(), true, 'isDarkMode must return true after login restoration');
+
+  // 5. Functional verification: Light mode user logging in keeps light mode
+  delete window.ConnectifyThemeLoaded;
+  window.localStorage.setItem('connectea:theme:v1', 'light');
+  window.localStorage.removeItem('connectea:theme:restore_dark');
+  window.location.href = 'https://connect.det.wa.edu.au/login';
+  eval(themeJs);
+
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), null, 'restore flag must not be set for light mode users');
+
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  eval(themeJs);
+
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'light', 'light mode remains light after login');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'connectea-dark must remain off');
+  assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false for light mode user');
 });
 
 console.log('\n================================================================');
