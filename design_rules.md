@@ -36,7 +36,7 @@ Extremely concise summary of the core visual design language, contrast standards
   6. `connectify-weakness-toggle` (Weakness Analyzer)
   7. `connectify-categories-toggle` (Settings)
 - **Secondary Tool Buttons**: Settings and Weakness Analyzer feature clean white buttons (`#ffffff`) in light mode with centered text (`text-align: center !important; justify-content: center !important;`).
-- **Workspace Navigation**: Dedicated `← Back to Menu` navigation header (`.cx-back-menu`); single active tool policy enforced via `connectify-open` event; Escape key dismissal.
+- **Workspace Navigation**: Dedicated `← Back to Menu` navigation header (`.cx-back-menu`) positioned at the top right of the header; single active tool policy enforced via `connectify-open` event; outside click and Escape key dismissal.
 
 ## 4. Outcome Meter & Tooltip Architecture
 - **Bar Dimensions**: Width **18px**, total height **56px** (2–3x scale).

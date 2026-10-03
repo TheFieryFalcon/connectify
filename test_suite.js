@@ -152,9 +152,20 @@ class MockElement {
     if (!this._listeners[event]) this._listeners[event] = [];
     this._listeners[event].push(fn);
   }
+  removeEventListener(event, fn) {
+    if (this._listeners?.[event]) {
+      this._listeners[event] = this._listeners[event].filter(l => l !== fn);
+    }
+  }
   dispatchEvent(e) {
-    if (this._listeners?.[e.type]) {
-      this._listeners[e.type].forEach(fn => fn(e));
+    if (!e.target) e.target = this;
+    let curr = this;
+    while (curr) {
+      if (curr._listeners?.[e.type]) {
+        curr._listeners[e.type].forEach(fn => fn(e));
+      }
+      if (!e.bubbles || e._propagationStopped) break;
+      curr = curr.parentElement || curr.parentNode;
     }
   }
   append(...kids) {
@@ -291,13 +302,24 @@ class MockEvent {
   constructor(type, init = {}) {
     this.type = type;
     this.key = init.key || '';
+    this.target = init.target || null;
     this.detail = init.detail;
     this.bubbles = init.bubbles ?? true;
     this.cancelable = init.cancelable ?? true;
     this.defaultPrevented = false;
+    this._propagationStopped = false;
   }
   preventDefault() { this.defaultPrevented = true; }
-  stopPropagation() {}
+  stopPropagation() { this._propagationStopped = true; }
+  composedPath() {
+    const list = [];
+    let curr = this.target;
+    while (curr) {
+      list.push(curr);
+      curr = curr.parentElement || curr.parentNode;
+    }
+    return list;
+  }
 }
 
 const mockLocalStorage = {
@@ -327,7 +349,8 @@ global.document = {
   documentElement: domRoot,
   activeElement: domBody,
   addEventListener: (event, fn) => domRoot.addEventListener(event, fn),
-  removeEventListener: () => {}
+  removeEventListener: (event, fn) => domRoot.removeEventListener(event, fn),
+  dispatchEvent: (e) => domRoot.dispatchEvent(e)
 };
 global.HTMLElement = MockElement;
 global.getComputedStyle = (el) => el._computedStyle || {};
@@ -3558,6 +3581,64 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   clearBtn.click();
   assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), null, 'Clear button must remove override');
   assert.strictEqual(refreshCount2, 2, 'Clear button must trigger onRefresh');
+});
+
+runTest('Test 126: Clicking outside the sidebar collapses the sidebar, Close button is removed, and Back to Menu is positioned at top right', () => {
+  const currentSidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+
+  // Verify code signatures
+  assert.ok(!currentSidebarJs.includes("createElement('button', '❮ Close')"), 'sidebar.js must not create Close button');
+  assert.ok(currentSidebarJs.includes('strayCloseBtn.remove()'), 'sidebar.js must purge any stray close button');
+  assert.ok(currentSidebarJs.includes('handleOutsideClick'), 'sidebar.js must define outside-click handler');
+  assert.ok(currentSidebarJs.includes("header.append(brand, homeBtn)"), 'sidebar.js must append brand and homeBtn in header');
+
+  // Functional test: evaluate sidebar.js
+  eval(currentSidebarJs);
+
+  const sidebar = document.getElementById('connectify-sidebar');
+  const handle = document.getElementById('connectify-sidebar-handle');
+  assert.ok(sidebar, 'Sidebar element must exist');
+  assert.ok(handle, 'Handle element must exist');
+
+  // 1. Verify Close button does NOT exist in sidebar
+  const closeBtn = sidebar.querySelector('.cx-close-btn');
+  assert.strictEqual(closeBtn, null, 'Close button (.cx-close-btn) must not exist in sidebar');
+
+  // 2. Verify Back to Menu button exists in header
+  const header = sidebar.querySelector('header');
+  assert.ok(header, 'Header must exist');
+  const homeBtn = header.querySelector('.cx-back-menu');
+  assert.ok(homeBtn, 'Back to menu button (.cx-back-menu) must exist in header');
+  assert.strictEqual(homeBtn.textContent, '← Back to Menu', 'Back to menu button must have correct text');
+
+  // 3. Open sidebar via handle click
+  assert.strictEqual(sidebar.hidden, true, 'Sidebar initially hidden');
+  handle.click();
+  assert.strictEqual(sidebar.hidden, false, 'Sidebar must open on handle click');
+  assert.strictEqual(handle.getAttribute('aria-expanded'), 'true', 'Handle aria-expanded must be true when open');
+
+  // 4. Click inside sidebar should NOT collapse it
+  const toolMenu = sidebar.querySelector('.cx-tool-menu');
+  assert.ok(toolMenu, 'Tool menu must exist');
+  toolMenu.dispatchEvent(new MockEvent('click', { target: toolMenu, bubbles: true }));
+  assert.strictEqual(sidebar.hidden, false, 'Clicking inside sidebar must NOT collapse it');
+
+  // 5. Click outside sidebar (on domBody) should collapse sidebar
+  const outsideEl = document.createElement('div');
+  domBody.appendChild(outsideEl);
+  outsideEl.dispatchEvent(new MockEvent('click', { target: outsideEl, bubbles: true }));
+  assert.strictEqual(sidebar.hidden, true, 'Clicking outside sidebar must collapse sidebar');
+  assert.strictEqual(handle.getAttribute('aria-expanded'), 'false', 'Handle aria-expanded must be false when collapsed');
+
+  // 6. Test Back to Menu button when active tool is open
+  handle.click();
+  assert.strictEqual(sidebar.hidden, false, 'Sidebar reopened');
+  sidebar.classList.add('cx-tool-active');
+  assert.ok(sidebar.classList.contains('cx-tool-active'), 'Tool active mode');
+
+  homeBtn.click();
+  assert.strictEqual(sidebar.classList.contains('cx-tool-active'), false, 'Back to menu must exit active tool mode');
+  assert.strictEqual(sidebar.hidden, false, 'Back to menu must keep sidebar open');
 });
 
 console.log('\n================================================================');

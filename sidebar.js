@@ -80,18 +80,23 @@
     // Header and navigation
     let header = sidebar.querySelector('header');
     let homeBtn = sidebar.querySelector('.cx-back-menu');
-    let closeBtn = sidebar.querySelector('.cx-close-btn');
+
+    // Remove any legacy or stray close button from header
+    const strayCloseBtn = sidebar.querySelector('.cx-close-btn');
+    if (strayCloseBtn) strayCloseBtn.remove();
 
     if (!header) {
       header = createElement('header');
       const brand = createElement('strong', 'Connectify');
       homeBtn = createElement('button', '← Back to Menu');
-      closeBtn = createElement('button', '❮ Close');
-
-      homeBtn.type = closeBtn.type = 'button';
+      homeBtn.type = 'button';
       homeBtn.className = 'cx-back-menu';
-      closeBtn.className = 'cx-close-btn';
-      header.append(brand, homeBtn, closeBtn);
+      header.append(brand, homeBtn);
+    } else if (!homeBtn) {
+      homeBtn = createElement('button', '← Back to Menu');
+      homeBtn.type = 'button';
+      homeBtn.className = 'cx-back-menu';
+      header.append(homeBtn);
     }
 
     let toolMenu = sidebar.querySelector('.cx-tool-menu');
@@ -307,15 +312,27 @@
       }
     };
 
-    if (closeBtn) {
-      closeBtn.onclick = () => {
-        if (!sidebar.hidden) closeSidebar();
-      };
-    }
-
     if (homeBtn) {
       homeBtn.onclick = closeAllTools;
     }
+
+    // Collapse sidebar when clicking outside the sidebar and handle
+    if (window._connectifyOutsideClickAttached) {
+      document.removeEventListener('click', window._connectifyOutsideClickAttached);
+    }
+    const handleOutsideClick = e => {
+      if (sidebar.hidden) return;
+      const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+      const isInside = path.includes(sidebar) ||
+                       path.includes(handle) ||
+                       sidebar.contains(e.target) ||
+                       handle.contains(e.target);
+      if (!isInside) {
+        closeSidebar();
+      }
+    };
+    window._connectifyOutsideClickAttached = handleOutsideClick;
+    document.addEventListener('click', handleOutsideClick);
 
     // Central delegated tool launcher listener
     const handleToolLaunchClick = e => {

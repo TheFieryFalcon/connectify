@@ -56,7 +56,7 @@ This document details user-facing visual features 1 through 10, covering direct 
   - **ATAR Estimate** (`#connectify-estimate-toggle`)
   - **Weakness Analyzer** (`#connectify-weakness-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
   - **Settings & Calibration** (`#connectify-categories-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
-- **Functionality**: Smoothly expands drawer from 310px to 900px (`.cx-tool-active`) with prominent `← Back to Menu` navigation header, single-active-tool view policy, Escape dismissal, and event propagation isolation (`e.stopPropagation()`) preventing double-toggle desynchronization.
+- **Functionality**: Smoothly expands drawer from 310px to 900px (`.cx-tool-active`) with prominent `← Back to Menu` navigation header at top right, single-active-tool view policy, outside-click and Escape collapse, and event propagation isolation (`e.stopPropagation()`) preventing double-toggle desynchronization.
 
 ### 5. Outline Accordion Expand / Collapse Controls
 - **Source Modules**: [`atar-features.js`](file:///Users/uwong/Downloads/2.1.14_0/atar-features.js), [`assessment-data.js`](file:///Users/uwong/Downloads/2.1.14_0/assessment-data.js)
