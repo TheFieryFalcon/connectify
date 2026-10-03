@@ -156,13 +156,12 @@
           const bodyRect = (document.body && typeof document.body.getBoundingClientRect === 'function') ? document.body.getBoundingClientRect() : null;
           const bodyTop = bodyRect ? (bodyRect.top + pageY) : 0;
 
-          const targetDocY = Math.round(sidebarDocTop - bodyTop + Math.min(sidebarHeight, 500) / 2);
-          const viewportY = Math.round(rect.top + Math.min(sidebarHeight, 500) / 2);
-          handle._lastViewportY = viewportY;
+          const targetDocY = Math.round(sidebarDocTop - bodyTop + (sidebarHeight <= vh ? sidebarHeight / 2 : Math.min(sidebarHeight, vh) / 2));
+          handle._lastViewportY = centerY;
 
           if (isFixed) {
             handle.style.position = 'fixed';
-            handle.style.top = `${viewportY}px`;
+            handle.style.top = `${centerY}px`;
           } else {
             handle.style.position = 'absolute';
             handle.style.top = `${targetDocY}px`;

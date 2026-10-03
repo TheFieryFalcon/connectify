@@ -4450,7 +4450,32 @@ runTest('Test 131: Sidebar handle excludes primary menu and detects fixed/sticky
   assert.strictEqual(handle.style.position, 'fixed', 'Handle must ignore primary menu and remain fixed');
   primaryMenu.remove();
 
-  // 4. Test display width scaling function
+  // 4. Test fixed/sticky sidebar centering: handle mounts at centerY (vertical center below top bar)
+  const fixedSidebar = document.createElement('nav');
+  fixedSidebar.className = 'cvr-c-service-menu';
+  fixedSidebar.getBoundingClientRect = () => ({
+    top: 50,
+    bottom: 400,
+    height: 350,
+    left: 0,
+    right: 220,
+    width: 220
+  });
+  domBody.appendChild(fixedSidebar);
+
+  const origGetComputedStyle = window.getComputedStyle;
+  try {
+    window.getComputedStyle = el => (el === fixedSidebar ? { position: 'fixed' } : { position: 'static' });
+    handle.updatePosition();
+    assert.strictEqual(handle.style.position, 'fixed', 'Handle must use position: fixed when sidebar is fixed');
+    // Top bar is at 0, available height is 800, centerY = 400px
+    assert.strictEqual(handle.style.top, '400px', 'Handle must mount at centerY (400px) instead of 225px');
+  } finally {
+    window.getComputedStyle = origGetComputedStyle;
+    fixedSidebar.remove();
+  }
+
+  // 5. Test display width scaling function
   const origInnerWidth = window.innerWidth;
   try {
     window.innerWidth = 820;
