@@ -287,9 +287,9 @@
           input.title = 'Single week number: 1-10 for Term 1, 11-20 for Term 2, 21-30 for Term 3, 31-40 for Term 4';
           input.style.width = '110px';
           if (currentVal) input.value = currentVal;
+          const initialVal = currentVal || '';
 
-          input.addEventListener('input', () => {
-            const val = input.value.trim();
+          const saveValue = (val) => {
             const targetKey = isDuplicateName && specificKey ? specificKey : (specificKey || genericKey);
             if (val) {
               localStorage.setItem(targetKey, val);
@@ -303,11 +303,50 @@
                 localStorage.removeItem(genericKey.replace('connectea:', 'connectify:'));
               }
             }
+          };
 
+          let committed = false;
+          const commit = () => {
+            if (committed) return;
+            committed = true;
             clearTimeout(window._cxTimeRefresh);
-            window._cxTimeRefresh = setTimeout(() => {
-              if (typeof onRefresh === 'function') onRefresh();
-            }, 600);
+            if (typeof onRefresh === 'function') onRefresh();
+          };
+
+          input.addEventListener('input', () => {
+            const val = input.value.trim();
+            saveValue(val);
+
+            // Avoid premature kick-out / auto-refresh while actively focused and typing.
+            // Programmatic/headless inputs (document.activeElement !== input) can refresh after debounce.
+            clearTimeout(window._cxTimeRefresh);
+            if (document.activeElement !== input) {
+              window._cxTimeRefresh = setTimeout(() => {
+                commit();
+              }, 600);
+            }
+          });
+
+          input.addEventListener('blur', () => {
+            commit();
+          });
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (document.activeElement === input && typeof input.blur === 'function') {
+                input.blur();
+              }
+              commit();
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              input.value = initialVal;
+              saveValue(initialVal);
+              if (document.activeElement === input && typeof input.blur === 'function') {
+                input.blur();
+              }
+              commit();
+            }
           });
 
           inputRow.append(input);
@@ -317,7 +356,12 @@
             clearBtn.title = 'Clear custom time override';
             clearBtn.style.padding = '0 4px';
             clearBtn.style.cursor = 'pointer';
+            clearBtn.onmousedown = (e) => {
+              if (e && typeof e.preventDefault === 'function') e.preventDefault();
+            };
             clearBtn.onclick = () => {
+              committed = true;
+              clearTimeout(window._cxTimeRefresh);
               if (specificKey) {
                 localStorage.removeItem(specificKey);
                 localStorage.removeItem(specificKey.replace('connectea:', 'connectify:'));
@@ -353,7 +397,17 @@
           editBtn.style.fontSize = '12px';
           editBtn.style.padding = '0';
           editBtn.onclick = () => {
-            containerSpan.replaceWith(createInputField(savedTime || '', false));
+            const inputWrapper = createInputField(savedTime || '', false);
+            if (typeof containerSpan.replaceWith === 'function') {
+              containerSpan.replaceWith(inputWrapper);
+            } else if (containerSpan.parentElement) {
+              containerSpan.parentElement.replaceChild(inputWrapper, containerSpan);
+            }
+            const inputEl = inputWrapper.querySelector('input');
+            if (inputEl) {
+              if (typeof inputEl.focus === 'function') inputEl.focus();
+              if (typeof inputEl.select === 'function') inputEl.select();
+            }
           };
           containerSpan.append(editBtn);
           whenCell = containerSpan;

@@ -70,8 +70,9 @@
     let selectedSubject = '';
     let lastDataSignature = '';
 
-    function refresh() {
+    function refresh(force = false) {
       if (panel.hidden) return;
+      if (!force && panel.contains(document.activeElement) && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
       const data = dataAPI ? dataAPI.collect(true) : [];
       const sig = JSON.stringify(data);
       if (sig === lastDataSignature) return;
@@ -176,9 +177,9 @@
           isHistory,
           byAssessment,
           subjectName: titleSubject,
-          onRefresh: () => {
+          onRefresh: (force = true) => {
             lastDataSignature = '';
-            refresh();
+            refresh(force);
           }
         });
       }
@@ -187,7 +188,7 @@
     function expandAndRefresh() {
       if (dataAPI?.expandAll) dataAPI.expandAll();
       lastDataSignature = '';
-      refresh();
+      refresh(true);
     }
 
     // Toggle button interactions

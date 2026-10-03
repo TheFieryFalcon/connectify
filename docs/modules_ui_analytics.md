@@ -43,18 +43,18 @@ This document covers the user interface and analytics modules, including target 
   - `computeYBounds(points, isHistory)`: Dynamically calculates Y-axis min/max bounds and grid tick intervals.
 - **Export**: `window.ConnectifyProgressMath`.
 
-#### [`progress-chart.js`](file:///Users/uwong/Downloads/2.1.14_0/progress-chart.js) (340 lines)
+#### [`progress-chart.js`](file:///Users/uwong/Downloads/2.1.14_0/progress-chart.js)
 - **Role**: Native SVG polyline chart generator.
 - **Key Functions**:
   - `renderChart(container, options)`: Generates responsive SVG line chart with dual polylines (blue: student score, red: cohort mean), grid lines, value ticks, interactive data points with hover tooltips, and plotted data detail table.
-  - Supports custom week timestamp overrides and uncompleted task display directly within the plotted data table.
+  - Supports custom week timestamp overrides (focus-protected editing, commit on Enter/blur) and uncompleted task display directly within the plotted data table.
 - **Export**: `window.ConnectifyProgressChart`.
 
-#### [`progress-graph.js`](file:///Users/uwong/Downloads/2.1.14_0/progress-graph.js) (265 lines)
+#### [`progress-graph.js`](file:///Users/uwong/Downloads/2.1.14_0/progress-graph.js)
 - **Role**: Progress Graph modal controller (`#connectify-progress`).
 - **Key Functions**:
   - Builds subject selector chips and "ATAR Progression" selector.
-  - `render(data)`: Delegates plotting to `progress-chart.js`.
+  - `render(data)`: Delegates plotting to `progress-chart.js`. `refresh(force)` guards against re-rendering while editing.
   - `cleanupImprovementArrows()`: Purges obsolete improvement indicators and un-nests panels.
 - **Export**: `window.ConnectifyProgress`.
 

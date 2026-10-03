@@ -71,7 +71,35 @@ class MockElement {
       fill: 'rgb(0, 0, 0)'
     };
   }
-  focus() {}
+  focus() {
+    if (global.document) global.document.activeElement = this;
+    this.dispatchEvent(new MockEvent('focus'));
+  }
+  blur() {
+    if (global.document && global.document.activeElement === this) {
+      global.document.activeElement = global.document.body || null;
+    }
+    this.dispatchEvent(new MockEvent('blur'));
+  }
+  select() {}
+  replaceWith(newEl) {
+    if (this.parentElement) {
+      const idx = this.parentElement.children.indexOf(this);
+      if (idx !== -1) {
+        this.parentElement.children.splice(idx, 1, newEl);
+        newEl.parentElement = this.parentElement;
+        newEl.parentNode = this.parentElement;
+        newEl.isConnected = true;
+      }
+      const idxNodes = this.parentElement.childNodes.indexOf(this);
+      if (idxNodes !== -1) {
+        this.parentElement.childNodes.splice(idxNodes, 1, newEl);
+      }
+      this.parentElement = null;
+      this.parentNode = null;
+      this.isConnected = false;
+    }
+  }
   contains(other) {
     if (other === this) return true;
     for (const c of (this.children || [])) {
@@ -84,6 +112,7 @@ class MockElement {
   }
   click() {
     this.clickCount++;
+    if (typeof this.onclick === 'function') this.onclick(new MockEvent('click'));
     this.dispatchEvent(new MockEvent('click'));
   }
   set innerHTML(html) {
@@ -261,6 +290,7 @@ class MockElement {
 class MockEvent {
   constructor(type, init = {}) {
     this.type = type;
+    this.key = init.key || '';
     this.detail = init.detail;
     this.bubbles = init.bubbles ?? true;
     this.cancelable = init.cancelable ?? true;
@@ -295,6 +325,7 @@ global.document = {
   head: domHead,
   body: domBody,
   documentElement: domRoot,
+  activeElement: domBody,
   addEventListener: (event, fn) => domRoot.addEventListener(event, fn),
   removeEventListener: () => {}
 };
@@ -3415,6 +3446,118 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   const resolvedT2 = window.ConnectifyPredictorMath.resolveCustomDate('Chemistry ATAR', task2);
   assert.strictEqual(resolvedT1, '17', 'Task 1 must resolve to 17');
   assert.strictEqual(resolvedT2, '27', 'Task 2 must resolve to 27');
+});
+
+runTest('Test 125: Progress graph date editor protects active typing from premature refresh and commits on Enter or blur', () => {
+  const chartJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-chart.js'), 'utf8');
+  const graphJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8');
+
+  // Verify code signatures
+  assert.ok(graphJs.includes('if (!force && panel.contains(document.activeElement) && (document.activeElement.tagName === \'INPUT\' || document.activeElement.tagName === \'TEXTAREA\')) return;'),
+    'progress-graph.js refresh() must guard against destroying DOM when input is active');
+  assert.ok(chartJs.includes('if (document.activeElement !== input)'),
+    'progress-chart.js must not schedule debounced refresh while input is actively focused');
+  assert.ok(chartJs.includes("e.key === 'Enter'") && chartJs.includes("e.key === 'Escape'"),
+    'progress-chart.js must handle Enter and Escape keys');
+
+  // Functional test
+  mockLocalStorage.clear();
+  delete window.ConnectifyProgressChart;
+  eval(chartJs);
+
+  const container = document.createElement('div');
+  const task = { id: 'task_unscheduled', name: 'Practical Investigation', score: 80, mean: 65, order: null, sequence: 1, pending: false };
+
+  let refreshCount = 0;
+  window.ConnectifyProgressChart.renderChart(container, {
+    points: [task],
+    isHistory: false,
+    byAssessment: false,
+    subjectName: 'Physics ATAR',
+    onRefresh: () => { refreshCount++; }
+  });
+
+  const input = container.querySelector('input');
+  assert.ok(input, 'Must render input element for unconfigured task');
+
+  // 1. Focus the input
+  input.focus();
+  assert.strictEqual(document.activeElement, input, 'Input must be active element when focused');
+
+  // 2. Simulate typing '1'
+  input.value = '1';
+  input.dispatchEvent(new MockEvent('input'));
+
+  // Synchronous storage check: partial input saved
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_unscheduled'), '1', 'Must save to storage on input');
+  // BUT onRefresh must NOT have fired because input is focused
+  assert.strictEqual(refreshCount, 0, 'Must NOT trigger onRefresh while actively focused on input');
+
+  // 3. Test progress-graph.js refresh() guard with mock panel
+  const panel = document.createElement('div');
+  panel.appendChild(container);
+  assert.ok(panel.contains(document.activeElement), 'Panel contains active element');
+
+  // Simulate refresh() logic from progress-graph.js:
+  let renderCalled = false;
+  const mockRender = () => { renderCalled = true; };
+  const mockRefresh = (force = false) => {
+    if (!force && panel.contains(document.activeElement) && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+    mockRender();
+  };
+
+  mockRefresh();
+  assert.strictEqual(renderCalled, false, 'refresh() must return early without re-rendering while user is focused');
+
+  // 4. Simulate typing '7' -> '17'
+  input.value = '17';
+  input.dispatchEvent(new MockEvent('input'));
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_unscheduled'), '17', 'Must update storage to 17');
+  assert.strictEqual(refreshCount, 0, 'Still must NOT trigger onRefresh while typing');
+
+  // 5. User presses Enter to commit
+  input.dispatchEvent(new MockEvent('keydown', { key: 'Enter' }));
+  assert.strictEqual(refreshCount, 1, 'Pressing Enter must commit and trigger onRefresh');
+
+  // 6. Test editing an existing task with date & Escape key
+  const taskWithDate = { id: 'task_dated', name: 'Midyear Exam', score: 85, mean: 70, order: 19, sequence: 2, pending: false };
+  const container2 = document.createElement('div');
+  let refreshCount2 = 0;
+  mockLocalStorage.setItem('connectea:time_override:Physics ATAR:task_dated', '19');
+
+  window.ConnectifyProgressChart.renderChart(container2, {
+    points: [taskWithDate],
+    isHistory: false,
+    byAssessment: false,
+    subjectName: 'Physics ATAR',
+    onRefresh: () => { refreshCount2++; }
+  });
+
+  const editBtn = container2.querySelector('.cx-time-edit-btn');
+  assert.ok(editBtn, 'Must render edit button for dated task');
+  editBtn.click();
+
+  const editInput = container2.querySelector('input');
+  assert.ok(editInput, 'Clicking edit button must replace text with input');
+  assert.strictEqual(document.activeElement, editInput, 'Edit input must be focused');
+  assert.strictEqual(editInput.value, '19', 'Edit input must have initial value 19');
+
+  // User changes value to 25 but presses Escape
+  editInput.value = '25';
+  editInput.dispatchEvent(new MockEvent('input'));
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), '25', 'Storage updated on input');
+
+  editInput.dispatchEvent(new MockEvent('keydown', { key: 'Escape' }));
+  assert.strictEqual(editInput.value, '19', 'Escape must restore initial value 19 in input');
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), '19', 'Escape must restore initial value 19 in storage');
+  assert.strictEqual(refreshCount2, 1, 'Escape must commit restored value and trigger onRefresh');
+
+  // 7. Test clear button '✕'
+  const clearBtn = container2.querySelector('.cx-time-clear-btn');
+  assert.ok(clearBtn, 'Must render clear button when currentVal exists');
+  clearBtn.click();
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), null, 'Clear button must remove override');
+  assert.strictEqual(refreshCount2, 2, 'Clear button must trigger onRefresh');
 });
 
 console.log('\n================================================================');
