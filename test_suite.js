@@ -71,6 +71,8 @@ class MockElement {
       fill: 'rgb(0, 0, 0)'
     };
   }
+  get firstChild() { return this.childNodes[0] || this.children[0] || null; }
+  get lastChild() { return this.childNodes[this.childNodes.length - 1] || this.children[this.children.length - 1] || null; }
   focus() {
     if (global.document) global.document.activeElement = this;
     this.dispatchEvent(new MockEvent('focus'));
@@ -3763,6 +3765,180 @@ runTest('Test 127: Sleek sidebar handle, dynamic vertical centering with top bar
 
     assert.strictEqual(sidebar.hidden, true, 'Clicking outside sidebar when panel is active must collapse sidebar');
     assert.strictEqual(handle.getAttribute('aria-expanded'), 'false', 'Handle aria-expanded must be false');
+    clickOutsideEl.remove();
+  } finally {
+    global.setTimeout = origSetTimeout;
+    global.clearTimeout = origClearTimeout;
+  }
+});
+
+runTest('Test 128: Scoped top-bar handle centering, baseline removal outcome bar suppression, synchronized drawer slide animation, and Back to Menu retention', () => {
+  const currentSidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+  const currentSidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  const currentPredMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  const currentCohortViewJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
+  const currentCohortStatsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+
+  // 1. Verify CSS rules for synchronized drawer animation
+  assert.ok(currentSidebarCss.includes('transform:translateX(0)'), 'sidebar.css must set transform: translateX(0) on sidebar');
+  assert.ok(currentSidebarCss.includes('transform:translateX(-100%)!important'), 'sidebar.css must slide sidebar off-screen when hidden');
+  assert.ok(currentSidebarCss.includes('visibility:hidden!important'), 'sidebar.css must hide visibility when hidden');
+  assert.ok(currentSidebarCss.includes('top 0.15s ease-out'), 'sidebar.css must transition top position on handle');
+
+  // 2. Verify JS signatures
+  assert.ok(currentSidebarJs.includes('getTopBarBottom'), 'sidebar.js must define getTopBarBottom');
+  assert.ok(currentSidebarJs.includes('justReturnedToMenu'), 'sidebar.js must define justReturnedToMenu guard');
+  assert.ok(currentPredMathJs.includes('candidateSubjKeys'), 'predictor-math.js must define candidateSubjKeys in saveBaselines');
+  assert.ok(currentCohortStatsJs.includes('connectify-baselines-updated'), 'cohort-stats.js must listen to connectify-baselines-updated');
+
+  // 3. Evaluate scripts to test functionality
+  eval(currentPredMathJs);
+  eval(currentCohortViewJs);
+  eval(currentSidebarJs);
+
+  const sidebar = document.getElementById('connectify-sidebar');
+  const handle = document.getElementById('connectify-sidebar-handle');
+  assert.ok(sidebar, 'Sidebar element must exist');
+  assert.ok(handle, 'Handle element must exist');
+
+  // 4. Test scoped top-bar handle centering
+  // Create a fake tile header with top: 300 (should NOT be picked up by getTopBarBottom)
+  const tileHeader = document.createElement('header');
+  tileHeader.className = 'eds-c-tile__header';
+  tileHeader.getBoundingClientRect = () => ({ top: 300, bottom: 350, height: 50 });
+  domBody.appendChild(tileHeader);
+
+  // Create a genuine top navigation bar docked at top: 0 with bottom: 90
+  const topNav = document.createElement('nav');
+  topNav.className = 'cvr-c-primary-navigation';
+  topNav.getBoundingClientRect = () => ({ top: 0, bottom: 90, height: 90 });
+  domBody.appendChild(topNav);
+
+  handle.updatePosition();
+  // vh = 800; topBarBottom = 90; centerY = 90 + (800 - 90)/2 = 445px
+  assert.strictEqual(handle.style.top, '445px', 'Handle top must center below genuine top bar (ignoring tile headers)');
+
+  // Clean up mock navigation elements
+  tileHeader.remove();
+  topNav.remove();
+
+  // 5. Test baseline removal and first task outcome bar suppression
+  delete window.ConnectifyTaskTypes;
+  const taskTypesCode = fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8');
+  eval(taskTypesCode);
+
+  const testSubj = 'Physics ATAR';
+  const subjectsList = [{
+    name: testSubj,
+    tasks: [{
+      id: 'phys-t1',
+      name: 'Task 1',
+      score: 72,
+      pending: false,
+      weight: 15,
+      semester: 1,
+      sequence: 0
+    }]
+  }];
+
+  const card = document.createElement('div');
+  card.className = 'eds-c-tile';
+  const cTitle = document.createElement('div');
+  cTitle.className = 'eds-c-tile__title';
+  cTitle.textContent = testSubj;
+  card.appendChild(cTitle);
+
+  const task1Row = document.createElement('div');
+  task1Row.className = 'cvr-c-task';
+  task1Row.closest = (sel) => (sel.includes('eds-c-tile') || sel.includes('c-tile')) ? card : null;
+
+  const detailsContainer = document.createElement('div');
+  detailsContainer.className = 'cvr-c-task__details';
+  const l1 = document.createElement('span');
+  l1.className = 'v-label';
+  l1.textContent = 'Physics';
+  const l2 = document.createElement('span');
+  l2.className = 'v-label';
+  l2.textContent = 'Term 1, Week 2';
+  const l3 = document.createElement('span');
+  l3.className = 'v-label';
+  l3.textContent = 'Task 1';
+  detailsContainer.append(l1, l2, l3);
+  task1Row.append(detailsContainer);
+
+  const marksContainer = document.createElement('div');
+  marksContainer.className = 'cvr-c-task__marks';
+  const markCell = document.createElement('div');
+  markCell.className = 'cvr-c-task__mark';
+  markCell.textContent = '72%';
+  marksContainer.appendChild(markCell);
+  task1Row.appendChild(marksContainer);
+  card.appendChild(task1Row);
+  domBody.appendChild(card);
+
+  // Set baseline for Physics ATAR
+  window.ConnectifyPredictorMath.saveBaselines({ subjects: { [testSubj]: 75 }, types: {} });
+  window.ConnectifyCohortView.render(task1Row, false, 'phys-k1', 50, null, subjectsList);
+  const panelStateWithBaseline = window.ConnectifyCohortView.panels.get(task1Row);
+  assert.ok(panelStateWithBaseline, 'Panel state must exist');
+  assert.strictEqual(panelStateWithBaseline.outcomeBar.hidden, false, 'First task must render outcome bar when baseline exists');
+
+  // Now REMOVE the baseline for Physics ATAR
+  window.ConnectifyPredictorMath.saveBaselines({ subjects: {}, types: {} });
+  const baselinesAfterRemoval = window.ConnectifyPredictorMath.getBaselines();
+  assert.strictEqual(baselinesAfterRemoval.subjects[testSubj], undefined, 'Baseline must be removed and not resurrected');
+
+  // Re-render task 1 row
+  window.ConnectifyCohortView.render(task1Row, false, 'phys-k1', 50, null, subjectsList);
+  assert.strictEqual(panelStateWithBaseline.outcomeBar.hidden, true, 'First task outcome bar must be hidden when baseline is removed');
+  assert.strictEqual(panelStateWithBaseline.outcomeBar.children.length, 0, 'First task outcome bar child segments must be cleared');
+  card.remove();
+
+  // 6. Test Back to Menu retention (mouse moving outside should NOT collapse drawer)
+  sidebar.hidden = false;
+  handle.setAttribute('aria-expanded', 'true');
+  sidebar.classList.add('cx-tool-active');
+
+  const homeBtn = sidebar.querySelector('.cx-back-menu');
+  assert.ok(homeBtn, 'Back to menu button must exist');
+
+  // Click Back to Menu from active tool panel
+  homeBtn.click();
+  assert.strictEqual(sidebar.classList.contains('cx-tool-active'), false, 'Clicking Back to Menu must exit active tool mode');
+  assert.strictEqual(sidebar.hidden, false, 'Sidebar must remain open on Back to Menu click');
+
+  // Simulate mousemove outside sidebar (e.g. at clientX = 850 where homeBtn was)
+  const origSetTimeout = global.setTimeout;
+  const origClearTimeout = global.clearTimeout;
+  const timerCallbacks = [];
+
+  global.setTimeout = (cb, ms) => {
+    timerCallbacks.push(cb);
+    return timerCallbacks.length;
+  };
+  global.clearTimeout = (id) => {
+    if (typeof id === 'number' && timerCallbacks[id - 1]) {
+      timerCallbacks[id - 1] = () => {};
+    }
+  };
+
+  try {
+    const moveOutsideAfterBack = new MockEvent('mousemove', { target: domBody, clientX: 850, clientY: 100, bubbles: true });
+    document.dispatchEvent(moveOutsideAfterBack);
+
+    // Verify hover collapse is NOT scheduled
+    assert.strictEqual(timerCallbacks.length, 0, 'Moving mouse outside after Back to Menu must not schedule collapse');
+    assert.strictEqual(sidebar.hidden, false, 'Sidebar must remain open after mouse moves outside following Back to Menu');
+
+    // Verify document mouseleave also does NOT collapse
+    document.dispatchEvent(new MockEvent('mouseleave', { bubbles: true }));
+    assert.strictEqual(sidebar.hidden, false, 'Mouseleave document must not collapse sidebar when justReturnedToMenu is true');
+
+    // Click outside should now collapse it
+    const clickOutsideEl = document.createElement('div');
+    domBody.appendChild(clickOutsideEl);
+    clickOutsideEl.dispatchEvent(new MockEvent('click', { target: clickOutsideEl, bubbles: true }));
+    assert.strictEqual(sidebar.hidden, true, 'Clicking outside sidebar must collapse sidebar even after Back to Menu');
     clickOutsideEl.remove();
   } finally {
     global.setTimeout = origSetTimeout;

@@ -13,6 +13,14 @@
   const panels = new WeakMap();
 
   const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+  const clearChildren = el => {
+    if (!el) return;
+    if (typeof el.replaceChildren === 'function') {
+      el.replaceChildren();
+    } else {
+      while (el.firstChild) el.removeChild(el.firstChild);
+    }
+  };
 
   const math = () => window.ConnectifyCohortMath || {
     toNumeric: v => (v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)) ? Number(v) : undefined),
@@ -25,10 +33,15 @@
     rankString: () => ''
   };
 
-  const types = () => window.ConnectifyTaskTypes || {
-    getTaskMeta: () => ({ subjectName: '', taskName: '', labels: [], labelsKey: '' }),
-    updateTypeSelect: () => {},
-    saveTaskTypeOverride: () => {}
+  const types = () => {
+    const t = window.ConnectifyTaskTypes;
+    if (t && typeof t.getTaskMeta === 'function') return t;
+    return {
+      getTaskMeta: () => ({ subjectName: '', taskName: '', labels: [], labelsKey: '' }),
+      updateTypeSelect: () => {},
+      saveTaskTypeOverride: () => {},
+      ...(t || {})
+    };
   };
 
   const estimator = () => window.ConnectifyCohortEstimator || {
@@ -55,6 +68,10 @@
   let typesVersion = 0;
   if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
     window.addEventListener('connectify-baselines-updated', () => {
+      cachedBaselinesSig = null;
+      typesVersion++;
+    });
+    window.addEventListener('connectify-predictions-updated', () => {
       cachedBaselinesSig = null;
       typesVersion++;
     });
@@ -580,6 +597,8 @@
           if (isFirstOfSubject) {
             ui.outcomeBar.hidden = true;
             ui.outcomeBar.style.setProperty('display', 'none', 'important');
+            clearChildren(ui.outcomeBar);
+            delete ui.outcomeBar._renderedKey;
           } else {
             let prediction = predMath.getCachedPrediction
               ? (predMath.getCachedPrediction(meta.subjectName, taskMock.id) ||
@@ -597,6 +616,8 @@
             if (!prediction || prediction.unpredicted) {
               ui.outcomeBar.hidden = true;
               ui.outcomeBar.style.setProperty('display', 'none', 'important');
+              clearChildren(ui.outcomeBar);
+              delete ui.outcomeBar._renderedKey;
             } else {
               const outcome = predMath.evaluateOutcome(mark, prediction);
               renderOutcomeBar(ui.outcomeBar, outcome);
@@ -606,6 +627,8 @@
           console.error('cohort-view error in outcomeBar:', e);
           ui.outcomeBar.hidden = true;
           ui.outcomeBar.style.setProperty('display', 'none', 'important');
+          clearChildren(ui.outcomeBar);
+          delete ui.outcomeBar._renderedKey;
         }
       }
     }
@@ -738,7 +761,7 @@
     }
     bar._renderedKey = outcomeKey;
 
-    while (bar.firstChild) bar.removeChild(bar.firstChild);
+    clearChildren(bar);
 
     const baseColors = ['red', 'orange', 'yellow', 'green'];
     for (const colorName of baseColors) {

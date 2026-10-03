@@ -58,9 +58,9 @@ This document details user-facing visual features 1 through 10, covering direct 
   - **Weakness Analyzer** (`#connectify-weakness-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
   - **Settings & Calibration** (`#connectify-categories-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
 - **Functionality**:
-  - **Left Edge Push Expand**: Moving mouse cursor to the left edge of the screen (`clientX <= 12`) or hovering over the handle automatically expands the sidebar drawer.
-  - **Conditional Hover Collapse**: Moving mouse outside the sidebar collapses it after a 120ms debounce when no tool is active. When a tool panel is active (`.cx-tool-active`), hover-out collapse is suppressed and clicking outside the sidebar is required to collapse it.
-  - **Dynamic Vertical Centering**: Dynamically calculates top navigation bar bottom offset (`.cvr-c-primary-navigation`, `.cvr-c-header`) on scroll and resize, keeping the handle centered in the active viewport below the header.
+  - **Left Edge Push Expand & Drawer Slide Animation**: Moving mouse cursor to the left edge of the screen (`clientX <= 12`) or hovering over the handle automatically expands the sidebar drawer. Both drawer and handle animate in lockstep with synchronized `0.2s cubic-bezier(0.16, 1, 0.3, 1)` transitions (`transform: translateX(-100%)` to `0`), completely eliminating drawer clipping.
+  - **Conditional Hover Collapse & Back to Menu Retention**: Moving mouse outside the sidebar collapses it after a 120ms debounce when no tool is active. When a tool panel is active (`.cx-tool-active`), hover collapse is suppressed and clicking outside collapses it. Returning from an active tool panel (`← Back to Menu`) retains the launcher menu without collapsing even if the mouse is outside the 310px width (`justReturnedToMenu`).
+  - **Scoped Dynamic Vertical Centering**: Dynamically queries only top navigation bars (`.cvr-c-header`, `.cvr-c-primary-navigation` with `rect.top <= 25`), avoiding course card tile headers, and smoothly centers the handle across the visible viewport on scroll and resize.
   - **Navigation & Layout**: Expands drawer from 310px to 900px (`.cx-tool-active`) with prominent `← Back to Menu` navigation button at the top right of the header. Outside-click and Escape key handlers collapse the drawer safely.
 
 ### 5. Outline Accordion Expand / Collapse Controls
@@ -86,7 +86,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`cohort-stats.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-stats.js)
 - **DOM Insertion**: Inside assessment rows (`.cvr-c-task__details`) alongside task labels.
 - **UI Appearance**: Light blue card (`.connectea-panel`) showing distribution quantiles and student percentile rank metrics. Preserves constant 1920x1080 display width scaling in a single horizontal row (`.connectea-row-wrapper`) alongside type dropdown and outcome bar.
-- **Functionality**: Extracts Highcharts quantiles, computes weighted mean, standard deviation, PCHIP cohort percentile, $z$-score, and school rank. Automatically hides on incomplete/unmarked tasks. Maintains constant horizontal alignment without wrapping.
+- **Functionality**: Extracts Highcharts quantiles, computes weighted mean, standard deviation, PCHIP cohort percentile, $z$-score, and school rank. Automatically hides on incomplete/unmarked tasks. First task of a subject strictly suppresses outcome bars when no subject baseline exists or when a baseline is cleared, thoroughly purging candidate keys to prevent resurrecting deleted baselines. Maintains constant horizontal alignment without wrapping.
 
 ### 9. Assessment Type Dropdowns & Custom Categories
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`task-types.js`](file:///Users/uwong/Downloads/2.1.14_0/task-types.js)

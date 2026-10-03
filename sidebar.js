@@ -50,23 +50,36 @@
       handle.setAttribute('aria-expanded', 'false');
     }
 
+    function getTopBarBottom() {
+      const selectors = [
+        '.cvr-c-header',
+        '.cvr-c-primary-navigation',
+        '.cvr-c-primary-navigation__container',
+        '.cvr-c-primary-navigation__bar',
+        '.cvr-c-branding',
+        'header.cvr-c-header',
+        'nav.cvr-c-primary-navigation'
+      ];
+      let maxBottom = 0;
+      for (const sel of selectors) {
+        const matches = document.querySelectorAll(sel);
+        for (const el of matches) {
+          if (sidebar.contains(el) || el.id === 'connectify-sidebar-handle') continue;
+          if (typeof el.getBoundingClientRect === 'function') {
+            const rect = el.getBoundingClientRect();
+            // Must be docked at or above viewport top to be part of the top navigation bar
+            if (rect.top <= 25 && rect.bottom > maxBottom) {
+              maxBottom = rect.bottom;
+            }
+          }
+        }
+      }
+      return Math.max(0, maxBottom);
+    }
+
     function updateHandlePosition() {
       try {
-        const navCandidates = document.querySelectorAll('.cvr-c-primary-navigation, .cvr-c-header, .cvr-c-branding, header, nav');
-        let nav = null;
-        for (const el of navCandidates) {
-          if (!sidebar.contains(el) && el.id !== 'connectify-sidebar-handle') {
-            nav = el;
-            break;
-          }
-        }
-        let topBarBottom = 0;
-        if (nav && typeof nav.getBoundingClientRect === 'function') {
-          const rect = nav.getBoundingClientRect();
-          if (rect.bottom > 0 && rect.top < (window.innerHeight || 800)) {
-            topBarBottom = Math.max(0, rect.bottom);
-          }
-        }
+        const topBarBottom = getTopBarBottom();
         const vh = window.innerHeight || document.documentElement?.clientHeight || 800;
         const availableHeight = Math.max(0, vh - topBarBottom);
         const centerY = Math.round(topBarBottom + availableHeight / 2);
@@ -105,6 +118,12 @@
     }
     window._connectifyResizeAttached = updateHandlePosition;
     window.addEventListener('resize', updateHandlePosition, { passive: true });
+
+    [50, 150, 300, 600, 1200].forEach(delay => setTimeout(updateHandlePosition, delay));
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', updateHandlePosition);
+    }
+    window.addEventListener('load', updateHandlePosition);
 
     // Header and navigation
     let header = sidebar.querySelector('header');
@@ -311,7 +330,10 @@
       }
     }
 
+    let justReturnedToMenu = false;
+
     function openSidebar() {
+      justReturnedToMenu = false;
       sidebar.hidden = false;
       updateHandleState(true);
       syncState();
@@ -328,6 +350,7 @@
     }
 
     function closeSidebar() {
+      justReturnedToMenu = false;
       if (hoverCollapseTimeout) {
         clearTimeout(hoverCollapseTimeout);
         hoverCollapseTimeout = null;
@@ -338,6 +361,7 @@
     }
 
     handle.onclick = () => {
+      justReturnedToMenu = false;
       if (sidebar.hidden) {
         openSidebar();
       } else {
@@ -350,7 +374,12 @@
     });
 
     if (homeBtn) {
-      homeBtn.onclick = closeAllTools;
+      homeBtn.onclick = () => {
+        if (sidebar.classList.contains('cx-tool-active')) {
+          justReturnedToMenu = true;
+        }
+        closeAllTools();
+      };
     }
 
     // Collapse sidebar when clicking outside the sidebar and handle
@@ -365,6 +394,7 @@
                        sidebar.contains(e.target) ||
                        handle.contains(e.target);
       if (!isInside) {
+        justReturnedToMenu = false;
         closeSidebar();
       }
     };
@@ -381,6 +411,7 @@
       // 1. Moving mouse to the left edge of the screen expands the sidebar
       if (sidebar.hidden) {
         if (e.clientX <= 12 || handle.contains(e.target)) {
+          justReturnedToMenu = false;
           if (hoverCollapseTimeout) {
             clearTimeout(hoverCollapseTimeout);
             hoverCollapseTimeout = null;
@@ -391,8 +422,9 @@
       }
 
       // 2. If sidebar is open and NO panel is active:
-      // Collapse when mouse moves outside of the sidebar and handle
-      if (!sidebar.classList.contains('cx-tool-active')) {
+      // Collapse when mouse moves outside of the sidebar and handle,
+      // unless user just returned to menu from an active tool panel
+      if (!sidebar.classList.contains('cx-tool-active') && !justReturnedToMenu) {
         const sidebarRect = typeof sidebar.getBoundingClientRect === 'function' ? sidebar.getBoundingClientRect() : null;
         const handleRect = typeof handle.getBoundingClientRect === 'function' ? handle.getBoundingClientRect() : null;
 
@@ -407,18 +439,18 @@
             hoverCollapseTimeout = null;
           }
         } else {
-          // Mouse is outside sidebar and handle, and no tool is active
+          // Mouse is outside sidebar and handle, no tool is active, and didn't just return to menu
           if (!hoverCollapseTimeout) {
             hoverCollapseTimeout = setTimeout(() => {
               hoverCollapseTimeout = null;
-              if (!sidebar.hidden && !sidebar.classList.contains('cx-tool-active')) {
+              if (!sidebar.hidden && !sidebar.classList.contains('cx-tool-active') && !justReturnedToMenu) {
                 closeSidebar();
               }
             }, 120);
           }
         }
       } else {
-        // A panel is active: hover-out should NOT collapse
+        // A panel is active or user just returned to menu: hover-out should NOT collapse
         if (hoverCollapseTimeout) {
           clearTimeout(hoverCollapseTimeout);
           hoverCollapseTimeout = null;
@@ -432,7 +464,7 @@
       document.removeEventListener('mouseleave', window._connectifyMouseLeaveAttached);
     }
     const handleMouseLeaveDoc = () => {
-      if (!sidebar.hidden && !sidebar.classList.contains('cx-tool-active')) {
+      if (!sidebar.hidden && !sidebar.classList.contains('cx-tool-active') && !justReturnedToMenu) {
         closeSidebar();
       }
     };
@@ -443,6 +475,7 @@
     const handleToolLaunchClick = e => {
       const toggle = e.target.closest('#connectify-target-toggle, #connectify-grade-toggle, #connectify-estimate-toggle, #connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle');
       if (!toggle) return;
+      justReturnedToMenu = false;
 
       const id = toggle.id;
       if (id === 'connectify-target-toggle') {

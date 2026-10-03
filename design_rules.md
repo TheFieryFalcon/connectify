@@ -25,8 +25,10 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Login Screen Dark Mode Suppression & Post-Login Restoration**: Dark mode is strictly toggled off on `https://connect.det.wa.edu.au/login` (removing `.connectea-dark` and temporarily setting storage to `light`, recording `connectea:theme:restore_dark`) to prevent broken styles on the account selector. Upon successful login and navigation to normal Connect pages, dark mode is automatically restored.
 
 ## 3. Sidebar & Workspace Geometry
-- **Toggle Handle (`#connectify-sidebar-handle`)**: Viewport edge, width 38px, height 74px (expanded handle: 205px wide, 76px high).
+- **Toggle Handle (`#connectify-sidebar-handle`)**: Sleek 30px width handle with directional chevron (`❮` / `❯`), dynamically centered vertically across the active viewport accounting for top navigation bars (`rect.top <= 25`).
 - **Drawer Width (`#connectify-sidebar`)**: Compact 310px; expands to **900px** (`.cx-tool-active`) when any tool is active.
+- **Drawer Slide Synchronization**: `#connectify-sidebar` and `#connectify-sidebar-handle` animate in lockstep with matching `0.2s cubic-bezier(0.16, 1, 0.3, 1)` transitions using `transform: translateX(-100%)` to `0`, preventing clipping.
+- **Left-Edge Push & Hover Dismissal**: Moving mouse to `clientX <= 12` expands the drawer. Moving mouse outside collapses it after 120ms debounce when no tool is active. When a tool is active, hover collapse is suppressed and clicking outside collapses it. Returning from an active tool panel retains the launcher menu (`justReturnedToMenu`) without hover collapse.
 - **Canonical Launcher Button Sequence**:
   1. `connectify-target-toggle` (Target ATAR)
   2. `connectify-grade-toggle` (Target Grade)
@@ -49,6 +51,7 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Suppression Rules**:
   - Suppress outcome bars on incomplete or unmarked assessments (`Number.isFinite(mark)` check).
   - Suppress on first assessment of a subject unless cold-start baselines exist (first tasks of a type render normally when prior subject data exists).
+  - When baselines are cleared/removed, `saveBaselines()` thoroughly purges all legacy storage candidate keys to prevent zombie baseline resurrection, strictly suppressing outcome bars on first tasks.
 - **Interaction**: Segments must have `pointer-events: none !important;` to eliminate hover boundary thrashing. Handled via singleton floating tooltip (`#connectea-outcome-tooltip`) using viewport-fixed coordinates. Outcome bars and segments must **never** set the native HTML `title` attribute to prevent overlapping dual tooltips.
 
 ## 5. Cold-Start & Mathematical Modeling

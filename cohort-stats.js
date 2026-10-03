@@ -446,6 +446,8 @@
     persistentEstimates.clear();
     schedule(true);
   });
+  window.addEventListener('connectify-baselines-updated', () => schedule(true));
+  window.addEventListener('connectify-predictions-updated', () => schedule(true));
 
   let timer = setInterval(schedule, 8000);
 

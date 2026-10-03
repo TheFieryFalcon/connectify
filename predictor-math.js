@@ -138,16 +138,52 @@
     const typeKey = `connectify:baseline:types:${account}`;
     const subjectKey = `connectify:baseline:subjects:${account}`;
 
-    if (updatedBaselines.types) {
+    const candidateTypeKeys = [
+      'connectea:baseline:types',
+      'connectea:baselines:types',
+      'connectify:baseline:types',
+      'connectify:baselines:types',
+      `connectea:baseline:types:${account}`,
+      `connectea:baselines:types:${account}`,
+      `connectify:baselines:types:${account}`,
+      `connectify:baseline:types:${account}`
+    ];
+    const candidateSubjKeys = [
+      'connectea:baseline:subjects',
+      'connectea:baselines:subjects',
+      'connectify:baseline:subjects',
+      'connectify:baselines:subjects',
+      `connectea:baseline:subjects:${account}`,
+      `connectea:baselines:subjects:${account}`,
+      `connectify:baselines:subjects:${account}`,
+      `connectify:baseline:subjects:${account}`
+    ];
+
+    if (updatedBaselines.types !== undefined) {
       try {
-        localStorage.setItem(typeKey, JSON.stringify(updatedBaselines.types));
+        localStorage.setItem(typeKey, JSON.stringify(updatedBaselines.types || {}));
+        for (const k of candidateTypeKeys) {
+          if (k !== typeKey) {
+            try { localStorage.removeItem(k); } catch {}
+          }
+        }
       } catch {}
     }
-    if (updatedBaselines.subjects) {
+    if (updatedBaselines.subjects !== undefined) {
       try {
-        localStorage.setItem(subjectKey, JSON.stringify(updatedBaselines.subjects));
+        localStorage.setItem(subjectKey, JSON.stringify(updatedBaselines.subjects || {}));
+        for (const k of candidateSubjKeys) {
+          if (k !== subjectKey) {
+            try { localStorage.removeItem(k); } catch {}
+          }
+        }
       } catch {}
     }
+
+    cachedBaselines = {
+      types: updatedBaselines.types || {},
+      subjects: updatedBaselines.subjects || {}
+    };
 
     if (window.ConnectifyPredictorMath?.updatePredictionCache) {
       window.ConnectifyPredictorMath.updatePredictionCache();
