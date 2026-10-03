@@ -325,12 +325,12 @@
     const mid = Math.min(99.5, Math.max(10, round(rawMid, 1)));
 
     // 6. Low & High Spreads:
-    // Scale Low more strongly when averages are high and variance is present, as downside risk
-    // on difficult assessments is substantially wider than upward gain when averages have been pulled up by peak scores:
-    const lowHighScorePenalty = Math.max(0, mid - 75) * 0.35 * varianceDampener;
-    const lowDelta = Math.min(26.0, Math.max(1.5, (sigma * sigma) / 10 + 0.7 * sigma + lowHighScorePenalty));
+    // Scale Low and High moderately with variance, avoiding excessive spreads on volatile subjects
+    // while reflecting realistic downside and upside potential:
+    const lowHighScorePenalty = Math.max(0, mid - 75) * 0.20 * varianceDampener;
+    const lowDelta = Math.min(18.0, Math.max(1.5, (sigma * sigma) / 20 + 0.45 * sigma + lowHighScorePenalty));
     const low = Math.max(0, round(mid - lowDelta, 1));
-    const highDelta = Math.min(22.0, Math.max(1.5, 1.35 * sigma));
+    const highDelta = Math.min(8.5, Math.max(1.5, 0.88 * sigma));
     const high = Math.min(100, round(applyLogarithmicCeiling(mid, highDelta), 1));
 
     // 7. Multiplicative 10% Breakout Score threshold (Score > 1.10 * High):
@@ -350,7 +350,7 @@
   }
 
   // --- PREDICTION PERSISTENCE & CACHING ---
-  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v9_20261001_pred';
+  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v10_20261003_pred';
   const PREDICTOR_CACHE_VERSION_KEY = window.ConnectifyCache?.KEYS?.PREDICTOR || 'connectify:cache_version:predictor';
   const LEGACY_PREDICTION_VERSION_KEY = 'connectify:prediction_version';
 
@@ -1070,7 +1070,7 @@
 
         // Ensure distinct scenario bounds for subject projections
         const remainingRatio = Math.max(0.15, (predictedUpcomingWeight + unpredictedUpcomingWeight) / totalSubjectWeight);
-        const minSubjectSpread = Math.max(3.0, round(12.0 * remainingRatio, 1));
+        const minSubjectSpread = Math.max(2.0, round(7.5 * remainingRatio, 1));
         if (projectedMid - projectedLow < minSubjectSpread) {
           projectedLow = Math.max(0, round(projectedMid - minSubjectSpread, 1));
         }
@@ -1080,13 +1080,13 @@
       } else if (hasSubjectAverage && completedWeight > 0) {
         const midScore = round(runningMark, 1);
         projectedMid = midScore;
-        projectedLow = Math.max(0, round(midScore - 4.0, 1));
-        projectedHigh = Math.min(100, round(applyLogarithmicCeiling(midScore, 4.0), 1));
+        projectedLow = Math.max(0, round(midScore - 2.5, 1));
+        projectedHigh = Math.min(100, round(applyLogarithmicCeiling(midScore, 2.5), 1));
       } else if (hasSubjectAverage && baselineMark !== null) {
         const baseScore = round(baselineMark, 1);
         projectedMid = baseScore;
-        projectedLow = Math.max(0, round(baseScore - 6.0, 1));
-        projectedHigh = Math.min(100, round(applyLogarithmicCeiling(baseScore, 6.0), 1));
+        projectedLow = Math.max(0, round(baseScore - 4.0, 1));
+        projectedHigh = Math.min(100, round(applyLogarithmicCeiling(baseScore, 4.0), 1));
       }
 
       results.push({

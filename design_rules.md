@@ -53,7 +53,7 @@ Extremely concise summary of the core visual design language, contrast standards
 
 ## 5. Cold-Start & Mathematical Modeling
 - **Logarithmic Headroom Above 80%**: Taper achievable gains proportionally to remaining headroom $\frac{100 - \text{Score}}{20}$.
-- **Quadratic Variance Penalty on Low Estimate**: Low delta scales quadratically with variance ($\Delta_{\text{Low}} = \min(18, \max(5, \frac{\sigma^2}{10} + 0.6\sigma))$).
+- **Calibrated Variance Scaling on Predictions**: Low delta scales moderately with variance ($\Delta_{\text{Low}} = \min(18, \max(1.5, \frac{\sigma^2}{20} + 0.45\sigma + \Delta_{\text{penalty}}))$) and high delta as $\Delta_{\text{High}} = \min(8.5, \max(1.5, 0.88\sigma))$, preventing excessive spread on volatile subjects while preserving realistic downside/upside bounds.
 - **Settings Cold-Start Guidance**: When a subject lacks scores or baselines, display guidance card with a direct "Go to Settings" shortcut. Dynamically inject baseline inputs when custom categories are created.
 
 ## 6. Runtime & DOM Safety

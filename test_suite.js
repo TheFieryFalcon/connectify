@@ -1987,8 +1987,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v9_20261001_pred'"), 'predictor-math.js must use v9_20261001_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v9_20261001_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v9_20261001_pred');
+  assert.ok(predMathCode.includes("'v10_20261003_pred'"), 'predictor-math.js must use v10_20261003_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v10_20261003_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v10_20261003_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2000,7 +2000,7 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   };
   const pred = predMath.predictTask('Chemistry', { name: 'Test 4' }, historicalElevated);
   assert.ok(pred.mid < 90, `Mid prediction (${pred.mid}%) must be dampened below elevated 90% average`);
-  assert.ok(pred.low <= 76, `Low prediction (${pred.low}%) must reflect asymmetric downside risk from peak score leverage`);
+  assert.ok(pred.low <= 82, `Low prediction (${pred.low}%) must reflect downside risk dialed back with calibrated variance`);
 });
 
 runTest('predictor-ui.js and atar-ui.js render user-prompted Expand All buttons', () => {
@@ -2081,9 +2081,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v9_20261001_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v10_20261003_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v9_20261001_pred'), 'predictor-math.js must bump version to v9_20261001_pred');
+  assert.ok(predMathJs.includes('v10_20261003_pred'), 'predictor-math.js must bump version to v10_20261003_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -2095,7 +2095,7 @@ runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICT
   };
   const pred = predMath.predictTask('Mathematics Methods', { name: 'Test 4' }, historicalHigh);
   assert.ok(pred.mid >= 90, `Mid prediction (${pred.mid}%) for a 93.5% student must preserve momentum and stay >= 90%`);
-  assert.ok(pred.low <= 85, `Low prediction (${pred.low}%) must reflect downside spread`);
+  assert.ok(pred.low <= 88, `Low prediction (${pred.low}%) must reflect downside spread`);
 });
 
 runTest('Test 94: Chemistry integer weeks parse as valid dates and format via Progress Graph formatTimestamp', () => {
@@ -3282,9 +3282,54 @@ runTest('Test 122: Back to top button styling parity, expandAll multi-card dedup
   assert.ok(!sidebarCss.includes('.cvr-c-task__details{flex:1 1 auto!important'), 'sidebar.css must not force flex: 1 1 auto on .cvr-c-task__details');
 });
 
+runTest('Test 123: Calibrated variance scaling prevents excessive spread on volatile subjects (~73% Low and ~81% High)', () => {
+  const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+  assert.ok(predMathJs.includes('(sigma * sigma) / 20 + 0.45 * sigma'), 'predictor-math.js must use dialed-back quadratic variance scaling / 20 + 0.45 * sigma');
+  assert.ok(predMathJs.includes('0.88 * sigma'), 'predictor-math.js must use 0.88 * sigma for high delta scaling');
+  assert.ok(predMathJs.includes('minSubjectSpread = Math.max(2.0, round(7.5 * remainingRatio, 1))'), 'predictor-math.js must use calibrated minSubjectSpread');
+
+  // Functional test with Chemistry student scenario:
+  // 61% completed at 78% average, sigma = 11.5
+  // Upcoming tasks: Practical Investigation 2 (9%, mid 77), 11 ATAR EXAM (30%, mid 79)
+  window.ConnectifyTaskTypes = {
+    getEffectiveType: (subj, task) => task.name.includes('Investigation') ? 'Application' : 'Exam'
+  };
+
+  const historical = {
+    subjects: { 'Chemistry ATAR': 78 },
+    subjectSpreads: { 'Chemistry ATAR': 11.5 },
+    types: { 'Application': 76, 'Exam': 80 },
+    typeCounts: { 'Application': 2, 'Exam': 1 },
+    overallAverage: 78,
+    spread: 11.5
+  };
+
+  const pred1 = predMath.predictTask('Chemistry ATAR', { name: 'Practical Investigation 2', weight: 9 }, historical);
+  const pred2 = predMath.predictTask('Chemistry ATAR', { name: '11 ATAR EXAM', weight: 30 }, historical);
+
+  assert.strictEqual(pred1.low, 65, 'Task 1 low must be 65%');
+  assert.strictEqual(pred1.mid, 77, 'Task 1 mid must be 77%');
+  assert.strictEqual(pred1.high, 85, 'Task 1 high must be 85%');
+
+  assert.strictEqual(pred2.low, 66, 'Task 2 low must be 66%');
+  assert.strictEqual(pred2.mid, 79, 'Task 2 mid must be 79%');
+  assert.strictEqual(pred2.high, 86, 'Task 2 high must be 86%');
+
+  // Test subject grade aggregation
+  const completedEarned = 47.58; // 61% @ 78%
+  const upcomingLowEarned = (pred1.low / 100) * 9 + (pred2.low / 100) * 30;
+  const upcomingHighEarned = (pred1.high / 100) * 9 + (pred2.high / 100) * 30;
+  const projLow = Math.round(((completedEarned + upcomingLowEarned) / 100) * 1000) / 10;
+  const projHigh = Math.round(((completedEarned + upcomingHighEarned) / 100) * 1000) / 10;
+
+  assert.ok(projLow >= 72.5 && projLow <= 73.5, `Projected subject Low (${projLow}%) must be ~73%`);
+  assert.ok(projHigh >= 80.5 && projHigh <= 81.5, `Projected subject High (${projHigh}%) must be ~81%`);
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');
 
 process.exit(0);
+
 
