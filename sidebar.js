@@ -180,11 +180,29 @@
     handle.updatePosition = updateHandlePosition;
     window._connectifyUpdateHandlePosition = updateHandlePosition;
     updateHandleState(false);
+    let handleRafPending = false;
+    const handleScrollThrottled = e => {
+      if (e && e.target && (sidebar.contains(e.target) || handle.contains(e.target))) {
+        return;
+      }
+      if (!handleRafPending) {
+        handleRafPending = true;
+        if (typeof requestAnimationFrame === 'function') {
+          requestAnimationFrame(() => {
+            handleRafPending = false;
+            updateHandlePosition();
+          });
+        } else {
+          handleRafPending = false;
+          updateHandlePosition();
+        }
+      }
+    };
     if (window._connectifyScrollAttached) {
       window.removeEventListener('scroll', window._connectifyScrollAttached, true);
     }
-    window._connectifyScrollAttached = updateHandlePosition;
-    window.addEventListener('scroll', updateHandlePosition, { passive: true, capture: true });
+    window._connectifyScrollAttached = handleScrollThrottled;
+    window.addEventListener('scroll', handleScrollThrottled, { passive: true, capture: true });
 
     if (window._connectifyResizeAttached) {
       window.removeEventListener('resize', window._connectifyResizeAttached);
@@ -503,7 +521,7 @@
         const handleRect = typeof handle.getBoundingClientRect === 'function' ? handle.getBoundingClientRect() : null;
 
         const inSidebar = sidebar.contains(e.target) ||
-          (sidebarRect && e.clientX >= sidebarRect.left && e.clientX <= sidebarRect.right && e.clientY >= sidebarRect.top && e.clientY <= sidebarRect.bottom);
+          (sidebarRect && e.clientX >= (sidebarRect.left - 5) && e.clientX <= (sidebarRect.right + 25) && e.clientY >= (sidebarRect.top - 5) && e.clientY <= (sidebarRect.bottom + 5));
         const inHandle = handle.contains(e.target) ||
           (handleRect && e.clientX >= handleRect.left && e.clientX <= handleRect.right && e.clientY >= handleRect.top && e.clientY <= handleRect.bottom);
 
@@ -533,6 +551,16 @@
     };
     window._connectifyMouseMoveAttached = handleMouseMove;
     document.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    const cancelCollapse = () => {
+      if (hoverCollapseTimeout) {
+        clearTimeout(hoverCollapseTimeout);
+        hoverCollapseTimeout = null;
+      }
+    };
+    sidebar.addEventListener('scroll', cancelCollapse, { passive: true });
+    workspace.addEventListener('scroll', cancelCollapse, { passive: true });
+    sidebar.addEventListener('wheel', cancelCollapse, { passive: true });
 
     if (window._connectifyMouseLeaveAttached) {
       document.removeEventListener('mouseleave', window._connectifyMouseLeaveAttached);

@@ -476,8 +476,13 @@
   function updateDisplayWidthScale() {
     try {
       const width = window.innerWidth || document.documentElement?.clientWidth || 1920;
-      const scale = Math.min(1, Math.max(0.35, width / 1920));
-      document.documentElement?.style.setProperty('--cx-display-scale', scale.toFixed(4));
+      let scale = 1;
+      if (width < 850) scale = 0.80;
+      else if (width < 1050) scale = 0.85;
+      else if (width < 1250) scale = 0.90;
+      else if (width < 1450) scale = 0.95;
+      else scale = 1;
+      document.documentElement?.style.setProperty('--cx-display-scale', scale.toFixed(2));
     } catch {}
   }
   updateDisplayWidthScale();

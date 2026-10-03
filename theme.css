@@ -3207,25 +3207,7 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 }
 
 /* Responsive display-width scaling for subject and task panels */
-:is(.container, .container-fluid, .container-fluid-max-xl, .container-fluid-max-lg, .container-lg, .container-xl, .columns-max, .portlet-layout, .portlet-column, .eds-o-main, main.eds-o-main, #main-content, .cvr-c-dashboard) {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
 :is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-:is(.eds-c-accordion, .cvr-c-accordion, .eds-c-accordion__panel, .cvr-c-accordion__panel, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-tile__body, .cvr-c-tile__body) {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-:is(.cvr-c-tasks, .cvr-c-task, .cvr-c-task-group) {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
@@ -3253,13 +3235,10 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 :root {
   --cx-display-scale: 1;
 }
-@media (max-width: 1750px) { :root { --cx-display-scale: 0.90; } }
-@media (max-width: 1550px) { :root { --cx-display-scale: 0.82; } }
-@media (max-width: 1350px) { :root { --cx-display-scale: 0.72; } }
-@media (max-width: 1200px) { :root { --cx-display-scale: 0.62; } }
-@media (max-width: 1050px) { :root { --cx-display-scale: 0.54; } }
-@media (max-width: 900px)  { :root { --cx-display-scale: 0.46; } }
-@media (max-width: 768px)  { :root { --cx-display-scale: 0.38; } }
+@media (max-width: 1450px) { :root { --cx-display-scale: 0.95; } }
+@media (max-width: 1250px) { :root { --cx-display-scale: 0.90; } }
+@media (max-width: 1050px) { :root { --cx-display-scale: 0.85; } }
+@media (max-width: 850px)  { :root { --cx-display-scale: 0.80; } }
 
 .connectea-row-wrapper {
   zoom: var(--cx-display-scale, 1) !important;
