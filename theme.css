@@ -3235,10 +3235,24 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 :root {
   --cx-display-scale: 1;
 }
-@media (max-width: 1450px) { :root { --cx-display-scale: 0.95; } }
-@media (max-width: 1250px) { :root { --cx-display-scale: 0.90; } }
-@media (max-width: 1050px) { :root { --cx-display-scale: 0.85; } }
-@media (max-width: 850px)  { :root { --cx-display-scale: 0.80; } }
+@media (max-width: 1400px) { :root { --cx-display-scale: 0.92; } }
+@media (max-width: 1200px) { :root { --cx-display-scale: 0.85; } }
+@media (max-width: 1050px) { :root { --cx-display-scale: 0.76; } }
+@media (max-width: 950px)  {
+  :root { --cx-display-scale: 0.62; }
+  .connectea-row-wrapper { gap: 8px !important; }
+  .connectea-panel { padding: 6px 10px !important; }
+}
+@media (max-width: 800px)  {
+  :root { --cx-display-scale: 0.55; }
+  .connectea-row-wrapper { gap: 6px !important; }
+  .connectea-panel { padding: 5px 8px !important; }
+}
+@media (max-width: 650px)  {
+  :root { --cx-display-scale: 0.48; }
+  .connectea-row-wrapper { gap: 4px !important; }
+  .connectea-panel { padding: 4px 6px !important; }
+}
 
 .connectea-row-wrapper {
   zoom: var(--cx-display-scale, 1) !important;

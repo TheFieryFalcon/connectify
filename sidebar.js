@@ -77,6 +77,23 @@
       return Math.max(0, maxBottom);
     }
 
+    function isElementFixedOrSticky(el) {
+      let cur = el;
+      while (cur && cur !== document.body && cur !== document.documentElement) {
+        if (typeof window.getComputedStyle === 'function') {
+          const style = window.getComputedStyle(cur);
+          if (style) {
+            const pos = style.position;
+            if (pos === 'fixed' || pos === 'sticky') {
+              return true;
+            }
+          }
+        }
+        cur = cur.parentElement;
+      }
+      return false;
+    }
+
     function getConnectSidebar() {
       const selectors = [
         '.cvr-c-service-menu',
@@ -84,7 +101,6 @@
         '.cvr-c-side-menu',
         '.cvr-c-classes-menu',
         '.cvr-c-category-menu',
-        '.cvr-c-primary-menu',
         '.product-menu',
         '.sidenav-menu-slider'
       ];
@@ -93,7 +109,9 @@
         if (el && typeof el.getBoundingClientRect === 'function') {
           if (sidebar.contains(el) || el.id === 'connectify-sidebar-handle') continue;
           const rect = el.getBoundingClientRect();
-          if ((rect.width > 0 || rect.height > 0 || el.offsetWidth > 0 || el.offsetHeight > 0) && rect.left <= 60 && rect.right > 0) {
+          const height = el.offsetHeight || rect.height || 0;
+          const width = el.offsetWidth || rect.width || 0;
+          if (height >= 120 && (width > 0 || rect.width > 0) && rect.left <= 60 && rect.right > 0) {
             return el;
           }
         }
@@ -133,18 +151,18 @@
           const pageY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement?.scrollTop || document.body?.scrollTop || 0);
           const sidebarDocTop = rect.top + pageY;
           const sidebarHeight = connectSidebar.offsetHeight || rect.height || 350;
-          const csStyle = (typeof window.getComputedStyle === 'function') ? window.getComputedStyle(connectSidebar) : null;
-          const isFixed = csStyle && (csStyle.position === 'fixed');
+          const isFixed = isElementFixedOrSticky(connectSidebar);
 
           const bodyRect = (document.body && typeof document.body.getBoundingClientRect === 'function') ? document.body.getBoundingClientRect() : null;
           const bodyTop = bodyRect ? (bodyRect.top + pageY) : 0;
 
           const targetDocY = Math.round(sidebarDocTop - bodyTop + Math.min(sidebarHeight, 500) / 2);
-          handle._lastViewportY = Math.round(rect.top + Math.min(sidebarHeight, 500) / 2);
+          const viewportY = Math.round(rect.top + Math.min(sidebarHeight, 500) / 2);
+          handle._lastViewportY = viewportY;
 
           if (isFixed) {
             handle.style.position = 'fixed';
-            handle.style.top = `${handle._lastViewportY}px`;
+            handle.style.top = `${viewportY}px`;
           } else {
             handle.style.position = 'absolute';
             handle.style.top = `${targetDocY}px`;
@@ -181,9 +199,17 @@
     window._connectifyUpdateHandlePosition = updateHandlePosition;
     updateHandleState(false);
     let handleRafPending = false;
+    let scrollTransitionTimer = null;
     const handleScrollThrottled = e => {
       if (e && e.target && (sidebar.contains(e.target) || handle.contains(e.target))) {
         return;
+      }
+      if (sidebar.hidden) {
+        handle.style.transition = 'left 0.2s cubic-bezier(0.16,1,0.3,1), background 0.15s ease';
+        if (scrollTransitionTimer) clearTimeout(scrollTransitionTimer);
+        scrollTransitionTimer = setTimeout(() => {
+          handle.style.transition = '';
+        }, 150);
       }
       if (!handleRafPending) {
         handleRafPending = true;

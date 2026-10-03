@@ -227,6 +227,24 @@
       color: #dddddd !important;
       border-color: #4a4a4a !important;
     }
+    @media (max-width: 1400px) { :root { --cx-display-scale: 0.92; } }
+    @media (max-width: 1200px) { :root { --cx-display-scale: 0.85; } }
+    @media (max-width: 1050px) { :root { --cx-display-scale: 0.76; } }
+    @media (max-width: 950px)  {
+      :root { --cx-display-scale: 0.62; }
+      .connectea-row-wrapper { gap: 8px !important; }
+      .connectea-panel { padding: 6px 10px !important; }
+    }
+    @media (max-width: 800px)  {
+      :root { --cx-display-scale: 0.55; }
+      .connectea-row-wrapper { gap: 6px !important; }
+      .connectea-panel { padding: 5px 8px !important; }
+    }
+    @media (max-width: 650px)  {
+      :root { --cx-display-scale: 0.48; }
+      .connectea-row-wrapper { gap: 4px !important; }
+      .connectea-panel { padding: 4px 6px !important; }
+    }
   `;
 
   const persistentEstimates = new Map();
@@ -477,10 +495,12 @@
     try {
       const width = window.innerWidth || document.documentElement?.clientWidth || 1920;
       let scale = 1;
-      if (width < 850) scale = 0.80;
-      else if (width < 1050) scale = 0.85;
-      else if (width < 1250) scale = 0.90;
-      else if (width < 1450) scale = 0.95;
+      if (width < 650) scale = 0.48;
+      else if (width < 800) scale = 0.55;
+      else if (width < 950) scale = 0.62;
+      else if (width < 1050) scale = 0.76;
+      else if (width < 1200) scale = 0.85;
+      else if (width < 1400) scale = 0.92;
       else scale = 1;
       document.documentElement?.style.setProperty('--cx-display-scale', scale.toFixed(2));
     } catch {}

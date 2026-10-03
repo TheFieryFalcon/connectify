@@ -4412,6 +4412,63 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   });
 });
 
+runTest('Test 131: Sidebar handle excludes primary menu and detects fixed/sticky sidebars, and width scaling adapts at 820 width', () => {
+  const currentSidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+  const currentCohortStatsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+  const currentSidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  const currentThemeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+
+  // 1. Verify CSS and JS signatures
+  assert.ok(!currentSidebarJs.includes("'.cvr-c-primary-menu'"), 'sidebar.js must exclude .cvr-c-primary-menu from getConnectSidebar');
+  assert.ok(currentSidebarJs.includes('height >= 120'), 'sidebar.js must require height >= 120 for sidebar elements');
+  assert.ok(currentSidebarJs.includes('isElementFixedOrSticky'), 'sidebar.js must define isElementFixedOrSticky');
+  assert.ok(currentSidebarCss.includes('max-width: 950px') && currentSidebarCss.includes('--cx-display-scale: 0.62'), 'sidebar.css must include 0.62 scale at max-width: 950px');
+  assert.ok(currentThemeCss.includes('max-width: 950px') && currentThemeCss.includes('--cx-display-scale: 0.62'), 'theme.css must include 0.62 scale at max-width: 950px');
+
+  // 2. Evaluate sidebar.js and cohort-stats.js
+  eval(currentSidebarJs);
+  eval(currentCohortStatsJs);
+
+  const handle = document.getElementById('connectify-sidebar-handle');
+  assert.ok(handle, 'Handle element must exist');
+
+  // 3. Verify that primary menu (.cvr-c-primary-menu) with low height is ignored
+  const primaryMenu = document.createElement('nav');
+  primaryMenu.className = 'cvr-c-primary-menu';
+  primaryMenu.getBoundingClientRect = () => ({
+    top: 0,
+    bottom: 40,
+    height: 40,
+    left: 0,
+    right: 200,
+    width: 200
+  });
+  domBody.appendChild(primaryMenu);
+
+  handle.updatePosition();
+  // Since primaryMenu is not a valid sidebar, handle must fall back to viewport fixed centering
+  assert.strictEqual(handle.style.position, 'fixed', 'Handle must ignore primary menu and remain fixed');
+  primaryMenu.remove();
+
+  // 4. Test display width scaling function
+  const origInnerWidth = window.innerWidth;
+  try {
+    window.innerWidth = 820;
+    window.ConnectifyCohort.updateDisplayWidthScale();
+    assert.strictEqual(document.documentElement.style.getPropertyValue('--cx-display-scale'), '0.62', 'Width 820 must scale to 0.62');
+
+    window.innerWidth = 750;
+    window.ConnectifyCohort.updateDisplayWidthScale();
+    assert.strictEqual(document.documentElement.style.getPropertyValue('--cx-display-scale'), '0.55', 'Width 750 must scale to 0.55');
+
+    window.innerWidth = 1920;
+    window.ConnectifyCohort.updateDisplayWidthScale();
+    assert.strictEqual(document.documentElement.style.getPropertyValue('--cx-display-scale'), '1.00', 'Width 1920 must scale to 1.00');
+  } finally {
+    window.innerWidth = origInnerWidth;
+  }
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');
