@@ -36,16 +36,20 @@
       display: flex !important;
       align-items: center !important;
       gap: 14px !important;
-      flex-wrap: nowrap !important;
+      flex-wrap: wrap !important;
       margin: 4px 0 !important;
+      width: 100% !important;
       max-width: 100% !important;
+      box-sizing: border-box !important;
       clear: both !important;
       overflow: visible !important;
     }
     .connectea-row-wrapper > .connectea-panel {
-      flex: 0 0 auto !important;
-      width: auto !important;
-      max-width: fit-content !important;
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
       margin: 0 !important;
     }
     .connectea-panel {

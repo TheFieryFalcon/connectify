@@ -160,6 +160,10 @@
         window.ConnectifyCategorySettings.createSettingsPanel();
       }
 
+      if (!window.ConnectifyProgress?.panelRefs && window.ConnectifyProgress?.ensureProgressPanel) {
+        window.ConnectifyProgress.ensureProgressPanel();
+      }
+
       if (!document.getElementById('connectify-predictor-toggle') && window.ConnectifyPredictorUI?.ensurePredictorPanel) {
         window.ConnectifyPredictorUI.ensurePredictorPanel();
       }
@@ -314,7 +318,7 @@
     }
 
     // Central delegated tool launcher listener
-    sidebar.addEventListener('click', e => {
+    const handleToolLaunchClick = e => {
       const toggle = e.target.closest('#connectify-target-toggle, #connectify-grade-toggle, #connectify-estimate-toggle, #connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle');
       if (!toggle) return;
 
@@ -338,7 +342,7 @@
           window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
         }
       } else if (id === 'connectify-progress-toggle') {
-        const refs = window.ConnectifyProgress?.panelRefs;
+        const refs = window.ConnectifyProgress?.panelRefs || (window.ConnectifyProgress?.ensureProgressPanel && window.ConnectifyProgress.ensureProgressPanel());
         if (refs?.openProgress) {
           const progPanel = refs.panel || document.getElementById('connectify-progress');
           if (progPanel && !progPanel.hidden) {
@@ -391,7 +395,10 @@
           window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
         }
       }
-    });
+    };
+
+    sidebar.addEventListener('click', handleToolLaunchClick);
+    document.addEventListener('click', handleToolLaunchClick);
 
     window.addEventListener('connectify-open', e => {
       if (e.detail !== 'home') openSidebar();

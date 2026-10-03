@@ -3244,6 +3244,42 @@ runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, g
   assert.strictEqual(inputEl.type, 'number', 'Week input must have type number');
 });
 
+runTest('Test 122: Back to top button styling parity, expandAll multi-card deduplication, progress-graph lifecycle, and display-width scaling', () => {
+  const atarCss = fs.readFileSync(path.resolve(BASE_DIR, 'atar.css'), 'utf8');
+  const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const progressJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8');
+  const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+  const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+  const cohortStatsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+
+  // 1. Back to top button parity
+  assert.ok(atarCss.includes('border-radius: 6px !important;'), 'atar.css .cx-back-to-top-btn must have border-radius: 6px');
+  assert.ok(atarCss.includes('font-weight: 500 !important;'), 'atar.css .cx-back-to-top-btn must have font-weight: 500');
+  assert.ok(atarCss.includes('background-color: #ffffff !important;'), 'atar.css .cx-back-to-top-btn must have background-color: #ffffff');
+  assert.ok(themeCss.includes('.connectea-dark .cx-back-to-top-btn'), 'theme.css must style dark mode .cx-back-to-top-btn');
+
+  // 2. expandAll multi-card deduplication
+  assert.ok(!assessJs.includes('[class*="card"]'), 'expandAll must not deduplicate using [class*="card"] to avoid merging cards into outer dashboard card');
+  assert.ok(assessJs.includes('.eds-c-accordion__section, .cvr-c-accordion__section') || assessJs.includes('.eds-c-tile, .cvr-c-tile'), 'expandAll must deduplicate per accordion section / tile');
+
+  // 3. progress-graph.js lifecycle and adoption
+  assert.ok(progressJs.includes('if (window.__connectifyProgressInitialized && window.ConnectifyProgress) return;'), 'progress-graph.js must only return early if already initialized AND window.ConnectifyProgress exists');
+  assert.ok(progressJs.includes("document.getElementById('connectify-progress-toggle') || createElement('button', 'Year in Progress')"), 'progress-graph.js must adopt existing toggle button');
+  assert.ok(progressJs.includes('ensureProgressPanel'), 'progress-graph.js must export ensureProgressPanel');
+
+  // 4. sidebar.js delegated click listener on document
+  assert.ok(sidebarJs.includes("document.addEventListener('click', handleToolLaunchClick)"), 'sidebar.js must listen for tool launches at document level');
+  assert.ok(sidebarJs.includes('ensureProgressPanel'), 'sidebar.js must instantiate progress panel alongside other tools');
+
+  // 5. Subject and task panel display-width scaling
+  assert.ok(cohortStatsJs.includes('flex-wrap: wrap !important;'), 'cohort-stats.js must use flex-wrap: wrap on .connectea-row-wrapper');
+  assert.ok(cohortStatsJs.includes('width: 100% !important;'), 'cohort-stats.js must make .connectea-row-wrapper 100% width');
+  assert.ok(sidebarCss.includes('.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:wrap!important'), 'sidebar.css must wrap .connectea-row-wrapper');
+  assert.ok(sidebarCss.includes(':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)'), 'sidebar.css must scale subject cards to 100% width');
+  assert.ok(themeCss.includes(':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)'), 'theme.css must scale subject cards to 100% width');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

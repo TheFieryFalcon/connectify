@@ -62,8 +62,8 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Source Modules**: [`atar-features.js`](file:///Users/uwong/Downloads/2.1.14_0/atar-features.js), [`assessment-data.js`](file:///Users/uwong/Downloads/2.1.14_0/assessment-data.js)
 - **DOM Insertion**: Floating pill button container (`#cx-expand-btn`) anchored to bottom-right; animated loading pill (`#cx-expand-progress`) on first expand.
 - **UI Appearance**: Compact buttons: `Expand All` and `Collapse All`. Progress pill shows animated spinner, percentage, and blue fill bar.
-- **Functionality**: Clicks accordion headings staggered across animation frames; mounts `#cx-expand-progress` on bulk expand, freezes scroll (`.cx-freeze-scroll`), skips calculations when cache is valid, and persists pill through DOM refresh; silences background MutationObservers during animation (`window.ConnectifyIsAccordionAnimating`) and flushes deferred passes on settle; respects `connectify:auto_expand` setting on load.
-- **Back to Top Button**: Injects a centered button (`#cx-back-to-top-btn` in `#cx-back-to-top-container`) at the bottom of the outlines list for smooth scrolling back to top.
+- **Functionality**: Clicks accordion headings staggered across animation frames; mounts `#cx-expand-progress` on bulk expand, freezes scroll (`.cx-freeze-scroll`), skips calculations when cache is valid, and persists pill through DOM refresh; silences background MutationObservers during animation (`window.ConnectifyIsAccordionAnimating`) and flushes deferred passes on settle; deduplicates headings per section/tile rather than outer dashboard wrappers to guarantee all cards collapse/expand; respects `connectify:auto_expand` setting on load.
+- **Back to Top Button**: Injects a centered button (`#cx-back-to-top-btn` in `#cx-back-to-top-container`) at the bottom of the outlines list for smooth scrolling back to top. Styled identically across light (`#ffffff` background, `#cbd5e1` border) and dark modes (`#202c3b` surface, `#455a73` border) with 6px rounded corners, 500 font-weight, and $\ge 5:1$ contrast.
 
 ### 6. Year 12 WACE Exam Countdown Banner
 - **Source Module**: [`wace-countdown.js`](file:///Users/uwong/Downloads/2.1.14_0/wace-countdown.js)
@@ -74,14 +74,14 @@ This document details user-facing visual features 1 through 10, covering direct 
 ### 7. Compound Subject Progress Bars
 - **Source Module**: [`compound-progress.js`](file:///Users/uwong/Downloads/2.1.14_0/compound-progress.js)
 - **DOM Insertion**: Embedded in subject card headers (`.eds-c-tile__header`, `.cvr-c-tile__header`, `.c-tile__header`), below title (`.cx-compound-progress-container`).
-- **UI Appearance**: Multi-segmented horizontal bar (`height: 6px; border-radius: 3px;`) color-coded by category with completion status text.
+- **UI Appearance**: Multi-segmented horizontal bar (`height: 6px; border-radius: 3px;`) color-coded by category with completion status text. Scales to 100% display width.
 - **Functionality**: Proportional task weights; completed assessments opaque, pending translucent; hover tooltips; Semester 1 cards display Semester 1 tasks, while Semester 2 cards encapsulate tasks from both semesters for cumulative annual progress tracking; reactive to category changes.
 
 ### 8. Assessment Cohort Statistics & Rank Panels
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`cohort-stats.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-stats.js)
 - **DOM Insertion**: Inside assessment rows (`.cvr-c-task__details`) alongside task labels.
-- **UI Appearance**: Light blue card (`.connectea-panel`) showing distribution quantiles and student percentile rank metrics.
-- **Functionality**: Extracts Highcharts quantiles, computes weighted mean, standard deviation, PCHIP cohort percentile, $z$-score, and school rank. Automatically hides on incomplete/unmarked tasks.
+- **UI Appearance**: Light blue card (`.connectea-panel`) showing distribution quantiles and student percentile rank metrics. Wraps flexibly (`.connectea-row-wrapper`) and scales to 100% display width.
+- **Functionality**: Extracts Highcharts quantiles, computes weighted mean, standard deviation, PCHIP cohort percentile, $z$-score, and school rank. Automatically hides on incomplete/unmarked tasks. Scales responsively without overflow on drawer expansion.
 
 ### 9. Assessment Type Dropdowns & Custom Categories
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`task-types.js`](file:///Users/uwong/Downloads/2.1.14_0/task-types.js)

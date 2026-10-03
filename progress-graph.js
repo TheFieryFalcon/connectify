@@ -8,7 +8,7 @@
   'use strict';
 
   try {
-    if (window.__connectifyProgressInitialized || document.getElementById('connectify-progress-toggle')) return;
+    if (window.__connectifyProgressInitialized && window.ConnectifyProgress) return;
     window.__connectifyProgressInitialized = true;
 
     if (!Element.prototype.replaceChildren) {
@@ -31,29 +31,41 @@
     };
 
     // UI elements
-    const toggleBtn = createElement('button', 'Year in Progress');
+    const toggleBtn = document.getElementById('connectify-progress-toggle') || createElement('button', 'Year in Progress');
     toggleBtn.id = 'connectify-progress-toggle';
     toggleBtn.type = 'button';
     toggleBtn.setAttribute('aria-expanded', 'false');
 
-    const panel = createElement('section');
-    panel.id = 'connectify-progress';
-    panel.hidden = true;
-    panel.setAttribute('aria-label', 'Assessment progress');
+    let panel = document.getElementById('connectify-progress');
+    let title, choicesContainer, chartContainer, scanBtn;
+    if (panel) {
+      title = panel.querySelector('header strong') || createElement('strong', 'Year in Progress');
+      choicesContainer = panel.querySelector('.cx-subjects') || createElement('div', null, 'cx-subjects');
+      scanBtn = panel.querySelector('button') || createElement('button', 'Refresh Assessments');
+      chartContainer = panel.querySelector('div:not(.cx-subjects)') || createElement('div');
+      if (!panel.contains(choicesContainer)) panel.append(choicesContainer);
+      if (!panel.contains(scanBtn)) panel.append(scanBtn);
+      if (!panel.contains(chartContainer)) panel.append(chartContainer);
+    } else {
+      panel = createElement('section');
+      panel.id = 'connectify-progress';
+      panel.hidden = true;
+      panel.setAttribute('aria-label', 'Assessment progress');
 
-    const head = createElement('header');
-    const title = createElement('strong', 'Year in Progress');
-    title.tabIndex = -1;
-    head.append(title);
+      const head = createElement('header');
+      title = createElement('strong', 'Year in Progress');
+      title.tabIndex = -1;
+      head.append(title);
 
-    const choicesContainer = createElement('div', null, 'cx-subjects');
-    const chartContainer = createElement('div');
+      choicesContainer = createElement('div', null, 'cx-subjects');
+      chartContainer = createElement('div');
 
-    const scanBtn = createElement('button', 'Refresh Assessments');
-    scanBtn.type = 'button';
+      scanBtn = createElement('button', 'Refresh Assessments');
+      scanBtn.type = 'button';
 
-    panel.append(head, choicesContainer, scanBtn, chartContainer);
-    document.body.append(toggleBtn, panel);
+      panel.append(head, choicesContainer, scanBtn, chartContainer);
+      document.body.append(toggleBtn, panel);
+    }
 
     let selectedSubject = '';
     let lastDataSignature = '';
@@ -184,6 +196,7 @@
       toggleBtn.setAttribute('aria-expanded', 'true');
       toggleBtn.setAttribute('aria-pressed', 'true');
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'progress' }));
+      lastDataSignature = '';
       refresh();
       title.focus();
     }
@@ -236,7 +249,16 @@
       }
     }
 
+    function ensureProgressPanel() {
+      return window.ConnectifyProgress?.panelRefs;
+    }
+
     window.ConnectifyProgress = {
+      render,
+      refresh,
+      openProgress,
+      closeProgress,
+      ensureProgressPanel,
       history: (...args) => (mathAPI?.history || window.ConnectifyProgressMath?.history)(...args),
       panelRefs: {
         toggleBtn,

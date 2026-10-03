@@ -103,8 +103,8 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
 .connectea-dark #connectify-radar-chart text,.connectea-dark #connectify-radar-chart .highcharts-axis-labels text{fill:#e1eaf3!important;color:#e1eaf3!important}
 .connectea-dark #connectify-radar-chart .highcharts-yaxis-labels text{fill:#8fa6bd!important;color:#8fa6bd!important}
 .cvr-c-task__details{overflow:visible!important}
-.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:nowrap!important;margin:4px 0!important;max-width:100%!important;clear:both!important;overflow:visible!important}
-.connectea-row-wrapper>.connectea-panel{flex:0 0 auto!important;width:auto!important;max-width:fit-content!important;margin:0!important}
+.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:wrap!important;margin:4px 0!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;clear:both!important;overflow:visible!important}
+.connectea-row-wrapper>.connectea-panel{flex:1 1 auto!important;min-width:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;margin:0!important}
 .connectea-type-container{display:inline-flex;align-items:center;flex:0 0 auto}
 .connectea-type-label{display:inline-flex;align-items:center;gap:6px;font:12px/1.4 system-ui,-apple-system,sans-serif;color:#4e6076;font-weight:500;cursor:pointer;user-select:none}
 .connectea-type-select{box-sizing:border-box;min-height:26px;padding:2px 8px;border:1px solid #b9cbe1;border-radius:6px;background:#f7f9fc;color:#203c5e;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;outline:none;transition:border-color .2s,background-color .2s}
@@ -1185,3 +1185,49 @@ body.cx-freeze-scroll {
   background: #962d22 !important;
   border-color: #78241c !important;
 }
+
+/* Responsive display-width scaling for subject and task panels */
+:is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+:is(.eds-c-accordion, .cvr-c-accordion, .eds-c-accordion__panel, .cvr-c-accordion__panel, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-tile__body, .cvr-c-tile__body) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+:is(.cvr-c-tasks, .cvr-c-task, .cvr-c-task-group) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.cvr-c-task__details {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.cvr-c-task__chart {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.cx-compound-progress-container,
+.cx-compound-progress-bar {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.connectea-type-container,
+.connectea-outcome-bar,
+.connectea-subject-controls {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+

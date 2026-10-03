@@ -1332,14 +1332,17 @@ html.connectea-dark {
   background-color: #202c3b !important;
   color: #f1f5f9 !important;
   border: 1px solid #455a73 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+  border-radius: 6px !important;
+  padding: 6px 14px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
 }
 
 .connectea-dark .cx-back-to-top-btn:hover {
   background-color: #2c3b4e !important;
   border-color: #5d7899 !important;
   color: #ffffff !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -3202,3 +3205,49 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
   background: #962d22 !important;
   border-color: #78241c !important;
 }
+
+/* Responsive display-width scaling for subject and task panels */
+:is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+:is(.eds-c-accordion, .cvr-c-accordion, .eds-c-accordion__panel, .cvr-c-accordion__panel, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-tile__body, .cvr-c-tile__body) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+:is(.cvr-c-tasks, .cvr-c-task, .cvr-c-task-group) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.cvr-c-task__details {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.cvr-c-task__chart {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.cx-compound-progress-container,
+.cx-compound-progress-bar {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.connectea-type-container,
+.connectea-outcome-bar,
+.connectea-subject-controls {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+

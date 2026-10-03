@@ -686,8 +686,10 @@
   }
 
   function resolveTaskOrder(subjectName, task) {
-    const customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${task.name}`) ||
-                        localStorage.getItem(`connectify:time_override:${subjectName}:${task.name}`);
+    if (!task) return null;
+    const taskName = task.name || '';
+    const customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
+                        localStorage.getItem(`connectify:time_override:${subjectName}:${taskName}`);
     if (customOrder !== null && customOrder !== '') {
       const num = Number(customOrder);
       if (Number.isFinite(num) && num > 0) {
@@ -702,13 +704,15 @@
         return (term - 1) * 12 + week;
       }
     }
-    return (task.caption && typeof orderHint === 'function') ? orderHint(task.caption) : task.order;
+    if (Number.isFinite(task.order)) return task.order;
+    return (task.caption && typeof orderHint === 'function') ? orderHint(task.caption) : (task.order ?? null);
   }
 
   function formatCollectedSubjects(includePending) {
     return Array.from(subjectsCache, ([name, tasks]) => ({
       name,
-      tasks: Array.from(tasks.values())
+      tasks: Array.from((tasks && typeof tasks.values === 'function') ? tasks.values() : (Array.isArray(tasks) ? tasks : []))
+        .filter(Boolean)
         .map(t => {
           const resolvedOrder = resolveTaskOrder(name, t);
           return resolvedOrder !== t.order ? { ...t, order: resolvedOrder } : t;
@@ -909,7 +913,10 @@
     const seenCards = new Set();
     const headings = [];
     for (const h of rawHeadings) {
-      const card = typeof h.closest === 'function' ? h.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, [class*="tile"], [class*="card"]') : null;
+      const card = typeof h.closest === 'function'
+        ? (h.closest('.eds-c-accordion__section, .cvr-c-accordion__section') ||
+           h.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'))
+        : null;
       if (card && seenCards.has(card)) continue;
       if (card) seenCards.add(card);
       headings.push(h);
@@ -920,6 +927,15 @@
     isBulkExpanding = true;
     window.ConnectifyIsBulkExpanding = true;
     window.ConnectifyIsAccordionAnimating = true;
+    clearTimeout(bulkExpandTimer);
+    const bulkExpandSafetyTimer = setTimeout(() => {
+      if (isBulkExpanding) {
+        isBulkExpanding = false;
+        window.ConnectifyIsBulkExpanding = false;
+        window.ConnectifyIsAccordionAnimating = false;
+        finishProgress();
+      }
+    }, 10000);
     let clickedAny = false;
     let index = 0;
     const total = headings.length;

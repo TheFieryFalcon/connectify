@@ -133,8 +133,8 @@ This document covers the user interface and analytics modules, including target 
 - **Key Functions**:
   - Injects toggle handle (`#connectify-sidebar-handle`) and drawer (`#connectify-sidebar`).
   - Canonical launcher buttons: Target ATAR, Target Grade, Predictor, Year in Progress, ATAR Estimate, Weakness Analyzer, Settings.
-  - Proactive tool initialization: ensures Weakness Analyzer and Settings panels are created.
-  - Centralized delegated click handling: dispatches tool opening and synchronizes `aria-pressed`.
+  - Proactive tool initialization: ensures Weakness Analyzer, Settings, and Year in Progress panels are created.
+  - Centralized delegated click handling: dispatches tool opening at document level and synchronizes `aria-pressed`.
   - Workspace Drawer Expansion: opening any tool expands drawer to 900px (`.cx-tool-active`) with `← Back to Menu` navigation.
 - **Export**: `window.ConnectifyInitSidebar`.
 
