@@ -17,7 +17,15 @@
     const text = Array.from(tiles)
       .map(c => c.textContent || '')
       .join(' ');
-    return /\bYear\s*(?:11|12)\b/i.test(text) || /\bATAR\b/i.test(text) || /\bYear\s*(?:11|12)\b/i.test(document.body?.textContent || '') || /\bATAR\b/i.test(document.body?.textContent || '');
+    const docText = document.body?.textContent || '';
+    return /\b(?:Year|Yr|Y)\s*(?:11|12)\b/i.test(text) ||
+           /\bATAR\b/i.test(text) ||
+           /\b(?:11|12)\s+[A-Z]/i.test(text) ||
+           /\bUnit(?:s)?\s*[1-4]\b/i.test(text) ||
+           /\bWACE\b/i.test(text) ||
+           /\bSemester\s*[12]\b/i.test(text) ||
+           /\b(?:Year|Yr|Y)\s*(?:11|12)\b/i.test(docText) ||
+           /\bATAR\b/i.test(docText);
   }
 
   function readCourses(atarOnly = true) {

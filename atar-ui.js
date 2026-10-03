@@ -191,9 +191,6 @@
     document.body.append(calculatorPanel);
 
     function selectTab(mode) {
-      const isEligible = scraper ? scraper.isAtarEligible() : true;
-      if (!isEligible) mode = 'grade';
-
       isPlanningMode = mode === 'target';
       isGradingMode = mode === 'grade';
 
@@ -212,6 +209,13 @@
       estimateTab.setAttribute('aria-pressed', String(!isPlanningMode && !isGradingMode));
       targetTab.setAttribute('aria-pressed', String(isPlanningMode));
       gradeTab.setAttribute('aria-pressed', String(isGradingMode));
+
+      const sidebarTarget = document.getElementById('connectify-target-toggle');
+      const sidebarGrade = document.getElementById('connectify-grade-toggle');
+      const sidebarEstimate = document.getElementById('connectify-estimate-toggle');
+      if (sidebarTarget && sidebarTarget !== targetTab) sidebarTarget.setAttribute('aria-pressed', String(isPlanningMode));
+      if (sidebarGrade && sidebarGrade !== gradeTab) sidebarGrade.setAttribute('aria-pressed', String(isGradingMode));
+      if (sidebarEstimate && sidebarEstimate !== estimateTab) sidebarEstimate.setAttribute('aria-pressed', String(!isPlanningMode && !isGradingMode));
 
       courseListContainer.hidden = detailSummary.hidden = resetBtn.hidden = expandAllBtn.hidden = calculationDetails.hidden =
         isPlanningMode || isGradingMode;
@@ -236,8 +240,10 @@
     estimateTab.addEventListener('click', () => openCalculator('estimate'));
     targetTab.addEventListener('click', () => openCalculator('target'));
     gradeTab.addEventListener('click', () => openCalculator('grade'));
-
     selectTab('estimate');
+    estimateTab.setAttribute('aria-pressed', 'false');
+    targetTab.setAttribute('aria-pressed', 'false');
+    gradeTab.setAttribute('aria-pressed', 'false');
 
     function updateResults() {
       if (isGradingMode && (hasSemesterTwoStarted() || isTargetClosed(0))) {
@@ -292,13 +298,6 @@
     }
 
     function renderCourseRows() {
-      const eligible = scraper ? scraper.isAtarEligible() : true;
-      estimateTab.hidden = targetTab.hidden = !eligible;
-      if (!eligible && !isGradingMode) {
-        selectTab('grade');
-        return;
-      }
-
       if (calc?.renderCourseList) {
         calc.renderCourseList(courseListContainer, courses, activeSemester, updateResults);
       }
@@ -314,8 +313,6 @@
       const nextCourses = scraper.readCourses(false);
       const eligible = scraper.isAtarEligible();
       const signature = JSON.stringify([eligible, nextCourses]);
-
-      estimateTab.hidden = targetTab.hidden = !eligible;
 
       if (signature !== lastStateSignature) {
         gradeCourses = nextCourses;
@@ -334,12 +331,24 @@
       if (e.detail !== 'calculator') {
         calculatorPanel.hidden = true;
         for (const b of [estimateTab, targetTab, gradeTab]) b.setAttribute('aria-pressed', 'false');
+        const sidebarTarget = document.getElementById('connectify-target-toggle');
+        const sidebarGrade = document.getElementById('connectify-grade-toggle');
+        const sidebarEstimate = document.getElementById('connectify-estimate-toggle');
+        if (sidebarTarget) sidebarTarget.setAttribute('aria-pressed', 'false');
+        if (sidebarGrade) sidebarGrade.setAttribute('aria-pressed', 'false');
+        if (sidebarEstimate) sidebarEstimate.setAttribute('aria-pressed', 'false');
       }
     });
 
     function closeCalculator() {
       calculatorPanel.hidden = true;
       for (const b of [estimateTab, targetTab, gradeTab]) b.setAttribute('aria-pressed', 'false');
+      const sidebarTarget = document.getElementById('connectify-target-toggle');
+      const sidebarGrade = document.getElementById('connectify-grade-toggle');
+      const sidebarEstimate = document.getElementById('connectify-estimate-toggle');
+      if (sidebarTarget) sidebarTarget.setAttribute('aria-pressed', 'false');
+      if (sidebarGrade) sidebarGrade.setAttribute('aria-pressed', 'false');
+      if (sidebarEstimate) sidebarEstimate.setAttribute('aria-pressed', 'false');
       (isGradingMode ? gradeTab : isPlanningMode ? targetTab : estimateTab).focus();
     }
 

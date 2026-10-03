@@ -114,40 +114,69 @@ class MockElement {
   }
   click() {
     this.clickCount++;
-    if (typeof this.onclick === 'function') this.onclick(new MockEvent('click'));
-    this.dispatchEvent(new MockEvent('click'));
+    const evt = new MockEvent('click');
+    if (typeof this.onclick === 'function') this.onclick(evt);
+    if (!evt._propagationStopped) {
+      this.dispatchEvent(evt);
+    }
   }
   set innerHTML(html) {
     this._innerHTML = html;
     this.children = [];
     this.childNodes = [];
     if (!html) return;
-    const tagMatches = Array.from(html.matchAll(/<([a-z0-9-]+)([^>]*)>/gi));
-    for (const match of tagMatches) {
-      const tag = match[1].toLowerCase();
-      if (['br', 'hr', 'img', 'input', 'meta', 'link'].includes(tag) || !tag.startsWith('/')) {
-        const attrs = match[2] || '';
+    const stack = [this];
+    const tokenRegex = /(?:<(\/)?([a-z0-9-]+)([^>]*)>)|([^<]+)/gi;
+    const voidTags = new Set(['br', 'hr', 'img', 'input', 'meta', 'link']);
+    let match;
+    while ((match = tokenRegex.exec(html)) !== null) {
+      if (match[4]) {
+        const text = match[4].trim();
+        if (text) {
+          const top = stack[stack.length - 1];
+          if (!top.textContent) top.textContent = text;
+          else top.textContent += ' ' + text;
+        }
+      } else if (match[1]) {
+        const tag = match[2].toLowerCase();
+        if (stack.length > 1 && stack[stack.length - 1].tagName.toLowerCase() === tag) {
+          stack.pop();
+        }
+      } else {
+        const tag = match[2].toLowerCase();
+        const attrs = match[3] || '';
+        const child = new MockElement(tag);
         const idMatch = attrs.match(/id="([^"]+)"/i);
         const classMatch = attrs.match(/class="([^"]+)"/i);
-        if (idMatch || classMatch) {
-          const child = new MockElement(tag);
-          if (idMatch) child.id = idMatch[1];
-          if (classMatch) {
-            child.className = classMatch[1];
-            classMatch[1].split(/\s+/).filter(Boolean).forEach(c => child.classList.add(c));
-          }
-          child.parentElement = this;
-          child.parentNode = this;
-          this.children.push(child);
-          this.childNodes.push(child);
+        const typeMatch = attrs.match(/type="([^"]+)"/i);
+        if (idMatch) child.id = idMatch[1];
+        if (classMatch) {
+          child.className = classMatch[1];
+          classMatch[1].split(/\s+/).filter(Boolean).forEach(c => child.classList.add(c));
+        }
+        if (typeMatch) child.type = typeMatch[1];
+        const top = stack[stack.length - 1];
+        child.parentElement = top;
+        child.parentNode = top;
+        child.isConnected = true;
+        top.children.push(child);
+        top.childNodes.push(child);
+        if (!voidTags.has(tag)) {
+          stack.push(child);
         }
       }
     }
   }
   get innerHTML() { return this._innerHTML || ''; }
   setAttribute(k, v) { this._attrs[k] = String(v); }
-  getAttribute(k) { return this._attrs[k] ?? null; }
-  hasAttribute(k) { return k in this._attrs; }
+  getAttribute(k) {
+    if (k === 'type' && this.type !== undefined) return this.type;
+    return this._attrs[k] ?? null;
+  }
+  hasAttribute(k) {
+    if (k === 'type' && this.type !== undefined) return true;
+    return k in this._attrs;
+  }
   removeAttribute(k) { delete this._attrs[k]; }
   addEventListener(event, fn) {
     if (!this._listeners) this._listeners = {};
@@ -230,6 +259,26 @@ class MockElement {
   matches(selector) {
     const parts = selector.split(',').map(s => s.trim());
     return parts.some(sel => {
+      if (sel.includes('[') && sel.endsWith(']')) {
+        const bracketIdx = sel.indexOf('[');
+        const prefix = sel.slice(0, bracketIdx);
+        if (prefix && this.tagName.toLowerCase() !== prefix.toLowerCase()) return false;
+        const attrContent = sel.slice(bracketIdx + 1, -1);
+        if (attrContent.includes('=')) {
+          const [k, v] = attrContent.split('=');
+          const cleanVal = v.replace(/^["']|["']$/g, '');
+          return this.getAttribute(k.trim()) === cleanVal;
+        }
+        return this.hasAttribute(attrContent);
+      }
+      if (sel.includes(':not(')) {
+        const notIdx = sel.indexOf(':not(');
+        const base = sel.slice(0, notIdx);
+        const negated = sel.slice(notIdx + 5, -1);
+        const baseMatch = !base || this.matches(base);
+        const negMatch = this.matches(negated);
+        return baseMatch && !negMatch;
+      }
       if (sel.startsWith('.')) {
         const cls = sel.slice(1);
         return (this.className || '').split(/\s+/).includes(cls);
@@ -237,9 +286,12 @@ class MockElement {
       if (sel.startsWith('#')) {
         return this.id === sel.slice(1);
       }
-      if (sel.startsWith('[') && sel.endsWith(']')) {
-        const attr = sel.slice(1, -1);
-        return this.hasAttribute(attr);
+      if (sel.includes('.')) {
+        const [tag, ...classes] = sel.split('.');
+        const tagMatch = !tag || this.tagName.toLowerCase() === tag.toLowerCase();
+        const curClasses = (this.className || '').split(/\s+/);
+        const classMatch = classes.every(c => curClasses.includes(c));
+        return tagMatch && classMatch;
       }
       return this.tagName.toLowerCase() === sel.toLowerCase();
     });
@@ -344,6 +396,7 @@ domRoot.appendChild(domBody);
 global.window = global;
 global.document = {
   createElement: (tag) => new MockElement(tag),
+  createTextNode: (text) => { const el = new MockElement('#text'); el.textContent = String(text ?? ''); return el; },
   getElementById: (id) => domRoot.querySelector(`#${id}`),
   querySelector: (sel) => domRoot.querySelector(sel),
   querySelectorAll: (sel) => domRoot.querySelectorAll(sel),
@@ -356,6 +409,7 @@ global.document = {
   dispatchEvent: (e) => domRoot.dispatchEvent(e)
 };
 global.HTMLElement = MockElement;
+global.Element = MockElement;
 global.getComputedStyle = (el) => el._computedStyle || {};
 global.localStorage = mockLocalStorage;
 global.sessionStorage = mockLocalStorage;
@@ -3944,6 +3998,418 @@ runTest('Test 128: Scoped top-bar handle centering, baseline removal outcome bar
     global.setTimeout = origSetTimeout;
     global.clearTimeout = origClearTimeout;
   }
+});
+
+runTest('Test 129: Sidebar handle anchors directly to Connect native left sidebar and moves with it without floating', () => {
+  const currentSidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+  assert.ok(currentSidebarJs.includes('getConnectSidebar'), 'sidebar.js must define getConnectSidebar');
+
+  // Evaluate sidebar.js
+  eval(currentSidebarJs);
+
+  const sidebar = document.getElementById('connectify-sidebar');
+  const handle = document.getElementById('connectify-sidebar-handle');
+  assert.ok(sidebar, 'Sidebar element must exist');
+  assert.ok(handle, 'Handle element must exist');
+
+  // 1. Create a mock Connect native left sidebar (.cvr-c-service-menu)
+  const connectMenu = document.createElement('nav');
+  connectMenu.className = 'cvr-c-service-menu';
+  connectMenu.getBoundingClientRect = () => ({
+    top: 100,
+    bottom: 500,
+    height: 400,
+    left: 0,
+    right: 220,
+    width: 220
+  });
+  domBody.appendChild(connectMenu);
+
+  sidebar.hidden = true;
+  handle.setAttribute('aria-expanded', 'false');
+  handle.updatePosition();
+
+  // Handle must anchor to Connect's sidebar in document coordinates:
+  // sidebarDocTop = 100, height = 400, center = 100 + 400/2 = 300px
+  assert.strictEqual(handle.style.position, 'absolute', 'Handle position must be absolute when anchored to Connect sidebar');
+  assert.strictEqual(handle.style.top, '300px', 'Handle top must anchor to Connect sidebar center');
+  assert.strictEqual(handle.style.transform, 'translateY(-50%)', 'Handle transform must be translateY(-50%)');
+
+  // 2. When Connect's sidebar position changes (e.g. page scrolled down so Connect sidebar is at top: 50)
+  connectMenu.getBoundingClientRect = () => ({
+    top: 50,
+    bottom: 450,
+    height: 400,
+    left: 0,
+    right: 220,
+    width: 220
+  });
+  handle.updatePosition();
+  assert.strictEqual(handle.style.position, 'absolute', 'Handle position remains absolute as Connect sidebar scrolls');
+  assert.strictEqual(handle.style.top, '250px', 'Handle top must update to match scrolled Connect sidebar');
+
+  // 3. When Connectify sidebar drawer is opened (sidebar.hidden = false)
+  sidebar.hidden = false;
+  handle.setAttribute('aria-expanded', 'true');
+  handle.updatePosition();
+
+  // When open, handle switches to fixed positioning in the active viewport
+  assert.strictEqual(handle.style.position, 'fixed', 'Handle position must switch to fixed when drawer is opened');
+  assert.strictEqual(handle.style.transform, 'translateY(-50%)', 'Handle transform remains translateY(-50%)');
+
+  // 4. When Connectify sidebar drawer is closed again (sidebar.hidden = true)
+  sidebar.hidden = true;
+  handle.setAttribute('aria-expanded', 'false');
+  handle.updatePosition();
+
+  assert.strictEqual(handle.style.position, 'absolute', 'Handle position must return to absolute when drawer closes');
+  assert.strictEqual(handle.style.top, '250px', 'Handle top must re-anchor to Connect sidebar');
+
+  // Clean up mock Connect menu
+  connectMenu.remove();
+
+  // 5. Fallback when Connect sidebar is removed
+  handle.updatePosition();
+  assert.strictEqual(handle.style.position, 'fixed', 'Handle position falls back to fixed when no Connect sidebar exists');
+});
+
+runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy, and clicking each tool mounts all documented interface elements', () => {
+  // 1. Clean up DOM and reset initialization flags
+  delete window.__connectifySidebarInitialized;
+  delete window.__connectifyProgressInitialized;
+  delete window.__connectifyAtarUiInitialized;
+  delete window.ConnectifyAtar;
+  delete window.ConnectifyWeakness;
+  delete window.ConnectifyCategorySettings;
+  delete window.ConnectifyPredictorUI;
+  delete window.ConnectifyTargetAtarUI;
+  delete window.ConnectifyTargetGradeUI;
+  delete window.ConnectifyTargetPlannerUI;
+
+  [
+    'connectify-sidebar',
+    'connectify-sidebar-handle',
+    'connectea-atar',
+    'connectify-progress',
+    'connectify-weakness',
+    'connectify-categories',
+    'connectify-predictor',
+    'connectify-target-toggle',
+    'connectify-grade-toggle',
+    'connectify-predictor-toggle',
+    'connectify-progress-toggle',
+    'connectify-estimate-toggle',
+    'connectify-weakness-toggle',
+    'connectify-categories-toggle'
+  ].forEach(id => {
+    document.querySelectorAll('#' + id).forEach(el => el.remove());
+  });
+
+  // 2. Evaluate all tool modules in manifest order
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'scaling-data.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-solver.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-scraper.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-calculator.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-atar-ui.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-grade-ui.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-planner-ui.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'progress-math.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'progress-chart.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'weakness-radar.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'predictor-ui.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8'));
+
+  const sidebar = document.getElementById('connectify-sidebar');
+  const handle = document.getElementById('connectify-sidebar-handle');
+  assert.ok(sidebar, 'Sidebar element (#connectify-sidebar) must exist in DOM');
+  assert.ok(handle, 'Handle element (#connectify-sidebar-handle) must exist in DOM');
+
+  // Verify sidebar container attributes
+  assert.strictEqual(sidebar.tagName.toLowerCase(), 'aside', 'Sidebar must be an aside element');
+  assert.strictEqual(sidebar.getAttribute('aria-label'), 'Connectify tools', 'Sidebar must have aria-label="Connectify tools"');
+  assert.strictEqual(sidebar.hidden, true, 'Sidebar must initially be hidden');
+
+  // Verify handle attributes
+  assert.strictEqual(handle.tagName.toLowerCase(), 'button', 'Handle must be a button element');
+  assert.strictEqual(handle.getAttribute('aria-expanded'), 'false', 'Handle aria-expanded must be false initially');
+  assert.strictEqual(handle.title, 'Open Connectify tools', 'Handle title must be "Open Connectify tools"');
+  assert.strictEqual(handle.getAttribute('aria-label'), 'Open Connectify tools', 'Handle aria-label must match title');
+  const handleArrow = handle.querySelector('.cx-handle-arrow');
+  assert.ok(handleArrow, 'Handle must contain arrow span (.cx-handle-arrow)');
+  assert.strictEqual(handleArrow.textContent, '❯', 'Arrow icon must point right when collapsed');
+
+  // Verify header and navigation components
+  const header = sidebar.querySelector('header');
+  assert.ok(header, 'Sidebar must contain header element');
+  const brand = header.querySelector('strong');
+  assert.ok(brand, 'Header must contain strong brand element');
+  assert.strictEqual(brand.textContent, 'Connectify', 'Brand text must be "Connectify"');
+  const homeBtn = header.querySelector('.cx-back-menu');
+  assert.ok(homeBtn, 'Header must contain Back to Menu button (.cx-back-menu)');
+  assert.strictEqual(homeBtn.textContent, '← Back to Menu', 'Back button text must be "← Back to Menu"');
+  assert.strictEqual(sidebar.querySelector('.cx-close-btn'), null, 'Stray close button (.cx-close-btn) must not exist');
+
+  // Verify intro text
+  const introText = sidebar.querySelector('.cx-tools-intro');
+  assert.ok(introText, 'Intro text (.cx-tools-intro) must exist');
+  assert.ok(introText.textContent.includes('Select a tool below'), 'Intro text must guide user to select a tool');
+
+  // Verify tool navigation menu and canonical button sequence
+  const toolMenu = sidebar.querySelector('.cx-tool-menu');
+  assert.ok(toolMenu, 'Tool menu (.cx-tool-menu) must exist');
+  assert.strictEqual(toolMenu.tagName.toLowerCase(), 'nav', 'Tool menu must be a nav element');
+  assert.strictEqual(toolMenu.getAttribute('aria-label'), 'Tools', 'Tool menu must have aria-label="Tools"');
+
+  const expectedButtons = [
+    { id: 'connectify-target-toggle', label: 'Target ATAR', class: 'cx-calculator-tool' },
+    { id: 'connectify-grade-toggle', label: 'Target Grade', class: 'cx-calculator-tool' },
+    { id: 'connectify-predictor-toggle', label: 'Predictor', class: 'cx-calculator-tool' },
+    { id: 'connectify-progress-toggle', label: 'Year in Progress', class: 'cx-calculator-tool' },
+    { id: 'connectify-estimate-toggle', label: 'ATAR Estimate', class: 'cx-calculator-tool' },
+    { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer', class: 'cx-secondary-tool' },
+    { id: 'connectify-categories-toggle', label: 'Settings', class: 'cx-secondary-tool' }
+  ];
+
+  assert.strictEqual(toolMenu.children.length, 7, 'Tool menu must contain exactly 7 buttons');
+  expectedButtons.forEach((exp, idx) => {
+    const btn = toolMenu.children[idx];
+    assert.strictEqual(btn.id, exp.id, `Button at index ${idx} must have id ${exp.id}`);
+    assert.strictEqual(btn.textContent, exp.label, `Button ${exp.id} must have label "${exp.label}"`);
+    assert.ok(btn.classList.contains(exp.class), `Button ${exp.id} must have class ${exp.class}`);
+    assert.strictEqual(btn.getAttribute('aria-pressed'), 'false', `Button ${exp.id} must start unpressed`);
+  });
+
+  // Verify workspace and mounted panels
+  const workspace = sidebar.querySelector('.cx-workspace');
+  assert.ok(workspace, 'Workspace container (.cx-workspace) must exist');
+  const expectedPanels = [
+    'connectea-atar',
+    'connectify-predictor',
+    'connectify-progress',
+    'connectify-weakness',
+    'connectify-categories'
+  ];
+  assert.strictEqual(workspace.children.length, 5, 'Workspace must contain exactly 5 tool panels');
+  expectedPanels.forEach(panelId => {
+    const p = workspace.querySelector('#' + panelId);
+    assert.ok(p, `Panel #${panelId} must be mounted inside workspace`);
+    assert.strictEqual(p.hidden, true, `Panel #${panelId} must start hidden`);
+  });
+
+  // -------------------------------------------------------------------------
+  // TOOL 1: Target ATAR
+  // -------------------------------------------------------------------------
+  const targetBtn = document.getElementById('connectify-target-toggle');
+  targetBtn.click();
+
+  assert.strictEqual(sidebar.hidden, false, 'Sidebar must open on tool click');
+  assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar must enter cx-tool-active mode');
+  assert.strictEqual(introText.hidden, true, 'Intro text must be hidden when tool is active');
+  assert.strictEqual(targetBtn.getAttribute('aria-pressed'), 'true', 'Target ATAR button must be pressed');
+
+  const atarPanel = document.getElementById('connectea-atar');
+  assert.strictEqual(atarPanel.hidden, false, 'Target ATAR panel (#connectea-atar) must be visible');
+  assert.ok(atarPanel.getAttribute('aria-label').includes('Target ATAR'), 'Panel label must indicate Target ATAR Planner');
+
+  // Verify Target ATAR internal elements
+  const targetHeading = atarPanel.querySelector('.cta-heading strong');
+  assert.ok(targetHeading && targetHeading.textContent.includes('Target ATAR'), 'Target ATAR heading must render');
+  const targetSemesterBtns = atarPanel.querySelectorAll('.cta-semesters button');
+  assert.strictEqual(targetSemesterBtns.length, 2, 'Semester 1 and 2 selector buttons must render');
+  const plannerContainer = atarPanel.querySelector('.cta-planner');
+  assert.ok(plannerContainer && !plannerContainer.hidden, 'Target planner container (.cta-planner) must be unhidden');
+  const targetScoreInput = atarPanel.querySelector('input.cta-score');
+  assert.ok(targetScoreInput, 'Target ATAR score input (input.cta-score) must render');
+  const targetRecalcBtn = atarPanel.querySelector('.cta-form-controls button.cta-reset');
+  assert.ok(targetRecalcBtn && targetRecalcBtn.textContent.includes('Recalculate'), 'Recalculate button must render in Target ATAR');
+  const targetDiffLabel = atarPanel.querySelector('label.cta-difficulty-label');
+  assert.ok(targetDiffLabel && targetDiffLabel.querySelector('input[type="checkbox"]'), 'Difficulty weighting checkbox must render');
+  const topFourContainer = atarPanel.querySelector('.cta-top-four-selector');
+  assert.ok(topFourContainer, 'Top four subject container (.cta-top-four-selector) must render');
+  const targetOutput = atarPanel.querySelector('.cta-target-output');
+  assert.ok(targetOutput, 'Target requirement output container (.cta-target-output) must render');
+  const targetExpandOutlines = atarPanel.querySelector('.cta-expand-outlines');
+  assert.ok(targetExpandOutlines, 'Expand All Outlines button (.cta-expand-outlines) must render');
+
+  // -------------------------------------------------------------------------
+  // TOOL 2: Target Grade
+  // -------------------------------------------------------------------------
+  const gradeBtn = document.getElementById('connectify-grade-toggle');
+  gradeBtn.click();
+
+  assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
+  assert.strictEqual(gradeBtn.getAttribute('aria-pressed'), 'true', 'Target Grade button must be pressed');
+  assert.strictEqual(targetBtn.getAttribute('aria-pressed'), 'false', 'Target ATAR button must no longer be pressed');
+  assert.strictEqual(atarPanel.hidden, false, '#connectea-atar remains visible for Target Grade');
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target Grade Planner', 'Panel label must indicate Target Grade Planner');
+
+  // Verify Target Grade internal elements
+  const gradeHeading = atarPanel.querySelector('.cta-heading strong');
+  assert.strictEqual(gradeHeading.textContent, 'Target Grade Planner', 'Target Grade heading must render');
+  const subjectSelect = atarPanel.querySelector('select.cta-subject-select');
+  assert.ok(subjectSelect, 'Subject dropdown selector (select.cta-subject-select) must render');
+  const gradeScoreInput = atarPanel.querySelector('input.cta-score');
+  assert.ok(gradeScoreInput, 'Grade score input (input.cta-score) must render');
+  const gradeOutput = atarPanel.querySelector('.cta-target-output');
+  assert.ok(gradeOutput, 'Grade breakdown output container (.cta-target-output) must render');
+
+  // -------------------------------------------------------------------------
+  // TOOL 3: Predictor
+  // -------------------------------------------------------------------------
+  const predBtn = document.getElementById('connectify-predictor-toggle');
+  predBtn.click();
+
+  assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
+  assert.strictEqual(predBtn.getAttribute('aria-pressed'), 'true', 'Predictor button must be pressed');
+  assert.strictEqual(atarPanel.hidden, true, 'Target ATAR panel must be hidden');
+  const predPanel = document.getElementById('connectify-predictor');
+  assert.strictEqual(predPanel.hidden, false, 'Predictor panel (#connectify-predictor) must be visible');
+
+  // Verify Predictor internal elements
+  const predHeader = predPanel.querySelector('.cx-pred-header');
+  assert.ok(predHeader, 'Predictor header (.cx-pred-header) must render');
+  const predTitle = predPanel.querySelector('.cx-pred-title');
+  assert.strictEqual(predTitle.textContent, 'Predictor', 'Predictor title must render');
+  const predSubtitle = predPanel.querySelector('.cx-pred-subtitle');
+  assert.strictEqual(predSubtitle.textContent, 'Momentum & Assessment Modeling', 'Predictor subtitle must render');
+  const predTabs = predPanel.querySelector('.cx-pred-main-tabs');
+  assert.ok(predTabs, 'Predictor tabs container (.cx-pred-main-tabs) must render');
+  const gradePredTab = predPanel.querySelector('#cx-pred-btn-grade');
+  assert.ok(gradePredTab && gradePredTab.textContent.includes('Grade Predictor'), 'Grade Predictor tab button must render');
+  const atarPredTab = predPanel.querySelector('#cx-pred-btn-atar');
+  assert.ok(atarPredTab && atarPredTab.textContent.includes('ATAR Predictor'), 'ATAR Predictor tab button must render');
+  const predContent = predPanel.querySelector('#cx-pred-content');
+  assert.ok(predContent, 'Predictor content container (#cx-pred-content) must render');
+
+  // -------------------------------------------------------------------------
+  // TOOL 4: Year in Progress
+  // -------------------------------------------------------------------------
+  const progBtn = document.getElementById('connectify-progress-toggle');
+  progBtn.click();
+
+  assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
+  assert.strictEqual(progBtn.getAttribute('aria-pressed'), 'true', 'Year in Progress button must be pressed');
+  assert.strictEqual(predPanel.hidden, true, 'Predictor panel must be hidden');
+  const progPanel = document.getElementById('connectify-progress');
+  assert.strictEqual(progPanel.hidden, false, 'Progress panel (#connectify-progress) must be visible');
+
+  // Verify Progress internal elements
+  const progTitle = progPanel.querySelector('header strong');
+  assert.strictEqual(progTitle.textContent, 'Year in Progress', 'Progress title must render');
+  const subjectsContainer = progPanel.querySelector('.cx-subjects');
+  assert.ok(subjectsContainer, 'Subjects chip selector container (.cx-subjects) must render');
+  const refreshAssessmentsBtn = progPanel.querySelector('button');
+  assert.ok(refreshAssessmentsBtn && refreshAssessmentsBtn.textContent.includes('Refresh Assessments'), 'Refresh Assessments button must render');
+  const chartContainer = progPanel.querySelector('div:not(.cx-subjects)');
+  assert.ok(chartContainer, 'Progress chart container must render');
+
+  // -------------------------------------------------------------------------
+  // TOOL 5: ATAR Estimate
+  // -------------------------------------------------------------------------
+  const estBtn = document.getElementById('connectify-estimate-toggle');
+  estBtn.click();
+
+  assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
+  assert.strictEqual(estBtn.getAttribute('aria-pressed'), 'true', 'ATAR Estimate button must be pressed');
+  assert.strictEqual(progPanel.hidden, true, 'Progress panel must be hidden');
+  assert.strictEqual(atarPanel.hidden, false, 'ATAR panel (#connectea-atar) must be visible');
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated ATAR', 'Panel label must indicate Estimated ATAR');
+
+  // Verify ATAR Estimate internal elements
+  const estHeading = atarPanel.querySelector('.cta-heading strong');
+  assert.strictEqual(estHeading.textContent, 'Estimated ATAR', 'Estimated ATAR heading must render');
+  const courseList = atarPanel.querySelector('.cta-courses');
+  assert.ok(courseList && !courseList.hidden, 'Courses list container (.cta-courses) must be unhidden');
+  const breakdownSummary = atarPanel.querySelector('.cta-breakdown');
+  assert.ok(breakdownSummary && !breakdownSummary.hidden, 'Breakdown summary (.cta-breakdown) must be unhidden');
+  const resetBtn = Array.from(atarPanel.querySelectorAll('button.cta-reset')).find(b => !b.classList.contains('cta-expand-outlines'));
+  assert.ok(resetBtn && !resetBtn.hidden && resetBtn.textContent.includes('Reset to School Marks'), 'Reset button must be unhidden');
+  const methodDetails = atarPanel.querySelector('details.cta-method');
+  assert.ok(methodDetails && !methodDetails.hidden, 'Methodology details (details.cta-method) must be unhidden');
+  const methodSummary = methodDetails.querySelector('summary');
+  assert.strictEqual(methodSummary.textContent, 'Calculation Methodology & Sources', 'Methodology summary text must match');
+
+  // -------------------------------------------------------------------------
+  // TOOL 6: Weakness Analyzer
+  // -------------------------------------------------------------------------
+  const weakBtn = document.getElementById('connectify-weakness-toggle');
+  weakBtn.click();
+
+  assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
+  assert.strictEqual(weakBtn.getAttribute('aria-pressed'), 'true', 'Weakness Analyzer button must be pressed');
+  assert.strictEqual(atarPanel.hidden, true, 'ATAR panel must be hidden');
+  const weakPanel = document.getElementById('connectify-weakness');
+  assert.strictEqual(weakPanel.hidden, false, 'Weakness panel (#connectify-weakness) must be visible');
+
+  // Verify Weakness Analyzer internal elements
+  const weakTitle = weakPanel.querySelector('header strong');
+  assert.strictEqual(weakTitle.textContent, 'Weakness Analyzer', 'Weakness Analyzer title must render');
+  const radarModeSelect = weakPanel.querySelector('#cx-radar-mode');
+  assert.ok(radarModeSelect, 'Group by dropdown selector (#cx-radar-mode) must render');
+  const weakExpandAllBtn = weakPanel.querySelector('#cx-weakness-expand-all');
+  assert.ok(weakExpandAllBtn && weakExpandAllBtn.textContent.includes('Expand All Outlines'), 'Expand All Outlines button must render');
+  const radarChart = weakPanel.querySelector('#connectify-radar-chart');
+  assert.ok(radarChart, 'Radar chart container (#connectify-radar-chart) must render');
+  const weakFilters = weakPanel.querySelector('#cx-weakness-filters');
+  assert.ok(weakFilters, 'Weakness filters container (#cx-weakness-filters) must render');
+  const selectAllBtn = weakPanel.querySelector('#cx-weakness-all');
+  assert.ok(selectAllBtn && selectAllBtn.textContent.includes('Select All'), 'Select All button must render');
+  const deselectAllBtn = weakPanel.querySelector('#cx-weakness-none');
+  assert.ok(deselectAllBtn && deselectAllBtn.textContent.includes('Deselect All'), 'Deselect All button must render');
+  const checkboxesContainer = weakPanel.querySelector('#cx-weakness-checkboxes');
+  assert.ok(checkboxesContainer, 'Subject checkboxes container (#cx-weakness-checkboxes) must render');
+
+  // -------------------------------------------------------------------------
+  // TOOL 7: Settings
+  // -------------------------------------------------------------------------
+  const catBtn = document.getElementById('connectify-categories-toggle');
+  catBtn.click();
+
+  assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
+  assert.strictEqual(catBtn.getAttribute('aria-pressed'), 'true', 'Settings button must be pressed');
+  assert.strictEqual(weakPanel.hidden, true, 'Weakness panel must be hidden');
+  const catPanel = document.getElementById('connectify-categories');
+  assert.strictEqual(catPanel.hidden, false, 'Settings panel (#connectify-categories) must be visible');
+
+  // Verify Settings internal elements
+  const catTitle = catPanel.querySelector('header strong');
+  assert.strictEqual(catTitle.textContent, 'Settings', 'Settings title must render');
+  const autoExpandToggle = catPanel.querySelector('#cx-auto-expand-toggle');
+  assert.ok(autoExpandToggle, 'Auto-expand checkbox toggle (#cx-auto-expand-toggle) must render');
+  const cohortInput = catPanel.querySelector('#cx-general-cohort-input');
+  assert.ok(cohortInput, 'General cohort input (#cx-general-cohort-input) must render');
+  const addCategoryBtn = catPanel.querySelector('#cx-cat-add');
+  assert.ok(addCategoryBtn && addCategoryBtn.textContent.includes('Add Category'), 'Add Category button must render');
+  const saveCatBtn = catPanel.querySelector('#cx-cat-save');
+  assert.ok(saveCatBtn && saveCatBtn.textContent.includes('Save Changes'), 'Save Changes button must render');
+  const baselinesContainer = catPanel.querySelector('#cx-baselines-container');
+  assert.ok(baselinesContainer, 'Baselines container (#cx-baselines-container) must render');
+
+  // -------------------------------------------------------------------------
+  // HEADER: Back to Menu Button
+  // -------------------------------------------------------------------------
+  homeBtn.click();
+
+  assert.strictEqual(sidebar.classList.contains('cx-tool-active'), false, 'Sidebar must exit cx-tool-active mode on Back to Menu');
+  assert.strictEqual(introText.hidden, false, 'Intro text must be restored when returning to launcher menu');
+  assert.strictEqual(sidebar.hidden, false, 'Sidebar must remain open when navigating Back to Menu');
+
+  // Verify all panels are hidden
+  expectedPanels.forEach(panelId => {
+    const p = workspace.querySelector('#' + panelId);
+    assert.strictEqual(p.hidden, true, `Panel #${panelId} must be hidden after returning to menu`);
+  });
+
+  // Verify all tool buttons are unpressed
+  expectedButtons.forEach(exp => {
+    const btn = document.getElementById(exp.id);
+    assert.strictEqual(btn.getAttribute('aria-pressed'), 'false', `Button ${exp.id} must be aria-pressed="false" after returning to menu`);
+  });
 });
 
 console.log('\n================================================================');

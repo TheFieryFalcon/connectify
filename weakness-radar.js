@@ -257,6 +257,9 @@
   }
 
   function createWeaknessPanel() {
+    if (window.ConnectifyWeakness?.panelRefs) {
+      return window.ConnectifyWeakness.panelRefs;
+    }
     const toggleBtn = document.createElement('button');
     toggleBtn.textContent = 'Weakness Analyzer';
     toggleBtn.type = 'button';

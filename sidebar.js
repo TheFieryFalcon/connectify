@@ -77,12 +77,85 @@
       return Math.max(0, maxBottom);
     }
 
+    function getConnectSidebar() {
+      const selectors = [
+        '.cvr-c-service-menu',
+        '.cvr-c-service-menu__wrapper',
+        '.cvr-c-side-menu',
+        '.cvr-c-classes-menu',
+        '.cvr-c-category-menu',
+        '.cvr-c-primary-menu',
+        '.product-menu',
+        '.sidenav-menu-slider'
+      ];
+      for (const sel of selectors) {
+        const el = document.querySelector(sel);
+        if (el && typeof el.getBoundingClientRect === 'function') {
+          if (sidebar.contains(el) || el.id === 'connectify-sidebar-handle') continue;
+          const rect = el.getBoundingClientRect();
+          if ((rect.width > 0 || rect.height > 0 || el.offsetWidth > 0 || el.offsetHeight > 0) && rect.left <= 60 && rect.right > 0) {
+            return el;
+          }
+        }
+      }
+      return null;
+    }
+
     function updateHandlePosition() {
       try {
         const topBarBottom = getTopBarBottom();
         const vh = window.innerHeight || document.documentElement?.clientHeight || 800;
         const availableHeight = Math.max(0, vh - topBarBottom);
         const centerY = Math.round(topBarBottom + availableHeight / 2);
+
+        // When Connectify tool drawer is OPEN: dock to drawer edge in the active viewport
+        if (!sidebar.hidden) {
+          handle.style.position = 'fixed';
+          handle.style.top = `${centerY}px`;
+          handle.style.transform = 'translateY(-50%)';
+          return;
+        }
+
+        // When Connectify tool drawer is CLOSED:
+        // Anchor to Connect's native left sidebar if present, moving directly with it as the page scrolls
+        const connectSidebar = getConnectSidebar();
+        if (connectSidebar) {
+          if (typeof ResizeObserver === 'function' && !connectSidebar._connectifyHandleObserved) {
+            connectSidebar._connectifyHandleObserved = true;
+            try {
+              new ResizeObserver(() => {
+                if (sidebar.hidden) updateHandlePosition();
+              }).observe(connectSidebar);
+            } catch {}
+          }
+
+          const rect = connectSidebar.getBoundingClientRect();
+          const pageY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement?.scrollTop || document.body?.scrollTop || 0);
+          const sidebarDocTop = rect.top + pageY;
+          const sidebarHeight = connectSidebar.offsetHeight || rect.height || 350;
+          const csStyle = (typeof window.getComputedStyle === 'function') ? window.getComputedStyle(connectSidebar) : null;
+          const isFixed = csStyle && (csStyle.position === 'fixed');
+
+          const bodyRect = (document.body && typeof document.body.getBoundingClientRect === 'function') ? document.body.getBoundingClientRect() : null;
+          const bodyTop = bodyRect ? (bodyRect.top + pageY) : 0;
+
+          const targetDocY = Math.round(sidebarDocTop - bodyTop + Math.min(sidebarHeight, 500) / 2);
+          handle._lastViewportY = Math.round(rect.top + Math.min(sidebarHeight, 500) / 2);
+
+          if (isFixed) {
+            handle.style.position = 'fixed';
+            handle.style.top = `${handle._lastViewportY}px`;
+          } else {
+            handle.style.position = 'absolute';
+            handle.style.top = `${targetDocY}px`;
+          }
+          handle.style.transform = 'translateY(-50%)';
+          return;
+        }
+
+        // Fallback when no Connect sidebar is present: center within visible viewport below top bar
+        handle._lastViewportY = centerY;
+        handle.style.position = 'fixed';
         handle.style.top = `${centerY}px`;
         handle.style.transform = 'translateY(-50%)';
       } catch {}
@@ -274,6 +347,7 @@
         } else {
           btn.className = 'cx-calculator-tool';
         }
+        btn.setAttribute('aria-pressed', 'false');
         resolvedButtons.push(btn);
       }
 
@@ -473,28 +547,52 @@
 
     // Central delegated tool launcher listener
     const handleToolLaunchClick = e => {
-      const toggle = e.target.closest('#connectify-target-toggle, #connectify-grade-toggle, #connectify-estimate-toggle, #connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle');
+      if (e._connectifyToolHandled) return;
+      const toggle = e.target.closest('#connectify-target-toggle, #connectify-grade-toggle, #connectify-estimate-toggle, #connectify-predictor-toggle, #connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle');
       if (!toggle) return;
+      e._connectifyToolHandled = true;
       justReturnedToMenu = false;
 
       const id = toggle.id;
       if (id === 'connectify-target-toggle') {
+        toggle.setAttribute('aria-pressed', 'true');
+        document.getElementById('connectify-grade-toggle')?.setAttribute('aria-pressed', 'false');
+        document.getElementById('connectify-estimate-toggle')?.setAttribute('aria-pressed', 'false');
         if (window.ConnectifyAtar?.openCalculator) {
           window.ConnectifyAtar.openCalculator('target');
         } else {
           window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
         }
       } else if (id === 'connectify-grade-toggle') {
+        toggle.setAttribute('aria-pressed', 'true');
+        document.getElementById('connectify-target-toggle')?.setAttribute('aria-pressed', 'false');
+        document.getElementById('connectify-estimate-toggle')?.setAttribute('aria-pressed', 'false');
         if (window.ConnectifyAtar?.openCalculator) {
           window.ConnectifyAtar.openCalculator('grade');
         } else {
           window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
         }
       } else if (id === 'connectify-estimate-toggle') {
+        toggle.setAttribute('aria-pressed', 'true');
+        document.getElementById('connectify-target-toggle')?.setAttribute('aria-pressed', 'false');
+        document.getElementById('connectify-grade-toggle')?.setAttribute('aria-pressed', 'false');
         if (window.ConnectifyAtar?.openCalculator) {
           window.ConnectifyAtar.openCalculator('estimate');
         } else {
           window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
+        }
+      } else if (id === 'connectify-predictor-toggle') {
+        const refs = window.ConnectifyPredictorUI?.panelRefs || (window.ConnectifyPredictorUI?.ensurePredictorPanel && window.ConnectifyPredictorUI.ensurePredictorPanel());
+        if (refs?.openPredictor) {
+          const pPanel = refs.panel || document.getElementById('connectify-predictor');
+          if (pPanel && !pPanel.hidden) {
+            refs.closePredictor();
+            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
+          } else {
+            refs.openPredictor();
+          }
+        } else {
+          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'predictor' }));
         }
       } else if (id === 'connectify-progress-toggle') {
         const refs = window.ConnectifyProgress?.panelRefs || (window.ConnectifyProgress?.ensureProgressPanel && window.ConnectifyProgress.ensureProgressPanel());
@@ -552,10 +650,15 @@
       }
     };
 
+    if (window._connectifyToolLaunchAttached) {
+      sidebar.removeEventListener('click', window._connectifyToolLaunchAttached);
+      document.removeEventListener('click', window._connectifyToolLaunchAttached);
+    }
+    window._connectifyToolLaunchAttached = handleToolLaunchClick;
     sidebar.addEventListener('click', handleToolLaunchClick);
     document.addEventListener('click', handleToolLaunchClick);
 
-    window.addEventListener('connectify-open', e => {
+    const handleConnectifyOpen = e => {
       if (e.detail !== 'home') openSidebar();
       const activeTool = e.detail;
       const btnMap = {
@@ -565,11 +668,25 @@
         weakness: ['connectify-weakness-toggle'],
         categories: ['connectify-categories-toggle']
       };
+      if (activeTool === 'calculator') {
+        toolMenu.querySelectorAll('button').forEach(btn => {
+          if (!btnMap.calculator.includes(btn.id)) {
+            btn.setAttribute('aria-pressed', 'false');
+          }
+        });
+        return;
+      }
       toolMenu.querySelectorAll('button').forEach(btn => {
         const isActive = btnMap[activeTool]?.includes(btn.id) || false;
         btn.setAttribute('aria-pressed', String(isActive));
       });
-    });
+    };
+
+    if (window._connectifyOpenAttached) {
+      window.removeEventListener('connectify-open', window._connectifyOpenAttached);
+    }
+    window._connectifyOpenAttached = handleConnectifyOpen;
+    window.addEventListener('connectify-open', handleConnectifyOpen);
 
     let isSyncing = false;
     function syncState() {

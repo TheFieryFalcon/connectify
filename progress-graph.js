@@ -40,11 +40,15 @@
     let title, choicesContainer, chartContainer, scanBtn;
     if (panel) {
       title = panel.querySelector('header strong') || createElement('strong', 'Year in Progress');
+      scanBtn = Array.from(panel.querySelectorAll('button')).find(b => b.textContent.includes('Refresh Assessments')) || createElement('button', 'Refresh Assessments');
       choicesContainer = panel.querySelector('.cx-subjects') || createElement('div', null, 'cx-subjects');
-      scanBtn = panel.querySelector('button') || createElement('button', 'Refresh Assessments');
       chartContainer = panel.querySelector('div:not(.cx-subjects)') || createElement('div');
-      if (!panel.contains(choicesContainer)) panel.append(choicesContainer);
-      if (!panel.contains(scanBtn)) panel.append(scanBtn);
+      if (choicesContainer.parentElement === panel) {
+        panel.insertBefore(scanBtn, choicesContainer);
+      } else {
+        if (!panel.contains(scanBtn)) panel.append(scanBtn);
+        if (!panel.contains(choicesContainer)) panel.append(choicesContainer);
+      }
       if (!panel.contains(chartContainer)) panel.append(chartContainer);
     } else {
       panel = createElement('section');
@@ -57,13 +61,13 @@
       title.tabIndex = -1;
       head.append(title);
 
-      choicesContainer = createElement('div', null, 'cx-subjects');
-      chartContainer = createElement('div');
-
       scanBtn = createElement('button', 'Refresh Assessments');
       scanBtn.type = 'button';
 
-      panel.append(head, choicesContainer, scanBtn, chartContainer);
+      choicesContainer = createElement('div', null, 'cx-subjects');
+      chartContainer = createElement('div');
+
+      panel.append(head, scanBtn, choicesContainer, chartContainer);
       document.body.append(toggleBtn, panel);
     }
 

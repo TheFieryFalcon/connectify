@@ -947,8 +947,8 @@
     const headings = [];
     for (const h of rawHeadings) {
       const card = typeof h.closest === 'function'
-        ? (h.closest('.eds-c-accordion__section, .cvr-c-accordion__section') ||
-           h.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'))
+        ? (h.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') ||
+           h.closest('.eds-c-accordion__section, .cvr-c-accordion__section'))
         : null;
       if (card && seenCards.has(card)) continue;
       if (card) seenCards.add(card);
@@ -956,6 +956,8 @@
     }
 
     if (headings.length === 0) return;
+
+    const initialScrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement?.scrollTop || document.body?.scrollTop || 0);
 
     isBulkExpanding = true;
     window.ConnectifyIsBulkExpanding = true;
@@ -1012,6 +1014,9 @@
 
     function finishProgress() {
       unlockScroll();
+      if (typeof window.scrollTo === 'function') {
+        window.scrollTo(0, initialScrollY);
+      }
       if (!progressPill) return;
       updateProgress(100, '✓ Outlines expanded & statistics updated');
       setTimeout(() => {
@@ -1144,11 +1149,21 @@
           (typeof heading.closest === 'function' ? heading.closest('button, [role="button"]') : null) ||
           (typeof heading.matches === 'function' && heading.matches('button, [role="button"]') ? heading : null);
         if (btn) {
+          const stopBubble = e => { if (typeof e.stopPropagation === 'function') e.stopPropagation(); };
+          if (btn !== heading && typeof heading.addEventListener === 'function') {
+            heading.addEventListener('click', stopBubble, true);
+          }
           btn.click();
+          if (btn !== heading && typeof heading.removeEventListener === 'function') {
+            heading.removeEventListener('click', stopBubble, true);
+          }
           clickedAny = true;
         } else {
           heading.click();
           clickedAny = true;
+        }
+        if (typeof window.scrollTo === 'function') {
+          window.scrollTo(0, initialScrollY);
         }
       }
       setTimeout(clickNext, 65);

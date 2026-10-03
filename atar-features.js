@@ -21,9 +21,9 @@
     function isAutoExpandEnabled() {
       try {
         const val = localStorage.getItem('connectify:auto_expand');
-        if (val !== null) return val !== 'false';
+        return val === 'true';
       } catch (e) {}
-      return true;
+      return false;
     }
 
     function checkStartupAutoExpand() {
@@ -164,12 +164,20 @@
         }
       }
 
-      if (!weaknessInstance && window.ConnectifyWeakness?.createWeaknessPanel) {
-        weaknessInstance = window.ConnectifyWeakness.createWeaknessPanel();
+      if (!weaknessInstance) {
+        if (window.ConnectifyWeakness?.ensureWeaknessPanel) {
+          weaknessInstance = window.ConnectifyWeakness.ensureWeaknessPanel();
+        } else if (window.ConnectifyWeakness?.createWeaknessPanel) {
+          weaknessInstance = window.ConnectifyWeakness.createWeaknessPanel();
+        }
       }
 
-      if (!settingsInstance && window.ConnectifyCategorySettings?.createSettingsPanel) {
-        settingsInstance = window.ConnectifyCategorySettings.createSettingsPanel();
+      if (!settingsInstance) {
+        if (window.ConnectifyCategorySettings?.ensureSettingsPanel) {
+          settingsInstance = window.ConnectifyCategorySettings.ensureSettingsPanel();
+        } else if (window.ConnectifyCategorySettings?.createSettingsPanel) {
+          settingsInstance = window.ConnectifyCategorySettings.createSettingsPanel();
+        }
       }
 
       if (typeof window.ConnectifyInitSidebar === 'function' && window.ConnectifyInitSidebar !== initSidebarTools) {

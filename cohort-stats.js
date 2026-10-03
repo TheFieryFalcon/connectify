@@ -41,6 +41,8 @@
       max-width: 100% !important;
       clear: both !important;
       overflow: visible !important;
+      zoom: var(--cx-display-scale, 1);
+      transform-origin: left center !important;
     }
     .connectea-row-wrapper > .connectea-panel {
       flex: 0 0 auto !important;
@@ -471,6 +473,18 @@
 
   schedule(true);
 
+  function updateDisplayWidthScale() {
+    try {
+      const width = window.innerWidth || document.documentElement?.clientWidth || 1920;
+      const scale = Math.min(1, Math.max(0.35, width / 1920));
+      document.documentElement?.style.setProperty('--cx-display-scale', scale.toFixed(4));
+    } catch {}
+  }
+  updateDisplayWidthScale();
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', updateDisplayWidthScale, { passive: true });
+  }
+
   window.ConnectifyCohort = {
     percentile: (...args) => math().percentile(...args),
     summary: (...args) => math().summary(...args),
@@ -479,6 +493,7 @@
     estimatedSize: (...args) => estimator().estimateCohortSize(...args),
     pass,
     schedule,
+    updateDisplayWidthScale,
     clearCohortCache: () => window.ConnectifyCache?.clearCohortCache?.(),
     COHORT_ALGO_VERSION: window.ConnectifyCache?.VERSIONS?.COHORT || 'v4_20261001_cohort'
   };

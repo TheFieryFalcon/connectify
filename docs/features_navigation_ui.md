@@ -47,8 +47,8 @@ This document details user-facing visual features 1 through 10, covering direct 
 
 ### 4. Floating Tools Drawer & Sidebar
 - **Source Modules**: [`sidebar.js`](file:///Users/uwong/Downloads/2.1.14_0/sidebar.js), [`sidebar.css`](file:///Users/uwong/Downloads/2.1.14_0/sidebar.css)
-- **DOM Insertion**: Fixed to viewport (`#connectify-sidebar-handle` and `#connectify-sidebar`).
-- **UI Appearance**: Compact 30px width handle with directional arrow icon (`❮` / `❯`) without text or excess whitespace. Smoothly centered vertically across the available visible height below the Connect navigation bar.
+- **DOM Insertion**: Anchored to Connect's native sidebar (`#connectify-sidebar-handle`) and fixed to viewport (`#connectify-sidebar`).
+- **UI Appearance**: Compact 30px width handle with directional arrow icon (`❮` / `❯`) without text or excess whitespace. Anchors directly to Connect's left menu when closed; centers vertically on drawer edge when open.
 - **Canonical Tools**:
   - **Target ATAR** (`#connectify-target-toggle`)
   - **Target Grade** (`#connectify-grade-toggle`)
@@ -58,6 +58,7 @@ This document details user-facing visual features 1 through 10, covering direct 
   - **Weakness Analyzer** (`#connectify-weakness-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
   - **Settings & Calibration** (`#connectify-categories-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
 - **Functionality**:
+  - **Connect Native Sidebar Anchoring**: When closed, the handle discovers Connect's native left navigation sidebar (`.cvr-c-service-menu`, `.cvr-c-side-menu`, etc.) and anchors directly to it via `position: absolute` in document coordinates. This scrolls synchronously with Connect's sidebar at native frame rates without floating fixed. Switches to `position: fixed` in the active viewport when the drawer opens, and falls back to dynamic viewport centering if no Connect sidebar exists.
   - **Left Edge Push Expand & Drawer Slide Animation**: Moving mouse cursor to the left edge of the screen (`clientX <= 12`) or hovering over the handle automatically expands the sidebar drawer. Both drawer and handle animate in lockstep with synchronized `0.2s cubic-bezier(0.16, 1, 0.3, 1)` transitions (`transform: translateX(-100%)` to `0`), completely eliminating drawer clipping.
   - **Conditional Hover Collapse & Back to Menu Retention**: Moving mouse outside the sidebar collapses it after a 120ms debounce when no tool is active. When a tool panel is active (`.cx-tool-active`), hover collapse is suppressed and clicking outside collapses it. Returning from an active tool panel (`← Back to Menu`) retains the launcher menu without collapsing even if the mouse is outside the 310px width (`justReturnedToMenu`).
   - **Scoped Dynamic Vertical Centering**: Dynamically queries only top navigation bars (`.cvr-c-header`, `.cvr-c-primary-navigation` with `rect.top <= 25`), avoiding course card tile headers, and smoothly centers the handle across the visible viewport on scroll and resize.
