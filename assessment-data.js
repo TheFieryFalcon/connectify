@@ -495,8 +495,17 @@
         mean: cohortMean(row),
         semester: parseSemester(card),
         order: (() => {
-           const customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
-                               localStorage.getItem(`connectea:time_override:${title}:${taskName}`);
+           let customOrder = null;
+           if (id) {
+              customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${id}`) ||
+                            localStorage.getItem(`connectea:time_override:${title}:${id}`) ||
+                            localStorage.getItem(`connectify:time_override:${subjectName}:${id}`);
+           }
+           if ((customOrder === null || customOrder === '') && occurrenceCount === 0 && taskName) {
+              customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
+                            localStorage.getItem(`connectea:time_override:${title}:${taskName}`) ||
+                            localStorage.getItem(`connectify:time_override:${subjectName}:${taskName}`);
+           }
            if (customOrder !== null && customOrder !== '') {
               const num = Number(customOrder);
               if (Number.isFinite(num) && num > 0) {
@@ -688,8 +697,29 @@
   function resolveTaskOrder(subjectName, task) {
     if (!task) return null;
     const taskName = task.name || '';
-    const customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
-                        localStorage.getItem(`connectify:time_override:${subjectName}:${taskName}`);
+    const taskId = task.id || '';
+
+    let customOrder = null;
+    if (taskId) {
+      customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskId}`) ||
+                    localStorage.getItem(`connectify:time_override:${subjectName}:${taskId}`);
+    }
+
+    if (customOrder === null || customOrder === '') {
+      const cachedMap = subjectsCache.get(subjectName);
+      const allTasks = cachedMap ? Array.from(cachedMap.values()) : (arguments[2] || []);
+      const duplicateTasks = (Array.isArray(allTasks) && taskName)
+        ? allTasks.filter(t => t && normalize(t.name).toLowerCase() === normalize(taskName).toLowerCase())
+        : [];
+      const isDuplicate = duplicateTasks.length > 1;
+      const isFirst = !isDuplicate || (duplicateTasks.length > 0 && duplicateTasks[0] === task);
+
+      if (isFirst && taskName) {
+        customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
+                      localStorage.getItem(`connectify:time_override:${subjectName}:${taskName}`);
+      }
+    }
+
     if (customOrder !== null && customOrder !== '') {
       const num = Number(customOrder);
       if (Number.isFinite(num) && num > 0) {
@@ -709,23 +739,26 @@
   }
 
   function formatCollectedSubjects(includePending) {
-    return Array.from(subjectsCache, ([name, tasks]) => ({
-      name,
-      tasks: Array.from((tasks && typeof tasks.values === 'function') ? tasks.values() : (Array.isArray(tasks) ? tasks : []))
-        .filter(Boolean)
-        .map(t => {
-          const resolvedOrder = resolveTaskOrder(name, t);
-          return resolvedOrder !== t.order ? { ...t, order: resolvedOrder } : t;
-        })
-        .filter(t => {
-          if (/^Assessment\s+\d+$/i.test(t.name) && !t.caption && (t.weight === null || t.weight === 0)) return false;
-          return includePending || !t.pending;
-        })
-        .sort((a, b) => {
-          if (a.order !== null && b.order !== null) return a.order - b.order;
-          return a.sequence - b.sequence;
-        })
-    }));
+    return Array.from(subjectsCache, ([name, tasks]) => {
+      const taskList = Array.from((tasks && typeof tasks.values === 'function') ? tasks.values() : (Array.isArray(tasks) ? tasks : []))
+        .filter(Boolean);
+      return {
+        name,
+        tasks: taskList
+          .map(t => {
+            const resolvedOrder = resolveTaskOrder(name, t);
+            return resolvedOrder !== t.order ? { ...t, order: resolvedOrder } : t;
+          })
+          .filter(t => {
+            if (/^Assessment\s+\d+$/i.test(t.name) && !t.caption && (t.weight === null || t.weight === 0)) return false;
+            return includePending || !t.pending;
+          })
+          .sort((a, b) => {
+            if (a.order !== null && b.order !== null) return a.order - b.order;
+            return a.sequence - b.sequence;
+          })
+      };
+    });
   }
 
   /**

@@ -503,10 +503,20 @@
 
           let taskOrder = null;
           const taskName = meta.taskName || '';
+          const taskId = meta.taskId || (meta.labelsKey ? `${meta.labelsKey}:0` : '');
           const caption = meta.labels?.[1] || '';
           const cardTitle = card ? (card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, h2, h3')?.textContent || '') : '';
-          const customOrder = localStorage.getItem(`connectea:time_override:${meta.subjectName}:${taskName}`) ||
-                              localStorage.getItem(`connectea:time_override:${cardTitle}:${taskName}`);
+          let customOrder = null;
+          if (taskId) {
+            customOrder = localStorage.getItem(`connectea:time_override:${meta.subjectName}:${taskId}`) ||
+                          localStorage.getItem(`connectea:time_override:${cardTitle}:${taskId}`) ||
+                          localStorage.getItem(`connectify:time_override:${meta.subjectName}:${taskId}`);
+          }
+          if (customOrder === null || customOrder === '') {
+            customOrder = localStorage.getItem(`connectea:time_override:${meta.subjectName}:${taskName}`) ||
+                          localStorage.getItem(`connectea:time_override:${cardTitle}:${taskName}`) ||
+                          localStorage.getItem(`connectify:time_override:${meta.subjectName}:${taskName}`);
+          }
           if (customOrder !== null && customOrder !== '') {
             const num = Number(customOrder);
             if (Number.isFinite(num) && num > 0) {

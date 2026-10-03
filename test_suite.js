@@ -3326,6 +3326,97 @@ runTest('Test 123: Calibrated variance scaling prevents excessive spread on vola
   assert.ok(projHigh >= 80.5 && projHigh <= 81.5, `Projected subject High (${projHigh}%) must be ~81%`);
 });
 
+runTest('Test 124: Tasks of the same name have independent date overrides and are not double counted', () => {
+  const chartJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-chart.js'), 'utf8');
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+
+  // Verify code signatures
+  assert.ok(chartJs.includes('const isDuplicateName = duplicateTasks.length > 1;'), 'progress-chart.js must detect duplicate-named tasks');
+  assert.ok(chartJs.includes('const isFirstOccurrence = !isDuplicateName || (duplicateTasks.length > 0 && duplicateTasks[0] === point);'), 'progress-chart.js must distinguish first occurrence');
+  assert.ok(assessJs.includes('const isDuplicate = duplicateTasks.length > 1;'), 'assessment-data.js must detect duplicate-named tasks in resolveTaskOrder');
+  assert.ok(predMathJs.includes('const actualTaskId = typeof taskOrName === \'object\' && taskOrName ? (taskOrName.id || taskId) : taskId;'), 'predictor-math.js must support taskId in resolveCustomDate');
+
+  // Functional test:
+  mockLocalStorage.clear();
+
+  delete window.ConnectifyProgressChart;
+  eval(chartJs);
+
+  const container = document.createElement('div');
+  const task1 = { id: 'id_sem1_er1', name: 'Extended response 1', score: 85, mean: 70, order: 19, sequence: 5, pending: false };
+  const task2 = { id: 'id_sem2_er1', name: 'Extended response 1', score: null, mean: null, order: null, sequence: 8, pending: true };
+  const mockPoints = [task1, task2];
+
+  // Set an old generic override (e.g. 17)
+  mockLocalStorage.setItem('connectea:time_override:Chemistry ATAR:Extended response 1', '17');
+
+  let refreshed = false;
+  window.ConnectifyProgressChart.renderChart(container, {
+    points: mockPoints,
+    isHistory: false,
+    byAssessment: false,
+    subjectName: 'Chemistry ATAR',
+    onRefresh: () => { refreshed = true; }
+  });
+
+  const table = container.querySelector('table');
+  assert.ok(table, 'Table must be rendered');
+  const rows = table.querySelectorAll('tr');
+  assert.strictEqual(rows.length, 3, 'Must render header + 2 task rows');
+
+  // Row 1 (Task 1): First occurrence gets generic key 17
+  const row1 = rows[1];
+  const r1EditBtn = row1.querySelector('.cx-time-edit-btn');
+  assert.ok(r1EditBtn, 'Task 1 must have edit button for week 17');
+  assert.ok(r1EditBtn.title.includes('Custom week 17'), 'Task 1 must inherit week 17 as first occurrence');
+
+  // Row 2 (Task 2): Second occurrence does NOT inherit generic key!
+  // It has order: null, so it renders the input field with warning
+  const row2 = rows[2];
+  const r2Warning = row2.querySelector('.cx-date-warning');
+  assert.ok(r2Warning, 'Task 2 must not inherit Task 1 date and should prompt for week input');
+  const r2Input = row2.querySelector('input');
+  assert.ok(r2Input, 'Task 2 must render week number input');
+  assert.strictEqual(r2Input.type, 'number', 'Week input must have type number');
+  assert.strictEqual(r2Input.value, '', 'Task 2 input must initially be empty');
+
+  // Simulate editing Task 2 to Week 27
+  r2Input.value = '27';
+  r2Input.dispatchEvent(new MockEvent('input'));
+
+  // Task 2 must be saved under its specific key
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Chemistry ATAR:id_sem2_er1'), '27', 'Task 2 must save to its specific key');
+  // Task 1's generic key must NOT be overwritten by Task 2
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Chemistry ATAR:Extended response 1'), '17', 'Task 1 generic key must remain 17');
+
+  // Test resolveTaskOrder in assessment-data.js
+  delete window.ConnectifyData;
+  eval(assessJs);
+
+  window.ConnectifyData.saveSubjectsCache([
+    { name: 'Chemistry ATAR', tasks: [task1, task2] }
+  ]);
+  window.ConnectifyData.loadSubjectsCache();
+
+  const collected = window.ConnectifyData.collect(true);
+  const chem = collected.find(s => s.name === 'Chemistry ATAR');
+  assert.ok(chem, 'Chemistry ATAR must be collected');
+  assert.strictEqual(chem.tasks.length, 2, 'Must contain both tasks without double counting or dropping');
+  assert.strictEqual(chem.tasks[0].id, 'id_sem1_er1', 'Task 1 order must be first');
+  assert.strictEqual(chem.tasks[1].id, 'id_sem2_er1', 'Task 2 order must be second');
+  // Task 2 week 27 -> (3 - 1) * 12 + 7 = 31
+  assert.strictEqual(chem.tasks[1].order, 31, 'Task 2 order must resolve to 31 (Term 3, Week 7)');
+
+  // Verify predictor-math resolveCustomDate distinguishes tasks
+  delete window.ConnectifyPredictorMath;
+  eval(predMathJs);
+  const resolvedT1 = window.ConnectifyPredictorMath.resolveCustomDate('Chemistry ATAR', task1);
+  const resolvedT2 = window.ConnectifyPredictorMath.resolveCustomDate('Chemistry ATAR', task2);
+  assert.strictEqual(resolvedT1, '17', 'Task 1 must resolve to 17');
+  assert.strictEqual(resolvedT2, '27', 'Task 2 must resolve to 27');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

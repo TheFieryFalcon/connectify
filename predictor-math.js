@@ -434,20 +434,40 @@
   }
 
   // --- DATE RESOLUTION & PROGRESS GRAPH SYNC ---
-  function resolveCustomDate(subjectName, taskName) {
-    if (!taskName) return null;
+  function resolveCustomDate(subjectName, taskOrName, taskId) {
+    if (!taskOrName) return null;
+    const taskName = typeof taskOrName === 'string' ? taskOrName : (taskOrName.name || '');
+    const actualTaskId = typeof taskOrName === 'object' && taskOrName ? (taskOrName.id || taskId) : taskId;
     const cleanSubj = cleanSubject(subjectName);
-    const candidates = [
-      `connectea:time_override:${subjectName}:${taskName}`,
-      `connectea:time_override:${cleanSubj}:${taskName}`,
-      `connectify:time_override:${subjectName}:${taskName}`,
-      `connectify:time_override:${cleanSubj}:${taskName}`
-    ];
-    for (const key of candidates) {
-      try {
-        const val = localStorage.getItem(key);
-        if (val !== null) return val.trim();
-      } catch {}
+
+    if (actualTaskId) {
+      const idCandidates = [
+        `connectea:time_override:${subjectName}:${actualTaskId}`,
+        `connectea:time_override:${cleanSubj}:${actualTaskId}`,
+        `connectify:time_override:${subjectName}:${actualTaskId}`,
+        `connectify:time_override:${cleanSubj}:${actualTaskId}`
+      ];
+      for (const key of idCandidates) {
+        try {
+          const val = localStorage.getItem(key);
+          if (val !== null) return val.trim();
+        } catch (e) {}
+      }
+    }
+
+    if (taskName) {
+      const candidates = [
+        `connectea:time_override:${subjectName}:${taskName}`,
+        `connectea:time_override:${cleanSubj}:${taskName}`,
+        `connectify:time_override:${subjectName}:${taskName}`,
+        `connectify:time_override:${cleanSubj}:${taskName}`
+      ];
+      for (const key of candidates) {
+        try {
+          const val = localStorage.getItem(key);
+          if (val !== null) return val.trim();
+        } catch (e) {}
+      }
     }
     try {
       const lowerTask = taskName.toLowerCase().trim();
@@ -460,14 +480,14 @@
           if (parts.length >= 4) {
             const s = parts[2].toLowerCase().trim();
             const t = parts.slice(3).join(':').toLowerCase().trim();
-            if ((!lowerSubj || s === lowerSubj || s === lowerClean) && t === lowerTask) {
+            if ((!lowerSubj || s === lowerSubj || s === lowerClean) && (t === lowerTask || (actualTaskId && t === String(actualTaskId).toLowerCase().trim()))) {
               const val = localStorage.getItem(k);
               if (val !== null) return val.trim();
             }
           }
         }
       }
-    } catch {}
+    } catch (e) {}
     return null;
   }
 
@@ -513,7 +533,7 @@
   function hasParsableDate(task, subjectName) {
     if (!task) return false;
     const sName = subjectName || task.subjectName;
-    const customTime = resolveCustomDate(sName, task.name);
+    const customTime = resolveCustomDate(sName, task);
     if (customTime !== null) {
       if (customTime === '') return false;
       const formatted = formatCustomWeek(customTime);
@@ -537,8 +557,8 @@
     const semester = Number(task.semester) || 1;
 
     let order = null;
-    if (subjectName && task.name) {
-      const customTime = resolveCustomDate(subjectName, task.name);
+    if (subjectName && (task.name || task.id)) {
+      const customTime = resolveCustomDate(subjectName, task);
       if (customTime !== null) {
         const formatted = formatCustomWeek(customTime);
         if (formatted && Number.isFinite(formatted.order)) {
@@ -976,7 +996,7 @@
           if (completedTasks.some(ct => cleanSubject(ct.name).toLowerCase() === normName)) continue;
 
           // Check if custom date is set in Progress Graph:
-          const customTime = resolveCustomDate(subj.name, t.name);
+          const customTime = resolveCustomDate(subj.name, t);
           if (customTime !== null) {
             if (customTime === '') {
               // Explicitly cleared or suppressed by user

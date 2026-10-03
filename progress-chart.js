@@ -234,8 +234,34 @@
       if (isHistory) {
         whenCell = point.name;
       } else {
-        const customKey = `connectea:time_override:${subjectName}:${point.name}`;
-        const savedTime = localStorage.getItem(customKey);
+        const taskId = point.id;
+        const taskName = point.name || '';
+
+        // Check if there are other tasks with the same name in this subject
+        const duplicateTasks = points.filter(
+          p => (p.name || '').toLowerCase().trim() === taskName.toLowerCase().trim()
+        );
+        const isDuplicateName = duplicateTasks.length > 1;
+        const isFirstOccurrence = !isDuplicateName || (duplicateTasks.length > 0 && duplicateTasks[0] === point);
+
+        // Build specific key using point.id (or sequence if id missing) for duplicate-named tasks
+        const disambiguator = taskId || (isDuplicateName && point.sequence !== undefined ? `seq_${point.sequence}` : null);
+        const specificKey = disambiguator ? `connectea:time_override:${subjectName}:${disambiguator}` : null;
+        const genericKey = `connectea:time_override:${subjectName}:${taskName}`;
+
+        // Retrieve saved custom date:
+        // Priority 1: Specific key (exact task instance)
+        // Priority 2: Generic key, BUT ONLY for non-duplicates or the first occurrence.
+        // This ensures subsequent tasks of the same name (like Row 9 & 10) never inherit the first task's date.
+        let savedTime = null;
+        if (specificKey) {
+          savedTime = localStorage.getItem(specificKey) ||
+                      localStorage.getItem(specificKey.replace('connectea:', 'connectify:'));
+        }
+        if (savedTime === null && isFirstOccurrence && genericKey) {
+          savedTime = localStorage.getItem(genericKey) ||
+                      localStorage.getItem(genericKey.replace('connectea:', 'connectify:'));
+        }
 
         const createInputField = (currentVal, showWarning = false) => {
           const wrapper = createElement('div');
@@ -264,8 +290,19 @@
 
           input.addEventListener('input', () => {
             const val = input.value.trim();
-            if (val) localStorage.setItem(customKey, val);
-            else localStorage.removeItem(customKey);
+            const targetKey = isDuplicateName && specificKey ? specificKey : (specificKey || genericKey);
+            if (val) {
+              localStorage.setItem(targetKey, val);
+            } else {
+              if (specificKey) {
+                localStorage.removeItem(specificKey);
+                localStorage.removeItem(specificKey.replace('connectea:', 'connectify:'));
+              }
+              if (isFirstOccurrence && genericKey) {
+                localStorage.removeItem(genericKey);
+                localStorage.removeItem(genericKey.replace('connectea:', 'connectify:'));
+              }
+            }
 
             clearTimeout(window._cxTimeRefresh);
             window._cxTimeRefresh = setTimeout(() => {
@@ -281,7 +318,14 @@
             clearBtn.style.padding = '0 4px';
             clearBtn.style.cursor = 'pointer';
             clearBtn.onclick = () => {
-              localStorage.removeItem(customKey);
+              if (specificKey) {
+                localStorage.removeItem(specificKey);
+                localStorage.removeItem(specificKey.replace('connectea:', 'connectify:'));
+              }
+              if (isFirstOccurrence && genericKey) {
+                localStorage.removeItem(genericKey);
+                localStorage.removeItem(genericKey.replace('connectea:', 'connectify:'));
+              }
               if (typeof onRefresh === 'function') onRefresh();
             };
             inputRow.append(clearBtn);

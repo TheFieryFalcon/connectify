@@ -54,7 +54,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectea:atar:2025:<account>:<year>` | `localStorage` | `atar-calculator.js` | ATAR score adjustments, top four selections, targets |
 | `connectea:preferences` | `localStorage` | `scaling-calibration.js` | Calibration table (`sem1_calibration:<courseId>`) |
 | `connectify:weakness_disabled_subjects` | `localStorage` | `weakness-radar.js` | Array of subjects excluded from Weakness Analyzer |
-| `connectea:time_override:<subject>:<task>` | `localStorage` | `progress-chart.js` | Manual school week overrides for assessments |
+| `connectea:time_override:<subject>:<task|taskId>` | `localStorage` | `progress-chart.js` | Manual school week overrides for assessments (disambiguated by task ID for duplicate names) |
 | `connectify:auto_expand` | `localStorage` | `category-settings.js` / `atar-features.js` | Boolean setting to auto-expand course outlines on load |
 | `connectify:stale_subjects` | `localStorage` | `assessment-data.js` / `new-grade.js` | Set of subjects whose collapsed grade/stats changed, awaiting targeted re-scrape upon expansion |
 | `connectify:subjects_cache:<student>` | `localStorage` | `assessment-data.js` | Persisted scraped subjects and tasks for instant collection without DOM rescrape |
