@@ -47,8 +47,9 @@ This document details user-facing visual features 1 through 10, covering direct 
 
 ### 4. Floating Tools Drawer & Sidebar
 - **Source Modules**: [`sidebar.js`](file:///Users/uwong/Downloads/2.1.14_0/sidebar.js), [`sidebar.css`](file:///Users/uwong/Downloads/2.1.14_0/sidebar.css)
-- **DOM Insertion**: Fixed to the right edge of viewport (`#connectify-sidebar-handle` and `#connectify-sidebar`).
-- **UI Appearance**: Floating handle expanding into a slide-out drawer containing canonical launcher buttons:
+- **DOM Insertion**: Fixed to viewport (`#connectify-sidebar-handle` and `#connectify-sidebar`).
+- **UI Appearance**: Compact 30px width handle with directional arrow icon (`❮` / `❯`) without text or excess whitespace. Smoothly centered vertically across the available visible height below the Connect navigation bar.
+- **Canonical Tools**:
   - **Target ATAR** (`#connectify-target-toggle`)
   - **Target Grade** (`#connectify-grade-toggle`)
   - **Predictor** (`#connectify-predictor-toggle`)
@@ -56,7 +57,11 @@ This document details user-facing visual features 1 through 10, covering direct 
   - **ATAR Estimate** (`#connectify-estimate-toggle`)
   - **Weakness Analyzer** (`#connectify-weakness-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
   - **Settings & Calibration** (`#connectify-categories-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
-- **Functionality**: Smoothly expands drawer from 310px to 900px (`.cx-tool-active`) with prominent `← Back to Menu` navigation header at top right, single-active-tool view policy, outside-click and Escape collapse, and event propagation isolation (`e.stopPropagation()`) preventing double-toggle desynchronization.
+- **Functionality**:
+  - **Left Edge Push Expand**: Moving mouse cursor to the left edge of the screen (`clientX <= 12`) or hovering over the handle automatically expands the sidebar drawer.
+  - **Conditional Hover Collapse**: Moving mouse outside the sidebar collapses it after a 120ms debounce when no tool is active. When a tool panel is active (`.cx-tool-active`), hover-out collapse is suppressed and clicking outside the sidebar is required to collapse it.
+  - **Dynamic Vertical Centering**: Dynamically calculates top navigation bar bottom offset (`.cvr-c-primary-navigation`, `.cvr-c-header`) on scroll and resize, keeping the handle centered in the active viewport below the header.
+  - **Navigation & Layout**: Expands drawer from 310px to 900px (`.cx-tool-active`) with prominent `← Back to Menu` navigation button at the top right of the header. Outside-click and Escape key handlers collapse the drawer safely.
 
 ### 5. Outline Accordion Expand / Collapse Controls
 - **Source Modules**: [`atar-features.js`](file:///Users/uwong/Downloads/2.1.14_0/atar-features.js), [`assessment-data.js`](file:///Users/uwong/Downloads/2.1.14_0/assessment-data.js)

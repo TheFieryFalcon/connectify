@@ -50,6 +50,31 @@
       handle.setAttribute('aria-expanded', 'false');
     }
 
+    function updateHandlePosition() {
+      try {
+        const navCandidates = document.querySelectorAll('.cvr-c-primary-navigation, .cvr-c-header, .cvr-c-branding, header, nav');
+        let nav = null;
+        for (const el of navCandidates) {
+          if (!sidebar.contains(el) && el.id !== 'connectify-sidebar-handle') {
+            nav = el;
+            break;
+          }
+        }
+        let topBarBottom = 0;
+        if (nav && typeof nav.getBoundingClientRect === 'function') {
+          const rect = nav.getBoundingClientRect();
+          if (rect.bottom > 0 && rect.top < (window.innerHeight || 800)) {
+            topBarBottom = Math.max(0, rect.bottom);
+          }
+        }
+        const vh = window.innerHeight || document.documentElement?.clientHeight || 800;
+        const availableHeight = Math.max(0, vh - topBarBottom);
+        const centerY = Math.round(topBarBottom + availableHeight / 2);
+        handle.style.top = `${centerY}px`;
+        handle.style.transform = 'translateY(-50%)';
+      } catch {}
+    }
+
     function updateHandleState(isOpen) {
       const icon = createElement('span', isOpen ? '❮' : '❯');
       icon.className = 'cx-handle-arrow';
@@ -60,22 +85,26 @@
         handle.append(icon);
       }
 
-      if (!isOpen) {
-        const label = createElement('span');
-        label.className = 'cx-handle-label';
-        label.append(
-          createElement('strong', 'Connectify Tools'),
-          createElement('small', 'ATAR · Grades · Progress')
-        );
-        handle.append(label);
-      }
-
       handle.title = isOpen ? 'Close Connectify tools' : 'Open Connectify tools';
       handle.setAttribute('aria-label', handle.title);
       handle.setAttribute('aria-expanded', String(isOpen));
+      updateHandlePosition();
     }
 
+    handle.updatePosition = updateHandlePosition;
+    window._connectifyUpdateHandlePosition = updateHandlePosition;
     updateHandleState(false);
+    if (window._connectifyScrollAttached) {
+      window.removeEventListener('scroll', window._connectifyScrollAttached, true);
+    }
+    window._connectifyScrollAttached = updateHandlePosition;
+    window.addEventListener('scroll', updateHandlePosition, { passive: true, capture: true });
+
+    if (window._connectifyResizeAttached) {
+      window.removeEventListener('resize', window._connectifyResizeAttached);
+    }
+    window._connectifyResizeAttached = updateHandlePosition;
+    window.addEventListener('resize', updateHandlePosition, { passive: true });
 
     // Header and navigation
     let header = sidebar.querySelector('header');
@@ -299,6 +328,10 @@
     }
 
     function closeSidebar() {
+      if (hoverCollapseTimeout) {
+        clearTimeout(hoverCollapseTimeout);
+        hoverCollapseTimeout = null;
+      }
       closeAllTools();
       sidebar.hidden = true;
       updateHandleState(false);
@@ -311,6 +344,10 @@
         closeSidebar();
       }
     };
+
+    handle.addEventListener('mouseenter', () => {
+      if (sidebar.hidden) openSidebar();
+    });
 
     if (homeBtn) {
       homeBtn.onclick = closeAllTools;
@@ -333,6 +370,74 @@
     };
     window._connectifyOutsideClickAttached = handleOutsideClick;
     document.addEventListener('click', handleOutsideClick);
+
+    // Edge push to expand & hover collapse when no panel is active
+    let hoverCollapseTimeout = null;
+
+    if (window._connectifyMouseMoveAttached) {
+      document.removeEventListener('mousemove', window._connectifyMouseMoveAttached);
+    }
+    const handleMouseMove = e => {
+      // 1. Moving mouse to the left edge of the screen expands the sidebar
+      if (sidebar.hidden) {
+        if (e.clientX <= 12 || handle.contains(e.target)) {
+          if (hoverCollapseTimeout) {
+            clearTimeout(hoverCollapseTimeout);
+            hoverCollapseTimeout = null;
+          }
+          openSidebar();
+        }
+        return;
+      }
+
+      // 2. If sidebar is open and NO panel is active:
+      // Collapse when mouse moves outside of the sidebar and handle
+      if (!sidebar.classList.contains('cx-tool-active')) {
+        const sidebarRect = typeof sidebar.getBoundingClientRect === 'function' ? sidebar.getBoundingClientRect() : null;
+        const handleRect = typeof handle.getBoundingClientRect === 'function' ? handle.getBoundingClientRect() : null;
+
+        const inSidebar = sidebar.contains(e.target) ||
+          (sidebarRect && e.clientX >= sidebarRect.left && e.clientX <= sidebarRect.right && e.clientY >= sidebarRect.top && e.clientY <= sidebarRect.bottom);
+        const inHandle = handle.contains(e.target) ||
+          (handleRect && e.clientX >= handleRect.left && e.clientX <= handleRect.right && e.clientY >= handleRect.top && e.clientY <= handleRect.bottom);
+
+        if (inSidebar || inHandle) {
+          if (hoverCollapseTimeout) {
+            clearTimeout(hoverCollapseTimeout);
+            hoverCollapseTimeout = null;
+          }
+        } else {
+          // Mouse is outside sidebar and handle, and no tool is active
+          if (!hoverCollapseTimeout) {
+            hoverCollapseTimeout = setTimeout(() => {
+              hoverCollapseTimeout = null;
+              if (!sidebar.hidden && !sidebar.classList.contains('cx-tool-active')) {
+                closeSidebar();
+              }
+            }, 120);
+          }
+        }
+      } else {
+        // A panel is active: hover-out should NOT collapse
+        if (hoverCollapseTimeout) {
+          clearTimeout(hoverCollapseTimeout);
+          hoverCollapseTimeout = null;
+        }
+      }
+    };
+    window._connectifyMouseMoveAttached = handleMouseMove;
+    document.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    if (window._connectifyMouseLeaveAttached) {
+      document.removeEventListener('mouseleave', window._connectifyMouseLeaveAttached);
+    }
+    const handleMouseLeaveDoc = () => {
+      if (!sidebar.hidden && !sidebar.classList.contains('cx-tool-active')) {
+        closeSidebar();
+      }
+    };
+    window._connectifyMouseLeaveAttached = handleMouseLeaveDoc;
+    document.addEventListener('mouseleave', handleMouseLeaveDoc);
 
     // Central delegated tool launcher listener
     const handleToolLaunchClick = e => {

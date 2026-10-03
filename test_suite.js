@@ -300,6 +300,7 @@ class MockElement {
 
 class MockEvent {
   constructor(type, init = {}) {
+    Object.assign(this, init);
     this.type = type;
     this.key = init.key || '';
     this.target = init.target || null;
@@ -3639,6 +3640,134 @@ runTest('Test 126: Clicking outside the sidebar collapses the sidebar, Close but
   homeBtn.click();
   assert.strictEqual(sidebar.classList.contains('cx-tool-active'), false, 'Back to menu must exit active tool mode');
   assert.strictEqual(sidebar.hidden, false, 'Back to menu must keep sidebar open');
+});
+
+runTest('Test 127: Sleek sidebar handle, dynamic vertical centering with top bar scroll, left edge expand, and conditional hover collapse', () => {
+  const currentSidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+  const currentSidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
+
+  // 1. Verify CSS styles for sleek handle
+  assert.ok(currentSidebarCss.includes('width:30px'), 'sidebar.css must set sleek width: 30px');
+  assert.ok(currentSidebarCss.includes('height:66px'), 'sidebar.css must set sleek height: 66px');
+  assert.ok(currentSidebarCss.includes('top:50%'), 'sidebar.css must set default top: 50%');
+  assert.ok(currentSidebarCss.includes('transform:translateY(-50%)'), 'sidebar.css must set transform: translateY(-50%)');
+  assert.ok(!currentSidebarCss.includes('.cx-handle-label'), 'sidebar.css must remove .cx-handle-label');
+
+  // 2. Verify JS signatures
+  assert.ok(!currentSidebarJs.includes('cx-handle-label'), 'sidebar.js must not reference .cx-handle-label');
+  assert.ok(!currentSidebarJs.includes('Connectify Tools'), 'sidebar.js must not add Connectify Tools text to handle');
+  assert.ok(!currentSidebarJs.includes('ATAR · Grades · Progress'), 'sidebar.js must not add subtitle text to handle');
+  assert.ok(currentSidebarJs.includes('updateHandlePosition'), 'sidebar.js must define updateHandlePosition');
+  assert.ok(currentSidebarJs.includes('handleMouseMove'), 'sidebar.js must define handleMouseMove');
+  assert.ok(currentSidebarJs.includes('handleMouseLeaveDoc'), 'sidebar.js must define handleMouseLeaveDoc');
+
+  // 3. Functional tests: evaluate sidebar.js
+  eval(currentSidebarJs);
+
+  const sidebar = document.getElementById('connectify-sidebar');
+  const handle = document.getElementById('connectify-sidebar-handle');
+  assert.ok(sidebar, 'Sidebar element must exist');
+  assert.ok(handle, 'Handle element must exist');
+
+  // Verify handle has no text label children
+  const handleLabel = handle.querySelector('.cx-handle-label');
+  assert.strictEqual(handleLabel, null, 'Handle must not contain .cx-handle-label');
+  const arrow = handle.querySelector('.cx-handle-arrow');
+  assert.ok(arrow, 'Handle must contain .cx-handle-arrow');
+
+  // 4. Test dynamic vertical centering with mock top navigation bar
+  const navBar = document.createElement('header');
+  navBar.className = 'cvr-c-primary-navigation';
+  navBar.getBoundingClientRect = () => ({ top: 0, bottom: 60, height: 60 });
+  domBody.appendChild(navBar);
+
+  handle.updatePosition();
+  // vh defaults to 800 in test environment
+  // topBarBottom = 60; availableHeight = 800 - 60 = 740; centerY = 60 + 740/2 = 430
+  assert.strictEqual(handle.style.top, '430px', 'Handle top must center within available height below nav bar');
+  assert.strictEqual(handle.style.transform, 'translateY(-50%)', 'Handle transform must be translateY(-50%)');
+
+  // Scrolled past: navBar is off-screen
+  navBar.getBoundingClientRect = () => ({ top: -80, bottom: -20, height: 60 });
+  handle.updatePosition();
+  // topBarBottom = 0; centerY = 800/2 = 400
+  assert.strictEqual(handle.style.top, '400px', 'Handle top must center within full viewport when nav bar is scrolled away');
+
+  // Clean up mock nav bar
+  navBar.remove();
+
+  // 5. Test edge push to expand: moving mouse to left edge (clientX <= 12)
+  sidebar.hidden = true;
+  handle.setAttribute('aria-expanded', 'false');
+
+  const edgeMoveEvent = new MockEvent('mousemove', { clientX: 8, clientY: 300, bubbles: true });
+  document.dispatchEvent(edgeMoveEvent);
+
+  assert.strictEqual(sidebar.hidden, false, 'Moving mouse to clientX <= 12 must expand sidebar');
+  assert.strictEqual(handle.getAttribute('aria-expanded'), 'true', 'Handle aria-expanded must be true when expanded');
+
+  // 6. Test conditional hover collapse with no active panel
+  const origSetTimeout = global.setTimeout;
+  const origClearTimeout = global.clearTimeout;
+  const timerCallbacks = [];
+
+  global.setTimeout = (cb, ms) => {
+    timerCallbacks.push(cb);
+    return timerCallbacks.length;
+  };
+  global.clearTimeout = (id) => {
+    if (typeof id === 'number' && timerCallbacks[id - 1]) {
+      timerCallbacks[id - 1] = () => {};
+    }
+  };
+
+  try {
+    // Mouse moving inside sidebar should NOT collapse
+    sidebar.classList.remove('cx-tool-active');
+    const insideMoveEvent = new MockEvent('mousemove', { target: sidebar, clientX: 100, clientY: 200, bubbles: true });
+    document.dispatchEvent(insideMoveEvent);
+    assert.strictEqual(sidebar.hidden, false, 'Mouse inside sidebar must keep sidebar open');
+
+    // Mouse moving outside sidebar when NO panel is active schedules collapse
+    const outsideMoveEvent = new MockEvent('mousemove', { target: domBody, clientX: 600, clientY: 400, bubbles: true });
+    document.dispatchEvent(outsideMoveEvent);
+    assert.ok(timerCallbacks.length > 0, 'Moving mouse outside sidebar must schedule hover collapse');
+
+    // Run scheduled collapse timer
+    timerCallbacks.forEach(cb => cb());
+    assert.strictEqual(sidebar.hidden, true, 'Hover collapse timer must collapse sidebar when no panel is active');
+    assert.strictEqual(handle.getAttribute('aria-expanded'), 'false', 'Handle aria-expanded must be false after hover collapse');
+
+    // 7. Test active panel prevents hover collapse
+    handle.click();
+    assert.strictEqual(sidebar.hidden, false, 'Sidebar reopened');
+    sidebar.classList.add('cx-tool-active');
+
+    // Clear callbacks and trigger outside mousemove
+    timerCallbacks.length = 0;
+    const activeOutsideMove = new MockEvent('mousemove', { target: domBody, clientX: 950, clientY: 400, bubbles: true });
+    document.dispatchEvent(activeOutsideMove);
+
+    // Active tool panel must NOT schedule collapse on hover-out
+    assert.strictEqual(timerCallbacks.length, 0, 'Active tool panel must not schedule hover collapse');
+    assert.strictEqual(sidebar.hidden, false, 'Sidebar must remain open when panel is active even when mouse is outside');
+
+    // Mouseleave on document should also NOT collapse when panel is active
+    document.dispatchEvent(new MockEvent('mouseleave', { bubbles: true }));
+    assert.strictEqual(sidebar.hidden, false, 'Mouseleave document must not collapse sidebar when panel is active');
+
+    // 8. Clicking outside sidebar when panel is active DOES collapse it
+    const clickOutsideEl = document.createElement('div');
+    domBody.appendChild(clickOutsideEl);
+    clickOutsideEl.dispatchEvent(new MockEvent('click', { target: clickOutsideEl, bubbles: true }));
+
+    assert.strictEqual(sidebar.hidden, true, 'Clicking outside sidebar when panel is active must collapse sidebar');
+    assert.strictEqual(handle.getAttribute('aria-expanded'), 'false', 'Handle aria-expanded must be false');
+    clickOutsideEl.remove();
+  } finally {
+    global.setTimeout = origSetTimeout;
+    global.clearTimeout = origClearTimeout;
+  }
 });
 
 console.log('\n================================================================');
