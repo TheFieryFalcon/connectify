@@ -80,8 +80,8 @@ This document details user-facing visual features 1 through 10, covering direct 
 ### 8. Assessment Cohort Statistics & Rank Panels
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`cohort-stats.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-stats.js)
 - **DOM Insertion**: Inside assessment rows (`.cvr-c-task__details`) alongside task labels.
-- **UI Appearance**: Light blue card (`.connectea-panel`) showing distribution quantiles and student percentile rank metrics. Wraps flexibly (`.connectea-row-wrapper`) and scales to 100% display width.
-- **Functionality**: Extracts Highcharts quantiles, computes weighted mean, standard deviation, PCHIP cohort percentile, $z$-score, and school rank. Automatically hides on incomplete/unmarked tasks. Scales responsively without overflow on drawer expansion.
+- **UI Appearance**: Light blue card (`.connectea-panel`) showing distribution quantiles and student percentile rank metrics. Preserves constant 1920x1080 display width scaling in a single horizontal row (`.connectea-row-wrapper`) alongside type dropdown and outcome bar.
+- **Functionality**: Extracts Highcharts quantiles, computes weighted mean, standard deviation, PCHIP cohort percentile, $z$-score, and school rank. Automatically hides on incomplete/unmarked tasks. Maintains constant horizontal alignment without wrapping.
 
 ### 9. Assessment Type Dropdowns & Custom Categories
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`task-types.js`](file:///Users/uwong/Downloads/2.1.14_0/task-types.js)

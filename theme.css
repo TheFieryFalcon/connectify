@@ -3226,14 +3226,7 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 }
 
 .cvr-c-task__details {
-  flex: 1 1 auto !important;
   min-width: 0 !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.cvr-c-task__chart {
-  max-width: 100% !important;
   box-sizing: border-box !important;
 }
 
@@ -3245,9 +3238,9 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 }
 
 .connectea-type-container,
-.connectea-outcome-bar,
-.connectea-subject-controls {
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+.connectea-outcome-bar {
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
 }
+
 

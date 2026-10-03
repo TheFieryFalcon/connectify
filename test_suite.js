@@ -3272,12 +3272,14 @@ runTest('Test 122: Back to top button styling parity, expandAll multi-card dedup
   assert.ok(sidebarJs.includes("document.addEventListener('click', handleToolLaunchClick)"), 'sidebar.js must listen for tool launches at document level');
   assert.ok(sidebarJs.includes('ensureProgressPanel'), 'sidebar.js must instantiate progress panel alongside other tools');
 
-  // 5. Subject and task panel display-width scaling
-  assert.ok(cohortStatsJs.includes('flex-wrap: wrap !important;'), 'cohort-stats.js must use flex-wrap: wrap on .connectea-row-wrapper');
-  assert.ok(cohortStatsJs.includes('width: 100% !important;'), 'cohort-stats.js must make .connectea-row-wrapper 100% width');
-  assert.ok(sidebarCss.includes('.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:wrap!important'), 'sidebar.css must wrap .connectea-row-wrapper');
+  // 5. Constant 1920x1080 display-width scaling and single-line stats panel layout
+  assert.ok(cohortStatsJs.includes('flex-wrap: nowrap !important;'), 'cohort-stats.js must use flex-wrap: nowrap on .connectea-row-wrapper');
+  assert.ok(cohortStatsJs.includes('max-width: fit-content !important;'), 'cohort-stats.js must set max-width: fit-content on .connectea-panel');
+  assert.ok(sidebarCss.includes('.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:nowrap!important'), 'sidebar.css must use nowrap on .connectea-row-wrapper');
+  assert.ok(sidebarCss.includes('.connectea-row-wrapper>.connectea-panel{flex:0 0 auto!important;width:auto!important;max-width:fit-content!important'), 'sidebar.css must set max-width: fit-content on .connectea-panel');
   assert.ok(sidebarCss.includes(':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)'), 'sidebar.css must scale subject cards to 100% width');
   assert.ok(themeCss.includes(':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)'), 'theme.css must scale subject cards to 100% width');
+  assert.ok(!sidebarCss.includes('.cvr-c-task__details{flex:1 1 auto!important'), 'sidebar.css must not force flex: 1 1 auto on .cvr-c-task__details');
 });
 
 console.log('\n================================================================');

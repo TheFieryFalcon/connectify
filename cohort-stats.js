@@ -36,28 +36,24 @@
       display: flex !important;
       align-items: center !important;
       gap: 14px !important;
-      flex-wrap: wrap !important;
+      flex-wrap: nowrap !important;
       margin: 4px 0 !important;
-      width: 100% !important;
       max-width: 100% !important;
-      box-sizing: border-box !important;
       clear: both !important;
       overflow: visible !important;
     }
     .connectea-row-wrapper > .connectea-panel {
-      flex: 1 1 auto !important;
-      min-width: 0 !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      box-sizing: border-box !important;
+      flex: 0 0 auto !important;
+      width: auto !important;
+      max-width: fit-content !important;
       margin: 0 !important;
     }
     .connectea-panel {
       box-sizing: border-box !important;
       display: block !important;
       min-width: 0 !important;
-      max-width: 100% !important;
-      width: 100% !important;
+      max-width: fit-content !important;
+      width: auto !important;
       clear: both !important;
       margin: 8px 0 !important;
       padding: 10px 14px !important;
