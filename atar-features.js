@@ -250,6 +250,9 @@
     const startupPollInterval = setInterval(() => {
       startupPollTicks++;
       checkStartupAutoExpand();
+      if (!document.getElementById('cx-expand-btn') && window.ConnectifyData) {
+        syncFeatures();
+      }
       if (hasAutoExpanded || startupPollTicks >= 60) {
         clearInterval(startupPollInterval);
       }
@@ -271,6 +274,9 @@
           checkStartupAutoExpand();
         }
         debouncedSyncBackToTop();
+        if (!document.getElementById('cx-expand-btn') && window.ConnectifyData) {
+          syncFeatures();
+        }
       }).observe(document.body, { childList: true, subtree: true });
     }
 

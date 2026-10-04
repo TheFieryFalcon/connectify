@@ -37,5 +37,12 @@ Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, scho
 ### ⚡ Seamless SSO Auto-Login
 - **Instant Authentication**: Automatically detects when you are redirected to the Department of Education Single Sign-On portal, reads your natively saved credentials, checks the terms box, and submits the login form in a fraction of a millisecond. It seamlessly bypasses manual logouts.
 
+### 🚀 What's New in Version 3.2.0
+- **Floating Tools Drawer & Native Sidebar Anchoring**: All analytical tools (ATAR Predictor, Target ATAR, Target Grade, Weakness Analyzer, Year in Progress, and Settings) are organized into a retractable drawer anchored to Connect's navigation bar, featuring left-edge hover expand and click-outside dismissal.
+- **Outline Expand All & Collapse All Controls**: Dedicated floating controls to expand or collapse all assessment outlines with non-blocking staggered animations and live progress feedback, accompanied by a quick "Back to top" navigation button.
+- **Responsive Display Width Scaling**: Intelligent scaling maintains assessment statistics, type selectors, and outcome bars neatly on a single horizontal row across desktop monitors and tablet displays (down to 820px width).
+- **Cumulative Annual Progress & Categorization**: Compound progress bars now encapsulate cumulative tasks across both Semester 1 and Semester 2 with custom assessment category overrides.
+- **Enhanced Dark Theme Coverage**: Zero-flicker dark mode integrated directly into Connect's top navigation with comprehensive styling across cards, marksbooks, and dialogs.
+
 ---
 *For legacy release notes prior to 3.0.0, see [2.0.0_changelog.md](2.0.0_changelog.md).*

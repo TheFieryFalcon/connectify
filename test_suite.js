@@ -4494,6 +4494,66 @@ runTest('Test 131: Sidebar handle excludes primary menu and detects fixed/sticky
   }
 });
 
+runTest('Test 132: expandAll unblocked click dispatch, capture-phase stability, and section-first deduplication', () => {
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const atarFeatJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-features.js'), 'utf8');
+
+  // 1. Verify absence of stopBubble / capture phase click cancellation
+  assert.ok(!assessJs.includes('stopBubble'), 'assessment-data.js must not register stopBubble listener that intercepts clicks');
+  assert.ok(!assessJs.includes('addEventListener(\x27click\x27, stopBubble'), 'assessment-data.js must not attach capture phase listeners during expandAll');
+
+  // 2. Verify section-first deduplication order
+  const dedupMatch = assessJs.match(/card\s*=\s*typeof h\.closest === ['"]function['"]\s*\?\s*\(([\s\S]*?)\)\s*:\s*null;/);
+  assert.ok(dedupMatch, 'assessment-data.js must contain card deduplication logic');
+  const dedupExpr = dedupMatch[1];
+  assert.ok(dedupExpr.indexOf('.eds-c-accordion__section') < dedupExpr.indexOf('.eds-c-tile'),
+    'expandAll must prioritize accordion sections over outer tiles for multi-section course cards');
+
+  // 3. Verify atar-features.js reactive check for cx-expand-btn
+  assert.ok(atarFeatJs.includes('!document.getElementById(\x27cx-expand-btn\x27) && window.ConnectifyData'),
+    'atar-features.js must check and sync cx-expand-btn if missing');
+
+  // 4. Functional test of expandAll dispatching click on accordion sections
+  eval(assessJs);
+  const container = document.createElement('div');
+  container.id = 'test-expand-container-132';
+
+  const clickedHeadings = [];
+  for (let i = 1; i <= 2; i++) {
+    const card = document.createElement('div');
+    card.className = 'eds-c-tile';
+    const section = document.createElement('div');
+    section.className = 'eds-c-accordion__section';
+    const heading = document.createElement('div');
+    heading.className = 'eds-c-accordion__section-heading';
+    heading.textContent = 'Show details';
+    const btn = document.createElement('button');
+    btn.className = 'v-button';
+    btn.textContent = 'Show details';
+    heading.appendChild(btn);
+    section.appendChild(heading);
+    card.appendChild(section);
+    container.appendChild(card);
+  }
+  document.body.appendChild(container);
+
+  const origClick = HTMLElement.prototype.click;
+  HTMLElement.prototype.click = function() {
+    clickedHeadings.push(this);
+  };
+
+  try {
+    window.ConnectifyIsBulkExpanding = false;
+    window.ConnectifyData.expandAll(true);
+    assert.strictEqual(clickedHeadings.length, 1, 'First section clicked immediately');
+  } finally {
+    HTMLElement.prototype.click = origClick;
+    container.remove();
+    window.ConnectifyIsBulkExpanding = false;
+    window.ConnectifyIsAccordionAnimating = false;
+  }
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');
