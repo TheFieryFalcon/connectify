@@ -167,7 +167,9 @@
           }
         }
         for (const k of toRemove) localStorage.removeItem(k);
-        localStorage.setItem(CACHE_KEYS.PREDICTOR, CACHE_VERSIONS.PREDICTOR);
+        // Do NOT stamp as current here — only populateChronologicalPredictions
+        // should set the stamp after actually writing predictions.
+        localStorage.removeItem(CACHE_KEYS.PREDICTOR);
       } catch (e) {
         console.warn('ConnectifyCache: failed to clear predictor cache', e);
       }
@@ -1037,12 +1039,13 @@
             if (expand && clickedAny) {
               updateProgress(90, 'Caching predictions... 90%');
               setTimeout(() => {
-                let all = null;
                 try {
-                  all = collect(true);
                   const hasValidCache = Boolean(window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.());
-                  if (!hasValidCache && window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
-                    window.ConnectifyPredictorMath.populateChronologicalPredictions(all, true);
+                  if (!hasValidCache) {
+                    const all = collect(true);
+                    if (window.ConnectifyPredictorMath?.populateChronologicalPredictions) {
+                      window.ConnectifyPredictorMath.populateChronologicalPredictions(all, true);
+                    }
                   }
                 } catch (e) {
                   console.warn('Prediction pre-cache error:', e);
@@ -1070,10 +1073,15 @@
                       if (window.ConnectifyDataSyncCharts) {
                         window.ConnectifyDataSyncCharts();
                       }
-                      const staleSet = getStaleSubjects();
-                      if (staleSet.size > 0) {
-                        collect(true, true);
-                      }
+                      // Defer stale-subjects re-scrape off the critical path
+                      setTimeout(() => {
+                        try {
+                          const staleSet = getStaleSubjects();
+                          if (staleSet.size > 0) {
+                            collect(true, true);
+                          }
+                        } catch (e) {}
+                      }, 200);
                     } catch (e) {}
 
                     const completeFinalize = () => {

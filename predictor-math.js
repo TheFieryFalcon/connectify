@@ -785,7 +785,8 @@
       if (cached) return cached;
     }
 
-    const rawSubjects = allSubjects || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+    // Use allSubjects if provided; avoid inline collect(true) to prevent quadratic DOM scrapes
+    const rawSubjects = allSubjects || [];
 
     if (!isPredictionCacheCurrent()) {
       populateChronologicalPredictions(rawSubjects, true);
