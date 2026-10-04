@@ -20,5 +20,18 @@
 - Two options, either have it toggled on for all stats panels or just for the subject summary ones
 - (MAYBE): Add icons to the sidebar? (everyone reading this, please let me know your thoughts on that through email)
 - Add "Max Possible Average" somewhere in the subject accordion
+- Add predictors to uncompleted tasks
 
+### Goals Update (Phase 1)
+- Centralize the Target ATAR and Target Grade menus to a Goal Manager menu
+- Use predictions to display how difficult the target is to reach with words depending on variance (e.g. medium difficulty high variance "Goal is Possible", medium difficulty low variance "Goal is Doable")
+- Add "Save as Goal" button
+- Add third window to view goal progress
 
+### 3.3.0 - Goals Update (Phase 2)
+- Add desaturated three-segment bar next to the four-segment bar displaying how close you are to your goal
+- Empty: Goal is impossible
+- Red: Far from goal (needs to get above High prediction for all following tasks to reach goal)
+- Yellow: Medium distance to goal (need to get a fair amount above Medium prediction for all following tasks to reach goal)
+- Green: Close to goal (need to get above Medium prediction for all following tasks to reach goal)
+- Full golden bar: Reached goal (amount exceeding is how "golden" the color is)
