@@ -1,4 +1,4 @@
-# Connectify 3.2.0 - Making Study Rewarding with Data Visualization
+# Connectify 3.2.1 - Making Study Rewarding with Data Visualization
 
 ### Thanks to Yanxi Li, Arya Byndoor, Hiruja Basnayaka, Lodinu Kalugalge, Oscar Ingram, Gemini 3.8 Flash, GPT-5.5, and Amrut Deshpande for making this extension possible. Thank you all who crowdfunded our launch to the Chrome Web Store.
 
