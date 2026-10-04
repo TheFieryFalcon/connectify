@@ -38,11 +38,11 @@ Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, scho
 - **Instant Authentication**: Automatically detects when you are redirected to the Department of Education Single Sign-On portal, reads your natively saved credentials, checks the terms box, and submits the login form in a fraction of a millisecond. It seamlessly bypasses manual logouts.
 
 ### 🚀 What's New in Version 3.2.0
-- **Floating Tools Drawer & Native Sidebar Anchoring**: All analytical tools (ATAR Predictor, Target ATAR, Target Grade, Weakness Analyzer, Year in Progress, and Settings) are organized into a retractable drawer anchored to Connect's navigation bar, featuring left-edge hover expand and click-outside dismissal.
-- **Outline Expand All & Collapse All Controls**: Dedicated floating controls to expand or collapse all assessment outlines with non-blocking staggered animations and live progress feedback, accompanied by a quick "Back to top" navigation button.
-- **Responsive Display Width Scaling**: Intelligent scaling maintains assessment statistics, type selectors, and outcome bars neatly on a single horizontal row across desktop monitors and tablet displays (down to 820px width).
-- **Cumulative Annual Progress & Categorization**: Compound progress bars now encapsulate cumulative tasks across both Semester 1 and Semester 2 with custom assessment category overrides.
-- **Enhanced Dark Theme Coverage**: Zero-flicker dark mode integrated directly into Connect's top navigation with comprehensive styling across cards, marksbooks, and dialogs.
+- **Four-Segment Outcome Bar**: Visualizes where your score lands relative to your cohort's distribution across 4 distinct quantile segments (Min, 25th, Median, 75th, and Max) directly alongside each assessment.
+- **Grade Prediction (Low, Mid & High Scenarios)**: Realistically forecasts your upcoming assessment scores with calibrated Low, Mid, and High scenario projections based on your past performance and subject volatility.
+- **Complete Dark Theme Overhaul**: Full site-wide dark mode with crisp contrast across every Connect page—course cards, tables, submission marksbooks, and dialogs—toggled directly from the top header bar.
+- **Retractable Tools Drawer**: Fast access to all your analytics (ATAR Predictor, Target Grade, Weakness Analyzer, Target ATAR, and Year in Progress) via a smooth sliding drawer anchored to Connect's sidebar.
+- **Assessment Outline Controls**: One-click floating Expand All and Collapse All buttons with live progress feedback, plus a smooth "Back to top" shortcut.
 
 ---
 *For legacy release notes prior to 3.0.0, see [2.0.0_changelog.md](2.0.0_changelog.md).*
