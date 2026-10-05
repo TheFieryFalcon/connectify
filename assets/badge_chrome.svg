@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="204" height="64" viewBox="0 0 204 64" role="img" aria-label="Available on Chrome Web Store">
+<svg xmlns="http://www.w3.org/2000/svg" width="236" height="64" viewBox="0 0 236 64" role="img" aria-label="Available on Chrome Web Store">
   <defs>
     <linearGradient id="cws-border" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ea4335"/>
@@ -13,7 +13,7 @@
     <clipPath id="clipPath26" clipPathUnits="userSpaceOnUse"><path d="M 0,792 H 612 V 0 H 0 Z"/></clipPath>
     <clipPath id="clipPath44" clipPathUnits="userSpaceOnUse"><path d="M 143.461,245.334 H 468.539 V 420.666 H 143.461 Z"/></clipPath>
   </defs>
-  <rect x="1" y="1" width="202" height="62" rx="10" ry="10" fill="url(#cws-bg)" stroke="url(#cws-border)" stroke-width="1.8"/>
+  <rect x="1" y="1" width="234" height="62" rx="10" ry="10" fill="url(#cws-bg)" stroke="url(#cws-border)" stroke-width="1.8"/>
   <g transform="translate(13, 10) scale(0.11)">
     <g transform="matrix(1.3333333,0,0,-1.3333333,-191.2812,729.11065)">
       <g clip-path="url(#clipPath26)">
