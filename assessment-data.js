@@ -936,7 +936,8 @@
    * and pre-caches chronological predictions across all tasks.
    */
   function expandAll(expand = true) {
-    if (isBulkExpanding) return;
+    if (isBulkExpanding && window.ConnectifyIsBulkExpanding) return;
+    isBulkExpanding = Boolean(window.ConnectifyIsBulkExpanding);
     const pattern = expand ? /show details/i : /hide details/i;
     const rawHeadings = Array.from(
       document.querySelectorAll(
@@ -960,6 +961,36 @@
     if (headings.length === 0) return;
 
     const initialScrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement?.scrollTop || document.body?.scrollTop || 0);
+
+    if (!expand) {
+      isBulkExpanding = true;
+      window.ConnectifyIsBulkExpanding = true;
+      window.ConnectifyIsAccordionAnimating = true;
+
+      for (const heading of headings) {
+        if (pattern.test(heading.textContent)) {
+          const btn = (typeof heading.querySelector === 'function' ? heading.querySelector('button, .v-button, [role="button"]') : null) ||
+            (typeof heading.closest === 'function' ? heading.closest('button, [role="button"]') : null) ||
+            (typeof heading.matches === 'function' && heading.matches('button, [role="button"]') ? heading : null);
+          if (btn) {
+            btn.click();
+          } else {
+            heading.click();
+          }
+        }
+      }
+
+      if (typeof window.scrollTo === 'function') {
+        window.scrollTo(0, initialScrollY);
+      }
+
+      isBulkExpanding = false;
+      window.ConnectifyIsBulkExpanding = false;
+      setTimeout(() => {
+        window.ConnectifyIsAccordionAnimating = false;
+      }, 450);
+      return;
+    }
 
     isBulkExpanding = true;
     window.ConnectifyIsBulkExpanding = true;
@@ -1267,6 +1298,7 @@
     orderHint,
     correctedCaption,
     expandAll,
+    collapseAll: () => expandAll(false),
     scrapeSubjectTasks,
     parseCardSubjectTasks,
     hasCachedSubjects,

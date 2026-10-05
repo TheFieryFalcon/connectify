@@ -4554,6 +4554,121 @@ runTest('Test 132: expandAll unblocked click dispatch, capture-phase stability, 
   }
 });
 
+runTest('Test 133: Instant collapseAll execution without serialization delays, simultaneous click dispatch, and animation guard', () => {
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+
+  // 1. Verify fast path for !expand exists in assessment-data.js
+  assert.ok(assessJs.includes('if (!expand) {'), 'assessment-data.js must provide dedicated fast path for collapse (!expand)');
+  assert.ok(assessJs.includes('collapseAll: () => expandAll(false)'), 'assessment-data.js must export collapseAll method');
+
+  // 2. Functional test: multiple expanded cards collapse synchronously without 65ms per-card delay
+  delete window.__connectifyDataInitialized;
+  delete window.ConnectifyData;
+  window.ConnectifyIsBulkExpanding = false;
+  window.ConnectifyIsAccordionAnimating = false;
+  eval(assessJs);
+
+  const container = document.createElement('div');
+  container.id = 'test-collapse-container-133';
+
+  const clickedElements = [];
+  for (let i = 1; i <= 5; i++) {
+    const card = document.createElement('div');
+    card.className = 'eds-c-tile';
+    const section = document.createElement('div');
+    section.className = 'eds-c-accordion__section';
+    const heading = document.createElement('div');
+    heading.className = 'eds-c-accordion__section-heading';
+    heading.textContent = 'Hide details';
+    const btn = document.createElement('button');
+    btn.className = 'v-button';
+    btn.textContent = 'Hide details';
+    heading.appendChild(btn);
+    section.appendChild(heading);
+    card.appendChild(section);
+    container.appendChild(card);
+  }
+  document.body.appendChild(container);
+
+  const origClick = HTMLElement.prototype.click;
+  HTMLElement.prototype.click = function() {
+    clickedElements.push(this);
+  };
+
+  try {
+    window.ConnectifyIsBulkExpanding = false;
+    window.ConnectifyIsAccordionAnimating = false;
+
+    // Call collapseAll
+    window.ConnectifyData.collapseAll();
+
+    // All 5 cards must be clicked synchronously in the exact same tick
+    assert.strictEqual(clickedElements.length, 5, 'All open sections must be clicked simultaneously on collapse');
+
+    // window.ConnectifyIsBulkExpanding must be released immediately so UI is not locked
+    assert.strictEqual(window.ConnectifyIsBulkExpanding, false, 'isBulkExpanding must be released immediately after collapse loop');
+
+    // window.ConnectifyIsAccordionAnimating must be true to keep MutationObservers muted during CSS transition
+    assert.strictEqual(window.ConnectifyIsAccordionAnimating, true, 'isAccordionAnimating must be active for 450ms animation guard');
+  } finally {
+    HTMLElement.prototype.click = origClick;
+    container.remove();
+    window.ConnectifyIsBulkExpanding = false;
+    window.ConnectifyIsAccordionAnimating = false;
+  }
+});
+
+runTest('Test 134: expandAll performance caching integrity, non-blocking chunked finalization, and zero-rescrape guarantees', () => {
+  const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
+
+  // 1. Verify clearPredictorCache removes PREDICTOR version stamp rather than setting it prematurely
+  assert.ok(assessJs.includes('localStorage.removeItem(CACHE_KEYS.PREDICTOR);'),
+    'clearPredictorCache must remove version stamp so isPredictionCacheCurrent accurately reflects empty cache');
+
+  // 2. Verify finalizeExpansion checks hasValidCache BEFORE calling collect(true)
+  const finalizeCachePattern = /try\s*\{\s*const\s+hasValidCache\s*=\s*Boolean\(window\.ConnectifyPredictorMath\?\.isPredictionCacheCurrent\?\.?\(\)\);\s*if\s*\(!hasValidCache\)\s*\{\s*const\s+all\s*=\s*collect\(true\);/;
+  assert.ok(finalizeCachePattern.test(assessJs),
+    'finalizeExpansion must verify cache validity before triggering synchronous collect(true)');
+
+  // 3. Verify getOrComputeTaskPrediction avoids inline collect(true) fallback in task loop
+  assert.ok(predMathJs.includes('const rawSubjects = allSubjects || [];'),
+    'getOrComputeTaskPrediction must use passed allSubjects or empty array instead of triggering inline collect(true)');
+
+  // 4. Verify stale-subjects re-scrape at 98% is deferred off critical path
+  assert.ok(assessJs.includes('// Defer stale-subjects re-scrape off the critical path'),
+    'assessment-data.js must defer stale subjects collect to prevent blocking progress pill completion');
+
+  // 5. Functional test: verify prediction cache skipping when cache is current
+  delete window.__connectifyDataInitialized;
+  delete window.ConnectifyData;
+  delete window.ConnectifyPredictorMath;
+  mockLocalStorage.clear();
+  eval(predMathJs);
+  eval(assessJs);
+
+  let collectCallCount = 0;
+  const originalCollect = window.ConnectifyData.collect;
+  window.ConnectifyData.collect = function(...args) {
+    collectCallCount++;
+    return originalCollect.apply(this, args);
+  };
+
+  try {
+    // When cache is marked current, populateChronologicalPredictions must exit immediately without collecting
+    const ver = window.ConnectifyPredictorMath.PREDICTOR_ALGO_VERSION;
+    mockLocalStorage.setItem('connectify:prediction_algo_version', ver);
+    mockLocalStorage.setItem('connectify:prediction_version', ver);
+    mockLocalStorage.setItem('connectify:cache_version:predictor', ver);
+    assert.strictEqual(window.ConnectifyPredictorMath.isPredictionCacheCurrent(), true, 'Cache must be marked current');
+
+    window.ConnectifyPredictorMath.populateChronologicalPredictions(null, false);
+    assert.strictEqual(collectCallCount, 0, 'populateChronologicalPredictions must skip collect(true) when cache is valid and force is false');
+  } finally {
+    window.ConnectifyData.collect = originalCollect;
+  }
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');
