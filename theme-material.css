@@ -1,0 +1,484 @@
+/* --------------------------------------------------------------------------
+   14. Cards, Popups, Modals & Material Panels
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.mat-card, .v-window, .v-window-contents, .v-panel-content, .mat-dialog-container) {
+  background-color: #1e2632 !important;
+  border: 1px solid #3d5066 !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark :is(th, td) {
+  border-color: #36485e !important;
+}
+
+.connectea-dark #main-content :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell),
+.connectea-dark :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell) {
+  color: #f1f5f9 !important;
+}
+
+/* Angular Material Accordions, Expansion Panels & Tree Nodes (Site-Wide & Classes Page) */
+.connectea-dark :is(
+  .mat-accordion,
+  .mat-expansion-panel,
+  .mat-expansion-panel-header,
+  .mat-expansion-panel-body,
+  .mat-expansion-panel-content,
+  .mat-tree,
+  .mat-tree-node,
+  .mat-nested-tree-node
+) {
+  background-color: #1e2632 !important;
+  color: #f8fafc !important;
+  border-color: #3d5066 !important;
+}
+
+.connectea-dark .mat-expansion-panel {
+  border: 1px solid #3d5066 !important;
+  border-radius: 6px !important;
+}
+
+.connectea-dark :is(.mat-expansion-panel-header, .mat-tree-node):hover {
+  background-color: #24303f !important;
+}
+
+.connectea-dark :is(
+  .mat-expansion-panel-header-title,
+  .mat-expansion-panel-header-description,
+  .mat-panel-title,
+  .mat-panel-description
+) {
+  color: #f8fafc !important;
+}
+
+.connectea-dark .mat-expansion-indicator::after {
+  color: #cbd5e1 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Material Lists & Category Menus (Classes, Side Drawers, etc.) */
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-category-menu__wrapper,
+  .cvr-c-category-menu__list,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) {
+  background-color: #1a222d !important;
+  color: #f8fafc !important;
+  border-color: #36485e !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) :is(.mat-list-item, .mat-mdc-list-item) {
+  background-color: transparent !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid #2a3749 !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) :is(.mat-list-item, .mat-mdc-list-item):hover {
+  background-color: #24303f !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list,
+  .cvr-c-navigation,
+  .cvr-c-drawer
+) :is(
+  .mat-list-item,
+  .mat-mdc-list-item,
+  .mat-list-item-content,
+  .mat-list-text,
+  .mat-line,
+  .eds-c-nav-list__item,
+  .v-tree-node,
+  a,
+  span,
+  div,
+  p,
+  label
+) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) :is(
+  .mat-list-item,
+  .mat-mdc-list-item,
+  .eds-c-nav-list__item,
+  a
+):hover :is(span, div, p, label, .mat-line, .mat-list-text) {
+  color: #ffffff !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .cvr-c-service-menu,
+  .cvr-c-primary-menu,
+  .cvr-c-primary-navigation,
+  .cvr-c-branding,
+  .cvr-c-header,
+  .cvr-c-user-menu,
+  [class*="switch"],
+  [class*="role"],
+  [class*="user"],
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-nav-list
+) :is(svg, path, circle) {
+  color: #cbd5e1 !important;
+  fill: #cbd5e1 !important;
+  stroke: currentColor !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .cvr-c-service-menu,
+  .cvr-c-primary-menu,
+  .cvr-c-primary-navigation,
+  .cvr-c-branding,
+  .cvr-c-header,
+  .cvr-c-user-menu,
+  [class*="switch"],
+  [class*="role"],
+  [class*="user"],
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-nav-list,
+  .v-icon
+) :is(.mat-icon, .v-icon, .eds-c-icon) {
+  color: #cbd5e1 !important;
+  stroke: none !important;
+  -webkit-text-stroke: 0px !important;
+}
+
+/* Connect Webfont Glyphs, Role/Student Switcher & Action Icons */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  [class^="cvr-c-icon--"]:before,
+  [class*=" cvr-c-icon--"]:before,
+  .cvr-c-icon:before,
+  .cvr-c-icon--switch:before,
+  [class*="switch"]:before,
+  [class*="role"]:before,
+  .eds-c-icon:before,
+  [class^="cvr-c-icon--"],
+  [class*=" cvr-c-icon--"],
+  .cvr-c-icon,
+  .cvr-c-icon--switch
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
+  .cvr-c-icon,
+  .cvr-c-icon--switch,
+  [class^="cvr-c-icon--"]:before,
+  [class*=" cvr-c-icon--"]:before
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .cvr-c-icon,
+  .cvr-c-icon--switch,
+  [class^="cvr-c-icon--"]:before,
+  [class*=" cvr-c-icon--"]:before
+) {
+  color: #cbd5e1 !important;
+  -webkit-text-fill-color: #cbd5e1 !important;
+  stroke: none !important;
+  -webkit-text-stroke: 0px !important;
+  opacity: 1 !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .cvr-c-service-menu,
+  .cvr-c-primary-menu,
+  .cvr-c-primary-navigation,
+  .cvr-c-branding,
+  .cvr-c-header,
+  .cvr-c-user-menu,
+  [class*="switch"],
+  [class*="role"],
+  [class*="user"],
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-nav-list,
+  .v-icon
+) :is(.mat-list-item:hover, a:hover, button:hover, div:hover, [class*="item"]:hover) :is(svg, path, circle),
+.connectea-dark :is([class*="switch"], [class*="role"]):hover :is(svg, path, circle) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: currentColor !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .cvr-c-service-menu,
+  .cvr-c-primary-menu,
+  .cvr-c-primary-navigation,
+  .cvr-c-branding,
+  .cvr-c-header,
+  .cvr-c-user-menu,
+  [class*="switch"],
+  [class*="role"],
+  [class*="user"],
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-nav-list,
+  .v-icon
+) :is(.mat-list-item:hover, a:hover, button:hover, div:hover, [class*="item"]:hover) :is(.mat-icon, .v-icon, .eds-c-icon),
+.connectea-dark :is([class*="switch"], [class*="role"]):hover :is(.mat-icon, .v-icon, .eds-c-icon),
+.connectea-dark :is(
+  [class^="cvr-c-icon--"]:hover:before,
+  [class*=" cvr-c-icon--"]:hover:before,
+  .cvr-c-icon:hover:before,
+  .cvr-c-icon--switch:hover:before,
+  [class*="switch"]:hover:before,
+  [class*="role"]:hover:before,
+  .eds-c-icon:hover:before
+),
+.connectea-dark :is(button, a):hover :is(
+  [class^="cvr-c-icon--"]:before,
+  [class*=" cvr-c-icon--"]:before,
+  .cvr-c-icon:before,
+  .cvr-c-icon--switch:before,
+  [class*="switch"]:before,
+  [class*="role"]:before
+) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  stroke: none !important;
+  -webkit-text-stroke: 0px !important;
+}
+
+/* Classes Page List Items, Status, Sort Dropdown & Action Controls */
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) {
+  border-bottom: 1px solid #36485e !important;
+  color: #f8fafc !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) :is(h1, h2, h3, h4, [class*="title"], strong) {
+  color: #f8fafc !important;
+  font-weight: 650 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) :is(span, p, small, [class*="subtitle"], [class*="code"], [class*="status"], [class*="badge"]) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) :is(button, a, .mat-icon-button, [class*="action"], [class*="btn"]) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) svg {
+  color: #cbd5e1 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes,
+  .cvr-c-classes-list,
+  .cvr-c-class-list,
+  [class*="classes-list"],
+  [class*="class-item"],
+  [class*="class-row"]
+) :is(button, a, .mat-icon-button):hover svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes__sort,
+  .cvr-c-sort-by,
+  .eds-c-sort-by,
+  [class*="sort-by"],
+  .mat-form-field,
+  .mat-form-field-wrapper
+) :is(label, .mat-form-field-label, span) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .mat-select,
+  .mat-select-value,
+  .mat-select-value-text,
+  .mat-select-arrow
+) {
+  color: #f8fafc !important;
+}
+
+/* --------------------------------------------------------------------------
+   15. Homepage Promos, Notices & Alerts (My Connect, etc.)
+   -------------------------------------------------------------------------- */
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white,
+.connectea-dark :is(.cvr-c-promo, .cvr-c-promo__body, .cvr-c-promo__content, .cvr-c-notice, .cvr-c-maintenance-notice, .eds-c-notice, .eds-c-alert, .eds-t-white) {
+  background-color: #1e2632 !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #3d5066 !important;
+  border-radius: 8px !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .cvr-c-promo__body,
+.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) :is(.cvr-c-promo__body, .cvr-c-promo__content, .eds-c-notice__content) {
+  background-color: #1e2632 !important;
+  color: #cbd5e1 !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white :is(.cvr-c-promo__title, p),
+.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) :is(p, span, div, .cvr-c-promo__title) {
+  color: #cbd5e1 !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white strong,
+.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) strong {
+  color: #f8fafc !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button {
+  background-color: #24303f !important;
+  color: #e2e8f0 !important;
+  border-color: #4a617a !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button:hover {
+  background-color: #2e3c4e !important;
+  border-color: #607996 !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   16. Preferences Page, Settings Cards & Form Layouts
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .cvr-c-preferences,
+  .cvr-c-preferences-section,
+  .cvr-c-preference-group,
+  .cvr-c-preferences__section,
+  .cvr-c-preferences__group,
+  .cvr-c-form-section,
+  .cvr-c-form-group,
+  .v-panel,
+  .v-panel-content,
+  .v-panel-caption,
+  .eds-c-card,
+  .eds-c-card__body,
+  .eds-c-card__header,
+  .cvr-c-dashboard-card,
+  .v-formlayout,
+  .v-formlayout-row
+) {
+  background-color: #1e2632 !important;
+  border-color: #3d5066 !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-preferences,
+  .cvr-c-preferences-section,
+  .cvr-c-preference-group,
+  .eds-c-card,
+  .v-panel
+) :is(h1, h2, h3, h4, .eds-c-heading, .v-panel-caption, .cvr-c-preference-group__title, .cvr-c-preferences-section__title, .eds-c-card__title) {
+  color: #f8fafc !important;
+  border-bottom-color: #36485e !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-preferences,
+  .cvr-c-preferences-section,
+  .cvr-c-preference-group,
+  .eds-c-card,
+  .v-panel
+) :is(p, span, label, .v-label, .cvr-c-form__label, .eds-c-caption) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .v-filterselect,
+  .v-filterselect-input,
+  .v-select-select,
+  .v-textfield,
+  .eds-c-select,
+  .eds-c-form-control
+) {
+  background-color: #141a22 !important;
+  border: 1px solid #42556d !important;
+  color: #f1f5f9 !important;
+}
+

@@ -1,0 +1,386 @@
+/* --------------------------------------------------------------------------
+   6. Subject Course Card & Generic Tiles (.eds-c-tile, .cvr-c-tile, .c-tile)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card,
+  .mat-card,
+  .cvr-c-dashboard-card
+) {
+  background-color: #1e2632 !important;
+  border: 1px solid #3d5066 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+  color: #e2e8f0 !important;
+}
+
+/* Unified Card & Tile Header: clean border, no colored accent stripes */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card,
+  .mat-card,
+  .cvr-c-dashboard-card
+) :is(
+  .eds-c-tile__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .eds-c-card__header,
+  .cvr-c-card__header,
+  .mat-card-header
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
+  .eds-c-tile__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .eds-c-card__header,
+  .cvr-c-card__header,
+  .mat-card-header
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .eds-c-tile__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .eds-c-card__header,
+  .cvr-c-card__header,
+  .mat-card-header
+) {
+  background-color: transparent !important;
+  border-bottom: 1px solid #2e3c4e !important;
+  border-color: #2e3c4e !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  position: relative !important;
+}
+
+/* Suppress all native colored header divider lines (e.g. olive on Classes, red on Next Event) while preserving clearfix */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile__header,
+  .eds-t-grey-dark .eds-c-tile__header,
+  .eds-t-blue-dark .eds-c-tile__header,
+  .eds-t-blue-light .eds-c-tile__header,
+  .eds-t-green .eds-c-tile__header,
+  .eds-t-orange .eds-c-tile__header,
+  .eds-t-purple .eds-c-tile__header,
+  .eds-t-red .eds-c-tile__header,
+  .eds-t-teal .eds-c-tile__header,
+  .eds-c-tile--important .eds-c-tile__header,
+  .eds-c-tile__header--negative,
+  .eds-c-card__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .cvr-c-card__header,
+  .mat-card-header
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
+  .eds-c-tile__header,
+  .eds-t-grey-dark .eds-c-tile__header,
+  .eds-t-blue-dark .eds-c-tile__header,
+  .eds-t-blue-light .eds-c-tile__header,
+  .eds-t-green .eds-c-tile__header,
+  .eds-t-orange .eds-c-tile__header,
+  .eds-t-purple .eds-c-tile__header,
+  .eds-t-red .eds-c-tile__header,
+  .eds-t-teal .eds-c-tile__header,
+  .eds-c-tile--important .eds-c-tile__header,
+  .eds-c-tile__header--negative,
+  .eds-c-card__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .cvr-c-card__header,
+  .mat-card-header
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .eds-c-tile__header,
+  .eds-t-grey-dark .eds-c-tile__header,
+  .eds-t-blue-dark .eds-c-tile__header,
+  .eds-t-blue-light .eds-c-tile__header,
+  .eds-t-green .eds-c-tile__header,
+  .eds-t-orange .eds-c-tile__header,
+  .eds-t-purple .eds-c-tile__header,
+  .eds-t-red .eds-c-tile__header,
+  .eds-t-teal .eds-c-tile__header,
+  .eds-c-tile--important .eds-c-tile__header,
+  .eds-c-tile__header--negative,
+  .eds-c-card__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .cvr-c-card__header,
+  .mat-card-header
+) {
+  border-bottom: 1px solid #2e3c4e !important;
+  border-bottom-color: #2e3c4e !important;
+  border-color: #2e3c4e !important;
+}
+
+/* Suppress colored accent stripes and decorator pseudo-elements without breaking clearfix */
+.connectea-dark :is(
+  .eds-c-tile__accent,
+  .cvr-c-tile__accent,
+  .eds-c-tile__header-stripe,
+  .cvr-c-tile__header-stripe
+)::before,
+.connectea-dark :is(
+  .eds-c-tile__accent,
+  .cvr-c-tile__accent,
+  .eds-c-tile__header-stripe,
+  .cvr-c-tile__header-stripe
+)::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Neutralize native Connect red card and tile borders, headers, and text (.eds-t-red) */
+.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red) :is(.eds-c-tile, .eds-c-card, .cvr-c-card),
+.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red).eds-c-tile,
+.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red).eds-c-card {
+  border-color: #3d5066 !important;
+}
+
+.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red) :is(
+  h1,
+  h2,
+  h3,
+  h4,
+  .cvr-c-service-bar__title,
+  .cvr-c-statistic__value
+) {
+  color: #f8fafc !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-class__status-label--locked,
+  .cvr-c-attendance .eds-t-red.cvr-c-standard-label,
+  .eds-u-theme-multiplier.eds-t-red .cvr-c-standard-label,
+  .cvr-c-submission__status-label--overdue,
+  .cvr-c-entitystatus--reported,
+  .cvr-c-status-label--reported
+) {
+  background-color: #2b171a !important;
+  border: 1px solid #7f2329 !important;
+  color: #fca5a5 !important;
+}
+
+.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red) :is(
+  .cvr-u-border-bottom-sep--coloured,
+  .eds-c-tile__header,
+  .eds-c-message-container--current-theme
+),
+.connectea-dark .eds-c-tile--important .eds-c-tile__header {
+  border-color: #2e3c4e !important;
+}
+
+/* Tile Header Action Controls (e.g. "View All" button in Classes tile header) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card
+) :is(
+  .eds-c-tile__action,
+  .cvr-c-tile__action,
+  .c-tile__action,
+  .eds-c-tile__actions,
+  .cvr-c-tile__actions,
+  .eds-c-action-button,
+  .eds-c-action-button-set .eds-c-action-button,
+  .eds-c-tile__header .v-button,
+  .cvr-c-tile__header .v-button,
+  .eds-c-tile__header .v-link,
+  .cvr-c-tile__header .v-link,
+  .eds-c-tile__header a,
+  .cvr-c-tile__header a
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .eds-c-tile__header .v-button,
+  .eds-c-action-button-set .eds-c-action-button,
+  .eds-c-action-button
+) {
+  background-color: #24303f !important;
+  background-image: none !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #4a617a !important;
+  border-radius: 4px !important;
+  padding: 4px 12px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card
+) :is(
+  .eds-c-tile__action,
+  .cvr-c-tile__action,
+  .c-tile__action,
+  .eds-c-tile__actions,
+  .cvr-c-tile__actions,
+  .eds-c-action-button,
+  .eds-c-action-button-set .eds-c-action-button,
+  .eds-c-tile__header .v-button,
+  .cvr-c-tile__header .v-button,
+  .eds-c-tile__header .v-link,
+  .cvr-c-tile__header .v-link,
+  .eds-c-tile__header a,
+  .cvr-c-tile__header a
+):hover,
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .eds-c-tile__header .v-button,
+  .eds-c-action-button-set .eds-c-action-button,
+  .eds-c-action-button
+):hover {
+  background-color: #2e3c4e !important;
+  border-color: #607996 !important;
+  color: #ffffff !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card
+) :is(
+  .eds-c-tile__action,
+  .cvr-c-tile__action,
+  .c-tile__action,
+  .eds-c-tile__actions,
+  .cvr-c-tile__actions,
+  .eds-c-action-button,
+  .eds-c-tile__header .v-button,
+  .cvr-c-tile__header .v-button,
+  .eds-c-tile__header .v-link,
+  .cvr-c-tile__header .v-link
+) :is(a, span, div, p, .v-button-wrap, .v-button-caption) {
+  color: #f1f5f9 !important;
+  background: transparent !important;
+}
+
+.connectea-dark :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card
+) :is(
+  .eds-c-tile__action,
+  .cvr-c-tile__action,
+  .c-tile__action,
+  .eds-c-tile__actions,
+  .cvr-c-tile__actions,
+  .eds-c-tile__header .v-link,
+  .cvr-c-tile__header .v-link
+):hover :is(a, span, div, p) {
+  color: #ffffff !important;
+}
+
+.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-heading, .eds-c-tile__title, .cvr-c-tile__title, h2, h3, h4) {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-caption, .eds-c-tile__caption, .cvr-c-tile__caption, small) {
+  color: #94a3b8 !important;
+}
+
+.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-tile__body, .cvr-c-tile__body, .eds-c-accordion__panel) {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+/* Generic Tile Bodies, Inner Containers, Nav Lists & Resource Rows (Connect Help, Resources) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card,
+  .mat-card,
+  .cvr-c-dashboard-card
+) :is(
+  .eds-c-tile__body,
+  .cvr-c-tile__body,
+  .eds-c-tile__content,
+  .cvr-c-tile__content,
+  .eds-c-card__body,
+  .cvr-c-card__body,
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .eds-c-nav-list__link,
+  .eds-c-list,
+  .eds-c-list__item,
+  .eds-c-tile-list,
+  .eds-c-tile-list__item,
+  .cvr-c-resource,
+  .cvr-c-resource-item,
+  .cvr-c-resource-card,
+  .eds-c-resource,
+  .cvr-c-notice,
+  .cvr-c-notice-card,
+  .cvr-c-feed-item
+) {
+  background-color: #1e2632 !important;
+  border-color: #2e3c4e !important;
+  color: #e2e8f0 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .eds-c-nav-list__link,
+  .cvr-c-resource,
+  .cvr-c-resource-item,
+  .eds-c-resource
+) {
+  background-color: #1e2632 !important;
+  border-color: #2e3c4e !important;
+  color: #e2e8f0 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list__item,
+  .eds-c-nav-list__link,
+  .eds-c-list__item,
+  .eds-c-tile-list__item,
+  .cvr-c-resource-item
+):hover {
+  background-color: #263344 !important;
+  color: #ffffff !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .cvr-c-resource,
+  .eds-c-resource
+) :is(a, span, p, div, label, strong) {
+  color: #e2e8f0 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .cvr-c-resource,
+  .eds-c-resource
+) :is(.eds-c-icon, svg, path, circle) {
+  color: #94a3b8 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+

@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Connectify Architecture Reference
 
 This document details the world isolation model, script execution lifecycle, and single-page application (SPA) DOM sweeping architecture for the Connectify browser extension.

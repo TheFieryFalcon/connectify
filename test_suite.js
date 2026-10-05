@@ -12,6 +12,81 @@ const BASE_DIR = fs.existsSync(path.resolve(__dirname, 'predictor-math.js'))
   ? __dirname
   : '/Users/uwong/Downloads/2.1.14_0';
 
+// Module bundle definitions for split files
+const MODULE_BUNDLES = {
+  'theme.css': [
+    'theme-core.css',
+    'theme-tiles.css',
+    'theme-cards.css',
+    'theme-controls.css',
+    'theme-material.css',
+    'theme-feed.css',
+    'theme-tables.css',
+    'theme-navigation.css',
+    'theme-surfaces.css',
+    'theme.css'
+  ],
+  'sidebar.css': [
+    'sidebar-drawer.css',
+    'sidebar-notifications.css',
+    'sidebar-predictor.css',
+    'sidebar-settings.css',
+    'sidebar.css'
+  ],
+  'assessment-data.js': [
+    'assessment-cache.js',
+    'assessment-parser.js',
+    'assessment-expand.js',
+    'assessment-data.js'
+  ],
+  'predictor-math.js': [
+    'predictor-engine.js',
+    'predictor-dates.js',
+    'predictor-cache.js',
+    'predictor-math.js'
+  ],
+  'sidebar.js': [
+    'sidebar-handle.js',
+    'sidebar.js'
+  ],
+  'cohort-view.js': [
+    'cohort-outcome.js',
+    'cohort-panel.js',
+    'cohort-view.js'
+  ],
+  'category-settings.js': [
+    'category-baselines.js',
+    'category-settings.js'
+  ],
+  'predictor-ui.js': [
+    'predictor-grade-view.js',
+    'predictor-ui.js'
+  ],
+  'cohort-stats.js': [
+    'cohort-styles.js',
+    'cohort-stats.js'
+  ]
+};
+
+const origReadFileSync = fs.readFileSync;
+fs.readFileSync = function(filePath, ...args) {
+  const baseName = path.basename(filePath);
+  if (MODULE_BUNDLES[baseName]) {
+    const parts = MODULE_BUNDLES[baseName];
+    let combined = '';
+    let foundParts = 0;
+    for (const part of parts) {
+      const partPath = path.resolve(path.dirname(filePath), part);
+      if (fs.existsSync(partPath)) {
+        foundParts++;
+        combined += origReadFileSync.call(fs, partPath, ...args) + '\n';
+      }
+    }
+    if (foundParts > 0 && combined.trim()) return combined;
+  }
+  return origReadFileSync.call(fs, filePath, ...args);
+};
+
 // ---------------------------------------------------------------------------
 // Unified Mock DOM & Browser Environment
 // ---------------------------------------------------------------------------

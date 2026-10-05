@@ -22,11 +22,13 @@
     window.cxCategories = defaultCategories;
   }
 
+  const getStorageApi = () => (typeof browser !== 'undefined' && browser?.storage)
+    ? browser
+    : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
+
   const safeStorageGet = (keys, cb) => {
     try {
-      const api = (typeof browser !== 'undefined' && browser?.storage)
-        ? browser
-        : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
+      const api = getStorageApi();
       if (!api?.storage?.local) return;
       let handled = false;
       const callback = res => {
@@ -35,44 +37,32 @@
         if (res) cb(res);
       };
       const p = api.storage.local.get(keys, callback);
-      if (p && typeof p.then === 'function') {
-        p.then(callback).catch(() => {});
-      }
+      if (p && typeof p.then === 'function') p.then(callback).catch(() => {});
     } catch (e) {}
   };
 
   const safeStorageSet = obj => {
     try {
-      const api = (typeof browser !== 'undefined' && browser?.storage)
-        ? browser
-        : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
+      const api = getStorageApi();
       if (!api?.storage?.local) return;
       const p = api.storage.local.set(obj);
-      if (p && typeof p.catch === 'function') {
-        p.catch(() => {});
-      }
+      if (p && typeof p.catch === 'function') p.catch(() => {});
     } catch (e) {}
   };
 
   const safeStorageRemove = key => {
     try {
-      const api = (typeof browser !== 'undefined' && browser?.storage)
-        ? browser
-        : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
+      const api = getStorageApi();
       if (!api?.storage?.local) return;
       const p = api.storage.local.remove(key);
-      if (p && typeof p.catch === 'function') {
-        p.catch(() => {});
-      }
+      if (p && typeof p.catch === 'function') p.catch(() => {});
     } catch (e) {}
   };
 
   const resolveCategories = () => {
     try {
       const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
-      if (stored) {
-        window.cxCategories = JSON.parse(stored);
-      }
+      if (stored) window.cxCategories = JSON.parse(stored);
     } catch (e) {}
     safeStorageGet(['cx-categories'], res => {
       if (res && res['cx-categories']) {
@@ -151,9 +141,7 @@
           } catch {}
           safeStorageSet({ 'cx-categories': window.cxCategories });
           wrap.remove();
-          if (typeof onCategoryChange === 'function') {
-            onCategoryChange();
-          }
+          if (typeof onCategoryChange === 'function') onCategoryChange();
         };
         wrap.append(delBtn);
       }
@@ -191,20 +179,15 @@
 
         <div class="cx-settings-divider" style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:14px;padding-top:12px;">
           <div>
-            <label for="cx-general-cohort-input" class="cx-settings-label">
-              General Cohort Size
-            </label>
+            <label for="cx-general-cohort-input" class="cx-settings-label">General Cohort Size</label>
             <div style="display:flex;align-items:center;gap:6px;">
               <input type="number" id="cx-general-cohort-input" class="cx-settings-number-input" min="1" step="1" placeholder="500" style="box-sizing:border-box;width:80px;padding:3px 6px;border-radius:4px;font-size:12px;">
               <span class="cx-settings-hint">(default: 500)</span>
             </div>
             <p class="cx-settings-desc">Estimated total students in this year level.</p>
           </div>
-
           <div>
-            <label for="cx-atar-percentage-input" class="cx-settings-label">
-              ATAR Percentage
-            </label>
+            <label for="cx-atar-percentage-input" class="cx-settings-label">ATAR Percentage</label>
             <div style="display:flex;align-items:center;gap:6px;">
               <input type="number" id="cx-atar-percentage-input" class="cx-settings-number-input" min="1" max="100" step="1" placeholder="60" style="box-sizing:border-box;width:75px;padding:3px 6px;border-radius:4px;font-size:12px;">
               <span class="cx-settings-hint">% (default: 60%)</span>
@@ -255,27 +238,15 @@
     if (clearCacheBtn) {
       clearCacheBtn.addEventListener('click', () => {
         try {
-          if (window.ConnectifyCache?.clearResultsCache) {
-            window.ConnectifyCache.clearResultsCache();
-          }
-          if (window.ConnectifyCache?.clearCohortCache) {
-            window.ConnectifyCache.clearCohortCache();
-          }
-          if (window.ConnectifyCache?.clearPredictorCache) {
-            window.ConnectifyCache.clearPredictorCache();
-          }
-          if (window.ConnectifyData?.clearCache) {
-            window.ConnectifyData.clearCache();
-          }
-          try {
-            localStorage.removeItem('connectify:stale_subjects');
-          } catch {}
+          if (window.ConnectifyCache?.clearResultsCache) window.ConnectifyCache.clearResultsCache();
+          if (window.ConnectifyCache?.clearCohortCache) window.ConnectifyCache.clearCohortCache();
+          if (window.ConnectifyCache?.clearPredictorCache) window.ConnectifyCache.clearPredictorCache();
+          if (window.ConnectifyData?.clearCache) window.ConnectifyData.clearCache();
+          try { localStorage.removeItem('connectify:stale_subjects'); } catch {}
           const feedback = catPanel.querySelector('#cx-clear-cache-feedback');
           if (feedback) {
             feedback.style.display = 'inline';
-            setTimeout(() => {
-              feedback.style.display = 'none';
-            }, 3000);
+            setTimeout(() => { feedback.style.display = 'none'; }, 3000);
           }
         } catch (e) {
           console.warn('Failed to clear cache:', e);
@@ -362,269 +333,9 @@
     }
 
     function renderBaselines() {
-      const container = catPanel.querySelector('#cx-baselines-container');
-      if (!container) return;
-
-      // Preserve any currently typed input values before clearing
-      const currentTypeValues = {};
-      const currentSubjValues = {};
-      container.querySelectorAll('.cx-baseline-type-input').forEach(inp => {
-        if (inp.dataset.type && inp.value !== '') {
-          currentTypeValues[inp.dataset.type] = inp.value;
-        }
-      });
-      container.querySelectorAll('.cx-baseline-subj-input').forEach(inp => {
-        if (inp.dataset.subject && inp.value !== '') {
-          currentSubjValues[inp.dataset.subject] = inp.value;
-        }
-      });
-
-      container.innerHTML = '';
-
-      const baselines = window.ConnectifyPredictorMath?.getBaselines
-        ? window.ConnectifyPredictorMath.getBaselines()
-        : { types: {}, subjects: {} };
-
-      // 1. Assessment Type Baselines:
-      const typeHeading = document.createElement('strong');
-      typeHeading.className = 'cx-settings-heading';
-      typeHeading.textContent = 'Assessment Type Baselines (%)';
-
-      const typeDesc = document.createElement('p');
-      typeDesc.className = 'cx-settings-desc';
-      typeDesc.style.margin = '0 0 10px 0';
-      typeDesc.textContent = 'Your historical or expected percentage average for each assessment category:';
-
-      const typeGrid = document.createElement('div');
-      typeGrid.style.display = 'grid';
-      typeGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(130px, 1fr))';
-      typeGrid.style.gap = '10px';
-      typeGrid.style.marginBottom = '18px';
-
-      // Aggregate all categories: defaults + active custom + stored custom + baseline types + class custom categories
-      const allCatsSet = new Set(Object.keys(defaultCategories));
-      if (window.cxCategories) {
-        Object.keys(window.cxCategories).forEach(c => allCatsSet.add(c));
+      if (window.ConnectifyCategoryBaselines?.renderBaselines) {
+        window.ConnectifyCategoryBaselines.renderBaselines(catPanel, () => renderCategoryInputs(catPanel, () => renderBaselines()));
       }
-      try {
-        const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (parsed && typeof parsed === 'object') {
-            Object.keys(parsed).forEach(c => allCatsSet.add(c));
-          }
-        }
-      } catch {}
-      if (baselines.types) {
-        Object.keys(baselines.types).forEach(c => allCatsSet.add(c));
-      }
-      try {
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith('connectea:class_categories:')) {
-            const arr = JSON.parse(localStorage.getItem(k));
-            if (Array.isArray(arr)) {
-              arr.forEach(c => {
-                if (c && typeof c === 'string' && c.trim()) allCatsSet.add(c.trim());
-              });
-            }
-          }
-        }
-      } catch {}
-
-      const categories = Array.from(allCatsSet);
-      for (const cat of categories) {
-        const catColor = (window.cxCategories?.[cat]?.color) ||
-                         (window.ConnectifyTaskTypes?.getCategoryColor ? window.ConnectifyTaskTypes.getCategoryColor(cat) : '#3498db');
-
-        const field = document.createElement('div');
-        field.style.display = 'flex';
-        field.style.flexDirection = 'column';
-        field.style.gap = '3px';
-
-        const label = document.createElement('label');
-        label.className = 'cx-settings-label';
-        label.style.fontSize = '11.5px';
-        label.textContent = cat;
-        label.title = cat;
-        label.style.overflow = 'hidden';
-        label.style.textOverflow = 'ellipsis';
-        label.style.whiteSpace = 'nowrap';
-        label.style.color = catColor;
-
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.min = '0';
-        input.max = '100';
-        input.step = '0.5';
-        input.placeholder = 'e.g. 75';
-        input.className = 'cx-baseline-type-input cx-settings-number-input';
-        input.dataset.type = cat;
-        input.style.boxSizing = 'border-box';
-        input.style.width = '100%';
-        input.style.padding = '4px 6px';
-        input.style.borderRadius = '4px';
-        input.style.fontSize = '12px';
-
-        if (currentTypeValues[cat] !== undefined) {
-          input.value = currentTypeValues[cat];
-        } else if (baselines.types && baselines.types[cat] !== undefined) {
-          input.value = baselines.types[cat];
-        }
-
-        field.append(label, input);
-        typeGrid.append(field);
-      }
-
-      // 2. Subject Grade Baselines:
-      const subjHeading = document.createElement('strong');
-      subjHeading.className = 'cx-settings-heading';
-      subjHeading.textContent = 'Previous Year Subject Grade Baselines (%)';
-
-      const subjDesc = document.createElement('p');
-      subjDesc.className = 'cx-settings-desc';
-      subjDesc.style.margin = '0 0 10px 0';
-      subjDesc.textContent = 'Your final grade percentage from the previous year for enrolled subjects:';
-
-      const subjGrid = document.createElement('div');
-      subjGrid.style.display = 'grid';
-      subjGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(180px, 1fr))';
-      subjGrid.style.gap = '10px';
-      subjGrid.style.marginBottom = '16px';
-
-      const subjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
-      const cleanNames = new Set();
-      for (const s of subjects) {
-        const clean = window.ConnectifyPredictorMath?.cleanSubject
-          ? window.ConnectifyPredictorMath.cleanSubject(s.name)
-          : s.name.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
-        if (clean) cleanNames.add(clean);
-      }
-      for (const sName of Object.keys(baselines.subjects || {})) {
-        if (sName) cleanNames.add(sName);
-      }
-
-      if (cleanNames.size === 0) {
-        const emptyNote = document.createElement('div');
-        emptyNote.className = 'cx-settings-desc';
-        emptyNote.style.fontSize = '11.5px';
-        emptyNote.style.gridColumn = '1 / -1';
-        emptyNote.textContent = 'No enrolled subjects detected yet. Expand course outlines on Connect to populate subject list.';
-        subjGrid.append(emptyNote);
-      } else {
-        for (const sName of cleanNames) {
-          const field = document.createElement('div');
-          field.style.display = 'flex';
-          field.style.flexDirection = 'column';
-          field.style.gap = '3px';
-
-          const label = document.createElement('label');
-          label.className = 'cx-settings-label';
-          label.style.fontSize = '11.5px';
-          label.textContent = sName;
-          label.title = sName;
-          label.style.overflow = 'hidden';
-          label.style.textOverflow = 'ellipsis';
-          label.style.whiteSpace = 'nowrap';
-
-          const input = document.createElement('input');
-          input.type = 'number';
-          input.min = '0';
-          input.max = '100';
-          input.step = '0.5';
-          input.placeholder = 'e.g. 78';
-          input.className = 'cx-baseline-subj-input cx-settings-number-input';
-          input.dataset.subject = sName;
-          input.style.boxSizing = 'border-box';
-          input.style.width = '100%';
-          input.style.padding = '4px 6px';
-          input.style.borderRadius = '4px';
-          input.style.fontSize = '12px';
-
-          if (currentSubjValues[sName] !== undefined) {
-            input.value = currentSubjValues[sName];
-          } else if (baselines.subjects && baselines.subjects[sName] !== undefined) {
-            input.value = baselines.subjects[sName];
-          }
-
-          field.append(label, input);
-          subjGrid.append(field);
-        }
-      }
-
-      // Save button
-      const actions = document.createElement('div');
-      actions.style.display = 'flex';
-      actions.style.gap = '10px';
-      actions.style.alignItems = 'center';
-
-      const saveBtn = document.createElement('button');
-      saveBtn.type = 'button';
-      saveBtn.className = 'eds-c-button';
-      saveBtn.style.background = '#2563eb';
-      saveBtn.style.color = '#fff';
-      saveBtn.style.border = 'none';
-      saveBtn.style.padding = '6px 14px';
-      saveBtn.style.borderRadius = '4px';
-      saveBtn.style.cursor = 'pointer';
-      saveBtn.style.fontWeight = '600';
-      saveBtn.textContent = 'Save Baselines';
-
-      saveBtn.onclick = () => {
-        const typeInputs = container.querySelectorAll('.cx-baseline-type-input');
-        const subjInputs = container.querySelectorAll('.cx-baseline-subj-input');
-        const newTypes = {};
-        const newSubjs = {};
-
-        typeInputs.forEach(inp => {
-          const val = inp.value.trim();
-          if (val !== '' && Number.isFinite(Number(val))) {
-            newTypes[inp.dataset.type] = Number(val);
-          }
-        });
-
-        subjInputs.forEach(inp => {
-          const val = inp.value.trim();
-          if (val !== '' && Number.isFinite(Number(val))) {
-            newSubjs[inp.dataset.subject] = Number(val);
-          }
-        });
-
-        if (window.ConnectifyPredictorMath?.saveBaselines) {
-          window.ConnectifyPredictorMath.saveBaselines({ types: newTypes, subjects: newSubjs });
-        }
-
-        // Also ensure any custom categories in newTypes are registered in cxCategories
-        if (window.cxCategories) {
-          let updated = false;
-          for (const catName of Object.keys(newTypes)) {
-            if (!window.cxCategories[catName]) {
-              const color = window.ConnectifyTaskTypes?.getCategoryColor
-                ? window.ConnectifyTaskTypes.getCategoryColor(catName)
-                : '#3498db';
-              window.cxCategories[catName] = {
-                color,
-                keywords: [catName.toLowerCase()]
-              };
-              updated = true;
-            }
-          }
-          if (updated) {
-            try {
-              localStorage.setItem('cx-categories', JSON.stringify(window.cxCategories));
-              localStorage.setItem('connectea:categories', JSON.stringify(window.cxCategories));
-            } catch {}
-            renderCategoryInputs(catPanel, () => renderBaselines());
-          }
-        }
-
-        const origText = saveBtn.textContent;
-        saveBtn.textContent = '✓ Saved Baselines!';
-        setTimeout(() => { saveBtn.textContent = origText; }, 2000);
-      };
-
-      actions.append(saveBtn);
-      container.append(typeHeading, typeDesc, typeGrid, subjHeading, subjDesc, subjGrid, actions);
     }
 
     function openCategories() {
@@ -632,15 +343,9 @@
       catBtn.setAttribute('aria-pressed', 'true');
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
       try {
-        if (autoExpandToggle) {
-          autoExpandToggle.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
-        }
-        if (generalCohortInput) {
-          generalCohortInput.value = localStorage.getItem('connectify:general_cohort_size') || '';
-        }
-        if (atarPctInput) {
-          atarPctInput.value = localStorage.getItem('connectify:atar_percentage') || '';
-        }
+        if (autoExpandToggle) autoExpandToggle.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
+        if (generalCohortInput) generalCohortInput.value = localStorage.getItem('connectify:general_cohort_size') || '';
+        if (atarPctInput) atarPctInput.value = localStorage.getItem('connectify:atar_percentage') || '';
         resolveCategories();
       } catch (e) {
         console.warn('Connectify settings preferences error:', e);
@@ -697,7 +402,6 @@
       } catch (e) {}
       safeStorageSet({ 'cx-categories': updatedCats });
 
-      // Rescan every assessment set to Auto immediately!
       if (window.ConnectifyTaskTypes?.rescanAllAutoAssessments) {
         window.ConnectifyTaskTypes.rescanAllAutoAssessments();
       } else {
@@ -769,7 +473,6 @@
     SETTINGS_ALGO_VERSION: window.ConnectifyCache?.VERSIONS?.SETTINGS || 'v4_20261001_settings'
   };
 
-  // Pre-initialize so buttons and panels are ready for sidebar mounting
   try {
     ensureSettingsPanel();
   } catch {}

@@ -1,0 +1,457 @@
+/* --------------------------------------------------------------------------
+   27. Learning Content, Resource Panels & Tree Structures
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .cvr-c-learning-area,
+  .cvr-c-learning-area .cvr-c-expansion-panel__body,
+  .cvr-c-learning-content-select-container,
+  .cvr-c-learning-content-select-item
+) {
+  background-color: #1e2632 !important;
+  color: #e2e8f0 !important;
+  border-color: #36485e !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-resources-panel,
+  .cvr-c-featured-resources,
+  .cvr-c-featured-resources__content
+) {
+  background-color: #1e2632 !important;
+  color: #cbd5e1 !important;
+  border-color: #36485e !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-tree-panel,
+  .cvr-c-tree-row,
+  .cvr-c-tree-list,
+  .v-tree,
+  .v-treetable
+) {
+  background-color: #1e2632 !important;
+  color: #e2e8f0 !important;
+  border-color: #36485e !important;
+}
+
+.connectea-dark .cvr-c-tree-panel > tbody {
+  border-color: #36485e !important;
+}
+
+.connectea-dark :is(.v-tree-node-caption, .cvr-c-tree-row):hover {
+  background-color: #24303f !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark .v-tree-node-selected .v-tree-node-caption {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   28. System Notifications, Alerts, Tooltips & Popovers
+   -------------------------------------------------------------------------- */
+.connectea-dark .v-Notification {
+  background-color: #1e2632 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #4a617a !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+.connectea-dark :is(.v-Notification-caption, .v-Notification .v-Notification-caption) {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+.connectea-dark :is(.v-Notification-description, .v-Notification-details) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark .v-Notification-warning {
+  border-left: 4px solid #f59e0b !important;
+}
+
+.connectea-dark :is(.v-Notification-error, .v-Notification-system) {
+  border-left: 4px solid #ef4444 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-notifications,
+  .cvr-c-notifications__heading,
+  .cvr-c-notifications__item
+) {
+  background-color: #1e2632 !important;
+  color: #cbd5e1 !important;
+  border-color: #36485e !important;
+}
+
+.connectea-dark :is(
+  .alert,
+  .alert-primary,
+  .alert-secondary,
+  .alert-light,
+  .alert-dark
+) {
+  background-color: #18202b !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #3d5066 !important;
+  border-radius: 6px !important;
+}
+
+.connectea-dark :is(.alert-warning, .portlet-msg-alert) {
+  background-color: #2a2415 !important;
+  border-color: #785a15 !important;
+  color: #fde68a !important;
+}
+
+.connectea-dark :is(.alert-danger, .portlet-msg-error) {
+  background-color: #2b171a !important;
+  border-color: #7f2329 !important;
+  color: #fca5a5 !important;
+}
+
+.connectea-dark :is(.alert-success, .portlet-msg-success) {
+  background-color: #14281c !important;
+  border-color: #226738 !important;
+  color: #86efac !important;
+}
+
+.connectea-dark :is(.alert-info, .portlet-msg-info, .portlet-msg-help) {
+  background-color: #15263a !important;
+  border-color: #2b5480 !important;
+  color: #93c5fd !important;
+}
+
+.connectea-dark :is(.popover, .popover-body, .ui-tooltip, .v-tooltip, .v-tooltip-text) {
+  background-color: #18202b !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #4a617a !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+}
+
+.connectea-dark .popover-header {
+  background-color: #202c3b !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid #4a617a !important;
+  font-weight: 600 !important;
+}
+
+/* --------------------------------------------------------------------------
+   29. Badges, Status Labels, Tags, Switches & Wizard Steps
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.badge, .badge-item, .label, .label-item):not(#connectify-sidebar *) {
+  background-color: #24303f !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #4a617a !important;
+}
+
+.connectea-dark :is(.badge-light, .label-light, .badge-secondary, .label-secondary) {
+  background-color: #24303f !important;
+  color: #f1f5f9 !important;
+  border-color: #4a617a !important;
+}
+
+.connectea-dark :is(.badge-primary, .label-primary, .label-inverse-primary) {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+}
+
+.connectea-dark :is(.badge-success, .label-success, .label-inverse-success) {
+  background-color: #166534 !important;
+  color: #dcfce7 !important;
+  border-color: #22c55e !important;
+}
+
+.connectea-dark :is(.badge-warning, .label-warning, .label-inverse-warning) {
+  background-color: #854d0e !important;
+  color: #fef9c3 !important;
+  border-color: #eab308 !important;
+}
+
+.connectea-dark :is(.badge-danger, .label-danger, .label-inverse-danger) {
+  background-color: #991b1b !important;
+  color: #fee2e2 !important;
+  border-color: #ef4444 !important;
+}
+
+.connectea-dark :is(.badge-info, .label-info, .label-inverse-info) {
+  background-color: #1e40af !important;
+  color: #dbeafe !important;
+  border-color: #3b82f6 !important;
+}
+
+.connectea-dark :is(.cvr-c-status-label, .cvr-c-entitystatus) {
+  background-color: #24303f !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #4a617a !important;
+  border-radius: 4px !important;
+}
+
+.connectea-dark .cvr-c-status-label--draft {
+  background-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark .cvr-c-status-label--featured {
+  background-color: #854d0e !important;
+  color: #fef08a !important;
+}
+
+.connectea-dark .cvr-c-status-label--removed {
+  background-color: #1e2632 !important;
+  color: #94a3b8 !important;
+  border-color: #36485e !important;
+}
+
+.connectea-dark .cvr-c-status-label--reported {
+  background-color: #991b1b !important;
+  color: #fee2e2 !important;
+  border-color: #ef4444 !important;
+}
+
+.connectea-dark :is(.cvr-c-switch label, .eds-c-switch__slider, .custom-switch .custom-control-label::before) {
+  background-color: #202c3b !important;
+  border: 1px solid #4a617a !important;
+}
+
+.connectea-dark :is(.cvr-c-switch input:checked + label, .eds-c-switch input:checked + .eds-c-switch__slider, .custom-switch .custom-control-input:checked ~ .custom-control-label::before) {
+  background-color: #2563eb !important;
+  border-color: #3b82f6 !important;
+}
+
+.connectea-dark :is(.cvr-c-switch label:before, .eds-c-switch__slider:before, .custom-switch .custom-control-label::after) {
+  background-color: #f1f5f9 !important;
+}
+
+.connectea-dark :is(.cvr-c-wizard-steps, .cvr-c-wizard-step, .multi-step-item) {
+  color: #94a3b8 !important;
+  border-color: #36485e !important;
+}
+
+.connectea-dark :is(.cvr-c-wizard-step--current, .multi-step-item.active) {
+  color: #60a5fa !important;
+  font-weight: 700 !important;
+}
+
+/* --------------------------------------------------------------------------
+   30. Search, Floating Filters, Rich Media, Editors & KaTeX
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.eds-c-search__field, .cvr-c-search input, .site-search__field) {
+  background-color: #141a22 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #42556d !important;
+  border-radius: 6px !important;
+}
+
+.connectea-dark :is(.cvr-c-service-float-bar-search-panel, .cvr-c-service-float-bar-filter-panel) {
+  background-color: #1a222d !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #36485e !important;
+}
+
+.connectea-dark :is(.v-richtextarea, .cvr-c-richtextarea) {
+  border: 1px solid #42556d !important;
+  border-radius: 6px !important;
+}
+
+.connectea-dark :is(.v-richtextarea .gwt-RichTextArea, .cvr-c-richtextarea iframe) {
+  background-color: #141a22 !important;
+  color: #f1f5f9 !important;
+}
+
+.connectea-dark .v-richtextarea .gwt-RichTextToolbar {
+  background-color: #1a222d !important;
+  border-bottom: 1px solid #36485e !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark :is(.v-multifileupload-dropzone, .cvr-c-upload-control, .cvr-c-upload-gallery) {
+  background-color: #18202b !important;
+  border: 1.5px dashed #4a617a !important;
+  color: #cbd5e1 !important;
+  border-radius: 8px !important;
+}
+
+.connectea-dark :is(.v-multifileupload-dropzone:hover, .cvr-c-upload-control:hover) {
+  background-color: #202c3b !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark .cvr-c-attachment-row {
+  background-color: #1a222d !important;
+  border: 1px solid #36485e !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark :is(.eds-c-empty-content, .c-empty-state, .c-empty-state-title, .c-empty-state-text) {
+  color: #94a3b8 !important;
+}
+
+.connectea-dark :is(.slick-slide__image-wrapper, .cvr-c-thumbnail) {
+  background-color: #1e2632 !important;
+  border-color: #36485e !important;
+}
+
+.connectea-dark :is(.slick-next, .slick-prev) {
+  background-color: #24303f !important;
+  border: 1px solid #4a617a !important;
+  color: #f1f5f9 !important;
+}
+
+.connectea-dark :is(.katex, .katex-display, .katex-html) {
+  color: inherit !important;
+}
+
+/* Angular Material Class Pages (.eds.cvr.ngm) Contrast Normalization */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+  [class*="connect-"].theme-multiplier.text-primary,
+  [class*="connect-"].theme-multiplier .text-primary,
+  [class*="connect-"].text-primary,
+  [class*="connect-"] .text-primary,
+  .connect-purple.theme-multiplier.text-primary,
+  .connect-purple.theme-multiplier .text-primary,
+  .connect-purple.text-primary,
+  .connect-purple .text-primary,
+  .theme-multiplier.text-primary,
+  .theme-multiplier .text-primary,
+  .text-primary
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
+  [class*="connect-"].theme-multiplier.text-primary,
+  [class*="connect-"].theme-multiplier .text-primary,
+  [class*="connect-"].text-primary,
+  [class*="connect-"] .text-primary,
+  .connect-purple.theme-multiplier.text-primary,
+  .connect-purple.theme-multiplier .text-primary,
+  .connect-purple.text-primary,
+  .connect-purple .text-primary,
+  .theme-multiplier.text-primary,
+  .theme-multiplier .text-primary,
+  .text-primary
+) {
+  color: #f1f5f9 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+  [class*="connect-"].theme-multiplier .mat-divider--primary,
+  [class*="connect-"].theme-multiplier.mat-divider--primary,
+  [class*="connect-"] .mat-divider--primary,
+  [class*="connect-"].mat-divider--primary,
+  .connect-purple.theme-multiplier .mat-divider--primary,
+  .connect-purple.theme-multiplier.mat-divider--primary,
+  .connect-purple .mat-divider--primary,
+  .connect-purple.mat-divider--primary,
+  .theme-multiplier .mat-divider--primary,
+  .theme-multiplier.mat-divider--primary,
+  .mat-divider--primary,
+  .mat-divider
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
+  [class*="connect-"].theme-multiplier .mat-divider--primary,
+  [class*="connect-"].theme-multiplier.mat-divider--primary,
+  [class*="connect-"] .mat-divider--primary,
+  [class*="connect-"].mat-divider--primary,
+  .connect-purple.theme-multiplier .mat-divider--primary,
+  .connect-purple.theme-multiplier.mat-divider--primary,
+  .connect-purple .mat-divider--primary,
+  .connect-purple.mat-divider--primary,
+  .theme-multiplier .mat-divider--primary,
+  .theme-multiplier.mat-divider--primary,
+  .mat-divider--primary,
+  .mat-divider
+) {
+  border-top-color: #3d5066 !important;
+  border-color: #3d5066 !important;
+}
+
+/* Developer Settings Clear Cache button */
+.cx-clear-cache-btn {
+  background: #e74c3c !important;
+  color: #ffffff !important;
+  border: 1px solid #c0392b !important;
+  border-radius: 4px !important;
+  padding: 6px 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease, border-color 0.15s ease !important;
+}
+.cx-clear-cache-btn:hover {
+  background: #c0392b !important;
+  border-color: #a93226 !important;
+}
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-clear-cache-btn {
+  background: #c0392b !important;
+  color: #ffffff !important;
+  border: 1px solid #962d22 !important;
+}
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-clear-cache-btn:hover {
+  background: #962d22 !important;
+  border-color: #78241c !important;
+}
+
+/* Responsive display-width scaling for subject and task panels */
+:is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.cvr-c-task__details {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.cx-compound-progress-container,
+.cx-compound-progress-bar {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.connectea-type-container,
+.connectea-outcome-bar {
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+}
+
+/* Proportional display width scaling preserving single-line alignment */
+:root {
+  --cx-display-scale: 1;
+}
+@media (max-width: 1400px) { :root { --cx-display-scale: 0.92; } }
+@media (max-width: 1200px) { :root { --cx-display-scale: 0.85; } }
+@media (max-width: 1050px) { :root { --cx-display-scale: 0.76; } }
+@media (max-width: 950px)  {
+  :root { --cx-display-scale: 0.62; }
+  .connectea-row-wrapper { gap: 8px !important; }
+  .connectea-panel { padding: 6px 10px !important; }
+}
+@media (max-width: 800px)  {
+  :root { --cx-display-scale: 0.55; }
+  .connectea-row-wrapper { gap: 6px !important; }
+  .connectea-panel { padding: 5px 8px !important; }
+}
+@media (max-width: 650px)  {
+  :root { --cx-display-scale: 0.48; }
+  .connectea-row-wrapper { gap: 4px !important; }
+  .connectea-panel { padding: 4px 6px !important; }
+}
+
+.connectea-row-wrapper {
+  zoom: var(--cx-display-scale, 1) !important;
+  transform-origin: left center !important;
+}
+
+@supports not (zoom: 1) {
+  .connectea-row-wrapper {
+    transform: scale(var(--cx-display-scale, 1)) !important;
+    transform-origin: left center !important;
+  }
+}
+
+
+

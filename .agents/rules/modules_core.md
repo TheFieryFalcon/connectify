@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Connectify Core Modules Reference
 
 This document covers data ingestion, cohort distribution math, dynamic cohort size estimation, task categorization, and the core ATAR projection engine.

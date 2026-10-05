@@ -1,0 +1,256 @@
+/* Notifications Engine & Stack Container */
+#connectify-notifications-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10060;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  max-width: 440px;
+  width: calc(100vw - 48px);
+  pointer-events: none;
+}
+
+.cx-notification {
+  pointer-events: auto !important;
+  position: relative !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  border-left: 5px solid #185c8c !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+  padding: 14px 18px !important;
+  font: 13px/1.5 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  box-sizing: border-box !important;
+  animation: cx-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: opacity 0.25s ease, transform 0.25s ease !important;
+}
+
+.cx-notification-dismissing {
+  opacity: 0 !important;
+  transform: translateX(40px) !important;
+}
+
+.cx-notification--warning {
+  border-left-color: #eab308 !important;
+}
+
+.cx-notification--success {
+  border-left-color: #10b981 !important;
+}
+
+.cx-notification--info {
+  border-left-color: #3b82f6 !important;
+}
+
+.cx-notification--grade {
+  border-left-color: #7c3aed !important;
+}
+
+@keyframes cx-slide-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cx-notification-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 6px !important;
+}
+
+.cx-notification-title-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.cx-notification-icon {
+  font-size: 15px !important;
+  line-height: 1 !important;
+}
+
+.cx-notification-title {
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  color: #0f172a !important;
+}
+
+.cx-notification-close {
+  display: none !important;
+}
+
+.cx-notification-body {
+  margin-bottom: 8px !important;
+  color: #334155 !important;
+  font-size: 12.5px !important;
+  line-height: 1.5 !important;
+}
+
+.cx-notification-details {
+  margin: 6px 0 10px 0 !important;
+  padding: 6px 10px 6px 24px !important;
+  background: #f1f5f9 !important;
+  border-radius: 6px !important;
+  font-size: 11.5px !important;
+  color: #334155 !important;
+}
+
+.cx-notification-actions {
+  display: flex !important;
+  gap: 8px !important;
+  justify-content: flex-end !important;
+  margin-top: 10px !important;
+}
+
+.cx-notification-btn {
+  cursor: pointer !important;
+  font: 600 12px/1.3 system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  border-radius: 6px !important;
+  padding: 6px 14px !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+}
+
+.cx-notification-btn--primary {
+  background: #185c8c !important;
+  background-color: #185c8c !important;
+  color: #ffffff !important;
+  border-color: #13466a !important;
+}
+
+.cx-notification-btn--primary:hover {
+  background: #13466a !important;
+  background-color: #13466a !important;
+  color: #ffffff !important;
+}
+
+.cx-notification-btn--secondary {
+  background: #f1f5f9 !important;
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
+}
+
+.cx-notification-btn--secondary:hover {
+  background: #e2e8f0 !important;
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.cx-notification-btn--accent {
+  background: #6d28d9 !important;
+  background-color: #6d28d9 !important;
+  color: #ffffff !important;
+  border-color: #5b21b6 !important;
+}
+
+.cx-notification-btn--accent:hover {
+  background: #5b21b6 !important;
+  background-color: #5b21b6 !important;
+  color: #ffffff !important;
+}
+
+/* Dark mode overrides for notifications */
+.connectea-dark .cx-notification {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+}
+
+.connectea-dark .cx-notification--warning {
+  border-left-color: #facc15 !important;
+}
+
+.connectea-dark .cx-notification--success {
+  border-left-color: #34d399 !important;
+}
+
+.connectea-dark .cx-notification--grade {
+  border-left-color: #a78bfa !important;
+}
+
+.connectea-dark .cx-notification-title {
+  color: #f8fafc !important;
+}
+
+.connectea-dark .cx-notification-close {
+  display: none !important;
+}
+
+.connectea-dark .cx-notification-body {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark .cx-notification-details {
+  background: #0f172a !important;
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark .cx-notification-btn--primary {
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #1d4ed8 !important;
+}
+
+.connectea-dark .cx-notification-btn--primary:hover {
+  background: #1d4ed8 !important;
+  background-color: #1d4ed8 !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark .cx-notification-btn--secondary {
+  background: #334155 !important;
+  background-color: #334155 !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+.connectea-dark .cx-notification-btn--secondary:hover {
+  background: #475569 !important;
+  background-color: #475569 !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark .cx-notification-btn--accent {
+  background: #8b5cf6 !important;
+  background-color: #8b5cf6 !important;
+  color: #ffffff !important;
+  border-color: #7c3aed !important;
+}
+
+.connectea-dark .cx-notification-btn--accent:hover {
+  background: #7c3aed !important;
+  background-color: #7c3aed !important;
+  color: #ffffff !important;
+}
+
+/* Card Jump / Flash Animation */
+.cx-card-jump-highlight {
+  animation: cx-highlight-pulse 2s ease-out;
+}
+
+@keyframes cx-highlight-pulse {
+  0% {
+    box-shadow: 0 0 0 4px #8b5cf6, 0 0 20px rgba(139, 92, 246, 0.5);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
+#connectify-sidebar .cx-tools-intro{padding:14px 20px 4px 20px!important;margin:0!important;font-size:12.5px!important;line-height:1.5!important;color:#4b647f!important}
+.connectea-dark #connectify-sidebar .cx-tools-intro{color:#94a3b8!important}
+

@@ -1,0 +1,411 @@
+/* Predictor Tool Panel Styles */
+#connectify-predictor .cx-pred-header {
+  margin-bottom: 16px;
+}
+#connectify-predictor .cx-pred-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+#connectify-predictor .cx-pred-title {
+  font-size: 18px;
+  font-weight: 650;
+  color: inherit;
+}
+#connectify-predictor .cx-pred-subtitle {
+  font-size: 11px;
+  color: #55667a;
+}
+.connectea-dark #connectify-predictor .cx-pred-subtitle {
+  color: #94a3b8;
+}
+
+/* Primary Tabs (matching .cta-tabs pill bar design language) */
+.cx-pred-main-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #edf2f7;
+  border-radius: 9px;
+  margin-bottom: 16px;
+}
+.connectea-dark .cx-pred-main-tabs {
+  background: #191f27;
+}
+.cx-pred-main-tab {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #55667a;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+.cx-pred-main-tab:hover {
+  color: #174c75;
+}
+.cx-pred-main-tab.active {
+  background: #ffffff;
+  color: #215d90;
+  box-shadow: 0 1px 4px rgba(23, 57, 84, 0.15);
+  font-weight: 700;
+}
+.connectea-dark .cx-pred-main-tab {
+  color: #a0b2c6;
+}
+.connectea-dark .cx-pred-main-tab:hover {
+  color: #e1eaf3;
+}
+.connectea-dark .cx-pred-main-tab.active {
+  background: #34485d;
+  color: #e0eefb;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Subject Sub-Tabs (Chips) */
+.cx-pred-subtabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+.cx-pred-subtab {
+  background: #edf4fa;
+  border: 1px solid #c8d9e8;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #253b53;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  flex: 0 0 auto;
+}
+.cx-pred-subtab:hover {
+  background: #d9eafa;
+  border-color: #709fc4;
+  color: #174c75;
+}
+.cx-pred-subtab.active {
+  background: #24618c;
+  border-color: #1b4b6d;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(36, 97, 140, 0.3);
+}
+.connectea-dark .cx-pred-subtab {
+  background: #253342;
+  border-color: #3b5066;
+  color: #dceaf6;
+}
+.connectea-dark .cx-pred-subtab:hover {
+  background: #33485d;
+  color: #ffffff;
+}
+.connectea-dark .cx-pred-subtab.active {
+  background: #3575b9;
+  border-color: #6ba5d6;
+  color: #ffffff;
+}
+
+/* Cards & Containers */
+.cx-pred-card {
+  background: #edf5fb;
+  border: 1px solid #c8d9e8;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+.connectea-dark .cx-pred-card {
+  background: #253342;
+  border-color: #3b5066;
+  color: #e1eaf3;
+}
+
+.cx-pred-scenario-card {
+  background: #ffffff;
+  border: 1px solid #c8d9e8;
+  border-radius: 6px;
+  padding: 8px 6px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.cx-pred-scenario-card--low {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+.cx-pred-scenario-card--mid {
+  background: #e9f2fb;
+  border: 1.5px solid #709fc4;
+}
+.cx-pred-scenario-card--high {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+.cx-pred-scenario-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: 0.8;
+  color: inherit;
+}
+.cx-pred-scenario-label--low {
+  color: #64748b;
+}
+.cx-pred-scenario-label--mid {
+  font-weight: 700;
+  color: #174c75;
+}
+.cx-pred-scenario-label--high {
+  font-weight: 700;
+  color: #15803d;
+}
+.cx-pred-scenario-value {
+  font-size: 17px;
+  font-weight: 700;
+  margin-top: 3px;
+  color: inherit;
+}
+.cx-pred-scenario-value--low {
+  color: #475569;
+}
+.cx-pred-scenario-value--mid {
+  font-size: 20px;
+  font-weight: 800;
+  color: #174c75;
+  margin-top: 2px;
+}
+.cx-pred-scenario-value--atar {
+  font-size: 26px;
+}
+.cx-pred-scenario-value--high {
+  color: #15803d;
+  font-weight: 700;
+}
+.cx-pred-scenario-sub {
+  font-size: 9.5px;
+  opacity: 0.75;
+  margin-top: 1px;
+}
+.cx-pred-scenario-sub--low {
+  color: #64748b;
+}
+.cx-pred-scenario-sub--mid {
+  font-weight: 600;
+  color: #24618c;
+  font-size: 10.5px;
+}
+.cx-pred-scenario-sub--high {
+  font-weight: 600;
+  color: #15803d;
+}
+.cx-pred-hint {
+  color: #55667a;
+}
+.cx-pred-top4-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 2px 7px;
+  border-radius: 8px;
+}
+.cx-pred-reserve-badge {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.connectea-dark .cx-pred-scenario-card {
+  background: #1e252e;
+  border-color: #3b5066;
+  color: #dceaf6;
+}
+.connectea-dark .cx-pred-scenario-card--low {
+  background: #1e252e !important;
+  border-color: #3b5066 !important;
+}
+.connectea-dark .cx-pred-scenario-label--low {
+  color: #94a3b8 !important;
+}
+.connectea-dark .cx-pred-scenario-value--low {
+  color: #cbd5e1 !important;
+}
+.connectea-dark .cx-pred-scenario-sub--low {
+  color: #94a3b8 !important;
+}
+.connectea-dark .cx-pred-scenario-card--mid {
+  background: #1e3a5f !important;
+  border: 1.5px solid #60a5fa !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(96, 165, 250, 0.2) !important;
+}
+.connectea-dark .cx-pred-scenario-label--mid {
+  color: #93c5fd !important;
+}
+.connectea-dark .cx-pred-scenario-value--mid {
+  color: #ffffff !important;
+}
+.connectea-dark .cx-pred-scenario-sub--mid {
+  color: #bfdbfe !important;
+}
+.connectea-dark .cx-pred-scenario-card--high {
+  background: #143522 !important;
+  border-color: #2b6647 !important;
+}
+.connectea-dark .cx-pred-scenario-label--high {
+  color: #86efac !important;
+}
+.connectea-dark .cx-pred-scenario-value--high {
+  color: #4ade80 !important;
+}
+.connectea-dark .cx-pred-scenario-sub--high {
+  color: #86efac !important;
+}
+.connectea-dark .cx-pred-hint {
+  color: #94a3b8 !important;
+}
+.connectea-dark .cx-pred-top4-badge {
+  color: #4ade80 !important;
+  background: #143522 !important;
+  border: 1px solid #2b6647 !important;
+}
+
+/* Upcoming Tasks & Task Cards */
+.cx-pred-task-card {
+  background: #ffffff;
+  border: 1px solid #d9e2eb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+.connectea-dark .cx-pred-task-card {
+  background: #222830;
+  border-color: #414954;
+  color: #dce2e8;
+}
+
+/* Prediction Result Pills */
+.cx-pred-pill {
+  background: #f4f7fb;
+  border: 1px solid #c8d9e8;
+  border-radius: 5px;
+  padding: 6px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.cx-pred-pill--low {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+.cx-pred-pill--low strong {
+  color: #334155;
+}
+.cx-pred-pill--mid {
+  background: #d9eafa;
+  border-color: #709fc4;
+  color: #174c75;
+}
+.cx-pred-pill--mid strong {
+  color: #174c75;
+}
+.cx-pred-pill--high {
+  background: #e6f7ee;
+  border-color: #8cdab1;
+  color: #15803d;
+}
+.cx-pred-pill--high strong {
+  color: #15803d;
+}
+.connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) {
+  background: #1e252e !important;
+  border-color: #3b5066 !important;
+  color: #b4c5d5 !important;
+}
+.connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) strong {
+  color: #cbd5e1 !important;
+}
+.connectea-dark .cx-pred-pill--mid {
+  background: #1e3a5f !important;
+  border-color: #60a5fa !important;
+  color: #ffffff !important;
+}
+.connectea-dark .cx-pred-pill--mid strong {
+  color: #ffffff !important;
+}
+.connectea-dark .cx-pred-pill--high {
+  background: #143522 !important;
+  border-color: #2b6647 !important;
+  color: #4ade80 !important;
+}
+.connectea-dark .cx-pred-pill--high strong {
+  color: #4ade80 !important;
+}
+
+/* Unpredicted Cold-Start Notice */
+.cx-pred-unpredicted-notice {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11.5px;
+  color: #92400e;
+  line-height: 1.45;
+}
+.connectea-dark .cx-pred-unpredicted-notice {
+  background: #332a18;
+  border-color: #5c471c;
+  color: #ffd56b;
+}
+
+/* Guidance / No-Average Card */
+.cx-pred-no-average-card {
+  background: #edf5fb;
+  border: 1px dashed #709fc4;
+  border-radius: 8px;
+  padding: 28px 20px;
+  text-align: center;
+  margin-top: 8px;
+}
+.connectea-dark .cx-pred-no-average-card {
+  background: #253342;
+  border-color: #527d9f;
+  color: #dceaf6;
+}
+
+/* ATAR Contributing Courses Table */
+.cx-pred-courses-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+  text-align: left;
+  margin-top: 8px;
+}
+.cx-pred-courses-table th,
+.cx-pred-courses-table td {
+  padding: 7px 4px;
+  border-bottom: 1px solid #d9e2eb;
+}
+.connectea-dark .cx-pred-courses-table th,
+.connectea-dark .cx-pred-courses-table td {
+  border-color: #414954;
+  color: #dce2e8;
+}
+.cx-pred-courses-table th {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: #55667a;
+  font-weight: 700;
+}
+.connectea-dark .cx-pred-courses-table th {
+  color: #94a3b8;
+}
+

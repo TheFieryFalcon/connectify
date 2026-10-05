@@ -1,16 +1,12 @@
 /**
- * Connectify Sidebar & Tool Launcher
+ * Connectify Sidebar Drawer & Tool Launcher Workspace
  *
- * Provides a slide-out drawer hosting Connectify tools:
- * - ATAR / Target ATAR / Grade calculators
- * - Assessment Progress graphs
- * - Expand all / Unexpand all outline controls
+ * Provides the slide-out drawer hosting Connectify tools and panel navigation.
  */
 (() => {
   'use strict';
 
   try {
-    // Prevent duplicate instances from being mounted
     if (window.__connectifySidebarInitialized) return;
     window.__connectifySidebarInitialized = true;
 
@@ -20,19 +16,11 @@
       return el;
     };
 
-    // Reuse existing DOM nodes if another script run created them, or create fresh ones
     let sidebar = document.getElementById('connectify-sidebar');
-    let handle = document.getElementById('connectify-sidebar-handle');
+    let handle = window.ConnectifySidebarHandle?.handle || document.getElementById('connectify-sidebar-handle');
 
-    // Clean up any extra duplicate handles or sidebars in the document
-    const allSidebars = document.querySelectorAll('#connectify-sidebar');
-    if (allSidebars.length > 1) {
-      for (let i = 1; i < allSidebars.length; i++) allSidebars[i].remove();
-    }
-    const allHandles = document.querySelectorAll('#connectify-sidebar-handle');
-    if (allHandles.length > 1) {
-      for (let i = 1; i < allHandles.length; i++) allHandles[i].remove();
-    }
+    document.querySelectorAll('#connectify-sidebar').forEach((el, i) => { if (i > 0) el.remove(); });
+    document.querySelectorAll('#connectify-sidebar-handle').forEach((el, i) => { if (i > 0) el.remove(); });
 
     if (!sidebar) {
       sidebar = createElement('aside');
@@ -50,196 +38,8 @@
       handle.setAttribute('aria-expanded', 'false');
     }
 
-    function getTopBarBottom() {
-      const selectors = [
-        '.cvr-c-header',
-        '.cvr-c-primary-navigation',
-        '.cvr-c-primary-navigation__container',
-        '.cvr-c-primary-navigation__bar',
-        '.cvr-c-branding',
-        'header.cvr-c-header',
-        'nav.cvr-c-primary-navigation'
-      ];
-      let maxBottom = 0;
-      for (const sel of selectors) {
-        const matches = document.querySelectorAll(sel);
-        for (const el of matches) {
-          if (sidebar.contains(el) || el.id === 'connectify-sidebar-handle') continue;
-          if (typeof el.getBoundingClientRect === 'function') {
-            const rect = el.getBoundingClientRect();
-            // Must be docked at or above viewport top to be part of the top navigation bar
-            if (rect.top <= 25 && rect.bottom > maxBottom) {
-              maxBottom = rect.bottom;
-            }
-          }
-        }
-      }
-      return Math.max(0, maxBottom);
-    }
-
-    function isElementFixedOrSticky(el) {
-      let cur = el;
-      while (cur && cur !== document.body && cur !== document.documentElement) {
-        if (typeof window.getComputedStyle === 'function') {
-          const style = window.getComputedStyle(cur);
-          if (style) {
-            const pos = style.position;
-            if (pos === 'fixed' || pos === 'sticky') {
-              return true;
-            }
-          }
-        }
-        cur = cur.parentElement;
-      }
-      return false;
-    }
-
-    function getConnectSidebar() {
-      const selectors = [
-        '.cvr-c-service-menu',
-        '.cvr-c-service-menu__wrapper',
-        '.cvr-c-side-menu',
-        '.cvr-c-classes-menu',
-        '.cvr-c-category-menu',
-        '.product-menu',
-        '.sidenav-menu-slider'
-      ];
-      for (const sel of selectors) {
-        const el = document.querySelector(sel);
-        if (el && typeof el.getBoundingClientRect === 'function') {
-          if (sidebar.contains(el) || el.id === 'connectify-sidebar-handle') continue;
-          const rect = el.getBoundingClientRect();
-          const height = el.offsetHeight || rect.height || 0;
-          const width = el.offsetWidth || rect.width || 0;
-          if (height >= 120 && (width > 0 || rect.width > 0) && rect.left <= 60 && rect.right > 0) {
-            return el;
-          }
-        }
-      }
-      return null;
-    }
-
-    function updateHandlePosition() {
-      try {
-        const topBarBottom = getTopBarBottom();
-        const vh = window.innerHeight || document.documentElement?.clientHeight || 800;
-        const availableHeight = Math.max(0, vh - topBarBottom);
-        const centerY = Math.round(topBarBottom + availableHeight / 2);
-
-        // When Connectify tool drawer is OPEN: dock to drawer edge in the active viewport
-        if (!sidebar.hidden) {
-          handle.style.position = 'fixed';
-          handle.style.top = `${centerY}px`;
-          handle.style.transform = 'translateY(-50%)';
-          return;
-        }
-
-        // When Connectify tool drawer is CLOSED:
-        // Anchor to Connect's native left sidebar if present, moving directly with it as the page scrolls
-        const connectSidebar = getConnectSidebar();
-        if (connectSidebar) {
-          if (typeof ResizeObserver === 'function' && !connectSidebar._connectifyHandleObserved) {
-            connectSidebar._connectifyHandleObserved = true;
-            try {
-              new ResizeObserver(() => {
-                if (sidebar.hidden) updateHandlePosition();
-              }).observe(connectSidebar);
-            } catch {}
-          }
-
-          const rect = connectSidebar.getBoundingClientRect();
-          const pageY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement?.scrollTop || document.body?.scrollTop || 0);
-          const sidebarDocTop = rect.top + pageY;
-          const sidebarHeight = connectSidebar.offsetHeight || rect.height || 350;
-          const isFixed = isElementFixedOrSticky(connectSidebar);
-
-          const bodyRect = (document.body && typeof document.body.getBoundingClientRect === 'function') ? document.body.getBoundingClientRect() : null;
-          const bodyTop = bodyRect ? (bodyRect.top + pageY) : 0;
-
-          const targetDocY = Math.round(sidebarDocTop - bodyTop + (sidebarHeight <= vh ? sidebarHeight / 2 : Math.min(sidebarHeight, vh) / 2));
-          handle._lastViewportY = centerY;
-
-          if (isFixed) {
-            handle.style.position = 'fixed';
-            handle.style.top = `${centerY}px`;
-          } else {
-            handle.style.position = 'absolute';
-            handle.style.top = `${targetDocY}px`;
-          }
-          handle.style.transform = 'translateY(-50%)';
-          return;
-        }
-
-        // Fallback when no Connect sidebar is present: center within visible viewport below top bar
-        handle._lastViewportY = centerY;
-        handle.style.position = 'fixed';
-        handle.style.top = `${centerY}px`;
-        handle.style.transform = 'translateY(-50%)';
-      } catch {}
-    }
-
-    function updateHandleState(isOpen) {
-      const icon = createElement('span', isOpen ? '❮' : '❯');
-      icon.className = 'cx-handle-arrow';
-      if (typeof handle.replaceChildren === 'function') {
-        handle.replaceChildren(icon);
-      } else {
-        while (handle.firstChild) handle.removeChild(handle.firstChild);
-        handle.append(icon);
-      }
-
-      handle.title = isOpen ? 'Close Connectify tools' : 'Open Connectify tools';
-      handle.setAttribute('aria-label', handle.title);
-      handle.setAttribute('aria-expanded', String(isOpen));
-      updateHandlePosition();
-    }
-
-    handle.updatePosition = updateHandlePosition;
-    window._connectifyUpdateHandlePosition = updateHandlePosition;
-    updateHandleState(false);
-    let handleRafPending = false;
-    let scrollTransitionTimer = null;
-    const handleScrollThrottled = e => {
-      if (e && e.target && (sidebar.contains(e.target) || handle.contains(e.target))) {
-        return;
-      }
-      if (sidebar.hidden) {
-        handle.style.transition = 'left 0.2s cubic-bezier(0.16,1,0.3,1), background 0.15s ease';
-        if (scrollTransitionTimer) clearTimeout(scrollTransitionTimer);
-        scrollTransitionTimer = setTimeout(() => {
-          handle.style.transition = '';
-        }, 150);
-      }
-      if (!handleRafPending) {
-        handleRafPending = true;
-        if (typeof requestAnimationFrame === 'function') {
-          requestAnimationFrame(() => {
-            handleRafPending = false;
-            updateHandlePosition();
-          });
-        } else {
-          handleRafPending = false;
-          updateHandlePosition();
-        }
-      }
-    };
-    if (window._connectifyScrollAttached) {
-      window.removeEventListener('scroll', window._connectifyScrollAttached, true);
-    }
-    window._connectifyScrollAttached = handleScrollThrottled;
-    window.addEventListener('scroll', handleScrollThrottled, { passive: true, capture: true });
-
-    if (window._connectifyResizeAttached) {
-      window.removeEventListener('resize', window._connectifyResizeAttached);
-    }
-    window._connectifyResizeAttached = updateHandlePosition;
-    window.addEventListener('resize', updateHandlePosition, { passive: true });
-
-    [50, 150, 300, 600, 1200].forEach(delay => setTimeout(updateHandlePosition, delay));
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', updateHandlePosition);
-    }
-    window.addEventListener('load', updateHandlePosition);
+    const updateHandlePosition = () => (window._connectifyUpdateHandlePosition || window.ConnectifySidebarHandle?.updateHandlePosition || function() {})();
+    const updateHandleState = (isOpen) => (window.ConnectifySidebarHandle?.updateHandleState || function() {})(isOpen);
 
     // Header and navigation
     let header = sidebar.querySelector('header');
@@ -317,18 +117,14 @@
      */
     function mountTools() {
       // Ensure all tool components and panels are instantiated
-      if (!window.ConnectifyWeakness?.panelRefs && window.ConnectifyWeakness?.ensureWeaknessPanel) {
-        window.ConnectifyWeakness.ensureWeaknessPanel();
-      } else if (!window.ConnectifyWeakness?.panelRefs && window.ConnectifyWeakness?.createWeaknessPanel) {
-        window.ConnectifyWeakness.createWeaknessPanel();
+      if (!window.ConnectifyWeakness?.panelRefs) {
+        if (window.ConnectifyWeakness?.ensureWeaknessPanel) window.ConnectifyWeakness.ensureWeaknessPanel();
+        else if (window.ConnectifyWeakness?.createWeaknessPanel) window.ConnectifyWeakness.createWeaknessPanel();
       }
-
-      if (!window.ConnectifyCategorySettings?.panelRefs && window.ConnectifyCategorySettings?.ensureSettingsPanel) {
-        window.ConnectifyCategorySettings.ensureSettingsPanel();
-      } else if (!window.ConnectifyCategorySettings?.panelRefs && window.ConnectifyCategorySettings?.createSettingsPanel) {
-        window.ConnectifyCategorySettings.createSettingsPanel();
+      if (!window.ConnectifyCategorySettings?.panelRefs) {
+        if (window.ConnectifyCategorySettings?.ensureSettingsPanel) window.ConnectifyCategorySettings.ensureSettingsPanel();
+        else if (window.ConnectifyCategorySettings?.createSettingsPanel) window.ConnectifyCategorySettings.createSettingsPanel();
       }
-
       if (!window.ConnectifyProgress?.panelRefs && window.ConnectifyProgress?.ensureProgressPanel) {
         window.ConnectifyProgress.ensureProgressPanel();
       }
@@ -448,10 +244,15 @@
     }
 
     let justReturnedToMenu = false;
+    const setJustReturnedToMenu = (val) => {
+      justReturnedToMenu = val;
+      window._connectifyJustReturnedToMenu = val;
+    };
 
     function openSidebar() {
-      justReturnedToMenu = false;
+      setJustReturnedToMenu(false);
       sidebar.hidden = false;
+      handle.setAttribute('aria-expanded', 'true');
       updateHandleState(true);
       syncState();
     }
@@ -467,18 +268,15 @@
     }
 
     function closeSidebar() {
-      justReturnedToMenu = false;
-      if (hoverCollapseTimeout) {
-        clearTimeout(hoverCollapseTimeout);
-        hoverCollapseTimeout = null;
-      }
+      setJustReturnedToMenu(false);
       closeAllTools();
       sidebar.hidden = true;
+      handle.setAttribute('aria-expanded', 'false');
       updateHandleState(false);
     }
 
     handle.onclick = () => {
-      justReturnedToMenu = false;
+      setJustReturnedToMenu(false);
       if (sidebar.hidden) {
         openSidebar();
       } else {
@@ -493,7 +291,7 @@
     if (homeBtn) {
       homeBtn.onclick = () => {
         if (sidebar.classList.contains('cx-tool-active')) {
-          justReturnedToMenu = true;
+          setJustReturnedToMenu(true);
         }
         closeAllTools();
       };
@@ -511,92 +309,12 @@
                        sidebar.contains(e.target) ||
                        handle.contains(e.target);
       if (!isInside) {
-        justReturnedToMenu = false;
+        setJustReturnedToMenu(false);
         closeSidebar();
       }
     };
     window._connectifyOutsideClickAttached = handleOutsideClick;
     document.addEventListener('click', handleOutsideClick);
-
-    // Edge push to expand & hover collapse when no panel is active
-    let hoverCollapseTimeout = null;
-
-    if (window._connectifyMouseMoveAttached) {
-      document.removeEventListener('mousemove', window._connectifyMouseMoveAttached);
-    }
-    const handleMouseMove = e => {
-      // 1. Moving mouse to the left edge of the screen expands the sidebar
-      if (sidebar.hidden) {
-        if (e.clientX <= 12 || handle.contains(e.target)) {
-          justReturnedToMenu = false;
-          if (hoverCollapseTimeout) {
-            clearTimeout(hoverCollapseTimeout);
-            hoverCollapseTimeout = null;
-          }
-          openSidebar();
-        }
-        return;
-      }
-
-      // 2. If sidebar is open and NO panel is active:
-      // Collapse when mouse moves outside of the sidebar and handle,
-      // unless user just returned to menu from an active tool panel
-      if (!sidebar.classList.contains('cx-tool-active') && !justReturnedToMenu) {
-        const sidebarRect = typeof sidebar.getBoundingClientRect === 'function' ? sidebar.getBoundingClientRect() : null;
-        const handleRect = typeof handle.getBoundingClientRect === 'function' ? handle.getBoundingClientRect() : null;
-
-        const inSidebar = sidebar.contains(e.target) ||
-          (sidebarRect && e.clientX >= (sidebarRect.left - 5) && e.clientX <= (sidebarRect.right + 25) && e.clientY >= (sidebarRect.top - 5) && e.clientY <= (sidebarRect.bottom + 5));
-        const inHandle = handle.contains(e.target) ||
-          (handleRect && e.clientX >= handleRect.left && e.clientX <= handleRect.right && e.clientY >= handleRect.top && e.clientY <= handleRect.bottom);
-
-        if (inSidebar || inHandle) {
-          if (hoverCollapseTimeout) {
-            clearTimeout(hoverCollapseTimeout);
-            hoverCollapseTimeout = null;
-          }
-        } else {
-          // Mouse is outside sidebar and handle, no tool is active, and didn't just return to menu
-          if (!hoverCollapseTimeout) {
-            hoverCollapseTimeout = setTimeout(() => {
-              hoverCollapseTimeout = null;
-              if (!sidebar.hidden && !sidebar.classList.contains('cx-tool-active') && !justReturnedToMenu) {
-                closeSidebar();
-              }
-            }, 120);
-          }
-        }
-      } else {
-        // A panel is active or user just returned to menu: hover-out should NOT collapse
-        if (hoverCollapseTimeout) {
-          clearTimeout(hoverCollapseTimeout);
-          hoverCollapseTimeout = null;
-        }
-      }
-    };
-    window._connectifyMouseMoveAttached = handleMouseMove;
-    document.addEventListener('mousemove', handleMouseMove, { passive: true });
-
-    const cancelCollapse = () => {
-      if (hoverCollapseTimeout) {
-        clearTimeout(hoverCollapseTimeout);
-        hoverCollapseTimeout = null;
-      }
-    };
-    sidebar.addEventListener('scroll', cancelCollapse, { passive: true });
-    workspace.addEventListener('scroll', cancelCollapse, { passive: true });
-    sidebar.addEventListener('wheel', cancelCollapse, { passive: true });
-
-    if (window._connectifyMouseLeaveAttached) {
-      document.removeEventListener('mouseleave', window._connectifyMouseLeaveAttached);
-    }
-    const handleMouseLeaveDoc = () => {
-      if (!sidebar.hidden && !sidebar.classList.contains('cx-tool-active') && !justReturnedToMenu) {
-        closeSidebar();
-      }
-    };
-    window._connectifyMouseLeaveAttached = handleMouseLeaveDoc;
-    document.addEventListener('mouseleave', handleMouseLeaveDoc);
 
     // Central delegated tool launcher listener
     const handleToolLaunchClick = e => {
@@ -604,33 +322,16 @@
       const toggle = e.target.closest('#connectify-target-toggle, #connectify-grade-toggle, #connectify-estimate-toggle, #connectify-predictor-toggle, #connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle');
       if (!toggle) return;
       e._connectifyToolHandled = true;
-      justReturnedToMenu = false;
+      setJustReturnedToMenu(false);
 
       const id = toggle.id;
-      if (id === 'connectify-target-toggle') {
-        toggle.setAttribute('aria-pressed', 'true');
-        document.getElementById('connectify-grade-toggle')?.setAttribute('aria-pressed', 'false');
-        document.getElementById('connectify-estimate-toggle')?.setAttribute('aria-pressed', 'false');
+      if (id === 'connectify-target-toggle' || id === 'connectify-grade-toggle' || id === 'connectify-estimate-toggle') {
+        const mode = id === 'connectify-target-toggle' ? 'target' : (id === 'connectify-grade-toggle' ? 'grade' : 'estimate');
+        ['connectify-target-toggle', 'connectify-grade-toggle', 'connectify-estimate-toggle'].forEach(tid => {
+          document.getElementById(tid)?.setAttribute('aria-pressed', tid === id ? 'true' : 'false');
+        });
         if (window.ConnectifyAtar?.openCalculator) {
-          window.ConnectifyAtar.openCalculator('target');
-        } else {
-          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
-        }
-      } else if (id === 'connectify-grade-toggle') {
-        toggle.setAttribute('aria-pressed', 'true');
-        document.getElementById('connectify-target-toggle')?.setAttribute('aria-pressed', 'false');
-        document.getElementById('connectify-estimate-toggle')?.setAttribute('aria-pressed', 'false');
-        if (window.ConnectifyAtar?.openCalculator) {
-          window.ConnectifyAtar.openCalculator('grade');
-        } else {
-          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
-        }
-      } else if (id === 'connectify-estimate-toggle') {
-        toggle.setAttribute('aria-pressed', 'true');
-        document.getElementById('connectify-target-toggle')?.setAttribute('aria-pressed', 'false');
-        document.getElementById('connectify-grade-toggle')?.setAttribute('aria-pressed', 'false');
-        if (window.ConnectifyAtar?.openCalculator) {
-          window.ConnectifyAtar.openCalculator('estimate');
+          window.ConnectifyAtar.openCalculator(mode);
         } else {
           window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
         }
@@ -788,6 +489,9 @@
       syncState();
     }, 1500);
     syncState();
+
+    window.ConnectifyOpenSidebar = openSidebar;
+    window.ConnectifyCloseSidebar = closeSidebar;
   } catch (err) {
     console.error('Connectify error in sidebar.js:', err);
   }

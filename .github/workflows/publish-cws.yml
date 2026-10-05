@@ -1,0 +1,85 @@
+name: Publish to Chrome Web Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_to_everyone:
+        description: 'Publish live to all users (set false for draft/trusted testers)'
+        required: true
+        type: boolean
+        default: true
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish-cws:
+    name: Build & Publish to CWS
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from manifest
+        id: meta
+        run: |
+          VERSION=$(jq -r '.version // "unknown"' manifest.json)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Clean Chrome Extension Package
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          mkdir -p /tmp/cws-build
+          rsync -av \
+            --exclude='.git*' \
+            --exclude='.github*' \
+            --exclude='*.xpi' \
+            --exclude='*.zip' \
+            --exclude='*.crx' \
+            --exclude='_metadata*' \
+            --exclude='.DS_Store' \
+            --exclude='README.md' \
+            --exclude='2.0.0_changelog.md' \
+            --exclude='ATAR-REFERENCE.md' \
+            --exclude='overview.md' \
+            --exclude='CHROMEWEBSTORE.md' \
+            --exclude='PRIVACY.md' \
+            --exclude='Archive.zip' \
+            --exclude='updates.*' \
+            --exclude='assets*' \
+            --exclude='.agents*' \
+            --exclude='AGENTS.md' \
+            --exclude='GEMINI.md' \
+            --exclude='design_rules.md' \
+            --exclude='docs*' \
+            --exclude='test_suite.js' \
+            ./ /tmp/cws-build/
+
+          # Clean Chrome Web Store manifest (strip key, update_url, browser_specific_settings)
+          jq 'del(.browser_specific_settings) | del(.update_url) | del(.key)' \
+            /tmp/cws-build/manifest.json > /tmp/cws-build/manifest.cws.json
+          mv /tmp/cws-build/manifest.cws.json /tmp/cws-build/manifest.json
+
+          cd /tmp/cws-build
+          zip -r "$GITHUB_WORKSPACE/connectify-${VERSION}.zip" .
+          cd "$GITHUB_WORKSPACE"
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: connectify-${{ steps.meta.outputs.version }}-cws-zip
+          path: connectify-${{ steps.meta.outputs.version }}.zip
+
+      - name: Upload to Chrome Web Store
+        uses: mnao305/chrome-extension-upload@v5.0.0
+        with:
+          file-path: connectify-${{ steps.meta.outputs.version }}.zip
+          extension-id: ${{ secrets.CWS_EXTENSION_ID || 'cmdpfgdabplmlflhechpifkonkjaiohm' }}
+          client-id: ${{ secrets.CWS_CLIENT_ID }}
+          client-secret: ${{ secrets.CWS_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CWS_REFRESH_TOKEN }}
+          publish: ${{ github.event.inputs.publish_to_everyone != 'false' }}

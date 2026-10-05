@@ -1,0 +1,410 @@
+/* --------------------------------------------------------------------------
+   17. Dynamic Surface & Text Contrast Adaptation
+   -------------------------------------------------------------------------- */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-surface],
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(div, section, article, header, nav, table, tr, td, th, ul, li)[data-connectea-surface] {
+  background-color: #1e2632 !important;
+  border-color: #3d5066 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-ink],
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(div, span, p, a, label, strong, h1, h2, h3, h4, h5, h6, li, button, i)[data-connectea-ink] {
+  color: #f1f5f9 !important;
+}
+
+/* --------------------------------------------------------------------------
+   18. Feed Header Filter Button, Follow Pills & Feed Cards
+   -------------------------------------------------------------------------- */
+/* Feed Header Filter Button (Square funnel filter button override) */
+.connectea-dark :is(
+  .cvr-c-feed__filter,
+  .cvr-c-filter-button,
+  .eds-c-filter-button,
+  button[aria-label*="filter" i],
+  .cvr-c-feed-header button,
+  .cvr-c-feed-header :is(.v-button, .eds-c-button)
+) {
+  background-color: #24303f !important;
+  color: #f1f6fb !important;
+  border: 1px solid #4a617a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed__filter,
+  .cvr-c-filter-button,
+  .eds-c-filter-button,
+  button[aria-label*="filter" i],
+  .cvr-c-feed-header button,
+  .cvr-c-feed-header :is(.v-button, .eds-c-button)
+):hover {
+  background-color: #313f50 !important;
+  border-color: #6b88a5 !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed__filter,
+  .cvr-c-filter-button,
+  .eds-c-filter-button,
+  button[aria-label*="filter" i]
+) svg {
+  fill: #f1f6fb !important;
+  color: #f1f6fb !important;
+}
+
+/* Feed Follow Pill Buttons */
+.connectea-dark :is(
+  .eds-c-tag,
+  .cvr-c-tag,
+  .cvr-c-feed-item__follow,
+  [class*="feed"] [class*="follow"],
+  button[class*="follow" i],
+  a[class*="follow" i]
+) {
+  background-color: #24303f !important;
+  color: #f8fafc !important;
+  border: 1px solid #4a617a !important;
+  border-radius: 9999px !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.connectea-dark :is(
+  .eds-c-tag,
+  .cvr-c-tag,
+  .cvr-c-feed-item__follow,
+  [class*="feed"] [class*="follow"],
+  button[class*="follow" i],
+  a[class*="follow" i]
+):hover {
+  background-color: #313f50 !important;
+  border-color: #6b88a5 !important;
+  color: #ffffff !important;
+}
+
+/* Feed Cards & Author/Timestamp/Comment Metadata */
+.connectea-dark :is(
+  .cvr-c-feed-card,
+  .cvr-c-feed-item,
+  [class*="feed-card"],
+  [class*="feed-item"]
+) {
+  background-color: #1e2632 !important;
+  border: 1px solid #3d5066 !important;
+  border-radius: 8px !important;
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed-card,
+  .cvr-c-feed-item,
+  [class*="feed-card"],
+  [class*="feed-item"]
+) :is(h1, h2, h3, h4, strong, [class*="title"]) {
+  color: #f8fafc !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed-card,
+  .cvr-c-feed-item,
+  [class*="feed-card"],
+  [class*="feed-item"]
+) :is(
+  .cvr-c-feed-item__meta,
+  .cvr-c-feed-item__author,
+  .cvr-c-feed-item__date,
+  [class*="author"],
+  [class*="date"],
+  [class*="timestamp"],
+  [class*="meta"],
+  small,
+  em,
+  p
+) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed-card,
+  .cvr-c-feed-item,
+  [class*="feed-card"],
+  [class*="feed-item"]
+) svg {
+  color: #cbd5e1 !important;
+  fill: currentColor !important;
+}
+
+/* Feed Header Navigation Tabs (All, Classes, Read Later) */
+.connectea-dark :is(
+  .cvr-c-feed,
+  .cvr-c-feed-header,
+  .cvr-c-feed-header__tabs,
+  .cvr-c-feed__tabs,
+  .eds-c-tabs,
+  .mat-tab-header,
+  .mat-tab-group,
+  .mat-tab-nav-bar,
+  [class*="feed"] [class*="tab"]
+) :is(
+  .mat-tab-label,
+  .mat-tab-link,
+  .eds-c-tabs__tab,
+  .cvr-c-feed-tab,
+  .cvr-c-feed__tab,
+  .mat-tab-label-content,
+  button,
+  a,
+  span,
+  div,
+  li
+) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-feed,
+  .cvr-c-feed-header,
+  .cvr-c-feed-header__tabs,
+  .cvr-c-feed__tabs,
+  .eds-c-tabs,
+  .mat-tab-header,
+  .mat-tab-group,
+  .mat-tab-nav-bar,
+  [class*="feed"] [class*="tab"]
+) :is(
+  .mat-tab-label,
+  .mat-tab-link,
+  .eds-c-tabs__tab,
+  .cvr-c-feed-tab,
+  .cvr-c-feed__tab,
+  button,
+  a
+):hover,
+.connectea-dark :is(
+  .mat-tab-label-active,
+  .mat-tab-link.mat-tab-label-active,
+  .mat-tab-label.mat-tab-label-active,
+  .eds-c-tabs__tab--active,
+  .eds-c-tabs__tab[aria-selected="true"],
+  .cvr-c-feed__tab--active,
+  .active,
+  [class*="active"],
+  [aria-selected="true"]
+) :is(span, div, a, button, li),
+.connectea-dark :is(
+  .mat-tab-label-active,
+  .mat-tab-link.mat-tab-label-active,
+  .mat-tab-label.mat-tab-label-active,
+  .eds-c-tabs__tab--active,
+  .eds-c-tabs__tab[aria-selected="true"],
+  .cvr-c-feed__tab--active,
+  .active,
+  [class*="active"],
+  [aria-selected="true"]
+) {
+  color: #f8fafc !important;
+}
+
+/* Reports Page Year Selector Bar, Angular Toolbars & Sub-Headers */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  mat-toolbar,
+  .mat-toolbar,
+  .mat-toolbar-row,
+  .mat-toolbar-single-row,
+  mat-tab-header,
+  .mat-tab-header,
+  .mat-tab-nav-bar,
+  .cvr-c-reports,
+  .cvr-c-report,
+  .cvr-c-report-years,
+  .cvr-c-report-year,
+  .cvr-c-year-selector,
+  .cvr-c-reporting-period,
+  .cvr-c-report-header,
+  .cvr-c-sub-header,
+  .cvr-c-subheader,
+  .eds-c-sub-header,
+  .cvr-c-page-header + div,
+  .cvr-c-page-header + section,
+  [class*="year-selector"],
+  [class*="report-year"],
+  [class*="reports-year"],
+  [class*="header-bar"],
+  [class*="heading-bar"]
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
+  mat-toolbar,
+  .mat-toolbar,
+  mat-tab-header,
+  .mat-tab-header,
+  .cvr-c-reports,
+  .cvr-c-report-years,
+  .cvr-c-year-selector
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+  mat-toolbar,
+  .mat-toolbar,
+  mat-tab-header,
+  .mat-tab-header,
+  .cvr-c-reports,
+  .cvr-c-report-years,
+  .cvr-c-year-selector
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  mat-toolbar,
+  .mat-toolbar,
+  mat-tab-header,
+  .mat-tab-header,
+  .cvr-c-reports,
+  .cvr-c-report-years,
+  .cvr-c-year-selector
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
+  mat-toolbar,
+  .mat-toolbar,
+  mat-tab-header,
+  .mat-tab-header,
+  .cvr-c-reports,
+  .cvr-c-report-years,
+  .cvr-c-year-selector
+) {
+  background-color: #1a222d !important;
+  background-image: none !important;
+  color: #f8fafc !important;
+  border-color: #36485e !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  mat-toolbar,
+  .mat-toolbar,
+  mat-tab-header,
+  .mat-tab-header,
+  .cvr-c-reports,
+  .cvr-c-reports *,
+  .cvr-c-report-years,
+  .cvr-c-report-years *,
+  .cvr-c-report-year,
+  .cvr-c-year-selector,
+  .cvr-c-year-selector *,
+  .cvr-c-reporting-period,
+  .cvr-c-report-header,
+  .cvr-c-sub-header,
+  .cvr-c-subheader,
+  [class*="year-selector"],
+  [class*="report-year"]
+) {
+  background-color: #1a222d !important;
+  color: #f8fafc !important;
+  border-color: #36485e !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  mat-toolbar,
+  .mat-toolbar,
+  mat-tab-header,
+  .mat-tab-header,
+  .cvr-c-reports,
+  .cvr-c-report-years,
+  .cvr-c-year-selector,
+  [class*="year-selector"],
+  [class*="report-year"]
+) :is(div, span, p, h1, h2, h3, h4, strong, a, label, .mat-toolbar-row):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button) {
+  background-color: transparent !important;
+  color: #f8fafc !important;
+}
+
+.connectea-dark :is(
+  mat-toolbar,
+  .mat-toolbar,
+  .cvr-c-reports,
+  .cvr-c-report-years,
+  .cvr-c-year-selector
+) :is(button, .v-button, a, .mat-button) {
+  background-color: #24303f !important;
+  color: #f8fafc !important;
+  border: 1px solid #3d5066 !important;
+}
+
+.connectea-dark :is(
+  mat-toolbar,
+  .mat-toolbar,
+  .cvr-c-reports,
+  .cvr-c-report-years,
+  .cvr-c-year-selector
+) :is(button, .v-button, a, .mat-button):hover {
+  background-color: #313f50 !important;
+  color: #ffffff !important;
+  border-color: #5c7899 !important;
+}
+
+/* --------------------------------------------------------------------------
+   19. General Menus, Interactive Elements & Links (3.1.14 Parity)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .cvr-c-primary-navigation,
+  .cvr-c-primary-menu,
+  .cvr-c-service-menu,
+  .cvr-c-category-menu
+) {
+  background-color: #1a222d !important;
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-service-menu__wrapper,
+  .cvr-c-service-menu__list,
+  .cvr-c-primary-menu__body,
+  .cvr-c-primary-menu__list,
+  .cvr-c-category-menu__wrapper,
+  .cvr-c-primary-navigation__container
+) {
+  background-color: #1a222d !important;
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-service-menu__item,
+  .cvr-c-primary-menu__item,
+  .cvr-c-category-menu .eds-u-interactive,
+  .cvr-c-primary-navigation__links .v-link a,
+  .cvr-c-primary-navigation__button--avatar
+) {
+  background-color: #1a222d !important;
+  color: #cbd5e1 !important;
+  transition: background-color 0.15s ease;
+}
+
+.connectea-dark :is(
+  .cvr-c-service-menu__item,
+  .cvr-c-primary-menu__item,
+  .cvr-c-category-menu .eds-u-interactive,
+  .cvr-c-primary-navigation__links .v-link a,
+  .cvr-c-primary-navigation__button--avatar
+):hover {
+  background-color: #24303f !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-service-menu__item,
+  .cvr-c-primary-menu__item,
+  .cvr-c-category-menu .eds-u-interactive
+).eds-s-is-active {
+  background-color: #121820 !important;
+  color: #edf4fc !important;
+  box-shadow: inset 3px 0 #3b82f6 !important;
+}
+
+/* Horizontal Top Navigation Active Tab Indicator */
+.connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active, .eds-s-is-active a, .v-link.eds-s-is-active a) {
+  background-color: #121820 !important;
+  color: #edf4fc !important;
+  box-shadow: none !important;
+  border-bottom: 2px solid #3b82f6 !important;
+  border-radius: 4px 4px 0 0 !important;
+}
+
+.connectea-dark .eds-c-tile a {
+  color: #60a5fa !important;
+}
+

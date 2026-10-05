@@ -42,7 +42,7 @@ jobs:
       - name: Package Firefox .xpi
         run: |
           VERSION="${{ steps.meta.outputs.version }}"
-          zip -r "connectify-${VERSION}.xpi" . -x "*.git*" "*.github*" "*.DS_Store" "*_metadata*" "README.md" "ATAR-REFERENCE.md" "*.xpi" "*.zip" "*.crx"
+          zip -r "connectify-${VERSION}.xpi" . -x "*.git*" "*.github*" "*.DS_Store" "*_metadata*" "README.md" "ATAR-REFERENCE.md" "*.xpi" "*.zip" "*.crx" "assets*" ".agents*" "AGENTS.md" "GEMINI.md" "design_rules.md" "docs*" "test_suite.js"
 
       - name: Package Chrome .crx and .zip
         env:
@@ -54,7 +54,9 @@ jobs:
             --exclude='_metadata*' --exclude='.DS_Store' --exclude='README.md' \
             --exclude='2.0.0_changelog.md' --exclude='ATAR-REFERENCE.md' \
             --exclude='overview.md' --exclude='CHROMEWEBSTORE.md' --exclude='PRIVACY.md' \
-            --exclude='Archive.zip' --exclude='updates.*' ./ /tmp/chrome-build/
+            --exclude='Archive.zip' --exclude='updates.*' \
+            --exclude='assets*' --exclude='.agents*' --exclude='AGENTS.md' --exclude='GEMINI.md' \
+            --exclude='design_rules.md' --exclude='docs*' --exclude='test_suite.js' ./ /tmp/chrome-build/
 
           if [ -n "$CRX_KEY_SECRET" ]; then
             echo "$CRX_KEY_SECRET" > /tmp/key.pem
@@ -95,6 +97,20 @@ jobs:
           AMO_CHANNEL: 'listed'
         run: |
           node .github/scripts/publish-amo.js "connectify-${{ steps.meta.outputs.version }}.xpi"
+
+      - name: Publish to Chrome Web Store
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') && env.CWS_CLIENT_ID != ''
+        uses: mnao305/chrome-extension-upload@v5.0.0
+        env:
+          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+        with:
+          file-path: "connectify-${{ steps.meta.outputs.version }}.zip"
+          extension-id: ${{ secrets.CWS_EXTENSION_ID || 'cmdpfgdabplmlflhechpifkonkjaiohm' }}
+          client-id: ${{ secrets.CWS_CLIENT_ID }}
+          client-secret: ${{ secrets.CWS_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CWS_REFRESH_TOKEN }}
+          publish: true
+        continue-on-error: true
 
       - name: Publish and Update Manifests
         if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'

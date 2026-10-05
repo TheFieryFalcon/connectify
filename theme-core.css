@@ -1,0 +1,205 @@
+/* ==========================================================================
+   Connectify Site-Wide Dark Theme
+   Preserves every color difference, outline, hierarchy, and surface border.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Base Canvas, Typography & Global Root
+   -------------------------------------------------------------------------- */
+html.connectea-dark {
+  color-scheme: dark !important;
+  background-color: #12171f !important;
+  color: #e2e8f0 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+.connectea-dark body,
+.connectea-dark #main-content,
+.connectea-dark .v-app,
+.connectea-dark .v-ui,
+.connectea-dark .cvr-c-app-layout,
+.connectea-dark .cvr-c-app-layout__body {
+  background-color: #12171f !important;
+  color: #e2e8f0 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Universal High Contrast Typography Rules (WCAG AA Contrast >= 5:1) */
+.connectea-dark :is(label, .cvr-c-form__label, .eds-c-label) {
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark :is(p, .v-caption) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(h1, h2, h3, h4, h5, h6, strong, .eds-c-heading) {
+  color: #f8fafc !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Theme Toggle Switch
+   -------------------------------------------------------------------------- */
+.cvr-c-primary-navigation {
+  position: relative !important;
+}
+
+#connectea-theme-toggle {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  right: 16px;
+  z-index: 10020 !important;
+  width: 104px;
+  box-sizing: border-box;
+  margin: 0;
+  white-space: nowrap;
+  border-radius: 6px;
+  padding: 6px 11px;
+  font: 12px/1.4 system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  background: #25313f !important;
+  color: #f1f6fb !important;
+  border: 1px solid #526a81 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+#connectea-theme-toggle:hover {
+  background: #313f50 !important;
+  border-color: #6b88a5 !important;
+}
+
+#connectea-theme-toggle:focus-visible {
+  outline: 2px solid #598fbd;
+  outline-offset: 2px;
+}
+
+.connectea-dark #connectea-theme-toggle {
+  background: #24303f !important;
+  color: #f1f6fb !important;
+  border: 1px solid #485c72 !important;
+}
+
+.connectea-dark #connectea-theme-toggle:hover {
+  background: #2f3e52 !important;
+  border-color: #627b97 !important;
+}
+
+@media (max-width: 600px) {
+  #connectea-theme-toggle {
+    right: 8px !important;
+    font-size: 11px;
+    padding: 6px 8px;
+    width: auto;
+  }
+}
+
+@media print {
+  #connectea-theme-toggle {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Top Navigation Bar (.cvr-c-primary-navigation)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.cvr-c-primary-navigation, .cvr-c-primary-navigation__container, .cvr-c-primary-navigation__bar) {
+  background-color: #1a222d !important;
+  border-bottom: 1px solid #36485e !important;
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark .cvr-c-primary-navigation__links .v-link a,
+.connectea-dark .cvr-c-primary-navigation__button {
+  color: #cbd5e1 !important;
+  background-color: transparent !important;
+  border-radius: 4px;
+}
+
+.connectea-dark .cvr-c-primary-navigation__links .v-link a:hover,
+.connectea-dark .cvr-c-primary-navigation__button:hover {
+  background-color: #24303f !important;
+  color: #ffffff !important;
+}
+
+/* Active tab in top navigation (e.g. My Connect) */
+.connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a, .eds-s-is-active a, .v-link.eds-s-is-active) {
+  background-color: #121820 !important;
+  color: #ffffff !important;
+  border: 1px solid #3d5066 !important;
+  border-bottom: 2px solid #3b82f6 !important;
+  box-shadow: none !important;
+  border-radius: 4px 4px 0 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Left Sidebar / Navigation Drawer (.cvr-c-service-menu)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.cvr-c-service-menu, .cvr-c-service-menu__wrapper, .cvr-c-service-menu__list) {
+  background-color: #1a222d !important;
+  color: #cbd5e1 !important;
+  border-right: 1px solid #36485e !important;
+}
+
+.connectea-dark .cvr-c-service-menu__item {
+  background-color: transparent !important;
+  color: #cbd5e1 !important;
+  transition: background-color 0.15s ease;
+}
+
+.connectea-dark .cvr-c-service-menu__item:hover {
+  background-color: #24303f !important;
+  color: #ffffff !important;
+}
+
+/* Active item (e.g. Assessment Outlines) */
+.connectea-dark .cvr-c-service-menu__item.eds-s-is-active,
+.connectea-dark .cvr-c-service-menu__item.v-selected {
+  background-color: #121820 !important;
+  color: #ffffff !important;
+  box-shadow: inset 3px 0 #3b82f6 !important;
+  border-left-color: #3b82f6 !important;
+}
+
+.connectea-dark .cvr-c-service-menu__item :is(.v-label, .eds-o-media__body) {
+  color: inherit !important;
+  background-color: transparent !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. Subheader Bars, Heading Bars & Page Headers (Classes, Preferences, etc.)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .cvr-c-category-toolbar,
+  .cvr-c-service-bar,
+  .cvr-c-service-bar__control-panel,
+  .cvr-c-page-header,
+  .cvr-c-heading-bar,
+  .eds-c-heading-bar,
+  .cvr-c-sub-header,
+  .v-page-header,
+  .cvr-c-toolbar,
+  .v-slot-cvr-c-heading-bar,
+  .v-slot-cvr-c-page-header
+) {
+  background-color: #18202b !important;
+  border-bottom: 1px solid #36485e !important;
+  color: #f8fafc !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-category-toolbar,
+  .cvr-c-service-bar,
+  .cvr-c-page-header,
+  .cvr-c-heading-bar,
+  .eds-c-heading-bar,
+  .cvr-c-sub-header,
+  .v-page-header,
+  .cvr-c-toolbar
+) :is(h1, h2, h3, h4, span, div, .v-label, .eds-c-heading) {
+  color: #f8fafc !important;
+}
+

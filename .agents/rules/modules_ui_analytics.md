@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Connectify UI & Analytics Modules Reference
 
 This document covers the user interface and analytics modules, including target planners, progress graphs, weakness radar, and the Grade & ATAR Predictor.

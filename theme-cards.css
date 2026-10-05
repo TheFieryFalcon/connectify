@@ -1,0 +1,315 @@
+/* --------------------------------------------------------------------------
+   7. Compound Subject Progress Bars (Preserve category segment colors!)
+   -------------------------------------------------------------------------- */
+.connectea-dark .cx-compound-progress-container {
+  background: transparent !important;
+}
+
+.connectea-dark .cx-compound-progress-bar {
+  background-color: #151c26 !important;
+  border: 1px solid #3d526b !important;
+  border-radius: 4px !important;
+}
+
+.connectea-dark .cx-compound-progress-label {
+  color: #94a3b8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. Cohort Statistics Panel (.connectea-panel) - PRESERVE BLUE IDENTITY
+   -------------------------------------------------------------------------- */
+.connectea-dark .connectea-panel {
+  background-color: #15263a !important;
+  border: 1px solid #3b6088 !important;
+  border-radius: 8px !important;
+  color: #d6e8f8 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
+}
+
+.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) {
+  font-weight: 400 !important;
+}
+
+.connectea-dark .connectea-panel-distribution {
+  color: #cfe2f5 !important;
+}
+
+:is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong,
+.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong {
+  font-weight: 700 !important;
+}
+
+.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong {
+  color: #90c6f5 !important;
+}
+
+.connectea-dark .connectea-panel-standing {
+  color: #e2effa !important;
+}
+
+.connectea-dark .connectea-controls {
+  color: #b0d0ed !important;
+}
+
+.connectea-dark .connectea-controls input {
+  background-color: #0f1c2b !important;
+  border: 1px solid #335985 !important;
+  color: #f1f5f9 !important;
+  border-radius: 4px !important;
+}
+
+.connectea-dark .connectea-controls input:focus {
+  border-color: #60a5fa !important;
+  outline: 2px solid #60a5fa !important;
+}
+
+.connectea-dark .connectea-notice {
+  color: #7da8cf !important;
+}
+
+.connectea-dark .connectea-subject-controls {
+  border-top: 1px solid #3b6088 !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. Summary Total Mark & Grade Box (.cvr-c-task__marks)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.cvr-c-task__marks, .cvr-c-task__mark) {
+  background-color: #161e29 !important;
+  border-color: #3d5066 !important;
+  color: #f8fafc !important;
+}
+
+.connectea-dark .cvr-c-task__marks {
+  border: 1px solid #3d5066 !important;
+  border-radius: 6px !important;
+}
+
+.connectea-dark .cvr-c-task__mark {
+  border-right: 1px solid #3d5066 !important;
+}
+
+.connectea-dark .cvr-c-task__mark:last-child {
+  border-right: none !important;
+}
+
+:is(.connectea-dark, body, html) .cvr-c-tasks :is(
+  .cvr-c-task__mark-score,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
+  .cvr-c-task__mark > :is(.v-label, span, div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)
+) {
+  font-weight: 700 !important;
+}
+
+:is(.connectea-dark, body, html) :is(
+  .cvr-c-task__score,
+  .cvr-c-task__grade,
+  .cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark, .cvr-c-task__mark *, .cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__marks, .cvr-c-task__marks *)
+) {
+  font-weight: 400 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-task__score,
+  .cvr-c-task__grade,
+  .cvr-c-task__mark-score,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
+  .cvr-c-task__mark > :is(.v-label, span, div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)
+) {
+  color: #f8fafc !important;
+}
+
+:is(.connectea-dark, body, html) :is(
+  .cvr-c-task__outof,
+  .cvr-c-task__mark-out-of,
+  .cvr-c-task__mark-label,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):nth-child(2)
+) {
+  font-weight: 400 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-task__outof,
+  .cvr-c-task__mark-out-of,
+  .cvr-c-task__mark-label,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):nth-child(2)
+) {
+  color: #94a3b8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   10. Accordion Section Header ("Hide Details" / "Show Details")
+   -------------------------------------------------------------------------- */
+.connectea-dark .eds-c-accordion__section-heading {
+  background-color: transparent !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  color: #cbd5e1 !important;
+  transition: color 0.15s ease;
+}
+
+.connectea-dark .eds-c-accordion__section-heading:hover {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+/* CSS Containment for Smooth Accordion Expansion & Layout Isolation */
+.eds-c-accordion__panel,
+.cvr-c-accordion__panel {
+  contain: layout style;
+}
+
+.eds-c-accordion__panel,
+.cvr-c-accordion__panel {
+  will-change: height, max-height;
+}
+
+/* --------------------------------------------------------------------------
+   11. Assessment Task Rows (.cvr-c-task)
+   -------------------------------------------------------------------------- */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group) {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-accordion__panel,
+  .cvr-c-accordion__panel,
+  .eds-c-accordion__section-body
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .eds-c-accordion__panel,
+  .cvr-c-accordion__panel,
+  .eds-c-accordion__section-body
+) {
+  border-bottom: none !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-accordion__panel:before,
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr .eds-c-accordion__panel:before {
+  display: none !important;
+  content: none !important;
+}
+
+.connectea-dark .cvr-c-task__details {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {
+  color: #f8fafc !important;
+  font-weight: 400 !important;
+}
+
+.connectea-dark .cvr-c-task-group {
+  border-top: 1px solid #2e3c4e !important;
+}
+
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(
+  .cvr-c-task-group__title,
+  .cvr-c-task__group-name,
+  .cvr-c-task-group h2,
+  .cvr-c-task-group h3,
+  .cvr-c-task-group h4,
+  .cvr-c-task-group :is(.v-label, span, strong):first-child,
+  [class*="task-group"] :is(h2, h3, h4, [class*="title"]),
+  .cvr-c-task__group-title,
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is(
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+) {
+  font-weight: 700 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-task-group__title,
+  .cvr-c-task__group-name,
+  .cvr-c-task-group h2,
+  .cvr-c-task-group h3,
+  .cvr-c-task-group h4,
+  .cvr-c-task-group :is(.v-label, span, strong):first-child,
+  [class*="task-group"] :is(h2, h3, h4, [class*="title"]),
+  .cvr-c-task__group-title,
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is(
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+) {
+  color: #f1f5f9 !important;
+}
+
+/* Assessment Type Dropdowns (.connectea-type-select) */
+.connectea-dark .connectea-type-label {
+  color: #94a3b8 !important;
+}
+
+.connectea-dark .connectea-type-select {
+  background-color: #182330 !important;
+  border: 1px solid #385170 !important;
+  color: #dceaf7 !important;
+  border-radius: 6px !important;
+}
+
+.connectea-dark .connectea-type-select:hover {
+  background-color: #202d3e !important;
+  border-color: #4b6a8f !important;
+}
+
+.connectea-dark .connectea-type-select:focus {
+  border-color: #60a5fa !important;
+  outline: 2px solid #60a5fa !important;
+}
+
+.connectea-dark .connectea-type-select.connectea-overridden {
+  background-color: #22374e !important;
+  border-color: #43719e !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   12. Highcharts Boxplot Chart (.cvr-c-task__chart)
+   -------------------------------------------------------------------------- */
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__chart, .cvr-c-task__chart *, .highcharts-container, .highcharts-container *) {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.connectea-dark .cvr-c-task__chart :is(svg, .highcharts-container) {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.connectea-dark .cvr-c-task__chart .highcharts-background {
+  fill: transparent !important;
+}
+
+.connectea-dark .cvr-c-task__chart [fill="#FFFFFF"] {
+  fill: #161e29 !important;
+}
+
+.connectea-dark .cvr-c-task__chart [stroke="#A9A9A9"],
+.connectea-dark .cvr-c-task__chart [stroke="#000000"] {
+  stroke: #647b95 !important;
+}
+
+.connectea-dark .cvr-c-task__chart [fill="#000000"] {
+  fill: #f1f5f9 !important;
+}
+
+.connectea-dark .cvr-c-task__chart text {
+  fill: #94a3b8 !important;
+  color: #94a3b8 !important;
+}
+

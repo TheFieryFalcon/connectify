@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Connectify System & Styling Modules Reference
 
 This document covers notifications, grade change tracking, DOM integrity monitoring, navigation injection, dark theme surface adaptation, auto-login, stylesheets, and extension manifests.
