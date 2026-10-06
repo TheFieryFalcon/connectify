@@ -52,35 +52,22 @@
     if (!header) {
       header = createElement('header');
       const brand = createElement('strong', 'Connectify');
-      homeBtn = createElement('button', '← Back to Menu');
-      homeBtn.type = 'button';
-      homeBtn.className = 'cx-back-menu';
+      homeBtn = Object.assign(createElement('button', '← Back to Menu'), { type: 'button', className: 'cx-back-menu' });
       header.append(brand, homeBtn);
     } else if (!homeBtn) {
-      homeBtn = createElement('button', '← Back to Menu');
-      homeBtn.type = 'button';
-      homeBtn.className = 'cx-back-menu';
+      homeBtn = Object.assign(createElement('button', '← Back to Menu'), { type: 'button', className: 'cx-back-menu' });
       header.append(homeBtn);
     }
 
-    let toolMenu = sidebar.querySelector('.cx-tool-menu');
-    if (!toolMenu) {
-      toolMenu = createElement('nav');
-      toolMenu.className = 'cx-tool-menu';
-      toolMenu.setAttribute('aria-label', 'Tools');
-    }
+    let toolMenu = sidebar.querySelector('.cx-tool-menu') || Object.assign(createElement('nav'), { className: 'cx-tool-menu' });
+    toolMenu.setAttribute('aria-label', 'Tools');
 
-    let workspace = sidebar.querySelector('.cx-workspace');
-    if (!workspace) {
-      workspace = createElement('div');
-      workspace.className = 'cx-workspace';
-    }
+    let workspace = sidebar.querySelector('.cx-workspace') || Object.assign(createElement('div'), { className: 'cx-workspace' });
 
-    let introText = sidebar.querySelector('.cx-tools-intro');
-    if (!introText) {
-      introText = createElement('p', 'Select a tool below to view your analytics. Ensure subject outlines are expanded in Connect to load assessment data.');
-      introText.className = 'cx-tools-intro';
-    }
+    let introText = sidebar.querySelector('.cx-tools-intro') || Object.assign(
+      createElement('p', 'Select a tool below to view your analytics. Ensure subject outlines are expanded in Connect to load assessment data.'),
+      { className: 'cx-tools-intro' }
+    );
 
     if (!sidebar.contains(header)) sidebar.append(header);
     if (!sidebar.contains(introText)) sidebar.append(introText);
@@ -101,9 +88,7 @@
       if (sidebar.parentElement !== parent) {
         parent.appendChild(sidebar);
       }
-      if (handle.parentElement !== parent) {
-        parent.appendChild(handle);
-      }
+      parent.appendChild(handle);
     }
 
     attachSidebar();
@@ -134,12 +119,9 @@
       }
 
       const canonicalButtons = [
-        { id: 'connectify-target-toggle', label: 'Target ATAR' },
-        { id: 'connectify-grade-toggle', label: 'Target Grade' },
-        { id: 'connectify-predictor-toggle', label: 'Predictor' },
-        { id: 'connectify-progress-toggle', label: 'Year in Progress' },
-        { id: 'connectify-estimate-toggle', label: 'ATAR Estimate' },
-        { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' },
+        { id: 'connectify-target-toggle', label: 'Target ATAR' }, { id: 'connectify-grade-toggle', label: 'Target Grade' },
+        { id: 'connectify-predictor-toggle', label: 'Predictor' }, { id: 'connectify-progress-toggle', label: 'Year in Progress' },
+        { id: 'connectify-estimate-toggle', label: 'ATAR Estimate' }, { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' },
         { id: 'connectify-categories-toggle', label: 'Settings' }
       ];
 
@@ -204,13 +186,7 @@
       }
 
       // Mount and deduplicate workspace panels
-      const panelIds = [
-        'connectea-atar',
-        'connectify-predictor',
-        'connectify-progress',
-        'connectify-weakness',
-        'connectify-categories'
-      ];
+      const panelIds = ['connectea-atar', 'connectify-predictor', 'connectify-progress', 'connectify-weakness', 'connectify-categories'];
       for (const panelId of panelIds) {
         let matches = Array.from(document.querySelectorAll('#' + panelId));
         if (matches.length === 0 && panelId === 'connectea-atar' && window.ConnectifyAtar?.calculatorPanel) {
@@ -265,6 +241,11 @@
       sidebar.classList.remove('cx-tool-active');
       introText.hidden = false;
       toolMenu.querySelectorAll('button').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
+      if (handle) {
+        handle.dataset.toolActive = 'false';
+        handle.style.left = sidebar.hidden ? '' : 'min(310px, calc(100vw - 30px))';
+      }
+      updateHandlePosition();
     }
 
     function closeSidebar() {
@@ -453,6 +434,13 @@
         const hasActiveTool = Array.from(workspace.children).some(p => !p.hidden);
         sidebar.classList.toggle('cx-tool-active', hasActiveTool);
         introText.hidden = hasActiveTool;
+        if (handle) {
+          handle.dataset.toolActive = hasActiveTool ? 'true' : 'false';
+          if (!sidebar.hidden) {
+            handle.style.left = hasActiveTool ? 'min(900px, calc(100vw - 30px))' : 'min(310px, calc(100vw - 30px))';
+          }
+        }
+        updateHandlePosition();
       } finally {
         isSyncing = false;
       }

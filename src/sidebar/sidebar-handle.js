@@ -146,8 +146,16 @@
           handle.style.position = 'fixed';
           handle.style.top = `${centerY}px`;
           handle.style.transform = 'translateY(-50%)';
+          const isToolActive = sidebar.classList.contains('cx-tool-active');
+          handle.dataset.toolActive = isToolActive ? 'true' : 'false';
+          handle.style.left = isToolActive
+            ? 'min(900px, calc(100vw - 30px))'
+            : 'min(310px, calc(100vw - 30px))';
           return;
         }
+
+        handle.dataset.toolActive = 'false';
+        handle.style.left = '';
 
         // When Connectify tool drawer is CLOSED:
         // Anchor to Connect's native left sidebar if present, moving directly with it as the page scrolls

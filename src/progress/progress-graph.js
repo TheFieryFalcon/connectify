@@ -37,18 +37,25 @@
     toggleBtn.setAttribute('aria-expanded', 'false');
 
     let panel = document.getElementById('connectify-progress');
-    let title, choicesContainer, chartContainer, scanBtn;
+    let title, choicesContainer, chartContainer, scanBtn, head;
     if (panel) {
-      title = panel.querySelector('header strong') || createElement('strong', 'Year in Progress');
+      head = panel.querySelector('header');
+      if (!head) {
+        head = createElement('header');
+        panel.prepend(head);
+      }
+      title = head.querySelector('strong') || createElement('strong', 'Year in Progress');
+      title.tabIndex = -1;
+      if (!head.contains(title)) head.prepend(title);
+
       scanBtn = Array.from(panel.querySelectorAll('button')).find(b => b.textContent.includes('Refresh Assessments')) || createElement('button', 'Refresh Assessments');
+      scanBtn.type = 'button';
+      scanBtn.className = 'cx-refresh-btn';
+      if (!head.contains(scanBtn)) head.append(scanBtn);
+
       choicesContainer = panel.querySelector('.cx-subjects') || createElement('div', null, 'cx-subjects');
       chartContainer = panel.querySelector('div:not(.cx-subjects)') || createElement('div');
-      if (choicesContainer.parentElement === panel) {
-        panel.insertBefore(scanBtn, choicesContainer);
-      } else {
-        if (!panel.contains(scanBtn)) panel.append(scanBtn);
-        if (!panel.contains(choicesContainer)) panel.append(choicesContainer);
-      }
+      if (!panel.contains(choicesContainer)) panel.append(choicesContainer);
       if (!panel.contains(chartContainer)) panel.append(chartContainer);
     } else {
       panel = createElement('section');
@@ -56,18 +63,20 @@
       panel.hidden = true;
       panel.setAttribute('aria-label', 'Assessment progress');
 
-      const head = createElement('header');
+      head = createElement('header');
       title = createElement('strong', 'Year in Progress');
       title.tabIndex = -1;
-      head.append(title);
 
       scanBtn = createElement('button', 'Refresh Assessments');
       scanBtn.type = 'button';
+      scanBtn.className = 'cx-refresh-btn';
+
+      head.append(title, scanBtn);
 
       choicesContainer = createElement('div', null, 'cx-subjects');
       chartContainer = createElement('div');
 
-      panel.append(head, scanBtn, choicesContainer, chartContainer);
+      panel.append(head, choicesContainer, chartContainer);
       document.body.append(toggleBtn, panel);
     }
 

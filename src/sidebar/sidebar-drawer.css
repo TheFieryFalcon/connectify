@@ -7,7 +7,7 @@
 #connectify-sidebar .cx-outline-actions{display:flex;gap:8px;padding:0 20px 14px;border-bottom:1px solid #d8e3ee}#connectify-sidebar .cx-outline-actions button{flex:1;padding:7px}
 #connectify-sidebar .cx-workspace{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
 #connectify-sidebar :is(#connectea-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel){position:static!important;inset:auto!important;width:100%!important;max-height:none!important;overflow:visible!important;border:0;border-radius:0;box-shadow:none;padding:24px;background:transparent;color:inherit;box-sizing:border-box}
-#connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor) header{margin-bottom:16px}
+#connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor,#connectify-progress) header{margin-bottom:16px}
 #connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor) header strong{font-size:18px;font-weight:650;color:inherit}
 #connectify-sidebar #connectify-weakness #cx-radar-mode{padding:6px 10px;border-radius:6px;border:1px solid #bacddd;background:#fff;color:inherit;font:inherit}
 .connectea-dark #connectify-sidebar #connectify-weakness #cx-radar-mode{background:#2a3b4c;color:#e1eaf3;border-color:#496178}
@@ -25,6 +25,10 @@
 @media print{#connectify-sidebar,#connectify-sidebar-handle{display:none!important}}
 #connectify-sidebar-handle[aria-expanded=false]{left:0;right:auto}
 #connectify-sidebar-handle[aria-expanded=true]{left:min(310px,calc(100vw - 30px))}
+#connectify-sidebar.cx-tool-active:not([hidden])~#connectify-sidebar-handle,
+#connectify-sidebar.cx-tool-active:not([hidden])+#connectify-sidebar-handle,
+#connectify-sidebar-handle[aria-expanded=true][data-tool-active="true"],
+#connectify-sidebar-handle[data-tool-active="true"]{left:min(900px,calc(100vw - 30px))!important}
 #connectify-sidebar-handle:hover{background:#154b72}
 #connectify-sidebar-handle:focus-visible{outline:3px solid #f6b745;outline-offset:3px}
 .cx-handle-arrow{font-size:16px;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;user-select:none;transition:transform 0.15s ease}
@@ -59,20 +63,25 @@
   border-color: #64748b !important;
   color: #174c75 !important;
 }
-.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle) {
-  background: #2a3b4c !important;
+.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+.connectea-dark #connectify-sidebar .cx-tool-menu > .cx-secondary-tool,
+.connectea-dark #connectify-sidebar .cx-back-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+.connectea-dark #connectify-sidebar .cx-back-menu > .cx-secondary-tool {
+  background: #18222d !important;
   color: #e1eaf3 !important;
-  border-color: #496178 !important;
+  border: 1px solid #3b4d5e !important;
 }
-.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle):hover {
-  background: #364e65 !important;
-  border-color: #6ba5d6 !important;
+.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle):hover,
+.connectea-dark #connectify-sidebar .cx-tool-menu > .cx-secondary-tool:hover {
+  background: #24303e !important;
+  border-color: #556c84 !important;
   color: #ffffff !important;
 }
-.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)[aria-pressed=true] {
-  background: #41627d !important;
-  color: #fff !important;
-  border-color: #81acca !important;
+.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)[aria-pressed=true],
+.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu > .cx-secondary-tool[aria-pressed=true] {
+  background: #2f3e50 !important;
+  border-color: #6e88a3 !important;
+  color: #ffffff !important;
 }
 @media(max-width:650px){#connectify-sidebar.cx-tool-active .cx-tool-menu{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #connectify-sidebar.cx-tool-active>.cx-tool-menu,#connectify-sidebar.cx-tool-active>.cx-outline-actions{display:none!important}
