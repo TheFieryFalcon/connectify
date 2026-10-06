@@ -14,9 +14,9 @@ All instructions, design constraints, and architectural standards in `design_rul
    - All documentation markdown files $\le 150$ lines.
 
 2. **Pipeline & Execution (`docs/architecture.md`)**:
-   - MAIN world `data.js` stamps Highcharts boxplot quantiles onto DOM `dataset.connectifyStats`.
-   - ISOLATED world executes 42 content scripts in exact sequence from `assessment-cache.js` to `dom-sweeper.js`.
+   - MAIN world `src/system/data.js` stamps Highcharts boxplot quantiles onto DOM `dataset.connectifyStats`.
+   - ISOLATED world executes 42 content scripts in exact sequence from `src/assessment/assessment-cache.js` to `src/system/dom-sweeper.js`.
 
 3. **Subsystems & Modules (`docs/modules_*.md`)**:
-   - Full modular architecture with self-contained submodules (`assessment-cache.js`, `assessment-parser.js`, `assessment-expand.js`, `cohort-outcome.js`, `cohort-panel.js`, `cohort-styles.js`, `predictor-engine.js`, `predictor-dates.js`, `predictor-cache.js`, `predictor-grade-view.js`, `sidebar-handle.js`, `category-baselines.js`).
-   - Modular stylesheets (`theme-*.css`, `sidebar-*.css`).
+   - Full modular architecture under `src/` with self-contained submodules across `assessment/`, `cohort/`, `atar/`, `predictor/`, `progress/`, `sidebar/`, `theme/`, and `system/`.
+   - Modular stylesheets (`src/theme/theme-*.css`, `src/sidebar/sidebar-*.css`, `src/atar/atar.css`, `src/progress/progress.css`).

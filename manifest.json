@@ -28,7 +28,7 @@
             "https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*"
          ],
          "js": [
-            "data.js"
+            "src/system/data.js"
          ],
          "run_at": "document_idle",
          "world": "MAIN"
@@ -38,57 +38,57 @@
             "https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*"
          ],
          "css": [
-            "atar.css",
-            "progress.css",
-            "sidebar-drawer.css",
-            "sidebar-notifications.css",
-            "sidebar-predictor.css",
-            "sidebar-settings.css",
-            "sidebar.css"
+            "src/atar/atar.css",
+            "src/progress/progress.css",
+            "src/sidebar/sidebar-drawer.css",
+            "src/sidebar/sidebar-notifications.css",
+            "src/sidebar/sidebar-predictor.css",
+            "src/sidebar/sidebar-settings.css",
+            "src/sidebar/sidebar.css"
          ],
          "js": [
-            "assessment-cache.js",
-            "assessment-parser.js",
-            "assessment-expand.js",
-            "assessment-data.js",
-            "cohort-math.js",
-            "cohort-estimator.js",
-            "task-types.js",
-            "cohort-outcome.js",
-            "cohort-panel.js",
-            "cohort-view.js",
-            "cohort-styles.js",
-            "cohort-stats.js",
-            "scaling-data.js",
-            "atar-math.js",
-            "target-solver.js",
-            "atar-scraper.js",
-            "atar-calculator.js",
-            "target-atar-ui.js",
-            "target-grade-ui.js",
-            "target-planner-ui.js",
-            "atar-ui.js",
-            "progress-math.js",
-            "progress-chart.js",
-            "progress-graph.js",
-            "wace-countdown.js",
-            "compound-progress.js",
-            "weakness-radar.js",
-            "scaling-calibration.js",
-            "category-baselines.js",
-            "category-settings.js",
-            "predictor-engine.js",
-            "predictor-dates.js",
-            "predictor-cache.js",
-            "predictor-math.js",
-            "predictor-grade-view.js",
-            "predictor-ui.js",
-            "atar-features.js",
-            "sidebar-handle.js",
-            "sidebar.js",
-            "notifications.js",
-            "new-grade.js",
-            "dom-sweeper.js"
+            "src/assessment/assessment-cache.js",
+            "src/assessment/assessment-parser.js",
+            "src/assessment/assessment-expand.js",
+            "src/assessment/assessment-data.js",
+            "src/cohort/cohort-math.js",
+            "src/cohort/cohort-estimator.js",
+            "src/cohort/task-types.js",
+            "src/cohort/cohort-outcome.js",
+            "src/cohort/cohort-panel.js",
+            "src/cohort/cohort-view.js",
+            "src/cohort/cohort-styles.js",
+            "src/cohort/cohort-stats.js",
+            "src/atar/scaling-data.js",
+            "src/atar/atar-math.js",
+            "src/atar/target-solver.js",
+            "src/atar/atar-scraper.js",
+            "src/atar/atar-calculator.js",
+            "src/atar/target-atar-ui.js",
+            "src/atar/target-grade-ui.js",
+            "src/atar/target-planner-ui.js",
+            "src/atar/atar-ui.js",
+            "src/progress/progress-math.js",
+            "src/progress/progress-chart.js",
+            "src/progress/progress-graph.js",
+            "src/progress/wace-countdown.js",
+            "src/progress/compound-progress.js",
+            "src/progress/weakness-radar.js",
+            "src/atar/scaling-calibration.js",
+            "src/predictor/category-baselines.js",
+            "src/predictor/category-settings.js",
+            "src/predictor/predictor-engine.js",
+            "src/predictor/predictor-dates.js",
+            "src/predictor/predictor-cache.js",
+            "src/predictor/predictor-math.js",
+            "src/predictor/predictor-grade-view.js",
+            "src/predictor/predictor-ui.js",
+            "src/atar/atar-features.js",
+            "src/sidebar/sidebar-handle.js",
+            "src/sidebar/sidebar.js",
+            "src/system/notifications.js",
+            "src/system/new-grade.js",
+            "src/system/dom-sweeper.js"
          ],
          "run_at": "document_idle"
       },
@@ -97,19 +97,19 @@
             "https://connect.det.wa.edu.au/*"
          ],
          "css": [
-            "theme-core.css",
-            "theme-tiles.css",
-            "theme-cards.css",
-            "theme-controls.css",
-            "theme-material.css",
-            "theme-feed.css",
-            "theme-tables.css",
-            "theme-navigation.css",
-            "theme-surfaces.css",
-            "theme.css"
+            "src/theme/theme-core.css",
+            "src/theme/theme-tiles.css",
+            "src/theme/theme-cards.css",
+            "src/theme/theme-controls.css",
+            "src/theme/theme-material.css",
+            "src/theme/theme-feed.css",
+            "src/theme/theme-tables.css",
+            "src/theme/theme-navigation.css",
+            "src/theme/theme-surfaces.css",
+            "src/theme/theme.css"
          ],
          "js": [
-            "theme.js"
+            "src/theme/theme.js"
          ],
          "run_at": "document_idle"
       },
@@ -118,7 +118,7 @@
             "https://connect.det.wa.edu.au/*"
          ],
          "js": [
-            "navigation.js"
+            "src/system/navigation.js"
          ],
          "run_at": "document_idle"
       },
@@ -127,7 +127,7 @@
             "https://login.det.wa.edu.au/*"
          ],
          "js": [
-            "auto-login.js"
+            "src/system/auto-login.js"
          ],
          "run_at": "document_end"
       }

@@ -8,9 +8,32 @@ const assert = require('assert');
 const vm = require('vm');
 
 // Auto-resolve extension directory whether run from repo root or scratch dir
-const BASE_DIR = fs.existsSync(path.resolve(__dirname, 'predictor-math.js'))
+const BASE_DIR = fs.existsSync(path.resolve(__dirname, 'manifest.json'))
   ? __dirname
   : '/Users/uwong/Downloads/2.1.14_0';
+
+// Index all source files in src/ for transparent path resolution
+const SRC_DIR = path.resolve(BASE_DIR, 'src');
+const FILE_MAP = {};
+function indexSourceDir(dir) {
+  if (!fs.existsSync(dir)) return;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      indexSourceDir(full);
+    } else if (entry.isFile()) {
+      FILE_MAP[entry.name] = full;
+    }
+  }
+}
+indexSourceDir(SRC_DIR);
+
+function resolveFilePath(filePath) {
+  if (fs.existsSync(filePath)) return filePath;
+  const baseName = path.basename(filePath);
+  if (FILE_MAP[baseName]) return FILE_MAP[baseName];
+  return filePath;
+}
 
 // Module bundle definitions for split files
 const MODULE_BUNDLES = {
@@ -70,21 +93,22 @@ const MODULE_BUNDLES = {
 
 const origReadFileSync = fs.readFileSync;
 fs.readFileSync = function(filePath, ...args) {
-  const baseName = path.basename(filePath);
+  const resolved = resolveFilePath(filePath);
+  const baseName = path.basename(resolved);
   if (MODULE_BUNDLES[baseName]) {
     const parts = MODULE_BUNDLES[baseName];
     let combined = '';
     let foundParts = 0;
     for (const part of parts) {
-      const partPath = path.resolve(path.dirname(filePath), part);
-      if (fs.existsSync(partPath)) {
+      const partResolved = resolveFilePath(path.resolve(path.dirname(resolved), part));
+      if (fs.existsSync(partResolved)) {
         foundParts++;
-        combined += origReadFileSync.call(fs, partPath, ...args) + '\n';
+        combined += origReadFileSync.call(fs, partResolved, ...args) + '\n';
       }
     }
     if (foundParts > 0 && combined.trim()) return combined;
   }
-  return origReadFileSync.call(fs, filePath, ...args);
+  return origReadFileSync.call(fs, resolved, ...args);
 };
 
 // ---------------------------------------------------------------------------
@@ -2552,13 +2576,13 @@ runTest('Test 105: Aggressive accordion expand/collapse performance optimization
 });
 
 runTest('Test 106: All project JS files pass strict JavaScript syntax validation', () => {
-  const jsFiles = fs.readdirSync(BASE_DIR).filter(f => f.endsWith('.js') && f !== 'test_suite.js');
+  const jsFiles = Object.values(FILE_MAP).filter(f => f.endsWith('.js') && !f.endsWith('test_suite.js'));
   assert.ok(jsFiles.length > 10, 'Must validate all extension JS files');
   for (const f of jsFiles) {
-    const code = fs.readFileSync(path.resolve(BASE_DIR, f), 'utf8');
+    const code = fs.readFileSync(f, 'utf8');
     assert.doesNotThrow(() => {
-      new vm.Script(code, { filename: f });
-    }, `File ${f} must have valid JavaScript syntax without duplicate declarations`);
+      new vm.Script(code, { filename: path.basename(f) });
+    }, `File ${path.basename(f)} must have valid JavaScript syntax without duplicate declarations`);
   }
 });
 
