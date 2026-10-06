@@ -2,6 +2,7 @@
  * Connectify Theme Entry Point
  *
  * Modular architecture:
+ * - theme-tokens.css: CSS custom properties & palettes for multiple themes
  * - theme-core.css: Base canvas, typography, theme toggle, navigation & subheaders
  * - theme-tiles.css: Subject course cards, generic tiles & tile headers
  * - theme-cards.css: Progress bars, cohort statistics & task rows

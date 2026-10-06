@@ -38,6 +38,7 @@ function resolveFilePath(filePath) {
 // Module bundle definitions for split files
 const MODULE_BUNDLES = {
   'theme.css': [
+    'theme-tokens.css',
     'theme-core.css',
     'theme-tiles.css',
     'theme-cards.css',
@@ -4766,6 +4767,89 @@ runTest('Test 134: expandAll performance caching integrity, non-blocking chunked
   } finally {
     window.ConnectifyData.collect = originalCollect;
   }
+});
+
+runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and top navigation stability', () => {
+  const themeControlsCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-controls.css'), 'utf8');
+  const themeCoreCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-core.css'), 'utf8');
+  const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
+  const themeRegistryJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  const manifest = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'manifest.json'), 'utf8'));
+
+  // 1. Static checks: CSS controls exclude navbar and header buttons from padding inflation
+  assert.ok(themeControlsCss.includes(':not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle)'),
+    'theme-controls.css must exclude primary navigation and header buttons from generic button padding');
+  assert.ok(themeCoreCss.includes('min-height: 48px !important;'), 'theme-core.css must enforce min-height on cvr-c-primary-navigation');
+  assert.ok(themeCoreCss.includes('box-sizing: border-box !important;'), 'theme-core.css must enforce box-sizing on cvr-c-primary-navigation');
+
+  // 2. Static checks: theme.js excludes primary navigation from surface adaptation
+  assert.ok(themeJs.includes(':not(.cvr-c-primary-navigation):not(.cvr-c-primary-navigation *):not(.cvr-c-header):not(.cvr-c-header *)'),
+    'theme.js must exclude primary navigation from adaptSurfaces');
+
+  // 3. Static checks: theme-tokens.css defines custom properties and multiple palettes
+  assert.ok(themeTokensCss.includes('--cx-canvas-bg:') && themeTokensCss.includes('--cx-surface-bg:'), 'theme-tokens.css must define CSS custom properties');
+  assert.ok(themeTokensCss.includes('[data-connectea-theme="amoled"]') && themeTokensCss.includes('--cx-canvas-bg: #000000;'), 'theme-tokens.css must define AMOLED black theme');
+  assert.ok(themeTokensCss.includes('[data-connectea-theme="midnight"]') && themeTokensCss.includes('--cx-canvas-bg: #0b132b;'), 'theme-tokens.css must define Midnight navy theme');
+  assert.ok(themeTokensCss.includes('[data-connectea-theme="forest"]') && themeTokensCss.includes('--cx-canvas-bg: #0a1914;'), 'theme-tokens.css must define Forest theme');
+  assert.ok(themeTokensCss.includes('[data-connectea-theme="sunset"]') && themeTokensCss.includes('--cx-canvas-bg: #19111c;'), 'theme-tokens.css must define Sunset theme');
+  assert.ok(themeTokensCss.includes('#connectea-theme-menu'), 'theme-tokens.css must style the theme popover menu');
+
+  // 4. Manifest checks: theme-tokens.css and theme-registry.js are registered
+  const contentScript = manifest.content_scripts.find(s => s.matches && s.matches.includes('https://connect.det.wa.edu.au/*'));
+  assert.ok(contentScript.css.includes('src/theme/theme-tokens.css'), 'manifest.json must register theme-tokens.css');
+  assert.ok(contentScript.js.includes('src/theme/theme-registry.js'), 'manifest.json must register theme-registry.js');
+
+  // 5. Functional evaluation: theme-registry.js handles multi-themes and custom themes
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  const reg = window.ConnectifyThemeRegistry;
+  assert.ok(reg, 'window.ConnectifyThemeRegistry must be defined');
+
+  const themes = reg.getAvailableThemes();
+  const themeIds = themes.map(t => t.id);
+  assert.ok(themeIds.includes('dark'), 'Registry must include dark theme');
+  assert.ok(themeIds.includes('amoled'), 'Registry must include amoled theme');
+  assert.ok(themeIds.includes('midnight'), 'Registry must include midnight theme');
+  assert.ok(themeIds.includes('forest'), 'Registry must include forest theme');
+  assert.ok(themeIds.includes('sunset'), 'Registry must include sunset theme');
+  assert.ok(themeIds.includes('light'), 'Registry must include light theme');
+  assert.ok(themeIds.includes('custom'), 'Registry must include custom theme');
+
+  // Switch to AMOLED theme
+  reg.setTheme('amoled');
+  assert.strictEqual(reg.getTheme(), 'amoled', 'Active theme must be amoled');
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'amoled', 'dataset.connecteaTheme must be amoled');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true, 'connectea-dark must be active for amoled');
+
+  // Switch to custom theme with custom palette
+  reg.setTheme('custom', { canvas: '#101014', surface: '#181820', accent: '#a855f7' });
+  assert.strictEqual(reg.getTheme(), 'custom', 'Active theme must be custom');
+  assert.strictEqual(document.documentElement.style.getPropertyValue('--cx-canvas-bg'), '#101014', 'Custom canvas variable must be applied');
+  assert.strictEqual(document.documentElement.style.getPropertyValue('--cx-accent'), '#a855f7', 'Custom accent variable must be applied');
+
+  // Dynamic theme registration
+  const registered = reg.registerTheme({
+    id: 'cyberpunk',
+    name: 'Cyberpunk Neon',
+    icon: '⚡',
+    isDark: true,
+    swatch: ['#0f051d', '#1a0b2e', '#ff007f']
+  });
+  assert.strictEqual(registered, true, 'registerTheme must succeed');
+  reg.setTheme('cyberpunk');
+  assert.strictEqual(reg.getTheme(), 'cyberpunk', 'Active theme must be cyberpunk');
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'cyberpunk', 'dataset.connecteaTheme must be cyberpunk');
+
+  // Switch back to Classic Dark
+  reg.setTheme('dark');
+  assert.strictEqual(reg.getTheme(), 'dark', 'Active theme must be dark');
+  assert.strictEqual(document.documentElement.style.getPropertyValue('--cx-canvas-bg'), '', 'Custom variables must be cleared on preset theme');
+
+  // ConnectifyTheme helper forwards to registry
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'dark', 'ConnectifyTheme.getTheme must match registry');
+  assert.ok(Array.isArray(window.ConnectifyTheme.getAvailableThemes()), 'ConnectifyTheme.getAvailableThemes must return array');
 });
 
 console.log('\n================================================================');

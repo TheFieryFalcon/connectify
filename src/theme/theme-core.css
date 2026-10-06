@@ -44,6 +44,8 @@ html.connectea-dark {
    -------------------------------------------------------------------------- */
 .cvr-c-primary-navigation {
   position: relative !important;
+  min-height: 48px !important;
+  box-sizing: border-box !important;
 }
 
 #connectea-theme-toggle {
@@ -106,10 +108,16 @@ html.connectea-dark {
 /* --------------------------------------------------------------------------
    3. Top Navigation Bar (.cvr-c-primary-navigation)
    -------------------------------------------------------------------------- */
-.connectea-dark :is(.cvr-c-primary-navigation, .cvr-c-primary-navigation__container, .cvr-c-primary-navigation__bar) {
+.connectea-dark .cvr-c-primary-navigation {
   background-color: #1a222d !important;
   border-bottom: 1px solid #36485e !important;
   color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(.cvr-c-primary-navigation__container, .cvr-c-primary-navigation__bar) {
+  background-color: transparent !important;
+  border-bottom: none !important;
+  color: inherit !important;
 }
 
 .connectea-dark .cvr-c-primary-navigation__links .v-link a,

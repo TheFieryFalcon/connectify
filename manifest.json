@@ -97,6 +97,7 @@
             "https://connect.det.wa.edu.au/*"
          ],
          "css": [
+            "src/theme/theme-tokens.css",
             "src/theme/theme-core.css",
             "src/theme/theme-tiles.css",
             "src/theme/theme-cards.css",
@@ -109,6 +110,7 @@
             "src/theme/theme.css"
          ],
          "js": [
+            "src/theme/theme-registry.js",
             "src/theme/theme.js"
          ],
          "run_at": "document_idle"

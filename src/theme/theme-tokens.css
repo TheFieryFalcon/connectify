@@ -1,0 +1,282 @@
+/**
+ * Connectify Theme Tokens & Palette System
+ *
+ * Defines CSS custom properties for built-in themes and user-defined custom themes:
+ * - Classic Dark (dark)
+ * - AMOLED Pitch Black (amoled)
+ * - Midnight Navy (midnight)
+ * - Emerald Forest (forest)
+ * - Twilight Plum (sunset)
+ * - Default Light (light)
+ * - Custom Theme (custom)
+ */
+
+:root {
+  --cx-canvas-bg: #f8fafc;
+  --cx-surface-bg: #ffffff;
+  --cx-surface-secondary: #f1f5f9;
+  --cx-surface-elevated: #ffffff;
+  --cx-border: #cbd5e1;
+  --cx-border-subtle: #e2e8f0;
+  --cx-text-primary: #0f172a;
+  --cx-text-secondary: #334155;
+  --cx-text-muted: #64748b;
+  --cx-accent: #3b82f6;
+  --cx-accent-hover: #2563eb;
+  --cx-nav-bg: #ffffff;
+  --cx-nav-border: #cbd5e1;
+  --cx-button-bg: #ffffff;
+  --cx-button-hover: #f1f5f9;
+  --cx-button-border: #cbd5e1;
+  --cx-button-text: #0f172a;
+}
+
+/* Base Dark Theme (Classic Dark) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) {
+  --cx-canvas-bg: #12171f;
+  --cx-surface-bg: #1e2632;
+  --cx-surface-secondary: #1a222d;
+  --cx-surface-elevated: #24303f;
+  --cx-border: #3d5066;
+  --cx-border-subtle: #2a3749;
+  --cx-text-primary: #f8fafc;
+  --cx-text-secondary: #cbd5e1;
+  --cx-text-muted: #94a3b8;
+  --cx-accent: #3b82f6;
+  --cx-accent-hover: #60a5fa;
+  --cx-nav-bg: #1a222d;
+  --cx-nav-border: #36485e;
+  --cx-button-bg: #202c3b;
+  --cx-button-hover: #2c3b4e;
+  --cx-button-border: #455a73;
+  --cx-button-text: #f1f5f9;
+}
+
+/* AMOLED Pitch Black */
+[data-connectea-theme="amoled"].connectea-dark,
+[data-connectea-theme="amoled"] .connectea-dark,
+html[data-connectea-theme="amoled"] {
+  --cx-canvas-bg: #000000;
+  --cx-surface-bg: #0a0a0a;
+  --cx-surface-secondary: #121212;
+  --cx-surface-elevated: #181818;
+  --cx-border: #262626;
+  --cx-border-subtle: #1f1f1f;
+  --cx-text-primary: #ffffff;
+  --cx-text-secondary: #d4d4d4;
+  --cx-text-muted: #a3a3a3;
+  --cx-accent: #38bdf8;
+  --cx-accent-hover: #7dd3fc;
+  --cx-nav-bg: #050505;
+  --cx-nav-border: #222222;
+  --cx-button-bg: #121212;
+  --cx-button-hover: #202020;
+  --cx-button-border: #333333;
+  --cx-button-text: #ffffff;
+}
+
+/* Midnight Navy */
+[data-connectea-theme="midnight"].connectea-dark,
+[data-connectea-theme="midnight"] .connectea-dark,
+html[data-connectea-theme="midnight"] {
+  --cx-canvas-bg: #0b132b;
+  --cx-surface-bg: #141f36;
+  --cx-surface-secondary: #1c2a4a;
+  --cx-surface-elevated: #24355a;
+  --cx-border: #2d4168;
+  --cx-border-subtle: #1e2e4c;
+  --cx-text-primary: #f1f5f9;
+  --cx-text-secondary: #cbd5e1;
+  --cx-text-muted: #94a3b8;
+  --cx-accent: #60a5fa;
+  --cx-accent-hover: #93c5fd;
+  --cx-nav-bg: #0e1830;
+  --cx-nav-border: #233454;
+  --cx-button-bg: #182642;
+  --cx-button-hover: #22355c;
+  --cx-button-border: #344b76;
+  --cx-button-text: #f1f5f9;
+}
+
+/* Emerald Forest */
+[data-connectea-theme="forest"].connectea-dark,
+[data-connectea-theme="forest"] .connectea-dark,
+html[data-connectea-theme="forest"] {
+  --cx-canvas-bg: #0a1914;
+  --cx-surface-bg: #11261f;
+  --cx-surface-secondary: #163329;
+  --cx-surface-elevated: #1c4033;
+  --cx-border: #285444;
+  --cx-border-subtle: #1b3b2f;
+  --cx-text-primary: #ecfdf5;
+  --cx-text-secondary: #a7f3d0;
+  --cx-text-muted: #6ee7b7;
+  --cx-accent: #10b981;
+  --cx-accent-hover: #34d399;
+  --cx-nav-bg: #0d1f19;
+  --cx-nav-border: #1d4134;
+  --cx-button-bg: #132c24;
+  --cx-button-hover: #1a3b30;
+  --cx-button-border: #2c5949;
+  --cx-button-text: #ecfdf5;
+}
+
+/* Twilight Plum */
+[data-connectea-theme="sunset"].connectea-dark,
+[data-connectea-theme="sunset"] .connectea-dark,
+html[data-connectea-theme="sunset"] {
+  --cx-canvas-bg: #19111c;
+  --cx-surface-bg: #26182a;
+  --cx-surface-secondary: #331e38;
+  --cx-surface-elevated: #422648;
+  --cx-border: #55315e;
+  --cx-border-subtle: #3c2143;
+  --cx-text-primary: #fdf2f8;
+  --cx-text-secondary: #fbcfe8;
+  --cx-text-muted: #f472b6;
+  --cx-accent: #f43f5e;
+  --cx-accent-hover: #fb7185;
+  --cx-nav-bg: #1f1423;
+  --cx-nav-border: #43264b;
+  --cx-button-bg: #2b1930;
+  --cx-button-hover: #3a2241;
+  --cx-button-border: #5c3566;
+  --cx-button-text: #fdf2f8;
+}
+
+/* Token application for theme variants */
+[data-connectea-theme]:not([data-connectea-theme="dark"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) body,
+[data-connectea-theme]:not([data-connectea-theme="dark"]).connectea-dark {
+  background-color: var(--cx-canvas-bg) !important;
+  color: var(--cx-text-secondary) !important;
+}
+
+[data-connectea-theme]:not([data-connectea-theme="dark"]) :is(
+  .v-panel,
+  .v-panel-content,
+  .eds-c-card,
+  .cvr-c-tile,
+  .eds-c-tile,
+  [data-subject-card],
+  .cvr-c-dashboard-card,
+  [data-connectea-surface]
+) {
+  background-color: var(--cx-surface-bg) !important;
+  border-color: var(--cx-border) !important;
+}
+
+[data-connectea-theme]:not([data-connectea-theme="dark"]) .cvr-c-primary-navigation {
+  background-color: var(--cx-nav-bg) !important;
+  border-bottom-color: var(--cx-nav-border) !important;
+}
+
+[data-connectea-theme]:not([data-connectea-theme="dark"]) :is(
+  h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption
+) {
+  color: var(--cx-text-primary) !important;
+}
+
+[data-connectea-theme]:not([data-connectea-theme="dark"]) :is(
+  label, .cvr-c-form__label, .eds-c-label, p
+) {
+  color: var(--cx-text-secondary) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Theme Selector Popover Menu & Arrow
+   -------------------------------------------------------------------------- */
+.connectea-theme-arrow {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 10px;
+  opacity: 0.8;
+  vertical-align: middle;
+  transition: transform 0.15s ease;
+}
+
+.connectea-theme-arrow:hover {
+  opacity: 1;
+}
+
+#connectea-theme-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  width: 200px;
+  background: #1e2632;
+  border: 1px solid #3d5066;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  padding: 6px;
+  z-index: 10030;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font: 12px/1.4 system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
+}
+
+.connectea-theme-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+  font-size: 12px;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.connectea-theme-option:hover {
+  background: #2b394b;
+  color: #ffffff;
+}
+
+.connectea-theme-option.eds-s-is-active,
+.connectea-theme-option[aria-selected="true"] {
+  background: #121820;
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+.connectea-theme-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.connectea-theme-custom-panel {
+  margin-top: 4px;
+  padding: 6px;
+  border-top: 1px solid #2a3749;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.connectea-theme-custom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.connectea-theme-custom-row input[type="color"] {
+  width: 24px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #3d5066;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+}

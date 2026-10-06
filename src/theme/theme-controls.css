@@ -167,7 +167,7 @@
   .mat-stroked-button,
   .mat-raised-button,
   .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.eds-c-accordion__section-heading):not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced) {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced) {
   background-color: #202c3b !important;
   color: #f1f5f9 !important;
   border: 1px solid #455a73 !important;
@@ -204,7 +204,7 @@
   .mat-stroked-button,
   .mat-raised-button,
   .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.eds-c-accordion__section-heading):hover {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):hover {
   background-color: #2c3b4e !important;
   border-color: #5b7594 !important;
   color: #ffffff !important;
@@ -224,7 +224,7 @@
   .mat-stroked-button,
   .mat-raised-button,
   .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.eds-c-accordion__section-heading):active {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):active {
   background-color: #192432 !important;
   transform: translateY(1px) !important;
 }
@@ -242,7 +242,7 @@
   .mat-stroked-button,
   .mat-raised-button,
   .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.eds-c-accordion__section-heading):focus-visible {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):focus-visible {
   border-color: #3b82f6 !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
   outline: none !important;
