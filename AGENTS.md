@@ -20,3 +20,6 @@ All instructions, design constraints, and architectural standards in `design_rul
 3. **Subsystems & Modules (`docs/modules_*.md`)**:
    - Full modular architecture under `src/` with self-contained submodules across `assessment/`, `cohort/`, `atar/`, `predictor/`, `progress/`, `sidebar/`, `theme/`, and `system/`.
    - Modular stylesheets (`src/theme/theme-*.css`, `src/sidebar/sidebar-*.css`, `src/atar/atar.css`, `src/progress/progress.css`).
+
+4. **Git & Remote Workflow**:
+   - Always commit and push all verified changes to remote (`origin main`) after completing every task. Never leave working trees uncommitted or unpushed.

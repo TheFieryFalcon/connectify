@@ -41,3 +41,8 @@ Isolated world content scripts execute in exact dependency order under `src/`:
 - `theme.js` & modular CSS (`theme-*.css`): Site-wide dark theme, unstyled surface adaptation (`data-connectea-surface`).
 - Modular styles: `sidebar-drawer.css`, `sidebar-notifications.css`, `sidebar-predictor.css`, `sidebar-settings.css`, `theme-core.css`, `theme-tiles.css`, `theme-cards.css`, `theme-controls.css`, `theme-material.css`, `theme-feed.css`, `theme-tables.css`, `theme-navigation.css`, `theme-surfaces.css`.
 - Storage keys: `connectea:theme:v1`, `connectea:task_type_overrides`, `connectea:class_categories:`, `cx-categories`, `connectify:prediction:`, `connectify:stats_cache:`, `connectify:grade_cache:`, `connectify:cache_version:<subsystem>`.
+ 
+---
+ 
+## 5. Git & Remote Workflow
+- Always commit and push all verified changes to remote (`origin main`) after completing every task. Never leave working trees uncommitted or unpushed.
