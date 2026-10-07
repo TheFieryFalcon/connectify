@@ -4941,6 +4941,38 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   assert.strictEqual(window.ConnectifyTheme.getTheme(), 'custom', 'theme must be restored to custom');
   assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
   assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'custom');
+
+  // 4. Functional check: Logout screen disables theme and restores after login
+  window.ConnectifyTheme.setTheme('forest');
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'forest');
+
+  // Navigate to logged out page: https://connect.det.wa.edu.au/public/loggedout.html
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/public/loggedout.html';
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  assert.strictEqual(window.ConnectifyTheme.isLogoutUrl('https://connect.det.wa.edu.au/public/loggedout.html'), true);
+  assert.strictEqual(window.ConnectifyTheme.isLogoutUrl('https://connect.det.wa.edu.au/c/portal/logout'), true);
+  assert.strictEqual(window.ConnectifyTheme.isLogoutUrl('https://connect.det.wa.edu.au/classes'), false);
+  assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false on logout page');
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'light', 'getTheme must return light on logout page');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'connectea-dark must be removed on logout');
+  assert.strictEqual(document.documentElement.getAttribute('data-connectea-logout'), 'true', 'data-connectea-logout must be set on logout');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), 'true', 'restore_dark must be true on logout');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), 'forest', 'restore_theme must save forest on logout');
+
+  // Return to normal page - forest theme must be restored
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'forest', 'storage must be restored to forest');
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'forest', 'theme must be restored to forest');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'forest');
+  assert.strictEqual(document.documentElement.getAttribute('data-connectea-logout'), null);
 });
 
 runTest('Test 137: Dark, Default, and Quantum Dark themes correspond to previous versions and legacy palettes', () => {
@@ -5536,6 +5568,31 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
 
   const tree = crawlerMod.buildDirectoryTree(['/group/students/calendar', '/connect/cvr/classes']);
   assert.ok(tree.children.group && tree.children.connect, 'Directory tree must organize paths into branches');
+
+  // Verify class ID extraction across redirects and destination URLs
+  assert.strictEqual(crawlerMod.extractClassId('https://connect.det.wa.edu.au/redirect/cls/6611613497'), '6611613497', 'extractClassId must parse /redirect/cls/<id>');
+  assert.strictEqual(crawlerMod.extractClassId('https://connect.det.wa.edu.au/group/students/ui/class/announcements?coisp=DomainSchoolClass:6611613497'), '6611613497', 'extractClassId must parse coisp=DomainSchoolClass:<id>');
+  assert.strictEqual(crawlerMod.extractClassId('https://connect.det.wa.edu.au/group/students/ui/my-connect'), null, 'extractClassId must return null on non-class routes');
+
+  // Verify filterUrlList enforces maxClassRedirects (5) limit across redirect and destination URLs
+  const sampleRoutes = [
+    'https://connect.det.wa.edu.au/group/students/ui/my-connect',
+    'https://connect.det.wa.edu.au/group/students/ui/my-settings/profile',
+    'https://connect.det.wa.edu.au/documents/123/file.pdf',
+    'https://connect.det.wa.edu.au/redirect/cls/101',
+    'https://connect.det.wa.edu.au/redirect/cls/102',
+    'https://connect.det.wa.edu.au/redirect/cls/103',
+    'https://connect.det.wa.edu.au/redirect/cls/104',
+    'https://connect.det.wa.edu.au/redirect/cls/105',
+    'https://connect.det.wa.edu.au/group/students/ui/class/announcements?coisp=DomainSchoolClass:101',
+    'https://connect.det.wa.edu.au/group/students/ui/class/announcements?coisp=DomainSchoolClass:106',
+    'https://connect.det.wa.edu.au/redirect/cls/107'
+  ];
+  const filtered = crawlerMod.filterUrlList(sampleRoutes, 5);
+  assert.ok(!filtered.some(u => u.includes('/documents/')), 'filterUrlList must remove documents');
+  const classIdsInFiltered = new Set(filtered.map(crawlerMod.extractClassId).filter(Boolean));
+  assert.strictEqual(classIdsInFiltered.size, 5, 'filterUrlList must strictly limit scanned classes to 5 unique classes');
+  assert.ok(filtered.includes('https://connect.det.wa.edu.au/group/students/ui/my-settings/profile'), 'filterUrlList must preserve non-class pages like profile');
 
   // 5. package.json scripts
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));

@@ -237,8 +237,11 @@ async function clickInteractiveButtons(page) {
       for (const node of candidateNodes) {
         if (node.children.length > 3) continue;
         const txt = (node.textContent || '').trim();
-        if (/\b(show\s*details|view\s*details|expand\s*all|expand\s*outlines|more\s*details)\b/i.test(txt)) {
-          if (!elements.includes(node)) {
+        const isNoticeView = (/^\s*view\b/i.test(txt) && !/\b(view\s*all|view\s*more|see\s*more)\b/i.test(txt) &&
+          (node.closest('.cvr-c-notice, .eds-c-card, .cvr-c-tile, .cvr-c-feed, [class*="notice"], [class*="feed"]') || /^\s*view\s*$/i.test(txt)));
+
+        if (/\b(show\s*details|view\s*details|expand\s*all|expand\s*outlines|more\s*details)\b/i.test(txt) || isNoticeView) {
+          if (!elements.includes(node) && !node.closest('nav, .cvr-c-primary-navigation, .pagination, .pager')) {
             elements.push(node);
           }
         }
@@ -246,6 +249,7 @@ async function clickInteractiveButtons(page) {
 
       const seenSections = new Set();
       const clickedElements = new Set();
+      let noticeViewClicks = 0;
 
       try {
         for (const el of elements) {
@@ -300,10 +304,18 @@ async function clickInteractiveButtons(page) {
           const label = (el.getAttribute('aria-label') || el.getAttribute('title') || '').trim();
           const directText = (el.textContent || '').trim().slice(0, 50);
 
-          // Skip destructive actions, sign-out, or external view links
-          if (/\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off|view\s*all|show\s*more|print|export)\b/i.test(label) ||
-              /\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off|view\s*all|show\s*more|print|export)\b/i.test(directText)) {
+          // Skip destructive actions, state-mutating toggles, or pagination/more links
+          // EXPLICIT REQUIREMENT: Never click on "see more", "show more", "view all", "follow", or "bookmark"
+          if (/\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off|view\s*all|show\s*more|see\s*more|load\s*more|follow|unfollow|bookmark|favorite|print|export)\b/i.test(label) ||
+              /\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off|view\s*all|show\s*more|see\s*more|load\s*more|follow|unfollow|bookmark|favorite|print|export)\b/i.test(directText)) {
             continue;
+          }
+
+          // Limit notice View clicks to 2 per view to reveal modal/content without thrashing
+          const isNoticeViewBtn = /^\s*view\b/i.test(directText) && !/\b(view\s*all|view\s*more)\b/i.test(directText);
+          if (isNoticeViewBtn && el.closest('.cvr-c-notice, .eds-c-card, .cvr-c-tile, .cvr-c-feed, [class*="notice"], [class*="feed"]')) {
+            if (noticeViewClicks >= 2) continue;
+            noticeViewClicks++;
           }
 
           // Skip already expanded panels

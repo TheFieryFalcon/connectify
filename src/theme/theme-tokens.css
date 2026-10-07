@@ -383,10 +383,13 @@
   color: var(--cx-accent) !important;
 }
 
-/* Login Page Guard: Disable all themes completely */
+/* Login & Logout Page Guard: Disable all themes completely */
 [data-connectea-login],
 [data-connectea-login] body,
-[data-connectea-login] * {
+[data-connectea-login] *,
+[data-connectea-logout],
+[data-connectea-logout] body,
+[data-connectea-logout] * {
   --cx-canvas-bg: initial !important;
   --cx-surface-bg: initial !important;
   --cx-surface-secondary: initial !important;
@@ -398,7 +401,8 @@
   --cx-accent: initial !important;
 }
 
-[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu) {
+[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu),
+[data-connectea-logout] :is(#connectea-theme-toggle, #connectea-theme-menu) {
   display: none !important;
 }
 

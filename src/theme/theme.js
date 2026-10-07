@@ -38,12 +38,34 @@
     }
   };
 
-  function updateDomThemeAttributes(dark, themeId, isLogin) {
-    if (isLogin) {
+  const isLogoutUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
+    try {
+      const loc = new URL(url, typeof window !== 'undefined' && window.location?.href ? window.location.href : 'https://connect.det.wa.edu.au');
+      const isConnect = loc.hostname === 'connect.det.wa.edu.au';
+      const path = loc.pathname.toLowerCase(), search = loc.search.toLowerCase();
+      const isPath = path === '/logout' || path.startsWith('/logout/') || path.includes('/portal/logout') || path.includes('/c/portal/logout') || path.includes('/web/guest/logout') || path.includes('/signout') || path.includes('/sign-out') || path.includes('loggedout') || path.includes('logged-out');
+      const isParam = search.includes('logout') || search.includes('logged_out') || search.includes('signed_out') || search.includes('session_expired');
+      if ((isConnect && (isPath || isParam)) || loc.hostname === 'logout.det.wa.edu.au' || isPath) return true;
+      if (typeof document !== 'undefined' && (!url || (typeof window !== 'undefined' && url === window.location?.href))) {
+        if (/logged out|signed out/i.test(document.title || '')) return true;
+        const msg = document.querySelector('.portlet-msg-info, .alert-info, .login-status, .cvr-c-status-message');
+        if (msg && /logged out|signed out|session.*expired/i.test(msg.textContent || '')) return true;
+      }
+      return false;
+    } catch { return typeof url === 'string' && /logout|signout|sign-out|loggedout/i.test(url); }
+  };
+
+  const isAuthDisabled = (url) => isLoginUrl(url) || isLogoutUrl(url);
+
+  function updateDomThemeAttributes(dark, themeId, isAuth) {
+    const isLogout = isLogoutUrl();
+    if (isAuth || isLogout) {
       document.documentElement.classList.remove('connectea-dark');
       delete document.documentElement.dataset.connecteaTheme;
       document.documentElement.removeAttribute('data-connectea-theme');
       document.documentElement.setAttribute('data-connectea-login', 'true');
+      if (isLogout) document.documentElement.setAttribute('data-connectea-logout', 'true');
+      else document.documentElement.removeAttribute('data-connectea-logout');
       if (document.body) {
         document.body.classList.remove('connectea-dark');
         delete document.body.dataset.connecteaTheme;
@@ -54,6 +76,7 @@
       if (themeMenu) closeThemeMenu();
     } else {
       document.documentElement.removeAttribute('data-connectea-login');
+      document.documentElement.removeAttribute('data-connectea-logout');
       document.documentElement.classList.toggle('connectea-dark', dark);
       if (document.body) document.body.classList.toggle('connectea-dark', dark);
       const cur = themeId || (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (dark ? 'dark' : 'light'));
@@ -63,7 +86,7 @@
   }
 
   try {
-    if (isLoginUrl()) {
+    if (isAuthDisabled()) {
       const isDarkActive = localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true';
       if (isDarkActive) {
         localStorage.setItem(RESTORE_KEY, 'true');
@@ -95,7 +118,7 @@
   }
   toggleButton.className = 'connectea-theme-toggle';
 
-  updateDomThemeAttributes(isDarkMode, activeTheme, isLoginUrl());
+  updateDomThemeAttributes(isDarkMode, activeTheme, isAuthDisabled());
 
   function cleanupDuplicateButtons() {
     for (const btn of document.querySelectorAll('#connectea-theme-toggle, .connectea-theme-toggle')) if (btn !== toggleButton) btn.remove();
@@ -137,7 +160,7 @@
 
   function updateTogglePosition(forceReset = false) {
     cleanupDuplicateButtons();
-    if (isLoginUrl()) {
+    if (isAuthDisabled()) {
       if (toggleButton.parentElement) toggleButton.remove();
       if (themeMenu) closeThemeMenu();
       return;
@@ -184,7 +207,7 @@
   }
 
   function adaptSurfaces() {
-    if (!isDarkMode || isLoginUrl()) return;
+    if (!isDarkMode || isAuthDisabled()) return;
     try {
       const surfaceCandidates = document.body.querySelectorAll(
         ':is(header, nav, aside, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .eds-c-nav-list, .eds-c-nav-list__item, .portlet, .portlet-content, .portlet-body, .journal-content-article, .eds-c-tile__body, .cvr-c-tile__body, [class*="help"], [class*="guide"], [class*="resource"]):not([data-connectea-surface]):not(.cvr-c-primary-navigation):not(.cvr-c-primary-navigation *):not(.cvr-c-header):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
@@ -209,7 +232,7 @@
 
   function openThemeMenu(anchorEl) {
     closeThemeMenu();
-    if (isLoginUrl()) return;
+    if (isAuthDisabled()) return;
     themeMenu = document.createElement('div');
     themeMenu.id = 'connectea-theme-menu';
     themeMenu.setAttribute('role', 'menu');
@@ -261,7 +284,7 @@
   }
 
   function applyTheme(isDark, themeId) {
-    if (isLoginUrl()) {
+    if (isAuthDisabled()) {
       if (isDark || isDarkMode) {
         try {
           localStorage.setItem(RESTORE_KEY, 'true');
@@ -286,7 +309,7 @@
       } catch {}
     }
     isDarkMode = isDark;
-    updateDomThemeAttributes(isDarkMode, themeId, isLoginUrl());
+    updateDomThemeAttributes(isDarkMode, themeId, isAuthDisabled());
     updateToggleButtonLabel(isDarkMode);
     updateTogglePosition();
     if (isDarkMode) scheduleAdaptSurfaces();
@@ -302,7 +325,7 @@
     const now = Date.now();
     if (now - lastToggleTime < 300) return;
     lastToggleTime = now;
-    if (isLoginUrl()) { applyTheme(false); return; }
+    if (isAuthDisabled()) { applyTheme(false); return; }
     try { localStorage.removeItem(RESTORE_KEY); } catch {}
     const isCurrentlyDark = document.documentElement.classList.contains('connectea-dark');
     const nextDark = !isCurrentlyDark;
@@ -337,7 +360,7 @@
     const effectiveDelay = delay ?? (Date.now() - pageStartTime < 2500 ? 1200 : 400);
     adaptTimer = setTimeout(() => {
       if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-      if (isDarkMode && !isLoginUrl()) adaptSurfaces();
+      if (isDarkMode && !isAuthDisabled()) adaptSurfaces();
     }, effectiveDelay);
   }
 
@@ -347,7 +370,7 @@
     syncScheduled = true;
     requestAnimationFrame(() => {
       syncScheduled = false;
-      if (isLoginUrl()) {
+      if (isAuthDisabled()) {
         if (isDarkMode || document.documentElement.classList.contains('connectea-dark')) {
           try {
             localStorage.setItem(RESTORE_KEY, 'true');
@@ -390,7 +413,7 @@
 
   window.addEventListener('resize', () => updateTogglePosition(true));
   window.addEventListener('storage', e => {
-    if (e.key === STORAGE_KEY && e.newValue) applyTheme(!isLoginUrl() && e.newValue === 'dark');
+    if (e.key === STORAGE_KEY && e.newValue) applyTheme(!isAuthDisabled() && e.newValue === 'dark');
   });
 
   updateTogglePosition();
@@ -398,7 +421,7 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       try {
-        if (isLoginUrl()) {
+        if (isAuthDisabled()) {
           const isDark = isDarkMode || localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true';
           if (isDark) {
             localStorage.setItem(RESTORE_KEY, 'true');
@@ -418,7 +441,7 @@
           activeTheme = restored;
         }
       } catch {}
-      if (isLoginUrl()) {
+      if (isAuthDisabled()) {
         updateDomThemeAttributes(false, 'light', true);
       } else {
         if (document.body) document.body.classList.toggle('connectea-dark', isDarkMode);
@@ -431,7 +454,7 @@
   let mountPollCount = 0;
   const mountPollInterval = setInterval(() => {
     mountPollCount++;
-    if (isLoginUrl()) {
+    if (isAuthDisabled()) {
       updateDomThemeAttributes(false, 'light', true);
       clearInterval(mountPollInterval);
       return;
@@ -453,11 +476,14 @@
 
   window.ConnectifyTheme = {
     isLoginUrl,
-    isDarkMode: () => (isLoginUrl() ? false : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.isDarkMode() : isDarkMode)),
+    isLogoutUrl,
+    isLoginOrLogoutUrl: isAuthDisabled,
+    isAuthDisabled,
+    isDarkMode: () => (isAuthDisabled() ? false : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.isDarkMode() : isDarkMode)),
     applyTheme,
-    getTheme: () => (isLoginUrl() ? 'light' : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (isDarkMode ? 'dark' : 'light'))),
+    getTheme: () => (isAuthDisabled() ? 'light' : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (isDarkMode ? 'dark' : 'light'))),
     setTheme: (id, colors) => {
-      if (isLoginUrl()) return false;
+      if (isAuthDisabled()) return false;
       const res = window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setTheme(id, colors) : true;
       applyTheme(id !== 'light', id);
       return res;

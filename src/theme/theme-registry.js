@@ -102,7 +102,26 @@
     }
   };
 
-  if (isLoginUrl()) {
+  const isLogoutUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
+    try {
+      const loc = new URL(url, typeof window !== 'undefined' && window.location?.href ? window.location.href : 'https://connect.det.wa.edu.au');
+      const isConnect = loc.hostname === 'connect.det.wa.edu.au';
+      const path = loc.pathname.toLowerCase(), search = loc.search.toLowerCase();
+      const isPath = path === '/logout' || path.startsWith('/logout/') || path.includes('/portal/logout') || path.includes('/c/portal/logout') || path.includes('/web/guest/logout') || path.includes('/signout') || path.includes('/sign-out') || path.includes('loggedout') || path.includes('logged-out');
+      const isParam = search.includes('logout') || search.includes('logged_out') || search.includes('signed_out') || search.includes('session_expired');
+      if ((isConnect && (isPath || isParam)) || loc.hostname === 'logout.det.wa.edu.au' || isPath) return true;
+      if (typeof document !== 'undefined' && (!url || (typeof window !== 'undefined' && url === window.location?.href))) {
+        if (/logged out|signed out/i.test(document.title || '')) return true;
+        const msg = document.querySelector('.portlet-msg-info, .alert-info, .login-status, .cvr-c-status-message');
+        if (msg && /logged out|signed out|session.*expired/i.test(msg.textContent || '')) return true;
+      }
+      return false;
+    } catch { return typeof url === 'string' && /logout|signout|sign-out|loggedout/i.test(url); }
+  };
+
+  const isAuthDisabled = (url) => isLoginUrl(url) || isLogoutUrl(url);
+
+  if (isAuthDisabled()) {
     try {
       const isDark = localStorage.getItem(STORAGE_KEY) === 'dark';
       if (isDark || localStorage.getItem(RESTORE_KEY) === 'true') {
@@ -120,6 +139,8 @@
       delete document.documentElement.dataset.connecteaTheme;
       document.documentElement.removeAttribute('data-connectea-theme');
       document.documentElement.setAttribute('data-connectea-login', 'true');
+      if (isLogoutUrl()) document.documentElement.setAttribute('data-connectea-logout', 'true');
+      else document.documentElement.removeAttribute('data-connectea-logout');
       if (document.body) {
         document.body.classList.remove('connectea-dark');
         delete document.body.dataset.connecteaTheme;
@@ -199,7 +220,7 @@
   }
 
   function getTheme() {
-    if (isLoginUrl()) return 'light';
+    if (isAuthDisabled()) return 'light';
     try {
       const savedId = localStorage.getItem(STORAGE_THEME_ID);
       if (savedId && registry.has(savedId)) return savedId;
@@ -211,7 +232,7 @@
   }
 
   function isDarkMode() {
-    if (isLoginUrl()) return false;
+    if (isAuthDisabled()) return false;
     if (typeof document !== 'undefined' && document.documentElement) {
       return document.documentElement.classList.contains('connectea-dark');
     }
@@ -225,7 +246,7 @@
   }
 
   function setTheme(themeId, customColors) {
-    if (isLoginUrl()) {
+    if (isAuthDisabled()) {
       try {
         if (themeId && themeId !== 'light') {
           localStorage.setItem(RESTORE_KEY, 'true');
@@ -242,6 +263,8 @@
         delete document.documentElement.dataset.connecteaTheme;
         document.documentElement.removeAttribute('data-connectea-theme');
         document.documentElement.setAttribute('data-connectea-login', 'true');
+        if (isLogoutUrl()) document.documentElement.setAttribute('data-connectea-logout', 'true');
+        else document.documentElement.removeAttribute('data-connectea-logout');
         if (document.body) {
           document.body.classList.remove('connectea-dark');
           delete document.body.dataset.connecteaTheme;
@@ -292,6 +315,9 @@
 
   window.ConnectifyThemeRegistry = {
     isLoginUrl,
+    isLogoutUrl,
+    isAuthDisabled,
+    isLoginOrLogoutUrl: isAuthDisabled,
     isDarkMode,
     getTheme,
     setTheme,
@@ -300,6 +326,7 @@
     getCustomColors,
     setCustomColors,
     applyCustomTokens,
+    clearCustomTokens,
     onThemeChange,
     BUILTIN_THEMES
   };
