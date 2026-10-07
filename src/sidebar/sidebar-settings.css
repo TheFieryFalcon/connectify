@@ -61,27 +61,27 @@
 /* Settings Dark Mode High Contrast Rules (>= 5:1 contrast) */
 .connectea-dark .cx-settings-section,
 .connectea-dark .cx-settings-divider {
-  border-top-color: #3b4d5e !important;
+  border-top-color: var(--cx-border, #3b4d5e) !important;
 }
 .connectea-dark .cx-settings-heading {
-  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 .connectea-dark .cx-settings-label {
-  color: #e2e8f0 !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
 }
 .connectea-dark .cx-settings-desc,
 .connectea-dark .cx-settings-hint,
 .connectea-dark .cx-settings-col-header {
-  color: #94a3b8 !important;
+  color: var(--cx-text-muted, #94a3b8) !important;
 }
 .connectea-dark :is(.cx-settings-number-input, .cx-baseline-type-input, .cx-baseline-subj-input) {
-  background: #141a22 !important;
-  color: #f1f5f9 !important;
-  border-color: #496178 !important;
+  background: var(--cx-input-bg, #141a22) !important;
+  color: var(--cx-input-text, #f1f5f9) !important;
+  border-color: var(--cx-input-border, #496178) !important;
 }
 .connectea-dark :is(.cx-settings-number-input, .cx-baseline-type-input, .cx-baseline-subj-input):focus {
-  border-color: #60a5fa !important;
-  outline: 2px solid #60a5fa !important;
+  border-color: var(--cx-border-focus, #60a5fa) !important;
+  outline: 2px solid var(--cx-accent, #60a5fa) !important;
 }
 
 /* Weakness Mode Label */
@@ -90,26 +90,26 @@
 }
 .connectea-dark .cx-radar-mode-label,
 .connectea-dark #connectify-sidebar .cx-radar-mode-label {
-  color: #e2e8f0 !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
 }
 
 /* Global High Contrast Net for Connectify Sidebar in Dark Mode (>= 5:1) */
 .connectea-dark #connectify-sidebar {
-  background: #202933 !important;
-  color: #e1eaf3 !important;
-  border-color: #425567 !important;
+  background: var(--cx-surface-bg, #202933) !important;
+  color: var(--cx-text-primary, #e1eaf3) !important;
+  border-color: var(--cx-border, #425567) !important;
 }
 .connectea-dark #connectify-sidebar label:not(.cx-cat-name-label) {
-  color: #e2e8f0 !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
 }
 .connectea-dark #connectify-sidebar .cx-cat-name-label {
   color: var(--cx-cat-color, inherit) !important;
 }
 .connectea-dark #connectify-sidebar strong {
-  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 .connectea-dark #connectify-sidebar p {
-  color: #cbd5e1 !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
 /* Freeze screen scrolling during bulk expansion */
@@ -175,24 +175,24 @@ body.cx-freeze-scroll {
 
 /* Dark Mode Progress Pill */
 :is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(#cx-expand-progress, .cx-expand-progress-pill) {
-  background: #1e2632 !important;
-  color: #f8fafc !important;
-  border-color: #2e3c4e !important;
+  background: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: var(--cx-border, #2e3c4e) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38) !important;
 }
 :is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-spinner {
-  border-color: #3b82f6 !important;
+  border-color: var(--cx-accent, #3b82f6) !important;
   border-top-color: transparent !important;
 }
 :is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-label {
-  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 :is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-track {
-  background: #12171f !important;
-  border-color: #2e3c4e !important;
+  background: var(--cx-canvas-bg, #12171f) !important;
+  border-color: var(--cx-border, #2e3c4e) !important;
 }
 :is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-bar {
-  background: linear-gradient(90deg, #3b82f6, #60a5fa) !important;
+  background: linear-gradient(90deg, var(--cx-accent, #3b82f6), var(--cx-accent-hover, #60a5fa)) !important;
 }
 
 /* Typography parity across light and dark modes */

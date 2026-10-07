@@ -80,8 +80,8 @@
   .mat-selection-list
 ) :is(.mat-list-item, .mat-mdc-list-item) {
   background-color: transparent !important;
-  color: #f8fafc !important;
-  border-bottom: 1px solid #2a3749 !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-bottom: 1px solid var(--cx-border-subtle, #2a3749) !important;
 }
 
 .connectea-dark :is(
@@ -92,7 +92,7 @@
   .mat-nav-list,
   .mat-selection-list
 ) :is(.mat-list-item, .mat-mdc-list-item):hover {
-  background-color: #24303f !important;
+  background-color: var(--cx-surface-hover, #24303f) !important;
 }
 
 .connectea-dark :is(
@@ -301,7 +301,8 @@
   [class*="class-row"]
 ) {
   border-bottom: 1px solid #36485e !important;
-  color: #f8fafc !important;
+  border-bottom: 1px solid var(--cx-border, #36485e) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 .connectea-dark :is(
@@ -312,7 +313,7 @@
   [class*="class-item"],
   [class*="class-row"]
 ) :is(h1, h2, h3, h4, [class*="title"], strong) {
-  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
   font-weight: 650 !important;
 }
 

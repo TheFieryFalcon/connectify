@@ -24,14 +24,14 @@
     {
       id: 'dark',
       name: 'Dark',
-      icon: '☾',
+      icon: '🌙',
       isDark: true,
       swatch: ['#12171f', '#1e2632', '#3b82f6']
     },
     {
       id: 'quantum',
       name: 'Quantum Dark',
-      icon: '⚛',
+      icon: '⚛️',
       isDark: true,
       swatch: ['#292929', '#333333', '#d4b483']
     },

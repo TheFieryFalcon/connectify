@@ -170,7 +170,7 @@
   .mat-stroked-button,
   .mat-raised-button,
   .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced) {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]) {
   background-color: #202c3b !important;
   background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
   color: var(--cx-button-text, var(--cx-text-primary, #f1f5f9)) !important;
@@ -209,7 +209,7 @@
   .mat-stroked-button,
   .mat-raised-button,
   .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):hover {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   border-color: var(--cx-border-hover, #5b7594) !important;
   color: #ffffff !important;
@@ -229,7 +229,7 @@
   .mat-stroked-button,
   .mat-raised-button,
   .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):active {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):active {
   background-color: var(--cx-surface-active, #192432) !important;
   transform: translateY(1px) !important;
 }
@@ -247,7 +247,7 @@
   .mat-stroked-button,
   .mat-raised-button,
   .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):focus-visible {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):focus-visible {
   border-color: var(--cx-accent, #3b82f6) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
   outline: none !important;

@@ -203,9 +203,12 @@
   .eds-c-action-button
 ) {
   background-color: #24303f !important;
+  background-color: var(--cx-button-bg, var(--cx-surface-elevated, #24303f)) !important;
   background-image: none !important;
   color: #f1f5f9 !important;
+  color: var(--cx-button-text, var(--cx-text-primary, #f1f5f9)) !important;
   border: 1px solid #4a617a !important;
+  border: 1px solid var(--cx-button-border, var(--cx-border, #4a617a)) !important;
   border-radius: 4px !important;
   padding: 4px 12px !important;
   font-size: 13px !important;
@@ -253,7 +256,9 @@
   .eds-c-action-button
 ):hover {
   background-color: #2e3c4e !important;
+  background-color: var(--cx-surface-hover, #2e3c4e) !important;
   border-color: #607996 !important;
+  border-color: var(--cx-border-hover, #607996) !important;
   color: #ffffff !important;
 }
 

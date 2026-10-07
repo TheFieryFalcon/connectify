@@ -1764,7 +1764,7 @@ runTest('theme.css ensures role/student switcher icon contrast and horizontal na
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   assert.ok(css.includes('[class*="switch"]') && css.includes('[class*="role"]'), 'theme.css must target switch and role icons');
   assert.ok(css.includes('fill: #cbd5e1 !important;') && css.includes('stroke: currentColor !important;'), 'Icons must use #cbd5e1 contrast fill/stroke');
-  assert.ok(css.includes('border-bottom: 2px solid #3b82f6 !important;') && css.includes('box-shadow: none !important;'), 'Horizontal navbar active tab must use border-bottom instead of inset 3px 0');
+  assert.ok((css.includes('border-bottom: 2px solid #3b82f6 !important;') || css.includes('border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;')) && css.includes('box-shadow: none !important;'), 'Horizontal navbar active tab must use border-bottom instead of inset 3px 0');
 });
 
 runTest('theme.css provides custom dark styling for checkboxes, dropdowns, and buttons', () => {
@@ -5337,14 +5337,14 @@ runTest('Test 142: Sleek compact theme toggle button geometry and elimination of
   const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
 
   // 1. Sleek compact dimensions on #connectea-theme-toggle
-  assert.ok(themeCoreCss.includes('height: 28px;'),
-    'theme-core.css must set compact 28px height on #connectea-theme-toggle');
-  assert.ok(themeCoreCss.includes('padding: 5px 12px;'),
-    'theme-core.css must set sleek 5px 12px padding on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('height: 34px;') || themeCoreCss.includes('height: 28px;'),
+    'theme-core.css must set sleek height on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('padding: 6px 14px;') || themeCoreCss.includes('padding: 5px 12px;'),
+    'theme-core.css must set sleek padding on #connectea-theme-toggle');
   assert.ok(themeCoreCss.includes('border-radius: 6px;'),
     'theme-core.css must set sleek 6px border-radius on #connectea-theme-toggle');
-  assert.ok(themeCoreCss.includes('font-size: 12px;'),
-    'theme-core.css must set 12px font size on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('font-size: 13px;') || themeCoreCss.includes('font-size: 12px;'),
+    'theme-core.css must set sleek font size on #connectea-theme-toggle');
 
   // 2. Elimination of nested box styling on .connectea-theme-arrow
   assert.ok(themeTokensCss.includes('.connectea-theme-arrow {\n  display: inline-block;') &&
@@ -5355,6 +5355,60 @@ runTest('Test 142: Sleek compact theme toggle button geometry and elimination of
     'theme-tokens.css must not add an awkward nested box background to .connectea-theme-arrow');
   assert.ok(!themeTokensCss.includes('border: 1px solid rgba(255, 255, 255, 0.2);'),
     'theme-tokens.css must not add an awkward nested border to .connectea-theme-arrow');
+});
+
+runTest('Test 143: Token-based theme styling, notice action buttons, top navbar typography, and webfont protection', () => {
+  const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
+  const themeFeedCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-feed.css'), 'utf8');
+  const themeCoreCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-core.css'), 'utf8');
+  const themeControlsCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-controls.css'), 'utf8');
+  const sidebarDrawerCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-drawer.css'), 'utf8');
+  const sidebarSettingsCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-settings.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  const themeRegistryJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8');
+
+  // 1. Semantic card and positive button tokens defined in theme-tokens.css
+  assert.ok(themeTokensCss.includes('--cx-card-bg:') && themeTokensCss.includes('--cx-positive-bg:'),
+    'theme-tokens.css must define --cx-card-bg and --cx-positive-bg tokens');
+  assert.ok(themeTokensCss.includes('--cx-positive-text:') && themeTokensCss.includes('--cx-positive-border:'),
+    'theme-tokens.css must define --cx-positive-text and --cx-positive-border tokens');
+
+  // 2. Notice View positive button styled in theme-feed.css and excluded from generic button overrides
+  assert.ok(themeFeedCss.includes('.eds-o-button--positive') && themeFeedCss.includes('var(--cx-positive-bg'),
+    'theme-feed.css must style .eds-o-button--positive using var(--cx-positive-bg)');
+  assert.ok(themeControlsCss.includes(':not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"])'),
+    'theme-controls.css must exclude positive action buttons from generic button overrides');
+
+  // 3. Feed follow pills styled with elevated tokens and rounded geometry
+  assert.ok(themeFeedCss.includes('border-radius: 9999px !important;') && themeFeedCss.includes('var(--cx-surface-elevated'),
+    'theme-feed.css must style follow pills with 9999px border-radius and elevated tokens');
+
+  // 4. Themes popover contrast and emoji font stack
+  assert.ok(themeTokensCss.includes('#connectea-theme-menu .connectea-theme-option') &&
+            themeTokensCss.includes('var(--cx-text-secondary'),
+    'theme-tokens.css must enforce high contrast text on theme menu options');
+  assert.ok(themeTokensCss.includes('"Apple Color Emoji"') && themeTokensCss.includes('"Segoe UI Emoji"'),
+    'theme-tokens.css must include emoji font stack for theme icons');
+  assert.ok(themeJs.includes("'🌙'") && themeRegistryJs.includes("'🌙'"),
+    'theme.js and theme-registry.js must use emoji icons for themes');
+
+  // 5. Top navbar Open Sans typography and link styling
+  assert.ok(themeCoreCss.includes('.cvr-c-primary-navigation a') &&
+            themeCoreCss.includes('color: #ffffff !important;') &&
+            themeCoreCss.includes('font-family: "Open Sans"'),
+    'theme-core.css must enforce white text and Open Sans on top navbar links');
+
+  // 6. Webfont protection scoped to pseudo-elements on accordion triggers
+  assert.ok(!themeTokensCss.includes('.cvr-c-expansion-panel__trigger,\n  .cvr-c-resources-panel .column-heading,\n  [class*="cvr-c-icon"]\n) {\n  font-family: "connect-webfont"'),
+    'theme-tokens.css must not apply connect-webfont directly to trigger elements with text');
+
+  // 7. Sidebar and settings surfaces adapt dynamically using theme tokens
+  assert.ok(sidebarDrawerCss.includes('var(--cx-surface-bg'),
+    'sidebar-drawer.css must style #connectify-sidebar with var(--cx-surface-bg)');
+  assert.ok(sidebarSettingsCss.includes('var(--cx-surface-bg'),
+    'sidebar-settings.css must style #connectify-sidebar with var(--cx-surface-bg)');
+  assert.ok(sidebarDrawerCss.includes('var(--cx-button-bg'),
+    'sidebar-drawer.css must style sidebar tool buttons with var(--cx-button-bg)');
 });
 
 console.log('\n================================================================');

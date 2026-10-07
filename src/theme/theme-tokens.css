@@ -25,6 +25,7 @@
   --cx-table-header-bg: #f8fafc; --cx-table-row-hover: #f1f5f9; --cx-table-row-alt: #f8fafc; --cx-table-border: #e2e8f0;
   --cx-badge-bg: #e2e8f0; --cx-badge-border: #cbd5e1; --cx-badge-text: #1e293b;
   --cx-badge-success-bg: #dcfce7; --cx-badge-warning-bg: #fef9c3; --cx-badge-danger-bg: #fee2e2; --cx-badge-info-bg: #dbeafe;
+  --cx-card-bg: #ffffff; --cx-positive-bg: #8cae04; --cx-positive-hover: #9ec204; --cx-positive-text: #ffffff; --cx-positive-border: #7b9900; --cx-button-text-hover: #0f172a;
   --cx-scrollbar-thumb: #cbd5e1; --cx-scrollbar-track: transparent;
   --cx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05); --cx-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1); --cx-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
@@ -40,12 +41,13 @@
   --cx-accent: #3b82f6; --cx-accent-hover: #60a5fa; --cx-accent-active: #2563eb; --cx-accent-subtle: rgba(59, 130, 246, 0.15); --cx-accent-text: #ffffff;
   --cx-nav-bg: #1a222d; --cx-nav-border: #36485e; --cx-nav-text: #cbd5e1; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #121820;
   --cx-button-bg: #202c3b; --cx-button-hover: #2c3b4e; --cx-button-active: #192432;
-  --cx-button-border: #455a73; --cx-button-border-hover: #5b7594; --cx-button-text: #f1f5f9;
+  --cx-button-border: #455a73; --cx-button-border-hover: #5b7594; --cx-button-text: #f1f5f9; --cx-button-text-hover: #ffffff;
   --cx-button-primary-bg: #2563eb; --cx-button-primary-hover: #1d4ed8; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #141a22; --cx-input-border: #42556d; --cx-input-border-focus: #3b82f6; --cx-input-text: #f1f5f9; --cx-input-placeholder: #64748b;
   --cx-table-header-bg: #1a222d; --cx-table-row-hover: #263344; --cx-table-row-alt: #161e28; --cx-table-border: #2e3c4e;
   --cx-badge-bg: #24303f; --cx-badge-border: #4a617a; --cx-badge-text: #f1f5f9;
   --cx-badge-success-bg: #166534; --cx-badge-warning-bg: #854d0e; --cx-badge-danger-bg: #991b1b; --cx-badge-info-bg: #1e40af;
+  --cx-card-bg: #1e2632; --cx-positive-bg: #7b9900; --cx-positive-hover: #8fb200; --cx-positive-text: #ffffff; --cx-positive-border: #6b8500;
   --cx-scrollbar-thumb: #3d5066; --cx-scrollbar-track: #12171f;
   --cx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3); --cx-shadow-md: 0 4px 10px rgba(0, 0, 0, 0.4); --cx-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
@@ -60,11 +62,12 @@
   --cx-accent: #d4b483; --cx-accent-hover: #e2c9a3; --cx-accent-active: #c5a36f; --cx-accent-subtle: rgba(212, 180, 131, 0.15); --cx-accent-text: #222222;
   --cx-nav-bg: #2a2a2a; --cx-nav-border: #3a3a3a; --cx-nav-text: #cccccc; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #222222;
   --cx-button-bg: #303944; --cx-button-hover: #3b4857; --cx-button-active: #252d36;
-  --cx-button-border: #4c5a69; --cx-button-border-hover: #617387; --cx-button-text: #cccccc;
+  --cx-button-border: #4c5a69; --cx-button-border-hover: #617387; --cx-button-text: #cccccc; --cx-button-text-hover: #ffffff;
   --cx-button-primary-bg: #d4b483; --cx-button-primary-hover: #e2c9a3; --cx-button-primary-text: #222222;
   --cx-input-bg: #242424; --cx-input-border: #444444; --cx-input-border-focus: #d4b483; --cx-input-text: #cccccc; --cx-input-placeholder: #777777;
   --cx-table-header-bg: #2a2a2a; --cx-table-row-hover: #3a3a3a; --cx-table-row-alt: #2c2c2c; --cx-table-border: #3a3a3a;
   --cx-badge-bg: #3a3a3a; --cx-badge-border: #4a4a4a; --cx-badge-text: #cccccc;
+  --cx-card-bg: #333333; --cx-positive-bg: #7b9900; --cx-positive-hover: #8fb200; --cx-positive-text: #ffffff; --cx-positive-border: #6b8500;
   --cx-scrollbar-thumb: #444444; --cx-scrollbar-track: #292929;
 }
 
@@ -78,11 +81,12 @@
   --cx-accent: #38bdf8; --cx-accent-hover: #7dd3fc; --cx-accent-active: #0284c7; --cx-accent-subtle: rgba(56, 189, 248, 0.15); --cx-accent-text: #000000;
   --cx-nav-bg: #050505; --cx-nav-border: #222222; --cx-nav-text: #e5e5e5; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #000000;
   --cx-button-bg: #121212; --cx-button-hover: #202020; --cx-button-active: #080808;
-  --cx-button-border: #333333; --cx-button-border-hover: #444444; --cx-button-text: #ffffff;
+  --cx-button-border: #333333; --cx-button-border-hover: #444444; --cx-button-text: #ffffff; --cx-button-text-hover: #ffffff;
   --cx-button-primary-bg: #0284c7; --cx-button-primary-hover: #0369a1; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #050505; --cx-input-border: #262626; --cx-input-border-focus: #38bdf8; --cx-input-text: #ffffff; --cx-input-placeholder: #525252;
   --cx-table-header-bg: #0c0c0c; --cx-table-row-hover: #141414; --cx-table-row-alt: #080808; --cx-table-border: #1f1f1f;
   --cx-badge-bg: #181818; --cx-badge-border: #262626; --cx-badge-text: #ffffff;
+  --cx-card-bg: #0a0a0a; --cx-positive-bg: #7b9900; --cx-positive-hover: #8fb200; --cx-positive-text: #ffffff; --cx-positive-border: #6b8500;
   --cx-scrollbar-thumb: #262626; --cx-scrollbar-track: #000000;
 }
 
@@ -96,11 +100,12 @@
   --cx-accent: #60a5fa; --cx-accent-hover: #93c5fd; --cx-accent-active: #3b82f6; --cx-accent-subtle: rgba(96, 165, 250, 0.15); --cx-accent-text: #ffffff;
   --cx-nav-bg: #0e1830; --cx-nav-border: #233454; --cx-nav-text: #cbd5e1; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #090f21;
   --cx-button-bg: #182642; --cx-button-hover: #22355c; --cx-button-active: #121e35;
-  --cx-button-border: #344b76; --cx-button-border-hover: #486499; --cx-button-text: #f1f5f9;
+  --cx-button-border: #344b76; --cx-button-border-hover: #486499; --cx-button-text: #f1f5f9; --cx-button-text-hover: #ffffff;
   --cx-button-primary-bg: #2563eb; --cx-button-primary-hover: #1d4ed8; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #0e1830; --cx-input-border: #2a3c61; --cx-input-border-focus: #60a5fa; --cx-input-text: #f1f5f9; --cx-input-placeholder: #64748b;
   --cx-table-header-bg: #101c37; --cx-table-row-hover: #1c2b4c; --cx-table-row-alt: #121e3b; --cx-table-border: #1e2e4c;
   --cx-badge-bg: #1f3054; --cx-badge-border: #344b76; --cx-badge-text: #f1f5f9;
+  --cx-card-bg: #141f36; --cx-positive-bg: #7b9900; --cx-positive-hover: #8fb200; --cx-positive-text: #ffffff; --cx-positive-border: #6b8500;
   --cx-scrollbar-thumb: #2d4168; --cx-scrollbar-track: #0b132b;
 }
 
@@ -114,11 +119,12 @@
   --cx-accent: #10b981; --cx-accent-hover: #34d399; --cx-accent-active: #059669; --cx-accent-subtle: rgba(16, 185, 129, 0.15); --cx-accent-text: #ffffff;
   --cx-nav-bg: #0d1f19; --cx-nav-border: #1d4134; --cx-nav-text: #a7f3d0; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #07130f;
   --cx-button-bg: #132c24; --cx-button-hover: #1a3b30; --cx-button-active: #0e201a;
-  --cx-button-border: #2c5949; --cx-button-border-hover: #3c7a64; --cx-button-text: #ecfdf5;
+  --cx-button-border: #2c5949; --cx-button-border-hover: #3c7a64; --cx-button-text: #ecfdf5; --cx-button-text-hover: #ffffff;
   --cx-button-primary-bg: #059669; --cx-button-primary-hover: #047857; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #0d1f19; --cx-input-border: #224a3b; --cx-input-border-focus: #10b981; --cx-input-text: #ecfdf5; --cx-input-placeholder: #4b8b70;
   --cx-table-header-bg: #0e231c; --cx-table-row-hover: #17362c; --cx-table-row-alt: #10261f; --cx-table-border: #1b3b2f;
   --cx-badge-bg: #1a3b30; --cx-badge-border: #2c5949; --cx-badge-text: #ecfdf5;
+  --cx-card-bg: #11261f; --cx-positive-bg: #059669; --cx-positive-hover: #10b981; --cx-positive-text: #ffffff; --cx-positive-border: #047857;
   --cx-scrollbar-thumb: #285444; --cx-scrollbar-track: #0a1914;
 }
 
@@ -132,11 +138,12 @@
   --cx-accent: #f43f5e; --cx-accent-hover: #fb7185; --cx-accent-active: #e11d48; --cx-accent-subtle: rgba(244, 63, 94, 0.15); --cx-accent-text: #ffffff;
   --cx-nav-bg: #1f1423; --cx-nav-border: #43264b; --cx-nav-text: #fbcfe8; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #130a17;
   --cx-button-bg: #2b1930; --cx-button-hover: #3a2241; --cx-button-active: #211325;
-  --cx-button-border: #5c3566; --cx-button-border-hover: #764483; --cx-button-text: #fdf2f8;
+  --cx-button-border: #5c3566; --cx-button-border-hover: #764483; --cx-button-text: #fdf2f8; --cx-button-text-hover: #ffffff;
   --cx-button-primary-bg: #e11d48; --cx-button-primary-hover: #be123c; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #1e1322; --cx-input-border: #4b2a54; --cx-input-border-focus: #f43f5e; --cx-input-text: #fdf2f8; --cx-input-placeholder: #9d507b;
   --cx-table-header-bg: #221426; --cx-table-row-hover: #361f3c; --cx-table-row-alt: #28182d; --cx-table-border: #3c2143;
   --cx-badge-bg: #3a2241; --cx-badge-border: #5c3566; --cx-badge-text: #fdf2f8;
+  --cx-card-bg: #26182a; --cx-positive-bg: #7b9900; --cx-positive-hover: #8fb200; --cx-positive-text: #ffffff; --cx-positive-border: #6b8500;
   --cx-scrollbar-thumb: #55315e; --cx-scrollbar-track: #19111c;
 }
 
@@ -176,14 +183,13 @@
   .v-datefield-button, .v-datefield-calendarpanel button,
   .cvr-c-reply, .cvr-c-expansion-panel__trigger, .cvr-c-resources-panel .column-heading,
   [class*="cvr-c-icon"], [class*="eds-c-icon"]
-),
+):is(::before, ::after),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
-  [class^="cvr-c-icon--"], [class*=" cvr-c-icon--"], .cvr-c-icon, .cvr-c-icon--switch,
-  [class^="eds-c-icon"], [class*=" eds-c-icon"], .eds-c-icon,
-  .v-datefield-button, .v-datefield-calendarpanel button,
-  .cvr-c-reply, .cvr-c-expansion-panel__trigger, .cvr-c-resources-panel .column-heading,
-  [class*="cvr-c-icon"], [class*="eds-c-icon"]
-):is(::before, ::after) {
+  i.cvr-c-icon, i.eds-c-icon, span.cvr-c-icon, span.eds-c-icon,
+  [class^="cvr-c-icon--"]:not(button):not(div):not(a):not(section):not(header),
+  [class*=" cvr-c-icon--"]:not(button):not(div):not(a):not(section):not(header),
+  .cvr-c-icon--switch:not(button):not(div):not(a):not(section):not(header)
+) {
   font-family: "connect-webfont" !important;
   font-style: normal !important;
   font-weight: normal !important;
@@ -345,7 +351,7 @@
 /* Buttons and Action Elements */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   .v-button, .eds-c-button, .eds-c-standard-button
-):not(.cx-clear-cache-btn):not(#connectify-sidebar *) {
+):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]) {
   background-color: var(--cx-button-bg) !important;
   color: var(--cx-button-text) !important;
   border-color: var(--cx-button-border) !important;
@@ -353,7 +359,7 @@
 
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   .v-button:hover, .eds-c-button:hover, .eds-c-standard-button:hover
-):not(.cx-clear-cache-btn):not(#connectify-sidebar *) {
+):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]) {
   background-color: var(--cx-surface-hover) !important;
   border-color: var(--cx-border-strong) !important;
 }
@@ -412,79 +418,50 @@
 }
 
 #connectea-theme-menu {
-  position: fixed;
-  width: 250px;
-  background: var(--cx-surface-bg, #1e2632);
-  border: 1px solid var(--cx-border, #3d5066);
-  border-radius: 10px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
-  padding: 10px;
-  z-index: 10035;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 13.5px;
-  box-sizing: border-box;
+  position: fixed; width: 250px; background: var(--cx-surface-bg, #1e2632) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important; border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65); padding: 10px; z-index: 10035;
+  display: flex; flex-direction: column; gap: 6px;
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", sans-serif !important;
+  font-size: 13.5px; box-sizing: border-box;
 }
 
-.connectea-theme-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  min-height: 40px;
-  border-radius: 7px;
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--cx-text-secondary, #cbd5e1);
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
-  box-sizing: border-box;
-  font-size: 13.5px;
-  font-family: inherit;
+#connectea-theme-menu .connectea-theme-option {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 40px;
+  border-radius: 8px; background: transparent !important; border: 1px solid transparent !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important; cursor: pointer; width: 100%;
+  text-align: left; box-sizing: border-box; font-size: 14px; font-weight: 500; font-family: inherit;
   transition: background 0.12s ease, color 0.12s ease;
 }
-.connectea-theme-option:hover {
-  background: var(--cx-surface-hover, #2b394b);
-  color: var(--cx-text-primary, #ffffff);
+#connectea-theme-menu .connectea-theme-option:hover {
+  background: var(--cx-surface-hover, #2b394b) !important; color: #ffffff !important;
 }
-.connectea-theme-option.eds-s-is-active,
-.connectea-theme-option[aria-selected="true"] {
-  background: var(--cx-surface-active, #121820);
-  color: var(--cx-accent, #60a5fa);
-  font-weight: 600;
-  border-color: var(--cx-border-subtle, #334155);
+#connectea-theme-menu .connectea-theme-option.eds-s-is-active,
+#connectea-theme-menu .connectea-theme-option[aria-selected="true"] {
+  background: var(--cx-surface-active, #121820) !important; color: #ffffff !important;
+  font-weight: 600; border-color: var(--cx-border-subtle, #334155) !important;
 }
 
 .connectea-theme-swatch {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  flex-shrink: 0;
-  box-sizing: border-box;
+  width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, 0.45); flex-shrink: 0; box-sizing: border-box;
 }
-
 .connectea-theme-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;
-  font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 17px; width: 22px; height: 22px; flex-shrink: 0;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", sans-serif !important;
+}
+.connectea-theme-name {
+  color: inherit !important; font-size: 14px !important; font-weight: 600 !important;
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 .connectea-theme-toggle-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 15px;
   width: 18px;
   height: 18px;
   margin-right: 2px;
-  font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", sans-serif !important;
 }

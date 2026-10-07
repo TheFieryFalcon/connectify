@@ -64,55 +64,55 @@ html.connectea-dark {
   margin: 0;
   white-space: nowrap;
   border-radius: 6px;
-  padding: 5px 12px;
+  padding: 6px 14px;
   font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.35;
   cursor: pointer;
-  background: #25313f !important;
-  color: #f1f6fb !important;
-  border: 1px solid #526a81 !important;
+  background: var(--cx-button-bg, #25313f) !important;
+  color: var(--cx-button-text, #f1f6fb) !important;
+  border: 1px solid var(--cx-button-border, #526a81) !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   transition: background 0.15s ease, border-color 0.15s ease;
   right: 16px;
-  min-width: 96px;
+  min-width: 108px;
   width: auto;
-  height: 28px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 #connectea-theme-toggle:hover {
-  background: #313f50 !important;
-  border-color: #6b88a5 !important;
+  background: var(--cx-button-hover, #313f50) !important;
+  border-color: var(--cx-button-border-hover, #6b88a5) !important;
 }
 
 #connectea-theme-toggle:focus-visible {
-  outline: 2px solid #598fbd;
+  outline: 2px solid var(--cx-accent, #598fbd);
   outline-offset: 2px;
 }
 
 .connectea-dark #connectea-theme-toggle {
-  background: #24303f !important;
-  color: #f1f6fb !important;
-  border: 1px solid #485c72 !important;
+  background: var(--cx-button-bg, #24303f) !important;
+  color: var(--cx-button-text, #f1f6fb) !important;
+  border: 1px solid var(--cx-button-border, #485c72) !important;
 }
 
 .connectea-dark #connectea-theme-toggle:hover {
-  background: #2f3e52 !important;
-  border-color: #627b97 !important;
+  background: var(--cx-button-hover, #2f3e52) !important;
+  border-color: var(--cx-button-border-hover, #627b97) !important;
 }
 
 @media (max-width: 600px) {
   #connectea-theme-toggle {
     right: 8px !important;
-    font-size: 11px;
-    padding: 4px 8px;
-    min-width: 80px;
-    height: 26px;
+    font-size: 12px;
+    padding: 5px 10px;
+    min-width: 88px;
+    height: 30px;
   }
 }
 
@@ -135,6 +135,7 @@ html.connectea-dark {
 
 .connectea-dark :is(
   .cvr-c-primary-navigation,
+  .cvr-c-primary-navigation *,
   .cvr-c-primary-navigation__links,
   .cvr-c-primary-navigation__links a,
   .cvr-c-primary-navigation__links div,
@@ -168,7 +169,17 @@ html.connectea-dark {
   text-decoration: none !important;
 }
 
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div > a, .cvr-js-greedy__trigger > div > a, .v-link a) {
+.connectea-dark :is(
+  .cvr-c-primary-navigation a,
+  .cvr-c-primary-navigation a:link,
+  .cvr-c-primary-navigation a:visited,
+  .cvr-c-primary-navigation a span,
+  .cvr-c-primary-navigation .v-link,
+  .cvr-c-primary-navigation .v-link a,
+  .cvr-c-primary-navigation .cvr-js-greedy__item a,
+  .cvr-c-primary-navigation .cvr-js-greedy__item a span,
+  .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div > a, .cvr-js-greedy__trigger > div > a, .v-link a)
+):not(#connectea-theme-toggle):not(#connectea-theme-toggle *) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
   font-size: 14px !important;
   font-weight: 700 !important;
@@ -191,16 +202,21 @@ html.connectea-dark {
 }
 
 /* Active tab in top navigation matches light mode: pure background color, NO side/top borders, NO outlines, NO radius */
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div, .v-link.eds-s-is-active a, .eds-s-is-active a, .v-link.eds-s-is-active) {
+.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div, .v-link.eds-s-is-active a, .eds-s-is-active a, .v-link.eds-s-is-active, .eds-s-is-active) {
   background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
   color: #ffffff !important;
   border: none !important;
-  border-bottom: 2px solid #3b82f6 !important;
   border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
   box-shadow: none !important;
   border-radius: 0 !important;
   outline: none !important;
   margin: 0 !important;
+  text-decoration: none !important;
+}
+
+.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div, .v-link.eds-s-is-active a, .eds-s-is-active a, .v-link.eds-s-is-active, .eds-s-is-active) :is(a, span, div) {
+  color: #ffffff !important;
+  text-decoration: none !important;
 }
 
 /* --------------------------------------------------------------------------

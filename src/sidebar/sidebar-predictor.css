@@ -223,22 +223,22 @@
 }
 
 .connectea-dark .cx-pred-scenario-card {
-  background: #1e252e;
-  border-color: #3b5066;
-  color: #dceaf6;
+  background: var(--cx-surface-elevated, #1e252e);
+  border-color: var(--cx-border, #3b5066);
+  color: var(--cx-text-primary, #dceaf6);
 }
 .connectea-dark .cx-pred-scenario-card--low {
-  background: #1e252e !important;
-  border-color: #3b5066 !important;
+  background: var(--cx-surface-elevated, #1e252e) !important;
+  border-color: var(--cx-border, #3b5066) !important;
 }
 .connectea-dark .cx-pred-scenario-label--low {
-  color: #94a3b8 !important;
+  color: var(--cx-text-muted, #94a3b8) !important;
 }
 .connectea-dark .cx-pred-scenario-value--low {
-  color: #cbd5e1 !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 .connectea-dark .cx-pred-scenario-sub--low {
-  color: #94a3b8 !important;
+  color: var(--cx-text-muted, #94a3b8) !important;
 }
 .connectea-dark .cx-pred-scenario-card--mid {
   background: #1e3a5f !important;
@@ -326,12 +326,12 @@
   color: #15803d;
 }
 .connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) {
-  background: #1e252e !important;
-  border-color: #3b5066 !important;
-  color: #b4c5d5 !important;
+  background: var(--cx-surface-elevated, #1e252e) !important;
+  border-color: var(--cx-border, #3b5066) !important;
+  color: var(--cx-text-secondary, #b4c5d5) !important;
 }
 .connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) strong {
-  color: #cbd5e1 !important;
+  color: var(--cx-text-primary, #cbd5e1) !important;
 }
 .connectea-dark .cx-pred-pill--mid {
   background: #1e3a5f !important;
@@ -376,9 +376,9 @@
   margin-top: 8px;
 }
 .connectea-dark .cx-pred-no-average-card {
-  background: #253342;
-  border-color: #527d9f;
-  color: #dceaf6;
+  background: var(--cx-surface-elevated, #253342);
+  border-color: var(--cx-border, #527d9f);
+  color: var(--cx-text-primary, #dceaf6);
 }
 
 /* ATAR Contributing Courses Table */
