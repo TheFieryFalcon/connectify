@@ -38,6 +38,7 @@ function parseArgs() {
     screenshotsDir: path.resolve(__dirname, '..', 'screenshots'),
     outputJson: path.resolve(__dirname, '..', 'theme_unstyled_report.json'),
     outputMd: path.resolve(__dirname, '..', 'theme_unstyled_report.md'),
+    delay: 2500,
     headful: false,
     headless: null,
     username: null,
@@ -54,6 +55,7 @@ function parseArgs() {
     else if (a === '--urls' && args[i + 1]) options.urlsList = args[++i].split(',').map(s => s.trim()).filter(Boolean);
     else if (a === '--paste') options.paste = true;
     else if (a === '--theme' && args[i + 1]) options.theme = args[++i];
+    else if (a === '--delay' && args[i + 1]) options.delay = parseInt(args[++i], 10);
     else if (a === '--no-click-buttons') options.clickButtons = false;
     else if (a === '--margin-tolerance' && args[i + 1]) options.marginTolerance = parseFloat(args[++i]);
     else if (a === '--size-tolerance' && args[i + 1]) options.sizeTolerance = parseFloat(args[++i]);
@@ -628,13 +630,13 @@ async function runThemeAudit() {
 
     try {
       await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
-      await new Promise(r => setTimeout(r, 1200));
+      await utils.waitForPageReady(page, options.delay);
 
       if (options.clickButtons) {
         console.log('[ThemeAudit] Expanding interactive JavaScript buttons and accordions...');
         const clicked = await clickInteractiveButtons(page);
         console.log(`  └─ Dispatched clicks to ${clicked.length} interactive elements`);
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 800));
       }
 
       // 1. Capture Connect Native Theme Baseline

@@ -20,7 +20,7 @@ function parseArgs() {
     startUrl: DEFAULT_START_URL,
     maxDepth: 7,
     maxPages: 100,
-    delay: 600,
+    delay: 2500,
     headful: false,
     headless: null,
     username: null,
@@ -268,7 +268,7 @@ async function crawl() {
     try {
       const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
       if (response) responseStatus = response.status();
-      await new Promise(r => setTimeout(r, options.delay));
+      await utils.waitForPageReady(page, options.delay);
       pageTitle = await page.title().catch(() => '');
 
       // Trigger lazy navigation menus if present to reveal dropdown routes
@@ -278,6 +278,7 @@ async function crawl() {
           if (trigger) trigger.click();
         } catch {}
       }).catch(() => {});
+      await new Promise(r => setTimeout(r, 400));
 
       // Audit UI elements for 3.0:1 contrast compliance (WCAG 2.1 AA Non-text Contrast SC 1.4.11)
       const uiContrast = await utils.auditPageUiContrast(page);

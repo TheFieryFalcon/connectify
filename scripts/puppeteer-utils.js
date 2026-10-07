@@ -156,6 +156,7 @@ async function authenticate(page, options = {}) {
         waitUntil: 'domcontentloaded',
         timeout: 20000
       });
+      await waitForPageReady(page, 1500);
       if (await isAuthenticated(page)) {
         console.log('[PuppeteerUtils] Restored authenticated session from file.');
         return { success: true, method: 'session' };
@@ -410,6 +411,40 @@ async function auditPageUiContrast(page) {
   });
 }
 
+/**
+ * Waits for network idle, document readyState, disappearance of loading spinners,
+ * and an explicit settling delay to ensure dynamic portlets fully render.
+ */
+async function waitForPageReady(page, postDelayMs = 2500) {
+  try {
+    // 1. Wait for document.readyState === 'complete'
+    await page.waitForFunction(() => document.readyState === 'complete', { timeout: 15000 }).catch(() => {});
+
+    // 2. Wait for short network idle window (graceful timeout)
+    if (typeof page.waitForNetworkIdle === 'function') {
+      await page.waitForNetworkIdle({ idleTime: 500, timeout: 6000 }).catch(() => {});
+    }
+
+    // 3. Wait for any active Connect/CVR loading spinners to clear
+    await page.waitForFunction(() => {
+      const spinners = document.querySelectorAll(
+        '.cvr-c-spinner, .v-loading-indicator, .eds-c-spinner, mat-spinner, .loading-mask, [aria-busy="true"]'
+      );
+      for (const s of spinners) {
+        if (s.offsetParent !== null && window.getComputedStyle(s).display !== 'none' && window.getComputedStyle(s).visibility !== 'hidden') {
+          return false;
+        }
+      }
+      return true;
+    }, { timeout: 6000 }).catch(() => {});
+  } catch {}
+
+  // 4. Post-load delay for async AJAX portlets / animations to settle
+  if (postDelayMs > 0) {
+    await new Promise(r => setTimeout(r, postDelayMs));
+  }
+}
+
 module.exports = {
   EXTENSION_ROOT,
   DEFAULT_SESSION_FILE,
@@ -419,6 +454,7 @@ module.exports = {
   loadSession,
   isAuthenticated,
   authenticate,
+  waitForPageReady,
   sRgbToLinear,
   calculateLuminance,
   calculateContrastRatio,
