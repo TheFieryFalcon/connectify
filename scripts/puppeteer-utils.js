@@ -113,8 +113,23 @@ async function isAuthenticated(page) {
     const url = page.url();
     if (!url.includes('connect.det.wa.edu.au')) return false;
     if (url.includes('/login') || url.includes('login.det.wa.edu.au')) return false;
-    const bodyText = await page.evaluate(() => document.body?.innerText || '');
-    if (/sign\s*in|log\s*in\s*to\s*connect|session\s*expired/i.test(bodyText)) return false;
+
+    // Check if interactive login form is present on page
+    const hasLoginForm = await page.evaluate(() => {
+      return Boolean(document.querySelector('#ssousername, input[name="username"], input[name="password"], form[action*="login"]'));
+    }).catch(() => false);
+    if (hasLoginForm) return false;
+
+    // Check for positive indicators of authenticated portal
+    const hasAuthIndicator = await page.evaluate(() => {
+      const hasLogout = Boolean(document.querySelector('a[href*="logout"], a[href*="signout"], button[title*="Logout" i], button[title*="Sign out" i]'));
+      const hasPortalNav = Boolean(document.querySelector('.cvr-c-primary-menu, .cvr-c-navbar, #navigation, .navigation-bar, .my-classes, #header-profile, #p_p_id_56_INSTANCE_'));
+      return hasLogout || hasPortalNav;
+    }).catch(() => false);
+    if (hasAuthIndicator) return true;
+
+    const bodyText = await page.evaluate(() => document.body?.innerText || '').catch(() => '');
+    if (/sign\s*in\s+to|log\s*in\s*to\s*connect|session\s*expired/i.test(bodyText)) return false;
     return true;
   } catch {
     return false;
@@ -192,9 +207,10 @@ async function authenticate(page, options = {}) {
   if (interactive || (!username && !hasSession)) {
     console.log('\n' + '='.repeat(64));
     console.log('INTERACTIVE LOGIN REQUIRED');
+    console.log('A Chrome browser window has opened for you.');
     console.log('Please log into Connect in the browser window.');
     console.log('Complete any department SSO, 2FA or security prompts.');
-    console.log('The script will automatically continue once logged in.');
+    console.log('The script will automatically detect login and proceed.');
     console.log('='.repeat(64) + '\n');
 
     await page.goto('https://connect.det.wa.edu.au/login', {
@@ -202,12 +218,25 @@ async function authenticate(page, options = {}) {
       timeout: 30000
     }).catch(() => {});
 
+    await page.bringToFront().catch(() => {});
+
     const startTime = Date.now();
+    let lastLogTime = 0;
     while (Date.now() - startTime < timeoutMs) {
       await new Promise(r => setTimeout(r, 2000));
+      const now = Date.now();
+      const elapsed = Math.round((now - startTime) / 1000);
+      const remaining = Math.max(0, Math.round((timeoutMs - (now - startTime)) / 1000));
+
+      if (now - lastLogTime >= 5000) {
+        lastLogTime = now;
+        const currentUrl = page.url();
+        console.log(`[PuppeteerUtils] Waiting for login... (${elapsed}s elapsed, ${remaining}s remaining) | Current URL: ${currentUrl}`);
+      }
+
       if (await isAuthenticated(page)) {
         await saveSession(page, sessionFile);
-        console.log('[PuppeteerUtils] Login detected! Session saved.');
+        console.log('\n[PuppeteerUtils] Login detected! Authenticated session saved to ' + path.basename(sessionFile));
         return { success: true, method: 'interactive' };
       }
     }

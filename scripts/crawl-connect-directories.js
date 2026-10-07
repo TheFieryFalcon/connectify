@@ -18,10 +18,11 @@ function parseArgs() {
   const args = process.argv.slice(2);
   const options = {
     startUrl: DEFAULT_START_URL,
-    maxDepth: 4,
+    maxDepth: 7,
     maxPages: 100,
     delay: 600,
     headful: false,
+    headless: null,
     username: null,
     password: null,
     interactive: false,
@@ -39,6 +40,7 @@ function parseArgs() {
     else if (a === '--max-pages' && args[i + 1]) options.maxPages = parseInt(args[++i], 10);
     else if (a === '--delay' && args[i + 1]) options.delay = parseInt(args[++i], 10);
     else if (a === '--headful' || a === '--no-headless') options.headful = true;
+    else if (a === '--headless') options.headless = true;
     else if ((a === '--username' || a === '-u') && args[i + 1]) options.username = args[++i];
     else if ((a === '--password' || a === '-p') && args[i + 1]) options.password = args[++i];
     else if (a === '--interactive') options.interactive = true;
@@ -183,8 +185,18 @@ async function crawl() {
   console.log('[ConnectCrawler] Initializing Connect Directory Crawler...');
   console.log(`[ConnectCrawler] Max depth: ${options.maxDepth} | Max pages: ${options.maxPages} | Delay: ${options.delay}ms`);
 
+  const hasSession = fs.existsSync(options.session);
+  const hasCreds = Boolean(options.username || process.env.CONNECT_USER || process.env.CONNECT_USERNAME);
+  const isHeadless = options.headless !== null
+    ? options.headless
+    : (options.headful ? false : (options.interactive ? false : (hasSession || hasCreds)));
+
+  if (!isHeadless && !options.headful) {
+    console.log('[ConnectCrawler] No saved session or credentials found — launching visible browser window for login.');
+  }
+
   const browser = await utils.launchBrowser({
-    headless: !options.headful,
+    headless: isHeadless,
     loadExtension: true
   });
 
