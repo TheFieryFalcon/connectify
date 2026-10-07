@@ -5489,9 +5489,10 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   const cr = utilsMod.calculateContrastRatio(black, white);
   assert.ok(Math.abs(cr - 21) < 0.2, `Black on white contrast must be ~21:1 (got ${cr})`);
 
-  // 3. test-theme-styles exports parity functions and button clicking
+  // 3. test-theme-styles exports parity functions and multi-URL resolver
   const themeTesterMod = require(themeTesterPath);
   assert.strictEqual(typeof themeTesterMod.runThemeAudit, 'function', 'runThemeAudit must be exported');
+  assert.strictEqual(typeof themeTesterMod.resolveTargetUrls, 'function', 'resolveTargetUrls must be exported');
   assert.strictEqual(typeof themeTesterMod.clickInteractiveButtons, 'function', 'clickInteractiveButtons must be exported');
   assert.strictEqual(typeof themeTesterMod.captureNativeBaseline, 'function', 'captureNativeBaseline must be exported');
   assert.strictEqual(typeof themeTesterMod.auditThemeAgainstBaseline, 'function', 'auditThemeAgainstBaseline must be exported');

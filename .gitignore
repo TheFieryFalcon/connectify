@@ -9,3 +9,4 @@ connect_session.json
 screenshots/
 theme_unstyled_report.*
 connect_directories.*
+crawled_urls.txt

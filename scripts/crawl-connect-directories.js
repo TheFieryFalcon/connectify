@@ -28,7 +28,8 @@ function parseArgs() {
     force: false,
     session: path.resolve(__dirname, '..', utils.DEFAULT_SESSION_FILE),
     outputJson: path.resolve(__dirname, '..', 'connect_directories.json'),
-    outputMd: path.resolve(__dirname, '..', 'connect_directories.md')
+    outputMd: path.resolve(__dirname, '..', 'connect_directories.md'),
+    outputUrls: path.resolve(__dirname, '..', 'crawled_urls.txt')
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -45,6 +46,7 @@ function parseArgs() {
     else if (a === '--session' && args[i + 1]) options.session = path.resolve(args[++i]);
     else if (a === '--output-json' && args[i + 1]) options.outputJson = path.resolve(args[++i]);
     else if (a === '--output-md' && args[i + 1]) options.outputMd = path.resolve(args[++i]);
+    else if (a === '--output-urls' && args[i + 1]) options.outputUrls = path.resolve(args[++i]);
   }
   return options;
 }
@@ -167,6 +169,11 @@ async function crawl() {
       if (existing && Array.isArray(existing.routes) && existing.routes.length > 0) {
         console.log(`[ConnectCrawler] Crawl already completed previously (${existing.routes.length} routes found).`);
         console.log(`[ConnectCrawler] Manifest: ${options.outputJson}`);
+        if (!fs.existsSync(options.outputUrls)) {
+          const urlList = existing.routes.map(r => r.url).sort();
+          fs.writeFileSync(options.outputUrls, urlList.join('\n') + '\n', 'utf8');
+        }
+        console.log(`[ConnectCrawler] URL List: ${options.outputUrls}`);
         console.log('[ConnectCrawler] Skipping crawl (runs once). Use --force to re-crawl.');
         return existing;
       }
@@ -346,6 +353,11 @@ async function crawl() {
 
   fs.writeFileSync(options.outputJson, JSON.stringify(manifest, null, 2), 'utf8');
   console.log(`[ConnectCrawler] Saved directory manifest: ${options.outputJson}`);
+
+  // Write Clean URL List (one URL per line) for pasting into test-theme-styles.js
+  const cleanUrls = Array.from(discoveredRoutes.values()).map(r => r.url).sort();
+  fs.writeFileSync(options.outputUrls, cleanUrls.join('\n') + '\n', 'utf8');
+  console.log(`[ConnectCrawler] Saved clean URL list: ${options.outputUrls} (${cleanUrls.length} URLs)`);
 
   // Write Markdown Sitemap (< 150 lines)
   let md = `# Connect Portal Directory & Route Map\n\n`;

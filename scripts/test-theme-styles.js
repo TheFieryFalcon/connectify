@@ -1,20 +1,23 @@
 /**
  * Connectify Theme Unstyled Elements & Parity Tester
- * Captures a baseline from the Connect Native Theme (native styling) and verifies
- * that in every theme:
- * 1. Fonts, weights, and styles remain identical to Connect native styling.
- * 2. Margins remain identical to Connect native styling.
- * 3. Element sizes (bounding boxes) remain identical to Connect native styling.
- * 4. No more or fewer visible elements exist (exact element visibility parity).
- * 5. Interactive JavaScript buttons (accordions, tabs, cards) are clicked to audit expanded states.
- * 6. Contrast meets WCAG AA standards (>= 4.5:1 body, >= 3.0:1 large/UI, no critical < 2.0:1).
- * 7. Background bleed and native purple Angular Material artifacts are flagged.
+ * Audits one or more URLs (or a crawled URL list) across all registered themes against
+ * the Connect Native Theme (untouched native styling) baseline:
+ * 1. Ensures identical fonts, sizes, weights, and styles as Connect native styling.
+ * 2. Ensures identical margins as Connect native styling.
+ * 3. Ensures identical element sizes (bounding boxes) as Connect native styling.
+ * 4. Ensures no more or fewer visible elements (exact visibility parity).
+ * 5. Dispatches clicks to interactive JavaScript buttons (accordions, tabs, cards)
+ *    to audit expanded states.
+ * 6. Enforces WCAG contrast standards (>= 4.5:1 body, >= 3.0:1 large, no critical < 2.0:1).
+ * 7. Flags unadapted light background bleed in dark themes and native purple ink bars.
+ * 8. Accepts multiple URLs sequentially via --urls-file, --urls, --paste, or crawled_urls.txt.
  */
 
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 const utils = require('./puppeteer-utils');
 
 const DEFAULT_PAGE = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
@@ -24,6 +27,9 @@ function parseArgs() {
   const options = {
     url: null,
     file: null,
+    urlsFile: null,
+    urlsList: null,
+    paste: false,
     theme: 'all',
     clickButtons: true,
     marginTolerance: 1.0,
@@ -43,6 +49,9 @@ function parseArgs() {
     const a = args[i];
     if (a === '--url' && args[i + 1]) options.url = args[++i];
     else if (a === '--file' && args[i + 1]) options.file = args[++i];
+    else if (a === '--urls-file' && args[i + 1]) options.urlsFile = path.resolve(args[++i]);
+    else if (a === '--urls' && args[i + 1]) options.urlsList = args[++i].split(',').map(s => s.trim()).filter(Boolean);
+    else if (a === '--paste') options.paste = true;
     else if (a === '--theme' && args[i + 1]) options.theme = args[++i];
     else if (a === '--no-click-buttons') options.clickButtons = false;
     else if (a === '--margin-tolerance' && args[i + 1]) options.marginTolerance = parseFloat(args[++i]);
@@ -58,6 +67,63 @@ function parseArgs() {
     else if (a === '--session' && args[i + 1]) options.session = path.resolve(args[++i]);
   }
   return options;
+}
+
+function readUrlsFromStdin() {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+    const lines = [];
+    rl.on('line', (line) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        rl.close();
+      } else {
+        lines.push(trimmed);
+      }
+    });
+    rl.on('close', () => {
+      resolve(lines);
+    });
+  });
+}
+
+async function resolveTargetUrls(options) {
+  const urls = [];
+
+  if (options.url) {
+    urls.push(options.url);
+  } else if (options.file) {
+    urls.push('file://' + path.resolve(options.file));
+  } else if (options.urlsList && options.urlsList.length > 0) {
+    urls.push(...options.urlsList);
+  } else if (options.urlsFile && fs.existsSync(options.urlsFile)) {
+    console.log(`[ThemeAudit] Loading URLs from: ${options.urlsFile}`);
+    const raw = fs.readFileSync(options.urlsFile, 'utf8');
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+    urls.push(...lines);
+  } else if (options.paste) {
+    console.log('\n[ThemeAudit] Paste your URLs below (one per line). Press Enter on an empty line when finished:');
+    const lines = await readUrlsFromStdin();
+    urls.push(...lines);
+  } else {
+    // Check if crawled_urls.txt exists from previous crawler run
+    const defaultUrlsPath = path.resolve(__dirname, '..', 'crawled_urls.txt');
+    if (fs.existsSync(defaultUrlsPath)) {
+      console.log(`[ThemeAudit] Found ${path.basename(defaultUrlsPath)} from directory crawler, loading URLs...`);
+      const raw = fs.readFileSync(defaultUrlsPath, 'utf8');
+      const lines = raw.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+      urls.push(...lines);
+    }
+  }
+
+  if (urls.length === 0) {
+    urls.push(DEFAULT_PAGE);
+  }
+
+  return Array.from(new Set(urls));
 }
 
 /**
@@ -82,7 +148,6 @@ async function clickInteractiveButtons(page) {
 
     for (const el of elements) {
       const text = (el.innerText || el.getAttribute('aria-label') || '').toLowerCase();
-      // Exclude destructive actions or navigation-away triggers
       if (/logout|signout|delete|remove|cancel|leave|exit|dismiss/i.test(text)) continue;
       if (el.tagName === 'A' || el.closest('a[href]')) continue;
       if (el.type === 'submit') continue;
@@ -105,7 +170,7 @@ async function clickInteractiveButtons(page) {
  * state from the Connect Native Theme (untouched native styling).
  */
 async function captureNativeBaseline(page) {
-  // 1. Ensure Connect Native Theme is active (no dark mode, no theme tokens)
+  // Ensure Connect Native Theme is active (no dark mode, no theme tokens)
   await page.evaluate(() => {
     if (window.ConnectifyThemeRegistry?.setTheme) {
       window.ConnectifyThemeRegistry.setTheme('light');
@@ -125,7 +190,6 @@ async function captureNativeBaseline(page) {
 
   await new Promise(r => setTimeout(r, 400));
 
-  // 2. Extract baseline metrics for all visible elements
   return await page.evaluate(() => {
     function cleanFontFamily(f) {
       if (!f) return '';
@@ -204,12 +268,7 @@ async function captureNativeBaseline(page) {
 }
 
 /**
- * Audits the current theme against the Connect Native Theme baseline for:
- * - Visible elements count & set parity
- * - Font family, size, weight, and style parity
- * - Margin parity
- * - Size parity
- * - Contrast, background bleed, and Angular Material artifacts
+ * Audits the current theme against the Connect Native Theme baseline.
  */
 async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineData, options) {
   return await page.evaluate((tid, isDark, baseline, opts) => {
@@ -376,7 +435,6 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
             });
           }
         } else {
-          // Extra element visible in theme that wasn't in native baseline
           issues.push({
             category: 'PARITY',
             type: 'EXTRA_ELEMENT_VISIBLE_IN_THEME',
@@ -455,7 +513,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
       }
     }
 
-    // 3. Elements that were visible in native baseline but hidden in theme
+    // Elements that were visible in native baseline but hidden in theme
     for (const auditId of Object.keys(baseMap)) {
       if (!currentVisibleIds.has(auditId)) {
         const base = baseMap[auditId];
@@ -470,7 +528,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
       }
     }
 
-    // 4. Overall visible count check
+    // Overall visible count check
     if (currentVisibleCount !== baseline.visibleCount) {
       issues.push({
         category: 'PARITY',
@@ -481,7 +539,6 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
       });
     }
 
-    // Deduplicate issues
     const uniqueMap = new Map();
     for (const iss of issues) {
       const key = `${iss.type}:${iss.selector}:${iss.details}`;
@@ -500,6 +557,9 @@ async function runThemeAudit() {
   const options = parseArgs();
   console.log('[ThemeAudit] Initializing Connectify Theme & Parity Auditor...');
 
+  const targetUrls = await resolveTargetUrls(options);
+  console.log(`[ThemeAudit] Loaded ${targetUrls.length} page URL(s) to audit one by one.`);
+
   const browser = await utils.launchBrowser({
     headless: !options.headful,
     loadExtension: true
@@ -508,16 +568,9 @@ async function runThemeAudit() {
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 900 });
 
-  let targetUrl = options.url;
-  if (options.file) {
-    targetUrl = 'file://' + path.resolve(options.file);
-  } else if (!targetUrl) {
-    targetUrl = DEFAULT_PAGE;
-  }
-
-  console.log(`[ThemeAudit] Target page: ${targetUrl}`);
-
-  if (targetUrl.includes('connect.det.wa.edu.au')) {
+  // Handle authentication if any URL targets Connect
+  const needsAuth = targetUrls.some(u => u.includes('connect.det.wa.edu.au'));
+  if (needsAuth) {
     await utils.authenticate(page, {
       username: options.username,
       password: options.password,
@@ -526,37 +579,16 @@ async function runThemeAudit() {
     });
   }
 
-  await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 }).catch(() => {});
-  await new Promise(r => setTimeout(r, 1500));
-
-  // Expand interactive elements if requested
-  if (options.clickButtons) {
-    console.log('[ThemeAudit] Expanding interactive JavaScript buttons and accordions...');
-    const clickedButtons = await clickInteractiveButtons(page);
-    console.log(`  └─ Dispatched clicks to ${clickedButtons.length} interactive elements`);
-    await new Promise(r => setTimeout(r, 600));
-  }
-
-  // 1. Capture Connect Native Theme Baseline
-  console.log('\n[ThemeAudit] Capturing Connect Native Theme baseline (native styling)...');
-  const baseline = await captureNativeBaseline(page);
-  console.log(`  └─ Baseline captured: ${baseline.visibleCount} visible elements recorded.`);
-
-  // 2. Determine themes to test (excludes native/light as that is the baseline)
-  const availableThemes = await page.evaluate(() => {
-    if (window.ConnectifyThemeRegistry?.getAvailableThemes) {
-      return window.ConnectifyThemeRegistry.getAvailableThemes().filter(t => t.id !== 'light');
-    }
-    return [
-      { id: 'dark', name: 'Dark', isDark: true },
-      { id: 'quantum', name: 'Quantum Dark', isDark: true },
-      { id: 'amoled', name: 'AMOLED Black', isDark: true },
-      { id: 'midnight', name: 'Midnight Navy', isDark: true },
-      { id: 'forest', name: 'Emerald Forest', isDark: true },
-      { id: 'sunset', name: 'Twilight Plum', isDark: true },
-      { id: 'custom', name: 'Custom Theme', isDark: true }
-    ];
-  });
+  // Load available themes (excluding native/light as that is the baseline)
+  const availableThemes = [
+    { id: 'dark', name: 'Dark', isDark: true },
+    { id: 'quantum', name: 'Quantum Dark', isDark: true },
+    { id: 'amoled', name: 'AMOLED Black', isDark: true },
+    { id: 'midnight', name: 'Midnight Navy', isDark: true },
+    { id: 'forest', name: 'Emerald Forest', isDark: true },
+    { id: 'sunset', name: 'Twilight Plum', isDark: true },
+    { id: 'custom', name: 'Custom Theme', isDark: true }
+  ];
 
   const themesToTest = options.theme === 'all'
     ? availableThemes
@@ -572,100 +604,118 @@ async function runThemeAudit() {
     fs.mkdirSync(options.screenshotsDir, { recursive: true });
   }
 
-  const results = {};
-  console.log(`\nAuditing ${themesToTest.length} theme(s) against Connect Native baseline\n` + '-'.repeat(72));
+  const allPageResults = {};
 
-  for (const t of themesToTest) {
-    // Switch to theme
-    await page.evaluate((tid) => {
-      if (window.ConnectifyThemeRegistry?.setTheme) {
-        window.ConnectifyThemeRegistry.setTheme(tid);
-      } else {
-        document.documentElement.classList.add('connectea-dark');
-        document.documentElement.dataset.connecteaTheme = tid;
+  // Iterate across all target URLs one by one
+  for (let pageIdx = 0; pageIdx < targetUrls.length; pageIdx++) {
+    const targetUrl = targetUrls[pageIdx];
+    console.log(`\n========================================================================`);
+    console.log(`[Page ${pageIdx + 1}/${targetUrls.length}] Auditing: ${targetUrl}`);
+    console.log(`========================================================================`);
+
+    try {
+      await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+      await new Promise(r => setTimeout(r, 1200));
+
+      if (options.clickButtons) {
+        console.log('[ThemeAudit] Expanding interactive JavaScript buttons and accordions...');
+        const clicked = await clickInteractiveButtons(page);
+        console.log(`  └─ Dispatched clicks to ${clicked.length} interactive elements`);
+        await new Promise(r => setTimeout(r, 500));
       }
-    }, t.id);
 
-    // Expand buttons in theme if requested
-    if (options.clickButtons) {
-      await clickInteractiveButtons(page);
-    }
-    await new Promise(r => setTimeout(r, 400));
+      // 1. Capture Connect Native Theme Baseline
+      console.log('[ThemeAudit] Capturing Connect Native Theme baseline (native styling)...');
+      const baseline = await captureNativeBaseline(page);
+      console.log(`  └─ Baseline captured: ${baseline.visibleCount} visible elements.`);
 
-    const auditResult = await auditThemeAgainstBaseline(page, t.id, t.isDark !== false, baseline, options);
-    results[t.id] = { theme: t, audit: auditResult };
+      const pageThemeResults = {};
+      console.log(`Auditing ${themesToTest.length} theme(s) against Connect Native baseline:`);
 
-    const issues = auditResult.issues;
-    const parityIssues = issues.filter(i => i.category === 'PARITY').length;
-    const criticalContrast = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
-    const styleIssues = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
+      for (const t of themesToTest) {
+        await page.evaluate((tid) => {
+          if (window.ConnectifyThemeRegistry?.setTheme) {
+            window.ConnectifyThemeRegistry.setTheme(tid);
+          } else {
+            document.documentElement.classList.add('connectea-dark');
+            document.documentElement.dataset.connecteaTheme = tid;
+          }
+        }, t.id);
 
-    console.log(
-      `• ${t.name.padEnd(16)} [${t.id}]: ` +
-      `Visible: ${auditResult.visibleCount}/${auditResult.baselineVisibleCount} | ` +
-      `Parity Diffs: ${parityIssues} | Critical Contrast: ${criticalContrast} | Style Issues: ${styleIssues}`
-    );
+        if (options.clickButtons) {
+          await clickInteractiveButtons(page);
+        }
+        await new Promise(r => setTimeout(r, 400));
 
-    if (options.screenshots) {
-      const shotPath = path.join(options.screenshotsDir, `theme-${t.id}.png`);
-      await page.screenshot({ path: shotPath, fullPage: false });
-      console.log(`  └─ Screenshot: ${shotPath}`);
+        const auditResult = await auditThemeAgainstBaseline(page, t.id, t.isDark !== false, baseline, options);
+        pageThemeResults[t.id] = { theme: t, audit: auditResult };
+
+        const issues = auditResult.issues;
+        const parityDiffs = issues.filter(i => i.category === 'PARITY').length;
+        const criticalContrast = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
+        const styleIssues = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
+
+        console.log(
+          `• ${t.name.padEnd(16)} [${t.id}]: ` +
+          `Visible: ${auditResult.visibleCount}/${auditResult.baselineVisibleCount} | ` +
+          `Parity Diffs: ${parityDiffs} | Critical Contrast: ${criticalContrast} | Style Issues: ${styleIssues}`
+        );
+
+        if (options.screenshots) {
+          const pageSlug = targetUrl.replace(/[^a-zA-Z0-9]/g, '_').slice(-30);
+          const shotPath = path.join(options.screenshotsDir, `p${pageIdx + 1}_${pageSlug}_${t.id}.png`);
+          await page.screenshot({ path: shotPath, fullPage: false });
+          console.log(`  └─ Screenshot: ${shotPath}`);
+        }
+      }
+
+      allPageResults[targetUrl] = {
+        url: targetUrl,
+        baselineVisibleCount: baseline.visibleCount,
+        themes: pageThemeResults
+      };
+    } catch (err) {
+      console.warn(`[ThemeAudit] Error auditing ${targetUrl}: ${err.message}`);
     }
   }
 
-  console.log('-'.repeat(72));
+  console.log(`\n` + '='.repeat(72));
+  console.log(`[ThemeAudit] Completed audit of ${Object.keys(allPageResults).length} page(s).`);
+  console.log('='.repeat(72));
 
   // Write JSON Manifest
   fs.writeFileSync(options.outputJson, JSON.stringify({
-    url: targetUrl,
     auditedAt: new Date().toISOString(),
-    baseline: {
-      theme: 'Connect Native Theme',
-      visibleCount: baseline.visibleCount,
-      totalElements: baseline.totalElements
-    },
-    themes: results
+    totalPages: Object.keys(allPageResults).length,
+    pages: allPageResults
   }, null, 2), 'utf8');
-  console.log(`\n[ThemeAudit] Saved JSON audit manifest: ${options.outputJson}`);
+  console.log(`[ThemeAudit] Saved JSON audit manifest: ${options.outputJson}`);
 
   // Write Markdown Report (< 150 lines)
   let md = `# Connectify Theme Parity & Style Audit Report\n\n`;
-  md += `**Target Page:** \`${targetUrl}\`  \n`;
+  md += `**Pages Audited:** ${Object.keys(allPageResults).length}  \n`;
   md += `**Baseline Theme:** Connect Native Theme (native styling)  \n`;
-  md += `**Native Visible Elements:** ${baseline.visibleCount}  \n`;
   md += `**Audited At:** ${new Date().toUTCString()}  \n\n`;
+  md += `## Multi-Page Parity & Compliance Matrix\n\n`;
+  md += `| Page URL | Theme | Visible | Parity Diffs | Critical | Status |\n`;
+  md += `| :--- | :--- | :---: | :---: | :---: | :---: |\n`;
 
-  md += `## Theme Parity & Compliance Matrix\n\n`;
-  md += `| Theme | Visible Count | Parity Diffs | Critical Contrast | Style Issues | Status |\n`;
-  md += `| :--- | :---: | :---: | :---: | :---: | :---: |\n`;
+  let mdRows = 0;
+  for (const pageUrl of Object.keys(allPageResults)) {
+    const pageData = allPageResults[pageUrl];
+    const urlDisplay = pageUrl.replace(/^https?:\/\/connect\.det\.wa\.edu\.au/, '').slice(0, 30) || '/';
+    for (const tid of Object.keys(pageData.themes)) {
+      if (mdRows >= 45) break;
+      const item = pageData.themes[tid];
+      const issues = item.audit.issues;
+      const pDiff = issues.filter(i => i.category === 'PARITY').length;
+      const cCrit = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
+      const sDiff = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
+      const status = pDiff === 0 && cCrit === 0 && sDiff === 0 ? '✅ Pass' : (cCrit > 0 ? '❌ Crit' : '⚠️ Warn');
 
-  for (const tid of Object.keys(results)) {
-    const item = results[tid];
-    const issues = item.audit.issues;
-    const pDiff = issues.filter(i => i.category === 'PARITY').length;
-    const cCrit = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
-    const sDiff = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
-    const status = pDiff === 0 && cCrit === 0 && sDiff === 0 ? '✅ Pass' : (cCrit > 0 ? '❌ Critical' : '⚠️ Warning');
-
-    md += `| **${item.theme.name}** (\`${tid}\`) | ${item.audit.visibleCount}/${item.audit.baselineVisibleCount} | ${pDiff} | ${cCrit} | ${sDiff} | ${status} |\n`;
-  }
-
-  md += `\n## Sample Parity & Styling Findings\n\n`;
-  md += `| Theme | Category | Type | Selector | Details |\n`;
-  md += `| :--- | :--- | :--- | :--- | :--- |\n`;
-
-  let rowCount = 0;
-  for (const tid of Object.keys(results)) {
-    const item = results[tid];
-    for (const iss of item.audit.issues) {
-      if (rowCount >= 35) break;
-      const det = (iss.details || '').replace(/\|/g, '-').slice(0, 45);
-      md += `| \`${tid}\` | ${iss.category} | \`${iss.type}\` | \`${iss.selector}\` | ${det} |\n`;
-      rowCount++;
+      md += `| \`${urlDisplay}\` | **${item.theme.name}** | ${item.audit.visibleCount}/${pageData.baselineVisibleCount} | ${pDiff} | ${cCrit} | ${status} |\n`;
+      mdRows++;
     }
-  }
-  if (rowCount === 0) {
-    md += `| *All* | - | - | - | *100% parity with Connect native styling and 0 style defects.* |\n`;
   }
 
   const mdLines = md.split('\n');
@@ -686,6 +736,7 @@ if (require.main === module) {
 
 module.exports = {
   runThemeAudit,
+  resolveTargetUrls,
   clickInteractiveButtons,
   captureNativeBaseline,
   auditThemeAgainstBaseline
