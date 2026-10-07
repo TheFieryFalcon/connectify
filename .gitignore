@@ -4,3 +4,8 @@
 _metadata/
 overview.md
 connect_css/
+node_modules/
+connect_session.json
+screenshots/
+theme_unstyled_report.*
+connect_directories.*

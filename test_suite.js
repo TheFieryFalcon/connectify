@@ -94,6 +94,7 @@ const MODULE_BUNDLES = {
 
 const origReadFileSync = fs.readFileSync;
 fs.readFileSync = function(filePath, ...args) {
+  if (typeof filePath !== 'string') return origReadFileSync.call(fs, filePath, ...args);
   const resolved = resolveFilePath(filePath);
   const baseName = path.basename(resolved);
   if (MODULE_BUNDLES[baseName]) {
@@ -5454,6 +5455,58 @@ runTest('Test 144: Classes page header parity, Angular Material tab specificity,
   assert.ok(themeRegistryJs.includes("swatch: ['#282828', '#32302f', '#fabd2f']") &&
             themeJs.includes("swatch: ['#282828', '#32302f', '#fabd2f']"),
     'theme-registry.js and theme.js must use inspiration swatch for Quantum Dark');
+});
+
+runTest('Test 145: Puppeteer theme unstyled element auditor and Connect directory crawler scripts', () => {
+  const utilsPath = path.resolve(__dirname, 'scripts/puppeteer-utils.js');
+  const themeTesterPath = path.resolve(__dirname, 'scripts/test-theme-styles.js');
+  const crawlerPath = path.resolve(__dirname, 'scripts/crawl-connect-directories.js');
+  const pkgJsonPath = path.resolve(__dirname, 'package.json');
+
+  // 1. Files exist and satisfy line limit (<= 500 lines)
+  assert.ok(fs.existsSync(utilsPath), 'scripts/puppeteer-utils.js must exist');
+  assert.ok(fs.existsSync(themeTesterPath), 'scripts/test-theme-styles.js must exist');
+  assert.ok(fs.existsSync(crawlerPath), 'scripts/crawl-connect-directories.js must exist');
+
+  const utilsLines = fs.readFileSync(utilsPath, 'utf8').split('\n').length;
+  const themeTesterLines = fs.readFileSync(themeTesterPath, 'utf8').split('\n').length;
+  const crawlerLines = fs.readFileSync(crawlerPath, 'utf8').split('\n').length;
+
+  assert.ok(utilsLines <= 500, `puppeteer-utils.js must be <= 500 lines (got ${utilsLines})`);
+  assert.ok(themeTesterLines <= 500, `test-theme-styles.js must be <= 500 lines (got ${themeTesterLines})`);
+  assert.ok(crawlerLines <= 500, `crawl-connect-directories.js must be <= 500 lines (got ${crawlerLines})`);
+
+  // 2. puppeteer-utils exports and WCAG calculations
+  const utilsMod = require(utilsPath);
+  assert.strictEqual(typeof utilsMod.launchBrowser, 'function', 'launchBrowser must be exported');
+  assert.strictEqual(typeof utilsMod.authenticate, 'function', 'authenticate must be exported');
+  assert.strictEqual(typeof utilsMod.saveSession, 'function', 'saveSession must be exported');
+  assert.strictEqual(typeof utilsMod.loadSession, 'function', 'loadSession must be exported');
+  assert.strictEqual(typeof utilsMod.calculateContrastRatio, 'function', 'calculateContrastRatio must be exported');
+
+  // Verify WCAG contrast calculation: black on white = 21:1
+  const black = { r: 0, g: 0, b: 0 };
+  const white = { r: 255, g: 255, b: 255 };
+  const cr = utilsMod.calculateContrastRatio(black, white);
+  assert.ok(Math.abs(cr - 21) < 0.2, `Black on white contrast must be ~21:1 (got ${cr})`);
+
+  // 3. crawler exports and tree building
+  const crawlerMod = require(crawlerPath);
+  assert.strictEqual(typeof crawlerMod.crawl, 'function', 'crawl must be exported');
+  assert.strictEqual(typeof crawlerMod.normalizeUrl, 'function', 'normalizeUrl must be exported');
+  assert.strictEqual(typeof crawlerMod.buildDirectoryTree, 'function', 'buildDirectoryTree must be exported');
+  assert.strictEqual(typeof crawlerMod.formatAsciiTree, 'function', 'formatAsciiTree must be exported');
+
+  const norm = crawlerMod.normalizeUrl('https://connect.det.wa.edu.au/group/students/ui/my-connect;jsessionid=ABC#top', 'https://connect.det.wa.edu.au');
+  assert.strictEqual(norm, 'https://connect.det.wa.edu.au/group/students/ui/my-connect', 'normalizeUrl must strip jsessionid and hash');
+
+  const tree = crawlerMod.buildDirectoryTree(['/group/students/calendar', '/connect/cvr/classes']);
+  assert.ok(tree.children.group && tree.children.connect, 'Directory tree must organize paths into branches');
+
+  // 4. package.json scripts
+  const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+  assert.strictEqual(pkg.scripts['test:themes'], 'node scripts/test-theme-styles.js', 'package.json must define test:themes script');
+  assert.strictEqual(pkg.scripts['crawl'], 'node scripts/crawl-connect-directories.js', 'package.json must define crawl script');
 });
 
 console.log('\n================================================================');
