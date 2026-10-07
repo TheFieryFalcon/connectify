@@ -25,6 +25,7 @@ function parseArgs() {
     startUrl: DEFAULT_START_URL,
     maxDepth: 7,
     maxPages: 100,
+    maxClassRedirects: 5,
     delay: 2500,
     headful: false,
     headless: null,
@@ -43,6 +44,7 @@ function parseArgs() {
     if (a === '--url' && args[i + 1]) options.startUrl = args[++i];
     else if (a === '--max-depth' && args[i + 1]) options.maxDepth = parseInt(args[++i], 10);
     else if (a === '--max-pages' && args[i + 1]) options.maxPages = parseInt(args[++i], 10);
+    else if (a === '--max-class-redirects' && args[i + 1]) options.maxClassRedirects = parseInt(args[++i], 10);
     else if (a === '--delay' && args[i + 1]) options.delay = parseInt(args[++i], 10);
     else if (a === '--headful' || a === '--no-headless') options.headful = true;
     else if (a === '--headless') options.headless = true;
@@ -80,6 +82,7 @@ function isExcludedPath(pathname) {
   const lower = pathname.toLowerCase();
   if (/logout|signout|timeout|inactivity|session_expired/i.test(lower)) return true;
   if (lower.startsWith('/cvr') || lower.startsWith('/connect/cvr')) return true;
+  if (lower.startsWith('/documents') || lower.startsWith('/content')) return true;
   if (/\.(png|jpg|jpeg|gif|svg|ico|css|js|woff|woff2|ttf|eot|pdf|zip|docx?|xlsx?|pptx?)$/i.test(lower)) {
     return true;
   }
@@ -99,6 +102,29 @@ function categorizePath(pathname) {
   if (p.startsWith('/documents/') || p.startsWith('/content/')) return 'Document Repository';
   if (p.startsWith('/c/portal/') || p.startsWith('/api/')) return 'Portlet / API Endpoint';
   return 'General Route';
+}
+
+function filterUrlList(routes, maxClassRedirects = 5) {
+  const otherUrls = [];
+  const clsUrls = [];
+  for (const r of routes) {
+    const rawUrl = typeof r === 'string' ? r : (r.url || '');
+    let pathname = '';
+    try {
+      pathname = (r.pathname || new URL(rawUrl).pathname).toLowerCase();
+    } catch {
+      continue;
+    }
+    // Zero copies of static documents or content
+    if (pathname.startsWith('/documents') || pathname.startsWith('/content')) continue;
+    // Limit /redirect/cls/* to maxClassRedirects copies
+    if (pathname.startsWith('/redirect/cls/')) {
+      if (clsUrls.length < maxClassRedirects) clsUrls.push(rawUrl);
+    } else {
+      otherUrls.push(rawUrl);
+    }
+  }
+  return [...otherUrls, ...clsUrls].sort();
 }
 
 function buildDirectoryTree(paths) {
@@ -176,11 +202,9 @@ async function crawl() {
       if (existing && Array.isArray(existing.routes) && existing.routes.length > 0) {
         console.log(`[ConnectCrawler] Crawl already completed previously (${existing.routes.length} routes found).`);
         console.log(`[ConnectCrawler] Manifest: ${options.outputJson}`);
-        if (!fs.existsSync(options.outputUrls)) {
-          const urlList = existing.routes.map(r => r.url).sort();
-          fs.writeFileSync(options.outputUrls, urlList.join('\n') + '\n', 'utf8');
-        }
-        console.log(`[ConnectCrawler] URL List: ${options.outputUrls}`);
+        const urlList = filterUrlList(existing.routes, options.maxClassRedirects);
+        fs.writeFileSync(options.outputUrls, urlList.join('\n') + '\n', 'utf8');
+        console.log(`[ConnectCrawler] URL List: ${options.outputUrls} (${urlList.length} URLs)`);
         console.log('[ConnectCrawler] Skipping crawl (runs once). Use --force to re-crawl.');
         return existing;
       }
@@ -230,6 +254,7 @@ async function crawl() {
   const visited = new Set();
   const discoveredRoutes = new Map(); // pathname -> { url, title, category, depth, status }
   const externalLinks = new Set();
+  const enqueuedClassRedirects = new Set();
 
   // Seed discovery entry points
   const seeds = [
@@ -296,6 +321,17 @@ async function crawl() {
         console.log(`  └─ UI Contrast (< 3.0:1): ${uiContrast.violations.length} violations (${uiContrast.auditedCount} UI elements audited)`);
       }
 
+      // Enforce class redirects limit
+      if (parsedUrl.pathname.startsWith('/redirect/cls/')) {
+        let clsCount = 0;
+        for (const k of discoveredRoutes.keys()) {
+          if (k.startsWith('/redirect/cls/')) clsCount++;
+        }
+        if (clsCount >= options.maxClassRedirects && !discoveredRoutes.has(parsedUrl.pathname)) {
+          continue;
+        }
+      }
+
       const category = categorizePath(parsedUrl.pathname);
       discoveredRoutes.set(parsedUrl.pathname, {
         url,
@@ -317,6 +353,12 @@ async function crawl() {
             const childHost = new URL(norm).hostname;
             if (childHost === TARGET_HOST) {
               const childPath = new URL(norm).pathname;
+              if (childPath.startsWith('/redirect/cls/')) {
+                if (enqueuedClassRedirects.size >= options.maxClassRedirects && !enqueuedClassRedirects.has(norm)) {
+                  continue;
+                }
+                enqueuedClassRedirects.add(norm);
+              }
               if (!isExcludedPath(childPath) && !visited.has(norm)) {
                 queue.push({ url: norm, depth: depth + 1 });
               }
@@ -378,7 +420,7 @@ async function crawl() {
   console.log(`[ConnectCrawler] Saved directory manifest: ${options.outputJson}`);
 
   // Write Clean URL List (one URL per line) for pasting into test-theme-styles.js
-  const cleanUrls = Array.from(discoveredRoutes.values()).map(r => r.url).sort();
+  const cleanUrls = filterUrlList(Array.from(discoveredRoutes.values()), options.maxClassRedirects);
   fs.writeFileSync(options.outputUrls, cleanUrls.join('\n') + '\n', 'utf8');
   console.log(`[ConnectCrawler] Saved clean URL list: ${options.outputUrls} (${cleanUrls.length} URLs)`);
 
@@ -424,4 +466,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { crawl, normalizeUrl, buildDirectoryTree, formatAsciiTree };
+module.exports = { crawl, normalizeUrl, buildDirectoryTree, formatAsciiTree, filterUrlList };
