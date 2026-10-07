@@ -5497,6 +5497,32 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   assert.strictEqual(typeof themeTesterMod.discoverSubPages, 'function', 'discoverSubPages must be exported');
   assert.strictEqual(typeof themeTesterMod.captureNativeBaseline, 'function', 'captureNativeBaseline must be exported');
   assert.strictEqual(typeof themeTesterMod.auditThemeAgainstBaseline, 'function', 'auditThemeAgainstBaseline must be exported');
+  assert.strictEqual(typeof themeTesterMod.computeElementsSignature, 'function', 'computeElementsSignature must be exported');
+
+  // Verify elements signature matches for identical views and differs for distinct views
+  const baseA = {
+    visibleCount: 2,
+    elements: {
+      el1: { tagName: 'div', selector: '.card', textSnippet: 'Title A', size: { width: 100, height: 50 } },
+      el2: { tagName: 'span', selector: '.badge', textSnippet: 'Badge', size: { width: 30, height: 20 } }
+    }
+  };
+  const baseB = {
+    visibleCount: 2,
+    elements: {
+      el1: { tagName: 'div', selector: '.card', textSnippet: 'Title A', size: { width: 100, height: 50 } },
+      el2: { tagName: 'span', selector: '.badge', textSnippet: 'Badge', size: { width: 30, height: 20 } }
+    }
+  };
+  const baseC = {
+    visibleCount: 2,
+    elements: {
+      el1: { tagName: 'div', selector: '.card', textSnippet: 'Title DIFFERENT', size: { width: 100, height: 50 } },
+      el2: { tagName: 'span', selector: '.badge', textSnippet: 'Badge', size: { width: 30, height: 20 } }
+    }
+  };
+  assert.strictEqual(themeTesterMod.computeElementsSignature(baseA), themeTesterMod.computeElementsSignature(baseB), 'Identical views must have matching signatures');
+  assert.notStrictEqual(themeTesterMod.computeElementsSignature(baseA), themeTesterMod.computeElementsSignature(baseC), 'Distinct views must have different signatures');
 
   // 4. crawler exports and tree building
   const crawlerMod = require(crawlerPath);

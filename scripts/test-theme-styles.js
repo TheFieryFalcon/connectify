@@ -18,6 +18,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const crypto = require('crypto');
 const utils = require('./puppeteer-utils');
 
 const DEFAULT_PAGE = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
@@ -136,12 +137,29 @@ async function resolveTargetUrls(options) {
 }
 
 /**
+ * Computes a unique deterministic SHA-256 signature of a baseline's visible elements,
+ * including tag names, selectors, text snippets, and bounding box dimensions.
+ * Used to detect and skip redundant in-page views that have the exact same elements.
+ */
+function computeElementsSignature(baseline) {
+  if (!baseline || !baseline.elements) return '';
+  const hash = crypto.createHash('sha256');
+  hash.update(String(baseline.visibleCount || 0));
+  const keys = Object.keys(baseline.elements);
+  for (let i = 0; i < keys.length; i++) {
+    const el = baseline.elements[keys[i]];
+    hash.update(`;${el.tagName}|${el.selector}|${el.textSnippet}|${el.size?.width || 0}x${el.size?.height || 0}`);
+  }
+  return hash.digest('hex');
+}
+
+/**
  * Dispatches clicks to interactive JavaScript buttons and accordion/tab triggers
  * on the page to expand collapsible panels and reveal dynamic UI components.
  */
 async function clickInteractiveButtons(page) {
   try {
-    return await page.evaluate(() => {
+    const clickTask = page.evaluate(() => {
       const clicked = [];
 
       // 1. If ConnectifyData.expandAll is available from the extension, run it first
@@ -152,24 +170,32 @@ async function clickInteractiveButtons(page) {
         } catch {}
       }
 
-      // 2. Navigation blocker: intercept clicks on real external links without breaking in-page handlers
+      // 2. Prevent modal dialogs from blocking execution
+      window.alert = () => {};
+      window.confirm = () => true;
+      window.prompt = () => null;
+
+      // 3. Disable beforeunload dialog prompt so synthetic clicks never block the browser
+      const origBeforeUnload = window.onbeforeunload;
+      window.onbeforeunload = null;
+
+      // 4. Temporarily block navigation and form submissions during synthetic dispatch
       const navBlocker = (e) => {
         const a = e.target?.closest?.('a[href]');
         if (a) {
           const href = (a.getAttribute('href') || '').trim();
           if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
             e.preventDefault();
+            e.stopImmediatePropagation();
           }
         }
       };
-      window.addEventListener('click', navBlocker, true);
-
-      // Temporary unload protection during synthetic dispatch
-      const origBeforeUnload = window.onbeforeunload;
-      window.onbeforeunload = (e) => {
+      const submitBlocker = (e) => {
         e.preventDefault();
-        return false;
+        e.stopImmediatePropagation();
       };
+      window.addEventListener('click', navBlocker, true);
+      window.addEventListener('submit', submitBlocker, true);
 
       const INTERACTIVE_SELECTORS = [
         // Connect / EDS / CVR Accordions & Expansion Panels
@@ -188,39 +214,30 @@ async function clickInteractiveButtons(page) {
         '.mat-expansion-panel-header:not(.mat-expanded):not([aria-disabled="true"])',
 
         // Collapsible Toggles & Details
-        '[data-toggle="collapse"]',
+        '[data-toggle="collapse"]:not(a)',
         '.panel-heading.collapsed',
         'details:not([open]) > summary',
         'summary',
-        '[aria-expanded="false"]:not([role="tab"]):not(.mat-tab-label)',
+        '[aria-expanded="false"][class*="accordion"]',
+        '[aria-expanded="false"][class*="panel"]',
+        '[aria-expanded="false"][class*="card"]',
+        '[aria-expanded="false"][class*="tile"]',
 
-        // Connectify Built-in Buttons
+        // Connectify Built-in Expand Buttons
         '#cx-expand-all',
         '.cx-expand-btn',
         '.cta-expand-outlines',
-        '#cx-weakness-expand-all',
-
-        // Calendar event details / more triggers
-        '.fc-more',
-        'a.fc-more',
-        '.fc-event',
-
-        // Dedicated expansion buttons & triggers
-        'button[class*="expand"]',
-        'button[class*="detail"]',
-        'button[class*="toggle"]',
-        '[role="button"][class*="expand"]',
-        '[role="button"][class*="detail"]'
+        '#cx-weakness-expand-all'
       ].join(', ');
 
       const elements = Array.from(document.querySelectorAll(INTERACTIVE_SELECTORS));
 
-      // Also detect elements with explicit expansion / details text
-      const candidateNodes = Array.from(document.querySelectorAll('div, h2, h3, h4, h5, span, a, p, button'));
+      // Also detect buttons/summaries with explicit expansion text (using fast textContent, no layout reflow)
+      const candidateNodes = Array.from(document.querySelectorAll('button, summary, [role="button"]'));
       for (const node of candidateNodes) {
         if (node.children.length > 3) continue;
-        const txt = (node.innerText || node.textContent || '').trim();
-        if (/\b(show\s*details|view\s*details|expand\s*all|expand\s*outlines|more\s*details|show\s*more|view\s*all)\b/i.test(txt)) {
+        const txt = (node.textContent || '').trim();
+        if (/\b(show\s*details|view\s*details|expand\s*all|expand\s*outlines|more\s*details)\b/i.test(txt)) {
           if (!elements.includes(node)) {
             elements.push(node);
           }
@@ -230,102 +247,110 @@ async function clickInteractiveButtons(page) {
       const seenSections = new Set();
       const clickedElements = new Set();
 
-      for (const el of elements) {
-        // Skip theme toggle
-        if (el.id === 'connectea-theme-toggle' || el.closest('#connectea-theme-toggle')) continue;
-        if (el.closest('#connectify-sidebar, #connectify-sidebar-handle')) continue;
+      try {
+        for (const el of elements) {
+          // Skip theme toggle and Connectify sidebar controls
+          if (el.id === 'connectea-theme-toggle' || el.closest('#connectea-theme-toggle')) continue;
+          if (el.closest('#connectify-sidebar, #connectify-sidebar-handle')) continue;
 
-        // Skip site navigation, headers, breadcrumbs, pagination
-        if (el.closest('.cvr-c-header, .cvr-c-navbar, .cvr-c-primary-navigation, .cvr-c-primary-menu, .cvr-c-side-menu, .cvr-c-user-menu, nav, [role="navigation"], .breadcrumb, .breadcrumbs, .pagination, .pager')) {
-          continue;
-        }
-
-        // Skip navbar tabs and view switchers (they are audited separately as distinct sub-views)
-        if (el.matches('[role="tab"], .mat-tab-label, .mat-tab-link, .nav-tabs a, .nav-pills a, .fc-button')) {
-          continue;
-        }
-
-        // Skip calendar previous/next/today navigation buttons
-        if (el.matches('.mat-calendar-previous-button, .mat-calendar-next-button, .fc-prev-button, .fc-next-button, .fc-today-button')) {
-          continue;
-        }
-        if (el.closest('.fc-toolbar, .fc-header-toolbar') && el.matches('.fc-button, button')) {
-          continue;
-        }
-
-        // Skip real navigation links (allow in-page hashes, javascript:, and role="button")
-        const a = el.tagName === 'A' ? el : el.closest('a[href]');
-        if (a) {
-          const href = (a.getAttribute('href') || '').trim();
-          const isPageAnchor = !href || href.startsWith('#') || href.startsWith('javascript:');
-          const isRoleTrigger = a.getAttribute('role') === 'button' || a.hasAttribute('data-toggle') || a.classList.contains('fc-event') || a.classList.contains('fc-more');
-          if (!isPageAnchor && !isRoleTrigger) {
+          // Skip site navigation, headers, breadcrumbs, pagination
+          if (el.closest('.cvr-c-header, .cvr-c-navbar, .cvr-c-primary-navigation, .cvr-c-primary-menu, .cvr-c-side-menu, .cvr-c-user-menu, nav, [role="navigation"], .breadcrumb, .breadcrumbs, .pagination, .pager')) {
             continue;
           }
-        }
 
-        // Skip form submits and resets
-        if (el.type === 'submit' || el.type === 'reset') continue;
-        if (el.tagName === 'BUTTON' && el.closest('form') && el.getAttribute('type') !== 'button') continue;
-
-        // Skip framework route navigation attributes
-        if (el.hasAttribute('routerlink') || el.hasAttribute('data-route') || el.hasAttribute('data-url') || el.hasAttribute('ng-reflect-router-link')) {
-          continue;
-        }
-
-        // Skip explicit location redirection in onclick
-        const onclick = el.getAttribute('onclick') || '';
-        if (/window\.location|location\.href|location\.assign|location\.replace|window\.open\(/i.test(onclick)) {
-          continue;
-        }
-
-        const label = (el.getAttribute('aria-label') || el.getAttribute('title') || '').trim();
-        const directText = (el.innerText || el.textContent || '').trim().slice(0, 50);
-
-        // Skip destructive actions or sign-out
-        if (/\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off)\b/i.test(label) ||
-            /\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off)\b/i.test(directText)) {
-          continue;
-        }
-
-        // Skip already expanded panels
-        if (el.getAttribute('aria-expanded') === 'true') continue;
-        if (el.classList.contains('mat-expanded')) continue;
-        if (el.matches('.mat-tab-label-active, [aria-selected="true"]')) continue;
-        if (el.matches('details[open] > summary')) continue;
-        if (/hide\s*details/i.test(directText)) continue;
-
-        // Deduplicate accordion headings per section/tile
-        if (el.matches('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading')) {
-          const section = el.closest('.eds-c-accordion__section, .cvr-c-accordion__section, .eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
-          if (section) {
-            if (seenSections.has(section)) continue;
-            seenSections.add(section);
+          // Skip navbar tabs and view switchers (audited separately as distinct sub-views)
+          if (el.matches('[role="tab"], .mat-tab-label, .mat-tab-link, .nav-tabs a, .nav-pills a, .fc-button')) {
+            continue;
           }
+
+          // Skip calendar previous/next/today navigation buttons
+          if (el.matches('.mat-calendar-previous-button, .mat-calendar-next-button, .fc-prev-button, .fc-next-button, .fc-today-button')) {
+            continue;
+          }
+          if (el.closest('.fc-toolbar, .fc-header-toolbar') && el.matches('.fc-button, button')) {
+            continue;
+          }
+
+          // Skip real navigation links (allow in-page hashes, javascript:, and role="button")
+          const a = el.tagName === 'A' ? el : el.closest('a[href]');
+          if (a) {
+            const href = (a.getAttribute('href') || '').trim();
+            const isPageAnchor = !href || href.startsWith('#') || href.startsWith('javascript:');
+            const isRoleTrigger = a.getAttribute('role') === 'button' || a.hasAttribute('data-toggle');
+            if (!isPageAnchor && !isRoleTrigger) {
+              continue;
+            }
+          }
+
+          // Skip form submits and resets
+          if (el.type === 'submit' || el.type === 'reset') continue;
+          if (el.tagName === 'BUTTON' && el.closest('form') && el.getAttribute('type') !== 'button') continue;
+
+          // Skip framework route navigation attributes
+          if (el.hasAttribute('routerlink') || el.hasAttribute('data-route') || el.hasAttribute('data-url') || el.hasAttribute('ng-reflect-router-link')) {
+            continue;
+          }
+
+          // Skip explicit location redirection in onclick
+          const onclick = el.getAttribute('onclick') || '';
+          if (/window\.location|location\.href|location\.assign|location\.replace|window\.open\(/i.test(onclick)) {
+            continue;
+          }
+
+          const label = (el.getAttribute('aria-label') || el.getAttribute('title') || '').trim();
+          const directText = (el.textContent || '').trim().slice(0, 50);
+
+          // Skip destructive actions, sign-out, or external view links
+          if (/\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off|view\s*all|show\s*more|print|export)\b/i.test(label) ||
+              /\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off|view\s*all|show\s*more|print|export)\b/i.test(directText)) {
+            continue;
+          }
+
+          // Skip already expanded panels
+          if (el.getAttribute('aria-expanded') === 'true') continue;
+          if (el.classList.contains('mat-expanded')) continue;
+          if (el.matches('.mat-tab-label-active, [aria-selected="true"]')) continue;
+          if (el.matches('details[open] > summary')) continue;
+          if (/hide\s*details/i.test(directText)) continue;
+
+          // Deduplicate accordion headings per section/tile
+          if (el.matches('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading')) {
+            const section = el.closest('.eds-c-accordion__section, .cvr-c-accordion__section, .eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
+            if (section) {
+              if (seenSections.has(section)) continue;
+              seenSections.add(section);
+            }
+          }
+
+          // Identify the exact clickable element (target inner trigger if available)
+          const target = el.querySelector?.('button, .v-button, [role="button"], .eds-c-accordion__trigger, .cvr-c-expansion-panel__trigger') || el;
+          if (clickedElements.has(target)) continue;
+          clickedElements.add(target);
+
+          try {
+            target.click();
+            target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+            target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+
+            const tag = target.tagName.toLowerCase();
+            const id = target.id ? '#' + target.id : '';
+            const cls = target.className && typeof target.className === 'string' ? '.' + target.className.trim().split(/\s+/)[0] : '';
+            const textSnippet = directText ? `[${directText.slice(0, 15)}]` : '';
+            clicked.push(`${tag}${id}${cls}${textSnippet}`);
+          } catch {}
         }
-
-        // Identify the exact clickable element (target inner trigger if available)
-        const target = el.querySelector?.('button, .v-button, [role="button"], .eds-c-accordion__trigger, .cvr-c-expansion-panel__trigger') || el;
-        if (clickedElements.has(target)) continue;
-        clickedElements.add(target);
-
-        try {
-          target.click();
-          target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-          target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
-
-          const tag = target.tagName.toLowerCase();
-          const id = target.id ? '#' + target.id : '';
-          const cls = target.className && typeof target.className === 'string' ? '.' + target.className.trim().split(/\s+/)[0] : '';
-          const textSnippet = directText ? `[${directText.slice(0, 15)}]` : '';
-          clicked.push(`${tag}${id}${cls}${textSnippet}`);
-        } catch {}
+      } finally {
+        window.removeEventListener('click', navBlocker, true);
+        window.removeEventListener('submit', submitBlocker, true);
+        window.onbeforeunload = origBeforeUnload;
       }
 
-      window.removeEventListener('click', navBlocker, true);
-      window.onbeforeunload = origBeforeUnload;
       return clicked;
     });
+
+    // Hard 4-second timeout guarantee: never hang or freeze the audit
+    const timeout = new Promise(resolve => setTimeout(() => resolve([]), 4000));
+    return await Promise.race([clickTask, timeout]);
   } catch (err) {
     return [];
   }
@@ -929,6 +954,9 @@ async function runThemeAudit() {
     let page = null;
     try {
       page = await browser.newPage();
+      page.on('dialog', async (d) => {
+        try { await d.dismiss(); } catch {}
+      });
       await page.setViewport({ width: 1280, height: 900 });
 
       await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
@@ -952,12 +980,14 @@ async function runThemeAudit() {
       ];
 
       if (viewsToAudit.length > 1) {
-        console.log(`[ThemeAudit] Discovered ${subViews.length} in-page sub-view(s) under ${targetUrl} (auditing ${viewsToAudit.length} view(s)):`);
+        console.log(`[ThemeAudit] Discovered ${subViews.length} in-page sub-view(s) under ${targetUrl} (auditing up to ${viewsToAudit.length} view(s)):`);
         for (let vIdx = 0; vIdx < viewsToAudit.length; vIdx++) {
           const v = viewsToAudit[vIdx];
           console.log(`  └─ [${vIdx + 1}/${viewsToAudit.length}] ${v.title}${v.isInitial ? ' (Initial view)' : ' (Navbar heading)'}`);
         }
       }
+
+      const seenViewSignatures = new Map();
 
       // Audit each view / content state under targetUrl
       for (let vIdx = 0; vIdx < viewsToAudit.length; vIdx++) {
@@ -994,10 +1024,26 @@ async function runThemeAudit() {
           const baseline = await captureNativeBaseline(page);
           console.log(`       └─ Baseline captured: ${baseline.visibleCount} visible elements.`);
 
+          // D. Skip redundant view if it has the exact same elements as an already-audited view
+          const viewSignature = computeElementsSignature(baseline);
+          if (seenViewSignatures.has(viewSignature)) {
+            const existingTitle = seenViewSignatures.get(viewSignature);
+            console.log(`       └─ Skipping "${currentView.title}": exact same elements (${baseline.visibleCount} visible) as view "${existingTitle}".`);
+            await page.evaluate(() => {
+              if (window.ConnectifyThemeRegistry?.setTheme) {
+                window.ConnectifyThemeRegistry.setTheme('default');
+              }
+              document.documentElement.classList.remove('connectea-dark');
+              delete document.documentElement.dataset.connecteaTheme;
+            }).catch(() => {});
+            continue;
+          }
+          seenViewSignatures.set(viewSignature, currentView.title);
+
           const viewThemeResults = {};
           console.log(`    └─ Auditing ${themesToTest.length} theme(s) against Connect Native baseline:`);
 
-          // D. Audit all themes
+          // E. Audit all themes
           for (const t of themesToTest) {
             await page.evaluate((tid) => {
               if (window.ConnectifyThemeRegistry?.setTheme) {
@@ -1127,5 +1173,6 @@ module.exports = {
   captureNativeBaseline,
   auditThemeAgainstBaseline,
   discoverSubPages,
-  activateNavbarHeading
+  activateNavbarHeading,
+  computeElementsSignature
 };
