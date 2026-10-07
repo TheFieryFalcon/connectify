@@ -80,17 +80,47 @@
   const isLoginUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
     try {
       const loc = new URL(url);
-      return loc.hostname === 'connect.det.wa.edu.au' && (
-        loc.pathname === '/login' ||
-        loc.pathname.startsWith('/login/')
-      );
+      const isConnect = loc.hostname === 'connect.det.wa.edu.au';
+      const isLoginHost = loc.hostname === 'login.det.wa.edu.au';
+      const isLoginPath = loc.pathname === '/login' ||
+        loc.pathname.startsWith('/login/') ||
+        loc.pathname.includes('/portal/login');
+      return (isConnect && isLoginPath) || isLoginHost;
     } catch {
       return typeof url === 'string' && (
         url === 'https://connect.det.wa.edu.au/login' ||
-        url.startsWith('https://connect.det.wa.edu.au/login')
+        url.startsWith('https://connect.det.wa.edu.au/login') ||
+        url.includes('login.det.wa.edu.au')
       );
     }
   };
+
+  if (isLoginUrl()) {
+    try {
+      const isDark = localStorage.getItem(STORAGE_KEY) === 'dark';
+      if (isDark || localStorage.getItem(RESTORE_KEY) === 'true') {
+        localStorage.setItem(RESTORE_KEY, 'true');
+        const savedTheme = localStorage.getItem(STORAGE_THEME_ID);
+        if (savedTheme && savedTheme !== 'light') {
+          localStorage.setItem('connectea:theme:restore_theme', savedTheme);
+        }
+      }
+      localStorage.setItem(STORAGE_KEY, 'light');
+      localStorage.setItem(STORAGE_THEME_ID, 'light');
+    } catch {}
+    if (typeof document !== 'undefined' && document.documentElement) {
+      document.documentElement.classList.remove('connectea-dark');
+      delete document.documentElement.dataset.connecteaTheme;
+      document.documentElement.removeAttribute('data-connectea-theme');
+      document.documentElement.setAttribute('data-connectea-login', 'true');
+      if (document.body) {
+        document.body.classList.remove('connectea-dark');
+        delete document.body.dataset.connecteaTheme;
+        document.body.removeAttribute('data-connectea-theme');
+      }
+      clearCustomTokens();
+    }
+  }
 
   function getAvailableThemes() {
     return Array.from(registry.values());
@@ -190,10 +220,28 @@
   function setTheme(themeId, customColors) {
     if (isLoginUrl()) {
       try {
-        localStorage.setItem(RESTORE_KEY, 'true');
+        if (themeId && themeId !== 'light') {
+          localStorage.setItem(RESTORE_KEY, 'true');
+          localStorage.setItem('connectea:theme:restore_theme', themeId);
+        } else {
+          localStorage.removeItem(RESTORE_KEY);
+          localStorage.removeItem('connectea:theme:restore_theme');
+        }
         localStorage.setItem(STORAGE_KEY, 'light');
         localStorage.setItem(STORAGE_THEME_ID, 'light');
       } catch {}
+      if (typeof document !== 'undefined' && document.documentElement) {
+        document.documentElement.classList.remove('connectea-dark');
+        delete document.documentElement.dataset.connecteaTheme;
+        document.documentElement.removeAttribute('data-connectea-theme');
+        document.documentElement.setAttribute('data-connectea-login', 'true');
+        if (document.body) {
+          document.body.classList.remove('connectea-dark');
+          delete document.body.dataset.connecteaTheme;
+          document.body.removeAttribute('data-connectea-theme');
+        }
+        clearCustomTokens();
+      }
       return false;
     }
 

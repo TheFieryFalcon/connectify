@@ -55,7 +55,7 @@
 /* AMOLED Pitch Black */
 [data-connectea-theme="amoled"].connectea-dark,
 [data-connectea-theme="amoled"] .connectea-dark,
-html[data-connectea-theme="amoled"] {
+html.connectea-dark[data-connectea-theme="amoled"] {
   --cx-canvas-bg: #000000;
   --cx-surface-bg: #0a0a0a;
   --cx-surface-secondary: #121212;
@@ -78,7 +78,7 @@ html[data-connectea-theme="amoled"] {
 /* Midnight Navy */
 [data-connectea-theme="midnight"].connectea-dark,
 [data-connectea-theme="midnight"] .connectea-dark,
-html[data-connectea-theme="midnight"] {
+html.connectea-dark[data-connectea-theme="midnight"] {
   --cx-canvas-bg: #0b132b;
   --cx-surface-bg: #141f36;
   --cx-surface-secondary: #1c2a4a;
@@ -101,7 +101,7 @@ html[data-connectea-theme="midnight"] {
 /* Emerald Forest */
 [data-connectea-theme="forest"].connectea-dark,
 [data-connectea-theme="forest"] .connectea-dark,
-html[data-connectea-theme="forest"] {
+html.connectea-dark[data-connectea-theme="forest"] {
   --cx-canvas-bg: #0a1914;
   --cx-surface-bg: #11261f;
   --cx-surface-secondary: #163329;
@@ -124,7 +124,7 @@ html[data-connectea-theme="forest"] {
 /* Twilight Plum */
 [data-connectea-theme="sunset"].connectea-dark,
 [data-connectea-theme="sunset"] .connectea-dark,
-html[data-connectea-theme="sunset"] {
+html.connectea-dark[data-connectea-theme="sunset"] {
   --cx-canvas-bg: #19111c;
   --cx-surface-bg: #26182a;
   --cx-surface-secondary: #331e38;
@@ -145,13 +145,13 @@ html[data-connectea-theme="sunset"] {
 }
 
 /* Token application for theme variants */
-[data-connectea-theme]:not([data-connectea-theme="dark"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) body,
-[data-connectea-theme]:not([data-connectea-theme="dark"]).connectea-dark {
+[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) body,
+[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]).connectea-dark {
   background-color: var(--cx-canvas-bg) !important;
   color: var(--cx-text-secondary) !important;
 }
 
-[data-connectea-theme]:not([data-connectea-theme="dark"]) :is(
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
   .v-panel,
   .v-panel-content,
   .eds-c-card,
@@ -165,21 +165,42 @@ html[data-connectea-theme="sunset"] {
   border-color: var(--cx-border) !important;
 }
 
-[data-connectea-theme]:not([data-connectea-theme="dark"]) .cvr-c-primary-navigation {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) .cvr-c-primary-navigation {
   background-color: var(--cx-nav-bg) !important;
   border-bottom-color: var(--cx-nav-border) !important;
 }
 
-[data-connectea-theme]:not([data-connectea-theme="dark"]) :is(
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
   h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption
 ) {
   color: var(--cx-text-primary) !important;
 }
 
-[data-connectea-theme]:not([data-connectea-theme="dark"]) :is(
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
   label, .cvr-c-form__label, .eds-c-label, p
 ) {
   color: var(--cx-text-secondary) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Login Page Guard: Disable all themes completely
+   -------------------------------------------------------------------------- */
+[data-connectea-login],
+[data-connectea-login] body,
+[data-connectea-login] * {
+  --cx-canvas-bg: initial !important;
+  --cx-surface-bg: initial !important;
+  --cx-surface-secondary: initial !important;
+  --cx-surface-elevated: initial !important;
+  --cx-border: initial !important;
+  --cx-border-subtle: initial !important;
+  --cx-text-primary: initial !important;
+  --cx-text-secondary: initial !important;
+  --cx-accent: initial !important;
+}
+
+[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu) {
+  display: none !important;
 }
 
 /* --------------------------------------------------------------------------

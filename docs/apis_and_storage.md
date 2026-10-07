@@ -46,6 +46,10 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | Key Pattern | Storage Type | Module | Description |
 |---|---|---|---|
 | `connectea:theme:v1` | `localStorage` | `theme.js` | Current theme (`'dark'` or `'light'`) |
+| `connectea:theme:id` | `localStorage` | `theme-registry.js` | Active theme identifier (`'dark'`, `'amoled'`, `'midnight'`, `'forest'`, `'sunset'`, `'light'`, `'custom'`) |
+| `connectea:theme:restore_dark` | `localStorage` | `theme.js` | Flag to restore dark mode after navigating away from login page |
+| `connectea:theme:restore_theme` | `localStorage` | `theme-registry.js` | Saved theme ID to restore after navigating away from login page |
+| `connectea:theme:custom_colors` | `localStorage` | `theme-registry.js` | Custom theme JSON palette (`canvas`, `surface`, `accent`) |
 | `connectea:cohort:v3:<student>:<year>:<subject>` | `localStorage` | `cohort-estimator.js` | Custom user-override cohort size |
 | `connectea:observed_spreads:<key>` | `sessionStorage` | `cohort-estimator.js` | Cached empirical IQR ratios |
 | `connectea:task_type_overrides` | `localStorage` | `task-types.js` | Map of assessment manual category overrides |

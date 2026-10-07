@@ -4852,6 +4852,96 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   assert.ok(Array.isArray(window.ConnectifyTheme.getAvailableThemes()), 'ConnectifyTheme.getAvailableThemes must return array');
 });
 
+runTest('Test 136: Login page disables all themes (preset, custom palettes) and restores exact theme after login', () => {
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  const themeRegistryJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8');
+  const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
+
+  // 1. Static CSS checks: all theme tokens require .connectea-dark and exclude [data-connectea-login]
+  assert.ok(themeTokensCss.includes('html.connectea-dark[data-connectea-theme="amoled"]'),
+    'theme-tokens.css amoled theme must require .connectea-dark');
+  assert.ok(themeTokensCss.includes('[data-connectea-login]'),
+    'theme-tokens.css must define [data-connectea-login] rule block');
+  assert.ok(themeTokensCss.includes('[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu)'),
+    'theme-tokens.css must hide theme toggle and popover on login page');
+
+  // 2. Functional check: AMOLED theme active, navigate to login page
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  eval(themeRegistryJs);
+  eval(themeJs);
+  window.ConnectifyTheme.setTheme('amoled');
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'amoled');
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'amoled');
+
+  // Navigate to login page
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/login';
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  assert.strictEqual(window.ConnectifyTheme.isLoginUrl('https://connect.det.wa.edu.au/login'), true);
+  assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false on login page');
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'light', 'getTheme must return light on login page');
+  assert.strictEqual(window.ConnectifyThemeRegistry.getTheme(), 'light', 'Registry getTheme must return light on login page');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'connectea-dark must be removed on login');
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined, 'data-connectea-theme must be removed on login');
+  assert.strictEqual(document.documentElement.getAttribute('data-connectea-login'), 'true', 'data-connectea-login must be set on login');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'light', 'storage v1 must be light on login');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'light', 'storage theme id must be light on login');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), 'true', 'restore_dark must be true');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), 'amoled', 'restore_theme must save amoled');
+
+  // Setting theme on login page must be rejected
+  const loginSetThemeResult = window.ConnectifyTheme.setTheme('sunset');
+  assert.strictEqual(loginSetThemeResult, false, 'setTheme on login page must return false');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'theme must not activate on login page');
+
+  // Navigate back to classes page - AMOLED must be restored
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'dark', 'storage must be restored to dark');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'amoled', 'storage theme id must be restored to amoled');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), null, 'restore flag must be cleared');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), null, 'restore theme flag must be cleared');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true, 'connectea-dark must be restored');
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'amoled', 'data-connectea-theme must be amoled');
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'amoled', 'getTheme must return amoled');
+
+  // 3. Functional check with Custom Palette on login.det.wa.edu.au
+  window.ConnectifyTheme.setTheme('custom', { canvas: '#18122B', surface: '#251b3e', accent: '#a855f7' });
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'custom');
+  assert.strictEqual(document.documentElement.style.getPropertyValue('--cx-canvas-bg'), '#18122B');
+
+  // Navigate to login.det.wa.edu.au
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://login.det.wa.edu.au/';
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  assert.strictEqual(window.ConnectifyTheme.isLoginUrl('https://login.det.wa.edu.au/'), true);
+  assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false);
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'light');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false);
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined);
+  assert.strictEqual(document.documentElement.style.getPropertyValue('--cx-canvas-bg'), '', 'custom inline css properties must be cleared on login');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), 'custom', 'restore_theme must save custom');
+
+  // Return to normal page - custom theme must be restored
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'custom', 'storage must be restored to custom');
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'custom', 'theme must be restored to custom');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'custom');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

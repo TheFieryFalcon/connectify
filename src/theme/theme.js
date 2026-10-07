@@ -12,36 +12,72 @@
 
   const STORAGE_KEY = 'connectea:theme:v1';
   const RESTORE_KEY = 'connectea:theme:restore_dark';
+  const RESTORE_THEME_KEY = 'connectea:theme:restore_theme';
+  const STORAGE_THEME_ID = 'connectea:theme:id';
   let isDarkMode = false;
+  let activeTheme = 'dark';
 
   const isLoginUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
     try {
       const loc = new URL(url);
-      return loc.hostname === 'connect.det.wa.edu.au' && (loc.pathname === '/login' || loc.pathname.startsWith('/login/'));
+      const isConnect = loc.hostname === 'connect.det.wa.edu.au';
+      const isLoginHost = loc.hostname === 'login.det.wa.edu.au';
+      const isLoginPath = loc.pathname === '/login' ||
+        loc.pathname.startsWith('/login/') ||
+        loc.pathname.includes('/portal/login');
+      return (isConnect && isLoginPath) || isLoginHost;
     } catch {
-      return typeof url === 'string' && (url === 'https://connect.det.wa.edu.au/login' || url.startsWith('https://connect.det.wa.edu.au/login'));
+      return typeof url === 'string' && (
+        url === 'https://connect.det.wa.edu.au/login' ||
+        url.startsWith('https://connect.det.wa.edu.au/login') ||
+        url.includes('login.det.wa.edu.au')
+      );
     }
   };
 
   try {
     if (isLoginUrl()) {
-      if (localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true') {
+      const isDarkActive = localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true';
+      if (isDarkActive) {
         localStorage.setItem(RESTORE_KEY, 'true');
+        const currentTheme = localStorage.getItem(STORAGE_THEME_ID);
+        if (currentTheme && currentTheme !== 'light') localStorage.setItem(RESTORE_THEME_KEY, currentTheme);
       }
       localStorage.setItem(STORAGE_KEY, 'light');
+      localStorage.setItem(STORAGE_THEME_ID, 'light');
       isDarkMode = false;
+      activeTheme = 'light';
     } else if (localStorage.getItem(RESTORE_KEY) === 'true') {
+      activeTheme = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
       localStorage.removeItem(RESTORE_KEY);
+      localStorage.removeItem(RESTORE_THEME_KEY);
       localStorage.setItem(STORAGE_KEY, 'dark');
+      localStorage.setItem(STORAGE_THEME_ID, activeTheme);
       isDarkMode = true;
     } else {
       isDarkMode = localStorage.getItem(STORAGE_KEY) === 'dark';
+      activeTheme = isDarkMode ? (localStorage.getItem(STORAGE_THEME_ID) || 'dark') : 'light';
     }
   } catch {}
 
-  // Apply dark mode class immediately to avoid any initial page flash
-  document.documentElement.classList.toggle('connectea-dark', isDarkMode);
-  if (document.body) document.body.classList.toggle('connectea-dark', isDarkMode);
+  // Strip or apply dark mode and theme attributes
+  if (isLoginUrl()) {
+    document.documentElement.classList.remove('connectea-dark');
+    delete document.documentElement.dataset.connecteaTheme;
+    document.documentElement.removeAttribute('data-connectea-theme');
+    document.documentElement.setAttribute('data-connectea-login', 'true');
+    if (document.body) {
+      document.body.classList.remove('connectea-dark');
+      delete document.body.dataset.connecteaTheme;
+      document.body.removeAttribute('data-connectea-theme');
+    }
+  } else {
+    document.documentElement.removeAttribute('data-connectea-login');
+    document.documentElement.classList.toggle('connectea-dark', isDarkMode);
+    if (document.body) document.body.classList.toggle('connectea-dark', isDarkMode);
+    if (isDarkMode) document.documentElement.dataset.connecteaTheme = activeTheme;
+    else { delete document.documentElement.dataset.connecteaTheme; document.documentElement.removeAttribute('data-connectea-theme'); }
+  }
 
   // Reuse existing button if already in DOM or create once
   let toggleButton = document.getElementById('connectea-theme-toggle');
@@ -54,10 +90,7 @@
 
   function cleanupDuplicateButtons() {
     const existingButtons = document.querySelectorAll('#connectea-theme-toggle, .connectea-theme-toggle');
-    for (const btn of existingButtons) {
-      if (btn !== toggleButton) btn.remove();
-    }
-
+    for (const btn of existingButtons) if (btn !== toggleButton) btn.remove();
     const containers = [document.querySelector('.cvr-c-primary-navigation'), document.body].filter(Boolean);
     for (const container of containers) {
       const candidates = container.querySelectorAll('button:not(#connectea-theme-toggle):not(.cx-calculator-tool):not(.cx-back-menu):not(.cx-close-btn)');
@@ -65,9 +98,7 @@
         if (btn.closest('#connectify-sidebar')) continue;
         const text = (btn.textContent || '').trim().toLowerCase();
         const aria = (btn.getAttribute('aria-label') || '').toLowerCase();
-        if (text.includes('dark mode') || text.includes('light mode') || aria.includes('dark mode') || aria.includes('light mode')) {
-          btn.remove();
-        }
+        if (text.includes('dark mode') || text.includes('light mode') || aria.includes('dark mode') || aria.includes('light mode')) btn.remove();
       }
     }
   }
@@ -84,6 +115,7 @@
     cleanupDuplicateButtons();
     if (isLoginUrl()) {
       if (toggleButton.parentElement) toggleButton.remove();
+      if (themeMenu) closeThemeMenu();
       return;
     }
     if (forceReset) headerRightInset = null;
@@ -92,31 +124,21 @@
       if (toggleButton.parentElement) toggleButton.remove();
       return;
     }
+    if (toggleButton.parentElement !== nav) nav.append(toggleButton);
 
-    if (toggleButton.parentElement !== nav) {
-      nav.append(toggleButton);
-    }
-
-    // Find notification bell icon whether hollow, solid, or with notification dot/badge
-    const bell = nav
-      .querySelector(':is(.cvr-c-icon--notification-hollow, .cvr-c-icon--notification, .cvr-c-icon--notification-solid, [class*="notification"])')
-      ?.closest('[role="button"], button') ||
-      nav.querySelector('[aria-label*="notification" i], [data-automation-id="notifications"]');
+    const bell = nav.querySelector(':is(.cvr-c-icon--notification-hollow, .cvr-c-icon--notification, .cvr-c-icon--notification-solid, [class*="notification"])')?.closest('[role="button"], button') || nav.querySelector('[aria-label*="notification" i], [data-automation-id="notifications"]');
     const bellRect = bell?.getBoundingClientRect();
     const navRect = nav.getBoundingClientRect();
-
     let computedInset = null;
     if (bellRect?.width && bellRect.left > 60 && navRect.right >= bellRect.left) {
       computedInset = Math.max(8, navRect.right - bellRect.left + 12);
     } else {
-      // Fallback: position to the left of the avatar/user menu if bell is still loading
       const avatar = nav.querySelector('.cvr-c-primary-navigation__button--avatar, [class*="avatar"]')?.closest('[role="button"], button');
       const avatarRect = avatar?.getBoundingClientRect();
       if (avatarRect?.width && avatarRect.left > 60 && navRect.right >= avatarRect.left) {
         computedInset = Math.max(8, navRect.right - avatarRect.left + 140);
       }
     }
-
     if (computedInset !== null) headerRightInset = computedInset;
     toggleButton.style.right = `${headerRightInset ?? 90}px`;
   }
@@ -128,11 +150,7 @@
     const parts = match[1].split(',').map(Number);
     return (parts.length === 4 && (parts[3] === 0 || (!allowTranslucent && parts[3] < 0.9))) ? null : parts.slice(0, 3);
   }
-
-  function isNeutralColor(rgb) {
-    return rgb && Math.max(...rgb) - Math.min(...rgb) < 24;
-  }
-
+  const isNeutralColor = rgb => rgb && Math.max(...rgb) - Math.min(...rgb) < 24;
   function isDarkColor(rgb) {
     if (!rgb) return false;
     const lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
@@ -140,41 +158,26 @@
     return lum < 135 || (isNeutralColor(rgb) && Math.max(...rgb) < 140) || isConnectRed;
   }
 
-  /**
-   * Identifies unstyled bright neutral surfaces and dark text outside Assessment Outlines
-   * and tags them with [data-connectea-surface] and [data-connectea-ink].
-   * Does NOT touch el.style directly, ensuring zero flickering and zero MutationObserver feedback loops.
-   */
   function adaptSurfaces() {
     if (!isDarkMode || isLoginUrl()) return;
-
     try {
       const surfaceCandidates = document.body.querySelectorAll(
         ':is(header, nav, aside, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .eds-c-nav-list, .eds-c-nav-list__item, .portlet-content, .portlet-body):not([data-connectea-surface]):not(.cvr-c-primary-navigation):not(.cvr-c-primary-navigation *):not(.cvr-c-header):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
       );
-
       for (const el of surfaceCandidates) {
         if (['SCRIPT', 'STYLE', 'LINK', 'CANVAS', 'VIDEO', 'IFRAME', 'SVG'].includes(el.tagName)) continue;
         if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header')) continue;
-        const style = window.getComputedStyle(el);
-        const bgRgb = parseRgb(style.backgroundColor);
-        if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) {
-          el.setAttribute('data-connectea-surface', '');
-        }
+        const bgRgb = parseRgb(window.getComputedStyle(el).backgroundColor);
+        if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) el.setAttribute('data-connectea-surface', '');
       }
-
       const inkCandidates = document.querySelectorAll(
         '[data-connectea-surface] :is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
       );
       for (const el of inkCandidates) {
-        if (el.children.length > 2) continue;
-        if (el.hasAttribute('data-connectea-surface')) continue;
+        if (el.children.length > 2 || el.hasAttribute('data-connectea-surface')) continue;
         if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header')) continue;
-        const style = window.getComputedStyle(el);
-        const fgRgb = parseRgb(style.color, true);
-        if (isDarkColor(fgRgb)) {
-          el.setAttribute('data-connectea-ink', '');
-        }
+        const fgRgb = parseRgb(window.getComputedStyle(el).color, true);
+        if (isDarkColor(fgRgb)) el.setAttribute('data-connectea-ink', '');
       }
     } catch (e) {}
   }
@@ -212,8 +215,7 @@
       swatch.style.backgroundColor = (t.swatch && t.swatch[1]) || '#1e2632';
       const label = document.createElement('span');
       label.textContent = `${t.icon} ${t.name}`;
-      opt.appendChild(swatch);
-      opt.appendChild(label);
+      opt.append(swatch, label);
       opt.onclick = (e) => {
         e.stopPropagation();
         if (reg) reg.setTheme(t.id);
@@ -245,41 +247,51 @@
       if (isDark || isDarkMode) {
         try {
           localStorage.setItem(RESTORE_KEY, 'true');
+          const cur = themeId || (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : null);
+          if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
         } catch {}
       }
       isDark = false;
-      try {
-        localStorage.setItem(STORAGE_KEY, 'light');
-      } catch {}
+      try { localStorage.setItem(STORAGE_KEY, 'light'); localStorage.setItem(STORAGE_THEME_ID, 'light'); } catch {}
     } else {
       try {
         if (localStorage.getItem(RESTORE_KEY) === 'true') {
+          const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
           localStorage.removeItem(RESTORE_KEY);
+          localStorage.removeItem(RESTORE_THEME_KEY);
           isDark = true;
+          themeId = restored;
           localStorage.setItem(STORAGE_KEY, 'dark');
+          localStorage.setItem(STORAGE_THEME_ID, restored);
+          if (window.ConnectifyThemeRegistry) window.ConnectifyThemeRegistry.setTheme(restored);
         }
       } catch {}
     }
     isDarkMode = isDark;
-    document.documentElement.classList.toggle('connectea-dark', isDarkMode);
-    if (document.body) {
-      document.body.classList.toggle('connectea-dark', isDarkMode);
-    }
-
-    const currentTheme = themeId || (typeof window.ConnectifyThemeRegistry !== 'undefined'
-      ? window.ConnectifyThemeRegistry.getTheme()
-      : (isDarkMode ? 'dark' : 'light'));
-
-    if (isDarkMode) {
-      document.documentElement.dataset.connecteaTheme = currentTheme;
-    } else {
+    if (isLoginUrl()) {
+      document.documentElement.classList.remove('connectea-dark');
       delete document.documentElement.dataset.connecteaTheme;
+      document.documentElement.removeAttribute('data-connectea-theme');
+      document.documentElement.setAttribute('data-connectea-login', 'true');
+      if (document.body) {
+        document.body.classList.remove('connectea-dark');
+        delete document.body.dataset.connecteaTheme;
+        document.body.removeAttribute('data-connectea-theme');
+      }
+      if (window.ConnectifyThemeRegistry?.clearCustomTokens) window.ConnectifyThemeRegistry.clearCustomTokens();
+      if (toggleButton.parentElement) toggleButton.remove();
+      if (themeMenu) closeThemeMenu();
+    } else {
+      document.documentElement.removeAttribute('data-connectea-login');
+      document.documentElement.classList.toggle('connectea-dark', isDarkMode);
+      if (document.body) document.body.classList.toggle('connectea-dark', isDarkMode);
+      const currentTheme = themeId || (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (isDarkMode ? 'dark' : 'light'));
+      if (isDarkMode) document.documentElement.dataset.connecteaTheme = currentTheme;
+      else { delete document.documentElement.dataset.connecteaTheme; document.documentElement.removeAttribute('data-connectea-theme'); }
     }
 
     const label = isDarkMode ? '☀ Light mode' : '☾ Dark mode';
-    if (toggleButton.textContent !== label) {
-      toggleButton.textContent = label;
-    }
+    if (toggleButton.textContent !== label) toggleButton.textContent = label;
     toggleButton.setAttribute('aria-label', label);
     toggleButton.setAttribute('aria-pressed', String(isDarkMode));
 
@@ -293,43 +305,25 @@
         toggleButton.appendChild(arrow);
       }
     }
-
     updateTogglePosition();
-    if (isDarkMode) {
-      scheduleAdaptSurfaces();
-    }
+    if (isDarkMode) scheduleAdaptSurfaces();
   }
 
   let lastToggleTime = 0;
   toggleButton.onclick = (e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    if (e) { e.preventDefault(); e.stopPropagation(); }
     if (e?.target?.closest?.('.connectea-theme-arrow')) {
-      if (themeMenu) closeThemeMenu();
-      else openThemeMenu();
+      if (themeMenu) closeThemeMenu(); else openThemeMenu();
       return;
     }
     const now = Date.now();
-    if (now - lastToggleTime < 300) return; // 300ms debounce
+    if (now - lastToggleTime < 300) return;
     lastToggleTime = now;
-
-    if (isLoginUrl()) {
-      applyTheme(false);
-      return;
-    }
-
-    try {
-      localStorage.removeItem(RESTORE_KEY);
-    } catch {}
-
-    // Use current DOM state as ground truth to prevent any desync
+    if (isLoginUrl()) { applyTheme(false); return; }
+    try { localStorage.removeItem(RESTORE_KEY); } catch {}
     const isCurrentlyDark = document.documentElement.classList.contains('connectea-dark');
     const nextDark = !isCurrentlyDark;
-    try {
-      localStorage.setItem(STORAGE_KEY, nextDark ? 'dark' : 'light');
-    } catch {}
+    try { localStorage.setItem(STORAGE_KEY, nextDark ? 'dark' : 'light'); } catch {}
     if (typeof window.ConnectifyThemeRegistry !== 'undefined') {
       window.ConnectifyThemeRegistry.setTheme(nextDark ? 'dark' : 'light');
     }
@@ -360,7 +354,6 @@
     }, effectiveDelay);
   }
 
-  // Re-attach toggle button and adapt surfaces across client-side SPA route navigations
   let syncScheduled = false;
   const debouncedSync = () => {
     if (syncScheduled) return;
@@ -371,83 +364,91 @@
         if (isDarkMode || document.documentElement.classList.contains('connectea-dark')) {
           try {
             localStorage.setItem(RESTORE_KEY, 'true');
+            const cur = localStorage.getItem(STORAGE_THEME_ID);
+            if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
           } catch {}
           applyTheme(false);
         }
         if (toggleButton.parentElement) toggleButton.remove();
+        if (themeMenu) closeThemeMenu();
         return;
       }
       try {
         if (localStorage.getItem(RESTORE_KEY) === 'true') {
+          const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
           localStorage.removeItem(RESTORE_KEY);
+          localStorage.removeItem(RESTORE_THEME_KEY);
           localStorage.setItem(STORAGE_KEY, 'dark');
-          applyTheme(true);
+          localStorage.setItem(STORAGE_THEME_ID, restored);
+          applyTheme(true, restored);
           return;
         }
       } catch {}
       cleanupDuplicateButtons();
       const nav = document.querySelector('.cvr-c-primary-navigation');
-      if (!nav || toggleButton.parentElement !== nav || !toggleButton.isConnected) {
-        updateTogglePosition(true);
-      } else {
-        updateTogglePosition();
-      }
-      if (isDarkMode) {
-        scheduleAdaptSurfaces();
-      }
+      updateTogglePosition(!nav || toggleButton.parentElement !== nav || !toggleButton.isConnected);
+      if (isDarkMode) scheduleAdaptSurfaces();
     });
   };
 
   new MutationObserver(records => {
     if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-    const shouldUpdate = records.some(record => {
-      if (record.target === toggleButton || record.target.parentElement?.closest('#connectea-theme-toggle') || record.target.closest?.('#connectify-sidebar')) {
-        return false;
-      }
-      if (record.type === 'attributes' && (record.attributeName === 'data-connectea-surface' || record.attributeName === 'data-connectea-ink')) {
-        return false;
-      }
-      if (record.target?.closest?.('.eds-c-tile, .cvr-c-tile, .eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectea-panel')) {
-        return false;
-      }
+    const shouldUpdate = records.some(r => {
+      if (r.target === toggleButton || r.target.parentElement?.closest('#connectea-theme-toggle') || r.target.closest?.('#connectify-sidebar')) return false;
+      if (r.type === 'attributes' && (r.attributeName === 'data-connectea-surface' || r.attributeName === 'data-connectea-ink')) return false;
+      if (r.target?.closest?.('.eds-c-tile, .cvr-c-tile, .eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectea-panel')) return false;
       return true;
     });
     if (shouldUpdate) debouncedSync();
-  }).observe(document.body, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['class']
-  });
+  }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
   window.addEventListener('resize', () => updateTogglePosition(true));
   window.addEventListener('storage', e => {
-    if (e.key === STORAGE_KEY && e.newValue) {
-      applyTheme(!isLoginUrl() && e.newValue === 'dark');
-    }
+    if (e.key === STORAGE_KEY && e.newValue) applyTheme(!isLoginUrl() && e.newValue === 'dark');
   });
 
-  // Initial mount with fast polling during initial SPA render
   updateTogglePosition();
   if (isDarkMode) scheduleAdaptSurfaces(600);
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       try {
         if (isLoginUrl()) {
-          if (isDarkMode || localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true') {
+          const isDark = isDarkMode || localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true';
+          if (isDark) {
             localStorage.setItem(RESTORE_KEY, 'true');
+            const cur = localStorage.getItem(STORAGE_THEME_ID);
+            if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
           }
           localStorage.setItem(STORAGE_KEY, 'light');
+          localStorage.setItem(STORAGE_THEME_ID, 'light');
           isDarkMode = false;
         } else if (localStorage.getItem(RESTORE_KEY) === 'true') {
+          const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
           localStorage.removeItem(RESTORE_KEY);
+          localStorage.removeItem(RESTORE_THEME_KEY);
           localStorage.setItem(STORAGE_KEY, 'dark');
+          localStorage.setItem(STORAGE_THEME_ID, restored);
           isDarkMode = true;
+          activeTheme = restored;
         }
       } catch {}
-      if (document.body) document.body.classList.toggle('connectea-dark', isDarkMode);
-      updateTogglePosition(true);
-      if (isDarkMode) scheduleAdaptSurfaces(800);
+      if (isLoginUrl()) {
+        document.documentElement.classList.remove('connectea-dark');
+        delete document.documentElement.dataset.connecteaTheme;
+        document.documentElement.removeAttribute('data-connectea-theme');
+        document.documentElement.setAttribute('data-connectea-login', 'true');
+        if (document.body) {
+          document.body.classList.remove('connectea-dark');
+          delete document.body.dataset.connecteaTheme;
+          document.body.removeAttribute('data-connectea-theme');
+        }
+        if (toggleButton.parentElement) toggleButton.remove();
+        if (themeMenu) closeThemeMenu();
+      } else {
+        if (document.body) document.body.classList.toggle('connectea-dark', isDarkMode);
+        updateTogglePosition(true);
+        if (isDarkMode) scheduleAdaptSurfaces(800);
+      }
     });
   }
 
@@ -456,36 +457,38 @@
     mountPollCount++;
     if (isLoginUrl()) {
       if (toggleButton.parentElement) toggleButton.remove();
+      if (themeMenu) closeThemeMenu();
       clearInterval(mountPollInterval);
       return;
     }
     try {
       if (localStorage.getItem(RESTORE_KEY) === 'true') {
+        const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
         localStorage.removeItem(RESTORE_KEY);
+        localStorage.removeItem(RESTORE_THEME_KEY);
         localStorage.setItem(STORAGE_KEY, 'dark');
-        applyTheme(true);
+        localStorage.setItem(STORAGE_THEME_ID, restored);
+        applyTheme(true, restored);
       }
     } catch {}
     const nav = document.querySelector('.cvr-c-primary-navigation');
     if (nav && toggleButton.parentElement !== nav) updateTogglePosition(true);
-    if (mountPollCount >= 30 || (nav && toggleButton.parentElement === nav)) {
-      clearInterval(mountPollInterval);
-    }
+    if (mountPollCount >= 30 || (nav && toggleButton.parentElement === nav)) clearInterval(mountPollInterval);
   }, 100);
 
   window.ConnectifyTheme = {
     isLoginUrl,
-    isDarkMode: () => isDarkMode,
+    isDarkMode: () => (isLoginUrl() ? false : isDarkMode),
     applyTheme,
-    getTheme: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (isDarkMode ? 'dark' : 'light')),
+    getTheme: () => (isLoginUrl() ? 'light' : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (isDarkMode ? 'dark' : 'light'))),
     setTheme: (id, colors) => {
+      if (isLoginUrl()) return false;
       const res = window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setTheme(id, colors) : true;
       applyTheme(id !== 'light', id);
       return res;
     },
     getAvailableThemes: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getAvailableThemes() : [
-      { id: 'dark', name: 'Classic Dark', icon: '☾' },
-      { id: 'light', name: 'Default Light', icon: '☀' }
+      { id: 'dark', name: 'Classic Dark', icon: '☾' }, { id: 'light', name: 'Default Light', icon: '☀' }
     ]),
     registerTheme: def => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.registerTheme(def) : false),
     getCustomColors: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getCustomColors() : null),
