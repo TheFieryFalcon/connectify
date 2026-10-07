@@ -23,10 +23,17 @@
   const BUILTIN_THEMES = [
     {
       id: 'dark',
-      name: 'Classic Dark',
+      name: 'Dark',
       icon: '☾',
       isDark: true,
       swatch: ['#12171f', '#1e2632', '#3b82f6']
+    },
+    {
+      id: 'quantum',
+      name: 'Quantum Dark',
+      icon: '⚛',
+      isDark: true,
+      swatch: ['#292929', '#333333', '#d4b483']
     },
     {
       id: 'amoled',
@@ -58,7 +65,7 @@
     },
     {
       id: 'light',
-      name: 'Default Light',
+      name: 'Default',
       icon: '☀',
       isDark: false,
       swatch: ['#f8fafc', '#ffffff', '#3b82f6']
@@ -255,10 +262,13 @@
 
     if (typeof document !== 'undefined' && document.documentElement) {
       document.documentElement.classList.toggle('connectea-dark', isDark);
-      if (document.body) {
-        document.body.classList.toggle('connectea-dark', isDark);
+      if (document.body) document.body.classList.toggle('connectea-dark', isDark);
+      if (isDark) {
+        document.documentElement.dataset.connecteaTheme = theme.id;
+      } else {
+        delete document.documentElement.dataset.connecteaTheme;
+        document.documentElement.removeAttribute('data-connectea-theme');
       }
-      document.documentElement.dataset.connecteaTheme = theme.id;
 
       if (theme.id === 'custom' || customColors) {
         if (customColors) setCustomColors(customColors);

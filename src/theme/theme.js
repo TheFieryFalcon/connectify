@@ -194,12 +194,13 @@
 
     const reg = window.ConnectifyThemeRegistry;
     const themes = reg ? reg.getAvailableThemes() : [
-      { id: 'dark', name: 'Classic Dark', icon: '☾', swatch: ['#12171f', '#1e2632', '#3b82f6'] },
+      { id: 'dark', name: 'Dark', icon: '☾', swatch: ['#12171f', '#1e2632', '#3b82f6'] },
+      { id: 'quantum', name: 'Quantum Dark', icon: '⚛', swatch: ['#292929', '#333333', '#d4b483'] },
       { id: 'amoled', name: 'AMOLED Black', icon: '🌑', swatch: ['#000000', '#0a0a0a', '#38bdf8'] },
       { id: 'midnight', name: 'Midnight Navy', icon: '🌌', swatch: ['#0b132b', '#141f36', '#60a5fa'] },
       { id: 'forest', name: 'Emerald Forest', icon: '🌲', swatch: ['#0a1914', '#11261f', '#10b981'] },
       { id: 'sunset', name: 'Twilight Plum', icon: '🌅', swatch: ['#19111c', '#26182a', '#f43f5e'] },
-      { id: 'light', name: 'Default Light', icon: '☀', swatch: ['#f8fafc', '#ffffff', '#3b82f6'] },
+      { id: 'light', name: 'Default', icon: '☀', swatch: ['#f8fafc', '#ffffff', '#3b82f6'] },
       { id: 'custom', name: 'Custom Theme', icon: '🎨', swatch: ['#111827', '#1f2937', '#6366f1'] }
     ];
     const activeId = reg ? reg.getTheme() : (isDarkMode ? 'dark' : 'light');
@@ -478,7 +479,7 @@
 
   window.ConnectifyTheme = {
     isLoginUrl,
-    isDarkMode: () => (isLoginUrl() ? false : isDarkMode),
+    isDarkMode: () => (isLoginUrl() ? false : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.isDarkMode() : isDarkMode)),
     applyTheme,
     getTheme: () => (isLoginUrl() ? 'light' : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (isDarkMode ? 'dark' : 'light'))),
     setTheme: (id, colors) => {
@@ -488,7 +489,7 @@
       return res;
     },
     getAvailableThemes: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getAvailableThemes() : [
-      { id: 'dark', name: 'Classic Dark', icon: '☾' }, { id: 'light', name: 'Default Light', icon: '☀' }
+      { id: 'dark', name: 'Dark', icon: '☾' }, { id: 'light', name: 'Default', icon: '☀' }
     ]),
     registerTheme: def => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.registerTheme(def) : false),
     getCustomColors: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getCustomColors() : null),

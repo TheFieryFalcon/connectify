@@ -31,7 +31,7 @@
   --cx-button-text: #0f172a;
 }
 
-/* Base Dark Theme (Classic Dark) */
+/* Base Dark Theme (Dark) */
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) {
   --cx-canvas-bg: #12171f;
   --cx-surface-bg: #1e2632;
@@ -50,6 +50,29 @@
   --cx-button-hover: #2c3b4e;
   --cx-button-border: #455a73;
   --cx-button-text: #f1f5f9;
+}
+
+/* Quantum Dark (Legacy <= 3.1.14 Palette) */
+[data-connectea-theme="quantum"].connectea-dark,
+[data-connectea-theme="quantum"] .connectea-dark,
+html.connectea-dark[data-connectea-theme="quantum"] {
+  --cx-canvas-bg: #292929;
+  --cx-surface-bg: #333333;
+  --cx-surface-secondary: #2a2a2a;
+  --cx-surface-elevated: #3a3a3a;
+  --cx-border: #3a3a3a;
+  --cx-border-subtle: #4a4a4a;
+  --cx-text-primary: #cccccc;
+  --cx-text-secondary: #bbbbbb;
+  --cx-text-muted: #999999;
+  --cx-accent: #d4b483;
+  --cx-accent-hover: #e2c9a3;
+  --cx-nav-bg: #2a2a2a;
+  --cx-nav-border: #3a3a3a;
+  --cx-button-bg: #303944;
+  --cx-button-hover: #3b4857;
+  --cx-button-border: #4c5a69;
+  --cx-button-text: #cccccc;
 }
 
 /* AMOLED Pitch Black */
@@ -146,11 +169,28 @@ html.connectea-dark[data-connectea-theme="sunset"] {
 
 /* Token application for theme variants */
 [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) body,
-[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]).connectea-dark {
+[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]).connectea-dark,
+:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) {
   background-color: var(--cx-canvas-bg) !important;
   color: var(--cx-text-secondary) !important;
 }
 
+:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
+  .v-panel,
+  .v-panel-content,
+  .eds-c-card,
+  .cvr-c-tile,
+  .eds-c-tile,
+  [data-subject-card],
+  .cvr-c-dashboard-card,
+  [data-connectea-surface],
+  .cvr-c-task,
+  .cvr-c-task__details,
+  .cvr-c-tasks,
+  .cvr-c-task-group,
+  .cvr-c-task__marks,
+  .cvr-c-task__mark
+),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
   .v-panel,
   .v-panel-content,
@@ -165,21 +205,38 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   border-color: var(--cx-border) !important;
 }
 
+:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(.cvr-c-primary-navigation, .cvr-c-service-menu, .cvr-c-primary-menu),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) .cvr-c-primary-navigation {
   background-color: var(--cx-nav-bg) !important;
   border-bottom-color: var(--cx-nav-border) !important;
 }
 
+:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
+  h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption
+),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
   h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption
 ) {
   color: var(--cx-text-primary) !important;
 }
 
+:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
+  label, .cvr-c-form__label, .eds-c-label, p
+),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
   label, .cvr-c-form__label, .eds-c-label, p
 ) {
   color: var(--cx-text-secondary) !important;
+}
+
+:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(.v-button, .eds-c-button, .eds-c-standard-button) {
+  background-color: var(--cx-button-bg) !important;
+  color: var(--cx-button-text) !important;
+  border-color: var(--cx-button-border) !important;
+}
+
+:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(.eds-c-tile a, .cvr-c-tile a, .connectea-panel a) {
+  color: var(--cx-accent) !important;
 }
 
 /* --------------------------------------------------------------------------

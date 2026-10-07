@@ -4942,6 +4942,84 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'custom');
 });
 
+runTest('Test 137: Dark, Default, and Quantum Dark themes correspond to previous versions and legacy palettes', () => {
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  const themeRegistryJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8');
+  const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
+
+  // 1. Static checks: Quantum Dark palette corresponds to versions 3.1.14 and below
+  assert.ok(themeTokensCss.includes('[data-connectea-theme="quantum"]'), 'theme-tokens.css must define Quantum Dark selector');
+  assert.ok(themeTokensCss.includes('--cx-canvas-bg: #292929;'), 'Quantum Dark must have 3.1.14 canvas #292929');
+  assert.ok(themeTokensCss.includes('--cx-surface-bg: #333333;'), 'Quantum Dark must have 3.1.14 surface #333333');
+  assert.ok(themeTokensCss.includes('--cx-accent: #d4b483;'), 'Quantum Dark must have 3.1.14 accent #d4b483');
+  assert.ok(themeTokensCss.includes('--cx-button-bg: #303944;'), 'Quantum Dark must have 3.1.14 button #303944');
+
+  // Base Dark Theme corresponds to modern dark mode (v3.2.x)
+  assert.ok(themeTokensCss.includes('--cx-canvas-bg: #12171f;'), 'Base dark must have #12171f canvas');
+  assert.ok(themeTokensCss.includes('--cx-surface-bg: #1e2632;'), 'Base dark must have #1e2632 surface');
+  assert.ok(themeTokensCss.includes('--cx-accent: #3b82f6;'), 'Base dark must have #3b82f6 accent');
+
+  // 2. Functional evaluation of Registry
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  const reg = window.ConnectifyThemeRegistry;
+  const themes = reg.getAvailableThemes();
+  const themeMap = new Map(themes.map(t => [t.id, t]));
+
+  assert.ok(themeMap.has('quantum'), 'Registry must include quantum theme');
+  assert.strictEqual(themeMap.get('quantum').name, 'Quantum Dark');
+  assert.strictEqual(themeMap.get('dark').name, 'Dark');
+  assert.strictEqual(themeMap.get('light').name, 'Default');
+
+  // Switch to Quantum Dark
+  reg.setTheme('quantum');
+  assert.strictEqual(reg.getTheme(), 'quantum');
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'quantum');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'quantum');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'dark');
+
+  // Switch to Default (Light mode from previous versions)
+  reg.setTheme('light');
+  assert.strictEqual(reg.getTheme(), 'light');
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined, 'Default theme must remove data-connectea-theme');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'Default theme must remove connectea-dark');
+  assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false for Default theme');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'light');
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'light');
+
+  // Switch to Dark (Dark mode from previous versions)
+  reg.setTheme('dark');
+  assert.strictEqual(reg.getTheme(), 'dark');
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'dark');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
+  assert.strictEqual(window.ConnectifyTheme.isDarkMode(), true);
+
+  // Quantum Dark login/restore cycle
+  reg.setTheme('quantum');
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/login';
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false);
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined);
+  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), 'quantum');
+
+  // Return to classes
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  assert.strictEqual(window.ConnectifyTheme.getTheme(), 'quantum', 'Quantum Dark must restore post-login');
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'quantum');
+  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');
