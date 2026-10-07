@@ -2,9 +2,7 @@
    20. Universal Border Restoration & Structural Integrity
    -------------------------------------------------------------------------- */
 .connectea-dark :is(
-  .cvr-c-task__mark,
   .mat-card,
-  .eds-c-tile,
   .mat-expansion-panel,
   th,
   td,

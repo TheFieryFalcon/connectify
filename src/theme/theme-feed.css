@@ -355,8 +355,7 @@
   .cvr-c-service-menu__list,
   .cvr-c-primary-menu__body,
   .cvr-c-primary-menu__list,
-  .cvr-c-category-menu__wrapper,
-  .cvr-c-primary-navigation__container
+  .cvr-c-category-menu__wrapper
 ) {
   background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
   color: var(--cx-nav-text, #cbd5e1) !important;
@@ -366,7 +365,6 @@
   .cvr-c-service-menu__item,
   .cvr-c-primary-menu__item,
   .cvr-c-category-menu .eds-u-interactive,
-  .cvr-c-primary-navigation__links .v-link a,
   .cvr-c-primary-navigation__button--avatar
 ) {
   background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
@@ -378,7 +376,6 @@
   .cvr-c-service-menu__item,
   .cvr-c-primary-menu__item,
   .cvr-c-category-menu .eds-u-interactive,
-  .cvr-c-primary-navigation__links .v-link a,
   .cvr-c-primary-navigation__button--avatar
 ):hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
@@ -398,10 +395,13 @@
 /* Horizontal Top Navigation Active Tab Indicator */
 .connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active, .eds-s-is-active a, .v-link.eds-s-is-active a) {
   background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
-  color: #edf4fc !important;
+  color: #ffffff !important;
   box-shadow: none !important;
+  border: none !important;
   border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
-  border-radius: 4px 4px 0 0 !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  margin: 0 !important;
 }
 
 .connectea-dark .eds-c-tile a {

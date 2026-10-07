@@ -12,7 +12,7 @@ html.connectea-dark {
   color: var(--cx-text-secondary, #e2e8f0) !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
 .connectea-dark body {
@@ -20,7 +20,7 @@ html.connectea-dark {
   color: var(--cx-text-secondary, #e2e8f0) !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
 .connectea-dark #main-content,
@@ -51,6 +51,7 @@ html.connectea-dark {
 .cvr-c-primary-navigation {
   position: relative !important;
   min-height: 48px !important;
+  height: 50px !important;
   box-sizing: border-box !important;
 }
 
@@ -127,37 +128,79 @@ html.connectea-dark {
 .connectea-dark .cvr-c-primary-navigation {
   background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
   border-bottom: 1px solid var(--cx-nav-border, var(--cx-border, #36485e)) !important;
-  color: var(--cx-nav-text, #cbd5e1) !important;
+  color: #ffffff !important;
+  height: 50px !important;
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-primary-navigation,
+  .cvr-c-primary-navigation__links,
+  .cvr-c-primary-navigation__links a,
+  .cvr-c-primary-navigation__links div,
+  .cvr-c-primary-navigation__title,
+  .cvr-c-primary-navigation .v-button-caption,
+  .cvr-c-primary-navigation__user-controls,
+  .cvr-c-primary-navigation__button
+) {
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
 }
 
 .connectea-dark :is(.cvr-c-primary-navigation__container, .cvr-c-primary-navigation__bar) {
   background-color: transparent !important;
   border-bottom: none !important;
   color: inherit !important;
+  height: 50px !important;
 }
 
-.connectea-dark .cvr-c-primary-navigation__links .v-link a,
-.connectea-dark .cvr-c-primary-navigation__button {
-  color: var(--cx-nav-text, #cbd5e1) !important;
+.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div, .cvr-js-greedy__trigger > div) {
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  height: 50px !important;
+  line-height: 1.3571428571 !important;
+  color: #ffffff !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  text-decoration: none !important;
+}
+
+.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div > a, .cvr-js-greedy__trigger > div > a, .v-link a) {
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 50px !important;
+  height: 50px !important;
+  max-height: 50px !important;
+  color: #ffffff !important;
   background-color: transparent !important;
-  border-radius: 4px;
+  border: none !important;
+  outline: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  text-decoration: none !important;
 }
 
-.connectea-dark .cvr-c-primary-navigation__links .v-link a:hover,
+.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div:hover, .cvr-js-greedy__trigger > div:hover, .v-link a:hover),
 .connectea-dark .cvr-c-primary-navigation__button:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: #ffffff !important;
 }
 
-/* Active tab in top navigation (e.g. My Connect) */
-.connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a, .eds-s-is-active a, .v-link.eds-s-is-active) {
+/* Active tab in top navigation matches light mode: pure background color, NO side/top borders, NO outlines, NO radius */
+.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div, .v-link.eds-s-is-active a, .eds-s-is-active a, .v-link.eds-s-is-active) {
   background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
   color: #ffffff !important;
-  border: 1px solid var(--cx-border, #3d5066) !important;
+  border: none !important;
   border-bottom: 2px solid #3b82f6 !important;
   border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
   box-shadow: none !important;
-  border-radius: 4px 4px 0 0 !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  margin: 0 !important;
 }
 
 /* --------------------------------------------------------------------------

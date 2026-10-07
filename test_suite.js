@@ -5289,6 +5289,49 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
   assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'quantum');
 });
 
+runTest('Test 141: Top navbar Open Sans typography, height, white text, and light-mode margin, size, and outline parity', () => {
+  const themeCoreCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-core.css'), 'utf8');
+  const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
+  const themeCardsCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-cards.css'), 'utf8');
+  const themeFeedCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-feed.css'), 'utf8');
+  const themeTilesCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tiles.css'), 'utf8');
+  const themeTablesCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tables.css'), 'utf8');
+
+  // 1. Top navbar font family enforces Connect's native Open Sans
+  assert.ok(themeCoreCss.includes('font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;'),
+    'theme-core.css must enforce Connect native Open Sans font on top navigation bar');
+  assert.ok(themeTokensCss.includes('font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;'),
+    'theme-tokens.css must enforce Connect native Open Sans font on top navigation bar');
+  assert.ok(themeCoreCss.includes('height: 50px !important;'),
+    'theme-core.css must enforce light-mode 50px height on top navigation bar');
+
+  // 2. Top navbar links typography and styling match light mode
+  assert.ok(themeCoreCss.includes('line-height: 50px !important;') && themeCoreCss.includes('color: #ffffff !important;'),
+    'theme-core.css must enforce 50px line-height and white text on top navbar links');
+  assert.ok(!themeFeedCss.includes('.cvr-c-primary-navigation__links .v-link a,\n  .cvr-c-primary-navigation__button--avatar'),
+    'theme-feed.css must not override top navbar links with muted text color');
+
+  // 3. Active tab in top navigation has no distorting top/left/right border or border-radius
+  assert.ok(themeCoreCss.includes('border: none !important;') && themeCoreCss.includes('border-radius: 0 !important;'),
+    'theme-core.css active nav tab must have border: none and border-radius: 0 to eliminate outlines');
+  assert.ok(themeFeedCss.includes('border-radius: 0 !important;'),
+    'theme-feed.css active nav tab must have border-radius: 0 to eliminate box outline');
+
+  // 4. Task mark boxes (.cvr-c-task__marks) match light mode's border geometry (no full 1px border or 6px radius)
+  assert.ok(themeCardsCss.includes('.cvr-c-task__marks {\n  border-top: none !important;\n  border-left: none !important;\n  border-right: none !important;'),
+    'theme-cards.css must remove top, left, and right borders on .cvr-c-task__marks to match light mode');
+  assert.ok(themeCardsCss.includes('border-radius: 0 !important;'),
+    'theme-cards.css must enforce border-radius: 0 on .cvr-c-task__marks');
+  assert.ok(!themeTablesCss.includes('.cvr-c-task__mark,\n  .mat-card'),
+    'theme-tables.css must not force 4-sided 1px border on .cvr-c-task__mark');
+
+  // 5. Tile header action button matches light mode 52px height and border-left
+  assert.ok(themeTilesCss.includes('.eds-c-tile__header .v-button') && themeTilesCss.includes('height: 52px !important;'),
+    'theme-tiles.css must preserve light-mode 52px height and border-left on tile header action button');
+  assert.ok(themeTilesCss.includes('border-left: 1px solid var(--cx-border') && themeTilesCss.includes('border-radius: 0 !important;'),
+    'theme-tiles.css must preserve border-left and border-radius: 0 on tile header action button');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

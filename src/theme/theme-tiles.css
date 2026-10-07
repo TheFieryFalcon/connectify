@@ -199,7 +199,6 @@
   .cvr-c-tile__header a
 ),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
-  .eds-c-tile__header .v-button,
   .eds-c-action-button-set .eds-c-action-button,
   .eds-c-action-button
 ) {
@@ -219,6 +218,17 @@
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(.eds-c-tile__header .v-button, .cvr-c-tile__header .v-button) {
+  background-color: transparent !important;
+  border: none !important;
+  border-left: 1px solid var(--cx-border, #3d5066) !important;
+  border-radius: 0 !important;
+  height: 52px !important;
+  min-width: 50px !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
   .eds-c-tile,
   .cvr-c-tile,
@@ -233,15 +243,12 @@
   .cvr-c-tile__actions,
   .eds-c-action-button,
   .eds-c-action-button-set .eds-c-action-button,
-  .eds-c-tile__header .v-button,
-  .cvr-c-tile__header .v-button,
   .eds-c-tile__header .v-link,
   .cvr-c-tile__header .v-link,
   .eds-c-tile__header a,
   .cvr-c-tile__header a
 ):hover,
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
-  .eds-c-tile__header .v-button,
   .eds-c-action-button-set .eds-c-action-button,
   .eds-c-action-button
 ):hover {
