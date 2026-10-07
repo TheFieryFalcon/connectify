@@ -135,38 +135,79 @@ async function resolveTargetUrls(options) {
  * on the page to expand collapsible panels and reveal dynamic UI components.
  */
 async function clickInteractiveButtons(page) {
-  return await page.evaluate(() => {
-    const BUTTON_SELECTORS = [
-      '.cvr-c-expansion-panel__trigger',
-      '.eds-c-card__trigger',
-      '.mat-tab-label:not(.mat-tab-disabled)',
-      '.v-accordion-item-caption',
-      '.v-button:not(.v-disabled)',
-      'button:not([disabled]):not([type="submit"])',
-      '[role="button"]:not([aria-disabled="true"])',
-      '[aria-expanded="false"]'
-    ].join(', ');
+  try {
+    return await page.evaluate(() => {
+      // Intercept accidental anchor link navigations during click dispatch
+      const clickBlocker = (e) => {
+        const target = e.target;
+        if (target && (target.tagName === 'A' || target.closest('a[href]'))) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+      window.addEventListener('click', clickBlocker, true);
 
-    const elements = document.querySelectorAll(BUTTON_SELECTORS);
-    const clicked = [];
+      const EXPAND_SELECTORS = [
+        '.cvr-c-expansion-panel__trigger',
+        '.eds-c-card__trigger',
+        '.v-accordion-item-caption',
+        '.mat-expansion-panel-header:not([aria-disabled="true"])',
+        '.panel-heading.collapsed',
+        '[data-toggle="collapse"].collapsed',
+        '.cx-expand-btn',
+        '#cx-expand-all',
+        '[aria-expanded="false"]'
+      ].join(', ');
 
-    for (const el of elements) {
-      const text = (el.innerText || el.getAttribute('aria-label') || '').toLowerCase();
-      if (/logout|signout|delete|remove|cancel|leave|exit|dismiss/i.test(text)) continue;
-      if (el.tagName === 'A' || el.closest('a[href]')) continue;
-      if (el.type === 'submit') continue;
-      if (el.id === 'connectea-theme-toggle') continue;
+      const elements = Array.from(document.querySelectorAll(EXPAND_SELECTORS));
 
-      try {
-        el.click();
-        const tag = el.tagName.toLowerCase();
-        const id = el.id ? '#' + el.id : '';
-        const cls = el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/)[0] : '';
-        clicked.push(`${tag}${id}${cls}`);
-      } catch {}
-    }
-    return clicked;
-  });
+      // Also include buttons with explicit expand / details text
+      const allButtons = Array.from(document.querySelectorAll('button:not([disabled]), [role="button"]:not([aria-disabled="true"])'));
+      for (const btn of allButtons) {
+        if (!elements.includes(btn)) {
+          const t = (btn.innerText || btn.getAttribute('aria-label') || '').toLowerCase();
+          if (/expand|show\s*more|more\s*details|view\s*details|breakdown|subject\s*outlines/i.test(t)) {
+            elements.push(btn);
+          }
+        }
+      }
+
+      const clicked = [];
+
+      for (const el of elements) {
+        // Disallow links, router links, and URL navigations
+        if (el.tagName === 'A' || el.closest('a[href]')) continue;
+        if (el.hasAttribute('routerlink') || el.hasAttribute('data-route') || el.hasAttribute('data-url')) continue;
+        if (el.closest('nav, [role="navigation"], header, .cvr-c-navbar, .navigation-bar, .mat-calendar, .fc-toolbar, .pagination, .pager')) continue;
+        if (el.type === 'submit' || el.type === 'reset') continue;
+        if (el.id === 'connectea-theme-toggle') continue;
+
+        // Skip already expanded panels
+        if (el.getAttribute('aria-expanded') === 'true') continue;
+
+        const text = (el.innerText || el.getAttribute('aria-label') || '').toLowerCase();
+        if (/logout|signout|delete|remove|cancel|leave|exit|dismiss|back|next|prev|previous|month|year|day|week|today|jump|search|filter|edit|save|print|export|download|share|add|create|new/i.test(text)) {
+          continue;
+        }
+
+        const onclick = el.getAttribute('onclick') || '';
+        if (/location|href|open\(|navigate|submit/i.test(onclick)) continue;
+
+        try {
+          el.click();
+          const tag = el.tagName.toLowerCase();
+          const id = el.id ? '#' + el.id : '';
+          const cls = el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/)[0] : '';
+          clicked.push(`${tag}${id}${cls}`);
+        } catch {}
+      }
+
+      window.removeEventListener('click', clickBlocker, true);
+      return clicked;
+    });
+  } catch (err) {
+    return [];
+  }
 }
 
 /**
@@ -581,17 +622,17 @@ async function runThemeAudit() {
     loadExtension: true
   });
 
-  const page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 900 });
-
   // Handle authentication if any URL targets Connect
   if (needsAuth) {
-    await utils.authenticate(page, {
+    const authPage = await browser.newPage();
+    await authPage.setViewport({ width: 1280, height: 900 });
+    await utils.authenticate(authPage, {
       username: options.username,
       password: options.password,
       interactive: options.interactive,
       sessionFile: options.session
     });
+    await authPage.close().catch(() => {});
   }
 
   // Load available themes (excluding native/light as that is the baseline)
@@ -628,7 +669,11 @@ async function runThemeAudit() {
     console.log(`[Page ${pageIdx + 1}/${targetUrls.length}] Auditing: ${targetUrl}`);
     console.log(`========================================================================`);
 
+    let page = null;
     try {
+      page = await browser.newPage();
+      await page.setViewport({ width: 1280, height: 900 });
+
       await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
       await utils.waitForPageReady(page, options.delay);
 
@@ -636,7 +681,7 @@ async function runThemeAudit() {
         console.log('[ThemeAudit] Expanding interactive JavaScript buttons and accordions...');
         const clicked = await clickInteractiveButtons(page);
         console.log(`  └─ Dispatched clicks to ${clicked.length} interactive elements`);
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 600));
       }
 
       // 1. Capture Connect Native Theme Baseline
@@ -657,10 +702,7 @@ async function runThemeAudit() {
           }
         }, t.id);
 
-        if (options.clickButtons) {
-          await clickInteractiveButtons(page);
-        }
-        await new Promise(r => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 300));
 
         const auditResult = await auditThemeAgainstBaseline(page, t.id, t.isDark !== false, baseline, options);
         pageThemeResults[t.id] = { theme: t, audit: auditResult };
@@ -691,6 +733,10 @@ async function runThemeAudit() {
       };
     } catch (err) {
       console.warn(`[ThemeAudit] Error auditing ${targetUrl}: ${err.message}`);
+    } finally {
+      if (page && !page.isClosed()) {
+        await page.close().catch(() => {});
+      }
     }
   }
 
