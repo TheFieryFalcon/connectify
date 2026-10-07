@@ -415,14 +415,14 @@ async function auditPageUiContrast(page) {
  * Waits for network idle, document readyState, disappearance of loading spinners,
  * and an explicit settling delay to ensure dynamic portlets fully render.
  */
-async function waitForPageReady(page, postDelayMs = 2500) {
+async function waitForPageReady(page, postDelayMs = 1250) {
   try {
     // 1. Wait for document.readyState === 'complete'
-    await page.waitForFunction(() => document.readyState === 'complete', { timeout: 15000 }).catch(() => {});
+    await page.waitForFunction(() => document.readyState === 'complete', { timeout: 10000 }).catch(() => {});
 
     // 2. Wait for short network idle window (graceful timeout)
     if (typeof page.waitForNetworkIdle === 'function') {
-      await page.waitForNetworkIdle({ idleTime: 500, timeout: 6000 }).catch(() => {});
+      await page.waitForNetworkIdle({ idleTime: 400, timeout: 3000 }).catch(() => {});
     }
 
     // 3. Wait for any active Connect/CVR loading spinners to clear
@@ -436,7 +436,7 @@ async function waitForPageReady(page, postDelayMs = 2500) {
         }
       }
       return true;
-    }, { timeout: 6000 }).catch(() => {});
+    }, { timeout: 3500 }).catch(() => {});
   } catch {}
 
   // 4. Post-load delay for async AJAX portlets / animations to settle

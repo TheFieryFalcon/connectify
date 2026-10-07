@@ -38,7 +38,7 @@ function parseArgs() {
     screenshotsDir: path.resolve(__dirname, '..', 'screenshots'),
     outputJson: path.resolve(__dirname, '..', 'theme_unstyled_report.json'),
     outputMd: path.resolve(__dirname, '..', 'theme_unstyled_report.md'),
-    delay: 2500,
+    delay: 1250,
     headful: false,
     headless: null,
     username: null,

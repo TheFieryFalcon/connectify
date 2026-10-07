@@ -26,7 +26,7 @@ function parseArgs() {
     maxDepth: 7,
     maxPages: 100,
     maxClassRedirects: 5,
-    delay: 2500,
+    delay: 1250,
     headful: false,
     headless: null,
     username: null,
@@ -315,12 +315,6 @@ async function crawl() {
       }).catch(() => {});
       await new Promise(r => setTimeout(r, 400));
 
-      // Audit UI elements for 3.0:1 contrast compliance (WCAG 2.1 AA Non-text Contrast SC 1.4.11)
-      const uiContrast = await utils.auditPageUiContrast(page);
-      if (uiContrast.violations.length > 0) {
-        console.log(`  └─ UI Contrast (< 3.0:1): ${uiContrast.violations.length} violations (${uiContrast.auditedCount} UI elements audited)`);
-      }
-
       // Enforce class redirects limit
       if (parsedUrl.pathname.startsWith('/redirect/cls/')) {
         let clsCount = 0;
@@ -339,8 +333,7 @@ async function crawl() {
         title: pageTitle.trim(),
         category,
         depth,
-        status: responseStatus,
-        uiContrast
+        status: responseStatus
       });
 
       // If within max depth, extract links and enqueue
@@ -392,16 +385,6 @@ async function crawl() {
   }
   console.log('\n');
 
-  // Calculate UI contrast totals
-  let totalUiAudited = 0;
-  let totalUiViolations = 0;
-  for (const r of discoveredRoutes.values()) {
-    if (r.uiContrast) {
-      totalUiAudited += r.uiContrast.auditedCount || 0;
-      totalUiViolations += r.uiContrast.violations?.length || 0;
-    }
-  }
-
   // Write JSON Manifest
   const manifest = {
     crawledAt: new Date().toISOString(),
@@ -409,8 +392,6 @@ async function crawl() {
     totalPagesCrawled: visited.size,
     totalRoutesFound: discoveredRoutes.size,
     totalExternalLinks: externalLinks.size,
-    totalUiElementsAudited: totalUiAudited,
-    totalUiContrastViolations: totalUiViolations,
     directoryTree: tree,
     routes: Array.from(discoveredRoutes.values()).sort((a, b) => a.pathname.localeCompare(b.pathname)),
     externalResources: Array.from(externalLinks).sort()
@@ -429,8 +410,7 @@ async function crawl() {
   md.push = (str) => { md += str + '\n'; };
   md.push(`**Host:** \`${TARGET_HOST}\`  `);
   md.push(`**Crawled:** ${new Date().toUTCString()}  `);
-  md.push(`**Routes Found:** ${discoveredRoutes.size} | **Pages Crawled:** ${visited.size}  `);
-  md.push(`**UI Elements Audited (>= 3.0:1):** ${totalUiAudited} | **UI Contrast Issues:** ${totalUiViolations}\n`);
+  md.push(`**Routes Found:** ${discoveredRoutes.size} | **Pages Crawled:** ${visited.size}\n`);
   md.push(`## Directory Hierarchy (ASCII Tree)\n`);
   md.push('```text');
   md.push(`${TARGET_HOST}/`);
@@ -438,14 +418,12 @@ async function crawl() {
   if (asciiTree.length > 40) md.push(`... [${asciiTree.length - 40} more branches in JSON]`);
   md.push('```\n');
   md.push(`## Key Portal Routes & Classifications\n`);
-  md.push(`| Status | Category | Path | UI Contrast (< 3.0:1) |`);
-  md.push(`| :---: | :--- | :--- | :---: |`);
+  md.push(`| Status | Category | Path |`);
+  md.push(`| :---: | :--- | :--- |`);
 
   const sortedRoutes = Array.from(discoveredRoutes.values()).sort((a, b) => a.pathname.localeCompare(b.pathname));
   for (const r of sortedRoutes.slice(0, 40)) {
-    const issues = r.uiContrast?.violations?.length || 0;
-    const badge = issues === 0 ? '✅ Pass' : `⚠️ ${issues} issue(s)`;
-    md.push(`| \`${r.status}\` | ${r.category} | \`${r.pathname}\` | ${badge} |`);
+    md.push(`| \`${r.status}\` | ${r.category} | \`${r.pathname}\` |`);
   }
   if (sortedRoutes.length > 40) {
     md.push(`\n*... and ${sortedRoutes.length - 40} additional endpoints recorded in connect_directories.json.*`);
