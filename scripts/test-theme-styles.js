@@ -44,7 +44,9 @@ function parseArgs() {
     username: null,
     password: null,
     interactive: false,
-    session: path.resolve(__dirname, '..', utils.DEFAULT_SESSION_FILE)
+    session: path.resolve(__dirname, '..', utils.DEFAULT_SESSION_FILE),
+    subPages: true,
+    maxSubPages: 8
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -57,6 +59,9 @@ function parseArgs() {
     else if (a === '--theme' && args[i + 1]) options.theme = args[++i];
     else if (a === '--delay' && args[i + 1]) options.delay = parseInt(args[++i], 10);
     else if (a === '--no-click-buttons') options.clickButtons = false;
+    else if (a === '--no-sub-pages') options.subPages = false;
+    else if (a === '--sub-pages') options.subPages = true;
+    else if (a === '--max-sub-pages' && args[i + 1]) options.maxSubPages = parseInt(args[++i], 10);
     else if (a === '--margin-tolerance' && args[i + 1]) options.marginTolerance = parseFloat(args[++i]);
     else if (a === '--size-tolerance' && args[i + 1]) options.sizeTolerance = parseFloat(args[++i]);
     else if (a === '--screenshots') options.screenshots = true;
@@ -137,75 +142,279 @@ async function resolveTargetUrls(options) {
 async function clickInteractiveButtons(page) {
   try {
     return await page.evaluate(() => {
-      // Intercept accidental anchor link navigations during click dispatch
-      const clickBlocker = (e) => {
-        const target = e.target;
-        if (target && (target.tagName === 'A' || target.closest('a[href]'))) {
-          e.preventDefault();
-          e.stopPropagation();
+      const clicked = [];
+
+      // 1. If ConnectifyData.expandAll is available from the extension, run it first
+      if (window.ConnectifyData?.expandAll) {
+        try {
+          window.ConnectifyData.expandAll(true);
+          clicked.push('ConnectifyData.expandAll');
+        } catch {}
+      }
+
+      // 2. Navigation blocker: intercept clicks on real external links without breaking in-page handlers
+      const navBlocker = (e) => {
+        const a = e.target?.closest?.('a[href]');
+        if (a) {
+          const href = (a.getAttribute('href') || '').trim();
+          if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+            e.preventDefault();
+          }
         }
       };
-      window.addEventListener('click', clickBlocker, true);
+      window.addEventListener('click', navBlocker, true);
 
-      const EXPAND_SELECTORS = [
+      // Temporary unload protection during synthetic dispatch
+      const origBeforeUnload = window.onbeforeunload;
+      window.onbeforeunload = (e) => {
+        e.preventDefault();
+        return false;
+      };
+
+      const INTERACTIVE_SELECTORS = [
+        // Connect / EDS / CVR Accordions & Expansion Panels
+        '.eds-c-accordion__section-heading',
+        '.cvr-c-accordion__section-heading',
+        '.eds-c-accordion__trigger',
         '.cvr-c-expansion-panel__trigger',
         '.eds-c-card__trigger',
+        '.eds-c-card__header',
         '.v-accordion-item-caption',
-        '.mat-expansion-panel-header:not([aria-disabled="true"])',
+        '.v-accordion-item',
+
+        // Angular Material Accordions & Expansion Panels
+        '.mat-expansion-panel-header:not(.mat-expanded):not([aria-disabled="true"])',
+
+        // Angular Material & Standard Tabs
+        '.mat-tab-label:not(.mat-tab-label-active):not(.mat-tab-disabled)',
+        '[role="tab"]:not([aria-selected="true"]):not([aria-disabled="true"])',
+        '.nav-tabs > li:not(.active) > a',
+
+        // Collapsible Toggles & Details
+        '[data-toggle="collapse"]',
         '.panel-heading.collapsed',
-        '[data-toggle="collapse"].collapsed',
-        '.cx-expand-btn',
+        'details:not([open]) > summary',
+        'summary',
+        '[aria-expanded="false"]',
+
+        // Connectify Built-in Buttons
         '#cx-expand-all',
-        '[aria-expanded="false"]'
+        '.cx-expand-btn',
+        '.cta-expand-outlines',
+        '#cx-weakness-expand-all',
+
+        // Buttons & Clickable Triggers
+        'button:not([disabled]):not([type="submit"]):not([type="reset"])',
+        '[role="button"]:not([aria-disabled="true"])',
+        '.v-button:not(.v-disabled)',
+        '.eds-c-standard-button:not([disabled])',
+        '.eds-c-button:not([disabled])',
+        '.eds-c-icon-button:not([disabled])',
+        '.cvr-c-icon-button:not([disabled])'
       ].join(', ');
 
-      const elements = Array.from(document.querySelectorAll(EXPAND_SELECTORS));
+      const elements = Array.from(document.querySelectorAll(INTERACTIVE_SELECTORS));
 
-      // Also include buttons with explicit expand / details text
-      const allButtons = Array.from(document.querySelectorAll('button:not([disabled]), [role="button"]:not([aria-disabled="true"])'));
-      for (const btn of allButtons) {
-        if (!elements.includes(btn)) {
-          const t = (btn.innerText || btn.getAttribute('aria-label') || '').toLowerCase();
-          if (/expand|show\s*more|more\s*details|view\s*details|breakdown|subject\s*outlines/i.test(t)) {
-            elements.push(btn);
+      // Also detect elements with explicit expansion / details text
+      const candidateNodes = Array.from(document.querySelectorAll('div, h2, h3, h4, h5, span, a, p'));
+      for (const node of candidateNodes) {
+        if (node.children.length > 2) continue;
+        const txt = (node.innerText || node.textContent || '').trim();
+        if (/^(show\s*details|view\s*details|expand\s*all|expand\s*outlines|more\s*details)$/i.test(txt)) {
+          if (!elements.includes(node)) {
+            elements.push(node);
           }
         }
       }
 
-      const clicked = [];
+      const seenSections = new Set();
+      const clickedElements = new Set();
 
       for (const el of elements) {
-        // Disallow links, router links, and URL navigations
-        if (el.tagName === 'A' || el.closest('a[href]')) continue;
-        if (el.hasAttribute('routerlink') || el.hasAttribute('data-route') || el.hasAttribute('data-url')) continue;
-        if (el.closest('nav, [role="navigation"], header, .cvr-c-navbar, .navigation-bar, .mat-calendar, .fc-toolbar, .pagination, .pager')) continue;
-        if (el.type === 'submit' || el.type === 'reset') continue;
-        if (el.id === 'connectea-theme-toggle') continue;
+        // Skip theme toggle
+        if (el.id === 'connectea-theme-toggle' || el.closest('#connectea-theme-toggle')) continue;
 
-        // Skip already expanded panels
-        if (el.getAttribute('aria-expanded') === 'true') continue;
-
-        const text = (el.innerText || el.getAttribute('aria-label') || '').toLowerCase();
-        if (/logout|signout|delete|remove|cancel|leave|exit|dismiss|back|next|prev|previous|month|year|day|week|today|jump|search|filter|edit|save|print|export|download|share|add|create|new/i.test(text)) {
+        // Skip site navigation, headers, breadcrumbs, pagination
+        if (el.closest('.cvr-c-header, .cvr-c-navbar, .cvr-c-primary-navigation, .cvr-c-primary-menu, .cvr-c-side-menu, .cvr-c-user-menu, nav, [role="navigation"], .breadcrumb, .breadcrumbs, .pagination, .pager')) {
           continue;
         }
 
+        // Skip calendar month/day controls and grids
+        if (el.closest('.mat-calendar, .fc-toolbar, .fc-header-toolbar, .calendar-container, [class*="calendar-nav"], [class*="calendar-header"]')) {
+          continue;
+        }
+        if (el.matches('.mat-calendar-previous-button, .mat-calendar-next-button, .mat-calendar-body-cell, .fc-prev-button, .fc-next-button, .fc-today-button')) {
+          continue;
+        }
+
+        // Skip real navigation links (allow in-page hashes, javascript:, and role="button"/"tab")
+        const a = el.tagName === 'A' ? el : el.closest('a[href]');
+        if (a) {
+          const href = (a.getAttribute('href') || '').trim();
+          const isPageAnchor = !href || href.startsWith('#') || href.startsWith('javascript:');
+          const isRoleTrigger = a.getAttribute('role') === 'button' || a.getAttribute('role') === 'tab' || a.hasAttribute('data-toggle');
+          if (!isPageAnchor && !isRoleTrigger) {
+            continue;
+          }
+        }
+
+        // Skip form submits and resets
+        if (el.type === 'submit' || el.type === 'reset') continue;
+        if (el.tagName === 'BUTTON' && el.closest('form') && el.getAttribute('type') !== 'button') continue;
+
+        // Skip framework route navigation attributes
+        if (el.hasAttribute('routerlink') || el.hasAttribute('data-route') || el.hasAttribute('data-url') || el.hasAttribute('ng-reflect-router-link')) {
+          continue;
+        }
+
+        // Skip explicit location redirection in onclick
         const onclick = el.getAttribute('onclick') || '';
-        if (/location|href|open\(|navigate|submit/i.test(onclick)) continue;
+        if (/window\.location|location\.href|location\.assign|location\.replace|window\.open\(/i.test(onclick)) {
+          continue;
+        }
+
+        const label = (el.getAttribute('aria-label') || el.getAttribute('title') || '').trim();
+        const directText = (el.innerText || el.textContent || '').trim().slice(0, 50);
+
+        // Skip destructive actions or sign-out
+        if (/\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off)\b/i.test(label) ||
+            /\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off)\b/i.test(directText)) {
+          continue;
+        }
+
+        // Skip already expanded panels
+        if (el.getAttribute('aria-expanded') === 'true') continue;
+        if (el.classList.contains('mat-expanded')) continue;
+        if (el.matches('.mat-tab-label-active, [aria-selected="true"]')) continue;
+        if (el.matches('details[open] > summary')) continue;
+        if (/hide\s*details/i.test(directText)) continue;
+
+        // Deduplicate accordion headings per section/tile
+        if (el.matches('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading')) {
+          const section = el.closest('.eds-c-accordion__section, .cvr-c-accordion__section, .eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
+          if (section) {
+            if (seenSections.has(section)) continue;
+            seenSections.add(section);
+          }
+        }
+
+        // Identify the exact clickable element (target inner trigger if available)
+        const target = el.querySelector?.('button, .v-button, [role="button"], .eds-c-accordion__trigger, .cvr-c-expansion-panel__trigger') || el;
+        if (clickedElements.has(target)) continue;
+        clickedElements.add(target);
 
         try {
-          el.click();
-          const tag = el.tagName.toLowerCase();
-          const id = el.id ? '#' + el.id : '';
-          const cls = el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/)[0] : '';
-          clicked.push(`${tag}${id}${cls}`);
+          target.click();
+          target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+          target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+
+          const tag = target.tagName.toLowerCase();
+          const id = target.id ? '#' + target.id : '';
+          const cls = target.className && typeof target.className === 'string' ? '.' + target.className.trim().split(/\s+/)[0] : '';
+          const textSnippet = directText ? `[${directText.slice(0, 15)}]` : '';
+          clicked.push(`${tag}${id}${cls}${textSnippet}`);
         } catch {}
       }
 
-      window.removeEventListener('click', clickBlocker, true);
+      window.removeEventListener('click', navBlocker, true);
+      window.onbeforeunload = origBeforeUnload;
       return clicked;
     });
   } catch (err) {
+    return [];
+  }
+}
+
+/**
+ * Discovers sub-pages and view switchers under the current page.
+ * Detects:
+ * 1. Child links and query variations (e.g. ?view=week, ?view=day, /classes/123).
+ * 2. Interactive tabs & view switchers (e.g. .mat-tab-label, [role="tab"], calendar views).
+ */
+async function discoverSubPages(page, currentUrl) {
+  try {
+    return await page.evaluate((baseHref) => {
+      const subPages = [];
+      const seen = new Set();
+      let currentBase = '';
+      let currentSearch = '';
+      try {
+        const u = new URL(baseHref);
+        currentBase = u.pathname;
+        currentSearch = u.search || '';
+      } catch {
+        currentBase = window.location.pathname;
+        currentSearch = window.location.search || '';
+      }
+
+      // 1. Direct anchor links pointing to sub-routes or query variations
+      const anchors = Array.from(document.querySelectorAll('a[href]'));
+      for (const a of anchors) {
+        const href = a.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript:')) continue;
+        try {
+          const fullUrl = new URL(href, window.location.href);
+          if (fullUrl.hostname !== window.location.hostname) continue;
+
+          // Exclude logout, login, session timeouts, static files, and document assets
+          if (/logout|signout|session_expired|login/i.test(fullUrl.pathname)) continue;
+          if (/\.(png|jpg|jpeg|gif|svg|ico|css|js|woff|woff2|ttf|pdf|zip|docx?|xlsx?)$/i.test(fullUrl.pathname)) continue;
+          if (fullUrl.pathname.startsWith('/documents') || fullUrl.pathname.startsWith('/content')) continue;
+
+          // Sub-page criteria:
+          // A. Same pathname but has search params that differ from current
+          // B. Or starts with current pathname and is deeper (child route)
+          const isQuerySubPage = fullUrl.pathname === currentBase && fullUrl.search && fullUrl.search !== currentSearch;
+          const isPathSubPage = fullUrl.pathname.startsWith(currentBase) && fullUrl.pathname !== currentBase && fullUrl.pathname !== currentBase + '/';
+
+          if (isQuerySubPage || isPathSubPage) {
+            const cleanUrl = fullUrl.href.split('#')[0];
+            if (!seen.has(cleanUrl)) {
+              seen.add(cleanUrl);
+              const linkText = (a.innerText || a.getAttribute('aria-label') || a.title || fullUrl.search || fullUrl.pathname).trim().replace(/\s+/g, ' ');
+              subPages.push({
+                url: cleanUrl,
+                title: linkText.slice(0, 40) || 'Sub-page',
+                type: 'url'
+              });
+            }
+          }
+        } catch {}
+      }
+
+      // 2. Interactive tabs and view switchers on the page (e.g. Calendar views, Material tabs)
+      const TAB_SELECTORS = [
+        '.mat-tab-label:not(.mat-tab-label-active):not(.mat-tab-disabled)',
+        '[role="tab"]:not([aria-selected="true"]):not([aria-disabled="true"])',
+        '.fc-button:not(.fc-state-active)',
+        '.mat-button-toggle:not(.mat-button-toggle-checked) button',
+        '.cvr-c-year-selector button:not(.active)',
+        '.cvr-c-report-years button:not(.active)'
+      ].join(', ');
+
+      const tabNodes = Array.from(document.querySelectorAll(TAB_SELECTORS));
+      tabNodes.forEach((node, idx) => {
+        if (node.closest('.cvr-c-header, .cvr-c-navbar, .cvr-c-primary-navigation, nav, [role="navigation"]')) return;
+        const text = (node.innerText || node.getAttribute('aria-label') || node.title || `Tab ${idx + 1}`).trim().replace(/\s+/g, ' ');
+        if (/logout|signout|delete/i.test(text)) return;
+
+        const triggerId = `cx-subpage-trigger-${idx}`;
+        node.setAttribute('data-cx-trigger-id', triggerId);
+
+        const tabKey = `trigger:${text}`;
+        if (!seen.has(tabKey)) {
+          seen.add(tabKey);
+          subPages.push({
+            triggerSelector: `[data-cx-trigger-id="${triggerId}"]`,
+            title: text.slice(0, 30) || `View ${idx + 1}`,
+            type: 'tab'
+          });
+        }
+      });
+
+      return subPages;
+    }, currentUrl);
+  } catch {
     return [];
   }
 }
@@ -680,8 +889,11 @@ async function runThemeAudit() {
       if (options.clickButtons) {
         console.log('[ThemeAudit] Expanding interactive JavaScript buttons and accordions...');
         const clicked = await clickInteractiveButtons(page);
-        console.log(`  └─ Dispatched clicks to ${clicked.length} interactive elements`);
-        await new Promise(r => setTimeout(r, 600));
+        const sample = clicked.length > 0
+          ? ` (${clicked.slice(0, 5).join(', ')}${clicked.length > 5 ? ` +${clicked.length - 5} more` : ''})`
+          : '';
+        console.log(`  └─ Dispatched clicks to ${clicked.length} interactive element(s)${sample}`);
+        await new Promise(r => setTimeout(r, 800));
       }
 
       // 1. Capture Connect Native Theme Baseline
@@ -731,6 +943,118 @@ async function runThemeAudit() {
         baselineVisibleCount: baseline.visibleCount,
         themes: pageThemeResults
       };
+
+      // 2. Sub-page Navigation & Auditing
+      if (options.subPages) {
+        // Reset page to Connect Native baseline before sub-page discovery
+        await page.evaluate(() => {
+          if (window.ConnectifyThemeRegistry?.setTheme) {
+            window.ConnectifyThemeRegistry.setTheme('default');
+          }
+          document.documentElement.classList.remove('connectea-dark');
+          delete document.documentElement.dataset.connecteaTheme;
+        }).catch(() => {});
+
+        const discoveredSubs = await discoverSubPages(page, targetUrl);
+        const subPagesToAudit = discoveredSubs.slice(0, options.maxSubPages);
+
+        if (subPagesToAudit.length > 0) {
+          console.log(`\n[ThemeAudit] Discovered ${discoveredSubs.length} sub-page(s) for ${targetUrl} (navigating up to ${subPagesToAudit.length}):`);
+          for (let sIdx = 0; sIdx < subPagesToAudit.length; sIdx++) {
+            const sub = subPagesToAudit[sIdx];
+            console.log(`  └─ [${sIdx + 1}/${subPagesToAudit.length}] ${sub.title} (${sub.type === 'url' ? sub.url : sub.triggerSelector})`);
+          }
+
+          for (let sIdx = 0; sIdx < subPagesToAudit.length; sIdx++) {
+            const sub = subPagesToAudit[sIdx];
+            let subPage = null;
+            try {
+              subPage = await browser.newPage();
+              await subPage.setViewport({ width: 1280, height: 900 });
+
+              let subUrl = targetUrl;
+              if (sub.type === 'url' && sub.url) {
+                subUrl = sub.url;
+                await subPage.goto(subUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+              } else if (sub.type === 'tab' && sub.triggerSelector) {
+                await subPage.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+                await utils.waitForPageReady(subPage, options.delay);
+
+                // Safely click the tab/view trigger with navigation detection
+                await Promise.all([
+                  subPage.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 }).catch(() => {}),
+                  subPage.click(sub.triggerSelector).catch(() => {})
+                ]);
+                subUrl = subPage.url();
+              }
+
+              await utils.waitForPageReady(subPage, options.delay);
+              const actualSubUrl = subPage.url();
+
+              console.log(`\n  ┌───────────────────────────────────────────────────────────────`);
+              console.log(`  │ [Sub-page ${sIdx + 1}/${subPagesToAudit.length}] Auditing: ${sub.title}`);
+              console.log(`  │ URL: ${actualSubUrl}`);
+              console.log(`  └───────────────────────────────────────────────────────────────`);
+
+              if (options.clickButtons) {
+                await clickInteractiveButtons(subPage);
+                await new Promise(r => setTimeout(r, 400));
+              }
+
+              const subBaseline = await captureNativeBaseline(subPage);
+              console.log(`    └─ Baseline captured: ${subBaseline.visibleCount} visible elements.`);
+
+              const subThemeResults = {};
+              for (const t of themesToTest) {
+                await subPage.evaluate((tid) => {
+                  if (window.ConnectifyThemeRegistry?.setTheme) {
+                    window.ConnectifyThemeRegistry.setTheme(tid);
+                  } else {
+                    document.documentElement.classList.add('connectea-dark');
+                    document.documentElement.dataset.connecteaTheme = tid;
+                  }
+                }, t.id);
+
+                await new Promise(r => setTimeout(r, 250));
+
+                const subAuditResult = await auditThemeAgainstBaseline(subPage, t.id, t.isDark !== false, subBaseline, options);
+                subThemeResults[t.id] = { theme: t, audit: subAuditResult };
+
+                const sIssues = subAuditResult.issues;
+                const sPDiffs = sIssues.filter(i => i.category === 'PARITY').length;
+                const sCCrit = sIssues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
+                const sStyles = sIssues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
+
+                console.log(
+                  `    • ${t.name.padEnd(16)} [${t.id}]: ` +
+                  `Visible: ${subAuditResult.visibleCount}/${subAuditResult.baselineVisibleCount} | ` +
+                  `Parity: ${sPDiffs} | Crit: ${sCCrit} | Style: ${sStyles}`
+                );
+
+                if (options.screenshots) {
+                  const subSlug = actualSubUrl.replace(/[^a-zA-Z0-9]/g, '_').slice(-25);
+                  const subShotPath = path.join(options.screenshotsDir, `p${pageIdx + 1}_sub${sIdx + 1}_${subSlug}_${t.id}.png`);
+                  await subPage.screenshot({ path: subShotPath, fullPage: false });
+                }
+              }
+
+              allPageResults[actualSubUrl] = {
+                url: actualSubUrl,
+                parentUrl: targetUrl,
+                subPageTitle: sub.title,
+                baselineVisibleCount: subBaseline.visibleCount,
+                themes: subThemeResults
+              };
+            } catch (subErr) {
+              console.warn(`    └─ [ThemeAudit] Failed to audit sub-page (${sub.title}): ${subErr.message}`);
+            } finally {
+              if (subPage && !subPage.isClosed()) {
+                await subPage.close().catch(() => {});
+              }
+            }
+          }
+        }
+      }
     } catch (err) {
       console.warn(`[ThemeAudit] Error auditing ${targetUrl}: ${err.message}`);
     } finally {
@@ -800,5 +1124,6 @@ module.exports = {
   resolveTargetUrls,
   clickInteractiveButtons,
   captureNativeBaseline,
-  auditThemeAgainstBaseline
+  auditThemeAgainstBaseline,
+  discoverSubPages
 };

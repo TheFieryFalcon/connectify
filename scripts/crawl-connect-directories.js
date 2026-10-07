@@ -188,6 +188,12 @@ async function extractPageLinks(page) {
       if (h) found.add(h);
     });
 
+    // 4. Buttons and tabs with action routes
+    document.querySelectorAll('button[data-url], button[data-route], [data-href]').forEach(el => {
+      const u = el.getAttribute('data-url') || el.getAttribute('data-route') || el.getAttribute('data-href');
+      if (u) found.add(u);
+    });
+
     return Array.from(found);
   });
 }
@@ -327,9 +333,11 @@ async function crawl() {
       }
 
       const category = categorizePath(parsedUrl.pathname);
-      discoveredRoutes.set(parsedUrl.pathname, {
+      const routeKey = parsedUrl.pathname + (parsedUrl.search ? parsedUrl.search : '');
+      discoveredRoutes.set(routeKey, {
         url,
         pathname: parsedUrl.pathname,
+        search: parsedUrl.search || '',
         title: pageTitle.trim(),
         category,
         depth,
