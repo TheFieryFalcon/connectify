@@ -25,6 +25,7 @@ function parseArgs() {
     username: null,
     password: null,
     interactive: false,
+    force: false,
     session: path.resolve(__dirname, '..', utils.DEFAULT_SESSION_FILE),
     outputJson: path.resolve(__dirname, '..', 'connect_directories.json'),
     outputMd: path.resolve(__dirname, '..', 'connect_directories.md')
@@ -40,6 +41,7 @@ function parseArgs() {
     else if ((a === '--username' || a === '-u') && args[i + 1]) options.username = args[++i];
     else if ((a === '--password' || a === '-p') && args[i + 1]) options.password = args[++i];
     else if (a === '--interactive') options.interactive = true;
+    else if (a === '--force' || a === '-f') options.force = true;
     else if (a === '--session' && args[i + 1]) options.session = path.resolve(args[++i]);
     else if (a === '--output-json' && args[i + 1]) options.outputJson = path.resolve(args[++i]);
     else if (a === '--output-md' && args[i + 1]) options.outputMd = path.resolve(args[++i]);
@@ -157,6 +159,20 @@ async function extractPageLinks(page) {
 
 async function crawl() {
   const options = parseArgs();
+
+  // Run-once guard: do not re-crawl if manifest already exists unless --force is specified
+  if (!options.force && fs.existsSync(options.outputJson)) {
+    try {
+      const existing = JSON.parse(fs.readFileSync(options.outputJson, 'utf8'));
+      if (existing && Array.isArray(existing.routes) && existing.routes.length > 0) {
+        console.log(`[ConnectCrawler] Crawl already completed previously (${existing.routes.length} routes found).`);
+        console.log(`[ConnectCrawler] Manifest: ${options.outputJson}`);
+        console.log('[ConnectCrawler] Skipping crawl (runs once). Use --force to re-crawl.');
+        return existing;
+      }
+    } catch {}
+  }
+
   console.log('[ConnectCrawler] Initializing Connect Directory Crawler...');
   console.log(`[ConnectCrawler] Max depth: ${options.maxDepth} | Max pages: ${options.maxPages} | Delay: ${options.delay}ms`);
 
