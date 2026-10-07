@@ -33,7 +33,7 @@
       name: 'Quantum Dark',
       icon: '⚛️',
       isDark: true,
-      swatch: ['#292929', '#333333', '#d4b483']
+      swatch: ['#282828', '#32302f', '#fabd2f']
     },
     {
       id: 'amoled',

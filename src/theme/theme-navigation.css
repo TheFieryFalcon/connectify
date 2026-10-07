@@ -227,6 +227,76 @@
   border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
 }
 
+/* Angular Material High-Specificity Tabs & Ink Bar (.eds.cvr.ngm) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+  mat-tab-header, .mat-tab-header,
+  mat-tab-nav-bar, .mat-tab-nav-bar,
+  mat-tab-group, .mat-tab-group,
+  .mat-tab-labels, [class*="feed__tab"], [class*="feed-header__tab"]
+) :is(.mat-tab-label, .mat-tab-link, .mat-tab-label-content, a, button, span, div),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  mat-tab-header, .mat-tab-header,
+  mat-tab-nav-bar, .mat-tab-nav-bar,
+  mat-tab-group, .mat-tab-group,
+  .mat-tab-labels
+) :is(.mat-tab-label, .mat-tab-link, .mat-tab-label-content) {
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  letter-spacing: normal !important;
+  text-decoration: none !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+  mat-tab-header, .mat-tab-header,
+  mat-tab-nav-bar, .mat-tab-nav-bar,
+  mat-tab-group, .mat-tab-group
+) :is(.mat-tab-label, .mat-tab-link):hover,
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  mat-tab-header, .mat-tab-header,
+  mat-tab-nav-bar, .mat-tab-nav-bar,
+  mat-tab-group, .mat-tab-group
+) :is(.mat-tab-label, .mat-tab-link):hover {
+  color: #ffffff !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+  mat-tab-header, .mat-tab-header,
+  mat-tab-nav-bar, .mat-tab-nav-bar,
+  mat-tab-group, .mat-tab-group
+) :is(
+  .mat-tab-label-active,
+  .mat-tab-link.mat-tab-label-active,
+  .mat-tab-label.mat-tab-label-active,
+  [aria-selected="true"],
+  .active
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  mat-tab-header, .mat-tab-header,
+  mat-tab-nav-bar, .mat-tab-nav-bar,
+  mat-tab-group, .mat-tab-group
+) :is(
+  .mat-tab-label-active,
+  .mat-tab-link.mat-tab-label-active,
+  .mat-tab-label.mat-tab-label-active,
+  [aria-selected="true"],
+  .active
+) {
+  color: var(--cx-text-primary, #ffffff) !important;
+  font-weight: 700 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+  .mat-ink-bar,
+  .mat-tab-nav-bar .mat-ink-bar,
+  .mat-tab-group .mat-ink-bar
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.mat-ink-bar, [class*="ink-bar"]) {
+  background-color: var(--cx-accent, #3b82f6) !important;
+  height: 2px !important;
+}
+
 .connectea-dark :is(
   .nav-tabs,
   .nav-pills,

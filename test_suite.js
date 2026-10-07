@@ -4947,12 +4947,12 @@ runTest('Test 137: Dark, Default, and Quantum Dark themes correspond to previous
   const themeRegistryJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8');
   const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
 
-  // 1. Static checks: Quantum Dark palette corresponds to versions 3.1.14 and below
+  // 1. Static checks: Quantum Dark palette corresponds to inspiration / legacy theme tokens
   assert.ok(themeTokensCss.includes('[data-connectea-theme="quantum"]'), 'theme-tokens.css must define Quantum Dark selector');
-  assert.ok(themeTokensCss.includes('--cx-canvas-bg: #292929;'), 'Quantum Dark must have 3.1.14 canvas #292929');
-  assert.ok(themeTokensCss.includes('--cx-surface-bg: #333333;'), 'Quantum Dark must have 3.1.14 surface #333333');
-  assert.ok(themeTokensCss.includes('--cx-accent: #d4b483;'), 'Quantum Dark must have 3.1.14 accent #d4b483');
-  assert.ok(themeTokensCss.includes('--cx-button-bg: #303944;'), 'Quantum Dark must have 3.1.14 button #303944');
+  assert.ok(themeTokensCss.includes('--cx-canvas-bg: #282828;') || themeTokensCss.includes('--cx-canvas-bg: #292929;'), 'Quantum Dark must have canvas color');
+  assert.ok(themeTokensCss.includes('--cx-surface-bg: #32302f;') || themeTokensCss.includes('--cx-surface-bg: #333333;'), 'Quantum Dark must have surface color');
+  assert.ok(themeTokensCss.includes('--cx-accent: #fabd2f;') || themeTokensCss.includes('--cx-accent: #d4b483;'), 'Quantum Dark must have golden accent color');
+  assert.ok(themeTokensCss.includes('--cx-button-bg: #3c3836;') || themeTokensCss.includes('--cx-button-bg: #303944;'), 'Quantum Dark must have button color');
 
   // Base Dark Theme corresponds to modern dark mode (v3.2.x)
   assert.ok(themeTokensCss.includes('--cx-canvas-bg: #12171f;'), 'Base dark must have #12171f canvas');
@@ -5409,6 +5409,51 @@ runTest('Test 143: Token-based theme styling, notice action buttons, top navbar 
     'sidebar-settings.css must style #connectify-sidebar with var(--cx-surface-bg)');
   assert.ok(sidebarDrawerCss.includes('var(--cx-button-bg'),
     'sidebar-drawer.css must style sidebar tool buttons with var(--cx-button-bg)');
+});
+
+runTest('Test 144: Classes page header parity, Angular Material tab specificity, dropdown tokenization, and Quantum Dark inspiration palette', () => {
+  const themeCoreCss = fs.readFileSync(path.resolve(SRC_DIR, 'theme/theme-core.css'), 'utf8');
+  const themeMaterialCss = fs.readFileSync(path.resolve(SRC_DIR, 'theme/theme-material.css'), 'utf8');
+  const themeNavCss = fs.readFileSync(path.resolve(SRC_DIR, 'theme/theme-navigation.css'), 'utf8');
+  const themeTokensCss = fs.readFileSync(path.resolve(SRC_DIR, 'theme/theme-tokens.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(SRC_DIR, 'theme/theme.js'), 'utf8');
+  const themeRegistryJs = fs.readFileSync(path.resolve(SRC_DIR, 'theme/theme-registry.js'), 'utf8');
+
+  // 1. Classes page sort header has transparent background matching light mode
+  assert.ok(themeCoreCss.includes('.cvr-c-classes__sort') &&
+            themeCoreCss.includes('background: transparent !important;'),
+    'theme-core.css must enforce transparent background on Classes sort header');
+
+  // 2. Classes page list items and text elements enforce Open Sans typography
+  assert.ok(themeMaterialCss.includes('.eds-c-selection-list') &&
+            themeMaterialCss.includes('font-family: "Open Sans"'),
+    'theme-material.css must enforce Open Sans on Classes list items');
+
+  // 3. Angular Material tabs (.eds.cvr.ngm) have high-specificity Open Sans and .mat-ink-bar has var(--cx-accent)
+  assert.ok(themeNavCss.includes('.eds.cvr.ngm') &&
+            themeNavCss.includes('mat-tab-header') &&
+            themeNavCss.includes('.mat-ink-bar'),
+    'theme-navigation.css must style Angular Material tabs with high specificity');
+  assert.ok(themeNavCss.includes('.mat-ink-bar') && themeNavCss.includes('var(--cx-accent'),
+    'theme-navigation.css must style .mat-ink-bar with var(--cx-accent)');
+
+  // 4. Dropdowns tokenize colors without hardcoded hex
+  assert.ok(themeMaterialCss.includes('.mat-select-panel') &&
+            themeMaterialCss.includes('var(--cx-surface-elevated'),
+    'theme-material.css must style .mat-select-panel with elevated tokens');
+  assert.ok(themeMaterialCss.includes('.mat-option') &&
+            themeMaterialCss.includes('var(--cx-surface-hover'),
+    'theme-material.css must style .mat-option hover state with hover tokens');
+
+  // 5. Quantum Dark uses inspiration theme palette
+  assert.ok(themeTokensCss.includes('--cx-canvas-bg: #282828;') &&
+            themeTokensCss.includes('--cx-surface-bg: #32302f;') &&
+            themeTokensCss.includes('--cx-accent: #fabd2f;') &&
+            themeTokensCss.includes('--cx-positive-bg: #98971a;'),
+    'theme-tokens.css must define Quantum Dark with Gruvbox/Evolve inspiration colors');
+  assert.ok(themeRegistryJs.includes("swatch: ['#282828', '#32302f', '#fabd2f']") &&
+            themeJs.includes("swatch: ['#282828', '#32302f', '#fabd2f']"),
+    'theme-registry.js and theme.js must use inspiration swatch for Quantum Dark');
 });
 
 console.log('\n================================================================');

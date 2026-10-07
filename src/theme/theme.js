@@ -191,7 +191,7 @@
       );
       for (const el of surfaceCandidates) {
         if (['SCRIPT', 'STYLE', 'LINK', 'CANVAS', 'VIDEO', 'IFRAME', 'SVG'].includes(el.tagName)) continue;
-        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header')) continue;
+        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by')) continue;
         const bgRgb = parseRgb(window.getComputedStyle(el).backgroundColor);
         if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) el.setAttribute('data-connectea-surface', '');
       }
@@ -200,7 +200,7 @@
       );
       for (const el of inkCandidates) {
         if (el.children.length > 2 || el.hasAttribute('data-connectea-surface')) continue;
-        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header')) continue;
+        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by')) continue;
         const fgRgb = parseRgb(window.getComputedStyle(el).color, true);
         if (isDarkColor(fgRgb)) el.setAttribute('data-connectea-ink', '');
       }
@@ -217,7 +217,7 @@
     const reg = window.ConnectifyThemeRegistry;
     const defaultList = [
       { id: 'dark', name: 'Dark', icon: '🌙', swatch: ['#12171f', '#1e2632', '#3b82f6'] },
-      { id: 'quantum', name: 'Quantum Dark', icon: '⚛️', swatch: ['#292929', '#333333', '#d4b483'] },
+      { id: 'quantum', name: 'Quantum Dark', icon: '⚛️', swatch: ['#282828', '#32302f', '#fabd2f'] },
       { id: 'amoled', name: 'AMOLED Black', icon: '🌑', swatch: ['#000000', '#0a0a0a', '#38bdf8'] },
       { id: 'midnight', name: 'Midnight Navy', icon: '🌌', swatch: ['#0b132b', '#141f36', '#60a5fa'] },
       { id: 'forest', name: 'Emerald Forest', icon: '🌲', swatch: ['#0a1914', '#11261f', '#10b981'] },

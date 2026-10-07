@@ -33,6 +33,13 @@ html.connectea-dark {
 }
 
 /* Universal High Contrast Typography Rules (WCAG AA Contrast >= 5:1) */
+.connectea-dark :is(
+  h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, select, textarea, label, strong, small,
+  .eds-c-heading, .v-caption, .v-label
+):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.material-icons):not(.connectea-theme-icon):not(.connectea-theme-arrow) {
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+}
+
 .connectea-dark :is(label, .cvr-c-form__label, .eds-c-label) {
   color: #e2e8f0 !important;
 }
@@ -268,7 +275,7 @@ html.connectea-dark {
   .cvr-c-toolbar,
   .v-slot-cvr-c-heading-bar,
   .v-slot-cvr-c-page-header
-) {
+):not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]) {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   border-bottom: 1px solid var(--cx-border, #36485e) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
@@ -285,5 +292,23 @@ html.connectea-dark {
   .cvr-c-toolbar
 ) :is(h1, h2, h3, h4, span, div, .v-label, .eds-c-heading) {
   color: #f8fafc !important;
+}
+
+/* Classes Page Sort Header & Controls: transparent background matching light mode */
+.connectea-dark :is(
+  .cvr-c-classes__sort,
+  .cvr-c-sort-by,
+  .eds-c-sort-by,
+  [class*="classes"] .cvr-c-classes__sort,
+  [class*="classes"] [class*="sort-by"],
+  .cvr-c-classes-header,
+  .cvr-c-classes__header,
+  .cvr-c-classes-list__header
+) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 

@@ -52,23 +52,24 @@
   --cx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3); --cx-shadow-md: 0 4px 10px rgba(0, 0, 0, 0.4); --cx-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-/* Quantum Dark (Legacy <= 3.1.14 Palette) */
+/* Quantum Dark (Evolve / Gruvbox Inspiration Palette) */
 [data-connectea-theme="quantum"].connectea-dark, [data-connectea-theme="quantum"] .connectea-dark, html.connectea-dark[data-connectea-theme="quantum"] {
-  --cx-canvas-bg: #292929; --cx-canvas-subtle: #222222;
-  --cx-surface-bg: #333333; --cx-surface-secondary: #2a2a2a; --cx-surface-elevated: #3a3a3a;
-  --cx-surface-hover: #3d3d3d; --cx-surface-active: #484848;
-  --cx-border: #3a3a3a; --cx-border-subtle: #4a4a4a; --cx-border-strong: #5a5a5a; --cx-border-focus: #d4b483;
-  --cx-text-primary: #cccccc; --cx-text-secondary: #bbbbbb; --cx-text-muted: #999999; --cx-text-disabled: #777777; --cx-text-inverse: #1a1a1a;
-  --cx-accent: #d4b483; --cx-accent-hover: #e2c9a3; --cx-accent-active: #c5a36f; --cx-accent-subtle: rgba(212, 180, 131, 0.15); --cx-accent-text: #222222;
-  --cx-nav-bg: #2a2a2a; --cx-nav-border: #3a3a3a; --cx-nav-text: #cccccc; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #222222;
-  --cx-button-bg: #303944; --cx-button-hover: #3b4857; --cx-button-active: #252d36;
-  --cx-button-border: #4c5a69; --cx-button-border-hover: #617387; --cx-button-text: #cccccc; --cx-button-text-hover: #ffffff;
-  --cx-button-primary-bg: #d4b483; --cx-button-primary-hover: #e2c9a3; --cx-button-primary-text: #222222;
-  --cx-input-bg: #242424; --cx-input-border: #444444; --cx-input-border-focus: #d4b483; --cx-input-text: #cccccc; --cx-input-placeholder: #777777;
-  --cx-table-header-bg: #2a2a2a; --cx-table-row-hover: #3a3a3a; --cx-table-row-alt: #2c2c2c; --cx-table-border: #3a3a3a;
-  --cx-badge-bg: #3a3a3a; --cx-badge-border: #4a4a4a; --cx-badge-text: #cccccc;
-  --cx-card-bg: #333333; --cx-positive-bg: #7b9900; --cx-positive-hover: #8fb200; --cx-positive-text: #ffffff; --cx-positive-border: #6b8500;
-  --cx-scrollbar-thumb: #444444; --cx-scrollbar-track: #292929;
+  --cx-canvas-bg: #282828; --cx-canvas-subtle: #1e2021;
+  --cx-surface-bg: #32302f; --cx-surface-secondary: #282828; --cx-surface-elevated: #3c3836;
+  --cx-surface-hover: #504944; --cx-surface-active: #1d2021;
+  --cx-border: #504944; --cx-border-subtle: #3c3836; --cx-border-strong: #665c54; --cx-border-focus: #fabd2f;
+  --cx-text-primary: #fbf1c7; --cx-text-secondary: #ebdbb2; --cx-text-muted: #a89984; --cx-text-disabled: #7c6f64; --cx-text-inverse: #1d2021;
+  --cx-accent: #fabd2f; --cx-accent-hover: #fcd34d; --cx-accent-active: #d79921; --cx-accent-subtle: rgba(250, 189, 47, 0.15); --cx-accent-text: #1d2021;
+  --cx-accent-purple: #7957d5; --cx-accent-coral: #e74632; --cx-accent-cyan: #83a598;
+  --cx-nav-bg: #1d2021; --cx-nav-border: #3c3836; --cx-nav-text: #ebdbb2; --cx-nav-text-hover: #fbf1c7; --cx-nav-item-active: #282828;
+  --cx-button-bg: #3c3836; --cx-button-hover: #504944; --cx-button-active: #282828;
+  --cx-button-border: #504944; --cx-button-border-hover: #665c54; --cx-button-text: #fbf1c7; --cx-button-text-hover: #ffffff;
+  --cx-button-primary-bg: #fabd2f; --cx-button-primary-hover: #fcd34d; --cx-button-primary-text: #1d2021;
+  --cx-input-bg: #1d2021; --cx-input-border: #504944; --cx-input-border-focus: #fabd2f; --cx-input-text: #fbf1c7; --cx-input-placeholder: #a89984;
+  --cx-table-header-bg: #282828; --cx-table-row-hover: #3c3836; --cx-table-row-alt: #232425; --cx-table-border: #3c3836;
+  --cx-badge-bg: #3c3836; --cx-badge-border: #504944; --cx-badge-text: #fbf1c7;
+  --cx-card-bg: #32302f; --cx-positive-bg: #98971a; --cx-positive-hover: #b8bb26; --cx-positive-text: #ffffff; --cx-positive-border: #79740e;
+  --cx-scrollbar-thumb: #504944; --cx-scrollbar-track: #282828;
 }
 
 /* AMOLED Pitch Black */
@@ -170,6 +171,7 @@
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption,
   .cvr-c-class__name, .cvr-c-classes-list__title,
+  :is(.cvr-c-classes, .cvr-c-classes-list, .eds-c-selection-list, .cvr-c-class, [class*="class-"]) :is(span, p, a, div, label, small),
   .connectea-panel, .connectea-distribution, .connectea-result
 ):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]) {
   color: var(--cx-text-primary) !important;
