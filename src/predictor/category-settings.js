@@ -185,8 +185,6 @@
                 <option value="midnight">🌌 Midnight Navy</option>
                 <option value="forest">🌲 Emerald Forest</option>
                 <option value="sunset">🌅 Twilight Plum</option>
-                <option value="light">☀ Default (Light)</option>
-                <option value="custom">🎨 Custom Palette</option>
               </select>
             </div>
             <p class="cx-settings-desc">Interface theme and visual palette.</p>
@@ -325,7 +323,9 @@
 
     const themeSelectInput = catPanel.querySelector('#cx-theme-select-input');
     if (themeSelectInput) {
-      themeSelectInput.value = window.ConnectifyTheme ? window.ConnectifyTheme.getTheme() : (localStorage.getItem('connectea:theme:id') || 'dark');
+      const rawTheme = window.ConnectifyTheme ? window.ConnectifyTheme.getTheme() : (localStorage.getItem('connectea:theme:id') || 'dark');
+      themeSelectInput.value = (rawTheme === 'light' || rawTheme === 'custom') ? (localStorage.getItem('connectea:theme:restore_theme') || 'dark') : rawTheme;
+      if (!themeSelectInput.value) themeSelectInput.value = 'dark';
       themeSelectInput.addEventListener('change', () => {
         if (window.ConnectifyTheme) window.ConnectifyTheme.setTheme(themeSelectInput.value);
       });

@@ -5051,9 +5051,8 @@ runTest('Test 138: Dark theme v3.2.1 parity, Connect Help and tile contrast, abu
   assert.ok(themeTilesCss.includes('.cvr-c-class__name') && themeTilesCss.includes('.cvr-c-classes-list__title'), 'theme-tiles.css must target class title elements');
   assert.ok(themeTilesCss.includes('var(--cx-text-primary, #f8fafc) !important;'), 'theme-tiles.css must set high contrast primary text on headings');
 
-  // 3. Dedicated theme button in theme-core.css and theme.js
-  assert.ok(themeCoreCss.includes('#connectea-theme-select-btn'), 'theme-core.css must style #connectea-theme-select-btn');
-  assert.ok(themeJs.includes('#connectea-theme-select-btn'), 'theme.js must create and manage #connectea-theme-select-btn');
+  // 3. Top bar theme toggle button and theme menu in theme-core.css and theme.js
+  assert.ok(themeCoreCss.includes('#connectea-theme-toggle'), 'theme-core.css must style #connectea-theme-toggle');
   assert.ok(themeJs.includes('document.body.appendChild(themeMenu)'), 'theme.js must attach themeMenu to document.body to prevent button nesting issues');
 
   // 4. Color Theme selector in Category Settings
@@ -5090,6 +5089,80 @@ runTest('Test 138: Dark theme v3.2.1 parity, Connect Help and tile contrast, abu
       }
     }
   }
+});
+
+runTest('Test 139: Font stack enforcement, dark surfaces styled with theme tokens, Themes/Default toggle text, theme button removed, Default/custom removed from select', () => {
+  const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
+  const themeCoreCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-core.css'), 'utf8');
+  const themeCardsCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-cards.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  const cohortStylesJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-styles.js'), 'utf8');
+  const catSettingsJs = fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8');
+
+  // 1. Clean sans-serif font stack enforced across root dark selectors to eliminate serif fallback
+  assert.ok(themeTokensCss.includes('-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;'),
+    'theme-tokens.css must enforce system sans-serif font stack');
+  assert.ok(themeCoreCss.includes('-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;'),
+    'theme-core.css must enforce system sans-serif font stack');
+
+  // 2. All surfaces touched by dark mode are styled dynamically with CSS tokens (not hardcoded hex colors)
+  assert.ok(themeCardsCss.includes('var(--cx-surface-elevated'), 'theme-cards.css must use var(--cx-surface-elevated) for panels');
+  assert.ok(themeCardsCss.includes('var(--cx-surface-secondary'), 'theme-cards.css must use var(--cx-surface-secondary) for task marks');
+  assert.ok(cohortStylesJs.includes('var(--cx-surface-elevated'), 'cohort-styles.js must use var(--cx-surface-elevated) for panels');
+  assert.ok(cohortStylesJs.includes('var(--cx-input-bg'), 'cohort-styles.js must use var(--cx-input-bg) for inputs');
+  assert.ok(themeTokensCss.includes('.connectea-panel') && themeTokensCss.includes('var(--cx-surface-elevated)'),
+    'theme-tokens.css must dynamically theme .connectea-panel');
+  assert.ok(themeTokensCss.includes('.cvr-c-task__marks') && themeTokensCss.includes('var(--cx-surface-secondary)'),
+    'theme-tokens.css must dynamically theme .cvr-c-task__marks');
+
+  // 3. Separate themes button is removed
+  assert.ok(!themeCoreCss.includes('#connectea-theme-select-btn {'), 'theme-core.css must not style removed #connectea-theme-select-btn');
+  assert.ok(!themeJs.includes("createElement('button')\n    themeSelectBtn.id = 'connectea-theme-select-btn'") && !themeJs.includes("themeSelectBtn = document.createElement('button')"),
+    'theme.js must not create #connectea-theme-select-btn');
+
+  // 4. Toggle button text is Themes and Default (not Dark mode and Light mode)
+  assert.ok(!themeJs.includes("'☾ Dark mode'") && !themeJs.includes("'☀ Light mode'"),
+    'theme.js must not use Dark Mode or Light Mode as toggle button text');
+  assert.ok(themeJs.includes("'Default'") && themeJs.includes("'Themes'"),
+    'theme.js must use Default and Themes for toggle button text');
+
+  // 5. Default and Custom Theme removed from themes select in Category Settings
+  assert.ok(!catSettingsJs.includes('<option value="light">'), 'category-settings.js must not include Default in themes select');
+  assert.ok(!catSettingsJs.includes('<option value="custom">'), 'category-settings.js must not include Custom in themes select');
+  assert.ok(catSettingsJs.includes('<option value="dark">') && catSettingsJs.includes('<option value="quantum">'),
+    'category-settings.js must include dark themes');
+
+  // 6. Custom theme option and color palettes removed from theme menu
+  assert.ok(!themeTokensCss.includes('.connectea-theme-custom-panel'), 'theme-tokens.css must not style custom color panel');
+  assert.ok(!themeJs.includes('connectea-theme-custom-panel'), 'theme.js must not render custom color panel');
+  assert.ok(!themeJs.includes('input type="color"'), 'theme.js must not render color inputs');
+
+  // 7. Functional test of toggle button labels and theme switching
+  delete window.ConnectifyThemeLoaded;
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  const nav = document.createElement('nav');
+  nav.className = 'cvr-c-primary-navigation';
+  document.body.appendChild(nav);
+
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8'));
+  eval(themeJs);
+
+  const toggleBtn = document.getElementById('connectea-theme-toggle');
+  assert.ok(toggleBtn, 'Toggle button must exist');
+
+  // In default (light) mode:
+  window.ConnectifyTheme.applyTheme(false);
+  assert.ok(toggleBtn.textContent.includes('Themes'), `Default mode button text must contain Themes, got "${toggleBtn.textContent}"`);
+
+  // In theme/dark mode:
+  window.ConnectifyTheme.applyTheme(true, 'quantum');
+  assert.ok(toggleBtn.textContent.includes('Default'), `Dark mode button text must contain Default, got "${toggleBtn.textContent}"`);
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'quantum');
+
+  // Switch back to Default:
+  window.ConnectifyTheme.applyTheme(false);
+  assert.ok(toggleBtn.textContent.includes('Themes'), `Switched back button text must contain Themes, got "${toggleBtn.textContent}"`);
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined);
 });
 
 console.log('\n================================================================');

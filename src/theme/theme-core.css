@@ -8,10 +8,11 @@
    -------------------------------------------------------------------------- */
 html.connectea-dark {
   color-scheme: dark !important;
-  background-color: #12171f !important;
-  color: #e2e8f0 !important;
+  background-color: var(--cx-canvas-bg, #12171f) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
 .connectea-dark body,
@@ -20,10 +21,11 @@ html.connectea-dark {
 .connectea-dark .v-ui,
 .connectea-dark .cvr-c-app-layout,
 .connectea-dark .cvr-c-app-layout__body {
-  background-color: #12171f !important;
-  color: #e2e8f0 !important;
+  background-color: var(--cx-canvas-bg, #12171f) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
 /* Universal High Contrast Typography Rules (WCAG AA Contrast >= 5:1) */
@@ -48,8 +50,7 @@ html.connectea-dark {
   box-sizing: border-box !important;
 }
 
-#connectea-theme-toggle,
-#connectea-theme-select-btn {
+#connectea-theme-toggle {
   position: absolute !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
@@ -66,36 +67,27 @@ html.connectea-dark {
   border: 1px solid #526a81 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-#connectea-theme-toggle {
   right: 16px;
   width: 104px;
 }
 
-#connectea-theme-select-btn {
-  right: 128px;
-}
-
-#connectea-theme-toggle:hover,
-#connectea-theme-select-btn:hover {
+#connectea-theme-toggle:hover {
   background: #313f50 !important;
   border-color: #6b88a5 !important;
 }
 
-#connectea-theme-toggle:focus-visible,
-#connectea-theme-select-btn:focus-visible {
+#connectea-theme-toggle:focus-visible {
   outline: 2px solid #598fbd;
   outline-offset: 2px;
 }
 
-.connectea-dark :is(#connectea-theme-toggle, #connectea-theme-select-btn) {
+.connectea-dark #connectea-theme-toggle {
   background: #24303f !important;
   color: #f1f6fb !important;
   border: 1px solid #485c72 !important;
 }
 
-.connectea-dark :is(#connectea-theme-toggle, #connectea-theme-select-btn):hover {
+.connectea-dark #connectea-theme-toggle:hover {
   background: #2f3e52 !important;
   border-color: #627b97 !important;
 }
@@ -106,9 +98,6 @@ html.connectea-dark {
     font-size: 11px;
     padding: 6px 8px;
     width: auto;
-  }
-  #connectea-theme-select-btn {
-    display: none !important;
   }
 }
 

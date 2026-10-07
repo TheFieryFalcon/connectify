@@ -192,20 +192,20 @@
       flex: 1 1 260px !important;
     }
     .connectea-dark .connectea-panel {
-      background: #333333 !important;
-      color: #cccccc !important;
-      border-color: #3a3a3a !important;
+      background: var(--cx-surface-elevated, #333333) !important;
+      color: var(--cx-text-secondary, #cccccc) !important;
+      border-color: var(--cx-border, #3a3a3a) !important;
     }
     .connectea-dark .connectea-subject-controls {
-      border-top-color: #3a3a3a !important;
+      border-top-color: var(--cx-border, #3a3a3a) !important;
     }
     .connectea-dark .connectea-notice {
-      color: #999999 !important;
+      color: var(--cx-text-muted, #999999) !important;
     }
     .connectea-dark .connectea-controls input {
-      background: #212121 !important;
-      color: #dddddd !important;
-      border-color: #4a4a4a !important;
+      background: var(--cx-input-bg, #212121) !important;
+      color: var(--cx-text-primary, #dddddd) !important;
+      border-color: var(--cx-input-border, #4a4a4a) !important;
     }
     @media (max-width: 1400px) { :root { --cx-display-scale: 0.92; } }
     @media (max-width: 1200px) { :root { --cx-display-scale: 0.85; } }

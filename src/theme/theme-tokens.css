@@ -1,6 +1,6 @@
 /**
  * Connectify Theme Tokens & Palette System
- * Abundant CSS custom properties for all built-in themes and custom user palettes:
+ * Abundant CSS custom properties for all built-in themes:
  * - Dark (Modern site-wide dark mode, v3.2.x parity)
  * - Quantum Dark (Legacy <= 3.1.14: #292929 canvas, #333333 surface, #d4b483 accent)
  * - AMOLED Pitch Black (Pure #000000, #38bdf8 accent)
@@ -8,7 +8,6 @@
  * - Emerald Forest (#0a1914 canvas, #11261f surface, #10b981 accent)
  * - Twilight Plum (#19111c canvas, #26182a surface, #f43f5e accent)
  * - Default Light (Clean white #f8fafc / #ffffff, #3b82f6 accent)
- * - Custom Theme (User-configured interactive color palette)
  */
 
 :root {
@@ -153,44 +152,197 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   --cx-scrollbar-thumb: #55315e; --cx-scrollbar-track: #19111c;
 }
 
-/* System-wide Token Application across Theme Variants */
+/* ==========================================================================
+   Universal Surface Adaptation: Every surface touched by dark mode is
+   dynamically styled by custom themes using semantic tokens.
+   ========================================================================== */
 :is(html, body).connectea-dark:not([data-connectea-login]),
 [data-connectea-theme]:not([data-connectea-login]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) body,
 [data-connectea-theme]:not([data-connectea-login]).connectea-dark {
   background-color: var(--cx-canvas-bg) !important;
   color: var(--cx-text-secondary) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .v-panel, .v-panel-content, .eds-c-card, .cvr-c-tile, .eds-c-tile,
+  body, #main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable
+) {
+  background-color: var(--cx-canvas-bg) !important;
+  color: var(--cx-text-secondary) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Universal Typography & Headings */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption,
+  .cvr-c-class__name, .cvr-c-classes-list__title, [class*="title"], [class*="heading"]
+) {
+  color: var(--cx-text-primary) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  label, .cvr-c-form__label, .eds-c-label, p, span, div, li
+) {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Subject Tiles, Cards, Portlets & Dashboard Containers */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .v-panel, .v-panel-content, .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
   [data-subject-card], .cvr-c-dashboard-card, [data-connectea-surface],
-  .cvr-c-task, .cvr-c-task__details, .cvr-c-tasks, .cvr-c-task-group,
-  .cvr-c-task__marks, .cvr-c-task__mark
+  .portlet, .portlet-boundary, .portlet-content, .portlet-body, .journal-content-article,
+  .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content,
+  .cvr-c-task, .cvr-c-task__details, .cvr-c-tasks, .cvr-c-task-group
 ) {
   background-color: var(--cx-surface-bg) !important;
   border-color: var(--cx-border) !important;
+  color: var(--cx-text-secondary) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(.cvr-c-primary-navigation, .cvr-c-service-menu, .cvr-c-primary-menu) {
+/* Cohort Statistics Panels, Distribution Panels & Task Standing */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .connectea-panel, .connectea-distribution, .connectea-result,
+  .connectea-panel-distribution, .connectea-panel-standing, .connectea-row-wrapper
+) {
+  background-color: var(--cx-surface-elevated) !important;
+  border-color: var(--cx-border) !important;
+  color: var(--cx-text-secondary) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .connectea-panel, .connectea-distribution, .connectea-result
+) strong {
+  color: var(--cx-accent) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .connectea-controls, .connectea-notice
+) {
+  color: var(--cx-text-muted) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) .connectea-controls input {
+  background-color: var(--cx-input-bg) !important;
+  border-color: var(--cx-input-border) !important;
+  color: var(--cx-text-primary) !important;
+}
+
+/* Summary Marks & Task Scores */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .cvr-c-task__marks, .cvr-c-task__mark
+) {
+  background-color: var(--cx-surface-secondary) !important;
+  border-color: var(--cx-border) !important;
+  color: var(--cx-text-primary) !important;
+}
+
+/* Material Accordions & Expansion Panels */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .mat-card, .mat-accordion, .mat-expansion-panel, .mat-expansion-panel-header,
+  .mat-expansion-panel-body, .mat-expansion-panel-content, .mat-tree, .mat-tree-node,
+  .eds-c-accordion__panel
+) {
+  background-color: var(--cx-surface-bg) !important;
+  border-color: var(--cx-border) !important;
+  color: var(--cx-text-secondary) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .mat-expansion-panel-header, .mat-tree-node
+):hover {
+  background-color: var(--cx-surface-hover) !important;
+}
+
+/* Nav Lists, Resource Links, and Connect Help */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .eds-c-nav-list, .eds-c-nav-list__item, .eds-c-nav-list__link,
+  .cvr-c-resource, .cvr-c-resource-item, .eds-c-resource, [class*="guide"], [class*="help"]
+) {
+  background-color: var(--cx-surface-bg) !important;
+  border-color: var(--cx-border-subtle) !important;
+  color: var(--cx-text-secondary) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .eds-c-nav-list__item, .eds-c-nav-list__link, .cvr-c-resource-item
+):hover {
+  background-color: var(--cx-surface-hover) !important;
+  color: var(--cx-text-primary) !important;
+}
+
+/* Tables, Grids & Submission Marksbooks */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  table, .table, .table-striped, .table-hover, .table-bordered,
+  .cvr-c-table, .cvr-c-table--marksbook, .cvr-c-submission-students-table,
+  .v-table, .v-grid, .v-treetable
+):not(#connectify-sidebar *) {
+  background-color: var(--cx-surface-bg) !important;
+  color: var(--cx-text-secondary) !important;
+  border-color: var(--cx-table-border) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  thead, thead th, thead td, .v-table-header, .v-grid-header
+) {
+  background-color: var(--cx-table-header-bg) !important;
+  color: var(--cx-text-primary) !important;
+  border-color: var(--cx-table-border) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(tbody tr):hover {
+  background-color: var(--cx-table-row-hover) !important;
+}
+
+/* Dropdowns, Menubars, Context Menus & Popups */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .v-filterselect-suggestpopup, .v-menubar-popup, .v-contextmenu, .v-context-menu-container,
+  .v-popupview-popup, .dropdown-menu, .clay-dropdown-menu, .ui-menu, .ui-autocomplete,
+  .v-datefield-popup, .v-datefield-calendarpanel, .v-window, .v-window-contents, .mat-dialog-container
+):not(#connectify-sidebar *) {
+  background-color: var(--cx-surface-elevated) !important;
+  color: var(--cx-text-secondary) !important;
+  border-color: var(--cx-border) !important;
+}
+
+/* Primary Navigation Bar */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .cvr-c-primary-navigation, .cvr-c-service-menu, .cvr-c-primary-menu
+) {
   background-color: var(--cx-nav-bg) !important;
   border-bottom-color: var(--cx-nav-border) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption) {
-  color: var(--cx-text-primary) !important;
-}
-
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(label, .cvr-c-form__label, .eds-c-label, p) {
-  color: var(--cx-text-secondary) !important;
-}
-
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(.v-button, .eds-c-button, .eds-c-standard-button):not(.cx-clear-cache-btn):not(#connectify-sidebar *) {
+/* Buttons and Action Elements */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .v-button, .eds-c-button, .eds-c-standard-button
+):not(.cx-clear-cache-btn):not(#connectify-sidebar *) {
   background-color: var(--cx-button-bg) !important;
   color: var(--cx-button-text) !important;
   border-color: var(--cx-button-border) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(.eds-c-tile a, .cvr-c-tile a, .connectea-panel a) {
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .v-button:hover, .eds-c-button:hover, .eds-c-standard-button:hover
+):not(.cx-clear-cache-btn):not(#connectify-sidebar *) {
+  background-color: var(--cx-surface-hover) !important;
+  border-color: var(--cx-border-strong) !important;
+}
+
+/* Form Inputs, Textareas & Selects */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]),
+  textarea, select, .connectea-type-select
+) {
+  background-color: var(--cx-input-bg) !important;
+  color: var(--cx-text-primary) !important;
+  border-color: var(--cx-input-border) !important;
+}
+
+/* Links & Accents */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .eds-c-tile a, .cvr-c-tile a, .connectea-panel a, .portlet-body a
+):not(.eds-c-tile__action):not(.cvr-c-tile__action) {
   color: var(--cx-accent) !important;
 }
 
@@ -209,8 +361,7 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   --cx-accent: initial !important;
 }
 
-[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu),
-[data-connectea-login] #connectea-theme-select-btn {
+[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu) {
   display: none !important;
 }
 
@@ -227,7 +378,7 @@ html.connectea-dark[data-connectea-theme="sunset"] {
 
 #connectea-theme-menu {
   position: fixed;
-  width: 220px;
+  width: 200px;
   background: var(--cx-surface-bg, #1e2632);
   border: 1px solid var(--cx-border, #3d5066);
   border-radius: 8px;
@@ -275,29 +426,4 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   border: 1px solid rgba(255, 255, 255, 0.25);
   flex-shrink: 0;
   box-sizing: border-box;
-}
-
-.connectea-theme-custom-panel {
-  margin-top: 6px;
-  padding: 6px 4px 2px 4px;
-  border-top: 1px solid var(--cx-border-subtle, #2a3749);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.connectea-theme-custom-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--cx-text-muted, #94a3b8);
-}
-.connectea-theme-custom-row input[type="color"] {
-  width: 26px;
-  height: 20px;
-  padding: 0;
-  border: 1px solid var(--cx-border, #3d5066);
-  border-radius: 3px;
-  background: transparent;
-  cursor: pointer;
 }

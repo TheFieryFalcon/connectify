@@ -19,10 +19,10 @@
    8. Cohort Statistics Panel (.connectea-panel) - PRESERVE BLUE IDENTITY
    -------------------------------------------------------------------------- */
 .connectea-dark .connectea-panel {
-  background-color: #15263a !important;
-  border: 1px solid #3b6088 !important;
+  background-color: var(--cx-surface-elevated, #15263a) !important;
+  border: 1px solid var(--cx-border, #3b6088) !important;
   border-radius: 8px !important;
-  color: #d6e8f8 !important;
+  color: var(--cx-text-secondary, #d6e8f8) !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
 }
 
@@ -31,7 +31,7 @@
 }
 
 .connectea-dark .connectea-panel-distribution {
-  color: #cfe2f5 !important;
+  color: var(--cx-text-secondary, #cfe2f5) !important;
 }
 
 :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong,
@@ -40,21 +40,21 @@
 }
 
 .connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong {
-  color: #90c6f5 !important;
+  color: var(--cx-accent, #90c6f5) !important;
 }
 
 .connectea-dark .connectea-panel-standing {
-  color: #e2effa !important;
+  color: var(--cx-text-primary, #e2effa) !important;
 }
 
 .connectea-dark .connectea-controls {
-  color: #b0d0ed !important;
+  color: var(--cx-text-muted, #b0d0ed) !important;
 }
 
 .connectea-dark .connectea-controls input {
-  background-color: #0f1c2b !important;
-  border: 1px solid #335985 !important;
-  color: #f1f5f9 !important;
+  background-color: var(--cx-input-bg, #0f1c2b) !important;
+  border: 1px solid var(--cx-input-border, #335985) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
   border-radius: 4px !important;
 }
 
@@ -75,18 +75,18 @@
    9. Summary Total Mark & Grade Box (.cvr-c-task__marks)
    -------------------------------------------------------------------------- */
 .connectea-dark :is(.cvr-c-task__marks, .cvr-c-task__mark) {
-  background-color: #161e29 !important;
-  border-color: #3d5066 !important;
-  color: #f8fafc !important;
+  background-color: var(--cx-surface-secondary, #161e29) !important;
+  border-color: var(--cx-border, #3d5066) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 .connectea-dark .cvr-c-task__marks {
-  border: 1px solid #3d5066 !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
   border-radius: 6px !important;
 }
 
 .connectea-dark .cvr-c-task__mark {
-  border-right: 1px solid #3d5066 !important;
+  border-right: 1px solid var(--cx-border, #3d5066) !important;
 }
 
 .connectea-dark .cvr-c-task__mark:last-child {
