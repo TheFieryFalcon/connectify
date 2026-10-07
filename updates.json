@@ -1,10 +1,10 @@
 {
   "addons": {
-    "connect-chart-tea@local": {
+    "connectify@local": {
       "updates": [
         {
-          "version": "3.1.5",
-          "update_link": "https://github.com/TheFieryFalcon/connectify/releases/download/v3.1.5/connectify-3.1.5.xpi"
+          "version": "3.2.1-1791389340",
+          "update_link": "https://github.com/TheFieryFalcon/connectify/releases/download/v3.2.1-1791389340/connectify-3.2.1-1791389340.xpi"
         }
       ]
     }
