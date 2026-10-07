@@ -5179,9 +5179,17 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
   const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
   const themeRegistryJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8');
 
-  // 1. Webfont icon preservation: font-family revert protection and no generic tag font overrides
-  assert.ok(themeTokensCss.includes('font-family: revert !important;'),
-    'theme-tokens.css must protect webfonts using font-family: revert !important');
+  // 1. Webfont icon preservation: explicit connect-webfont, Material Icons, and symbol font
+  assert.ok(themeTokensCss.includes('font-family: "connect-webfont" !important;'),
+    'theme-tokens.css must protect connect-webfont glyphs using font-family: "connect-webfont" !important;');
+  assert.ok(themeTokensCss.includes("font-family: 'Material Icons' !important;"),
+    'theme-tokens.css must protect Google Material Icons using font-family: \'Material Icons\' !important;');
+  assert.ok(themeTokensCss.includes("-webkit-font-feature-settings: 'liga' !important;"),
+    'theme-tokens.css must enforce ligature feature settings for Material Icons');
+  assert.ok(themeTokensCss.includes('"Apple Symbols"') && themeTokensCss.includes('"Segoe UI Symbol"'),
+    'theme-tokens.css must define symbol/emoji font stack matching Connect webfont style');
+  assert.ok(themeTokensCss.includes('width: 250px;') && themeTokensCss.includes('min-height: 40px;'),
+    'theme-tokens.css must size theme menu and options generously for easy clicking');
   assert.ok(!themeTokensCss.includes('span, div, li {\n  font-family:'),
     'theme-tokens.css must not apply system font stack directly to span, div, li');
   assert.ok(themeTokensCss.includes(':not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"])'),
@@ -5260,6 +5268,25 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
     assert.ok(document.documentElement.classList.contains('connectea-dark'),
       `applyTheme(true, '${th}') must keep connectea-dark class on html`);
   }
+
+  // 5. Themes menu click and icon structure
+  const toggleBtn = document.getElementById('connectea-theme-toggle');
+  assert.ok(toggleBtn, 'Toggle button must exist');
+  const arrowEl = toggleBtn.querySelector('.connectea-theme-arrow');
+  assert.ok(arrowEl, 'Toggle button must contain .connectea-theme-arrow');
+  arrowEl.click();
+  const themeMenu = document.getElementById('connectea-theme-menu');
+  assert.ok(themeMenu, 'Clicking .connectea-theme-arrow must open #connectea-theme-menu');
+  const options = themeMenu.querySelectorAll('.connectea-theme-option');
+  assert.strictEqual(options.length, 6, 'Themes menu must render all 6 built-in dark themes');
+  const icons = themeMenu.querySelectorAll('.connectea-theme-icon');
+  assert.strictEqual(icons.length, 6, 'Every theme option must contain a .connectea-theme-icon element');
+
+  // Click Quantum Dark option in menu
+  const quantumOpt = Array.from(options).find(opt => opt.querySelector('.connectea-theme-name')?.textContent.includes('Quantum Dark'));
+  assert.ok(quantumOpt, 'Themes menu must include Quantum Dark option');
+  quantumOpt.click();
+  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'quantum');
 });
 
 console.log('\n================================================================');

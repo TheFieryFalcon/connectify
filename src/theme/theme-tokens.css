@@ -53,9 +53,7 @@ html.connectea-dark[data-connectea-theme="dark"] {
 }
 
 /* Quantum Dark (Legacy <= 3.1.14 Palette) */
-[data-connectea-theme="quantum"].connectea-dark,
-[data-connectea-theme="quantum"] .connectea-dark,
-html.connectea-dark[data-connectea-theme="quantum"] {
+[data-connectea-theme="quantum"].connectea-dark, [data-connectea-theme="quantum"] .connectea-dark, html.connectea-dark[data-connectea-theme="quantum"] {
   --cx-canvas-bg: #292929; --cx-canvas-subtle: #222222;
   --cx-surface-bg: #333333; --cx-surface-secondary: #2a2a2a; --cx-surface-elevated: #3a3a3a;
   --cx-surface-hover: #3d3d3d; --cx-surface-active: #484848;
@@ -73,9 +71,7 @@ html.connectea-dark[data-connectea-theme="quantum"] {
 }
 
 /* AMOLED Pitch Black */
-[data-connectea-theme="amoled"].connectea-dark,
-[data-connectea-theme="amoled"] .connectea-dark,
-html.connectea-dark[data-connectea-theme="amoled"] {
+[data-connectea-theme="amoled"].connectea-dark, [data-connectea-theme="amoled"] .connectea-dark, html.connectea-dark[data-connectea-theme="amoled"] {
   --cx-canvas-bg: #000000; --cx-canvas-subtle: #050505;
   --cx-surface-bg: #0a0a0a; --cx-surface-secondary: #121212; --cx-surface-elevated: #181818;
   --cx-surface-hover: #1a1a1a; --cx-surface-active: #222222;
@@ -93,9 +89,7 @@ html.connectea-dark[data-connectea-theme="amoled"] {
 }
 
 /* Midnight Navy */
-[data-connectea-theme="midnight"].connectea-dark,
-[data-connectea-theme="midnight"] .connectea-dark,
-html.connectea-dark[data-connectea-theme="midnight"] {
+[data-connectea-theme="midnight"].connectea-dark, [data-connectea-theme="midnight"] .connectea-dark, html.connectea-dark[data-connectea-theme="midnight"] {
   --cx-canvas-bg: #0b132b; --cx-canvas-subtle: #080d1e;
   --cx-surface-bg: #141f36; --cx-surface-secondary: #1c2a4a; --cx-surface-elevated: #24355a;
   --cx-surface-hover: #223359; --cx-surface-active: #2b406e;
@@ -113,9 +107,7 @@ html.connectea-dark[data-connectea-theme="midnight"] {
 }
 
 /* Emerald Forest */
-[data-connectea-theme="forest"].connectea-dark,
-[data-connectea-theme="forest"] .connectea-dark,
-html.connectea-dark[data-connectea-theme="forest"] {
+[data-connectea-theme="forest"].connectea-dark, [data-connectea-theme="forest"] .connectea-dark, html.connectea-dark[data-connectea-theme="forest"] {
   --cx-canvas-bg: #0a1914; --cx-canvas-subtle: #06110d;
   --cx-surface-bg: #11261f; --cx-surface-secondary: #163329; --cx-surface-elevated: #1c4033;
   --cx-surface-hover: #1e4537; --cx-surface-active: #255444;
@@ -133,9 +125,7 @@ html.connectea-dark[data-connectea-theme="forest"] {
 }
 
 /* Twilight Plum */
-[data-connectea-theme="sunset"].connectea-dark,
-[data-connectea-theme="sunset"] .connectea-dark,
-html.connectea-dark[data-connectea-theme="sunset"] {
+[data-connectea-theme="sunset"].connectea-dark, [data-connectea-theme="sunset"] .connectea-dark, html.connectea-dark[data-connectea-theme="sunset"] {
   --cx-canvas-bg: #19111c; --cx-canvas-subtle: #120b15;
   --cx-surface-bg: #26182a; --cx-surface-secondary: #331e38; --cx-surface-elevated: #422648;
   --cx-surface-hover: #48294e; --cx-surface-active: #56315e;
@@ -169,7 +159,6 @@ html.connectea-dark[data-connectea-theme="sunset"] {
 ) {
   background-color: var(--cx-canvas-bg) !important;
   color: var(--cx-text-secondary) !important;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
 /* Universal Typography & Headings (Preserve webfont icons!) */
@@ -182,18 +171,46 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
-/* Explicit Webfont Glyph Protection: NEVER override icon font-family */
+/* Explicit Webfont Glyph Protection: Always enforce Connect & Material icon fonts */
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
   [class^="cvr-c-icon--"], [class*=" cvr-c-icon--"], .cvr-c-icon, .cvr-c-icon--switch,
   [class^="eds-c-icon"], [class*=" eds-c-icon"], .eds-c-icon,
-  .mat-icon, .v-icon, [data-icon], i:not(.cx-text)
+  .v-datefield-button, .v-datefield-calendarpanel button,
+  .cvr-c-reply, .cvr-c-expansion-panel__trigger, .cvr-c-resources-panel .column-heading,
+  [class*="cvr-c-icon"], [class*="eds-c-icon"]
 ),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
   [class^="cvr-c-icon--"], [class*=" cvr-c-icon--"], .cvr-c-icon, .cvr-c-icon--switch,
   [class^="eds-c-icon"], [class*=" eds-c-icon"], .eds-c-icon,
-  .mat-icon, .v-icon, [data-icon], i:not(.cx-text)
+  .v-datefield-button, .v-datefield-calendarpanel button,
+  .cvr-c-reply, .cvr-c-expansion-panel__trigger, .cvr-c-resources-panel .column-heading,
+  [class*="cvr-c-icon"], [class*="eds-c-icon"]
 ):is(::before, ::after) {
-  font-family: revert !important;
+  font-family: "connect-webfont" !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  speak: none !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons, [class*="material-icons"], .mat-icon, [class*="mat-icon"], mat-icon),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons, [class*="material-icons"], .mat-icon, [class*="mat-icon"], mat-icon):is(::before, ::after) {
+  font-family: 'Material Icons' !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  line-height: 1 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  word-wrap: normal !important;
+  white-space: nowrap !important;
+  direction: ltr !important;
+  -webkit-font-feature-settings: 'liga' !important;
+  font-feature-settings: 'liga' !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-icon, [class*="v-icon"], .fontawesome-alloy, [class*="fontawesome"]),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-icon, [class*="v-icon"], .fontawesome-alloy, [class*="fontawesome"]):is(::before, ::after) {
+  font-family: FontAwesome, "connect-webfont", Vaadin-Icons !important;
 }
 
 /* Subject Tiles, Cards, Portlets & Dashboard Containers */
@@ -376,45 +393,56 @@ html.connectea-dark[data-connectea-theme="sunset"] {
 
 /* Theme Selector Popover Menu, Trigger Button & Swatches */
 .connectea-theme-arrow {
-  display: inline-block;
-  margin-left: 5px;
-  font-size: 10px;
-  opacity: 0.8;
-  vertical-align: middle;
-  transition: transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  padding: 3px 8px;
+  font-size: 11px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
-.connectea-theme-arrow:hover { opacity: 1; }
+.connectea-theme-arrow:hover {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.4);
+}
 
 #connectea-theme-menu {
   position: fixed;
-  width: 200px;
+  width: 250px;
   background: var(--cx-surface-bg, #1e2632);
   border: 1px solid var(--cx-border, #3d5066);
-  border-radius: 8px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
-  padding: 8px;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+  padding: 10px;
   z-index: 10035;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font: 12px/1.4 system-ui, -apple-system, sans-serif;
+  gap: 6px;
+  font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13.5px;
   box-sizing: border-box;
 }
 
 .connectea-theme-option {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 5px;
+  gap: 10px;
+  padding: 9px 12px;
+  min-height: 40px;
+  border-radius: 7px;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--cx-text-secondary, #cbd5e1);
   cursor: pointer;
   width: 100%;
   text-align: left;
   box-sizing: border-box;
-  font-size: 12px;
+  font-size: 13.5px;
+  font-family: inherit;
   transition: background 0.12s ease, color 0.12s ease;
 }
 .connectea-theme-option:hover {
@@ -426,13 +454,36 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   background: var(--cx-surface-active, #121820);
   color: var(--cx-accent, #60a5fa);
   font-weight: 600;
+  border-color: var(--cx-border-subtle, #334155);
 }
 
 .connectea-theme-swatch {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
   flex-shrink: 0;
   box-sizing: border-box;
+}
+
+.connectea-theme-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+}
+
+.connectea-theme-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  width: 18px;
+  height: 18px;
+  margin-right: 2px;
+  font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
 }

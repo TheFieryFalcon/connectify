@@ -114,13 +114,19 @@
   function updateToggleButtonLabel(dark) {
     if (!toggleButton) return;
     const label = dark ? 'Default' : 'Themes';
-    toggleButton.textContent = label;
+    const iconChar = dark ? '☀' : '🎨';
+    toggleButton.textContent = `${iconChar} ${label}`;
     toggleButton.setAttribute('aria-label', label);
     toggleButton.setAttribute('aria-pressed', String(dark));
     const arrow = document.createElement('span');
     arrow.className = 'connectea-theme-arrow';
     arrow.setAttribute('title', 'Theme options');
+    arrow.setAttribute('aria-label', 'Open theme menu');
     arrow.textContent = ' ▾';
+    arrow.onclick = (e) => {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (themeMenu) closeThemeMenu(); else openThemeMenu(toggleButton);
+    };
     toggleButton.appendChild(arrow);
   }
 
@@ -230,9 +236,13 @@
       const swatch = document.createElement('span');
       swatch.className = 'connectea-theme-swatch';
       swatch.style.backgroundColor = (t.swatch && t.swatch[1]) || '#1e2632';
-      const label = document.createElement('span');
-      label.textContent = `${t.icon} ${t.name}`;
-      opt.append(swatch, label);
+      const icon = document.createElement('span');
+      icon.className = 'connectea-theme-icon';
+      icon.textContent = t.icon;
+      const name = document.createElement('span');
+      name.className = 'connectea-theme-name';
+      name.textContent = t.name;
+      opt.append(swatch, icon, name);
       opt.onclick = (e) => {
         e.stopPropagation();
         if (reg) reg.setTheme(t.id);
