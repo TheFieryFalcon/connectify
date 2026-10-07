@@ -1,11 +1,14 @@
 /**
- * Connectify Theme Unstyled Elements Tester
- * Tests any Connect or custom web page across all registered themes for:
- * - Low contrast / WCAG AA violations
- * - Background bleed (unadapted light boxes in dark themes or dark boxes in light)
- * - Typography / serif fallback font regressions
- * - Unadapted Angular Material components (native purple ink bars, unstyled panels)
- * - Hardcoded inline color overrides
+ * Connectify Theme Unstyled Elements & Parity Tester
+ * Captures a baseline from the Connect Native Theme (native styling) and verifies
+ * that in every theme:
+ * 1. Fonts, weights, and styles remain identical to Connect native styling.
+ * 2. Margins remain identical to Connect native styling.
+ * 3. Element sizes (bounding boxes) remain identical to Connect native styling.
+ * 4. No more or fewer visible elements exist (exact element visibility parity).
+ * 5. Interactive JavaScript buttons (accordions, tabs, cards) are clicked to audit expanded states.
+ * 6. Contrast meets WCAG AA standards (>= 4.5:1 body, >= 3.0:1 large/UI, no critical < 2.0:1).
+ * 7. Background bleed and native purple Angular Material artifacts are flagged.
  */
 
 'use strict';
@@ -22,6 +25,9 @@ function parseArgs() {
     url: null,
     file: null,
     theme: 'all',
+    clickButtons: true,
+    marginTolerance: 1.0,
+    sizeTolerance: 2.0,
     screenshots: false,
     screenshotsDir: path.resolve(__dirname, '..', 'screenshots'),
     outputJson: path.resolve(__dirname, '..', 'theme_unstyled_report.json'),
@@ -38,6 +44,9 @@ function parseArgs() {
     if (a === '--url' && args[i + 1]) options.url = args[++i];
     else if (a === '--file' && args[i + 1]) options.file = args[++i];
     else if (a === '--theme' && args[i + 1]) options.theme = args[++i];
+    else if (a === '--no-click-buttons') options.clickButtons = false;
+    else if (a === '--margin-tolerance' && args[i + 1]) options.marginTolerance = parseFloat(args[++i]);
+    else if (a === '--size-tolerance' && args[i + 1]) options.sizeTolerance = parseFloat(args[++i]);
     else if (a === '--screenshots') options.screenshots = true;
     else if (a === '--screenshots-dir' && args[i + 1]) options.screenshotsDir = path.resolve(args[++i]);
     else if (a === '--output' && args[i + 1]) options.outputJson = path.resolve(args[++i]);
@@ -52,174 +61,444 @@ function parseArgs() {
 }
 
 /**
- * In-browser DOM auditor function passed to page.evaluate()
+ * Dispatches clicks to interactive JavaScript buttons and accordion/tab triggers
+ * on the page to expand collapsible panels and reveal dynamic UI components.
  */
-function auditPageElements(themeId, isDarkTheme) {
-  function parseRgb(colorStr) {
-    if (!colorStr) return null;
-    const match = colorStr.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
-    if (!match) return null;
-    return {
-      r: parseFloat(match[1]),
-      g: parseFloat(match[2]),
-      b: parseFloat(match[3]),
-      a: match[4] !== undefined ? parseFloat(match[4]) : 1.0
-    };
-  }
+async function clickInteractiveButtons(page) {
+  return await page.evaluate(() => {
+    const BUTTON_SELECTORS = [
+      '.cvr-c-expansion-panel__trigger',
+      '.eds-c-card__trigger',
+      '.mat-tab-label:not(.mat-tab-disabled)',
+      '.v-accordion-item-caption',
+      '.v-button:not(.v-disabled)',
+      'button:not([disabled]):not([type="submit"])',
+      '[role="button"]:not([aria-disabled="true"])',
+      '[aria-expanded="false"]'
+    ].join(', ');
 
-  function getLuminance(r, g, b) {
-    const fn = (c) => {
+    const elements = document.querySelectorAll(BUTTON_SELECTORS);
+    const clicked = [];
+
+    for (const el of elements) {
+      const text = (el.innerText || el.getAttribute('aria-label') || '').toLowerCase();
+      // Exclude destructive actions or navigation-away triggers
+      if (/logout|signout|delete|remove|cancel|leave|exit|dismiss/i.test(text)) continue;
+      if (el.tagName === 'A' || el.closest('a[href]')) continue;
+      if (el.type === 'submit') continue;
+      if (el.id === 'connectea-theme-toggle') continue;
+
+      try {
+        el.click();
+        const tag = el.tagName.toLowerCase();
+        const id = el.id ? '#' + el.id : '';
+        const cls = el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/)[0] : '';
+        clicked.push(`${tag}${id}${cls}`);
+      } catch {}
+    }
+    return clicked;
+  });
+}
+
+/**
+ * Stamps all DOM elements with persistent audit IDs and captures the baseline
+ * state from the Connect Native Theme (untouched native styling).
+ */
+async function captureNativeBaseline(page) {
+  // 1. Ensure Connect Native Theme is active (no dark mode, no theme tokens)
+  await page.evaluate(() => {
+    if (window.ConnectifyThemeRegistry?.setTheme) {
+      window.ConnectifyThemeRegistry.setTheme('light');
+    }
+    document.documentElement.classList.remove('connectea-dark');
+    document.documentElement.removeAttribute('data-connectea-theme');
+    delete document.documentElement.dataset.connecteaTheme;
+    if (document.body) {
+      document.body.classList.remove('connectea-dark');
+      document.body.removeAttribute('data-connectea-theme');
+      delete document.body.dataset.connecteaTheme;
+    }
+    if (window.ConnectifyThemeRegistry?.clearCustomTokens) {
+      window.ConnectifyThemeRegistry.clearCustomTokens();
+    }
+  });
+
+  await new Promise(r => setTimeout(r, 400));
+
+  // 2. Extract baseline metrics for all visible elements
+  return await page.evaluate(() => {
+    function cleanFontFamily(f) {
+      if (!f) return '';
+      return f.replace(/['"]/g, '').toLowerCase().split(',').map(s => s.trim()).join(', ');
+    }
+
+    function normalizeWeight(w) {
+      if (w === 'bold' || w === 'bolder') return 700;
+      if (w === 'normal' || w === 'lighter') return 400;
+      const num = parseInt(w, 10);
+      return isNaN(num) ? 400 : num;
+    }
+
+    function getSelector(el) {
+      if (el.id) return '#' + el.id;
+      let path = el.tagName.toLowerCase();
+      if (el.className && typeof el.className === 'string') {
+        const cls = el.className.trim().split(/\s+/).filter(c => !c.startsWith('ng-') && !c.startsWith('cx-audit-')).slice(0, 2).join('.');
+        if (cls) path += '.' + cls;
+      }
+      return path;
+    }
+
+    const allElements = document.querySelectorAll('body *');
+    const baselineMap = {};
+    let visibleCount = 0;
+
+    for (let i = 0; i < allElements.length; i++) {
+      const el = allElements[i];
+      const auditId = 'cx_aud_' + i;
+      el.dataset.cxAuditId = auditId;
+
+      const tag = el.tagName.toLowerCase();
+      if (['script', 'style', 'svg', 'path', 'noscript', 'meta', 'link'].includes(tag)) continue;
+
+      const style = window.getComputedStyle(el);
+      if (style.visibility === 'hidden' || style.display === 'none' || parseFloat(style.opacity) === 0) continue;
+
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) continue;
+
+      visibleCount++;
+      const text = (el.innerText || '').slice(0, 30).trim();
+
+      baselineMap[auditId] = {
+        auditId,
+        selector: getSelector(el),
+        tagName: tag,
+        textSnippet: text,
+        font: {
+          family: cleanFontFamily(style.fontFamily),
+          rawFamily: style.fontFamily,
+          size: parseFloat(style.fontSize) || 14,
+          weight: normalizeWeight(style.fontWeight),
+          style: style.fontStyle
+        },
+        margin: {
+          top: parseFloat(style.marginTop) || 0,
+          right: parseFloat(style.marginRight) || 0,
+          bottom: parseFloat(style.marginBottom) || 0,
+          left: parseFloat(style.marginLeft) || 0
+        },
+        size: {
+          width: Math.round(rect.width * 10) / 10,
+          height: Math.round(rect.height * 10) / 10
+        }
+      };
+    }
+
+    return {
+      totalElements: allElements.length,
+      visibleCount,
+      elements: baselineMap
+    };
+  });
+}
+
+/**
+ * Audits the current theme against the Connect Native Theme baseline for:
+ * - Visible elements count & set parity
+ * - Font family, size, weight, and style parity
+ * - Margin parity
+ * - Size parity
+ * - Contrast, background bleed, and Angular Material artifacts
+ */
+async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineData, options) {
+  return await page.evaluate((tid, isDark, baseline, opts) => {
+    function parseRgb(colorStr) {
+      if (!colorStr) return null;
+      const match = colorStr.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
+      if (!match) return null;
+      return {
+        r: parseFloat(match[1]),
+        g: parseFloat(match[2]),
+        b: parseFloat(match[3]),
+        a: match[4] !== undefined ? parseFloat(match[4]) : 1.0
+      };
+    }
+
+    function sRgbToLinear(c) {
       const norm = c / 255;
       return norm <= 0.03928 ? norm / 12.92 : Math.pow((norm + 0.055) / 1.055, 2.4);
-    };
-    return 0.2126 * fn(r) + 0.7152 * fn(g) + 0.0722 * fn(b);
-  }
+    }
 
-  function getContrast(rgb1, rgb2) {
-    const l1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
-    const l2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
-    return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
-  }
+    function getLuminance(r, g, b) {
+      return 0.2126 * sRgbToLinear(r) + 0.7152 * sRgbToLinear(g) + 0.0722 * sRgbToLinear(b);
+    }
 
-  function getEffectiveBg(el) {
-    let curr = el;
-    while (curr && curr !== document.documentElement) {
-      const style = window.getComputedStyle(curr);
-      const bg = parseRgb(style.backgroundColor);
-      if (bg && bg.a > 0.05) {
-        return bg;
+    function getContrast(rgb1, rgb2) {
+      const l1 = getLuminance(rgb1.r, rgb1.g, rgb1.b);
+      const l2 = getLuminance(rgb2.r, rgb2.g, rgb2.b);
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+
+    function getEffectiveBg(el) {
+      let curr = el;
+      while (curr && curr !== document.documentElement) {
+        const style = window.getComputedStyle(curr);
+        const bg = parseRgb(style.backgroundColor);
+        if (bg && bg.a > 0.05) return bg;
+        curr = curr.parentElement;
       }
-      curr = curr.parentElement;
+      return isDark ? { r: 18, g: 23, b: 31, a: 1 } : { r: 255, g: 255, b: 255, a: 1 };
     }
-    return isDarkTheme ? { r: 18, g: 23, b: 31, a: 1 } : { r: 255, g: 255, b: 255, a: 1 };
-  }
 
-  function getSelector(el) {
-    if (el.id) return '#' + el.id;
-    let path = el.tagName.toLowerCase();
-    if (el.className && typeof el.className === 'string') {
-      const cls = el.className.trim().split(/\s+/).filter(c => !c.startsWith('ng-')).slice(0, 2).join('.');
-      if (cls) path += '.' + cls;
+    function cleanFontFamily(f) {
+      if (!f) return '';
+      return f.replace(/['"]/g, '').toLowerCase().split(',').map(s => s.trim()).join(', ');
     }
-    return path;
-  }
 
-  const issues = [];
-  const allElements = document.querySelectorAll('body *');
+    function normalizeWeight(w) {
+      if (w === 'bold' || w === 'bolder') return 700;
+      if (w === 'normal' || w === 'lighter') return 400;
+      const num = parseInt(w, 10);
+      return isNaN(num) ? 400 : num;
+    }
 
-  for (const el of allElements) {
-    const rect = el.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) continue;
-    const tag = el.tagName.toLowerCase();
-    if (['script', 'style', 'svg', 'path', 'noscript', 'meta', 'link'].includes(tag)) continue;
-
-    const style = window.getComputedStyle(el);
-    if (style.visibility === 'hidden' || style.display === 'none' || parseFloat(style.opacity) === 0) continue;
-
-    const elBg = parseRgb(style.backgroundColor);
-    const elColor = parseRgb(style.color);
-    const effectiveBg = getEffectiveBg(el);
-    const selector = getSelector(el);
-    const text = (el.innerText || '').trim();
-    const hasDirectText = Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim().length > 0);
-
-    // 1. Angular Material Purple Ink Bar Check
-    if (el.classList.contains('mat-ink-bar')) {
-      if (elBg && elBg.r > 90 && elBg.r < 125 && elBg.b > 160) {
-        issues.push({
-          type: 'NATIVE_PURPLE_INK_BAR',
-          severity: 'HIGH',
-          selector,
-          details: `Native purple .mat-ink-bar detected (${style.backgroundColor})`,
-          bg: style.backgroundColor
-        });
+    function getSelector(el) {
+      if (el.id) return '#' + el.id;
+      let path = el.tagName.toLowerCase();
+      if (el.className && typeof el.className === 'string') {
+        const cls = el.className.trim().split(/\s+/).filter(c => !c.startsWith('ng-') && !c.startsWith('cx-audit-')).slice(0, 2).join('.');
+        if (cls) path += '.' + cls;
       }
+      return path;
     }
 
-    // 2. Background Bleed Checks
-    if (elBg && elBg.a > 0.7 && !['img', 'video', 'canvas'].includes(tag)) {
-      const bgLum = getLuminance(elBg.r, elBg.g, elBg.b);
-      if (isDarkTheme && bgLum > 0.65 && (elBg.r > 210 && elBg.g > 210 && elBg.b > 210)) {
-        if (!el.closest('.mat-badge, .badge, .status-pill, .chip-light')) {
+    const issues = [];
+    const baseMap = baseline.elements;
+    const currentElements = document.querySelectorAll('body *');
+    const currentVisibleIds = new Set();
+    let currentVisibleCount = 0;
+
+    for (let i = 0; i < currentElements.length; i++) {
+      const el = currentElements[i];
+      const auditId = el.dataset.cxAuditId || ('cx_aud_' + i);
+      const tag = el.tagName.toLowerCase();
+      if (['script', 'style', 'svg', 'path', 'noscript', 'meta', 'link'].includes(tag)) continue;
+
+      const style = window.getComputedStyle(el);
+      const isVisible = style.visibility !== 'hidden' && style.display !== 'none' && parseFloat(style.opacity) > 0;
+      const rect = el.getBoundingClientRect();
+      const hasBox = rect.width > 0 && rect.height > 0;
+      const selector = getSelector(el);
+      const text = (el.innerText || '').slice(0, 30).trim();
+
+      if (isVisible && hasBox) {
+        currentVisibleCount++;
+        currentVisibleIds.add(auditId);
+
+        // 1. Check Parity against Native Baseline
+        const base = baseMap[auditId];
+        if (base) {
+          // A. Font Parity Check
+          const currFontFamily = cleanFontFamily(style.fontFamily);
+          const currFontSize = parseFloat(style.fontSize) || 14;
+          const currFontWeight = normalizeWeight(style.fontWeight);
+
+          if (currFontFamily !== base.font.family) {
+            issues.push({
+              category: 'PARITY',
+              type: 'FONT_FAMILY_MISMATCH',
+              severity: 'HIGH',
+              selector,
+              details: `Font family changed: Native "${base.font.rawFamily}" vs Theme "${style.fontFamily}"`,
+              textSnippet: text
+            });
+          }
+
+          if (Math.abs(currFontSize - base.font.size) > 0.5) {
+            issues.push({
+              category: 'PARITY',
+              type: 'FONT_SIZE_MISMATCH',
+              severity: 'MEDIUM',
+              selector,
+              details: `Font size changed: Native ${base.font.size}px vs Theme ${currFontSize}px`,
+              textSnippet: text
+            });
+          }
+
+          if (currFontWeight !== base.font.weight) {
+            issues.push({
+              category: 'PARITY',
+              type: 'FONT_WEIGHT_MISMATCH',
+              severity: 'HIGH',
+              selector,
+              details: `Font weight changed: Native ${base.font.weight} vs Theme ${currFontWeight}`,
+              textSnippet: text
+            });
+          }
+
+          // B. Margin Parity Check
+          const curMarginTop = parseFloat(style.marginTop) || 0;
+          const curMarginRight = parseFloat(style.marginRight) || 0;
+          const curMarginBottom = parseFloat(style.marginBottom) || 0;
+          const curMarginLeft = parseFloat(style.marginLeft) || 0;
+          const mTol = opts.marginTolerance || 1.0;
+
+          if (
+            Math.abs(curMarginTop - base.margin.top) > mTol ||
+            Math.abs(curMarginRight - base.margin.right) > mTol ||
+            Math.abs(curMarginBottom - base.margin.bottom) > mTol ||
+            Math.abs(curMarginLeft - base.margin.left) > mTol
+          ) {
+            issues.push({
+              category: 'PARITY',
+              type: 'MARGIN_MISMATCH',
+              severity: 'MEDIUM',
+              selector,
+              details: `Margins changed: Native [${base.margin.top}, ${base.margin.right}, ${base.margin.bottom}, ${base.margin.left}] vs Theme [${curMarginTop}, ${curMarginRight}, ${curMarginBottom}, ${curMarginLeft}]`,
+              textSnippet: text
+            });
+          }
+
+          // C. Element Size Parity Check
+          const curWidth = Math.round(rect.width * 10) / 10;
+          const curHeight = Math.round(rect.height * 10) / 10;
+          const sTol = opts.sizeTolerance || 2.0;
+
+          if (Math.abs(curWidth - base.size.width) > sTol || Math.abs(curHeight - base.size.height) > sTol) {
+            issues.push({
+              category: 'PARITY',
+              type: 'SIZE_MISMATCH',
+              severity: 'MEDIUM',
+              selector,
+              details: `Element size changed: Native [${base.size.width}x${base.size.height}] vs Theme [${curWidth}x${curHeight}]`,
+              textSnippet: text
+            });
+          }
+        } else {
+          // Extra element visible in theme that wasn't in native baseline
           issues.push({
-            type: 'DARK_MODE_LIGHT_BG_BLEED',
+            category: 'PARITY',
+            type: 'EXTRA_ELEMENT_VISIBLE_IN_THEME',
             severity: 'HIGH',
             selector,
-            details: `Light background bleed in dark mode (${style.backgroundColor})`,
-            bg: style.backgroundColor
+            details: `Extra element visible in theme not visible in Connect native styling`,
+            textSnippet: text
           });
         }
-      } else if (!isDarkTheme && bgLum < 0.15 && (elBg.r < 45 && elBg.g < 45 && elBg.b < 45)) {
-        if (!el.closest('.connectea-theme-toggle, .mat-tooltip')) {
-          issues.push({
-            type: 'LIGHT_MODE_DARK_BG_BLEED',
-            severity: 'MEDIUM',
-            selector,
-            details: `Unintended dark surface in light mode (${style.backgroundColor})`,
-            bg: style.backgroundColor
-          });
+
+        // 2. Styling & Unstyled Elements Checks
+        const elBg = parseRgb(style.backgroundColor);
+        const elColor = parseRgb(style.color);
+        const effectiveBg = getEffectiveBg(el);
+
+        // Native Purple Ink Bar
+        if (el.classList.contains('mat-ink-bar')) {
+          if (elBg && elBg.r > 90 && elBg.r < 125 && elBg.b > 160) {
+            issues.push({
+              category: 'STYLE',
+              type: 'NATIVE_PURPLE_INK_BAR',
+              severity: 'HIGH',
+              selector,
+              details: `Native purple .mat-ink-bar active: ${style.backgroundColor}`
+            });
+          }
+        }
+
+        // Background Bleed in Dark Mode
+        if (isDark && elBg && elBg.a > 0.7 && !['img', 'video', 'canvas'].includes(tag)) {
+          const bgLum = getLuminance(elBg.r, elBg.g, elBg.b);
+          if (bgLum > 0.65 && elBg.r > 210 && elBg.g > 210 && elBg.b > 210) {
+            if (!el.closest('.mat-badge, .badge, .status-pill, .chip-light')) {
+              issues.push({
+                category: 'STYLE',
+                type: 'DARK_MODE_LIGHT_BG_BLEED',
+                severity: 'HIGH',
+                selector,
+                details: `Light background bleed in dark theme: ${style.backgroundColor}`
+              });
+            }
+          }
+        }
+
+        // Contrast Checks
+        const hasDirectText = Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim().length > 0);
+        if (hasDirectText && elColor && effectiveBg) {
+          const cr = getContrast(elColor, effectiveBg);
+          const fontSize = parseFloat(style.fontSize) || 14;
+          const isBold = normalizeWeight(style.fontWeight) >= 600;
+          const isLarge = fontSize >= 18 || (fontSize >= 14 && isBold);
+          const minCr = isLarge ? 3.0 : 4.5;
+
+          if (cr < 2.0) {
+            issues.push({
+              category: 'STYLE',
+              type: 'CRITICAL_CONTRAST_VIOLATION',
+              severity: 'CRITICAL',
+              selector,
+              details: `Illegible contrast ratio ${cr.toFixed(2)}:1 (color: ${style.color})`,
+              contrast: cr.toFixed(2),
+              textSnippet: text
+            });
+          } else if (cr < minCr) {
+            issues.push({
+              category: 'STYLE',
+              type: 'LOW_CONTRAST_WARNING',
+              severity: 'WARNING',
+              selector,
+              details: `Sub-standard contrast ratio ${cr.toFixed(2)}:1 < ${minCr}:1`,
+              contrast: cr.toFixed(2),
+              textSnippet: text
+            });
+          }
         }
       }
     }
 
-    // 3. Typography & Serif Fallback Check
-    const font = style.fontFamily.toLowerCase();
-    const isIcon = el.classList.contains('mat-icon') || el.classList.contains('material-icons') ||
-      font.includes('fontawesome') || font.includes('material') || font.includes('glyph');
-    if (!isIcon && hasDirectText) {
-      if ((font.includes('times') || font.includes('serif')) && !font.includes('sans-serif')) {
+    // 3. Elements that were visible in native baseline but hidden in theme
+    for (const auditId of Object.keys(baseMap)) {
+      if (!currentVisibleIds.has(auditId)) {
+        const base = baseMap[auditId];
         issues.push({
-          type: 'SERIF_FALLBACK_FONT',
+          category: 'PARITY',
+          type: 'ELEMENT_HIDDEN_IN_THEME',
           severity: 'HIGH',
-          selector,
-          details: `Serif fallback font active: "${style.fontFamily}"`,
-          textSnippet: text.slice(0, 30)
+          selector: base.selector,
+          details: `Element visible in Connect native styling is hidden in theme`,
+          textSnippet: base.textSnippet
         });
       }
     }
 
-    // 4. Contrast Ratio & Legibility Checks (only on elements with direct visible text)
-    if (hasDirectText && elColor && effectiveBg) {
-      const cr = getContrast(elColor, effectiveBg);
-      const fontSize = parseFloat(style.fontSize) || 14;
-      const isBold = parseInt(style.fontWeight, 10) >= 600 || style.fontWeight === 'bold';
-      const isLarge = fontSize >= 18 || (fontSize >= 14 && isBold);
-      const minCr = isLarge ? 3.0 : 4.5;
-
-      if (cr < 2.0) {
-        issues.push({
-          type: 'CRITICAL_CONTRAST_VIOLATION',
-          severity: 'CRITICAL',
-          selector,
-          details: `Illegible contrast ratio ${cr.toFixed(2)}:1 (color: ${style.color}, bg: rgba(${effectiveBg.r},${effectiveBg.g},${effectiveBg.b},${effectiveBg.a}))`,
-          contrast: cr.toFixed(2),
-          textSnippet: text.slice(0, 40)
-        });
-      } else if (cr < minCr) {
-        issues.push({
-          type: 'LOW_CONTRAST_WARNING',
-          severity: 'WARNING',
-          selector,
-          details: `Sub-standard contrast ratio ${cr.toFixed(2)}:1 < ${minCr}:1 (color: ${style.color})`,
-          contrast: cr.toFixed(2),
-          textSnippet: text.slice(0, 40)
-        });
-      }
+    // 4. Overall visible count check
+    if (currentVisibleCount !== baseline.visibleCount) {
+      issues.push({
+        category: 'PARITY',
+        type: 'VISIBLE_COUNT_MISMATCH',
+        severity: 'HIGH',
+        selector: 'body',
+        details: `Visible elements count mismatch: Native ${baseline.visibleCount} vs Theme ${currentVisibleCount}`
+      });
     }
-  }
 
-  // Deduplicate issues by selector and type
-  const uniqueMap = new Map();
-  for (const item of issues) {
-    const key = `${item.type}:${item.selector}`;
-    if (!uniqueMap.has(key)) uniqueMap.set(key, item);
-  }
-  return Array.from(uniqueMap.values());
+    // Deduplicate issues
+    const uniqueMap = new Map();
+    for (const iss of issues) {
+      const key = `${iss.type}:${iss.selector}:${iss.details}`;
+      if (!uniqueMap.has(key)) uniqueMap.set(key, iss);
+    }
+
+    return {
+      visibleCount: currentVisibleCount,
+      baselineVisibleCount: baseline.visibleCount,
+      issues: Array.from(uniqueMap.values())
+    };
+  }, themeId, isDarkTheme, baselineData, options);
 }
 
 async function runThemeAudit() {
   const options = parseArgs();
-  console.log('[ThemeAudit] Starting Connectify Theme Unstyled Elements Audit...');
+  console.log('[ThemeAudit] Initializing Connectify Theme & Parity Auditor...');
 
   const browser = await utils.launchBrowser({
     headless: !options.headful,
@@ -236,9 +515,8 @@ async function runThemeAudit() {
     targetUrl = DEFAULT_PAGE;
   }
 
-  console.log(`[ThemeAudit] Navigating to target: ${targetUrl}`);
+  console.log(`[ThemeAudit] Target page: ${targetUrl}`);
 
-  // Handle authentication if connecting to live Connect
   if (targetUrl.includes('connect.det.wa.edu.au')) {
     await utils.authenticate(page, {
       username: options.username,
@@ -251,10 +529,23 @@ async function runThemeAudit() {
   await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 }).catch(() => {});
   await new Promise(r => setTimeout(r, 1500));
 
-  // Determine available themes from Connectify registry or default list
-  const themeList = await page.evaluate(() => {
+  // Expand interactive elements if requested
+  if (options.clickButtons) {
+    console.log('[ThemeAudit] Expanding interactive JavaScript buttons and accordions...');
+    const clickedButtons = await clickInteractiveButtons(page);
+    console.log(`  └─ Dispatched clicks to ${clickedButtons.length} interactive elements`);
+    await new Promise(r => setTimeout(r, 600));
+  }
+
+  // 1. Capture Connect Native Theme Baseline
+  console.log('\n[ThemeAudit] Capturing Connect Native Theme baseline (native styling)...');
+  const baseline = await captureNativeBaseline(page);
+  console.log(`  └─ Baseline captured: ${baseline.visibleCount} visible elements recorded.`);
+
+  // 2. Determine themes to test (excludes native/light as that is the baseline)
+  const availableThemes = await page.evaluate(() => {
     if (window.ConnectifyThemeRegistry?.getAvailableThemes) {
-      return window.ConnectifyThemeRegistry.getAvailableThemes();
+      return window.ConnectifyThemeRegistry.getAvailableThemes().filter(t => t.id !== 'light');
     }
     return [
       { id: 'dark', name: 'Dark', isDark: true },
@@ -263,17 +554,16 @@ async function runThemeAudit() {
       { id: 'midnight', name: 'Midnight Navy', isDark: true },
       { id: 'forest', name: 'Emerald Forest', isDark: true },
       { id: 'sunset', name: 'Twilight Plum', isDark: true },
-      { id: 'light', name: 'Default', isDark: false },
       { id: 'custom', name: 'Custom Theme', isDark: true }
     ];
   });
 
   const themesToTest = options.theme === 'all'
-    ? themeList
-    : themeList.filter(t => t.id === options.theme || t.name.toLowerCase() === options.theme.toLowerCase());
+    ? availableThemes
+    : availableThemes.filter(t => t.id === options.theme || t.name.toLowerCase() === options.theme.toLowerCase());
 
   if (themesToTest.length === 0) {
-    console.error(`[ThemeAudit] Unknown theme: "${options.theme}". Available: ${themeList.map(t => t.id).join(', ')}`);
+    console.error(`[ThemeAudit] Unknown theme: "${options.theme}". Available: ${availableThemes.map(t => t.id).join(', ')}`);
     await browser.close();
     process.exit(1);
   }
@@ -283,31 +573,38 @@ async function runThemeAudit() {
   }
 
   const results = {};
-  console.log(`\nAuditing ${themesToTest.length} theme(s) on ${targetUrl}\n` + '-'.repeat(64));
+  console.log(`\nAuditing ${themesToTest.length} theme(s) against Connect Native baseline\n` + '-'.repeat(72));
 
   for (const t of themesToTest) {
-    // Switch theme via ConnectifyThemeRegistry or direct DOM attributes
+    // Switch to theme
     await page.evaluate((tid) => {
       if (window.ConnectifyThemeRegistry?.setTheme) {
         window.ConnectifyThemeRegistry.setTheme(tid);
       } else {
-        const isDark = tid !== 'light';
-        document.documentElement.classList.toggle('connectea-dark', isDark);
-        if (isDark) document.documentElement.dataset.connecteaTheme = tid;
-        else delete document.documentElement.dataset.connecteaTheme;
+        document.documentElement.classList.add('connectea-dark');
+        document.documentElement.dataset.connecteaTheme = tid;
       }
     }, t.id);
 
+    // Expand buttons in theme if requested
+    if (options.clickButtons) {
+      await clickInteractiveButtons(page);
+    }
     await new Promise(r => setTimeout(r, 400));
 
-    const issues = await page.evaluate(auditPageElements, t.id, t.isDark !== false);
-    results[t.id] = { theme: t, issues };
+    const auditResult = await auditThemeAgainstBaseline(page, t.id, t.isDark !== false, baseline, options);
+    results[t.id] = { theme: t, audit: auditResult };
 
-    const criticalCount = issues.filter(i => i.severity === 'CRITICAL').length;
-    const highCount = issues.filter(i => i.severity === 'HIGH').length;
-    const warnCount = issues.filter(i => i.severity === 'WARNING' || i.severity === 'MEDIUM').length;
+    const issues = auditResult.issues;
+    const parityIssues = issues.filter(i => i.category === 'PARITY').length;
+    const criticalContrast = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
+    const styleIssues = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
 
-    console.log(`• ${t.name.padEnd(16)} [${t.id}]: ${criticalCount} critical, ${highCount} high, ${warnCount} warnings`);
+    console.log(
+      `• ${t.name.padEnd(16)} [${t.id}]: ` +
+      `Visible: ${auditResult.visibleCount}/${auditResult.baselineVisibleCount} | ` +
+      `Parity Diffs: ${parityIssues} | Critical Contrast: ${criticalContrast} | Style Issues: ${styleIssues}`
+    );
 
     if (options.screenshots) {
       const shotPath = path.join(options.screenshotsDir, `theme-${t.id}.png`);
@@ -316,56 +613,65 @@ async function runThemeAudit() {
     }
   }
 
-  console.log('-'.repeat(64));
+  console.log('-'.repeat(72));
 
-  // Generate Reports
+  // Write JSON Manifest
   fs.writeFileSync(options.outputJson, JSON.stringify({
     url: targetUrl,
     auditedAt: new Date().toISOString(),
+    baseline: {
+      theme: 'Connect Native Theme',
+      visibleCount: baseline.visibleCount,
+      totalElements: baseline.totalElements
+    },
     themes: results
   }, null, 2), 'utf8');
-  console.log(`\n[ThemeAudit] JSON report saved: ${options.outputJson}`);
+  console.log(`\n[ThemeAudit] Saved JSON audit manifest: ${options.outputJson}`);
 
-  let mdContent = `# Connectify Theme Audit Report\n\n`;
-  mdContent += `**Target Page:** \`${targetUrl}\`  \n`;
-  mdContent += `**Audited At:** ${new Date().toUTCString()}  \n\n`;
-  mdContent += `## Summary Matrix\n\n`;
-  mdContent += `| Theme | Critical | High | Warnings | Status |\n`;
-  mdContent += `| :--- | :---: | :---: | :---: | :---: |\n`;
+  // Write Markdown Report (< 150 lines)
+  let md = `# Connectify Theme Parity & Style Audit Report\n\n`;
+  md += `**Target Page:** \`${targetUrl}\`  \n`;
+  md += `**Baseline Theme:** Connect Native Theme (native styling)  \n`;
+  md += `**Native Visible Elements:** ${baseline.visibleCount}  \n`;
+  md += `**Audited At:** ${new Date().toUTCString()}  \n\n`;
+
+  md += `## Theme Parity & Compliance Matrix\n\n`;
+  md += `| Theme | Visible Count | Parity Diffs | Critical Contrast | Style Issues | Status |\n`;
+  md += `| :--- | :---: | :---: | :---: | :---: | :---: |\n`;
 
   for (const tid of Object.keys(results)) {
     const item = results[tid];
-    const c = item.issues.filter(i => i.severity === 'CRITICAL').length;
-    const h = item.issues.filter(i => i.severity === 'HIGH').length;
-    const w = item.issues.filter(i => i.severity === 'WARNING' || i.severity === 'MEDIUM').length;
-    const status = c === 0 && h === 0 ? '✅ Pass' : (c > 0 ? '❌ Critical' : '⚠️ Warning');
-    mdContent += `| **${item.theme.name}** (\`${tid}\`) | ${c} | ${h} | ${w} | ${status} |\n`;
+    const issues = item.audit.issues;
+    const pDiff = issues.filter(i => i.category === 'PARITY').length;
+    const cCrit = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
+    const sDiff = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
+    const status = pDiff === 0 && cCrit === 0 && sDiff === 0 ? '✅ Pass' : (cCrit > 0 ? '❌ Critical' : '⚠️ Warning');
+
+    md += `| **${item.theme.name}** (\`${tid}\`) | ${item.audit.visibleCount}/${item.audit.baselineVisibleCount} | ${pDiff} | ${cCrit} | ${sDiff} | ${status} |\n`;
   }
 
-  mdContent += `\n## Issue Details by Theme\n\n`;
+  md += `\n## Sample Parity & Styling Findings\n\n`;
+  md += `| Theme | Category | Type | Selector | Details |\n`;
+  md += `| :--- | :--- | :--- | :--- | :--- |\n`;
+
+  let rowCount = 0;
   for (const tid of Object.keys(results)) {
     const item = results[tid];
-    mdContent += `### ${item.theme.name} (\`${tid}\`)\n\n`;
-    if (item.issues.length === 0) {
-      mdContent += `*No unstyled elements detected.*\n\n`;
-    } else {
-      mdContent += `| Severity | Type | Selector | Details |\n`;
-      mdContent += `| :--- | :--- | :--- | :--- |\n`;
-      for (const iss of item.issues.slice(0, 20)) {
-        mdContent += `| \`${iss.severity}\` | \`${iss.type}\` | \`${iss.selector}\` | ${iss.details} |\n`;
-      }
-      if (item.issues.length > 20) {
-        mdContent += `\n*... and ${item.issues.length - 20} more issues omitted for brevity.*\n`;
-      }
-      mdContent += `\n`;
+    for (const iss of item.audit.issues) {
+      if (rowCount >= 35) break;
+      const det = (iss.details || '').replace(/\|/g, '-').slice(0, 45);
+      md += `| \`${tid}\` | ${iss.category} | \`${iss.type}\` | \`${iss.selector}\` | ${det} |\n`;
+      rowCount++;
     }
   }
+  if (rowCount === 0) {
+    md += `| *All* | - | - | - | *100% parity with Connect native styling and 0 style defects.* |\n`;
+  }
 
-  // Ensure markdown stays under 150 lines if written
-  const mdLines = mdContent.split('\n');
-  const finalMd = mdLines.length > 145 ? mdLines.slice(0, 140).join('\n') + '\n\n*Report truncated to 150 lines.*' : mdContent;
+  const mdLines = md.split('\n');
+  const finalMd = mdLines.length > 145 ? mdLines.slice(0, 140).join('\n') + '\n\n*Truncated to 150 lines.*' : md;
   fs.writeFileSync(options.outputMd, finalMd, 'utf8');
-  console.log(`[ThemeAudit] Markdown report saved: ${options.outputMd}`);
+  console.log(`[ThemeAudit] Saved Markdown audit report: ${options.outputMd}`);
 
   await browser.close();
   console.log('[ThemeAudit] Theme testing complete.');
@@ -378,4 +684,9 @@ if (require.main === module) {
   });
 }
 
-module.exports = { runThemeAudit, auditPageElements };
+module.exports = {
+  runThemeAudit,
+  clickInteractiveButtons,
+  captureNativeBaseline,
+  auditThemeAgainstBaseline
+};

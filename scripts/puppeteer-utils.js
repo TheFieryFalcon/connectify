@@ -237,6 +237,150 @@ function calculateContrastRatio(rgb1, rgb2) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+/**
+ * Audits all UI elements (buttons, glyphs, icons, inputs, tabs) on the current
+ * page to ensure a minimum 3.0:1 contrast ratio against their background.
+ */
+async function auditPageUiContrast(page) {
+  return await page.evaluate(() => {
+    function parseRgb(colorStr) {
+      if (!colorStr) return null;
+      const match = colorStr.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
+      if (!match) return null;
+      return {
+        r: parseFloat(match[1]),
+        g: parseFloat(match[2]),
+        b: parseFloat(match[3]),
+        a: match[4] !== undefined ? parseFloat(match[4]) : 1.0
+      };
+    }
+
+    function sRgbToLinear(c) {
+      const norm = c / 255;
+      return norm <= 0.03928 ? norm / 12.92 : Math.pow((norm + 0.055) / 1.055, 2.4);
+    }
+
+    function calculateLuminance(r, g, b) {
+      return 0.2126 * sRgbToLinear(r) + 0.7152 * sRgbToLinear(g) + 0.0722 * sRgbToLinear(b);
+    }
+
+    function calculateContrast(rgb1, rgb2) {
+      const l1 = calculateLuminance(rgb1.r, rgb1.g, rgb1.b);
+      const l2 = calculateLuminance(rgb2.r, rgb2.g, rgb2.b);
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+
+    function getEffectiveBg(el) {
+      let curr = el;
+      while (curr && curr !== document.documentElement) {
+        const style = window.getComputedStyle(curr);
+        const bg = parseRgb(style.backgroundColor);
+        if (bg && bg.a > 0.05) return bg;
+        curr = curr.parentElement;
+      }
+      return { r: 255, g: 255, b: 255, a: 1 };
+    }
+
+    function getSelector(el) {
+      if (el.id) return '#' + el.id;
+      let path = el.tagName.toLowerCase();
+      if (el.className && typeof el.className === 'string') {
+        const cls = el.className.trim().split(/\s+/).filter(c => !c.startsWith('ng-')).slice(0, 2).join('.');
+        if (cls) path += '.' + cls;
+      }
+      return path;
+    }
+
+    const UI_SELECTOR = [
+      'button',
+      '[role="button"]',
+      '.v-button',
+      '.mat-button',
+      '.mat-raised-button',
+      '.mat-icon-button',
+      '.eds-o-button',
+      'input[type="button"]',
+      'input[type="submit"]',
+      '.mat-icon',
+      '.material-icons',
+      '[class*="icon-"]',
+      '[class*="cvr-c-icon"]',
+      '[class*="eds-c-icon"]',
+      '.connect-webfont',
+      '.cx-handle-arrow',
+      '.connectea-theme-arrow',
+      'svg',
+      'i',
+      '.v-icon',
+      '.mat-tab-label',
+      '.mat-tab-link',
+      '.v-menubar-menuitem',
+      '.cvr-c-primary-navigation a',
+      'input:not([type="hidden"])',
+      'select',
+      'textarea',
+      '.mat-select'
+    ].join(', ');
+
+    const elements = document.querySelectorAll(UI_SELECTOR);
+    const violations = [];
+    let auditedCount = 0;
+
+    for (const el of elements) {
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) continue;
+      const style = window.getComputedStyle(el);
+      if (style.visibility === 'hidden' || style.display === 'none' || parseFloat(style.opacity) === 0) continue;
+
+      auditedCount++;
+
+      let fg = parseRgb(style.color);
+      const tag = el.tagName.toLowerCase();
+      if (tag === 'svg' || el.closest('svg')) {
+        const fill = parseRgb(style.fill);
+        const stroke = parseRgb(style.stroke);
+        if (fill && fill.a > 0.05 && style.fill !== 'none') fg = fill;
+        else if (stroke && stroke.a > 0.05 && style.stroke !== 'none') fg = stroke;
+      }
+
+      const hasText = (el.innerText || el.textContent || '').trim().length > 0;
+      if (!hasText && !['svg', 'i'].includes(tag)) {
+        const border = parseRgb(style.borderColor);
+        if (border && border.a > 0.5 && parseFloat(style.borderWidth) > 0) {
+          fg = border;
+        }
+      }
+
+      const bg = getEffectiveBg(el);
+      if (!fg || !bg) continue;
+
+      const cr = calculateContrast(fg, bg);
+      if (cr < 3.0) {
+        const label = (el.innerText || el.getAttribute('aria-label') || el.title || el.placeholder || tag).trim().slice(0, 30);
+        violations.push({
+          selector: getSelector(el),
+          tagName: tag,
+          label,
+          contrast: parseFloat(cr.toFixed(2)),
+          fgColor: `rgb(${Math.round(fg.r)}, ${Math.round(fg.g)}, ${Math.round(fg.b)})`,
+          bgColor: `rgb(${Math.round(bg.r)}, ${Math.round(bg.g)}, ${Math.round(bg.b)})`
+        });
+      }
+    }
+
+    const uniqueMap = new Map();
+    for (const v of violations) {
+      const key = `${v.selector}:${v.label}`;
+      if (!uniqueMap.has(key)) uniqueMap.set(key, v);
+    }
+
+    return {
+      auditedCount,
+      violations: Array.from(uniqueMap.values())
+    };
+  });
+}
+
 module.exports = {
   EXTENSION_ROOT,
   DEFAULT_SESSION_FILE,
@@ -248,5 +392,6 @@ module.exports = {
   authenticate,
   sRgbToLinear,
   calculateLuminance,
-  calculateContrastRatio
+  calculateContrastRatio,
+  auditPageUiContrast
 };
