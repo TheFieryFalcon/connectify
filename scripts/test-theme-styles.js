@@ -179,23 +179,20 @@ async function clickInteractiveButtons(page) {
         '.cvr-c-expansion-panel__trigger',
         '.eds-c-card__trigger',
         '.eds-c-card__header',
+        '.eds-c-tile__header',
+        '.cvr-c-tile__header',
         '.v-accordion-item-caption',
         '.v-accordion-item',
 
         // Angular Material Accordions & Expansion Panels
         '.mat-expansion-panel-header:not(.mat-expanded):not([aria-disabled="true"])',
 
-        // Angular Material & Standard Tabs
-        '.mat-tab-label:not(.mat-tab-label-active):not(.mat-tab-disabled)',
-        '[role="tab"]:not([aria-selected="true"]):not([aria-disabled="true"])',
-        '.nav-tabs > li:not(.active) > a',
-
         // Collapsible Toggles & Details
         '[data-toggle="collapse"]',
         '.panel-heading.collapsed',
         'details:not([open]) > summary',
         'summary',
-        '[aria-expanded="false"]',
+        '[aria-expanded="false"]:not([role="tab"]):not(.mat-tab-label)',
 
         // Connectify Built-in Buttons
         '#cx-expand-all',
@@ -203,24 +200,27 @@ async function clickInteractiveButtons(page) {
         '.cta-expand-outlines',
         '#cx-weakness-expand-all',
 
-        // Buttons & Clickable Triggers
-        'button:not([disabled]):not([type="submit"]):not([type="reset"])',
-        '[role="button"]:not([aria-disabled="true"])',
-        '.v-button:not(.v-disabled)',
-        '.eds-c-standard-button:not([disabled])',
-        '.eds-c-button:not([disabled])',
-        '.eds-c-icon-button:not([disabled])',
-        '.cvr-c-icon-button:not([disabled])'
+        // Calendar event details / more triggers
+        '.fc-more',
+        'a.fc-more',
+        '.fc-event',
+
+        // Dedicated expansion buttons & triggers
+        'button[class*="expand"]',
+        'button[class*="detail"]',
+        'button[class*="toggle"]',
+        '[role="button"][class*="expand"]',
+        '[role="button"][class*="detail"]'
       ].join(', ');
 
       const elements = Array.from(document.querySelectorAll(INTERACTIVE_SELECTORS));
 
       // Also detect elements with explicit expansion / details text
-      const candidateNodes = Array.from(document.querySelectorAll('div, h2, h3, h4, h5, span, a, p'));
+      const candidateNodes = Array.from(document.querySelectorAll('div, h2, h3, h4, h5, span, a, p, button'));
       for (const node of candidateNodes) {
-        if (node.children.length > 2) continue;
+        if (node.children.length > 3) continue;
         const txt = (node.innerText || node.textContent || '').trim();
-        if (/^(show\s*details|view\s*details|expand\s*all|expand\s*outlines|more\s*details)$/i.test(txt)) {
+        if (/\b(show\s*details|view\s*details|expand\s*all|expand\s*outlines|more\s*details|show\s*more|view\s*all)\b/i.test(txt)) {
           if (!elements.includes(node)) {
             elements.push(node);
           }
@@ -233,26 +233,32 @@ async function clickInteractiveButtons(page) {
       for (const el of elements) {
         // Skip theme toggle
         if (el.id === 'connectea-theme-toggle' || el.closest('#connectea-theme-toggle')) continue;
+        if (el.closest('#connectify-sidebar, #connectify-sidebar-handle')) continue;
 
         // Skip site navigation, headers, breadcrumbs, pagination
         if (el.closest('.cvr-c-header, .cvr-c-navbar, .cvr-c-primary-navigation, .cvr-c-primary-menu, .cvr-c-side-menu, .cvr-c-user-menu, nav, [role="navigation"], .breadcrumb, .breadcrumbs, .pagination, .pager')) {
           continue;
         }
 
-        // Skip calendar month/day controls and grids
-        if (el.closest('.mat-calendar, .fc-toolbar, .fc-header-toolbar, .calendar-container, [class*="calendar-nav"], [class*="calendar-header"]')) {
-          continue;
-        }
-        if (el.matches('.mat-calendar-previous-button, .mat-calendar-next-button, .mat-calendar-body-cell, .fc-prev-button, .fc-next-button, .fc-today-button')) {
+        // Skip navbar tabs and view switchers (they are audited separately as distinct sub-views)
+        if (el.matches('[role="tab"], .mat-tab-label, .mat-tab-link, .nav-tabs a, .nav-pills a, .fc-button')) {
           continue;
         }
 
-        // Skip real navigation links (allow in-page hashes, javascript:, and role="button"/"tab")
+        // Skip calendar previous/next/today navigation buttons
+        if (el.matches('.mat-calendar-previous-button, .mat-calendar-next-button, .fc-prev-button, .fc-next-button, .fc-today-button')) {
+          continue;
+        }
+        if (el.closest('.fc-toolbar, .fc-header-toolbar') && el.matches('.fc-button, button')) {
+          continue;
+        }
+
+        // Skip real navigation links (allow in-page hashes, javascript:, and role="button")
         const a = el.tagName === 'A' ? el : el.closest('a[href]');
         if (a) {
           const href = (a.getAttribute('href') || '').trim();
           const isPageAnchor = !href || href.startsWith('#') || href.startsWith('javascript:');
-          const isRoleTrigger = a.getAttribute('role') === 'button' || a.getAttribute('role') === 'tab' || a.hasAttribute('data-toggle');
+          const isRoleTrigger = a.getAttribute('role') === 'button' || a.hasAttribute('data-toggle') || a.classList.contains('fc-event') || a.classList.contains('fc-more');
           if (!isPageAnchor && !isRoleTrigger) {
             continue;
           }
@@ -326,96 +332,138 @@ async function clickInteractiveButtons(page) {
 }
 
 /**
- * Discovers sub-pages and view switchers under the current page.
- * Detects:
- * 1. Child links and query variations (e.g. ?view=week, ?view=day, /classes/123).
- * 2. Interactive tabs & view switchers (e.g. .mat-tab-label, [role="tab"], calendar views).
+ * Discovers in-page sub-views under the same URL:
+ * Specifically: different headings on the navbar, tabs, and view switchers
+ * (e.g. Month/Week/Day calendar views, tab headings, sub-nav headings).
  */
-async function discoverSubPages(page, currentUrl) {
+async function discoverSubPages(page) {
   try {
-    return await page.evaluate((baseHref) => {
-      const subPages = [];
+    return await page.evaluate(() => {
+      const views = [];
       const seen = new Set();
-      let currentBase = '';
-      let currentSearch = '';
-      try {
-        const u = new URL(baseHref);
-        currentBase = u.pathname;
-        currentSearch = u.search || '';
-      } catch {
-        currentBase = window.location.pathname;
-        currentSearch = window.location.search || '';
-      }
 
-      // 1. Direct anchor links pointing to sub-routes or query variations
-      const anchors = Array.from(document.querySelectorAll('a[href]'));
-      for (const a of anchors) {
-        const href = a.getAttribute('href');
-        if (!href || href.startsWith('#') || href.startsWith('javascript:')) continue;
-        try {
-          const fullUrl = new URL(href, window.location.href);
-          if (fullUrl.hostname !== window.location.hostname) continue;
+      const NAVBAR_HEADING_SELECTORS = [
+        // Top navbar headings & primary navigation tabs
+        '.cvr-c-navbar [role="tab"]',
+        '.cvr-c-primary-navigation [role="tab"]',
+        '.cvr-c-primary-menu [role="tab"]',
+        '.mat-tab-header .mat-tab-label',
+        '.mat-tab-nav-bar .mat-tab-link',
+        '.mat-tab-labels .mat-tab-label',
+        '[role="tablist"] [role="tab"]',
+        '.nav-tabs > li > a',
+        '.nav-pills > li > a',
 
-          // Exclude logout, login, session timeouts, static files, and document assets
-          if (/logout|signout|session_expired|login/i.test(fullUrl.pathname)) continue;
-          if (/\.(png|jpg|jpeg|gif|svg|ico|css|js|woff|woff2|ttf|pdf|zip|docx?|xlsx?)$/i.test(fullUrl.pathname)) continue;
-          if (fullUrl.pathname.startsWith('/documents') || fullUrl.pathname.startsWith('/content')) continue;
+        // Calendar sub-views (e.g. Month, Week, Day, Agenda, List)
+        '.fc-toolbar .fc-button:not(.fc-prev-button):not(.fc-next-button):not(.fc-today-button)',
+        '.fc-header-toolbar button:not(.fc-prev-button):not(.fc-next-button):not(.fc-today-button)',
+        '.mat-button-toggle-group .mat-button-toggle button',
 
-          // Sub-page criteria:
-          // A. Same pathname but has search params that differ from current
-          // B. Or starts with current pathname and is deeper (child route)
-          const isQuerySubPage = fullUrl.pathname === currentBase && fullUrl.search && fullUrl.search !== currentSearch;
-          const isPathSubPage = fullUrl.pathname.startsWith(currentBase) && fullUrl.pathname !== currentBase && fullUrl.pathname !== currentBase + '/';
-
-          if (isQuerySubPage || isPathSubPage) {
-            const cleanUrl = fullUrl.href.split('#')[0];
-            if (!seen.has(cleanUrl)) {
-              seen.add(cleanUrl);
-              const linkText = (a.innerText || a.getAttribute('aria-label') || a.title || fullUrl.search || fullUrl.pathname).trim().replace(/\s+/g, ' ');
-              subPages.push({
-                url: cleanUrl,
-                title: linkText.slice(0, 40) || 'Sub-page',
-                type: 'url'
-              });
-            }
-          }
-        } catch {}
-      }
-
-      // 2. Interactive tabs and view switchers on the page (e.g. Calendar views, Material tabs)
-      const TAB_SELECTORS = [
-        '.mat-tab-label:not(.mat-tab-label-active):not(.mat-tab-disabled)',
-        '[role="tab"]:not([aria-selected="true"]):not([aria-disabled="true"])',
-        '.fc-button:not(.fc-state-active)',
-        '.mat-button-toggle:not(.mat-button-toggle-checked) button',
-        '.cvr-c-year-selector button:not(.active)',
-        '.cvr-c-report-years button:not(.active)'
+        // Feed & section tabs
+        '[class*="feed__tab"]',
+        '[class*="feed-header__tab"]',
+        '.cvr-c-year-selector button',
+        '.cvr-c-report-years button'
       ].join(', ');
 
-      const tabNodes = Array.from(document.querySelectorAll(TAB_SELECTORS));
-      tabNodes.forEach((node, idx) => {
-        if (node.closest('.cvr-c-header, .cvr-c-navbar, .cvr-c-primary-navigation, nav, [role="navigation"]')) return;
-        const text = (node.innerText || node.getAttribute('aria-label') || node.title || `Tab ${idx + 1}`).trim().replace(/\s+/g, ' ');
-        if (/logout|signout|delete/i.test(text)) return;
+      const nodes = Array.from(document.querySelectorAll(NAVBAR_HEADING_SELECTORS));
 
-        const triggerId = `cx-subpage-trigger-${idx}`;
-        node.setAttribute('data-cx-trigger-id', triggerId);
+      nodes.forEach((el, idx) => {
+        // Skip theme toggle or controls outside main content/nav
+        if (el.id === 'connectea-theme-toggle' || el.closest('#connectea-theme-toggle')) return;
+        if (el.closest('#connectify-sidebar, #connectify-sidebar-handle')) return;
 
-        const tabKey = `trigger:${text}`;
-        if (!seen.has(tabKey)) {
-          seen.add(tabKey);
-          subPages.push({
-            triggerSelector: `[data-cx-trigger-id="${triggerId}"]`,
-            title: text.slice(0, 30) || `View ${idx + 1}`,
-            type: 'tab'
+        const text = (el.innerText || el.getAttribute('aria-label') || el.title || '').trim().replace(/\s+/g, ' ');
+        if (!text || text.length > 35) return;
+        if (/\b(logout|signout|delete|remove|next|prev|previous)\b/i.test(text)) return;
+
+        const isActive = el.classList.contains('mat-tab-label-active') ||
+                         el.classList.contains('active') ||
+                         el.classList.contains('fc-state-active') ||
+                         el.getAttribute('aria-selected') === 'true' ||
+                         el.closest('li')?.classList.contains('active');
+
+        const triggerId = `cx-nav-heading-${idx}`;
+        el.setAttribute('data-cx-nav-id', triggerId);
+
+        const key = text.toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          views.push({
+            id: triggerId,
+            selector: `[data-cx-nav-id="${triggerId}"]`,
+            title: text,
+            isActive: Boolean(isActive)
           });
         }
       });
 
-      return subPages;
-    }, currentUrl);
+      return views;
+    });
   } catch {
     return [];
+  }
+}
+
+/**
+ * Switches to a different heading on the navbar, tab, or view under the same URL.
+ * Safely handles full page reloads, portlet AJAX posts, or client-side tab transitions.
+ */
+async function activateNavbarHeading(page, headingTitle, delay = 1250) {
+  try {
+    const navPromise = page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 }).catch(() => null);
+
+    const clicked = await page.evaluate((title) => {
+      const NAVBAR_SELECTORS = [
+        '.mat-tab-header .mat-tab-label',
+        '.mat-tab-nav-bar .mat-tab-link',
+        '.mat-tab-labels .mat-tab-label',
+        '[role="tab"]',
+        '.nav-tabs > li > a',
+        '.nav-pills > li > a',
+        '.fc-toolbar .fc-button:not(.fc-prev-button):not(.fc-next-button):not(.fc-today-button)',
+        '.fc-header-toolbar button:not(.fc-prev-button):not(.fc-next-button):not(.fc-today-button)',
+        '.mat-button-toggle-group button',
+        '.cvr-c-navbar [role="tab"]',
+        '.cvr-c-navbar a.nav-link',
+        '.cvr-c-navbar a',
+        '.cvr-c-primary-navigation [role="tab"]',
+        '.cvr-c-primary-navigation a',
+        '.cvr-c-sub-navigation a',
+        '.portlet-tabs a',
+        '[class*="feed__tab"]',
+        '[class*="feed-header__tab"]',
+        '.cvr-c-year-selector button',
+        '.cvr-c-report-years button',
+        'button'
+      ].join(', ');
+
+      const nodes = Array.from(document.querySelectorAll(NAVBAR_SELECTORS));
+      const target = nodes.find(el => {
+        if (el.id === 'connectea-theme-toggle' || el.closest('#connectea-theme-toggle')) return false;
+        if (el.closest('#connectify-sidebar, #connectify-sidebar-handle')) return false;
+        const t = (el.innerText || el.getAttribute('aria-label') || el.title || '').trim().replace(/\s+/g, ' ');
+        return t.toLowerCase() === title.toLowerCase();
+      });
+
+      if (target) {
+        target.scrollIntoView?.({ block: 'nearest' });
+        target.click();
+        target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+        target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+        return true;
+      }
+      return false;
+    }, headingTitle).catch(() => true);
+
+    if (clicked) {
+      await navPromise;
+      await utils.waitForPageReady(page, delay);
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
   }
 }
 
@@ -886,173 +934,126 @@ async function runThemeAudit() {
       await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
       await utils.waitForPageReady(page, options.delay);
 
-      if (options.clickButtons) {
-        console.log('[ThemeAudit] Expanding interactive JavaScript buttons and accordions...');
-        const clicked = await clickInteractiveButtons(page);
-        const sample = clicked.length > 0
-          ? ` (${clicked.slice(0, 5).join(', ')}${clicked.length > 5 ? ` +${clicked.length - 5} more` : ''})`
-          : '';
-        console.log(`  └─ Dispatched clicks to ${clicked.length} interactive element(s)${sample}`);
-        await new Promise(r => setTimeout(r, 800));
+      // In-page Sub-views Discovery (Navbar headings, tabs, calendar view switchers)
+      let subViews = [];
+      if (options.subPages) {
+        subViews = await discoverSubPages(page);
       }
 
-      // 1. Capture Connect Native Theme Baseline
-      console.log('[ThemeAudit] Capturing Connect Native Theme baseline (native styling)...');
-      const baseline = await captureNativeBaseline(page);
-      console.log(`  └─ Baseline captured: ${baseline.visibleCount} visible elements.`);
+      // Determine initial/active view title
+      const activeSubView = subViews.find(v => v.isActive);
+      const initialTitle = activeSubView ? activeSubView.title : 'Default View';
 
-      const pageThemeResults = {};
-      console.log(`Auditing ${themesToTest.length} theme(s) against Connect Native baseline:`);
+      // Gather all views to audit under the same URL
+      const otherViews = subViews.filter(v => !v.isActive).slice(0, options.maxSubPages);
+      const viewsToAudit = [
+        { title: initialTitle, isInitial: true },
+        ...otherViews.map(v => ({ title: v.title, isInitial: false }))
+      ];
 
-      for (const t of themesToTest) {
-        await page.evaluate((tid) => {
-          if (window.ConnectifyThemeRegistry?.setTheme) {
-            window.ConnectifyThemeRegistry.setTheme(tid);
-          } else {
-            document.documentElement.classList.add('connectea-dark');
-            document.documentElement.dataset.connecteaTheme = tid;
-          }
-        }, t.id);
-
-        await new Promise(r => setTimeout(r, 300));
-
-        const auditResult = await auditThemeAgainstBaseline(page, t.id, t.isDark !== false, baseline, options);
-        pageThemeResults[t.id] = { theme: t, audit: auditResult };
-
-        const issues = auditResult.issues;
-        const parityDiffs = issues.filter(i => i.category === 'PARITY').length;
-        const criticalContrast = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
-        const styleIssues = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
-
-        console.log(
-          `• ${t.name.padEnd(16)} [${t.id}]: ` +
-          `Visible: ${auditResult.visibleCount}/${auditResult.baselineVisibleCount} | ` +
-          `Parity Diffs: ${parityDiffs} | Critical Contrast: ${criticalContrast} | Style Issues: ${styleIssues}`
-        );
-
-        if (options.screenshots) {
-          const pageSlug = targetUrl.replace(/[^a-zA-Z0-9]/g, '_').slice(-30);
-          const shotPath = path.join(options.screenshotsDir, `p${pageIdx + 1}_${pageSlug}_${t.id}.png`);
-          await page.screenshot({ path: shotPath, fullPage: false });
-          console.log(`  └─ Screenshot: ${shotPath}`);
+      if (viewsToAudit.length > 1) {
+        console.log(`[ThemeAudit] Discovered ${subViews.length} in-page sub-view(s) under ${targetUrl} (auditing ${viewsToAudit.length} view(s)):`);
+        for (let vIdx = 0; vIdx < viewsToAudit.length; vIdx++) {
+          const v = viewsToAudit[vIdx];
+          console.log(`  └─ [${vIdx + 1}/${viewsToAudit.length}] ${v.title}${v.isInitial ? ' (Initial view)' : ' (Navbar heading)'}`);
         }
       }
 
-      allPageResults[targetUrl] = {
-        url: targetUrl,
-        baselineVisibleCount: baseline.visibleCount,
-        themes: pageThemeResults
-      };
+      // Audit each view / content state under targetUrl
+      for (let vIdx = 0; vIdx < viewsToAudit.length; vIdx++) {
+        const currentView = viewsToAudit[vIdx];
+        console.log(`\n  ┌───────────────────────────────────────────────────────────────`);
+        console.log(`  │ [View ${vIdx + 1}/${viewsToAudit.length}] Auditing: ${currentView.title}`);
+        console.log(`  │ URL: ${targetUrl}`);
+        console.log(`  └───────────────────────────────────────────────────────────────`);
 
-      // 2. Sub-page Navigation & Auditing
-      if (options.subPages) {
-        // Reset page to Connect Native baseline before sub-page discovery
-        await page.evaluate(() => {
-          if (window.ConnectifyThemeRegistry?.setTheme) {
-            window.ConnectifyThemeRegistry.setTheme('default');
-          }
-          document.documentElement.classList.remove('connectea-dark');
-          delete document.documentElement.dataset.connecteaTheme;
-        }).catch(() => {});
-
-        const discoveredSubs = await discoverSubPages(page, targetUrl);
-        const subPagesToAudit = discoveredSubs.slice(0, options.maxSubPages);
-
-        if (subPagesToAudit.length > 0) {
-          console.log(`\n[ThemeAudit] Discovered ${discoveredSubs.length} sub-page(s) for ${targetUrl} (navigating up to ${subPagesToAudit.length}):`);
-          for (let sIdx = 0; sIdx < subPagesToAudit.length; sIdx++) {
-            const sub = subPagesToAudit[sIdx];
-            console.log(`  └─ [${sIdx + 1}/${subPagesToAudit.length}] ${sub.title} (${sub.type === 'url' ? sub.url : sub.triggerSelector})`);
-          }
-
-          for (let sIdx = 0; sIdx < subPagesToAudit.length; sIdx++) {
-            const sub = subPagesToAudit[sIdx];
-            let subPage = null;
-            try {
-              subPage = await browser.newPage();
-              await subPage.setViewport({ width: 1280, height: 900 });
-
-              let subUrl = targetUrl;
-              if (sub.type === 'url' && sub.url) {
-                subUrl = sub.url;
-                await subPage.goto(subUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
-              } else if (sub.type === 'tab' && sub.triggerSelector) {
-                await subPage.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
-                await utils.waitForPageReady(subPage, options.delay);
-
-                // Safely click the tab/view trigger with navigation detection
-                await Promise.all([
-                  subPage.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 }).catch(() => {}),
-                  subPage.click(sub.triggerSelector).catch(() => {})
-                ]);
-                subUrl = subPage.url();
-              }
-
-              await utils.waitForPageReady(subPage, options.delay);
-              const actualSubUrl = subPage.url();
-
-              console.log(`\n  ┌───────────────────────────────────────────────────────────────`);
-              console.log(`  │ [Sub-page ${sIdx + 1}/${subPagesToAudit.length}] Auditing: ${sub.title}`);
-              console.log(`  │ URL: ${actualSubUrl}`);
-              console.log(`  └───────────────────────────────────────────────────────────────`);
-
-              if (options.clickButtons) {
-                await clickInteractiveButtons(subPage);
-                await new Promise(r => setTimeout(r, 400));
-              }
-
-              const subBaseline = await captureNativeBaseline(subPage);
-              console.log(`    └─ Baseline captured: ${subBaseline.visibleCount} visible elements.`);
-
-              const subThemeResults = {};
-              for (const t of themesToTest) {
-                await subPage.evaluate((tid) => {
-                  if (window.ConnectifyThemeRegistry?.setTheme) {
-                    window.ConnectifyThemeRegistry.setTheme(tid);
-                  } else {
-                    document.documentElement.classList.add('connectea-dark');
-                    document.documentElement.dataset.connecteaTheme = tid;
-                  }
-                }, t.id);
-
-                await new Promise(r => setTimeout(r, 250));
-
-                const subAuditResult = await auditThemeAgainstBaseline(subPage, t.id, t.isDark !== false, subBaseline, options);
-                subThemeResults[t.id] = { theme: t, audit: subAuditResult };
-
-                const sIssues = subAuditResult.issues;
-                const sPDiffs = sIssues.filter(i => i.category === 'PARITY').length;
-                const sCCrit = sIssues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
-                const sStyles = sIssues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
-
-                console.log(
-                  `    • ${t.name.padEnd(16)} [${t.id}]: ` +
-                  `Visible: ${subAuditResult.visibleCount}/${subAuditResult.baselineVisibleCount} | ` +
-                  `Parity: ${sPDiffs} | Crit: ${sCCrit} | Style: ${sStyles}`
-                );
-
-                if (options.screenshots) {
-                  const subSlug = actualSubUrl.replace(/[^a-zA-Z0-9]/g, '_').slice(-25);
-                  const subShotPath = path.join(options.screenshotsDir, `p${pageIdx + 1}_sub${sIdx + 1}_${subSlug}_${t.id}.png`);
-                  await subPage.screenshot({ path: subShotPath, fullPage: false });
-                }
-              }
-
-              allPageResults[actualSubUrl] = {
-                url: actualSubUrl,
-                parentUrl: targetUrl,
-                subPageTitle: sub.title,
-                baselineVisibleCount: subBaseline.visibleCount,
-                themes: subThemeResults
-              };
-            } catch (subErr) {
-              console.warn(`    └─ [ThemeAudit] Failed to audit sub-page (${sub.title}): ${subErr.message}`);
-            } finally {
-              if (subPage && !subPage.isClosed()) {
-                await subPage.close().catch(() => {});
-              }
+        try {
+          // A. Switch to navbar heading if not the initial view
+          if (!currentView.isInitial) {
+            console.log(`    └─ Switching to navbar heading: "${currentView.title}"...`);
+            const activated = await activateNavbarHeading(page, currentView.title, options.delay);
+            if (!activated) {
+              console.warn(`    └─ Could not activate navbar heading "${currentView.title}", skipping.`);
+              continue;
             }
           }
+
+          // B. Open all collapsible panels on this view
+          if (options.clickButtons) {
+            console.log(`    └─ Expanding interactive panels and accordions...`);
+            const clicked = await clickInteractiveButtons(page);
+            const sample = clicked.length > 0
+              ? ` (${clicked.slice(0, 5).join(', ')}${clicked.length > 5 ? ` +${clicked.length - 5} more` : ''})`
+              : '';
+            console.log(`       └─ Dispatched clicks to ${clicked.length} panel/accordion element(s)${sample}`);
+            await new Promise(r => setTimeout(r, 600));
+          }
+
+          // C. Capture Connect Native Theme Baseline
+          console.log(`    └─ Capturing Connect Native Theme baseline for "${currentView.title}"...`);
+          const baseline = await captureNativeBaseline(page);
+          console.log(`       └─ Baseline captured: ${baseline.visibleCount} visible elements.`);
+
+          const viewThemeResults = {};
+          console.log(`    └─ Auditing ${themesToTest.length} theme(s) against Connect Native baseline:`);
+
+          // D. Audit all themes
+          for (const t of themesToTest) {
+            await page.evaluate((tid) => {
+              if (window.ConnectifyThemeRegistry?.setTheme) {
+                window.ConnectifyThemeRegistry.setTheme(tid);
+              } else {
+                document.documentElement.classList.add('connectea-dark');
+                document.documentElement.dataset.connecteaTheme = tid;
+              }
+            }, t.id);
+
+            await new Promise(r => setTimeout(r, 300));
+
+            const auditResult = await auditThemeAgainstBaseline(page, t.id, t.isDark !== false, baseline, options);
+            viewThemeResults[t.id] = { theme: t, audit: auditResult };
+
+            const issues = auditResult.issues;
+            const parityDiffs = issues.filter(i => i.category === 'PARITY').length;
+            const criticalContrast = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
+            const styleIssues = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
+
+            console.log(
+              `       • ${t.name.padEnd(16)} [${t.id}]: ` +
+              `Visible: ${auditResult.visibleCount}/${auditResult.baselineVisibleCount} | ` +
+              `Parity: ${parityDiffs} | Crit: ${criticalContrast} | Style: ${styleIssues}`
+            );
+
+            if (options.screenshots) {
+              const viewSlug = currentView.title.replace(/[^a-zA-Z0-9]/g, '_').slice(-15);
+              const pageSlug = targetUrl.replace(/[^a-zA-Z0-9]/g, '_').slice(-25);
+              const shotPath = path.join(options.screenshotsDir, `p${pageIdx + 1}_v${vIdx + 1}_${pageSlug}_${viewSlug}_${t.id}.png`);
+              await page.screenshot({ path: shotPath, fullPage: false });
+            }
+          }
+
+          // E. Record results
+          const resultKey = viewsToAudit.length > 1
+            ? `${targetUrl} [${currentView.title}]`
+            : targetUrl;
+
+          allPageResults[resultKey] = {
+            url: targetUrl,
+            viewTitle: currentView.title,
+            baselineVisibleCount: baseline.visibleCount,
+            themes: viewThemeResults
+          };
+
+          // F. Reset to Connect Native baseline before switching to next heading
+          await page.evaluate(() => {
+            if (window.ConnectifyThemeRegistry?.setTheme) {
+              window.ConnectifyThemeRegistry.setTheme('default');
+            }
+            document.documentElement.classList.remove('connectea-dark');
+            delete document.documentElement.dataset.connecteaTheme;
+          }).catch(() => {});
+        } catch (viewErr) {
+          console.warn(`    └─ [ThemeAudit] Failed to audit view "${currentView.title}": ${viewErr.message}`);
         }
       }
     } catch (err) {
@@ -1082,13 +1083,13 @@ async function runThemeAudit() {
   md += `**Baseline Theme:** Connect Native Theme (native styling)  \n`;
   md += `**Audited At:** ${new Date().toUTCString()}  \n\n`;
   md += `## Multi-Page Parity & Compliance Matrix\n\n`;
-  md += `| Page URL | Theme | Visible | Parity Diffs | Critical | Status |\n`;
+  md += `| Page URL / View | Theme | Visible | Parity Diffs | Critical | Status |\n`;
   md += `| :--- | :--- | :---: | :---: | :---: | :---: |\n`;
 
   let mdRows = 0;
   for (const pageUrl of Object.keys(allPageResults)) {
     const pageData = allPageResults[pageUrl];
-    const urlDisplay = pageUrl.replace(/^https?:\/\/connect\.det\.wa\.edu\.au/, '').slice(0, 30) || '/';
+    const urlDisplay = pageUrl.replace(/^https?:\/\/connect\.det\.wa\.edu\.au/, '').slice(0, 45) || '/';
     for (const tid of Object.keys(pageData.themes)) {
       if (mdRows >= 45) break;
       const item = pageData.themes[tid];
@@ -1125,5 +1126,6 @@ module.exports = {
   clickInteractiveButtons,
   captureNativeBaseline,
   auditThemeAgainstBaseline,
-  discoverSubPages
+  discoverSubPages,
+  activateNavbarHeading
 };
