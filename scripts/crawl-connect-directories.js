@@ -16,6 +16,11 @@ const TARGET_HOST = 'connect.det.wa.edu.au';
 
 function parseArgs() {
   const args = process.argv.slice(2);
+  const isEnvForce = process.env.npm_config_force === 'true' ||
+                     process.env.npm_config_force === '1' ||
+                     process.env.FORCE === 'true' ||
+                     process.env.FORCE === '1';
+
   const options = {
     startUrl: DEFAULT_START_URL,
     maxDepth: 7,
@@ -26,7 +31,7 @@ function parseArgs() {
     username: null,
     password: null,
     interactive: false,
-    force: false,
+    force: isEnvForce,
     session: path.resolve(__dirname, '..', utils.DEFAULT_SESSION_FILE),
     outputJson: path.resolve(__dirname, '..', 'connect_directories.json'),
     outputMd: path.resolve(__dirname, '..', 'connect_directories.md'),
@@ -44,7 +49,7 @@ function parseArgs() {
     else if ((a === '--username' || a === '-u') && args[i + 1]) options.username = args[++i];
     else if ((a === '--password' || a === '-p') && args[i + 1]) options.password = args[++i];
     else if (a === '--interactive') options.interactive = true;
-    else if (a === '--force' || a === '-f') options.force = true;
+    else if (a === '--force' || a === '-f' || a === 'force' || a === '--recrawl' || a === 'recrawl') options.force = true;
     else if (a === '--session' && args[i + 1]) options.session = path.resolve(args[++i]);
     else if (a === '--output-json' && args[i + 1]) options.outputJson = path.resolve(args[++i]);
     else if (a === '--output-md' && args[i + 1]) options.outputMd = path.resolve(args[++i]);
@@ -74,6 +79,7 @@ function normalizeUrl(rawUrl, baseUrl) {
 function isExcludedPath(pathname) {
   const lower = pathname.toLowerCase();
   if (/logout|signout|timeout|inactivity|session_expired/i.test(lower)) return true;
+  if (lower.startsWith('/cvr') || lower.startsWith('/connect/cvr')) return true;
   if (/\.(png|jpg|jpeg|gif|svg|ico|css|js|woff|woff2|ttf|eot|pdf|zip|docx?|xlsx?|pptx?)$/i.test(lower)) {
     return true;
   }
@@ -82,15 +88,14 @@ function isExcludedPath(pathname) {
 
 function categorizePath(pathname) {
   const p = pathname.toLowerCase();
-  if (p.startsWith('/connect/cvr/class/')) return 'Class Space';
-  if (p.startsWith('/connect/cvr/classes')) return 'Classes Directory';
-  if (p.startsWith('/group/students/ui/my-settings/assessment-outlines')) return 'Assessment Outlines';
-  if (p.startsWith('/group/students/ui/my-connect')) return 'Student Dashboard';
-  if (p.startsWith('/group/students/notices')) return 'Notices & Feed';
-  if (p.startsWith('/group/students/calendar')) return 'Calendar';
-  if (p.startsWith('/group/students/library')) return 'Library';
+  if (p.includes('/cls/') || p.includes('/class/')) return 'Class Space';
+  if (p.includes('/classes')) return 'Classes Directory';
+  if (p.includes('assessment-outlines')) return 'Assessment Outlines';
+  if (p.includes('my-connect')) return 'Student Dashboard';
+  if (p.includes('feed') || p.includes('notices')) return 'Notices & Feed';
+  if (p.includes('calendar')) return 'Calendar';
+  if (p.includes('library')) return 'Library';
   if (p.startsWith('/group/')) return 'Portal Page';
-  if (p.startsWith('/connect/cvr/')) return 'CVR Microfrontend';
   if (p.startsWith('/documents/') || p.startsWith('/content/')) return 'Document Repository';
   if (p.startsWith('/c/portal/') || p.startsWith('/api/')) return 'Portlet / API Endpoint';
   return 'General Route';
@@ -232,7 +237,8 @@ async function crawl() {
     'https://connect.det.wa.edu.au/group/students',
     'https://connect.det.wa.edu.au/group/students/ui/my-connect',
     'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines',
-    'https://connect.det.wa.edu.au/connect/cvr/classes',
+    'https://connect.det.wa.edu.au/group/students/ui/classes',
+    'https://connect.det.wa.edu.au/group/students/ui/feed',
     'https://connect.det.wa.edu.au/group/students/notices',
     'https://connect.det.wa.edu.au/group/students/calendar',
     'https://connect.det.wa.edu.au/group/students/library'
@@ -268,6 +274,10 @@ async function crawl() {
     try {
       const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
       if (response) responseStatus = response.status();
+      if (responseStatus >= 400) {
+        console.warn(`  └─ Skipped non-success response (${responseStatus}): ${parsedUrl.pathname}`);
+        continue;
+      }
       await utils.waitForPageReady(page, options.delay);
       pageTitle = await page.title().catch(() => '');
 

@@ -9,7 +9,8 @@
   "scripts": {
     "test": "node test_suite.js",
     "test:themes": "node scripts/test-theme-styles.js",
-    "crawl": "node scripts/crawl-connect-directories.js"
+    "crawl": "node scripts/crawl-connect-directories.js",
+    "crawl:force": "node scripts/crawl-connect-directories.js --force"
   },
   "repository": {
     "type": "git",
