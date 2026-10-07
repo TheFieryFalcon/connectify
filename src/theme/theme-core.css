@@ -111,9 +111,9 @@ html.connectea-dark {
    3. Top Navigation Bar (.cvr-c-primary-navigation)
    -------------------------------------------------------------------------- */
 .connectea-dark .cvr-c-primary-navigation {
-  background-color: #1a222d !important;
-  border-bottom: 1px solid #36485e !important;
-  color: #cbd5e1 !important;
+  background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
+  border-bottom: 1px solid var(--cx-nav-border, var(--cx-border, #36485e)) !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
 .connectea-dark :is(.cvr-c-primary-navigation__container, .cvr-c-primary-navigation__bar) {
@@ -124,23 +124,24 @@ html.connectea-dark {
 
 .connectea-dark .cvr-c-primary-navigation__links .v-link a,
 .connectea-dark .cvr-c-primary-navigation__button {
-  color: #cbd5e1 !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
   background-color: transparent !important;
   border-radius: 4px;
 }
 
 .connectea-dark .cvr-c-primary-navigation__links .v-link a:hover,
 .connectea-dark .cvr-c-primary-navigation__button:hover {
-  background-color: #24303f !important;
+  background-color: var(--cx-surface-hover, #24303f) !important;
   color: #ffffff !important;
 }
 
 /* Active tab in top navigation (e.g. My Connect) */
 .connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a, .eds-s-is-active a, .v-link.eds-s-is-active) {
-  background-color: #121820 !important;
+  background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
   color: #ffffff !important;
-  border: 1px solid #3d5066 !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
   border-bottom: 2px solid #3b82f6 !important;
+  border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
   box-shadow: none !important;
   border-radius: 4px 4px 0 0 !important;
 }
@@ -149,29 +150,29 @@ html.connectea-dark {
    4. Left Sidebar / Navigation Drawer (.cvr-c-service-menu)
    -------------------------------------------------------------------------- */
 .connectea-dark :is(.cvr-c-service-menu, .cvr-c-service-menu__wrapper, .cvr-c-service-menu__list) {
-  background-color: #1a222d !important;
-  color: #cbd5e1 !important;
-  border-right: 1px solid #36485e !important;
+  background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
+  border-right: 1px solid var(--cx-nav-border, var(--cx-border, #36485e)) !important;
 }
 
 .connectea-dark .cvr-c-service-menu__item {
   background-color: transparent !important;
-  color: #cbd5e1 !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
   transition: background-color 0.15s ease;
 }
 
 .connectea-dark .cvr-c-service-menu__item:hover {
-  background-color: #24303f !important;
+  background-color: var(--cx-surface-hover, #24303f) !important;
   color: #ffffff !important;
 }
 
 /* Active item (e.g. Assessment Outlines) */
 .connectea-dark .cvr-c-service-menu__item.eds-s-is-active,
 .connectea-dark .cvr-c-service-menu__item.v-selected {
-  background-color: #121820 !important;
+  background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
   color: #ffffff !important;
-  box-shadow: inset 3px 0 #3b82f6 !important;
-  border-left-color: #3b82f6 !important;
+  box-shadow: inset 3px 0 var(--cx-accent, #3b82f6) !important;
+  border-left-color: var(--cx-accent, #3b82f6) !important;
 }
 
 .connectea-dark .cvr-c-service-menu__item :is(.v-label, .eds-o-media__body) {
@@ -195,9 +196,9 @@ html.connectea-dark {
   .v-slot-cvr-c-heading-bar,
   .v-slot-cvr-c-page-header
 ) {
-  background-color: #18202b !important;
-  border-bottom: 1px solid #36485e !important;
-  color: #f8fafc !important;
+  background-color: var(--cx-surface-secondary, #18202b) !important;
+  border-bottom: 1px solid var(--cx-border, #36485e) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 .connectea-dark :is(

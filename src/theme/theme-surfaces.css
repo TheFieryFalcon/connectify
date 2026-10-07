@@ -7,9 +7,9 @@
   .cvr-c-learning-content-select-container,
   .cvr-c-learning-content-select-item
 ) {
-  background-color: #1e2632 !important;
-  color: #e2e8f0 !important;
-  border-color: #36485e !important;
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
+  border-color: var(--cx-border, #36485e) !important;
 }
 
 .connectea-dark :is(
@@ -17,9 +17,9 @@
   .cvr-c-featured-resources,
   .cvr-c-featured-resources__content
 ) {
-  background-color: #1e2632 !important;
-  color: #cbd5e1 !important;
-  border-color: #36485e !important;
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  border-color: var(--cx-border, #36485e) !important;
 }
 
 .connectea-dark :is(
@@ -29,22 +29,22 @@
   .v-tree,
   .v-treetable
 ) {
-  background-color: #1e2632 !important;
-  color: #e2e8f0 !important;
-  border-color: #36485e !important;
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
+  border-color: var(--cx-border, #36485e) !important;
 }
 
 .connectea-dark .cvr-c-tree-panel > tbody {
-  border-color: #36485e !important;
+  border-color: var(--cx-border, #36485e) !important;
 }
 
 .connectea-dark :is(.v-tree-node-caption, .cvr-c-tree-row):hover {
-  background-color: #24303f !important;
+  background-color: var(--cx-surface-hover, #24303f) !important;
   color: #ffffff !important;
 }
 
 .connectea-dark .v-tree-node-selected .v-tree-node-caption {
-  background-color: #2563eb !important;
+  background-color: var(--cx-accent, #2563eb) !important;
   color: #ffffff !important;
 }
 
@@ -52,20 +52,20 @@
    28. System Notifications, Alerts, Tooltips & Popovers
    -------------------------------------------------------------------------- */
 .connectea-dark .v-Notification {
-  background-color: #1e2632 !important;
-  color: #f1f5f9 !important;
-  border: 1px solid #4a617a !important;
+  background-color: var(--cx-surface-elevated, #1e2632) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
 }
 
 .connectea-dark :is(.v-Notification-caption, .v-Notification .v-Notification-caption) {
-  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
   font-weight: 700 !important;
 }
 
 .connectea-dark :is(.v-Notification-description, .v-Notification-details) {
-  color: #cbd5e1 !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
 .connectea-dark .v-Notification-warning {
@@ -81,9 +81,9 @@
   .cvr-c-notifications__heading,
   .cvr-c-notifications__item
 ) {
-  background-color: #1e2632 !important;
-  color: #cbd5e1 !important;
-  border-color: #36485e !important;
+  background-color: var(--cx-surface-elevated, #1e2632) !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  border-color: var(--cx-border, #36485e) !important;
 }
 
 .connectea-dark :is(
@@ -93,9 +93,9 @@
   .alert-light,
   .alert-dark
 ) {
-  background-color: #18202b !important;
-  color: #e2e8f0 !important;
-  border: 1px solid #3d5066 !important;
+  background-color: var(--cx-surface-secondary, #18202b) !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
   border-radius: 6px !important;
 }
 
@@ -124,17 +124,17 @@
 }
 
 .connectea-dark :is(.popover, .popover-body, .ui-tooltip, .v-tooltip, .v-tooltip-text) {
-  background-color: #18202b !important;
-  color: #f1f5f9 !important;
-  border: 1px solid #4a617a !important;
+  background-color: var(--cx-surface-elevated, #18202b) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
   border-radius: 6px !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
 }
 
 .connectea-dark .popover-header {
-  background-color: #202c3b !important;
-  color: #f8fafc !important;
-  border-bottom: 1px solid #4a617a !important;
+  background-color: var(--cx-surface-secondary, #202c3b) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-bottom: 1px solid var(--cx-border, #4a617a) !important;
   font-weight: 600 !important;
 }
 
@@ -142,21 +142,21 @@
    29. Badges, Status Labels, Tags, Switches & Wizard Steps
    -------------------------------------------------------------------------- */
 .connectea-dark :is(.badge, .badge-item, .label, .label-item):not(#connectify-sidebar *) {
-  background-color: #24303f !important;
-  color: #f1f5f9 !important;
-  border: 1px solid #4a617a !important;
+  background-color: var(--cx-surface-secondary, #24303f) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
 }
 
 .connectea-dark :is(.badge-light, .label-light, .badge-secondary, .label-secondary) {
-  background-color: #24303f !important;
-  color: #f1f5f9 !important;
-  border-color: #4a617a !important;
+  background-color: var(--cx-surface-secondary, #24303f) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border-color: var(--cx-border, #4a617a) !important;
 }
 
 .connectea-dark :is(.badge-primary, .label-primary, .label-inverse-primary) {
-  background-color: #2563eb !important;
+  background-color: var(--cx-accent, #2563eb) !important;
   color: #ffffff !important;
-  border-color: #3b82f6 !important;
+  border-color: var(--cx-accent-hover, #3b82f6) !important;
 }
 
 .connectea-dark :is(.badge-success, .label-success, .label-inverse-success) {
@@ -184,9 +184,9 @@
 }
 
 .connectea-dark :is(.cvr-c-status-label, .cvr-c-entitystatus) {
-  background-color: #24303f !important;
-  color: #f1f5f9 !important;
-  border: 1px solid #4a617a !important;
+  background-color: var(--cx-surface-secondary, #24303f) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
   border-radius: 4px !important;
 }
 
@@ -201,9 +201,9 @@
 }
 
 .connectea-dark .cvr-c-status-label--removed {
-  background-color: #1e2632 !important;
-  color: #94a3b8 !important;
-  border-color: #36485e !important;
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-muted, #94a3b8) !important;
+  border-color: var(--cx-border, #36485e) !important;
 }
 
 .connectea-dark .cvr-c-status-label--reported {
@@ -213,13 +213,13 @@
 }
 
 .connectea-dark :is(.cvr-c-switch label, .eds-c-switch__slider, .custom-switch .custom-control-label::before) {
-  background-color: #202c3b !important;
-  border: 1px solid #4a617a !important;
+  background-color: var(--cx-input-bg, #202c3b) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
 }
 
 .connectea-dark :is(.cvr-c-switch input:checked + label, .eds-c-switch input:checked + .eds-c-switch__slider, .custom-switch .custom-control-input:checked ~ .custom-control-label::before) {
-  background-color: #2563eb !important;
-  border-color: #3b82f6 !important;
+  background-color: var(--cx-accent, #2563eb) !important;
+  border-color: var(--cx-accent-hover, #3b82f6) !important;
 }
 
 .connectea-dark :is(.cvr-c-switch label:before, .eds-c-switch__slider:before, .custom-switch .custom-control-label::after) {
@@ -227,12 +227,12 @@
 }
 
 .connectea-dark :is(.cvr-c-wizard-steps, .cvr-c-wizard-step, .multi-step-item) {
-  color: #94a3b8 !important;
-  border-color: #36485e !important;
+  color: var(--cx-text-muted, #94a3b8) !important;
+  border-color: var(--cx-border, #36485e) !important;
 }
 
 .connectea-dark :is(.cvr-c-wizard-step--current, .multi-step-item.active) {
-  color: #60a5fa !important;
+  color: var(--cx-accent-hover, #60a5fa) !important;
   font-weight: 700 !important;
 }
 
@@ -240,66 +240,66 @@
    30. Search, Floating Filters, Rich Media, Editors & KaTeX
    -------------------------------------------------------------------------- */
 .connectea-dark :is(.eds-c-search__field, .cvr-c-search input, .site-search__field) {
-  background-color: #141a22 !important;
-  color: #f1f5f9 !important;
-  border: 1px solid #42556d !important;
+  background-color: var(--cx-input-bg, #141a22) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #42556d) !important;
   border-radius: 6px !important;
 }
 
 .connectea-dark :is(.cvr-c-service-float-bar-search-panel, .cvr-c-service-float-bar-filter-panel) {
-  background-color: #1a222d !important;
-  color: #e2e8f0 !important;
-  border: 1px solid #36485e !important;
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
+  border: 1px solid var(--cx-border, #36485e) !important;
 }
 
 .connectea-dark :is(.v-richtextarea, .cvr-c-richtextarea) {
-  border: 1px solid #42556d !important;
+  border: 1px solid var(--cx-border, #42556d) !important;
   border-radius: 6px !important;
 }
 
 .connectea-dark :is(.v-richtextarea .gwt-RichTextArea, .cvr-c-richtextarea iframe) {
-  background-color: #141a22 !important;
-  color: #f1f5f9 !important;
+  background-color: var(--cx-input-bg, #141a22) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
 .connectea-dark .v-richtextarea .gwt-RichTextToolbar {
-  background-color: #1a222d !important;
-  border-bottom: 1px solid #36485e !important;
-  color: #e2e8f0 !important;
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+  border-bottom: 1px solid var(--cx-border, #36485e) !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
 }
 
 .connectea-dark :is(.v-multifileupload-dropzone, .cvr-c-upload-control, .cvr-c-upload-gallery) {
-  background-color: #18202b !important;
-  border: 1.5px dashed #4a617a !important;
-  color: #cbd5e1 !important;
+  background-color: var(--cx-surface-secondary, #18202b) !important;
+  border: 1.5px dashed var(--cx-border, #4a617a) !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
   border-radius: 8px !important;
 }
 
 .connectea-dark :is(.v-multifileupload-dropzone:hover, .cvr-c-upload-control:hover) {
-  background-color: #202c3b !important;
-  border-color: #3b82f6 !important;
+  background-color: var(--cx-surface-hover, #202c3b) !important;
+  border-color: var(--cx-accent, #3b82f6) !important;
   color: #ffffff !important;
 }
 
 .connectea-dark .cvr-c-attachment-row {
-  background-color: #1a222d !important;
-  border: 1px solid #36485e !important;
-  color: #e2e8f0 !important;
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+  border: 1px solid var(--cx-border, #36485e) !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
 }
 
 .connectea-dark :is(.eds-c-empty-content, .c-empty-state, .c-empty-state-title, .c-empty-state-text) {
-  color: #94a3b8 !important;
+  color: var(--cx-text-muted, #94a3b8) !important;
 }
 
 .connectea-dark :is(.slick-slide__image-wrapper, .cvr-c-thumbnail) {
-  background-color: #1e2632 !important;
-  border-color: #36485e !important;
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  border-color: var(--cx-border, #36485e) !important;
 }
 
 .connectea-dark :is(.slick-next, .slick-prev) {
-  background-color: #24303f !important;
-  border: 1px solid #4a617a !important;
-  color: #f1f5f9 !important;
+  background-color: var(--cx-surface-hover, #24303f) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
 .connectea-dark :is(.katex, .katex-display, .katex-html) {

@@ -268,10 +268,10 @@
   .cvr-c-report-years,
   .cvr-c-year-selector
 ) {
-  background-color: #1a222d !important;
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
   background-image: none !important;
-  color: #f8fafc !important;
-  border-color: #36485e !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: var(--cx-border, #36485e) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
@@ -293,9 +293,9 @@
   [class*="year-selector"],
   [class*="report-year"]
 ) {
-  background-color: #1a222d !important;
-  color: #f8fafc !important;
-  border-color: #36485e !important;
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: var(--cx-border, #36485e) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
@@ -310,7 +310,7 @@
   [class*="report-year"]
 ) :is(div, span, p, h1, h2, h3, h4, strong, a, label, .mat-toolbar-row):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button) {
   background-color: transparent !important;
-  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 .connectea-dark :is(
@@ -320,9 +320,9 @@
   .cvr-c-report-years,
   .cvr-c-year-selector
 ) :is(button, .v-button, a, .mat-button) {
-  background-color: #24303f !important;
-  color: #f8fafc !important;
-  border: 1px solid #3d5066 !important;
+  background-color: var(--cx-button-bg, #24303f) !important;
+  color: var(--cx-button-text, #f8fafc) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
 }
 
 .connectea-dark :is(
@@ -332,9 +332,9 @@
   .cvr-c-report-years,
   .cvr-c-year-selector
 ) :is(button, .v-button, a, .mat-button):hover {
-  background-color: #313f50 !important;
+  background-color: var(--cx-surface-hover, #313f50) !important;
   color: #ffffff !important;
-  border-color: #5c7899 !important;
+  border-color: var(--cx-border-strong, #5c7899) !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -346,8 +346,8 @@
   .cvr-c-service-menu,
   .cvr-c-category-menu
 ) {
-  background-color: #1a222d !important;
-  color: #cbd5e1 !important;
+  background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
 .connectea-dark :is(
@@ -358,8 +358,8 @@
   .cvr-c-category-menu__wrapper,
   .cvr-c-primary-navigation__container
 ) {
-  background-color: #1a222d !important;
-  color: #cbd5e1 !important;
+  background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
 .connectea-dark :is(
@@ -369,8 +369,8 @@
   .cvr-c-primary-navigation__links .v-link a,
   .cvr-c-primary-navigation__button--avatar
 ) {
-  background-color: #1a222d !important;
-  color: #cbd5e1 !important;
+  background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
   transition: background-color 0.15s ease;
 }
 
@@ -381,7 +381,7 @@
   .cvr-c-primary-navigation__links .v-link a,
   .cvr-c-primary-navigation__button--avatar
 ):hover {
-  background-color: #24303f !important;
+  background-color: var(--cx-surface-hover, #24303f) !important;
   color: #ffffff !important;
 }
 
@@ -390,17 +390,17 @@
   .cvr-c-primary-menu__item,
   .cvr-c-category-menu .eds-u-interactive
 ).eds-s-is-active {
-  background-color: #121820 !important;
+  background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
   color: #edf4fc !important;
-  box-shadow: inset 3px 0 #3b82f6 !important;
+  box-shadow: inset 3px 0 var(--cx-accent, #3b82f6) !important;
 }
 
 /* Horizontal Top Navigation Active Tab Indicator */
 .connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active, .eds-s-is-active a, .v-link.eds-s-is-active a) {
-  background-color: #121820 !important;
+  background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
   color: #edf4fc !important;
   box-shadow: none !important;
-  border-bottom: 2px solid #3b82f6 !important;
+  border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
   border-radius: 4px 4px 0 0 !important;
 }
 

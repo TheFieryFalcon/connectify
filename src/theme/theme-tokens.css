@@ -172,19 +172,28 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
-/* Universal Typography & Headings */
+/* Universal Typography & Headings (Preserve webfont icons!) */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption,
-  .cvr-c-class__name, .cvr-c-classes-list__title, [class*="title"], [class*="heading"]
-) {
+  .cvr-c-class__name, .cvr-c-classes-list__title,
+  .connectea-panel, .connectea-distribution, .connectea-result
+):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]) {
   color: var(--cx-text-primary) !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  label, .cvr-c-form__label, .eds-c-label, p, span, div, li
-) {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+/* Explicit Webfont Glyph Protection: NEVER override icon font-family */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  [class^="cvr-c-icon--"], [class*=" cvr-c-icon--"], .cvr-c-icon, .cvr-c-icon--switch,
+  [class^="eds-c-icon"], [class*=" eds-c-icon"], .eds-c-icon,
+  .mat-icon, .v-icon, [data-icon], i:not(.cx-text)
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  [class^="cvr-c-icon--"], [class*=" cvr-c-icon--"], .cvr-c-icon, .cvr-c-icon--switch,
+  [class^="eds-c-icon"], [class*=" eds-c-icon"], .eds-c-icon,
+  .mat-icon, .v-icon, [data-icon], i:not(.cx-text)
+):is(::before, ::after) {
+  font-family: revert !important;
 }
 
 /* Subject Tiles, Cards, Portlets & Dashboard Containers */

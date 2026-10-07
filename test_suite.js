@@ -5165,6 +5165,103 @@ runTest('Test 139: Font stack enforcement, dark surfaces styled with theme token
   assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined);
 });
 
+runTest('Test 140: Webfont icon preservation and complete dark surface token styling across all themes', () => {
+  const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
+  const themeCoreCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-core.css'), 'utf8');
+  const themeTilesCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tiles.css'), 'utf8');
+  const themeCardsCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-cards.css'), 'utf8');
+  const themeControlsCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-controls.css'), 'utf8');
+  const themeMaterialCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-material.css'), 'utf8');
+  const themeFeedCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-feed.css'), 'utf8');
+  const themeTablesCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tables.css'), 'utf8');
+  const themeNavigationCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-navigation.css'), 'utf8');
+  const themeSurfacesCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-surfaces.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  const themeRegistryJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8');
+
+  // 1. Webfont icon preservation: font-family revert protection and no generic tag font overrides
+  assert.ok(themeTokensCss.includes('font-family: revert !important;'),
+    'theme-tokens.css must protect webfonts using font-family: revert !important');
+  assert.ok(!themeTokensCss.includes('span, div, li {\n  font-family:'),
+    'theme-tokens.css must not apply system font stack directly to span, div, li');
+  assert.ok(themeTokensCss.includes(':not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"])'),
+    'theme-tokens.css must exclude icon classes from heading typography rules');
+  assert.ok(themeMaterialCss.includes('[class^="cvr-c-icon--"]:before') && themeMaterialCss.includes('color: #cbd5e1 !important;'),
+    'theme-material.css must preserve high contrast color for webfont glyphs without overriding font-family');
+
+  // 2. All surfaces styled by old 3.2.1 dark theme use semantic theme tokens
+  // Top nav, sidebar, heading bars (theme-core.css)
+  assert.ok(themeCoreCss.includes('var(--cx-nav-bg'), 'theme-core.css must style navigation with var(--cx-nav-bg)');
+  assert.ok(themeCoreCss.includes('var(--cx-nav-item-active'), 'theme-core.css must style active nav items with var(--cx-nav-item-active)');
+  assert.ok(themeCoreCss.includes('var(--cx-surface-secondary'), 'theme-core.css must style heading bars with var(--cx-surface-secondary)');
+
+  // Cards and tiles (theme-tiles.css)
+  assert.ok(themeTilesCss.includes('var(--cx-surface-bg'), 'theme-tiles.css must style tiles with var(--cx-surface-bg)');
+
+  // Cards and compound progress (theme-cards.css)
+  assert.ok(themeCardsCss.includes('var(--cx-surface-elevated'), 'theme-cards.css must style panels with var(--cx-surface-elevated)');
+  assert.ok(themeCardsCss.includes('var(--cx-surface-secondary'), 'theme-cards.css must style progress bars with var(--cx-surface-secondary)');
+  assert.ok(themeCardsCss.includes('var(--cx-input-bg'), 'theme-cards.css must style type select with var(--cx-input-bg)');
+
+  // Feed and category menus (theme-feed.css)
+  assert.ok(themeFeedCss.includes('var(--cx-nav-bg'), 'theme-feed.css must style category menu with var(--cx-nav-bg)');
+  assert.ok(themeFeedCss.includes('var(--cx-surface-elevated'), 'theme-feed.css must style reports and toolbars with var(--cx-surface-elevated)');
+
+  // Material dialogs, accordions, and controls (theme-material.css)
+  assert.ok(themeMaterialCss.includes('var(--cx-surface-bg'), 'theme-material.css must style accordions and modals with var(--cx-surface-bg)');
+  assert.ok(themeMaterialCss.includes('var(--cx-surface-elevated'), 'theme-material.css must style category menus with var(--cx-surface-elevated)');
+  assert.ok(themeMaterialCss.includes('var(--cx-input-bg'), 'theme-material.css must style form controls with var(--cx-input-bg)');
+
+  // Tables, headers, alt rows, and hover states (theme-tables.css)
+  assert.ok(themeTablesCss.includes('var(--cx-surface-bg'), 'theme-tables.css must style tables with var(--cx-surface-bg)');
+  assert.ok(themeTablesCss.includes('var(--cx-table-header-bg'), 'theme-tables.css must style table headers with var(--cx-table-header-bg)');
+  assert.ok(themeTablesCss.includes('var(--cx-table-row-alt'), 'theme-tables.css must style alt rows with var(--cx-table-row-alt)');
+  assert.ok(themeTablesCss.includes('var(--cx-table-row-hover'), 'theme-tables.css must style hover rows with var(--cx-table-row-hover)');
+
+  // Menus, calendars, and speech boxes (theme-navigation.css)
+  assert.ok(themeNavigationCss.includes('var(--cx-surface-elevated'), 'theme-navigation.css must style dropdowns with var(--cx-surface-elevated)');
+  assert.ok(themeNavigationCss.includes('var(--cx-surface-bg'), 'theme-navigation.css must style calendars with var(--cx-surface-bg)');
+  assert.ok(themeNavigationCss.includes('var(--cx-surface-secondary'), 'theme-navigation.css must style speech boxes/breadcrumbs with var(--cx-surface-secondary)');
+
+  // Form controls, buttons, checkboxes, dropdowns, and progress pills (theme-controls.css)
+  assert.ok(themeControlsCss.includes('var(--cx-input-bg'), 'theme-controls.css must style inputs and selects with var(--cx-input-bg)');
+  assert.ok(themeControlsCss.includes('var(--cx-button-bg'), 'theme-controls.css must style buttons with var(--cx-button-bg)');
+  assert.ok(themeControlsCss.includes('var(--cx-accent'), 'theme-controls.css must style checked controls with var(--cx-accent)');
+
+  // Surfaces: learning areas, resource panels, tree panels, notifications, alerts (theme-surfaces.css)
+  assert.ok(themeSurfacesCss.includes('var(--cx-surface-bg'), 'theme-surfaces.css must style learning areas with var(--cx-surface-bg)');
+  assert.ok(themeSurfacesCss.includes('var(--cx-surface-elevated'), 'theme-surfaces.css must style notifications with var(--cx-surface-elevated)');
+  assert.ok(themeSurfacesCss.includes('var(--cx-surface-secondary'), 'theme-surfaces.css must style alerts with var(--cx-surface-secondary)');
+
+  // 3. Every preset theme defines complete surface palettes in theme-tokens.css
+  const themes = ['dark', 'quantum', 'amoled', 'midnight', 'forest', 'sunset'];
+  const requiredTokens = [
+    '--cx-canvas-bg', '--cx-surface-bg', '--cx-surface-secondary', '--cx-surface-elevated',
+    '--cx-border', '--cx-text-primary', '--cx-text-secondary', '--cx-accent',
+    '--cx-nav-bg', '--cx-button-bg', '--cx-input-bg', '--cx-table-header-bg'
+  ];
+  for (const th of themes) {
+    const selector = `[data-connectea-theme="${th}"]`;
+    assert.ok(themeTokensCss.includes(selector), `theme-tokens.css must define selector for ${th}`);
+    for (const tok of requiredTokens) {
+      assert.ok(themeTokensCss.includes(tok), `theme-tokens.css must define ${tok} for all themes`);
+    }
+  }
+
+  // 4. Runtime theme switching verification across all themes
+  delete window.ConnectifyThemeLoaded;
+  eval(themeRegistryJs);
+  eval(themeJs);
+
+  for (const th of themes) {
+    window.ConnectifyTheme.applyTheme(true, th);
+    assert.strictEqual(document.documentElement.dataset.connecteaTheme, th,
+      `applyTheme(true, '${th}') must set data-connectea-theme to '${th}'`);
+    assert.ok(document.documentElement.classList.contains('connectea-dark'),
+      `applyTheme(true, '${th}') must keep connectea-dark class on html`);
+  }
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

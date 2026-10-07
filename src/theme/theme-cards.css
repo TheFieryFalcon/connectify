@@ -6,8 +6,8 @@
 }
 
 .connectea-dark .cx-compound-progress-bar {
-  background-color: #151c26 !important;
-  border: 1px solid #3d526b !important;
+  background-color: var(--cx-surface-secondary, #151c26) !important;
+  border: 1px solid var(--cx-border, #3d526b) !important;
   border-radius: 4px !important;
 }
 
@@ -256,25 +256,25 @@
 }
 
 .connectea-dark .connectea-type-select {
-  background-color: #182330 !important;
-  border: 1px solid #385170 !important;
-  color: #dceaf7 !important;
+  background-color: var(--cx-input-bg, #182330) !important;
+  border: 1px solid var(--cx-input-border, #385170) !important;
+  color: var(--cx-text-primary, #dceaf7) !important;
   border-radius: 6px !important;
 }
 
 .connectea-dark .connectea-type-select:hover {
-  background-color: #202d3e !important;
-  border-color: #4b6a8f !important;
+  background-color: var(--cx-surface-hover, #202d3e) !important;
+  border-color: var(--cx-border-strong, #4b6a8f) !important;
 }
 
 .connectea-dark .connectea-type-select:focus {
-  border-color: #60a5fa !important;
-  outline: 2px solid #60a5fa !important;
+  border-color: var(--cx-accent, #60a5fa) !important;
+  outline: 2px solid var(--cx-accent, #60a5fa) !important;
 }
 
 .connectea-dark .connectea-type-select.connectea-overridden {
-  background-color: #22374e !important;
-  border-color: #43719e !important;
+  background-color: var(--cx-surface-elevated, #22374e) !important;
+  border-color: var(--cx-accent, #43719e) !important;
   color: #ffffff !important;
 }
 
@@ -296,7 +296,7 @@
 }
 
 .connectea-dark .cvr-c-task__chart [fill="#FFFFFF"] {
-  fill: #161e29 !important;
+  fill: var(--cx-surface-secondary, #161e29) !important;
 }
 
 .connectea-dark .cvr-c-task__chart [stroke="#A9A9A9"],
