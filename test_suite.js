@@ -5332,6 +5332,31 @@ runTest('Test 141: Top navbar Open Sans typography, height, white text, and ligh
     'theme-tiles.css must preserve border-left and border-radius: 0 on tile header action button');
 });
 
+runTest('Test 142: Sleek compact theme toggle button geometry and elimination of nested arrow box', () => {
+  const themeCoreCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-core.css'), 'utf8');
+  const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
+
+  // 1. Sleek compact dimensions on #connectea-theme-toggle
+  assert.ok(themeCoreCss.includes('height: 28px;'),
+    'theme-core.css must set compact 28px height on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('padding: 5px 12px;'),
+    'theme-core.css must set sleek 5px 12px padding on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('border-radius: 6px;'),
+    'theme-core.css must set sleek 6px border-radius on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('font-size: 12px;'),
+    'theme-core.css must set 12px font size on #connectea-theme-toggle');
+
+  // 2. Elimination of nested box styling on .connectea-theme-arrow
+  assert.ok(themeTokensCss.includes('.connectea-theme-arrow {\n  display: inline-block;') &&
+            themeTokensCss.includes('background: transparent;') &&
+            themeTokensCss.includes('border: none;'),
+    'theme-tokens.css must use sleek inline-block transparent borderless styling on .connectea-theme-arrow');
+  assert.ok(!themeTokensCss.includes('background: rgba(255, 255, 255, 0.14);'),
+    'theme-tokens.css must not add an awkward nested box background to .connectea-theme-arrow');
+  assert.ok(!themeTokensCss.includes('border: 1px solid rgba(255, 255, 255, 0.2);'),
+    'theme-tokens.css must not add an awkward nested border to .connectea-theme-arrow');
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

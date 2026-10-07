@@ -396,21 +396,19 @@
 
 /* Theme Selector Popover Menu, Trigger Button & Swatches */
 .connectea-theme-arrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 8px;
-  padding: 3px 8px;
-  font-size: 11px;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 10px;
+  opacity: 0.8;
+  vertical-align: middle;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
+
 .connectea-theme-arrow:hover {
-  background: rgba(255, 255, 255, 0.28);
-  border-color: rgba(255, 255, 255, 0.4);
+  opacity: 1;
 }
 
 #connectea-theme-menu {
