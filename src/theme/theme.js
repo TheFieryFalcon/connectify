@@ -1,8 +1,8 @@
 /**
  * Connectify Dark Theme Engine
  *
- * Provides instant, flicker-free site-wide dark mode styling for Connect
- * and accordion arrow enhancements.
+ * Provides instant, flicker-free site-wide dark mode styling for Connect,
+ * dynamic theme switching, custom palettes, and surface adaptations.
  */
 (() => {
   'use strict';
@@ -16,6 +16,10 @@
   const STORAGE_THEME_ID = 'connectea:theme:id';
   let isDarkMode = false;
   let activeTheme = 'dark';
+  let toggleButton = null;
+  let themeSelectBtn = null;
+  let themeMenu = null;
+  const closeThemeMenu = () => { if (themeMenu) { themeMenu.remove(); themeMenu = null; } };
 
   const isLoginUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
     try {
@@ -34,6 +38,31 @@
       );
     }
   };
+
+  function updateDomThemeAttributes(dark, themeId, isLogin) {
+    if (isLogin) {
+      document.documentElement.classList.remove('connectea-dark');
+      delete document.documentElement.dataset.connecteaTheme;
+      document.documentElement.removeAttribute('data-connectea-theme');
+      document.documentElement.setAttribute('data-connectea-login', 'true');
+      if (document.body) {
+        document.body.classList.remove('connectea-dark');
+        delete document.body.dataset.connecteaTheme;
+        document.body.removeAttribute('data-connectea-theme');
+      }
+      if (window.ConnectifyThemeRegistry?.clearCustomTokens) window.ConnectifyThemeRegistry.clearCustomTokens();
+      if (toggleButton?.parentElement) toggleButton.remove();
+      if (themeSelectBtn?.parentElement) themeSelectBtn.remove();
+      if (themeMenu) closeThemeMenu();
+    } else {
+      document.documentElement.removeAttribute('data-connectea-login');
+      document.documentElement.classList.toggle('connectea-dark', dark);
+      if (document.body) document.body.classList.toggle('connectea-dark', dark);
+      const cur = themeId || (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (dark ? 'dark' : 'light'));
+      if (dark) document.documentElement.dataset.connecteaTheme = cur;
+      else { delete document.documentElement.dataset.connecteaTheme; document.documentElement.removeAttribute('data-connectea-theme'); }
+    }
+  }
 
   try {
     if (isLoginUrl()) {
@@ -60,27 +89,8 @@
     }
   } catch {}
 
-  // Strip or apply dark mode and theme attributes
-  if (isLoginUrl()) {
-    document.documentElement.classList.remove('connectea-dark');
-    delete document.documentElement.dataset.connecteaTheme;
-    document.documentElement.removeAttribute('data-connectea-theme');
-    document.documentElement.setAttribute('data-connectea-login', 'true');
-    if (document.body) {
-      document.body.classList.remove('connectea-dark');
-      delete document.body.dataset.connecteaTheme;
-      document.body.removeAttribute('data-connectea-theme');
-    }
-  } else {
-    document.documentElement.removeAttribute('data-connectea-login');
-    document.documentElement.classList.toggle('connectea-dark', isDarkMode);
-    if (document.body) document.body.classList.toggle('connectea-dark', isDarkMode);
-    if (isDarkMode) document.documentElement.dataset.connecteaTheme = activeTheme;
-    else { delete document.documentElement.dataset.connecteaTheme; document.documentElement.removeAttribute('data-connectea-theme'); }
-  }
-
-  // Reuse existing button if already in DOM or create once
-  let toggleButton = document.getElementById('connectea-theme-toggle');
+  // Reuse existing buttons if already in DOM or create once
+  toggleButton = document.getElementById('connectea-theme-toggle');
   if (!toggleButton) {
     toggleButton = document.createElement('button');
     toggleButton.id = 'connectea-theme-toggle';
@@ -88,13 +98,25 @@
   }
   toggleButton.className = 'connectea-theme-toggle';
 
+  themeSelectBtn = document.getElementById('connectea-theme-select-btn');
+  if (!themeSelectBtn) {
+    themeSelectBtn = document.createElement('button');
+    themeSelectBtn.id = 'connectea-theme-select-btn';
+    themeSelectBtn.type = 'button';
+    themeSelectBtn.className = 'connectea-theme-select-btn';
+    themeSelectBtn.title = 'Select theme';
+    themeSelectBtn.setAttribute('aria-label', 'Select theme');
+    themeSelectBtn.textContent = '🎨 Themes ▾';
+  }
+
+  updateDomThemeAttributes(isDarkMode, activeTheme, isLoginUrl());
+
   function cleanupDuplicateButtons() {
-    const existingButtons = document.querySelectorAll('#connectea-theme-toggle, .connectea-theme-toggle');
-    for (const btn of existingButtons) if (btn !== toggleButton) btn.remove();
+    for (const btn of document.querySelectorAll('#connectea-theme-toggle, .connectea-theme-toggle')) if (btn !== toggleButton) btn.remove();
+    for (const btn of document.querySelectorAll('#connectea-theme-select-btn, .connectea-theme-select-btn')) if (btn !== themeSelectBtn) btn.remove();
     const containers = [document.querySelector('.cvr-c-primary-navigation'), document.body].filter(Boolean);
     for (const container of containers) {
-      const candidates = container.querySelectorAll('button:not(#connectea-theme-toggle):not(.cx-calculator-tool):not(.cx-back-menu):not(.cx-close-btn)');
-      for (const btn of candidates) {
+      for (const btn of container.querySelectorAll('button:not(#connectea-theme-toggle):not(#connectea-theme-select-btn):not(.cx-calculator-tool):not(.cx-back-menu):not(.cx-close-btn)')) {
         if (btn.closest('#connectify-sidebar')) continue;
         const text = (btn.textContent || '').trim().toLowerCase();
         const aria = (btn.getAttribute('aria-label') || '').toLowerCase();
@@ -115,6 +137,7 @@
     cleanupDuplicateButtons();
     if (isLoginUrl()) {
       if (toggleButton.parentElement) toggleButton.remove();
+      if (themeSelectBtn.parentElement) themeSelectBtn.remove();
       if (themeMenu) closeThemeMenu();
       return;
     }
@@ -122,6 +145,7 @@
     const nav = document.querySelector('.cvr-c-primary-navigation');
     if (!nav) {
       if (toggleButton.parentElement) toggleButton.remove();
+      if (themeSelectBtn.parentElement) themeSelectBtn.remove();
       return;
     }
     if (toggleButton.parentElement !== nav) nav.append(toggleButton);
@@ -140,7 +164,12 @@
       }
     }
     if (computedInset !== null) headerRightInset = computedInset;
-    toggleButton.style.right = `${headerRightInset ?? 90}px`;
+    const baseInset = headerRightInset ?? 90;
+    toggleButton.style.right = `${baseInset}px`;
+
+    if (themeSelectBtn.parentElement !== nav) nav.append(themeSelectBtn);
+    const toggleWidth = toggleButton.offsetWidth || 104;
+    themeSelectBtn.style.right = `${baseInset + toggleWidth + 8}px`;
   }
 
   function parseRgb(value, allowTranslucent = false) {
@@ -162,7 +191,7 @@
     if (!isDarkMode || isLoginUrl()) return;
     try {
       const surfaceCandidates = document.body.querySelectorAll(
-        ':is(header, nav, aside, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .eds-c-nav-list, .eds-c-nav-list__item, .portlet-content, .portlet-body):not([data-connectea-surface]):not(.cvr-c-primary-navigation):not(.cvr-c-primary-navigation *):not(.cvr-c-header):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
+        ':is(header, nav, aside, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .eds-c-nav-list, .eds-c-nav-list__item, .portlet, .portlet-content, .portlet-body, .journal-content-article, .eds-c-tile__body, .cvr-c-tile__body, [class*="help"], [class*="guide"], [class*="resource"]):not([data-connectea-surface]):not(.cvr-c-primary-navigation):not(.cvr-c-primary-navigation *):not(.cvr-c-header):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(#connectea-theme-select-btn):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
       );
       for (const el of surfaceCandidates) {
         if (['SCRIPT', 'STYLE', 'LINK', 'CANVAS', 'VIDEO', 'IFRAME', 'SVG'].includes(el.tagName)) continue;
@@ -171,7 +200,7 @@
         if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) el.setAttribute('data-connectea-surface', '');
       }
       const inkCandidates = document.querySelectorAll(
-        '[data-connectea-surface] :is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
+        '[data-connectea-surface] :is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(#connectea-theme-select-btn):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
       );
       for (const el of inkCandidates) {
         if (el.children.length > 2 || el.hasAttribute('data-connectea-surface')) continue;
@@ -182,10 +211,7 @@
     } catch (e) {}
   }
 
-  let themeMenu = null;
-  const closeThemeMenu = () => { if (themeMenu) { themeMenu.remove(); themeMenu = null; } };
-
-  function openThemeMenu() {
+  function openThemeMenu(anchorEl) {
     closeThemeMenu();
     if (isLoginUrl()) return;
     themeMenu = document.createElement('div');
@@ -194,14 +220,10 @@
 
     const reg = window.ConnectifyThemeRegistry;
     const themes = reg ? reg.getAvailableThemes() : [
-      { id: 'dark', name: 'Dark', icon: '☾', swatch: ['#12171f', '#1e2632', '#3b82f6'] },
-      { id: 'quantum', name: 'Quantum Dark', icon: '⚛', swatch: ['#292929', '#333333', '#d4b483'] },
-      { id: 'amoled', name: 'AMOLED Black', icon: '🌑', swatch: ['#000000', '#0a0a0a', '#38bdf8'] },
-      { id: 'midnight', name: 'Midnight Navy', icon: '🌌', swatch: ['#0b132b', '#141f36', '#60a5fa'] },
-      { id: 'forest', name: 'Emerald Forest', icon: '🌲', swatch: ['#0a1914', '#11261f', '#10b981'] },
-      { id: 'sunset', name: 'Twilight Plum', icon: '🌅', swatch: ['#19111c', '#26182a', '#f43f5e'] },
-      { id: 'light', name: 'Default', icon: '☀', swatch: ['#f8fafc', '#ffffff', '#3b82f6'] },
-      { id: 'custom', name: 'Custom Theme', icon: '🎨', swatch: ['#111827', '#1f2937', '#6366f1'] }
+      { id: 'dark', name: 'Dark', icon: '☾', swatch: ['#12171f', '#1e2632', '#3b82f6'] }, { id: 'quantum', name: 'Quantum Dark', icon: '⚛', swatch: ['#292929', '#333333', '#d4b483'] },
+      { id: 'amoled', name: 'AMOLED Black', icon: '🌑', swatch: ['#000000', '#0a0a0a', '#38bdf8'] }, { id: 'midnight', name: 'Midnight Navy', icon: '🌌', swatch: ['#0b132b', '#141f36', '#60a5fa'] },
+      { id: 'forest', name: 'Emerald Forest', icon: '🌲', swatch: ['#0a1914', '#11261f', '#10b981'] }, { id: 'sunset', name: 'Twilight Plum', icon: '🌅', swatch: ['#19111c', '#26182a', '#f43f5e'] },
+      { id: 'light', name: 'Default', icon: '☀', swatch: ['#f8fafc', '#ffffff', '#3b82f6'] }, { id: 'custom', name: 'Custom Theme', icon: '🎨', swatch: ['#111827', '#1f2937', '#6366f1'] }
     ];
     const activeId = reg ? reg.getTheme() : (isDarkMode ? 'dark' : 'light');
 
@@ -240,7 +262,13 @@
       customPanel.appendChild(row);
     }
     themeMenu.appendChild(customPanel);
-    toggleButton.appendChild(themeMenu);
+
+    const target = anchorEl || themeSelectBtn || toggleButton;
+    const rect = target.getBoundingClientRect();
+    themeMenu.style.position = 'fixed';
+    themeMenu.style.top = `${Math.round(rect.bottom + 6)}px`;
+    themeMenu.style.right = `${Math.max(8, Math.round(window.innerWidth - rect.right))}px`;
+    document.body.appendChild(themeMenu);
   }
 
   function applyTheme(isDark, themeId) {
@@ -269,27 +297,7 @@
       } catch {}
     }
     isDarkMode = isDark;
-    if (isLoginUrl()) {
-      document.documentElement.classList.remove('connectea-dark');
-      delete document.documentElement.dataset.connecteaTheme;
-      document.documentElement.removeAttribute('data-connectea-theme');
-      document.documentElement.setAttribute('data-connectea-login', 'true');
-      if (document.body) {
-        document.body.classList.remove('connectea-dark');
-        delete document.body.dataset.connecteaTheme;
-        document.body.removeAttribute('data-connectea-theme');
-      }
-      if (window.ConnectifyThemeRegistry?.clearCustomTokens) window.ConnectifyThemeRegistry.clearCustomTokens();
-      if (toggleButton.parentElement) toggleButton.remove();
-      if (themeMenu) closeThemeMenu();
-    } else {
-      document.documentElement.removeAttribute('data-connectea-login');
-      document.documentElement.classList.toggle('connectea-dark', isDarkMode);
-      if (document.body) document.body.classList.toggle('connectea-dark', isDarkMode);
-      const currentTheme = themeId || (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (isDarkMode ? 'dark' : 'light'));
-      if (isDarkMode) document.documentElement.dataset.connecteaTheme = currentTheme;
-      else { delete document.documentElement.dataset.connecteaTheme; document.documentElement.removeAttribute('data-connectea-theme'); }
-    }
+    updateDomThemeAttributes(isDarkMode, themeId, isLoginUrl());
 
     const label = isDarkMode ? '☀ Light mode' : '☾ Dark mode';
     if (toggleButton.textContent !== label) toggleButton.textContent = label;
@@ -314,7 +322,7 @@
   toggleButton.onclick = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     if (e?.target?.closest?.('.connectea-theme-arrow')) {
-      if (themeMenu) closeThemeMenu(); else openThemeMenu();
+      if (themeMenu) closeThemeMenu(); else openThemeMenu(toggleButton);
       return;
     }
     const now = Date.now();
@@ -331,13 +339,18 @@
     applyTheme(nextDark);
   };
 
-  toggleButton.oncontextmenu = (e) => {
+  themeSelectBtn.onclick = (e) => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
-    if (themeMenu) closeThemeMenu(); else openThemeMenu();
+    if (themeMenu) closeThemeMenu();
+    else openThemeMenu(themeSelectBtn);
   };
+  themeSelectBtn.oncontextmenu = (e) => { if (e) { e.preventDefault(); e.stopPropagation(); } if (themeMenu) closeThemeMenu(); else openThemeMenu(themeSelectBtn); };
+  toggleButton.oncontextmenu = (e) => { if (e) { e.preventDefault(); e.stopPropagation(); } if (themeMenu) closeThemeMenu(); else openThemeMenu(toggleButton); };
 
   document.addEventListener('click', (e) => {
-    if (themeMenu && toggleButton && !toggleButton.contains(e.target)) closeThemeMenu();
+    if (themeMenu && !themeMenu.contains(e.target) && !toggleButton.contains(e.target) && (!themeSelectBtn || !themeSelectBtn.contains(e.target))) {
+      closeThemeMenu();
+    }
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && themeMenu) closeThemeMenu();
@@ -370,8 +383,7 @@
           } catch {}
           applyTheme(false);
         }
-        if (toggleButton.parentElement) toggleButton.remove();
-        if (themeMenu) closeThemeMenu();
+        updateDomThemeAttributes(false, 'light', true);
         return;
       }
       try {
@@ -395,9 +407,9 @@
   new MutationObserver(records => {
     if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
     const shouldUpdate = records.some(r => {
-      if (r.target === toggleButton || r.target.parentElement?.closest('#connectea-theme-toggle') || r.target.closest?.('#connectify-sidebar')) return false;
+      if (r.target === toggleButton || r.target === themeSelectBtn || r.target.parentElement?.closest('#connectea-theme-toggle, #connectea-theme-select-btn') || r.target.closest?.('#connectify-sidebar')) return false;
       if (r.type === 'attributes' && (r.attributeName === 'data-connectea-surface' || r.attributeName === 'data-connectea-ink')) return false;
-      if (r.target?.closest?.('.eds-c-tile, .cvr-c-tile, .eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectea-panel')) return false;
+      if (r.target?.closest?.('.eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectea-panel')) return false;
       return true;
     });
     if (shouldUpdate) debouncedSync();
@@ -434,17 +446,7 @@
         }
       } catch {}
       if (isLoginUrl()) {
-        document.documentElement.classList.remove('connectea-dark');
-        delete document.documentElement.dataset.connecteaTheme;
-        document.documentElement.removeAttribute('data-connectea-theme');
-        document.documentElement.setAttribute('data-connectea-login', 'true');
-        if (document.body) {
-          document.body.classList.remove('connectea-dark');
-          delete document.body.dataset.connecteaTheme;
-          document.body.removeAttribute('data-connectea-theme');
-        }
-        if (toggleButton.parentElement) toggleButton.remove();
-        if (themeMenu) closeThemeMenu();
+        updateDomThemeAttributes(false, 'light', true);
       } else {
         if (document.body) document.body.classList.toggle('connectea-dark', isDarkMode);
         updateTogglePosition(true);
@@ -457,8 +459,7 @@
   const mountPollInterval = setInterval(() => {
     mountPollCount++;
     if (isLoginUrl()) {
-      if (toggleButton.parentElement) toggleButton.remove();
-      if (themeMenu) closeThemeMenu();
+      updateDomThemeAttributes(false, 'light', true);
       clearInterval(mountPollInterval);
       return;
     }
@@ -488,9 +489,7 @@
       applyTheme(id !== 'light', id);
       return res;
     },
-    getAvailableThemes: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getAvailableThemes() : [
-      { id: 'dark', name: 'Dark', icon: '☾' }, { id: 'light', name: 'Default', icon: '☀' }
-    ]),
+    getAvailableThemes: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getAvailableThemes() : [{ id: 'dark', name: 'Dark', icon: '☾' }, { id: 'light', name: 'Default', icon: '☀' }]),
     registerTheme: def => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.registerTheme(def) : false),
     getCustomColors: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getCustomColors() : null),
     setCustomColors: c => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setCustomColors(c) : false)

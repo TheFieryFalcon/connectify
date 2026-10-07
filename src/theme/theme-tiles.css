@@ -299,9 +299,14 @@
   color: #94a3b8 !important;
 }
 
-.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-tile__body, .cvr-c-tile__body, .eds-c-accordion__panel) {
+.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-accordion__panel) {
   background-color: transparent !important;
   color: #e2e8f0 !important;
+}
+
+.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-tile__body, .cvr-c-tile__body) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
 /* Generic Tile Bodies, Inner Containers, Nav Lists & Resource Rows (Connect Help, Resources) */
@@ -312,7 +317,12 @@
   .eds-c-card,
   .cvr-c-card,
   .mat-card,
-  .cvr-c-dashboard-card
+  .cvr-c-dashboard-card,
+  .portlet,
+  .portlet-boundary,
+  .portlet-content,
+  .portlet-body,
+  .journal-content-article
 ) :is(
   .eds-c-tile__body,
   .cvr-c-tile__body,
@@ -320,6 +330,9 @@
   .cvr-c-tile__content,
   .eds-c-card__body,
   .cvr-c-card__body,
+  .portlet-content,
+  .portlet-body,
+  .journal-content-article,
   .eds-c-nav-list,
   .eds-c-nav-list__item,
   .eds-c-nav-list__link,
@@ -333,11 +346,16 @@
   .eds-c-resource,
   .cvr-c-notice,
   .cvr-c-notice-card,
-  .cvr-c-feed-item
+  .cvr-c-feed-item,
+  [class*="guide"],
+  [class*="help"],
+  [class*="resource"],
+  ul,
+  ol
 ) {
-  background-color: #1e2632 !important;
-  border-color: #2e3c4e !important;
-  color: #e2e8f0 !important;
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
@@ -346,11 +364,16 @@
   .eds-c-nav-list__link,
   .cvr-c-resource,
   .cvr-c-resource-item,
-  .eds-c-resource
+  .eds-c-resource,
+  [class*="guide"],
+  [class*="help"]
 ) {
   background-color: #1e2632 !important;
+  background-color: var(--cx-surface-bg, #1e2632) !important;
   border-color: #2e3c4e !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
   color: #e2e8f0 !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
@@ -358,9 +381,12 @@
   .eds-c-nav-list__link,
   .eds-c-list__item,
   .eds-c-tile-list__item,
-  .cvr-c-resource-item
+  .cvr-c-resource-item,
+  [class*="guide"] li,
+  [class*="help"] li
 ):hover {
   background-color: #263344 !important;
+  background-color: var(--cx-surface-hover, #263344) !important;
   color: #ffffff !important;
 }
 
@@ -368,9 +394,11 @@
   .eds-c-nav-list,
   .eds-c-nav-list__item,
   .cvr-c-resource,
-  .eds-c-resource
+  .eds-c-resource,
+  [class*="guide"],
+  [class*="help"]
 ) :is(a, span, p, div, label, strong) {
-  color: #e2e8f0 !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
@@ -379,8 +407,56 @@
   .cvr-c-resource,
   .eds-c-resource
 ) :is(.eds-c-icon, svg, path, circle) {
-  color: #94a3b8 !important;
+  color: var(--cx-text-muted, #94a3b8) !important;
   fill: currentColor !important;
   stroke: currentColor !important;
 }
+
+/* Explicit high-contrast tile and card links (Classes, Notices, Feeds, Help) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card,
+  .cvr-c-dashboard-card,
+  .portlet,
+  .portlet-body
+) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button) {
+  color: var(--cx-accent, #60a5fa) !important;
+  font-weight: 500 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card,
+  .cvr-c-dashboard-card,
+  .portlet,
+  .portlet-body
+) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):hover {
+  color: var(--cx-accent-hover, #93c5fd) !important;
+  text-decoration: underline !important;
+}
+
+/* High contrast for class names, notice titles, and tile headings */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(
+  .eds-c-tile__title, .cvr-c-tile__title, .cvr-c-class__name, .cvr-c-classes-list__title,
+  [class*="class-name"], [class*="class-title"], [class*="class__name"], [class*="notice__title"], [class*="feed-item__title"],
+  h1, h2, h3, h4
+) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+  font-weight: 700 !important;
+}
+
+/* High contrast secondary details: teacher, room code, timestamps */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(
+  .eds-c-caption, .eds-c-tile__caption, .cvr-c-tile__caption, .cvr-c-class__code, .cvr-c-class__teacher, .cvr-c-class__details,
+  [class*="teacher"], [class*="code"], [class*="subtitle"], [class*="meta"], [class*="date"], small
+) {
+  color: var(--cx-text-muted, #94a3b8) !important;
+}
+
 

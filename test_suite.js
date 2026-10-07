@@ -5020,6 +5020,78 @@ runTest('Test 137: Dark, Default, and Quantum Dark themes correspond to previous
   assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
 });
 
+runTest('Test 138: Dark theme v3.2.1 parity, Connect Help and tile contrast, abundant token coverage, dedicated theme button, and line limits', () => {
+  const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
+  const themeTilesCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tiles.css'), 'utf8');
+  const themeCoreCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-core.css'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
+  const catSettingsJs = fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8');
+
+  // 1. Abundant theme tokens: verify diverse semantic token groups
+  const requiredTokens = [
+    '--cx-canvas-bg', '--cx-surface-bg', '--cx-surface-elevated', '--cx-surface-hover',
+    '--cx-border', '--cx-border-subtle', '--cx-border-strong',
+    '--cx-text-primary', '--cx-text-secondary', '--cx-text-muted',
+    '--cx-accent', '--cx-accent-hover',
+    '--cx-table-header-bg', '--cx-table-row-hover',
+    '--cx-input-bg', '--cx-input-border',
+    '--cx-button-bg', '--cx-button-text',
+    '--cx-badge-bg', '--cx-badge-text',
+    '--cx-scrollbar-track', '--cx-scrollbar-thumb'
+  ];
+  for (const token of requiredTokens) {
+    assert.ok(themeTokensCss.includes(token), `theme-tokens.css must define token ${token}`);
+  }
+
+  // 2. Connect Help, generic tile bodies, and tile links high contrast
+  assert.ok(themeTilesCss.includes('.eds-c-tile__body') && themeTilesCss.includes('.cvr-c-tile__body'), 'theme-tiles.css must target tile bodies');
+  assert.ok(themeTilesCss.includes('.portlet-body') && themeTilesCss.includes('.journal-content-article'), 'theme-tiles.css must target portlet containers for Connect Help');
+  assert.ok(themeTilesCss.includes('var(--cx-surface-bg, #1e2632) !important;'), 'theme-tiles.css must set surface-bg for tile bodies');
+  assert.ok(themeTilesCss.includes('var(--cx-accent, #60a5fa) !important;'), 'theme-tiles.css must set high-contrast accent links');
+  assert.ok(themeTilesCss.includes('.cvr-c-class__name') && themeTilesCss.includes('.cvr-c-classes-list__title'), 'theme-tiles.css must target class title elements');
+  assert.ok(themeTilesCss.includes('var(--cx-text-primary, #f8fafc) !important;'), 'theme-tiles.css must set high contrast primary text on headings');
+
+  // 3. Dedicated theme button in theme-core.css and theme.js
+  assert.ok(themeCoreCss.includes('#connectea-theme-select-btn'), 'theme-core.css must style #connectea-theme-select-btn');
+  assert.ok(themeJs.includes('#connectea-theme-select-btn'), 'theme.js must create and manage #connectea-theme-select-btn');
+  assert.ok(themeJs.includes('document.body.appendChild(themeMenu)'), 'theme.js must attach themeMenu to document.body to prevent button nesting issues');
+
+  // 4. Color Theme selector in Category Settings
+  assert.ok(catSettingsJs.includes('#cx-theme-select-input'), 'category-settings.js must render #cx-theme-select-input');
+  assert.ok(catSettingsJs.includes('window.ConnectifyTheme.setTheme'), 'category-settings.js must invoke ConnectifyTheme.setTheme on change');
+
+  // 5. Strict line limits: all JS and CSS in src <= 500 lines, all markdown <= 150 lines
+  function checkDir(dir) {
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) checkDir(full);
+      else if (ent.isFile() && (full.endsWith('.js') || full.endsWith('.css'))) {
+        const lines = origReadFileSync.call(fs, full, 'utf8').split('\n').length;
+        assert.ok(lines <= 500, `File ${full} has ${lines} lines, exceeding 500 line limit`);
+      }
+    }
+  }
+  checkDir(path.resolve(BASE_DIR, 'src'));
+
+  for (const ent of fs.readdirSync(BASE_DIR, { withFileTypes: true })) {
+    const full = path.join(BASE_DIR, ent.name);
+    if (ent.isFile() && full.endsWith('.md')) {
+      const lines = origReadFileSync.call(fs, full, 'utf8').split('\n').length;
+      assert.ok(lines <= 150, `Markdown file ${full} has ${lines} lines, exceeding 150 line limit`);
+    }
+  }
+  const docsDir = path.resolve(BASE_DIR, 'docs');
+  if (fs.existsSync(docsDir)) {
+    for (const ent of fs.readdirSync(docsDir, { withFileTypes: true })) {
+      const full = path.join(docsDir, ent.name);
+      if (ent.isFile() && full.endsWith('.md')) {
+        const lines = origReadFileSync.call(fs, full, 'utf8').split('\n').length;
+        assert.ok(lines <= 150, `Markdown file ${full} has ${lines} lines, exceeding 150 line limit`);
+      }
+    }
+  }
+});
+
 console.log('\n================================================================');
 console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
 console.log('================================================================\n');

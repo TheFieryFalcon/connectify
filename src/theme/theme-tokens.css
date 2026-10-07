@@ -1,247 +1,200 @@
 /**
  * Connectify Theme Tokens & Palette System
- *
- * Defines CSS custom properties for built-in themes and user-defined custom themes:
- * - Classic Dark (dark)
- * - AMOLED Pitch Black (amoled)
- * - Midnight Navy (midnight)
- * - Emerald Forest (forest)
- * - Twilight Plum (sunset)
- * - Default Light (light)
- * - Custom Theme (custom)
+ * Abundant CSS custom properties for all built-in themes and custom user palettes:
+ * - Dark (Modern site-wide dark mode, v3.2.x parity)
+ * - Quantum Dark (Legacy <= 3.1.14: #292929 canvas, #333333 surface, #d4b483 accent)
+ * - AMOLED Pitch Black (Pure #000000, #38bdf8 accent)
+ * - Midnight Navy (#0b132b canvas, #141f36 surface, #60a5fa accent)
+ * - Emerald Forest (#0a1914 canvas, #11261f surface, #10b981 accent)
+ * - Twilight Plum (#19111c canvas, #26182a surface, #f43f5e accent)
+ * - Default Light (Clean white #f8fafc / #ffffff, #3b82f6 accent)
+ * - Custom Theme (User-configured interactive color palette)
  */
 
 :root {
-  --cx-canvas-bg: #f8fafc;
-  --cx-surface-bg: #ffffff;
-  --cx-surface-secondary: #f1f5f9;
-  --cx-surface-elevated: #ffffff;
-  --cx-border: #cbd5e1;
-  --cx-border-subtle: #e2e8f0;
-  --cx-text-primary: #0f172a;
-  --cx-text-secondary: #334155;
-  --cx-text-muted: #64748b;
-  --cx-accent: #3b82f6;
-  --cx-accent-hover: #2563eb;
-  --cx-nav-bg: #ffffff;
-  --cx-nav-border: #cbd5e1;
-  --cx-button-bg: #ffffff;
-  --cx-button-hover: #f1f5f9;
-  --cx-button-border: #cbd5e1;
-  --cx-button-text: #0f172a;
+  --cx-canvas-bg: #f8fafc; --cx-canvas-subtle: #f1f5f9;
+  --cx-surface-bg: #ffffff; --cx-surface-secondary: #f1f5f9; --cx-surface-elevated: #ffffff;
+  --cx-surface-hover: #f1f5f9; --cx-surface-active: #e2e8f0;
+  --cx-border: #cbd5e1; --cx-border-subtle: #e2e8f0; --cx-border-strong: #94a3b8; --cx-border-focus: #3b82f6;
+  --cx-text-primary: #0f172a; --cx-text-secondary: #334155; --cx-text-muted: #64748b; --cx-text-disabled: #94a3b8; --cx-text-inverse: #ffffff;
+  --cx-accent: #3b82f6; --cx-accent-hover: #2563eb; --cx-accent-active: #1d4ed8; --cx-accent-subtle: rgba(59, 130, 246, 0.1); --cx-accent-text: #ffffff;
+  --cx-nav-bg: #ffffff; --cx-nav-border: #cbd5e1; --cx-nav-text: #334155; --cx-nav-text-hover: #0f172a; --cx-nav-item-active: #e2e8f0;
+  --cx-button-bg: #ffffff; --cx-button-hover: #f1f5f9; --cx-button-active: #e2e8f0;
+  --cx-button-border: #cbd5e1; --cx-button-border-hover: #94a3b8; --cx-button-text: #0f172a;
+  --cx-button-primary-bg: #2563eb; --cx-button-primary-hover: #1d4ed8; --cx-button-primary-text: #ffffff;
+  --cx-input-bg: #ffffff; --cx-input-border: #cbd5e1; --cx-input-border-focus: #3b82f6; --cx-input-text: #0f172a; --cx-input-placeholder: #94a3b8;
+  --cx-table-header-bg: #f8fafc; --cx-table-row-hover: #f1f5f9; --cx-table-row-alt: #f8fafc; --cx-table-border: #e2e8f0;
+  --cx-badge-bg: #e2e8f0; --cx-badge-border: #cbd5e1; --cx-badge-text: #1e293b;
+  --cx-badge-success-bg: #dcfce7; --cx-badge-warning-bg: #fef9c3; --cx-badge-danger-bg: #fee2e2; --cx-badge-info-bg: #dbeafe;
+  --cx-scrollbar-thumb: #cbd5e1; --cx-scrollbar-track: transparent;
+  --cx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05); --cx-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1); --cx-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-/* Base Dark Theme (Dark) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) {
-  --cx-canvas-bg: #12171f;
-  --cx-surface-bg: #1e2632;
-  --cx-surface-secondary: #1a222d;
-  --cx-surface-elevated: #24303f;
-  --cx-border: #3d5066;
-  --cx-border-subtle: #2a3749;
-  --cx-text-primary: #f8fafc;
-  --cx-text-secondary: #cbd5e1;
-  --cx-text-muted: #94a3b8;
-  --cx-accent: #3b82f6;
-  --cx-accent-hover: #60a5fa;
-  --cx-nav-bg: #1a222d;
-  --cx-nav-border: #36485e;
-  --cx-button-bg: #202c3b;
-  --cx-button-hover: #2c3b4e;
-  --cx-button-border: #455a73;
-  --cx-button-text: #f1f5f9;
+/* Base Dark Theme (v3.2.x parity) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark),
+[data-connectea-theme="dark"].connectea-dark,
+[data-connectea-theme="dark"] .connectea-dark,
+html.connectea-dark[data-connectea-theme="dark"] {
+  --cx-canvas-bg: #12171f; --cx-canvas-subtle: #0d1218;
+  --cx-surface-bg: #1e2632; --cx-surface-secondary: #1a222d; --cx-surface-elevated: #24303f;
+  --cx-surface-hover: #263344; --cx-surface-active: #2c3b4e;
+  --cx-border: #3d5066; --cx-border-subtle: #2e3c4e; --cx-border-strong: #4a617a; --cx-border-focus: #3b82f6;
+  --cx-text-primary: #f8fafc; --cx-text-secondary: #e2e8f0; --cx-text-muted: #94a3b8; --cx-text-disabled: #64748b; --cx-text-inverse: #0f172a;
+  --cx-accent: #3b82f6; --cx-accent-hover: #60a5fa; --cx-accent-active: #2563eb; --cx-accent-subtle: rgba(59, 130, 246, 0.15); --cx-accent-text: #ffffff;
+  --cx-nav-bg: #1a222d; --cx-nav-border: #36485e; --cx-nav-text: #cbd5e1; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #121820;
+  --cx-button-bg: #202c3b; --cx-button-hover: #2c3b4e; --cx-button-active: #192432;
+  --cx-button-border: #455a73; --cx-button-border-hover: #5b7594; --cx-button-text: #f1f5f9;
+  --cx-button-primary-bg: #2563eb; --cx-button-primary-hover: #1d4ed8; --cx-button-primary-text: #ffffff;
+  --cx-input-bg: #141a22; --cx-input-border: #42556d; --cx-input-border-focus: #3b82f6; --cx-input-text: #f1f5f9; --cx-input-placeholder: #64748b;
+  --cx-table-header-bg: #1a222d; --cx-table-row-hover: #263344; --cx-table-row-alt: #161e28; --cx-table-border: #2e3c4e;
+  --cx-badge-bg: #24303f; --cx-badge-border: #4a617a; --cx-badge-text: #f1f5f9;
+  --cx-badge-success-bg: #166534; --cx-badge-warning-bg: #854d0e; --cx-badge-danger-bg: #991b1b; --cx-badge-info-bg: #1e40af;
+  --cx-scrollbar-thumb: #3d5066; --cx-scrollbar-track: #12171f;
+  --cx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3); --cx-shadow-md: 0 4px 10px rgba(0, 0, 0, 0.4); --cx-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 /* Quantum Dark (Legacy <= 3.1.14 Palette) */
 [data-connectea-theme="quantum"].connectea-dark,
 [data-connectea-theme="quantum"] .connectea-dark,
 html.connectea-dark[data-connectea-theme="quantum"] {
-  --cx-canvas-bg: #292929;
-  --cx-surface-bg: #333333;
-  --cx-surface-secondary: #2a2a2a;
-  --cx-surface-elevated: #3a3a3a;
-  --cx-border: #3a3a3a;
-  --cx-border-subtle: #4a4a4a;
-  --cx-text-primary: #cccccc;
-  --cx-text-secondary: #bbbbbb;
-  --cx-text-muted: #999999;
-  --cx-accent: #d4b483;
-  --cx-accent-hover: #e2c9a3;
-  --cx-nav-bg: #2a2a2a;
-  --cx-nav-border: #3a3a3a;
-  --cx-button-bg: #303944;
-  --cx-button-hover: #3b4857;
-  --cx-button-border: #4c5a69;
-  --cx-button-text: #cccccc;
+  --cx-canvas-bg: #292929; --cx-canvas-subtle: #222222;
+  --cx-surface-bg: #333333; --cx-surface-secondary: #2a2a2a; --cx-surface-elevated: #3a3a3a;
+  --cx-surface-hover: #3d3d3d; --cx-surface-active: #484848;
+  --cx-border: #3a3a3a; --cx-border-subtle: #4a4a4a; --cx-border-strong: #5a5a5a; --cx-border-focus: #d4b483;
+  --cx-text-primary: #cccccc; --cx-text-secondary: #bbbbbb; --cx-text-muted: #999999; --cx-text-disabled: #777777; --cx-text-inverse: #1a1a1a;
+  --cx-accent: #d4b483; --cx-accent-hover: #e2c9a3; --cx-accent-active: #c5a36f; --cx-accent-subtle: rgba(212, 180, 131, 0.15); --cx-accent-text: #222222;
+  --cx-nav-bg: #2a2a2a; --cx-nav-border: #3a3a3a; --cx-nav-text: #cccccc; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #222222;
+  --cx-button-bg: #303944; --cx-button-hover: #3b4857; --cx-button-active: #252d36;
+  --cx-button-border: #4c5a69; --cx-button-border-hover: #617387; --cx-button-text: #cccccc;
+  --cx-button-primary-bg: #d4b483; --cx-button-primary-hover: #e2c9a3; --cx-button-primary-text: #222222;
+  --cx-input-bg: #242424; --cx-input-border: #444444; --cx-input-border-focus: #d4b483; --cx-input-text: #cccccc; --cx-input-placeholder: #777777;
+  --cx-table-header-bg: #2a2a2a; --cx-table-row-hover: #3a3a3a; --cx-table-row-alt: #2c2c2c; --cx-table-border: #3a3a3a;
+  --cx-badge-bg: #3a3a3a; --cx-badge-border: #4a4a4a; --cx-badge-text: #cccccc;
+  --cx-scrollbar-thumb: #444444; --cx-scrollbar-track: #292929;
 }
 
 /* AMOLED Pitch Black */
 [data-connectea-theme="amoled"].connectea-dark,
 [data-connectea-theme="amoled"] .connectea-dark,
 html.connectea-dark[data-connectea-theme="amoled"] {
-  --cx-canvas-bg: #000000;
-  --cx-surface-bg: #0a0a0a;
-  --cx-surface-secondary: #121212;
-  --cx-surface-elevated: #181818;
-  --cx-border: #262626;
-  --cx-border-subtle: #1f1f1f;
-  --cx-text-primary: #ffffff;
-  --cx-text-secondary: #d4d4d4;
-  --cx-text-muted: #a3a3a3;
-  --cx-accent: #38bdf8;
-  --cx-accent-hover: #7dd3fc;
-  --cx-nav-bg: #050505;
-  --cx-nav-border: #222222;
-  --cx-button-bg: #121212;
-  --cx-button-hover: #202020;
-  --cx-button-border: #333333;
-  --cx-button-text: #ffffff;
+  --cx-canvas-bg: #000000; --cx-canvas-subtle: #050505;
+  --cx-surface-bg: #0a0a0a; --cx-surface-secondary: #121212; --cx-surface-elevated: #181818;
+  --cx-surface-hover: #1a1a1a; --cx-surface-active: #222222;
+  --cx-border: #262626; --cx-border-subtle: #1f1f1f; --cx-border-strong: #333333; --cx-border-focus: #38bdf8;
+  --cx-text-primary: #ffffff; --cx-text-secondary: #d4d4d4; --cx-text-muted: #a3a3a3; --cx-text-disabled: #525252; --cx-text-inverse: #000000;
+  --cx-accent: #38bdf8; --cx-accent-hover: #7dd3fc; --cx-accent-active: #0284c7; --cx-accent-subtle: rgba(56, 189, 248, 0.15); --cx-accent-text: #000000;
+  --cx-nav-bg: #050505; --cx-nav-border: #222222; --cx-nav-text: #e5e5e5; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #000000;
+  --cx-button-bg: #121212; --cx-button-hover: #202020; --cx-button-active: #080808;
+  --cx-button-border: #333333; --cx-button-border-hover: #444444; --cx-button-text: #ffffff;
+  --cx-button-primary-bg: #0284c7; --cx-button-primary-hover: #0369a1; --cx-button-primary-text: #ffffff;
+  --cx-input-bg: #050505; --cx-input-border: #262626; --cx-input-border-focus: #38bdf8; --cx-input-text: #ffffff; --cx-input-placeholder: #525252;
+  --cx-table-header-bg: #0c0c0c; --cx-table-row-hover: #141414; --cx-table-row-alt: #080808; --cx-table-border: #1f1f1f;
+  --cx-badge-bg: #181818; --cx-badge-border: #262626; --cx-badge-text: #ffffff;
+  --cx-scrollbar-thumb: #262626; --cx-scrollbar-track: #000000;
 }
 
 /* Midnight Navy */
 [data-connectea-theme="midnight"].connectea-dark,
 [data-connectea-theme="midnight"] .connectea-dark,
 html.connectea-dark[data-connectea-theme="midnight"] {
-  --cx-canvas-bg: #0b132b;
-  --cx-surface-bg: #141f36;
-  --cx-surface-secondary: #1c2a4a;
-  --cx-surface-elevated: #24355a;
-  --cx-border: #2d4168;
-  --cx-border-subtle: #1e2e4c;
-  --cx-text-primary: #f1f5f9;
-  --cx-text-secondary: #cbd5e1;
-  --cx-text-muted: #94a3b8;
-  --cx-accent: #60a5fa;
-  --cx-accent-hover: #93c5fd;
-  --cx-nav-bg: #0e1830;
-  --cx-nav-border: #233454;
-  --cx-button-bg: #182642;
-  --cx-button-hover: #22355c;
-  --cx-button-border: #344b76;
-  --cx-button-text: #f1f5f9;
+  --cx-canvas-bg: #0b132b; --cx-canvas-subtle: #080d1e;
+  --cx-surface-bg: #141f36; --cx-surface-secondary: #1c2a4a; --cx-surface-elevated: #24355a;
+  --cx-surface-hover: #223359; --cx-surface-active: #2b406e;
+  --cx-border: #2d4168; --cx-border-subtle: #1e2e4c; --cx-border-strong: #3b5585; --cx-border-focus: #60a5fa;
+  --cx-text-primary: #f1f5f9; --cx-text-secondary: #cbd5e1; --cx-text-muted: #94a3b8; --cx-text-disabled: #64748b; --cx-text-inverse: #0b132b;
+  --cx-accent: #60a5fa; --cx-accent-hover: #93c5fd; --cx-accent-active: #3b82f6; --cx-accent-subtle: rgba(96, 165, 250, 0.15); --cx-accent-text: #ffffff;
+  --cx-nav-bg: #0e1830; --cx-nav-border: #233454; --cx-nav-text: #cbd5e1; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #090f21;
+  --cx-button-bg: #182642; --cx-button-hover: #22355c; --cx-button-active: #121e35;
+  --cx-button-border: #344b76; --cx-button-border-hover: #486499; --cx-button-text: #f1f5f9;
+  --cx-button-primary-bg: #2563eb; --cx-button-primary-hover: #1d4ed8; --cx-button-primary-text: #ffffff;
+  --cx-input-bg: #0e1830; --cx-input-border: #2a3c61; --cx-input-border-focus: #60a5fa; --cx-input-text: #f1f5f9; --cx-input-placeholder: #64748b;
+  --cx-table-header-bg: #101c37; --cx-table-row-hover: #1c2b4c; --cx-table-row-alt: #121e3b; --cx-table-border: #1e2e4c;
+  --cx-badge-bg: #1f3054; --cx-badge-border: #344b76; --cx-badge-text: #f1f5f9;
+  --cx-scrollbar-thumb: #2d4168; --cx-scrollbar-track: #0b132b;
 }
 
 /* Emerald Forest */
 [data-connectea-theme="forest"].connectea-dark,
 [data-connectea-theme="forest"] .connectea-dark,
 html.connectea-dark[data-connectea-theme="forest"] {
-  --cx-canvas-bg: #0a1914;
-  --cx-surface-bg: #11261f;
-  --cx-surface-secondary: #163329;
-  --cx-surface-elevated: #1c4033;
-  --cx-border: #285444;
-  --cx-border-subtle: #1b3b2f;
-  --cx-text-primary: #ecfdf5;
-  --cx-text-secondary: #a7f3d0;
-  --cx-text-muted: #6ee7b7;
-  --cx-accent: #10b981;
-  --cx-accent-hover: #34d399;
-  --cx-nav-bg: #0d1f19;
-  --cx-nav-border: #1d4134;
-  --cx-button-bg: #132c24;
-  --cx-button-hover: #1a3b30;
-  --cx-button-border: #2c5949;
-  --cx-button-text: #ecfdf5;
+  --cx-canvas-bg: #0a1914; --cx-canvas-subtle: #06110d;
+  --cx-surface-bg: #11261f; --cx-surface-secondary: #163329; --cx-surface-elevated: #1c4033;
+  --cx-surface-hover: #1e4537; --cx-surface-active: #255444;
+  --cx-border: #285444; --cx-border-subtle: #1b3b2f; --cx-border-strong: #366d58; --cx-border-focus: #10b981;
+  --cx-text-primary: #ecfdf5; --cx-text-secondary: #a7f3d0; --cx-text-muted: #6ee7b7; --cx-text-disabled: #4b8b70; --cx-text-inverse: #0a1914;
+  --cx-accent: #10b981; --cx-accent-hover: #34d399; --cx-accent-active: #059669; --cx-accent-subtle: rgba(16, 185, 129, 0.15); --cx-accent-text: #ffffff;
+  --cx-nav-bg: #0d1f19; --cx-nav-border: #1d4134; --cx-nav-text: #a7f3d0; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #07130f;
+  --cx-button-bg: #132c24; --cx-button-hover: #1a3b30; --cx-button-active: #0e201a;
+  --cx-button-border: #2c5949; --cx-button-border-hover: #3c7a64; --cx-button-text: #ecfdf5;
+  --cx-button-primary-bg: #059669; --cx-button-primary-hover: #047857; --cx-button-primary-text: #ffffff;
+  --cx-input-bg: #0d1f19; --cx-input-border: #224a3b; --cx-input-border-focus: #10b981; --cx-input-text: #ecfdf5; --cx-input-placeholder: #4b8b70;
+  --cx-table-header-bg: #0e231c; --cx-table-row-hover: #17362c; --cx-table-row-alt: #10261f; --cx-table-border: #1b3b2f;
+  --cx-badge-bg: #1a3b30; --cx-badge-border: #2c5949; --cx-badge-text: #ecfdf5;
+  --cx-scrollbar-thumb: #285444; --cx-scrollbar-track: #0a1914;
 }
 
 /* Twilight Plum */
 [data-connectea-theme="sunset"].connectea-dark,
 [data-connectea-theme="sunset"] .connectea-dark,
 html.connectea-dark[data-connectea-theme="sunset"] {
-  --cx-canvas-bg: #19111c;
-  --cx-surface-bg: #26182a;
-  --cx-surface-secondary: #331e38;
-  --cx-surface-elevated: #422648;
-  --cx-border: #55315e;
-  --cx-border-subtle: #3c2143;
-  --cx-text-primary: #fdf2f8;
-  --cx-text-secondary: #fbcfe8;
-  --cx-text-muted: #f472b6;
-  --cx-accent: #f43f5e;
-  --cx-accent-hover: #fb7185;
-  --cx-nav-bg: #1f1423;
-  --cx-nav-border: #43264b;
-  --cx-button-bg: #2b1930;
-  --cx-button-hover: #3a2241;
-  --cx-button-border: #5c3566;
-  --cx-button-text: #fdf2f8;
+  --cx-canvas-bg: #19111c; --cx-canvas-subtle: #120b15;
+  --cx-surface-bg: #26182a; --cx-surface-secondary: #331e38; --cx-surface-elevated: #422648;
+  --cx-surface-hover: #48294e; --cx-surface-active: #56315e;
+  --cx-border: #55315e; --cx-border-subtle: #3c2143; --cx-border-strong: #6c3f76; --cx-border-focus: #f43f5e;
+  --cx-text-primary: #fdf2f8; --cx-text-secondary: #fbcfe8; --cx-text-muted: #f472b6; --cx-text-disabled: #9d507b; --cx-text-inverse: #19111c;
+  --cx-accent: #f43f5e; --cx-accent-hover: #fb7185; --cx-accent-active: #e11d48; --cx-accent-subtle: rgba(244, 63, 94, 0.15); --cx-accent-text: #ffffff;
+  --cx-nav-bg: #1f1423; --cx-nav-border: #43264b; --cx-nav-text: #fbcfe8; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #130a17;
+  --cx-button-bg: #2b1930; --cx-button-hover: #3a2241; --cx-button-active: #211325;
+  --cx-button-border: #5c3566; --cx-button-border-hover: #764483; --cx-button-text: #fdf2f8;
+  --cx-button-primary-bg: #e11d48; --cx-button-primary-hover: #be123c; --cx-button-primary-text: #ffffff;
+  --cx-input-bg: #1e1322; --cx-input-border: #4b2a54; --cx-input-border-focus: #f43f5e; --cx-input-text: #fdf2f8; --cx-input-placeholder: #9d507b;
+  --cx-table-header-bg: #221426; --cx-table-row-hover: #361f3c; --cx-table-row-alt: #28182d; --cx-table-border: #3c2143;
+  --cx-badge-bg: #3a2241; --cx-badge-border: #5c3566; --cx-badge-text: #fdf2f8;
+  --cx-scrollbar-thumb: #55315e; --cx-scrollbar-track: #19111c;
 }
 
-/* Token application for theme variants */
-[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) body,
-[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]).connectea-dark,
-:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) {
+/* System-wide Token Application across Theme Variants */
+:is(html, body).connectea-dark:not([data-connectea-login]),
+[data-connectea-theme]:not([data-connectea-login]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) body,
+[data-connectea-theme]:not([data-connectea-login]).connectea-dark {
   background-color: var(--cx-canvas-bg) !important;
   color: var(--cx-text-secondary) !important;
 }
 
-:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
-  .v-panel,
-  .v-panel-content,
-  .eds-c-card,
-  .cvr-c-tile,
-  .eds-c-tile,
-  [data-subject-card],
-  .cvr-c-dashboard-card,
-  [data-connectea-surface],
-  .cvr-c-task,
-  .cvr-c-task__details,
-  .cvr-c-tasks,
-  .cvr-c-task-group,
-  .cvr-c-task__marks,
-  .cvr-c-task__mark
-),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
-  .v-panel,
-  .v-panel-content,
-  .eds-c-card,
-  .cvr-c-tile,
-  .eds-c-tile,
-  [data-subject-card],
-  .cvr-c-dashboard-card,
-  [data-connectea-surface]
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .v-panel, .v-panel-content, .eds-c-card, .cvr-c-tile, .eds-c-tile,
+  [data-subject-card], .cvr-c-dashboard-card, [data-connectea-surface],
+  .cvr-c-task, .cvr-c-task__details, .cvr-c-tasks, .cvr-c-task-group,
+  .cvr-c-task__marks, .cvr-c-task__mark
 ) {
   background-color: var(--cx-surface-bg) !important;
   border-color: var(--cx-border) !important;
 }
 
-:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(.cvr-c-primary-navigation, .cvr-c-service-menu, .cvr-c-primary-menu),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) .cvr-c-primary-navigation {
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.cvr-c-primary-navigation, .cvr-c-service-menu, .cvr-c-primary-menu) {
   background-color: var(--cx-nav-bg) !important;
   border-bottom-color: var(--cx-nav-border) !important;
 }
 
-:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
-  h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption
-),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
-  h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption
-) {
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption) {
   color: var(--cx-text-primary) !important;
 }
 
-:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
-  label, .cvr-c-form__label, .eds-c-label, p
-),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(
-  label, .cvr-c-form__label, .eds-c-label, p
-) {
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(label, .cvr-c-form__label, .eds-c-label, p) {
   color: var(--cx-text-secondary) !important;
 }
 
-:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(.v-button, .eds-c-button, .eds-c-standard-button) {
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.v-button, .eds-c-button, .eds-c-standard-button):not(.cx-clear-cache-btn):not(#connectify-sidebar *) {
   background-color: var(--cx-button-bg) !important;
   color: var(--cx-button-text) !important;
   border-color: var(--cx-button-border) !important;
 }
 
-:is(html, body).connectea-dark[data-connectea-theme]:not([data-connectea-theme="dark"]):not([data-connectea-login]) :is(.eds-c-tile a, .cvr-c-tile a, .connectea-panel a) {
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.eds-c-tile a, .cvr-c-tile a, .connectea-panel a) {
   color: var(--cx-accent) !important;
 }
 
-/* --------------------------------------------------------------------------
-   Login Page Guard: Disable all themes completely
-   -------------------------------------------------------------------------- */
+/* Login Page Guard: Disable all themes completely */
 [data-connectea-login],
 [data-connectea-login] body,
 [data-connectea-login] * {
@@ -256,13 +209,12 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   --cx-accent: initial !important;
 }
 
-[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu) {
+[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu),
+[data-connectea-login] #connectea-theme-select-btn {
   display: none !important;
 }
 
-/* --------------------------------------------------------------------------
-   Theme Selector Popover Menu & Arrow
-   -------------------------------------------------------------------------- */
+/* Theme Selector Popover Menu, Trigger Button & Swatches */
 .connectea-theme-arrow {
   display: inline-block;
   margin-left: 5px;
@@ -271,25 +223,20 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   vertical-align: middle;
   transition: transform 0.15s ease;
 }
-
-.connectea-theme-arrow:hover {
-  opacity: 1;
-}
+.connectea-theme-arrow:hover { opacity: 1; }
 
 #connectea-theme-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  width: 200px;
-  background: #1e2632;
-  border: 1px solid #3d5066;
+  position: fixed;
+  width: 220px;
+  background: var(--cx-surface-bg, #1e2632);
+  border: 1px solid var(--cx-border, #3d5066);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-  padding: 6px;
-  z-index: 10030;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  padding: 8px;
+  z-index: 10035;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   font: 12px/1.4 system-ui, -apple-system, sans-serif;
   box-sizing: border-box;
 }
@@ -298,11 +245,11 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 6px 10px;
   border-radius: 5px;
   background: transparent;
   border: none;
-  color: #cbd5e1;
+  color: var(--cx-text-secondary, #cbd5e1);
   cursor: pointer;
   width: 100%;
   text-align: left;
@@ -310,16 +257,14 @@ html.connectea-dark[data-connectea-theme="sunset"] {
   font-size: 12px;
   transition: background 0.12s ease, color 0.12s ease;
 }
-
 .connectea-theme-option:hover {
-  background: #2b394b;
-  color: #ffffff;
+  background: var(--cx-surface-hover, #2b394b);
+  color: var(--cx-text-primary, #ffffff);
 }
-
 .connectea-theme-option.eds-s-is-active,
 .connectea-theme-option[aria-selected="true"] {
-  background: #121820;
-  color: #60a5fa;
+  background: var(--cx-surface-active, #121820);
+  color: var(--cx-accent, #60a5fa);
   font-weight: 600;
 }
 
@@ -333,27 +278,25 @@ html.connectea-dark[data-connectea-theme="sunset"] {
 }
 
 .connectea-theme-custom-panel {
-  margin-top: 4px;
-  padding: 6px;
-  border-top: 1px solid #2a3749;
+  margin-top: 6px;
+  padding: 6px 4px 2px 4px;
+  border-top: 1px solid var(--cx-border-subtle, #2a3749);
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-
 .connectea-theme-custom-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--cx-text-muted, #94a3b8);
 }
-
 .connectea-theme-custom-row input[type="color"] {
-  width: 24px;
+  width: 26px;
   height: 20px;
   padding: 0;
-  border: 1px solid #3d5066;
+  border: 1px solid var(--cx-border, #3d5066);
   border-radius: 3px;
   background: transparent;
   cursor: pointer;

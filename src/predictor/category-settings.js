@@ -90,34 +90,21 @@
     for (const [cat, data] of Object.entries(currentCats)) {
       const wrap = document.createElement('div');
       wrap.className = 'cx-cat-wrap';
-      wrap.dataset.cat = cat;
-      wrap.style.display = 'flex';
-      wrap.style.alignItems = 'center';
-      wrap.style.marginBottom = '10px';
-      wrap.style.gap = '8px';
+      wrap.style.cssText = 'display:flex;align-items:center;margin-bottom:10px;gap:8px;';
 
       const label = document.createElement('label');
       label.className = 'cx-cat-name-label';
       label.textContent = cat;
-      label.style.width = '90px';
-      label.style.fontSize = '12px';
-      label.style.fontWeight = '600';
-      label.style.color = data.color || '#3498db';
-      label.style.setProperty('--cx-cat-color', data.color || '#3498db');
-      label.style.overflow = 'hidden';
-      label.style.textOverflow = 'ellipsis';
-      label.style.whiteSpace = 'nowrap';
       label.title = cat;
+      label.style.setProperty('--cx-cat-color', data.color || '#3498db');
+      label.style.cssText = `width:90px;font-size:12px;font-weight:600;color:${data.color || '#3498db'};--cx-cat-color:${data.color || '#3498db'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;`;
 
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'cx-cat-keyword-input';
       input.id = `cx-cat-input-${cat.replace(/\s+/g, '_')}`;
       input.value = Array.isArray(data.keywords) ? data.keywords.join(', ') : '';
-      input.style.flex = '1';
-      input.style.padding = '4px 8px';
-      input.style.border = '1px solid #ccc';
-      input.style.borderRadius = '4px';
+      input.style.cssText = 'flex:1;padding:4px 8px;border:1px solid #ccc;border-radius:4px;';
 
       wrap.append(label, input);
 
@@ -126,13 +113,7 @@
         delBtn.type = 'button';
         delBtn.textContent = '✕';
         delBtn.title = `Delete category "${cat}"`;
-        delBtn.style.background = 'transparent';
-        delBtn.style.color = '#e74c3c';
-        delBtn.style.border = '1px solid #e74c3c';
-        delBtn.style.borderRadius = '4px';
-        delBtn.style.cursor = 'pointer';
-        delBtn.style.padding = '2px 7px';
-        delBtn.style.fontSize = '11px';
+        delBtn.style.cssText = 'background:transparent;color:#e74c3c;border:1px solid #e74c3c;border-radius:4px;cursor:pointer;padding:2px 7px;font-size:11px;';
         delBtn.onclick = () => {
           delete window.cxCategories[cat];
           try {
@@ -193,6 +174,22 @@
               <span class="cx-settings-hint">% (default: 60%)</span>
             </div>
             <p class="cx-settings-desc">Proportion enrolled in the ATAR pathway.</p>
+          </div>
+          <div>
+            <label for="cx-theme-select-input" class="cx-settings-label">Color Theme</label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <select id="cx-theme-select-input" class="cx-settings-select" style="box-sizing:border-box;padding:3px 8px;border-radius:4px;font-size:12px;cursor:pointer;">
+                <option value="dark">☾ Dark (v3.2.1 Parity)</option>
+                <option value="quantum">⚛ Quantum Dark (Legacy &le;3.1.14)</option>
+                <option value="amoled">🌑 AMOLED Black</option>
+                <option value="midnight">🌌 Midnight Navy</option>
+                <option value="forest">🌲 Emerald Forest</option>
+                <option value="sunset">🌅 Twilight Plum</option>
+                <option value="light">☀ Default (Light)</option>
+                <option value="custom">🎨 Custom Palette</option>
+              </select>
+            </div>
+            <p class="cx-settings-desc">Interface theme and visual palette.</p>
           </div>
         </div>
       </section>
@@ -326,10 +323,16 @@
       });
     }
 
+    const themeSelectInput = catPanel.querySelector('#cx-theme-select-input');
+    if (themeSelectInput) {
+      themeSelectInput.value = window.ConnectifyTheme ? window.ConnectifyTheme.getTheme() : (localStorage.getItem('connectea:theme:id') || 'dark');
+      themeSelectInput.addEventListener('change', () => {
+        if (window.ConnectifyTheme) window.ConnectifyTheme.setTheme(themeSelectInput.value);
+      });
+    }
+
     function renderCalib() {
-      if (window.ConnectifyCalibration?.renderCalibTable) {
-        window.ConnectifyCalibration.renderCalibTable(catPanel);
-      }
+      if (window.ConnectifyCalibration?.renderCalibTable) window.ConnectifyCalibration.renderCalibTable(catPanel);
     }
 
     function renderBaselines() {
@@ -346,6 +349,7 @@
         if (autoExpandToggle) autoExpandToggle.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
         if (generalCohortInput) generalCohortInput.value = localStorage.getItem('connectify:general_cohort_size') || '';
         if (atarPctInput) atarPctInput.value = localStorage.getItem('connectify:atar_percentage') || '';
+        if (themeSelectInput && window.ConnectifyTheme) themeSelectInput.value = window.ConnectifyTheme.getTheme();
         resolveCategories();
       } catch (e) {
         console.warn('Connectify settings preferences error:', e);
