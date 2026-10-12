@@ -5656,6 +5656,59 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
       const targetUrl = `https://connect.det.wa.edu.au/group/students/ui/my-settings/${sub}`;
       assert.ok(normDiscovered.includes(targetUrl), `extractPageLinks must discover ${targetUrl} from navigation menu`);
     }
+
+    // Verify normalizeUrl canonicalizes class/notices with URL-encoded or literal coisp across entry points
+    const normNoticesMyConnect = crawlerMod.normalizeUrl('class/notices?coisp=DomainSchoolClass%3A27866513', 'https://connect.det.wa.edu.au/group/students/ui/my-connect');
+    assert.strictEqual(normNoticesMyConnect, 'https://connect.det.wa.edu.au/group/students/ui/class/notices?coisp=DomainSchoolClass%3A27866513', 'normalizeUrl must canonicalize class/notices from dashboard');
+
+    const normNoticesSummary = crawlerMod.normalizeUrl('class/notices?coisp=DomainSchoolClass%3A27866513', 'https://connect.det.wa.edu.au/group/students/ui/class/summary?coisp=DomainSchoolClass:27866513');
+    assert.strictEqual(normNoticesSummary, 'https://connect.det.wa.edu.au/group/students/ui/class/notices?coisp=DomainSchoolClass%3A27866513', 'normalizeUrl must avoid /class/class/ duplication from summary page');
+
+    const normNoticesRoot = crawlerMod.normalizeUrl('class/notices?coisp=DomainSchoolClass%3A27866513', 'https://connect.det.wa.edu.au/');
+    assert.strictEqual(normNoticesRoot, 'https://connect.det.wa.edu.au/group/students/ui/class/notices?coisp=DomainSchoolClass%3A27866513', 'normalizeUrl must prefix root relative class/notices');
+
+    const normAnnounce = crawlerMod.normalizeUrl('class/announcements?coisp=DomainSchoolClass:6611613497', 'https://connect.det.wa.edu.au/group/students/ui/classes');
+    assert.strictEqual(normAnnounce, 'https://connect.det.wa.edu.au/group/students/ui/class/announcements?coisp=DomainSchoolClass:6611613497', 'normalizeUrl must canonicalize class/announcements');
+
+    // Verify extractClassId on class/notices URLs
+    assert.strictEqual(crawlerMod.extractClassId('https://connect.det.wa.edu.au/group/students/ui/class/notices?coisp=DomainSchoolClass%3A27866513'), '27866513', 'extractClassId must parse %3A class id on class/notices');
+    assert.strictEqual(crawlerMod.extractClassId('class/notices?coisp=DomainSchoolClass%3A27866513'), '27866513', 'extractClassId must parse relative class/notices');
+
+    // Verify dynamic extraction of class tabs (Notices) and direct attribute routes
+    global.window.location = {
+      pathname: '/group/students/ui/class/summary',
+      search: '?coisp=DomainSchoolClass%3A27866513',
+      href: 'https://connect.det.wa.edu.au/group/students/ui/class/summary?coisp=DomainSchoolClass%3A27866513'
+    };
+    const tabLabels = ['Summary', 'Notices', 'Announcements', 'Discussions', 'Submissions', 'Learners'];
+    const tabMockEls = tabLabels.map(label => ({
+      tagName: 'div',
+      attributes: [{ name: 'class', value: 'eds-c-tabs__tab' }],
+      querySelector: () => ({ innerText: label, textContent: label }),
+      innerText: label,
+      textContent: label,
+      querySelectorAll: () => []
+    }));
+    const noticeCardEl = {
+      tagName: 'div',
+      attributes: [
+        { name: 'class', value: 'cvr-c-notice' },
+        { name: 'data-url', value: 'class/notices?coisp=DomainSchoolClass%3A27866513' }
+      ],
+      querySelector: () => null,
+      innerText: 'View Notice',
+      textContent: 'View Notice',
+      querySelectorAll: () => []
+    };
+    global.document.querySelectorAll = (sel) => {
+      if (sel === 'a[href], area[href]') return [];
+      if (sel.includes('eds-c-tabs__tab')) return tabMockEls;
+      if (sel === '*') return [noticeCardEl, ...tabMockEls];
+      return [];
+    };
+    const classDiscovered = crawlerMod.extractPageLinks(mockPage);
+    const normClassDiscovered = classDiscovered.map(l => crawlerMod.normalizeUrl(l, global.window.location.href));
+    assert.ok(normClassDiscovered.includes('https://connect.det.wa.edu.au/group/students/ui/class/notices?coisp=DomainSchoolClass%3A27866513'), 'extractPageLinks must discover class/notices?coisp=DomainSchoolClass%3A27866513');
   } finally {
     global.window = origWindow;
     global.document = origDoc;

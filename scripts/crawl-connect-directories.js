@@ -57,9 +57,11 @@ function normalizeUrl(rawUrl, baseUrl) {
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
     parsed.hash = '';
     parsed.pathname = parsed.pathname.replace(/;jsessionid=[^/?#]+/gi, '').replace(/\/+/g, '/');
-    if (parsed.pathname.length > 1 && parsed.pathname.endsWith('/')) {
-      parsed.pathname = parsed.pathname.slice(0, -1);
-    }
+    if (parsed.pathname.length > 1 && parsed.pathname.endsWith('/')) parsed.pathname = parsed.pathname.slice(0, -1);
+    if (parsed.pathname.includes('/class/class/')) parsed.pathname = parsed.pathname.replace(/\/class\/class\//g, '/class/');
+    if (parsed.pathname.startsWith('/class/')) parsed.pathname = '/group/students/ui' + parsed.pathname;
+    else if (parsed.pathname.startsWith('/group/class/')) parsed.pathname = '/group/students/ui' + parsed.pathname.slice(6);
+    else if (parsed.pathname.startsWith('/ui/class/')) parsed.pathname = '/group/students' + parsed.pathname;
     if (!parsed.searchParams.has('coisp') && baseUrl) {
       try {
         const baseObj = new URL(baseUrl);
@@ -105,14 +107,14 @@ function categorizePath(pathname) {
 
 function extractClassId(urlStr) {
   try {
-    const u = new URL(urlStr);
+    const u = new URL(urlStr, 'https://connect.det.wa.edu.au');
     const m1 = u.pathname.match(/\/redirect\/cls\/([0-9a-zA-Z_-]+)/i);
     if (m1) return m1[1];
-    const m2 = (u.search || '').match(/DomainSchoolClass(?::|%3A)([0-9a-zA-Z_-]+)/i);
+    const m2 = (u.search || urlStr).match(/DomainSchoolClass(?::|%3A)([0-9a-zA-Z_-]+)/i);
     if (m2) return m2[1];
     const m3 = u.pathname.match(/\/cls\/([0-9a-zA-Z_-]+)/i);
     if (m3) return m3[1];
-    if (u.pathname.includes('/ui/class/')) {
+    if (u.pathname.includes('/ui/class/') || u.pathname.includes('/class/')) {
       const coisp = u.searchParams.get('coisp');
       if (coisp) {
         const m = coisp.match(/(?::|%3A)?([0-9a-zA-Z_-]+)$/);
@@ -192,29 +194,30 @@ function extractPageLinks(page) {
     // 2. Generic attribute scan across all DOM elements (Angular router links, Lexicon, Vaadin, data routes)
     for (const el of document.querySelectorAll('*')) {
       if (!el.attributes) continue;
-      const tag = el.tagName.toLowerCase();
+      const tag = (el.tagName || '').toLowerCase();
       if (tag === 'script' || tag === 'style' || tag === 'link' || tag === 'meta') continue;
       for (let i = 0; i < el.attributes.length; i++) {
         const attr = el.attributes[i];
         const v = attr.value;
         if (!v || typeof v !== 'string') continue;
         const name = attr.name.toLowerCase();
-        if (name.includes('route') || name.includes('link') || name.includes('path') || name.includes('url') || name.includes('target') || name.includes('service') || name.includes('slug')) {
-          add(v.replace(/,/g, '/'));
-        } else if (v.startsWith('/') || v.includes('connect.det.wa.edu.au')) {
+        if (v.includes('coisp=') || v.includes('class/') || v.includes('redirect/cls/') || v.startsWith('/') || v.includes('connect.det.wa.edu.au')) {
           add(v);
-        } else if (name === 'onclick') {
+        } else if (name.includes('route') || name.includes('link') || name.includes('path') || name.includes('url') || name.includes('target') || name.includes('service') || name.includes('slug')) {
+          add(v.replace(/,/g, '/'));
+        }
+        if (name === 'onclick' || name.startsWith('ng-') || name.startsWith('data-')) {
+          const quoted = v.match(/['"`]([^'"`\s>]*(?:class\/|coisp=|\/(?:group|redirect|connect|ui)\/)[^'"`\s>]*)['"`]/gi);
+          if (quoted) for (const q of quoted) { const c = q.replace(/^['"`]|['"`]$/g, '').trim(); if (c) add(c); }
           const matches = v.match(/(?:location(?:\.href)?|window\.open|assign|replace|navigate)\s*[=(]\s*['"`]([^'"`]+)['"`]/gi);
           if (matches) for (const m of matches) { const u = m.match(/['"`]([^'"`]+)['"`]/); if (u && u[1]) add(u[1]); }
-          const pathMatch = v.match(/['"`](\/(?:group|redirect|connect)\/[^'"`]+)['"`]/);
-          if (pathMatch && pathMatch[1]) add(pathMatch[1]);
         }
       }
     }
 
-    // 3. Navigation menus & sidebars (e.g. .cvr-c-service-menu, .cvr-c-category-menu, .eds-c-nav-list, .mat-nav-list)
+    // 3. Navigation menus, tabs, and sidebars (e.g. .eds-c-tabs, .cvr-c-service-menu, .cvr-c-category-menu, .mat-tab-label, [role="tab"])
     const navItems = document.querySelectorAll(
-      '.cvr-c-service-menu__item, .cvr-c-category-menu__item, .cvr-c-primary-menu__item, .eds-c-nav-list__item, .mat-nav-list .mat-list-item, [class*="service-menu"] li, [class*="service-menu"] a, [class*="service-menu"] button, [role="menuitem"]'
+      '.eds-c-tabs__tab, .eds-c-tabs li, .eds-c-tabs a, [role="tab"], .mat-tab-label, .mat-tab-link, .nav-tabs li, .nav-tabs a, .cvr-c-service-menu__item, .cvr-c-category-menu__item, .cvr-c-primary-menu__item, .cvr-c-category-toolbar button, .cvr-c-category-toolbar a, .eds-c-nav-list__item, .mat-nav-list .mat-list-item, [class*="service-menu"] li, [class*="service-menu"] a, [class*="service-menu"] button, [role="menuitem"], [class*="category-menu"] li, [class*="category-menu"] a'
     );
     const curPath = window.location.pathname.replace(/\/+$/, '');
     const lastSlash = curPath.lastIndexOf('/');
@@ -222,7 +225,7 @@ function extractPageLinks(page) {
     const search = window.location.search || '';
 
     for (const item of navItems) {
-      const labelEl = item.querySelector('.cvr-c-service-menu__item-label, [class*="label"], [class*="title"]') || item;
+      const labelEl = item.querySelector('.cvr-c-service-menu__item-label, .eds-c-tabs__tab, [class*="label"], [class*="title"]') || item;
       const text = (labelEl.innerText || labelEl.textContent || '').trim().replace(/\s+/g, ' ');
       if (text && text.length > 1 && text.length < 40 && !/\b(logout|signout|delete|remove)\b/i.test(text)) {
         const slug = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -232,7 +235,13 @@ function extractPageLinks(page) {
             add(branchBase + slug);
             if (search) add(branchBase + slug + search);
           }
-          if (search) add(slug + search);
+          if (search) {
+            add(slug + search);
+            if (curPath.includes('/class/')) {
+              add('class/' + slug + search);
+              add('/group/students/ui/class/' + slug + search);
+            }
+          }
         }
       }
     }
@@ -341,13 +350,9 @@ async function crawl() {
 
     // Class limit enforcement before navigation
     const classId = extractClassId(url);
-    if (classId) {
-      if (!scannedClassIds.has(classId)) {
-        if (scannedClassIds.size >= options.maxClassRedirects) {
-          continue;
-        }
-        scannedClassIds.add(classId);
-      }
+    if (classId && !scannedClassIds.has(classId)) {
+      if (scannedClassIds.size >= options.maxClassRedirects) continue;
+      scannedClassIds.add(classId);
     }
 
     console.log(`[Depth ${depth}] [${visited.size}/${options.maxPages}] Visiting: ${parsedUrl.pathname}`);
@@ -376,13 +381,9 @@ async function crawl() {
 
       // Check class ID on destination URL
       const finalClassId = extractClassId(normFinalUrl);
-      if (finalClassId) {
-        if (!scannedClassIds.has(finalClassId)) {
-          if (scannedClassIds.size >= options.maxClassRedirects) {
-            continue;
-          }
-          scannedClassIds.add(finalClassId);
-        }
+      if (finalClassId && !scannedClassIds.has(finalClassId)) {
+        if (scannedClassIds.size >= options.maxClassRedirects) continue;
+        scannedClassIds.add(finalClassId);
       }
 
       let parsedFinal;
@@ -418,10 +419,8 @@ async function crawl() {
             if (childHost === TARGET_HOST) {
               const childPath = new URL(norm).pathname;
               const childClassId = extractClassId(norm);
-              if (childClassId) {
-                if (!scannedClassIds.has(childClassId) && scannedClassIds.size >= options.maxClassRedirects) {
-                  continue;
-                }
+              if (childClassId && !scannedClassIds.has(childClassId) && scannedClassIds.size >= options.maxClassRedirects) {
+                continue;
               }
               if (!isExcludedPath(childPath) && !visited.has(norm) && !enqueued.has(norm)) {
                 queue.push({ url: norm, depth: depth + 1 });
