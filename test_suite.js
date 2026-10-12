@@ -535,13 +535,27 @@ console.log('================================================================\n'
 
 let totalTests = 0;
 let passedTests = 0;
+const pendingTestPromises = [];
 
 function runTest(name, fn) {
   totalTests++;
   try {
-    fn();
-    passedTests++;
-    console.log(`✓ [PASSED] ${name}`);
+    const res = fn();
+    if (res && typeof res.then === 'function') {
+      pendingTestPromises.push(
+        res.then(() => {
+          passedTests++;
+          console.log(`✓ [PASSED] ${name}`);
+        }).catch(err => {
+          console.error(`✗ [FAILED] ${name}`);
+          console.error(err);
+          process.exit(1);
+        })
+      );
+    } else {
+      passedTests++;
+      console.log(`✓ [PASSED] ${name}`);
+    }
   } catch (err) {
     console.error(`✗ [FAILED] ${name}`);
     console.error(err);
@@ -5493,7 +5507,7 @@ runTest('Test 144: Classes page header parity, Angular Material tab specificity,
     'theme-registry.js and theme.js must use inspiration swatch for Quantum Dark');
 });
 
-runTest('Test 145: Puppeteer theme unstyled element auditor and Connect directory crawler scripts', () => {
+runTest('Test 145: Puppeteer theme unstyled element auditor and Connect directory crawler scripts', async () => {
   const utilsPath = path.resolve(__dirname, 'scripts/puppeteer-utils.js');
   const themeTesterPath = path.resolve(__dirname, 'scripts/test-theme-styles.js');
   const crawlerPath = path.resolve(__dirname, 'scripts/crawl-connect-directories.js');
@@ -5559,6 +5573,254 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   };
   assert.strictEqual(themeTesterMod.computeElementsSignature(baseA), themeTesterMod.computeElementsSignature(baseB), 'Identical views must have matching signatures');
   assert.notStrictEqual(themeTesterMod.computeElementsSignature(baseA), themeTesterMod.computeElementsSignature(baseC), 'Distinct views must have different signatures');
+
+  // Verify auditThemeAgainstBaseline detects parity errors for outline, border, svg fill/stroke, font style, and font weight
+  const mockBaseline = {
+    visibleCount: 4,
+    elements: {
+      el_outline: {
+        auditId: 'el_outline',
+        selector: '.card-outline',
+        tagName: 'div',
+        textSnippet: 'Outline card',
+        font: { family: 'open sans', rawFamily: 'Open Sans', size: 14, weight: 400, style: 'normal' },
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        size: { width: 100, height: 100 },
+        outline: { style: 'none', width: 0, color: '' },
+        border: { topWidth: 0, rightWidth: 0, bottomWidth: 0, leftWidth: 0 }
+      },
+      el_border: {
+        auditId: 'el_border',
+        selector: '.card-divider',
+        tagName: 'div',
+        textSnippet: 'Card title',
+        font: { family: 'open sans', rawFamily: 'Open Sans', size: 14, weight: 400, style: 'normal' },
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        size: { width: 100, height: 20 },
+        outline: { style: 'none', width: 0, color: '' },
+        border: { topWidth: 0, rightWidth: 0, bottomWidth: 0, leftWidth: 0 }
+      },
+      el_svg: {
+        auditId: 'el_svg',
+        selector: 'svg.icon-comment',
+        tagName: 'svg',
+        isSvg: true,
+        textSnippet: '',
+        font: { family: 'open sans', rawFamily: 'Open Sans', size: 14, weight: 400, style: 'normal' },
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        size: { width: 16, height: 16 },
+        outline: { style: 'none', width: 0, color: '' },
+        border: { topWidth: 0, rightWidth: 0, bottomWidth: 0, leftWidth: 0 },
+        svg: { fill: 'none', stroke: 'currentColor', strokeWidth: 1 }
+      },
+      el_font: {
+        auditId: 'el_font',
+        selector: '.author-text',
+        tagName: 'span',
+        textSnippet: 'Mr. Smith',
+        font: { family: 'open sans', rawFamily: 'Open Sans', size: 14, weight: 400, style: 'normal' },
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        size: { width: 80, height: 20 },
+        outline: { style: 'none', width: 0, color: '' },
+        border: { topWidth: 0, rightWidth: 0, bottomWidth: 0, leftWidth: 0 }
+      }
+    }
+  };
+
+  const parityDomEls = [
+    {
+      dataset: { cxAuditId: 'el_outline' },
+      tagName: 'DIV',
+      innerText: 'Outline card',
+      textContent: 'Outline card',
+      getBoundingClientRect: () => ({ width: 100, height: 100 }),
+      getAttribute: () => null,
+      classList: { contains: () => false },
+      closest: () => null,
+      childNodes: [{ nodeType: 3, textContent: 'Outline card' }],
+      _style: {
+        visibility: 'visible',
+        display: 'block',
+        opacity: '1',
+        fontSize: '14px',
+        fontWeight: '400',
+        fontStyle: 'normal',
+        fontFamily: 'Open Sans',
+        outlineStyle: 'solid',
+        outlineWidth: '2px',
+        borderTopStyle: 'none',
+        borderBottomStyle: 'none',
+        borderLeftStyle: 'none',
+        borderRightStyle: 'none',
+        backgroundColor: 'rgb(24, 26, 27)',
+        color: 'rgb(255, 255, 255)'
+      }
+    },
+    {
+      dataset: { cxAuditId: 'el_border' },
+      tagName: 'DIV',
+      innerText: 'Card title',
+      textContent: 'Card title',
+      getBoundingClientRect: () => ({ width: 100, height: 20 }),
+      getAttribute: () => null,
+      classList: { contains: () => false },
+      closest: () => null,
+      childNodes: [{ nodeType: 3, textContent: 'Card title' }],
+      _style: {
+        visibility: 'visible',
+        display: 'block',
+        opacity: '1',
+        fontSize: '14px',
+        fontWeight: '400',
+        fontStyle: 'normal',
+        fontFamily: 'Open Sans',
+        outlineStyle: 'none',
+        borderTopStyle: 'none',
+        borderBottomStyle: 'solid',
+        borderBottomWidth: '1px',
+        borderLeftStyle: 'none',
+        borderRightStyle: 'none',
+        backgroundColor: 'rgb(24, 26, 27)',
+        color: 'rgb(255, 255, 255)'
+      }
+    },
+    {
+      dataset: { cxAuditId: 'el_svg' },
+      tagName: 'SVG',
+      innerText: '',
+      textContent: '',
+      getBoundingClientRect: () => ({ width: 16, height: 16 }),
+      getAttribute: (attr) => attr === 'fill' ? 'currentColor' : null,
+      classList: { contains: () => false },
+      closest: () => null,
+      childNodes: [],
+      _style: {
+        visibility: 'visible',
+        display: 'inline-block',
+        opacity: '1',
+        fontSize: '14px',
+        fontWeight: '400',
+        fontStyle: 'normal',
+        fontFamily: 'Open Sans',
+        outlineStyle: 'none',
+        fill: 'currentColor',
+        stroke: '',
+        borderTopStyle: 'none',
+        borderBottomStyle: 'none',
+        borderLeftStyle: 'none',
+        borderRightStyle: 'none'
+      }
+    },
+    {
+      dataset: { cxAuditId: 'el_font' },
+      tagName: 'SPAN',
+      innerText: 'Mr. Smith',
+      textContent: 'Mr. Smith',
+      getBoundingClientRect: () => ({ width: 80, height: 20 }),
+      getAttribute: () => null,
+      classList: { contains: () => false },
+      closest: () => null,
+      childNodes: [{ nodeType: 3, textContent: 'Mr. Smith' }],
+      _style: {
+        visibility: 'visible',
+        display: 'inline',
+        opacity: '1',
+        fontSize: '14px',
+        fontWeight: '700',
+        fontStyle: 'italic',
+        fontFamily: 'Open Sans',
+        outlineStyle: 'none',
+        borderTopStyle: 'none',
+        borderBottomStyle: 'none',
+        borderLeftStyle: 'none',
+        borderRightStyle: 'none',
+        backgroundColor: 'rgb(24, 26, 27)',
+        color: 'rgb(255, 255, 255)'
+      }
+    }
+  ];
+
+  const origWinAudit = global.window;
+  const origDocAudit = global.document;
+  try {
+    global.window = {
+      getComputedStyle: (el) => el._style || {}
+    };
+    global.document = {
+      documentElement: {},
+      body: {},
+      querySelectorAll: (sel) => sel === 'body *' ? parityDomEls : []
+    };
+    const mockPageAudit = {
+      evaluate: async (fn, ...args) => fn(...args)
+    };
+    const auditRes = await themeTesterMod.auditThemeAgainstBaseline(mockPageAudit, 'dark', true, mockBaseline, {});
+    const issueTypes = auditRes.issues.map(i => i.type);
+    assert.ok(issueTypes.includes('OUTLINE_MISMATCH'), 'auditThemeAgainstBaseline must detect OUTLINE_MISMATCH');
+    assert.ok(issueTypes.includes('BORDER_MISMATCH'), 'auditThemeAgainstBaseline must detect BORDER_MISMATCH');
+    assert.ok(issueTypes.includes('SVG_FILL_MISMATCH'), 'auditThemeAgainstBaseline must detect SVG_FILL_MISMATCH');
+    assert.ok(issueTypes.includes('SVG_STROKE_MISMATCH'), 'auditThemeAgainstBaseline must detect SVG_STROKE_MISMATCH');
+    assert.ok(issueTypes.includes('FONT_WEIGHT_MISMATCH'), 'auditThemeAgainstBaseline must detect FONT_WEIGHT_MISMATCH');
+    assert.ok(issueTypes.includes('FONT_STYLE_MISMATCH'), 'auditThemeAgainstBaseline must detect FONT_STYLE_MISMATCH');
+
+    // Verify clickInteractiveButtons discovers and clicks mat-card button and div.v-button
+    let matClicked = 0;
+    let vClicked = 0;
+    const mockMatButton = {
+      tagName: 'BUTTON',
+      id: 'mat-notice-view',
+      className: 'mat-button',
+      innerText: 'View',
+      textContent: 'View',
+      children: [],
+      getAttribute: (attr) => attr === 'type' ? 'button' : null,
+      hasAttribute: () => false,
+      matches: () => false,
+      closest: (sel) => sel && sel.includes('mat-card') ? { tagName: 'MAT-CARD' } : null,
+      querySelector: () => null,
+      dispatchEvent: (ev) => { if (ev.type === 'click') matClicked++; },
+      click: () => { matClicked++; }
+    };
+    const mockVaadinButton = {
+      tagName: 'DIV',
+      id: '',
+      className: 'v-button',
+      innerText: 'View Notice',
+      textContent: 'View Notice',
+      children: [],
+      getAttribute: () => null,
+      hasAttribute: () => false,
+      matches: () => false,
+      closest: () => null,
+      querySelector: () => null,
+      dispatchEvent: (ev) => { if (ev.type === 'click') vClicked++; },
+      click: () => { vClicked++; }
+    };
+
+    global.window = {
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      onbeforeunload: null,
+      MouseEvent: class { constructor(type) { this.type = type; } },
+      PointerEvent: class { constructor(type) { this.type = type; } }
+    };
+    global.document = {
+      querySelectorAll: (sel) => {
+        if (sel.includes('mat-card button') || sel.includes('.v-button') || sel.includes('button, summary')) {
+          return [mockMatButton, mockVaadinButton];
+        }
+        return [];
+      }
+    };
+    const clickedButtons = await themeTesterMod.clickInteractiveButtons(mockPageAudit);
+    assert.ok(clickedButtons.some(b => b.includes('button#mat-notice-view') && b.includes('View')), 'clickInteractiveButtons must click mat-card View button');
+    assert.ok(clickedButtons.some(b => b.includes('div.v-button') && b.includes('View Notice')), 'clickInteractiveButtons must click div.v-button View Notice');
+    assert.ok(matClicked >= 1, 'mat-card View button must receive click event');
+    assert.ok(vClicked >= 1, 'div.v-button View Notice must receive click event');
+  } finally {
+    global.window = origWinAudit;
+    global.document = origDocAudit;
+  }
 
   // 4. crawler exports and tree building
   const crawlerMod = require(crawlerPath);
@@ -5733,10 +5995,11 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   assert.strictEqual(pkg.scripts['crawl:interactive'], 'node scripts/crawl-connect-directories.js --interactive', 'package.json must define crawl:interactive script');
 });
 
-console.log('\n================================================================');
-console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
-console.log('================================================================\n');
-
-process.exit(0);
+Promise.all(pendingTestPromises).then(() => {
+  console.log('\n================================================================');
+  console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
+  console.log('================================================================\n');
+  process.exit(0);
+});
 
 

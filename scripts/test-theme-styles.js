@@ -188,8 +188,11 @@ async function clickInteractiveButtons(page) {
       const navBlocker = (e) => {
         const a = e.target?.closest?.('a[href]');
         if (a) {
-          const href = (a.getAttribute('href') || '').trim();
-          if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+          const href = (a.getAttribute?.('href') || '').trim();
+          const isButton = a.getAttribute?.('role') === 'button' || a.hasAttribute?.('data-toggle') ||
+                           a.classList?.contains?.('v-button') || a.classList?.contains?.('eds-c-action-button') ||
+                           /\bview\b/i.test(a.textContent || '');
+          if (!isButton && href && !href.startsWith('#') && !href.startsWith('javascript:')) {
             e.preventDefault();
             e.stopImmediatePropagation();
           }
@@ -218,8 +221,25 @@ async function clickInteractiveButtons(page) {
         // Angular Material Accordions & Expansion Panels
         '.mat-expansion-panel-header:not(.mat-expanded):not([aria-disabled="true"])',
 
+        // Notice / Feed Card action triggers and view buttons
+        '.cvr-c-feed-item button',
+        '.cvr-c-feed-card button',
+        'mat-card button',
+        '.mat-card button',
+        '.eds-c-card button',
+        '.eds-o-button--positive',
+        '.eds-c-button--positive',
+        '.eds-c-action-button',
+        '.cvr-c-action-button',
+        '.v-button',
+        'button[class*="action"]',
+        'button[class*="view"]',
+        '[class*="action-button"]',
+        '[class*="view-button"]',
+
         // Collapsible Toggles & Details
         '[data-toggle="collapse"]:not(a)',
+        '[data-toggle="modal"]',
         '.panel-heading.collapsed',
         'details:not([open]) > summary',
         'summary',
@@ -238,14 +258,16 @@ async function clickInteractiveButtons(page) {
       const elements = Array.from(document.querySelectorAll(INTERACTIVE_SELECTORS));
 
       // Also detect buttons/summaries with explicit expansion text (using fast textContent, no layout reflow)
-      const candidateNodes = Array.from(document.querySelectorAll('button, summary, [role="button"]'));
+      const candidateNodes = Array.from(document.querySelectorAll(
+        'button, summary, [role="button"], .v-button, .eds-c-button, .eds-o-button, .eds-c-action-button, .cvr-c-action-button, [class*="action-button"], [class*="view-button"], mat-card button, .mat-card button, [class*="feed"] button, [class*="notice"] button'
+      ));
       for (const node of candidateNodes) {
-        if (node.children.length > 3) continue;
-        const txt = (node.textContent || '').trim();
-        const isNoticeView = (/^\s*view\b/i.test(txt) && !/\b(view\s*all|view\s*more|see\s*more)\b/i.test(txt) &&
-          (node.closest('.cvr-c-notice, .eds-c-card, .cvr-c-tile, .cvr-c-feed, [class*="notice"], [class*="feed"]') || /^\s*view\s*$/i.test(txt)));
+        if (node.children.length > 6) continue;
+        const rawTxt = (node.innerText || node.textContent || '').trim();
+        const cleanTxt = rawTxt.replace(/\s+/g, ' ');
+        const isNoticeView = (/\bview\b/i.test(cleanTxt) && !/\b(view\s*all|view\s*more|see\s*more|grid\s*view|list\s*view)\b/i.test(cleanTxt));
 
-        if (/\b(show\s*details|view\s*details|expand\s*all|expand\s*outlines|more\s*details)\b/i.test(txt) || isNoticeView) {
+        if (/\b(show\s*details|view\s*details|expand\s*all|expand\s*outlines|more\s*details)\b/i.test(cleanTxt) || isNoticeView) {
           if (!elements.includes(node) && !node.closest('nav, .cvr-c-primary-navigation, .pagination, .pager')) {
             elements.push(node);
           }
@@ -259,33 +281,35 @@ async function clickInteractiveButtons(page) {
       try {
         for (const el of elements) {
           // Skip theme toggle and Connectify sidebar controls
-          if (el.id === 'connectea-theme-toggle' || el.closest('#connectea-theme-toggle')) continue;
-          if (el.closest('#connectify-sidebar, #connectify-sidebar-handle')) continue;
+          if (el.id === 'connectea-theme-toggle' || el.closest?.('#connectea-theme-toggle')) continue;
+          if (el.closest?.('#connectify-sidebar, #connectify-sidebar-handle')) continue;
 
           // Skip site navigation, headers, breadcrumbs, pagination
-          if (el.closest('.cvr-c-header, .cvr-c-navbar, .cvr-c-primary-navigation, .cvr-c-primary-menu, .cvr-c-side-menu, .cvr-c-user-menu, nav, [role="navigation"], .breadcrumb, .breadcrumbs, .pagination, .pager')) {
+          if (el.closest?.('.cvr-c-header, .cvr-c-navbar, .cvr-c-primary-navigation, .cvr-c-primary-menu, .cvr-c-side-menu, .cvr-c-user-menu, nav, [role="navigation"], .breadcrumb, .breadcrumbs, .pagination, .pager')) {
             continue;
           }
 
           // Skip navbar tabs and view switchers (audited separately as distinct sub-views)
-          if (el.matches('[role="tab"], .mat-tab-label, .mat-tab-link, .nav-tabs a, .nav-pills a, .fc-button')) {
+          if (el.matches?.('[role="tab"], .mat-tab-label, .mat-tab-link, .nav-tabs a, .nav-pills a, .fc-button')) {
             continue;
           }
 
           // Skip calendar previous/next/today navigation buttons
-          if (el.matches('.mat-calendar-previous-button, .mat-calendar-next-button, .fc-prev-button, .fc-next-button, .fc-today-button')) {
+          if (el.matches?.('.mat-calendar-previous-button, .mat-calendar-next-button, .fc-prev-button, .fc-next-button, .fc-today-button')) {
             continue;
           }
-          if (el.closest('.fc-toolbar, .fc-header-toolbar') && el.matches('.fc-button, button')) {
+          if (el.closest?.('.fc-toolbar, .fc-header-toolbar') && el.matches?.('.fc-button, button')) {
             continue;
           }
 
           // Skip real navigation links (allow in-page hashes, javascript:, and role="button")
-          const a = el.tagName === 'A' ? el : el.closest('a[href]');
+          const a = el.tagName === 'A' ? el : el.closest?.('a[href]');
           if (a) {
-            const href = (a.getAttribute('href') || '').trim();
+            const href = (a.getAttribute?.('href') || '').trim();
             const isPageAnchor = !href || href.startsWith('#') || href.startsWith('javascript:');
-            const isRoleTrigger = a.getAttribute('role') === 'button' || a.hasAttribute('data-toggle');
+            const isRoleTrigger = a.getAttribute?.('role') === 'button' || a.hasAttribute?.('data-toggle') ||
+                                  a.classList?.contains?.('v-button') || a.classList?.contains?.('eds-c-action-button') ||
+                                  /\bview\b/i.test(a.textContent || '');
             if (!isPageAnchor && !isRoleTrigger) {
               continue;
             }
@@ -293,20 +317,20 @@ async function clickInteractiveButtons(page) {
 
           // Skip form submits and resets
           if (el.type === 'submit' || el.type === 'reset') continue;
-          if (el.tagName === 'BUTTON' && el.closest('form') && el.getAttribute('type') !== 'button') continue;
+          if (el.tagName === 'BUTTON' && el.closest?.('form') && el.getAttribute?.('type') !== 'button') continue;
 
           // Skip framework route navigation attributes
-          if (el.hasAttribute('routerlink') || el.hasAttribute('data-route') || el.hasAttribute('data-url') || el.hasAttribute('ng-reflect-router-link')) {
+          if (el.hasAttribute?.('routerlink') || el.hasAttribute?.('data-route') || el.hasAttribute?.('data-url') || el.hasAttribute?.('ng-reflect-router-link')) {
             continue;
           }
 
           // Skip explicit location redirection in onclick
-          const onclick = el.getAttribute('onclick') || '';
+          const onclick = el.getAttribute?.('onclick') || '';
           if (/window\.location|location\.href|location\.assign|location\.replace|window\.open\(/i.test(onclick)) {
             continue;
           }
 
-          const label = (el.getAttribute('aria-label') || el.getAttribute('title') || '').trim();
+          const label = (el.getAttribute?.('aria-label') || el.getAttribute?.('title') || '').trim();
           const directText = (el.textContent || '').trim().slice(0, 50);
 
           // Skip destructive actions, state-mutating toggles, or pagination/more links
@@ -316,23 +340,23 @@ async function clickInteractiveButtons(page) {
             continue;
           }
 
-          // Limit notice View clicks to 2 per view to reveal modal/content without thrashing
-          const isNoticeViewBtn = /^\s*view\b/i.test(directText) && !/\b(view\s*all|view\s*more)\b/i.test(directText);
-          if (isNoticeViewBtn && el.closest('.cvr-c-notice, .eds-c-card, .cvr-c-tile, .cvr-c-feed, [class*="notice"], [class*="feed"]')) {
-            if (noticeViewClicks >= 2) continue;
+          // Limit notice View clicks to 3 per view to reveal modal/content without thrashing
+          const isNoticeViewBtn = /\bview\b/i.test(directText) && !/\b(view\s*all|view\s*more|grid\s*view|list\s*view)\b/i.test(directText);
+          if (isNoticeViewBtn) {
+            if (noticeViewClicks >= 3) continue;
             noticeViewClicks++;
           }
 
           // Skip already expanded panels
-          if (el.getAttribute('aria-expanded') === 'true') continue;
-          if (el.classList.contains('mat-expanded')) continue;
-          if (el.matches('.mat-tab-label-active, [aria-selected="true"]')) continue;
-          if (el.matches('details[open] > summary')) continue;
+          if (el.getAttribute?.('aria-expanded') === 'true') continue;
+          if (el.classList?.contains?.('mat-expanded')) continue;
+          if (el.matches?.('.mat-tab-label-active, [aria-selected="true"]')) continue;
+          if (el.matches?.('details[open] > summary')) continue;
           if (/hide\s*details/i.test(directText)) continue;
 
           // Deduplicate accordion headings per section/tile
-          if (el.matches('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading')) {
-            const section = el.closest('.eds-c-accordion__section, .cvr-c-accordion__section, .eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
+          if (el.matches?.('.eds-c-accordion__section-heading, .cvr-c-accordion__section-heading')) {
+            const section = el.closest?.('.eds-c-accordion__section, .cvr-c-accordion__section, .eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
             if (section) {
               if (seenSections.has(section)) continue;
               seenSections.add(section);
@@ -344,17 +368,25 @@ async function clickInteractiveButtons(page) {
           if (clickedElements.has(target)) continue;
           clickedElements.add(target);
 
-          try {
-            target.click();
-            target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
-            target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+          const targetsToClick = [target];
+          const innerCaption = target.querySelector?.('.v-button-caption, .v-button-wrap, .mat-button-wrapper, span, button');
+          if (innerCaption && innerCaption !== target) targetsToClick.push(innerCaption);
 
-            const tag = target.tagName.toLowerCase();
-            const id = target.id ? '#' + target.id : '';
-            const cls = target.className && typeof target.className === 'string' ? '.' + target.className.trim().split(/\s+/)[0] : '';
-            const textSnippet = directText ? `[${directText.slice(0, 15)}]` : '';
-            clicked.push(`${tag}${id}${cls}${textSnippet}`);
-          } catch {}
+          for (const t of targetsToClick) {
+            const evOpts = { bubbles: true, cancelable: true, view: window, buttons: 1 };
+            try { t.dispatchEvent(new PointerEvent('pointerdown', evOpts)); } catch {}
+            try { t.dispatchEvent(new MouseEvent('mousedown', evOpts)); } catch {}
+            try { t.dispatchEvent(new PointerEvent('pointerup', evOpts)); } catch {}
+            try { t.dispatchEvent(new MouseEvent('mouseup', evOpts)); } catch {}
+            try { t.click?.(); } catch {}
+            try { t.dispatchEvent(new MouseEvent('click', evOpts)); } catch {}
+          }
+
+          const tag = target.tagName.toLowerCase();
+          const id = target.id ? '#' + target.id : '';
+          const cls = target.className && typeof target.className === 'string' ? '.' + target.className.trim().split(/\s+/)[0] : '';
+          const textSnippet = directText ? `[${directText.slice(0, 15)}]` : '';
+          clicked.push(`${tag}${id}${cls}${textSnippet}`);
         }
       } finally {
         window.removeEventListener('click', navBlocker, true);
@@ -366,8 +398,14 @@ async function clickInteractiveButtons(page) {
     });
 
     // Hard 4-second timeout guarantee: never hang or freeze the audit
-    const timeout = new Promise(resolve => setTimeout(() => resolve([]), 4000));
-    return await Promise.race([clickTask, timeout]);
+    let timer;
+    const timeout = new Promise(resolve => {
+      timer = setTimeout(() => resolve([]), 4000);
+      if (timer?.unref) timer.unref();
+    });
+    const res = await Promise.race([clickTask, timeout]);
+    if (timer) clearTimeout(timer);
+    return res;
   } catch (err) {
     return [];
   }
@@ -567,28 +605,31 @@ async function captureNativeBaseline(page) {
       el.dataset.cxAuditId = auditId;
 
       const tag = el.tagName.toLowerCase();
-      if (['script', 'style', 'svg', 'path', 'noscript', 'meta', 'link'].includes(tag)) continue;
+      if (['script', 'style', 'noscript', 'meta', 'link', 'template'].includes(tag)) continue;
 
       const style = window.getComputedStyle(el);
       if (style.visibility === 'hidden' || style.display === 'none' || parseFloat(style.opacity) === 0) continue;
 
       const rect = el.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) continue;
+      const isSvg = tag === 'svg' || tag === 'path' || tag === 'g' || tag === 'rect' || tag === 'circle' || tag === 'polygon' || tag === 'polyline' || tag === 'line' || (typeof SVGElement !== 'undefined' && el instanceof SVGElement);
+      if (!isSvg && (rect.width <= 0 || rect.height <= 0)) continue;
+      if (isSvg && (rect.width <= 0 && rect.height <= 0)) continue;
 
       visibleCount++;
-      const text = (el.innerText || '').slice(0, 30).trim();
+      const text = (el.innerText || el.textContent || '').slice(0, 30).trim();
 
       baselineMap[auditId] = {
         auditId,
         selector: getSelector(el),
         tagName: tag,
+        isSvg,
         textSnippet: text,
         font: {
           family: cleanFontFamily(style.fontFamily),
           rawFamily: style.fontFamily,
           size: parseFloat(style.fontSize) || 14,
           weight: normalizeWeight(style.fontWeight),
-          style: style.fontStyle
+          style: style.fontStyle || 'normal'
         },
         margin: {
           top: parseFloat(style.marginTop) || 0,
@@ -599,7 +640,23 @@ async function captureNativeBaseline(page) {
         size: {
           width: Math.round(rect.width * 10) / 10,
           height: Math.round(rect.height * 10) / 10
-        }
+        },
+        outline: {
+          style: style.outlineStyle || 'none',
+          width: parseFloat(style.outlineWidth) || 0,
+          color: style.outlineColor || ''
+        },
+        border: {
+          topWidth: (style.borderTopStyle !== 'none' && parseFloat(style.borderTopWidth) > 0) ? parseFloat(style.borderTopWidth) : 0,
+          rightWidth: (style.borderRightStyle !== 'none' && parseFloat(style.borderRightWidth) > 0) ? parseFloat(style.borderRightWidth) : 0,
+          bottomWidth: (style.borderBottomStyle !== 'none' && parseFloat(style.borderBottomWidth) > 0) ? parseFloat(style.borderBottomWidth) : 0,
+          leftWidth: (style.borderLeftStyle !== 'none' && parseFloat(style.borderLeftWidth) > 0) ? parseFloat(style.borderLeftWidth) : 0
+        },
+        svg: isSvg ? {
+          fill: style.fill || el.getAttribute('fill') || '',
+          stroke: style.stroke || el.getAttribute('stroke') || '',
+          strokeWidth: parseFloat(style.strokeWidth || el.getAttribute('stroke-width')) || 0
+        } : null
       };
     }
 
@@ -677,7 +734,8 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
     }
 
     const issues = [];
-    const baseMap = baseline.elements;
+    opts = opts || {};
+    const baseMap = baseline?.elements || {};
     const currentElements = document.querySelectorAll('body *');
     const currentVisibleIds = new Set();
     let currentVisibleCount = 0;
@@ -686,14 +744,15 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
       const el = currentElements[i];
       const auditId = el.dataset.cxAuditId || ('cx_aud_' + i);
       const tag = el.tagName.toLowerCase();
-      if (['script', 'style', 'svg', 'path', 'noscript', 'meta', 'link'].includes(tag)) continue;
+      if (['script', 'style', 'noscript', 'meta', 'link', 'template'].includes(tag)) continue;
 
       const style = window.getComputedStyle(el);
       const isVisible = style.visibility !== 'hidden' && style.display !== 'none' && parseFloat(style.opacity) > 0;
       const rect = el.getBoundingClientRect();
-      const hasBox = rect.width > 0 && rect.height > 0;
+      const isSvg = tag === 'svg' || tag === 'path' || tag === 'g' || tag === 'rect' || tag === 'circle' || tag === 'polygon' || tag === 'polyline' || tag === 'line' || (typeof SVGElement !== 'undefined' && el instanceof SVGElement);
+      const hasBox = isSvg ? (rect.width > 0 || rect.height > 0 || isVisible) : (rect.width > 0 && rect.height > 0);
       const selector = getSelector(el);
-      const text = (el.innerText || '').slice(0, 30).trim();
+      const text = (el.innerText || el.textContent || '').slice(0, 30).trim();
 
       if (isVisible && hasBox) {
         currentVisibleCount++;
@@ -706,6 +765,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           const currFontFamily = cleanFontFamily(style.fontFamily);
           const currFontSize = parseFloat(style.fontSize) || 14;
           const currFontWeight = normalizeWeight(style.fontWeight);
+          const currFontStyle = style.fontStyle || 'normal';
 
           if (currFontFamily !== base.font.family) {
             issues.push({
@@ -736,6 +796,17 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
               severity: 'HIGH',
               selector,
               details: `Font weight changed: Native ${base.font.weight} vs Theme ${currFontWeight}`,
+              textSnippet: text
+            });
+          }
+
+          if (base.font.style && currFontStyle !== base.font.style && (currFontStyle === 'italic' || base.font.style === 'italic')) {
+            issues.push({
+              category: 'PARITY',
+              type: 'FONT_STYLE_MISMATCH',
+              severity: 'HIGH',
+              selector,
+              details: `Font style changed: Native "${base.font.style}" vs Theme "${currFontStyle}"`,
               textSnippet: text
             });
           }
@@ -778,6 +849,91 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
               textSnippet: text
             });
           }
+
+          // D. Outline Parity Check
+          const curOutlineStyle = style.outlineStyle || 'none';
+          const curOutlineWidth = parseFloat(style.outlineWidth) || 0;
+          const baseOutlineStyle = base.outline?.style || 'none';
+          const baseOutlineWidth = base.outline?.width || 0;
+          if (
+            (curOutlineStyle !== 'none' && curOutlineWidth > 0 && (baseOutlineStyle === 'none' || baseOutlineWidth === 0)) ||
+            (baseOutlineStyle !== 'none' && baseOutlineWidth > 0 && (curOutlineStyle === 'none' || curOutlineWidth === 0)) ||
+            (curOutlineStyle !== 'none' && baseOutlineStyle !== 'none' && Math.abs(curOutlineWidth - baseOutlineWidth) > 0.5)
+          ) {
+            issues.push({
+              category: 'PARITY',
+              type: 'OUTLINE_MISMATCH',
+              severity: 'HIGH',
+              selector,
+              details: `Outline changed: Native "${baseOutlineStyle} ${baseOutlineWidth}px" vs Theme "${curOutlineStyle} ${curOutlineWidth}px"`,
+              textSnippet: text
+            });
+          }
+
+          // E. Border Parity Check
+          const curBorderTop = (style.borderTopStyle !== 'none' && parseFloat(style.borderTopWidth) > 0) ? parseFloat(style.borderTopWidth) : 0;
+          const curBorderBottom = (style.borderBottomStyle !== 'none' && parseFloat(style.borderBottomWidth) > 0) ? parseFloat(style.borderBottomWidth) : 0;
+          const curBorderLeft = (style.borderLeftStyle !== 'none' && parseFloat(style.borderLeftWidth) > 0) ? parseFloat(style.borderLeftWidth) : 0;
+          const curBorderRight = (style.borderRightStyle !== 'none' && parseFloat(style.borderRightWidth) > 0) ? parseFloat(style.borderRightWidth) : 0;
+
+          const baseBorderTop = base.border?.topWidth || 0;
+          const baseBorderBottom = base.border?.bottomWidth || 0;
+          const baseBorderLeft = base.border?.leftWidth || 0;
+          const baseBorderRight = base.border?.rightWidth || 0;
+
+          const addedBorder = (curBorderTop > 0 && baseBorderTop === 0) || (curBorderBottom > 0 && baseBorderBottom === 0) ||
+                              (curBorderLeft > 0 && baseBorderLeft === 0) || (curBorderRight > 0 && baseBorderRight === 0);
+          const removedBorder = (baseBorderTop > 0 && curBorderTop === 0) || (baseBorderBottom > 0 && curBorderBottom === 0) ||
+                                (baseBorderLeft > 0 && curBorderLeft === 0) || (baseBorderRight > 0 && curBorderRight === 0);
+
+          if (addedBorder || removedBorder) {
+            issues.push({
+              category: 'PARITY',
+              type: 'BORDER_MISMATCH',
+              severity: 'MEDIUM',
+              selector,
+              details: `Border changed: Native [T:${baseBorderTop}, R:${baseBorderRight}, B:${baseBorderBottom}, L:${baseBorderLeft}] vs Theme [T:${curBorderTop}, R:${curBorderRight}, B:${curBorderBottom}, L:${curBorderLeft}]`,
+              textSnippet: text
+            });
+          }
+
+          // F. SVG Fill and Stroke Parity Check
+          if (base.isSvg || isSvg) {
+            function normalizeFillVal(f) {
+              if (!f || f === 'none' || f === 'transparent' || f === 'rgba(0, 0, 0, 0)') return 'none';
+              return f.replace(/\s+/g, '').toLowerCase();
+            }
+            const curFill = style.fill || el.getAttribute('fill') || '';
+            const baseFill = base.svg?.fill || '';
+            const normCurFill = normalizeFillVal(curFill);
+            const normBaseFill = normalizeFillVal(baseFill);
+
+            if (normCurFill !== normBaseFill && (normCurFill === 'none' || normBaseFill === 'none' || normCurFill === 'currentcolor' || normBaseFill === 'currentcolor')) {
+              issues.push({
+                category: 'PARITY',
+                type: 'SVG_FILL_MISMATCH',
+                severity: 'HIGH',
+                selector,
+                details: `SVG fill changed: Native "${baseFill || 'none'}" vs Theme "${curFill || 'none'}"`,
+                textSnippet: text
+              });
+            }
+
+            const curStroke = style.stroke || el.getAttribute('stroke') || '';
+            const baseStroke = base.svg?.stroke || '';
+            const normCurStroke = normalizeFillVal(curStroke);
+            const normBaseStroke = normalizeFillVal(baseStroke);
+            if (normCurStroke !== normBaseStroke && (normCurStroke === 'none' || normBaseStroke === 'none')) {
+              issues.push({
+                category: 'PARITY',
+                type: 'SVG_STROKE_MISMATCH',
+                severity: 'HIGH',
+                selector,
+                details: `SVG stroke changed: Native "${baseStroke || 'none'}" vs Theme "${curStroke || 'none'}"`,
+                textSnippet: text
+              });
+            }
+          }
         } else {
           issues.push({
             category: 'PARITY',
@@ -795,7 +951,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         const effectiveBg = getEffectiveBg(el);
 
         // Native Purple Ink Bar
-        if (el.classList.contains('mat-ink-bar')) {
+        if (el.classList?.contains?.('mat-ink-bar')) {
           if (elBg && elBg.r > 90 && elBg.r < 125 && elBg.b > 160) {
             issues.push({
               category: 'STYLE',
@@ -811,7 +967,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         if (isDark && elBg && elBg.a > 0.7 && !['img', 'video', 'canvas'].includes(tag)) {
           const bgLum = getLuminance(elBg.r, elBg.g, elBg.b);
           if (bgLum > 0.65 && elBg.r > 210 && elBg.g > 210 && elBg.b > 210) {
-            if (!el.closest('.mat-badge, .badge, .status-pill, .chip-light')) {
+            if (!el.closest?.('.mat-badge, .badge, .status-pill, .chip-light')) {
               issues.push({
                 category: 'STYLE',
                 type: 'DARK_MODE_LIGHT_BG_BLEED',
@@ -824,7 +980,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         }
 
         // Contrast Checks
-        const hasDirectText = Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim().length > 0);
+        const hasDirectText = Array.from(el.childNodes || []).some(n => n.nodeType === 3 && n.textContent?.trim().length > 0);
         if (hasDirectText && elColor && effectiveBg) {
           const cr = getContrast(elColor, effectiveBg);
           const fontSize = parseFloat(style.fontSize) || 14;
@@ -873,7 +1029,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
     }
 
     // Overall visible count check
-    if (currentVisibleCount !== baseline.visibleCount) {
+    if (baseline && typeof baseline.visibleCount === 'number' && currentVisibleCount !== baseline.visibleCount) {
       issues.push({
         category: 'PARITY',
         type: 'VISIBLE_COUNT_MISMATCH',
@@ -1149,22 +1305,27 @@ async function runThemeAudit() {
   md += `| Page URL / View | Theme | Visible | Parity Diffs | Critical | Status |\n`;
   md += `| :--- | :--- | :---: | :---: | :---: | :---: |\n`;
 
-  let mdRows = 0;
+  const allRows = [];
   for (const pageUrl of Object.keys(allPageResults)) {
     const pageData = allPageResults[pageUrl];
     const urlDisplay = pageUrl.replace(/^https?:\/\/connect\.det\.wa\.edu\.au/, '').slice(0, 45) || '/';
     for (const tid of Object.keys(pageData.themes)) {
-      if (mdRows >= 45) break;
       const item = pageData.themes[tid];
       const issues = item.audit.issues;
       const pDiff = issues.filter(i => i.category === 'PARITY').length;
       const cCrit = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
       const sDiff = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
       const status = pDiff === 0 && cCrit === 0 && sDiff === 0 ? '✅ Pass' : (cCrit > 0 ? '❌ Crit' : '⚠️ Warn');
-
-      md += `| \`${urlDisplay}\` | **${item.theme.name}** | ${item.audit.visibleCount}/${pageData.baselineVisibleCount} | ${pDiff} | ${cCrit} | ${status} |\n`;
-      mdRows++;
+      allRows.push({ urlDisplay, themeName: item.theme.name, visible: `${item.audit.visibleCount}/${pageData.baselineVisibleCount}`, pDiff, cCrit, sDiff, status });
     }
+  }
+
+  // Prioritize displaying pages with parity differences and critical contrast issues
+  allRows.sort((a, b) => (b.cCrit - a.cCrit) || (b.pDiff - a.pDiff) || (b.sDiff - a.sDiff));
+
+  for (let i = 0; i < Math.min(allRows.length, 45); i++) {
+    const r = allRows[i];
+    md += `| \`${r.urlDisplay}\` | **${r.themeName}** | ${r.visible} | ${r.pDiff} | ${r.cCrit} | ${r.status} |\n`;
   }
 
   const mdLines = md.split('\n');
