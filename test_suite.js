@@ -5598,6 +5598,17 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   assert.strictEqual(classIdsInFiltered.size, 5, 'filterUrlList must strictly limit scanned classes to 5 unique classes');
   assert.ok(filtered.includes('https://connect.det.wa.edu.au/group/students/ui/my-settings/profile'), 'filterUrlList must preserve non-class pages like profile');
 
+  // Verify filterUrlList deduplicates percent-encoded (%3A) and literal (:) class URLs
+  const dupRoutes = [
+    'https://connect.det.wa.edu.au/group/students/ui/class/discussions?coisp=DomainSchoolClass%3A27866513',
+    'https://connect.det.wa.edu.au/group/students/ui/class/discussions?coisp=DomainSchoolClass:27866513',
+    'https://connect.det.wa.edu.au/group/students/ui/class/learners?coisp=DomainSchoolClass%3A27866513',
+    'https://connect.det.wa.edu.au/group/students/ui/class/learners?coisp=DomainSchoolClass:27866513'
+  ];
+  const dedupFiltered = crawlerMod.filterUrlList(dupRoutes, 5);
+  assert.strictEqual(dedupFiltered.length, 2, 'filterUrlList must purge duplicate %3A vs : class URLs');
+  assert.ok(!dedupFiltered.some(u => u.includes('%3A')), 'filterUrlList must canonicalize to literal : format');
+
   // Verify non-user-facing pages (/combo, browserconfig.xml, machine configs) are excluded
   assert.ok(crawlerMod.isExcludedPath('/combo'), 'isExcludedPath must exclude /combo');
   assert.ok(crawlerMod.isExcludedPath('/combo?browserId=firefox&minifierType=js'), 'isExcludedPath must exclude /combo queries');

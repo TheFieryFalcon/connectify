@@ -127,28 +127,27 @@ function extractClassId(urlStr) {
 }
 
 function filterUrlList(routes, maxClassRedirects = 5) {
-  const otherUrls = [];
-  const clsUrls = [];
-  const seenClassIds = new Set();
+  const otherUrls = [], clsUrls = [];
+  const seenClassIds = new Set(), seenUrls = new Set();
   for (const r of routes) {
     const rawUrl = typeof r === 'string' ? r : (r.url || '');
     let pathname = '';
-    try {
-      pathname = (r.pathname || new URL(rawUrl).pathname).toLowerCase();
-    } catch {
-      continue;
-    }
+    try { pathname = (r.pathname || new URL(rawUrl).pathname).toLowerCase(); } catch { continue; }
     if (isExcludedPath(pathname)) continue;
 
-    const classId = extractClassId(rawUrl);
+    const cleanUrl = rawUrl.replace(/DomainSchoolClass%3A/gi, 'DomainSchoolClass:');
+    if (seenUrls.has(cleanUrl)) continue;
+    seenUrls.add(cleanUrl);
+
+    const classId = extractClassId(cleanUrl);
     if (classId) {
       if (!seenClassIds.has(classId)) {
         if (seenClassIds.size >= maxClassRedirects) continue;
         seenClassIds.add(classId);
       }
-      clsUrls.push(rawUrl);
+      clsUrls.push(cleanUrl);
     } else {
-      otherUrls.push(rawUrl);
+      otherUrls.push(cleanUrl);
     }
   }
   return [...otherUrls, ...clsUrls].sort();
@@ -308,12 +307,8 @@ async function crawl() {
   console.log('[ConnectCrawler] Authentication confirmed. Beginning crawl...\n');
 
   // BFS Queue and tracking sets
-  const queue = [];
-  const visited = new Set();
-  const enqueued = new Set();
-  const discoveredRoutes = new Map(); // routeKey -> { url, pathname, search, title, category, depth, status }
-  const externalLinks = new Set();
-  const scannedClassIds = new Set();
+  const queue = [], visited = new Set(), enqueued = new Set();
+  const discoveredRoutes = new Map(), externalLinks = new Set(), scannedClassIds = new Set();
 
   // Canonical portal entry points
   const seeds = [
@@ -325,16 +320,20 @@ async function crawl() {
 
   for (const s of seeds) {
     const norm = normalizeUrl(s, options.startUrl);
-    if (norm && !enqueued.has(norm)) {
-      queue.push({ url: norm, depth: 0 });
-      enqueued.add(norm);
+    if (norm) {
+      const canon = norm.replace(/DomainSchoolClass%3A/gi, 'DomainSchoolClass:');
+      if (!enqueued.has(canon)) {
+        queue.push({ url: canon, depth: 0 });
+        enqueued.add(canon);
+      }
     }
   }
 
   while (queue.length > 0 && visited.size < options.maxPages) {
     const { url, depth } = queue.shift();
-    if (visited.has(url)) continue;
-    visited.add(url);
+    const canonUrl = url.replace(/DomainSchoolClass%3A/gi, 'DomainSchoolClass:');
+    if (visited.has(canonUrl)) continue;
+    visited.add(canonUrl);
 
     let parsedUrl;
     try {
@@ -375,8 +374,9 @@ async function crawl() {
       const normFinalUrl = normalizeUrl(finalUrlStr, options.startUrl) || finalUrlStr;
       if (normFinalUrl !== url) {
         console.log(`  ↳ Redirected: ${url} -> ${normFinalUrl}`);
-        visited.add(normFinalUrl);
-        enqueued.add(normFinalUrl);
+        const canonRedirect = normFinalUrl.replace(/DomainSchoolClass%3A/gi, 'DomainSchoolClass:');
+        visited.add(canonRedirect);
+        enqueued.add(canonRedirect);
       }
 
       // Check class ID on destination URL
@@ -387,19 +387,16 @@ async function crawl() {
       }
 
       let parsedFinal;
-      try {
-        parsedFinal = new URL(normFinalUrl);
-      } catch {
-        parsedFinal = parsedUrl;
-      }
+      try { parsedFinal = new URL(normFinalUrl); } catch { parsedFinal = parsedUrl; }
 
       const finalPath = parsedFinal.pathname;
-      const finalSearch = parsedFinal.search || '';
+      const finalSearch = (parsedFinal.search || '').replace(/DomainSchoolClass%3A/gi, 'DomainSchoolClass:');
+      const canonicalFinalUrl = normFinalUrl.replace(/DomainSchoolClass%3A/gi, 'DomainSchoolClass:');
       const routeKey = finalPath + (finalSearch ? finalSearch : '');
       const category = categorizePath(finalPath);
 
       discoveredRoutes.set(routeKey, {
-        url: normFinalUrl,
+        url: canonicalFinalUrl,
         pathname: finalPath,
         search: finalSearch,
         title: pageTitle.trim(),
@@ -422,9 +419,10 @@ async function crawl() {
               if (childClassId && !scannedClassIds.has(childClassId) && scannedClassIds.size >= options.maxClassRedirects) {
                 continue;
               }
-              if (!isExcludedPath(childPath) && !visited.has(norm) && !enqueued.has(norm)) {
-                queue.push({ url: norm, depth: depth + 1 });
-                enqueued.add(norm);
+              const canonicalNorm = norm.replace(/DomainSchoolClass%3A/gi, 'DomainSchoolClass:');
+              if (!isExcludedPath(childPath) && !visited.has(canonicalNorm) && !enqueued.has(canonicalNorm)) {
+                queue.push({ url: canonicalNorm, depth: depth + 1 });
+                enqueued.add(canonicalNorm);
               }
             } else {
               externalLinks.add(norm);
