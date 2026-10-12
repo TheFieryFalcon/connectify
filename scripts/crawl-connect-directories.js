@@ -68,10 +68,13 @@ function normalizeUrl(rawUrl, baseUrl) {
 
 function isExcludedPath(pathname) {
   const lower = pathname.toLowerCase();
-  if (/logout|signout|timeout|inactivity|session_expired/i.test(lower)) return true;
+  if (/logout|signout|timeout|inactivity|session_expired|loggedout/i.test(lower)) return true;
   if (lower.startsWith('/cvr') || lower.startsWith('/connect/cvr')) return true;
   if (lower.startsWith('/documents') || lower.startsWith('/content')) return true;
-  return /\.(png|jpg|jpeg|gif|svg|ico|css|js|woff|woff2|ttf|eot|pdf|zip|docx?|xlsx?|pptx?)$/i.test(lower);
+  if (lower.startsWith('/combo') || lower === '/combo') return true;
+  if (lower.startsWith('/public/home-screen') || lower.includes('browserconfig') || lower.includes('manifest')) return true;
+  if (lower.startsWith('/html/js') || lower.startsWith('/html/css') || lower.startsWith('/o/frontend-') || lower.startsWith('/api/')) return true;
+  return /\.(png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|woff2?|ttf|eot|otf|pdf|zip|tar|gz|docx?|xlsx?|pptx?|xml|json|webmanifest|map|txt|mp[34]|wav)$/i.test(lower);
 }
 
 function categorizePath(pathname) {
@@ -124,7 +127,7 @@ function filterUrlList(routes, maxClassRedirects = 5) {
     } catch {
       continue;
     }
-    if (pathname.startsWith('/documents') || pathname.startsWith('/content')) continue;
+    if (isExcludedPath(pathname)) continue;
 
     const classId = extractClassId(rawUrl);
     if (classId) {
@@ -188,6 +191,8 @@ async function extractPageLinks(page) {
     const allEls = document.querySelectorAll('*');
     for (const el of allEls) {
       if (!el.attributes) continue;
+      const tag = el.tagName.toLowerCase();
+      if (tag === 'script' || tag === 'style' || tag === 'link' || tag === 'meta') continue;
       for (let i = 0; i < el.attributes.length; i++) {
         const attr = el.attributes[i];
         const v = attr.value;
@@ -471,9 +476,7 @@ async function crawl() {
   for (const r of sortedRoutes.slice(0, 40)) {
     md += `| \`${r.status}\` | ${r.category} | \`${r.pathname}\` |\n`;
   }
-  if (sortedRoutes.length > 40) {
-    md += `\n*... and ${sortedRoutes.length - 40} additional endpoints recorded in connect_directories.json.*\n`;
-  }
+  if (sortedRoutes.length > 40) md += `\n*... and ${sortedRoutes.length - 40} additional endpoints recorded in connect_directories.json.*\n`;
 
   const mdLines = md.split('\n');
   const finalMd = mdLines.length > 145 ? mdLines.slice(0, 140).join('\n') + '\n\n*Truncated to 150 lines.*' : md;
@@ -484,10 +487,7 @@ async function crawl() {
 }
 
 if (require.main === module) {
-  crawl().catch(err => {
-    console.error('[ConnectCrawler] Fatal error:', err);
-    process.exit(1);
-  });
+  crawl().catch(err => { console.error('[ConnectCrawler] Fatal error:', err); process.exit(1); });
 }
 
-module.exports = { crawl, normalizeUrl, buildDirectoryTree, formatAsciiTree, filterUrlList, extractClassId };
+module.exports = { crawl, normalizeUrl, buildDirectoryTree, formatAsciiTree, filterUrlList, extractClassId, isExcludedPath };

@@ -5594,6 +5594,17 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   assert.strictEqual(classIdsInFiltered.size, 5, 'filterUrlList must strictly limit scanned classes to 5 unique classes');
   assert.ok(filtered.includes('https://connect.det.wa.edu.au/group/students/ui/my-settings/profile'), 'filterUrlList must preserve non-class pages like profile');
 
+  // Verify non-user-facing pages (/combo, browserconfig.xml, machine configs) are excluded
+  assert.ok(crawlerMod.isExcludedPath('/combo'), 'isExcludedPath must exclude /combo');
+  assert.ok(crawlerMod.isExcludedPath('/combo?browserId=firefox&minifierType=js'), 'isExcludedPath must exclude /combo queries');
+  assert.ok(crawlerMod.isExcludedPath('/public/home-screen/ui/browserconfig.xml'), 'isExcludedPath must exclude browserconfig.xml');
+  assert.ok(crawlerMod.isExcludedPath('/public/home-screen/ui/manifest.json'), 'isExcludedPath must exclude manifest.json');
+  assert.ok(crawlerMod.isExcludedPath('/api/jsonws'), 'isExcludedPath must exclude /api/ endpoints');
+  assert.ok(crawlerMod.isExcludedPath('/documents/123/guide.pdf'), 'isExcludedPath must exclude documents');
+  assert.ok(!crawlerMod.isExcludedPath('/group/students/ui/my-connect'), 'isExcludedPath must allow /group/students/ui/my-connect');
+  assert.ok(!crawlerMod.isExcludedPath('/group/students/ui/my-settings/profile'), 'isExcludedPath must allow profile');
+  assert.ok(!crawlerMod.isExcludedPath('/group/students/ui/class/announcements'), 'isExcludedPath must allow class announcements');
+
   // 5. package.json scripts
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
   assert.strictEqual(pkg.scripts['test:themes'], 'node scripts/test-theme-styles.js', 'package.json must define test:themes script');
