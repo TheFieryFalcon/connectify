@@ -25,6 +25,11 @@ const DEFAULT_PAGE = 'https://connect.det.wa.edu.au/group/students/ui/my-setting
 
 function parseArgs() {
   const args = process.argv.slice(2);
+  const isEnvInteractive = process.env.npm_config_interactive === 'true' ||
+                          process.env.npm_config_interactive === '1' ||
+                          process.env.INTERACTIVE === 'true' ||
+                          process.env.INTERACTIVE === '1';
+
   const options = {
     url: null,
     file: null,
@@ -44,7 +49,7 @@ function parseArgs() {
     headless: null,
     username: null,
     password: null,
-    interactive: false,
+    interactive: isEnvInteractive,
     session: path.resolve(__dirname, '..', utils.DEFAULT_SESSION_FILE),
     subPages: true,
     maxSubPages: 8
@@ -73,7 +78,7 @@ function parseArgs() {
     else if (a === '--headless') options.headless = true;
     else if ((a === '--username' || a === '-u') && args[i + 1]) options.username = args[++i];
     else if ((a === '--password' || a === '-p') && args[i + 1]) options.password = args[++i];
-    else if (a === '--interactive') options.interactive = true;
+    else if (a === '--interactive' || a === '-i' || a === 'interactive') options.interactive = true;
     else if (a === '--session' && args[i + 1]) options.session = path.resolve(args[++i]);
   }
   return options;

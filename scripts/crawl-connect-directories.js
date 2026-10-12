@@ -18,10 +18,12 @@ function parseArgs() {
   const args = process.argv.slice(2);
   const isEnvForce = process.env.npm_config_force === 'true' || process.env.npm_config_force === '1' ||
                      process.env.FORCE === 'true' || process.env.FORCE === '1';
+  const isEnvInteractive = process.env.npm_config_interactive === 'true' || process.env.npm_config_interactive === '1' ||
+                          process.env.INTERACTIVE === 'true' || process.env.INTERACTIVE === '1';
 
   const options = {
     startUrl: DEFAULT_START_URL, maxDepth: 7, maxPages: 100, maxClassRedirects: 5, delay: 1250,
-    headful: false, headless: null, username: null, password: null, interactive: false, force: isEnvForce,
+    headful: false, headless: null, username: null, password: null, interactive: isEnvInteractive, force: isEnvForce,
     session: path.resolve(__dirname, '..', utils.DEFAULT_SESSION_FILE),
     outputJson: path.resolve(__dirname, '..', 'connect_directories.json'),
     outputMd: path.resolve(__dirname, '..', 'connect_directories.md'),
@@ -39,7 +41,7 @@ function parseArgs() {
     else if (a === '--headless') options.headless = true;
     else if ((a === '--username' || a === '-u') && args[i + 1]) options.username = args[++i];
     else if ((a === '--password' || a === '-p') && args[i + 1]) options.password = args[++i];
-    else if (a === '--interactive') options.interactive = true;
+    else if (a === '--interactive' || a === '-i' || a === 'interactive') options.interactive = true;
     else if (a === '--force' || a === '-f' || a === 'force' || a === '--recrawl' || a === 'recrawl') options.force = true;
     else if (a === '--session' && args[i + 1]) options.session = path.resolve(args[++i]);
     else if (a === '--output-json' && args[i + 1]) options.outputJson = path.resolve(args[++i]);

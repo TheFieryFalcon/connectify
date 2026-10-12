@@ -5597,7 +5597,9 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   // 5. package.json scripts
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
   assert.strictEqual(pkg.scripts['test:themes'], 'node scripts/test-theme-styles.js', 'package.json must define test:themes script');
+  assert.strictEqual(pkg.scripts['test:themes:interactive'], 'node scripts/test-theme-styles.js --interactive', 'package.json must define test:themes:interactive script');
   assert.strictEqual(pkg.scripts['crawl'], 'node scripts/crawl-connect-directories.js', 'package.json must define crawl script');
+  assert.strictEqual(pkg.scripts['crawl:interactive'], 'node scripts/crawl-connect-directories.js --interactive', 'package.json must define crawl:interactive script');
 });
 
 console.log('\n================================================================');
