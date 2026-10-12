@@ -31,22 +31,22 @@ function parseArgs() {
   };
 
   for (let i = 0; i < args.length; i++) {
-    const a = args[i];
-    if (a === '--url' && args[i + 1]) options.startUrl = args[++i];
-    else if (a === '--max-depth' && args[i + 1]) options.maxDepth = parseInt(args[++i], 10);
-    else if (a === '--max-pages' && args[i + 1]) options.maxPages = parseInt(args[++i], 10);
-    else if (a === '--max-class-redirects' && args[i + 1]) options.maxClassRedirects = parseInt(args[++i], 10);
-    else if (a === '--delay' && args[i + 1]) options.delay = parseInt(args[++i], 10);
+    const a = args[i], next = args[i + 1];
+    if (a === '--url' && next) options.startUrl = args[++i];
+    else if (a === '--max-depth' && next) options.maxDepth = parseInt(args[++i], 10);
+    else if (a === '--max-pages' && next) options.maxPages = parseInt(args[++i], 10);
+    else if (a === '--max-class-redirects' && next) options.maxClassRedirects = parseInt(args[++i], 10);
+    else if (a === '--delay' && next) options.delay = parseInt(args[++i], 10);
     else if (a === '--headful' || a === '--no-headless') options.headful = true;
     else if (a === '--headless') options.headless = true;
-    else if ((a === '--username' || a === '-u') && args[i + 1]) options.username = args[++i];
-    else if ((a === '--password' || a === '-p') && args[i + 1]) options.password = args[++i];
     else if (a === '--interactive' || a === '-i' || a === 'interactive') options.interactive = true;
     else if (a === '--force' || a === '-f' || a === 'force' || a === '--recrawl' || a === 'recrawl') options.force = true;
-    else if (a === '--session' && args[i + 1]) options.session = path.resolve(args[++i]);
-    else if (a === '--output-json' && args[i + 1]) options.outputJson = path.resolve(args[++i]);
-    else if (a === '--output-md' && args[i + 1]) options.outputMd = path.resolve(args[++i]);
-    else if (a === '--output-urls' && args[i + 1]) options.outputUrls = path.resolve(args[++i]);
+    else if ((a === '--username' || a === '-u') && next) options.username = args[++i];
+    else if ((a === '--password' || a === '-p') && next) options.password = args[++i];
+    else if (a === '--session' && next) options.session = path.resolve(args[++i]);
+    else if (a === '--output-json' && next) options.outputJson = path.resolve(args[++i]);
+    else if (a === '--output-md' && next) options.outputMd = path.resolve(args[++i]);
+    else if (a === '--output-urls' && next) options.outputUrls = path.resolve(args[++i]);
   }
   return options;
 }
@@ -59,6 +59,15 @@ function normalizeUrl(rawUrl, baseUrl) {
     parsed.pathname = parsed.pathname.replace(/;jsessionid=[^/?#]+/gi, '').replace(/\/+/g, '/');
     if (parsed.pathname.length > 1 && parsed.pathname.endsWith('/')) {
       parsed.pathname = parsed.pathname.slice(0, -1);
+    }
+    if (!parsed.searchParams.has('coisp') && baseUrl) {
+      try {
+        const baseObj = new URL(baseUrl);
+        const baseCoisp = baseObj.searchParams.get('coisp');
+        if (baseCoisp && (parsed.pathname.includes('/class/') || parsed.pathname.includes('/cls/'))) {
+          parsed.searchParams.set('coisp', baseCoisp);
+        }
+      } catch {}
     }
     return parsed.href;
   } catch {
@@ -82,7 +91,7 @@ function categorizePath(pathname) {
   if (p.includes('/cls/') || p.includes('/class/')) return 'Class Space';
   if (p.includes('/classes')) return 'Classes Directory';
   if (p.includes('assessment-outlines')) return 'Assessment Outlines';
-  if (p.includes('my-settings') || p.includes('profile') || p.includes('password')) return 'User Settings & Profile';
+  if (p.includes('my-settings') || p.includes('profile') || p.includes('password') || p.includes('preference') || p.includes('notification') || p.includes('attendance') || p.includes('report')) return 'User Settings & Profile';
   if (p.includes('my-connect')) return 'Student Dashboard';
   if (p.includes('feed') || p.includes('notices')) return 'Notices & Feed';
   if (p.includes('calendar')) return 'Calendar';
@@ -99,14 +108,14 @@ function extractClassId(urlStr) {
     const u = new URL(urlStr);
     const m1 = u.pathname.match(/\/redirect\/cls\/([0-9a-zA-Z_-]+)/i);
     if (m1) return m1[1];
-    const m2 = (u.search || '').match(/DomainSchoolClass:([0-9a-zA-Z_-]+)/i);
+    const m2 = (u.search || '').match(/DomainSchoolClass(?::|%3A)([0-9a-zA-Z_-]+)/i);
     if (m2) return m2[1];
     const m3 = u.pathname.match(/\/cls\/([0-9a-zA-Z_-]+)/i);
     if (m3) return m3[1];
     if (u.pathname.includes('/ui/class/')) {
       const coisp = u.searchParams.get('coisp');
       if (coisp) {
-        const m = coisp.match(/:([0-9a-zA-Z_-]+)/);
+        const m = coisp.match(/(?::|%3A)?([0-9a-zA-Z_-]+)$/);
         return m ? m[1] : coisp;
       }
       return 'class-space';
@@ -146,12 +155,10 @@ function filterUrlList(routes, maxClassRedirects = 5) {
 function buildDirectoryTree(paths) {
   const root = { name: '/', count: 0, children: {} };
   for (const rawPath of paths) {
-    let curr = root;
-    curr.count++;
+    let curr = root; curr.count++;
     for (const seg of rawPath.split('/').filter(Boolean)) {
       if (!curr.children[seg]) curr.children[seg] = { name: seg, count: 0, children: {} };
-      curr = curr.children[seg];
-      curr.count++;
+      curr = curr.children[seg]; curr.count++;
     }
   }
   return root;
@@ -161,25 +168,20 @@ function formatAsciiTree(node, prefix = '') {
   let lines = [];
   const entries = Object.keys(node.children).sort();
   for (let i = 0; i < entries.length; i++) {
-    const key = entries[i];
-    const isLast = i === entries.length - 1;
-    const connector = isLast ? '└── ' : '├── ';
-    const child = node.children[key];
-    const childHasChildren = Object.keys(child.children).length > 0;
-    lines.push(`${prefix}${connector}${key}${childHasChildren ? '/' : ''}`);
-    if (childHasChildren) {
-      lines = lines.concat(formatAsciiTree(child, prefix + (isLast ? '    ' : '│   ')));
-    }
+    const key = entries[i], isLast = i === entries.length - 1;
+    const child = node.children[key], hasChildren = Object.keys(child.children).length > 0;
+    lines.push(`${prefix}${isLast ? '└── ' : '├── '}${key}${hasChildren ? '/' : ''}`);
+    if (hasChildren) lines = lines.concat(formatAsciiTree(child, prefix + (isLast ? '    ' : '│   ')));
   }
   return lines;
 }
 
-async function extractPageLinks(page) {
-  return await page.evaluate(() => {
+function extractPageLinks(page) {
+  return page.evaluate(() => {
     const found = new Set();
     const add = (val) => {
       if (!val || typeof val !== 'string') return;
-      const s = val.trim();
+      const s = val.replace(/[\[\]'"]/g, '').trim();
       if (!s || s.startsWith('#') || s.startsWith('javascript:') || s.startsWith('mailto:')) return;
       found.add(s);
     };
@@ -188,8 +190,7 @@ async function extractPageLinks(page) {
     document.querySelectorAll('a[href], area[href]').forEach(a => add(a.getAttribute('href')));
 
     // 2. Generic attribute scan across all DOM elements (Angular router links, Lexicon, Vaadin, data routes)
-    const allEls = document.querySelectorAll('*');
-    for (const el of allEls) {
+    for (const el of document.querySelectorAll('*')) {
       if (!el.attributes) continue;
       const tag = el.tagName.toLowerCase();
       if (tag === 'script' || tag === 'style' || tag === 'link' || tag === 'meta') continue;
@@ -198,21 +199,40 @@ async function extractPageLinks(page) {
         const v = attr.value;
         if (!v || typeof v !== 'string') continue;
         const name = attr.name.toLowerCase();
-
-        if (name.includes('route') || name.includes('link') || name.includes('path') || name.includes('url')) {
+        if (name.includes('route') || name.includes('link') || name.includes('path') || name.includes('url') || name.includes('target') || name.includes('service') || name.includes('slug')) {
           add(v.replace(/,/g, '/'));
         } else if (v.startsWith('/') || v.includes('connect.det.wa.edu.au')) {
           add(v);
         } else if (name === 'onclick') {
           const matches = v.match(/(?:location(?:\.href)?|window\.open|assign|replace|navigate)\s*[=(]\s*['"`]([^'"`]+)['"`]/gi);
-          if (matches) {
-            for (const m of matches) {
-              const u = m.match(/['"`]([^'"`]+)['"`]/);
-              if (u && u[1]) add(u[1]);
-            }
-          }
+          if (matches) for (const m of matches) { const u = m.match(/['"`]([^'"`]+)['"`]/); if (u && u[1]) add(u[1]); }
           const pathMatch = v.match(/['"`](\/(?:group|redirect|connect)\/[^'"`]+)['"`]/);
           if (pathMatch && pathMatch[1]) add(pathMatch[1]);
+        }
+      }
+    }
+
+    // 3. Navigation menus & sidebars (e.g. .cvr-c-service-menu, .cvr-c-category-menu, .eds-c-nav-list, .mat-nav-list)
+    const navItems = document.querySelectorAll(
+      '.cvr-c-service-menu__item, .cvr-c-category-menu__item, .cvr-c-primary-menu__item, .eds-c-nav-list__item, .mat-nav-list .mat-list-item, [class*="service-menu"] li, [class*="service-menu"] a, [class*="service-menu"] button, [role="menuitem"]'
+    );
+    const curPath = window.location.pathname.replace(/\/+$/, '');
+    const lastSlash = curPath.lastIndexOf('/');
+    const branchBase = lastSlash > 0 ? curPath.substring(0, lastSlash + 1) : '';
+    const search = window.location.search || '';
+
+    for (const item of navItems) {
+      const labelEl = item.querySelector('.cvr-c-service-menu__item-label, [class*="label"], [class*="title"]') || item;
+      const text = (labelEl.innerText || labelEl.textContent || '').trim().replace(/\s+/g, ' ');
+      if (text && text.length > 1 && text.length < 40 && !/\b(logout|signout|delete|remove)\b/i.test(text)) {
+        const slug = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        if (slug) {
+          add(slug);
+          if (branchBase) {
+            add(branchBase + slug);
+            if (search) add(branchBase + slug + search);
+          }
+          if (search) add(slug + search);
         }
       }
     }
@@ -288,14 +308,10 @@ async function crawl() {
 
   // Canonical portal entry points
   const seeds = [
-    'https://connect.det.wa.edu.au',
-    'https://connect.det.wa.edu.au/group/students',
-    'https://connect.det.wa.edu.au/group/students/ui/my-connect',
-    'https://connect.det.wa.edu.au/group/students/ui/classes',
-    'https://connect.det.wa.edu.au/group/students/ui/feed',
-    'https://connect.det.wa.edu.au/group/students/notices',
-    'https://connect.det.wa.edu.au/group/students/calendar',
-    'https://connect.det.wa.edu.au/group/students/library'
+    'https://connect.det.wa.edu.au', 'https://connect.det.wa.edu.au/group/students',
+    'https://connect.det.wa.edu.au/group/students/ui/my-connect', 'https://connect.det.wa.edu.au/group/students/ui/classes',
+    'https://connect.det.wa.edu.au/group/students/ui/feed', 'https://connect.det.wa.edu.au/group/students/notices',
+    'https://connect.det.wa.edu.au/group/students/calendar', 'https://connect.det.wa.edu.au/group/students/library'
   ];
 
   for (const s of seeds) {
@@ -462,22 +478,10 @@ async function crawl() {
   console.log(`[ConnectCrawler] Saved clean URL list: ${options.outputUrls} (${cleanUrls.length} URLs)`);
 
   // Write Markdown Sitemap (< 150 lines)
-  let md = `# Connect Portal Directory & Route Map\n\n`;
-  md += `**Host:** \`${TARGET_HOST}\`  \n`;
-  md += `**Crawled:** ${new Date().toUTCString()}  \n`;
-  md += `**Routes Found:** ${discoveredRoutes.size} | **Pages Crawled:** ${visited.size}\n\n`;
-  md += `## Directory Hierarchy (ASCII Tree)\n\n\`\`\`text\n${TARGET_HOST}/\n`;
-  for (const line of asciiTree.slice(0, 40)) md += line + '\n';
-  if (asciiTree.length > 40) md += `... [${asciiTree.length - 40} more branches in JSON]\n`;
-  md += `\`\`\`\n\n## Key Portal Routes & Classifications\n\n`;
-  md += `| Status | Category | Path |\n| :---: | :--- | :--- |\n`;
-
+  let md = `# Connect Portal Directory & Route Map\n\n**Host:** \`${TARGET_HOST}\`  \n**Crawled:** ${new Date().toUTCString()}  \n**Routes Found:** ${discoveredRoutes.size} | **Pages Crawled:** ${visited.size}\n\n## Directory Hierarchy (ASCII Tree)\n\n\`\`\`text\n${TARGET_HOST}/\n${asciiTree.slice(0, 40).join('\n')}\n${asciiTree.length > 40 ? `... [${asciiTree.length - 40} more branches in JSON]\n` : ''}\`\`\`\n\n## Key Portal Routes & Classifications\n\n| Status | Category | Path |\n| :---: | :--- | :--- |\n`;
   const sortedRoutes = Array.from(discoveredRoutes.values()).sort((a, b) => a.pathname.localeCompare(b.pathname));
-  for (const r of sortedRoutes.slice(0, 40)) {
-    md += `| \`${r.status}\` | ${r.category} | \`${r.pathname}\` |\n`;
-  }
+  for (const r of sortedRoutes.slice(0, 40)) md += `| \`${r.status}\` | ${r.category} | \`${r.pathname}\` |\n`;
   if (sortedRoutes.length > 40) md += `\n*... and ${sortedRoutes.length - 40} additional endpoints recorded in connect_directories.json.*\n`;
-
   const mdLines = md.split('\n');
   const finalMd = mdLines.length > 145 ? mdLines.slice(0, 140).join('\n') + '\n\n*Truncated to 150 lines.*' : md;
   fs.writeFileSync(options.outputMd, finalMd, 'utf8');
@@ -490,4 +494,4 @@ if (require.main === module) {
   crawl().catch(err => { console.error('[ConnectCrawler] Fatal error:', err); process.exit(1); });
 }
 
-module.exports = { crawl, normalizeUrl, buildDirectoryTree, formatAsciiTree, filterUrlList, extractClassId, isExcludedPath };
+module.exports = { crawl, normalizeUrl, buildDirectoryTree, formatAsciiTree, filterUrlList, extractClassId, isExcludedPath, extractPageLinks, categorizePath };

@@ -71,55 +71,55 @@ html.connectea-dark {
   margin: 0;
   white-space: nowrap;
   border-radius: 6px;
-  padding: 6px 14px;
+  padding: 5px 12px;
   font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
   cursor: pointer;
-  background: var(--cx-button-bg, #25313f) !important;
-  color: var(--cx-button-text, #f1f6fb) !important;
-  border: 1px solid var(--cx-button-border, #526a81) !important;
+  background: #25313f !important;
+  color: #f1f6fb !important;
+  border: 1px solid #526a81 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   transition: background 0.15s ease, border-color 0.15s ease;
   right: 16px;
-  min-width: 108px;
+  min-width: 96px;
   width: auto;
-  height: 34px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 #connectea-theme-toggle:hover {
-  background: var(--cx-button-hover, #313f50) !important;
-  border-color: var(--cx-button-border-hover, #6b88a5) !important;
+  background: #313f50 !important;
+  border-color: #6b88a5 !important;
 }
 
 #connectea-theme-toggle:focus-visible {
-  outline: 2px solid var(--cx-accent, #598fbd);
+  outline: 2px solid #598fbd;
   outline-offset: 2px;
 }
 
 .connectea-dark #connectea-theme-toggle {
-  background: var(--cx-button-bg, #24303f) !important;
-  color: var(--cx-button-text, #f1f6fb) !important;
-  border: 1px solid var(--cx-button-border, #485c72) !important;
+  background: #24303f !important;
+  color: #f1f6fb !important;
+  border: 1px solid #485c72 !important;
 }
 
 .connectea-dark #connectea-theme-toggle:hover {
-  background: var(--cx-button-hover, #2f3e52) !important;
-  border-color: var(--cx-button-border-hover, #627b97) !important;
+  background: #2f3e52 !important;
+  border-color: #627b97 !important;
 }
 
 @media (max-width: 600px) {
   #connectea-theme-toggle {
     right: 8px !important;
-    font-size: 12px;
-    padding: 5px 10px;
-    min-width: 88px;
-    height: 30px;
+    font-size: 11px;
+    padding: 4px 8px;
+    min-width: 80px;
+    height: 26px;
   }
 }
 

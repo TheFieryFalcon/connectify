@@ -5370,14 +5370,18 @@ runTest('Test 142: Sleek compact theme toggle button geometry and elimination of
   const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
 
   // 1. Sleek compact dimensions on #connectea-theme-toggle
-  assert.ok(themeCoreCss.includes('height: 34px;') || themeCoreCss.includes('height: 28px;'),
-    'theme-core.css must set sleek height on #connectea-theme-toggle');
-  assert.ok(themeCoreCss.includes('padding: 6px 14px;') || themeCoreCss.includes('padding: 5px 12px;'),
-    'theme-core.css must set sleek padding on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('height: 28px;'),
+    'theme-core.css must set sleek 28px height on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('padding: 5px 12px;'),
+    'theme-core.css must set sleek 5px 12px padding on #connectea-theme-toggle');
   assert.ok(themeCoreCss.includes('border-radius: 6px;'),
     'theme-core.css must set sleek 6px border-radius on #connectea-theme-toggle');
-  assert.ok(themeCoreCss.includes('font-size: 13px;') || themeCoreCss.includes('font-size: 12px;'),
-    'theme-core.css must set sleek font size on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('font-size: 12px;'),
+    'theme-core.css must set sleek 12px font size on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('background: #25313f !important;'),
+    'theme-core.css must set #25313f light-mode background on #connectea-theme-toggle');
+  assert.ok(themeCoreCss.includes('background: #24303f !important;'),
+    'theme-core.css must set #24303f dark-mode background on #connectea-theme-toggle');
 
   // 2. Elimination of nested box styling on .connectea-theme-arrow
   assert.ok(themeTokensCss.includes('.connectea-theme-arrow {\n  display: inline-block;') &&
@@ -5604,6 +5608,58 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   assert.ok(!crawlerMod.isExcludedPath('/group/students/ui/my-connect'), 'isExcludedPath must allow /group/students/ui/my-connect');
   assert.ok(!crawlerMod.isExcludedPath('/group/students/ui/my-settings/profile'), 'isExcludedPath must allow profile');
   assert.ok(!crawlerMod.isExcludedPath('/group/students/ui/class/announcements'), 'isExcludedPath must allow class announcements');
+
+  // Verify normalizeUrl preserves coisp parameter on class routes
+  const classBase = 'https://connect.det.wa.edu.au/group/students/ui/class/announcements?coisp=DomainSchoolClass:6611613497';
+  const discNorm = crawlerMod.normalizeUrl('discussions', classBase);
+  assert.ok(discNorm.includes('/ui/class/discussions') && discNorm.includes('coisp=DomainSchoolClass'), 'normalizeUrl must preserve coisp on relative class routes');
+
+  // Verify route categorization for my-settings sub-pages
+  assert.strictEqual(crawlerMod.categorizePath('/group/students/ui/my-settings/profile'), 'User Settings & Profile');
+  assert.strictEqual(crawlerMod.categorizePath('/group/students/ui/my-settings/preferences'), 'User Settings & Profile');
+  assert.strictEqual(crawlerMod.categorizePath('/group/students/ui/my-settings/notifications'), 'User Settings & Profile');
+  assert.strictEqual(crawlerMod.categorizePath('/group/students/ui/my-settings/attendance'), 'User Settings & Profile');
+  assert.strictEqual(crawlerMod.categorizePath('/group/students/ui/my-settings/reports'), 'User Settings & Profile');
+  assert.strictEqual(crawlerMod.categorizePath('/group/students/ui/my-settings/assessment-outlines'), 'Assessment Outlines');
+
+  // Verify extractPageLinks dynamic discovery of all 6 my-settings pages from .cvr-c-service-menu
+  assert.strictEqual(typeof crawlerMod.extractPageLinks, 'function', 'extractPageLinks must be exported');
+  const origWindow = global.window;
+  const origDoc = global.document;
+  try {
+    global.window = {
+      location: {
+        pathname: '/group/students/ui/my-settings/profile',
+        search: '',
+        href: 'https://connect.det.wa.edu.au/group/students/ui/my-settings/profile'
+      }
+    };
+    const menuItems = ['Profile', 'Preferences', 'Notifications', 'Attendance', 'Reports', 'Assessment Outlines'];
+    const mockEls = menuItems.map(label => ({
+      attributes: [{ name: 'class', value: 'cvr-c-service-menu__item' }],
+      querySelector: () => ({ innerText: label, textContent: label }),
+      innerText: label,
+      textContent: label,
+      querySelectorAll: () => []
+    }));
+    global.document = {
+      querySelectorAll: (sel) => {
+        if (sel === 'a[href], area[href]' || sel === '*') return [];
+        if (sel.includes('cvr-c-service-menu__item')) return mockEls;
+        return [];
+      }
+    };
+    const mockPage = { evaluate: (fn) => fn() };
+    const discovered = crawlerMod.extractPageLinks(mockPage);
+    const normDiscovered = discovered.map(l => crawlerMod.normalizeUrl(l, global.window.location.href));
+    for (const sub of ['profile', 'preferences', 'notifications', 'attendance', 'reports', 'assessment-outlines']) {
+      const targetUrl = `https://connect.det.wa.edu.au/group/students/ui/my-settings/${sub}`;
+      assert.ok(normDiscovered.includes(targetUrl), `extractPageLinks must discover ${targetUrl} from navigation menu`);
+    }
+  } finally {
+    global.window = origWindow;
+    global.document = origDoc;
+  }
 
   // 5. package.json scripts
   const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
