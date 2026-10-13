@@ -1218,6 +1218,10 @@ async function captureNativeBaseline(page, options = {}) {
       return widthVal;
     }
 
+    function getBorderStyle(st, side) {
+      return (st['border' + side + 'Style'] || st.borderStyle || 'none').toLowerCase();
+    }
+
     function cleanFontFamily(f) {
       if (!f) return '';
       return f.replace(/['"]/g, '').toLowerCase().split(',').map(s => s.trim()).join(', ');
@@ -1297,7 +1301,12 @@ async function captureNativeBaseline(page, options = {}) {
 
       const rect = el.getBoundingClientRect();
       const isSvg = tag === 'svg' || tag === 'path' || tag === 'g' || tag === 'rect' || tag === 'circle' || tag === 'polygon' || tag === 'polyline' || tag === 'line' || (typeof SVGElement !== 'undefined' && el instanceof SVGElement);
-      if (!isSvg && (rect.width <= 0 || rect.height <= 0)) continue;
+      const isLayoutDropzone = el.classList?.contains?.('portlet-dropzone') ||
+                               el.classList?.contains?.('portlet-column') ||
+                               el.classList?.contains?.('portlet-column-content') ||
+                               el.classList?.contains?.('portlet-layout') ||
+                               (typeof el.id === 'string' && el.id.startsWith('layout-column'));
+      if (!isSvg && !isLayoutDropzone && (rect.width <= 0 || rect.height <= 0)) continue;
       if (isSvg && (rect.width <= 0 && rect.height <= 0)) continue;
 
       visibleCount++;
@@ -1322,8 +1331,9 @@ async function captureNativeBaseline(page, options = {}) {
                             el.classList?.contains?.('eds-c-table__column');
       const isContainer = el.id === 'main-content' || el.classList?.contains?.('portlet') ||
                           el.classList?.contains?.('portlet-content') || el.classList?.contains?.('portlet-body') ||
+                          isLayoutDropzone ||
                           el.classList?.contains?.('cvr-c-service-bar') ||
-                          (rect.width >= 300 && rect.height >= 200 && !isTable);
+                          (rect.width >= 300 && (rect.height >= 200 || el.children?.length > 0) && !isTable);
 
       baselineMap[auditId] = {
         auditId,
@@ -1349,7 +1359,7 @@ async function captureNativeBaseline(page, options = {}) {
           height: Math.round(rect.height * 10) / 10
         },
         outline: {
-          style: style.outlineStyle || 'none',
+          style: (style.outlineStyle || 'none').toLowerCase(),
           width: parseFloat(style.outlineWidth) || 0,
           color: style.outlineColor || ''
         },
@@ -1357,7 +1367,11 @@ async function captureNativeBaseline(page, options = {}) {
           topWidth: isVisibleBorder(style, 'Top'),
           rightWidth: isVisibleBorder(style, 'Right'),
           bottomWidth: isVisibleBorder(style, 'Bottom'),
-          leftWidth: isVisibleBorder(style, 'Left')
+          leftWidth: isVisibleBorder(style, 'Left'),
+          topStyle: getBorderStyle(style, 'Top'),
+          rightStyle: getBorderStyle(style, 'Right'),
+          bottomStyle: getBorderStyle(style, 'Bottom'),
+          leftStyle: getBorderStyle(style, 'Left')
         },
         borderRadius: bRadius,
         rawBorderRadius: rawRadius,
@@ -1550,7 +1564,12 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
       const isVisible = style.visibility !== 'hidden' && style.display !== 'none' && parseFloat(style.opacity) > 0;
       const rect = el.getBoundingClientRect();
       const isSvg = tag === 'svg' || tag === 'path' || tag === 'g' || tag === 'rect' || tag === 'circle' || tag === 'polygon' || tag === 'polyline' || tag === 'line' || (typeof SVGElement !== 'undefined' && el instanceof SVGElement);
-      const hasBox = isSvg ? (rect.width > 0 || rect.height > 0) : (rect.width > 0 && rect.height > 0);
+      const isLayoutDropzone = el.classList?.contains?.('portlet-dropzone') ||
+                               el.classList?.contains?.('portlet-column') ||
+                               el.classList?.contains?.('portlet-column-content') ||
+                               el.classList?.contains?.('portlet-layout') ||
+                               (typeof el.id === 'string' && el.id.startsWith('layout-column'));
+      const hasBox = isSvg ? (rect.width > 0 || rect.height > 0) : (isLayoutDropzone ? (rect.width > 0 || rect.height >= 0) : (rect.width > 0 && rect.height > 0));
       const selector = getSelector(el);
       const text = (el.innerText || el.textContent || '').slice(0, 30).trim();
 
@@ -1811,6 +1830,47 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
             }
           }
 
+          // 7. Dashed or Dotted Border Added (unwanted dashed outlines/segments)
+          const curTopStyle = (style.borderTopStyle || 'none').toLowerCase();
+          const curRightStyle = (style.borderRightStyle || 'none').toLowerCase();
+          const curBottomStyle = (style.borderBottomStyle || 'none').toLowerCase();
+          const curLeftStyle = (style.borderLeftStyle || 'none').toLowerCase();
+          const curOutStyle = (style.outlineStyle || 'none').toLowerCase();
+
+          const hasDashedBorder = (curBorderTop > 0 && (curTopStyle === 'dashed' || curTopStyle === 'dotted')) ||
+                                  (curBorderRight > 0 && (curRightStyle === 'dashed' || curRightStyle === 'dotted')) ||
+                                  (curBorderBottom > 0 && (curBottomStyle === 'dashed' || curBottomStyle === 'dotted')) ||
+                                  (curBorderLeft > 0 && (curLeftStyle === 'dashed' || curLeftStyle === 'dotted'));
+          const hasDashedOutline = curOutlineWidth > 0 && (curOutStyle === 'dashed' || curOutStyle === 'dotted');
+
+          const baseTopStyle = base.border?.topStyle || 'none';
+          const baseRightStyle = base.border?.rightStyle || 'none';
+          const baseBottomStyle = base.border?.bottomStyle || 'none';
+          const baseLeftStyle = base.border?.leftStyle || 'none';
+          const baseOutStyle = base.outline?.style || 'none';
+
+          const baseHadDashed = baseTopStyle === 'dashed' || baseTopStyle === 'dotted' ||
+                                baseRightStyle === 'dashed' || baseRightStyle === 'dotted' ||
+                                baseBottomStyle === 'dashed' || baseBottomStyle === 'dotted' ||
+                                baseLeftStyle === 'dashed' || baseLeftStyle === 'dotted' ||
+                                baseOutStyle === 'dashed' || baseOutStyle === 'dotted';
+
+          const isLegitUploadZone = el.classList?.contains?.('v-multifileupload-dropzone') ||
+                                    el.classList?.contains?.('cvr-c-upload-control') ||
+                                    el.classList?.contains?.('cvr-c-upload-gallery') ||
+                                    (tag === 'input' && el.getAttribute?.('type') === 'file');
+
+          if ((hasDashedBorder || hasDashedOutline) && !baseHadDashed && !isLegitUploadZone) {
+            issues.push({
+              category: 'PARITY',
+              type: 'DASHED_BORDER_ADDED',
+              severity: 'HIGH',
+              selector,
+              details: `Element gained unwanted dashed or dotted border/outline: [T:${curTopStyle} ${curBorderTop}px, R:${curRightStyle} ${curBorderRight}px, B:${curBottomStyle} ${curBorderBottom}px, L:${curLeftStyle} ${curBorderLeft}px, outline:${curOutStyle} ${curOutlineWidth}px]`,
+              textSnippet: text
+            });
+          }
+
           // F. SVG Fill and Stroke Parity Check
           if (base.isSvg || isSvg) {
             function normalizeFillVal(f) {
@@ -1849,6 +1909,35 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
             }
           }
         } else {
+          const curTopStyle = (style.borderTopStyle || 'none').toLowerCase();
+          const curRightStyle = (style.borderRightStyle || 'none').toLowerCase();
+          const curBottomStyle = (style.borderBottomStyle || 'none').toLowerCase();
+          const curLeftStyle = (style.borderLeftStyle || 'none').toLowerCase();
+          const curOutStyle = (style.outlineStyle || 'none').toLowerCase();
+          const curBorderTop = isVisibleBorder(style, 'Top');
+          const curBorderRight = isVisibleBorder(style, 'Right');
+          const curBorderBottom = isVisibleBorder(style, 'Bottom');
+          const curBorderLeft = isVisibleBorder(style, 'Left');
+          const curOutlineWidth = parseFloat(style.outlineWidth) || 0;
+          const hasDashedBorder = (curBorderTop > 0 && (curTopStyle === 'dashed' || curTopStyle === 'dotted')) ||
+                                  (curBorderRight > 0 && (curRightStyle === 'dashed' || curRightStyle === 'dotted')) ||
+                                  (curBorderBottom > 0 && (curBottomStyle === 'dashed' || curBottomStyle === 'dotted')) ||
+                                  (curBorderLeft > 0 && (curLeftStyle === 'dashed' || curLeftStyle === 'dotted'));
+          const hasDashedOutline = curOutlineWidth > 0 && (curOutStyle === 'dashed' || curOutStyle === 'dotted');
+          const isLegitUploadZone = el.classList?.contains?.('v-multifileupload-dropzone') ||
+                                    el.classList?.contains?.('cvr-c-upload-control') ||
+                                    el.classList?.contains?.('cvr-c-upload-gallery') ||
+                                    (tag === 'input' && el.getAttribute?.('type') === 'file');
+          if ((hasDashedBorder || hasDashedOutline) && !isLegitUploadZone) {
+            issues.push({
+              category: 'PARITY',
+              type: 'DASHED_BORDER_ADDED',
+              severity: 'HIGH',
+              selector,
+              details: `Element became visible with unwanted dashed/dotted border: [T:${curTopStyle} ${curBorderTop}px, R:${curRightStyle} ${curBorderRight}px, B:${curBottomStyle} ${curBorderBottom}px, L:${curLeftStyle} ${curBorderLeft}px]`,
+              textSnippet: text
+            });
+          }
           issues.push({
             category: 'PARITY',
             type: 'EXTRA_ELEMENT_VISIBLE_IN_THEME',

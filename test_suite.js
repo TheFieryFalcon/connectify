@@ -5625,6 +5625,25 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
         size: { width: 80, height: 20 },
         outline: { style: 'none', width: 0, color: '' },
         border: { topWidth: 0, rightWidth: 0, bottomWidth: 0, leftWidth: 0 }
+      },
+      el_dashed: {
+        auditId: 'el_dashed',
+        selector: '#layout-column_column-1',
+        tagName: 'div',
+        textSnippet: 'Column 1',
+        font: { family: 'open sans', rawFamily: 'Open Sans', size: 14, weight: 400, style: 'normal' },
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+        size: { width: 300, height: 200 },
+        outline: { style: 'none', width: 0, color: '' },
+        border: { topWidth: 0, rightWidth: 0, bottomWidth: 0, leftWidth: 0, topStyle: 'none', rightStyle: 'none', bottomStyle: 'none', leftStyle: 'none' },
+        borderRadius: 0,
+        rawBorderRadius: '0px',
+        isButton: false,
+        isActionButton: false,
+        isTable: false,
+        isTableCell: false,
+        isTableColumn: false,
+        isContainer: true
       }
     }
   };
@@ -5739,6 +5758,37 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
         backgroundColor: 'rgb(24, 26, 27)',
         color: 'rgb(255, 255, 255)'
       }
+    },
+    {
+      dataset: { cxAuditId: 'el_dashed' },
+      tagName: 'DIV',
+      innerText: 'Column 1',
+      textContent: 'Column 1',
+      getBoundingClientRect: () => ({ width: 300, height: 200 }),
+      getAttribute: () => null,
+      classList: { contains: (c) => c === 'portlet-column' || c === 'portlet-dropzone' },
+      closest: () => null,
+      childNodes: [{ nodeType: 3, textContent: 'Column 1' }],
+      _style: {
+        visibility: 'visible',
+        display: 'block',
+        opacity: '1',
+        fontSize: '14px',
+        fontWeight: '400',
+        fontStyle: 'normal',
+        fontFamily: 'Open Sans',
+        outlineStyle: 'none',
+        borderTopStyle: 'dashed',
+        borderTopWidth: '1px',
+        borderBottomStyle: 'dashed',
+        borderBottomWidth: '1px',
+        borderLeftStyle: 'dashed',
+        borderLeftWidth: '1px',
+        borderRightStyle: 'dashed',
+        borderRightWidth: '1px',
+        backgroundColor: 'rgb(24, 26, 27)',
+        color: 'rgb(255, 255, 255)'
+      }
     }
   ];
 
@@ -5762,6 +5812,8 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
     assert.ok(issueTypes.includes('SVG_STROKE_MISMATCH'), 'auditThemeAgainstBaseline must detect SVG_STROKE_MISMATCH');
     assert.ok(issueTypes.includes('FONT_WEIGHT_MISMATCH'), 'auditThemeAgainstBaseline must detect FONT_WEIGHT_MISMATCH');
     assert.ok(issueTypes.includes('FONT_STYLE_MISMATCH'), 'auditThemeAgainstBaseline must detect FONT_STYLE_MISMATCH');
+    assert.ok(issueTypes.includes('DASHED_BORDER_ADDED'), 'auditThemeAgainstBaseline must detect DASHED_BORDER_ADDED');
+    assert.ok(issueTypes.includes('CONTAINER_OUTLINE_ADDED'), 'auditThemeAgainstBaseline must detect CONTAINER_OUTLINE_ADDED');
 
     // Verify clickInteractiveButtons discovers and clicks mat-card button and div.v-button
     let matClicked = 0;
