@@ -5542,6 +5542,7 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   // 3. test-theme-styles exports parity functions and multi-URL resolver
   const themeTesterMod = require(themeTesterPath);
   assert.strictEqual(typeof themeTesterMod.runThemeAudit, 'function', 'runThemeAudit must be exported');
+  assert.strictEqual(typeof themeTesterMod.buildAuditManifest, 'function', 'buildAuditManifest must be exported');
   assert.strictEqual(typeof themeTesterMod.resolveTargetUrls, 'function', 'resolveTargetUrls must be exported');
   assert.strictEqual(typeof themeTesterMod.clickInteractiveButtons, 'function', 'clickInteractiveButtons must be exported');
   assert.strictEqual(typeof themeTesterMod.discoverSubPages, 'function', 'discoverSubPages must be exported');
@@ -6335,6 +6336,177 @@ runTest('Test 146: Sidebar disabled state, notice banner, and Back to All button
     document.querySelectorAll('#connectify-sidebar-handle').forEach(el => el.remove());
     delete window.__connectifySidebarInitialized;
   }
+});
+
+runTest('Test 147: Style test JSON manifest aggregates all audited views under pages and views', async () => {
+  const themeTesterMod = require(path.resolve(__dirname, 'scripts/test-theme-styles.js'));
+
+  // 1. Verify buildAuditManifest aggregates multiple views without losing or overwriting any view
+  const targetUrlA = 'https://connect.det.wa.edu.au/group/students/ui/feed';
+  const targetUrlB = 'https://connect.det.wa.edu.au/group/students/ui/class/summary?coisp=DomainSchoolClass:2204735831';
+
+  const viewRecordA1 = {
+    url: targetUrlA,
+    viewTitle: 'All',
+    auditScope: 'page',
+    baselineVisibleCount: 1997,
+    themes: { dark: { id: 'dark', name: 'Dark' } }
+  };
+  const viewRecordA2 = {
+    url: targetUrlA,
+    viewTitle: 'Classes',
+    auditScope: 'page',
+    baselineVisibleCount: 1101,
+    themes: { dark: { id: 'dark', name: 'Dark' } }
+  };
+  const viewRecordA3 = {
+    url: targetUrlA,
+    viewTitle: 'Sidebar: Target ATAR',
+    auditScope: 'sidebar',
+    baselineVisibleCount: 250,
+    themes: { dark: { id: 'dark', name: 'Dark' } }
+  };
+
+  const viewRecordB1 = {
+    url: targetUrlB,
+    viewTitle: 'Default View',
+    auditScope: 'page',
+    baselineVisibleCount: 228,
+    themes: { dark: { id: 'dark', name: 'Dark' } }
+  };
+  const viewRecordB2 = {
+    url: targetUrlB,
+    viewTitle: 'Notices',
+    auditScope: 'page',
+    baselineVisibleCount: 240,
+    themes: { dark: { id: 'dark', name: 'Dark' } }
+  };
+
+  const pageResults = {
+    [targetUrlA]: {
+      url: targetUrlA,
+      totalViews: 3,
+      views: {
+        'All': viewRecordA1,
+        'Classes': viewRecordA2,
+        'Sidebar: Target ATAR': viewRecordA3
+      },
+      viewsList: [viewRecordA1, viewRecordA2, viewRecordA3],
+      viewTitle: 'All',
+      baselineVisibleCount: 1997,
+      themes: viewRecordA1.themes
+    },
+    [targetUrlB]: {
+      url: targetUrlB,
+      totalViews: 2,
+      views: {
+        'Default View': viewRecordB1,
+        'Notices': viewRecordB2
+      },
+      viewsList: [viewRecordB1, viewRecordB2],
+      viewTitle: 'Default View',
+      baselineVisibleCount: 228,
+      themes: viewRecordB1.themes
+    }
+  };
+
+  const allPageResults = {
+    [`${targetUrlA} [All]`]: viewRecordA1,
+    [`${targetUrlA} [Classes]`]: viewRecordA2,
+    [`${targetUrlA} [Sidebar: Target ATAR]`]: viewRecordA3,
+    [`${targetUrlB} [Default View]`]: viewRecordB1,
+    [`${targetUrlB} [Notices]`]: viewRecordB2
+  };
+
+  const manifest = themeTesterMod.buildAuditManifest(pageResults, allPageResults);
+
+  // Distinct page count and total views count
+  assert.strictEqual(manifest.totalPages, 2, 'Manifest totalPages must equal distinct page URL count (2)');
+  assert.strictEqual(manifest.totalViews, 5, 'Manifest totalViews must equal total views count (5)');
+
+  // Every page contains ALL views under .views
+  assert.ok(manifest.pages[targetUrlA], 'Target page A must exist in manifest.pages');
+  assert.strictEqual(manifest.pages[targetUrlA].totalViews, 3, 'Page A totalViews must be 3');
+  assert.ok(manifest.pages[targetUrlA].views['All'], 'Page A must contain "All" view');
+  assert.ok(manifest.pages[targetUrlA].views['Classes'], 'Page A must contain "Classes" view');
+  assert.ok(manifest.pages[targetUrlA].views['Sidebar: Target ATAR'], 'Page A must contain "Sidebar: Target ATAR" view');
+  assert.strictEqual(manifest.pages[targetUrlA].views['All'].baselineVisibleCount, 1997);
+  assert.strictEqual(manifest.pages[targetUrlA].views['Classes'].baselineVisibleCount, 1101);
+  assert.strictEqual(manifest.pages[targetUrlA].views['Sidebar: Target ATAR'].baselineVisibleCount, 250);
+
+  assert.ok(manifest.pages[targetUrlB], 'Target page B must exist in manifest.pages');
+  assert.strictEqual(manifest.pages[targetUrlB].totalViews, 2, 'Page B totalViews must be 2');
+  assert.ok(manifest.pages[targetUrlB].views['Default View'], 'Page B must contain "Default View"');
+  assert.ok(manifest.pages[targetUrlB].views['Notices'], 'Page B must contain "Notices" view');
+  assert.strictEqual(manifest.pages[targetUrlB].views['Default View'].baselineVisibleCount, 228);
+  assert.strictEqual(manifest.pages[targetUrlB].views['Notices'].baselineVisibleCount, 240);
+
+  // Backward-compatible individual view access via resultKey
+  assert.ok(manifest.pages[`${targetUrlA} [Classes]`], 'Legacy index pages[url [view]] must exist');
+  assert.strictEqual(manifest.pages[`${targetUrlA} [Classes]`].baselineVisibleCount, 1101);
+  assert.strictEqual(manifest.views[`${targetUrlA} [Classes]`].baselineVisibleCount, 1101);
+
+  // 2. Test reconstruction from flat results when pageResults is empty
+  const reconstructed = themeTesterMod.buildAuditManifest({}, allPageResults);
+  assert.strictEqual(reconstructed.totalPages, 2, 'Reconstructed totalPages must be 2');
+  assert.strictEqual(reconstructed.totalViews, 5, 'Reconstructed totalViews must be 5');
+  assert.strictEqual(reconstructed.pages[targetUrlA].totalViews, 3, 'Reconstructed Page A totalViews must be 3');
+  assert.strictEqual(reconstructed.pages[targetUrlB].totalViews, 2, 'Reconstructed Page B totalViews must be 2');
+  assert.ok(reconstructed.pages[targetUrlA].views['All']);
+  assert.ok(reconstructed.pages[targetUrlA].views['Classes']);
+
+  // 3. Verify discoverSubPages discovers .eds-c-tabs__tab and recognizes active state
+  const mockSubpageDom = {
+    evaluate: (fn) => {
+      const prevWin = global.window;
+      const prevDoc = global.document;
+      try {
+        global.window = {};
+        global.document = {
+          querySelectorAll: (sel) => {
+            if (sel.includes('.eds-c-tabs__tab')) {
+              return [
+                {
+                  classList: { contains: (c) => c === 'eds-c-tabs__tab--active' },
+                  getAttribute: (a) => a === 'aria-selected' ? 'true' : null,
+                  innerText: 'Summary',
+                  closest: () => null,
+                  setAttribute: () => {}
+                },
+                {
+                  classList: { contains: () => false },
+                  getAttribute: () => null,
+                  innerText: 'Notices',
+                  closest: () => null,
+                  setAttribute: () => {}
+                },
+                {
+                  classList: { contains: () => false },
+                  getAttribute: () => null,
+                  innerText: 'Discussions',
+                  closest: () => null,
+                  setAttribute: () => {}
+                }
+              ];
+            }
+            return [];
+          }
+        };
+        return fn();
+      } finally {
+        global.window = prevWin;
+        global.document = prevDoc;
+      }
+    }
+  };
+
+  const discoveredViews = await themeTesterMod.discoverSubPages(mockSubpageDom);
+  assert.strictEqual(discoveredViews.length, 3, 'Must discover 3 eds-c-tabs__tab tabs');
+  assert.strictEqual(discoveredViews[0].title, 'Summary', 'First tab must be Summary');
+  assert.strictEqual(discoveredViews[0].isActive, true, 'Summary tab must be active');
+  assert.strictEqual(discoveredViews[1].title, 'Notices', 'Second tab must be Notices');
+  assert.strictEqual(discoveredViews[1].isActive, false, 'Notices tab must not be active');
+  assert.strictEqual(discoveredViews[2].title, 'Discussions', 'Third tab must be Discussions');
 });
 
 Promise.all(pendingTestPromises).then(() => {

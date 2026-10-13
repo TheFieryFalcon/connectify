@@ -681,6 +681,9 @@ async function discoverSubPages(page) {
         '.mat-tab-nav-bar .mat-tab-link',
         '.mat-tab-labels .mat-tab-label',
         '[role="tablist"] [role="tab"]',
+        '.eds-c-tabs__tab',
+        '.eds-c-tabs [role="tab"]',
+        '.eds-c-tabs a',
         '.nav-tabs > li > a',
         '.nav-pills > li > a',
 
@@ -709,6 +712,7 @@ async function discoverSubPages(page) {
 
         const isActive = el.classList.contains('mat-tab-label-active') ||
                          el.classList.contains('active') ||
+                         el.classList.contains('eds-c-tabs__tab--active') ||
                          el.classList.contains('fc-state-active') ||
                          el.getAttribute('aria-selected') === 'true' ||
                          el.closest('li')?.classList.contains('active');
@@ -748,6 +752,9 @@ async function activateNavbarHeading(page, headingTitle, delay = 1250) {
         '.mat-tab-header .mat-tab-label',
         '.mat-tab-nav-bar .mat-tab-link',
         '.mat-tab-labels .mat-tab-label',
+        '.eds-c-tabs__tab',
+        '.eds-c-tabs [role="tab"]',
+        '.eds-c-tabs a',
         '[role="tab"]',
         '.nav-tabs > li > a',
         '.nav-pills > li > a',
@@ -2183,6 +2190,7 @@ async function runThemeAudit(customOptions = {}) {
   }
 
   const allPageResults = {};
+  const pageResults = {};
 
   // Iterate across all target URLs one by one
   for (let pageIdx = 0; pageIdx < targetUrls.length; pageIdx++) {
@@ -2418,12 +2426,31 @@ async function runThemeAudit(customOptions = {}) {
             ? `${targetUrl} [${currentView.title}]`
             : targetUrl;
 
-          allPageResults[resultKey] = {
+          const viewRecord = {
             url: targetUrl,
             viewTitle: currentView.title,
+            auditScope: currentView.auditScope || 'page',
             baselineVisibleCount: baseline.visibleCount,
             themes: viewThemeResults
           };
+
+          allPageResults[resultKey] = viewRecord;
+
+          if (!pageResults[targetUrl]) {
+            pageResults[targetUrl] = {
+              url: targetUrl,
+              totalViews: 0,
+              views: {},
+              viewsList: [],
+              viewTitle: currentView.title,
+              baselineVisibleCount: baseline.visibleCount,
+              themes: viewThemeResults
+            };
+          }
+
+          pageResults[targetUrl].views[currentView.title] = viewRecord;
+          pageResults[targetUrl].viewsList.push(viewRecord);
+          pageResults[targetUrl].totalViews = Object.keys(pageResults[targetUrl].views).length;
 
           // F. Reset to Connect Native baseline before switching to next heading
           await page.evaluate(() => {
@@ -2468,15 +2495,12 @@ async function runThemeAudit(customOptions = {}) {
   }
 
   console.log(`\n` + '='.repeat(72));
-  console.log(`[ThemeAudit] Completed audit of ${Object.keys(allPageResults).length} page(s).`);
+  console.log(`[ThemeAudit] Completed audit of ${Object.keys(pageResults).length} page(s) across ${Object.keys(allPageResults).length} view(s).`);
   console.log('='.repeat(72));
 
   // Write JSON Manifest
-  fs.writeFileSync(options.outputJson, JSON.stringify({
-    auditedAt: new Date().toISOString(),
-    totalPages: Object.keys(allPageResults).length,
-    pages: allPageResults
-  }, null, 2), 'utf8');
+  const manifestData = buildAuditManifest(pageResults, allPageResults);
+  fs.writeFileSync(options.outputJson, JSON.stringify(manifestData, null, 2), 'utf8');
   console.log(`[ThemeAudit] Saved JSON audit manifest: ${options.outputJson}`);
 
   // Write Markdown Report (< 150 lines)
@@ -2525,6 +2549,73 @@ async function runThemeAudit(customOptions = {}) {
 
   await browser.close();
   console.log('[ThemeAudit] Theme testing complete.');
+  return manifestData;
+}
+
+/**
+ * Constructs the structured audit manifest preserving all audited views across all pages.
+ * - pages[url] maps each page URL to a record containing all of its views in .views and .viewsList
+ * - pages[resultKey] also retains flat individual view records for backwards compatibility
+ * - views maps each unique view resultKey to its audit data
+ * - totalPages reflects distinct page URLs audited
+ * - totalViews reflects all views audited across all pages
+ */
+function buildAuditManifest(pageResults = {}, allPageResults = {}, auditedAt = new Date().toISOString()) {
+  const pagesOutput = {};
+
+  // If pageResults is empty but allPageResults has items, reconstruct page groupings
+  const resolvedPageResults = { ...pageResults };
+  if (Object.keys(resolvedPageResults).length === 0 && Object.keys(allPageResults).length > 0) {
+    for (const [key, vData] of Object.entries(allPageResults)) {
+      const url = vData.url || key.split(' [')[0];
+      if (!resolvedPageResults[url]) {
+        resolvedPageResults[url] = {
+          url,
+          totalViews: 0,
+          views: {},
+          viewsList: [],
+          viewTitle: vData.viewTitle,
+          baselineVisibleCount: vData.baselineVisibleCount,
+          themes: vData.themes
+        };
+      }
+      const title = vData.viewTitle || 'Default View';
+      resolvedPageResults[url].views[title] = vData;
+      resolvedPageResults[url].viewsList.push(vData);
+      resolvedPageResults[url].totalViews = Object.keys(resolvedPageResults[url].views).length;
+    }
+  }
+
+  // 1. Grouped page records where each page contains ALL its views
+  for (const [url, pData] of Object.entries(resolvedPageResults)) {
+    const viewsMap = pData.views || {};
+    const viewsList = pData.viewsList || Object.values(viewsMap);
+    const initialView = viewsList[0] || {};
+    pagesOutput[url] = {
+      url: pData.url || url,
+      totalViews: pData.totalViews || Object.keys(viewsMap).length,
+      views: viewsMap,
+      viewsList: viewsList,
+      viewTitle: pData.viewTitle || initialView.viewTitle || 'Default View',
+      baselineVisibleCount: pData.baselineVisibleCount || initialView.baselineVisibleCount || 0,
+      themes: pData.themes || initialView.themes || {}
+    };
+  }
+
+  // 2. Also expose individual views under resultKey on pagesOutput for backwards compatibility
+  for (const [resKey, vData] of Object.entries(allPageResults)) {
+    if (!pagesOutput[resKey]) {
+      pagesOutput[resKey] = vData;
+    }
+  }
+
+  return {
+    auditedAt,
+    totalPages: Object.keys(resolvedPageResults).length,
+    totalViews: Object.keys(allPageResults).length,
+    pages: pagesOutput,
+    views: allPageResults
+  };
 }
 
 if (require.main === module) {
@@ -2537,6 +2628,7 @@ if (require.main === module) {
 module.exports = {
   parseArgs,
   runThemeAudit,
+  buildAuditManifest,
   resolveTargetUrls,
   clickInteractiveButtons,
   captureNativeBaseline,
