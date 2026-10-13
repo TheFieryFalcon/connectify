@@ -2,7 +2,7 @@
    13. Form Controls & General Buttons
    -------------------------------------------------------------------------- */
 /* Text Inputs & Textareas */
-.connectea-dark :is(input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]), textarea) {
+.connectea-dark :is(input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not(.mat-input-element):not(.connectea-subject-cohort-input):not([class*="connectea-"]), textarea) {
   background-color: var(--cx-input-bg, #141a22) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border: 1px solid var(--cx-border, #42556d) !important;
@@ -21,10 +21,7 @@
 }
 
 /* High-Contrast Dark Checkboxes (Native, Clay, Material, Vaadin) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) input[type="checkbox"],
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .v-checkbox input[type="checkbox"],
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-checkbox-input,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-checkbox input[type="checkbox"] {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]) {
   appearance: none !important;
   -webkit-appearance: none !important;
   width: 17px !important;
@@ -40,17 +37,12 @@
   transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) input[type="checkbox"]:hover,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .v-checkbox input[type="checkbox"]:hover,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-checkbox input[type="checkbox"]:hover {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):hover {
   border-color: var(--cx-accent-hover, #60a5fa) !important;
   background-color: var(--cx-surface-hover, #222d3d) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) input[type="checkbox"]:checked,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .v-checkbox input[type="checkbox"]:checked,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-checkbox-input:checked,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-checkbox input[type="checkbox"]:checked {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):checked {
   background-color: #2563eb !important;
   background-color: var(--cx-accent, #2563eb) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
@@ -60,9 +52,7 @@
   background-position: center !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) input[type="checkbox"]:focus,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .v-checkbox input[type="checkbox"]:focus,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-checkbox input[type="checkbox"]:focus {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"], .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
   outline: none !important;
 }
@@ -100,11 +90,10 @@
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) label:has(input[type="checkbox"]) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   cursor: pointer !important;
-  font-size: 13px !important;
 }
 
 /* High-Contrast Dark Dropdowns & Selects */
-.connectea-dark select,
+.connectea-dark select:not(.connectea-type-select):not([class*="connectea-"]),
 .connectea-dark .v-select select,
 .connectea-dark .eds-c-select select,
 .connectea-dark :is(.cvr-c-classes__sort, .cvr-c-sort-by) select {
@@ -164,19 +153,12 @@
   .eds-c-card__action,
   .eds-c-card__action :is(a, button),
   .cvr-c-preferences__reset,
-  .cvr-c-preferences :is(button, .v-button),
-  button.mat-focus-indicator,
-  .mat-button,
-  .mat-stroked-button,
-  .mat-raised-button,
-  .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]) {
+  .cvr-c-preferences :is(button, .v-button)
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.c-toolbar-button):not(.mat-menu-trigger):not(.mat-tooltip-trigger):not([class*="toolbar"]):not([class*="service-bar"]):not([class*="action-button"]):not([class*="pagination"]):not(.quick-action-menu) {
   background-color: #202c3b !important;
-  background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
   color: var(--cx-button-text, var(--cx-text-primary, #f1f5f9)) !important;
   border: 1px solid #455a73 !important;
-  border: 1px solid var(--cx-button-border, var(--cx-border, #455a73)) !important;
-  border-radius: 6px !important;
+  border-radius: 4px !important;
   padding: 6px 14px !important;
   font-size: 13px !important;
   font-weight: 500 !important;
@@ -184,7 +166,56 @@
   text-decoration: none !important;
   cursor: pointer !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+}
+
+/* Action Menu Trigger & Pagination Buttons: Borderless Matching Light Mode */
+.connectea-dark :is(.eds-c-action-button, .cvr-c-action-button, .eds-c-action-button-set :is(.v-button, .eds-c-action-button), .cvr-c-pagination-button-set button, .eds-c-pagination-button-set button, .eds-c-pagination-button, .quick-action-menu, [class*="action-button"]):not(.eds-o-button--positive) {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border-radius: 4px !important;
+}
+
+.connectea-dark :is(.eds-c-action-button, .cvr-c-action-button, .eds-c-action-button-set :is(.v-button, .eds-c-action-button), .cvr-c-pagination-button-set button, .eds-c-pagination-button-set button, .eds-c-pagination-button, .quick-action-menu, [class*="action-button"]):not(.eds-o-button--positive):hover {
+  background-color: var(--cx-surface-hover, #24303f) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+/* Disabled Button Parity (Download button, inactive triggers) */
+.connectea-dark :is(.v-button, .eds-c-button, button, .btn):is(:disabled, [disabled], .v-disabled, .v-button-disabled, [aria-disabled="true"], .eds-s-is-disabled) {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  background-color: transparent !important;
+  border: 1px solid var(--cx-border-subtle, #334155) !important;
+  color: var(--cx-text-muted, #64748b) !important;
+  box-shadow: none !important;
+}
+.connectea-dark :is(.eds-o-button--square, [class*="button--square"]) {
+  border-radius: 0 !important;
+}
+
+.connectea-dark :is(button.mat-focus-indicator, .mat-button, .mat-raised-button, .mat-flat-button):not(.mat-stroked-button):not(.c-toolbar-button):not(.mat-menu-trigger):not(.mat-tooltip-trigger):not(.mat-icon-button):not([class*="toolbar"]):not([class*="service-bar"]) {
+  background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
+  color: var(--cx-button-text, var(--cx-text-primary, #f1f5f9)) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  padding: 0 16px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+.connectea-dark :is(.mat-button, .mat-raised-button, .mat-flat-button, button.mat-focus-indicator:not([class*="border"]):not(.border-left)):not(.mat-stroked-button):not([class*="border"]):not(.border-left) {
+  border: none !important;
+}
+
+.connectea-dark :is(.mat-stroked-button, button.mat-focus-indicator.border, button.mat-focus-indicator[class*="border"]) {
+  border-color: var(--cx-button-border, var(--cx-border, #455a73)) !important;
+  padding: 0 15px !important;
 }
 
 .connectea-dark :is(
@@ -203,13 +234,8 @@
   .eds-c-card__action,
   .eds-c-card__action :is(a, button),
   .cvr-c-preferences__reset,
-  .cvr-c-preferences :is(button, .v-button),
-  button.mat-focus-indicator,
-  .mat-button,
-  .mat-stroked-button,
-  .mat-raised-button,
-  .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):hover {
+  .cvr-c-preferences :is(button, .v-button)
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   border-color: var(--cx-border-hover, #5b7594) !important;
   color: #ffffff !important;
@@ -223,13 +249,8 @@
   .cvr-c-button,
   .btn,
   input[type="button"],
-  input[type="submit"],
-  button.mat-focus-indicator,
-  .mat-button,
-  .mat-stroked-button,
-  .mat-raised-button,
-  .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):active {
+  input[type="submit"]
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):active {
   background-color: var(--cx-surface-active, #192432) !important;
   transform: translateY(1px) !important;
 }
@@ -241,13 +262,8 @@
   .cvr-c-button,
   .btn,
   input[type="button"],
-  input[type="submit"],
-  button.mat-focus-indicator,
-  .mat-button,
-  .mat-stroked-button,
-  .mat-raised-button,
-  .mat-flat-button
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):focus-visible {
+  input[type="submit"]
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):focus-visible {
   border-color: var(--cx-accent, #3b82f6) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
   outline: none !important;
@@ -269,20 +285,13 @@
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-/* Circular & Icon Action Buttons (e.g. trash/delete, icon-only controls) */
+/* Circular Action Buttons (e.g. trash/delete, circular controls) */
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
-  .eds-c-icon-button,
-  .cvr-c-icon-button,
-  .mat-icon-button,
   .btn-monospaced,
   .rounded-circle:is(button, a, .btn),
   button:has([class*="trash"], [class*="delete"], [class*="bin"]),
   [class*="delete"]:is(button, a, .btn),
   [class*="trash"]:is(button, a, .btn)
-),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
-  .eds-c-icon-button,
-  .cvr-c-icon-button
 ) {
   background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
   background-image: none !important;
@@ -294,16 +303,55 @@
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
   .eds-c-icon-button,
   .cvr-c-icon-button,
+  .cvr-c-pri-nav-icon-button,
   .mat-icon-button,
+  .c-toolbar-button,
+  button.mat-menu-trigger,
+  button.mat-tooltip-trigger,
+  .v-button.eds-o-button--captionless
+):not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button) {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .mat-stroked-button,
+  button.mat-focus-indicator.border,
+  .mat-icon-button.border,
+  [class*="button"].border
+) {
+  border: 1px solid var(--cx-button-border, var(--cx-border, #455a73)) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.border-left, [class*="border-left"], .eds-u-separator--left, [class*="separator--left"]) {
+  border-left: 1px solid var(--cx-border, #455a73) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .c-toolbar-button,
+  .toggle--white-rounded,
+  .toggle--grey-light,
+  [class*="toggle--grey"],
+  button.mat-icon-button,
+  button.mat-menu-trigger,
+  button.mat-tooltip-trigger
+) {
+  background-color: var(--cx-surface-secondary, #202c3b) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-light :is(.mat-icon, mat-icon, cnt-icon),
+:is(html, body).connectea-dark :is(.toggle--grey-light, [class*="toggle--grey"], .c-toolbar-button) :is(.mat-icon, mat-icon, cnt-icon, .mat-ligature-font, .material-icons) {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  fill: currentColor !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
   .btn-monospaced,
   .rounded-circle:is(button, a, .btn),
   button:has([class*="trash"], [class*="delete"], [class*="bin"]),
   [class*="delete"]:is(button, a, .btn),
   [class*="trash"]:is(button, a, .btn)
-):hover,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
-  .eds-c-icon-button,
-  .cvr-c-icon-button
 ):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   border-color: var(--cx-border-hover, #6482a6) !important;
@@ -314,26 +362,12 @@
   .eds-c-icon-button,
   .cvr-c-icon-button,
   .mat-icon-button,
-  .btn-monospaced,
-  .rounded-circle:is(button, a, .btn),
-  button:has([class*="trash"], [class*="delete"], [class*="bin"]),
-  [class*="delete"]:is(button, a, .btn),
-  [class*="trash"]:is(button, a, .btn)
-) :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)) :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
   color: #cbd5e1 !important;
   fill: #cbd5e1 !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
-  .eds-c-icon-button,
-  .cvr-c-icon-button,
-  .mat-icon-button,
-  .btn-monospaced,
-  .rounded-circle:is(button, a, .btn),
-  button:has([class*="trash"], [class*="delete"], [class*="bin"]),
-  [class*="delete"]:is(button, a, .btn),
-  [class*="trash"]:is(button, a, .btn)
-):hover :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)):hover :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
   color: #ffffff !important;
   fill: #ffffff !important;
 }

@@ -36,10 +36,8 @@
 
 :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong,
 .connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong {
+  font-family: inherit !important;
   font-weight: 700 !important;
-}
-
-.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong {
   color: var(--cx-accent, #90c6f5) !important;
 }
 
@@ -104,6 +102,18 @@
   border-right: none !important;
 }
 
+.connectea-dark :is(.c-scope-statistic, [class*="scope-statistic"]) {
+  background-color: var(--cx-surface-secondary, #161e29) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark :is(.mat-card-button, button[class*="card-button"]) {
+  background-color: var(--cx-surface-elevated, #24303f) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
+}
+
 :is(.connectea-dark, body, html) .cvr-c-tasks :is(
   .cvr-c-task__mark-score,
   .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
@@ -153,14 +163,30 @@
    -------------------------------------------------------------------------- */
 .connectea-dark .eds-c-accordion__section-heading {
   background-color: transparent !important;
-  border: none !important;
   border-top: none !important;
-  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid var(--cx-border, #3d5066) !important;
   color: #cbd5e1 !important;
   transition: color 0.15s ease;
 }
 
+.connectea-dark :is(.eds-c-accordion__section.eds-s-is-active, [class*="section"].eds-s-is-active) .eds-c-accordion__section-heading {
+  border-bottom: none !important;
+}
+
+.connectea-dark .eds-c-accordion__section-heading :is(.v-label, .eds-c-accordion__section-label, span, div) {
+  background-color: transparent !important;
+  border: none !important;
+  color: inherit !important;
+}
+
 .connectea-dark .eds-c-accordion__section-heading:hover {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+.connectea-dark .eds-c-accordion__section-heading:hover :is(.v-label, .eds-c-accordion__section-label, span, div) {
   background-color: transparent !important;
   color: #f1f5f9 !important;
 }
@@ -196,7 +222,7 @@
   .cvr-c-accordion__panel,
   .eds-c-accordion__section-body
 ) {
-  border-bottom: none !important;
+  border-bottom: 1px solid var(--cx-border, #3d5066) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-accordion__panel:before,
@@ -215,8 +241,13 @@
   font-weight: 400 !important;
 }
 
-.connectea-dark .cvr-c-task-group {
+.connectea-dark .cvr-c-task {
   border-top: 1px solid #2e3c4e !important;
+  border-bottom: 1px solid #2e3c4e !important;
+}
+
+.connectea-dark .cvr-c-task-group {
+  border-top: none !important;
 }
 
 :is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(
@@ -322,5 +353,142 @@
 .connectea-dark .cvr-c-task__chart text {
   fill: #94a3b8 !important;
   color: #94a3b8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   13. Profile, Selection Lists, Legends & Action Buttons
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  fieldset,
+  legend,
+  .c-floating-form-field,
+  .c-floating-form-field legend,
+  .eds-c-selection-list,
+  .eds-c-selection-list__item,
+  .eds-o-list__item,
+  .eds-c-tile.eds-o-feature,
+  .cvr-c-recent-event-activity
+) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark :is(.eds-c-action-button, .v-button-eds-c-action-button, .eds-c-action-button-set .v-button):not(.eds-o-button--positive) {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.connectea-dark .eds-c-tile__footer .v-button {
+  background-color: var(--cx-button-bg, #202c3b) !important;
+  color: var(--cx-button-text, #f1f5f9) !important;
+  border-color: var(--cx-border, #455a73) !important;
+}
+
+.connectea-dark :is(.eds-c-action-button, .v-button-eds-c-action-button, .eds-c-action-button-set .v-button, .eds-c-tile__footer .v-button) :is(.v-button-wrap, .v-button-caption) {
+  color: inherit !important;
+}
+
+.connectea-dark :is(a.eds-c-link, a.link--reversed, [class*="link--reversed"]) {
+  color: var(--cx-accent-link, #60a5fa) !important;
+}
+
+.connectea-dark :is(a.eds-c-link, a.link--reversed, [class*="link--reversed"]):hover {
+  color: #93c5fd !important;
+}
+
+/* --------------------------------------------------------------------------
+   Discussion Panel, CKEditor 5 & Rich Text Editor Dark Adaptation
+   -------------------------------------------------------------------------- */
+.connectea-dark {
+  --ck-color-base-background: var(--cx-input-bg, #141a22);
+  --ck-color-base-border: var(--cx-border, #3d5066);
+  --ck-color-toolbar-background: var(--cx-surface-secondary, #18222e);
+  --ck-color-toolbar-border: var(--cx-border, #3d5066);
+  --ck-color-text: var(--cx-text-primary, #f1f5f9);
+  --ck-color-button-default-hover-background: var(--cx-surface-hover, #24303f);
+  --ck-color-button-on-background: var(--cx-surface-active, #1f2b3a);
+  --ck-color-panel-background: var(--cx-surface-elevated, #1a222d);
+  --ck-color-panel-border: var(--cx-border, #3d5066);
+}
+
+.connectea-dark :is(.eds-c-form-label, .cvr-c-form-label, .c-form-label, .control-label, .mat-form-field-label, .mat-form-field-outline-legend, .ck-form-label, cnt-rich-text-editor label, cnt-rich-text-editor .label, legend, label:not(.custom-control-label):not(.v-checkbox label):not(.eds-c-checkbox label):not(.mat-checkbox label)) {
+  background-color: transparent !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+.connectea-dark :is(.ck.ck-toolbar, .ck-toolbar, .ck.ck-editor__top .ck-sticky-panel .ck-toolbar) {
+  background-color: var(--cx-surface-secondary, #18222e) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+  border-bottom: 1px solid var(--cx-border-subtle, #2e3c4e) !important;
+}
+
+.connectea-dark :is(.ck.ck-toolbar .ck-toolbar__separator) {
+  background-color: var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark :is(.ck.ck-button, .ck-button) {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  background: transparent !important;
+}
+
+.connectea-dark :is(.ck.ck-button, .ck-button):hover {
+  background-color: var(--cx-surface-hover, #24303f) !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark :is(.ck.ck-button.ck-on, .ck-button.ck-on) {
+  background-color: var(--cx-surface-active, #1f2b3a) !important;
+  color: var(--cx-accent, #60a5fa) !important;
+}
+
+.connectea-dark :is(.ck.ck-button, .ck-button) :is(.ck-icon, svg, [class*="icon"], .ck-button__label) {
+  color: currentColor !important;
+  fill: currentColor !important;
+}
+
+.connectea-dark :is(.ck.ck-editor__main > .ck-editor__editable, .ck.ck-content, .ck-editor__editable) {
+  background-color: var(--cx-input-bg, #141a22) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+  border-top: none !important;
+  min-height: 140px;
+}
+
+.connectea-dark :is(.ck.ck-editor__main > .ck-editor__editable:focus, .ck.ck-content:focus) {
+  border-color: var(--cx-accent, #3b82f6) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+}
+
+.connectea-dark :is(.ck.ck-editor__main > .ck-editor__editable, .ck.ck-content) :is(p, span, div, li, h1, h2, h3, h4) {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+.connectea-dark :is(.ck.ck-dropdown__panel, .ck.ck-list, .ck.ck-balloon-panel) {
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+}
+
+.connectea-dark :is(.ck.ck-list__item, .ck-list__item) :is(.ck-button, button) {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+.connectea-dark :is(.cvr-c-image-gallery, .image-gallery, [class*="image-gallery"], .dropzone, [class*="dropzone"], [class*="drop-zone"]) {
+  background-color: var(--cx-input-bg, #141a22) !important;
+  border: 1px dashed var(--cx-border, #455a73) !important;
+  border-radius: 6px !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+.connectea-dark :is(.cvr-c-image-gallery, .image-gallery, [class*="image-gallery"], .dropzone, [class*="dropzone"], [class*="drop-zone"]) :is(span, p, div, label) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+.connectea-dark :is(.cvr-c-image-gallery, .image-gallery, [class*="image-gallery"], .dropzone, [class*="dropzone"], [class*="drop-zone"]) :is(svg, mat-icon, [class*="icon"]) {
+  color: var(--cx-text-muted, #94a3b8) !important;
+  fill: currentColor !important;
 }
 

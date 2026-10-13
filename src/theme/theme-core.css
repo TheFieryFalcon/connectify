@@ -36,7 +36,7 @@ html.connectea-dark {
 .connectea-dark :is(
   h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, select, textarea, label, strong, small,
   .eds-c-heading, .v-caption, .v-label
-):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.material-icons):not(.connectea-theme-icon):not(.connectea-theme-arrow) {
+):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.material-icons):not(.connectea-theme-icon):not(.connectea-theme-arrow):not(.v-button-wrap):not(.v-button-caption):not(.eds-c-icon-button *):not(.cvr-c-icon-button *):not(.cvr-c-pri-nav-icon-button *):not(.avatar-content):not([class*="avatar"]):not(.connectea-panel *):not([class*="connectea-"]) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 
@@ -141,16 +141,41 @@ html.connectea-dark {
 }
 
 .connectea-dark :is(
+  .cvr-c-primary-navigation .eds-c-icon-button,
+  .cvr-c-primary-navigation .cvr-c-icon-button,
+  .cvr-c-primary-navigation .cvr-c-primary-navigation__user-controls--icon,
+  .cvr-c-primary-navigation [class*="user-controls"] .eds-o-button,
+  .cvr-c-primary-navigation [class*="notification"]
+) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.connectea-dark .cvr-c-primary-navigation :is(
+  [class^="cvr-c-icon--"],
+  [class*=" cvr-c-icon--"],
+  .cvr-c-icon,
+  .cvr-c-icon--email,
+  .cvr-c-icon--notification-full,
+  .cvr-c-icon--notification-hollow
+):is(::before, ::after) {
+  font-family: "connect-webfont" !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  speak: none !important;
+}
+
+.connectea-dark :is(
   .cvr-c-primary-navigation,
-  .cvr-c-primary-navigation *,
   .cvr-c-primary-navigation__links,
   .cvr-c-primary-navigation__links a,
   .cvr-c-primary-navigation__links div,
   .cvr-c-primary-navigation__title,
-  .cvr-c-primary-navigation .v-button-caption,
-  .cvr-c-primary-navigation__user-controls,
-  .cvr-c-primary-navigation__button
-) {
+  .cvr-c-primary-navigation__bar
+):not(#connectea-theme-toggle):not(#connectea-theme-toggle *):not(.eds-c-icon-button):not(.eds-c-icon-button *):not([class*="icon"]):not([class*="icon"] *) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
   -webkit-font-smoothing: antialiased !important;
 }
@@ -186,7 +211,7 @@ html.connectea-dark {
   .cvr-c-primary-navigation .cvr-js-greedy__item a,
   .cvr-c-primary-navigation .cvr-js-greedy__item a span,
   .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div > a, .cvr-js-greedy__trigger > div > a, .v-link a)
-):not(#connectea-theme-toggle):not(#connectea-theme-toggle *) {
+):not(#connectea-theme-toggle):not(#connectea-theme-toggle *):not(.eds-c-icon-button):not(.eds-c-icon-button *):not([class*="icon"]):not([class*="icon"] *):not(.v-button-wrap):not(.v-button-caption) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
   font-size: 14px !important;
   font-weight: 700 !important;
@@ -213,7 +238,6 @@ html.connectea-dark {
   background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
   color: #ffffff !important;
   border: none !important;
-  border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
   box-shadow: none !important;
   border-radius: 0 !important;
   outline: none !important;
@@ -232,7 +256,7 @@ html.connectea-dark {
 .connectea-dark :is(.cvr-c-service-menu, .cvr-c-service-menu__wrapper, .cvr-c-service-menu__list) {
   background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
   color: var(--cx-nav-text, #cbd5e1) !important;
-  border-right: 1px solid var(--cx-nav-border, var(--cx-border, #36485e)) !important;
+  border-right: none !important;
 }
 
 .connectea-dark .cvr-c-service-menu__item {
@@ -265,25 +289,27 @@ html.connectea-dark {
    -------------------------------------------------------------------------- */
 .connectea-dark :is(
   .cvr-c-category-toolbar,
-  .cvr-c-service-bar,
   .cvr-c-service-bar__control-panel,
   .cvr-c-page-header,
   .cvr-c-heading-bar,
   .eds-c-heading-bar,
   .cvr-c-sub-header,
   .v-page-header,
-  .cvr-c-toolbar,
-  .v-slot-cvr-c-heading-bar,
-  .v-slot-cvr-c-page-header
+  .cvr-c-toolbar
 ):not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]) {
   background-color: var(--cx-surface-secondary, #18202b) !important;
-  border-bottom: 1px solid var(--cx-border, #36485e) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark :is(.cvr-c-service-bar, .cvr-c-service-bar__container) {
+  background-color: var(--cx-canvas-bg, #121820) !important;
+  border: none !important;
 }
 
 .connectea-dark :is(
   .cvr-c-category-toolbar,
   .cvr-c-service-bar,
+  .cvr-c-service-bar__title,
   .cvr-c-page-header,
   .cvr-c-heading-bar,
   .eds-c-heading-bar,
@@ -291,7 +317,7 @@ html.connectea-dark {
   .v-page-header,
   .cvr-c-toolbar
 ) :is(h1, h2, h3, h4, span, div, .v-label, .eds-c-heading) {
-  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 /* Classes Page Sort Header & Controls: transparent background matching light mode */

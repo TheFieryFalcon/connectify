@@ -7,6 +7,7 @@
 'use strict';
 
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const readline = require('readline');
 const puppeteer = require('puppeteer');
@@ -21,15 +22,13 @@ function getChromeExecutablePath() {
   if (process.env.PUPPETEER_EXECUTABLE_PATH) {
     return process.env.PUPPETEER_EXECUTABLE_PATH;
   }
-  const macChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-  if (process.platform === 'darwin' && fs.existsSync(macChrome)) {
-    return macChrome;
+  if (process.env.PUPPETEER_USE_SYSTEM_CHROME === 'true') {
+    const macChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+    if (process.platform === 'darwin' && fs.existsSync(macChrome)) {
+      return macChrome;
+    }
   }
-  try {
-    return puppeteer.executablePath();
-  } catch {
-    return undefined;
-  }
+  return undefined;
 }
 
 /**
@@ -50,24 +49,46 @@ async function launchBrowser(options = {}) {
     '--window-size=1280,900'
   ];
 
+  let tempUserDataDir = null;
   if (loadExtension) {
+    tempUserDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'connectify-chrome-'));
+    args.push(`--user-data-dir=${tempUserDataDir}`);
     args.push(`--disable-extensions-except=${EXTENSION_ROOT}`);
     args.push(`--load-extension=${EXTENSION_ROOT}`);
   }
 
   const execPath = getChromeExecutablePath();
   const launchConfig = {
-    headless: headless ? 'shell' : false,
+    headless: headless ? true : false,
     args,
     slowMo,
     defaultViewport: viewport
   };
+
+  if (loadExtension) {
+    launchConfig.ignoreDefaultArgs = ['--disable-extensions'];
+    if (tempUserDataDir) {
+      launchConfig.userDataDir = tempUserDataDir;
+    }
+  }
 
   if (execPath && fs.existsSync(execPath)) {
     launchConfig.executablePath = execPath;
   }
 
   const browser = await puppeteer.launch(launchConfig);
+  if (tempUserDataDir) {
+    const origClose = browser.close.bind(browser);
+    browser.close = async () => {
+      try {
+        await origClose();
+      } finally {
+        try {
+          fs.rmSync(tempUserDataDir, { recursive: true, force: true });
+        } catch {}
+      }
+    };
+  }
   return browser;
 }
 
@@ -76,7 +97,13 @@ async function launchBrowser(options = {}) {
  */
 async function saveSession(page, sessionPath = DEFAULT_SESSION_FILE) {
   try {
-    const cookies = await page.cookies();
+    let cookies = [];
+    try {
+      const client = await page.target().createCDPSession();
+      const res = await client.send('Network.getAllCookies');
+      if (res?.cookies?.length) cookies = res.cookies;
+    } catch {}
+    if (!cookies.length) cookies = await page.cookies();
     const resolvedPath = path.resolve(sessionPath);
     fs.writeFileSync(resolvedPath, JSON.stringify(cookies, null, 2), 'utf8');
     return true;
@@ -160,6 +187,8 @@ async function authenticate(page, options = {}) {
       if (await isAuthenticated(page)) {
         console.log('[PuppeteerUtils] Restored authenticated session from file.');
         return { success: true, method: 'session' };
+      } else {
+        console.log('[PuppeteerUtils] Saved session in ' + path.basename(sessionFile) + ' has expired.');
       }
     } catch {}
   }
@@ -205,7 +234,13 @@ async function authenticate(page, options = {}) {
   }
 
   // 3. Fallback: Interactive browser login
-  if (interactive || (!username && !hasSession)) {
+  const isHeadless = Boolean(page.browser()?.process?.()?.spawnargs?.some(a => a.includes('--headless')));
+  if (isHeadless && !username) {
+    console.log('[PuppeteerUtils] Authentication required, but browser is running in headless mode.');
+    return { success: false, method: 'none', reason: 'headless_unauthenticated' };
+  }
+
+  if (interactive || !username) {
     console.log('\n' + '='.repeat(64));
     console.log('INTERACTIVE LOGIN REQUIRED');
     console.log('A Chrome browser window has opened for you.');

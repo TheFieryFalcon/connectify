@@ -2,16 +2,17 @@
    20. Universal Border Restoration & Structural Integrity
    -------------------------------------------------------------------------- */
 .connectea-dark :is(
-  .mat-card,
-  .mat-expansion-panel,
-  th,
-  td,
-  input,
+  input:not([type="checkbox"]):not([type="radio"]):not(.mat-input-element):not(.cdk-visually-hidden):not(.mat-checkbox-input),
   select,
   textarea
 ) {
   border-style: solid !important;
   border-width: 1px !important;
+}
+
+.connectea-dark :is(.cdk-visually-hidden, .mat-checkbox-input) {
+  border: 0 !important;
+  border-width: 0 !important;
 }
 /* --------------------------------------------------------------------------
    21. Tables, Grids & Submission Marksbooks
@@ -29,6 +30,10 @@
   .cvr-c-table--submission-students,
   .cvr-c-table--list,
   .cvr-c-submission-students-table,
+  .mat-table,
+  mat-table,
+  .cdk-table,
+  cdk-table,
   .v-table,
   .v-table-table,
   .v-grid,
@@ -43,6 +48,10 @@
   thead,
   thead th,
   thead td,
+  .mat-header-row,
+  mat-header-row,
+  .mat-header-cell,
+  mat-header-cell,
   .v-table-header,
   .v-table-header-cell,
   .v-grid-header,
@@ -57,7 +66,6 @@
   background-color: var(--cx-table-header-bg, var(--cx-surface-secondary, #18202b)) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-color: var(--cx-border, #36485e) !important;
-  font-weight: 650 !important;
 }
 
 .connectea-dark :is(
@@ -65,6 +73,10 @@
   tbody td,
   tfoot th,
   tfoot td,
+  .mat-row,
+  mat-row,
+  .mat-cell,
+  mat-cell,
   .v-table-cell-content,
   .v-table-row,
   .v-grid-row,
@@ -79,6 +91,38 @@
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
   border-color: var(--cx-border-subtle, #2e3c4e) !important;
+}
+
+.connectea-dark :is(
+  table:not(.table-bordered),
+  .table:not(.table-bordered),
+  .table-list,
+  .cvr-c-table,
+  .cvr-c-table--list,
+  .cvr-c-tree-panel,
+  .cvr-c-submission-students-table,
+  .v-table,
+  .v-table-table
+) {
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.connectea-dark :is(
+  table:not(.table-bordered),
+  .table:not(.table-bordered),
+  .table-list,
+  .cvr-c-table,
+  .cvr-c-table--list,
+  .cvr-c-tree-panel,
+  .cvr-c-submission-students-table,
+  .mat-table,
+  mat-table,
+  .v-table,
+  .v-table-table
+) :is(th, td) {
+  border-left: none !important;
+  border-right: none !important;
 }
 
 .connectea-dark :is(
@@ -223,4 +267,107 @@
   color: #f1f5f9 !important;
   background-color: rgba(18, 23, 31, 0.85) !important;
 }
+
+/* --------------------------------------------------------------------------
+   24. Dialogs, Drawers & Material Overlays
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  mat-drawer-container,
+  mat-drawer-content,
+  mat-drawer,
+  .example-container,
+  cnt-library-avatar-picker,
+  cnt-library-avatar-picker-dialog,
+  cnt-change-password-dialog
+) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark :is(mat-hint, .mat-hint, [id^="mat-hint"]) {
+  color: var(--cx-text-muted, #94a3b8) !important;
+}
+
+.connectea-dark :is(mat-label, .mat-form-field-label) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+.connectea-dark :is(.mat-input-element, input.mat-input-element) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+  caret-color: var(--cx-accent, #3b82f6) !important;
+}
+
+/* --------------------------------------------------------------------------
+   25. Angular Material Paginator & Pagination Controls
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  mat-paginator,
+  .mat-paginator,
+  cnt-paginator,
+  .cnt-paginator,
+  .mat-paginator-container,
+  .mat-paginator-outer-container,
+  .connect-paginator-container
+) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+:is(html, body).connectea-dark :is(
+  .mat-paginator-page-size,
+  .mat-paginator-page-size-label,
+  .mat-paginator-range-label,
+  .mat-paginator-range-actions,
+  .connect-paginator-label,
+  span.connect-paginator-label,
+  .mat-select-value,
+  .mat-select-value-text,
+  .mat-select-min-line
+) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+:is(html, body).connectea-dark :is(mat-paginator, .mat-paginator, cnt-paginator, .cnt-paginator, .connect-paginator-container) :is(
+  .mat-select-arrow,
+  .mat-form-field-underline,
+  .mat-form-field-ripple
+) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  border-color: var(--cx-border, #36485e) !important;
+  background-color: var(--cx-border, #36485e) !important;
+}
+
+:is(html, body).connectea-dark :is(.mat-paginator-decrement, .mat-paginator-increment, .mat-paginator-first, .mat-paginator-last) {
+  border-color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+:is(html, body).connectea-dark :is(mat-paginator, .mat-paginator, cnt-paginator, .cnt-paginator) :is(.mat-icon, mat-icon, .mat-paginator-icon) {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  fill: currentColor !important;
+}
+
+:is(html, body).connectea-dark :is(
+  button[disabled],
+  .mat-button-disabled,
+  .mat-disabled,
+  [aria-disabled="true"]
+) :is(.mat-icon, mat-icon, cnt-icon, .mat-paginator-icon, .mat-ligature-font, .material-icons, svg, .mat-paginator-decrement, .mat-paginator-increment, .mat-paginator-first, .mat-paginator-last) {
+  color: var(--cx-text-muted, #94a3b8) !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
+  fill: currentColor !important;
+  opacity: 0.65 !important;
+}
+
+:is(html, body).connectea-dark :is(
+  .toggle-trigger.toggle--grey-dark,
+  .toggle--grey-dark,
+  .c-toolbar-button.toggle--grey-dark,
+  .mat-button-base.toggle--grey-dark
+) :is(.mat-icon, mat-icon, cnt-icon, svg, .material-icons),
+:is(html, body).connectea-dark.eds.cvr.ngm .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-dark :is(.mat-icon, mat-icon, cnt-icon, svg, .material-icons) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  fill: currentColor !important;
+}
+
+
 

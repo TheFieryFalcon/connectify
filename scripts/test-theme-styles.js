@@ -24,11 +24,82 @@ const utils = require('./puppeteer-utils');
 const DEFAULT_PAGE = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
 
 function parseArgs() {
-  const args = process.argv.slice(2);
+  const rawArgs = process.argv.slice(2);
   const isEnvInteractive = process.env.npm_config_interactive === 'true' ||
                           process.env.npm_config_interactive === '1' ||
                           process.env.INTERACTIVE === 'true' ||
                           process.env.INTERACTIVE === '1';
+
+  // Normalize args to expand --key=val and -k=val into separate tokens
+  const args = [];
+  for (let i = 0; i < rawArgs.length; i++) {
+    const item = rawArgs[i];
+    if ((item.startsWith('--') || item.startsWith('-')) && item.includes('=')) {
+      const eqIdx = item.indexOf('=');
+      args.push(item.slice(0, eqIdx));
+      args.push(item.slice(eqIdx + 1));
+    } else {
+      args.push(item);
+    }
+  }
+
+  const isEnvHelp = process.env.npm_config_help === 'true' || process.env.npm_config_h === 'true';
+  const isHelpRequested = isEnvHelp || args.some(a =>
+    a === '--help' || a === '-h' || a === 'help' || a === '-help' || a === '/?' || a === '/help'
+  );
+
+  if (isHelpRequested) {
+    console.log(`
+Connectify Theme Parity & Sidebar Auditor
+
+Usage:
+  node scripts/test-theme-styles.js [options]
+  npm run test:themes -- [options]
+
+Targeting Options:
+  --url <url>              Audit a single URL
+  --urls <u1,u2,...>       Audit comma-separated list of URLs
+  --urls-file <file>       Read URLs from a text file (one per line)
+  --file <path>            Audit a local HTML file
+  --no-crawled             Do not load crawled_urls.txt (default is to load if present)
+  --crawled                Explicitly load crawled_urls.txt
+  --paste                  Paste URLs interactively
+
+Sidebar & View Options:
+  --sidebar                Audit sidebar and all tabs/sub-tabs (default: true)
+  --no-sidebar             Disable sidebar audit
+  --sidebar-only           Audit ONLY sidebar views (menu, tools, tabs, sub-tabs)
+  --sub-pages              Audit navbar heading sub-views (default: true)
+  --no-sub-pages           Disable navbar heading sub-views
+  --max-sub-pages <n>      Max navbar headings to audit per page (default: 8)
+
+Audit & Browser Options:
+  --theme <id>             Theme to test: dark, quantum, amoled, midnight, forest, sunset, custom, all (default: all)
+  --delay <ms>             Settling delay between views in ms (default: 1250)
+  --no-click-buttons       Do not automatically expand accordions/panels
+  --click-buttons          Automatically expand accordions/panels (default: true)
+  --screenshots            Save comparison screenshots
+  --no-screenshots         Disable screenshots (default: false)
+  --screenshots-dir <dir>  Directory to save screenshots
+  --output <file>          Save JSON audit report
+  --report-md <file>       Save Markdown summary report
+  --headless               Run in headless mode
+  --headful, --no-headless Run with visible browser window
+  --interactive, -i        Prompt for login if needed
+  --username, -u, --user   Connect username
+  --password, -p, --pass   Connect password
+  --session <file>         Session cookies file (default: connect_session.json)
+  --scroll                 Incrementally scroll down through the ENTIRE page (default: true)
+  --no-scroll              Disable smooth full-page scrolling
+  --scroll-step <px>       Scroll step in pixels (default: 400)
+  --scroll-delay <ms>      Delay per scroll increment in ms (default: 60)
+  --max-scrolls <n>        Max scroll iterations per page (default: 100)
+  --margin-tolerance <n>   Margin comparison tolerance in px (default: 1.0)
+  --size-tolerance <n>     Size comparison tolerance in px (default: 2.0)
+  --help, -h               Show this help message
+`);
+    process.exit(0);
+  }
 
   const options = {
     url: null,
@@ -52,34 +123,73 @@ function parseArgs() {
     interactive: isEnvInteractive,
     session: path.resolve(__dirname, '..', utils.DEFAULT_SESSION_FILE),
     subPages: true,
-    maxSubPages: 8
+    maxSubPages: 8,
+    sidebar: true,
+    sidebarOnly: false,
+    noCrawled: false,
+    crawled: true,
+    explicitCrawled: false,
+    scroll: true,
+    scrollStep: 400,
+    scrollDelay: 60,
+    maxScrolls: 100
   };
+
+  // Inspect npm environment variables
+  if (process.env.npm_config_theme) options.theme = process.env.npm_config_theme;
+  if (process.env.npm_config_url) options.url = process.env.npm_config_url;
+  if (process.env.npm_config_user || process.env.npm_config_username) options.username = process.env.npm_config_user || process.env.npm_config_username;
+  if (process.env.npm_config_password || process.env.npm_config_pass) options.password = process.env.npm_config_password || process.env.npm_config_pass;
+  if (process.env.npm_config_delay) options.delay = parseInt(process.env.npm_config_delay, 10);
+  if (process.env.npm_config_sidebar === 'false') options.sidebar = false;
+  if (process.env.npm_config_sidebar_only === 'true') { options.sidebar = true; options.sidebarOnly = true; }
+  if (process.env.npm_config_headless === 'true') options.headless = true;
+  if (process.env.npm_config_headless === 'false' || process.env.npm_config_headful === 'true') { options.headful = true; options.headless = false; }
+  if (process.env.npm_config_crawled === 'false') options.noCrawled = true;
+  if (process.env.npm_config_scroll === 'false') options.scroll = false;
+  if (process.env.npm_config_scroll_step) options.scrollStep = parseInt(process.env.npm_config_scroll_step, 10);
+  if (process.env.npm_config_scroll_delay) options.scrollDelay = parseInt(process.env.npm_config_scroll_delay, 10);
 
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
-    if (a === '--url' && args[i + 1]) options.url = args[++i];
-    else if (a === '--file' && args[i + 1]) options.file = args[++i];
+    if ((a === '--url' || a === '-url') && args[i + 1]) options.url = args[++i];
+    else if ((a === '--file' || a === '-f') && args[i + 1]) options.file = args[++i];
     else if (a === '--urls-file' && args[i + 1]) options.urlsFile = path.resolve(args[++i]);
     else if (a === '--urls' && args[i + 1]) options.urlsList = args[++i].split(',').map(s => s.trim()).filter(Boolean);
+    else if (a === '--crawled') { options.crawled = true; options.noCrawled = false; options.explicitCrawled = true; }
+    else if (a === '--no-crawled') { options.noCrawled = true; options.crawled = false; }
     else if (a === '--paste') options.paste = true;
-    else if (a === '--theme' && args[i + 1]) options.theme = args[++i];
-    else if (a === '--delay' && args[i + 1]) options.delay = parseInt(args[++i], 10);
+    else if ((a === '--theme' || a === '-t') && args[i + 1]) options.theme = args[++i];
+    else if ((a === '--delay' || a === '-d') && args[i + 1]) options.delay = parseInt(args[++i], 10);
     else if (a === '--no-click-buttons') options.clickButtons = false;
+    else if (a === '--click-buttons') options.clickButtons = true;
     else if (a === '--no-sub-pages') options.subPages = false;
     else if (a === '--sub-pages') options.subPages = true;
+    else if (a === '--no-sidebar') options.sidebar = false;
+    else if (a === '--sidebar') options.sidebar = true;
+    else if (a === '--sidebar-only') { options.sidebar = true; options.sidebarOnly = true; }
     else if (a === '--max-sub-pages' && args[i + 1]) options.maxSubPages = parseInt(args[++i], 10);
     else if (a === '--margin-tolerance' && args[i + 1]) options.marginTolerance = parseFloat(args[++i]);
     else if (a === '--size-tolerance' && args[i + 1]) options.sizeTolerance = parseFloat(args[++i]);
     else if (a === '--screenshots') options.screenshots = true;
+    else if (a === '--no-screenshots') options.screenshots = false;
     else if (a === '--screenshots-dir' && args[i + 1]) options.screenshotsDir = path.resolve(args[++i]);
-    else if (a === '--output' && args[i + 1]) options.outputJson = path.resolve(args[++i]);
-    else if (a === '--report-md' && args[i + 1]) options.outputMd = path.resolve(args[++i]);
-    else if (a === '--headful' || a === '--no-headless') options.headful = true;
+    else if ((a === '--output' || a === '--out' || a === '-o') && args[i + 1]) options.outputJson = path.resolve(args[++i]);
+    else if ((a === '--report-md' || a === '--md') && args[i + 1]) options.outputMd = path.resolve(args[++i]);
+    else if (a === '--headful' || a === '--no-headless') { options.headful = true; options.headless = false; }
     else if (a === '--headless') options.headless = true;
-    else if ((a === '--username' || a === '-u') && args[i + 1]) options.username = args[++i];
-    else if ((a === '--password' || a === '-p') && args[i + 1]) options.password = args[++i];
+    else if ((a === '--username' || a === '-u' || a === '--user') && args[i + 1]) options.username = args[++i];
+    else if ((a === '--password' || a === '-p' || a === '--pass') && args[i + 1]) options.password = args[++i];
     else if (a === '--interactive' || a === '-i' || a === 'interactive') options.interactive = true;
-    else if (a === '--session' && args[i + 1]) options.session = path.resolve(args[++i]);
+    else if ((a === '--session' || a === '-s') && args[i + 1]) options.session = path.resolve(args[++i]);
+    else if (a === '--no-scroll') options.scroll = false;
+    else if (a === '--scroll') options.scroll = true;
+    else if (a === '--scroll-step' && args[i + 1]) options.scrollStep = parseInt(args[++i], 10);
+    else if (a === '--scroll-delay' && args[i + 1]) options.scrollDelay = parseInt(args[++i], 10);
+    else if (a === '--max-scrolls' && args[i + 1]) options.maxScrolls = parseInt(args[++i], 10);
+    else if ((a.startsWith('http://') || a.startsWith('https://')) && !options.url) {
+      options.url = a;
+    }
   }
   return options;
 }
@@ -106,15 +216,14 @@ function readUrlsFromStdin() {
 }
 
 async function resolveTargetUrls(options) {
+  if (options.sidebarOnly) {
+    if (options.url) return [options.url];
+    return [DEFAULT_PAGE];
+  }
+
   const urls = [];
 
-  if (options.url) {
-    urls.push(options.url);
-  } else if (options.file) {
-    urls.push('file://' + path.resolve(options.file));
-  } else if (options.urlsList && options.urlsList.length > 0) {
-    urls.push(...options.urlsList);
-  } else if (options.urlsFile && fs.existsSync(options.urlsFile)) {
+  if (options.urlsFile && fs.existsSync(options.urlsFile)) {
     console.log(`[ThemeAudit] Loading URLs from: ${options.urlsFile}`);
     const raw = fs.readFileSync(options.urlsFile, 'utf8');
     const lines = raw.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
@@ -123,8 +232,14 @@ async function resolveTargetUrls(options) {
     console.log('\n[ThemeAudit] Paste your URLs below (one per line). Press Enter on an empty line when finished:');
     const lines = await readUrlsFromStdin();
     urls.push(...lines);
-  } else {
-    // Check if crawled_urls.txt exists from previous crawler run
+  } else if (options.urlsList && options.urlsList.length > 0) {
+    urls.push(...options.urlsList);
+  } else if (options.file) {
+    urls.push('file://' + path.resolve(options.file));
+  } else if (options.url && !options.explicitCrawled) {
+    urls.push(options.url);
+  } else if (!options.noCrawled) {
+    // Default behavior: automatically load crawled_urls.txt if present
     const defaultUrlsPath = path.resolve(__dirname, '..', 'crawled_urls.txt');
     if (fs.existsSync(defaultUrlsPath)) {
       console.log(`[ThemeAudit] Found ${path.basename(defaultUrlsPath)} from directory crawler, loading URLs...`);
@@ -132,13 +247,144 @@ async function resolveTargetUrls(options) {
       const lines = raw.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
       urls.push(...lines);
     }
+    if (options.url) {
+      urls.unshift(options.url);
+    }
   }
 
   if (urls.length === 0) {
     urls.push(DEFAULT_PAGE);
   }
 
-  return Array.from(new Set(urls));
+  // Ensure DEFAULT_PAGE (assessment-outlines) is always audited first if present or in default crawled mode
+  const uniqueUrls = Array.from(new Set(urls));
+  const defIdx = uniqueUrls.indexOf(DEFAULT_PAGE);
+  if (defIdx > 0) {
+    uniqueUrls.splice(defIdx, 1);
+    uniqueUrls.unshift(DEFAULT_PAGE);
+  } else if (defIdx === -1 && !options.url && !options.file) {
+    uniqueUrls.unshift(DEFAULT_PAGE);
+  }
+  return uniqueUrls;
+}
+
+/**
+ * Incrementally scrolls down the entire page (and any scrollable sub-containers or sidebar)
+ * from top to bottom, triggering IntersectionObservers, lazy-loaded components, infinite feeds,
+ * and layout calculations, then scrolls smoothly back to the top.
+ */
+async function scrollEntirePage(page, options = {}) {
+  const {
+    step = 400,
+    delayMs = 60,
+    maxScrolls = 100,
+    scope = 'page'
+  } = options;
+
+  try {
+    // Ensure any background expansion animation has completed
+    await page.waitForFunction(() => {
+      if (window.ConnectifyIsBulkExpanding) return false;
+      if (window.ConnectifyIsAccordionAnimating) return false;
+      return true;
+    }, { timeout: 4000 }).catch(() => {});
+
+    await page.evaluate(async (opts) => {
+      const sleep = ms => new Promise(r => setTimeout(r, ms));
+      const isSidebar = opts.scope === 'sidebar';
+
+      // Remove scroll freeze if temporarily left by an animation
+      if (document.body?.classList?.contains('cx-freeze-scroll')) {
+        document.body.classList.remove('cx-freeze-scroll');
+      }
+
+      if (isSidebar) {
+        const sidebar = document.getElementById('connectify-sidebar');
+        const scrollables = [];
+        if (sidebar) {
+          scrollables.push(sidebar);
+          const ws = sidebar.querySelector('.cx-workspace, .cx-tool-workspace');
+          if (ws) scrollables.push(ws);
+        }
+        for (let tIdx = 0; tIdx < scrollables.length; tIdx++) {
+          const target = scrollables[tIdx];
+          const totalH = target.scrollHeight || 0;
+          let curr = 0;
+          while (curr < totalH && curr < 15000) {
+            curr += (opts.step || 350);
+            target.scrollTop = curr;
+            await sleep(opts.delayMs || 50);
+          }
+          await sleep(100);
+          target.scrollTop = 0;
+          await sleep(50);
+        }
+        return;
+      }
+
+      // 1. Traverse the full window / documentElement height
+      const getScrollHeight = () => Math.max(
+        document.body ? document.body.scrollHeight : 0,
+        document.documentElement ? document.documentElement.scrollHeight : 0,
+        window.innerHeight || 0
+      );
+
+      let currScroll = 0;
+      let iterations = 0;
+      const maxIter = opts.maxScrolls || 100;
+      const stepSize = opts.step || 400;
+      const pauseMs = opts.delayMs || 60;
+
+      while (iterations < maxIter) {
+        const totalHeight = getScrollHeight();
+        const viewportHeight = window.innerHeight || 900;
+
+        currScroll += stepSize;
+        window.scrollTo({ top: currScroll, behavior: 'auto' });
+
+        // Scroll any scrollable content containers found within the page
+        const scrollableContainers = document.querySelectorAll(
+          '.cvr-c-content, .portlet-body, .eds-c-layout__main, .v-scrollable, [style*="overflow: auto"], [style*="overflow-y: auto"], [style*="overflow-y: scroll"]'
+        );
+        for (let sIdx = 0; sIdx < scrollableContainers.length; sIdx++) {
+          const sc = scrollableContainers[sIdx];
+          if (sc.scrollHeight > sc.clientHeight + 25) {
+            sc.scrollTop = Math.min(sc.scrollHeight, sc.scrollTop + stepSize);
+          }
+        }
+
+        await sleep(pauseMs);
+        iterations++;
+
+        if (window.scrollY + viewportHeight >= totalHeight - 20) {
+          // Pause to check if lazy loading expands the document
+          await sleep(150);
+          const newHeight = getScrollHeight();
+          if (newHeight <= totalHeight) {
+            break;
+          }
+        }
+      }
+
+      // 2. Pause at bottom to allow all bottom observers to settle
+      await sleep(150);
+
+      // 3. Scroll back to top so sticky headers and initial elements are restored
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      const scrollableContainers = document.querySelectorAll(
+        '.cvr-c-content, .portlet-body, .eds-c-layout__main, .v-scrollable, [style*="overflow: auto"], [style*="overflow-y: auto"], [style*="overflow-y: scroll"]'
+      );
+      for (let sIdx = 0; sIdx < scrollableContainers.length; sIdx++) {
+        scrollableContainers[sIdx].scrollTop = 0;
+      }
+      await sleep(150);
+    }, { step, delayMs, maxScrolls, scope });
+
+    // Allow layout to stabilize after scrolling back to top
+    await new Promise(r => setTimeout(r, 200));
+  } catch (err) {
+    // Non-fatal, continue with page audit
+  }
 }
 
 /**
@@ -276,7 +522,8 @@ async function clickInteractiveButtons(page) {
 
       const seenSections = new Set();
       const clickedElements = new Set();
-      let noticeViewClicks = 0;
+      let matNoticeViewClicks = 0;
+      let vaadinNoticeViewClicks = 0;
 
       try {
         for (const el of elements) {
@@ -316,7 +563,7 @@ async function clickInteractiveButtons(page) {
           }
 
           // Skip form submits and resets
-          if (el.type === 'submit' || el.type === 'reset') continue;
+          if ((el.type === 'submit' || el.type === 'reset') && el.closest?.('form')) continue;
           if (el.tagName === 'BUTTON' && el.closest?.('form') && el.getAttribute?.('type') !== 'button') continue;
 
           // Skip framework route navigation attributes
@@ -335,16 +582,25 @@ async function clickInteractiveButtons(page) {
 
           // Skip destructive actions, state-mutating toggles, or pagination/more links
           // EXPLICIT REQUIREMENT: Never click on "see more", "show more", "view all", "follow", or "bookmark"
-          if (/\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off|view\s*all|show\s*more|see\s*more|load\s*more|follow|unfollow|bookmark|favorite|print|export)\b/i.test(label) ||
-              /\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off|view\s*all|show\s*more|see\s*more|load\s*more|follow|unfollow|bookmark|favorite|print|export)\b/i.test(directText)) {
+          if (/\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off|view\s*all|show\s*more|see\s*more|load\s*more|follow|unfollow|bookmark|favorite|turned_in|turned_in_not|print|export)\b/i.test(label) ||
+              /\b(log\s*out|sign\s*out|delete|remove|leave|sign\s*off|view\s*all|show\s*more|see\s*more|load\s*more|follow|unfollow|bookmark|favorite|turned_in|turned_in_not|print|export)\b/i.test(directText)) {
             continue;
           }
 
-          // Limit notice View clicks to 3 per view to reveal modal/content without thrashing
+          // Limit notice View clicks to reveal modal dialog without stacking duplicates
           const isNoticeViewBtn = /\bview\b/i.test(directText) && !/\b(view\s*all|view\s*more|grid\s*view|list\s*view)\b/i.test(directText);
           if (isNoticeViewBtn) {
-            if (noticeViewClicks >= 3) continue;
-            noticeViewClicks++;
+            const isVaadin = (typeof el.className === 'string' && el.className.includes('v-button')) ||
+                             (typeof el.matches === 'function' && el.matches('.v-button, .v-button *')) ||
+                             (typeof el.closest === 'function' && el.closest('.v-button'));
+            const hasDialog = typeof document.querySelector === 'function' && document.querySelector('mat-dialog-container');
+            if (isVaadin) {
+              if (vaadinNoticeViewClicks >= 1) continue;
+              vaadinNoticeViewClicks++;
+            } else {
+              if (hasDialog || matNoticeViewClicks >= 1) continue;
+              matNoticeViewClicks++;
+            }
           }
 
           // Skip already expanded panels
@@ -368,19 +624,13 @@ async function clickInteractiveButtons(page) {
           if (clickedElements.has(target)) continue;
           clickedElements.add(target);
 
-          const targetsToClick = [target];
-          const innerCaption = target.querySelector?.('.v-button-caption, .v-button-wrap, .mat-button-wrapper, span, button');
-          if (innerCaption && innerCaption !== target) targetsToClick.push(innerCaption);
-
-          for (const t of targetsToClick) {
-            const evOpts = { bubbles: true, cancelable: true, view: window, buttons: 1 };
-            try { t.dispatchEvent(new PointerEvent('pointerdown', evOpts)); } catch {}
-            try { t.dispatchEvent(new MouseEvent('mousedown', evOpts)); } catch {}
-            try { t.dispatchEvent(new PointerEvent('pointerup', evOpts)); } catch {}
-            try { t.dispatchEvent(new MouseEvent('mouseup', evOpts)); } catch {}
-            try { t.click?.(); } catch {}
-            try { t.dispatchEvent(new MouseEvent('click', evOpts)); } catch {}
-          }
+          try {
+            if (typeof target.click === 'function') {
+              target.click();
+            } else {
+              target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+            }
+          } catch {}
 
           const tag = target.tagName.toLowerCase();
           const id = target.id ? '#' + target.id : '';
@@ -548,12 +798,378 @@ async function activateNavbarHeading(page, headingTitle, delay = 1250) {
 }
 
 /**
+ * Discovers the Connectify sidebar and all tools, tabs, and sub-tabs within it
+ * to audit each as a distinct, independent view.
+ */
+async function discoverSidebarViews(page, options = {}) {
+  try {
+    return await page.evaluate(() => {
+      const sidebar = document.getElementById('connectify-sidebar');
+      if (!sidebar) return [];
+
+      const views = [];
+
+      function ensureOpen() {
+        sidebar.hidden = false;
+        const handle = document.getElementById('connectify-sidebar-handle');
+        if (handle) {
+          handle.setAttribute('aria-expanded', 'true');
+        }
+        if (typeof window.ConnectifyOpenSidebar === 'function') {
+          try { window.ConnectifyOpenSidebar(); } catch {}
+        }
+      }
+
+      function returnToMenu() {
+        const homeBtn = sidebar.querySelector('.cx-back-menu');
+        if (homeBtn && typeof homeBtn.click === 'function') {
+          try { homeBtn.click(); } catch {}
+        } else {
+          const workspace = sidebar.querySelector('.cx-workspace');
+          if (workspace && workspace.children) {
+            for (const child of workspace.children) child.hidden = true;
+          }
+          sidebar.classList?.remove?.('cx-tool-active');
+        }
+      }
+
+      ensureOpen();
+      returnToMenu();
+
+      // 1. Sidebar Main Menu view (drawer open with tool launcher buttons)
+      views.push({
+        id: 'cx-sidebar-menu',
+        title: 'Sidebar: Main Menu',
+        auditScope: 'sidebar',
+        toolId: null,
+        toolName: 'Main Menu',
+        isInitial: false
+      });
+
+      // Canonical tool configuration list
+      const toolConfigs = [
+        { id: 'connectify-target-toggle', defaultName: 'Target ATAR', type: 'atar' },
+        { id: 'connectify-grade-toggle', defaultName: 'Target Grade', type: 'atar' },
+        { id: 'connectify-predictor-toggle', defaultName: 'Predictor', type: 'predictor' },
+        { id: 'connectify-progress-toggle', defaultName: 'Year in Progress', type: 'progress' },
+        { id: 'connectify-estimate-toggle', defaultName: 'ATAR Estimate', type: 'atar' },
+        { id: 'connectify-weakness-toggle', defaultName: 'Weakness Analyzer', type: 'weakness' },
+        { id: 'connectify-categories-toggle', defaultName: 'Settings', type: 'settings' }
+      ];
+
+      const allToolBtns = Array.from(sidebar.querySelectorAll('.cx-tool-menu button'));
+
+      for (const cfg of toolConfigs) {
+        let btn = document.getElementById(cfg.id) ||
+                  sidebar.querySelector(`button#${cfg.id}`) ||
+                  sidebar.querySelector(`.cx-tool-menu button[id*="${cfg.id}"]`) ||
+                  allToolBtns.find(b => b.id === cfg.id || b.id?.includes(cfg.id) || (b.textContent && b.textContent.includes(cfg.defaultName)));
+
+        // If no tool button found in DOM and no buttons in .cx-tool-menu, record standard view (mock/test fallback)
+        if (!btn && allToolBtns.length === 0 && !sidebar.querySelector('.cx-tool-menu button')) {
+          views.push({
+            id: `cx-sidebar-${cfg.id}`,
+            title: `Sidebar: ${cfg.defaultName}`,
+            auditScope: 'sidebar',
+            toolId: cfg.id,
+            toolName: cfg.defaultName,
+            isInitial: false
+          });
+          continue;
+        }
+
+        const toolName = (btn?.innerText || btn?.textContent || cfg.defaultName).trim();
+
+        // Mount and activate this tool
+        returnToMenu();
+        if (btn && typeof btn.click === 'function') {
+          try { btn.click(); } catch {}
+        }
+
+        if (cfg.type === 'atar') {
+          // Check for semester buttons
+          const semButtons = Array.from(sidebar.querySelectorAll('.cta-semesters:not(.cta-tabs) .cta-semester, .cta-semesters button'));
+          if (semButtons.length > 0) {
+            semButtons.forEach((sBtn, sIdx) => {
+              const semText = (sBtn.innerText || sBtn.textContent || `Semester ${sIdx + 1}`).trim();
+              views.push({
+                id: `cx-sidebar-${cfg.id}-sem${sIdx}`,
+                title: `Sidebar: ${toolName} [${semText}]`,
+                auditScope: 'sidebar',
+                toolId: cfg.id,
+                toolName,
+                subTabSelector: `.cta-semesters .cta-semester:nth-child(${sIdx + 1}), .cta-semesters button:nth-child(${sIdx + 1})`,
+                subTabIndex: sIdx,
+                subTabName: semText,
+                isInitial: false
+              });
+            });
+          } else {
+            views.push({
+              id: `cx-sidebar-${cfg.id}`,
+              title: `Sidebar: ${toolName}`,
+              auditScope: 'sidebar',
+              toolId: cfg.id,
+              toolName,
+              isInitial: false
+            });
+          }
+        } else if (cfg.type === 'predictor') {
+          const gradeBtn = sidebar.querySelector('#cx-pred-btn-grade');
+          const atarBtn = sidebar.querySelector('#cx-pred-btn-atar');
+
+          if (gradeBtn || atarBtn) {
+            // A. Grade Predictor Tab
+            if (gradeBtn && typeof gradeBtn.click === 'function') {
+              try { gradeBtn.click(); } catch {}
+            }
+            const chips = Array.from(sidebar.querySelectorAll('.cx-pred-subtabs .cx-pred-subtab'));
+            if (chips.length > 0) {
+              chips.forEach((chip, cIdx) => {
+                const chipText = (chip.innerText || chip.textContent || `Subject ${cIdx + 1}`).trim();
+                views.push({
+                  id: `cx-sidebar-pred-grade-chip${cIdx}`,
+                  title: `Sidebar: Predictor [Grade Predictor - ${chipText}]`,
+                  auditScope: 'sidebar',
+                  toolId: cfg.id,
+                  toolName,
+                  tabSelector: '#cx-pred-btn-grade',
+                  tabName: 'Grade Predictor',
+                  subTabSelector: `.cx-pred-subtabs .cx-pred-subtab[data-idx="${cIdx}"], .cx-pred-subtabs .cx-pred-subtab:nth-child(${cIdx + 1})`,
+                  subTabIndex: cIdx,
+                  subTabName: chipText,
+                  isInitial: false
+                });
+              });
+            } else {
+              views.push({
+                id: 'cx-sidebar-pred-grade',
+                title: 'Sidebar: Predictor [Grade Predictor]',
+                auditScope: 'sidebar',
+                toolId: cfg.id,
+                toolName,
+                tabSelector: '#cx-pred-btn-grade',
+                tabName: 'Grade Predictor',
+                isInitial: false
+              });
+            }
+
+            // B. ATAR Predictor Tab
+            if (atarBtn) {
+              views.push({
+                id: 'cx-sidebar-pred-atar',
+                title: 'Sidebar: Predictor [ATAR Predictor]',
+                auditScope: 'sidebar',
+                toolId: cfg.id,
+                toolName,
+                tabSelector: '#cx-pred-btn-atar',
+                tabName: 'ATAR Predictor',
+                isInitial: false
+              });
+            }
+          } else {
+            views.push({
+              id: `cx-sidebar-${cfg.id}`,
+              title: `Sidebar: ${toolName}`,
+              auditScope: 'sidebar',
+              toolId: cfg.id,
+              toolName,
+              isInitial: false
+            });
+          }
+        } else if (cfg.type === 'progress') {
+          const subButtons = Array.from(sidebar.querySelectorAll('.cx-subjects button'));
+          if (subButtons.length > 0) {
+            subButtons.forEach((subBtn, subIdx) => {
+              const subText = (subBtn.innerText || subBtn.textContent || `Subject ${subIdx + 1}`).trim();
+              views.push({
+                id: `cx-sidebar-prog-sub${subIdx}`,
+                title: `Sidebar: Year in Progress [${subText}]`,
+                auditScope: 'sidebar',
+                toolId: cfg.id,
+                toolName,
+                subTabSelector: `.cx-subjects button:nth-child(${subIdx + 1})`,
+                subTabIndex: subIdx,
+                subTabName: subText,
+                isInitial: false
+              });
+            });
+          } else {
+            views.push({
+              id: `cx-sidebar-${cfg.id}`,
+              title: `Sidebar: ${toolName}`,
+              auditScope: 'sidebar',
+              toolId: cfg.id,
+              toolName,
+              isInitial: false
+            });
+          }
+        } else if (cfg.type === 'weakness') {
+          const modeSelect = sidebar.querySelector('#cx-radar-mode');
+          const options = modeSelect ? Array.from(modeSelect.options || []) : [];
+          if (options.length > 1) {
+            options.forEach(opt => {
+              const optText = (opt.text || opt.value).trim();
+              views.push({
+                id: `cx-sidebar-weakness-${opt.value}`,
+                title: `Sidebar: Weakness Analyzer [${optText}]`,
+                auditScope: 'sidebar',
+                toolId: cfg.id,
+                toolName,
+                selectSelector: '#cx-radar-mode',
+                selectValue: opt.value,
+                selectName: optText,
+                isInitial: false
+              });
+            });
+          } else {
+            views.push({
+              id: `cx-sidebar-${cfg.id}`,
+              title: `Sidebar: ${toolName}`,
+              auditScope: 'sidebar',
+              toolId: cfg.id,
+              toolName,
+              isInitial: false
+            });
+          }
+        } else {
+          // Settings or other tools
+          views.push({
+            id: `cx-sidebar-${cfg.id}`,
+            title: `Sidebar: ${toolName}`,
+            auditScope: 'sidebar',
+            toolId: cfg.id,
+            toolName,
+            isInitial: false
+          });
+        }
+      }
+
+      // Check for any extra unconfigured tools in the sidebar menu
+      const handledIds = new Set(toolConfigs.map(c => c.id));
+      const extraButtons = Array.from(sidebar.querySelectorAll('.cx-tool-menu button')).filter(b => b.id && !handledIds.has(b.id));
+      for (const eBtn of extraButtons) {
+        const eName = (eBtn.innerText || eBtn.textContent || eBtn.id).trim();
+        views.push({
+          id: `cx-sidebar-${eBtn.id}`,
+          title: `Sidebar: ${eName}`,
+          auditScope: 'sidebar',
+          toolId: eBtn.id,
+          toolName: eName,
+          isInitial: false
+        });
+      }
+
+      // Reset to home menu after discovery
+      returnToMenu();
+
+      return views;
+    });
+  } catch (err) {
+    return [];
+  }
+}
+
+/**
+ * Activates a specific sidebar view (drawer, tool, tab, or sub-tab).
+ */
+async function activateSidebarView(page, currentView, delay = 1250) {
+  try {
+    const activated = await page.evaluate((view) => {
+      const sidebar = document.getElementById('connectify-sidebar');
+      if (!sidebar) return false;
+
+      // 1. Ensure sidebar is open and visible
+      sidebar.hidden = false;
+      const handle = document.getElementById('connectify-sidebar-handle');
+      if (handle) {
+        handle.setAttribute('aria-expanded', 'true');
+        handle.style.left = 'min(310px, calc(100vw - 30px))';
+      }
+      if (typeof window.ConnectifyOpenSidebar === 'function') {
+        try { window.ConnectifyOpenSidebar(); } catch {}
+      }
+
+      // 2. If viewing the main sidebar menu
+      if (!view.toolId) {
+        const homeBtn = sidebar.querySelector('.cx-back-menu');
+        if (homeBtn && typeof homeBtn.click === 'function') {
+          homeBtn.click();
+        } else {
+          const workspace = sidebar.querySelector('.cx-workspace');
+          if (workspace && workspace.children) {
+            for (const child of workspace.children) child.hidden = true;
+          }
+          sidebar.classList?.remove?.('cx-tool-active');
+        }
+        return true;
+      }
+
+      // 3. Switch to tool
+      // First return to menu to reset tool state cleanly
+      const homeBtn = sidebar.querySelector('.cx-back-menu');
+      if (homeBtn && typeof homeBtn.click === 'function') {
+        try { homeBtn.click(); } catch {}
+      }
+
+      // Find and click the tool toggle button
+      const toolBtn = document.getElementById(view.toolId) ||
+                      sidebar.querySelector(`button#${view.toolId}`) ||
+                      sidebar.querySelector(`.cx-tool-menu button[id*="${view.toolId}"]`);
+      if (toolBtn && typeof toolBtn.click === 'function') {
+        try { toolBtn.click(); } catch {}
+      }
+
+      // 4. Activate primary tab if specified (e.g. #cx-pred-btn-grade or #cx-pred-btn-atar)
+      if (view.tabSelector) {
+        const tabEl = sidebar.querySelector(view.tabSelector) || document.querySelector(view.tabSelector);
+        if (tabEl && typeof tabEl.click === 'function') {
+          try { tabEl.click(); } catch {}
+        }
+      }
+
+      // 5. Activate sub-tab if specified (e.g. semester button, chip, subject button)
+      if (view.subTabSelector) {
+        const subTabEl = sidebar.querySelector(view.subTabSelector) || document.querySelector(view.subTabSelector);
+        if (subTabEl && typeof subTabEl.click === 'function') {
+          try { subTabEl.click(); } catch {}
+        }
+      } else if (view.subTabIndex !== undefined && view.toolId?.includes('progress')) {
+        const subBtns = Array.from(sidebar.querySelectorAll('.cx-subjects button'));
+        if (subBtns[view.subTabIndex] && typeof subBtns[view.subTabIndex].click === 'function') {
+          try { subBtns[view.subTabIndex].click(); } catch {}
+        }
+      }
+
+      // 6. Set select value if specified (e.g. #cx-radar-mode)
+      if (view.selectSelector && view.selectValue) {
+        const sel = sidebar.querySelector(view.selectSelector) || document.querySelector(view.selectSelector);
+        if (sel) {
+          sel.value = view.selectValue;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+
+      return true;
+    }, currentView).catch(() => false);
+
+    if (activated) {
+      await new Promise(r => setTimeout(r, Math.min(delay, 500)));
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Stamps all DOM elements with persistent audit IDs and captures the baseline
  * state from the Connect Native Theme (untouched native styling).
  */
-async function captureNativeBaseline(page) {
+async function captureNativeBaseline(page, options = {}) {
   // Ensure Connect Native Theme is active (no dark mode, no theme tokens)
-  await page.evaluate(() => {
+  await page.evaluate((opts) => {
     if (window.ConnectifyThemeRegistry?.setTheme) {
       window.ConnectifyThemeRegistry.setTheme('light');
     }
@@ -568,11 +1184,40 @@ async function captureNativeBaseline(page) {
     if (window.ConnectifyThemeRegistry?.clearCustomTokens) {
       window.ConnectifyThemeRegistry.clearCustomTokens();
     }
-  });
+    if (opts?.auditScope === 'sidebar') {
+      const sidebar = document.getElementById('connectify-sidebar');
+      if (sidebar) sidebar.hidden = false;
+    }
+  }, options);
 
   await new Promise(r => setTimeout(r, 400));
 
-  return await page.evaluate(() => {
+  return await page.evaluate((opts) => {
+    function parseRgb(colorStr) {
+      if (!colorStr) return null;
+      const match = colorStr.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
+      if (!match) return null;
+      return {
+        r: parseFloat(match[1]),
+        g: parseFloat(match[2]),
+        b: parseFloat(match[3]),
+        a: match[4] !== undefined ? parseFloat(match[4]) : 1.0
+      };
+    }
+
+    function isVisibleBorder(st, side) {
+      const borderStyle = st['border' + side + 'Style'] || st.borderStyle || 'none';
+      const widthVal = parseFloat(st['border' + side + 'Width'] || st.borderWidth) || 0;
+      if (borderStyle === 'none' || borderStyle === 'hidden' || widthVal <= 0) return 0;
+      const colorStr = st['border' + side + 'Color'] || st.borderColor;
+      if (colorStr) {
+        if (colorStr === 'transparent' || colorStr === 'rgba(0, 0, 0, 0)' || colorStr === 'rgba(0,0,0,0)') return 0;
+        const rgb = parseRgb(colorStr);
+        if (rgb && rgb.a <= 0.05) return 0;
+      }
+      return widthVal;
+    }
+
     function cleanFontFamily(f) {
       if (!f) return '';
       return f.replace(/['"]/g, '').toLowerCase().split(',').map(s => s.trim()).join(', ');
@@ -587,7 +1232,7 @@ async function captureNativeBaseline(page) {
 
     function getSelector(el) {
       if (el.id) return '#' + el.id;
-      let path = el.tagName.toLowerCase();
+      let path = (el.tagName || 'div').toLowerCase();
       if (el.className && typeof el.className === 'string') {
         const cls = el.className.trim().split(/\s+/).filter(c => !c.startsWith('ng-') && !c.startsWith('cx-audit-')).slice(0, 2).join('.');
         if (cls) path += '.' + cls;
@@ -595,17 +1240,57 @@ async function captureNativeBaseline(page) {
       return path;
     }
 
-    const allElements = document.querySelectorAll('body *');
+    opts = opts || {};
+    const isSidebarScope = opts.auditScope === 'sidebar';
+    let allElements;
+    if (isSidebarScope) {
+      const sidebarRoot = typeof document.getElementById === 'function' ? document.getElementById('connectify-sidebar') : null;
+      const handleRoot = typeof document.getElementById === 'function' ? document.getElementById('connectify-sidebar-handle') : null;
+      if (sidebarRoot || handleRoot) {
+        allElements = [];
+        if (sidebarRoot) {
+          allElements.push(sidebarRoot);
+          if (typeof sidebarRoot.querySelectorAll === 'function') {
+            allElements.push(...Array.from(sidebarRoot.querySelectorAll('*')));
+          }
+        }
+        if (handleRoot) {
+          allElements.push(handleRoot);
+          if (typeof handleRoot.querySelectorAll === 'function') {
+            allElements.push(...Array.from(handleRoot.querySelectorAll('*')));
+          }
+        }
+      } else {
+        const bodyEls = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('body *')) : [];
+        allElements = bodyEls.filter(el =>
+          el.id === 'connectify-sidebar' || el.id === 'connectify-sidebar-handle' ||
+          Boolean(typeof el.closest === 'function' && el.closest('#connectify-sidebar, #connectify-sidebar-handle'))
+        );
+      }
+    } else {
+      allElements = typeof document.querySelectorAll === 'function' ? document.querySelectorAll('body *') : [];
+    }
+
     const baselineMap = {};
     let visibleCount = 0;
 
     for (let i = 0; i < allElements.length; i++) {
       const el = allElements[i];
       const auditId = 'cx_aud_' + i;
+      if (!el.dataset) el.dataset = {};
       el.dataset.cxAuditId = auditId;
 
-      const tag = el.tagName.toLowerCase();
-      if (['script', 'style', 'noscript', 'meta', 'link', 'template'].includes(tag)) continue;
+      const tag = (el.tagName || 'div').toLowerCase();
+      if (['script', 'style', 'noscript', 'meta', 'link', 'template', 'title', 'desc', 'defs', 'clippath', 'mask'].includes(tag)) continue;
+      
+      if (isSidebarScope) {
+        const inSidebar = el.id === 'connectify-sidebar' || el.id === 'connectify-sidebar-handle' ||
+                          Boolean(typeof el.closest === 'function' && el.closest('#connectify-sidebar, #connectify-sidebar-handle'));
+        if (!inSidebar) continue;
+        if (el.id === 'connectea-theme-toggle' || (typeof el.closest === 'function' && el.closest('#connectea-theme-toggle'))) continue;
+      } else {
+        if (el.closest?.('#cx-expand-progress, #cx-expand-btn, [id*="cx-expand-"], [class*="cx-expand-"], mat-progress-bar, .mat-progress-bar, mat-spinner, .mat-spinner, mat-progress-spinner, #connectea-theme-toggle, #connectea-theme-menu, #connectify-sidebar, #connectify-sidebar-handle, [class*="connectify-"], [id*="connectify-"], .connectify-cohort-panel, .cx-compound-progress-container, .cx-workspace-panel, .cx-refresh-btn, .highcharts-container, svg.highcharts-root, .connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-type-select, .connectea-outcome-bar, .connectea-subject-controls')) continue;
+      }
 
       const style = window.getComputedStyle(el);
       if (style.visibility === 'hidden' || style.display === 'none' || parseFloat(style.opacity) === 0) continue;
@@ -617,6 +1302,28 @@ async function captureNativeBaseline(page) {
 
       visibleCount++;
       const text = (el.innerText || el.textContent || '').slice(0, 30).trim();
+
+      const bRadius = parseFloat(style.borderRadius) || 0;
+      const rawRadius = style.borderRadius || '';
+      const isButton = tag === 'button' || el.getAttribute?.('role') === 'button' ||
+                       el.classList?.contains?.('btn') || el.classList?.contains?.('v-button') ||
+                       el.classList?.contains?.('mat-button') || el.classList?.contains?.('eds-c-button') ||
+                       el.classList?.contains?.('cvr-c-btn');
+      const isActionButton = el.classList?.contains?.('eds-c-action-button') ||
+                             el.classList?.contains?.('cvr-c-action-button') ||
+                             el.classList?.contains?.('action-button') ||
+                             el.classList?.contains?.('eds-c-pagination-button') ||
+                             (isButton && rect.width <= 36 && rect.height <= 36);
+      const isTable = tag === 'table' || el.classList?.contains?.('table') ||
+                      el.classList?.contains?.('eds-c-table') || el.classList?.contains?.('tree-panel');
+      const isTableCell = tag === 'td' || tag === 'th' || el.classList?.contains?.('table-cell') ||
+                          el.classList?.contains?.('eds-c-table__cell');
+      const isTableColumn = tag === 'col' || tag === 'colgroup' || el.classList?.contains?.('table-column') ||
+                            el.classList?.contains?.('eds-c-table__column');
+      const isContainer = el.id === 'main-content' || el.classList?.contains?.('portlet') ||
+                          el.classList?.contains?.('portlet-content') || el.classList?.contains?.('portlet-body') ||
+                          el.classList?.contains?.('cvr-c-service-bar') ||
+                          (rect.width >= 300 && rect.height >= 200 && !isTable);
 
       baselineMap[auditId] = {
         auditId,
@@ -647,11 +1354,19 @@ async function captureNativeBaseline(page) {
           color: style.outlineColor || ''
         },
         border: {
-          topWidth: (style.borderTopStyle !== 'none' && parseFloat(style.borderTopWidth) > 0) ? parseFloat(style.borderTopWidth) : 0,
-          rightWidth: (style.borderRightStyle !== 'none' && parseFloat(style.borderRightWidth) > 0) ? parseFloat(style.borderRightWidth) : 0,
-          bottomWidth: (style.borderBottomStyle !== 'none' && parseFloat(style.borderBottomWidth) > 0) ? parseFloat(style.borderBottomWidth) : 0,
-          leftWidth: (style.borderLeftStyle !== 'none' && parseFloat(style.borderLeftWidth) > 0) ? parseFloat(style.borderLeftWidth) : 0
+          topWidth: isVisibleBorder(style, 'Top'),
+          rightWidth: isVisibleBorder(style, 'Right'),
+          bottomWidth: isVisibleBorder(style, 'Bottom'),
+          leftWidth: isVisibleBorder(style, 'Left')
         },
+        borderRadius: bRadius,
+        rawBorderRadius: rawRadius,
+        isButton,
+        isActionButton,
+        isTable,
+        isTableCell,
+        isTableColumn,
+        isContainer,
         svg: isSvg ? {
           fill: style.fill || el.getAttribute('fill') || '',
           stroke: style.stroke || el.getAttribute('stroke') || '',
@@ -665,7 +1380,7 @@ async function captureNativeBaseline(page) {
       visibleCount,
       elements: baselineMap
     };
-  });
+  }, options);
 }
 
 /**
@@ -703,9 +1418,20 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
     function getEffectiveBg(el) {
       let curr = el;
       while (curr && curr !== document.documentElement) {
+        if (curr === document.body) {
+          if (isDark) return { r: 18, g: 23, b: 31, a: 1 };
+          const bStyle = window.getComputedStyle(curr);
+          const bBg = parseRgb(bStyle.backgroundColor);
+          return (bBg && bBg.a > 0.05) ? bBg : { r: 255, g: 255, b: 255, a: 1 };
+        }
         const style = window.getComputedStyle(curr);
         const bg = parseRgb(style.backgroundColor);
-        if (bg && bg.a > 0.05) return bg;
+        if (bg && bg.a > 0.05) {
+          if (isDark && bg.r > 200 && bg.g > 200 && bg.b > 200 && (curr.id === 'main-content' || curr.classList?.contains?.('portlet-layout') || curr.classList?.contains?.('portlet-dropzone'))) {
+            return { r: 18, g: 23, b: 31, a: 1 };
+          }
+          return bg;
+        }
         curr = curr.parentElement;
       }
       return isDark ? { r: 18, g: 23, b: 31, a: 1 } : { r: 255, g: 255, b: 255, a: 1 };
@@ -725,7 +1451,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
 
     function getSelector(el) {
       if (el.id) return '#' + el.id;
-      let path = el.tagName.toLowerCase();
+      let path = (el.tagName || 'div').toLowerCase();
       if (el.className && typeof el.className === 'string') {
         const cls = el.className.trim().split(/\s+/).filter(c => !c.startsWith('ng-') && !c.startsWith('cx-audit-')).slice(0, 2).join('.');
         if (cls) path += '.' + cls;
@@ -733,24 +1459,98 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
       return path;
     }
 
+    function isVisibleBorder(st, side) {
+      const borderStyle = st['border' + side + 'Style'] || st.borderStyle || 'none';
+      const widthVal = parseFloat(st['border' + side + 'Width'] || st.borderWidth) || 0;
+      if (borderStyle === 'none' || borderStyle === 'hidden' || widthVal <= 0) return 0;
+      const colorStr = st['border' + side + 'Color'] || st.borderColor;
+      if (colorStr) {
+        if (colorStr === 'transparent' || colorStr === 'rgba(0, 0, 0, 0)' || colorStr === 'rgba(0,0,0,0)') return 0;
+        const rgb = parseRgb(colorStr);
+        if (rgb && rgb.a <= 0.05) return 0;
+      }
+      return widthVal;
+    }
+
+    function checkWebfontGlitch(node) {
+      try {
+        const checkPseudo = (pseudoName) => {
+          const ps = pseudoName ? window.getComputedStyle(node, pseudoName) : window.getComputedStyle(node);
+          if (!ps) return null;
+          const content = (typeof ps.getPropertyValue === 'function' ? ps.getPropertyValue('content') : ps.content) || '';
+          const textVal = pseudoName ? content : (node.innerText || node.textContent || '');
+          const hasPua = /[\uE000-\uF8FF\uF000-\uFFFF]/.test(textVal) || /[\uE800-\uE8FF]/.test(textVal) || /["']\\e[0-9a-f]{3,4}["']/i.test(content);
+          if (hasPua) {
+            const fontFam = (ps.fontFamily || '').toLowerCase();
+            const isWebfont = fontFam.includes('connect-webfont') || fontFam.includes('vaadin') || fontFam.includes('font-awesome') || fontFam.includes('fontawesome') || fontFam.includes('icomoon') || fontFam.includes('material') || fontFam.includes('glyph');
+            const isStandardFont = fontFam.startsWith('open sans') || fontFam.startsWith('arial') || fontFam.startsWith('roboto') || fontFam.startsWith('system-ui') || fontFam.startsWith('sans-serif');
+            if (!isWebfont || isStandardFont) {
+              return { fontFam, pseudo: pseudoName || 'self' };
+            }
+          }
+          return null;
+        };
+        return checkPseudo(null) || checkPseudo('::before') || checkPseudo('::after');
+      } catch {
+        return null;
+      }
+    }
+
     const issues = [];
     opts = opts || {};
+    const isSidebarScope = opts.auditScope === 'sidebar';
     const baseMap = baseline?.elements || {};
-    const currentElements = document.querySelectorAll('body *');
+    let currentElements;
+    if (isSidebarScope) {
+      const sidebarRoot = typeof document.getElementById === 'function' ? document.getElementById('connectify-sidebar') : null;
+      const handleRoot = typeof document.getElementById === 'function' ? document.getElementById('connectify-sidebar-handle') : null;
+      if (sidebarRoot || handleRoot) {
+        currentElements = [];
+        if (sidebarRoot) {
+          currentElements.push(sidebarRoot);
+          if (typeof sidebarRoot.querySelectorAll === 'function') {
+            currentElements.push(...Array.from(sidebarRoot.querySelectorAll('*')));
+          }
+        }
+        if (handleRoot) {
+          currentElements.push(handleRoot);
+          if (typeof handleRoot.querySelectorAll === 'function') {
+            currentElements.push(...Array.from(handleRoot.querySelectorAll('*')));
+          }
+        }
+      } else {
+        const bodyEls = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('body *')) : [];
+        currentElements = bodyEls.filter(el =>
+          el.id === 'connectify-sidebar' || el.id === 'connectify-sidebar-handle' ||
+          Boolean(typeof el.closest === 'function' && el.closest('#connectify-sidebar, #connectify-sidebar-handle'))
+        );
+      }
+    } else {
+      currentElements = typeof document.querySelectorAll === 'function' ? document.querySelectorAll('body *') : [];
+    }
     const currentVisibleIds = new Set();
     let currentVisibleCount = 0;
 
     for (let i = 0; i < currentElements.length; i++) {
       const el = currentElements[i];
-      const auditId = el.dataset.cxAuditId || ('cx_aud_' + i);
-      const tag = el.tagName.toLowerCase();
-      if (['script', 'style', 'noscript', 'meta', 'link', 'template'].includes(tag)) continue;
+      const auditId = el.dataset?.cxAuditId || ('cx_aud_' + i);
+      const tag = (el.tagName || 'div').toLowerCase();
+      if (['script', 'style', 'noscript', 'meta', 'link', 'template', 'title', 'desc', 'defs', 'clippath', 'mask'].includes(tag)) continue;
+      
+      if (isSidebarScope) {
+        const inSidebar = el.id === 'connectify-sidebar' || el.id === 'connectify-sidebar-handle' ||
+                          Boolean(typeof el.closest === 'function' && el.closest('#connectify-sidebar, #connectify-sidebar-handle'));
+        if (!inSidebar) continue;
+        if (el.id === 'connectea-theme-toggle' || (typeof el.closest === 'function' && el.closest('#connectea-theme-toggle'))) continue;
+      } else {
+        if (el.closest?.('#cx-expand-progress, #cx-expand-btn, [id*="cx-expand-"], [class*="cx-expand-"], mat-progress-bar, .mat-progress-bar, mat-spinner, .mat-spinner, mat-progress-spinner, #connectea-theme-toggle, #connectea-theme-menu, #connectify-sidebar, #connectify-sidebar-handle, [class*="connectify-"], [id*="connectify-"], .connectify-cohort-panel, .cx-compound-progress-container, .cx-workspace-panel, .cx-refresh-btn, .highcharts-container, svg.highcharts-root, .connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-type-select, .connectea-outcome-bar, .connectea-subject-controls')) continue;
+      }
 
       const style = window.getComputedStyle(el);
       const isVisible = style.visibility !== 'hidden' && style.display !== 'none' && parseFloat(style.opacity) > 0;
       const rect = el.getBoundingClientRect();
       const isSvg = tag === 'svg' || tag === 'path' || tag === 'g' || tag === 'rect' || tag === 'circle' || tag === 'polygon' || tag === 'polyline' || tag === 'line' || (typeof SVGElement !== 'undefined' && el instanceof SVGElement);
-      const hasBox = isSvg ? (rect.width > 0 || rect.height > 0 || isVisible) : (rect.width > 0 && rect.height > 0);
+      const hasBox = isSvg ? (rect.width > 0 || rect.height > 0) : (rect.width > 0 && rect.height > 0);
       const selector = getSelector(el);
       const text = (el.innerText || el.textContent || '').slice(0, 30).trim();
 
@@ -767,7 +1567,13 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           const currFontWeight = normalizeWeight(style.fontWeight);
           const currFontStyle = style.fontStyle || 'normal';
 
-          if (currFontFamily !== base.font.family) {
+          function getPrimaryFont(f) {
+            if (!f) return '';
+            const cleaned = f.replace(/['"]/g, '').toLowerCase();
+            return cleaned.split(',')[0].trim();
+          }
+
+          if (currFontFamily !== base.font.family && getPrimaryFont(style.fontFamily) !== getPrimaryFont(base.font.rawFamily)) {
             issues.push({
               category: 'PARITY',
               type: 'FONT_FAMILY_MISMATCH',
@@ -871,10 +1677,10 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           }
 
           // E. Border Parity Check
-          const curBorderTop = (style.borderTopStyle !== 'none' && parseFloat(style.borderTopWidth) > 0) ? parseFloat(style.borderTopWidth) : 0;
-          const curBorderBottom = (style.borderBottomStyle !== 'none' && parseFloat(style.borderBottomWidth) > 0) ? parseFloat(style.borderBottomWidth) : 0;
-          const curBorderLeft = (style.borderLeftStyle !== 'none' && parseFloat(style.borderLeftWidth) > 0) ? parseFloat(style.borderLeftWidth) : 0;
-          const curBorderRight = (style.borderRightStyle !== 'none' && parseFloat(style.borderRightWidth) > 0) ? parseFloat(style.borderRightWidth) : 0;
+          const curBorderTop = isVisibleBorder(style, 'Top');
+          const curBorderBottom = isVisibleBorder(style, 'Bottom');
+          const curBorderLeft = isVisibleBorder(style, 'Left');
+          const curBorderRight = isVisibleBorder(style, 'Right');
 
           const baseBorderTop = base.border?.topWidth || 0;
           const baseBorderBottom = base.border?.bottomWidth || 0;
@@ -895,6 +1701,114 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
               details: `Border changed: Native [T:${baseBorderTop}, R:${baseBorderRight}, B:${baseBorderBottom}, L:${baseBorderLeft}] vs Theme [T:${curBorderTop}, R:${curBorderRight}, B:${curBorderBottom}, L:${curBorderLeft}]`,
               textSnippet: text
             });
+          }
+
+          // Specific Defect Checks:
+          // 1. Table Cell and Column Border Added or Removed
+          const isTableElement = Boolean(
+            base.isTableCell || base.isTable || base.isTableColumn ||
+            tag === 'td' || tag === 'th' || tag === 'col' || tag === 'colgroup' ||
+            el.classList?.contains?.('table-cell') || el.classList?.contains?.('table-column') ||
+            el.classList?.contains?.('eds-c-table__cell') || el.classList?.contains?.('eds-c-table__column')
+          );
+
+          if (isTableElement && (addedBorder || removedBorder)) {
+            const addedSides = [];
+            const removedSides = [];
+            if (curBorderTop > 0 && baseBorderTop === 0) addedSides.push(`Top (${curBorderTop}px)`);
+            if (curBorderRight > 0 && baseBorderRight === 0) addedSides.push(`Right (${curBorderRight}px)`);
+            if (curBorderBottom > 0 && baseBorderBottom === 0) addedSides.push(`Bottom (${curBorderBottom}px)`);
+            if (curBorderLeft > 0 && baseBorderLeft === 0) addedSides.push(`Left (${curBorderLeft}px)`);
+
+            if (baseBorderTop > 0 && curBorderTop === 0) removedSides.push(`Top (${baseBorderTop}px)`);
+            if (baseBorderRight > 0 && curBorderRight === 0) removedSides.push(`Right (${baseBorderRight}px)`);
+            if (baseBorderBottom > 0 && curBorderBottom === 0) removedSides.push(`Bottom (${baseBorderBottom}px)`);
+            if (baseBorderLeft > 0 && curBorderLeft === 0) removedSides.push(`Left (${baseBorderLeft}px)`);
+
+            let actionDesc = '';
+            if (addedSides.length > 0 && removedSides.length > 0) {
+              actionDesc = `gained unwanted border on [${addedSides.join(', ')}] and lost border on [${removedSides.join(', ')}]`;
+            } else if (addedSides.length > 0) {
+              actionDesc = `gained unwanted border on [${addedSides.join(', ')}]`;
+            } else {
+              actionDesc = `lost unwanted border on [${removedSides.join(', ')}]`;
+            }
+
+            issues.push({
+              category: 'PARITY',
+              type: 'TABLE_VERTICAL_BORDER_ADDED',
+              severity: 'HIGH',
+              selector,
+              details: `Table cell/column ${actionDesc}: Native [T:${baseBorderTop}, R:${baseBorderRight}, B:${baseBorderBottom}, L:${baseBorderLeft}] vs Theme [T:${curBorderTop}, R:${curBorderRight}, B:${curBorderBottom}, L:${curBorderLeft}]`,
+              textSnippet: text
+            });
+          }
+
+          // 2. Action Button Border Added
+          if (base.isActionButton && baseBorderTop === 0 && baseBorderBottom === 0 && baseBorderLeft === 0 && baseBorderRight === 0) {
+            if (curBorderTop > 0 || curBorderBottom > 0 || curBorderLeft > 0 || curBorderRight > 0) {
+              issues.push({
+                category: 'PARITY',
+                type: 'BUTTON_BORDER_ADDED',
+                severity: 'HIGH',
+                selector,
+                details: `Action button gained unwanted visible border: [T:${curBorderTop}, R:${curBorderRight}, B:${curBorderBottom}, L:${curBorderLeft}]`,
+                textSnippet: text
+              });
+            }
+          }
+
+          // 3. Circular Outline Added
+          const curBorderRadius = parseFloat(style.borderRadius) || 0;
+          const isThemeCircular = curBorderRadius >= 16 || (typeof style.borderRadius === 'string' && style.borderRadius.includes('50%'));
+          const wasNativeCircular = (base.borderRadius >= 16) || (typeof base.rawBorderRadius === 'string' && base.rawBorderRadius.includes('50%'));
+          if ((base.isActionButton || base.isButton) && !wasNativeCircular && isThemeCircular && (addedBorder || curOutlineWidth > 0)) {
+            issues.push({
+              category: 'PARITY',
+              type: 'CIRCULAR_OUTLINE_ADDED',
+              severity: 'HIGH',
+              selector,
+              details: `Button gained circular outline: Native radius ${base.borderRadius}px vs Theme radius ${style.borderRadius}`,
+              textSnippet: text
+            });
+          }
+
+          // 4. Button Radius Mismatch (square corners becoming rounded)
+          if (base.isButton && !base.isActionButton && base.borderRadius === 0 && curBorderRadius >= 4) {
+            issues.push({
+              category: 'PARITY',
+              type: 'BUTTON_RADIUS_MISMATCH',
+              severity: 'HIGH',
+              selector,
+              details: `Button corners rounded when native had square corners: Native ${base.borderRadius}px vs Theme ${curBorderRadius}px`,
+              textSnippet: text
+            });
+          }
+
+          // 5. Button Size Mismatch
+          if (base.isButton && (Math.abs(curHeight - base.size.height) > 4 || Math.abs(curWidth - base.size.width) > 8)) {
+            issues.push({
+              category: 'PARITY',
+              type: 'BUTTON_SIZE_MISMATCH',
+              severity: 'HIGH',
+              selector,
+              details: `Button size mismatch: Native [${base.size.width}x${base.size.height}] vs Theme [${curWidth}x${curHeight}]`,
+              textSnippet: text
+            });
+          }
+
+          // 6. Container Outline Added (creating unwanted new segments)
+          if (base.isContainer && baseBorderTop === 0 && baseBorderBottom === 0 && baseBorderLeft === 0 && baseBorderRight === 0 && (base.outline?.width || 0) === 0) {
+            if (curBorderTop > 0 || curBorderBottom > 0 || curBorderLeft > 0 || curBorderRight > 0 || curOutlineWidth > 0) {
+              issues.push({
+                category: 'PARITY',
+                type: 'CONTAINER_OUTLINE_ADDED',
+                severity: 'HIGH',
+                selector,
+                details: `Container gained unwanted border or outline creating a new page segment: [T:${curBorderTop}, R:${curBorderRight}, B:${curBorderBottom}, L:${curBorderLeft}]`,
+                textSnippet: text
+              });
+            }
           }
 
           // F. SVG Fill and Stroke Parity Check
@@ -950,7 +1864,20 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         const elColor = parseRgb(style.color);
         const effectiveBg = getEffectiveBg(el);
 
-        // Native Purple Ink Bar
+        // A. Unicode Webfont Icon Check (Missing webfont renders tofu Unicode placeholder box)
+        const iconGlitch = checkWebfontGlitch(el);
+        if (iconGlitch) {
+          issues.push({
+            category: 'STYLE',
+            type: 'BROKEN_WEBFONT_ICON',
+            severity: 'CRITICAL',
+            selector,
+            details: `Unicode webfont icon has overridden font family "${iconGlitch.fontFam}" (${iconGlitch.pseudo}), rendering tofu placeholder`,
+            textSnippet: text
+          });
+        }
+
+        // B. Native Purple Ink Bar
         if (el.classList?.contains?.('mat-ink-bar')) {
           if (elBg && elBg.r > 90 && elBg.r < 125 && elBg.b > 160) {
             issues.push({
@@ -963,11 +1890,15 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           }
         }
 
-        // Background Bleed in Dark Mode
-        if (isDark && elBg && elBg.a > 0.7 && !['img', 'video', 'canvas'].includes(tag)) {
+        // C. Background Bleed in Dark Mode
+        if (isDark && elBg && elBg.a > 0.6 && !['img', 'video', 'canvas'].includes(tag)) {
           const bgLum = getLuminance(elBg.r, elBg.g, elBg.b);
-          if (bgLum > 0.65 && elBg.r > 210 && elBg.g > 210 && elBg.b > 210) {
-            if (!el.closest?.('.mat-badge, .badge, .status-pill, .chip-light')) {
+          const isLightBg = bgLum > 0.45 || (elBg.r > 165 && elBg.g > 165 && elBg.b > 165);
+          if (isLightBg) {
+            const isExempt = Boolean(el.closest?.(
+              '.mat-badge, .badge, .status-pill, .chip-light, [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning, .portal-session-warning, .session-timeout, .cvr-c-timeout-alert'
+            ));
+            if (!isExempt) {
               issues.push({
                 category: 'STYLE',
                 type: 'DARK_MODE_LIGHT_BG_BLEED',
@@ -979,22 +1910,36 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           }
         }
 
-        // Contrast Checks
+        // D. Contrast Checks (Including unadapted native plum/purple #7f375c and dark-on-dark text)
         const hasDirectText = Array.from(el.childNodes || []).some(n => n.nodeType === 3 && n.textContent?.trim().length > 0);
-        if (hasDirectText && elColor && effectiveBg) {
-          const cr = getContrast(elColor, effectiveBg);
+        if (hasDirectText && elColor && effectiveBg && !isSvg && !el.closest?.('svg')) {
+          const alpha = elColor.a !== undefined ? elColor.a : 1.0;
+          const compColor = {
+            r: Math.round(elColor.r * alpha + effectiveBg.r * (1.0 - alpha)),
+            g: Math.round(elColor.g * alpha + effectiveBg.g * (1.0 - alpha)),
+            b: Math.round(elColor.b * alpha + effectiveBg.b * (1.0 - alpha)),
+            a: 1.0
+          };
+          const cr = getContrast(compColor, effectiveBg);
           const fontSize = parseFloat(style.fontSize) || 14;
           const isBold = normalizeWeight(style.fontWeight) >= 600;
           const isLarge = fontSize >= 18 || (fontSize >= 14 && isBold);
           const minCr = isLarge ? 3.0 : 4.5;
+          const isUnadaptedPurple = isDark && elColor.r > 100 && elColor.r < 150 && elColor.g < 80 && elColor.b < 120;
+          const effBgLum = getLuminance(effectiveBg.r, effectiveBg.g, effectiveBg.b);
+          const isUnadaptedDarkOnDark = isDark && effBgLum < 0.15 && (compColor.r < 95 && compColor.g < 95 && compColor.b < 95);
 
-          if (cr < 2.0) {
+          if (cr < 3.0 || (isUnadaptedPurple && cr < 4.5) || isUnadaptedDarkOnDark) {
             issues.push({
               category: 'STYLE',
               type: 'CRITICAL_CONTRAST_VIOLATION',
               severity: 'CRITICAL',
               selector,
-              details: `Illegible contrast ratio ${cr.toFixed(2)}:1 (color: ${style.color})`,
+              details: isUnadaptedPurple
+                ? `Illegible unadapted purple text ${style.color} on dark background (contrast ${cr.toFixed(2)}:1)`
+                : (isUnadaptedDarkOnDark
+                  ? `Illegible unadapted dark text ${style.color} on dark background (contrast ${cr.toFixed(2)}:1)`
+                  : `Illegible contrast ratio ${cr.toFixed(2)}:1 (color: ${style.color})`),
               contrast: cr.toFixed(2),
               textSnippet: text
             });
@@ -1034,7 +1979,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         category: 'PARITY',
         type: 'VISIBLE_COUNT_MISMATCH',
         severity: 'HIGH',
-        selector: 'body',
+        selector: isSidebarScope ? '#connectify-sidebar' : 'body',
         details: `Visible elements count mismatch: Native ${baseline.visibleCount} vs Theme ${currentVisibleCount}`
       });
     }
@@ -1053,8 +1998,8 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
   }, themeId, isDarkTheme, baselineData, options);
 }
 
-async function runThemeAudit() {
-  const options = parseArgs();
+async function runThemeAudit(customOptions = {}) {
+  const options = Object.assign(parseArgs(), customOptions);
   console.log('[ThemeAudit] Initializing Connectify Theme & Parity Auditor...');
 
   const targetUrls = await resolveTargetUrls(options);
@@ -1072,22 +2017,55 @@ async function runThemeAudit() {
     console.log('[ThemeAudit] No saved session or credentials found — launching visible browser window for login.');
   }
 
-  const browser = await utils.launchBrowser({
+  let browser = await utils.launchBrowser({
     headless: isHeadless,
     loadExtension: true
   });
 
   // Handle authentication if any URL targets Connect
   if (needsAuth) {
-    const authPage = await browser.newPage();
+    let authPage = await browser.newPage();
     await authPage.setViewport({ width: 1280, height: 900 });
-    await utils.authenticate(authPage, {
+    let authRes = await utils.authenticate(authPage, {
       username: options.username,
       password: options.password,
-      interactive: options.interactive,
+      interactive: options.interactive || !isHeadless,
       sessionFile: options.session
     });
     await authPage.close().catch(() => {});
+
+    // If authentication failed (e.g. session expired or invalid) and browser was headless,
+    // automatically relaunch in a visible browser window so user can interactively log in
+    if (!authRes?.success && isHeadless) {
+      if (options.headless === true) {
+        console.error('\n[ThemeAudit] Error: Saved session in ' + path.basename(options.session) + ' has expired, and explicit --headless was requested without valid credentials.');
+        console.error('[ThemeAudit] Please run with --interactive or provide --username and --password.');
+        await browser.close().catch(() => {});
+        process.exit(1);
+      }
+      console.log('\n[ThemeAudit] Saved session in ' + path.basename(options.session) + ' has expired.');
+      console.log('[ThemeAudit] Relaunching in a visible browser window for interactive login...');
+      await browser.close().catch(() => {});
+      browser = await utils.launchBrowser({
+        headless: false,
+        loadExtension: true
+      });
+      authPage = await browser.newPage();
+      await authPage.setViewport({ width: 1280, height: 900 });
+      authRes = await utils.authenticate(authPage, {
+        username: options.username,
+        password: options.password,
+        interactive: true,
+        sessionFile: options.session
+      });
+      await authPage.close().catch(() => {});
+    }
+
+    if (!authRes?.success) {
+      console.error('\n[ThemeAudit] Authentication failed or was cancelled. Exiting to avoid auditing unauthenticated login pages.');
+      await browser.close().catch(() => {});
+      process.exit(1);
+    }
   }
 
   // Load available themes (excluding native/light as that is the baseline)
@@ -1132,8 +2110,27 @@ async function runThemeAudit() {
       });
       await page.setViewport({ width: 1280, height: 900 });
 
+      // Ensure session cookies are loaded into newly opened page
+      if (fs.existsSync(options.session)) {
+        await utils.loadSession(page, options.session);
+      }
+
       await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
       await utils.waitForPageReady(page, options.delay);
+
+      // Verify that page didn't redirect to unauthenticated login
+      const currentUrl = page.url();
+      if (!targetUrl.includes('/login') && (currentUrl.includes('/login') || currentUrl.includes('login.det.wa.edu.au'))) {
+        console.warn(`[ThemeAudit] Warning: ${targetUrl} redirected to login (${currentUrl}). Session may have expired. Skipping page audit.`);
+        await page.close().catch(() => {});
+        continue;
+      }
+
+      // Explore and trigger lazy-loaded components across the ENTIRE page
+      if (options.scroll) {
+        console.log(`    └─ Scrolling down to explore and render ENTIRE page content...`);
+        await scrollEntirePage(page, { scope: 'page', step: options.scrollStep, delayMs: options.scrollDelay, maxScrolls: options.maxScrolls });
+      }
 
       // In-page Sub-views Discovery (Navbar headings, tabs, calendar view switchers)
       let subViews = [];
@@ -1145,18 +2142,32 @@ async function runThemeAudit() {
       const activeSubView = subViews.find(v => v.isActive);
       const initialTitle = activeSubView ? activeSubView.title : 'Default View';
 
-      // Gather all views to audit under the same URL
+      // Gather all page views to audit under the same URL
       const otherViews = subViews.filter(v => !v.isActive).slice(0, options.maxSubPages);
-      const viewsToAudit = [
-        { title: initialTitle, isInitial: true },
-        ...otherViews.map(v => ({ title: v.title, isInitial: false }))
+      const pageViews = [
+        { title: initialTitle, isInitial: true, auditScope: 'page' },
+        ...otherViews.map(v => ({ title: v.title, isInitial: false, auditScope: 'page' }))
       ];
 
+      // Discover Sidebar Views (sidebar drawer and all tabs/sub-tabs)
+      let sidebarViews = [];
+      if (options.sidebar) {
+        sidebarViews = await discoverSidebarViews(page, options);
+      }
+
+      let viewsToAudit = [];
+      if (options.sidebarOnly) {
+        viewsToAudit = sidebarViews;
+      } else {
+        viewsToAudit = [...pageViews, ...sidebarViews];
+      }
+
       if (viewsToAudit.length > 1) {
-        console.log(`[ThemeAudit] Discovered ${subViews.length} in-page sub-view(s) under ${targetUrl} (auditing up to ${viewsToAudit.length} view(s)):`);
+        console.log(`[ThemeAudit] Discovered ${viewsToAudit.length} view(s) to audit under ${targetUrl} (${pageViews.length} page, ${sidebarViews.length} sidebar):`);
         for (let vIdx = 0; vIdx < viewsToAudit.length; vIdx++) {
           const v = viewsToAudit[vIdx];
-          console.log(`  └─ [${vIdx + 1}/${viewsToAudit.length}] ${v.title}${v.isInitial ? ' (Initial view)' : ' (Navbar heading)'}`);
+          const typeLabel = v.auditScope === 'sidebar' ? 'Sidebar view' : (v.isInitial ? 'Initial view' : 'Navbar heading');
+          console.log(`  └─ [${vIdx + 1}/${viewsToAudit.length}] ${v.title} (${typeLabel})`);
         }
       }
 
@@ -1165,40 +2176,73 @@ async function runThemeAudit() {
       // Audit each view / content state under targetUrl
       for (let vIdx = 0; vIdx < viewsToAudit.length; vIdx++) {
         const currentView = viewsToAudit[vIdx];
+        const isSidebar = currentView.auditScope === 'sidebar';
         console.log(`\n  ┌───────────────────────────────────────────────────────────────`);
         console.log(`  │ [View ${vIdx + 1}/${viewsToAudit.length}] Auditing: ${currentView.title}`);
-        console.log(`  │ URL: ${targetUrl}`);
+        console.log(`  │ Scope: ${currentView.auditScope || 'page'} | URL: ${targetUrl}`);
         console.log(`  └───────────────────────────────────────────────────────────────`);
 
         try {
-          // A. Switch to navbar heading if not the initial view
-          if (!currentView.isInitial) {
-            console.log(`    └─ Switching to navbar heading: "${currentView.title}"...`);
-            const activated = await activateNavbarHeading(page, currentView.title, options.delay);
+          if (isSidebar) {
+            console.log(`    └─ Activating sidebar view: "${currentView.title}"...`);
+            const activated = await activateSidebarView(page, currentView, options.delay);
             if (!activated) {
-              console.warn(`    └─ Could not activate navbar heading "${currentView.title}", skipping.`);
+              console.warn(`    └─ Could not activate sidebar view "${currentView.title}", skipping.`);
               continue;
+            }
+          } else {
+            // Ensure sidebar is closed during standard page auditing so page parity is preserved
+            await page.evaluate(() => {
+              const sidebar = document.getElementById('connectify-sidebar');
+              if (sidebar) sidebar.hidden = true;
+            }).catch(() => {});
+
+            // Switch to navbar heading if not the initial view
+            if (!currentView.isInitial) {
+              console.log(`    └─ Switching to navbar heading: "${currentView.title}"...`);
+              const activated = await activateNavbarHeading(page, currentView.title, options.delay);
+              if (!activated) {
+                console.warn(`    └─ Could not activate navbar heading "${currentView.title}", skipping.`);
+                continue;
+              }
             }
           }
 
-          // B. Open all collapsible panels on this view
-          if (options.clickButtons) {
+          // B. Open all collapsible panels on this view (page views only)
+          if (!isSidebar && options.clickButtons) {
             console.log(`    └─ Expanding interactive panels and accordions...`);
             const clicked = await clickInteractiveButtons(page);
             const sample = clicked.length > 0
               ? ` (${clicked.slice(0, 5).join(', ')}${clicked.length > 5 ? ` +${clicked.length - 5} more` : ''})`
               : '';
-            console.log(`       └─ Dispatched clicks to ${clicked.length} panel/accordion element(s)${sample}`);
-            await new Promise(r => setTimeout(r, 600));
+            await page.waitForFunction(() => {
+              if (window.ConnectifyIsBulkExpanding) return false;
+              if (window.ConnectifyIsAccordionAnimating) return false;
+              if (document.body?.classList?.contains('cx-freeze-scroll')) return false;
+              return true;
+            }, { timeout: 6000 }).catch(() => {});
+            await new Promise(r => setTimeout(r, 2000));
+
+            // Scroll down through newly revealed and expanded content across the entire page
+            if (options.scroll) {
+              console.log(`    └─ Scrolling down through newly revealed and expanded page content...`);
+              await scrollEntirePage(page, { scope: 'page', step: options.scrollStep, delayMs: options.scrollDelay, maxScrolls: options.maxScrolls });
+            }
+          }
+
+          // Scroll through the entire view (page or sidebar) so every element is fully rendered before baseline capture
+          if (options.scroll) {
+            console.log(`    └─ Scrolling down to capture the ENTIRE ${isSidebar ? 'sidebar' : 'page'} view...`);
+            await scrollEntirePage(page, { scope: currentView.auditScope, step: options.scrollStep, delayMs: options.scrollDelay, maxScrolls: options.maxScrolls });
           }
 
           // C. Capture Connect Native Theme Baseline
           console.log(`    └─ Capturing Connect Native Theme baseline for "${currentView.title}"...`);
-          const baseline = await captureNativeBaseline(page);
+          const baseline = await captureNativeBaseline(page, { auditScope: currentView.auditScope });
           console.log(`       └─ Baseline captured: ${baseline.visibleCount} visible elements.`);
 
           // D. Skip redundant view if it has the exact same elements as an already-audited view
-          const viewSignature = computeElementsSignature(baseline);
+          const viewSignature = (isSidebar ? 'sidebar:' + (currentView.id || currentView.title) + ':' : '') + computeElementsSignature(baseline);
           if (seenViewSignatures.has(viewSignature)) {
             const existingTitle = seenViewSignatures.get(viewSignature);
             console.log(`       └─ Skipping "${currentView.title}": exact same elements (${baseline.visibleCount} visible) as view "${existingTitle}".`);
@@ -1208,6 +2252,12 @@ async function runThemeAudit() {
               }
               document.documentElement.classList.remove('connectea-dark');
               delete document.documentElement.dataset.connecteaTheme;
+              document.documentElement.removeAttribute('data-connectea-theme');
+              if (document.body) {
+                document.body.classList.remove('connectea-dark');
+                delete document.body.dataset.connecteaTheme;
+                document.body.removeAttribute('data-connectea-theme');
+              }
             }).catch(() => {});
             continue;
           }
@@ -1221,15 +2271,27 @@ async function runThemeAudit() {
             await page.evaluate((tid) => {
               if (window.ConnectifyThemeRegistry?.setTheme) {
                 window.ConnectifyThemeRegistry.setTheme(tid);
-              } else {
-                document.documentElement.classList.add('connectea-dark');
-                document.documentElement.dataset.connecteaTheme = tid;
+              }
+              document.documentElement.classList.add('connectea-dark');
+              document.documentElement.dataset.connecteaTheme = tid;
+              if (document.body) {
+                document.body.classList.add('connectea-dark');
+                document.body.dataset.connecteaTheme = tid;
               }
             }, t.id);
 
             await new Promise(r => setTimeout(r, 300));
 
-            const auditResult = await auditThemeAgainstBaseline(page, t.id, t.isDark !== false, baseline, options);
+            if (isSidebar) {
+              await activateSidebarView(page, currentView, 100);
+            }
+
+            // Scroll down through entire themed page/sidebar to trigger any theme-dependent layout/rendering
+            if (options.scroll) {
+              await scrollEntirePage(page, { scope: currentView.auditScope, step: options.scrollStep, delayMs: options.scrollDelay, maxScrolls: options.maxScrolls });
+            }
+
+            const auditResult = await auditThemeAgainstBaseline(page, t.id, t.isDark !== false, baseline, { ...options, auditScope: currentView.auditScope });
             viewThemeResults[t.id] = { theme: t, audit: auditResult };
 
             const issues = auditResult.issues;
@@ -1244,10 +2306,21 @@ async function runThemeAudit() {
             );
 
             if (options.screenshots) {
-              const viewSlug = currentView.title.replace(/[^a-zA-Z0-9]/g, '_').slice(-15);
+              const viewSlug = currentView.title.replace(/[^a-zA-Z0-9]/g, '_').slice(-20);
               const pageSlug = targetUrl.replace(/[^a-zA-Z0-9]/g, '_').slice(-25);
               const shotPath = path.join(options.screenshotsDir, `p${pageIdx + 1}_v${vIdx + 1}_${pageSlug}_${viewSlug}_${t.id}.png`);
-              await page.screenshot({ path: shotPath, fullPage: false });
+              if (isSidebar) {
+                const sidebarEl = await page.$('#connectify-sidebar');
+                if (sidebarEl) {
+                  await sidebarEl.screenshot({ path: shotPath }).catch(async () => {
+                    await page.screenshot({ path: shotPath, fullPage: true });
+                  });
+                } else {
+                  await page.screenshot({ path: shotPath, fullPage: true });
+                }
+              } else {
+                await page.screenshot({ path: shotPath, fullPage: true });
+              }
             }
           }
 
@@ -1265,12 +2338,33 @@ async function runThemeAudit() {
 
           // F. Reset to Connect Native baseline before switching to next heading
           await page.evaluate(() => {
+            const closeButtons = document.querySelectorAll('mat-dialog-container button, .mat-dialog-header button, .v-window-closebox, [aria-label*="close" i]');
+            for (const b of closeButtons) {
+              if (/close/i.test(b.textContent || '') || /close/i.test(b.getAttribute('aria-label') || '') || b.classList?.contains('v-window-closebox')) {
+                try { b.click(); } catch {}
+              }
+            }
+            const sidebar = document.getElementById('connectify-sidebar');
+            if (sidebar) {
+              const homeBtn = sidebar.querySelector('.cx-back-menu');
+              if (homeBtn && typeof homeBtn.click === 'function') {
+                try { homeBtn.click(); } catch {}
+              }
+            }
             if (window.ConnectifyThemeRegistry?.setTheme) {
               window.ConnectifyThemeRegistry.setTheme('default');
             }
             document.documentElement.classList.remove('connectea-dark');
             delete document.documentElement.dataset.connecteaTheme;
+            document.documentElement.removeAttribute('data-connectea-theme');
+            if (document.body) {
+              document.body.classList.remove('connectea-dark');
+              delete document.body.dataset.connecteaTheme;
+              document.body.removeAttribute('data-connectea-theme');
+            }
           }).catch(() => {});
+          await page.keyboard.press('Escape').catch(() => {});
+          await new Promise(r => setTimeout(r, 200));
         } catch (viewErr) {
           console.warn(`    └─ [ThemeAudit] Failed to audit view "${currentView.title}": ${viewErr.message}`);
         }
@@ -1308,13 +2402,20 @@ async function runThemeAudit() {
   const allRows = [];
   for (const pageUrl of Object.keys(allPageResults)) {
     const pageData = allPageResults[pageUrl];
-    const urlDisplay = pageUrl.replace(/^https?:\/\/connect\.det\.wa\.edu\.au/, '').slice(0, 45) || '/';
+    let urlDisplay;
+    const cleanUrl = (pageData.url || pageUrl).replace(/^https?:\/\/connect\.det\.wa\.edu\.au/, '') || '/';
+    if (pageData.viewTitle && pageData.viewTitle !== 'Default View') {
+      const shortPath = cleanUrl.length > 25 ? '...' + cleanUrl.slice(-22) : cleanUrl;
+      urlDisplay = `${shortPath} [${pageData.viewTitle}]`.slice(0, 60);
+    } else {
+      urlDisplay = cleanUrl.slice(0, 45);
+    }
     for (const tid of Object.keys(pageData.themes)) {
       const item = pageData.themes[tid];
       const issues = item.audit.issues;
       const pDiff = issues.filter(i => i.category === 'PARITY').length;
-      const cCrit = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
-      const sDiff = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
+      const cCrit = issues.filter(i => i.severity === 'CRITICAL' || i.type === 'CRITICAL_CONTRAST_VIOLATION' || i.type === 'BROKEN_WEBFONT_ICON').length;
+      const sDiff = issues.filter(i => i.category === 'STYLE' && i.severity !== 'CRITICAL' && i.type !== 'CRITICAL_CONTRAST_VIOLATION' && i.type !== 'BROKEN_WEBFONT_ICON').length;
       const status = pDiff === 0 && cCrit === 0 && sDiff === 0 ? '✅ Pass' : (cCrit > 0 ? '❌ Crit' : '⚠️ Warn');
       allRows.push({ urlDisplay, themeName: item.theme.name, visible: `${item.audit.visibleCount}/${pageData.baselineVisibleCount}`, pDiff, cCrit, sDiff, status });
     }
@@ -1345,6 +2446,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  parseArgs,
   runThemeAudit,
   resolveTargetUrls,
   clickInteractiveButtons,
@@ -1352,5 +2454,8 @@ module.exports = {
   auditThemeAgainstBaseline,
   discoverSubPages,
   activateNavbarHeading,
-  computeElementsSignature
+  discoverSidebarViews,
+  activateSidebarView,
+  computeElementsSignature,
+  scrollEntirePage
 };

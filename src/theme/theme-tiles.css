@@ -11,10 +11,17 @@
   .cvr-c-dashboard-card
 ) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
-  border: 1px solid var(--cx-border, #3d5066) !important;
   border-radius: 8px !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+
+.connectea-dark :is(.eds-c-card, .cvr-c-card, .mat-card, .cvr-c-dashboard-card) {
+  border: 1px solid var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) {
+  border: none !important;
 }
 
 /* Unified Card & Tile Header: clean border, no colored accent stripes */
@@ -31,24 +38,21 @@
   .cvr-c-tile__header,
   .c-tile__header,
   .eds-c-card__header,
-  .cvr-c-card__header,
-  .mat-card-header
+  .cvr-c-card__header
 ),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
   .eds-c-tile__header,
   .cvr-c-tile__header,
   .c-tile__header,
   .eds-c-card__header,
-  .cvr-c-card__header,
-  .mat-card-header
+  .cvr-c-card__header
 ),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
   .eds-c-tile__header,
   .cvr-c-tile__header,
   .c-tile__header,
   .eds-c-card__header,
-  .cvr-c-card__header,
-  .mat-card-header
+  .cvr-c-card__header
 ) {
   background-color: transparent !important;
   border-bottom: 1px solid #2e3c4e !important;
@@ -75,8 +79,7 @@
   .eds-c-card__header,
   .cvr-c-tile__header,
   .c-tile__header,
-  .cvr-c-card__header,
-  .mat-card-header
+  .cvr-c-card__header
 ),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
   .eds-c-tile__header,
@@ -93,8 +96,7 @@
   .eds-c-card__header,
   .cvr-c-tile__header,
   .c-tile__header,
-  .cvr-c-card__header,
-  .mat-card-header
+  .cvr-c-card__header
 ),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
   .eds-c-tile__header,
@@ -111,8 +113,7 @@
   .eds-c-card__header,
   .cvr-c-tile__header,
   .c-tile__header,
-  .cvr-c-card__header,
-  .mat-card-header
+  .cvr-c-card__header
 ) {
   border-bottom: 1px solid #2e3c4e !important;
   border-bottom-color: #2e3c4e !important;
@@ -136,14 +137,12 @@
   content: none !important;
 }
 
-/* Neutralize native Connect red card and tile borders, headers, and text (.eds-t-red) */
-.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red) :is(.eds-c-tile, .eds-c-card, .cvr-c-card),
-.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red).eds-c-tile,
-.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red).eds-c-card {
+/* Neutralize native Connect theme multiplier card and tile borders, headers, and text (.eds-t-*) */
+.connectea-dark :is([class*="eds-t-"], .eds-t-red, .eds-u-theme-multiplier) :is(.eds-c-tile, .eds-c-card, .cvr-c-card) {
   border-color: #3d5066 !important;
 }
 
-.connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red) :is(
+.connectea-dark :is([class*="eds-t-"], .eds-t-red, .eds-u-theme-multiplier) :is(
   h1,
   h2,
   h3,
@@ -152,6 +151,10 @@
   .cvr-c-statistic__value
 ) {
   color: #f8fafc !important;
+}
+
+.connectea-dark :is([class*="eds-t-"], .eds-t-purple, .eds-u-theme-multiplier) :is(a, .eds-c-link):not(.eds-o-button--positive):not([class*="button--positive"]) {
+  color: var(--cx-accent-link, #60a5fa) !important;
 }
 
 .connectea-dark :is(
@@ -189,18 +192,12 @@
   .c-tile__action,
   .eds-c-tile__actions,
   .cvr-c-tile__actions,
-  .eds-c-action-button,
-  .eds-c-action-button-set .eds-c-action-button,
   .eds-c-tile__header .v-button,
   .cvr-c-tile__header .v-button,
   .eds-c-tile__header .v-link,
   .cvr-c-tile__header .v-link,
   .eds-c-tile__header a,
   .cvr-c-tile__header a
-),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
-  .eds-c-action-button-set .eds-c-action-button,
-  .eds-c-action-button
 ) {
   background-color: #24303f !important;
   background-color: var(--cx-button-bg, var(--cx-surface-elevated, #24303f)) !important;
@@ -431,12 +428,9 @@
   .c-tile,
   .eds-c-card,
   .cvr-c-card,
-  .cvr-c-dashboard-card,
-  .portlet,
-  .portlet-body
-) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button) {
+  .cvr-c-dashboard-card
+) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *) {
   color: var(--cx-accent, #60a5fa) !important;
-  font-weight: 500 !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
@@ -445,10 +439,8 @@
   .c-tile,
   .eds-c-card,
   .cvr-c-card,
-  .cvr-c-dashboard-card,
-  .portlet,
-  .portlet-body
-) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):hover {
+  .cvr-c-dashboard-card
+) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *):hover {
   color: var(--cx-accent-hover, #93c5fd) !important;
   text-decoration: underline !important;
 }

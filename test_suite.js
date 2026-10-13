@@ -5547,6 +5547,8 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   assert.strictEqual(typeof themeTesterMod.discoverSubPages, 'function', 'discoverSubPages must be exported');
   assert.strictEqual(typeof themeTesterMod.captureNativeBaseline, 'function', 'captureNativeBaseline must be exported');
   assert.strictEqual(typeof themeTesterMod.auditThemeAgainstBaseline, 'function', 'auditThemeAgainstBaseline must be exported');
+  assert.strictEqual(typeof themeTesterMod.discoverSidebarViews, 'function', 'discoverSidebarViews must be exported');
+  assert.strictEqual(typeof themeTesterMod.activateSidebarView, 'function', 'activateSidebarView must be exported');
   assert.strictEqual(typeof themeTesterMod.computeElementsSignature, 'function', 'computeElementsSignature must be exported');
 
   // Verify elements signature matches for identical views and differs for distinct views
@@ -5743,14 +5745,12 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   const origWinAudit = global.window;
   const origDocAudit = global.document;
   try {
-    global.window = {
+    global.window = Object.assign(Object.create(origWinAudit), {
       getComputedStyle: (el) => el._style || {}
-    };
-    global.document = {
-      documentElement: {},
-      body: {},
+    });
+    global.document = Object.assign(Object.create(origDocAudit), {
       querySelectorAll: (sel) => sel === 'body *' ? parityDomEls : []
-    };
+    });
     const mockPageAudit = {
       evaluate: async (fn, ...args) => fn(...args)
     };
@@ -5797,26 +5797,168 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
       click: () => { vClicked++; }
     };
 
-    global.window = {
+    global.window = Object.assign(Object.create(origWinAudit), {
       addEventListener: () => {},
       removeEventListener: () => {},
       onbeforeunload: null,
       MouseEvent: class { constructor(type) { this.type = type; } },
       PointerEvent: class { constructor(type) { this.type = type; } }
-    };
-    global.document = {
+    });
+    global.document = Object.assign(Object.create(origDocAudit), {
       querySelectorAll: (sel) => {
         if (sel.includes('mat-card button') || sel.includes('.v-button') || sel.includes('button, summary')) {
           return [mockMatButton, mockVaadinButton];
         }
         return [];
       }
-    };
+    });
     const clickedButtons = await themeTesterMod.clickInteractiveButtons(mockPageAudit);
     assert.ok(clickedButtons.some(b => b.includes('button#mat-notice-view') && b.includes('View')), 'clickInteractiveButtons must click mat-card View button');
     assert.ok(clickedButtons.some(b => b.includes('div.v-button') && b.includes('View Notice')), 'clickInteractiveButtons must click div.v-button View Notice');
     assert.ok(matClicked >= 1, 'mat-card View button must receive click event');
     assert.ok(vClicked >= 1, 'div.v-button View Notice must receive click event');
+
+    const toolBtnList = [
+      { id: 'connectify-target-toggle', textContent: 'Target ATAR', click: () => {} },
+      { id: 'connectify-grade-toggle', textContent: 'Target Grade', click: () => {} },
+      { id: 'connectify-predictor-toggle', textContent: 'Predictor', click: () => {} },
+      { id: 'connectify-progress-toggle', textContent: 'Year in Progress', click: () => {} },
+      { id: 'connectify-estimate-toggle', textContent: 'ATAR Estimate', click: () => {} },
+      { id: 'connectify-weakness-toggle', textContent: 'Weakness Analyzer', click: () => {} },
+      { id: 'connectify-categories-toggle', textContent: 'Settings', click: () => {} }
+    ];
+
+    const mockSidebarDom = {
+      id: 'connectify-sidebar',
+      hidden: true,
+      classList: { contains: () => false, remove: () => {} },
+      querySelector: (sel) => {
+        if (sel === '.cx-back-menu') return { click: () => {} };
+        if (sel === '#cx-pred-btn-grade') return { click: () => {} };
+        if (sel === '#cx-pred-btn-atar') return { click: () => {} };
+        if (sel === '#cx-radar-mode') return { options: [{ value: 'type', text: 'By Type' }, { value: 'subject', text: 'By Subject' }] };
+        if (sel === '.cx-tool-menu button') return toolBtnList[0];
+        const match = toolBtnList.find(b => sel && sel.includes(b.id));
+        if (match) return match;
+        return null;
+      },
+      querySelectorAll: (sel) => {
+        if (sel.includes('.cx-tool-menu button')) {
+          return toolBtnList;
+        }
+        if (sel.includes('.cta-semesters') || sel.includes('.cta-semester')) {
+          return [
+            { textContent: 'Semester 1', click: () => {} },
+            { textContent: 'Semester 2', click: () => {} }
+          ];
+        }
+        if (sel.includes('.cx-pred-subtab')) {
+          return [
+            { textContent: 'English', click: () => {} },
+            { textContent: 'Math Methods', click: () => {} }
+          ];
+        }
+        if (sel.includes('.cx-subjects button')) {
+          return [
+            { textContent: 'Physics', click: () => {} },
+            { textContent: 'Chemistry', click: () => {} }
+          ];
+        }
+        return [];
+      }
+    };
+    const mockHandleDom = {
+      id: 'connectify-sidebar-handle',
+      setAttribute: () => {},
+      style: {}
+    };
+    const mockPageSidebar = {
+      evaluate: async (fn, ...args) => {
+        const prevDoc = global.document;
+        try {
+          global.document = Object.assign(Object.create(origDocAudit), {
+            getElementById: (id) => {
+              if (id === 'connectify-sidebar') return mockSidebarDom;
+              if (id === 'connectify-sidebar-handle') return mockHandleDom;
+              const match = toolBtnList.find(b => b.id === id);
+              if (match) return match;
+              return origDocAudit?.getElementById ? origDocAudit.getElementById(id) : null;
+            },
+            querySelector: (sel) => mockSidebarDom.querySelector(sel) || (origDocAudit?.querySelector ? origDocAudit.querySelector(sel) : null),
+            querySelectorAll: (sel) => mockSidebarDom.querySelectorAll(sel)
+          });
+          return fn(...args);
+        } finally {
+          global.document = prevDoc;
+        }
+      }
+    };
+
+    const discoveredSidebarViews = await themeTesterMod.discoverSidebarViews(mockPageSidebar);
+    assert.ok(discoveredSidebarViews.length >= 8, `Must discover at least 8 sidebar views (got ${discoveredSidebarViews.length})`);
+    assert.ok(discoveredSidebarViews.every(v => v.auditScope === 'sidebar'), 'All sidebar views must have auditScope: "sidebar"');
+    assert.ok(discoveredSidebarViews.some(v => v.id === 'cx-sidebar-menu'), 'Must discover Sidebar Main Menu');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Target ATAR') && v.title.includes('Semester 1')), 'Must discover Target ATAR Semester 1');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Target ATAR') && v.title.includes('Semester 2')), 'Must discover Target ATAR Semester 2');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Grade Predictor') && v.title.includes('English')), 'Must discover Grade Predictor English sub-tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Grade Predictor') && v.title.includes('Math Methods')), 'Must discover Grade Predictor Math Methods sub-tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('ATAR Predictor')), 'Must discover ATAR Predictor tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Year in Progress') && v.title.includes('Physics')), 'Must discover Year in Progress Physics sub-tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Weakness Analyzer') && v.title.includes('By Type')), 'Must discover Weakness Analyzer By Type mode');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Weakness Analyzer') && v.title.includes('By Subject')), 'Must discover Weakness Analyzer By Subject mode');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Settings')), 'Must discover Settings view');
+
+    // Verify activateSidebarView opens drawer and unhides sidebar
+    const activatedView = await themeTesterMod.activateSidebarView(mockPageSidebar, discoveredSidebarViews[1], 10);
+    assert.strictEqual(activatedView, true, 'activateSidebarView must return true on success');
+    assert.strictEqual(mockSidebarDom.hidden, false, 'activateSidebarView must unhide the sidebar');
+
+    // Verify sidebar scope isolation in captureNativeBaseline
+    const mockSidebarChild = {
+      id: 'connectify-sidebar-child',
+      tagName: 'DIV',
+      innerText: 'Predictor Card',
+      textContent: 'Predictor Card',
+      getBoundingClientRect: () => ({ width: 100, height: 50 }),
+      getAttribute: () => null,
+      classList: { contains: () => false },
+      closest: (sel) => sel.includes('connectify-sidebar') ? mockSidebarDom : null,
+      _style: { visibility: 'visible', display: 'block', opacity: '1', fontSize: '14px', fontWeight: '400', fontFamily: 'Open Sans' }
+    };
+    mockSidebarDom.querySelectorAll = (sel) => [mockSidebarChild];
+    mockSidebarDom.closest = (sel) => sel.includes('connectify-sidebar') ? mockSidebarDom : null;
+    mockSidebarDom._style = { visibility: 'visible', display: 'block', opacity: '1', fontSize: '14px', fontWeight: '400', fontFamily: 'Open Sans' };
+    mockSidebarDom.getBoundingClientRect = () => ({ width: 300, height: 500 });
+    mockSidebarDom.innerText = 'Sidebar';
+    mockSidebarDom.textContent = 'Sidebar';
+    mockSidebarDom.tagName = 'DIV';
+
+    const mockPageAuditScope = {
+      evaluate: async (fn, ...args) => {
+        const prevDoc = global.document;
+        const prevWin = global.window;
+        try {
+          global.window = Object.assign(Object.create(origWinAudit), {
+            getComputedStyle: (el) => el._style || {},
+            ConnectifyThemeRegistry: { setTheme: () => {}, clearCustomTokens: () => {} }
+          });
+          global.document = Object.assign(Object.create(origDocAudit), {
+            getElementById: (id) => id === 'connectify-sidebar' ? mockSidebarDom : (origDocAudit?.getElementById ? origDocAudit.getElementById(id) : null),
+            querySelectorAll: (sel) => sel === 'body *' ? [mockSidebarChild] : []
+          });
+          return fn(...args);
+        } finally {
+          global.document = prevDoc;
+          global.window = prevWin;
+        }
+      }
+    };
+
+    const pageBaseline = await themeTesterMod.captureNativeBaseline(mockPageAuditScope, { auditScope: 'page' });
+    assert.strictEqual(pageBaseline.visibleCount, 0, 'Page audit scope must exclude connectify-sidebar elements');
+
+    const sidebarBaseline = await themeTesterMod.captureNativeBaseline(mockPageAuditScope, { auditScope: 'sidebar' });
+    assert.ok(sidebarBaseline.visibleCount > 0, 'Sidebar audit scope must capture connectify-sidebar elements');
   } finally {
     global.window = origWinAudit;
     global.document = origDocAudit;

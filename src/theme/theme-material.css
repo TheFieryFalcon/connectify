@@ -16,6 +16,12 @@
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
+.connectea-dark :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon) {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  fill: currentColor !important;
+}
+
 /* Angular Material Accordions, Expansion Panels & Tree Nodes (Site-Wide & Classes Page) */
 .connectea-dark :is(
   .mat-accordion,
@@ -33,7 +39,7 @@
 }
 
 .connectea-dark .mat-expansion-panel {
-  border: 1px solid var(--cx-border, #3d5066) !important;
+  border: none !important;
   border-radius: 6px !important;
 }
 
@@ -81,7 +87,7 @@
 ) :is(.mat-list-item, .mat-mdc-list-item) {
   background-color: transparent !important;
   color: var(--cx-text-primary, #f8fafc) !important;
-  border-bottom: 1px solid var(--cx-border-subtle, #2a3749) !important;
+  border-bottom-color: var(--cx-border-subtle, #2a3749) !important;
 }
 
 .connectea-dark :is(
@@ -157,13 +163,16 @@
   [class*="switch"],
   [class*="role"],
   [class*="user"],
-  .eds-c-nav-list,
-  .mat-list,
-  .mat-nav-list
+  .eds-c-nav-list
 ) :is(svg, path, circle) {
   color: #cbd5e1 !important;
   fill: #cbd5e1 !important;
   stroke: currentColor !important;
+}
+
+.connectea-dark :is(.mat-list, .mat-nav-list) :is(svg, path, circle) {
+  color: #cbd5e1 !important;
+  fill: #cbd5e1 !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(

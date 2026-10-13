@@ -207,14 +207,14 @@
   }
 
   function adaptSurfaces() {
-    if (!isDarkMode || isAuthDisabled()) return;
+    const isDark = isDarkMode || document.documentElement.classList.contains('connectea-dark');
+    if (!isDark || isAuthDisabled()) return;
     try {
       const surfaceCandidates = document.body.querySelectorAll(
         ':is(header, nav, aside, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .eds-c-nav-list, .eds-c-nav-list__item, .portlet, .portlet-content, .portlet-body, .journal-content-article, .eds-c-tile__body, .cvr-c-tile__body, [class*="help"], [class*="guide"], [class*="resource"]):not([data-connectea-surface]):not(.cvr-c-primary-navigation):not(.cvr-c-primary-navigation *):not(.cvr-c-header):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
       );
       for (const el of surfaceCandidates) {
-        if (['SCRIPT', 'STYLE', 'LINK', 'CANVAS', 'VIDEO', 'IFRAME', 'SVG'].includes(el.tagName)) continue;
-        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by')) continue;
+        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by, [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning') || el.matches('.portlet, .portlet-boundary, .portlet-layout, #main-content')) continue;
         const bgRgb = parseRgb(window.getComputedStyle(el).backgroundColor);
         if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) el.setAttribute('data-connectea-surface', '');
       }
@@ -223,7 +223,7 @@
       );
       for (const el of inkCandidates) {
         if (el.children.length > 2 || el.hasAttribute('data-connectea-surface')) continue;
-        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by')) continue;
+        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by, [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning')) continue;
         const fgRgb = parseRgb(window.getComputedStyle(el).color, true);
         if (isDarkColor(fgRgb)) el.setAttribute('data-connectea-ink', '');
       }
@@ -255,16 +255,12 @@
       opt.type = 'button';
       opt.className = `connectea-theme-option${t.id === activeId ? ' eds-s-is-active' : ''}`;
       opt.setAttribute('role', 'menuitem');
-      opt.setAttribute('aria-selected', String(t.id === activeId));
       const swatch = document.createElement('span');
-      swatch.className = 'connectea-theme-swatch';
-      swatch.style.backgroundColor = (t.swatch && t.swatch[1]) || '#1e2632';
+      swatch.className = 'connectea-theme-swatch'; swatch.style.backgroundColor = (t.swatch && t.swatch[1]) || '#1e2632';
       const icon = document.createElement('span');
-      icon.className = 'connectea-theme-icon';
-      icon.textContent = t.icon;
+      icon.className = 'connectea-theme-icon'; icon.textContent = t.icon;
       const name = document.createElement('span');
-      name.className = 'connectea-theme-name';
-      name.textContent = t.name;
+      name.className = 'connectea-theme-name'; name.textContent = t.name;
       opt.append(swatch, icon, name);
       opt.onclick = (e) => {
         e.stopPropagation();
@@ -412,10 +408,12 @@
   }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
 
   window.addEventListener('resize', () => updateTogglePosition(true));
-  window.addEventListener('storage', e => {
-    if (e.key === STORAGE_KEY && e.newValue) applyTheme(!isAuthDisabled() && e.newValue === 'dark');
+  window.addEventListener('storage', e => { if (e.key === STORAGE_KEY && e.newValue) applyTheme(!isAuthDisabled() && e.newValue === 'dark'); });
+  window.addEventListener('connectea:themechange', e => {
+    if (isAuthDisabled()) return;
+    const tId = e.detail?.themeId || 'dark', isDark = e.detail?.theme ? e.detail.theme.isDark : (tId !== 'light');
+    applyTheme(isDark, tId);
   });
-
   updateTogglePosition();
   if (isDarkMode) scheduleAdaptSurfaces(600);
   if (document.readyState === 'loading') {

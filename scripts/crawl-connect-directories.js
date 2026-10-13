@@ -81,7 +81,7 @@ function isExcludedPath(pathname) {
   const lower = pathname.toLowerCase();
   if (/logout|signout|timeout|inactivity|session_expired|loggedout/i.test(lower)) return true;
   if (lower.startsWith('/cvr') || lower.startsWith('/connect/cvr')) return true;
-  if (lower.startsWith('/documents') || lower.startsWith('/content')) return true;
+  if (lower.startsWith('/documents') || (lower.startsWith('/content') && !lower.includes('class'))) return true;
   if (lower.startsWith('/combo') || lower === '/combo') return true;
   if (lower.startsWith('/public/home-screen') || lower.includes('browserconfig') || lower.includes('manifest')) return true;
   if (lower.startsWith('/html/js') || lower.startsWith('/html/css') || lower.startsWith('/o/frontend-') || lower.startsWith('/api/')) return true;
@@ -222,12 +222,21 @@ function extractPageLinks(page) {
     const lastSlash = curPath.lastIndexOf('/');
     const branchBase = lastSlash > 0 ? curPath.substring(0, lastSlash + 1) : '';
     const search = window.location.search || '';
+    const mCoisp = search.match(/coisp=([a-zA-Z0-9_:]+)/);
+    if (mCoisp) {
+      for (const sub of ['announcements', 'learning-content', 'class-library', 'summary', 'discussions', 'submissions', 'learners']) {
+        add('/group/students/ui/class/' + sub + '?coisp=' + mCoisp[1]);
+      }
+    }
 
     for (const item of navItems) {
       const labelEl = item.querySelector('.cvr-c-service-menu__item-label, .eds-c-tabs__tab, [class*="label"], [class*="title"]') || item;
       const text = (labelEl.innerText || labelEl.textContent || '').trim().replace(/\s+/g, ' ');
       if (text && text.length > 1 && text.length < 40 && !/\b(logout|signout|delete|remove)\b/i.test(text)) {
-        const slug = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        let slug = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        if (slug === 'notices') slug = 'announcements';
+        if (slug === 'content') slug = 'learning-content';
+        if (slug === 'library') slug = 'class-library';
         if (slug) {
           add(slug);
           if (branchBase) {
@@ -273,34 +282,27 @@ async function crawl() {
 
   const hasSession = fs.existsSync(options.session);
   const hasCreds = Boolean(options.username || process.env.CONNECT_USER || process.env.CONNECT_USERNAME);
-  const isHeadless = options.headless !== null
-    ? options.headless
-    : (options.headful ? false : (options.interactive ? false : (hasSession || hasCreds)));
-
-  if (!isHeadless && !options.headful) {
-    console.log('[ConnectCrawler] No saved session or credentials found — launching visible browser window for login.');
-  }
-
-  const browser = await utils.launchBrowser({
-    headless: isHeadless,
-    loadExtension: true
-  });
-
-  const page = await browser.newPage();
+  let isHeadless = options.headless !== null ? options.headless : (options.headful ? false : (options.interactive ? false : (hasSession || hasCreds)));
+  let browser = await utils.launchBrowser({ headless: isHeadless, loadExtension: true });
+  let page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 900 });
 
-  // Authenticate session
   console.log('[ConnectCrawler] Verifying authentication...');
-  const auth = await utils.authenticate(page, {
-    username: options.username,
-    password: options.password,
-    interactive: options.interactive,
-    sessionFile: options.session
-  });
+  let auth = await utils.authenticate(page, { username: options.username, password: options.password, interactive: options.interactive || !isHeadless, sessionFile: options.session });
+
+  if (!auth.success && isHeadless && options.headless !== true) {
+    console.log('[ConnectCrawler] Saved session expired. Relaunching visible browser for interactive login...');
+    await browser.close().catch(() => {});
+    isHeadless = false;
+    browser = await utils.launchBrowser({ headless: false, loadExtension: true });
+    page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 900 });
+    auth = await utils.authenticate(page, { username: options.username, password: options.password, interactive: true, sessionFile: options.session });
+  }
 
   if (!auth.success && !(await utils.isAuthenticated(page))) {
-    console.error('[ConnectCrawler] Authentication failed. Please provide credentials (--user, --pass) or use --interactive.');
-    await browser.close();
+    console.error('[ConnectCrawler] Authentication failed. Please provide credentials or use --interactive.');
+    await browser.close().catch(() => {});
     process.exit(1);
   }
 

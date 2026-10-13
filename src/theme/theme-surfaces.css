@@ -86,48 +86,61 @@
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark :is(
-  .alert,
-  .alert-primary,
-  .alert-secondary,
-  .alert-light,
-  .alert-dark
-) {
+.connectea-dark :is(.alert, .alert-primary, .alert-secondary, .alert-light, .alert-dark):not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   color: var(--cx-text-primary, #e2e8f0) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
   border-radius: 6px !important;
 }
 
-.connectea-dark :is(.alert-warning, .portlet-msg-alert) {
+.connectea-dark :is(.alert-warning, .portlet-msg-alert):not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
   background-color: #2a2415 !important;
   border-color: #785a15 !important;
   color: #fde68a !important;
 }
 
-.connectea-dark :is(.alert-danger, .portlet-msg-error) {
+.connectea-dark :is(.alert-danger, .portlet-msg-error):not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
   background-color: #2b171a !important;
   border-color: #7f2329 !important;
   color: #fca5a5 !important;
 }
 
-.connectea-dark :is(.alert-success, .portlet-msg-success) {
+.connectea-dark :is(.alert-success, .portlet-msg-success):not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
   background-color: #14281c !important;
   border-color: #226738 !important;
   color: #86efac !important;
 }
 
-.connectea-dark :is(.alert-info, .portlet-msg-info, .portlet-msg-help) {
+.connectea-dark :is(.alert-info, .portlet-msg-info, .portlet-msg-help):not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
   background-color: #15263a !important;
   border-color: #2b5480 !important;
   color: #93c5fd !important;
 }
 
-.connectea-dark :is(.popover, .popover-body, .ui-tooltip, .v-tooltip, .v-tooltip-text) {
+/* Connect Session & Timeout Alerts: Preserved in native styling without dark theme overrides */
+:is(html, body).connectea-dark :is(.popup-alert-notice, .popup-alert-warning, .session-timeout, .portal-session-warning, .alert-session, .liferay-session-warning, [class*="session-timeout"], [class*="session-warning"], [class*="timeout-alert"], [id*="sessionTimeout"], [id*="session-timeout"], [id*="sessionWarning"], .cvr-c-timeout-alert, .cvr-c-session-alert) {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  border: 1px solid #ffeeba !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+}
+
+:is(html, body).connectea-dark :is(.popup-alert-notice, .popup-alert-warning, .session-timeout, .portal-session-warning, .alert-session, .liferay-session-warning, [class*="session-timeout"], [class*="session-warning"], [class*="timeout-alert"], [id*="sessionTimeout"], [id*="session-timeout"], [id*="sessionWarning"], .cvr-c-timeout-alert, .cvr-c-session-alert) :is(span, p, div, label, strong, h1, h2, h3, h4) {
+  color: #856404 !important;
+}
+
+.connectea-dark :is(.popover, .popover-body, .ui-tooltip) {
   background-color: var(--cx-surface-elevated, #18202b) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border: 1px solid var(--cx-border, #4a617a) !important;
   border-radius: 6px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+}
+
+.connectea-dark :is(.v-tooltip, .v-tooltip-text) {
+  background-color: var(--cx-surface-elevated, #18202b) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: none !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
 }
 

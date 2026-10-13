@@ -15,6 +15,7 @@
     const notifyResultsUpdated = (card) => (window.ConnectifyData?.notifyResultsUpdated || function() {})(card);
   let isBulkExpanding = false;
   let bulkExpandTimer = null;
+  let notifyUpdateTimer = null;
 
   /**
    * Programmatically click the accordion headers to expand or collapse details.

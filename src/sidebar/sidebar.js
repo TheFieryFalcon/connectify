@@ -16,7 +16,7 @@
       return el;
     };
 
-    let sidebar = document.getElementById('connectify-sidebar');
+    let sidebar = document.getElementById('connectify-sidebar') || window.ConnectifySidebarHandle?.sidebar;
     let handle = window.ConnectifySidebarHandle?.handle || document.getElementById('connectify-sidebar-handle');
 
     document.querySelectorAll('#connectify-sidebar').forEach((el, i) => { if (i > 0) el.remove(); });
@@ -220,9 +220,18 @@
     }
 
     let justReturnedToMenu = false;
+    let justReturnedToMenuTimer = null;
     const setJustReturnedToMenu = (val) => {
       justReturnedToMenu = val;
       window._connectifyJustReturnedToMenu = val;
+      if (justReturnedToMenuTimer) clearTimeout(justReturnedToMenuTimer);
+      if (val) {
+        justReturnedToMenuTimer = setTimeout(() => {
+          justReturnedToMenu = false;
+          window._connectifyJustReturnedToMenu = false;
+          justReturnedToMenuTimer = null;
+        }, 2000);
+      }
     };
 
     function openSidebar() {

@@ -171,9 +171,8 @@
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption,
   .cvr-c-class__name, .cvr-c-classes-list__title,
-  :is(.cvr-c-classes, .cvr-c-classes-list, .eds-c-selection-list, .cvr-c-class, [class*="class-"]) :is(span, p, a, div, label, small),
-  .connectea-panel, .connectea-distribution, .connectea-result
-):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]) {
+  :is(.cvr-c-classes, .cvr-c-classes-list, .eds-c-selection-list, .cvr-c-class, [class*="class-"]) :is(span, p, a, div, label, small)
+):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.connectea-panel *):not([class*="connectea-"]) {
   color: var(--cx-text-primary) !important;
   font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
@@ -188,9 +187,9 @@
 ):is(::before, ::after),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
   i.cvr-c-icon, i.eds-c-icon, span.cvr-c-icon, span.eds-c-icon,
-  [class^="cvr-c-icon--"]:not(button):not(div):not(a):not(section):not(header),
-  [class*=" cvr-c-icon--"]:not(button):not(div):not(a):not(section):not(header),
-  .cvr-c-icon--switch:not(button):not(div):not(a):not(section):not(header)
+  [class^="cvr-c-icon--"]:not(button):not(div):not(a):not(section):not(header):not(img),
+  [class*=" cvr-c-icon--"]:not(button):not(div):not(a):not(section):not(header):not(img),
+  .cvr-c-icon--switch:not(button):not(div):not(a):not(section):not(header):not(img)
 ) {
   font-family: "connect-webfont" !important;
   font-style: normal !important;
@@ -198,38 +197,49 @@
   speak: none !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons, [class*="material-icons"], .mat-icon, [class*="mat-icon"], mat-icon),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons, [class*="material-icons"], .mat-icon, [class*="mat-icon"], mat-icon):is(::before, ::after) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons, [class*="material-icons"], .mat-icon, [class*="mat-icon"], mat-icon):not(button):not([class*="button"]):not(.btn):not(.material-icons-outlined):not([class*="material-icons-outlined"]):not(:has(svg)):not(svg):not(path),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons, [class*="material-icons"], .mat-icon, [class*="mat-icon"], mat-icon):not(button):not([class*="button"]):not(.btn):not(.material-icons-outlined):not([class*="material-icons-outlined"]):not(:has(svg)):not(svg):not(path):is(::before, ::after) {
   font-family: 'Material Icons' !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons-outlined, [class*="material-icons-outlined"]):not(button):not([class*="button"]):not(.btn):not(:has(svg)):not(svg):not(path),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons-outlined, [class*="material-icons-outlined"]):not(button):not([class*="button"]):not(.btn):not(:has(svg)):not(svg):not(path):is(::before, ::after) {
+  font-family: 'Material Icons Outlined' !important;
   font-style: normal !important;
   font-weight: normal !important;
   line-height: 1 !important;
-  text-transform: none !important;
   letter-spacing: normal !important;
-  word-wrap: normal !important;
+  text-transform: none !important;
   white-space: nowrap !important;
+  word-wrap: normal !important;
   direction: ltr !important;
   -webkit-font-feature-settings: 'liga' !important;
   font-feature-settings: 'liga' !important;
   -webkit-font-smoothing: antialiased !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-icon, [class*="v-icon"], .fontawesome-alloy, [class*="fontawesome"]),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-icon, [class*="v-icon"], .fontawesome-alloy, [class*="fontawesome"]):is(::before, ::after) {
-  font-family: FontAwesome, "connect-webfont", Vaadin-Icons !important;
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(span.v-icon, i.v-icon, span.fontawesome-alloy, i.fontawesome-alloy):not(img):not(button):not(div):not(a),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-icon, [class*="v-icon"], .fontawesome-alloy, [class*="fontawesome"]):not(img):not(button):not(div):not(a):is(::before, ::after) {
+  font-family: "connect-webfont", FontAwesome, Vaadin-Icons !important;
 }
 
 /* Subject Tiles, Cards, Portlets & Dashboard Containers */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   .v-panel, .v-panel-content, .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
   [data-subject-card], .cvr-c-dashboard-card, [data-connectea-surface],
-  .portlet, .portlet-boundary, .portlet-content, .portlet-body, .journal-content-article,
+  .journal-content-article,
   .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content,
   .cvr-c-task, .cvr-c-task__details, .cvr-c-tasks, .cvr-c-task-group
 ) {
   background-color: var(--cx-surface-bg) !important;
   border-color: var(--cx-border) !important;
   color: var(--cx-text-secondary) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.portlet, .portlet-boundary, .portlet-content, .portlet-body, .portlet-decorate, #main-content) {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Cohort Statistics Panels, Distribution Panels & Task Standing */
@@ -339,8 +349,8 @@
 
 /* Primary Navigation Bar (Matches Connect light mode Open Sans typography) */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .cvr-c-primary-navigation, .cvr-c-primary-navigation__links, .cvr-c-primary-navigation__title, .cvr-c-primary-navigation .v-button-caption
-) {
+  .cvr-c-primary-navigation__links, .cvr-c-primary-navigation__title, .cvr-c-primary-navigation .v-button-caption
+):not(.eds-c-icon-button *):not([class*="icon"] *) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
@@ -353,7 +363,7 @@
 /* Buttons and Action Elements */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   .v-button, .eds-c-button, .eds-c-standard-button
-):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]) {
+):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
   background-color: var(--cx-button-bg) !important;
   color: var(--cx-button-text) !important;
   border-color: var(--cx-button-border) !important;
@@ -361,14 +371,14 @@
 
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   .v-button:hover, .eds-c-button:hover, .eds-c-standard-button:hover
-):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]) {
+):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
   background-color: var(--cx-surface-hover) !important;
   border-color: var(--cx-border-strong) !important;
 }
 
 /* Form Inputs, Textareas & Selects */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]),
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not(.mat-input-element),
   textarea, select, .connectea-type-select
 ) {
   background-color: var(--cx-input-bg) !important;
@@ -380,7 +390,7 @@
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   .eds-c-tile a, .cvr-c-tile a, .connectea-panel a, .portlet-body a
 ):not(.eds-c-tile__action):not(.cvr-c-tile__action) {
-  color: var(--cx-accent) !important;
+  color: var(--cx-accent-hover, #60a5fa) !important;
 }
 
 /* Login & Logout Page Guard: Disable all themes completely */
@@ -428,7 +438,7 @@
   border: 1px solid var(--cx-border, #3d5066) !important; border-radius: 10px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65); padding: 10px; z-index: 10035;
   display: flex; flex-direction: column; gap: 6px;
-  font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", sans-serif !important;
+  font-family: "Apple Symbols", "Segoe UI Symbol", Symbola, "Noto Sans Symbols", -apple-system, "system-ui", "Segoe UI", Roboto, sans-serif !important;
   font-size: 13.5px; box-sizing: border-box;
 }
 

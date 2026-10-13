@@ -35,22 +35,40 @@
     }
 
     const parent = document.body || document.documentElement;
+    if (parent && !sidebar.parentElement) {
+      parent.appendChild(sidebar);
+    }
     if (parent && !handle.parentElement) {
       parent.appendChild(handle);
     }
 
+    const getSidebar = () => document.getElementById('connectify-sidebar') || sidebar;
+
     let justReturnedToMenu = false;
+    let justReturnedToMenuTimer = null;
     const isJustReturnedToMenu = () => justReturnedToMenu || window._connectifyJustReturnedToMenu;
     const setJustReturnedToMenu = (v) => {
       justReturnedToMenu = v;
       window._connectifyJustReturnedToMenu = v;
+      if (justReturnedToMenuTimer) {
+        clearTimeout(justReturnedToMenuTimer);
+        justReturnedToMenuTimer = null;
+      }
+      if (v) {
+        justReturnedToMenuTimer = setTimeout(() => {
+          justReturnedToMenu = false;
+          window._connectifyJustReturnedToMenu = false;
+          justReturnedToMenuTimer = null;
+        }, 2000);
+      }
     };
     const openSidebar = () => {
       setJustReturnedToMenu(false);
       if (window.ConnectifyOpenSidebar) {
         window.ConnectifyOpenSidebar();
       } else {
-        if (sidebar) sidebar.hidden = false;
+        const sb = getSidebar();
+        if (sb) sb.hidden = false;
         updateHandleState(true);
       }
     };
@@ -60,7 +78,8 @@
       if (window.ConnectifyCloseSidebar) {
         window.ConnectifyCloseSidebar();
       } else {
-        if (sidebar) sidebar.hidden = true;
+        const sb = getSidebar();
+        if (sb) sb.hidden = true;
         updateHandleState(false);
       }
     };
@@ -141,12 +160,13 @@
         const availableHeight = Math.max(0, vh - topBarBottom);
         const centerY = Math.round(topBarBottom + availableHeight / 2);
 
+        const sb = getSidebar();
         // When Connectify tool drawer is OPEN: dock to drawer edge in the active viewport
-        if (!sidebar.hidden) {
+        if (sb && !sb.hidden) {
           handle.style.position = 'fixed';
           handle.style.top = `${centerY}px`;
           handle.style.transform = 'translateY(-50%)';
-          const isToolActive = sidebar.classList.contains('cx-tool-active');
+          const isToolActive = sb.classList.contains('cx-tool-active');
           handle.dataset.toolActive = isToolActive ? 'true' : 'false';
           handle.style.left = isToolActive
             ? 'min(900px, calc(100vw - 30px))'
@@ -165,7 +185,8 @@
             connectSidebar._connectifyHandleObserved = true;
             try {
               new ResizeObserver(() => {
-                if (sidebar.hidden) updateHandlePosition();
+                const s = getSidebar();
+                if (s && s.hidden) updateHandlePosition();
               }).observe(connectSidebar);
             } catch {}
           }
@@ -225,10 +246,11 @@
     let handleRafPending = false;
     let scrollTransitionTimer = null;
     const handleScrollThrottled = e => {
-      if (e && e.target && (sidebar.contains(e.target) || handle.contains(e.target))) {
+      const sb = getSidebar();
+      if (e && e.target && ((sb && sb.contains(e.target)) || handle.contains(e.target))) {
         return;
       }
-      if (sidebar.hidden) {
+      if (sb && sb.hidden) {
         handle.style.transition = 'left 0.2s cubic-bezier(0.16,1,0.3,1), background 0.15s ease';
         if (scrollTransitionTimer) clearTimeout(scrollTransitionTimer);
         scrollTransitionTimer = setTimeout(() => {
@@ -268,7 +290,8 @@
 
     handle.onclick = () => {
       setJustReturnedToMenu(false);
-      if (sidebar.hidden) {
+      const sb = getSidebar();
+      if (sb && sb.hidden) {
         openSidebar();
       } else {
         closeSidebar();
@@ -276,9 +299,9 @@
     };
 
     handle.addEventListener('mouseenter', () => {
-      if (sidebar.hidden) openSidebar();
+      const sb = getSidebar();
+      if (sb && sb.hidden) openSidebar();
     });
-
 
     const workspace = sidebar.querySelector('.cx-workspace') || { addEventListener: () => {} };
     // Edge push to expand & hover collapse when no panel is active
@@ -288,8 +311,11 @@
       document.removeEventListener('mousemove', window._connectifyMouseMoveAttached);
     }
     const handleMouseMove = e => {
+      const sb = getSidebar();
+      if (!sb) return;
+
       // 1. Moving mouse to the left edge of the screen expands the sidebar
-      if (sidebar.hidden) {
+      if (sb.hidden) {
         if (e.clientX <= 12 || handle.contains(e.target)) {
           setJustReturnedToMenu(false);
           if (hoverCollapseTimeout) {
@@ -304,11 +330,11 @@
       // 2. If sidebar is open and NO panel is active:
       // Collapse when mouse moves outside of the sidebar and handle,
       // unless user just returned to menu from an active tool panel
-      if (!sidebar.classList.contains('cx-tool-active') && !isJustReturnedToMenu()) {
-        const sidebarRect = typeof sidebar.getBoundingClientRect === 'function' ? sidebar.getBoundingClientRect() : null;
+      if (!sb.classList.contains('cx-tool-active') && !isJustReturnedToMenu()) {
+        const sidebarRect = typeof sb.getBoundingClientRect === 'function' ? sb.getBoundingClientRect() : null;
         const handleRect = typeof handle.getBoundingClientRect === 'function' ? handle.getBoundingClientRect() : null;
 
-        const inSidebar = sidebar.contains(e.target) ||
+        const inSidebar = sb.contains(e.target) ||
           (sidebarRect && e.clientX >= (sidebarRect.left - 5) && e.clientX <= (sidebarRect.right + 25) && e.clientY >= (sidebarRect.top - 5) && e.clientY <= (sidebarRect.bottom + 5));
         const inHandle = handle.contains(e.target) ||
           (handleRect && e.clientX >= handleRect.left && e.clientX <= handleRect.right && e.clientY >= handleRect.top && e.clientY <= handleRect.bottom);
@@ -323,7 +349,8 @@
           if (!hoverCollapseTimeout) {
             hoverCollapseTimeout = setTimeout(() => {
               hoverCollapseTimeout = null;
-              if (!sidebar.hidden && !sidebar.classList.contains('cx-tool-active') && !isJustReturnedToMenu()) {
+              const curSb = getSidebar();
+              if (curSb && !curSb.hidden && !curSb.classList.contains('cx-tool-active') && !isJustReturnedToMenu()) {
                 closeSidebar();
               }
             }, 120);
@@ -346,24 +373,34 @@
         hoverCollapseTimeout = null;
       }
     };
-    sidebar.addEventListener('scroll', cancelCollapse, { passive: true });
-    workspace.addEventListener('scroll', cancelCollapse, { passive: true });
-    sidebar.addEventListener('wheel', cancelCollapse, { passive: true });
+    const attachCancelEvents = (el) => {
+      if (!el || typeof el.addEventListener !== 'function') return;
+      el.addEventListener('scroll', cancelCollapse, { passive: true });
+      el.addEventListener('wheel', cancelCollapse, { passive: true });
+    };
+    attachCancelEvents(sidebar);
+    document.addEventListener('DOMContentLoaded', () => {
+      const sb = getSidebar();
+      attachCancelEvents(sb);
+      attachCancelEvents(sb?.querySelector?.('.cx-workspace'));
+    });
 
     if (window._connectifyMouseLeaveAttached) {
       document.removeEventListener('mouseleave', window._connectifyMouseLeaveAttached);
     }
     const handleMouseLeaveDoc = () => {
-      if (!sidebar.hidden && !sidebar.classList.contains('cx-tool-active') && !isJustReturnedToMenu()) {
+      const sb = getSidebar();
+      if (sb && !sb.hidden && !sb.classList.contains('cx-tool-active') && !isJustReturnedToMenu()) {
         closeSidebar();
       }
     };
     window._connectifyMouseLeaveAttached = handleMouseLeaveDoc;
     document.addEventListener('mouseleave', handleMouseLeaveDoc);
 
-
     window.ConnectifySidebarHandle = {
       handle,
+      sidebar,
+      getSidebar,
       getTopBarBottom,
       isElementFixedOrSticky,
       getConnectSidebar,

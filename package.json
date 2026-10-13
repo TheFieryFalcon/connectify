@@ -10,6 +10,7 @@
     "test": "node test_suite.js",
     "test:themes": "node scripts/test-theme-styles.js",
     "test:themes:interactive": "node scripts/test-theme-styles.js --interactive",
+    "test:themes:help": "node scripts/test-theme-styles.js --help",
     "crawl": "node scripts/crawl-connect-directories.js",
     "crawl:force": "node scripts/crawl-connect-directories.js --force",
     "crawl:interactive": "node scripts/crawl-connect-directories.js --interactive"

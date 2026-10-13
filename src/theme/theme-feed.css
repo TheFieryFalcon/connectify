@@ -7,6 +7,12 @@
   border-color: var(--cx-border, #3d5066) !important;
 }
 
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.portlet, .portlet-boundary, .portlet-content, .portlet-body, #main-content)[data-connectea-surface] {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-ink],
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(div, span, p, a, label, strong, h1, h2, h3, h4, h5, h6, li, button, i)[data-connectea-ink] {
   color: var(--cx-text-primary, #f1f5f9) !important;
@@ -16,99 +22,57 @@
    18. Feed Header Filter Button, Follow Pills, Action Buttons & Feed Cards
    -------------------------------------------------------------------------- */
 /* Feed Header Filter Button (Square funnel filter button override) */
-.connectea-dark :is(
-  .cvr-c-feed__filter,
-  .cvr-c-filter-button,
-  .eds-c-filter-button,
-  button[aria-label*="filter" i],
-  .cvr-c-feed-header button,
-  .cvr-c-feed-header :is(.v-button, .eds-c-button)
-) {
-  background-color: var(--cx-surface-elevated, #24303f) !important;
+.connectea-dark :is(.cvr-c-feed__filter, .cvr-c-filter-button, .eds-c-filter-button, button[aria-label*="filter" i], .cvr-c-feed-header button, .cvr-c-feed-header :is(.v-button, .eds-c-button), .stream-filter-icon-button) {
+  background-color: transparent !important;
   color: var(--cx-text-primary, #f1f6fb) !important;
-  border: 1px solid var(--cx-border, #4a617a) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-feed__filter,
-  .cvr-c-filter-button,
-  .eds-c-filter-button,
-  button[aria-label*="filter" i],
-  .cvr-c-feed-header button,
-  .cvr-c-feed-header :is(.v-button, .eds-c-button)
-):hover {
-  background-color: var(--cx-surface-hover, #313f50) !important;
-  border-color: var(--cx-border-strong, #6b88a5) !important;
+.connectea-dark :is(.cvr-c-feed__filter, .cvr-c-filter-button, .eds-c-filter-button, button[aria-label*="filter" i], .cvr-c-feed-header button, .cvr-c-feed-header :is(.v-button, .eds-c-button), .stream-filter-icon-button):hover {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   color: #ffffff !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-feed__filter,
-  .cvr-c-filter-button,
-  .eds-c-filter-button,
-  button[aria-label*="filter" i]
-) svg {
+.connectea-dark :is(.cvr-c-feed__filter, .cvr-c-filter-button, .eds-c-filter-button, button[aria-label*="filter" i], .stream-filter-icon-button) :is(svg, mat-icon, [class*="icon"]) {
   fill: var(--cx-text-primary, #f1f6fb) !important;
   color: var(--cx-text-primary, #f1f6fb) !important;
 }
 
 /* Notice / Feed Card Positive Action Button (View button) */
-.connectea-dark :is(
-  .eds-o-button--positive,
-  .eds-c-button--positive,
-  .v-button.eds-o-button--positive,
-  .eds-c-action-button.eds-o-button--positive,
-  [class*="button--positive"],
-  [class*="button-positive"],
-  :is(.cvr-c-feed-card, .cvr-c-feed-item, [class*="feed"]) :is(.v-button, .eds-c-button, button, a):is([class*="positive"], [class*="view"])
-) {
-  background-color: var(--cx-positive-bg, #7b9900) !important;
+.connectea-dark :is(.eds-o-button--positive, .eds-c-button--positive, .v-button.eds-o-button--positive, .v-button-eds-o-button--positive, .eds-c-action-button.eds-o-button--positive, [class*="button--positive"], [class*="button-positive"], :is(.cvr-c-feed-card, .cvr-c-feed-item, [class*="feed"], cnt-stream-notice-card, mat-card, .eds-c-card, .cvr-c-notice, .cvr-c-notice-card) :is(.v-button, .eds-c-button, button, a):is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]), mat-dialog-container button.mat-primary, .mat-dialog-actions button.mat-primary) {
+  background-color: var(--cx-positive-bg, #8cae04) !important;
   color: var(--cx-positive-text, #ffffff) !important;
-  border: 1px solid var(--cx-positive-border, #6b8500) !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
-.connectea-dark :is(
-  .eds-o-button--positive,
-  .eds-c-button--positive,
-  .v-button.eds-o-button--positive,
-  .eds-c-action-button.eds-o-button--positive,
-  [class*="button--positive"],
-  [class*="button-positive"],
-  :is(.cvr-c-feed-card, .cvr-c-feed-item, [class*="feed"]) :is(.v-button, .eds-c-button, button, a):is([class*="positive"], [class*="view"])
-):hover {
-  background-color: var(--cx-positive-hover, #8fb200) !important;
+.connectea-dark :is(.eds-o-button--positive, .eds-c-button--positive, .v-button.eds-o-button--positive, .v-button-eds-o-button--positive, .eds-c-action-button.eds-o-button--positive, [class*="button--positive"], [class*="button-positive"], :is(.cvr-c-feed-card, .cvr-c-feed-item, [class*="feed"], cnt-stream-notice-card, mat-card, .eds-c-card, .cvr-c-notice, .cvr-c-notice-card) :is(.v-button, .eds-c-button, button, a):is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]), mat-dialog-container button.mat-primary, .mat-dialog-actions button.mat-primary):hover {
+  background-color: var(--cx-positive-hover, #9ec204) !important;
   color: var(--cx-positive-text, #ffffff) !important;
-  border-color: var(--cx-positive-border, #6b8500) !important;
+  border: none !important;
 }
 
-.connectea-dark :is(
-  .eds-o-button--positive,
-  .eds-c-button--positive,
-  .v-button.eds-o-button--positive,
-  .eds-c-action-button.eds-o-button--positive,
-  [class*="button--positive"],
-  [class*="button-positive"]
-) :is(span, div, a, .v-button-caption) {
+.connectea-dark :is(.eds-o-button--positive, .eds-c-button--positive, .v-button.eds-o-button--positive, .eds-c-action-button.eds-o-button--positive, [class*="button--positive"], [class*="button-positive"]) :is(span, div, a, .v-button-caption) {
   color: var(--cx-positive-text, #ffffff) !important;
   text-decoration: none !important;
 }
 
+.connectea-dark :is(cnt-avatar, ngx-avatar) {
+  font-family: "Open Sans", "Helvetica Neue", sans-serif !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(.avatar-content, [class*="avatar-content"]),
+:is(html, body).connectea-dark :is(.avatar-content, [class*="avatar-content"]) {
+  font-family: Helvetica, Arial, sans-serif !important;
+  color: #ffffff !important;
+  background-color: var(--cx-avatar-bg, #24303f) !important;
+}
+
 /* Feed Follow Pill Buttons */
-.connectea-dark :is(
-  .eds-c-tag,
-  .cvr-c-tag,
-  .badge,
-  .badge-pill,
-  .label-pill,
-  .cvr-c-feed-item__follow,
-  [class*="feed"] [class*="follow"],
-  [class*="tag"],
-  [class*="pill"],
-  button[class*="follow" i],
-  a[class*="follow" i],
-  [aria-label*="follow" i]
-) {
+.connectea-dark :is(mat-chip, .mat-chip, .mat-standard-chip, .eds-c-tag, .cvr-c-tag, .badge, .badge-pill, .label-pill, .cvr-c-feed-item__follow):not(mat-chip-list):not(.mat-chip-list) {
   background-color: var(--cx-surface-elevated, #24303f) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border: 1px solid var(--cx-border, #4a617a) !important;
@@ -116,23 +80,16 @@
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.connectea-dark :is(
-  .eds-c-tag,
-  .cvr-c-tag,
-  .badge,
-  .badge-pill,
-  .label-pill,
-  .cvr-c-feed-item__follow,
-  [class*="feed"] [class*="follow"],
-  [class*="tag"],
-  [class*="pill"],
-  button[class*="follow" i],
-  a[class*="follow" i],
-  [aria-label*="follow" i]
-):hover {
+.connectea-dark :is(mat-chip, .mat-chip, .mat-standard-chip, .eds-c-tag, .cvr-c-tag, .badge, .badge-pill, .label-pill, .cvr-c-feed-item__follow):not(mat-chip-list):not(.mat-chip-list):hover {
   background-color: var(--cx-surface-hover, #313f50) !important;
   border-color: var(--cx-border-strong, #6b88a5) !important;
   color: #ffffff !important;
+}
+
+.connectea-dark :is(mat-chip-list, .mat-chip-list) {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 /* Feed Cards & Author/Timestamp/Comment Metadata */
@@ -140,12 +97,19 @@
   .cvr-c-feed-card,
   .cvr-c-feed-item,
   [class*="feed-card"],
-  [class*="feed-item"]
+  [class*="feed-item"],
+  cnt-stream-notice-card,
+  cnt-stream-notice-card mat-card,
+  mat-card.mat-card
 ) {
   background-color: var(--cx-card-bg, var(--cx-surface-bg, #1e2632)) !important;
-  border: 1px solid var(--cx-border, #3d5066) !important;
-  border-radius: 8px !important;
+  border: none !important;
+  border-radius: 4px !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+.connectea-dark :is(cnt-stream-notice-card, mat-card) .mat-card-header {
+  border-bottom: none !important;
 }
 
 .connectea-dark :is(
@@ -161,7 +125,11 @@
   .cvr-c-feed-card,
   .cvr-c-feed-item,
   [class*="feed-card"],
-  [class*="feed-item"]
+  [class*="feed-item"],
+  cnt-stream-notice-card,
+  cnt-stream-card-author,
+  mat-card,
+  .mat-card
 ) :is(
   .cvr-c-feed-item__meta,
   .cvr-c-feed-item__author,
@@ -170,91 +138,118 @@
   [class*="date"],
   [class*="timestamp"],
   [class*="meta"],
+  .mat-caption,
+  .text-muted,
   small,
   em,
   p
-) {
+),
+.connectea-dark :is(.text-muted, .mat-caption.text-muted, .mat-caption) {
   color: var(--cx-text-muted, #cbd5e1) !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-feed-card,
-  .cvr-c-feed-item,
-  [class*="feed-card"],
-  [class*="feed-item"]
-) svg {
+.connectea-dark :is(.tutorial-author, .author-details, .cvr-c-feed-item__author, .cvr-c-feed-card__author, .stream-notice-author, cnt-stream-card-author) :is(a, .author-name, [class*="name"]) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+  font-weight: 600 !important;
+}
+
+.connectea-dark :is(.tutorial-author, .author-details, .cvr-c-feed-item__author, .cvr-c-feed-card__author, .stream-notice-author, cnt-stream-card-author) :is(span, .role, .time, .date, .eds-c-caption, [class*="date"], [class*="meta"]) {
+  color: var(--cx-text-muted, #94a3b8) !important;
+  font-weight: 400 !important;
+}
+
+.connectea-dark :is(.cvr-c-feed-card, .cvr-c-feed-item, [class*="feed-card"], [class*="feed-item"]) svg:not([fill="none"]):not([stroke]) {
   color: var(--cx-text-muted, #cbd5e1) !important;
   fill: currentColor !important;
 }
 
+.connectea-dark :is(.cvr-c-feed-card, .cvr-c-feed-item, [class*="feed-card"], [class*="feed-item"]) svg[fill="none"] {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
 /* Feed Header Navigation Tabs (All, Classes, Read Later) */
-.connectea-dark :is(
-  .cvr-c-feed,
-  .cvr-c-feed-header,
-  .cvr-c-feed-header__tabs,
-  .cvr-c-feed__tabs,
-  .eds-c-tabs,
-  .mat-tab-header,
-  .mat-tab-group,
-  .mat-tab-nav-bar,
-  [class*="feed"] [class*="tab"]
-) :is(
-  .mat-tab-label,
-  .mat-tab-link,
-  .eds-c-tabs__tab,
-  .cvr-c-feed-tab,
-  .cvr-c-feed__tab,
-  .mat-tab-label-content,
-  button,
-  a,
-  span,
-  div,
-  li
-) {
+.connectea-dark :is(.cvr-c-feed, .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs, .mat-tab-group, .mat-tab-nav-bar, [class*="feed"] [class*="tab"]) {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.connectea-dark mat-tab-header.mat-tab-header {
+  border-bottom: 1px solid var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark :is(.cvr-c-feed, .cvr-c-feed-header, cnt-stream-notice-card, [class*="feed"]) .mat-ink-bar {
+  background-color: var(--cx-positive-bg, #8cae04) !important;
+}
+
+.connectea-dark :is(.mat-dialog-container, mat-dialog-container) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border: none !important;
+  box-shadow: 0 11px 15px -7px rgba(0,0,0,0.5), 0 24px 38px 3px rgba(0,0,0,0.35), 0 9px 46px 8px rgba(0,0,0,0.3) !important;
+}
+
+.connectea-dark :is(.v-popupview-popup, .v-popupview-popup-cvr-js-popup-view-panel),
+.connectea-dark :is(.v-popupview-popup, .v-popupview-popup-cvr-js-popup-view-panel) .popupContent,
+.connectea-dark :is(.v-popupview-popup, .v-popupview-popup-cvr-js-popup-view-panel) .v-csslayout {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark :is(.v-popupview-popup, .v-popupview-popup-cvr-js-popup-view-panel) :is(div, span, label, p, .v-label) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark :is(cnt-notice-view, mat-dialog-container, .cvr-c-feed-card, .cvr-c-feed-item) :is(p, span, div, u, em, li) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-feed,
-  .cvr-c-feed-header,
-  .cvr-c-feed-header__tabs,
-  .cvr-c-feed__tabs,
-  .eds-c-tabs,
-  .mat-tab-header,
-  .mat-tab-group,
-  .mat-tab-nav-bar,
-  [class*="feed"] [class*="tab"]
-) :is(
-  .mat-tab-label,
-  .mat-tab-link,
-  .eds-c-tabs__tab,
-  .cvr-c-feed-tab,
-  .cvr-c-feed__tab,
-  button,
-  a
-):hover,
-.connectea-dark :is(
-  .mat-tab-label-active,
-  .mat-tab-link.mat-tab-label-active,
-  .mat-tab-label.mat-tab-label-active,
-  .eds-c-tabs__tab--active,
-  .eds-c-tabs__tab[aria-selected="true"],
-  .cvr-c-feed__tab--active,
-  .active,
-  [class*="active"],
-  [aria-selected="true"]
-) :is(span, div, a, button, li),
-.connectea-dark :is(
-  .mat-tab-label-active,
-  .mat-tab-link.mat-tab-label-active,
-  .mat-tab-label.mat-tab-label-active,
-  .eds-c-tabs__tab--active,
-  .eds-c-tabs__tab[aria-selected="true"],
-  .cvr-c-feed__tab--active,
-  .active,
-  [class*="active"],
-  [aria-selected="true"]
-) {
+.connectea-dark :is(cnt-notice-view, mat-dialog-container, .cvr-c-feed-card, .cvr-c-feed-item) :is(h1, h2, h3, h4, h5, h6, strong, b, a:not(.btn):not(.mat-button-base)) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark :is(cnt-notice-view, mat-dialog-container) a.link--reversed {
+  color: var(--cx-link, #60a5fa) !important;
+}
+
+.connectea-dark :is(cnt-notice-view, mat-dialog-container) u {
+  color: inherit !important;
+  text-decoration: underline !important;
+}
+
+.connectea-dark :is(mat-icon, .mat-icon):is([icon*="lock"], [class*="lock"]),
+.connectea-dark .text-danger {
+  color: var(--cx-danger, #f87171) !important;
+}
+
+.connectea-dark :is(.font-weight-bold, .fw-bold, b, strong) {
+  font-weight: 700 !important;
+}
+
+.connectea-dark :is(.mat-dialog-header, .cvr-c-popup__header) {
+  background-color: var(--cx-surface-secondary, #1a222d) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-bottom: none !important;
+}
+
+.connectea-dark :is(.mat-dialog-container, mat-dialog-container) :is(button.mat-stroked-button, button[mat-stroked-button]) {
+  background-color: transparent !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark :is(.d-flex.justify-content-end, .c-service-bar-control-panel, .c-service-bar-control-panel--xwide) {
+  background-color: transparent !important;
+}
+
+.connectea-dark :is(.cvr-c-feed, .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs, .mat-tab-header, .mat-tab-nav-bar, [class*="feed"] [class*="tab"]) :is(.mat-tab-label, .mat-tab-link, .eds-c-tabs__tab, .cvr-c-feed-tab, .cvr-c-feed__tab, .mat-tab-label-content, button, a, span, div.mat-tab-label, div.mat-tab-label-content, li) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+.connectea-dark :is(.cvr-c-feed, .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs, .mat-tab-header, .mat-tab-nav-bar, [class*="feed"] [class*="tab"]) :is(.mat-tab-label, .mat-tab-link, .eds-c-tabs__tab, .cvr-c-feed-tab, .cvr-c-feed__tab, button, a):hover,
+.connectea-dark :is(.mat-tab-label-active, .mat-tab-link.mat-tab-label-active, .mat-tab-label.mat-tab-label-active, .eds-c-tabs__tab--active, .eds-c-tabs__tab[aria-selected="true"], .cvr-c-feed__tab--active, .mat-tab-label[aria-selected="true"], .mat-tab-link[aria-selected="true"]) :is(span, a, button, li, .mat-tab-label-content),
+.connectea-dark :is(.mat-tab-label-active, .mat-tab-link.mat-tab-label-active, .mat-tab-label.mat-tab-label-active, .eds-c-tabs__tab--active, .eds-c-tabs__tab[aria-selected="true"], .cvr-c-feed__tab--active, .mat-tab-label[aria-selected="true"], .mat-tab-link[aria-selected="true"]) {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
@@ -451,10 +446,17 @@
   color: #ffffff !important;
   box-shadow: none !important;
   border: none !important;
-  border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
   border-radius: 0 !important;
   outline: none !important;
   margin: 0 !important;
+}
+
+.connectea-dark .cvr-c-primary-navigation__links .eds-s-is-active a::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
+  box-shadow: none !important;
 }
 
 .connectea-dark .eds-c-tile a {
