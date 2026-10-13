@@ -30,10 +30,11 @@
     }
 
     if (!handle) {
-      handle = createElement('button', '❮');
-      handle.id = 'connectify-sidebar-handle';
-      handle.type = 'button';
-      handle.title = 'Open Connectify tools';
+      handle = Object.assign(createElement('button', '❮'), {
+        id: 'connectify-sidebar-handle',
+        type: 'button',
+        title: 'Open Connectify tools'
+      });
       handle.setAttribute('aria-label', 'Open Connectify tools');
       handle.setAttribute('aria-expanded', 'false');
     }
@@ -44,8 +45,6 @@
     // Header and navigation
     let header = sidebar.querySelector('header');
     let homeBtn = sidebar.querySelector('.cx-back-menu');
-
-    // Remove any legacy or stray close button from header
     const strayCloseBtn = sidebar.querySelector('.cx-close-btn');
     if (strayCloseBtn) strayCloseBtn.remove();
 
@@ -69,54 +68,92 @@
       { className: 'cx-tools-intro' }
     );
 
-    if (!sidebar.contains(header)) sidebar.append(header);
-    if (!sidebar.contains(introText)) sidebar.append(introText);
-    if (!sidebar.contains(toolMenu)) sidebar.append(toolMenu);
-    if (!sidebar.contains(workspace)) sidebar.append(workspace);
+    function clickConnectAllButton() {
+      const selectors = [
+        '.eds-c-accordion--dark .eds-c-accordion__section-label', '.eds-c-accordion--dark .eds-c-accordion__section-heading',
+        '.eds-c-accordion__section-label', '.eds-c-accordion__section-heading',
+        '.cvr-c-category-toolbar__container .v-label', '.cvr-c-category-toolbar .v-label',
+        '.cvr-c-tree-list__item .v-label', '.cvr-c-tree-list__item', '.v-accordion .v-label', '[role="button"]'
+      ];
+      for (const sel of selectors) {
+        const match = Array.from(document.querySelectorAll(sel)).find(el => (el.innerText || el.textContent || '').trim().toLowerCase() === 'all');
+        if (match) {
+          match.click();
+          if (match.parentElement && typeof match.parentElement.click === 'function' && match.parentElement !== document.body) {
+            match.parentElement.click();
+          }
+          try {
+            const Evt = window.MouseEvent || window.Event;
+            if (typeof Evt === 'function') {
+              match.dispatchEvent(new Evt('click', { bubbles: true, cancelable: true }));
+            }
+          } catch (_) {}
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function isOutlinesFilterRestricted() {
+      const outlinesRoot = document.querySelector('.assessmentoutlinesui, [class*="assessmentoutline"], .cvr-c-category-toolbar, .eds-c-accordion--dark');
+      if (!outlinesRoot) return false;
+
+      const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, [class*="subject-card"]');
+      const toolbarTitle = (document.querySelector('.cvr-c-category-toolbar__title .v-label, .cvr-c-category-toolbar__title')?.textContent || '').trim();
+
+      const filterApplied = Boolean(toolbarTitle && toolbarTitle.toLowerCase() !== 'all');
+      const insufficientClasses = tiles.length < 4;
+
+      return filterApplied || insufficientClasses;
+    }
+
+    let filterNotice = sidebar.querySelector('.cx-filter-notice');
+    if (!filterNotice) {
+      filterNotice = Object.assign(createElement('div'), { className: 'cx-filter-notice', hidden: true });
+      const noticeTitle = Object.assign(createElement('strong', 'Filter Applied'), { className: 'cx-filter-title' });
+      const noticeMsg = Object.assign(createElement('p', 'A course outline filter is currently active. Connectify features require all courses to be visible. Please return to "All" to re-enable tools.'), { className: 'cx-filter-text' });
+      const backToAllBtn = Object.assign(createElement('button', '← Back to All'), {
+        type: 'button', className: 'cx-back-to-all-btn', id: 'cx-back-to-all-btn',
+        onclick: (e) => {
+          e.preventDefault(); e.stopPropagation();
+          clickConnectAllButton();
+          setTimeout(syncState, 250);
+          setTimeout(syncState, 800);
+        }
+      });
+      filterNotice.append(noticeTitle, noticeMsg, backToAllBtn);
+    }
+
+    [header, filterNotice, introText, toolMenu, workspace].forEach(el => {
+      if (el && !sidebar.contains(el)) sidebar.append(el);
+    });
 
     function attachSidebar() {
       const parent = document.body || document.documentElement;
       if (!parent) return;
 
-      // Ensure no duplicate handle exists
       const existingHandles = document.querySelectorAll('#connectify-sidebar-handle');
       existingHandles.forEach(h => { if (h !== handle) h.remove(); });
 
       const existingSidebars = document.querySelectorAll('#connectify-sidebar');
       existingSidebars.forEach(s => { if (s !== sidebar) s.remove(); });
 
-      if (sidebar.parentElement !== parent) {
-        parent.appendChild(sidebar);
-      }
+      if (sidebar.parentElement !== parent) parent.appendChild(sidebar);
       parent.appendChild(handle);
     }
 
     attachSidebar();
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', attachSidebar);
-    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', attachSidebar);
     window.addEventListener('load', attachSidebar);
 
     /**
      * Mount tool launcher buttons into the sidebar menu and tool panels into the workspace.
      */
     function mountTools() {
-      // Ensure all tool components and panels are instantiated
-      if (!window.ConnectifyWeakness?.panelRefs) {
-        if (window.ConnectifyWeakness?.ensureWeaknessPanel) window.ConnectifyWeakness.ensureWeaknessPanel();
-        else if (window.ConnectifyWeakness?.createWeaknessPanel) window.ConnectifyWeakness.createWeaknessPanel();
-      }
-      if (!window.ConnectifyCategorySettings?.panelRefs) {
-        if (window.ConnectifyCategorySettings?.ensureSettingsPanel) window.ConnectifyCategorySettings.ensureSettingsPanel();
-        else if (window.ConnectifyCategorySettings?.createSettingsPanel) window.ConnectifyCategorySettings.createSettingsPanel();
-      }
-      if (!window.ConnectifyProgress?.panelRefs && window.ConnectifyProgress?.ensureProgressPanel) {
-        window.ConnectifyProgress.ensureProgressPanel();
-      }
-
-      if (!document.getElementById('connectify-predictor-toggle') && window.ConnectifyPredictorUI?.ensurePredictorPanel) {
-        window.ConnectifyPredictorUI.ensurePredictorPanel();
-      }
+      if (!window.ConnectifyWeakness?.panelRefs) (window.ConnectifyWeakness?.ensureWeaknessPanel || window.ConnectifyWeakness?.createWeaknessPanel)?.();
+      if (!window.ConnectifyCategorySettings?.panelRefs) (window.ConnectifyCategorySettings?.ensureSettingsPanel || window.ConnectifyCategorySettings?.createSettingsPanel)?.();
+      if (!window.ConnectifyProgress?.panelRefs) window.ConnectifyProgress?.ensureProgressPanel?.();
+      if (!document.getElementById('connectify-predictor-toggle')) window.ConnectifyPredictorUI?.ensurePredictorPanel?.();
 
       const canonicalButtons = [
         { id: 'connectify-target-toggle', label: 'Target ATAR' }, { id: 'connectify-grade-toggle', label: 'Target Grade' },
@@ -130,32 +167,15 @@
         let matches = Array.from(document.querySelectorAll('#' + item.id));
         if (matches.length === 0) {
           const atarBtns = window.ConnectifyAtar?.calculatorButtons || window.ConnectifyAtar?.toolButtons || [];
-          const found = atarBtns.find(b => b && b.id === item.id);
-          if (found) {
-            matches = [found];
-          } else if (item.id === 'connectify-predictor-toggle') {
-            const predBtn = window.ConnectifyPredictorUI?.panelRefs?.toggleBtn || window.ConnectifyPredictorUI?.getInstance?.()?.toggleBtn;
-            if (predBtn) matches = [predBtn];
-          } else if (item.id === 'connectify-progress-toggle') {
-            const progBtn = document.getElementById('connectify-progress-toggle') || window.ConnectifyProgress?.panelRefs?.toggleBtn;
-            if (progBtn) matches = [progBtn];
-          } else if (item.id === 'connectify-weakness-toggle' && window.ConnectifyWeakness?.panelRefs?.toggleBtn) {
-            matches = [window.ConnectifyWeakness.panelRefs.toggleBtn];
-          } else if (item.id === 'connectify-categories-toggle' && window.ConnectifyCategorySettings?.panelRefs?.catBtn) {
-            matches = [window.ConnectifyCategorySettings.panelRefs.catBtn];
-          }
+          const found = atarBtns.find(b => b && b.id === item.id) ||
+            (item.id === 'connectify-predictor-toggle' && (window.ConnectifyPredictorUI?.panelRefs?.toggleBtn || window.ConnectifyPredictorUI?.getInstance?.()?.toggleBtn)) ||
+            (item.id === 'connectify-progress-toggle' && (document.getElementById('connectify-progress-toggle') || window.ConnectifyProgress?.panelRefs?.toggleBtn)) ||
+            (item.id === 'connectify-weakness-toggle' && window.ConnectifyWeakness?.panelRefs?.toggleBtn) ||
+            (item.id === 'connectify-categories-toggle' && window.ConnectifyCategorySettings?.panelRefs?.catBtn);
+          if (found) matches = [found];
         }
-        let btn = null;
-        if (matches.length > 0) {
-          const inMenu = matches.find(m => m.parentElement === toolMenu);
-          btn = inMenu || matches[0];
-          // Purge duplicate button nodes with same ID from DOM
-          for (const m of matches) {
-            if (m !== btn && m.parentElement) {
-              m.remove();
-            }
-          }
-        }
+        let btn = matches.find(m => m.parentElement === toolMenu) || matches[0];
+        matches.forEach(m => { if (m !== btn && m.parentElement) m.remove(); });
         if (!btn) {
           btn = createElement('button', item.label);
           btn.id = item.id;
@@ -163,58 +183,36 @@
         } else if (item.label) {
           btn.textContent = item.label;
         }
-        if (item.id === 'connectify-weakness-toggle' || item.id === 'connectify-categories-toggle') {
-          btn.className = 'cx-secondary-tool';
-        } else {
-          btn.className = 'cx-calculator-tool';
-        }
+        btn.className = (item.id === 'connectify-weakness-toggle' || item.id === 'connectify-categories-toggle') ? 'cx-secondary-tool' : 'cx-calculator-tool';
         btn.setAttribute('aria-pressed', 'false');
         resolvedButtons.push(btn);
       }
 
-      // Purge any unknown, stray, or obsolete child buttons from toolMenu
       const resolvedSet = new Set(resolvedButtons);
       Array.from(toolMenu.children).forEach(child => {
-        if (!resolvedSet.has(child)) {
-          child.remove();
-        }
+        if (!resolvedSet.has(child)) child.remove();
       });
 
-      // Append all resolved buttons in the canonical sequence
-      for (const btn of resolvedButtons) {
-        toolMenu.append(btn);
-      }
+      for (const btn of resolvedButtons) toolMenu.append(btn);
 
-      // Mount and deduplicate workspace panels
-      const panelIds = ['connectea-atar', 'connectify-predictor', 'connectify-progress', 'connectify-weakness', 'connectify-categories'];
-      for (const panelId of panelIds) {
+      const panelDefs = [
+        ['connectea-atar', () => window.ConnectifyAtar?.calculatorPanel],
+        ['connectify-predictor', () => window.ConnectifyPredictorUI?.panelRefs?.panel || window.ConnectifyPredictorUI?.getInstance?.()?.panel],
+        ['connectify-progress', () => document.getElementById('connectify-progress') || window.ConnectifyProgress?.panelRefs?.panel],
+        ['connectify-weakness', () => window.ConnectifyWeakness?.panelRefs?.panel || (window.ConnectifyWeakness?.ensureWeaknessPanel && window.ConnectifyWeakness.ensureWeaknessPanel().panel)],
+        ['connectify-categories', () => window.ConnectifyCategorySettings?.panelRefs?.catPanel || (window.ConnectifyCategorySettings?.ensureSettingsPanel && window.ConnectifyCategorySettings.ensureSettingsPanel().catPanel)]
+      ];
+
+      for (const [panelId, getter] of panelDefs) {
         let matches = Array.from(document.querySelectorAll('#' + panelId));
-        if (matches.length === 0 && panelId === 'connectea-atar' && window.ConnectifyAtar?.calculatorPanel) {
-          matches = [window.ConnectifyAtar.calculatorPanel];
-        } else if (matches.length === 0 && panelId === 'connectify-predictor') {
-          const pPanel = window.ConnectifyPredictorUI?.panelRefs?.panel || window.ConnectifyPredictorUI?.getInstance?.()?.panel;
-          if (pPanel) matches = [pPanel];
-        } else if (matches.length === 0 && panelId === 'connectify-progress') {
-          const progPanel = document.getElementById('connectify-progress') || window.ConnectifyProgress?.panelRefs?.panel;
-          if (progPanel) matches = [progPanel];
-        } else if (matches.length === 0 && panelId === 'connectify-weakness') {
-          const wPanel = window.ConnectifyWeakness?.panelRefs?.panel || (window.ConnectifyWeakness?.ensureWeaknessPanel && window.ConnectifyWeakness.ensureWeaknessPanel().panel);
-          if (wPanel) matches = [wPanel];
-        } else if (matches.length === 0 && panelId === 'connectify-categories') {
-          const cPanel = window.ConnectifyCategorySettings?.panelRefs?.catPanel || (window.ConnectifyCategorySettings?.ensureSettingsPanel && window.ConnectifyCategorySettings.ensureSettingsPanel().catPanel);
-          if (cPanel) matches = [cPanel];
+        if (matches.length === 0) {
+          const fallback = getter();
+          if (fallback) matches = [fallback];
         }
         if (matches.length > 0) {
-          const inWorkspace = matches.find(m => m.parentElement === workspace);
-          const panel = inWorkspace || matches[0];
-          for (const m of matches) {
-            if (m !== panel && m.parentElement) {
-              m.remove();
-            }
-          }
-          if (panel.parentElement !== workspace) {
-            workspace.append(panel);
-          }
+          const panel = matches.find(m => m.parentElement === workspace) || matches[0];
+          matches.forEach(m => { if (m !== panel && m.parentElement) m.remove(); });
+          if (panel.parentElement !== workspace) workspace.append(panel);
         }
       }
     }
@@ -244,11 +242,9 @@
 
     function closeAllTools() {
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
-      for (const child of workspace.children) {
-        child.hidden = true;
-      }
+      for (const child of workspace.children) child.hidden = true;
       sidebar.classList.remove('cx-tool-active');
-      introText.hidden = false;
+      introText.hidden = isOutlinesFilterRestricted();
       toolMenu.querySelectorAll('button').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
       if (handle) {
         handle.dataset.toolActive = 'false';
@@ -267,11 +263,7 @@
 
     handle.onclick = () => {
       setJustReturnedToMenu(false);
-      if (sidebar.hidden) {
-        openSidebar();
-      } else {
-        closeSidebar();
-      }
+      if (sidebar.hidden) openSidebar(); else closeSidebar();
     };
 
     handle.addEventListener('mouseenter', () => {
@@ -280,9 +272,7 @@
 
     if (homeBtn) {
       homeBtn.onclick = () => {
-        if (sidebar.classList.contains('cx-tool-active')) {
-          setJustReturnedToMenu(true);
-        }
+        if (sidebar.classList.contains('cx-tool-active')) setJustReturnedToMenu(true);
         closeAllTools();
       };
     }
@@ -294,10 +284,7 @@
     const handleOutsideClick = e => {
       if (sidebar.hidden) return;
       const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
-      const isInside = path.includes(sidebar) ||
-                       path.includes(handle) ||
-                       sidebar.contains(e.target) ||
-                       handle.contains(e.target);
+      const isInside = path.includes(sidebar) || path.includes(handle) || sidebar.contains(e.target) || handle.contains(e.target);
       if (!isInside) {
         setJustReturnedToMenu(false);
         closeSidebar();
@@ -308,7 +295,7 @@
 
     // Central delegated tool launcher listener
     const handleToolLaunchClick = e => {
-      if (e._connectifyToolHandled) return;
+      if (e._connectifyToolHandled || sidebar.classList.contains('cx-filter-disabled')) return;
       const toggle = e.target.closest('#connectify-target-toggle, #connectify-grade-toggle, #connectify-estimate-toggle, #connectify-predictor-toggle, #connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle');
       if (!toggle) return;
       e._connectifyToolHandled = true;
@@ -325,71 +312,55 @@
         } else {
           window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
         }
-      } else if (id === 'connectify-predictor-toggle') {
-        const refs = window.ConnectifyPredictorUI?.panelRefs || (window.ConnectifyPredictorUI?.ensurePredictorPanel && window.ConnectifyPredictorUI.ensurePredictorPanel());
-        if (refs?.openPredictor) {
-          const pPanel = refs.panel || document.getElementById('connectify-predictor');
-          if (pPanel && !pPanel.hidden) {
-            refs.closePredictor();
+      } else {
+        const toolMap = {
+          'connectify-predictor-toggle': {
+            getRefs: () => window.ConnectifyPredictorUI?.panelRefs || window.ConnectifyPredictorUI?.ensurePredictorPanel?.(),
+            panelId: 'connectify-predictor',
+            open: (r) => r?.openPredictor?.(),
+            close: (r) => r?.closePredictor?.(),
+            detail: 'predictor'
+          },
+          'connectify-progress-toggle': {
+            getRefs: () => window.ConnectifyProgress?.panelRefs || window.ConnectifyProgress?.ensureProgressPanel?.(),
+            panelId: 'connectify-progress',
+            open: (r) => r?.openProgress?.(),
+            close: (r) => r?.closeProgress?.(),
+            detail: 'progress'
+          },
+          'connectify-weakness-toggle': {
+            getRefs: () => window.ConnectifyWeakness?.panelRefs || window.ConnectifyWeakness?.ensureWeaknessPanel?.(),
+            panelId: 'connectify-weakness',
+            open: (r) => r?.openWeakness?.(),
+            close: (r) => r?.closeWeakness?.(),
+            detail: 'weakness'
+          },
+          'connectify-categories-toggle': {
+            getRefs: () => window.ConnectifyCategorySettings?.panelRefs || window.ConnectifyCategorySettings?.ensureSettingsPanel?.(),
+            panelId: 'connectify-categories',
+            open: (r) => r?.openCategories?.(),
+            close: (r) => r?.closeCategories?.(),
+            detail: 'categories'
+          }
+        };
+        const cfg = toolMap[id];
+        if (cfg) {
+          const refs = cfg.getRefs();
+          const panel = refs?.panel || refs?.catPanel || document.getElementById(cfg.panelId);
+          if (panel && !panel.hidden) {
+            cfg.close(refs);
             window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
+          } else if (refs && (refs.openPredictor || refs.openProgress || refs.openWeakness || refs.openCategories)) {
+            cfg.open(refs);
+          } else if (panel) {
+            panel.hidden = false;
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.setAttribute('aria-pressed', 'true');
+            window.dispatchEvent(new CustomEvent('connectify-open', { detail: cfg.detail }));
+            if (id === 'connectify-progress-toggle') refs?.refresh?.();
           } else {
-            refs.openPredictor();
+            window.dispatchEvent(new CustomEvent('connectify-open', { detail: cfg.detail }));
           }
-        } else {
-          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'predictor' }));
-        }
-      } else if (id === 'connectify-progress-toggle') {
-        const refs = window.ConnectifyProgress?.panelRefs || (window.ConnectifyProgress?.ensureProgressPanel && window.ConnectifyProgress.ensureProgressPanel());
-        if (refs?.openProgress) {
-          const progPanel = refs.panel || document.getElementById('connectify-progress');
-          if (progPanel && !progPanel.hidden) {
-            refs.closeProgress();
-            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
-          } else {
-            refs.openProgress();
-          }
-        } else {
-          const progPanel = document.getElementById('connectify-progress');
-          if (progPanel) {
-            const willShow = progPanel.hidden;
-            progPanel.hidden = !willShow;
-            toggle.setAttribute('aria-expanded', String(willShow));
-            toggle.setAttribute('aria-pressed', String(willShow));
-            if (willShow) {
-              window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'progress' }));
-              if (window.ConnectifyProgress?.panelRefs?.refresh) {
-                window.ConnectifyProgress.panelRefs.refresh();
-              }
-            } else {
-              window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
-            }
-          }
-        }
-      } else if (id === 'connectify-weakness-toggle') {
-        const refs = window.ConnectifyWeakness?.panelRefs || (window.ConnectifyWeakness?.ensureWeaknessPanel && window.ConnectifyWeakness.ensureWeaknessPanel());
-        if (refs?.openWeakness) {
-          const wPanel = refs.panel || document.getElementById('connectify-weakness');
-          if (wPanel && !wPanel.hidden) {
-            refs.closeWeakness();
-            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
-          } else {
-            refs.openWeakness();
-          }
-        } else {
-          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'weakness' }));
-        }
-      } else if (id === 'connectify-categories-toggle') {
-        const refs = window.ConnectifyCategorySettings?.panelRefs || (window.ConnectifyCategorySettings?.ensureSettingsPanel && window.ConnectifyCategorySettings.ensureSettingsPanel());
-        if (refs?.openCategories) {
-          const cPanel = refs.catPanel || document.getElementById('connectify-categories');
-          if (cPanel && !cPanel.hidden) {
-            refs.closeCategories();
-            window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
-          } else {
-            refs.openCategories();
-          }
-        } else {
-          window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
         }
       }
     };
@@ -403,6 +374,7 @@
     document.addEventListener('click', handleToolLaunchClick);
 
     const handleConnectifyOpen = e => {
+      if (sidebar.classList.contains('cx-filter-disabled')) return;
       if (e.detail !== 'home') openSidebar();
       const activeTool = e.detail;
       const btnMap = {
@@ -414,9 +386,7 @@
       };
       if (activeTool === 'calculator') {
         toolMenu.querySelectorAll('button').forEach(btn => {
-          if (!btnMap.calculator.includes(btn.id)) {
-            btn.setAttribute('aria-pressed', 'false');
-          }
+          if (!btnMap.calculator.includes(btn.id)) btn.setAttribute('aria-pressed', 'false');
         });
         return;
       }
@@ -440,9 +410,30 @@
         attachSidebar();
         mountTools();
 
-        const hasActiveTool = Array.from(workspace.children).some(p => !p.hidden);
-        sidebar.classList.toggle('cx-tool-active', hasActiveTool);
-        introText.hidden = hasActiveTool;
+        const isRestricted = isOutlinesFilterRestricted();
+        sidebar.classList.toggle('cx-filter-disabled', isRestricted);
+        if (filterNotice) filterNotice.hidden = !isRestricted;
+
+        if (isRestricted) {
+          for (const child of workspace.children) child.hidden = true;
+          sidebar.classList.remove('cx-tool-active');
+          introText.hidden = true;
+          toolMenu.querySelectorAll('button').forEach(btn => {
+            btn.disabled = true;
+            btn.setAttribute('aria-disabled', 'true');
+            btn.setAttribute('aria-pressed', 'false');
+          });
+        } else {
+          toolMenu.querySelectorAll('button').forEach(btn => {
+            btn.disabled = false;
+            btn.removeAttribute('aria-disabled');
+          });
+          const hasActiveTool = Array.from(workspace.children).some(p => !p.hidden);
+          sidebar.classList.toggle('cx-tool-active', hasActiveTool);
+          introText.hidden = hasActiveTool;
+        }
+
+        const hasActiveTool = !isRestricted && Array.from(workspace.children).some(p => !p.hidden);
         if (handle) {
           handle.dataset.toolActive = hasActiveTool ? 'true' : 'false';
           if (!sidebar.hidden) {
@@ -480,6 +471,7 @@
       }
     });
 
+    window.ConnectifySidebar = { isOutlinesFilterRestricted, clickConnectAllButton, syncState, openSidebar, closeSidebar };
     window.ConnectifyInitSidebar = syncState;
     setInterval(() => {
       if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;

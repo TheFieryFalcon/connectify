@@ -5795,14 +5795,29 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   const origWinAudit = global.window;
   const origDocAudit = global.document;
   try {
-    global.window = Object.assign(Object.create(origWinAudit), {
-      getComputedStyle: (el) => el._style || {}
-    });
-    global.document = Object.assign(Object.create(origDocAudit), {
-      querySelectorAll: (sel) => sel === 'body *' ? parityDomEls : []
-    });
+    let currentAuditQuerySelectorAll = (sel) => sel === 'body *' ? parityDomEls : [];
     const mockPageAudit = {
-      evaluate: async (fn, ...args) => fn(...args)
+      evaluate: async (fn, ...args) => {
+        const prevWin = global.window;
+        const prevDoc = global.document;
+        try {
+          global.window = Object.assign(Object.create(origWinAudit), {
+            getComputedStyle: (el) => el._style || {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            onbeforeunload: null,
+            MouseEvent: class { constructor(type) { this.type = type; } },
+            PointerEvent: class { constructor(type) { this.type = type; } }
+          });
+          global.document = Object.assign(Object.create(origDocAudit), {
+            querySelectorAll: (sel) => currentAuditQuerySelectorAll(sel)
+          });
+          return await fn(...args);
+        } finally {
+          global.window = prevWin;
+          global.document = prevDoc;
+        }
+      }
     };
     const auditRes = await themeTesterMod.auditThemeAgainstBaseline(mockPageAudit, 'dark', true, mockBaseline, {});
     const issueTypes = auditRes.issues.map(i => i.type);
@@ -5849,21 +5864,12 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
       click: () => { vClicked++; }
     };
 
-    global.window = Object.assign(Object.create(origWinAudit), {
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      onbeforeunload: null,
-      MouseEvent: class { constructor(type) { this.type = type; } },
-      PointerEvent: class { constructor(type) { this.type = type; } }
-    });
-    global.document = Object.assign(Object.create(origDocAudit), {
-      querySelectorAll: (sel) => {
-        if (sel.includes('mat-card button') || sel.includes('.v-button') || sel.includes('button, summary')) {
-          return [mockMatButton, mockVaadinButton];
-        }
-        return [];
+    currentAuditQuerySelectorAll = (sel) => {
+      if (sel.includes('mat-card button') || sel.includes('.v-button') || sel.includes('button, summary')) {
+        return [mockMatButton, mockVaadinButton];
       }
-    });
+      return [];
+    };
     const clickedButtons = await themeTesterMod.clickInteractiveButtons(mockPageAudit);
     assert.ok(clickedButtons.some(b => b.includes('button#mat-notice-view') && b.includes('View')), 'clickInteractiveButtons must click mat-card View button');
     assert.ok(clickedButtons.some(b => b.includes('div.v-button') && b.includes('View Notice')), 'clickInteractiveButtons must click div.v-button View Notice');
@@ -6094,13 +6100,6 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   const origWindow = global.window;
   const origDoc = global.document;
   try {
-    global.window = {
-      location: {
-        pathname: '/group/students/ui/my-settings/profile',
-        search: '',
-        href: 'https://connect.det.wa.edu.au/group/students/ui/my-settings/profile'
-      }
-    };
     const menuItems = ['Profile', 'Preferences', 'Notifications', 'Attendance', 'Reports', 'Assessment Outlines'];
     const mockEls = menuItems.map(label => ({
       attributes: [{ name: 'class', value: 'cvr-c-service-menu__item' }],
@@ -6109,16 +6108,34 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
       textContent: label,
       querySelectorAll: () => []
     }));
-    global.document = {
-      querySelectorAll: (sel) => {
-        if (sel === 'a[href], area[href]' || sel === '*') return [];
-        if (sel.includes('cvr-c-service-menu__item')) return mockEls;
-        return [];
+    const mockPage = {
+      evaluate: (fn) => {
+        const prevWin = global.window;
+        const prevDoc = global.document;
+        try {
+          global.window = {
+            location: {
+              pathname: '/group/students/ui/my-settings/profile',
+              search: '',
+              href: 'https://connect.det.wa.edu.au/group/students/ui/my-settings/profile'
+            }
+          };
+          global.document = {
+            querySelectorAll: (sel) => {
+              if (sel === 'a[href], area[href]' || sel === '*') return [];
+              if (sel.includes('cvr-c-service-menu__item')) return mockEls;
+              return [];
+            }
+          };
+          return fn();
+        } finally {
+          global.window = prevWin;
+          global.document = prevDoc;
+        }
       }
     };
-    const mockPage = { evaluate: (fn) => fn() };
     const discovered = crawlerMod.extractPageLinks(mockPage);
-    const normDiscovered = discovered.map(l => crawlerMod.normalizeUrl(l, global.window.location.href));
+    const normDiscovered = discovered.map(l => crawlerMod.normalizeUrl(l, 'https://connect.det.wa.edu.au/group/students/ui/my-settings/profile'));
     for (const sub of ['profile', 'preferences', 'notifications', 'attendance', 'reports', 'assessment-outlines']) {
       const targetUrl = `https://connect.det.wa.edu.au/group/students/ui/my-settings/${sub}`;
       assert.ok(normDiscovered.includes(targetUrl), `extractPageLinks must discover ${targetUrl} from navigation menu`);
@@ -6142,11 +6159,6 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
     assert.strictEqual(crawlerMod.extractClassId('class/notices?coisp=DomainSchoolClass%3A27866513'), '27866513', 'extractClassId must parse relative class/notices');
 
     // Verify dynamic extraction of class tabs (Notices) and direct attribute routes
-    global.window.location = {
-      pathname: '/group/students/ui/class/summary',
-      search: '?coisp=DomainSchoolClass%3A27866513',
-      href: 'https://connect.det.wa.edu.au/group/students/ui/class/summary?coisp=DomainSchoolClass%3A27866513'
-    };
     const tabLabels = ['Summary', 'Notices', 'Announcements', 'Discussions', 'Submissions', 'Learners'];
     const tabMockEls = tabLabels.map(label => ({
       tagName: 'div',
@@ -6167,14 +6179,35 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
       textContent: 'View Notice',
       querySelectorAll: () => []
     };
-    global.document.querySelectorAll = (sel) => {
-      if (sel === 'a[href], area[href]') return [];
-      if (sel.includes('eds-c-tabs__tab')) return tabMockEls;
-      if (sel === '*') return [noticeCardEl, ...tabMockEls];
-      return [];
+    const mockPageClass = {
+      evaluate: (fn) => {
+        const prevWin = global.window;
+        const prevDoc = global.document;
+        try {
+          global.window = {
+            location: {
+              pathname: '/group/students/ui/class/summary',
+              search: '?coisp=DomainSchoolClass%3A27866513',
+              href: 'https://connect.det.wa.edu.au/group/students/ui/class/summary?coisp=DomainSchoolClass%3A27866513'
+            }
+          };
+          global.document = {
+            querySelectorAll: (sel) => {
+              if (sel === 'a[href], area[href]') return [];
+              if (sel.includes('eds-c-tabs__tab')) return tabMockEls;
+              if (sel === '*') return [noticeCardEl, ...tabMockEls];
+              return [];
+            }
+          };
+          return fn();
+        } finally {
+          global.window = prevWin;
+          global.document = prevDoc;
+        }
+      }
     };
-    const classDiscovered = crawlerMod.extractPageLinks(mockPage);
-    const normClassDiscovered = classDiscovered.map(l => crawlerMod.normalizeUrl(l, global.window.location.href));
+    const classDiscovered = crawlerMod.extractPageLinks(mockPageClass);
+    const normClassDiscovered = classDiscovered.map(l => crawlerMod.normalizeUrl(l, 'https://connect.det.wa.edu.au/group/students/ui/class/summary?coisp=DomainSchoolClass%3A27866513'));
     assert.ok(normClassDiscovered.includes('https://connect.det.wa.edu.au/group/students/ui/class/notices?coisp=DomainSchoolClass%3A27866513'), 'extractPageLinks must discover class/notices?coisp=DomainSchoolClass%3A27866513');
   } finally {
     global.window = origWindow;
@@ -6186,7 +6219,122 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   assert.strictEqual(pkg.scripts['test:themes'], 'node scripts/test-theme-styles.js', 'package.json must define test:themes script');
   assert.strictEqual(pkg.scripts['test:themes:interactive'], 'node scripts/test-theme-styles.js --interactive', 'package.json must define test:themes:interactive script');
   assert.strictEqual(pkg.scripts['crawl'], 'node scripts/crawl-connect-directories.js', 'package.json must define crawl script');
-  assert.strictEqual(pkg.scripts['crawl:interactive'], 'node scripts/crawl-connect-directories.js --interactive', 'package.json must define crawl:interactive script');
+});
+
+runTest('Test 146: Sidebar disabled state, notice banner, and Back to All button on filtered course outlines', async () => {
+  await Promise.all(pendingTestPromises);
+  const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+  const drawerCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-drawer.css'), 'utf8');
+
+  // 1. Static CSS verification
+  assert.ok(drawerCss.includes('.cx-filter-disabled'), 'sidebar-drawer.css must define .cx-filter-disabled');
+  assert.ok(drawerCss.includes('.cx-filter-notice'), 'sidebar-drawer.css must define .cx-filter-notice');
+  assert.ok(drawerCss.includes('.cx-filter-title'), 'sidebar-drawer.css must define .cx-filter-title');
+  assert.ok(drawerCss.includes('.cx-filter-text'), 'sidebar-drawer.css must define .cx-filter-text');
+  assert.ok(drawerCss.includes('.cx-back-to-all-btn'), 'sidebar-drawer.css must define .cx-back-to-all-btn');
+
+  // 2. Static JS verification
+  assert.ok(sidebarJs.includes('clickConnectAllButton'), 'sidebar.js must define clickConnectAllButton');
+  assert.ok(sidebarJs.includes('isOutlinesFilterRestricted'), 'sidebar.js must define isOutlinesFilterRestricted');
+  assert.ok(sidebarJs.includes('cx-back-to-all-btn'), 'sidebar.js must render back-to-all button');
+  assert.ok(sidebarJs.includes('cx-filter-disabled'), 'sidebar.js must toggle cx-filter-disabled');
+
+  // 3. Functional tests
+  const outlinesRoot = document.createElement('div');
+  outlinesRoot.className = 'assessmentoutlinesui';
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'cvr-c-category-toolbar';
+  const toolbarTitle = document.createElement('span');
+  toolbarTitle.className = 'cvr-c-category-toolbar__title';
+  toolbarTitle.textContent = 'Chemistry';
+  toolbar.appendChild(toolbarTitle);
+  outlinesRoot.appendChild(toolbar);
+
+  const accordion = document.createElement('div');
+  accordion.className = 'eds-c-accordion--dark';
+  const allSectionHeading = document.createElement('div');
+  allSectionHeading.className = 'eds-c-accordion__section-heading';
+  const allLabel = document.createElement('span');
+  allLabel.className = 'eds-c-accordion__section-label';
+  allLabel.textContent = 'All';
+  allSectionHeading.appendChild(allLabel);
+  accordion.appendChild(allSectionHeading);
+  outlinesRoot.appendChild(accordion);
+
+  let allClicked = false;
+  allSectionHeading.addEventListener('click', () => {
+    allClicked = true;
+  });
+
+  // Only 2 tiles initially (< 4 classes)
+  const tilesContainer = document.createElement('div');
+  for (let i = 0; i < 2; i++) {
+    const tile = document.createElement('div');
+    tile.className = 'eds-c-tile';
+    tilesContainer.appendChild(tile);
+  }
+  outlinesRoot.appendChild(tilesContainer);
+  document.body.appendChild(outlinesRoot);
+
+  delete window.__connectifySidebarInitialized;
+  delete global.__connectifySidebarInitialized;
+  window.__connectifySidebarInitialized = false;
+  if (global.window) global.window.__connectifySidebarInitialized = false;
+  document.querySelectorAll('#connectify-sidebar').forEach(el => el.remove());
+  document.querySelectorAll('#connectify-sidebar-handle').forEach(el => el.remove());
+
+  try {
+    eval(sidebarJs);
+
+    const sidebar = document.getElementById('connectify-sidebar');
+    assert.ok(sidebar, 'Sidebar element must exist');
+
+    // With filter applied and only 2 tiles, sidebar must be in disabled state
+    assert.strictEqual(window.ConnectifySidebar.isOutlinesFilterRestricted(), true, 'Outlines must be detected as restricted');
+    assert.ok(sidebar.classList.contains('cx-filter-disabled'), 'Sidebar must have cx-filter-disabled class');
+
+    const notice = sidebar.querySelector('.cx-filter-notice');
+    assert.ok(notice, 'Filter notice must exist in sidebar');
+    assert.strictEqual(notice.hidden, false, 'Filter notice must be visible');
+
+    const backBtn = sidebar.querySelector('.cx-back-to-all-btn');
+    assert.ok(backBtn, 'Back to All button must exist in notice');
+
+    // Tool launcher buttons must be disabled
+    const toolBtns = sidebar.querySelectorAll('.cx-tool-menu button');
+    assert.ok(toolBtns.length > 0, 'Tool buttons must exist');
+    toolBtns.forEach(btn => {
+      assert.strictEqual(btn.disabled, true, `Button #${btn.id} must be disabled`);
+      assert.strictEqual(btn.getAttribute('aria-disabled'), 'true', `Button #${btn.id} must have aria-disabled="true"`);
+    });
+
+    // Clicking Back to All button dispatches click to Connect All accordion heading
+    backBtn.click();
+    assert.strictEqual(allClicked, true, 'Clicking Back to All button must click Connect All section');
+
+    // Simulate Connect restoring all 12 classes and resetting toolbar title
+    toolbarTitle.textContent = 'All';
+    for (let i = 0; i < 10; i++) {
+      const tile = document.createElement('div');
+      tile.className = 'eds-c-tile';
+      tilesContainer.appendChild(tile);
+    }
+    window.ConnectifySidebar.syncState();
+
+    assert.strictEqual(window.ConnectifySidebar.isOutlinesFilterRestricted(), false, 'Outlines must now be unrestricted');
+    assert.strictEqual(sidebar.classList.contains('cx-filter-disabled'), false, 'cx-filter-disabled must be removed');
+    assert.strictEqual(notice.hidden, true, 'Filter notice must be hidden when unrestricted');
+    toolBtns.forEach(btn => {
+      assert.strictEqual(btn.disabled, false, `Button #${btn.id} must be enabled when unrestricted`);
+      assert.strictEqual(btn.getAttribute('aria-disabled'), null, `Button #${btn.id} must not have aria-disabled`);
+    });
+  } finally {
+    outlinesRoot.remove();
+    document.querySelectorAll('#connectify-sidebar').forEach(el => el.remove());
+    document.querySelectorAll('#connectify-sidebar-handle').forEach(el => el.remove());
+    delete window.__connectifySidebarInitialized;
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

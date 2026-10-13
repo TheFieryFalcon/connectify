@@ -280,3 +280,84 @@ html.connectea-dark #connectify-weakness select,html.connectea-dark #cx-radar-mo
   box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.55), 0 8px 12px -6px rgba(0, 0, 0, 0.45) !important;
 }
 
+/* Filter-applied disabled state in sidebar */
+#connectify-sidebar.cx-filter-disabled .cx-tool-menu > button,
+#connectify-sidebar.cx-filter-disabled .cx-tool-menu > .cx-calculator-tool,
+#connectify-sidebar.cx-filter-disabled .cx-tool-menu > .cx-secondary-tool {
+  opacity: 0.38 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  filter: grayscale(0.85) !important;
+}
+
+#connectify-sidebar .cx-filter-notice {
+  margin: 14px 20px 8px;
+  padding: 14px 16px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-left: 4px solid #64748b;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.connectea-dark #connectify-sidebar .cx-filter-notice {
+  background: var(--cx-surface-elevated, #1a222d);
+  border-color: var(--cx-border, #3b4d5e);
+  border-left: 4px solid var(--cx-border-focus, #5f7a99);
+}
+
+#connectify-sidebar .cx-filter-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 6px;
+  letter-spacing: -0.2px;
+}
+
+.connectea-dark #connectify-sidebar .cx-filter-title {
+  color: var(--cx-text-muted, #94a3b8);
+}
+
+#connectify-sidebar .cx-filter-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #64748b;
+  margin: 0 0 12px 0;
+}
+
+.connectea-dark #connectify-sidebar .cx-filter-text {
+  color: var(--cx-text-secondary, #94a3b8);
+}
+
+#connectify-sidebar .cx-back-to-all-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  padding: 9px 14px !important;
+  background: #24618c !important;
+  color: #ffffff !important;
+  border: 1px solid #1a4d70 !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease, transform 0.1s ease !important;
+}
+
+#connectify-sidebar .cx-back-to-all-btn:hover {
+  background: #1a4d70 !important;
+}
+
+.connectea-dark #connectify-sidebar .cx-back-to-all-btn {
+  background: var(--cx-accent, #3b82f6) !important;
+  border-color: var(--cx-accent-hover, #2563eb) !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark #connectify-sidebar .cx-back-to-all-btn:hover {
+  background: var(--cx-accent-hover, #2563eb) !important;
+}
+
