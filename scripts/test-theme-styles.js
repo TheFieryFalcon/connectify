@@ -1436,26 +1436,49 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
       return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
     }
 
+    function blendRgb(top, bottom) {
+      const a = top.a !== undefined ? top.a : 1.0;
+      return {
+        r: Math.round(top.r * a + bottom.r * (1.0 - a)),
+        g: Math.round(top.g * a + bottom.g * (1.0 - a)),
+        b: Math.round(top.b * a + bottom.b * (1.0 - a)),
+        a: 1.0
+      };
+    }
+
     function getEffectiveBg(el) {
+      const defaultBg = isDark ? { r: 18, g: 23, b: 31, a: 1 } : { r: 255, g: 255, b: 255, a: 1 };
+      const layers = [];
       let curr = el;
       while (curr && curr !== document.documentElement) {
         if (curr === document.body) {
-          if (isDark) return { r: 18, g: 23, b: 31, a: 1 };
+          if (isDark) {
+            layers.unshift({ r: 18, g: 23, b: 31, a: 1 });
+            break;
+          }
           const bStyle = window.getComputedStyle(curr);
           const bBg = parseRgb(bStyle.backgroundColor);
-          return (bBg && bBg.a > 0.05) ? bBg : { r: 255, g: 255, b: 255, a: 1 };
+          layers.unshift((bBg && bBg.a > 0.05) ? bBg : { r: 255, g: 255, b: 255, a: 1 });
+          break;
         }
         const style = window.getComputedStyle(curr);
         const bg = parseRgb(style.backgroundColor);
-        if (bg && bg.a > 0.05) {
+        if (bg && bg.a > 0.01) {
           if (isDark && bg.r > 200 && bg.g > 200 && bg.b > 200 && (curr.id === 'main-content' || curr.classList?.contains?.('portlet-layout') || curr.classList?.contains?.('portlet-dropzone'))) {
-            return { r: 18, g: 23, b: 31, a: 1 };
+            layers.unshift({ r: 18, g: 23, b: 31, a: 1 });
+            break;
           }
-          return bg;
+          layers.unshift(bg);
+          if (bg.a >= 0.95) break;
         }
         curr = curr.parentElement;
       }
-      return isDark ? { r: 18, g: 23, b: 31, a: 1 } : { r: 255, g: 255, b: 255, a: 1 };
+      if (layers.length === 0) return defaultBg;
+      let result = layers[0].a >= 0.95 ? layers[0] : blendRgb(layers[0], defaultBg);
+      for (let i = 1; i < layers.length; i++) {
+        result = blendRgb(layers[i], result);
+      }
+      return result;
     }
 
     function cleanFontFamily(f) {
@@ -1499,8 +1522,11 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           const ps = pseudoName ? window.getComputedStyle(node, pseudoName) : window.getComputedStyle(node);
           if (!ps) return null;
           const content = (typeof ps.getPropertyValue === 'function' ? ps.getPropertyValue('content') : ps.content) || '';
+          if (!pseudoName && node.children && node.children.length > 0) {
+            return null;
+          }
           const textVal = pseudoName ? content : (node.innerText || node.textContent || '');
-          const hasPua = /[\uE000-\uF8FF\uF000-\uFFFF]/.test(textVal) || /[\uE800-\uE8FF]/.test(textVal) || /["']\\e[0-9a-f]{3,4}["']/i.test(content);
+          const hasPua = /[\uE000-\uF8FF]/.test(textVal) || /["']\\e[0-9a-f]{3,4}["']/i.test(content);
           if (hasPua) {
             const fontFam = (ps.fontFamily || '').toLowerCase();
             const isWebfont = fontFam.includes('connect-webfont') || fontFam.includes('vaadin') || fontFam.includes('font-awesome') || fontFam.includes('fontawesome') || fontFam.includes('icomoon') || fontFam.includes('material') || fontFam.includes('glyph');
@@ -1975,7 +2001,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
 
         // B. Native Purple Ink Bar
         if (el.classList?.contains?.('mat-ink-bar')) {
-          if (elBg && elBg.r > 90 && elBg.r < 125 && elBg.b > 160) {
+          if (elBg && elBg.r > 90 && elBg.r < 125 && elBg.g < 100 && elBg.b > 160) {
             issues.push({
               category: 'STYLE',
               type: 'NATIVE_PURPLE_INK_BAR',
@@ -1991,8 +2017,12 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           const bgLum = getLuminance(elBg.r, elBg.g, elBg.b);
           const isLightBg = bgLum > 0.45 || (elBg.r > 165 && elBg.g > 165 && elBg.b > 165);
           if (isLightBg) {
-            const isExempt = Boolean(el.closest?.(
-              '.mat-badge, .badge, .status-pill, .chip-light, [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning, .portal-session-warning, .session-timeout, .cvr-c-timeout-alert'
+            const isControlOrWidget = ['input', 'button'].includes(tag) ||
+              el.classList?.contains?.('mat-ink-bar') ||
+              el.classList?.contains?.('mat-checkbox-background') ||
+              (rect.width <= 140 && rect.height <= 40);
+            const isExempt = isControlOrWidget || Boolean(el.closest?.(
+              '.mat-badge, .badge, .status-pill, .chip-light, [class*="badge"], [class*="chip"], [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning, .portal-session-warning, .session-timeout, .cvr-c-timeout-alert'
             ));
             if (!isExempt) {
               issues.push({

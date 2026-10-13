@@ -96,6 +96,7 @@
       label.className = 'cx-cat-name-label';
       label.textContent = cat;
       label.title = cat;
+      label.dataset.cat = cat;
       label.style.setProperty('--cx-cat-color', data.color || '#3498db');
       label.style.cssText = `width:90px;font-size:12px;font-weight:600;color:${data.color || '#3498db'};--cx-cat-color:${data.color || '#3498db'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;`;
 
@@ -207,13 +208,13 @@
       <section class="cx-settings-section" style="margin-top:36px;border-top:1px solid #d8e3ee;padding-top:24px;">
         <header style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
           <strong>Assessment Categories</strong>
-          <button type="button" id="cx-cat-add" class="eds-c-button" style="background:#3498db;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">+ Add Category</button>
+          <button type="button" id="cx-cat-add" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">+ Add Category</button>
         </header>
         <p class="cx-settings-desc" style="font-size:12px;margin:0 0 16px 0;">Customize the comma-separated keywords used to automatically detect your assessment types:</p>
         <div id="cx-categories-inputs"></div>
         <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
            <button type="button" id="cx-cat-save" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Save Changes</button>
-           <button type="button" id="cx-cat-reset" class="eds-c-button" style="background:#95a5a6;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;">Reset Defaults</button>
+           <button type="button" id="cx-cat-reset" class="eds-c-button" style="background:#4b5563;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Reset Defaults</button>
         </div>
       </section>
 

@@ -14,6 +14,7 @@
 #connectea-atar{width:min(540px,calc(100vw - 28px));padding:16px;line-height:1.4;box-shadow:0 12px 38px #15263830}
 #connectea-atar .cta-heading{gap:16px;margin-bottom:12px;align-items:flex-start}
 #connectea-atar .cta-heading strong{font-size:15px;line-height:1.4;font-weight:650;max-width:420px}
+.cta-heading strong:focus,#connectea-atar .cta-heading strong:focus{outline:none!important}
 #connectea-atar .cta-heading button{flex:none;padding:4px 8px;font-size:11px}
 #connectea-atar .cta-tabs{padding:4px;gap:4px;background:#edf2f7;border-radius:9px;margin-bottom:10px}
 #connectea-atar .cta-tabs .cta-semester{background:transparent;border:0;padding:7px 8px;font-size:12px;white-space:nowrap}
@@ -106,4 +107,5 @@
 .cx-back-to-top-btn:active {
   transform: translateY(1px) !important;
 }
-
+.cta-count-span{font-size:11px;font-weight:500;color:#55667a}
+.connectea-dark .cta-count-span{color:#cbd5e1!important}

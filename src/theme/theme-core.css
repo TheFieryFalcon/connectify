@@ -36,7 +36,7 @@ html.connectea-dark {
 .connectea-dark :is(
   h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, select, textarea, label, strong, small,
   .eds-c-heading, .v-caption, .v-label
-):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.material-icons):not(.connectea-theme-icon):not(.connectea-theme-arrow):not(.v-button-wrap):not(.v-button-caption):not(.eds-c-icon-button *):not(.cvr-c-icon-button *):not(.cvr-c-pri-nav-icon-button *):not(.avatar-content):not([class*="avatar"]):not(.connectea-panel *):not([class*="connectea-"]) {
+):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.material-icons):not(.connectea-theme-icon):not(.connectea-theme-arrow):not(.v-button-wrap):not(.v-button-caption):not(.eds-c-icon-button *):not(.cvr-c-icon-button *):not(.cvr-c-pri-nav-icon-button *):not(.avatar-content):not([class*="avatar"]):not(.connectea-panel *):not([class*="connectea-"]):not(#connectify-sidebar *):not(#connectify-sidebar-handle *) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 
@@ -303,7 +303,7 @@ html.connectea-dark {
 
 .connectea-dark :is(.cvr-c-service-bar, .cvr-c-service-bar__container) {
   background-color: var(--cx-canvas-bg, #121820) !important;
-  border: none !important;
+  border-bottom: 1px solid var(--cx-border, #2e3c4e) !important;
 }
 
 .connectea-dark :is(

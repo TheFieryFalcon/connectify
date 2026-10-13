@@ -103,7 +103,22 @@
   color: var(--cx-text-primary, #e2e8f0) !important;
 }
 .connectea-dark #connectify-sidebar .cx-cat-name-label {
-  color: var(--cx-cat-color, inherit) !important;
+  color: var(--cx-cat-color-dark, var(--cx-cat-color, inherit)) !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Essay"] {
+  color: #c084fc !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Exam"] {
+  color: #f87171 !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Application"] {
+  color: #60a5fa !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Test"] {
+  color: #4ade80 !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Take-Home"] {
+  color: #facc15 !important;
 }
 .connectea-dark #connectify-sidebar strong {
   color: var(--cx-text-primary, #f8fafc) !important;

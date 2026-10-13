@@ -58,7 +58,7 @@
   --cx-surface-bg: #32302f; --cx-surface-secondary: #282828; --cx-surface-elevated: #3c3836;
   --cx-surface-hover: #504944; --cx-surface-active: #1d2021;
   --cx-border: #504944; --cx-border-subtle: #3c3836; --cx-border-strong: #665c54; --cx-border-focus: #fabd2f;
-  --cx-text-primary: #fbf1c7; --cx-text-secondary: #ebdbb2; --cx-text-muted: #a89984; --cx-text-disabled: #7c6f64; --cx-text-inverse: #1d2021;
+  --cx-text-primary: #fbf1c7; --cx-text-secondary: #ebdbb2; --cx-text-muted: #bdae93; --cx-text-disabled: #7c6f64; --cx-text-inverse: #1d2021;
   --cx-accent: #fabd2f; --cx-accent-hover: #fcd34d; --cx-accent-active: #d79921; --cx-accent-subtle: rgba(250, 189, 47, 0.15); --cx-accent-text: #1d2021;
   --cx-accent-purple: #7957d5; --cx-accent-coral: #e74632; --cx-accent-cyan: #83a598;
   --cx-nav-bg: #1d2021; --cx-nav-border: #3c3836; --cx-nav-text: #ebdbb2; --cx-nav-text-hover: #fbf1c7; --cx-nav-item-active: #282828;

@@ -161,6 +161,8 @@
   .cvr-c-class__status-label--locked,
   .cvr-c-attendance .eds-t-red.cvr-c-standard-label,
   .eds-u-theme-multiplier.eds-t-red .cvr-c-standard-label,
+  .standard-label.connect-red,
+  .connect-red,
   .cvr-c-submission__status-label--overdue,
   .cvr-c-entitystatus--reported,
   .cvr-c-status-label--reported
@@ -168,6 +170,15 @@
   background-color: #2b171a !important;
   border: 1px solid #7f2329 !important;
   color: #fca5a5 !important;
+}
+
+.connectea-dark :is(
+  .standard-label.connect-blue-light,
+  .connect-blue-light
+) {
+  background-color: #172554 !important;
+  border: 1px solid #1e40af !important;
+  color: #93c5fd !important;
 }
 
 .connectea-dark :is(.eds-t-red, .eds-u-theme-multiplier.eds-t-red) :is(
@@ -461,6 +472,10 @@
   [class*="teacher"], [class*="code"], [class*="subtitle"], [class*="meta"], [class*="date"], small
 ) {
   color: var(--cx-text-muted, #94a3b8) !important;
+}
+
+.connectea-dark .eds-c-tile__footer {
+  border-top: 1px solid var(--cx-border, #2e3c4e) !important;
 }
 
 

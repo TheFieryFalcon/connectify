@@ -16,9 +16,14 @@
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-.connectea-dark :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon) {
+.connectea-dark :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]) {
   color: var(--cx-text-primary, #f1f5f9) !important;
+  fill: currentColor !important;
+}
+
+.connectea-dark :is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, .eds-c-button--primary, .v-button--primary, [class*="primary"], [class*="accent"]) :is(.mat-icon, mat-icon, cnt-icon) {
+  color: inherit !important;
   fill: currentColor !important;
 }
 
@@ -40,7 +45,7 @@
 
 .connectea-dark .mat-expansion-panel {
   border: none !important;
-  border-radius: 6px !important;
+  border-radius: 0 !important;
 }
 
 .connectea-dark :is(.mat-expansion-panel-header, .mat-tree-node):hover {

@@ -121,10 +121,7 @@
       topTitle.style.fontSize = '12px';
 
       const selectedCount = eligibleCourses.filter(c => !excludedSubjects.has(c.id || c.name)).length;
-      const countSpan = createEl('span', '', `${selectedCount} of ${eligibleCourses.length} selected`);
-      countSpan.style.fontSize = '11px';
-      countSpan.style.color = '#788896';
-      countSpan.style.fontWeight = '500';
+      const countSpan = createEl('span', 'cta-count-span', `${selectedCount} of ${eligibleCourses.length} selected`);
 
       topHeader.append(topTitle, countSpan);
       topFourContainer.append(topHeader);

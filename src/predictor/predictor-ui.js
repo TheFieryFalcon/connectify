@@ -189,7 +189,7 @@
                 const isTop = (atarProj.mid.topCourses || []).some(t => t.id === c.id);
                 const displayScore = c.score !== undefined ? (Number.isFinite(c.score) ? Math.round(c.score) : c.score) : '—';
                 return `
-                  <tr style="${isTop ? 'background:rgba(34,197,94,0.06);' : ''}">
+                  <tr class="${isTop ? 'cx-pred-top-row' : ''}">
                     <td style="padding:8px 4px; font-weight:600;">${c.name}</td>
                     <td style="padding:8px 4px; text-align:right; opacity:0.9;">${c.mark !== undefined ? c.mark + '%' : '—'}</td>
                     <td style="padding:8px 4px; text-align:right; font-weight:700;">${displayScore}</td>

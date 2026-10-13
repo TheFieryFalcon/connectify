@@ -116,8 +116,6 @@
   .cvr-c-table--list,
   .cvr-c-tree-panel,
   .cvr-c-submission-students-table,
-  .mat-table,
-  mat-table,
   .v-table,
   .v-table-table
 ) :is(th, td) {
@@ -328,13 +326,21 @@
 }
 
 :is(html, body).connectea-dark :is(mat-paginator, .mat-paginator, cnt-paginator, .cnt-paginator, .connect-paginator-container) :is(
-  .mat-select-arrow,
   .mat-form-field-underline,
   .mat-form-field-ripple
 ) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border-color: var(--cx-border, #36485e) !important;
   background-color: var(--cx-border, #36485e) !important;
+}
+
+:is(html, body).connectea-dark :is(mat-paginator, .mat-paginator, cnt-paginator, .cnt-paginator, .connect-paginator-container) .mat-select-arrow {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  border-top-color: var(--cx-text-secondary, #cbd5e1) !important;
+  border-right-color: transparent !important;
+  border-bottom-color: transparent !important;
+  border-left-color: transparent !important;
+  background-color: transparent !important;
 }
 
 :is(html, body).connectea-dark :is(.mat-paginator-decrement, .mat-paginator-increment, .mat-paginator-first, .mat-paginator-last) {

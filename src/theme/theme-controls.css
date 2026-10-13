@@ -21,7 +21,7 @@
 }
 
 /* High-Contrast Dark Checkboxes (Native, Clay, Material, Vaadin) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):not(#connectify-sidebar *):not([class*="connectea-"]) {
   appearance: none !important;
   -webkit-appearance: none !important;
   width: 17px !important;
@@ -93,7 +93,7 @@
 }
 
 /* High-Contrast Dark Dropdowns & Selects */
-.connectea-dark select:not(.connectea-type-select):not([class*="connectea-"]),
+.connectea-dark select:not(.connectea-type-select):not([class*="connectea-"]):not(#connectify-sidebar *),
 .connectea-dark .v-select select,
 .connectea-dark .eds-c-select select,
 .connectea-dark :is(.cvr-c-classes__sort, .cvr-c-sort-by) select {
@@ -170,7 +170,7 @@
 }
 
 /* Action Menu Trigger & Pagination Buttons: Borderless Matching Light Mode */
-.connectea-dark :is(.eds-c-action-button, .cvr-c-action-button, .eds-c-action-button-set :is(.v-button, .eds-c-action-button), .cvr-c-pagination-button-set button, .eds-c-pagination-button-set button, .eds-c-pagination-button, .quick-action-menu, [class*="action-button"]):not(.eds-o-button--positive) {
+.connectea-dark :is(.eds-c-action-button, .cvr-c-action-button, .cvr-c-pagination-button-set button, .eds-c-pagination-button-set button, .eds-c-pagination-button, .quick-action-menu, button.action-button, a.action-button):not(.eds-o-button--positive):not(.eds-c-tile__footer *):not([class*="-set"]) {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -178,7 +178,7 @@
   border-radius: 4px !important;
 }
 
-.connectea-dark :is(.eds-c-action-button, .cvr-c-action-button, .eds-c-action-button-set :is(.v-button, .eds-c-action-button), .cvr-c-pagination-button-set button, .eds-c-pagination-button-set button, .eds-c-pagination-button, .quick-action-menu, [class*="action-button"]):not(.eds-o-button--positive):hover {
+.connectea-dark :is(.eds-c-action-button, .cvr-c-action-button, .cvr-c-pagination-button-set button, .eds-c-pagination-button-set button, .eds-c-pagination-button, .quick-action-menu, button.action-button, a.action-button):not(.eds-o-button--positive):not(.eds-c-tile__footer *):not([class*="-set"]):hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: #ffffff !important;
   border: none !important;
@@ -358,13 +358,9 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
   color: #ffffff !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
-  .eds-c-icon-button,
-  .cvr-c-icon-button,
-  .mat-icon-button,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)) :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
-  color: #cbd5e1 !important;
-  fill: #cbd5e1 !important;
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)) :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], mat-icon, cnt-icon, [class^="cvr-c-icon--"]):not([data-original-color]) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  fill: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)):hover :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
