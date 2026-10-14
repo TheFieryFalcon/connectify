@@ -1,10 +1,4 @@
-/**
- * Connectify Category Settings & Customizer
- *
- * Implements assessment category customizer (+ Add Category, custom keywords, color themes)
- * and hosts the Settings panel.
- * Provides `window.ConnectifyCategorySettings`.
- */
+/** Connectify Category Settings & Customizer */
 (() => {
   'use strict';
 
@@ -18,46 +12,20 @@
     'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'presentation', 'oral', 'creative'] }
   };
 
-  if (!window.cxCategories) {
-    window.cxCategories = defaultCategories;
-  }
+  if (!window.cxCategories) window.cxCategories = defaultCategories;
 
-  const getStorageApi = () => (typeof browser !== 'undefined' && browser?.storage)
-    ? browser
-    : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
-
+  const getStorageApi = () => (typeof browser !== 'undefined' && browser?.storage) ? browser : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
   const safeStorageGet = (keys, cb) => {
     try {
-      const api = getStorageApi();
-      if (!api?.storage?.local) return;
+      const api = getStorageApi(); if (!api?.storage?.local) return;
       let handled = false;
-      const callback = res => {
-        if (handled) return;
-        handled = true;
-        if (res) cb(res);
-      };
+      const callback = res => { if (!handled && res) { handled = true; cb(res); } };
       const p = api.storage.local.get(keys, callback);
       if (p && typeof p.then === 'function') p.then(callback).catch(() => {});
-    } catch (e) {}
+    } catch {}
   };
-
-  const safeStorageSet = obj => {
-    try {
-      const api = getStorageApi();
-      if (!api?.storage?.local) return;
-      const p = api.storage.local.set(obj);
-      if (p && typeof p.catch === 'function') p.catch(() => {});
-    } catch (e) {}
-  };
-
-  const safeStorageRemove = key => {
-    try {
-      const api = getStorageApi();
-      if (!api?.storage?.local) return;
-      const p = api.storage.local.remove(key);
-      if (p && typeof p.catch === 'function') p.catch(() => {});
-    } catch (e) {}
-  };
+  const safeStorageSet = obj => { try { const p = getStorageApi()?.storage?.local?.set(obj); if (p?.catch) p.catch(() => {}); } catch {} };
+  const safeStorageRemove = key => { try { const p = getStorageApi()?.storage?.local?.remove(key); if (p?.catch) p.catch(() => {}); } catch {} };
 
   const resolveCategories = () => {
     try {
@@ -299,9 +267,31 @@
 
     const themeSelectInput = catPanel.querySelector('#cx-theme-select-input');
     if (themeSelectInput) {
+      if (!themeSelectInput.querySelector('option[value="light"]')) {
+        const defOpt = document.createElement('option');
+        defOpt.value = 'light';
+        defOpt.textContent = '☀ Default';
+        if (typeof themeSelectInput.prepend === 'function') {
+          themeSelectInput.prepend(defOpt);
+        } else if (typeof themeSelectInput.insertBefore === 'function') {
+          themeSelectInput.insertBefore(defOpt, themeSelectInput.firstChild);
+        } else if (typeof themeSelectInput.replaceChildren === 'function') {
+          themeSelectInput.replaceChildren(defOpt, ...(themeSelectInput.children || []));
+        } else {
+          themeSelectInput.appendChild(defOpt);
+        }
+      }
+      const customThemes = window.ConnectifyThemeRegistry?.getCustomThemes ? window.ConnectifyThemeRegistry.getCustomThemes() : [];
+      for (const ct of customThemes) {
+        if (!themeSelectInput.querySelector(`option[value="${ct.id}"]`)) {
+          const opt = document.createElement('option');
+          opt.value = ct.id;
+          opt.textContent = `${ct.icon || '🎨'} ${ct.name}`;
+          themeSelectInput.appendChild(opt);
+        }
+      }
       const rawTheme = window.ConnectifyTheme ? window.ConnectifyTheme.getTheme() : (localStorage.getItem('connectea:theme:id') || 'dark');
-      themeSelectInput.value = (rawTheme === 'light' || rawTheme === 'custom') ? (localStorage.getItem('connectea:theme:restore_theme') || 'dark') : rawTheme;
-      if (!themeSelectInput.value) themeSelectInput.value = 'dark';
+      themeSelectInput.value = rawTheme || 'dark';
       themeSelectInput.addEventListener('change', () => {
         if (window.ConnectifyTheme) window.ConnectifyTheme.setTheme(themeSelectInput.value);
       });

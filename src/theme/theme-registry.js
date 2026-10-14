@@ -20,70 +20,20 @@
     textSecondary: '#d1d5db'
   };
 
+  const BUILTIN_PALETTES = {
+    dark: { name: 'Dark', icon: '🌙', isDark: true, swatch: ['#12171f', '#1e2632', '#3b82f6'], canvas: '#12171f', canvasSubtle: '#0a0d12', surface: '#1e2632', surfaceSecondary: '#18202b', surfaceElevated: '#263242', surfaceHover: '#263344', border: '#455a73', borderSubtle: '#2e3c4e', borderStrong: '#5a7391', accent: '#3b82f6', accentHover: '#60a5fa', textPrimary: '#f8fafc', textSecondary: '#e2e8f0', tileLinkColor: '#f8fafc', button: '#202c3b', buttonHover: '#2c3b4e', buttonText: '#f1f5f9', inputBg: '#141a22', inputBorder: '#42556d' },
+    quantum: { name: 'Quantum Dark', icon: '⚛️', isDark: true, swatch: ['#282828', '#32302f', '#fabd2f'], canvas: '#282828', canvasSubtle: '#191b1c', surface: '#32302f', surfaceSecondary: '#282828', surfaceElevated: '#3c3836', surfaceHover: '#504944', border: '#5a524c', borderSubtle: '#3c3836', borderStrong: '#665c54', accent: '#fabd2f', accentHover: '#fcd34d', textPrimary: '#fbf1c7', textSecondary: '#ebdbb2', tileLinkColor: '#fbf1c7', button: '#3c3836', buttonHover: '#504944', buttonText: '#fbf1c7', inputBg: '#1d2021', inputBorder: '#504944' },
+    amoled: { name: 'AMOLED Black', icon: '🌑', isDark: true, swatch: ['#000000', '#0a0a0a', '#38bdf8'], canvas: '#000000', canvasSubtle: '#050505', surface: '#0d0d0d', surfaceSecondary: '#141414', surfaceElevated: '#1a1a1a', surfaceHover: '#1f1f1f', border: '#333333', borderSubtle: '#222222', borderStrong: '#444444', accent: '#38bdf8', accentHover: '#7dd3fc', textPrimary: '#ffffff', textSecondary: '#d4d4d4', tileLinkColor: '#ffffff', button: '#121212', buttonHover: '#202020', buttonText: '#ffffff', inputBg: '#050505', inputBorder: '#262626' },
+    midnight: { name: 'Midnight Navy', icon: '🌌', isDark: true, swatch: ['#0b132b', '#141f36', '#60a5fa'], canvas: '#0b132b', canvasSubtle: '#050914', surface: '#121e38', surfaceSecondary: '#18284a', surfaceElevated: '#1f325c', surfaceHover: '#253c6e', border: '#355085', borderSubtle: '#233559', borderStrong: '#4568a8', accent: '#60a5fa', accentHover: '#93c5fd', textPrimary: '#f1f5f9', textSecondary: '#cbd5e1', tileLinkColor: '#f1f5f9', button: '#182642', buttonHover: '#22355c', buttonText: '#f1f5f9', inputBg: '#0e1830', inputBorder: '#2a3c61' },
+    forest: { name: 'Emerald Forest', icon: '🌲', isDark: true, swatch: ['#0a1914', '#11261f', '#10b981'], canvas: '#0a1914', canvasSubtle: '#050d0a', surface: '#122820', surfaceSecondary: '#173329', surfaceElevated: '#1e4235', surfaceHover: '#244f3f', border: '#326753', borderSubtle: '#1e4235', borderStrong: '#44886f', accent: '#10b981', accentHover: '#34d399', textPrimary: '#ecfdf5', textSecondary: '#d1fae5', tileLinkColor: '#ecfdf5', button: '#132c24', buttonHover: '#1a3b30', buttonText: '#ecfdf5', inputBg: '#0d1f19', inputBorder: '#224a3b' },
+    sunset: { name: 'Twilight Plum', icon: '🌅', isDark: true, swatch: ['#19111c', '#26182a', '#f43f5e'], canvas: '#19111c', canvasSubtle: '#0d080e', surface: '#28182c', surfaceSecondary: '#351f3b', surfaceElevated: '#44274c', surfaceHover: '#4e2c56', border: '#64396f', borderSubtle: '#412548', borderStrong: '#824b91', accent: '#f43f5e', accentHover: '#fb7185', textPrimary: '#fdf2f8', textSecondary: '#fce7f3', tileLinkColor: '#fdf2f8', button: '#2b1930', buttonHover: '#3a2241', buttonText: '#fdf2f8', inputBg: '#1e1322', inputBorder: '#4b2a54' },
+    'liquid-glass': { name: 'Liquid Glass', icon: '🫧', isDark: true, swatch: ['#0b1120', 'rgba(56, 189, 248, 0.25)', '#38bdf8'], liquidGlass: true, canvas: '#0b1120', canvasSubtle: '#080d19', surface: 'rgba(26, 36, 52, 0.72)', surfaceSecondary: 'rgba(18, 24, 38, 0.68)', surfaceElevated: 'rgba(38, 51, 72, 0.80)', surfaceHover: 'rgba(255, 255, 255, 0.14)', border: 'rgba(255, 255, 255, 0.22)', borderSubtle: 'rgba(255, 255, 255, 0.12)', borderStrong: 'rgba(255, 255, 255, 0.32)', accent: '#38bdf8', accentHover: '#7dd3fc', textPrimary: '#ffffff', textSecondary: '#dbeafe', tileLinkColor: '#ffffff', button: 'rgba(255, 255, 255, 0.10)', buttonHover: 'rgba(255, 255, 255, 0.18)', buttonText: '#ffffff', inputBg: 'rgba(15, 23, 42, 0.60)', inputBorder: 'rgba(255, 255, 255, 0.14)' }
+  };
+
   const BUILTIN_THEMES = [
-    {
-      id: 'dark',
-      name: 'Dark',
-      icon: '🌙',
-      isDark: true,
-      swatch: ['#12171f', '#1e2632', '#3b82f6']
-    },
-    {
-      id: 'quantum',
-      name: 'Quantum Dark',
-      icon: '⚛️',
-      isDark: true,
-      swatch: ['#282828', '#32302f', '#fabd2f']
-    },
-    {
-      id: 'amoled',
-      name: 'AMOLED Black',
-      icon: '🌑',
-      isDark: true,
-      swatch: ['#000000', '#0a0a0a', '#38bdf8']
-    },
-    {
-      id: 'midnight',
-      name: 'Midnight Navy',
-      icon: '🌌',
-      isDark: true,
-      swatch: ['#0b132b', '#141f36', '#60a5fa']
-    },
-    {
-      id: 'forest',
-      name: 'Emerald Forest',
-      icon: '🌲',
-      isDark: true,
-      swatch: ['#0a1914', '#11261f', '#10b981']
-    },
-    {
-      id: 'sunset',
-      name: 'Twilight Plum',
-      icon: '🌅',
-      isDark: true,
-      swatch: ['#19111c', '#26182a', '#f43f5e']
-    },
-    {
-      id: 'liquid-glass',
-      name: 'Liquid Glass',
-      icon: '🫧',
-      isDark: true,
-      swatch: ['#0b1120', 'rgba(56, 189, 248, 0.25)', '#38bdf8']
-    },
-    {
-      id: 'light',
-      name: 'Default',
-      icon: '☀',
-      isDark: false,
-      swatch: ['#f8fafc', '#ffffff', '#3b82f6']
-    },
-    {
-      id: 'custom',
-      name: 'Custom Theme',
-      icon: '🎨',
-      isDark: true,
-      swatch: ['#111827', '#1f2937', '#6366f1']
-    }
+    ...Object.entries(BUILTIN_PALETTES).map(([id, p]) => ({ id, name: p.name, icon: p.icon, isDark: p.isDark, swatch: p.swatch })),
+    { id: 'light', name: 'Default', icon: '☀', isDark: false, swatch: ['#f8fafc', '#ffffff', '#3b82f6'] },
+    { id: 'custom', name: 'Custom Theme', icon: '🎨', isDark: true, swatch: ['#111827', '#1f2937', '#6366f1'] }
   ];
 
   const registry = new Map();
@@ -161,6 +111,64 @@
     return Array.from(registry.values());
   }
 
+  const STORAGE_CUSTOM_THEMES_LIST = 'connectea:custom_themes_list';
+
+  function getCustomThemes() {
+    try {
+      const stored = localStorage.getItem(STORAGE_CUSTOM_THEMES_LIST);
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  }
+
+  function loadSavedCustomThemes() {
+    for (const t of getCustomThemes()) {
+      if (t && t.id) registerTheme(t);
+    }
+  }
+
+  function saveCustomTheme(themeDef) {
+    if (!themeDef) return null;
+    const id = themeDef.id || `custom_${Date.now()}`;
+    const entry = {
+      id,
+      name: themeDef.name || 'Custom Theme',
+      icon: themeDef.icon || '🎨',
+      isDark: themeDef.isDark !== false,
+      isCustom: true,
+      liquidGlass: Boolean(themeDef.liquidGlass),
+      wallpaper: themeDef.wallpaper || null,
+      swatch: Array.isArray(themeDef.swatch) ? themeDef.swatch : [
+        themeDef.colors?.canvas || '#1e2632',
+        themeDef.colors?.surface || '#283444',
+        themeDef.colors?.accent || '#3b82f6'
+      ],
+      colors: themeDef.colors || {}
+    };
+    registerTheme(entry);
+    try {
+      const list = getCustomThemes().filter(t => t.id !== id);
+      list.push(entry);
+      localStorage.setItem(STORAGE_CUSTOM_THEMES_LIST, JSON.stringify(list));
+    } catch {}
+    return entry;
+  }
+
+  function deleteCustomTheme(themeId) {
+    if (!themeId || themeId === 'light' || themeId === 'dark') return false;
+    registry.delete(themeId);
+    try {
+      const list = getCustomThemes().filter(t => t.id !== themeId);
+      localStorage.setItem(STORAGE_CUSTOM_THEMES_LIST, JSON.stringify(list));
+    } catch {}
+    if (getTheme() === themeId) {
+      setTheme('dark');
+    }
+    for (const fn of listeners) {
+      try { fn(getTheme(), registry.get(getTheme())); } catch {}
+    }
+    return true;
+  }
+
   function registerTheme(themeDef) {
     if (!themeDef || typeof themeDef.id !== 'string') return false;
     registry.set(themeDef.id, {
@@ -168,6 +176,9 @@
       name: themeDef.name || themeDef.id,
       icon: themeDef.icon || '🎨',
       isDark: themeDef.isDark !== false,
+      isCustom: Boolean(themeDef.isCustom),
+      liquidGlass: Boolean(themeDef.liquidGlass),
+      wallpaper: themeDef.wallpaper || null,
       swatch: Array.isArray(themeDef.swatch) ? themeDef.swatch : ['#1e2632', '#3b82f6'],
       colors: themeDef.colors || null
     });
@@ -177,9 +188,7 @@
   function getCustomColors() {
     try {
       const stored = localStorage.getItem(STORAGE_CUSTOM_COLORS);
-      if (stored) {
-        return { ...DEFAULT_CUSTOM_COLORS, ...JSON.parse(stored) };
-      }
+      if (stored) return { ...DEFAULT_CUSTOM_COLORS, ...JSON.parse(stored) };
     } catch {}
     return { ...DEFAULT_CUSTOM_COLORS };
   }
@@ -189,14 +198,25 @@
     const root = document.documentElement;
     if (!root) return;
     const c = colors || getCustomColors();
-    root.style.setProperty('--cx-canvas-bg', c.canvas || '#111827');
-    root.style.setProperty('--cx-surface-bg', c.surface || '#1f2937');
-    root.style.setProperty('--cx-surface-secondary', c.surface || '#1f2937');
-    root.style.setProperty('--cx-surface-elevated', c.surface || '#1f2937');
-    root.style.setProperty('--cx-border', c.border || '#374151');
-    root.style.setProperty('--cx-accent', c.accent || '#6366f1');
-    root.style.setProperty('--cx-text-primary', c.textPrimary || '#f9fafb');
-    root.style.setProperty('--cx-text-secondary', c.textSecondary || '#d1d5db');
+    if (c.canvas) root.style.setProperty('--cx-canvas-bg', c.canvas);
+    if (c.canvasSubtle) root.style.setProperty('--cx-canvas-subtle', c.canvasSubtle);
+    if (c.surface) root.style.setProperty('--cx-surface-bg', c.surface);
+    if (c.surfaceSecondary) root.style.setProperty('--cx-surface-secondary', c.surfaceSecondary);
+    if (c.surfaceElevated) root.style.setProperty('--cx-surface-elevated', c.surfaceElevated);
+    if (c.surfaceHover) root.style.setProperty('--cx-surface-hover', c.surfaceHover);
+    if (c.border) root.style.setProperty('--cx-border', c.border);
+    if (c.borderSubtle) root.style.setProperty('--cx-border-subtle', c.borderSubtle);
+    if (c.borderStrong) root.style.setProperty('--cx-border-strong', c.borderStrong);
+    if (c.accent) root.style.setProperty('--cx-accent', c.accent);
+    if (c.accentHover) root.style.setProperty('--cx-accent-hover', c.accentHover);
+    if (c.textPrimary) root.style.setProperty('--cx-text-primary', c.textPrimary);
+    if (c.textSecondary) root.style.setProperty('--cx-text-secondary', c.textSecondary);
+    if (c.tileLinkColor || c.textPrimary) root.style.setProperty('--cx-tile-link-color', c.tileLinkColor || c.textPrimary);
+    if (c.button) root.style.setProperty('--cx-button-bg', c.button);
+    if (c.buttonHover) root.style.setProperty('--cx-button-hover', c.buttonHover);
+    if (c.buttonText) root.style.setProperty('--cx-button-text', c.buttonText);
+    if (c.inputBg) root.style.setProperty('--cx-input-bg', c.inputBg);
+    if (c.inputBorder) root.style.setProperty('--cx-input-border', c.inputBorder);
   }
 
   function clearCustomTokens() {
@@ -204,26 +224,22 @@
     const root = document.documentElement;
     if (!root) return;
     const props = [
-      '--cx-canvas-bg', '--cx-surface-bg', '--cx-surface-secondary',
-      '--cx-surface-elevated', '--cx-border', '--cx-accent',
-      '--cx-text-primary', '--cx-text-secondary'
+      '--cx-canvas-bg', '--cx-canvas-subtle', '--cx-surface-bg', '--cx-surface-secondary',
+      '--cx-surface-elevated', '--cx-surface-hover', '--cx-border', '--cx-border-subtle',
+      '--cx-border-strong', '--cx-accent', '--cx-accent-hover', '--cx-text-primary',
+      '--cx-text-secondary', '--cx-tile-link-color', '--cx-button-bg', '--cx-button-hover',
+      '--cx-button-text', '--cx-input-bg', '--cx-input-border'
     ];
-    for (const prop of props) {
-      root.style.removeProperty(prop);
-    }
+    for (const prop of props) root.style.removeProperty(prop);
   }
 
   function setCustomColors(colors) {
     try {
       const merged = { ...getCustomColors(), ...colors };
       localStorage.setItem(STORAGE_CUSTOM_COLORS, JSON.stringify(merged));
-      if (getTheme() === 'custom') {
-        applyCustomTokens(merged);
-      }
+      if (getTheme() === 'custom') applyCustomTokens(merged);
       return true;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
 
   function getTheme() {
@@ -315,19 +331,19 @@
         document.documentElement.removeAttribute('data-connectea-theme');
       }
 
-      if (theme.id === 'liquid-glass' || customColors?.glassDiffusion) {
+      if (theme.id === 'liquid-glass' || theme.liquidGlass || customColors?.glassDiffusion) {
         document.documentElement.setAttribute('data-connectea-glass', 'true');
       } else {
         document.documentElement.removeAttribute('data-connectea-glass');
       }
 
-      if (theme.id === 'custom' || customColors) {
+      if (theme.isCustom || theme.id === 'custom' || customColors) {
         if (customColors) setCustomColors(customColors);
-        applyCustomTokens(customColors || getCustomColors());
+        applyCustomTokens(customColors || theme.colors || getCustomColors());
       } else {
         clearCustomTokens();
       }
-      applyCustomBackground();
+      applyCustomBackground(theme.wallpaper || getCustomBackground());
     }
 
     for (const fn of listeners) {
@@ -390,6 +406,7 @@
     else document.documentElement.removeAttribute('data-connectea-glass');
   }
 
+  loadSavedCustomThemes();
   if (typeof document !== 'undefined') {
     applyCustomBackground();
   }
@@ -404,6 +421,9 @@
     getLastTheme,
     setTheme,
     getAvailableThemes,
+    getCustomThemes,
+    saveCustomTheme,
+    deleteCustomTheme,
     registerTheme,
     getCustomColors,
     setCustomColors,
@@ -415,6 +435,8 @@
     clearCustomBackground,
     applyCustomBackground,
     setGlassDiffusion,
+    getPresetPalettes: () => ({ ...BUILTIN_PALETTES }),
+    BUILTIN_PALETTES,
     BUILTIN_THEMES
   };
 })();

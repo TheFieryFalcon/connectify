@@ -38,7 +38,7 @@
 .connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong {
   font-family: inherit !important;
   font-weight: 700 !important;
-  color: var(--cx-accent, #90c6f5) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
 .connectea-dark .connectea-panel-standing {

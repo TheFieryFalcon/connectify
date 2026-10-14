@@ -1,9 +1,4 @@
-/**
- * Connectify Dark Theme Engine
- *
- * Provides instant, flicker-free site-wide dark mode styling for Connect,
- * dynamic theme switching, and comprehensive surface adaptations.
- */
+/** Connectify Dark Theme Engine - provides instant dark mode & surface adaptations */
 (() => {
   'use strict';
 
@@ -26,26 +21,18 @@
   const isLoginUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
     try {
       const loc = new URL(url);
-      const isConnect = loc.hostname === 'connect.det.wa.edu.au';
-      const isLoginHost = loc.hostname === 'login.det.wa.edu.au';
-      const isLoginPath = loc.pathname === '/login' ||
-        loc.pathname.startsWith('/login/') ||
-        loc.pathname.includes('/portal/login');
+      const isConnect = loc.hostname === 'connect.det.wa.edu.au', isLoginHost = loc.hostname === 'login.det.wa.edu.au';
+      const isLoginPath = loc.pathname === '/login' || loc.pathname.startsWith('/login/') || loc.pathname.includes('/portal/login');
       return (isConnect && isLoginPath) || isLoginHost;
     } catch {
-      return typeof url === 'string' && (
-        url === 'https://connect.det.wa.edu.au/login' ||
-        url.startsWith('https://connect.det.wa.edu.au/login') ||
-        url.includes('login.det.wa.edu.au')
-      );
+      return typeof url === 'string' && (url === 'https://connect.det.wa.edu.au/login' || url.startsWith('https://connect.det.wa.edu.au/login') || url.includes('login.det.wa.edu.au'));
     }
   };
 
   const isLogoutUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
     try {
       const loc = new URL(url, typeof window !== 'undefined' && window.location?.href ? window.location.href : 'https://connect.det.wa.edu.au');
-      const isConnect = loc.hostname === 'connect.det.wa.edu.au';
-      const path = loc.pathname.toLowerCase(), search = loc.search.toLowerCase();
+      const isConnect = loc.hostname === 'connect.det.wa.edu.au', path = loc.pathname.toLowerCase(), search = loc.search.toLowerCase();
       const isPath = path === '/logout' || path.startsWith('/logout/') || path.includes('/portal/logout') || path.includes('/c/portal/logout') || path.includes('/web/guest/logout') || path.includes('/signout') || path.includes('/sign-out') || path.includes('loggedout') || path.includes('logged-out');
       const isParam = search.includes('logout') || search.includes('logged_out') || search.includes('signed_out') || search.includes('session_expired');
       if ((isConnect && (isPath || isParam)) || loc.hostname === 'logout.det.wa.edu.au' || isPath) return true;
@@ -90,22 +77,17 @@
 
   try {
     if (isAuthDisabled()) {
-      const isDarkActive = localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true';
-      if (isDarkActive) {
+      if (localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true') {
         localStorage.setItem(RESTORE_KEY, 'true');
-        const currentTheme = localStorage.getItem(STORAGE_THEME_ID);
-        if (currentTheme && currentTheme !== 'light') localStorage.setItem(RESTORE_THEME_KEY, currentTheme);
+        const cur = localStorage.getItem(STORAGE_THEME_ID);
+        if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
       }
-      localStorage.setItem(STORAGE_KEY, 'light');
-      localStorage.setItem(STORAGE_THEME_ID, 'light');
-      isDarkMode = false;
-      activeTheme = 'light';
+      localStorage.setItem(STORAGE_KEY, 'light'); localStorage.setItem(STORAGE_THEME_ID, 'light');
+      isDarkMode = false; activeTheme = 'light';
     } else if (localStorage.getItem(RESTORE_KEY) === 'true') {
       activeTheme = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
-      localStorage.removeItem(RESTORE_KEY);
-      localStorage.removeItem(RESTORE_THEME_KEY);
-      localStorage.setItem(STORAGE_KEY, 'dark');
-      localStorage.setItem(STORAGE_THEME_ID, activeTheme);
+      localStorage.removeItem(RESTORE_KEY); localStorage.removeItem(RESTORE_THEME_KEY);
+      localStorage.setItem(STORAGE_KEY, 'dark'); localStorage.setItem(STORAGE_THEME_ID, activeTheme);
       isDarkMode = true;
     } else {
       isDarkMode = localStorage.getItem(STORAGE_KEY) === 'dark';
@@ -137,8 +119,6 @@
     }
   }
 
-  const SVG_PALETTE = '<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" class="connectea-theme-icon-svg" style="display:inline-block;vertical-align:-1px;margin-right:4px;opacity:0.9;"><path d="M8 0a8 8 0 1 0 0 16 2.5 2.5 0 0 0 2.5-2.5c0-.4-.1-.7-.3-1-.2-.3-.3-.6-.3-1 0-.8.7-1.5 1.5-1.5H13a3 3 0 0 0 3-3C16 3.6 12.4 0 8 0zm-4.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm2.5 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>';
-  const SVG_SUN = '<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" class="connectea-theme-icon-svg" style="display:inline-block;vertical-align:-1px;margin-right:4px;opacity:0.9;"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0zm0 13.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75zm7.5-6.25a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1 0-1.5h1.5zm-13.5 0a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1 0-1.5h1.5zm11.03-4.78a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06zm-9.54 9.54a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 0 1-1.06-1.06l1.06-1.06zm9.54 0a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 1 1 1.06-1.06l1.06 1.06zm-9.54-9.54a.75.75 0 0 1-1.06 1.06L2.39 3.47a.75.75 0 1 1 1.06-1.06l1.06 1.06z"/></svg>';
   const SVG_CHEVRON = '<svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-left:3px;"><path d="M1.5 2.75L4 5.25L6.5 2.75"/></svg>';
 
   function updateToggleButtonLabel(dark) {
@@ -217,19 +197,19 @@
     if (!isDark || isAuthDisabled()) return;
     try {
       const surfaceCandidates = document.body.querySelectorAll(
-        ':is(header, nav, aside, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .eds-c-nav-list, .eds-c-nav-list__item, .portlet, .portlet-content, .portlet-body, .journal-content-article, .eds-c-tile__body, .cvr-c-tile__body, [class*="help"], [class*="guide"], [class*="resource"]):not([data-connectea-surface]):not(.cvr-c-primary-navigation):not(.cvr-c-primary-navigation *):not(.cvr-c-header):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
+        ':is(header, nav, aside, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .eds-c-nav-list, .eds-c-nav-list__item, .portlet, .portlet-content, .portlet-body, .journal-content-article, .eds-c-tile__body, .cvr-c-tile__body, [class*="help"], [class*="guide"], [class*="resource"]):not([data-connectea-surface]):not(.cvr-c-primary-navigation):not(.cvr-c-primary-navigation *):not(.cvr-c-header):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *):not(.v-Notification-system):not(.v-Notification-system *)'
       );
       for (const el of surfaceCandidates) {
-        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by, [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning') || el.matches('.portlet, .portlet-boundary, .portlet-layout, #main-content')) continue;
+        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by, [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning, .v-Notification-system') || el.matches('.portlet, .portlet-boundary, .portlet-layout, #main-content')) continue;
         const bgRgb = parseRgb(window.getComputedStyle(el).backgroundColor);
         if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) el.setAttribute('data-connectea-surface', '');
       }
       const inkCandidates = document.querySelectorAll(
-        '[data-connectea-surface] :is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'
+        '[data-connectea-surface] :is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *):not(.v-Notification-system):not(.v-Notification-system *)'
       );
       for (const el of inkCandidates) {
         if (el.children.length > 2 || el.hasAttribute('data-connectea-surface')) continue;
-        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by, [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning')) continue;
+        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by, [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning, .v-Notification-system')) continue;
         const fgRgb = parseRgb(window.getComputedStyle(el).color, true);
         if (isDarkColor(fgRgb)) el.setAttribute('data-connectea-ink', '');
       }
@@ -246,10 +226,10 @@
 
     const reg = window.ConnectifyThemeRegistry;
     const defaultList = [
-      { id: 'dark', name: 'Dark', icon: '🌙', swatch: ['#12171f', '#1e2632', '#3b82f6'] }, { id: 'quantum', name: 'Quantum Dark', icon: '⚛️', swatch: ['#282828', '#32302f', '#fabd2f'] },
-      { id: 'amoled', name: 'AMOLED Black', icon: '🌑', swatch: ['#000000', '#0a0a0a', '#38bdf8'] }, { id: 'midnight', name: 'Midnight Navy', icon: '🌌', swatch: ['#0b132b', '#141f36', '#60a5fa'] },
-      { id: 'forest', name: 'Emerald Forest', icon: '🌲', swatch: ['#0a1914', '#11261f', '#10b981'] }, { id: 'sunset', name: 'Twilight Plum', icon: '🌅', swatch: ['#19111c', '#26182a', '#f43f5e'] },
-      { id: 'liquid-glass', name: 'Liquid Glass', icon: '🫧', swatch: ['#0b1120', 'rgba(56, 189, 248, 0.25)', '#38bdf8'] }
+      { id: 'dark', name: 'Dark', icon: '🌙' }, { id: 'quantum', name: 'Quantum Dark', icon: '⚛️', swatch: ['#282828', '#32302f', '#fabd2f'] },
+      { id: 'amoled', name: 'AMOLED Black', icon: '🌑' }, { id: 'midnight', name: 'Midnight Navy', icon: '🌌' },
+      { id: 'forest', name: 'Emerald Forest', icon: '🌲' }, { id: 'sunset', name: 'Twilight Plum', icon: '🌅' },
+      { id: 'liquid-glass', name: 'Liquid Glass', icon: '🫧' }
     ];
     const available = reg ? reg.getAvailableThemes() : defaultList;
     const themes = available.filter(t => t.id !== 'light' && t.id !== 'custom');
@@ -264,6 +244,14 @@
       const icon = document.createElement('span'); icon.className = 'connectea-theme-icon'; icon.textContent = t.icon;
       const name = document.createElement('span'); name.className = 'connectea-theme-name'; name.textContent = t.name;
       opt.append(swatch, icon, name);
+      if (t.isCustom) {
+        const del = document.createElement('span'); del.className = 'connectea-theme-delete-btn'; del.textContent = '✕'; del.title = 'Delete theme';
+        del.onclick = (ev) => {
+          ev.stopPropagation();
+          if (reg?.deleteCustomTheme) { reg.deleteCustomTheme(t.id); openThemeMenu(anchorEl); }
+        };
+        opt.append(del);
+      }
       opt.onclick = (e) => {
         e.stopPropagation();
         if (reg) reg.setTheme(t.id);
@@ -272,6 +260,18 @@
       };
       themeMenu.appendChild(opt);
     }
+
+    const customizerOpt = document.createElement('button');
+    customizerOpt.type = 'button';
+    customizerOpt.className = 'connectea-theme-customize-btn connectea-customize-action';
+    customizerOpt.setAttribute('role', 'menuitem');
+    customizerOpt.innerHTML = '<span class="connectea-customize-icon">✨</span><span class="connectea-theme-name">Customize Theme...</span>';
+    customizerOpt.onclick = (e) => {
+      e.stopPropagation();
+      closeThemeMenu();
+      if (window.ConnectifyThemeCustomizer) window.ConnectifyThemeCustomizer.open();
+    };
+    themeMenu.appendChild(customizerOpt);
 
     const target = anchorEl || toggleButton;
     const rect = target.getBoundingClientRect();

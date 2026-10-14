@@ -154,7 +154,7 @@
 }
 
 .connectea-dark :is([class*="eds-t-"], .eds-t-purple, .eds-u-theme-multiplier) :is(a, .eds-c-link):not(.eds-o-button--positive):not([class*="button--positive"]) {
-  color: var(--cx-accent-link, #60a5fa) !important;
+  color: var(--cx-accent, #60a5fa) !important;
 }
 
 .connectea-dark :is(
@@ -451,7 +451,7 @@
   .cvr-c-card,
   .cvr-c-dashboard-card
 ) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *) {
-  color: var(--cx-accent, #60a5fa) !important;
+  color: var(--cx-tile-link-color, var(--cx-text-primary, #f8fafc)) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(

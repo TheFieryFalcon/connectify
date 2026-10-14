@@ -74,7 +74,7 @@ Sidebar & View Options:
   --max-sub-pages <n>      Max navbar headings to audit per page (default: 8)
 
 Audit & Browser Options:
-  --theme <id>             Theme to test: dark, quantum, amoled, midnight, forest, sunset, custom, all (default: all)
+  --theme <id>             Theme to test: dark, quantum, amoled, midnight, forest, sunset, liquid-glass, all (default: all)
   --delay <ms>             Settling delay between views in ms (default: 1250)
   --no-click-buttons       Do not automatically expand accordions/panels
   --click-buttons          Automatically expand accordions/panels (default: true)
@@ -91,8 +91,8 @@ Audit & Browser Options:
   --session <file>         Session cookies file (default: connect_session.json)
   --scroll                 Incrementally scroll down through the ENTIRE page (default: true)
   --no-scroll              Disable smooth full-page scrolling
-  --scroll-step <px>       Scroll step in pixels (default: 400)
-  --scroll-delay <ms>      Delay per scroll increment in ms (default: 60)
+  --scroll-step <px>       Scroll step in pixels (default: 800)
+  --scroll-delay <ms>      Delay per scroll increment in ms (default: 15)
   --max-scrolls <n>        Max scroll iterations per page (default: 100)
   --margin-tolerance <n>   Margin comparison tolerance in px (default: 1.0)
   --size-tolerance <n>     Size comparison tolerance in px (default: 2.0)
@@ -130,8 +130,8 @@ Audit & Browser Options:
     crawled: true,
     explicitCrawled: false,
     scroll: true,
-    scrollStep: 400,
-    scrollDelay: 60,
+    scrollStep: 800,
+    scrollDelay: 15,
     maxScrolls: 100
   };
 
@@ -275,8 +275,8 @@ async function resolveTargetUrls(options) {
  */
 async function scrollEntirePage(page, options = {}) {
   const {
-    step = 400,
-    delayMs = 60,
+    step = 800,
+    delayMs = 15,
     maxScrolls = 100,
     scope = 'page'
   } = options;
@@ -1421,13 +1421,22 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
       };
     }
 
+    const LINEAR_LUT = new Float32Array(256);
+    for (let i = 0; i < 256; i++) {
+      const norm = i / 255;
+      LINEAR_LUT[i] = norm <= 0.03928 ? norm / 12.92 : Math.pow((norm + 0.055) / 1.055, 2.4);
+    }
+
     function sRgbToLinear(c) {
-      const norm = c / 255;
-      return norm <= 0.03928 ? norm / 12.92 : Math.pow((norm + 0.055) / 1.055, 2.4);
+      const idx = Math.max(0, Math.min(255, Math.round(c)));
+      return LINEAR_LUT[idx];
     }
 
     function getLuminance(r, g, b) {
-      return 0.2126 * sRgbToLinear(r) + 0.7152 * sRgbToLinear(g) + 0.0722 * sRgbToLinear(b);
+      const ir = Math.max(0, Math.min(255, Math.round(r)));
+      const ig = Math.max(0, Math.min(255, Math.round(g)));
+      const ib = Math.max(0, Math.min(255, Math.round(b)));
+      return 0.2126 * LINEAR_LUT[ir] + 0.7152 * LINEAR_LUT[ig] + 0.0722 * LINEAR_LUT[ib];
     }
 
     function getContrast(rgb1, rgb2) {
@@ -2081,6 +2090,45 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
             });
           }
         }
+
+        // E. Adjacent Container Contrast Standard (<= 1.5:1)
+        if (isDark && elBg && elBg.a > 0.5 && el.parentElement && !isSvg && !el.closest?.('svg')) {
+          const parentStyle = window.getComputedStyle(el.parentElement);
+          const parentBg = parseRgb(parentStyle.backgroundColor);
+          if (parentBg && parentBg.a > 0.5) {
+            const isDistinct = Math.abs(elBg.r - parentBg.r) > 4 || Math.abs(elBg.g - parentBg.g) > 4 || Math.abs(elBg.b - parentBg.b) > 4;
+            if (isDistinct) {
+              const bgCr = getContrast(elBg, parentBg);
+              if (bgCr <= 1.5) {
+                const bWidth = parseFloat(style.borderWidth) || parseFloat(style.borderTopWidth) || 0;
+                const bStyle = style.borderStyle || style.borderTopStyle || 'none';
+                const bColor = parseRgb(style.borderColor || style.borderTopColor);
+                const hasBorder = bWidth >= 0.75 && bStyle !== 'none' && bStyle !== 'hidden' && bColor && bColor.a > 0.3;
+                let hasSufficientBorderContrast = false;
+                if (hasBorder) {
+                  const bCrAgainstEl = getContrast(bColor, elBg);
+                  const bCrAgainstParent = getContrast(bColor, parentBg);
+                  hasSufficientBorderContrast = bCrAgainstEl >= 1.8 || bCrAgainstParent >= 1.8;
+                }
+                if (!hasSufficientBorderContrast) {
+                  const isExempt = Boolean(el.closest?.(
+                    '.v-Notification-system, [class*="progress"], [class*="chart"], [class*="box-plot"], .highcharts-container, .cvr-c-task__chart'
+                  ));
+                  if (!isExempt) {
+                    issues.push({
+                      category: 'STYLE',
+                      type: 'ADJACENT_SIMILAR_COLOR_WARNING',
+                      severity: 'WARNING',
+                      selector,
+                      details: `Adjacent containers styled with distinct colors have overly similar contrast ratio ${bgCr.toFixed(2)}:1 (<= 1.5:1) without a >= 2.0:1 border separator`,
+                      contrast: bgCr.toFixed(2)
+                    });
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
 
@@ -2202,8 +2250,7 @@ async function runThemeAudit(customOptions = {}) {
     { id: 'midnight', name: 'Midnight Navy', isDark: true },
     { id: 'forest', name: 'Emerald Forest', isDark: true },
     { id: 'sunset', name: 'Twilight Plum', isDark: true },
-    { id: 'liquid-glass', name: 'Liquid Glass', isDark: true },
-    { id: 'custom', name: 'Custom Theme', isDark: true }
+    { id: 'liquid-glass', name: 'Liquid Glass', isDark: true }
   ];
 
   const themesToTest = options.theme === 'all'

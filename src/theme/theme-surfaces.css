@@ -51,7 +51,7 @@
 /* --------------------------------------------------------------------------
    28. System Notifications, Alerts, Tooltips & Popovers
    -------------------------------------------------------------------------- */
-.connectea-dark .v-Notification {
+.connectea-dark .v-Notification:not(.v-Notification-system) {
   background-color: var(--cx-surface-elevated, #1e2632) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border: 1px solid var(--cx-border, #4a617a) !important;
@@ -59,21 +59,25 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
 }
 
-.connectea-dark :is(.v-Notification-caption, .v-Notification .v-Notification-caption) {
+.connectea-dark :is(.v-Notification-caption, .v-Notification:not(.v-Notification-system) .v-Notification-caption) {
   color: var(--cx-text-primary, #f8fafc) !important;
   font-weight: 700 !important;
 }
 
-.connectea-dark :is(.v-Notification-description, .v-Notification-details) {
+.connectea-dark :is(.v-Notification-description, .v-Notification-details):not(.v-Notification-system *) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark .v-Notification-warning {
+.connectea-dark .v-Notification-warning:not(.v-Notification-system) {
   border-left: 4px solid #f59e0b !important;
 }
 
-.connectea-dark :is(.v-Notification-error, .v-Notification-system) {
+.connectea-dark .v-Notification-error:not(.v-Notification-system) {
   border-left: 4px solid #ef4444 !important;
+}
+
+:is(.v-Notification-system, .v-Notification-system *) {
+  all: revert !important;
 }
 
 .connectea-dark :is(

@@ -107,10 +107,12 @@
             "src/theme/theme-tables.css",
             "src/theme/theme-navigation.css",
             "src/theme/theme-surfaces.css",
+            "src/theme/theme-customizer.css",
             "src/theme/theme.css"
          ],
          "js": [
             "src/theme/theme-registry.js",
+            "src/theme/theme-customizer.js",
             "src/theme/theme.js"
          ],
          "run_at": "document_idle"
