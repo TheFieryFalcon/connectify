@@ -35,7 +35,7 @@ Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, scho
 - **Adaptive Progress Timelines**: Custom SVG line graphs that track your ATAR trajectory over the year, dynamically scaling the y-axis to match your specific performance range for maximum detail.
 
 ### 🎨 Total UI Overhaul
-- **Stunning Dark Mode**: A completely redesigned, elegant dark theme that instantly applies across the entire Connect portal, dramatically improving contrast and readability.
+- **Multi-Theme System & In-DOM Customizer**: Switch instantly between 7 preset palettes (Dark, Quantum Dark with Gruvbox green highlights, AMOLED Black, Midnight Navy, Emerald Forest, Sunset Orange, and Apple Liquid Glass) or design custom themes with custom wallpaper upload, frosted glass diffusion, and live 14-token preview.
 - **Blazingly Fast**: Completely rewritten to be modular, efficient, and deeply integrated into Connect's native rendering engine, ensuring UI widgets instantly sync without lag.
 
 ### ⚡ Seamless SSO Auto-Login

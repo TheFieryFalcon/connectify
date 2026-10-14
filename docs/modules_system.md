@@ -47,16 +47,31 @@ This document covers notifications, grade change tracking, DOM integrity monitor
   - Monitors session expiry modals and unloads while idle (> 5 min) to set `cx-session-expired`.
   - Intercepts manual logout clicks to set `cx-manual-logout`.
 
-#### [`theme.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.js)
-- **Role**: Instant, zero-flicker site-wide dark mode engine for Connect with dynamic surface contrast adaptation.
+#### [`theme-registry.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-registry.js)
+- **Role**: Canonical palette definitions and custom theme registry.
 - **Key Functions**:
-  - Injects high-contrast toggle button (`#connectea-theme-toggle`) into primary navigation header.
-  - Positioning & deduplication: `cleanupDuplicateButtons()` purges duplicate toggle buttons. Uses multi-variant notification bell detection with avatar fallback to position toggle neatly to the left of the bell.
-  - Instantly toggles `.connectea-dark` on `document.documentElement` without DOM traversal or layout thrashing.
-  - `adaptSurfaces()`: Safely identifies unstyled neutral surfaces and dark colored text (e.g. red/purple `#7f375c`) across My Connect, Classes, and Preferences pages, tagging them with `data-connectea-surface` and `data-connectea-ink` without inline style mutations or observer feedback loops.
-  - Efficient debounced `MutationObserver` ensures button persistence across client-side SPA route navigations.
-  - Automatically toggles off dark mode on `https://connect.det.wa.edu.au/login` to prevent broken styles on the login selector card, and automatically toggles it back on upon successful login.
-  - Enhances accordion header arrows (`▴` / `▾`).
+  - `BUILTIN_PALETTES`: Stores immutable definitions for 7 built-in presets: Dark, Quantum Dark (Gruvbox green `#b8bb26` secondary), AMOLED Black, Midnight Navy, Emerald Forest, Sunset Orange, and Apple Liquid Glass.
+  - `getPresetPalettes()`, `getCustomThemes()`, `saveCustomTheme()`, `deleteCustomTheme()`: CRUD operations on custom theme JSON objects in `localStorage`.
+- **Export**: `window.ConnectifyThemeRegistry`.
+
+#### [`theme-customizer.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.js)
+- **Role**: In-DOM visual theme designer modal and static mockup preview.
+- **Key Functions**:
+  - `open(themeToEdit)` / `close()`: Mounts `#cx-customizer-modal` with Basic Mode (6 tokens) and Full Mode (14 tokens).
+  - Live Preview: Displays subject card mockup rendering all 14 tokens in authentic Connect positions without mutating the host DOM.
+  - HSV/HEX Color Picker: Interactive saturation/value canvas, hue slider, and hex input.
+  - Wallpaper & Liquid Glass: Uploads, caches (`connectea:theme:wallpaper`), and toggles frosted glass diffusion mode.
+  - JSON Import / Export: Backup and restore theme definitions.
+- **Export**: `window.ConnectifyThemeCustomizer`.
+
+#### [`theme.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.js)
+- **Role**: Zero-flicker multi-theme switcher and dynamic surface contrast adaptation.
+- **Key Functions**:
+  - Injects `#connectea-theme-toggle` into the navbar with enlarged 12x12 chevron dropdown trigger (`.connectea-theme-arrow`).
+  - Opens `#connectea-theme-menu` popover listing presets, custom themes, and "+ Customize Theme..." button meeting $\ge 5:1$ contrast.
+  - `applyTheme(id)`: Sets `data-connectea-theme`, handles custom wallpaper, and toggles Liquid Glass diffusion.
+  - `adaptSurfaces()`: Safely identifies unstyled surfaces across Connect and tags them with `data-connectea-surface`.
+  - Automatically suppresses dark themes on `/login` and restores the user's active theme upon successful login.
 
 #### [`auto-login.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/auto-login.js)
 - **Role**: Auto-submits login credentials on `https://login.det.wa.edu.au/*` while respecting session expiry and manual logout.
@@ -72,21 +87,20 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 #### Style Sheets
 - **[`atar.css`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar.css)**: Styling for calculator modal (`#connectea-atar`), target planning forms, course tables, and dark theme variants.
 - **[`progress.css`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/progress.css)**: Progress graph modal layout and SVG stroke/fill rules.
-- **[`sidebar.css`](file:///Users/uwong/Downloads/2.1.14_0/src/sidebar/sidebar.css)** & Submodules: Modular stylesheet bundle comprising:
-  - [`sidebar-drawer.css`](file:///Users/uwong/Downloads/2.1.14_0/src/sidebar/sidebar-drawer.css): Drawer layout, toggle handle, and slide transitions.
-  - [`sidebar-notifications.css`](file:///Users/uwong/Downloads/2.1.14_0/src/sidebar/sidebar-notifications.css): Vertical stacked notification container and toasts.
-  - [`sidebar-predictor.css`](file:///Users/uwong/Downloads/2.1.14_0/src/sidebar/sidebar-predictor.css): Predictor layout, scenario cards (Mid `#ffffff`, High `#4ade80`), and outcome meter tooltip.
-  - [`sidebar-settings.css`](file:///Users/uwong/Downloads/2.1.14_0/src/sidebar/sidebar-settings.css): Settings, baseline forms, and Weakness Analyzer labels.
-- **[`theme.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.css)** & Submodules: Site-wide dark mode modular stylesheet bundle comprising:
-  - [`theme-core.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-core.css): Global variables, canvas (`#12171f`), text, and base layout.
-  - [`theme-tiles.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-tiles.css): Subject tiles (`#1e2632`), card headers (`#2e3c4e`), and accordions (`#222b39`).
-  - [`theme-cards.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-cards.css): Assessment task cards, summary marks box (`#161e29`), and detail rows.
-  - [`theme-controls.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-controls.css): High-contrast buttons ($\ge 5:1$), custom checkboxes, and dropdowns.
-  - [`theme-material.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-material.css): Angular Material class page (`.eds.cvr.ngm`) contrast normalization.
-  - [`theme-feed.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-feed.css): Notices, feeds, discussion forums, and stream posts.
+- **[`sidebar.css`](file:///Users/uwong/Downloads/2.1.14_0/src/sidebar/sidebar.css)** & Submodules: Modular stylesheet bundle comprising `sidebar-drawer.css`, `sidebar-notifications.css`, `sidebar-predictor.css`, and `sidebar-settings.css`.
+- **[`theme.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.css)** & Submodules: Modular multi-theme stylesheet cascade comprising:
+  - [`theme-tokens.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-tokens.css): Palette CSS custom properties for all presets and compact arrow trigger geometry.
+  - [`theme-core.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-core.css): Global variables, canvas, and base layout.
+  - [`theme-tiles.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-tiles.css): Subject tiles, headers, and scoped wallpaper-translucent bodies.
+  - [`theme-cards.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-cards.css): Assessment task cards, summary marks box, and detail rows.
+  - [`theme-controls.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-controls.css): High-contrast buttons ($\ge 5:1$), checkboxes, and dropdowns.
+  - [`theme-material.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-material.css): Angular Material class page contrast normalization.
+  - [`theme-feed.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-feed.css): Notices, feeds, forums, and stream posts.
   - [`theme-tables.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-tables.css): Grade tables, attendance lists, and report summary tables.
-  - [`theme-navigation.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-navigation.css): Top navigation, active tabs (`#3b82f6`), breadcrumbs, and menus.
-  - [`theme-surfaces.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-surfaces.css): Dynamic surface contrast adapters and modal dialogs.
+  - [`theme-navigation.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-navigation.css): Top navigation, active tabs, breadcrumbs, and menus.
+  - [`theme-surfaces.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-surfaces.css): Dynamic surface contrast adapters and display scaling.
+  - [`theme-customizer.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.css): In-DOM theme designer dialog, color picker, and preview styles.
+  - [`theme.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.css): Entry point and priority cascade overrides for Liquid Glass 16px curvature and transparent accordions.
 
 #### Manifest & Update Manifests
 - **[`manifest.json`](file:///Users/uwong/Downloads/2.1.14_0/manifest.json)**: Extension manifest (Manifest V3) declaring permissions (`storage`), browser settings for Firefox Gecko, modular stylesheets, content scripts in dependency order, and matched URL patterns.

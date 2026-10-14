@@ -1,7 +1,3 @@
----
-trigger: always_on
----
-
 # Connectify Architecture Reference
 
 This document details the world isolation model, script execution lifecycle, and single-page application (SPA) DOM sweeping architecture for the Connectify browser extension.
@@ -65,6 +61,11 @@ Connect is built on Vaadin / Liferay SPA navigation where the DOM re-renders asy
 - Each module implements an active MutationObserver or debounced scheduler (`requestAnimationFrame`).
 - `ConnectifyIsUserActive()` in `navigation.js` tracks user activity (`mousemove`, `keydown`, `scroll`, etc.) with a 90-second timeout to prevent background CPU waste during idle sessions.
 - `dom-sweeper.js` monitors the DOM for missing injected components and prompts the user or auto-reinjects missing components upon dynamic view updates.
+
+### Global Theme & Customization Pipeline
+Themes execute site-wide across all Connect pages (`https://connect.det.wa.edu.au/*`):
+- **Scripts**: `theme-registry.js` (palette registry) $\to$ `theme-customizer.js` (in-DOM designer modal) $\to$ `theme.js` (theme engine & toggle).
+- **Stylesheets Cascade**: `theme-tokens.css` $\to$ `theme-core.css` $\to$ `theme-tiles.css` $\to$ `theme-cards.css` $\to$ `theme-controls.css` $\to$ `theme-material.css` $\to$ `theme-feed.css` $\to$ `theme-tables.css` $\to$ `theme-navigation.css` $\to$ `theme-surfaces.css` $\to$ `theme-customizer.css` $\to$ `theme.css` (final cascade overrides for Liquid Glass 16px curvature & transparent accordions).
 
 ---
 

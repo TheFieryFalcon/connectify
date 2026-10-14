@@ -50,8 +50,8 @@
   --cx-canvas-bg: #282828; --cx-canvas-subtle: #191b1c;
   --cx-surface-bg: #32302f; --cx-surface-secondary: #282828; --cx-surface-elevated: #3c3836;
   --cx-surface-hover: #504944; --cx-surface-active: #1d2021;
-  --cx-border: #5a524c; --cx-border-subtle: #3c3836; --cx-border-strong: #665c54; --cx-border-focus: #fabd2f;
-  --cx-text-primary: #fbf1c7; --cx-text-secondary: #ebdbb2; /* --cx-text-secondary: #b8bb26; */ --cx-text-muted: #bdae93; --cx-text-disabled: #7c6f64; --cx-text-inverse: #1d2021;
+  --cx-border: #5a524c; --cx-border-subtle: #3c3836; --cx-border-strong: #665c54; --cx-border-focus: #b8bb26;
+  --cx-text-primary: #fbf1c7; --cx-text-secondary: #b8bb26; --cx-text-muted: #bdae93; --cx-text-disabled: #7c6f64; --cx-text-inverse: #1d2021;
   --cx-accent: #fabd2f; --cx-accent-hover: #fcd34d; --cx-accent-active: #d79921; --cx-accent-subtle: rgba(250, 189, 47, 0.15); --cx-accent-text: #1d2021;
   --cx-accent-purple: #7957d5; --cx-accent-coral: #e74632; --cx-accent-cyan: #83a598;
   --cx-nav-bg: #1d2021; --cx-nav-border: #3c3836; --cx-nav-text: #ebdbb2; --cx-nav-text-hover: #fbf1c7; --cx-nav-item-active: #282828;
@@ -186,15 +186,15 @@
 }
 
 /* Translucent Assessment Outline Accordions & Subject Cards */
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .v-panel, [data-subject-card], .mat-card) {
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, [data-subject-card], .mat-card) {
   background-color: rgba(18, 26, 40, 0.65) !important;
   backdrop-filter: blur(16px) saturate(160%) contrast(102%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(160%) contrast(102%) !important;
 }
-[data-connectea-has-custom-bg="true"]:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .v-panel, [data-subject-card], .mat-card) {
+[data-connectea-has-custom-bg="true"]:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, [data-subject-card], .mat-card) {
   background-color: rgba(18, 26, 40, 0.85) !important;
 }
-:is([data-connectea-has-custom-bg="true"], [data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-accordion, .eds-c-accordion__panel, .v-panel-content, .cvr-c-tasks, .cvr-c-task-group, .cvr-c-task, .cvr-c-task__details, .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content) {
+:is([data-connectea-has-custom-bg="true"], [data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-accordion, .eds-c-accordion__panel, .v-panel-content, .cvr-c-tasks, .cvr-c-task-group, .cvr-c-task, .cvr-c-task__details, .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-accordion__section, .eds-c-accordion__section-body) {
   background: transparent !important; background-color: transparent !important;
 }
 :is([data-connectea-has-custom-bg="true"], [data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .connectea-panel {
@@ -207,10 +207,9 @@
 
 /* Corner Rounding Rules: Strict 0 without Liquid Glass; Aggressive with Liquid Glass */
 :not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .connectea-panel, .cx-compound-progress-bar, #ng-zone__classes-metrics-summary) { border-radius: 0 !important; }
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, #ng-zone__classes-metrics-summary) { border-radius: 18px !important; overflow: hidden !important; }
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.connectea-panel, #connectea-theme-menu, .mat-menu-panel, cnt-paginator, .cnt-paginator) { border-radius: 14px !important; }
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .v-panel-content, .mat-card, .mat-expansion-panel, .mat-expansion-panel-header, .connectea-panel, .cvr-c-dashboard-card, .portlet, .portlet-content, .portlet-body, [class*="card"], [class*="panel"], [class*="tile"], #ng-zone__classes-metrics-summary) { border-radius: 16px !important; overflow: hidden !important; }
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.modal-content, .ui-dialog, mat-dialog-container) { border-radius: 20px !important; }
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-button, .eds-c-button, .mat-button:not(.mat-card-button), .mat-raised-button) { border-radius: 12px !important; }
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-button, .eds-c-button, .btn, .mat-button:not(.mat-card-button), .mat-raised-button) { border-radius: 12px !important; }
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input, select, textarea, .mat-form-field-flex) { border-radius: 10px !important; }
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cx-compound-progress-bar { border-radius: 10px !important; overflow: hidden !important; }
 
@@ -442,19 +441,12 @@
 /* Theme Selector Popover Menu, Trigger Button & Swatches */
 .connectea-theme-arrow {
   display: inline-block;
-  margin-left: 5px;
-  font-size: 10px;
-  opacity: 0.8;
-  vertical-align: middle;
+  padding: 4px 6px; margin-left: 6px; font-size: 10px; opacity: 0.8; vertical-align: middle; line-height: 1;
   background: transparent;
   border: none;
-  cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  cursor: pointer; transition: transform 0.15s ease, opacity 0.15s ease;
 }
-
-.connectea-theme-arrow:hover {
-  opacity: 1;
-}
+.connectea-theme-arrow:hover { opacity: 1; }
 
 #connectea-theme-menu {
   position: fixed; width: 250px; background: var(--cx-surface-bg, #1e2632) !important;

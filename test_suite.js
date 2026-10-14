@@ -2960,7 +2960,7 @@ runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, 
   assert.ok(cohortViewJs.includes('<strong>Z-Score ${zStr}</strong>'), 'cohort-view.js must format Z-Score without colon or equals sign');
   assert.ok(!cohortViewJs.includes('z ≈'), 'cohort-view.js must not contain z ≈');
   assert.ok(cohortViewJs.includes('${data.rank} / ${totalDisplay}'), 'cohort-view.js must format rank without word Rank or colon');
-  assert.ok(cohortViewJs.includes("'connectea-type-title', 'Type'"), 'cohort-view.js must remove colon from Type');
+  assert.ok(cohortViewJs.includes("'connectea-type-title', 'Type: '"), 'cohort-view.js must format Type label with trailing colon and space');
   assert.ok(cohortViewJs.includes("'connectea-controls', 'Cohort Size '"), 'cohort-view.js must remove colon from Cohort Size');
   assert.ok(cohortViewJs.includes('Original Estimate ~'), 'cohort-view.js must remove colon from Original Estimate');
 

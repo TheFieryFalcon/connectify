@@ -23,3 +23,6 @@ All instructions, design constraints, and architectural standards in `design_rul
 
 4. **Git & Remote Workflow**:
    - Always commit and push all verified changes to remote (`origin main`) after completing every task. Never leave working trees uncommitted or unpushed.
+
+5. **Test Integrity & Direct Implementation**:
+   - When requested to change functionality, typography, markup, styling, or behavior, directly update the implementation and any tests that explicitly assert against that specific item. Never use indirect workarounds just to appease an outdated test assertion; update the test directly to assert the newly specified behavior.

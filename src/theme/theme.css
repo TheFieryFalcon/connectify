@@ -13,3 +13,43 @@
  * - theme-navigation.css: Dropdowns, calendars, tabs & comments
  * - theme-surfaces.css: Learning content, badges & display-width scaling
  */
+
+/* Translucent Accordions & Subject Tile Bodies over Wallpaper / Glass */
+:is([data-connectea-has-custom-bg="true"], [data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, [data-subject-card], .v-panel
+) :is(
+  .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content,
+  .eds-c-accordion, .eds-c-accordion__panel, .eds-c-accordion__section, .eds-c-accordion__section-body,
+  .v-panel-content, .cvr-c-tasks, .cvr-c-task-group, .cvr-c-task, .cvr-c-task__details
+) {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Liquid Glass Rounded Corners: Universal Panel, Card, Tile, Button & Control Curvature */
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
+  .v-panel, .v-panel-content, .mat-card, .mat-expansion-panel, .mat-expansion-panel-header,
+  .connectea-panel, .cvr-c-dashboard-card, .portlet, .portlet-content, .portlet-body,
+  [class*="card"], [class*="panel"], [class*="tile"], #ng-zone__classes-metrics-summary
+) {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.modal-content, .ui-dialog, mat-dialog-container) {
+  border-radius: 20px !important;
+}
+
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-button, .eds-c-button, .btn, .mat-button:not(.mat-card-button), .mat-raised-button) {
+  border-radius: 12px !important;
+}
+
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input, select, textarea, .mat-form-field-flex) {
+  border-radius: 10px !important;
+}
+
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cx-compound-progress-bar {
+  border-radius: 10px !important;
+  overflow: hidden !important;
+}

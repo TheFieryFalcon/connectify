@@ -119,7 +119,7 @@
     }
   }
 
-  const SVG_CHEVRON = '<svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-left:3px;"><path d="M1.5 2.75L4 5.25L6.5 2.75"/></svg>';
+  const SVG_CHEVRON = '<svg width="12" height="12" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M2 3.75L5 6.75L8 3.75"/></svg>';
 
   function updateToggleButtonLabel(dark) {
     if (!toggleButton) return;

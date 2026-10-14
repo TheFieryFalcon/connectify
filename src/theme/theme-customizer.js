@@ -57,7 +57,7 @@
 
   function deriveSecondaryTokens() {
     if (currentMode !== 'basic') return;
-    const { canvas, surface, button, border, accent } = currentTokens;
+    const { canvas, surface, button, border, accent, textPrimary } = currentTokens;
     currentTokens.canvasSubtle = adjustLightness(canvas, -8);
     currentTokens.surfaceSecondary = adjustLightness(surface, -5);
     currentTokens.surfaceElevated = adjustLightness(surface, 8);
@@ -67,7 +67,9 @@
     currentTokens.accentHover = adjustLightness(accent, 15);
     const { r, g, b } = parseHex(surface);
     const lum = 0.2126 * (r / 255) + 0.7152 * (g / 255) + 0.0722 * (b / 255);
-    currentTokens.textPrimary = lum < 0.4 ? '#f8fafc' : '#0f172a';
+    if (!textPrimary) {
+      currentTokens.textPrimary = lum < 0.4 ? '#f8fafc' : '#0f172a';
+    }
     currentTokens.textSecondary = lum < 0.4 ? '#d1d5db' : '#475569';
     currentTokens.tileLinkColor = currentTokens.textPrimary;
     currentTokens.buttonHover = adjustLightness(button, 12);
@@ -85,20 +87,26 @@
       const cssVar = '--cx-' + k.replace(/[A-Z]/g, m => '-' + m.toLowerCase()) + (k.endsWith('Bg') ? '' : (k.includes('canvas') || k.includes('surface') ? '-bg' : ''));
       preview.style.setProperty(cssVar, v);
     }
-    preview.style.setProperty('--cx-tile-link-color', currentTokens.tileLinkColor || currentTokens.textPrimary);
     preview.style.setProperty('--cx-canvas-bg', currentTokens.canvas);
+    preview.style.setProperty('--cx-canvas-subtle', currentTokens.canvasSubtle || currentTokens.canvas);
     preview.style.setProperty('--cx-surface-bg', currentTokens.surface);
+    preview.style.setProperty('--cx-surface-secondary', currentTokens.surfaceSecondary || currentTokens.surface);
+    preview.style.setProperty('--cx-surface-elevated', currentTokens.surfaceElevated || currentTokens.surface);
     preview.style.setProperty('--cx-border', currentTokens.border);
+    preview.style.setProperty('--cx-border-subtle', currentTokens.borderSubtle || currentTokens.border);
     preview.style.setProperty('--cx-accent', currentTokens.accent);
+    preview.style.setProperty('--cx-accent-hover', currentTokens.accentHover || currentTokens.accent);
     preview.style.setProperty('--cx-text-primary', currentTokens.textPrimary);
     preview.style.setProperty('--cx-text-secondary', currentTokens.textSecondary);
+    preview.style.setProperty('--cx-tile-link-color', currentTokens.tileLinkColor || currentTokens.textPrimary);
     preview.style.setProperty('--cx-button-bg', currentTokens.button);
-    preview.style.setProperty('--cx-button-text', currentTokens.buttonText);
+    preview.style.setProperty('--cx-button-hover', currentTokens.buttonHover || currentTokens.button);
+    preview.style.setProperty('--cx-button-text', currentTokens.buttonText || '#ffffff');
     preview.style.backgroundImage = currentWallpaper ? `url("${currentWallpaper}")` : 'none';
     const card = preview.querySelector('.cx-mock-card');
     if (card) {
-      card.style.borderRadius = currentLiquidGlass ? '14px' : '0px';
-      card.style.backdropFilter = currentLiquidGlass ? 'blur(12px)' : 'none';
+      card.style.borderRadius = currentLiquidGlass ? '16px' : '0px';
+      card.style.backdropFilter = currentLiquidGlass ? 'blur(16px)' : 'none';
     }
   }
 
@@ -178,20 +186,30 @@
             </div>
           </div>
           <div class="cx-preview-pane">
-            <h3 class="cx-preview-pane-title">Live Static Preview (No Page DOM Lag)</h3>
+            <h3 class="cx-preview-pane-title">Live Preview</h3>
             <div id="cx-customizer-preview">
+              <div class="cx-mock-subtle-bar">
+                <span>Classes</span> &rsaquo; <span>Assessment Outlines</span>
+              </div>
               <div class="cx-mock-card">
                 <div class="cx-mock-card-header">
                   <span class="cx-mock-title" id="cx-preview-heading">${currentThemeName}</span>
-                  <span style="font-size: 16px;">${currentEmoji}</span>
+                  <span class="cx-mock-elevated"><span id="cx-preview-emoji">${currentEmoji}</span> Year 12</span>
                 </div>
-                <div class="cx-mock-progress-bar"><div class="cx-mock-progress-fill"></div></div>
-                <div class="cx-mock-meta">Leon Harris from Willetton Senior High School</div>
+                <div class="cx-mock-progress-bar">
+                  <div class="cx-mock-progress-fill"></div>
+                  <div class="cx-mock-accent-indicator"></div>
+                </div>
+                <div class="cx-mock-meta">Leon Harris &bull; Willetton Senior High School</div>
                 <div class="cx-mock-stats-panel">
-                  Min 30.2% • Q1 62.3% • <strong>Med 70.8%</strong> • Q3 79.05% • <strong>Max 92.7%</strong> • <strong>Mean 68.4%</strong><br>
-                  <strong>Z-Score 0.96</strong> • <strong>Top 15%</strong> • <strong>35 / ~234</strong>
+                  Min 30.2% &bull; Q1 62.3% &bull; <strong>Med 70.8%</strong> &bull; Q3 79.1% &bull; <strong>Max 92.7%</strong>
+                  <div class="cx-mock-divider"></div>
+                  <strong>Z-Score 0.96</strong> &bull; <strong>Top 15%</strong> &bull; <span>35 / ~234</span>
                 </div>
-                <button class="cx-mock-button">View Tasks</button>
+                <div style="display: flex; gap: 8px;">
+                  <button class="cx-mock-button">View Tasks</button>
+                  <button class="cx-mock-button cx-mock-button-hover">Details</button>
+                </div>
               </div>
             </div>
           </div>
@@ -223,8 +241,8 @@
     if (!grid) return;
     const basicKeys = [
       { key: 'canvas', label: 'Canvas Background' }, { key: 'surface', label: 'Panel / Surface' },
-      { key: 'button', label: 'Button Color' }, { key: 'border', label: 'Outline / Border' },
-      { key: 'accent', label: 'Primary Accent' }
+      { key: 'textPrimary', label: 'Primary Text' }, { key: 'button', label: 'Button Color' },
+      { key: 'border', label: 'Outline / Border' }, { key: 'accent', label: 'Primary Accent' }
     ];
     const fullKeys = [
       { key: 'canvas', label: 'Canvas Background' }, { key: 'canvasSubtle', label: 'Subtle Canvas' },
@@ -325,6 +343,7 @@
     emojiInput.oninput = () => {
       currentEmoji = emojiInput.value || '🎨';
       modalEl.querySelector('#cx-header-icon').textContent = currentEmoji;
+      const prevEmoji = modalEl.querySelector('#cx-preview-emoji'); if (prevEmoji) prevEmoji.textContent = currentEmoji;
       renderMockup();
     };
     modalEl.querySelectorAll('.cx-emoji-btn').forEach(btn => {
@@ -332,6 +351,7 @@
         currentEmoji = btn.dataset.emoji;
         emojiInput.value = currentEmoji;
         modalEl.querySelector('#cx-header-icon').textContent = currentEmoji;
+        const prevEmoji = modalEl.querySelector('#cx-preview-emoji'); if (prevEmoji) prevEmoji.textContent = currentEmoji;
         renderMockup();
       };
     });

@@ -185,7 +185,7 @@
         typeContainer = createElement('div', 'connectea-type-container');
 
         const typeLabel = createElement('label', 'connectea-type-label');
-        const typeTitle = createElement('span', 'connectea-type-title', 'Type');
+        const typeTitle = createElement('span', 'connectea-type-title', 'Type: ');
 
         typeSelect = createElement('select', 'connectea-type-select');
         typeSelect.setAttribute('aria-label', 'Assessment type override');

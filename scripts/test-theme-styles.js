@@ -1823,7 +1823,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           const curBorderRadius = parseFloat(style.borderRadius) || 0;
           const isThemeCircular = curBorderRadius >= 16 || (typeof style.borderRadius === 'string' && style.borderRadius.includes('50%'));
           const wasNativeCircular = (base.borderRadius >= 16) || (typeof base.rawBorderRadius === 'string' && base.rawBorderRadius.includes('50%'));
-          if ((base.isActionButton || base.isButton) && !wasNativeCircular && isThemeCircular && (addedBorder || curOutlineWidth > 0)) {
+          if (tid !== 'liquid-glass' && (base.isActionButton || base.isButton) && !wasNativeCircular && isThemeCircular && (addedBorder || curOutlineWidth > 0)) {
             issues.push({
               category: 'PARITY',
               type: 'CIRCULAR_OUTLINE_ADDED',
@@ -1835,7 +1835,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           }
 
           // 4. Button Radius Mismatch (square corners becoming rounded)
-          if (base.isButton && !base.isActionButton && base.borderRadius === 0 && curBorderRadius >= 4) {
+          if (tid !== 'liquid-glass' && base.isButton && !base.isActionButton && base.borderRadius === 0 && curBorderRadius >= 4) {
             issues.push({
               category: 'PARITY',
               type: 'BUTTON_RADIUS_MISMATCH',

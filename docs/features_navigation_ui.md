@@ -12,32 +12,17 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **UI Appearance**: Matches native Connect navigation link styling seamlessly (`[Assessment Outlines]`).
 - **Functionality**: One-click direct link to `/group/students/ui/my-settings/assessment-outlines`, bypassing nested user menus. Automatically reinjects across client-side SPA route transitions.
 
-### 2. Site-Wide Dark Theme
-- **Source Modules**: [`theme.js`](file:///Users/uwong/Downloads/2.1.14_0/theme.js), [`theme.css`](file:///Users/uwong/Downloads/2.1.14_0/theme.css)
-- **DOM Insertion**: Injected into the top navigation/header bar across all Connect pages (`https://connect.det.wa.edu.au/*`).
-- **UI Appearance**: High-contrast toggle button (`☀ Light mode` / `☾ Dark mode`).
+### 2. Site-Wide Multi-Theme System & In-DOM Customizer
+- **Source Modules**: [`theme.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.js), [`theme-registry.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-registry.js), [`theme-customizer.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.js), [`theme.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.css)
+- **DOM Insertion**: Injected into the top navigation header across all Connect pages (`#connectea-theme-toggle` + `.connectea-theme-arrow`).
+- **UI Appearance**: Compact 28px toggle button with enlarged 12x12 chevron dropdown trigger; 250px popover menu (`#connectea-theme-menu`); full in-DOM designer modal (`#cx-customizer-modal`).
 - **Functionality**:
-  - Instant, zero-flicker toggle applying `.connectea-dark` to `document.documentElement` without DOM traversal or style recalculation loops.
-  - High-fidelity dark palette strictly preserving visual hierarchy:
-    - Main canvas: `#12171f`, Top nav & menus: `#1a222d`
-    - Course Card (`.eds-c-tile`): `#1e2632` with border `#2e3c4e`
-    - Cohort Statistics Panel (`.connectea-panel`): Deep navy `#15263a` with border `#264669` and soft blue text `#d6e8f8`
-    - Summary total mark & grade cell (`.cvr-c-task__marks`): Box `#161e29` with divider `#2d3b4d`
-    - Subheader bar: `#18202b`, Accordion section heading: `#222b39` with border `#2e3c4e`
-    - Compound progress bars: Preserves distinct category colors (teal, blue, purple, red)
-    - Assessment type dropdowns: `#182330` with border `#2c425c`
-    - Highcharts boxplots: `#161e29` box fill, `#647b95` whiskers, transparent canvas.
-    - Card/tile headers & bodies: Unified `#2e3c4e` border, suppressing native colored accent stripes; dark "View All" tile actions (`#24303f`); Connect Help, nav lists (`.eds-c-nav-list`, `.eds-c-nav-list__item`), and resource cards (`.cvr-c-resource`) styled with `#1e2632` surfaces, `#2e3c4e` borders, `#263344` hover, and `#e2e8f0` text; high-contrast role switch and webfont icons (`[class*="cvr-c-icon"]:before`, `.cvr-c-icon--switch:before`, `#cbd5e1`, hover `#ffffff`).
-    - Red outline normalization: Neutralizes `.eds-t-red` card borders to `#3d5066`, headings to `#f8fafc`, and renders attendance/locked alerts as soft dark-theme badges (`#2b171a`, border `#7f2329`, text `#fca5a5`).
-    - Material & utility components: Scopes `button.mat-focus-indicator`, `.mat-button`, `.mat-stroked-button` (`#202c3b` surface, `#455a73` border) and `div.w-100` flex wrappers.
-    - Base Connect margin alignment: Aligns with native Connect CSS by removing `.mat-expansion-panel` bottom margin override and excluding icon buttons from button padding.
-    - Form controls: Custom dark checkboxes (`appearance: none`, SVG checkmark), custom `<select>` dropdowns (SVG chevron, dark `<option>`), and polished button hierarchy ($\ge 5:1$ contrast).
-    - Tables & grids: Full coverage for `.table`, `.table-striped`, `.table-hover`, `.v-table`, `.v-grid`, `.cvr-c-table`, and `.cvr-c-submission-students-table` with `#1e2632` surfaces and `#36485e` borders.
-    - Modals & dialogs: Dark styling for `.v-window`, `.ui-dialog`, `.modal-content`, `.cvr-c-popup`, and dark backdrop curtains (`.v-window-modalitycurtain`, `.modal-backdrop`, `rgba(0,0,0,0.75)`).
-    - Menus & dropdowns: Dark auto-suggest popups (`.v-filterselect-suggestpopup`), `.dropdown-menu`, `.v-menubar-popup`, and `.ui-menu`.
-    - Calendars & dates: Full support for `.v-calendar`, `.ui-datepicker`, and `.v-datefield-popup` with highlighted today and selected dates.
-    - Tabs, breadcrumbs & feeds: `.v-tabsheet`, `.eds-c-tabs`, `.breadcrumb`, `.cvr-c-location-bar`, `.cvr-c-speech-box`, `.v-Notification`, `.alert`, and badges.
-  - Persists theme state in `localStorage` (`connectea:theme:v1`).
+  - Instant zero-flicker switching between 7 built-in themes: Dark (`dark`), Quantum Dark (`quantum` with Gruvbox bright green `#b8bb26` highlights), AMOLED Black (`amoled`), Midnight Navy (`midnight`), Emerald Forest (`forest`), Sunset Orange (`sunset`), and Apple Liquid Glass (`liquid-glass`).
+  - In-DOM Theme Customizer: Basic Mode (6 tokens) and Full Mode (14 tokens) with live preview rendering all 14 tokens in authentic Connect mockup elements, interactive HSV/HEX color picker, and JSON import/export.
+  - Apple Liquid Glass Mode: 16px corner curvature on Connect panels, 12px on buttons, 10px on inputs, and frosted glass diffusion (`blur(16px)`).
+  - Custom Wallpaper: User wallpaper upload with local persistence and translucent accordions/tile bodies allowing wallpaper pass-through.
+  - Login page suppression: Dark themes temporarily disable on `/login` and automatically restore upon successful login (`connectea:theme:restore_theme`).
+  - Persists active theme in `localStorage` (`connectea:theme:id`, `connectea:theme:last_theme`).
 
 ### 3. DET SSO Auto-Login Assistant
 - **Source Module**: [`auto-login.js`](file:///Users/uwong/Downloads/2.1.14_0/auto-login.js)

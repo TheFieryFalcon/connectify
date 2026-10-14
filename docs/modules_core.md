@@ -52,7 +52,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Role**: Creates and updates the DOM UI for assessment statistics panels and assessment type selector dropdowns.
 - **Submodules**:
   - [`cohort-outcome.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-outcome.js): Evaluates outcome meter segments (0..5), renders 18px x 56px multi-tier outcome bar, and handles secret purple breakout ($> 1.10 \times \text{High}$) with singleton floating tooltip.
-  - [`cohort-panel.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-panel.js): Injects `.connectea-panel`, `.connectea-row-wrapper`, and `.connectea-type-select` DOM nodes.
+  - [`cohort-panel.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-panel.js): Injects `.connectea-panel`, `.connectea-row-wrapper`, and `.connectea-type-select` DOM nodes with formatted `'Type: '` label.
 - **Key Functions**:
   - `readMark(row)`: Parses raw percentage score from `.cvr-c-task__mark` (supporting `%` and `X Out of Y`).
   - `readStats(row)`: Reads boxplot quantiles from DOM dataset bridge or Highcharts instance.

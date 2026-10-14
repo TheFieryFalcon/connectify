@@ -5,16 +5,19 @@ Extremely concise summary of the core visual design language, contrast standards
 ---
 
 ## 1. Color Palette & Hierarchy
-- **Canvas / Background**: Light `#f7f9fc`, Dark `#12171f`.
+- **Canvas / Background**: Light `#f7f9fc`, Dark `#12171f`, Quantum Dark `#282828` (Gruvbox bright green `#b8bb26` highlights), AMOLED `#000000`, Midnight `#0b132b`, Forest `#0a1914`, Sunset `#20101b`, Liquid Glass diffusion.
 - **Top Navigation & Menus**: Light `#ffffff` / `#e9f2fb`, Dark `#1a222d`.
-- **Course Tiles (`.eds-c-tile`)**: Light `#ffffff` (border `#d8e3ee`), Dark `#1e2632` (border `#2e3c4e`, hover `#3d5066`).
+- **Course Tiles (`.eds-c-tile`)**: Light `#ffffff` (border `#d8e3ee`), Dark `#1e2632` (border `#2e3c4e`, hover `#3d5066`). Translucent frosted glass (`rgba(18, 26, 40, 0.65)`) in Liquid Glass / custom background.
 - **Cohort Statistics Panel (`.connectea-panel`)**: Deep navy `#15263a`, border `#264669`, text `#d6e8f8`.
 - **Summary Marks Box (`.cvr-c-task__marks`)**: Box `#161e29`, divider `#2d3b4d`.
-- **Accordions & Section Headers**: `#222b39`, border `#2e3c4e`.
+- **Accordions & Section Headers**: `#222b39`, border `#2e3c4e`; transparent over custom wallpapers or Liquid Glass.
 - **Category Colors**: Exam (Gold `#d97706`), Test (Blue `#2563eb`), Application (Green `#059669`), Essay (Purple `#7c3aed`), Take-Home (Teal `#0d9488`). Labels bind to `--cx-cat-color` via `.cx-cat-name-label`.
+- **Assessment Type Label**: Always formatted as `"Type: "` with trailing colon and space.
 
 ## 2. Contrast & Typography Standards
 - **WCAG AA Threshold**: Minimum **5:1 contrast ratio** across all foreground text and backgrounds in both light and dark modes.
+- **Liquid Glass Geometry**: 16px corner curvature on Connect panels, cards, tiles, and modal dialogs; 12px on buttons; 10px on inputs. Strict 0px radius in standard dark themes.
+- **Theme Dropdown & Customizer**: Sleek 28px height with 12x12 chevron and expanded 4px 6px padding (`.connectea-theme-arrow`). In-DOM Theme Customizer (`#cx-customizer-modal`) with Basic & Full modes, live preview rendering all 14 tokens, interactive HSV/HEX color picker, custom wallpaper upload and caching, JSON import/export. Customize button text color strictly meets $\ge 5:1$ contrast across all themes (`var(--cx-text-primary)`).
 - **Scenario Values in Dark Mode**:
   - Low: `#e1eaf3` on dark card.
   - Middle / Expected: High-contrast white `#ffffff` on `#334c65`.
@@ -81,3 +84,6 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Extreme Brevity & High Signal**: Documentation must be kept extremely brief, concise, and focused strictly on useful architectural, mathematical, and implementation facts. Avoid fluff or redundant prose.
 - **Strict Line Count Constraint**: `overview.md`, `design_rules.md`, and all modular documentation files in `docs/` must remain strictly **$\le 150$ lines each** at all times.
 
+## 10. Test Integrity & Direct Implementation
+- **Direct Test Updates**: When requested to change functionality, typography, markup, styling, or behavior, directly update the implementation and any tests that explicitly assert against that specific item.
+- **No Workarounds to Appease Tests**: Never use indirect workarounds (such as initializing an element with an old value only to overwrite it with `.textContent`, or adding redundant attributes) just to appease an outdated test assertion. Outdated test assertions were likely written under an earlier requirement or misunderstanding and must be updated directly to assert the newly specified behavior.

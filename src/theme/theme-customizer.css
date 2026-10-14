@@ -328,6 +328,13 @@
   overflow: hidden;
 }
 
+.cx-mock-subtle-bar {
+  background: var(--cx-canvas-subtle, #0a0d12);
+  border: 1px solid var(--cx-border-subtle, #2e3c4e);
+  border-radius: 6px; padding: 5px 8px; font-size: 11px;
+  color: var(--cx-text-secondary, #e2e8f0); display: flex; align-items: center; gap: 6px;
+}
+
 .cx-mock-card {
   background-color: var(--cx-surface-bg, #1e2632);
   border: 1px solid var(--cx-border, #455a73);
@@ -348,19 +355,32 @@
   font-size: 14px;
   font-weight: 700;
   color: var(--cx-tile-link-color, var(--cx-text-primary, #f8fafc));
+  text-decoration: underline;
   margin: 0;
 }
 
+.cx-mock-elevated {
+  background: var(--cx-surface-elevated, #263242);
+  border: 1px solid var(--cx-border-subtle, #2e3c4e);
+  border-radius: 12px; padding: 2px 8px; font-size: 11px; font-weight: 600;
+  color: var(--cx-text-primary, #f8fafc); display: inline-flex; align-items: center; gap: 4px;
+}
+
 .cx-mock-progress-bar {
-  height: 6px;
-  background: var(--cx-surface-secondary, #18202b);
-  border-radius: 3px;
+  height: 8px;
+  background: var(--cx-canvas-subtle, #0a0d12);
+  border-radius: 4px;
   overflow: hidden;
   display: flex;
 }
 .cx-mock-progress-fill {
   background: var(--cx-accent, #3b82f6);
-  width: 72%;
+  width: 68%;
+  height: 100%;
+}
+.cx-mock-accent-indicator {
+  background: var(--cx-accent-hover, #60a5fa);
+  width: 14%;
   height: 100%;
 }
 
@@ -370,8 +390,8 @@
 }
 
 .cx-mock-stats-panel {
-  background: var(--cx-surface-elevated, #263242);
-  border: 1px solid var(--cx-border, #455a73);
+  background: var(--cx-surface-secondary, #18202b);
+  border: 1px solid var(--cx-border-subtle, #2e3c4e);
   border-radius: 6px;
   padding: 10px;
   font-size: 11px;
@@ -382,8 +402,12 @@
   color: var(--cx-text-primary, #f8fafc);
   font-weight: 700;
 }
+.cx-mock-divider {
+  border-top: 1px solid var(--cx-border-subtle, #2e3c4e);
+  margin: 6px 0;
+}
 
-.cx-mock-button {
+.cx-mock-button, .cx-mock-button-hover {
   background: var(--cx-button-bg, #202c3b);
   border: 1px solid var(--cx-border, #455a73);
   color: var(--cx-button-text, #f1f5f9);
@@ -391,8 +415,10 @@
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  align-self: flex-start;
   cursor: default;
+}
+.cx-mock-button-hover {
+  background: var(--cx-button-hover, #2c3b4e);
 }
 
 .cx-customizer-footer {
@@ -438,12 +464,18 @@
 #connectea-theme-menu .connectea-theme-customize-btn {
   display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 40px;
   border-radius: 8px; background: transparent !important; border: 1px dashed var(--cx-border, #3d5066) !important;
-  color: var(--cx-text-secondary, #cbd5e1) !important; cursor: pointer; width: 100%;
-  text-align: left; box-sizing: border-box; font-size: 14px; font-weight: 500; font-family: inherit;
+  color: var(--cx-text-primary, #f8fafc) !important; cursor: pointer; width: 100%;
+  text-align: left; box-sizing: border-box; font-size: 14px; font-weight: 600; font-family: inherit;
   transition: background 0.12s ease, color 0.12s ease; margin-top: 4px;
 }
+:root:not(.connectea-dark) #connectea-theme-menu .connectea-theme-customize-btn {
+  color: var(--cx-text-primary, #0f172a) !important;
+}
 #connectea-theme-menu .connectea-theme-customize-btn:hover {
-  background: var(--cx-surface-hover, #2b394b) !important; color: #ffffff !important;
+  background: var(--cx-surface-hover, #2b394b) !important; color: var(--cx-accent-hover, #ffffff) !important;
+}
+:root:not(.connectea-dark) #connectea-theme-menu .connectea-theme-customize-btn:hover {
+  background: var(--cx-surface-hover, #f1f5f9) !important; color: var(--cx-accent-hover, #2563eb) !important;
 }
 .connectea-customize-icon {
   display: inline-flex; align-items: center; justify-content: center; font-size: 17px; width: 22px; height: 22px; flex-shrink: 0;

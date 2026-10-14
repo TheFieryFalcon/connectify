@@ -38,12 +38,17 @@ Isolated world content scripts execute in exact dependency order under `src/`:
 - `notifications.js`: Universal vertical stacked toast manager (`#connectify-notifications-container`).
 - `new-grade.js`: Running average grade delta detection ($\ge 0.05\%$) with single-card expand and "Jump to Subject" glow.
 - `dom-sweeper.js`: SPA DOM monitor and health restorer; panel mutation filter suppresses collapse loops.
-- `theme.js` & modular CSS (`theme-*.css`): Site-wide dark theme, unstyled surface adaptation (`data-connectea-surface`).
-- Modular styles: `sidebar-drawer.css`, `sidebar-notifications.css`, `sidebar-predictor.css`, `sidebar-settings.css`, `theme-core.css`, `theme-tiles.css`, `theme-cards.css`, `theme-controls.css`, `theme-material.css`, `theme-feed.css`, `theme-tables.css`, `theme-navigation.css`, `theme-surfaces.css`.
+- `theme.js`, `theme-registry.js`, `theme-customizer.js` & modular CSS (`theme-*.css`): Site-wide dark theme, 7 preset palettes, in-DOM theme customizer, custom wallpaper upload/caching, Liquid Glass diffusion, unstyled surface adaptation (`data-connectea-surface`).
+- Modular styles: `sidebar-drawer.css`, `sidebar-notifications.css`, `sidebar-predictor.css`, `sidebar-settings.css`, `theme-tokens.css`, `theme-core.css`, `theme-tiles.css`, `theme-cards.css`, `theme-controls.css`, `theme-material.css`, `theme-feed.css`, `theme-tables.css`, `theme-navigation.css`, `theme-surfaces.css`, `theme-customizer.css`, `theme.css`.
 - Connect CSS reference: `./connect_css/` contains upstream Connect portal stylesheets (`main_aDnd.css`, `clay_aDnd.css`, etc.) providing native DOM selectors, layout classes, and UI structures.
-- Storage keys: `connectea:theme:v1`, `connectea:task_type_overrides`, `connectea:class_categories:`, `cx-categories`, `connectify:prediction:`, `connectify:stats_cache:`, `connectify:grade_cache:`, `connectify:cache_version:<subsystem>`.
+- Storage keys: `connectea:theme:v1`, `connectea:theme:id`, `connectea:theme:last_theme`, `connectea:theme:custom_themes`, `connectea:theme:wallpaper`, `connectea:theme:liquid_glass`, `connectea:task_type_overrides`, `connectea:class_categories:`, `cx-categories`, `connectify:prediction:`, `connectify:stats_cache:`, `connectify:grade_cache:`, `connectify:cache_version:<subsystem>`.
  
 ---
  
 ## 5. Git & Remote Workflow
 - Always commit and push all verified changes to remote (`origin main`) after completing every task. Never leave working trees uncommitted or unpushed.
+
+---
+
+## 6. Test Integrity & Direct Implementation
+- When requested to change functionality, typography, markup, styling, or behavior, directly update the implementation and any tests that explicitly assert against that specific item. Never use indirect workarounds (such as initializing an element with an old value only to overwrite it with `.textContent`, or adding redundant attributes) just to appease an outdated test assertion. Outdated test assertions were likely written under an earlier requirement or misunderstanding and must be updated directly to assert the newly specified behavior.
