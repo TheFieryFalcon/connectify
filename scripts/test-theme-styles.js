@@ -2202,6 +2202,7 @@ async function runThemeAudit(customOptions = {}) {
     { id: 'midnight', name: 'Midnight Navy', isDark: true },
     { id: 'forest', name: 'Emerald Forest', isDark: true },
     { id: 'sunset', name: 'Twilight Plum', isDark: true },
+    { id: 'liquid-glass', name: 'Liquid Glass', isDark: true },
     { id: 'custom', name: 'Custom Theme', isDark: true }
   ];
 

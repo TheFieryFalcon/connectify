@@ -186,6 +186,7 @@
                 <option value="midnight">🌌 Midnight Navy</option>
                 <option value="forest">🌲 Emerald Forest</option>
                 <option value="sunset">🌅 Twilight Plum</option>
+                <option value="liquid-glass">🫧 Liquid Glass (Apple Frosted)</option>
               </select>
             </div>
             <p class="cx-settings-desc">Interface theme and visual palette.</p>

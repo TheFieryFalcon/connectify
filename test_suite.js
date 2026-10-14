@@ -4808,6 +4808,7 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   assert.ok(themeTokensCss.includes('[data-connectea-theme="midnight"]') && themeTokensCss.includes('--cx-canvas-bg: #0b132b;'), 'theme-tokens.css must define Midnight navy theme');
   assert.ok(themeTokensCss.includes('[data-connectea-theme="forest"]') && themeTokensCss.includes('--cx-canvas-bg: #0a1914;'), 'theme-tokens.css must define Forest theme');
   assert.ok(themeTokensCss.includes('[data-connectea-theme="sunset"]') && themeTokensCss.includes('--cx-canvas-bg: #19111c;'), 'theme-tokens.css must define Sunset theme');
+  assert.ok(themeTokensCss.includes('[data-connectea-theme="liquid-glass"]') && themeTokensCss.includes('--cx-canvas-bg: #0b1120;'), 'theme-tokens.css must define Liquid Glass theme');
   assert.ok(themeTokensCss.includes('#connectea-theme-menu'), 'theme-tokens.css must style the theme popover menu');
 
   // 4. Manifest checks: theme-tokens.css and theme-registry.js are registered
@@ -5289,7 +5290,7 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
   assert.ok(themeSurfacesCss.includes('var(--cx-surface-secondary'), 'theme-surfaces.css must style alerts with var(--cx-surface-secondary)');
 
   // 3. Every preset theme defines complete surface palettes in theme-tokens.css
-  const themes = ['dark', 'quantum', 'amoled', 'midnight', 'forest', 'sunset'];
+  const themes = ['dark', 'quantum', 'amoled', 'midnight', 'forest', 'sunset', 'liquid-glass'];
   const requiredTokens = [
     '--cx-canvas-bg', '--cx-surface-bg', '--cx-surface-secondary', '--cx-surface-elevated',
     '--cx-border', '--cx-text-primary', '--cx-text-secondary', '--cx-accent',
@@ -5325,9 +5326,9 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
   const themeMenu = document.getElementById('connectea-theme-menu');
   assert.ok(themeMenu, 'Clicking .connectea-theme-arrow must open #connectea-theme-menu');
   const options = themeMenu.querySelectorAll('.connectea-theme-option');
-  assert.strictEqual(options.length, 6, 'Themes menu must render all 6 built-in dark themes');
+  assert.strictEqual(options.length, 7, 'Themes menu must render all 7 built-in dark themes');
   const icons = themeMenu.querySelectorAll('.connectea-theme-icon');
-  assert.strictEqual(icons.length, 6, 'Every theme option must contain a .connectea-theme-icon element');
+  assert.strictEqual(icons.length, 7, 'Every theme option must contain a .connectea-theme-icon element');
 
   // Click Quantum Dark option in menu
   const quantumOpt = Array.from(options).find(opt => opt.querySelector('.connectea-theme-name')?.textContent.includes('Quantum Dark'));
@@ -5505,6 +5506,13 @@ runTest('Test 144: Classes page header parity, Angular Material tab specificity,
   assert.ok(themeRegistryJs.includes("swatch: ['#282828', '#32302f', '#fabd2f']") &&
             themeJs.includes("swatch: ['#282828', '#32302f', '#fabd2f']"),
     'theme-registry.js and theme.js must use inspiration swatch for Quantum Dark');
+  assert.ok(themeTokensCss.includes('--cx-text-secondary: #b8bb26;'),
+    'theme-tokens.css must define Quantum Dark with green secondary color #b8bb26');
+  assert.ok(themeTokensCss.includes('backdrop-filter: blur(16px)') &&
+            themeTokensCss.includes('rgba(26, 36, 52, 0.72)'),
+    'theme-tokens.css must define Apple liquid glass frosted styling with translucent surfaces');
+  assert.ok(themeRegistryJs.includes("'liquid-glass'") && themeJs.includes("'liquid-glass'"),
+    'theme-registry.js and theme.js must register liquid-glass theme');
 });
 
 runTest('Test 145: Puppeteer theme unstyled element auditor and Connect directory crawler scripts', async () => {

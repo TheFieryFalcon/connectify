@@ -64,6 +64,13 @@
       swatch: ['#19111c', '#26182a', '#f43f5e']
     },
     {
+      id: 'liquid-glass',
+      name: 'Liquid Glass',
+      icon: '🫧',
+      isDark: true,
+      swatch: ['#0b1120', 'rgba(56, 189, 248, 0.25)', '#38bdf8']
+    },
+    {
       id: 'light',
       name: 'Default',
       icon: '☀',
