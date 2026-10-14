@@ -73,9 +73,7 @@
   --cx-text-primary: #ffffff; --cx-text-secondary: #d4d4d4; --cx-text-muted: #a3a3a3; --cx-text-disabled: #525252; --cx-text-inverse: #000000;
   --cx-accent: #38bdf8; --cx-accent-hover: #7dd3fc; --cx-accent-active: #0284c7; --cx-accent-subtle: rgba(56, 189, 248, 0.15); --cx-accent-text: #000000;
   --cx-nav-bg: #050505; --cx-nav-border: #222222; --cx-nav-text: #e5e5e5; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #000000;
-  --cx-button-bg: #121212; --cx-button-hover: #202020; --cx-button-active: #080808;
-  --cx-button-border: #333333; --cx-button-border-hover: #444444; --cx-button-text: #ffffff; --cx-button-text-hover: #ffffff;
-  --cx-button-primary-bg: #0284c7; --cx-button-primary-hover: #0369a1; --cx-button-primary-text: #ffffff;
+  --cx-button-bg: #121212; --cx-button-hover: #202020; --cx-button-active: #080808; --cx-button-border: #333333; --cx-button-border-hover: #444444; --cx-button-text: #ffffff; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #0284c7; --cx-button-primary-hover: #0369a1; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #050505; --cx-input-border: #262626; --cx-input-border-focus: #38bdf8; --cx-input-text: #ffffff; --cx-input-placeholder: #525252;
   --cx-table-header-bg: #0c0c0c; --cx-table-row-hover: #141414; --cx-table-row-alt: #080808; --cx-table-border: #1f1f1f;
   --cx-badge-bg: #181818; --cx-badge-border: #262626; --cx-badge-text: #ffffff;
@@ -92,9 +90,7 @@
   --cx-text-primary: #f1f5f9; --cx-text-secondary: #cbd5e1; --cx-text-muted: #94a3b8; --cx-text-disabled: #64748b; --cx-text-inverse: #0b132b;
   --cx-accent: #60a5fa; --cx-accent-hover: #93c5fd; --cx-accent-active: #3b82f6; --cx-accent-subtle: rgba(96, 165, 250, 0.15); --cx-accent-text: #ffffff;
   --cx-nav-bg: #0e1830; --cx-nav-border: #233454; --cx-nav-text: #cbd5e1; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #090f21;
-  --cx-button-bg: #182642; --cx-button-hover: #22355c; --cx-button-active: #121e35;
-  --cx-button-border: #344b76; --cx-button-border-hover: #486499; --cx-button-text: #f1f5f9; --cx-button-text-hover: #ffffff;
-  --cx-button-primary-bg: #2563eb; --cx-button-primary-hover: #1d4ed8; --cx-button-primary-text: #ffffff;
+  --cx-button-bg: #182642; --cx-button-hover: #22355c; --cx-button-active: #121e35; --cx-button-border: #344b76; --cx-button-border-hover: #486499; --cx-button-text: #f1f5f9; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #2563eb; --cx-button-primary-hover: #1d4ed8; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #0e1830; --cx-input-border: #2a3c61; --cx-input-border-focus: #60a5fa; --cx-input-text: #f1f5f9; --cx-input-placeholder: #64748b;
   --cx-table-header-bg: #101c37; --cx-table-row-hover: #1c2b4c; --cx-table-row-alt: #121e3b; --cx-table-border: #1e2e4c;
   --cx-badge-bg: #1f3054; --cx-badge-border: #344b76; --cx-badge-text: #f1f5f9;
@@ -111,9 +107,7 @@
   --cx-text-primary: #ecfdf5; --cx-text-secondary: #a7f3d0; --cx-text-muted: #6ee7b7; --cx-text-disabled: #4b8b70; --cx-text-inverse: #0a1914;
   --cx-accent: #10b981; --cx-accent-hover: #34d399; --cx-accent-active: #059669; --cx-accent-subtle: rgba(16, 185, 129, 0.15); --cx-accent-text: #ffffff;
   --cx-nav-bg: #0d1f19; --cx-nav-border: #1d4134; --cx-nav-text: #a7f3d0; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #07130f;
-  --cx-button-bg: #132c24; --cx-button-hover: #1a3b30; --cx-button-active: #0e201a;
-  --cx-button-border: #2c5949; --cx-button-border-hover: #3c7a64; --cx-button-text: #ecfdf5; --cx-button-text-hover: #ffffff;
-  --cx-button-primary-bg: #059669; --cx-button-primary-hover: #047857; --cx-button-primary-text: #ffffff;
+  --cx-button-bg: #132c24; --cx-button-hover: #1a3b30; --cx-button-active: #0e201a; --cx-button-border: #2c5949; --cx-button-border-hover: #3c7a64; --cx-button-text: #ecfdf5; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #059669; --cx-button-primary-hover: #047857; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #0d1f19; --cx-input-border: #224a3b; --cx-input-border-focus: #10b981; --cx-input-text: #ecfdf5; --cx-input-placeholder: #4b8b70;
   --cx-table-header-bg: #0e231c; --cx-table-row-hover: #17362c; --cx-table-row-alt: #10261f; --cx-table-border: #1b3b2f;
   --cx-badge-bg: #1a3b30; --cx-badge-border: #2c5949; --cx-badge-text: #ecfdf5;
@@ -130,9 +124,7 @@
   --cx-text-primary: #fdf2f8; --cx-text-secondary: #fbcfe8; --cx-text-muted: #f472b6; --cx-text-disabled: #9d507b; --cx-text-inverse: #19111c;
   --cx-accent: #f43f5e; --cx-accent-hover: #fb7185; --cx-accent-active: #e11d48; --cx-accent-subtle: rgba(244, 63, 94, 0.15); --cx-accent-text: #ffffff;
   --cx-nav-bg: #1f1423; --cx-nav-border: #43264b; --cx-nav-text: #fbcfe8; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #130a17;
-  --cx-button-bg: #2b1930; --cx-button-hover: #3a2241; --cx-button-active: #211325;
-  --cx-button-border: #5c3566; --cx-button-border-hover: #764483; --cx-button-text: #fdf2f8; --cx-button-text-hover: #ffffff;
-  --cx-button-primary-bg: #e11d48; --cx-button-primary-hover: #be123c; --cx-button-primary-text: #ffffff;
+  --cx-button-bg: #2b1930; --cx-button-hover: #3a2241; --cx-button-active: #211325; --cx-button-border: #5c3566; --cx-button-border-hover: #764483; --cx-button-text: #fdf2f8; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #e11d48; --cx-button-primary-hover: #be123c; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #1e1322; --cx-input-border: #4b2a54; --cx-input-border-focus: #f43f5e; --cx-input-text: #fdf2f8; --cx-input-placeholder: #9d507b;
   --cx-table-header-bg: #221426; --cx-table-row-hover: #361f3c; --cx-table-row-alt: #28182d; --cx-table-border: #3c2143;
   --cx-badge-bg: #3a2241; --cx-badge-border: #5c3566; --cx-badge-text: #fdf2f8;
@@ -149,9 +141,7 @@
   --cx-text-primary: #ffffff; --cx-text-secondary: #dbeafe; --cx-text-muted: #93c5fd; --cx-text-disabled: #64748b; --cx-text-inverse: #0b1120;
   --cx-accent: #38bdf8; --cx-accent-hover: #7dd3fc; --cx-accent-active: #0284c7; --cx-accent-subtle: rgba(56, 189, 248, 0.20); --cx-accent-text: #0b1120;
   --cx-nav-bg: rgba(15, 23, 42, 0.75); --cx-nav-border: rgba(255, 255, 255, 0.14); --cx-nav-text: #dbeafe; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: rgba(0, 0, 0, 0.3);
-  --cx-button-bg: rgba(255, 255, 255, 0.10); --cx-button-hover: rgba(255, 255, 255, 0.18); --cx-button-active: rgba(255, 255, 255, 0.24);
-  --cx-button-border: rgba(255, 255, 255, 0.16); --cx-button-border-hover: rgba(255, 255, 255, 0.30); --cx-button-text: #ffffff; --cx-button-text-hover: #ffffff;
-  --cx-button-primary-bg: #0284c7; --cx-button-primary-hover: #0369a1; --cx-button-primary-text: #ffffff;
+  --cx-button-bg: rgba(255, 255, 255, 0.10); --cx-button-hover: rgba(255, 255, 255, 0.18); --cx-button-active: rgba(255, 255, 255, 0.24); --cx-button-border: rgba(255, 255, 255, 0.16); --cx-button-border-hover: rgba(255, 255, 255, 0.30); --cx-button-text: #ffffff; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #0284c7; --cx-button-primary-hover: #0369a1; --cx-button-primary-text: #ffffff;
   --cx-input-bg: rgba(15, 23, 42, 0.60); --cx-input-border: rgba(255, 255, 255, 0.14); --cx-input-border-focus: #38bdf8; --cx-input-text: #ffffff; --cx-input-placeholder: #64748b;
   --cx-table-header-bg: rgba(20, 27, 40, 0.75); --cx-table-row-hover: rgba(255, 255, 255, 0.08); --cx-table-row-alt: rgba(255, 255, 255, 0.03); --cx-table-border: rgba(255, 255, 255, 0.10);
   --cx-badge-bg: rgba(255, 255, 255, 0.12); --cx-badge-border: rgba(255, 255, 255, 0.18); --cx-badge-text: #ffffff;
@@ -165,10 +155,8 @@
   .connectea-panel, #connectify-sidebar, #connectea-theme-menu, .v-panel,
   .modal-content, .ui-dialog, .cvr-c-service-bar, .cvr-c-service-bar__container
 ) {
-  backdrop-filter: blur(16px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(190%) contrast(105%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%) contrast(105%) !important;
+  backdrop-filter: blur(16px) saturate(160%) contrast(102%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) contrast(102%) !important;
   box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 16px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -10px rgba(0, 0, 0, 0.45) !important;
 }
 
@@ -177,8 +165,8 @@
   .cdk-overlay-backdrop, .cdk-overlay-dark-backdrop, .mat-drawer-backdrop,
   .eds-c-modal-overlay, .eds-c-overlay, .cvr-c-overlay, .cx-overlay
 ) {
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  backdrop-filter: blur(14px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
   background-color: rgba(11, 17, 32, 0.45) !important;
   opacity: 1 !important;
 }
@@ -189,20 +177,43 @@
 [data-connectea-has-custom-bg="true"] :is(.cvr-c-app-layout, .cvr-c-app-layout__body, #main-content, .v-app, .v-ui, .v-scrollable) {
   background-color: transparent !important;
 }
+
+/* Translucent Assessment Outline Accordions & Subject Cards */
+:is([data-connectea-has-custom-bg="true"], [data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .v-panel, [data-subject-card], .mat-card) {
+  background-color: rgba(18, 26, 40, 0.65) !important;
+  backdrop-filter: blur(16px) saturate(160%) contrast(102%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) contrast(102%) !important;
+}
+:is([data-connectea-has-custom-bg="true"], [data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-accordion, .eds-c-accordion__panel, .v-panel-content, .cvr-c-tasks, .cvr-c-task-group, .cvr-c-task, .cvr-c-task__details, .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content) {
+  background: transparent !important; background-color: transparent !important;
+}
+:is([data-connectea-has-custom-bg="true"], [data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .connectea-panel {
+  background-color: rgba(22, 34, 52, 0.65) !important;
+  backdrop-filter: blur(14px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+}
+
+/* Reading View Wallpaper Suppression (Notice & Discussion Detail Views - DOM Detected) */
+:is([data-connectea-reading-view="true"], body:has(:is(cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"]))) { background-image: none !important; background-color: var(--cx-canvas-bg, #121820) !important; }
+:is([data-connectea-reading-view="true"], body:has(:is(cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"]))) :is(cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"], cnt-notice-item-view-dialog, .cvr-c-app-layout, .cvr-c-app-layout__body, #main-content) { background-image: none !important; background-color: var(--cx-canvas-bg, #121820) !important; }
+
+/* Corner Rounding Rules: Strict 0 without Liquid Glass; Aggressive with Liquid Glass */
+:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .connectea-panel, .cx-compound-progress-bar, #ng-zone__classes-metrics-summary) { border-radius: 0 !important; }
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, #ng-zone__classes-metrics-summary) { border-radius: 18px !important; overflow: hidden !important; }
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.connectea-panel, #connectea-theme-menu, .mat-menu-panel, cnt-paginator, .cnt-paginator) { border-radius: 14px !important; }
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.modal-content, .ui-dialog, mat-dialog-container) { border-radius: 20px !important; }
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-button, .eds-c-button, .mat-button:not(.mat-card-button), .mat-raised-button) { border-radius: 12px !important; }
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input, select, textarea, .mat-form-field-flex) { border-radius: 10px !important; }
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cx-compound-progress-bar { border-radius: 10px !important; overflow: hidden !important; }
+
 /* Universal Surface Adaptation */
 :is(html, body).connectea-dark:not([data-connectea-login]),
 [data-connectea-theme]:not([data-connectea-login]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) body,
-[data-connectea-theme]:not([data-connectea-login]).connectea-dark {
+[data-connectea-theme]:not([data-connectea-login]).connectea-dark,
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(body, #main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable) {
   background-color: var(--cx-canvas-bg) !important;
   color: var(--cx-text-secondary) !important;
   font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-}
-
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  body, #main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable
-) {
-  background-color: var(--cx-canvas-bg) !important;
-  color: var(--cx-text-secondary) !important;
 }
 
 /* Universal Typography & Headings (Preserve webfont icons!) */
@@ -409,21 +420,10 @@
 }
 
 /* Login & Logout Page Guard: Disable all themes completely */
-[data-connectea-login],
-[data-connectea-login] body,
-[data-connectea-login] *,
-[data-connectea-logout],
-[data-connectea-logout] body,
-[data-connectea-logout] * {
-  --cx-canvas-bg: initial !important;
-  --cx-surface-bg: initial !important;
-  --cx-surface-secondary: initial !important;
-  --cx-surface-elevated: initial !important;
-  --cx-border: initial !important;
-  --cx-border-subtle: initial !important;
-  --cx-text-primary: initial !important;
-  --cx-text-secondary: initial !important;
-  --cx-accent: initial !important;
+:is([data-connectea-login], [data-connectea-logout], [data-connectea-login] *, [data-connectea-logout] *) {
+  --cx-canvas-bg: initial !important; --cx-surface-bg: initial !important; --cx-surface-secondary: initial !important;
+  --cx-surface-elevated: initial !important; --cx-border: initial !important; --cx-border-subtle: initial !important;
+  --cx-text-primary: initial !important; --cx-text-secondary: initial !important; --cx-accent: initial !important;
 }
 
 [data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu),

@@ -18,7 +18,10 @@
   let activeTheme = 'dark';
   let toggleButton = null;
   let themeMenu = null;
-  const closeThemeMenu = () => { if (themeMenu) { themeMenu.remove(); themeMenu = null; } };
+  const closeThemeMenu = () => {
+    if (themeMenu) { themeMenu.remove(); themeMenu = null; }
+    if (toggleButton) toggleButton.setAttribute('aria-expanded', 'false');
+  };
 
   const isLoginUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
     try {
@@ -134,18 +137,21 @@
     }
   }
 
+  const SVG_PALETTE = '<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" class="connectea-theme-icon-svg" style="display:inline-block;vertical-align:-1px;margin-right:4px;opacity:0.9;"><path d="M8 0a8 8 0 1 0 0 16 2.5 2.5 0 0 0 2.5-2.5c0-.4-.1-.7-.3-1-.2-.3-.3-.6-.3-1 0-.8.7-1.5 1.5-1.5H13a3 3 0 0 0 3-3C16 3.6 12.4 0 8 0zm-4.5 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm2.5 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>';
+  const SVG_SUN = '<svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" class="connectea-theme-icon-svg" style="display:inline-block;vertical-align:-1px;margin-right:4px;opacity:0.9;"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0zm0 13.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 1 .75-.75zm7.5-6.25a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1 0-1.5h1.5zm-13.5 0a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1 0-1.5h1.5zm11.03-4.78a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06zm-9.54 9.54a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 0 1-1.06-1.06l1.06-1.06zm9.54 0a.75.75 0 0 1-1.06 1.06l-1.06-1.06a.75.75 0 1 1 1.06-1.06l1.06 1.06zm-9.54-9.54a.75.75 0 0 1-1.06 1.06L2.39 3.47a.75.75 0 1 1 1.06-1.06l1.06 1.06z"/></svg>';
+  const SVG_CHEVRON = '<svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-left:3px;"><path d="M1.5 2.75L4 5.25L6.5 2.75"/></svg>';
+
   function updateToggleButtonLabel(dark) {
     if (!toggleButton) return;
     const label = dark ? 'Default' : 'Themes';
-    const iconChar = dark ? '☀' : '🎨';
-    toggleButton.textContent = `${iconChar} ${label}`;
+    toggleButton.textContent = label;
     toggleButton.setAttribute('aria-label', label);
     toggleButton.setAttribute('aria-pressed', String(dark));
     const arrow = document.createElement('span');
     arrow.className = 'connectea-theme-arrow';
     arrow.setAttribute('title', 'Theme options');
     arrow.setAttribute('aria-label', 'Open theme menu');
-    arrow.textContent = ' ▾';
+    arrow.innerHTML = SVG_CHEVRON;
     arrow.onclick = (e) => {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       if (themeMenu) closeThemeMenu(); else openThemeMenu(toggleButton);
@@ -233,18 +239,16 @@
   function openThemeMenu(anchorEl) {
     closeThemeMenu();
     if (isAuthDisabled()) return;
+    if (toggleButton) toggleButton.setAttribute('aria-expanded', 'true');
     themeMenu = document.createElement('div');
     themeMenu.id = 'connectea-theme-menu';
     themeMenu.setAttribute('role', 'menu');
 
     const reg = window.ConnectifyThemeRegistry;
     const defaultList = [
-      { id: 'dark', name: 'Dark', icon: '🌙', swatch: ['#12171f', '#1e2632', '#3b82f6'] },
-      { id: 'quantum', name: 'Quantum Dark', icon: '⚛️', swatch: ['#282828', '#32302f', '#fabd2f'] },
-      { id: 'amoled', name: 'AMOLED Black', icon: '🌑', swatch: ['#000000', '#0a0a0a', '#38bdf8'] },
-      { id: 'midnight', name: 'Midnight Navy', icon: '🌌', swatch: ['#0b132b', '#141f36', '#60a5fa'] },
-      { id: 'forest', name: 'Emerald Forest', icon: '🌲', swatch: ['#0a1914', '#11261f', '#10b981'] },
-      { id: 'sunset', name: 'Twilight Plum', icon: '🌅', swatch: ['#19111c', '#26182a', '#f43f5e'] },
+      { id: 'dark', name: 'Dark', icon: '🌙', swatch: ['#12171f', '#1e2632', '#3b82f6'] }, { id: 'quantum', name: 'Quantum Dark', icon: '⚛️', swatch: ['#282828', '#32302f', '#fabd2f'] },
+      { id: 'amoled', name: 'AMOLED Black', icon: '🌑', swatch: ['#000000', '#0a0a0a', '#38bdf8'] }, { id: 'midnight', name: 'Midnight Navy', icon: '🌌', swatch: ['#0b132b', '#141f36', '#60a5fa'] },
+      { id: 'forest', name: 'Emerald Forest', icon: '🌲', swatch: ['#0a1914', '#11261f', '#10b981'] }, { id: 'sunset', name: 'Twilight Plum', icon: '🌅', swatch: ['#19111c', '#26182a', '#f43f5e'] },
       { id: 'liquid-glass', name: 'Liquid Glass', icon: '🫧', swatch: ['#0b1120', 'rgba(56, 189, 248, 0.25)', '#38bdf8'] }
     ];
     const available = reg ? reg.getAvailableThemes() : defaultList;
@@ -306,6 +310,7 @@
     updateDomThemeAttributes(isDarkMode, themeId, isAuthDisabled());
     updateToggleButtonLabel(isDarkMode);
     updateTogglePosition();
+    checkReadingView();
     if (isDarkMode) scheduleAdaptSurfaces();
   }
 
@@ -324,12 +329,11 @@
     const isCurrentlyDark = document.documentElement.classList.contains('connectea-dark');
     const nextDark = !isCurrentlyDark;
     try { localStorage.setItem(STORAGE_KEY, nextDark ? 'dark' : 'light'); } catch {}
-    if (typeof window.ConnectifyThemeRegistry !== 'undefined') {
-      const savedTheme = localStorage.getItem(STORAGE_THEME_ID);
-      const activeThemeId = (savedTheme && savedTheme !== 'light' && savedTheme !== 'custom') ? savedTheme : 'dark';
-      window.ConnectifyThemeRegistry.setTheme(nextDark ? activeThemeId : 'light');
-    }
-    applyTheme(nextDark);
+    const reg = window.ConnectifyThemeRegistry;
+    const lastTheme = reg?.getLastTheme ? reg.getLastTheme() : (localStorage.getItem('connectea:last_theme_id') || 'dark');
+    const targetTheme = nextDark ? lastTheme : 'light';
+    if (reg) reg.setTheme(targetTheme);
+    applyTheme(nextDark, targetTheme);
   };
 
   toggleButton.oncontextmenu = (e) => {
@@ -337,14 +341,8 @@
     if (themeMenu) closeThemeMenu(); else openThemeMenu(toggleButton);
   };
 
-  document.addEventListener('click', (e) => {
-    if (themeMenu && !themeMenu.contains(e.target) && !toggleButton.contains(e.target)) {
-      closeThemeMenu();
-    }
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && themeMenu) closeThemeMenu();
-  });
+  document.addEventListener('click', (e) => { if (themeMenu && !themeMenu.contains(e.target) && !toggleButton.contains(e.target)) closeThemeMenu(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && themeMenu) closeThemeMenu(); });
 
   let adaptTimer = null;
   const pageStartTime = Date.now();
@@ -394,11 +392,19 @@
     });
   };
 
+  function checkReadingView() {
+    if (typeof document === 'undefined' || !document.documentElement) return;
+    const isReading = Boolean(document.querySelector('cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"], cnt-notice-item-view-dialog'));
+    if (isReading) document.documentElement.setAttribute('data-connectea-reading-view', 'true');
+    else document.documentElement.removeAttribute('data-connectea-reading-view');
+  }
+
   new MutationObserver(records => {
     if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
+    checkReadingView();
     const shouldUpdate = records.some(r => {
       if (r.target === toggleButton || r.target.parentElement?.closest('#connectea-theme-toggle') || r.target.closest?.('#connectify-sidebar')) return false;
-      if (r.type === 'attributes' && (r.attributeName === 'data-connectea-surface' || r.attributeName === 'data-connectea-ink')) return false;
+      if (r.type === 'attributes' && (r.attributeName === 'data-connectea-surface' || r.attributeName === 'data-connectea-ink' || r.attributeName === 'data-connectea-reading-view')) return false;
       if (r.target?.closest?.('.eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectea-panel')) return false;
       return true;
     });
@@ -424,17 +430,13 @@
             const cur = localStorage.getItem(STORAGE_THEME_ID);
             if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
           }
-          localStorage.setItem(STORAGE_KEY, 'light');
-          localStorage.setItem(STORAGE_THEME_ID, 'light');
+          localStorage.setItem(STORAGE_KEY, 'light'); localStorage.setItem(STORAGE_THEME_ID, 'light');
           isDarkMode = false;
         } else if (localStorage.getItem(RESTORE_KEY) === 'true') {
           const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
-          localStorage.removeItem(RESTORE_KEY);
-          localStorage.removeItem(RESTORE_THEME_KEY);
-          localStorage.setItem(STORAGE_KEY, 'dark');
-          localStorage.setItem(STORAGE_THEME_ID, restored);
-          isDarkMode = true;
-          activeTheme = restored;
+          localStorage.removeItem(RESTORE_KEY); localStorage.removeItem(RESTORE_THEME_KEY);
+          localStorage.setItem(STORAGE_KEY, 'dark'); localStorage.setItem(STORAGE_THEME_ID, restored);
+          isDarkMode = true; activeTheme = restored;
         }
       } catch {}
       if (isAuthDisabled()) {
@@ -458,10 +460,8 @@
     try {
       if (localStorage.getItem(RESTORE_KEY) === 'true') {
         const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
-        localStorage.removeItem(RESTORE_KEY);
-        localStorage.removeItem(RESTORE_THEME_KEY);
-        localStorage.setItem(STORAGE_KEY, 'dark');
-        localStorage.setItem(STORAGE_THEME_ID, restored);
+        localStorage.removeItem(RESTORE_KEY); localStorage.removeItem(RESTORE_THEME_KEY);
+        localStorage.setItem(STORAGE_KEY, 'dark'); localStorage.setItem(STORAGE_THEME_ID, restored);
         applyTheme(true, restored);
       }
     } catch {}
@@ -471,13 +471,10 @@
   }, 100);
 
   window.ConnectifyTheme = {
-    isLoginUrl,
-    isLogoutUrl,
-    isLoginOrLogoutUrl: isAuthDisabled,
-    isAuthDisabled,
+    isLoginUrl, isLogoutUrl, isLoginOrLogoutUrl: isAuthDisabled, isAuthDisabled, applyTheme,
     isDarkMode: () => (isAuthDisabled() ? false : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.isDarkMode() : isDarkMode)),
-    applyTheme,
     getTheme: () => (isAuthDisabled() ? 'light' : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (isDarkMode ? 'dark' : 'light'))),
+    getLastTheme: () => (window.ConnectifyThemeRegistry?.getLastTheme ? window.ConnectifyThemeRegistry.getLastTheme() : (localStorage.getItem('connectea:last_theme_id') || 'dark')),
     setTheme: (id, colors) => {
       if (isAuthDisabled()) return false;
       const res = window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setTheme(id, colors) : true;

@@ -197,7 +197,7 @@
   border-radius: 0 !important;
 }
 
-.connectea-dark :is(button.mat-focus-indicator, .mat-button, .mat-raised-button, .mat-flat-button):not(.mat-stroked-button):not(.c-toolbar-button):not(.mat-menu-trigger):not(.mat-tooltip-trigger):not(.mat-icon-button):not([class*="toolbar"]):not([class*="service-bar"]) {
+.connectea-dark :is(button.mat-focus-indicator, .mat-button, .mat-raised-button, .mat-flat-button):not(.mat-stroked-button):not(.c-toolbar-button):not(.mat-menu-trigger):not(.mat-tooltip-trigger):not(.mat-icon-button):not([class*="toolbar"]):not([class*="service-bar"]):not(.mat-card-button):not(.mat-card-header *) {
   background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
   color: var(--cx-button-text, var(--cx-text-primary, #f1f5f9)) !important;
   font-size: 14px !important;
@@ -255,15 +255,7 @@
   transform: translateY(1px) !important;
 }
 
-.connectea-dark :is(
-  .v-button,
-  .eds-c-button,
-  .eds-c-standard-button,
-  .cvr-c-button,
-  .btn,
-  input[type="button"],
-  input[type="submit"]
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):focus-visible {
+.connectea-dark :is(.v-button, .eds-c-button, .eds-c-standard-button, .cvr-c-button, .btn, input[type="button"], input[type="submit"]):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):focus-visible {
   border-color: var(--cx-accent, #3b82f6) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
   outline: none !important;
@@ -286,13 +278,7 @@
 }
 
 /* Circular Action Buttons (e.g. trash/delete, circular controls) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
-  .btn-monospaced,
-  .rounded-circle:is(button, a, .btn),
-  button:has([class*="trash"], [class*="delete"], [class*="bin"]),
-  [class*="delete"]:is(button, a, .btn),
-  [class*="trash"]:is(button, a, .btn)
-) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)) {
   background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
   background-image: none !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
@@ -346,13 +332,7 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
   fill: currentColor !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
-  .btn-monospaced,
-  .rounded-circle:is(button, a, .btn),
-  button:has([class*="trash"], [class*="delete"], [class*="bin"]),
-  [class*="delete"]:is(button, a, .btn),
-  [class*="trash"]:is(button, a, .btn)
-):hover {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   border-color: var(--cx-border-hover, #6482a6) !important;
   color: #ffffff !important;
@@ -366,6 +346,37 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)):hover :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
   color: #ffffff !important;
   fill: #ffffff !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-icon-button,
+.mat-icon-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-icon-button .mat-button-wrapper,
+.mat-icon-button .mat-button-wrapper {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  line-height: 1 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-icon-button :is(mat-icon, .mat-icon, cnt-icon, .mat-ligature-font, [class*="icon"]) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  font-size: 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  margin: 0 !important;
+  vertical-align: middle !important;
 }
 
 /* Primary Action Buttons */

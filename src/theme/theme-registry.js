@@ -247,6 +247,17 @@
     return theme ? theme.isDark : true;
   }
 
+  const STORAGE_LAST_THEME = 'connectea:last_theme_id';
+  function getLastTheme() {
+    try {
+      const last = localStorage.getItem(STORAGE_LAST_THEME);
+      if (last && registry.has(last) && last !== 'light') return last;
+      const current = localStorage.getItem(STORAGE_THEME_ID);
+      if (current && registry.has(current) && current !== 'light') return current;
+    } catch {}
+    return 'dark';
+  }
+
   const listeners = new Set();
   function onThemeChange(fn) {
     if (typeof fn === 'function') listeners.add(fn);
@@ -284,6 +295,10 @@
 
     const theme = registry.get(themeId) || registry.get('dark');
     const isDark = theme.isDark;
+
+    if (isDark && theme.id !== 'light') {
+      try { localStorage.setItem(STORAGE_LAST_THEME, theme.id); } catch {}
+    }
 
     try {
       localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
@@ -386,6 +401,7 @@
     isLoginOrLogoutUrl: isAuthDisabled,
     isDarkMode,
     getTheme,
+    getLastTheme,
     setTheme,
     getAvailableThemes,
     registerTheme,

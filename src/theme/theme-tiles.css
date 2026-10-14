@@ -467,23 +467,12 @@
 }
 
 /* High contrast for class names, notice titles, and tile headings */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(
-  .eds-c-tile__title, .cvr-c-tile__title, .cvr-c-class__name, .cvr-c-classes-list__title,
-  [class*="class-name"], [class*="class-title"], [class*="class__name"], [class*="notice__title"], [class*="feed-item__title"],
-  h1, h2, h3, h4
-) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(.eds-c-tile__title, .cvr-c-tile__title, .cvr-c-class__name, .cvr-c-classes-list__title, [class*="class-name"], [class*="class-title"], [class*="class__name"], [class*="notice__title"], [class*="feed-item__title"], h1, h2, h3, h4) {
   color: var(--cx-text-primary, #f8fafc) !important;
   font-weight: 700 !important;
 }
 
-/* High contrast secondary details: teacher, room code, timestamps, and captions */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
-  .eds-c-caption, .v-label.eds-c-caption, .v-caption,
-  :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(
-    .eds-c-tile__caption, .cvr-c-tile__caption, .cvr-c-class__code, .cvr-c-class__teacher, .cvr-c-class__details,
-    [class*="teacher"], [class*="code"], [class*="subtitle"], [class*="meta"], [class*="date"], small
-  )
-):not(#connectify-sidebar *) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-caption, .v-label.eds-c-caption, .v-caption, :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(.eds-c-tile__caption, .cvr-c-tile__caption, .cvr-c-class__code, .cvr-c-class__teacher, .cvr-c-class__details, [class*="teacher"], [class*="code"], [class*="subtitle"], [class*="meta"], [class*="date"], small)):not(#connectify-sidebar *) {
   color: var(--cx-text-muted, #94a3b8) !important;
 }
 
@@ -491,4 +480,18 @@
   border-top: 1px solid var(--cx-border, #2e3c4e) !important;
 }
 
+#ng-zone__classes-metrics-summary {
+  display: block !important;
+  background-color: var(--cx-card-bg, #ffffff) !important;
+  border: 1px solid var(--cx-border, #e2e8f0) !important;
+  box-shadow: var(--cx-card-shadow, 0 1px 3px rgba(0, 0, 0, 0.08)) !important;
+  padding: 16px !important;
+  margin-bottom: 24px !important;
+  box-sizing: border-box !important;
+}
 
+.connectea-dark #ng-zone__classes-metrics-summary {
+  background-color: var(--cx-surface-bg, #1a222d) !important;
+  border-color: var(--cx-border, #314256) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}

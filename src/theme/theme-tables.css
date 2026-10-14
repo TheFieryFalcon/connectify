@@ -298,17 +298,40 @@
 /* --------------------------------------------------------------------------
    25. Angular Material Paginator & Pagination Controls
    -------------------------------------------------------------------------- */
+cnt-paginator,
+.cnt-paginator,
+cnt-paginator .container-fluid,
+.cnt-paginator .container-fluid {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  background-color: var(--cx-card-bg, #ffffff) !important;
+  border-top: 1px solid var(--cx-border, #e2e8f0) !important;
+  box-sizing: border-box !important;
+  min-height: 56px !important;
+}
+
 .connectea-dark :is(
   mat-paginator,
   .mat-paginator,
   cnt-paginator,
   .cnt-paginator,
+  cnt-paginator .container-fluid,
+  .cnt-paginator .container-fluid,
   .mat-paginator-container,
   .mat-paginator-outer-container,
   .connect-paginator-container
 ) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+:is(cnt-paginator, .cnt-paginator) :is(.mat-paginator, mat-paginator, .connect-paginator-container, .mat-paginator-container, .mat-paginator-outer-container) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 :is(html, body).connectea-dark :is(

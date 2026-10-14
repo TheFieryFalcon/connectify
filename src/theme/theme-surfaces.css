@@ -349,36 +349,14 @@
   color: #f1f5f9 !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
-  [class*="connect-"].theme-multiplier .mat-divider--primary,
-  [class*="connect-"].theme-multiplier.mat-divider--primary,
-  [class*="connect-"] .mat-divider--primary,
-  [class*="connect-"].mat-divider--primary,
-  .connect-purple.theme-multiplier .mat-divider--primary,
-  .connect-purple.theme-multiplier.mat-divider--primary,
-  .connect-purple .mat-divider--primary,
-  .connect-purple.mat-divider--primary,
-  .theme-multiplier .mat-divider--primary,
-  .theme-multiplier.mat-divider--primary,
-  .mat-divider--primary,
-  .mat-divider
-),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
-  [class*="connect-"].theme-multiplier .mat-divider--primary,
-  [class*="connect-"].theme-multiplier.mat-divider--primary,
-  [class*="connect-"] .mat-divider--primary,
-  [class*="connect-"].mat-divider--primary,
-  .connect-purple.theme-multiplier .mat-divider--primary,
-  .connect-purple.theme-multiplier.mat-divider--primary,
-  .connect-purple .mat-divider--primary,
-  .connect-purple.mat-divider--primary,
-  .theme-multiplier .mat-divider--primary,
-  .theme-multiplier.mat-divider--primary,
-  .mat-divider--primary,
-  .mat-divider
-) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds.cvr.ngm, .eds.cvr.ngm *) :is(.mat-divider:not(.mat-divider--primary), [class*="connect-"].theme-multiplier .mat-divider:not(.mat-divider--primary)) {
   border-top-color: #3d5066 !important;
   border-color: #3d5066 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-divider--primary {
+  border-top-color: #9cb800 !important;
+  border-color: #9cb800 !important;
 }
 
 /* Developer Settings Clear Cache button */

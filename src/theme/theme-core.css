@@ -72,16 +72,17 @@ html.connectea-dark {
   white-space: nowrap;
   border-radius: 6px;
   padding: 5px 12px;
-  font-family: "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Open Sans", sans-serif;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 550;
+  letter-spacing: -0.15px;
   line-height: 1.4;
   cursor: pointer;
   background: #25313f !important;
   color: #f1f6fb !important;
-  border: 1px solid #526a81 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  transition: background 0.15s ease, border-color 0.15s ease;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
   right: 16px;
   min-width: 96px;
   width: auto;
@@ -94,7 +95,15 @@ html.connectea-dark {
 
 #connectea-theme-toggle:hover {
   background: #313f50 !important;
-  border-color: #6b88a5 !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+}
+
+#connectea-theme-toggle:active {
+  transform: translateY(-50%) scale(0.97) !important;
+}
+
+#connectea-theme-toggle[aria-expanded="true"] .connectea-theme-arrow {
+  transform: rotate(180deg);
 }
 
 #connectea-theme-toggle:focus-visible {
@@ -105,12 +114,12 @@ html.connectea-dark {
 .connectea-dark #connectea-theme-toggle {
   background: #24303f !important;
   color: #f1f6fb !important;
-  border: 1px solid #485c72 !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
 }
 
 .connectea-dark #connectea-theme-toggle:hover {
   background: #2f3e52 !important;
-  border-color: #627b97 !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
 }
 
 @media (max-width: 600px) {

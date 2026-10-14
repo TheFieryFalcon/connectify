@@ -323,7 +323,7 @@
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 
-.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, .eds-c-selection-list__item, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) :is(button, a, .mat-icon-button, [class*="action"], [class*="btn"]) {
+.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, .eds-c-selection-list__item, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) :is(button:not(.mat-icon-button), a, [class*="action"], [class*="btn"]) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }

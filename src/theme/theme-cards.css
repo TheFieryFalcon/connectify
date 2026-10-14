@@ -108,10 +108,20 @@
   border: 1px solid var(--cx-border, #3d5066) !important;
 }
 
-.connectea-dark :is(.mat-card-button, button[class*="card-button"]) {
-  background-color: var(--cx-surface-elevated, #24303f) !important;
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(mat-card-header, .mat-card-header) :is(.mat-card-button, button[class*="card-button"], .mat-button) {
+  height: 56px !important;
+  line-height: 56px !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-left: 1px solid var(--cx-border, #3d5066) !important;
+  padding: 0 16px !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
   color: var(--cx-text-primary, #f8fafc) !important;
-  border: 1px solid var(--cx-border, #4a617a) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(mat-card-header, .mat-card-header) :is(.mat-card-button, button[class*="card-button"], .mat-button):hover {
+  background-color: var(--cx-surface-hover, rgba(255, 255, 255, 0.06)) !important;
 }
 
 :is(.connectea-dark, body, html) .cvr-c-tasks :is(
@@ -460,10 +470,7 @@
   min-height: 140px;
 }
 
-.connectea-dark :is(.ck.ck-editor__main > .ck-editor__editable:focus, .ck.ck-content:focus) {
-  border-color: var(--cx-accent, #3b82f6) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
-}
+.connectea-dark :is(.ck.ck-editor__main > .ck-editor__editable:focus, .ck.ck-content:focus) { border-color: var(--cx-accent, #3b82f6) !important; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important; }
 .connectea-dark :is(.ck.ck-editor__main > .ck-editor__editable, .ck.ck-content) :is(p, span, div, li, h1, h2, h3, h4) { color: var(--cx-text-primary, #f1f5f9) !important; }
 .connectea-dark :is(.ck.ck-dropdown__panel, .ck.ck-list, .ck.ck-balloon-panel) {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
@@ -484,10 +491,5 @@
   border-radius: 6px !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
-.connectea-dark :is(.cvr-c-image-gallery, .upload-dropzone, .file-dropzone, .dropzone:not(.portlet-dropzone)) :is(span, p, div, label) {
-  color: var(--cx-text-secondary, #cbd5e1) !important;
-}
-.connectea-dark :is(.cvr-c-image-gallery, .upload-dropzone, .file-dropzone, .dropzone:not(.portlet-dropzone)) :is(svg, mat-icon, [class*="icon"]) {
-  color: var(--cx-text-muted, #94a3b8) !important;
-  fill: currentColor !important;
-}
+.connectea-dark :is(.cvr-c-image-gallery, .upload-dropzone, .file-dropzone, .dropzone:not(.portlet-dropzone)) :is(span, p, div, label) { color: var(--cx-text-secondary, #cbd5e1) !important; }
+.connectea-dark :is(.cvr-c-image-gallery, .upload-dropzone, .file-dropzone, .dropzone:not(.portlet-dropzone)) :is(svg, mat-icon, [class*="icon"]) { color: var(--cx-text-muted, #94a3b8) !important; fill: currentColor !important; }
