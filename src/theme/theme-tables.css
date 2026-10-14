@@ -94,8 +94,8 @@
 }
 
 .connectea-dark :is(
-  table:not(.table-bordered),
-  .table:not(.table-bordered),
+  table:not(.table-bordered):not(.mat-table):not(.cdk-table),
+  .table:not(.table-bordered):not(.mat-table):not(.cdk-table),
   .table-list,
   .cvr-c-table,
   .cvr-c-table--list,
@@ -109,8 +109,8 @@
 }
 
 .connectea-dark :is(
-  table:not(.table-bordered),
-  .table:not(.table-bordered),
+  table:not(.table-bordered):not(.mat-table):not(.cdk-table),
+  .table:not(.table-bordered):not(.mat-table):not(.cdk-table),
   .table-list,
   .cvr-c-table,
   .cvr-c-table--list,
@@ -118,7 +118,7 @@
   .cvr-c-submission-students-table,
   .v-table,
   .v-table-table
-) :is(th, td) {
+) :is(th, td):not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]) {
   border-left: none !important;
   border-right: none !important;
 }

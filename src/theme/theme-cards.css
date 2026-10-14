@@ -380,6 +380,9 @@
   box-shadow: none !important;
   outline: none !important;
 }
+.connectea-dark :is(.eds-c-action-button, .v-button-eds-c-action-button, .eds-c-action-button-set .v-button):is(.eds-s-is-first, .eds-u-separator--right, [class*="separator--right"]) {
+  border-right: 1px solid var(--cx-border, #455a73) !important;
+}
 
 .connectea-dark .eds-c-tile__footer .v-button {
   background-color: var(--cx-button-bg, #202c3b) !important;
@@ -461,20 +464,13 @@
   border-color: var(--cx-accent, #3b82f6) !important;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
 }
-
-.connectea-dark :is(.ck.ck-editor__main > .ck-editor__editable, .ck.ck-content) :is(p, span, div, li, h1, h2, h3, h4) {
-  color: var(--cx-text-primary, #f1f5f9) !important;
-}
-
+.connectea-dark :is(.ck.ck-editor__main > .ck-editor__editable, .ck.ck-content) :is(p, span, div, li, h1, h2, h3, h4) { color: var(--cx-text-primary, #f1f5f9) !important; }
 .connectea-dark :is(.ck.ck-dropdown__panel, .ck.ck-list, .ck.ck-balloon-panel) {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
 }
-
-.connectea-dark :is(.ck.ck-list__item, .ck-list__item) :is(.ck-button, button) {
-  color: var(--cx-text-primary, #f1f5f9) !important;
-}
+.connectea-dark :is(.ck.ck-list__item, .ck-list__item) :is(.ck-button, button) { color: var(--cx-text-primary, #f1f5f9) !important; }
 
 .connectea-dark :is(.portlet-dropzone, [class*="portlet-dropzone"], .portlet-column, .portlet-column-content, .portlet-layout, .cnt-ng-zone, [id*="layout-column"]) {
   border: none !important;
@@ -488,12 +484,10 @@
   border-radius: 6px !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
-
-.connectea-dark :is(.cvr-c-image-gallery, .image-gallery, [class*="image-gallery"], .upload-dropzone, .file-dropzone, .dropzone:not(.portlet-dropzone)):not(.portlet-dropzone):not([class*="portlet-dropzone"]) :is(span, p, div, label) {
+.connectea-dark :is(.cvr-c-image-gallery, .upload-dropzone, .file-dropzone, .dropzone:not(.portlet-dropzone)) :is(span, p, div, label) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
-
-.connectea-dark :is(.cvr-c-image-gallery, .image-gallery, [class*="image-gallery"], .upload-dropzone, .file-dropzone, .dropzone:not(.portlet-dropzone)):not(.portlet-dropzone):not([class*="portlet-dropzone"]) :is(svg, mat-icon, [class*="icon"]) {
+.connectea-dark :is(.cvr-c-image-gallery, .upload-dropzone, .file-dropzone, .dropzone:not(.portlet-dropzone)) :is(svg, mat-icon, [class*="icon"]) {
   color: var(--cx-text-muted, #94a3b8) !important;
   fill: currentColor !important;
 }

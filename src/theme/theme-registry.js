@@ -300,12 +300,19 @@
         document.documentElement.removeAttribute('data-connectea-theme');
       }
 
+      if (theme.id === 'liquid-glass' || customColors?.glassDiffusion) {
+        document.documentElement.setAttribute('data-connectea-glass', 'true');
+      } else {
+        document.documentElement.removeAttribute('data-connectea-glass');
+      }
+
       if (theme.id === 'custom' || customColors) {
         if (customColors) setCustomColors(customColors);
         applyCustomTokens(customColors || getCustomColors());
       } else {
         clearCustomTokens();
       }
+      applyCustomBackground();
     }
 
     for (const fn of listeners) {
@@ -318,6 +325,58 @@
       } catch {}
     }
     return true;
+  }
+
+  const STORAGE_CUSTOM_BG = 'connectea:custom_background';
+
+  function getCustomBackground() {
+    try { return localStorage.getItem(STORAGE_CUSTOM_BG) || null; } catch { return null; }
+  }
+
+  function setCustomBackground(dataUrl) {
+    try {
+      if (dataUrl) {
+        localStorage.setItem(STORAGE_CUSTOM_BG, dataUrl);
+        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+          try { chrome.storage.local.set({ [STORAGE_CUSTOM_BG]: dataUrl }); } catch {}
+        }
+      } else {
+        clearCustomBackground();
+        return;
+      }
+    } catch {}
+    applyCustomBackground(dataUrl);
+  }
+
+  function clearCustomBackground() {
+    try {
+      localStorage.removeItem(STORAGE_CUSTOM_BG);
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        try { chrome.storage.local.remove(STORAGE_CUSTOM_BG); } catch {}
+      }
+    } catch {}
+    applyCustomBackground(null);
+  }
+
+  function applyCustomBackground(bgUrl = getCustomBackground()) {
+    if (typeof document === 'undefined' || !document.documentElement) return;
+    if (bgUrl && !isAuthDisabled()) {
+      document.documentElement.setAttribute('data-connectea-has-custom-bg', 'true');
+      document.documentElement.style.setProperty('--cx-custom-bg-image', `url("${bgUrl}")`);
+    } else {
+      document.documentElement.removeAttribute('data-connectea-has-custom-bg');
+      document.documentElement.style.removeProperty('--cx-custom-bg-image');
+    }
+  }
+
+  function setGlassDiffusion(enable) {
+    if (typeof document === 'undefined' || !document.documentElement) return;
+    if (enable) document.documentElement.setAttribute('data-connectea-glass', 'true');
+    else document.documentElement.removeAttribute('data-connectea-glass');
+  }
+
+  if (typeof document !== 'undefined') {
+    applyCustomBackground();
   }
 
   window.ConnectifyThemeRegistry = {
@@ -335,6 +394,11 @@
     applyCustomTokens,
     clearCustomTokens,
     onThemeChange,
+    getCustomBackground,
+    setCustomBackground,
+    clearCustomBackground,
+    applyCustomBackground,
+    setGlassDiffusion,
     BUILTIN_THEMES
   };
 })();

@@ -181,7 +181,7 @@
           const typeColor = window.ConnectifyTaskTypes?.getCategoryColor
             ? window.ConnectifyTaskTypes.getCategoryColor(taskType)
             : '#3498db';
-          const isLightType = typeColor.toLowerCase() === '#f1c40f' || typeColor.toLowerCase() === '#f39c12';
+          const isLightType = typeColor.toLowerCase() === '#f1c40f' || typeColor.toLowerCase() === '#f39c12' || typeColor.toLowerCase() === '#2ecc71';
           const typeTextColor = isLightType ? '#111827' : '#ffffff';
 
           const taskHeader = document.createElement('div');
@@ -197,7 +197,7 @@
                 ${task?.customDate || task?.dateDisplay || (window.ConnectifyProgressMath?.formatTimestamp && Number.isFinite(task?.order) ? window.ConnectifyProgressMath.formatTimestamp(task.order, task.caption) : task?.caption) || ''} • Weight: ${Number.isFinite(task?.weight) ? task.weight + '%' : '—'}
               </div>
             </div>
-            <span style="font-size:10.5px; font-weight:700; color:${typeTextColor}; background:${typeColor}; padding:2.5px 8px; border-radius:10px;">
+            <span class="cx-pred-task-type-badge" data-cat="${taskType}" style="font-size:10.5px; font-weight:700; color:${typeTextColor}; background:${typeColor}; padding:2.5px 8px; border-radius:10px;">
               ${taskType}
             </span>
           `;

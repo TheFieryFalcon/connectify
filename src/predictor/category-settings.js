@@ -147,15 +147,11 @@
     catPanel.hidden = true;
     catPanel.className = 'cx-workspace-panel';
     catPanel.innerHTML = `
-      <header style="margin-bottom:20px;">
-        <strong style="font-size:18px;">Settings</strong>
-      </header>
-
+      <header style="margin-bottom:20px;"><strong style="font-size:18px;">Settings</strong></header>
       <section class="cx-settings-section" style="margin-bottom:28px;">
         <header style="margin-bottom:8px;"><strong>General Preferences</strong></header>
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;margin-top:8px;">
-          <input type="checkbox" id="cx-auto-expand-toggle" style="width:16px;height:16px;cursor:pointer;">
-          Auto-expand class tabs on page load
+          <input type="checkbox" id="cx-auto-expand-toggle" style="width:16px;height:16px;cursor:pointer;"> Auto-expand class tabs on page load
         </label>
         <p class="cx-settings-desc" style="margin:4px 0 0 24px;">When enabled, Connectify automatically expands course outlines on load to scrape assessment data.</p>
 
@@ -191,6 +187,13 @@
             </div>
             <p class="cx-settings-desc">Interface theme and visual palette.</p>
           </div>
+          <div id="cx-bg-settings-container" style="flex:1 1 100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
+            <label class="cx-settings-label" style="margin:0;">Custom Wallpaper:</label>
+            <input type="file" id="cx-bg-upload-input" accept="image/*" style="display:none;">
+            <button type="button" id="cx-bg-upload-btn" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">🖼 Upload Background</button>
+            <button type="button" id="cx-bg-remove-btn" class="eds-c-button" style="display:none;background:#64748b;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">✕ Remove</button>
+            <span id="cx-bg-status-label" class="cx-settings-hint" style="font-size:11px;">No custom background set</span>
+          </div>
         </div>
       </section>
 
@@ -220,9 +223,7 @@
       </section>
 
       <section class="cx-settings-section" style="margin-top:36px;border-top:1px solid #d8e3ee;padding-top:24px;">
-        <header style="margin-bottom:8px;">
-          <strong>Developer Settings</strong>
-        </header>
+        <header style="margin-bottom:8px;"><strong>Developer Settings</strong></header>
         <p class="cx-settings-desc" style="font-size:12px;margin:0 0 16px 0;">Reset local caches and saved student assessment data.</p>
         <div style="display:flex;align-items:center;gap:10px;">
           <button type="button" id="cx-clear-cache-btn" class="eds-c-button cx-clear-cache-btn" style="background:#e74c3c;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Clear Cache</button>
@@ -241,13 +242,8 @@
           if (window.ConnectifyData?.clearCache) window.ConnectifyData.clearCache();
           try { localStorage.removeItem('connectify:stale_subjects'); } catch {}
           const feedback = catPanel.querySelector('#cx-clear-cache-feedback');
-          if (feedback) {
-            feedback.style.display = 'inline';
-            setTimeout(() => { feedback.style.display = 'none'; }, 3000);
-          }
-        } catch (e) {
-          console.warn('Failed to clear cache:', e);
-        }
+          if (feedback) { feedback.style.display = 'inline'; setTimeout(() => { feedback.style.display = 'none'; }, 3000); }
+        } catch (e) { console.warn('Failed to clear cache:', e); }
       });
     }
 
@@ -255,31 +251,17 @@
       const catName = prompt('Enter new assessment category name (e.g. Practical, Investigation):');
       if (!catName || !catName.trim()) return;
       const cleanName = catName.trim();
-      if (!window.cxCategories) {
-        window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
+      if (!window.cxCategories) window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
+      if (Object.keys(window.cxCategories).some(k => k.toLowerCase() === cleanName.toLowerCase())) {
+        alert(`Category "${cleanName}" already exists!`); return;
       }
-      const currentCats = window.cxCategories;
-      const exists = Object.keys(currentCats).some(k => k.toLowerCase() === cleanName.toLowerCase());
-      if (exists) {
-        alert(`Category "${cleanName}" already exists!`);
-        return;
-      }
-
-      const color = window.ConnectifyTaskTypes?.getCategoryColor
-        ? window.ConnectifyTaskTypes.getCategoryColor(cleanName)
-        : '#3498db';
-
-      window.cxCategories[cleanName] = {
-        color,
-        keywords: [cleanName.toLowerCase()]
-      };
-
+      const color = window.ConnectifyTaskTypes?.getCategoryColor ? window.ConnectifyTaskTypes.getCategoryColor(cleanName) : '#3498db';
+      window.cxCategories[cleanName] = { color, keywords: [cleanName.toLowerCase()] };
       try {
         localStorage.setItem('cx-categories', JSON.stringify(window.cxCategories));
         localStorage.setItem('connectea:categories', JSON.stringify(window.cxCategories));
-      } catch (e) {}
+      } catch {}
       safeStorageSet({ 'cx-categories': window.cxCategories });
-
       renderCategoryInputs(catPanel, () => renderBaselines());
       renderBaselines();
       const newInput = catPanel.querySelector(`#cx-cat-input-${cleanName.replace(/\s+/g, '_')}`);
@@ -290,35 +272,27 @@
     if (autoExpandToggle) {
       autoExpandToggle.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
       autoExpandToggle.addEventListener('change', () => {
-        try { localStorage.setItem('connectify:auto_expand', String(autoExpandToggle.checked)); } catch (e) {}
+        try { localStorage.setItem('connectify:auto_expand', String(autoExpandToggle.checked)); } catch {}
         window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
       });
     }
-
     const generalCohortInput = catPanel.querySelector('#cx-general-cohort-input');
     if (generalCohortInput) {
       const saved = localStorage.getItem('connectify:general_cohort_size');
       if (saved) generalCohortInput.value = saved;
       generalCohortInput.addEventListener('input', () => {
-        try {
-          const val = generalCohortInput.value.trim();
-          if (val && Number(val) > 0) localStorage.setItem('connectify:general_cohort_size', val);
-          else localStorage.removeItem('connectify:general_cohort_size');
-        } catch (e) {}
+        const val = generalCohortInput.value.trim();
+        try { if (val && Number(val) > 0) localStorage.setItem('connectify:general_cohort_size', val); else localStorage.removeItem('connectify:general_cohort_size'); } catch {}
         window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
       });
     }
-
     const atarPctInput = catPanel.querySelector('#cx-atar-percentage-input');
     if (atarPctInput) {
       const saved = localStorage.getItem('connectify:atar_percentage');
       if (saved) atarPctInput.value = saved;
       atarPctInput.addEventListener('input', () => {
-        try {
-          const val = atarPctInput.value.trim();
-          if (val && Number(val) > 0 && Number(val) <= 100) localStorage.setItem('connectify:atar_percentage', val);
-          else localStorage.removeItem('connectify:atar_percentage');
-        } catch (e) {}
+        const val = atarPctInput.value.trim();
+        try { if (val && Number(val) > 0 && Number(val) <= 100) localStorage.setItem('connectify:atar_percentage', val); else localStorage.removeItem('connectify:atar_percentage'); } catch {}
         window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
       });
     }
@@ -331,6 +305,45 @@
       themeSelectInput.addEventListener('change', () => {
         if (window.ConnectifyTheme) window.ConnectifyTheme.setTheme(themeSelectInput.value);
       });
+    }
+
+    const bgUploadInput = catPanel.querySelector('#cx-bg-upload-input');
+    const bgUploadBtn = catPanel.querySelector('#cx-bg-upload-btn');
+    const bgRemoveBtn = catPanel.querySelector('#cx-bg-remove-btn');
+    const bgStatusLabel = catPanel.querySelector('#cx-bg-status-label');
+    function updateBgUI() {
+      const cur = window.ConnectifyTheme?.getCustomBackground?.();
+      if (bgRemoveBtn) bgRemoveBtn.style.display = cur ? 'inline-block' : 'none';
+      if (bgStatusLabel) bgStatusLabel.textContent = cur ? 'Custom wallpaper active' : 'No custom background set';
+    }
+    updateBgUI();
+    if (bgUploadBtn && bgUploadInput) {
+      bgUploadBtn.onclick = () => bgUploadInput.click();
+      bgUploadInput.onchange = () => {
+        const file = bgUploadInput.files?.[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          const rawUrl = e.target?.result; if (!rawUrl) return;
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 2560; let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) { const r = Math.min(maxDim / w, maxDim / h); w = Math.round(w * r); h = Math.round(h * r); }
+            const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            if (window.ConnectifyTheme) window.ConnectifyTheme.setCustomBackground(canvas.toDataURL('image/jpeg', 0.88));
+            updateBgUI();
+          };
+          img.src = rawUrl;
+        };
+        reader.readAsDataURL(file);
+      };
+    }
+    if (bgRemoveBtn) {
+      bgRemoveBtn.onclick = () => {
+        if (window.ConnectifyTheme) window.ConnectifyTheme.clearCustomBackground();
+        if (bgUploadInput) bgUploadInput.value = '';
+        updateBgUI();
+      };
     }
 
     function renderCalib() {
@@ -352,13 +365,12 @@
         if (generalCohortInput) generalCohortInput.value = localStorage.getItem('connectify:general_cohort_size') || '';
         if (atarPctInput) atarPctInput.value = localStorage.getItem('connectify:atar_percentage') || '';
         if (themeSelectInput && window.ConnectifyTheme) themeSelectInput.value = window.ConnectifyTheme.getTheme();
+        updateBgUI();
         resolveCategories();
       } catch (e) {
         console.warn('Connectify settings preferences error:', e);
       }
-      try { renderCategoryInputs(catPanel, () => renderBaselines()); } catch (e) { console.warn('renderCategoryInputs error:', e); }
-      try { renderCalib(); } catch (e) { console.warn('renderCalib error:', e); }
-      try { renderBaselines(); } catch (e) { console.warn('renderBaselines error:', e); }
+      try { renderCategoryInputs(catPanel, () => renderBaselines()); renderCalib(); renderBaselines(); } catch (e) { console.warn('Settings sub-render error:', e); }
     }
 
     function closeCategories() {

@@ -256,12 +256,9 @@
       opt.type = 'button';
       opt.className = `connectea-theme-option${t.id === activeId ? ' eds-s-is-active' : ''}`;
       opt.setAttribute('role', 'menuitem');
-      const swatch = document.createElement('span');
-      swatch.className = 'connectea-theme-swatch'; swatch.style.backgroundColor = (t.swatch && t.swatch[1]) || '#1e2632';
-      const icon = document.createElement('span');
-      icon.className = 'connectea-theme-icon'; icon.textContent = t.icon;
-      const name = document.createElement('span');
-      name.className = 'connectea-theme-name'; name.textContent = t.name;
+      const swatch = document.createElement('span'); swatch.className = 'connectea-theme-swatch'; swatch.style.backgroundColor = (t.swatch && t.swatch[1]) || '#1e2632';
+      const icon = document.createElement('span'); icon.className = 'connectea-theme-icon'; icon.textContent = t.icon;
+      const name = document.createElement('span'); name.className = 'connectea-theme-name'; name.textContent = t.name;
       opt.append(swatch, icon, name);
       opt.onclick = (e) => {
         e.stopPropagation();
@@ -490,6 +487,10 @@
     getAvailableThemes: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getAvailableThemes().filter(t => t.id !== 'light' && t.id !== 'custom') : [{ id: 'dark', name: 'Dark', icon: '☾' }]),
     registerTheme: def => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.registerTheme(def) : false),
     getCustomColors: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getCustomColors() : null),
-    setCustomColors: c => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setCustomColors(c) : false)
+    setCustomColors: c => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setCustomColors(c) : false),
+    getCustomBackground: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getCustomBackground() : null),
+    setCustomBackground: url => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setCustomBackground(url) : false),
+    clearCustomBackground: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.clearCustomBackground() : false),
+    setGlassDiffusion: en => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setGlassDiffusion(en) : false)
   };
 })();

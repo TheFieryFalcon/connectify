@@ -301,7 +301,12 @@ html.connectea-dark {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-.connectea-dark :is(.cvr-c-service-bar, .cvr-c-service-bar__container) {
+.connectea-dark .cvr-c-service-bar {
+  background-color: var(--cx-canvas-bg, #121820) !important;
+  border: none !important;
+}
+
+.connectea-dark .cvr-c-service-bar__container {
   background-color: var(--cx-canvas-bg, #121820) !important;
   border-bottom: 1px solid var(--cx-border, #2e3c4e) !important;
 }

@@ -160,12 +160,34 @@
   --cx-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25); --cx-shadow-md: 0 8px 32px rgba(0, 0, 0, 0.35); --cx-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
 }
 
-[data-connectea-theme="liquid-glass"]:is(.connectea-dark, [class*="connectea-dark"]) :is(
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(.connectea-dark, [class*="connectea-dark"]) :is(
   .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
-  .connectea-panel, #connectify-sidebar, #connectea-theme-menu, .v-panel
+  .connectea-panel, #connectify-sidebar, #connectea-theme-menu, .v-panel,
+  .modal-content, .ui-dialog, .cvr-c-service-bar, .cvr-c-service-bar__container
 ) {
   backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(190%) contrast(105%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(190%) contrast(105%) !important;
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 16px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -10px rgba(0, 0, 0, 0.45) !important;
+}
+
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(.connectea-dark, [class*="connectea-dark"]) :is(
+  .v-window-modalitycurtain, .modal-backdrop, .yui3-widget-mask, .ui-widget-overlay,
+  .cdk-overlay-backdrop, .cdk-overlay-dark-backdrop, .mat-drawer-backdrop,
+  .eds-c-modal-overlay, .eds-c-overlay, .cvr-c-overlay, .cx-overlay
+) {
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  background-color: rgba(11, 17, 32, 0.45) !important;
+  opacity: 1 !important;
+}
+
+[data-connectea-has-custom-bg="true"] body {
+  background: var(--cx-custom-bg-image) center center / cover no-repeat fixed !important;
+}
+[data-connectea-has-custom-bg="true"] :is(.cvr-c-app-layout, .cvr-c-app-layout__body, #main-content, .v-app, .v-ui, .v-scrollable) {
+  background-color: transparent !important;
 }
 /* Universal Surface Adaptation */
 :is(html, body).connectea-dark:not([data-connectea-login]),
@@ -188,7 +210,7 @@
   h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption,
   .cvr-c-class__name, .cvr-c-classes-list__title,
   :is(.cvr-c-classes, .cvr-c-classes-list, .eds-c-selection-list, .cvr-c-class, [class*="class-"]) :is(span, p, a, div, label, small)
-):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.connectea-panel *):not([class*="connectea-"]) {
+):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.connectea-panel *):not([class*="connectea-"]):not(#connectify-sidebar *):not(#connectify-sidebar-handle *):not(#connectea-atar *):not([class*="cta-"]) {
   color: var(--cx-text-primary) !important;
   font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
@@ -259,23 +281,9 @@
   color: var(--cx-text-secondary) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .connectea-panel, .connectea-distribution, .connectea-result
-) strong {
-  color: var(--cx-accent) !important;
-}
-
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .connectea-controls, .connectea-notice
-) {
-  color: var(--cx-text-muted) !important;
-}
-
-:is(html, body).connectea-dark:not([data-connectea-login]) .connectea-controls input {
-  background-color: var(--cx-input-bg) !important;
-  border-color: var(--cx-input-border) !important;
-  color: var(--cx-text-primary) !important;
-}
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.connectea-panel, .connectea-distribution, .connectea-result) strong { color: var(--cx-accent) !important; }
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.connectea-controls, .connectea-notice) { color: var(--cx-text-muted) !important; }
+:is(html, body).connectea-dark:not([data-connectea-login]) .connectea-controls input { background-color: var(--cx-input-bg) !important; border-color: var(--cx-input-border) !important; color: var(--cx-text-primary) !important; }
 
 /* Summary Marks & Task Scores */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
@@ -479,12 +487,6 @@
 }
 
 .connectea-theme-toggle-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  width: 18px;
-  height: 18px;
-  margin-right: 2px;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 15px; width: 18px; height: 18px; margin-right: 2px;
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", sans-serif !important;
 }

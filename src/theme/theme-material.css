@@ -17,13 +17,13 @@
 }
 
 .connectea-dark :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, [class*="accent"], [class*="primary"]) *) {
   color: var(--cx-text-primary, #f1f5f9) !important;
   fill: currentColor !important;
 }
 
-.connectea-dark :is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, .eds-c-button--primary, .v-button--primary, [class*="primary"], [class*="accent"]) :is(.mat-icon, mat-icon, cnt-icon) {
-  color: inherit !important;
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, .eds-c-button--primary, .v-button--primary, [class*="primary"], [class*="accent"], cnt-floating-form-field-button) :is(.mat-icon, mat-icon, cnt-icon) {
+  color: var(--cx-accent-text, inherit) !important;
   fill: currentColor !important;
 }
 
@@ -172,7 +172,7 @@
 ) :is(svg, path, circle) {
   color: #cbd5e1 !important;
   fill: #cbd5e1 !important;
-  stroke: currentColor !important;
+  stroke: none !important;
 }
 
 .connectea-dark :is(.mat-list, .mat-nav-list) :is(svg, path, circle) {
@@ -259,7 +259,7 @@
 .connectea-dark :is([class*="switch"], [class*="role"]):hover :is(svg, path, circle) {
   color: #ffffff !important;
   fill: #ffffff !important;
-  stroke: currentColor !important;
+  stroke: none !important;
 }
 
 .connectea-dark :is(
@@ -331,7 +331,7 @@
 .connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) svg {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   fill: currentColor !important;
-  stroke: currentColor !important;
+  stroke: none !important;
 }
 
 .connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) :is(button, a, .mat-icon-button):hover svg {

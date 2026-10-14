@@ -159,13 +159,23 @@
 
 .connectea-dark :is(
   .cvr-c-class__status-label--locked,
-  .cvr-c-attendance .eds-t-red.cvr-c-standard-label,
   .eds-u-theme-multiplier.eds-t-red .cvr-c-standard-label,
-  .standard-label.connect-red,
-  .connect-red,
+  span.standard-label.connect-red,
+  span.connect-red,
+  .connect-red:not(div),
   .cvr-c-submission__status-label--overdue,
   .cvr-c-entitystatus--reported,
   .cvr-c-status-label--reported
+) {
+  background-color: #2b171a !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+  color: #fca5a5 !important;
+}
+
+.connectea-dark :is(
+  div.standard-label.connect-red,
+  .cvr-c-attendance .standard-label.connect-red,
+  .cvr-c-attendance .eds-t-red.cvr-c-standard-label
 ) {
   background-color: #2b171a !important;
   border: 1px solid #7f2329 !important;
@@ -429,7 +439,7 @@
 ) :is(.eds-c-icon, svg, path, circle) {
   color: var(--cx-text-muted, #94a3b8) !important;
   fill: currentColor !important;
-  stroke: currentColor !important;
+  stroke: none !important;
 }
 
 /* Explicit high-contrast tile and card links (Classes, Notices, Feeds, Help) */
@@ -466,11 +476,14 @@
   font-weight: 700 !important;
 }
 
-/* High contrast secondary details: teacher, room code, timestamps */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(
-  .eds-c-caption, .eds-c-tile__caption, .cvr-c-tile__caption, .cvr-c-class__code, .cvr-c-class__teacher, .cvr-c-class__details,
-  [class*="teacher"], [class*="code"], [class*="subtitle"], [class*="meta"], [class*="date"], small
-) {
+/* High contrast secondary details: teacher, room code, timestamps, and captions */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-caption, .v-label.eds-c-caption, .v-caption,
+  :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(
+    .eds-c-tile__caption, .cvr-c-tile__caption, .cvr-c-class__code, .cvr-c-class__teacher, .cvr-c-class__details,
+    [class*="teacher"], [class*="code"], [class*="subtitle"], [class*="meta"], [class*="date"], small
+  )
+):not(#connectify-sidebar *) {
   color: var(--cx-text-muted, #94a3b8) !important;
 }
 

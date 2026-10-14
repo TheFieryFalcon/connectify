@@ -102,23 +102,44 @@
 .connectea-dark #connectify-sidebar label:not(.cx-cat-name-label) {
   color: var(--cx-text-primary, #e2e8f0) !important;
 }
-.connectea-dark #connectify-sidebar .cx-cat-name-label {
+.connectea-dark #connectify-sidebar .cx-cat-name-label,
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge {
   color: var(--cx-cat-color-dark, var(--cx-cat-color, inherit)) !important;
+}
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge {
+  background-color: var(--cx-badge-bg, rgba(255, 255, 255, 0.12)) !important;
+  border: 0 !important;
+  box-shadow: inset 0 0 0 1px var(--cx-border-subtle, rgba(255, 255, 255, 0.18)) !important;
 }
 .connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Essay"] {
   color: #c084fc !important;
 }
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge[data-cat="Essay"] {
+  color: #d8b4fe !important;
+}
 .connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Exam"] {
   color: #f87171 !important;
+}
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge[data-cat="Exam"] {
+  color: #fca5a5 !important;
 }
 .connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Application"] {
   color: #60a5fa !important;
 }
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge[data-cat="Application"] {
+  color: #93c5fd !important;
+}
 .connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Test"] {
   color: #4ade80 !important;
 }
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge[data-cat="Test"] {
+  color: #86efac !important;
+}
 .connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Take-Home"] {
   color: #facc15 !important;
+}
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge[data-cat="Take-Home"] {
+  color: #fde047 !important;
 }
 .connectea-dark #connectify-sidebar strong {
   color: var(--cx-text-primary, #f8fafc) !important;

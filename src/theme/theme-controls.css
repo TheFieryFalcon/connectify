@@ -2,7 +2,7 @@
    13. Form Controls & General Buttons
    -------------------------------------------------------------------------- */
 /* Text Inputs & Textareas */
-.connectea-dark :is(input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not(.mat-input-element):not(.connectea-subject-cohort-input):not([class*="connectea-"]), textarea) {
+.connectea-dark :is(input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not(.mat-input-element):not(.connectea-subject-cohort-input):not([class*="connectea-"]), textarea):not(#connectify-sidebar *):not(#connectify-sidebar-handle *) {
   background-color: var(--cx-input-bg, #141a22) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border: 1px solid var(--cx-border, #42556d) !important;

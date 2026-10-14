@@ -42,14 +42,14 @@
 }
 
 /* Notice / Feed Card Positive Action Button (View button) */
-.connectea-dark :is(.eds-o-button--positive, .eds-c-button--positive, .v-button.eds-o-button--positive, .v-button-eds-o-button--positive, .eds-c-action-button.eds-o-button--positive, [class*="button--positive"], [class*="button-positive"], :is(.cvr-c-feed-card, .cvr-c-feed-item, [class*="feed"], cnt-stream-notice-card, mat-card, .eds-c-card, .cvr-c-notice, .cvr-c-notice-card) :is(.v-button, .eds-c-button, button, a):is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]), mat-dialog-container button.mat-primary, .mat-dialog-actions button.mat-primary) {
+.connectea-dark :is(.eds-o-button--positive, .eds-c-button--positive, .v-button.eds-o-button--positive, .v-button-eds-o-button--positive, .eds-c-action-button.eds-o-button--positive, [class*="button--positive"], [class*="button-positive"], :is(.cvr-c-feed-card, .cvr-c-feed-item, [class*="feed"], cnt-stream-notice-card, mat-card, .eds-c-card, .cvr-c-notice, .cvr-c-notice-card) :is(.v-button, .eds-c-button, button, a):is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent), mat-dialog-container button.mat-primary, .mat-dialog-actions button.mat-primary) {
   background-color: var(--cx-positive-bg, #8cae04) !important;
   color: var(--cx-positive-text, #ffffff) !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-.connectea-dark :is(.eds-o-button--positive, .eds-c-button--positive, .v-button.eds-o-button--positive, .v-button-eds-o-button--positive, .eds-c-action-button.eds-o-button--positive, [class*="button--positive"], [class*="button-positive"], :is(.cvr-c-feed-card, .cvr-c-feed-item, [class*="feed"], cnt-stream-notice-card, mat-card, .eds-c-card, .cvr-c-notice, .cvr-c-notice-card) :is(.v-button, .eds-c-button, button, a):is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]), mat-dialog-container button.mat-primary, .mat-dialog-actions button.mat-primary):hover {
+.connectea-dark :is(.eds-o-button--positive, .eds-c-button--positive, .v-button.eds-o-button--positive, .v-button-eds-o-button--positive, .eds-c-action-button.eds-o-button--positive, [class*="button--positive"], [class*="button-positive"], :is(.cvr-c-feed-card, .cvr-c-feed-item, [class*="feed"], cnt-stream-notice-card, mat-card, .eds-c-card, .cvr-c-notice, .cvr-c-notice-card) :is(.v-button, .eds-c-button, button, a):is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent), mat-dialog-container button.mat-primary, .mat-dialog-actions button.mat-primary):hover {
   background-color: var(--cx-positive-hover, #9ec204) !important;
   color: var(--cx-positive-text, #ffffff) !important;
   border: none !important;
@@ -223,7 +223,7 @@
   color: var(--cx-danger, #f87171) !important;
 }
 
-.connectea-dark :is(.font-weight-bold, .fw-bold, b, strong) {
+.connectea-dark :is(.font-weight-bold, .fw-bold, b, strong):not(#connectify-sidebar *):not(#connectify-sidebar-handle *):not(#connectea-atar *):not([class*="connectea-"]):not([class*="cta-"]) {
   font-weight: 700 !important;
 }
 
