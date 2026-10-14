@@ -4811,10 +4811,21 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   assert.ok(themeTokensCss.includes('[data-connectea-theme="liquid-glass"]') && themeTokensCss.includes('--cx-canvas-bg: #0b1120;'), 'theme-tokens.css must define Liquid Glass theme');
   assert.ok(themeTokensCss.includes('#connectea-theme-menu'), 'theme-tokens.css must style the theme popover menu');
 
-  // 4. Manifest checks: theme-tokens.css and theme-registry.js are registered
+  // 4. Manifest checks: theme-tokens.css, theme-registry.js, and theme-customizer files are registered
   const contentScript = manifest.content_scripts.find(s => s.matches && s.matches.includes('https://connect.det.wa.edu.au/*'));
   assert.ok(contentScript.css.includes('src/theme/theme-tokens.css'), 'manifest.json must register theme-tokens.css');
+  assert.ok(contentScript.css.includes('src/theme/theme-customizer.css'), 'manifest.json must register theme-customizer.css');
   assert.ok(contentScript.js.includes('src/theme/theme-registry.js'), 'manifest.json must register theme-registry.js');
+  assert.ok(contentScript.js.includes('src/theme/theme-customizer.js'), 'manifest.json must register theme-customizer.js');
+
+  for (const cs of manifest.content_scripts || []) {
+    for (const js of cs.js || []) {
+      assert.ok(fs.existsSync(path.resolve(__dirname, js)), `Manifest content script JS file not found: ${js}`);
+    }
+    for (const css of cs.css || []) {
+      assert.ok(fs.existsSync(path.resolve(__dirname, css)), `Manifest content script CSS file not found: ${css}`);
+    }
+  }
 
   // 5. Functional evaluation: theme-registry.js handles multi-themes and custom themes
   eval(themeRegistryJs);
