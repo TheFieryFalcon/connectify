@@ -1,6 +1,17 @@
 # Connectify Context & Development Rules
 
-All development in this repository must strictly adhere to `design_rules.md` and all architectural specifications in `docs/`. This rule is always active across all conversations.
+All development in this repository must strictly adhere to `design_rules.md` and all architectural specifications in `docs/`. This rule is always active across all conversations. Refer to `docs/` for architectural questions instead of searching the codebase.
+
+The full rule set is always loaded into context via these imports:
+
+@design_rules.md
+@docs/architecture.md
+@docs/apis_and_storage.md
+@docs/modules_core.md
+@docs/modules_system.md
+@docs/modules_ui_analytics.md
+@docs/features_navigation_ui.md
+@docs/features_analytics_publishing.md
 
 ---
 

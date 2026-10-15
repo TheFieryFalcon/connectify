@@ -53,7 +53,8 @@ jobs:
             --exclude='assets*' \
             --exclude='.agents*' \
             --exclude='AGENTS.md' \
-            --exclude='GEMINI.md' \
+            --exclude='CLAUDE.md' \
+            --exclude='.claude*' \
             --exclude='design_rules.md' \
             --exclude='docs*' \
             --exclude='test_suite.js' \
