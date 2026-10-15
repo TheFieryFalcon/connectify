@@ -5519,8 +5519,8 @@ runTest('Test 144: Classes page header parity, Angular Material tab specificity,
     'theme-registry.js and theme.js must use inspiration swatch for Quantum Dark');
   assert.ok(themeTokensCss.includes('--cx-text-secondary: #b8bb26;'),
     'theme-tokens.css must define Quantum Dark with green secondary color #b8bb26');
-  assert.ok(themeTokensCss.includes('backdrop-filter: blur(16px)') &&
-            themeTokensCss.includes('rgba(26, 36, 52, 0.72)'),
+  assert.ok(themeTokensCss.includes('--cx-glass-blur') &&
+            themeTokensCss.includes('backdrop-filter: blur('),
     'theme-tokens.css must define Apple liquid glass frosted styling with translucent surfaces');
   assert.ok(themeRegistryJs.includes("'liquid-glass'") && themeJs.includes("'liquid-glass'"),
     'theme-registry.js and theme.js must register liquid-glass theme');
@@ -6526,6 +6526,109 @@ runTest('Test 147: Style test JSON manifest aggregates all audited views under p
   assert.strictEqual(discoveredViews[1].title, 'Notices', 'Second tab must be Notices');
   assert.strictEqual(discoveredViews[1].isActive, false, 'Notices tab must not be active');
   assert.strictEqual(discoveredViews[2].title, 'Discussions', 'Third tab must be Discussions');
+});
+
+runTest('Test 148: Theme Customizer button contrast, !important color enforcement, and secondary button theme-controls parity', () => {
+  const customizerCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-customizer.css'), 'utf8');
+  const controlsCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-controls.css'), 'utf8');
+
+  // 1. theme-customizer.css enforces text colors with !important
+  assert.ok(customizerCss.includes('#cx-customizer-modal button'), 'Must protect all buttons inside #cx-customizer-modal');
+  assert.ok(customizerCss.includes('color: #e2e8f0 !important'), 'Secondary buttons must enforce high-contrast #e2e8f0 with !important');
+  assert.ok(customizerCss.includes('.cx-btn-secondary') && customizerCss.includes('background-color: #243042 !important'), 'Secondary buttons must have dark surface background #243042 with !important');
+  assert.ok(customizerCss.includes('.cx-btn-primary') && customizerCss.includes('color: #ffffff !important'), 'Primary buttons must enforce #ffffff with !important');
+
+  // 2. theme-controls.css includes .cx-btn-secondary with !important parity
+  assert.ok(controlsCss.includes('.cx-btn-secondary'), 'theme-controls.css must style .cx-btn-secondary');
+  assert.ok(controlsCss.includes('#243042 !important') && controlsCss.includes('#e2e8f0 !important'), 'theme-controls.css must enforce #243042 and #e2e8f0 with !important');
+
+  // 3. Contrast verification: #e2e8f0 on #243042
+  function getLuminance(r, g, b) {
+    const a = [r, g, b].map(v => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+  }
+  const lumText = getLuminance(226, 232, 240); // #e2e8f0
+  const lumBg = getLuminance(36, 48, 66);      // #243042
+  const contrastRatio = (Math.max(lumText, lumBg) + 0.05) / (Math.min(lumText, lumBg) + 0.05);
+  assert.ok(contrastRatio >= 5.0, `Button contrast ratio ${contrastRatio.toFixed(2)} must be >= 5.0 (WCAG AA)`);
+});
+
+runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass panels, button parity, and save theme overwrite', () => {
+  const themeCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme.css'), 'utf8');
+  const themeTokensCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-tokens.css'), 'utf8');
+  const themeTilesCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-tiles.css'), 'utf8');
+  const themeFeedCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-feed.css'), 'utf8');
+  const customizerJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-customizer.js'), 'utf8');
+  const customizerCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-customizer.css'), 'utf8');
+  const registryJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8');
+  const parityTestJs = fs.readFileSync(path.resolve(__dirname, 'scripts/test-theme-styles.js'), 'utf8');
+
+  // 1. Panels opaque when Liquid Glass is off
+  assert.ok(themeCss.includes(':not([data-connectea-theme="liquid-glass"])') &&
+            themeCss.includes('background-color: var(--cx-surface-bg, #1e2632) !important'),
+            'theme.css must ensure panels are opaque when Liquid Glass is off');
+
+  // 2. Liquid Glass panel bottom corners rounded (16px) and tile body transparent
+  assert.ok(themeCss.includes('border-bottom-left-radius: 16px !important') &&
+            themeCss.includes('border-bottom-right-radius: 16px !important'),
+            'theme.css must round bottom corners with 16px radius');
+  assert.ok(themeCss.includes('overflow: hidden !important'),
+            'theme.css must have overflow: hidden on liquid glass panels');
+  assert.ok(themeCss.includes('.eds-c-tile__body') &&
+            themeCss.includes('background-color: transparent !important'),
+            'theme.css must make tile body transparent in Liquid Glass mode');
+
+  // 3. Buttons and inputs must NOT be styled with liquid-glass radii
+  assert.ok(!themeCss.includes('body[data-connectea-theme="liquid-glass"] button'),
+            'theme.css must NOT modify button border-radius for Liquid Glass');
+  assert.ok(!themeTokensCss.includes('body[data-connectea-theme="liquid-glass"] button'),
+            'theme-tokens.css must NOT modify button border-radius for Liquid Glass');
+
+  // 4. Parity test does not ignore buttons for liquid-glass and ignores panels/cards/tiles/modals
+  assert.ok(!parityTestJs.includes("tid !== 'liquid-glass' && (base.isActionButton || base.isButton)"),
+            'parity test must assert button circular outline across all themes including liquid-glass');
+  assert.ok(!parityTestJs.includes("tid !== 'liquid-glass' && base.isButton && !base.isActionButton"),
+            'parity test must assert button radius across all themes including liquid-glass');
+  assert.ok(parityTestJs.includes('isPanelCardTileModal') && parityTestJs.includes("tid !== 'liquid-glass' || !isPanelCardTileModal"),
+            'parity test must ignore only panels, cards, tiles, and modals for liquid-glass');
+
+  // 5. Element .cvr-u-padding--md hidden for parity
+  assert.ok(themeTilesCss.includes('.cvr-u-padding--md') && themeTilesCss.includes('display: none !important'),
+            'theme-tiles.css must hide .cvr-u-padding--md for parity');
+
+  // 6. Theme Customizer dual sliders (blur strength & transparency)
+  assert.ok(customizerJs.includes('cx-glass-blur-slider') && customizerJs.includes('cx-glass-opacity-slider'),
+            'theme-customizer.js must contain blur strength and transparency sliders');
+  assert.ok(customizerJs.includes('--cx-glass-blur') && customizerJs.includes('--cx-glass-opacity'),
+            'theme-customizer.js must bind to --cx-glass-blur and --cx-glass-opacity');
+  assert.ok(customizerCss.includes('#cx-glass-sliders-wrap'),
+            'theme-customizer.css must style #cx-glass-sliders-wrap');
+
+  // 7. Light mode container panel backgrounds
+  assert.ok(themeFeedCss.includes('cvr-c-feed-header') && themeFeedCss.includes('rgba(255, 255, 255, 0.90)'),
+            'theme-feed.css must supply light container panel backgrounds in light mode');
+
+  // 8. Functional test: saveCustomTheme overwrites if name matches (case-insensitive)
+  eval(registryJs);
+  const reg = window.ConnectifyThemeRegistry;
+  assert.ok(reg && typeof reg.saveCustomTheme === 'function', 'ThemeRegistry.saveCustomTheme must exist');
+
+  const initialCount = reg.getCustomThemes().length;
+  const t1 = reg.saveCustomTheme({ name: 'Neon Sky', glassBlur: 14, glassOpacity: 0.6 });
+  assert.ok(t1 && t1.id, 'Created theme must have an id');
+  const countAfterFirst = reg.getCustomThemes().length;
+  assert.strictEqual(countAfterFirst, initialCount + 1, 'Should add 1 new theme');
+
+  const t2 = reg.saveCustomTheme({ name: 'neon sky', glassBlur: 25, glassOpacity: 0.85 });
+  const countAfterSecond = reg.getCustomThemes().length;
+  assert.strictEqual(countAfterSecond, countAfterFirst, 'Overwriting theme with same name must not increase count');
+  assert.strictEqual(t2.id, t1.id, 'Overwritten theme must reuse existing theme ID');
+  const saved = reg.getCustomThemes().find(t => t.id === t1.id);
+  assert.strictEqual(saved.glassBlur, 25, 'Overwritten theme must have updated glassBlur');
+  assert.strictEqual(saved.glassOpacity, 0.85, 'Overwritten theme must have updated glassOpacity');
 });
 
 Promise.all(pendingTestPromises).then(() => {

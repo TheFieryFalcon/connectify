@@ -51,4 +51,5 @@ Isolated world content scripts execute in exact dependency order under `src/`:
 ---
 
 ## 6. Test Integrity & Direct Implementation
+- **User Instruction on Test Maintenance**: "In the future, when I ask you to change something, please change any tests that explicitly assert against that thing instead of using weird workarounds which may cause many more problems later, as that test was likely created out of a misunderstanding. Please push and commit always."
 - When requested to change functionality, typography, markup, styling, or behavior, directly update the implementation and any tests that explicitly assert against that specific item. Never use indirect workarounds (such as initializing an element with an old value only to overwrite it with `.textContent`, or adding redundant attributes) just to appease an outdated test assertion. Outdated test assertions were likely written under an earlier requirement or misunderstanding and must be updated directly to assert the newly specified behavior.

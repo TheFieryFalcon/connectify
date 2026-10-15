@@ -162,8 +162,8 @@
   .connectea-panel, #connectify-sidebar, #connectea-theme-menu, .v-panel,
   .modal-content, .ui-dialog, .cvr-c-service-bar, .cvr-c-service-bar__container
 ) {
-  backdrop-filter: blur(16px) saturate(160%) contrast(102%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(160%) contrast(102%) !important;
+  backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) contrast(102%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) contrast(102%) !important;
   box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 16px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -10px rgba(0, 0, 0, 0.45) !important;
 }
 
@@ -172,8 +172,8 @@
   .cdk-overlay-backdrop, .cdk-overlay-dark-backdrop, .mat-drawer-backdrop,
   .eds-c-modal-overlay, .eds-c-overlay, .cvr-c-overlay, .cx-overlay
 ) {
-  backdrop-filter: blur(14px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+  backdrop-filter: blur(var(--cx-glass-blur, 14px)) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 14px)) saturate(150%) !important;
   background-color: rgba(11, 17, 32, 0.45) !important;
   opacity: 1 !important;
 }
@@ -187,18 +187,15 @@
 
 /* Translucent Assessment Outline Accordions & Subject Cards */
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, [data-subject-card], .mat-card) {
-  background-color: rgba(18, 26, 40, 0.65) !important;
-  backdrop-filter: blur(16px) saturate(160%) contrast(102%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(160%) contrast(102%) !important;
+  background-color: var(--cx-glass-card-bg, rgba(18, 26, 40, var(--cx-glass-opacity, 0.65))) !important;
+  backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) contrast(102%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) contrast(102%) !important;
 }
-[data-connectea-has-custom-bg="true"]:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, [data-subject-card], .mat-card) {
-  background-color: rgba(18, 26, 40, 0.85) !important;
-}
-:is([data-connectea-has-custom-bg="true"], [data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-accordion, .eds-c-accordion__panel, .v-panel-content, .cvr-c-tasks, .cvr-c-task-group, .cvr-c-task, .cvr-c-task__details, .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-accordion__section, .eds-c-accordion__section-body) {
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-accordion, .eds-c-accordion__panel, .v-panel-content, .cvr-c-tasks, .cvr-c-task-group, .cvr-c-task, .cvr-c-task__details, .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-accordion__section, .eds-c-accordion__section-body) {
   background: transparent !important; background-color: transparent !important;
 }
-:is([data-connectea-has-custom-bg="true"], [data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .connectea-panel {
-  background-color: rgba(22, 34, 52, 0.65) !important;
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .connectea-panel {
+  background-color: var(--cx-glass-panel-bg, rgba(22, 34, 52, var(--cx-glass-opacity, 0.65))) !important;
 }
 
 /* Reading View Wallpaper Suppression (Notice & Discussion Detail Views - DOM Detected) */
@@ -207,10 +204,8 @@
 
 /* Corner Rounding Rules: Strict 0 without Liquid Glass; Aggressive with Liquid Glass */
 :not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .connectea-panel, .cx-compound-progress-bar, #ng-zone__classes-metrics-summary) { border-radius: 0 !important; }
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .v-panel-content, .mat-card, .mat-expansion-panel, .mat-expansion-panel-header, .connectea-panel, .cvr-c-dashboard-card, .portlet, .portlet-content, .portlet-body, [class*="card"], [class*="panel"], [class*="tile"], #ng-zone__classes-metrics-summary) { border-radius: 16px !important; overflow: hidden !important; }
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .v-panel-content, .mat-card, .mat-expansion-panel, .mat-expansion-panel-header, .connectea-panel, .cvr-c-dashboard-card, .portlet, .portlet-content, .portlet-body, [class*="card"], [class*="panel"], [class*="tile"], #ng-zone__classes-metrics-summary) { border-radius: 16px !important; border-bottom-left-radius: 16px !important; border-bottom-right-radius: 16px !important; overflow: hidden !important; }
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.modal-content, .ui-dialog, mat-dialog-container) { border-radius: 20px !important; }
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-button, .eds-c-button, .btn, .mat-button:not(.mat-card-button), .mat-raised-button) { border-radius: 12px !important; }
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input, select, textarea, .mat-form-field-flex) { border-radius: 10px !important; }
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cx-compound-progress-bar { border-radius: 10px !important; overflow: hidden !important; }
 
 /* Universal Surface Adaptation */

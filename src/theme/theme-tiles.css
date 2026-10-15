@@ -334,13 +334,16 @@
   color: #e2e8f0 !important;
 }
 
-:not([data-connectea-has-custom-bg="true"]):not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]).connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-tile__body, .cvr-c-tile__body) {
+/* Layout parity: hide .cvr-u-padding--md */
+.cvr-u-padding--md { display: none !important; }
+
+:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]).connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-tile__body, .cvr-c-tile__body) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
 /* Generic Tile Bodies, Inner Containers, Nav Lists & Resource Rows (Connect Help, Resources) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark):not([data-connectea-has-custom-bg="true"]):not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) :is(
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark):not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) :is(
   .eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .mat-card, .cvr-c-dashboard-card,
   .portlet, .portlet-boundary, .portlet-content, .portlet-body, .journal-content-article
 ) :is(

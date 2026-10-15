@@ -104,6 +104,7 @@
   toggleButton.className = 'connectea-theme-toggle';
 
   updateDomThemeAttributes(isDarkMode, activeTheme, isAuthDisabled());
+  if (isDarkMode && window.ConnectifyThemeRegistry) window.ConnectifyThemeRegistry.setTheme(activeTheme);
 
   function cleanupDuplicateButtons() {
     for (const btn of document.querySelectorAll('#connectea-theme-toggle, .connectea-theme-toggle')) if (btn !== toggleButton) btn.remove();
@@ -416,7 +417,7 @@
   window.addEventListener('connectea:themechange', e => {
     if (isAuthDisabled()) return;
     const tId = e.detail?.themeId || 'dark', isDark = e.detail?.theme ? e.detail.theme.isDark : (tId !== 'light');
-    applyTheme(isDark, tId);
+    activeTheme = tId; applyTheme(isDark, tId);
   });
   updateTogglePosition();
   if (isDarkMode) scheduleAdaptSurfaces(600);

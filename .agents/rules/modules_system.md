@@ -51,7 +51,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 - **Role**: Canonical palette definitions and custom theme registry.
 - **Key Functions**:
   - `BUILTIN_PALETTES`: Stores immutable definitions for 7 built-in presets: Dark, Quantum Dark (Gruvbox green `#b8bb26` secondary), AMOLED Black, Midnight Navy, Emerald Forest, Sunset Orange, and Apple Liquid Glass.
-  - `getPresetPalettes()`, `getCustomThemes()`, `saveCustomTheme()`, `deleteCustomTheme()`: CRUD operations on custom theme JSON objects in `localStorage`.
+  - `getPresetPalettes()`, `getCustomThemes()`, `saveCustomTheme()`, `deleteCustomTheme()`: CRUD operations on custom theme JSON objects in `localStorage`. `saveCustomTheme` performs case-insensitive name matching against existing custom themes to overwrite in place without creating duplicate IDs, persisting tokens, `glassBlur`, and `glassOpacity`.
 - **Export**: `window.ConnectifyThemeRegistry`.
 
 #### [`theme-customizer.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.js)
@@ -59,6 +59,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 - **Key Functions**:
   - `open(themeToEdit)` / `close()`: Mounts `#cx-customizer-modal` with Basic Mode (6 tokens) and Full Mode (14 tokens).
   - Live Preview: Displays subject card mockup rendering all 14 tokens in authentic Connect positions without mutating the host DOM.
+  - Dual Sliders: Blur strength slider (0–40px, `#cx-glass-blur-slider`) and transparency slider (10%–100%, `#cx-glass-opacity-slider`) dynamically binding to `--cx-glass-blur` and `--cx-glass-opacity`.
   - HSV/HEX Color Picker: Interactive saturation/value canvas, hue slider, and hex input.
   - Wallpaper & Liquid Glass: Uploads, caches (`connectea:theme:wallpaper`), and toggles frosted glass diffusion mode.
   - JSON Import / Export: Backup and restore theme definitions.
@@ -95,12 +96,12 @@ This document covers notifications, grade change tracking, DOM integrity monitor
   - [`theme-cards.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-cards.css): Assessment task cards, summary marks box, and detail rows.
   - [`theme-controls.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-controls.css): High-contrast buttons ($\ge 5:1$), checkboxes, and dropdowns.
   - [`theme-material.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-material.css): Angular Material class page contrast normalization.
-  - [`theme-feed.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-feed.css): Notices, feeds, forums, and stream posts.
+  - [`theme-feed.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-feed.css): Notices, feeds, forums, stream posts, and light mode container panel backgrounds (`rgba(255, 255, 255, 0.90)`).
   - [`theme-tables.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-tables.css): Grade tables, attendance lists, and report summary tables.
   - [`theme-navigation.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-navigation.css): Top navigation, active tabs, breadcrumbs, and menus.
   - [`theme-surfaces.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-surfaces.css): Dynamic surface contrast adapters and display scaling.
-  - [`theme-customizer.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.css): In-DOM theme designer dialog, color picker, and preview styles.
-  - [`theme.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.css): Entry point and priority cascade overrides for Liquid Glass 16px curvature and transparent accordions.
+  - [`theme-customizer.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.css): In-DOM theme designer dialog, color picker, and high-contrast button styling ($\ge 5:1$).
+  - [`theme.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.css): Entry point enforcing solid opaque panels when Liquid Glass is off, 16px bottom curvature with transparent tile bodies when on, and preserving button/input styling.
 
 #### Manifest & Update Manifests
 - **[`manifest.json`](file:///Users/uwong/Downloads/2.1.14_0/manifest.json)**: Extension manifest (Manifest V3) declaring permissions (`storage`), browser settings for Firefox Gecko, modular stylesheets, content scripts in dependency order, and matched URL patterns.

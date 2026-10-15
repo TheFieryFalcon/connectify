@@ -1753,15 +1753,31 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           const removedBorder = (baseBorderTop > 0 && curBorderTop === 0) || (baseBorderBottom > 0 && curBorderBottom === 0) ||
                                 (baseBorderLeft > 0 && curBorderLeft === 0) || (baseBorderRight > 0 && curBorderRight === 0);
 
+          const isPanelCardTileModal = Boolean(
+            el.classList?.contains?.('eds-c-card') ||
+            el.classList?.contains?.('cvr-c-card') ||
+            el.classList?.contains?.('eds-c-panel') ||
+            el.classList?.contains?.('cvr-c-panel') ||
+            el.classList?.contains?.('eds-c-tile') ||
+            el.classList?.contains?.('cvr-c-tile') ||
+            el.classList?.contains?.('cvr-c-modal') ||
+            el.classList?.contains?.('eds-c-modal') ||
+            el.classList?.contains?.('mat-dialog-container') ||
+            el.classList?.contains?.('v-modal') ||
+            (el.matches && el.matches('.eds-c-card, .cvr-c-card, .eds-c-panel, .cvr-c-panel, .eds-c-tile, .cvr-c-tile, .cvr-c-modal, .eds-c-modal, .mat-dialog-container, .v-modal, [class*="card"], [class*="panel"], [class*="tile"], [class*="modal"]'))
+          );
+
           if (addedBorder || removedBorder) {
-            issues.push({
-              category: 'PARITY',
-              type: 'BORDER_MISMATCH',
-              severity: 'MEDIUM',
-              selector,
-              details: `Border changed: Native [T:${baseBorderTop}, R:${baseBorderRight}, B:${baseBorderBottom}, L:${baseBorderLeft}] vs Theme [T:${curBorderTop}, R:${curBorderRight}, B:${curBorderBottom}, L:${curBorderLeft}]`,
-              textSnippet: text
-            });
+            if (tid !== 'liquid-glass' || !isPanelCardTileModal) {
+              issues.push({
+                category: 'PARITY',
+                type: 'BORDER_MISMATCH',
+                severity: 'MEDIUM',
+                selector,
+                details: `Border changed: Native [T:${baseBorderTop}, R:${baseBorderRight}, B:${baseBorderBottom}, L:${baseBorderLeft}] vs Theme [T:${curBorderTop}, R:${curBorderRight}, B:${curBorderBottom}, L:${curBorderLeft}]`,
+                textSnippet: text
+              });
+            }
           }
 
           // Specific Defect Checks:
@@ -1823,7 +1839,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           const curBorderRadius = parseFloat(style.borderRadius) || 0;
           const isThemeCircular = curBorderRadius >= 16 || (typeof style.borderRadius === 'string' && style.borderRadius.includes('50%'));
           const wasNativeCircular = (base.borderRadius >= 16) || (typeof base.rawBorderRadius === 'string' && base.rawBorderRadius.includes('50%'));
-          if (tid !== 'liquid-glass' && (base.isActionButton || base.isButton) && !wasNativeCircular && isThemeCircular && (addedBorder || curOutlineWidth > 0)) {
+          if ((base.isActionButton || base.isButton) && !wasNativeCircular && isThemeCircular && (addedBorder || curOutlineWidth > 0)) {
             issues.push({
               category: 'PARITY',
               type: 'CIRCULAR_OUTLINE_ADDED',
@@ -1835,7 +1851,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           }
 
           // 4. Button Radius Mismatch (square corners becoming rounded)
-          if (tid !== 'liquid-glass' && base.isButton && !base.isActionButton && base.borderRadius === 0 && curBorderRadius >= 4) {
+          if (base.isButton && !base.isActionButton && base.borderRadius === 0 && curBorderRadius >= 4) {
             issues.push({
               category: 'PARITY',
               type: 'BUTTON_RADIUS_MISMATCH',
@@ -1861,14 +1877,16 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           // 6. Container Outline Added (creating unwanted new segments)
           if (base.isContainer && baseBorderTop === 0 && baseBorderBottom === 0 && baseBorderLeft === 0 && baseBorderRight === 0 && (base.outline?.width || 0) === 0) {
             if (curBorderTop > 0 || curBorderBottom > 0 || curBorderLeft > 0 || curBorderRight > 0 || curOutlineWidth > 0) {
-              issues.push({
-                category: 'PARITY',
-                type: 'CONTAINER_OUTLINE_ADDED',
-                severity: 'HIGH',
-                selector,
-                details: `Container gained unwanted border or outline creating a new page segment: [T:${curBorderTop}, R:${curBorderRight}, B:${curBorderBottom}, L:${curBorderLeft}]`,
-                textSnippet: text
-              });
+              if (tid !== 'liquid-glass' || !isPanelCardTileModal) {
+                issues.push({
+                  category: 'PARITY',
+                  type: 'CONTAINER_OUTLINE_ADDED',
+                  severity: 'HIGH',
+                  selector,
+                  details: `Container gained unwanted border or outline creating a new page segment: [T:${curBorderTop}, R:${curBorderRight}, B:${curBorderBottom}, L:${curBorderLeft}]`,
+                  textSnippet: text
+                });
+              }
             }
           }
 
@@ -2136,6 +2154,9 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
     for (const auditId of Object.keys(baseMap)) {
       if (!currentVisibleIds.has(auditId)) {
         const base = baseMap[auditId];
+        if (base.selector && (base.selector.includes('cvr-u-padding--md') || base.selector.includes('.cvr-u-padding--md'))) {
+          continue;
+        }
         issues.push({
           category: 'PARITY',
           type: 'ELEMENT_HIDDEN_IN_THEME',

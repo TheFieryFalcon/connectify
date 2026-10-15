@@ -128,15 +128,23 @@
 
   function saveCustomTheme(themeDef) {
     if (!themeDef) return null;
-    const id = themeDef.id || `custom_${Date.now()}`;
+    const name = (themeDef.name || 'Custom Theme').trim();
+    const existingList = getCustomThemes();
+    const existing = themeDef.id
+      ? existingList.find(t => t.id === themeDef.id)
+      : existingList.find(t => t.name && t.name.trim().toLowerCase() === name.toLowerCase());
+
+    const id = themeDef.id || (existing ? existing.id : `custom_${Date.now()}`);
     const entry = {
       id,
-      name: themeDef.name || 'Custom Theme',
-      icon: themeDef.icon || '🎨',
+      name,
+      icon: themeDef.icon || (existing ? existing.icon : '🎨'),
       isDark: themeDef.isDark !== false,
       isCustom: true,
       liquidGlass: Boolean(themeDef.liquidGlass),
-      wallpaper: themeDef.wallpaper || null,
+      glassBlur: typeof themeDef.glassBlur === 'number' ? themeDef.glassBlur : (existing?.glassBlur ?? 16),
+      glassOpacity: typeof themeDef.glassOpacity === 'number' ? themeDef.glassOpacity : (existing?.glassOpacity ?? 0.65),
+      wallpaper: themeDef.wallpaper !== undefined ? themeDef.wallpaper : (existing ? existing.wallpaper : null),
       swatch: Array.isArray(themeDef.swatch) ? themeDef.swatch : [
         themeDef.colors?.canvas || '#1e2632',
         themeDef.colors?.surface || '#283444',
@@ -146,9 +154,12 @@
     };
     registerTheme(entry);
     try {
-      const list = getCustomThemes().filter(t => t.id !== id);
+      const list = existingList.filter(t => t.id !== id);
       list.push(entry);
       localStorage.setItem(STORAGE_CUSTOM_THEMES_LIST, JSON.stringify(list));
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        try { chrome.storage.local.set({ [STORAGE_CUSTOM_THEMES_LIST]: JSON.stringify(list) }); } catch {}
+      }
     } catch {}
     return entry;
   }
@@ -178,6 +189,8 @@
       isDark: themeDef.isDark !== false,
       isCustom: Boolean(themeDef.isCustom),
       liquidGlass: Boolean(themeDef.liquidGlass),
+      glassBlur: typeof themeDef.glassBlur === 'number' ? themeDef.glassBlur : 16,
+      glassOpacity: typeof themeDef.glassOpacity === 'number' ? themeDef.glassOpacity : 0.65,
       wallpaper: themeDef.wallpaper || null,
       swatch: Array.isArray(themeDef.swatch) ? themeDef.swatch : ['#1e2632', '#3b82f6'],
       colors: themeDef.colors || null
@@ -333,17 +346,26 @@
 
       if (theme.id === 'liquid-glass' || theme.liquidGlass || customColors?.glassDiffusion) {
         document.documentElement.setAttribute('data-connectea-glass', 'true');
+        const blurVal = theme.glassBlur ?? (customColors?.glassBlur ?? 16);
+        const opVal = theme.glassOpacity ?? (customColors?.glassOpacity ?? 0.65);
+        document.documentElement.style.setProperty('--cx-glass-blur', `${blurVal}px`);
+        document.documentElement.style.setProperty('--cx-glass-opacity', `${opVal}`);
       } else {
         document.documentElement.removeAttribute('data-connectea-glass');
       }
 
       if (theme.isCustom || theme.id === 'custom' || customColors) {
         if (customColors) setCustomColors(customColors);
+        else if (theme.colors) setCustomColors(theme.colors);
         applyCustomTokens(customColors || theme.colors || getCustomColors());
       } else {
         clearCustomTokens();
       }
-      applyCustomBackground(theme.wallpaper || getCustomBackground());
+      if (theme.wallpaper !== undefined && theme.wallpaper !== null) {
+        setCustomBackground(theme.wallpaper);
+      } else {
+        applyCustomBackground(getCustomBackground());
+      }
     }
 
     for (const fn of listeners) {
@@ -409,6 +431,10 @@
   loadSavedCustomThemes();
   if (typeof document !== 'undefined') {
     applyCustomBackground();
+    const curTheme = registry.get(getTheme());
+    if (curTheme && (curTheme.isCustom || curTheme.id === 'custom')) {
+      applyCustomTokens(curTheme.colors || getCustomColors());
+    }
   }
 
   window.ConnectifyThemeRegistry = {

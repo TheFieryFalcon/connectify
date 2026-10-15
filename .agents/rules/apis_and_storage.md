@@ -50,7 +50,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectea:theme:v1` | `localStorage` | `theme.js` | Current theme (`'dark'` or `'light'`) |
 | `connectea:theme:id` | `localStorage` | `theme-registry.js` | Active theme identifier (`'dark'`, `'quantum'`, `'amoled'`, `'midnight'`, `'forest'`, `'sunset'`, `'liquid-glass'`, `'custom'`, `'light'`) |
 | `connectea:theme:last_theme` | `localStorage` | `theme.js` | Identifier of active theme restored on startup |
-| `connectea:theme:custom_themes` | `localStorage` | `theme-registry.js` | Array of custom theme configurations and color palettes |
+| `connectea:theme:custom_themes` | `localStorage` & `storage.local` | `theme-registry.js` | Array of custom theme configurations (tokens, glassBlur, glassOpacity, wallpaper) with name-based overwrite |
 | `connectea:theme:wallpaper` | `localStorage` | `theme.js` | Data URI of custom background wallpaper |
 | `connectea:theme:liquid_glass` | `localStorage` | `theme.js` | Boolean flag enabling Liquid Glass diffusion mode |
 | `connectea:theme:restore_dark` | `localStorage` | `theme.js` | Flag to restore dark mode after navigating away from login page |

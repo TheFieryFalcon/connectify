@@ -381,12 +381,8 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 
 /* Primary Action Buttons */
 .connectea-dark :is(
-  .v-button--primary,
-  .eds-c-button--primary,
-  .cvr-c-button--primary,
-  .eds-c-standard-button--primary,
-  button[type="submit"],
-  .cx-btn-primary
+  .v-button--primary, .eds-c-button--primary, .cvr-c-button--primary,
+  .eds-c-standard-button--primary, button[type="submit"], .cx-btn-primary
 ) {
   background-color: #2563eb !important;
   background-color: var(--cx-accent, #2563eb) !important;
@@ -396,12 +392,8 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 }
 
 .connectea-dark :is(
-  .v-button--primary,
-  .eds-c-button--primary,
-  .cvr-c-button--primary,
-  .eds-c-standard-button--primary,
-  button[type="submit"],
-  .cx-btn-primary
+  .v-button--primary, .eds-c-button--primary, .cvr-c-button--primary,
+  .eds-c-standard-button--primary, button[type="submit"], .cx-btn-primary
 ):hover {
   background-color: var(--cx-accent-hover, #1d4ed8) !important;
   border-color: var(--cx-accent-hover, #60a5fa) !important;
@@ -410,10 +402,7 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 
 /* Secondary & Ghost Buttons */
 .connectea-dark :is(
-  .v-button--secondary,
-  .eds-c-button--secondary,
-  .v-button--flat,
-  .eds-c-button--flat
+  .v-button--secondary, .eds-c-button--secondary, .v-button--flat, .eds-c-button--flat
 ) {
   background-color: transparent !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
@@ -421,14 +410,23 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 }
 
 .connectea-dark :is(
-  .v-button--secondary,
-  .eds-c-button--secondary,
-  .v-button--flat,
-  .eds-c-button--flat
+  .v-button--secondary, .eds-c-button--secondary, .v-button--flat, .eds-c-button--flat
 ):hover {
   background-color: var(--cx-surface-hover, #202c3b) !important;
   color: #ffffff !important;
   border-color: var(--cx-border-hover, #5b7594) !important;
+}
+
+:is(html, body, .connectea-dark) :is(.cx-btn-secondary, button.cx-btn-secondary, #cx-customizer-modal .cx-btn-secondary) {
+  background-color: #243042 !important;
+  border: 1px solid #3b506c !important;
+  color: #e2e8f0 !important;
+}
+
+:is(html, body, .connectea-dark) :is(.cx-btn-secondary:hover, button.cx-btn-secondary:hover, #cx-customizer-modal .cx-btn-secondary:hover) {
+  background-color: #31425a !important;
+  border-color: #4f6b8f !important;
+  color: #ffffff !important;
 }
 
 /* Floating Expand / Collapse Buttons (#cx-expand-btn) */

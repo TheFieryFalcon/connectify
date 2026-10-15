@@ -36,14 +36,10 @@
     return { h: Math.round(h * 360), s, v };
   }
   function hsvToRgb(h, s, v) {
-    let r, g, b; const i = Math.floor((h / 360) * 6), f = (h / 360) * 6 - i;
+    const i = Math.floor((h / 360) * 6), f = (h / 360) * 6 - i;
     const p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
-    switch (i % 6) {
-      case 0: r = v; g = t; b = p; break; case 1: r = q; g = v; b = p; break;
-      case 2: r = p; g = v; b = t; break; case 3: r = p; g = q; b = v; break;
-      case 4: r = t; g = p; b = v; break; case 5: r = v; g = p; b = q; break;
-    }
-    return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+    const arr = [[v, t, p], [q, v, p], [p, v, t], [p, q, v], [t, p, v], [v, p, q]][i % 6];
+    return { r: Math.round(arr[0] * 255), g: Math.round(arr[1] * 255), b: Math.round(arr[2] * 255) };
   }
   function adjustLightness(hex, pct) {
     const { r, g, b } = parseHex(hex);
@@ -53,6 +49,7 @@
 
   let modalEl = null, currentMode = 'basic', currentTokens = getDefaultTokens();
   let currentThemeName = 'My Custom Theme', currentEmoji = '🎨', currentLiquidGlass = false, currentWallpaper = null;
+  let currentGlassBlur = 16, currentGlassOpacity = 0.65;
   let activeToken = 'canvas', pickerH = 215, pickerS = 0.5, pickerV = 0.5;
 
   function deriveSecondaryTokens() {
@@ -67,9 +64,7 @@
     currentTokens.accentHover = adjustLightness(accent, 15);
     const { r, g, b } = parseHex(surface);
     const lum = 0.2126 * (r / 255) + 0.7152 * (g / 255) + 0.0722 * (b / 255);
-    if (!textPrimary) {
-      currentTokens.textPrimary = lum < 0.4 ? '#f8fafc' : '#0f172a';
-    }
+    if (!textPrimary) currentTokens.textPrimary = lum < 0.4 ? '#f8fafc' : '#0f172a';
     currentTokens.textSecondary = lum < 0.4 ? '#d1d5db' : '#475569';
     currentTokens.tileLinkColor = currentTokens.textPrimary;
     currentTokens.buttonHover = adjustLightness(button, 12);
@@ -83,30 +78,24 @@
   function renderMockup() {
     const preview = modalEl?.querySelector('#cx-customizer-preview');
     if (!preview) return;
-    for (const [k, v] of Object.entries(currentTokens)) {
-      const cssVar = '--cx-' + k.replace(/[A-Z]/g, m => '-' + m.toLowerCase()) + (k.endsWith('Bg') ? '' : (k.includes('canvas') || k.includes('surface') ? '-bg' : ''));
-      preview.style.setProperty(cssVar, v);
-    }
-    preview.style.setProperty('--cx-canvas-bg', currentTokens.canvas);
-    preview.style.setProperty('--cx-canvas-subtle', currentTokens.canvasSubtle || currentTokens.canvas);
-    preview.style.setProperty('--cx-surface-bg', currentTokens.surface);
-    preview.style.setProperty('--cx-surface-secondary', currentTokens.surfaceSecondary || currentTokens.surface);
-    preview.style.setProperty('--cx-surface-elevated', currentTokens.surfaceElevated || currentTokens.surface);
-    preview.style.setProperty('--cx-border', currentTokens.border);
-    preview.style.setProperty('--cx-border-subtle', currentTokens.borderSubtle || currentTokens.border);
-    preview.style.setProperty('--cx-accent', currentTokens.accent);
-    preview.style.setProperty('--cx-accent-hover', currentTokens.accentHover || currentTokens.accent);
-    preview.style.setProperty('--cx-text-primary', currentTokens.textPrimary);
-    preview.style.setProperty('--cx-text-secondary', currentTokens.textSecondary);
-    preview.style.setProperty('--cx-tile-link-color', currentTokens.tileLinkColor || currentTokens.textPrimary);
-    preview.style.setProperty('--cx-button-bg', currentTokens.button);
-    preview.style.setProperty('--cx-button-hover', currentTokens.buttonHover || currentTokens.button);
-    preview.style.setProperty('--cx-button-text', currentTokens.buttonText || '#ffffff');
+    const pVars = {
+      '--cx-canvas-bg': currentTokens.canvas, '--cx-canvas-subtle': currentTokens.canvasSubtle || currentTokens.canvas,
+      '--cx-surface-bg': currentTokens.surface, '--cx-surface-secondary': currentTokens.surfaceSecondary || currentTokens.surface,
+      '--cx-surface-elevated': currentTokens.surfaceElevated || currentTokens.surface,
+      '--cx-border': currentTokens.border, '--cx-border-subtle': currentTokens.borderSubtle || currentTokens.border,
+      '--cx-accent': currentTokens.accent, '--cx-accent-hover': currentTokens.accentHover || currentTokens.accent,
+      '--cx-text-primary': currentTokens.textPrimary, '--cx-text-secondary': currentTokens.textSecondary,
+      '--cx-tile-link-color': currentTokens.tileLinkColor || currentTokens.textPrimary,
+      '--cx-button-bg': currentTokens.button, '--cx-button-hover': currentTokens.buttonHover || currentTokens.button,
+      '--cx-button-text': currentTokens.buttonText || '#ffffff', '--cx-glass-blur': `${currentGlassBlur}px`, '--cx-glass-opacity': `${currentGlassOpacity}`
+    };
+    for (const [k, v] of Object.entries(pVars)) preview.style.setProperty(k, v);
     preview.style.backgroundImage = currentWallpaper ? `url("${currentWallpaper}")` : 'none';
     const card = preview.querySelector('.cx-mock-card');
     if (card) {
       card.style.borderRadius = currentLiquidGlass ? '16px' : '0px';
-      card.style.backdropFilter = currentLiquidGlass ? 'blur(16px)' : 'none';
+      card.style.backdropFilter = currentLiquidGlass ? `blur(${currentGlassBlur}px)` : 'none';
+      card.style.backgroundColor = currentLiquidGlass ? `rgba(18, 26, 40, ${currentGlassOpacity})` : currentTokens.surface;
     }
   }
 
@@ -116,10 +105,13 @@
       currentThemeName = themeToEdit.name || 'Custom Theme';
       currentEmoji = themeToEdit.icon || '🎨';
       currentLiquidGlass = Boolean(themeToEdit.liquidGlass);
+      currentGlassBlur = typeof themeToEdit.glassBlur === 'number' ? themeToEdit.glassBlur : 16;
+      currentGlassOpacity = typeof themeToEdit.glassOpacity === 'number' ? themeToEdit.glassOpacity : 0.65;
       currentWallpaper = themeToEdit.wallpaper || null;
       currentTokens = { ...getDefaultTokens(), ...(themeToEdit.colors || {}) };
     } else {
       currentThemeName = 'My Theme'; currentEmoji = '🎨'; currentLiquidGlass = false;
+      currentGlassBlur = 16; currentGlassOpacity = 0.65;
       currentWallpaper = null; currentTokens = getDefaultTokens();
     }
     deriveSecondaryTokens();
@@ -177,6 +169,16 @@
                 <input type="checkbox" id="cx-glass-toggle" ${currentLiquidGlass ? 'checked' : ''}>
                 <span>Frosted Liquid Glass Mode (Diffusion & Rounded Corners)</span>
               </label>
+              <div id="cx-glass-sliders-wrap" style="display:${currentLiquidGlass ? 'flex' : 'none'};flex-direction:column;gap:6px;margin:6px 0;padding:6px 8px;background:rgba(0,0,0,0.25);border-radius:6px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94a3b8;">
+                  <span>Blur Strength: <strong id="cx-glass-blur-val" style="color:#e2e8f0;">${currentGlassBlur}px</strong></span>
+                  <input type="range" id="cx-glass-blur-slider" min="0" max="40" value="${currentGlassBlur}" style="width:110px;cursor:pointer;">
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94a3b8;">
+                  <span>Transparency: <strong id="cx-glass-opacity-val" style="color:#e2e8f0;">${Math.round(currentGlassOpacity * 100)}%</strong></span>
+                  <input type="range" id="cx-glass-opacity-slider" min="10" max="100" value="${Math.round(currentGlassOpacity * 100)}" style="width:110px;cursor:pointer;">
+                </div>
+              </div>
               <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
                 <input type="file" id="cx-bg-file-input" accept="image/*" style="display:none">
                 <button class="cx-btn cx-btn-secondary" id="cx-upload-bg-btn" style="padding: 4px 10px; font-size: 12px;">🖼 Custom Wallpaper</button>
@@ -253,14 +255,10 @@
       { key: 'textSecondary', label: 'Secondary Text' }, { key: 'tileLinkColor', label: 'Tile / Link Color' },
       { key: 'button', label: 'Button Background' }, { key: 'buttonHover', label: 'Button Hover' }
     ];
-    const keys = currentMode === 'basic' ? basicKeys : fullKeys;
-    grid.innerHTML = keys.map(t => `
+    grid.innerHTML = (currentMode === 'basic' ? basicKeys : fullKeys).map(t => `
       <div class="cx-token-item ${activeToken === t.key ? 'is-active' : ''}" data-key="${t.key}">
         <span class="cx-token-label">${t.label}</span>
-        <div class="cx-token-control-wrap">
-          <span class="cx-token-val">${currentTokens[t.key] || '#000000'}</span>
-          <div class="cx-token-chip" style="background-color: ${currentTokens[t.key] || '#000000'};"></div>
-        </div>
+        <div class="cx-token-control-wrap"><span class="cx-token-val">${currentTokens[t.key] || '#000'}</span><div class="cx-token-chip" style="background-color:${currentTokens[t.key] || '#000'};"></div></div>
       </div>
     `).join('');
 
@@ -268,30 +266,20 @@
       el.onclick = () => {
         activeToken = el.dataset.key;
         grid.querySelectorAll('.cx-token-item').forEach(x => x.classList.remove('is-active'));
-        el.classList.add('is-active');
-        syncPickerToToken(activeToken);
+        el.classList.add('is-active'); syncPickerToToken(activeToken);
       };
     });
   }
 
   function syncPickerToToken(key) {
-    const val = currentTokens[key] || '#1e2632';
-    const rgb = parseHex(val);
-    const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+    const val = currentTokens[key] || '#1e2632', rgb = parseHex(val), hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
     pickerH = hsv.h; pickerS = hsv.s; pickerV = hsv.v;
-    const nameEl = modalEl?.querySelector('#cx-active-token-name');
-    if (nameEl) nameEl.textContent = key;
-    const hueInput = modalEl?.querySelector('#cx-picker-hue');
-    if (hueInput) hueInput.value = pickerH;
-    const hexInput = modalEl?.querySelector('#cx-picker-hex');
-    if (hexInput) hexInput.value = toHex(rgb.r, rgb.g, rgb.b);
-    const svBox = modalEl?.querySelector('#cx-picker-sv');
-    if (svBox) svBox.style.backgroundColor = `hsl(${pickerH}, 100%, 50%)`;
+    const nameEl = modalEl?.querySelector('#cx-active-token-name'); if (nameEl) nameEl.textContent = key;
+    const hueInput = modalEl?.querySelector('#cx-picker-hue'); if (hueInput) hueInput.value = pickerH;
+    const hexInput = modalEl?.querySelector('#cx-picker-hex'); if (hexInput) hexInput.value = toHex(rgb.r, rgb.g, rgb.b);
+    const svBox = modalEl?.querySelector('#cx-picker-sv'); if (svBox) svBox.style.backgroundColor = `hsl(${pickerH}, 100%, 50%)`;
     const cursor = modalEl?.querySelector('#cx-picker-cursor');
-    if (cursor) {
-      cursor.style.left = `${pickerS * 100}%`;
-      cursor.style.top = `${(1 - pickerV) * 100}%`;
-    }
+    if (cursor) { cursor.style.left = `${pickerS * 100}%`; cursor.style.top = `${(1 - pickerV) * 100}%`; }
   }
 
   function updateColorFromPicker() {
@@ -357,7 +345,22 @@
     });
 
     modalEl.querySelector('#cx-glass-toggle').onchange = (e) => {
-      currentLiquidGlass = e.target.checked; renderMockup();
+      currentLiquidGlass = e.target.checked;
+      const wrap = modalEl.querySelector('#cx-glass-sliders-wrap');
+      if (wrap) wrap.style.display = currentLiquidGlass ? 'flex' : 'none';
+      renderMockup();
+    };
+    const blurSlider = modalEl.querySelector('#cx-glass-blur-slider');
+    if (blurSlider) blurSlider.oninput = (e) => {
+      currentGlassBlur = parseInt(e.target.value, 10);
+      const val = modalEl.querySelector('#cx-glass-blur-val'); if (val) val.textContent = `${currentGlassBlur}px`;
+      renderMockup();
+    };
+    const opSlider = modalEl.querySelector('#cx-glass-opacity-slider');
+    if (opSlider) opSlider.oninput = (e) => {
+      currentGlassOpacity = parseInt(e.target.value, 10) / 100;
+      const val = modalEl.querySelector('#cx-glass-opacity-val'); if (val) val.textContent = `${Math.round(currentGlassOpacity * 100)}%`;
+      renderMockup();
     };
 
     const svBox = modalEl.querySelector('#cx-picker-sv');
@@ -385,16 +388,13 @@
     hexInput.onchange = () => {
       const val = hexInput.value.trim();
       if (/^#[a-f0-9]{6}$/i.test(val)) {
-        currentTokens[activeToken] = val;
-        syncPickerToToken(activeToken);
+        currentTokens[activeToken] = val; syncPickerToToken(activeToken);
         deriveSecondaryTokens(); renderTokens(); renderMockup();
       }
     };
-
     modalEl.querySelectorAll('.cx-swatch-chip').forEach(ch => {
       ch.onclick = () => {
-        currentTokens[activeToken] = ch.dataset.color;
-        syncPickerToToken(activeToken);
+        currentTokens[activeToken] = ch.dataset.color; syncPickerToToken(activeToken);
         deriveSecondaryTokens(); renderTokens(); renderMockup();
       };
     });
@@ -423,7 +423,8 @@
     modalEl.querySelector('#cx-export-btn').onclick = () => {
       const data = {
         version: 1, name: currentThemeName, icon: currentEmoji,
-        liquidGlass: currentLiquidGlass, wallpaper: currentWallpaper,
+        liquidGlass: currentLiquidGlass, glassBlur: currentGlassBlur, glassOpacity: currentGlassOpacity,
+        wallpaper: currentWallpaper,
         swatch: [currentTokens.canvas, currentTokens.surface, currentTokens.accent],
         colors: { ...currentTokens }
       };
@@ -447,11 +448,19 @@
           if (imported.name) currentThemeName = imported.name;
           if (imported.icon) currentEmoji = imported.icon;
           if (imported.liquidGlass !== undefined) currentLiquidGlass = Boolean(imported.liquidGlass);
+          if (imported.glassBlur !== undefined) currentGlassBlur = imported.glassBlur;
+          if (imported.glassOpacity !== undefined) currentGlassOpacity = imported.glassOpacity;
           if (imported.wallpaper !== undefined) currentWallpaper = imported.wallpaper;
           if (imported.colors) currentTokens = { ...currentTokens, ...imported.colors };
           nameInput.value = currentThemeName; emojiInput.value = currentEmoji;
           modalEl.querySelector('#cx-header-icon').textContent = currentEmoji;
           modalEl.querySelector('#cx-glass-toggle').checked = currentLiquidGlass;
+          const wrap = modalEl.querySelector('#cx-glass-sliders-wrap');
+          if (wrap) wrap.style.display = currentLiquidGlass ? 'flex' : 'none';
+          if (blurSlider) blurSlider.value = currentGlassBlur;
+          if (modalEl.querySelector('#cx-glass-blur-val')) modalEl.querySelector('#cx-glass-blur-val').textContent = `${currentGlassBlur}px`;
+          if (opSlider) opSlider.value = Math.round(currentGlassOpacity * 100);
+          if (modalEl.querySelector('#cx-glass-opacity-val')) modalEl.querySelector('#cx-glass-opacity-val').textContent = `${Math.round(currentGlassOpacity * 100)}%`;
           deriveSecondaryTokens(); renderTokens(); syncPickerToToken(activeToken); renderMockup();
         } catch { alert('Invalid theme JSON file.'); }
       };
@@ -460,10 +469,14 @@
 
     modalEl.querySelector('#cx-save-btn').onclick = () => {
       deriveSecondaryTokens();
+      const finalName = (modalEl.querySelector('#cx-name-input')?.value || currentThemeName || 'Custom Theme').trim();
+      const finalIcon = (modalEl.querySelector('#cx-emoji-input')?.value || currentEmoji || '🎨').trim();
       const themeDef = {
-        name: currentThemeName.trim() || 'Custom Theme',
-        icon: currentEmoji.trim() || '🎨',
+        name: finalName,
+        icon: finalIcon,
         liquidGlass: currentLiquidGlass,
+        glassBlur: currentGlassBlur,
+        glassOpacity: currentGlassOpacity,
         wallpaper: currentWallpaper,
         swatch: [currentTokens.canvas, currentTokens.surface, currentTokens.accent],
         colors: { ...currentTokens }
