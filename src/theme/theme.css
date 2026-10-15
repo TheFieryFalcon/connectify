@@ -43,7 +43,7 @@
   .v-panel, .mat-card, .mat-expansion-panel, .mat-expansion-panel-header,
   .connectea-panel, .cvr-c-dashboard-card, .portlet, .portlet-content, .portlet-body,
   [class*="card"], [class*="panel"], [class*="tile"], #ng-zone__classes-metrics-summary
-) {
+):not(button):not(a):not(.v-button):not(.eds-c-button):not([role="button"]):not([class*="button"]):not([class*="action"]) {
   border-radius: 16px !important;
   border-bottom-left-radius: 16px !important;
   border-bottom-right-radius: 16px !important;
@@ -64,4 +64,19 @@
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cx-compound-progress-bar {
   border-radius: 10px !important;
   overflow: hidden !important;
+}
+
+/* Custom wallpaper pass-through: layout containers and wrappers that only hold tiles (e.g. the Assessment
+   Outlines outer .v-panel) are transparent so their padding never paints over the wallpaper. Tiles, cards and
+   panels themselves stay opaque unless Liquid Glass is on. */
+html[data-connectea-has-custom-bg="true"].connectea-dark:not([data-connectea-login]) :is(
+  #main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable
+),
+html[data-connectea-has-custom-bg="true"].connectea-dark:not([data-connectea-login]) :is(
+  .v-panel, .v-panel-content, .cvr-u-padding--md
+):has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }

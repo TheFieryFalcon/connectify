@@ -51,7 +51,8 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 - **Role**: Canonical palette definitions and custom theme registry.
 - **Key Functions**:
   - `BUILTIN_PALETTES`: Stores immutable definitions for 7 built-in presets: Dark, Quantum Dark, AMOLED Black, Midnight Navy, Emerald Forest, Sunset Orange, and Liquid Glass.
-  - `getPresetPalettes()`, `getCustomThemes()`, `saveCustomTheme()`, `deleteCustomTheme()`: CRUD operations on custom theme JSON objects across `localStorage` and `chrome.storage.local`. `saveCustomTheme` performs case-insensitive name matching to overwrite in place, safeguards against `QuotaExceededError` on large wallpapers, and immediately loads saved themes on startup.
+  - `getPresetPalettes()`, `getCustomThemes()`, `saveCustomTheme()`, `deleteCustomTheme()`: CRUD operations on custom theme JSON objects across `localStorage` and `chrome.storage.local`. `saveCustomTheme` performs case-insensitive name matching to overwrite in place, safeguards against `QuotaExceededError` on large wallpapers, and immediately loads saved themes on startup (re-applying a custom theme found only in `chrome.storage.local`).
+  - `applyCustomTokens()` / `clearCustomTokens()`: Write custom tokens (incl. `--cx-card-bg`, `--cx-nav-bg`) inline on both `<html>` and `<body>`, clearing stale tokens first. `setTheme()` stamps `data-connectea-theme` on both; the base dark token rule only targets `html.connectea-dark` so `<body>` never shadows custom tokens.
 - **Export**: `window.ConnectifyThemeRegistry`.
 
 #### [`theme-customizer.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.js)

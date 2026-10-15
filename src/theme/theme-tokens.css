@@ -22,8 +22,9 @@
   --cx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05); --cx-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1); --cx-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-/* Base Dark Theme (v3.2.x parity) */
-:is(html.connectea-dark:not([data-connectea-theme]), body.connectea-dark:not([data-connectea-theme]), .connectea-dark:not([data-connectea-theme])),
+/* Base Dark Theme (v3.2.x parity). Declared on <html> for every dark theme so custom themes inherit dark
+   fallbacks; never redeclared on <body> for custom themes, which would shadow their inline tokens. */
+html.connectea-dark,
 [data-connectea-theme="dark"].connectea-dark, [data-connectea-theme="dark"] .connectea-dark, html.connectea-dark[data-connectea-theme="dark"] {
   --cx-canvas-bg: #12171f; --cx-canvas-subtle: #0a0d12;
   --cx-surface-bg: #1e2632; --cx-surface-secondary: #18202b; --cx-surface-elevated: #263242;
@@ -203,7 +204,7 @@
 [data-connectea-reading-view="true"] :is(cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"], cnt-notice-item-view-dialog, .cvr-c-app-layout, .cvr-c-app-layout__body, #main-content) { background-image: none !important; background-color: var(--cx-canvas-bg, #121820) !important; }
 
 /* Universal Panel & Tile Background Curvature (16px) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .mat-expansion-panel-header, .connectea-panel, .cvr-c-dashboard-card, .portlet, .portlet-content, .portlet-body, [class*="card"], [class*="panel"], [class*="tile"], #ng-zone__classes-metrics-summary) { border-radius: 16px !important; border-bottom-left-radius: 16px !important; border-bottom-right-radius: 16px !important; overflow: hidden !important; }
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .mat-expansion-panel-header, .connectea-panel, .cvr-c-dashboard-card, .portlet, .portlet-content, .portlet-body, [class*="card"], [class*="panel"], [class*="tile"], #ng-zone__classes-metrics-summary):not(button):not(a):not(.v-button):not(.eds-c-button):not([role="button"]):not([class*="button"]):not([class*="action"]) { border-radius: 16px !important; border-bottom-left-radius: 16px !important; border-bottom-right-radius: 16px !important; overflow: hidden !important; }
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-tile__body, .cvr-c-tile__body, .eds-c-card__body, .cvr-c-card__body) { border-bottom-left-radius: 16px !important; border-bottom-right-radius: 16px !important; }
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.modal-content, .ui-dialog, mat-dialog-container) { border-radius: 20px !important; }
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cx-compound-progress-bar { border-radius: 10px !important; overflow: hidden !important; }

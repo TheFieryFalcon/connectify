@@ -70,8 +70,10 @@
       document.documentElement.classList.toggle('connectea-dark', dark);
       if (document.body) document.body.classList.toggle('connectea-dark', dark);
       const cur = themeId || (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (dark ? 'dark' : 'light'));
-      if (dark) document.documentElement.dataset.connecteaTheme = cur;
-      else { delete document.documentElement.dataset.connecteaTheme; document.documentElement.removeAttribute('data-connectea-theme'); }
+      for (const el of [document.documentElement, document.body].filter(Boolean)) {
+        if (dark) el.dataset.connecteaTheme = cur;
+        else { delete el.dataset.connecteaTheme; el.removeAttribute('data-connectea-theme'); }
+      }
     }
   }
 

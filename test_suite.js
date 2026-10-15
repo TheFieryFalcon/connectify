@@ -6682,6 +6682,59 @@ runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, p
     'theme-customizer.js must call window.ConnectifyTheme.applyTheme on save');
 });
 
+runTest('Test 151: Custom theme colors reach body, View button stays square, and wallpaper shows through outline wrappers', () => {
+  const themeCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme.css'), 'utf8');
+  const themeTokensCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-tokens.css'), 'utf8');
+  const themeFeedCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-feed.css'), 'utf8');
+  const registryJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8');
+  const themeJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme.js'), 'utf8');
+
+  // 1. Base dark tokens live on <html> for every dark theme and are never redeclared on <body> for custom themes
+  assert.ok(themeTokensCss.includes('/* Base Dark Theme (v3.2.x parity)') && /\*\/\nhtml\.connectea-dark,\n\[data-connectea-theme="dark"\]\.connectea-dark,/.test(themeTokensCss),
+    'theme-tokens.css base dark rule must target html.connectea-dark and dark-themed elements only');
+  assert.ok(!themeTokensCss.includes('body.connectea-dark:not([data-connectea-theme])'),
+    'theme-tokens.css must not redeclare dark tokens on an unthemed body');
+
+  // 2. Functional: custom tokens (incl. card and nav) apply to html AND body, the body carries the theme id,
+  //    and switching custom themes clears tokens the new theme does not define
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  eval(registryJs);
+  eval(themeJs);
+  const reg = window.ConnectifyThemeRegistry;
+  reg.registerTheme({ id: 'custom_a', name: 'A', isCustom: true, colors: { canvas: '#101014', surface: '#181820', inputBg: '#222222' } });
+  reg.registerTheme({ id: 'custom_b', name: 'B', isCustom: true, colors: { canvas: '#202024', surface: '#282830' } });
+  reg.setTheme('custom_a');
+  for (const el of [document.documentElement, document.body]) {
+    assert.strictEqual(el.style.getPropertyValue('--cx-canvas-bg'), '#101014', 'custom canvas must be applied to html and body');
+    assert.strictEqual(el.style.getPropertyValue('--cx-card-bg'), '#181820', 'custom surface must drive --cx-card-bg');
+    assert.strictEqual(el.style.getPropertyValue('--cx-nav-bg'), '#181820', 'custom surface must drive --cx-nav-bg');
+    assert.strictEqual(el.dataset.connecteaTheme, 'custom_a', 'html and body must both carry the custom theme id');
+  }
+  reg.setTheme('custom_b');
+  assert.strictEqual(document.body.style.getPropertyValue('--cx-canvas-bg'), '#202024', 'second custom theme must replace canvas');
+  assert.strictEqual(document.body.style.getPropertyValue('--cx-input-bg'), '', 'tokens from a previous custom theme must be cleared');
+  reg.setTheme('dark');
+  assert.strictEqual(document.body.style.getPropertyValue('--cx-canvas-bg'), '', 'preset theme must clear body custom tokens');
+  assert.strictEqual(document.body.dataset.connecteaTheme, 'dark', 'body must carry the preset theme id');
+  assert.ok(registryJs.includes('if (active?.isCustom && document.documentElement?.dataset.connecteaTheme !== active.id) setTheme(active.id);'),
+    'loadSavedCustomThemes must re-apply a custom theme found only in chrome.storage');
+
+  // 3. View / positive buttons are square and excluded from the 16px panel curvature
+  assert.ok(/background-color: var\(--cx-positive-bg, #8cae04\) !important;[\s\S]{0,160}border-radius: 0 !important;/.test(themeFeedCss),
+    'theme-feed.css positive (View) buttons must enforce border-radius: 0');
+  const buttonExclusion = ':not(button):not(a):not(.v-button):not(.eds-c-button):not([role="button"]):not([class*="button"]):not([class*="action"])';
+  assert.ok(themeCss.includes(buttonExclusion) && themeTokensCss.includes(buttonExclusion),
+    'theme.css and theme-tokens.css curvature rules must exclude buttons and action controls');
+
+  // 4. Wallpaper passes through layout containers and tile-only wrappers; tiles stay opaque without Liquid Glass
+  assert.ok(themeCss.includes('html[data-connectea-has-custom-bg="true"].connectea-dark:not([data-connectea-login]) :is(\n  #main-content'),
+    'theme.css must make layout containers transparent when a custom wallpaper is active');
+  assert.ok(themeCss.includes(':has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile)'),
+    'theme.css must only clear wrappers that contain tiles, never the tiles themselves');
+  assert.ok(themeCss.includes('background-color: var(--cx-surface-bg, #1e2632) !important'),
+    'non-Liquid-Glass panels must remain opaque');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

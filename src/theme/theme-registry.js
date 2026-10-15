@@ -133,6 +133,9 @@
               const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
               if (Array.isArray(list)) list.forEach(t => { if (t?.id) registerTheme(t); });
             } catch {}
+            // Re-apply a custom theme that was only known to chrome.storage at startup
+            const active = registry.get(getTheme());
+            if (active?.isCustom && document.documentElement?.dataset.connecteaTheme !== active.id) setTheme(active.id);
           }
         });
       } catch {}
@@ -224,51 +227,47 @@
     return { ...DEFAULT_CUSTOM_COLORS };
   }
 
+  function tokenTargets() {
+    return typeof document === 'undefined' ? [] : [document.documentElement, document.body].filter(Boolean);
+  }
+
   function applyCustomTokens(colors) {
-    if (typeof document === 'undefined') return;
-    const root = document.documentElement;
-    if (!root) return;
     const c = colors || getCustomColors();
-    if (c.canvas) root.style.setProperty('--cx-canvas-bg', c.canvas);
-    if (c.canvasSubtle) root.style.setProperty('--cx-canvas-subtle', c.canvasSubtle);
-    if (c.surface) root.style.setProperty('--cx-surface-bg', c.surface);
-    if (c.surfaceSecondary) root.style.setProperty('--cx-surface-secondary', c.surfaceSecondary);
-    if (c.surfaceElevated) root.style.setProperty('--cx-surface-elevated', c.surfaceElevated);
-    if (c.surfaceHover) root.style.setProperty('--cx-surface-hover', c.surfaceHover);
-    if (c.border) root.style.setProperty('--cx-border', c.border);
-    if (c.borderSubtle) root.style.setProperty('--cx-border-subtle', c.borderSubtle);
-    if (c.borderStrong) root.style.setProperty('--cx-border-strong', c.borderStrong);
-    if (c.accent) root.style.setProperty('--cx-accent', c.accent);
-    if (c.accentHover) root.style.setProperty('--cx-accent-hover', c.accentHover);
-    if (c.textPrimary) root.style.setProperty('--cx-text-primary', c.textPrimary);
-    if (c.textSecondary) root.style.setProperty('--cx-text-secondary', c.textSecondary);
-    if (c.tileLinkColor || c.textPrimary) root.style.setProperty('--cx-tile-link-color', c.tileLinkColor || c.textPrimary);
-    if (c.button) root.style.setProperty('--cx-button-bg', c.button);
-    if (c.buttonHover) root.style.setProperty('--cx-button-hover', c.buttonHover);
-    if (c.buttonText) root.style.setProperty('--cx-button-text', c.buttonText);
-    if (c.inputBg) root.style.setProperty('--cx-input-bg', c.inputBg);
-    if (c.inputBorder) root.style.setProperty('--cx-input-border', c.inputBorder);
+    const tokens = {
+      '--cx-canvas-bg': c.canvas, '--cx-canvas-subtle': c.canvasSubtle,
+      '--cx-surface-bg': c.surface, '--cx-card-bg': c.surface,
+      '--cx-surface-secondary': c.surfaceSecondary, '--cx-surface-elevated': c.surfaceElevated,
+      '--cx-surface-hover': c.surfaceHover, '--cx-nav-bg': c.surfaceSecondary || c.surface,
+      '--cx-border': c.border, '--cx-border-subtle': c.borderSubtle, '--cx-border-strong': c.borderStrong,
+      '--cx-accent': c.accent, '--cx-accent-hover': c.accentHover,
+      '--cx-text-primary': c.textPrimary, '--cx-text-secondary': c.textSecondary,
+      '--cx-tile-link-color': c.tileLinkColor || c.textPrimary,
+      '--cx-button-bg': c.button, '--cx-button-hover': c.buttonHover, '--cx-button-text': c.buttonText,
+      '--cx-input-bg': c.inputBg, '--cx-input-border': c.inputBorder
+    };
+    clearCustomTokens();
+    for (const el of tokenTargets()) {
+      for (const [prop, value] of Object.entries(tokens)) if (value) el.style.setProperty(prop, value);
+    }
   }
 
   function clearCustomTokens() {
-    if (typeof document === 'undefined') return;
-    const root = document.documentElement;
-    if (!root) return;
     const props = [
-      '--cx-canvas-bg', '--cx-canvas-subtle', '--cx-surface-bg', '--cx-surface-secondary',
-      '--cx-surface-elevated', '--cx-surface-hover', '--cx-border', '--cx-border-subtle',
+      '--cx-canvas-bg', '--cx-canvas-subtle', '--cx-surface-bg', '--cx-card-bg', '--cx-surface-secondary',
+      '--cx-surface-elevated', '--cx-surface-hover', '--cx-nav-bg', '--cx-border', '--cx-border-subtle',
       '--cx-border-strong', '--cx-accent', '--cx-accent-hover', '--cx-text-primary',
       '--cx-text-secondary', '--cx-tile-link-color', '--cx-button-bg', '--cx-button-hover',
       '--cx-button-text', '--cx-input-bg', '--cx-input-border'
     ];
-    for (const prop of props) root.style.removeProperty(prop);
+    for (const el of tokenTargets()) for (const prop of props) el.style.removeProperty(prop);
   }
 
   function setCustomColors(colors) {
     try {
       const merged = { ...getCustomColors(), ...colors };
       localStorage.setItem(STORAGE_CUSTOM_COLORS, JSON.stringify(merged));
-      if (getTheme() === 'custom') applyCustomTokens(merged);
+      const active = getTheme();
+      if (active === 'custom' || registry.get(active)?.isCustom) applyCustomTokens(merged);
       return true;
     } catch { return false; }
   }
@@ -355,11 +354,9 @@
     if (typeof document !== 'undefined' && document.documentElement) {
       document.documentElement.classList.toggle('connectea-dark', isDark);
       if (document.body) document.body.classList.toggle('connectea-dark', isDark);
-      if (isDark) {
-        document.documentElement.dataset.connecteaTheme = theme.id;
-      } else {
-        delete document.documentElement.dataset.connecteaTheme;
-        document.documentElement.removeAttribute('data-connectea-theme');
+      for (const el of tokenTargets()) {
+        if (isDark) el.dataset.connecteaTheme = theme.id;
+        else { delete el.dataset.connecteaTheme; el.removeAttribute('data-connectea-theme'); }
       }
 
       if (theme.id === 'liquid-glass' || theme.liquidGlass || customColors?.glassDiffusion) {
