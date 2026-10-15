@@ -8,7 +8,7 @@
   'use strict';
 
   try {
-  const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+  const { normalize, removeStorageKeys, isBaselineKey } = window.ConnectifyUtils;
   const subjectsCache = new Map();
   const statsCache = new Map();
 
@@ -105,14 +105,7 @@
         if (window.ConnectifyPredictorMath?.predictionMemoryCache?.clear) {
           window.ConnectifyPredictorMath.predictionMemoryCache.clear();
         }
-        const toRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && (k.startsWith('connectify:prediction:') || k === 'connectify:prediction_version')) {
-            toRemove.push(k);
-          }
-        }
-        for (const k of toRemove) localStorage.removeItem(k);
+        removeStorageKeys(k => k.startsWith('connectify:prediction:') || k === 'connectify:prediction_version');
         // Do NOT stamp as current here — only populateChronologicalPredictions
         // should set the stamp after actually writing predictions.
         localStorage.removeItem(CACHE_KEYS.PREDICTOR);
@@ -124,14 +117,7 @@
     clearResultsCache() {
       try {
         subjectsCache.clear();
-        const toRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && (k.startsWith('connectify:grade_cache:') || k.startsWith('connectify:subjects_cache'))) {
-            toRemove.push(k);
-          }
-        }
-        for (const k of toRemove) localStorage.removeItem(k);
+        removeStorageKeys(k => k.startsWith('connectify:grade_cache:') || k.startsWith('connectify:subjects_cache'));
         localStorage.setItem(CACHE_KEYS.RESULTS, CACHE_VERSIONS.RESULTS);
         window.dispatchEvent(new CustomEvent('connectify-results-updated'));
       } catch (e) {
@@ -152,15 +138,11 @@
           'connectify:auto_expand'
         ];
         for (const k of directKeys) localStorage.removeItem(k);
-        const toRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && (k.startsWith('connectify:baselines:') || k.startsWith('connectea:baselines:') || k.startsWith('connectea:class_categories:'))) {
-            toRemove.push(k);
-          }
-        }
-        for (const k of toRemove) localStorage.removeItem(k);
+        // Baselines live under singular and legacy plural prefixes (see ConnectifyUtils.BASELINE_PREFIXES)
+        removeStorageKeys(k => isBaselineKey(k) || k.startsWith('connectea:class_categories:'));
         localStorage.setItem(CACHE_KEYS.SETTINGS, CACHE_VERSIONS.SETTINGS);
+        // Predictor modules memoise baselines; this event drops their in-memory copy
+        window.dispatchEvent(new CustomEvent('connectify-baselines-updated'));
         window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
       } catch (e) {
         console.warn('ConnectifyCache: failed to clear settings cache', e);
@@ -170,14 +152,7 @@
     clearCohortCache() {
       try {
         statsCache.clear();
-        const toRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && (k.startsWith('connectea:cohort:v3:') || k.startsWith('connectify:stats_cache:'))) {
-            toRemove.push(k);
-          }
-        }
-        for (const k of toRemove) localStorage.removeItem(k);
+        removeStorageKeys(k => k.startsWith('connectea:cohort:v3:') || k.startsWith('connectify:stats_cache:'));
         if (window.ConnectifyCohortEstimator?.memory) {
           window.ConnectifyCohortEstimator.memory.clear();
         }

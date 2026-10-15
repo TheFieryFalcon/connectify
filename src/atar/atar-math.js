@@ -62,7 +62,7 @@
     [402.5, 99.95]
   ];
 
-  const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+  const { normalize } = window.ConnectifyUtils;
   const scoreValue = value => {
     if (value !== '' && value !== null && value !== undefined) {
       const num = Number(value);

@@ -50,18 +50,15 @@
       const lowerTask = taskName.toLowerCase().trim();
       const lowerSubj = subjectName ? subjectName.toLowerCase().trim() : '';
       const lowerClean = cleanSubj ? cleanSubj.toLowerCase().trim() : '';
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && (k.startsWith('connectea:time_override:') || k.startsWith('connectify:time_override:'))) {
-          const parts = k.split(':');
-          if (parts.length >= 4) {
-            const s = parts[2].toLowerCase().trim();
-            const t = parts.slice(3).join(':').toLowerCase().trim();
-            if ((!lowerSubj || s === lowerSubj || s === lowerClean) && (t === lowerTask || (actualTaskId && t === String(actualTaskId).toLowerCase().trim()))) {
-              const val = localStorage.getItem(k);
-              if (val !== null) return val.trim();
-            }
-          }
+      const overrideKeys = window.ConnectifyUtils.storageKeys(k => k.startsWith('connectea:time_override:') || k.startsWith('connectify:time_override:'));
+      for (const k of overrideKeys) {
+        const parts = k.split(':');
+        if (parts.length < 4) continue;
+        const s = parts[2].toLowerCase().trim();
+        const t = parts.slice(3).join(':').toLowerCase().trim();
+        if ((!lowerSubj || s === lowerSubj || s === lowerClean) && (t === lowerTask || (actualTaskId && t === String(actualTaskId).toLowerCase().trim()))) {
+          const val = localStorage.getItem(k);
+          if (val !== null) return val.trim();
         }
       }
     } catch (e) {}

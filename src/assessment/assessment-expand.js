@@ -8,7 +8,7 @@
   'use strict';
 
   try {
-  const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+  const { normalize } = window.ConnectifyUtils;
 
     const collect = (...args) => (window.ConnectifyData?.collect || function() { return []; })(...args);
     const getStaleSubjects = () => (window.ConnectifyCache?.getStaleSubjects ? window.ConnectifyCache.getStaleSubjects() : new Set());

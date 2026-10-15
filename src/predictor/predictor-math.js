@@ -8,8 +8,6 @@
 (() => {
   'use strict';
 
-  let cachedBaselines = null;
-
   const engine = window.ConnectifyPredictorEngine || {};
   const dates = window.ConnectifyPredictorDates || {};
   const cache = window.ConnectifyPredictorCache || {};
@@ -466,13 +464,8 @@
       } catch (e) {}
     });
 
-    window.addEventListener('connectify-baselines-updated', () => {
-      cachedBaselines = null;
-    });
-
     window.addEventListener('storage', e => {
       if (e.key && (e.key.includes('baseline') || e.key.includes('prediction'))) {
-        cachedBaselines = null;
         predictionMemoryCache.clear();
       }
     });

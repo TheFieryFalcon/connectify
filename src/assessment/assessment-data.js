@@ -11,7 +11,7 @@
     if (window.__connectifyDataInitialized && window.ConnectifyData) return;
     window.__connectifyDataInitialized = true;
 
-  const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+  const { normalize } = window.ConnectifyUtils;
 
     const cache = window.ConnectifyCache || {};
     const parser = window.ConnectifyParser || {};

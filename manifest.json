@@ -47,6 +47,7 @@
             "src/sidebar/sidebar.css"
          ],
          "js": [
+            "src/system/utils.js",
             "src/assessment/assessment-cache.js",
             "src/assessment/assessment-parser.js",
             "src/assessment/assessment-expand.js",

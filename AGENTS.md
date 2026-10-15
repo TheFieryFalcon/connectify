@@ -15,7 +15,7 @@ All instructions, design constraints, and architectural standards in `design_rul
 
 2. **Pipeline & Execution (`docs/architecture.md`)**:
    - MAIN world `src/system/data.js` stamps Highcharts boxplot quantiles onto DOM `dataset.connectifyStats`.
-   - ISOLATED world executes 42 content scripts in exact sequence from `src/assessment/assessment-cache.js` to `src/system/dom-sweeper.js`.
+   - ISOLATED world executes content scripts in the exact sequence listed in `manifest.json` / `docs/architecture.md`, starting with `src/system/utils.js` (`ConnectifyUtils`).
 
 3. **Subsystems & Modules (`docs/modules_*.md`)**:
    - Full modular architecture under `src/` with self-contained submodules across `assessment/`, `cohort/`, `atar/`, `predictor/`, `progress/`, `sidebar/`, `theme/`, and `system/`.

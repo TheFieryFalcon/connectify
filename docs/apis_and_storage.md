@@ -8,6 +8,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 
 | Global Object | Module | Primary Purpose |
 |---|---|---|
+| `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey` (load first) |
 | `window.ConnectifyData` | `assessment-data.js` | Scrapes assessment cards, caches tasks, and expands accordions |
 | `window.ConnectifyCache` | `assessment-data.js` | Subsystem cache versioning (predictor, results, settings, cohort) and clearing |
 | `window.ConnectifyCohortMath` | `cohort-math.js` | PCHIP cubic Hermite interpolation, variance, z-score |

@@ -284,11 +284,16 @@
       }
     };
 
+    // refresh() is a no-op while the panel is hidden; data events refresh an open panel immediately
     setInterval(() => {
+      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
       refresh();
-      cleanupImprovementArrows();
     }, 1500);
+    for (const evt of ['connectify-results-updated', 'connectify-task-type-changed', 'connectify-settings-updated']) {
+      window.addEventListener(evt, () => refresh());
+    }
 
+    // Arrows from older Connectify versions only exist at page load, so one sweep is enough
     cleanupImprovementArrows();
   } catch (err) {
     console.error('Connectify error in progress-graph.js:', err);

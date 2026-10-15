@@ -64,6 +64,7 @@ const MODULE_BUNDLES = {
     'assessment-data.js'
   ],
   'predictor-math.js': [
+    'utils.js',
     'predictor-engine.js',
     'predictor-dates.js',
     'predictor-cache.js',
@@ -527,6 +528,9 @@ global.MutationObserver = class {
   disconnect() {}
   takeRecords() { return []; }
 };
+
+// manifest.json loads src/system/utils.js before every other content script
+eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/utils.js'), 'utf8'));
 
 console.log('================================================================');
 console.log('       CONNECTIFY UNIFIED MASTER TEST SUITE EXECUTION           ');
@@ -6856,6 +6860,58 @@ runTest('Test 153: Theme CSS selectors are scoped to a theme hook (native Connec
     'non-glass negations must be anchored on html, never matched on body');
   assert.ok(!controlsCss.includes('font-size: 24px !important;\n  width: 24px !important;'), 'icon buttons must keep native icon sizes');
   assert.ok(!controlsCss.includes('.mat-icon-button .mat-button-wrapper {'), 'icon button wrappers must keep native layout');
+});
+
+runTest('Test 154: Shared utilities, settings reset clears every baseline key, and no duplicated helpers', () => {
+  const utils = window.ConnectifyUtils;
+  assert.strictEqual(utils.normalize('  Term 1\n  Test  '), 'Term 1 Test');
+  assert.deepStrictEqual(utils.baselineKeys('types', 'acc').slice(-1), ['connectify:baseline:types:acc'],
+    'the current baseline key must come last so it wins when merging');
+
+  // clearSettingsCache must remove singular and plural baseline keys and drop memoised baselines
+  eval(fs.readFileSync(path.resolve(__dirname, 'src/assessment/assessment-cache.js'), 'utf8'));
+  localStorage.clear();
+  const seeded = ['connectify:baseline:types:acc', 'connectea:baseline:subjects', 'connectify:baselines:types', 'connectea:class_categories:Chem'];
+  for (const k of seeded) localStorage.setItem(k, '{}');
+  localStorage.setItem('connectify:prediction:acc:Chem:1', '{}');
+  const dispatched = [];
+  const origDispatch = window.dispatchEvent;
+  window.dispatchEvent = e => { dispatched.push(e.type); return true; };
+  try {
+    window.ConnectifyCache.clearSettingsCache();
+  } finally {
+    window.dispatchEvent = origDispatch;
+  }
+  for (const k of seeded) assert.strictEqual(localStorage.getItem(k), null, `${k} must be cleared with settings`);
+  assert.strictEqual(localStorage.getItem('connectify:prediction:acc:Chem:1'), '{}', 'settings reset must not touch predictions');
+  assert.ok(dispatched.includes('connectify-baselines-updated'), `settings reset must dispatch connectify-baselines-updated (got ${dispatched.join(', ')})`);
+  localStorage.clear();
+
+  // No module re-implements the shared helpers
+  const offenders = [];
+  (function walk(dir) {
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) walk(full);
+      else if (full.endsWith('.js') && !full.endsWith(path.join('system', 'utils.js'))) {
+        const src = origReadFileSync.call(fs, full, 'utf8');
+        if (/const normalize = text =>/.test(src) || /for \(let i = 0; i < localStorage\.length; i\+\+\)/.test(src)) offenders.push(path.relative(__dirname, full));
+      }
+    }
+  })(path.resolve(__dirname, 'src'));
+  assert.deepStrictEqual(offenders, [], 'modules must use ConnectifyUtils instead of local normalize/storage scans');
+
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
+  const outlines = manifest.content_scripts.find(cs => (cs.js || []).includes('src/assessment/assessment-cache.js'));
+  assert.strictEqual(outlines.js[0], 'src/system/utils.js', 'utils.js must load before every other outlines content script');
+
+  // Year in Progress no longer sweeps the whole document every 1.5s
+  const progJs = origReadFileSync.call(fs, path.resolve(__dirname, 'src/progress/progress-graph.js'), 'utf8');
+  assert.ok(!/setInterval\(\(\) => \{[^}]*cleanupImprovementArrows\(\)/.test(progJs), 'arrow cleanup must run once, not on an interval');
+
+  // Theme login-restore logic lives in one place
+  const themeJs = origReadFileSync.call(fs, path.resolve(__dirname, 'src/theme/theme.js'), 'utf8');
+  assert.strictEqual((themeJs.match(/localStorage\.removeItem\(RESTORE_THEME_KEY\)/g) || []).length, 1, 'restore consumption must be implemented once');
 });
 
 Promise.all(pendingTestPromises).then(() => {

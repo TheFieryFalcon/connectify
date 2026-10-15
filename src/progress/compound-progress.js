@@ -74,7 +74,7 @@
     return '#999';
   }
 
-  const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+  const { normalize } = window.ConnectifyUtils;
 
   function cleanSubject(subjectName) {
     return (subjectName || '')

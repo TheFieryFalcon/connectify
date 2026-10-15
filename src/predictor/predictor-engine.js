@@ -74,16 +74,7 @@
 
     if (cachedBaselines) return cachedBaselines;
 
-    const candidateTypeKeys = [
-      'connectea:baseline:types',
-      'connectea:baselines:types',
-      'connectify:baseline:types',
-      'connectify:baselines:types',
-      `connectea:baseline:types:${account}`,
-      `connectea:baselines:types:${account}`,
-      `connectify:baselines:types:${account}`,
-      `connectify:baseline:types:${account}`
-    ];
+    const candidateTypeKeys = window.ConnectifyUtils.baselineKeys('types', account);
     for (const key of candidateTypeKeys) {
       try {
         const stored = localStorage.getItem(key);
@@ -96,16 +87,7 @@
       } catch {}
     }
 
-    const candidateSubjKeys = [
-      'connectea:baseline:subjects',
-      'connectea:baselines:subjects',
-      'connectify:baseline:subjects',
-      'connectify:baselines:subjects',
-      `connectea:baseline:subjects:${account}`,
-      `connectea:baselines:subjects:${account}`,
-      `connectify:baselines:subjects:${account}`,
-      `connectify:baseline:subjects:${account}`
-    ];
+    const candidateSubjKeys = window.ConnectifyUtils.baselineKeys('subjects', account);
     for (const key of candidateSubjKeys) {
       try {
         const stored = localStorage.getItem(key);
@@ -130,26 +112,8 @@
     const typeKey = `connectify:baseline:types:${account}`;
     const subjectKey = `connectify:baseline:subjects:${account}`;
 
-    const candidateTypeKeys = [
-      'connectea:baseline:types',
-      'connectea:baselines:types',
-      'connectify:baseline:types',
-      'connectify:baselines:types',
-      `connectea:baseline:types:${account}`,
-      `connectea:baselines:types:${account}`,
-      `connectify:baselines:types:${account}`,
-      `connectify:baseline:types:${account}`
-    ];
-    const candidateSubjKeys = [
-      'connectea:baseline:subjects',
-      'connectea:baselines:subjects',
-      'connectify:baseline:subjects',
-      'connectify:baselines:subjects',
-      `connectea:baseline:subjects:${account}`,
-      `connectea:baselines:subjects:${account}`,
-      `connectify:baselines:subjects:${account}`,
-      `connectify:baseline:subjects:${account}`
-    ];
+    const candidateTypeKeys = window.ConnectifyUtils.baselineKeys('types', account);
+    const candidateSubjKeys = window.ConnectifyUtils.baselineKeys('subjects', account);
 
     if (updatedBaselines.types !== undefined) {
       try {

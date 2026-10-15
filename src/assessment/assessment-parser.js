@@ -8,7 +8,7 @@
   'use strict';
 
   try {
-  const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+  const { normalize } = window.ConnectifyUtils;
 
     const getTaskStats = (...args) => (window.ConnectifyCache?.getTaskStats || function() { return null; })(...args);
   /**

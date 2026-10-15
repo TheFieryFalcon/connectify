@@ -13,7 +13,7 @@
 
   if (window.ConnectifyNewGrade) return;
 
-  const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+  const { normalize } = window.ConnectifyUtils;
 
   function getStudentId() {
     try {

@@ -13,7 +13,7 @@
   const math = () => window.ConnectifyMath || {};
 
   function parseAssessment(rawScore, weightedMark, name) {
-    const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+    const { normalize } = window.ConnectifyUtils;
     const scoreMatch = normalize(rawScore).match(/^(\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
     const isPending = /^[-–—]\s*Out\s+of\s+\d+(?:\.\d+)?$/i.test(normalize(rawScore));
     const weightMatch = normalize(weightedMark).match(/^(?:\d+(?:\.\d+)?|[-–—])\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);

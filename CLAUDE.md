@@ -28,10 +28,9 @@ The full rule set is always loaded into context via these imports:
 
 ---
 
-## 2. Architecture & 42-Script Dependency Pipeline (`docs/architecture.md`)
+## 2. Architecture & Script Pipeline (`docs/architecture.md`)
 Main world `src/system/data.js` extracts Highcharts boxplot quantiles onto DOM `dataset.connectifyStats`.
-Isolated world content scripts execute in exact dependency order under `src/`:
-1. `src/assessment/assessment-cache.js` 2. `src/assessment/assessment-parser.js` 3. `src/assessment/assessment-expand.js` 4. `src/assessment/assessment-data.js` 5. `src/cohort/cohort-math.js` 6. `src/cohort/cohort-estimator.js` 7. `src/cohort/task-types.js` 8. `src/cohort/cohort-outcome.js` 9. `src/cohort/cohort-panel.js` 10. `src/cohort/cohort-view.js` 11. `src/cohort/cohort-styles.js` 12. `src/cohort/cohort-stats.js` 13. `src/atar/scaling-data.js` 14. `src/atar/atar-math.js` 15. `src/atar/target-solver.js` 16. `src/atar/atar-scraper.js` 17. `src/atar/atar-calculator.js` 18. `src/atar/target-atar-ui.js` 19. `src/atar/target-grade-ui.js` 20. `src/atar/target-planner-ui.js` 21. `src/atar/atar-ui.js` 22. `src/progress/progress-math.js` 23. `src/progress/progress-chart.js` 24. `src/progress/progress-graph.js` 25. `src/progress/wace-countdown.js` 26. `src/progress/compound-progress.js` 27. `src/progress/weakness-radar.js` 28. `src/atar/scaling-calibration.js` 29. `src/predictor/category-baselines.js` 30. `src/predictor/category-settings.js` 31. `src/predictor/predictor-engine.js` 32. `src/predictor/predictor-dates.js` 33. `src/predictor/predictor-cache.js` 34. `src/predictor/predictor-math.js` 35. `src/predictor/predictor-grade-view.js` 36. `src/predictor/predictor-ui.js` 37. `src/atar/atar-features.js` 38. `src/sidebar/sidebar-handle.js` 39. `src/sidebar/sidebar.js` 40. `src/system/notifications.js` 41. `src/system/new-grade.js` 42. `src/system/dom-sweeper.js`.
+Isolated world content scripts run in the exact dependency order listed in `manifest.json` and `docs/architecture.md` (imported above), starting with `src/system/utils.js` (`ConnectifyUtils`: `normalize`, storage key scans, baseline keys). Reuse it instead of re-implementing helpers.
 
 ---
 

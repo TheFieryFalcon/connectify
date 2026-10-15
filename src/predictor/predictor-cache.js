@@ -298,17 +298,7 @@
       }
     }
     try {
-      const toRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith('connectify:prediction:')) {
-          const lowerKey = k.toLowerCase();
-          if (lowerKey.includes(`:${cleanSubj}:`)) {
-            toRemove.push(k);
-          }
-        }
-      }
-      for (const k of toRemove) localStorage.removeItem(k);
+      window.ConnectifyUtils.removeStorageKeys(k => k.startsWith('connectify:prediction:') && k.toLowerCase().includes(`:${cleanSubj}:`));
     } catch (e) {
       console.warn('ConnectifyPredictorMath: failed to clear subject prediction cache', e);
     }
@@ -327,16 +317,7 @@
         if (window.ConnectifyCache?.clearPredictorCache) {
           window.ConnectifyCache.clearPredictorCache();
         } else {
-          try {
-            const toRemove = [];
-            for (let i = 0; i < localStorage.length; i++) {
-              const k = localStorage.key(i);
-              if (k && (k.startsWith('connectify:prediction:') || k === LEGACY_PREDICTION_VERSION_KEY)) {
-                toRemove.push(k);
-              }
-            }
-            for (const k of toRemove) localStorage.removeItem(k);
-          } catch {}
+          window.ConnectifyUtils.removeStorageKeys(k => k.startsWith('connectify:prediction:') || k === LEGACY_PREDICTION_VERSION_KEY);
         }
       }
 

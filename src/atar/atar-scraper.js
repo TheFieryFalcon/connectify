@@ -30,7 +30,7 @@
 
   function readCourses(atarOnly = true) {
     const math = window.ConnectifyMath || {};
-    const normalize = math.normalize || (t => String(t ?? '').replace(/\s+/g, ' ').trim());
+    const { normalize } = window.ConnectifyUtils;
     const isAtarCourse = math.isAtarCourse || (t => /\bATAR\b/i.test(t));
     const scoreValue = math.scoreValue || (v => {
       const n = Number(v);

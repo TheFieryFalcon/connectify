@@ -74,15 +74,13 @@
         Object.keys(baselines.types).forEach(c => allCatsSet.add(c));
       }
       try {
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith('connectea:class_categories:')) {
-            const arr = JSON.parse(localStorage.getItem(k));
-            if (Array.isArray(arr)) {
-              arr.forEach(c => {
-                if (c && typeof c === 'string' && c.trim()) allCatsSet.add(c.trim());
-              });
-            }
+        for (const k of window.ConnectifyUtils.storageKeys(key => key.startsWith('connectea:class_categories:'))) {
+          let arr = null;
+          try { arr = JSON.parse(localStorage.getItem(k)); } catch {} // one bad entry must not hide the rest
+          if (Array.isArray(arr)) {
+            arr.forEach(c => {
+              if (c && typeof c === 'string' && c.trim()) allCatsSet.add(c.trim());
+            });
           }
         }
       } catch {}

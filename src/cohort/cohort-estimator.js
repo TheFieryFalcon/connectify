@@ -13,7 +13,7 @@
   const memory = new Map();
   const observedSpreadsBySubject = new Map();
 
-  const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+  const { normalize } = window.ConnectifyUtils;
 
   const math = () => window.ConnectifyCohortMath || {
     toNumeric: v => (v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)) ? Number(v) : undefined),

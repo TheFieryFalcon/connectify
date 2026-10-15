@@ -78,19 +78,13 @@
   }
 
   try {
+    const restored = isAuthDisabled() ? null : takeThemeToRestore();
     if (isAuthDisabled()) {
-      if (localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true') {
-        localStorage.setItem(RESTORE_KEY, 'true');
-        const cur = localStorage.getItem(STORAGE_THEME_ID);
-        if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
-      }
+      if (localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true') rememberThemeForLogin();
       localStorage.setItem(STORAGE_KEY, 'light'); localStorage.setItem(STORAGE_THEME_ID, 'light');
       isDarkMode = false; activeTheme = 'light';
-    } else if (localStorage.getItem(RESTORE_KEY) === 'true') {
-      activeTheme = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
-      localStorage.removeItem(RESTORE_KEY); localStorage.removeItem(RESTORE_THEME_KEY);
-      localStorage.setItem(STORAGE_KEY, 'dark'); localStorage.setItem(STORAGE_THEME_ID, activeTheme);
-      isDarkMode = true;
+    } else if (restored) {
+      isDarkMode = true; activeTheme = restored;
     } else {
       isDarkMode = localStorage.getItem(STORAGE_KEY) === 'dark';
       activeTheme = isDarkMode ? (localStorage.getItem(STORAGE_THEME_ID) || 'dark') : 'light';
@@ -284,30 +278,40 @@
     document.body.appendChild(themeMenu);
   }
 
+  // On the login/logout page: remember the active dark theme so it returns after signing in
+  function rememberThemeForLogin(themeId) {
+    try {
+      localStorage.setItem(RESTORE_KEY, 'true');
+      const cur = themeId || localStorage.getItem(STORAGE_THEME_ID);
+      if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
+    } catch {}
+  }
+
+  // Back on a normal page: consumes the remembered theme and returns its id (null if none)
+  function takeThemeToRestore() {
+    try {
+      if (localStorage.getItem(RESTORE_KEY) !== 'true') return null;
+      const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
+      localStorage.removeItem(RESTORE_KEY);
+      localStorage.removeItem(RESTORE_THEME_KEY);
+      localStorage.setItem(STORAGE_KEY, 'dark');
+      localStorage.setItem(STORAGE_THEME_ID, restored);
+      return restored;
+    } catch { return null; }
+  }
+
   function applyTheme(isDark, themeId) {
     if (isAuthDisabled()) {
-      if (isDark || isDarkMode) {
-        try {
-          localStorage.setItem(RESTORE_KEY, 'true');
-          const cur = themeId || (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : null);
-          if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
-        } catch {}
-      }
+      if (isDark || isDarkMode) rememberThemeForLogin(themeId);
       isDark = false;
       try { localStorage.setItem(STORAGE_KEY, 'light'); localStorage.setItem(STORAGE_THEME_ID, 'light'); } catch {}
     } else {
-      try {
-        if (localStorage.getItem(RESTORE_KEY) === 'true') {
-          const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
-          localStorage.removeItem(RESTORE_KEY);
-          localStorage.removeItem(RESTORE_THEME_KEY);
-          isDark = true;
-          themeId = restored;
-          localStorage.setItem(STORAGE_KEY, 'dark');
-          localStorage.setItem(STORAGE_THEME_ID, restored);
-          if (window.ConnectifyThemeRegistry) window.ConnectifyThemeRegistry.setTheme(restored);
-        }
-      } catch {}
+      const restored = takeThemeToRestore();
+      if (restored) {
+        isDark = true;
+        themeId = restored;
+        if (window.ConnectifyThemeRegistry) window.ConnectifyThemeRegistry.setTheme(restored);
+      }
     }
     isDarkMode = isDark;
     updateDomThemeAttributes(isDarkMode, themeId, isAuthDisabled());
@@ -367,27 +371,15 @@
       syncScheduled = false;
       if (isAuthDisabled()) {
         if (isDarkMode || document.documentElement.classList.contains('connectea-dark')) {
-          try {
-            localStorage.setItem(RESTORE_KEY, 'true');
-            const cur = localStorage.getItem(STORAGE_THEME_ID);
-            if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
-          } catch {}
+          rememberThemeForLogin();
           applyTheme(false);
         }
         updateDomThemeAttributes(false, 'light', true);
         return;
       }
-      try {
-        if (localStorage.getItem(RESTORE_KEY) === 'true') {
-          const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
-          localStorage.removeItem(RESTORE_KEY);
-          localStorage.removeItem(RESTORE_THEME_KEY);
-          localStorage.setItem(STORAGE_KEY, 'dark');
-          localStorage.setItem(STORAGE_THEME_ID, restored);
-          applyTheme(true, restored);
-          return;
-        }
-      } catch {}
+      const restored = takeThemeToRestore();
+      if (restored) { applyTheme(true, restored); return; }
+      checkReadingView();
       cleanupDuplicateButtons();
       const nav = document.querySelector('.cvr-c-primary-navigation');
       updateTogglePosition(!nav || toggleButton.parentElement !== nav || !toggleButton.isConnected);
@@ -404,7 +396,6 @@
 
   new MutationObserver(records => {
     if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-    checkReadingView();
     const shouldUpdate = records.some(r => {
       if (r.target === toggleButton || r.target.parentElement?.closest('#connectea-theme-toggle') || r.target.closest?.('#connectify-sidebar')) return false;
       if (r.type === 'attributes' && (r.attributeName === 'data-connectea-surface' || r.attributeName === 'data-connectea-ink' || r.attributeName === 'data-connectea-reading-view')) return false;
@@ -427,19 +418,12 @@
     document.addEventListener('DOMContentLoaded', () => {
       try {
         if (isAuthDisabled()) {
-          const isDark = isDarkMode || localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true';
-          if (isDark) {
-            localStorage.setItem(RESTORE_KEY, 'true');
-            const cur = localStorage.getItem(STORAGE_THEME_ID);
-            if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
-          }
+          if (isDarkMode || localStorage.getItem(STORAGE_KEY) === 'dark' || localStorage.getItem(RESTORE_KEY) === 'true') rememberThemeForLogin();
           localStorage.setItem(STORAGE_KEY, 'light'); localStorage.setItem(STORAGE_THEME_ID, 'light');
           isDarkMode = false;
-        } else if (localStorage.getItem(RESTORE_KEY) === 'true') {
-          const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
-          localStorage.removeItem(RESTORE_KEY); localStorage.removeItem(RESTORE_THEME_KEY);
-          localStorage.setItem(STORAGE_KEY, 'dark'); localStorage.setItem(STORAGE_THEME_ID, restored);
-          isDarkMode = true; activeTheme = restored;
+        } else {
+          const restored = takeThemeToRestore();
+          if (restored) { isDarkMode = true; activeTheme = restored; }
         }
       } catch {}
       if (isAuthDisabled()) {
@@ -460,14 +444,8 @@
       clearInterval(mountPollInterval);
       return;
     }
-    try {
-      if (localStorage.getItem(RESTORE_KEY) === 'true') {
-        const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
-        localStorage.removeItem(RESTORE_KEY); localStorage.removeItem(RESTORE_THEME_KEY);
-        localStorage.setItem(STORAGE_KEY, 'dark'); localStorage.setItem(STORAGE_THEME_ID, restored);
-        applyTheme(true, restored);
-      }
-    } catch {}
+    const restored = takeThemeToRestore();
+    if (restored) applyTheme(true, restored);
     const nav = document.querySelector('.cvr-c-primary-navigation');
     if (nav && toggleButton.parentElement !== nav) updateTogglePosition(true);
     if (mountPollCount >= 30 || (nav && toggleButton.parentElement === nav)) clearInterval(mountPollInterval);
