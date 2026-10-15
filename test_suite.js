@@ -71,7 +71,12 @@ const MODULE_BUNDLES = {
     'predictor-math.js'
   ],
   'sidebar.js': [
+    'sidebar-handle-position.js',
     'sidebar-handle.js',
+    'sidebar-hover.js',
+    'sidebar-filter.js',
+    'sidebar-tools.js',
+    'sidebar-shell.js',
     'sidebar.js'
   ],
   'cohort-view.js': [
@@ -107,6 +112,10 @@ const SPLIT_PARTS = {
   'theme-navigation.css': ['theme-navigation.css', 'theme-discussions.css'],
   'theme-surfaces.css': ['theme-surfaces.css', 'theme-search-scaling.css'],
   'theme-customizer.css': ['theme-customizer.css', 'theme-color-picker.css', 'theme-customizer-preview.css'],
+  'sidebar-drawer.css': ['sidebar-drawer.css', 'sidebar-handle-menu.css', 'sidebar-tool-menu.css', 'sidebar-weakness-types.css', 'sidebar-outcome-filter.css'],
+  'sidebar-notifications.css': ['sidebar-notifications.css', 'sidebar-notifications-dark.css'],
+  'sidebar-predictor.css': ['sidebar-predictor.css', 'sidebar-predictor-results.css'],
+  'sidebar-settings.css': ['sidebar-settings.css', 'sidebar-progress-scaling.css'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js'],
   'theme-customizer.js': ['theme-color-utils.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
   // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
@@ -559,6 +568,23 @@ global.MutationObserver = class {
 // manifest.json loads src/system/utils.js before every other content script
 eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/utils.js'), 'utf8'));
 
+// CSS assertions compare rule text, not formatting: comments and whitespace around CSS punctuation are
+// ignored, so a rule matches whether a stylesheet is minified or pretty-printed.
+const cssCompactCache = new Map();
+function cssCompact(text) {
+  const key = String(text);
+  if (!cssCompactCache.has(key)) {
+    cssCompactCache.set(key, key
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\s*!\s*important/g, '!important')
+      .replace(/\s*([{}:;,>])\s*/g, '$1')
+      .replace(/;}/g, '}')
+      .replace(/\s+/g, ' '));
+  }
+  return cssCompactCache.get(key);
+}
+const cssHas = (css, snippet) => cssCompact(css).includes(cssCompact(snippet).replace(/;$/, ''));
+
 // The selectors the theme surface adapter queries for light surfaces and the dark text on them
 function surfaceAdapterSelectors() {
   eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-surface-adapter.js'), 'utf8'));
@@ -611,19 +637,19 @@ const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
 const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
 
 runTest('theme.css styles My Connect promos, maintenance notices, and action buttons', () => {
-  assert.ok(themeCss.includes('.cvr-c-promo.eds-t-white'), 'Must style .cvr-c-promo.eds-t-white');
-  assert.ok(themeCss.includes('.cvr-c-maintenance-notice'), 'Must style .cvr-c-maintenance-notice');
-  assert.ok(themeCss.includes('.eds-c-tile__action'), 'Must style .eds-c-tile__action');
-  assert.ok(themeCss.includes('.eds-c-standard-button'), 'Must style .eds-c-standard-button');
+  assert.ok(cssHas(themeCss, '.cvr-c-promo.eds-t-white'), 'Must style .cvr-c-promo.eds-t-white');
+  assert.ok(cssHas(themeCss, '.cvr-c-maintenance-notice'), 'Must style .cvr-c-maintenance-notice');
+  assert.ok(cssHas(themeCss, '.eds-c-tile__action'), 'Must style .eds-c-tile__action');
+  assert.ok(cssHas(themeCss, '.eds-c-standard-button'), 'Must style .eds-c-standard-button');
 });
 
 runTest('theme.css styles Classes and Preferences heading bars and cards', () => {
-  assert.ok(themeCss.includes('.cvr-c-heading-bar'), 'Must style .cvr-c-heading-bar');
-  assert.ok(themeCss.includes('.cvr-c-page-header'), 'Must style .cvr-c-page-header');
-  assert.ok(themeCss.includes('.cvr-c-preferences'), 'Must style .cvr-c-preferences');
-  assert.ok(themeCss.includes('.cvr-c-preference-group'), 'Must style .cvr-c-preference-group');
-  assert.ok(themeCss.includes('.eds-c-card'), 'Must style .eds-c-card');
-  assert.ok(themeCss.includes('.v-panel-content'), 'Must style .v-panel-content');
+  assert.ok(cssHas(themeCss, '.cvr-c-heading-bar'), 'Must style .cvr-c-heading-bar');
+  assert.ok(cssHas(themeCss, '.cvr-c-page-header'), 'Must style .cvr-c-page-header');
+  assert.ok(cssHas(themeCss, '.cvr-c-preferences'), 'Must style .cvr-c-preferences');
+  assert.ok(cssHas(themeCss, '.cvr-c-preference-group'), 'Must style .cvr-c-preference-group');
+  assert.ok(cssHas(themeCss, '.eds-c-card'), 'Must style .eds-c-card');
+  assert.ok(cssHas(themeCss, '.v-panel-content'), 'Must style .v-panel-content');
 });
 
 runTest('theme.js implements flicker-free attribute surface adaptation', () => {
@@ -634,9 +660,9 @@ runTest('theme.js implements flicker-free attribute surface adaptation', () => {
 });
 
 runTest('Theme button mounting & positioning in primary navigation', () => {
-  assert.ok(themeCss.includes('.cvr-c-primary-navigation {'), 'theme.css must style .cvr-c-primary-navigation');
-  assert.ok(themeCss.includes('top: 50% !important;'), 'theme.css must vertically center #connectea-theme-toggle with top: 50%');
-  assert.ok(themeCss.includes('transform: translateY(-50%) !important;'), 'theme.css must center with translateY(-50%)');
+  assert.ok(cssHas(themeCss, '.cvr-c-primary-navigation {'), 'theme.css must style .cvr-c-primary-navigation');
+  assert.ok(cssHas(themeCss, 'top: 50% !important;'), 'theme.css must vertically center #connectea-theme-toggle with top: 50%');
+  assert.ok(cssHas(themeCss, 'transform: translateY(-50%) !important;'), 'theme.css must center with translateY(-50%)');
   assert.ok(themeJs.includes('mountPollInterval'), 'theme.js must include initial mounting poll interval');
   assert.ok(themeJs.includes('cleanupDuplicateButtons'), 'theme.js must cleanup duplicate theme buttons');
 });
@@ -683,10 +709,10 @@ runTest('Hardcoded inline colors replaced with semantic classes in settings and 
 });
 
 runTest('Brighter dark mode borders in theme.css and sidebar.css', () => {
-  assert.ok(themeCss.includes('border: 1px solid #3d5066 !important'), 'eds-c-tile must use brighter border #3d5066');
-  assert.ok(themeCss.includes('.connectea-dark .eds-c-accordion__section-heading'), 'accordion header must be styled');
-  assert.ok(themeCss.includes('border-bottom: 1px solid #36485e !important'), 'navigation & tasks must use brighter border #36485e');
-  assert.ok(sidebarCss.includes('.connectea-dark .cx-pred-scenario-card--mid'), 'sidebar.css must style dark mode scenario mid');
+  assert.ok(cssHas(themeCss, 'border: 1px solid #3d5066 !important'), 'eds-c-tile must use brighter border #3d5066');
+  assert.ok(cssHas(themeCss, '.connectea-dark .eds-c-accordion__section-heading'), 'accordion header must be styled');
+  assert.ok(cssHas(themeCss, 'border-bottom: 1px solid #36485e !important'), 'navigation & tasks must use brighter border #36485e');
+  assert.ok(cssHas(sidebarCss, '.connectea-dark .cx-pred-scenario-card--mid'), 'sidebar.css must style dark mode scenario mid');
 });
 
 runTest('WCAG AA Color Contrast Ratios meet or exceed 5:1 threshold', () => {
@@ -731,19 +757,19 @@ runTest('WCAG AA Color Contrast Ratios meet or exceed 5:1 threshold', () => {
 });
 
 runTest('White button styling for Settings and Weakness Analyzer in sidebar', () => {
-  assert.ok(sidebarCss.includes('#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)'), 'sidebar.css must style weakness and categories toggles');
-  assert.ok(sidebarCss.includes('background: #ffffff !important;'), 'Must specify #ffffff white background for light mode');
-  assert.ok(sidebarCss.includes('.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)'), 'Must preserve dark mode style');
+  assert.ok(cssHas(sidebarCss, '#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)'), 'sidebar.css must style weakness and categories toggles');
+  assert.ok(cssHas(sidebarCss, 'background: #ffffff !important;'), 'Must specify #ffffff white background for light mode');
+  assert.ok(cssHas(sidebarCss, '.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)'), 'Must preserve dark mode style');
 });
 
 runTest('theme.css covers Classes accordion, Feed filter funnel, and Follow pills with >= 5:1 contrast', () => {
-  assert.ok(themeCss.includes('.mat-expansion-panel'), 'theme.css must style .mat-expansion-panel');
-  assert.ok(themeCss.includes('.mat-accordion'), 'theme.css must style .mat-accordion');
-  assert.ok(themeCss.includes('.cvr-c-classes'), 'theme.css must style .cvr-c-classes');
-  assert.ok(themeCss.includes('.cvr-c-filter-button'), 'theme.css must style feed filter button');
-  assert.ok(themeCss.includes('.cvr-c-feed-item__follow'), 'theme.css must style feed follow button');
-  assert.ok(themeCss.includes('.mat-expansion-panel-header'), 'theme.css must style expansion panel header');
-  assert.ok(themeCss.includes('.cvr-c-task,') && themeCss.includes('.mat-expansion-panel,'), 'theme.css must restore borders for tasks, cards, and expansion panels');
+  assert.ok(cssHas(themeCss, '.mat-expansion-panel'), 'theme.css must style .mat-expansion-panel');
+  assert.ok(cssHas(themeCss, '.mat-accordion'), 'theme.css must style .mat-accordion');
+  assert.ok(cssHas(themeCss, '.cvr-c-classes'), 'theme.css must style .cvr-c-classes');
+  assert.ok(cssHas(themeCss, '.cvr-c-filter-button'), 'theme.css must style feed filter button');
+  assert.ok(cssHas(themeCss, '.cvr-c-feed-item__follow'), 'theme.css must style feed follow button');
+  assert.ok(cssHas(themeCss, '.mat-expansion-panel-header'), 'theme.css must style expansion panel header');
+  assert.ok(cssHas(themeCss, '.cvr-c-task,') && cssHas(themeCss, '.mat-expansion-panel,'), 'theme.css must restore borders for tasks, cards, and expansion panels');
 });
 
 // ===========================================================================
@@ -760,9 +786,9 @@ runTest('Outcome meter segments disable pointer-events to prevent hover boundary
 });
 
 runTest('Singleton floating tooltip is styled with fixed positioning and high z-index', () => {
-  assert.ok(sidebarCss.includes('#connectea-outcome-tooltip'), 'sidebar.css must style #connectea-outcome-tooltip');
-  assert.ok(sidebarCss.includes('position: fixed'), 'tooltip must use fixed viewport positioning');
-  assert.ok(sidebarCss.includes('z-index: 100050'), 'tooltip must have z-index: 100050');
+  assert.ok(cssHas(sidebarCss, '#connectea-outcome-tooltip'), 'sidebar.css must style #connectea-outcome-tooltip');
+  assert.ok(cssHas(sidebarCss, 'position: fixed'), 'tooltip must use fixed viewport positioning');
+  assert.ok(cssHas(sidebarCss, 'z-index: 100050'), 'tooltip must have z-index: 100050');
 });
 
 runTest('cohort-view.js manages floating outcome tooltip on mouseenter/mousemove/mouseleave', () => {
@@ -773,13 +799,13 @@ runTest('cohort-view.js manages floating outcome tooltip on mouseenter/mousemove
 });
 
 runTest('Outcome bar 2-3x sizing and dark mode segment color preservation', () => {
-  assert.ok(sidebarCss.includes('width: 18px !important;'), 'Outcome bar width must be enlarged (18px)');
-  assert.ok(sidebarCss.includes('height: 56px !important;'), 'Outcome bar height must be enlarged (56px)');
-  assert.ok(sidebarCss.includes('height: 10px !important;'), 'Outcome segment height must be enlarged (10px)');
-  assert.ok(sidebarCss.includes('height: 20px !important;'), 'Outcome purple segment height must be 20px');
-  assert.ok(sidebarCss.includes('.connectea-dark .connectea-outcome-segment:not([class*="connectea-active-"])'), 'Dark mode must only target inactive segments');
-  assert.ok(sidebarCss.includes('.connectea-outcome-bar.connectea-outcome-critical'), 'sidebar.css must style critical outcome bar');
-  assert.ok(sidebarCss.includes('connectea-glow-critical'), 'sidebar.css must define connectea-glow-critical animation');
+  assert.ok(cssHas(sidebarCss, 'width: 18px !important;'), 'Outcome bar width must be enlarged (18px)');
+  assert.ok(cssHas(sidebarCss, 'height: 56px !important;'), 'Outcome bar height must be enlarged (56px)');
+  assert.ok(cssHas(sidebarCss, 'height: 10px !important;'), 'Outcome segment height must be enlarged (10px)');
+  assert.ok(cssHas(sidebarCss, 'height: 20px !important;'), 'Outcome purple segment height must be 20px');
+  assert.ok(cssHas(sidebarCss, '.connectea-dark .connectea-outcome-segment:not([class*="connectea-active-"])'), 'Dark mode must only target inactive segments');
+  assert.ok(cssHas(sidebarCss, '.connectea-outcome-bar.connectea-outcome-critical'), 'sidebar.css must style critical outcome bar');
+  assert.ok(cssHas(sidebarCss, 'connectea-glow-critical'), 'sidebar.css must define connectea-glow-critical animation');
 });
 
 // Load predictor-math.js for mathematical evaluation
@@ -1145,9 +1171,9 @@ const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
 const atarUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
 
 runTest('Sidebar mounts launcher buttons in canonical order', () => {
-  const canonicalMatch = sidebarJs.match(/const canonicalButtons = \[\s*([\s\S]*?)\s*\];/);
-  assert.ok(canonicalMatch, 'canonicalButtons array must exist in sidebar.js');
-  const buttonIds = Array.from(canonicalMatch[1].matchAll(/id:\s*'([^']+)'/g)).map(m => m[1]);
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/sidebar-tools.js'), 'utf8'));
+  assert.ok(Array.isArray(window.ConnectifySidebarTools?.CANONICAL_BUTTONS), 'sidebar-tools.js must export CANONICAL_BUTTONS');
+  const buttonIds = window.ConnectifySidebarTools.CANONICAL_BUTTONS.map(b => b.id);
 
   const expectedOrder = [
     'connectify-target-toggle',
@@ -1170,15 +1196,15 @@ runTest('Target ATAR, Target Grade, and ATAR Estimate buttons and panel in sideb
 });
 
 runTest('Sidebar workspace drawer expands to 900px on active tool and provides back navigation', () => {
-  assert.ok(sidebarCss.includes('.cx-tool-active'), 'sidebar.css must style .cx-tool-active workspace mode');
-  assert.ok(sidebarCss.includes('min(900px'), 'sidebar.css must expand drawer to min(900px) on tool open');
+  assert.ok(cssHas(sidebarCss, '.cx-tool-active'), 'sidebar.css must style .cx-tool-active workspace mode');
+  assert.ok(cssHas(sidebarCss, 'min(900px'), 'sidebar.css must expand drawer to min(900px) on tool open');
   assert.ok(sidebarJs.includes('cx-back-menu'), 'sidebar.js must implement Back to Menu button');
 });
 
 runTest('Category settings preserves colored text in dark mode and supports dynamic categories in cold-start', () => {
   const catSettingsJs = fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8');
   assert.ok(catSettingsJs.includes("label.className = 'cx-cat-name-label'"), 'Must set cx-cat-name-label class');
-  assert.ok(sidebarCss.includes('.connectea-dark #connectify-sidebar .cx-cat-name-label'), 'sidebar.css must style .cx-cat-name-label with var(--cx-cat-color)');
+  assert.ok(cssHas(sidebarCss, '.connectea-dark #connectify-sidebar .cx-cat-name-label'), 'sidebar.css must style .cx-cat-name-label with var(--cx-cat-color)');
 
   // Cold-start dynamic custom categories
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8'));
@@ -1296,12 +1322,12 @@ console.log('\n--- SECTION 6: Regression Verification (Centered Buttons, First-A
 runTest('Weakness Analyzer & Settings button text is centered in sidebar.css', () => {
   const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
   assert.ok(
-    sidebarCss.includes('#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)') ||
-    sidebarCss.includes('.cx-secondary-tool'),
+    cssHas(sidebarCss, '#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)') ||
+    cssHas(sidebarCss, '.cx-secondary-tool'),
     'sidebar.css must select weakness and categories buttons'
   );
   assert.ok(
-    sidebarCss.includes('text-align: center !important') && sidebarCss.includes('justify-content: center !important'),
+    cssHas(sidebarCss, 'text-align: center !important') && cssHas(sidebarCss, 'justify-content: center !important'),
     'sidebar.css must center Weakness Analyzer and Settings button text'
   );
 });
@@ -1475,16 +1501,16 @@ runTest('theme.css styles Feed tabs, Classes drawer list items, and Reports year
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
 
   // 1. Feed navigation tabs
-  assert.ok(themeCss.includes('.cvr-c-feed') && themeCss.includes('.mat-tab-label'), 'theme.css must style feed navigation tabs');
-  assert.ok(themeCss.includes('color: #cbd5e1 !important') && themeCss.includes('color: #f8fafc !important'), 'theme.css must use high-contrast colors for feed tabs');
+  assert.ok(cssHas(themeCss, '.cvr-c-feed') && cssHas(themeCss, '.mat-tab-label'), 'theme.css must style feed navigation tabs');
+  assert.ok(cssHas(themeCss, 'color: #cbd5e1 !important') && cssHas(themeCss, 'color: #f8fafc !important'), 'theme.css must use high-contrast colors for feed tabs');
 
   // 2. Classes drawer navigation items & icons
-  assert.ok(themeCss.includes('.c-category-menu') && themeCss.includes('.mat-list-item-content'), 'theme.css must style classes drawer list items');
-  assert.ok(themeCss.includes('.eds-c-icon') || themeCss.includes('.mat-icon'), 'theme.css must style classes drawer icons');
+  assert.ok(cssHas(themeCss, '.c-category-menu') && cssHas(themeCss, '.mat-list-item-content'), 'theme.css must style classes drawer list items');
+  assert.ok(cssHas(themeCss, '.eds-c-icon') || cssHas(themeCss, '.mat-icon'), 'theme.css must style classes drawer icons');
 
   // 3. Reports page year selector bar
-  assert.ok(themeCss.includes('.cvr-c-reports') && themeCss.includes('.cvr-c-year-selector'), 'theme.css must style reports year selector bar');
-  assert.ok(themeCss.includes('#1a222d !important'), 'Reports year bar must have dark navy background');
+  assert.ok(cssHas(themeCss, '.cvr-c-reports') && cssHas(themeCss, '.cvr-c-year-selector'), 'theme.css must style reports year selector bar');
+  assert.ok(cssHas(themeCss, '#1a222d !important'), 'Reports year bar must have dark navy background');
 });
 
 runTest('overview.md and docs/*.md files strictly obey the 150-line limit and link integrity', () => {
@@ -1783,10 +1809,10 @@ runTest('assessment-data.js mounts animated progress pill on bulk expand and pre
 
   // Verify sidebar.css styles for #cx-expand-progress
   const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
-  assert.ok(sidebarCss.includes('#cx-expand-progress'), 'sidebar.css must style #cx-expand-progress');
-  assert.ok(sidebarCss.includes('cx-expand-spinner'), 'sidebar.css must style spinner animation');
-  assert.ok(sidebarCss.includes('cx-expand-bar'), 'sidebar.css must style progress bar');
-  assert.ok(sidebarCss.includes('#1e2632') && sidebarCss.includes('#ffffff'), 'progress pill must satisfy contrast standards');
+  assert.ok(cssHas(sidebarCss, '#cx-expand-progress'), 'sidebar.css must style #cx-expand-progress');
+  assert.ok(cssHas(sidebarCss, 'cx-expand-spinner'), 'sidebar.css must style spinner animation');
+  assert.ok(cssHas(sidebarCss, 'cx-expand-bar'), 'sidebar.css must style progress bar');
+  assert.ok(cssHas(sidebarCss, '#1e2632') && cssHas(sidebarCss, '#ffffff'), 'progress pill must satisfy contrast standards');
 });
 
 runTest('design_rules.md mandates subsystem cache invalidation rules and continuous doc updates', () => {
@@ -1800,50 +1826,50 @@ runTest('design_rules.md mandates subsystem cache invalidation rules and continu
 
 runTest('theme.css normalizes card and tile headers and suppresses colored accent stripes', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('.cvr-c-tile') && css.includes('.eds-c-tile'), 'theme.css must target both .cvr-c-tile and .eds-c-tile');
-  assert.ok(css.includes('border-bottom: 1px solid #2e3c4e !important;'), 'Tile headers must have normalized #2e3c4e bottom border');
-  assert.ok(css.includes('display: none !important;') && css.includes('content: none !important;'), 'Tile header pseudo-elements must be suppressed');
+  assert.ok(cssHas(css, '.cvr-c-tile') && cssHas(css, '.eds-c-tile'), 'theme.css must target both .cvr-c-tile and .eds-c-tile');
+  assert.ok(cssHas(css, 'border-bottom: 1px solid #2e3c4e !important;'), 'Tile headers must have normalized #2e3c4e bottom border');
+  assert.ok(cssHas(css, 'display: none !important;') && cssHas(css, 'content: none !important;'), 'Tile header pseudo-elements must be suppressed');
 });
 
 runTest('theme.css styles tile action buttons and View All controls with dark styling', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('.cvr-c-tile__action') && css.includes('.eds-c-tile__action'), 'theme.css must target .cvr-c-tile__action and .eds-c-tile__action');
-  assert.ok(css.includes('background-color: #24303f !important;'), 'Tile action buttons must have #24303f background');
-  assert.ok(css.includes('border: 1px solid #4a617a !important;'), 'Tile action buttons must have #4a617a border');
-  assert.ok(css.includes('color: #f1f5f9 !important;'), 'Tile action buttons must have #f1f5f9 high-contrast text');
+  assert.ok(cssHas(css, '.cvr-c-tile__action') && cssHas(css, '.eds-c-tile__action'), 'theme.css must target .cvr-c-tile__action and .eds-c-tile__action');
+  assert.ok(cssHas(css, 'background-color: #24303f !important;'), 'Tile action buttons must have #24303f background');
+  assert.ok(cssHas(css, 'border: 1px solid #4a617a !important;'), 'Tile action buttons must have #4a617a border');
+  assert.ok(cssHas(css, 'color: #f1f5f9 !important;'), 'Tile action buttons must have #f1f5f9 high-contrast text');
 });
 
 runTest('theme.css ensures role/student switcher icon contrast and horizontal navbar indicator', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('[class*="switch"]') && css.includes('[class*="role"]'), 'theme.css must target switch and role icons');
-  assert.ok(css.includes('fill: #cbd5e1 !important;') && css.includes('stroke: currentColor !important;'), 'Icons must use #cbd5e1 contrast fill/stroke');
-  assert.ok((css.includes('border-bottom: 2px solid #3b82f6 !important;') || css.includes('border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;')) && css.includes('box-shadow: none !important;'), 'Horizontal navbar active tab must use border-bottom instead of inset 3px 0');
+  assert.ok(cssHas(css, '[class*="switch"]') && cssHas(css, '[class*="role"]'), 'theme.css must target switch and role icons');
+  assert.ok(cssHas(css, 'fill: #cbd5e1 !important;') && cssHas(css, 'stroke: currentColor !important;'), 'Icons must use #cbd5e1 contrast fill/stroke');
+  assert.ok((cssHas(css, 'border-bottom: 2px solid #3b82f6 !important;') || cssHas(css, 'border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;')) && cssHas(css, 'box-shadow: none !important;'), 'Horizontal navbar active tab must use border-bottom instead of inset 3px 0');
 });
 
 runTest('theme.css provides custom dark styling for checkboxes, dropdowns, and buttons', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   // Checkbox tests
-  assert.ok(css.includes('input[type="checkbox"]'), 'theme.css must style input[type="checkbox"]');
-  assert.ok(css.includes('appearance: none !important;'), 'Checkbox must use appearance: none for custom rendering');
-  assert.ok(css.includes('background-color: #2563eb !important;') && css.includes("viewBox='0 0 16 16'"), 'Checked checkbox must use #2563eb with SVG checkmark');
+  assert.ok(cssHas(css, 'input[type="checkbox"]'), 'theme.css must style input[type="checkbox"]');
+  assert.ok(cssHas(css, 'appearance: none !important;'), 'Checkbox must use appearance: none for custom rendering');
+  assert.ok(cssHas(css, 'background-color: #2563eb !important;') && cssHas(css, "viewBox='0 0 16 16'"), 'Checked checkbox must use #2563eb with SVG checkmark');
   
   // Dropdown tests
-  assert.ok(css.includes('select') && css.includes('.cvr-c-classes__sort'), 'theme.css must style select and sort dropdowns');
-  assert.ok(css.includes("viewBox='0 0 20 20'"), 'Dropdown select must render custom SVG chevron');
-  assert.ok(css.includes('select option') && css.includes('background-color: #1a222d !important;'), 'Select options must use dark #1a222d background');
+  assert.ok(cssHas(css, 'select') && cssHas(css, '.cvr-c-classes__sort'), 'theme.css must style select and sort dropdowns');
+  assert.ok(cssHas(css, "viewBox='0 0 20 20'"), 'Dropdown select must render custom SVG chevron');
+  assert.ok(cssHas(css, 'select option') && cssHas(css, 'background-color: #1a222d !important;'), 'Select options must use dark #1a222d background');
 
   // Button tests
-  assert.ok(css.includes('.cvr-c-button') && css.includes('input[type="button"]'), 'theme.css must style all buttons and inputs');
-  assert.ok(css.includes('background-color: #202c3b !important;'), 'Default buttons must use #202c3b background');
-  assert.ok(css.includes('border: 1px solid #455a73 !important;'), 'Default buttons must use #455a73 border');
-  assert.ok(css.includes('.v-button--primary') && css.includes('background-color: #2563eb !important;'), 'Primary buttons must use #2563eb background');
+  assert.ok(cssHas(css, '.cvr-c-button') && cssHas(css, 'input[type="button"]'), 'theme.css must style all buttons and inputs');
+  assert.ok(cssHas(css, 'background-color: #202c3b !important;'), 'Default buttons must use #202c3b background');
+  assert.ok(cssHas(css, 'border: 1px solid #455a73 !important;'), 'Default buttons must use #455a73 border');
+  assert.ok(cssHas(css, '.v-button--primary') && cssHas(css, 'background-color: #2563eb !important;'), 'Primary buttons must use #2563eb background');
 });
 
 runTest('theme.css scopes buttons to avoid shrinking sidebar buttons and preserves container layout', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes(':not(#connectify-sidebar *)'), 'theme.css must explicitly exempt #connectify-sidebar * from button rules');
-  assert.ok(!css.includes('margin-bottom: 20px !important;'), 'theme.css must not force 20px margin-bottom on cards or tiles');
-  assert.ok(!css.includes('.eds-c-tile::after {\n  display: none !important;'), 'theme.css must not destroy clearfix on .eds-c-tile::after');
+  assert.ok(cssHas(css, ':not(#connectify-sidebar *)'), 'theme.css must explicitly exempt #connectify-sidebar * from button rules');
+  assert.ok(!cssHas(css, 'margin-bottom: 20px !important;'), 'theme.css must not force 20px margin-bottom on cards or tiles');
+  assert.ok(!cssHas(css, '.eds-c-tile::after {\n  display: none !important;'), 'theme.css must not destroy clearfix on .eds-c-tile::after');
 });
 
 runTest('sidebar.js implements centralized delegation and automatic component instantiation', () => {
@@ -1992,39 +2018,39 @@ runTest('predictor-ui.js preserves horizontal subtabs scroll position across ren
 
 runTest('theme.css comprehensively styles tables, submission marksbooks, and grids', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('.table') && css.includes('.table-striped') && css.includes('.table-hover'), 'theme.css must target standard and clay tables');
-  assert.ok(css.includes('.v-table') && css.includes('.v-grid'), 'theme.css must target Vaadin tables and grids');
-  assert.ok(css.includes('.cvr-c-table') && css.includes('.cvr-c-submission-students-table'), 'theme.css must target Connect submission marksbooks');
+  assert.ok(cssHas(css, '.table') && cssHas(css, '.table-striped') && cssHas(css, '.table-hover'), 'theme.css must target standard and clay tables');
+  assert.ok(cssHas(css, '.v-table') && cssHas(css, '.v-grid'), 'theme.css must target Vaadin tables and grids');
+  assert.ok(cssHas(css, '.cvr-c-table') && cssHas(css, '.cvr-c-submission-students-table'), 'theme.css must target Connect submission marksbooks');
 });
 
 runTest('theme.css comprehensively styles modals, dialogs, popups, and dark curtains', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('.v-window') && css.includes('.ui-dialog') && css.includes('.modal-content'), 'theme.css must target Vaadin windows, jQuery UI dialogs, and Clay modals');
-  assert.ok(css.includes('.v-window-modalitycurtain') && css.includes('.modal-backdrop'), 'theme.css must darken modal backdrop curtains');
-  assert.ok(css.includes('.cvr-c-popup') && css.includes('.cvr-c-popup-action-button'), 'theme.css must target Connect popups and buttons');
+  assert.ok(cssHas(css, '.v-window') && cssHas(css, '.ui-dialog') && cssHas(css, '.modal-content'), 'theme.css must target Vaadin windows, jQuery UI dialogs, and Clay modals');
+  assert.ok(cssHas(css, '.v-window-modalitycurtain') && cssHas(css, '.modal-backdrop'), 'theme.css must darken modal backdrop curtains');
+  assert.ok(cssHas(css, '.cvr-c-popup') && cssHas(css, '.cvr-c-popup-action-button'), 'theme.css must target Connect popups and buttons');
 });
 
 runTest('theme.css comprehensively styles dropdown menus, menubars, and auto-suggest popups', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('.v-filterselect-suggestpopup'), 'theme.css must target Vaadin combobox auto-suggest popups');
-  assert.ok(css.includes('.dropdown-menu') && css.includes('.clay-dropdown-menu'), 'theme.css must target dropdown menus');
-  assert.ok(css.includes('.v-menubar-popup') && css.includes('.ui-menu'), 'theme.css must target Vaadin menubars and jQuery UI menus');
+  assert.ok(cssHas(css, '.v-filterselect-suggestpopup'), 'theme.css must target Vaadin combobox auto-suggest popups');
+  assert.ok(cssHas(css, '.dropdown-menu') && cssHas(css, '.clay-dropdown-menu'), 'theme.css must target dropdown menus');
+  assert.ok(cssHas(css, '.v-menubar-popup') && cssHas(css, '.ui-menu'), 'theme.css must target Vaadin menubars and jQuery UI menus');
 });
 
 runTest('theme.css comprehensively styles calendars, datepickers, and time controls', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('.v-calendar') && css.includes('.v-calendar-month-day'), 'theme.css must target Vaadin calendar grid and days');
-  assert.ok(css.includes('.ui-datepicker') && css.includes('.ui-datepicker-header'), 'theme.css must target jQuery UI datepicker');
-  assert.ok(css.includes('.v-datefield-popup') && css.includes('.v-datefield-calendarpanel'), 'theme.css must target Vaadin datefield popups');
+  assert.ok(cssHas(css, '.v-calendar') && cssHas(css, '.v-calendar-month-day'), 'theme.css must target Vaadin calendar grid and days');
+  assert.ok(cssHas(css, '.ui-datepicker') && cssHas(css, '.ui-datepicker-header'), 'theme.css must target jQuery UI datepicker');
+  assert.ok(cssHas(css, '.v-datefield-popup') && cssHas(css, '.v-datefield-calendarpanel'), 'theme.css must target Vaadin datefield popups');
 });
 
 runTest('theme.css comprehensively styles tabsheets, breadcrumbs, speech boxes, and notifications', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('.v-tabsheet') && css.includes('.v-tabsheet-tabitem'), 'theme.css must target Vaadin tabsheets');
-  assert.ok(css.includes('.breadcrumb') && css.includes('.cvr-c-location-bar'), 'theme.css must target breadcrumbs and location bar');
-  assert.ok(css.includes('.cvr-c-speech-box'), 'theme.css must target discussion speech bubbles');
-  assert.ok(css.includes('.v-Notification') && css.includes('.cvr-c-notifications'), 'theme.css must target Vaadin and Connect notifications');
-  assert.ok(css.includes('.cvr-c-status-label') && css.includes('.cvr-c-switch'), 'theme.css must target status labels and switches');
+  assert.ok(cssHas(css, '.v-tabsheet') && cssHas(css, '.v-tabsheet-tabitem'), 'theme.css must target Vaadin tabsheets');
+  assert.ok(cssHas(css, '.breadcrumb') && cssHas(css, '.cvr-c-location-bar'), 'theme.css must target breadcrumbs and location bar');
+  assert.ok(cssHas(css, '.cvr-c-speech-box'), 'theme.css must target discussion speech bubbles');
+  assert.ok(cssHas(css, '.v-Notification') && cssHas(css, '.cvr-c-notifications'), 'theme.css must target Vaadin and Connect notifications');
+  assert.ok(cssHas(css, '.cvr-c-status-label') && cssHas(css, '.cvr-c-switch'), 'theme.css must target status labels and switches');
 });
 
 runTest('sidebar tool panels prevent double-toggle bubbling via e.stopPropagation()', () => {
@@ -2039,26 +2065,26 @@ runTest('sidebar tool panels prevent double-toggle bubbling via e.stopPropagatio
 
 runTest('theme.css normalizes native Connect red styling and eliminates bright outlines', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('.eds-t-red') && css.includes('border-color: #3d5066 !important;'), 'theme.css must normalize red card borders to dark neutral');
-  assert.ok(css.includes('.cvr-c-class__status-label--locked'), 'theme.css must style locked class status label');
-  assert.ok(css.includes('.cvr-c-attendance .eds-t-red.cvr-c-standard-label'), 'theme.css must style attendance red label');
-  assert.ok(css.includes('background-color: #2b171a !important;'), 'theme.css must render red status alerts as soft dark-theme badges');
+  assert.ok(cssHas(css, '.eds-t-red') && cssHas(css, 'border-color: #3d5066 !important;'), 'theme.css must normalize red card borders to dark neutral');
+  assert.ok(cssHas(css, '.cvr-c-class__status-label--locked'), 'theme.css must style locked class status label');
+  assert.ok(cssHas(css, '.cvr-c-attendance .eds-t-red.cvr-c-standard-label'), 'theme.css must style attendance red label');
+  assert.ok(cssHas(css, 'background-color: #2b171a !important;'), 'theme.css must render red status alerts as soft dark-theme badges');
 });
 
 runTest('theme.css styles Connect webfont glyphs and switcher icons with high contrast', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('.cvr-c-icon--switch:before') || css.includes('[class*="cvr-c-icon--switch"]:before'), 'theme.css must style switcher icon pseudo-element');
-  assert.ok(css.includes('[class^="cvr-c-icon--"]:before'), 'theme.css must style webfont icon before pseudo-elements');
-  assert.ok(css.includes('color: #cbd5e1 !important;'), 'theme.css must set high-contrast color for font glyphs');
+  assert.ok(cssHas(css, '.cvr-c-icon--switch:before') || cssHas(css, '[class*="cvr-c-icon--switch"]:before'), 'theme.css must style switcher icon pseudo-element');
+  assert.ok(cssHas(css, '[class^="cvr-c-icon--"]:before'), 'theme.css must style webfont icon before pseudo-elements');
+  assert.ok(cssHas(css, 'color: #cbd5e1 !important;'), 'theme.css must set high-contrast color for font glyphs');
 });
 
 runTest('theme.css covers Angular Material buttons, div.w-100, and aligns margins against base Connect CSS', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('button.mat-focus-indicator'), 'theme.css must style button.mat-focus-indicator');
-  assert.ok(css.includes('.mat-stroked-button'), 'theme.css must style .mat-stroked-button');
-  assert.ok(css.includes('div.w-100'), 'theme.css must style div.w-100');
-  assert.ok(!css.includes('.mat-expansion-panel {\n  border: 1px solid #3d5066 !important;\n  border-radius: 6px !important;\n  margin-bottom: 8px !important;'), 'theme.css must not have margin-bottom: 8px !important on mat-expansion-panel');
-  assert.ok(css.includes(':not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced)'), 'theme.css must exclude icon-only buttons from button padding');
+  assert.ok(cssHas(css, 'button.mat-focus-indicator'), 'theme.css must style button.mat-focus-indicator');
+  assert.ok(cssHas(css, '.mat-stroked-button'), 'theme.css must style .mat-stroked-button');
+  assert.ok(cssHas(css, 'div.w-100'), 'theme.css must style div.w-100');
+  assert.ok(!cssHas(css, '.mat-expansion-panel {\n  border: 1px solid #3d5066 !important;\n  border-radius: 6px !important;\n  margin-bottom: 8px !important;'), 'theme.css must not have margin-bottom: 8px !important on mat-expansion-panel');
+  assert.ok(cssHas(css, ':not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced)'), 'theme.css must exclude icon-only buttons from button padding');
 });
 
 runTest('atar-features.js injects and styles Back to top button at the bottom of assessment outlines', () => {
@@ -2069,8 +2095,8 @@ runTest('atar-features.js injects and styles Back to top button at the bottom of
   assert.ok(atarFeaturesCode.includes('cx-back-to-top-container'), 'atar-features.js must create cx-back-to-top-container');
   assert.ok(atarFeaturesCode.includes('cx-back-to-top-btn'), 'atar-features.js must create cx-back-to-top-btn');
   assert.ok(atarFeaturesCode.includes('Back to top'), 'atar-features.js button must have Back to top text');
-  assert.ok(atarCss.includes('.cx-back-to-top-container') && atarCss.includes('.cx-back-to-top-btn'), 'atar.css must style Back to top button');
-  assert.ok(themeCss.includes('.cx-back-to-top-btn'), 'theme.css must style Back to top button in dark mode');
+  assert.ok(cssHas(atarCss, '.cx-back-to-top-container') && cssHas(atarCss, '.cx-back-to-top-btn'), 'atar.css must style Back to top button');
+  assert.ok(cssHas(themeCss, '.cx-back-to-top-btn'), 'theme.css must style Back to top button in dark mode');
   assert.ok(atarFeaturesCode.includes('syncBackToTop()'), 'atar-features.js must have dedicated syncBackToTop function');
   assert.ok(atarFeaturesCode.includes('MutationObserver'), 'atar-features.js must observe DOM mutations to reactively mount Back to top button');
 });
@@ -2099,12 +2125,12 @@ runTest('category-settings.js and progress-graph.js provide robust panel singlet
 runTest('theme.css covers circular trash buttons, View All buttons, Clay/Material checkboxes, and neutralizes tile headers', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
 
-  assert.ok(css.includes('.btn-monospaced') && css.includes('trash'), 'theme.css must style circular icon buttons and trash controls');
-  assert.ok(css.includes('.eds-c-action-button') || css.includes('.eds-c-tile__header .v-button'), 'theme.css must style View All tile header action button');
-  assert.ok(css.includes('.custom-checkbox') && css.includes('.custom-control-label::before'), 'theme.css must style Clay custom checkboxes');
-  assert.ok(css.includes('.mat-checkbox-frame'), 'theme.css must style Angular Material checkbox frames');
-  assert.ok(css.includes(':is(html.connectea-dark, body.connectea-dark, .connectea-dark)') && css.includes('.eds.cvr'), 'theme.css must provide maximum specificity covering .eds.cvr');
-  assert.ok(css.includes('border-top: 1px solid #2e3c4e !important;') && css.includes('border-bottom: 1px solid #2e3c4e !important;'), 'theme.css must set dark borders on task rows to eliminate light #888 lines');
+  assert.ok(cssHas(css, '.btn-monospaced') && cssHas(css, 'trash'), 'theme.css must style circular icon buttons and trash controls');
+  assert.ok(cssHas(css, '.eds-c-action-button') || cssHas(css, '.eds-c-tile__header .v-button'), 'theme.css must style View All tile header action button');
+  assert.ok(cssHas(css, '.custom-checkbox') && cssHas(css, '.custom-control-label::before'), 'theme.css must style Clay custom checkboxes');
+  assert.ok(cssHas(css, '.mat-checkbox-frame'), 'theme.css must style Angular Material checkbox frames');
+  assert.ok(cssHas(css, ':is(html.connectea-dark, body.connectea-dark, .connectea-dark)') && cssHas(css, '.eds.cvr'), 'theme.css must provide maximum specificity covering .eds.cvr');
+  assert.ok(cssHas(css, 'border-top: 1px solid #2e3c4e !important;') && cssHas(css, 'border-bottom: 1px solid #2e3c4e !important;'), 'theme.css must set dark borders on task rows to eliminate light #888 lines');
 });
 
 runTest('assessment-data.js and cohort-view.js implement robust 5-number stats cache fallback', () => {
@@ -2152,8 +2178,8 @@ runTest('theme.css and theme.js normalize class page red outlines and headers wi
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   const js = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
 
-  assert.ok(css.includes('.eds.cvr.ngm') && css.includes('.text-primary'), 'theme.css must normalize .text-primary in .eds.cvr.ngm');
-  assert.ok(css.includes('.eds.cvr.ngm') && css.includes('.mat-divider--primary'), 'theme.css must normalize .mat-divider--primary in .eds.cvr.ngm');
+  assert.ok(cssHas(css, '.eds.cvr.ngm') && cssHas(css, '.text-primary'), 'theme.css must normalize .text-primary in .eds.cvr.ngm');
+  assert.ok(cssHas(css, '.eds.cvr.ngm') && cssHas(css, '.mat-divider--primary'), 'theme.css must normalize .mat-divider--primary in .eds.cvr.ngm');
   assert.ok(!/div\.w-100[^{}]*\{[^}]*background-color: transparent/.test(css), 'theme.css must not have generic transparent div.w-100 rule');
   assert.ok(js.includes('isDarkColor'), 'theme.js must implement isDarkColor helper');
   assert.ok(js.includes("el.hasAttribute('data-connectea-surface')"), 'theme.js must not tag surface containers as ink');
@@ -2196,9 +2222,9 @@ runTest('atar-ui.js scanAndRefresh awaits DOM expansion and theme.css uses high-
   assert.ok(atarUiJs.includes('setTimeout') && atarUiJs.includes('collect(true)'), 'atar-ui.js scanAndRefresh must await DOM expansion and re-collect tasks');
 
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(css.includes('.eds.cvr.ngm') && css.includes('.theme-multiplier.text-primary'), 'theme.css must use chained .theme-multiplier.text-primary');
-  assert.ok(css.includes('.eds.cvr.ngm') && css.includes('.mat-divider--primary'), 'theme.css must use chained .mat-divider--primary');
-  assert.ok(css.includes('.cvr-c-reports') && css.includes('#1a222d'), 'theme.css must style Reports container with solid #1a222d background');
+  assert.ok(cssHas(css, '.eds.cvr.ngm') && cssHas(css, '.theme-multiplier.text-primary'), 'theme.css must use chained .theme-multiplier.text-primary');
+  assert.ok(cssHas(css, '.eds.cvr.ngm') && cssHas(css, '.mat-divider--primary'), 'theme.css must use chained .mat-divider--primary');
+  assert.ok(cssHas(css, '.cvr-c-reports') && cssHas(css, '#1a222d'), 'theme.css must style Reports container with solid #1a222d background');
 });
 
 runTest('atar-scraper.js readCourses supports cvr-c-tile and semester parsing across both semesters', () => {
@@ -2221,9 +2247,9 @@ runTest('target-atar-ui.js and target-grade-ui.js prompt user with Expand Subjec
 runTest('theme.css styles mat-toolbar, mat-tab-header, and eliminates stroke from webfont pseudo-elements', () => {
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
-  assert.ok(themeCss.includes('mat-toolbar') && themeCss.includes('mat-tab-header'), 'theme.css must explicitly style mat-toolbar and mat-tab-header');
-  assert.ok(themeCss.includes('background-color: #1a222d !important'), 'theme.css must use solid #1a222d background for headers and toolbars');
-  assert.ok(!themeCss.includes('[class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before,\n  .cvr-c-icon:before,\n  .cvr-c-icon--switch:before,\n  [class*="switch"]:before,\n  [class*="role"]:before,\n  .eds-c-icon:before,\n  [class^="cvr-c-icon--"],\n  [class*=" cvr-c-icon--"],\n  .cvr-c-icon,\n  .cvr-c-icon--switch\n),\n:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n),\n:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n) {\n  color: #cbd5e1 !important;\n  fill: #cbd5e1 !important;\n  stroke: currentColor !important;'), 'theme.css must not apply stroke: currentColor to font icon :before selectors');
+  assert.ok(cssHas(themeCss, 'mat-toolbar') && cssHas(themeCss, 'mat-tab-header'), 'theme.css must explicitly style mat-toolbar and mat-tab-header');
+  assert.ok(cssHas(themeCss, 'background-color: #1a222d !important'), 'theme.css must use solid #1a222d background for headers and toolbars');
+  assert.ok(!cssHas(themeCss, '[class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before,\n  .cvr-c-icon:before,\n  .cvr-c-icon--switch:before,\n  [class*="switch"]:before,\n  [class*="role"]:before,\n  .eds-c-icon:before,\n  [class^="cvr-c-icon--"],\n  [class*=" cvr-c-icon--"],\n  .cvr-c-icon,\n  .cvr-c-icon--switch\n),\n:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n),\n:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n) {\n  color: #cbd5e1 !important;\n  fill: #cbd5e1 !important;\n  stroke: currentColor !important;'), 'theme.css must not apply stroke: currentColor to font icon :before selectors');
   assert.ok(themeJs.includes('mat-toolbar') && themeJs.includes('mat-tab-header'), 'theme.js adaptSurfaces must include mat-toolbar and mat-tab-header');
 });
 
@@ -2282,26 +2308,26 @@ runTest('theme.css normalizes accordion panels and sidebar.css enforces distinct
   const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
 
   assert.ok(
-    themeCss.includes('.connectea-dark .eds-c-accordion__section-heading') &&
-    themeCss.includes('background-color: transparent !important;') &&
-    themeCss.includes('border: none !important;'),
+    cssHas(themeCss, '.connectea-dark .eds-c-accordion__section-heading') &&
+    cssHas(themeCss, 'background-color: transparent !important;') &&
+    cssHas(themeCss, 'border: none !important;'),
     'theme.css must make accordion section headings flat and transparent with no borders'
   );
 
-  assert.ok(sidebarCss.includes('.connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) strong'), 'sidebar.css must style low pill numbers');
-  assert.ok(sidebarCss.includes('.connectea-dark .cx-pred-pill--mid strong'), 'sidebar.css must style mid pill numbers');
-  assert.ok(sidebarCss.includes('.connectea-dark .cx-pred-pill--high strong'), 'sidebar.css must style high pill numbers');
-  assert.ok(sidebarCss.includes('#cbd5e1 !important') && sidebarCss.includes('#4ade80 !important'), 'sidebar.css must define #cbd5e1 for low and #4ade80 for high with !important');
+  assert.ok(cssHas(sidebarCss, '.connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) strong'), 'sidebar.css must style low pill numbers');
+  assert.ok(cssHas(sidebarCss, '.connectea-dark .cx-pred-pill--mid strong'), 'sidebar.css must style mid pill numbers');
+  assert.ok(cssHas(sidebarCss, '.connectea-dark .cx-pred-pill--high strong'), 'sidebar.css must style high pill numbers');
+  assert.ok(cssHas(sidebarCss, '#cbd5e1 !important') && cssHas(sidebarCss, '#4ade80 !important'), 'sidebar.css must define #cbd5e1 for low and #4ade80 for high with !important');
 });
 
 runTest('Test 90: Accordion section heading is transparent with no borders and pseudo-element arrows/stripes removed', () => {
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
 
-  assert.ok(!themeCss.includes('data-cx-details-arrow'), 'theme.css must not contain data-cx-details-arrow pseudo-elements');
+  assert.ok(!cssHas(themeCss, 'data-cx-details-arrow'), 'theme.css must not contain data-cx-details-arrow pseudo-elements');
   assert.ok(!themeJs.includes('updateDetailArrows'), 'theme.js must not contain updateDetailArrows');
-  assert.ok(themeCss.includes('.eds-c-accordion__panel:before'), 'theme.css must target panel pseudo-element');
-  assert.ok(themeCss.includes('display: none !important;'), 'theme.css must hide accordion panel left vertical stripe');
+  assert.ok(cssHas(themeCss, '.eds-c-accordion__panel:before'), 'theme.css must target panel pseudo-element');
+  assert.ok(cssHas(themeCss, 'display: none !important;'), 'theme.css must hide accordion panel left vertical stripe');
 });
 
 runTest('Test 91: expandAll() displays progress bar on repeated expansions and paces click dispatch', () => {
@@ -2381,7 +2407,7 @@ runTest('Test 95: Accordion expand/collapse optimizations suppress layout thrash
   const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
   const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(themeCss.includes('contain: layout style;'), 'theme.css must apply CSS layout containment to subject cards and accordion panels');
+  assert.ok(cssHas(themeCss, 'contain: layout style;'), 'theme.css must apply CSS layout containment to subject cards and accordion panels');
   assert.ok(themeJs.includes('.eds-c-accordion'), 'theme.js MutationObserver must filter accordion mutations to eliminate getComputedStyle thrashing');
   assert.ok(assessJs.includes('show details'), 'assessment-data.js click listener must skip notify updates when collapsing accordion');
 });
@@ -2522,8 +2548,8 @@ runTest('Test 98: theme.css and theme.js protect Highcharts box plots on first c
   assert.ok(containmentBlock[1].includes('.eds-c-accordion__panel'), 'Containment rule must target .eds-c-accordion__panel');
 
   // Verify task chart transparency
-  assert.ok(themeCss.includes('.cvr-c-task__chart'), 'theme.css must target cvr-c-task__chart');
-  assert.ok(themeCss.includes('background: transparent !important;'), 'theme.css must enforce transparent background on task chart');
+  assert.ok(cssHas(themeCss, '.cvr-c-task__chart'), 'theme.css must target cvr-c-task__chart');
+  assert.ok(cssHas(themeCss, 'background: transparent !important;'), 'theme.css must enforce transparent background on task chart');
 
   // Verify theme.js excludes Highcharts and progress pill from surfaceCandidates and inkCandidates
   const adapterSelectors = surfaceAdapterSelectors();
@@ -2551,8 +2577,8 @@ runTest('Test 100: weakness-radar.js renders Expand All Outlines button and side
 
   assert.ok(weaknessJs.includes('id="cx-weakness-expand-all"'), 'weakness-radar.js must define #cx-weakness-expand-all');
   assert.ok(weaknessJs.includes('window.ConnectifyData.expandAll(true)'), 'weakness-radar.js must wire button to ConnectifyData.expandAll(true)');
-  assert.ok(sidebarCss.includes('.cx-weakness-expand-btn'), 'sidebar.css must style .cx-weakness-expand-btn');
-  assert.ok(sidebarCss.includes('.connectea-dark #connectify-sidebar .cx-weakness-expand-btn'), 'sidebar.css must style button in dark mode');
+  assert.ok(cssHas(sidebarCss, '.cx-weakness-expand-btn'), 'sidebar.css must style .cx-weakness-expand-btn');
+  assert.ok(cssHas(sidebarCss, '.connectea-dark #connectify-sidebar .cx-weakness-expand-btn'), 'sidebar.css must style button in dark mode');
 });
 
 runTest('Test 101: Expand all progress pill adapts correctly across light and dark themes', () => {
@@ -2561,15 +2587,15 @@ runTest('Test 101: Expand all progress pill adapts correctly across light and da
   const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
 
   // Verify light theme base styles
-  assert.ok(sidebarCss.includes('background: #ffffff;'), 'sidebar.css must specify light background #ffffff for light mode progress pill');
-  assert.ok(sidebarCss.includes('color: #1e293b;'), 'sidebar.css must specify dark text #1e293b for light mode progress pill');
-  assert.ok(sidebarCss.includes('background: #e2e8f0;'), 'sidebar.css must style progress track with #e2e8f0 in light mode');
+  assert.ok(cssHas(sidebarCss, 'background: #ffffff;'), 'sidebar.css must specify light background #ffffff for light mode progress pill');
+  assert.ok(cssHas(sidebarCss, 'color: #1e293b;'), 'sidebar.css must specify dark text #1e293b for light mode progress pill');
+  assert.ok(cssHas(sidebarCss, 'background: #e2e8f0;'), 'sidebar.css must style progress track with #e2e8f0 in light mode');
 
   // Verify dark theme overrides in sidebar.css and theme.css
-  assert.ok(sidebarCss.includes('.connectea-dark') && sidebarCss.includes('#cx-expand-progress'), 'sidebar.css must provide dark mode overrides for #cx-expand-progress');
-  assert.ok(themeCss.includes('.connectea-dark') && themeCss.includes('#cx-expand-progress'), 'theme.css must provide dark mode overrides for #cx-expand-progress');
-  assert.ok(themeCss.includes('background: #1e2632 !important;'), 'theme.css must use #1e2632 dark background for progress pill');
-  assert.ok(themeCss.includes('color: #f8fafc !important;'), 'theme.css must use #f8fafc text for progress pill in dark mode');
+  assert.ok(cssHas(sidebarCss, '.connectea-dark') && cssHas(sidebarCss, '#cx-expand-progress'), 'sidebar.css must provide dark mode overrides for #cx-expand-progress');
+  assert.ok(cssHas(themeCss, '.connectea-dark') && cssHas(themeCss, '#cx-expand-progress'), 'theme.css must provide dark mode overrides for #cx-expand-progress');
+  assert.ok(cssHas(themeCss, 'background: #1e2632 !important;'), 'theme.css must use #1e2632 dark background for progress pill');
+  assert.ok(cssHas(themeCss, 'color: #f8fafc !important;'), 'theme.css must use #f8fafc text for progress pill in dark mode');
 
   // Verify theme.js surface/ink exclusion
   const { surface: surfaceSel, ink: inkSel } = surfaceAdapterSelectors();
@@ -2582,14 +2608,14 @@ runTest('Test 103: Semester buttons maintain uniform left alignment and reserved
   const atarCss = fs.readFileSync(path.resolve(BASE_DIR, 'atar.css'), 'utf8');
 
   // Verify sidebar.css enforces left alignment, 10px 14px padding, and 4px transparent border on all semester buttons
-  assert.ok(sidebarCss.includes('#connectify-sidebar .cta-semesters:not(.cta-tabs) .cta-semester{text-align:left!important;padding:10px 14px!important;border-left:4px solid transparent!important;border-radius:6px!important}'), 'sidebar.css must enforce stable left alignment and 4px transparent border geometry');
+  assert.ok(cssHas(sidebarCss, '#connectify-sidebar .cta-semesters:not(.cta-tabs) .cta-semester{text-align:left!important;padding:10px 14px!important;border-left:4px solid transparent!important;border-radius:6px!important}'), 'sidebar.css must enforce stable left alignment and 4px transparent border geometry');
 
   // Verify atar.css enforces left alignment, 10px 14px padding, and 4px transparent border
-  assert.ok(atarCss.includes('.cta-semesters:not(.cta-tabs) .cta-semester{padding:10px 14px!important;') && atarCss.includes('border-left:4px solid transparent!important;text-align:left!important;'), 'atar.css must enforce stable left alignment and 4px transparent border geometry');
+  assert.ok(cssHas(atarCss, '.cta-semesters:not(.cta-tabs) .cta-semester{padding:10px 14px!important;') && cssHas(atarCss, 'border-left:4px solid transparent!important;text-align:left!important;'), 'atar.css must enforce stable left alignment and 4px transparent border geometry');
 
   // Verify active state retains matching padding and left alignment
-  assert.ok(sidebarCss.includes('.cta-semester.cta-semester-indicator{background:#edf4fa!important;border:1px solid #c8d9e8!important;border-left:4px solid #24618c!important;color:#1a3d5f!important;font-weight:600!important;cursor:default!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important}'), 'sidebar.css active semester must maintain 10px 14px padding and left text alignment');
-  assert.ok(atarCss.includes('.cta-semester.cta-semester-indicator{background:#edf4fa!important;border:1px solid #c8d9e8!important;border-left:4px solid #24618c!important;color:#1a3d5f!important;font-weight:600!important;cursor:default!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important}'), 'atar.css active semester must maintain 10px 14px padding and left text alignment');
+  assert.ok(cssHas(sidebarCss, '.cta-semester.cta-semester-indicator{background:#edf4fa!important;border:1px solid #c8d9e8!important;border-left:4px solid #24618c!important;color:#1a3d5f!important;font-weight:600!important;cursor:default!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important}'), 'sidebar.css active semester must maintain 10px 14px padding and left text alignment');
+  assert.ok(cssHas(atarCss, '.cta-semester.cta-semester-indicator{background:#edf4fa!important;border:1px solid #c8d9e8!important;border-left:4px solid #24618c!important;color:#1a3d5f!important;font-weight:600!important;cursor:default!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important}'), 'atar.css active semester must maintain 10px 14px padding and left text alignment');
 });
 
 runTest('Test 104: theme.css and theme.js comprehensively adapt Connect Help, nav lists, and generic dashboard tile bodies', () => {
@@ -2597,12 +2623,12 @@ runTest('Test 104: theme.css and theme.js comprehensively adapt Connect Help, na
   const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
 
   // Verify dark theme styling for tile bodies, nav lists, and resources
-  assert.ok(themeCss.includes('.eds-c-nav-list') && themeCss.includes('.eds-c-nav-list__item'), 'theme.css must target .eds-c-nav-list and .eds-c-nav-list__item');
-  assert.ok(themeCss.includes('background-color: #1e2632 !important;') && themeCss.includes('border-color: #2e3c4e !important;'), 'theme.css must enforce dark background and border on tile bodies and nav lists');
-  assert.ok(themeCss.includes('background-color: #263344 !important;'), 'theme.css must provide hover highlight for nav list items');
+  assert.ok(cssHas(themeCss, '.eds-c-nav-list') && cssHas(themeCss, '.eds-c-nav-list__item'), 'theme.css must target .eds-c-nav-list and .eds-c-nav-list__item');
+  assert.ok(cssHas(themeCss, 'background-color: #1e2632 !important;') && cssHas(themeCss, 'border-color: #2e3c4e !important;'), 'theme.css must enforce dark background and border on tile bodies and nav lists');
+  assert.ok(cssHas(themeCss, 'background-color: #263344 !important;'), 'theme.css must provide hover highlight for nav list items');
 
   // Verify SVG icon styling
-  assert.ok(themeCss.includes('color: #94a3b8 !important;') && themeCss.includes('fill: currentColor !important;'), 'theme.css must style list icons with proper high contrast');
+  assert.ok(cssHas(themeCss, 'color: #94a3b8 !important;') && cssHas(themeCss, 'fill: currentColor !important;'), 'theme.css must style list icons with proper high contrast');
 
   // Verify theme.js allows generic tiles to adapt surfaces
   assert.ok(!themeJs.includes(':not(.eds-c-tile *)'), 'theme.js must not exclude .eds-c-tile * from surfaceCandidates');
@@ -2632,8 +2658,8 @@ runTest('Test 105: Aggressive accordion expand/collapse performance optimization
   assert.ok(dataJs.includes('requestAnimationFrame'), 'data.js must debounce syncAllCharts with requestAnimationFrame');
 
   // Accordion panels use layout containment; will-change on height is not compositable and only adds layers
-  assert.ok(themeCss.includes('contain: layout style;'), 'theme.css must contain layout on accordion panels');
-  assert.ok(!themeCss.includes('will-change: height, max-height;'), 'theme.css must not set will-change on accordion panels');
+  assert.ok(cssHas(themeCss, 'contain: layout style;'), 'theme.css must contain layout on accordion panels');
+  assert.ok(!cssHas(themeCss, 'will-change: height, max-height;'), 'theme.css must not set will-change on accordion panels');
 });
 
 runTest('Test 106: All project JS files pass strict JavaScript syntax validation', () => {
@@ -2814,19 +2840,19 @@ runTest('Test 108: Accordion expansion multi-click fix, scroll freeze during bul
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
 
   // 1. Dark mode font unbolding and antialiasing
-  assert.ok(themeCss.includes('.connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {\n  color: #f8fafc !important;\n  font-weight: 400 !important;\n}'), 'theme.css must set task title font-weight to 400 in dark mode');
-  assert.ok(themeCss.includes('.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) {\n  font-weight: 400 !important;\n}'), 'theme.css must unbold connectea panel typography');
-  assert.ok(themeCss.includes('-webkit-font-smoothing: antialiased !important;'), 'theme.css must apply font antialiasing in dark mode');
+  assert.ok(cssHas(themeCss, '.connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {\n  color: #f8fafc !important;\n  font-weight: 400 !important;\n}'), 'theme.css must set task title font-weight to 400 in dark mode');
+  assert.ok(cssHas(themeCss, '.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) {\n  font-weight: 400 !important;\n}'), 'theme.css must unbold connectea panel typography');
+  assert.ok(cssHas(themeCss, '-webkit-font-smoothing: antialiased !important;'), 'theme.css must apply font antialiasing in dark mode');
   assert.ok(cohortJs.includes('.connectea-result {\n      font-weight: 400 !important;'), 'cohort-stats.js must use font-weight: 400 for .connectea-result');
 
   // 2. Removal and cleanup of improvement arrows
   assert.ok(progJs.includes('cleanupImprovementArrows'), 'progress-graph.js must define and run cleanupImprovementArrows');
   assert.ok(!progJs.includes('function updateImprovementArrows()'), 'progress-graph.js must not retain updateImprovementArrows');
-  assert.ok(sideCss.includes('.cx-improved{display:none!important}'), 'sidebar.css must suppress .cx-improved badges');
-  assert.ok(sideCss.includes('.cx-performance-row{display:contents!important}'), 'sidebar.css must neutralize .cx-performance-row wrappers');
+  assert.ok(cssHas(sideCss, '.cx-improved{display:none!important}'), 'sidebar.css must suppress .cx-improved badges');
+  assert.ok(cssHas(sideCss, '.cx-performance-row{display:contents!important}'), 'sidebar.css must neutralize .cx-performance-row wrappers');
 
   // 3. Scroll freezing and expand-all progress lifecycle
-  assert.ok(sideCss.includes('html.cx-freeze-scroll,\nbody.cx-freeze-scroll {\n  overflow: hidden !important;'), 'sidebar.css must define cx-freeze-scroll');
+  assert.ok(cssHas(sideCss, 'html.cx-freeze-scroll,\nbody.cx-freeze-scroll {\n  overflow: hidden !important;'), 'sidebar.css must define cx-freeze-scroll');
   assert.ok(assessJs.includes("classList.add('cx-freeze-scroll')"), 'assessment-data.js expandAll must add cx-freeze-scroll');
   assert.ok(assessJs.includes("classList.remove('cx-freeze-scroll')"), 'assessment-data.js finishProgress must remove cx-freeze-scroll');
   assert.ok(assessJs.includes("updateProgress(95, 'Rendering statistics & outcome bars... 95%')") || assessJs.includes("updateProgress(95, 'Refreshing statistics & outcome bars... 95%')"), 'expandAll must persist progress pill through 95% refresh phase');
@@ -2862,13 +2888,13 @@ runTest('Test 109: Text bolding parity across light and dark modes for Test head
   assert.ok(cohortStatsJs.includes('.connectea-distribution strong,\n    .connectea-result strong,\n    .connectea-panel strong {\n      font-weight: 700 !important;'), 'cohort-stats.js must style strong tags with font-weight 700');
 
   // 3. Verify theme.css and sidebar.css enforce bolding for Test headers, mark numbers, and stats strong tags
-  assert.ok(themeCss.includes('.cvr-c-task-group__title'), 'theme.css must target task group title');
-  assert.ok(themeCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong'), 'theme.css must bold panel strong tags in light and dark modes');
-  assert.ok(sidebarCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold panel strong tags');
-  assert.ok(sidebarCss.includes(':is(.cvr-c-task-group__title, .cvr-c-task__group-name'), 'sidebar.css must bold task group titles');
-  assert.ok(sidebarCss.includes('.cvr-c-tasks :is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child)'), 'sidebar.css must bold task mark scores inside .cvr-c-tasks');
-  assert.ok(sidebarCss.includes('.cvr-c-task:not(.cvr-c-tasks *)'), 'sidebar.css must explicitly unbold summary marks outside cvr-c-tasks');
-  assert.ok(themeCss.includes('.cvr-c-task:not(.cvr-c-tasks *)'), 'theme.css must explicitly unbold summary marks outside cvr-c-tasks');
+  assert.ok(cssHas(themeCss, '.cvr-c-task-group__title'), 'theme.css must target task group title');
+  assert.ok(cssHas(themeCss, ':is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong'), 'theme.css must bold panel strong tags in light and dark modes');
+  assert.ok(cssHas(sidebarCss, ':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold panel strong tags');
+  assert.ok(cssHas(sidebarCss, ':is(.cvr-c-task-group__title, .cvr-c-task__group-name'), 'sidebar.css must bold task group titles');
+  assert.ok(cssHas(sidebarCss, '.cvr-c-tasks :is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child)'), 'sidebar.css must bold task mark scores inside .cvr-c-tasks');
+  assert.ok(cssHas(sidebarCss, '.cvr-c-task:not(.cvr-c-tasks *)'), 'sidebar.css must explicitly unbold summary marks outside cvr-c-tasks');
+  assert.ok(cssHas(themeCss, '.cvr-c-task:not(.cvr-c-tasks *)'), 'theme.css must explicitly unbold summary marks outside cvr-c-tasks');
 });
 
 runTest('Test 110: Silent difference check, out-of-date cache prompt with one-time auto-expand, and chart 0 / non-configurable row stability', () => {
@@ -2937,8 +2963,8 @@ runTest('Test 110: Silent difference check, out-of-date cache prompt with one-ti
   const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
   assert.ok(catSetJs.includes('Developer Settings'), 'category-settings.js must render Developer Settings heading');
   assert.ok(catSetJs.includes('cx-clear-cache-btn'), 'category-settings.js must render Clear Cache button');
-  assert.ok(sideCss.includes('.cx-clear-cache-btn'), 'sidebar.css must style .cx-clear-cache-btn');
-  assert.ok(sideCss.includes('background: #e74c3c !important'), 'sidebar.css must style Clear Cache button in red');
+  assert.ok(cssHas(sideCss, '.cx-clear-cache-btn'), 'sidebar.css must style .cx-clear-cache-btn');
+  assert.ok(cssHas(sideCss, 'background: #e74c3c !important'), 'sidebar.css must style Clear Cache button in red');
 
   // 7. Target Grade panel Semester 1 (Closed) parity
   const atarUiCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
@@ -2955,10 +2981,10 @@ runTest('Test 111: Typography parity (unbolded overall % and letter grade), star
   const cohortStatsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
 
   // 1. Typography rules: overall % and letter grades are unbolded (400), task marks and stats strong are bold (700)
-  assert.ok(sideCss.includes(':is(.cvr-c-task__score, .cvr-c-task__grade'), 'sidebar.css must set font-weight 400 for overall percent and letter grades');
-  assert.ok(themeCss.includes(':is(.connectea-dark, body, html) :is(\n  .cvr-c-task__score,\n  .cvr-c-task__grade'), 'theme.css must set font-weight 400 for overall percent and letter grades');
-  assert.ok(sideCss.includes('.cvr-c-tasks :is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold task marks');
-  assert.ok(sideCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result) strong {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold stats panel strong elements');
+  assert.ok(cssHas(sideCss, ':is(.cvr-c-task__score, .cvr-c-task__grade'), 'sidebar.css must set font-weight 400 for overall percent and letter grades');
+  assert.ok(cssHas(themeCss, ':is(.connectea-dark, body, html) :is(\n  .cvr-c-task__score,\n  .cvr-c-task__grade'), 'theme.css must set font-weight 400 for overall percent and letter grades');
+  assert.ok(cssHas(sideCss, '.cvr-c-tasks :is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold task marks');
+  assert.ok(cssHas(sideCss, ':is(.connectea-panel, .connectea-distribution, .connectea-result) strong {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold stats panel strong elements');
 
   // 2. Startup auto-expand: decoupled from user activity, runs immediately on page load
   assert.ok(atarFeatJs.includes('function checkStartupAutoExpand()'), 'atar-features.js must define checkStartupAutoExpand');
@@ -2993,8 +3019,8 @@ runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, 
   const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
   // 1. Subject grade and summary mark text unbolding (font-weight: 400 !important)
-  assert.ok(sideCss.includes('.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'sidebar.css must explicitly set font-weight 400 for summary marks outside cvr-c-tasks');
-  assert.ok(themeCss.includes('.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'theme.css must explicitly set font-weight 400 for summary marks outside cvr-c-tasks');
+  assert.ok(cssHas(sideCss, '.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'sidebar.css must explicitly set font-weight 400 for summary marks outside cvr-c-tasks');
+  assert.ok(cssHas(themeCss, '.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'theme.css must explicitly set font-weight 400 for summary marks outside cvr-c-tasks');
 
   // 2. First task outcome bar suppression via .cvr-c-tasks .cvr-c-task query
   assert.ok(cohortViewJs.includes("card.querySelectorAll('.cvr-c-tasks .cvr-c-task')"), 'cohort-view.js must index tasks inside .cvr-c-tasks');
@@ -3019,18 +3045,18 @@ runTest('Test 113: Typography bolding parity between dark and light modes for ta
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
 
   // 1. Task titles and first details labels bolding in light and dark modes (font-weight: 700 !important)
-  assert.ok(sideCss.includes('.cvr-c-task__details .v-label:first-child'), 'sidebar.css must bold first details label');
-  assert.ok(sideCss.includes(':is(.connectea-dark, html.connectea-dark, body.connectea-dark)'), 'sidebar.css must enforce dark mode bolding parity');
-  assert.ok(themeCss.includes('.cvr-c-task__details .v-label:first-child'), 'theme.css must bold first details label in dark mode');
-  assert.ok(themeCss.includes(':is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is('), 'theme.css must override task details unbolding for task headers');
+  assert.ok(cssHas(sideCss, '.cvr-c-task__details .v-label:first-child'), 'sidebar.css must bold first details label');
+  assert.ok(cssHas(sideCss, ':is(.connectea-dark, html.connectea-dark, body.connectea-dark)'), 'sidebar.css must enforce dark mode bolding parity');
+  assert.ok(cssHas(themeCss, '.cvr-c-task__details .v-label:first-child'), 'theme.css must bold first details label in dark mode');
+  assert.ok(cssHas(themeCss, ':is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is('), 'theme.css must override task details unbolding for task headers');
 
   // 2. Summary mark and non-task score unbolding parity (font-weight: 400 !important)
-  assert.ok(sideCss.includes('.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'sidebar.css must unbold subject summary mark');
-  assert.ok(themeCss.includes('.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'theme.css must unbold subject summary mark');
+  assert.ok(cssHas(sideCss, '.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'sidebar.css must unbold subject summary mark');
+  assert.ok(cssHas(themeCss, '.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'theme.css must unbold subject summary mark');
 
   // 3. Stats panel strong elements parity
-  assert.ok(sideCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold stats panel strong elements');
-  assert.ok(themeCss.includes(':is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong'), 'theme.css must bold stats panel strong elements in dark mode');
+  assert.ok(cssHas(sideCss, ':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold stats panel strong elements');
+  assert.ok(cssHas(themeCss, ':is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong'), 'theme.css must bold stats panel strong elements in dark mode');
 });
 
 runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.edu.au/login and restored after login', () => {
@@ -3456,9 +3482,9 @@ runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, g
   assert.ok(assessJs.includes('const resolvedOrder = resolveTaskOrder(name, t)'), 'assessment-data.js formatCollectedSubjects must dynamically resolve order');
 
   // 5. Verify progress.css provides dark/light styling with >= 5:1 contrast
-  assert.ok(progressCss.includes('.cx-task-pending'), 'progress.css must define .cx-task-pending');
-  assert.ok(progressCss.includes('.cx-date-warning'), 'progress.css must define .cx-date-warning');
-  assert.ok(progressCss.includes('#connectify-progress input[type="number"]'), 'progress.css must style number inputs');
+  assert.ok(cssHas(progressCss, '.cx-task-pending'), 'progress.css must define .cx-task-pending');
+  assert.ok(cssHas(progressCss, '.cx-date-warning'), 'progress.css must define .cx-date-warning');
+  assert.ok(cssHas(progressCss, '#connectify-progress input[type="number"]'), 'progress.css must style number inputs');
 
   // 6. Verify sidebar and progress-graph.js use 'Year in Progress'
   const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
@@ -3525,10 +3551,10 @@ runTest('Test 122: Back to top button styling parity, expandAll multi-card dedup
   const cohortStatsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
 
   // 1. Back to top button parity
-  assert.ok(atarCss.includes('border-radius: 6px !important;'), 'atar.css .cx-back-to-top-btn must have border-radius: 6px');
-  assert.ok(atarCss.includes('font-weight: 500 !important;'), 'atar.css .cx-back-to-top-btn must have font-weight: 500');
-  assert.ok(atarCss.includes('background-color: #ffffff !important;'), 'atar.css .cx-back-to-top-btn must have background-color: #ffffff');
-  assert.ok(themeCss.includes('.connectea-dark .cx-back-to-top-btn'), 'theme.css must style dark mode .cx-back-to-top-btn');
+  assert.ok(cssHas(atarCss, 'border-radius: 6px !important;'), 'atar.css .cx-back-to-top-btn must have border-radius: 6px');
+  assert.ok(cssHas(atarCss, 'font-weight: 500 !important;'), 'atar.css .cx-back-to-top-btn must have font-weight: 500');
+  assert.ok(cssHas(atarCss, 'background-color: #ffffff !important;'), 'atar.css .cx-back-to-top-btn must have background-color: #ffffff');
+  assert.ok(cssHas(themeCss, '.connectea-dark .cx-back-to-top-btn'), 'theme.css must style dark mode .cx-back-to-top-btn');
 
   // 2. expandAll multi-card deduplication
   assert.ok(!assessJs.includes('[class*="card"]'), 'expandAll must not deduplicate using [class*="card"] to avoid merging cards into outer dashboard card');
@@ -3546,11 +3572,11 @@ runTest('Test 122: Back to top button styling parity, expandAll multi-card dedup
   // 5. Constant 1920x1080 display-width scaling and single-line stats panel layout
   assert.ok(cohortStatsJs.includes('flex-wrap: nowrap !important;'), 'cohort-stats.js must use flex-wrap: nowrap on .connectea-row-wrapper');
   assert.ok(cohortStatsJs.includes('max-width: fit-content !important;'), 'cohort-stats.js must set max-width: fit-content on .connectea-panel');
-  assert.ok(sidebarCss.includes('.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:nowrap!important'), 'sidebar.css must use nowrap on .connectea-row-wrapper');
-  assert.ok(sidebarCss.includes('.connectea-row-wrapper>.connectea-panel{flex:0 0 auto!important;width:auto!important;max-width:fit-content!important'), 'sidebar.css must set max-width: fit-content on .connectea-panel');
-  assert.ok(sidebarCss.includes(':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)'), 'sidebar.css must scale subject cards to 100% width');
-  assert.ok(themeCss.includes(':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)'), 'theme.css must scale subject cards to 100% width');
-  assert.ok(!sidebarCss.includes('.cvr-c-task__details{flex:1 1 auto!important'), 'sidebar.css must not force flex: 1 1 auto on .cvr-c-task__details');
+  assert.ok(cssHas(sidebarCss, '.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:nowrap!important'), 'sidebar.css must use nowrap on .connectea-row-wrapper');
+  assert.ok(cssHas(sidebarCss, '.connectea-row-wrapper>.connectea-panel{flex:0 0 auto!important;width:auto!important;max-width:fit-content!important'), 'sidebar.css must set max-width: fit-content on .connectea-panel');
+  assert.ok(cssHas(sidebarCss, ':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)'), 'sidebar.css must scale subject cards to 100% width');
+  assert.ok(cssHas(themeCss, ':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)'), 'theme.css must scale subject cards to 100% width');
+  assert.ok(!cssHas(sidebarCss, '.cvr-c-task__details{flex:1 1 auto!important'), 'sidebar.css must not force flex: 1 1 auto on .cvr-c-task__details');
 });
 
 runTest('Test 123: Calibrated variance scaling prevents excessive spread on volatile subjects (~73% Low and ~81% High)', () => {
@@ -3863,11 +3889,11 @@ runTest('Test 127: Sleek sidebar handle, dynamic vertical centering with top bar
   const currentSidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
 
   // 1. Verify CSS styles for sleek handle
-  assert.ok(currentSidebarCss.includes('width:30px'), 'sidebar.css must set sleek width: 30px');
-  assert.ok(currentSidebarCss.includes('height:66px'), 'sidebar.css must set sleek height: 66px');
-  assert.ok(currentSidebarCss.includes('top:50%'), 'sidebar.css must set default top: 50%');
-  assert.ok(currentSidebarCss.includes('transform:translateY(-50%)'), 'sidebar.css must set transform: translateY(-50%)');
-  assert.ok(!currentSidebarCss.includes('.cx-handle-label'), 'sidebar.css must remove .cx-handle-label');
+  assert.ok(cssHas(currentSidebarCss, 'width:30px'), 'sidebar.css must set sleek width: 30px');
+  assert.ok(cssHas(currentSidebarCss, 'height:66px'), 'sidebar.css must set sleek height: 66px');
+  assert.ok(cssHas(currentSidebarCss, 'top:50%'), 'sidebar.css must set default top: 50%');
+  assert.ok(cssHas(currentSidebarCss, 'transform:translateY(-50%)'), 'sidebar.css must set transform: translateY(-50%)');
+  assert.ok(!cssHas(currentSidebarCss, '.cx-handle-label'), 'sidebar.css must remove .cx-handle-label');
 
   // 2. Verify JS signatures
   assert.ok(!currentSidebarJs.includes('cx-handle-label'), 'sidebar.js must not reference .cx-handle-label');
@@ -3994,10 +4020,10 @@ runTest('Test 128: Scoped top-bar handle centering, baseline removal outcome bar
   const currentCohortStatsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
 
   // 1. Verify CSS rules for synchronized drawer animation
-  assert.ok(currentSidebarCss.includes('transform:translateX(0)'), 'sidebar.css must set transform: translateX(0) on sidebar');
-  assert.ok(currentSidebarCss.includes('transform:translateX(-100%)!important'), 'sidebar.css must slide sidebar off-screen when hidden');
-  assert.ok(currentSidebarCss.includes('visibility:hidden!important'), 'sidebar.css must hide visibility when hidden');
-  assert.ok(currentSidebarCss.includes('top 0.15s ease-out'), 'sidebar.css must transition top position on handle');
+  assert.ok(cssHas(currentSidebarCss, 'transform:translateX(0)'), 'sidebar.css must set transform: translateX(0) on sidebar');
+  assert.ok(cssHas(currentSidebarCss, 'transform:translateX(-100%)!important'), 'sidebar.css must slide sidebar off-screen when hidden');
+  assert.ok(cssHas(currentSidebarCss, 'visibility:hidden!important'), 'sidebar.css must hide visibility when hidden');
+  assert.ok(cssHas(currentSidebarCss, 'top 0.15s ease-out'), 'sidebar.css must transition top position on handle');
 
   // 2. Verify JS signatures
   assert.ok(currentSidebarJs.includes('getTopBarBottom'), 'sidebar.js must define getTopBarBottom');
@@ -4582,8 +4608,8 @@ runTest('Test 131: Sidebar handle excludes primary menu and detects fixed/sticky
   assert.ok(!currentSidebarJs.includes("'.cvr-c-primary-menu'"), 'sidebar.js must exclude .cvr-c-primary-menu from getConnectSidebar');
   assert.ok(currentSidebarJs.includes('height >= 120'), 'sidebar.js must require height >= 120 for sidebar elements');
   assert.ok(currentSidebarJs.includes('isElementFixedOrSticky'), 'sidebar.js must define isElementFixedOrSticky');
-  assert.ok(currentSidebarCss.includes('max-width: 950px') && currentSidebarCss.includes('--cx-display-scale: 0.62'), 'sidebar.css must include 0.62 scale at max-width: 950px');
-  assert.ok(currentThemeCss.includes('max-width: 950px') && currentThemeCss.includes('--cx-display-scale: 0.62'), 'theme.css must include 0.62 scale at max-width: 950px');
+  assert.ok(cssHas(currentSidebarCss, 'max-width: 950px') && cssHas(currentSidebarCss, '--cx-display-scale: 0.62'), 'sidebar.css must include 0.62 scale at max-width: 950px');
+  assert.ok(cssHas(currentThemeCss, 'max-width: 950px') && cssHas(currentThemeCss, '--cx-display-scale: 0.62'), 'theme.css must include 0.62 scale at max-width: 950px');
 
   // 2. Evaluate sidebar.js and cohort-stats.js
   eval(currentSidebarJs);
@@ -4838,10 +4864,10 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   const manifest = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'manifest.json'), 'utf8'));
 
   // 1. Static checks: CSS controls exclude navbar and header buttons from padding inflation
-  assert.ok(themeControlsCss.includes(':not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle)'),
+  assert.ok(cssHas(themeControlsCss, ':not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle)'),
     'theme-controls.css must exclude primary navigation and header buttons from generic button padding');
-  assert.ok(themeCoreCss.includes('min-height: 48px !important;'), 'theme-core.css must enforce min-height on cvr-c-primary-navigation');
-  assert.ok(themeCoreCss.includes('box-sizing: border-box !important;'), 'theme-core.css must enforce box-sizing on cvr-c-primary-navigation');
+  assert.ok(cssHas(themeCoreCss, 'min-height: 48px !important;'), 'theme-core.css must enforce min-height on cvr-c-primary-navigation');
+  assert.ok(cssHas(themeCoreCss, 'box-sizing: border-box !important;'), 'theme-core.css must enforce box-sizing on cvr-c-primary-navigation');
 
   // 2. Static checks: theme.js excludes primary navigation from surface adaptation
   const navSurfaceSel = surfaceAdapterSelectors().surface;
@@ -4849,13 +4875,13 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
     'theme surface adapter must exclude primary navigation from adaptSurfaces');
 
   // 3. Static checks: theme-tokens.css defines custom properties and multiple palettes
-  assert.ok(themeTokensCss.includes('--cx-canvas-bg:') && themeTokensCss.includes('--cx-surface-bg:'), 'theme-tokens.css must define CSS custom properties');
-  assert.ok(themeTokensCss.includes('[data-connectea-theme="amoled"]') && themeTokensCss.includes('--cx-canvas-bg: #000000;'), 'theme-tokens.css must define AMOLED black theme');
-  assert.ok(themeTokensCss.includes('[data-connectea-theme="midnight"]') && themeTokensCss.includes('--cx-canvas-bg: #0b132b;'), 'theme-tokens.css must define Midnight navy theme');
-  assert.ok(themeTokensCss.includes('[data-connectea-theme="forest"]') && themeTokensCss.includes('--cx-canvas-bg: #0a1914;'), 'theme-tokens.css must define Forest theme');
-  assert.ok(themeTokensCss.includes('[data-connectea-theme="sunset"]') && themeTokensCss.includes('--cx-canvas-bg: #19111c;'), 'theme-tokens.css must define Sunset theme');
-  assert.ok(themeTokensCss.includes('[data-connectea-theme="liquid-glass"]') && themeTokensCss.includes('--cx-canvas-bg: #0b1120;'), 'theme-tokens.css must define Liquid Glass theme');
-  assert.ok(themeTokensCss.includes('#connectea-theme-menu'), 'theme-tokens.css must style the theme popover menu');
+  assert.ok(cssHas(themeTokensCss, '--cx-canvas-bg:') && cssHas(themeTokensCss, '--cx-surface-bg:'), 'theme-tokens.css must define CSS custom properties');
+  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="amoled"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #000000;'), 'theme-tokens.css must define AMOLED black theme');
+  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="midnight"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0b132b;'), 'theme-tokens.css must define Midnight navy theme');
+  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="forest"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0a1914;'), 'theme-tokens.css must define Forest theme');
+  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="sunset"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #19111c;'), 'theme-tokens.css must define Sunset theme');
+  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="liquid-glass"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0b1120;'), 'theme-tokens.css must define Liquid Glass theme');
+  assert.ok(cssHas(themeTokensCss, '#connectea-theme-menu'), 'theme-tokens.css must style the theme popover menu');
 
   // 4. Manifest checks: theme-tokens.css, theme-registry.js, and theme-customizer files are registered
   const contentScript = manifest.content_scripts.find(s => s.matches && s.matches.includes('https://connect.det.wa.edu.au/*'));
@@ -4931,11 +4957,11 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
 
   // 1. Static CSS checks: all theme tokens require .connectea-dark and exclude [data-connectea-login]
-  assert.ok(themeTokensCss.includes('html.connectea-dark[data-connectea-theme="amoled"]'),
+  assert.ok(cssHas(themeTokensCss, 'html.connectea-dark[data-connectea-theme="amoled"]'),
     'theme-tokens.css amoled theme must require .connectea-dark');
-  assert.ok(themeTokensCss.includes('[data-connectea-login]'),
+  assert.ok(cssHas(themeTokensCss, '[data-connectea-login]'),
     'theme-tokens.css must define [data-connectea-login] rule block');
-  assert.ok(themeTokensCss.includes('[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu)'),
+  assert.ok(cssHas(themeTokensCss, '[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu)'),
     'theme-tokens.css must hide theme toggle and popover on login page');
 
   // 2. Functional check: AMOLED theme active, navigate to login page
@@ -5053,16 +5079,16 @@ runTest('Test 137: Dark, Default, and Quantum Dark themes correspond to previous
   const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
 
   // 1. Static checks: Quantum Dark palette corresponds to inspiration / legacy theme tokens
-  assert.ok(themeTokensCss.includes('[data-connectea-theme="quantum"]'), 'theme-tokens.css must define Quantum Dark selector');
-  assert.ok(themeTokensCss.includes('--cx-canvas-bg: #282828;') || themeTokensCss.includes('--cx-canvas-bg: #292929;'), 'Quantum Dark must have canvas color');
-  assert.ok(themeTokensCss.includes('--cx-surface-bg: #32302f;') || themeTokensCss.includes('--cx-surface-bg: #333333;'), 'Quantum Dark must have surface color');
-  assert.ok(themeTokensCss.includes('--cx-accent: #fabd2f;') || themeTokensCss.includes('--cx-accent: #d4b483;'), 'Quantum Dark must have golden accent color');
-  assert.ok(themeTokensCss.includes('--cx-button-bg: #3c3836;') || themeTokensCss.includes('--cx-button-bg: #303944;'), 'Quantum Dark must have button color');
+  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="quantum"]'), 'theme-tokens.css must define Quantum Dark selector');
+  assert.ok(cssHas(themeTokensCss, '--cx-canvas-bg: #282828;') || cssHas(themeTokensCss, '--cx-canvas-bg: #292929;'), 'Quantum Dark must have canvas color');
+  assert.ok(cssHas(themeTokensCss, '--cx-surface-bg: #32302f;') || cssHas(themeTokensCss, '--cx-surface-bg: #333333;'), 'Quantum Dark must have surface color');
+  assert.ok(cssHas(themeTokensCss, '--cx-accent: #fabd2f;') || cssHas(themeTokensCss, '--cx-accent: #d4b483;'), 'Quantum Dark must have golden accent color');
+  assert.ok(cssHas(themeTokensCss, '--cx-button-bg: #3c3836;') || cssHas(themeTokensCss, '--cx-button-bg: #303944;'), 'Quantum Dark must have button color');
 
   // Base Dark Theme corresponds to modern dark mode (v3.2.x)
-  assert.ok(themeTokensCss.includes('--cx-canvas-bg: #12171f;'), 'Base dark must have #12171f canvas');
-  assert.ok(themeTokensCss.includes('--cx-surface-bg: #1e2632;'), 'Base dark must have #1e2632 surface');
-  assert.ok(themeTokensCss.includes('--cx-accent: #3b82f6;'), 'Base dark must have #3b82f6 accent');
+  assert.ok(cssHas(themeTokensCss, '--cx-canvas-bg: #12171f;'), 'Base dark must have #12171f canvas');
+  assert.ok(cssHas(themeTokensCss, '--cx-surface-bg: #1e2632;'), 'Base dark must have #1e2632 surface');
+  assert.ok(cssHas(themeTokensCss, '--cx-accent: #3b82f6;'), 'Base dark must have #3b82f6 accent');
 
   // 2. Functional evaluation of Registry
   delete window.ConnectifyThemeLoaded;
@@ -5145,19 +5171,19 @@ runTest('Test 138: Dark theme v3.2.1 parity, Connect Help and tile contrast, abu
     '--cx-scrollbar-track', '--cx-scrollbar-thumb'
   ];
   for (const token of requiredTokens) {
-    assert.ok(themeTokensCss.includes(token), `theme-tokens.css must define token ${token}`);
+    assert.ok(cssHas(themeTokensCss, token), `theme-tokens.css must define token ${token}`);
   }
 
   // 2. Connect Help, generic tile bodies, and tile links high contrast
-  assert.ok(themeTilesCss.includes('.eds-c-tile__body') && themeTilesCss.includes('.cvr-c-tile__body'), 'theme-tiles.css must target tile bodies');
-  assert.ok(themeTilesCss.includes('.portlet-body') && themeTilesCss.includes('.journal-content-article'), 'theme-tiles.css must target portlet containers for Connect Help');
-  assert.ok(themeTilesCss.includes('var(--cx-surface-bg, #1e2632) !important;'), 'theme-tiles.css must set surface-bg for tile bodies');
-  assert.ok(themeTilesCss.includes('var(--cx-accent, #60a5fa) !important;'), 'theme-tiles.css must set high-contrast accent links');
-  assert.ok(themeTilesCss.includes('.cvr-c-class__name') && themeTilesCss.includes('.cvr-c-classes-list__title'), 'theme-tiles.css must target class title elements');
-  assert.ok(themeTilesCss.includes('var(--cx-text-primary, #f8fafc) !important;'), 'theme-tiles.css must set high contrast primary text on headings');
+  assert.ok(cssHas(themeTilesCss, '.eds-c-tile__body') && cssHas(themeTilesCss, '.cvr-c-tile__body'), 'theme-tiles.css must target tile bodies');
+  assert.ok(cssHas(themeTilesCss, '.portlet-body') && cssHas(themeTilesCss, '.journal-content-article'), 'theme-tiles.css must target portlet containers for Connect Help');
+  assert.ok(cssHas(themeTilesCss, 'var(--cx-surface-bg, #1e2632) !important;'), 'theme-tiles.css must set surface-bg for tile bodies');
+  assert.ok(cssHas(themeTilesCss, 'var(--cx-accent, #60a5fa) !important;'), 'theme-tiles.css must set high-contrast accent links');
+  assert.ok(cssHas(themeTilesCss, '.cvr-c-class__name') && cssHas(themeTilesCss, '.cvr-c-classes-list__title'), 'theme-tiles.css must target class title elements');
+  assert.ok(cssHas(themeTilesCss, 'var(--cx-text-primary, #f8fafc) !important;'), 'theme-tiles.css must set high contrast primary text on headings');
 
   // 3. Top bar theme toggle button and theme menu in theme-core.css and theme.js
-  assert.ok(themeCoreCss.includes('#connectea-theme-toggle'), 'theme-core.css must style #connectea-theme-toggle');
+  assert.ok(cssHas(themeCoreCss, '#connectea-theme-toggle'), 'theme-core.css must style #connectea-theme-toggle');
   assert.ok(themeJs.includes('document.body.appendChild(themeMenu)'), 'theme.js must attach themeMenu to document.body to prevent button nesting issues');
 
   // 4. Color Theme selector in Category Settings
@@ -5205,23 +5231,23 @@ runTest('Test 139: Font stack enforcement, dark surfaces styled with theme token
   const catSettingsJs = fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8');
 
   // 1. Clean sans-serif font stack enforced across root dark selectors to eliminate serif fallback
-  assert.ok(themeTokensCss.includes('-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;'),
+  assert.ok(cssHas(themeTokensCss, '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;'),
     'theme-tokens.css must enforce system sans-serif font stack');
-  assert.ok(themeCoreCss.includes('-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;'),
+  assert.ok(cssHas(themeCoreCss, '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;'),
     'theme-core.css must enforce system sans-serif font stack');
 
   // 2. All surfaces touched by dark mode are styled dynamically with CSS tokens (not hardcoded hex colors)
-  assert.ok(themeCardsCss.includes('var(--cx-surface-elevated'), 'theme-cards.css must use var(--cx-surface-elevated) for panels');
-  assert.ok(themeCardsCss.includes('var(--cx-surface-secondary'), 'theme-cards.css must use var(--cx-surface-secondary) for task marks');
+  assert.ok(cssHas(themeCardsCss, 'var(--cx-surface-elevated'), 'theme-cards.css must use var(--cx-surface-elevated) for panels');
+  assert.ok(cssHas(themeCardsCss, 'var(--cx-surface-secondary'), 'theme-cards.css must use var(--cx-surface-secondary) for task marks');
   assert.ok(cohortStylesJs.includes('var(--cx-surface-elevated'), 'cohort-styles.js must use var(--cx-surface-elevated) for panels');
   assert.ok(cohortStylesJs.includes('var(--cx-input-bg'), 'cohort-styles.js must use var(--cx-input-bg) for inputs');
-  assert.ok(themeTokensCss.includes('.connectea-panel') && themeTokensCss.includes('var(--cx-surface-elevated)'),
+  assert.ok(cssHas(themeTokensCss, '.connectea-panel') && cssHas(themeTokensCss, 'var(--cx-surface-elevated)'),
     'theme-tokens.css must dynamically theme .connectea-panel');
-  assert.ok(themeTokensCss.includes('.cvr-c-task__marks') && themeTokensCss.includes('var(--cx-surface-secondary)'),
+  assert.ok(cssHas(themeTokensCss, '.cvr-c-task__marks') && cssHas(themeTokensCss, 'var(--cx-surface-secondary)'),
     'theme-tokens.css must dynamically theme .cvr-c-task__marks');
 
   // 3. Separate themes button is removed
-  assert.ok(!themeCoreCss.includes('#connectea-theme-select-btn {'), 'theme-core.css must not style removed #connectea-theme-select-btn');
+  assert.ok(!cssHas(themeCoreCss, '#connectea-theme-select-btn {'), 'theme-core.css must not style removed #connectea-theme-select-btn');
   assert.ok(!themeJs.includes("createElement('button')\n    themeSelectBtn.id = 'connectea-theme-select-btn'") && !themeJs.includes("themeSelectBtn = document.createElement('button')"),
     'theme.js must not create #connectea-theme-select-btn');
 
@@ -5238,7 +5264,7 @@ runTest('Test 139: Font stack enforcement, dark surfaces styled with theme token
     'category-settings.js must include dark themes');
 
   // 6. Custom theme option and color palettes removed from theme menu
-  assert.ok(!themeTokensCss.includes('.connectea-theme-custom-panel'), 'theme-tokens.css must not style custom color panel');
+  assert.ok(!cssHas(themeTokensCss, '.connectea-theme-custom-panel'), 'theme-tokens.css must not style custom color panel');
   assert.ok(!themeJs.includes('connectea-theme-custom-panel'), 'theme.js must not render custom color panel');
   assert.ok(!themeJs.includes('input type="color"'), 'theme.js must not render color inputs');
 
@@ -5285,66 +5311,66 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
   const themeRegistryJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8');
 
   // 1. Webfont icon preservation: explicit connect-webfont, Material Icons, and symbol font
-  assert.ok(themeTokensCss.includes('font-family: "connect-webfont" !important;'),
+  assert.ok(cssHas(themeTokensCss, 'font-family: "connect-webfont" !important;'),
     'theme-tokens.css must protect connect-webfont glyphs using font-family: "connect-webfont" !important;');
-  assert.ok(themeTokensCss.includes("font-family: 'Material Icons' !important;"),
+  assert.ok(cssHas(themeTokensCss, "font-family: 'Material Icons' !important;"),
     'theme-tokens.css must protect Google Material Icons using font-family: \'Material Icons\' !important;');
-  assert.ok(themeTokensCss.includes("-webkit-font-feature-settings: 'liga' !important;"),
+  assert.ok(cssHas(themeTokensCss, "-webkit-font-feature-settings: 'liga' !important;"),
     'theme-tokens.css must enforce ligature feature settings for Material Icons');
-  assert.ok(themeTokensCss.includes('"Apple Symbols"') && themeTokensCss.includes('"Segoe UI Symbol"'),
+  assert.ok(cssHas(themeTokensCss, '"Apple Symbols"') && cssHas(themeTokensCss, '"Segoe UI Symbol"'),
     'theme-tokens.css must define symbol/emoji font stack matching Connect webfont style');
-  assert.ok(themeTokensCss.includes('width: 250px;') && themeTokensCss.includes('min-height: 40px;'),
+  assert.ok(cssHas(themeTokensCss, 'width: 250px;') && cssHas(themeTokensCss, 'min-height: 40px;'),
     'theme-tokens.css must size theme menu and options generously for easy clicking');
-  assert.ok(!themeTokensCss.includes('span, div, li {\n  font-family:'),
+  assert.ok(!cssHas(themeTokensCss, 'span, div, li {\n  font-family:'),
     'theme-tokens.css must not apply system font stack directly to span, div, li');
-  assert.ok(themeTokensCss.includes(':not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"])'),
+  assert.ok(cssHas(themeTokensCss, ':not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"])'),
     'theme-tokens.css must exclude icon classes from heading typography rules');
-  assert.ok(themeMaterialCss.includes('[class^="cvr-c-icon--"]:before') && themeMaterialCss.includes('color: #cbd5e1 !important;'),
+  assert.ok(cssHas(themeMaterialCss, '[class^="cvr-c-icon--"]:before') && cssHas(themeMaterialCss, 'color: #cbd5e1 !important;'),
     'theme-material.css must preserve high contrast color for webfont glyphs without overriding font-family');
 
   // 2. All surfaces styled by old 3.2.1 dark theme use semantic theme tokens
   // Top nav, sidebar, heading bars (theme-core.css)
-  assert.ok(themeCoreCss.includes('var(--cx-nav-bg'), 'theme-core.css must style navigation with var(--cx-nav-bg)');
-  assert.ok(themeCoreCss.includes('var(--cx-nav-item-active'), 'theme-core.css must style active nav items with var(--cx-nav-item-active)');
-  assert.ok(themeCoreCss.includes('var(--cx-surface-secondary'), 'theme-core.css must style heading bars with var(--cx-surface-secondary)');
+  assert.ok(cssHas(themeCoreCss, 'var(--cx-nav-bg'), 'theme-core.css must style navigation with var(--cx-nav-bg)');
+  assert.ok(cssHas(themeCoreCss, 'var(--cx-nav-item-active'), 'theme-core.css must style active nav items with var(--cx-nav-item-active)');
+  assert.ok(cssHas(themeCoreCss, 'var(--cx-surface-secondary'), 'theme-core.css must style heading bars with var(--cx-surface-secondary)');
 
   // Cards and tiles (theme-tiles.css)
-  assert.ok(themeTilesCss.includes('var(--cx-surface-bg'), 'theme-tiles.css must style tiles with var(--cx-surface-bg)');
+  assert.ok(cssHas(themeTilesCss, 'var(--cx-surface-bg'), 'theme-tiles.css must style tiles with var(--cx-surface-bg)');
 
   // Cards and compound progress (theme-cards.css)
-  assert.ok(themeCardsCss.includes('var(--cx-surface-elevated'), 'theme-cards.css must style panels with var(--cx-surface-elevated)');
-  assert.ok(themeCardsCss.includes('var(--cx-surface-secondary'), 'theme-cards.css must style progress bars with var(--cx-surface-secondary)');
-  assert.ok(themeCardsCss.includes('var(--cx-input-bg'), 'theme-cards.css must style type select with var(--cx-input-bg)');
+  assert.ok(cssHas(themeCardsCss, 'var(--cx-surface-elevated'), 'theme-cards.css must style panels with var(--cx-surface-elevated)');
+  assert.ok(cssHas(themeCardsCss, 'var(--cx-surface-secondary'), 'theme-cards.css must style progress bars with var(--cx-surface-secondary)');
+  assert.ok(cssHas(themeCardsCss, 'var(--cx-input-bg'), 'theme-cards.css must style type select with var(--cx-input-bg)');
 
   // Feed and category menus (theme-feed.css)
-  assert.ok(themeFeedCss.includes('var(--cx-nav-bg'), 'theme-feed.css must style category menu with var(--cx-nav-bg)');
-  assert.ok(themeFeedCss.includes('var(--cx-surface-elevated'), 'theme-feed.css must style reports and toolbars with var(--cx-surface-elevated)');
+  assert.ok(cssHas(themeFeedCss, 'var(--cx-nav-bg'), 'theme-feed.css must style category menu with var(--cx-nav-bg)');
+  assert.ok(cssHas(themeFeedCss, 'var(--cx-surface-elevated'), 'theme-feed.css must style reports and toolbars with var(--cx-surface-elevated)');
 
   // Material dialogs, accordions, and controls (theme-material.css)
-  assert.ok(themeMaterialCss.includes('var(--cx-surface-bg'), 'theme-material.css must style accordions and modals with var(--cx-surface-bg)');
-  assert.ok(themeMaterialCss.includes('var(--cx-surface-elevated'), 'theme-material.css must style category menus with var(--cx-surface-elevated)');
-  assert.ok(themeMaterialCss.includes('var(--cx-input-bg'), 'theme-material.css must style form controls with var(--cx-input-bg)');
+  assert.ok(cssHas(themeMaterialCss, 'var(--cx-surface-bg'), 'theme-material.css must style accordions and modals with var(--cx-surface-bg)');
+  assert.ok(cssHas(themeMaterialCss, 'var(--cx-surface-elevated'), 'theme-material.css must style category menus with var(--cx-surface-elevated)');
+  assert.ok(cssHas(themeMaterialCss, 'var(--cx-input-bg'), 'theme-material.css must style form controls with var(--cx-input-bg)');
 
   // Tables, headers, alt rows, and hover states (theme-tables.css)
-  assert.ok(themeTablesCss.includes('var(--cx-surface-bg'), 'theme-tables.css must style tables with var(--cx-surface-bg)');
-  assert.ok(themeTablesCss.includes('var(--cx-table-header-bg'), 'theme-tables.css must style table headers with var(--cx-table-header-bg)');
-  assert.ok(themeTablesCss.includes('var(--cx-table-row-alt'), 'theme-tables.css must style alt rows with var(--cx-table-row-alt)');
-  assert.ok(themeTablesCss.includes('var(--cx-table-row-hover'), 'theme-tables.css must style hover rows with var(--cx-table-row-hover)');
+  assert.ok(cssHas(themeTablesCss, 'var(--cx-surface-bg'), 'theme-tables.css must style tables with var(--cx-surface-bg)');
+  assert.ok(cssHas(themeTablesCss, 'var(--cx-table-header-bg'), 'theme-tables.css must style table headers with var(--cx-table-header-bg)');
+  assert.ok(cssHas(themeTablesCss, 'var(--cx-table-row-alt'), 'theme-tables.css must style alt rows with var(--cx-table-row-alt)');
+  assert.ok(cssHas(themeTablesCss, 'var(--cx-table-row-hover'), 'theme-tables.css must style hover rows with var(--cx-table-row-hover)');
 
   // Menus, calendars, and speech boxes (theme-navigation.css)
-  assert.ok(themeNavigationCss.includes('var(--cx-surface-elevated'), 'theme-navigation.css must style dropdowns with var(--cx-surface-elevated)');
-  assert.ok(themeNavigationCss.includes('var(--cx-surface-bg'), 'theme-navigation.css must style calendars with var(--cx-surface-bg)');
-  assert.ok(themeNavigationCss.includes('var(--cx-surface-secondary'), 'theme-navigation.css must style speech boxes/breadcrumbs with var(--cx-surface-secondary)');
+  assert.ok(cssHas(themeNavigationCss, 'var(--cx-surface-elevated'), 'theme-navigation.css must style dropdowns with var(--cx-surface-elevated)');
+  assert.ok(cssHas(themeNavigationCss, 'var(--cx-surface-bg'), 'theme-navigation.css must style calendars with var(--cx-surface-bg)');
+  assert.ok(cssHas(themeNavigationCss, 'var(--cx-surface-secondary'), 'theme-navigation.css must style speech boxes/breadcrumbs with var(--cx-surface-secondary)');
 
   // Form controls, buttons, checkboxes, dropdowns, and progress pills (theme-controls.css)
-  assert.ok(themeControlsCss.includes('var(--cx-input-bg'), 'theme-controls.css must style inputs and selects with var(--cx-input-bg)');
-  assert.ok(themeControlsCss.includes('var(--cx-button-bg'), 'theme-controls.css must style buttons with var(--cx-button-bg)');
-  assert.ok(themeControlsCss.includes('var(--cx-accent'), 'theme-controls.css must style checked controls with var(--cx-accent)');
+  assert.ok(cssHas(themeControlsCss, 'var(--cx-input-bg'), 'theme-controls.css must style inputs and selects with var(--cx-input-bg)');
+  assert.ok(cssHas(themeControlsCss, 'var(--cx-button-bg'), 'theme-controls.css must style buttons with var(--cx-button-bg)');
+  assert.ok(cssHas(themeControlsCss, 'var(--cx-accent'), 'theme-controls.css must style checked controls with var(--cx-accent)');
 
   // Surfaces: learning areas, resource panels, tree panels, notifications, alerts (theme-surfaces.css)
-  assert.ok(themeSurfacesCss.includes('var(--cx-surface-bg'), 'theme-surfaces.css must style learning areas with var(--cx-surface-bg)');
-  assert.ok(themeSurfacesCss.includes('var(--cx-surface-elevated'), 'theme-surfaces.css must style notifications with var(--cx-surface-elevated)');
-  assert.ok(themeSurfacesCss.includes('var(--cx-surface-secondary'), 'theme-surfaces.css must style alerts with var(--cx-surface-secondary)');
+  assert.ok(cssHas(themeSurfacesCss, 'var(--cx-surface-bg'), 'theme-surfaces.css must style learning areas with var(--cx-surface-bg)');
+  assert.ok(cssHas(themeSurfacesCss, 'var(--cx-surface-elevated'), 'theme-surfaces.css must style notifications with var(--cx-surface-elevated)');
+  assert.ok(cssHas(themeSurfacesCss, 'var(--cx-surface-secondary'), 'theme-surfaces.css must style alerts with var(--cx-surface-secondary)');
 
   // 3. Every preset theme defines complete surface palettes in theme-tokens.css
   const themes = ['dark', 'quantum', 'amoled', 'midnight', 'forest', 'sunset', 'liquid-glass'];
@@ -5355,9 +5381,9 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
   ];
   for (const th of themes) {
     const selector = `[data-connectea-theme="${th}"]`;
-    assert.ok(themeTokensCss.includes(selector), `theme-tokens.css must define selector for ${th}`);
+    assert.ok(cssHas(themeTokensCss, selector), `theme-tokens.css must define selector for ${th}`);
     for (const tok of requiredTokens) {
-      assert.ok(themeTokensCss.includes(tok), `theme-tokens.css must define ${tok} for all themes`);
+      assert.ok(cssHas(themeTokensCss, tok), `theme-tokens.css must define ${tok} for all themes`);
     }
   }
 
@@ -5403,37 +5429,37 @@ runTest('Test 141: Top navbar Open Sans typography, height, white text, and ligh
   const themeTablesCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tables.css'), 'utf8');
 
   // 1. Top navbar font family enforces Connect's native Open Sans
-  assert.ok(themeCoreCss.includes('font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;'),
+  assert.ok(cssHas(themeCoreCss, 'font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;'),
     'theme-core.css must enforce Connect native Open Sans font on top navigation bar');
-  assert.ok(themeTokensCss.includes('font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;'),
+  assert.ok(cssHas(themeTokensCss, 'font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;'),
     'theme-tokens.css must enforce Connect native Open Sans font on top navigation bar');
-  assert.ok(themeCoreCss.includes('height: 50px !important;'),
+  assert.ok(cssHas(themeCoreCss, 'height: 50px !important;'),
     'theme-core.css must enforce light-mode 50px height on top navigation bar');
 
   // 2. Top navbar links typography and styling match light mode
-  assert.ok(themeCoreCss.includes('line-height: 50px !important;') && themeCoreCss.includes('color: #ffffff !important;'),
+  assert.ok(cssHas(themeCoreCss, 'line-height: 50px !important;') && cssHas(themeCoreCss, 'color: #ffffff !important;'),
     'theme-core.css must enforce 50px line-height and white text on top navbar links');
-  assert.ok(!themeFeedCss.includes('.cvr-c-primary-navigation__links .v-link a,\n  .cvr-c-primary-navigation__button--avatar'),
+  assert.ok(!cssHas(themeFeedCss, '.cvr-c-primary-navigation__links .v-link a,\n  .cvr-c-primary-navigation__button--avatar'),
     'theme-feed.css must not override top navbar links with muted text color');
 
   // 3. Active tab in top navigation has no distorting top/left/right border or border-radius
-  assert.ok(themeCoreCss.includes('border: none !important;') && themeCoreCss.includes('border-radius: 0 !important;'),
+  assert.ok(cssHas(themeCoreCss, 'border: none !important;') && cssHas(themeCoreCss, 'border-radius: 0 !important;'),
     'theme-core.css active nav tab must have border: none and border-radius: 0 to eliminate outlines');
-  assert.ok(themeFeedCss.includes('border-radius: 0 !important;'),
+  assert.ok(cssHas(themeFeedCss, 'border-radius: 0 !important;'),
     'theme-feed.css active nav tab must have border-radius: 0 to eliminate box outline');
 
   // 4. Task mark boxes (.cvr-c-task__marks) match light mode's border geometry (no full 1px border or 6px radius)
-  assert.ok(themeCardsCss.includes('.cvr-c-task__marks {\n  border-top: none !important;\n  border-left: none !important;\n  border-right: none !important;'),
+  assert.ok(cssHas(themeCardsCss, '.cvr-c-task__marks {\n  border-top: none !important;\n  border-left: none !important;\n  border-right: none !important;'),
     'theme-cards.css must remove top, left, and right borders on .cvr-c-task__marks to match light mode');
-  assert.ok(themeCardsCss.includes('border-radius: 0 !important;'),
+  assert.ok(cssHas(themeCardsCss, 'border-radius: 0 !important;'),
     'theme-cards.css must enforce border-radius: 0 on .cvr-c-task__marks');
-  assert.ok(!themeTablesCss.includes('.cvr-c-task__mark,\n  .mat-card'),
+  assert.ok(!cssHas(themeTablesCss, '.cvr-c-task__mark,\n  .mat-card'),
     'theme-tables.css must not force 4-sided 1px border on .cvr-c-task__mark');
 
   // 5. Tile header action button matches light mode 52px height and border-left
-  assert.ok(themeTilesCss.includes('.eds-c-tile__header .v-button') && themeTilesCss.includes('height: 52px !important;'),
+  assert.ok(cssHas(themeTilesCss, '.eds-c-tile__header .v-button') && cssHas(themeTilesCss, 'height: 52px !important;'),
     'theme-tiles.css must preserve light-mode 52px height and border-left on tile header action button');
-  assert.ok(themeTilesCss.includes('border-left: 1px solid var(--cx-border') && themeTilesCss.includes('border-radius: 0 !important;'),
+  assert.ok(cssHas(themeTilesCss, 'border-left: 1px solid var(--cx-border') && cssHas(themeTilesCss, 'border-radius: 0 !important;'),
     'theme-tiles.css must preserve border-left and border-radius: 0 on tile header action button');
 });
 
@@ -5442,27 +5468,27 @@ runTest('Test 142: Sleek compact theme toggle button geometry and elimination of
   const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
 
   // 1. Sleek compact dimensions on #connectea-theme-toggle
-  assert.ok(themeCoreCss.includes('height: 28px;'),
+  assert.ok(cssHas(themeCoreCss, 'height: 28px;'),
     'theme-core.css must set sleek 28px height on #connectea-theme-toggle');
-  assert.ok(themeCoreCss.includes('padding: 5px 12px;'),
+  assert.ok(cssHas(themeCoreCss, 'padding: 5px 12px;'),
     'theme-core.css must set sleek 5px 12px padding on #connectea-theme-toggle');
-  assert.ok(themeCoreCss.includes('border-radius: 6px;'),
+  assert.ok(cssHas(themeCoreCss, 'border-radius: 6px;'),
     'theme-core.css must set sleek 6px border-radius on #connectea-theme-toggle');
-  assert.ok(themeCoreCss.includes('font-size: 12px;'),
+  assert.ok(cssHas(themeCoreCss, 'font-size: 12px;'),
     'theme-core.css must set sleek 12px font size on #connectea-theme-toggle');
-  assert.ok(themeCoreCss.includes('background: #25313f !important;'),
+  assert.ok(cssHas(themeCoreCss, 'background: #25313f !important;'),
     'theme-core.css must set #25313f light-mode background on #connectea-theme-toggle');
-  assert.ok(themeCoreCss.includes('background: #24303f !important;'),
+  assert.ok(cssHas(themeCoreCss, 'background: #24303f !important;'),
     'theme-core.css must set #24303f dark-mode background on #connectea-theme-toggle');
 
   // 2. Elimination of nested box styling on .connectea-theme-arrow
-  assert.ok(themeTokensCss.includes('.connectea-theme-arrow {\n  display: inline-block;') &&
-            themeTokensCss.includes('background: transparent;') &&
-            themeTokensCss.includes('border: none;'),
+  assert.ok(cssHas(themeTokensCss, '.connectea-theme-arrow {\n  display: inline-block;') &&
+            cssHas(themeTokensCss, 'background: transparent;') &&
+            cssHas(themeTokensCss, 'border: none;'),
     'theme-tokens.css must use sleek inline-block transparent borderless styling on .connectea-theme-arrow');
-  assert.ok(!themeTokensCss.includes('background: rgba(255, 255, 255, 0.14);'),
+  assert.ok(!cssHas(themeTokensCss, 'background: rgba(255, 255, 255, 0.14);'),
     'theme-tokens.css must not add an awkward nested box background to .connectea-theme-arrow');
-  assert.ok(!themeTokensCss.includes('border: 1px solid rgba(255, 255, 255, 0.2);'),
+  assert.ok(!cssHas(themeTokensCss, 'border: 1px solid rgba(255, 255, 255, 0.2);'),
     'theme-tokens.css must not add an awkward nested border to .connectea-theme-arrow');
 });
 
@@ -5477,46 +5503,46 @@ runTest('Test 143: Token-based theme styling, notice action buttons, top navbar 
   const themeRegistryJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8');
 
   // 1. Semantic card and positive button tokens defined in theme-tokens.css
-  assert.ok(themeTokensCss.includes('--cx-card-bg:') && themeTokensCss.includes('--cx-positive-bg:'),
+  assert.ok(cssHas(themeTokensCss, '--cx-card-bg:') && cssHas(themeTokensCss, '--cx-positive-bg:'),
     'theme-tokens.css must define --cx-card-bg and --cx-positive-bg tokens');
-  assert.ok(themeTokensCss.includes('--cx-positive-text:') && themeTokensCss.includes('--cx-positive-border:'),
+  assert.ok(cssHas(themeTokensCss, '--cx-positive-text:') && cssHas(themeTokensCss, '--cx-positive-border:'),
     'theme-tokens.css must define --cx-positive-text and --cx-positive-border tokens');
 
   // 2. Notice View positive button styled in theme-feed.css and excluded from generic button overrides
-  assert.ok(themeFeedCss.includes('.eds-o-button--positive') && themeFeedCss.includes('var(--cx-positive-bg'),
+  assert.ok(cssHas(themeFeedCss, '.eds-o-button--positive') && cssHas(themeFeedCss, 'var(--cx-positive-bg'),
     'theme-feed.css must style .eds-o-button--positive using var(--cx-positive-bg)');
-  assert.ok(themeControlsCss.includes(':not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"])'),
+  assert.ok(cssHas(themeControlsCss, ':not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"])'),
     'theme-controls.css must exclude positive action buttons from generic button overrides');
 
   // 3. Feed follow pills styled with elevated tokens and rounded geometry
-  assert.ok(themeFeedCss.includes('border-radius: 9999px !important;') && themeFeedCss.includes('var(--cx-surface-elevated'),
+  assert.ok(cssHas(themeFeedCss, 'border-radius: 9999px !important;') && cssHas(themeFeedCss, 'var(--cx-surface-elevated'),
     'theme-feed.css must style follow pills with 9999px border-radius and elevated tokens');
 
   // 4. Themes popover contrast and emoji font stack
-  assert.ok(themeTokensCss.includes('#connectea-theme-menu .connectea-theme-option') &&
-            themeTokensCss.includes('var(--cx-text-secondary'),
+  assert.ok(cssHas(themeTokensCss, '#connectea-theme-menu .connectea-theme-option') &&
+            cssHas(themeTokensCss, 'var(--cx-text-secondary'),
     'theme-tokens.css must enforce high contrast text on theme menu options');
-  assert.ok(themeTokensCss.includes('"Apple Color Emoji"') && themeTokensCss.includes('"Segoe UI Emoji"'),
+  assert.ok(cssHas(themeTokensCss, '"Apple Color Emoji"') && cssHas(themeTokensCss, '"Segoe UI Emoji"'),
     'theme-tokens.css must include emoji font stack for theme icons');
   assert.ok(themeJs.includes("'🌙'") && themeRegistryJs.includes("'🌙'"),
     'theme.js and theme-registry.js must use emoji icons for themes');
 
   // 5. Top navbar Open Sans typography and link styling
-  assert.ok(themeCoreCss.includes('.cvr-c-primary-navigation a') &&
-            themeCoreCss.includes('color: #ffffff !important;') &&
-            themeCoreCss.includes('font-family: "Open Sans"'),
+  assert.ok(cssHas(themeCoreCss, '.cvr-c-primary-navigation a') &&
+            cssHas(themeCoreCss, 'color: #ffffff !important;') &&
+            cssHas(themeCoreCss, 'font-family: "Open Sans"'),
     'theme-core.css must enforce white text and Open Sans on top navbar links');
 
   // 6. Webfont protection scoped to pseudo-elements on accordion triggers
-  assert.ok(!themeTokensCss.includes('.cvr-c-expansion-panel__trigger,\n  .cvr-c-resources-panel .column-heading,\n  [class*="cvr-c-icon"]\n) {\n  font-family: "connect-webfont"'),
+  assert.ok(!cssHas(themeTokensCss, '.cvr-c-expansion-panel__trigger,\n  .cvr-c-resources-panel .column-heading,\n  [class*="cvr-c-icon"]\n) {\n  font-family: "connect-webfont"'),
     'theme-tokens.css must not apply connect-webfont directly to trigger elements with text');
 
   // 7. Sidebar and settings surfaces adapt dynamically using theme tokens
-  assert.ok(sidebarDrawerCss.includes('var(--cx-surface-bg'),
+  assert.ok(cssHas(sidebarDrawerCss, 'var(--cx-surface-bg'),
     'sidebar-drawer.css must style #connectify-sidebar with var(--cx-surface-bg)');
-  assert.ok(sidebarSettingsCss.includes('var(--cx-surface-bg'),
+  assert.ok(cssHas(sidebarSettingsCss, 'var(--cx-surface-bg'),
     'sidebar-settings.css must style #connectify-sidebar with var(--cx-surface-bg)');
-  assert.ok(sidebarDrawerCss.includes('var(--cx-button-bg'),
+  assert.ok(cssHas(sidebarDrawerCss, 'var(--cx-button-bg'),
     'sidebar-drawer.css must style sidebar tool buttons with var(--cx-button-bg)');
 });
 
@@ -5529,44 +5555,44 @@ runTest('Test 144: Classes page header parity, Angular Material tab specificity,
   const themeRegistryJs = fs.readFileSync(path.resolve(SRC_DIR, 'theme/theme-registry.js'), 'utf8');
 
   // 1. Classes page sort header has transparent background matching light mode
-  assert.ok(themeCoreCss.includes('.cvr-c-classes__sort') &&
-            themeCoreCss.includes('background: transparent !important;'),
+  assert.ok(cssHas(themeCoreCss, '.cvr-c-classes__sort') &&
+            cssHas(themeCoreCss, 'background: transparent !important;'),
     'theme-core.css must enforce transparent background on Classes sort header');
 
   // 2. Classes page list items and text elements enforce Open Sans typography
-  assert.ok(themeMaterialCss.includes('.eds-c-selection-list') &&
-            themeMaterialCss.includes('font-family: "Open Sans"'),
+  assert.ok(cssHas(themeMaterialCss, '.eds-c-selection-list') &&
+            cssHas(themeMaterialCss, 'font-family: "Open Sans"'),
     'theme-material.css must enforce Open Sans on Classes list items');
 
   // 3. Angular Material tabs (.eds.cvr.ngm) have high-specificity Open Sans and .mat-ink-bar has var(--cx-accent)
-  assert.ok(themeNavCss.includes('.eds.cvr.ngm') &&
-            themeNavCss.includes('mat-tab-header') &&
-            themeNavCss.includes('.mat-ink-bar'),
+  assert.ok(cssHas(themeNavCss, '.eds.cvr.ngm') &&
+            cssHas(themeNavCss, 'mat-tab-header') &&
+            cssHas(themeNavCss, '.mat-ink-bar'),
     'theme-navigation.css must style Angular Material tabs with high specificity');
-  assert.ok(themeNavCss.includes('.mat-ink-bar') && themeNavCss.includes('var(--cx-accent'),
+  assert.ok(cssHas(themeNavCss, '.mat-ink-bar') && cssHas(themeNavCss, 'var(--cx-accent'),
     'theme-navigation.css must style .mat-ink-bar with var(--cx-accent)');
 
   // 4. Dropdowns tokenize colors without hardcoded hex
-  assert.ok(themeMaterialCss.includes('.mat-select-panel') &&
-            themeMaterialCss.includes('var(--cx-surface-elevated'),
+  assert.ok(cssHas(themeMaterialCss, '.mat-select-panel') &&
+            cssHas(themeMaterialCss, 'var(--cx-surface-elevated'),
     'theme-material.css must style .mat-select-panel with elevated tokens');
-  assert.ok(themeMaterialCss.includes('.mat-option') &&
-            themeMaterialCss.includes('var(--cx-surface-hover'),
+  assert.ok(cssHas(themeMaterialCss, '.mat-option') &&
+            cssHas(themeMaterialCss, 'var(--cx-surface-hover'),
     'theme-material.css must style .mat-option hover state with hover tokens');
 
   // 5. Quantum Dark uses inspiration theme palette
-  assert.ok(themeTokensCss.includes('--cx-canvas-bg: #282828;') &&
-            themeTokensCss.includes('--cx-surface-bg: #32302f;') &&
-            themeTokensCss.includes('--cx-accent: #fabd2f;') &&
-            themeTokensCss.includes('--cx-positive-bg: #98971a;'),
+  assert.ok(cssHas(themeTokensCss, '--cx-canvas-bg: #282828;') &&
+            cssHas(themeTokensCss, '--cx-surface-bg: #32302f;') &&
+            cssHas(themeTokensCss, '--cx-accent: #fabd2f;') &&
+            cssHas(themeTokensCss, '--cx-positive-bg: #98971a;'),
     'theme-tokens.css must define Quantum Dark with Gruvbox/Evolve inspiration colors');
   assert.ok(themeRegistryJs.includes("swatch: ['#282828', '#32302f', '#fabd2f']") &&
             themeJs.includes("swatch: ['#282828', '#32302f', '#fabd2f']"),
     'theme-registry.js and theme.js must use inspiration swatch for Quantum Dark');
-  assert.ok(themeTokensCss.includes('--cx-text-secondary: #b8bb26;'),
+  assert.ok(cssHas(themeTokensCss, '--cx-text-secondary: #b8bb26;'),
     'theme-tokens.css must define Quantum Dark with green secondary color #b8bb26');
-  assert.ok(themeTokensCss.includes('--cx-glass-blur') &&
-            themeTokensCss.includes('backdrop-filter: blur('),
+  assert.ok(cssHas(themeTokensCss, '--cx-glass-blur') &&
+            cssHas(themeTokensCss, 'backdrop-filter: blur('),
     'theme-tokens.css must define Apple liquid glass frosted styling with translucent surfaces');
   assert.ok(themeRegistryJs.includes("'liquid-glass'") && themeJs.includes("'liquid-glass'"),
     'theme-registry.js and theme.js must register liquid-glass theme');
@@ -6287,11 +6313,11 @@ runTest('Test 146: Sidebar disabled state, notice banner, and Back to All button
   const drawerCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-drawer.css'), 'utf8');
 
   // 1. Static CSS verification
-  assert.ok(drawerCss.includes('.cx-filter-disabled'), 'sidebar-drawer.css must define .cx-filter-disabled');
-  assert.ok(drawerCss.includes('.cx-filter-notice'), 'sidebar-drawer.css must define .cx-filter-notice');
-  assert.ok(drawerCss.includes('.cx-filter-title'), 'sidebar-drawer.css must define .cx-filter-title');
-  assert.ok(drawerCss.includes('.cx-filter-text'), 'sidebar-drawer.css must define .cx-filter-text');
-  assert.ok(drawerCss.includes('.cx-back-to-all-btn'), 'sidebar-drawer.css must define .cx-back-to-all-btn');
+  assert.ok(cssHas(drawerCss, '.cx-filter-disabled'), 'sidebar-drawer.css must define .cx-filter-disabled');
+  assert.ok(cssHas(drawerCss, '.cx-filter-notice'), 'sidebar-drawer.css must define .cx-filter-notice');
+  assert.ok(cssHas(drawerCss, '.cx-filter-title'), 'sidebar-drawer.css must define .cx-filter-title');
+  assert.ok(cssHas(drawerCss, '.cx-filter-text'), 'sidebar-drawer.css must define .cx-filter-text');
+  assert.ok(cssHas(drawerCss, '.cx-back-to-all-btn'), 'sidebar-drawer.css must define .cx-back-to-all-btn');
 
   // 2. Static JS verification
   assert.ok(sidebarJs.includes('clickConnectAllButton'), 'sidebar.js must define clickConnectAllButton');
@@ -6573,14 +6599,14 @@ runTest('Test 148: Theme Customizer button contrast, !important color enforcemen
   const controlsCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-controls.css'), 'utf8');
 
   // 1. theme-customizer.css enforces text colors with !important
-  assert.ok(customizerCss.includes('#cx-customizer-modal button'), 'Must protect all buttons inside #cx-customizer-modal');
-  assert.ok(customizerCss.includes('color: #e2e8f0 !important'), 'Secondary buttons must enforce high-contrast #e2e8f0 with !important');
-  assert.ok(customizerCss.includes('.cx-btn-secondary') && customizerCss.includes('background-color: #243042 !important'), 'Secondary buttons must have dark surface background #243042 with !important');
-  assert.ok(customizerCss.includes('.cx-btn-primary') && customizerCss.includes('color: #ffffff !important'), 'Primary buttons must enforce #ffffff with !important');
+  assert.ok(cssHas(customizerCss, '#cx-customizer-modal button'), 'Must protect all buttons inside #cx-customizer-modal');
+  assert.ok(cssHas(customizerCss, 'color: #e2e8f0 !important'), 'Secondary buttons must enforce high-contrast #e2e8f0 with !important');
+  assert.ok(cssHas(customizerCss, '.cx-btn-secondary') && cssHas(customizerCss, 'background-color: #243042 !important'), 'Secondary buttons must have dark surface background #243042 with !important');
+  assert.ok(cssHas(customizerCss, '.cx-btn-primary') && cssHas(customizerCss, 'color: #ffffff !important'), 'Primary buttons must enforce #ffffff with !important');
 
   // 2. theme-controls.css includes .cx-btn-secondary with !important parity
-  assert.ok(controlsCss.includes('.cx-btn-secondary'), 'theme-controls.css must style .cx-btn-secondary');
-  assert.ok(controlsCss.includes('#243042 !important') && controlsCss.includes('#e2e8f0 !important'), 'theme-controls.css must enforce #243042 and #e2e8f0 with !important');
+  assert.ok(cssHas(controlsCss, '.cx-btn-secondary'), 'theme-controls.css must style .cx-btn-secondary');
+  assert.ok(cssHas(controlsCss, '#243042 !important') && cssHas(controlsCss, '#e2e8f0 !important'), 'theme-controls.css must enforce #243042 and #e2e8f0 with !important');
 
   // 3. Contrast verification: #e2e8f0 on #243042
   function getLuminance(r, g, b) {
@@ -6607,24 +6633,24 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   const parityTestJs = fs.readFileSync(path.resolve(__dirname, 'scripts/test-theme-styles.js'), 'utf8');
 
   // 1. Panels opaque when Liquid Glass is off
-  assert.ok(themeCss.includes(':not([data-connectea-theme="liquid-glass"])') &&
-            themeCss.includes('background-color: var(--cx-surface-bg, #1e2632) !important'),
+  assert.ok(cssHas(themeCss, ':not([data-connectea-theme="liquid-glass"])') &&
+            cssHas(themeCss, 'background-color: var(--cx-surface-bg, #1e2632) !important'),
             'theme.css must ensure panels are opaque when Liquid Glass is off');
 
   // 2. Liquid Glass panel bottom corners rounded (16px) and tile body transparent
-  assert.ok(themeCss.includes('border-bottom-left-radius: 16px !important') &&
-            themeCss.includes('border-bottom-right-radius: 16px !important'),
+  assert.ok(cssHas(themeCss, 'border-bottom-left-radius: 16px !important') &&
+            cssHas(themeCss, 'border-bottom-right-radius: 16px !important'),
             'theme.css must round bottom corners with 16px radius');
-  assert.ok(themeCss.includes('overflow: hidden !important'),
+  assert.ok(cssHas(themeCss, 'overflow: hidden !important'),
             'theme.css must have overflow: hidden on liquid glass panels');
-  assert.ok(themeCss.includes('.eds-c-tile__body') &&
-            themeCss.includes('background-color: transparent !important'),
+  assert.ok(cssHas(themeCss, '.eds-c-tile__body') &&
+            cssHas(themeCss, 'background-color: transparent !important'),
             'theme.css must make tile body transparent in Liquid Glass mode');
 
   // 3. Buttons and inputs must NOT be styled with liquid-glass radii
-  assert.ok(!themeCss.includes('body[data-connectea-theme="liquid-glass"] button'),
+  assert.ok(!cssHas(themeCss, 'body[data-connectea-theme="liquid-glass"] button'),
             'theme.css must NOT modify button border-radius for Liquid Glass');
-  assert.ok(!themeTokensCss.includes('body[data-connectea-theme="liquid-glass"] button'),
+  assert.ok(!cssHas(themeTokensCss, 'body[data-connectea-theme="liquid-glass"] button'),
             'theme-tokens.css must NOT modify button border-radius for Liquid Glass');
 
   // 4. Parity test does not ignore buttons for liquid-glass and ignores panels/cards/tiles/modals
@@ -6636,9 +6662,9 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
             'parity test must ignore only panels, cards, tiles, and modals for liquid-glass');
 
   // 5. .cvr-u-padding--md has 0px padding in Liquid Glass only; other modes keep native padding
-  assert.ok(themeCss.includes('[data-connectea-glass="true"]) .cvr-u-padding--md {\n  padding: 0 !important;'),
+  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-u-padding--md {\n  padding: 0 !important;'),
             'theme.css must set padding: 0 on .cvr-u-padding--md only in Liquid Glass');
-  assert.ok(!themeTilesCss.includes('.cvr-u-padding--md { padding: 0 !important; }'),
+  assert.ok(!cssHas(themeTilesCss, '.cvr-u-padding--md { padding: 0 !important; }'),
             'theme-tiles.css must not remove .cvr-u-padding--md padding in every mode');
 
   // 6. Theme Customizer dual sliders (blur strength & transparency)
@@ -6646,11 +6672,11 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
             'theme-customizer.js must contain blur strength and transparency sliders');
   assert.ok(customizerJs.includes('--cx-glass-blur') && customizerJs.includes('--cx-glass-opacity'),
             'theme-customizer.js must bind to --cx-glass-blur and --cx-glass-opacity');
-  assert.ok(customizerCss.includes('#cx-glass-sliders-wrap'),
+  assert.ok(cssHas(customizerCss, '#cx-glass-sliders-wrap'),
             'theme-customizer.css must style #cx-glass-sliders-wrap');
 
   // 7. Light mode container panel backgrounds
-  assert.ok(themeFeedCss.includes('cvr-c-feed-header') && themeFeedCss.includes('rgba(255, 255, 255, 0.90)'),
+  assert.ok(cssHas(themeFeedCss, 'cvr-c-feed-header') && cssHas(themeFeedCss, 'rgba(255, 255, 255, 0.90)'),
             'theme-feed.css must supply light container panel backgrounds in light mode');
 
   // 8. Functional test: saveCustomTheme overwrites if name matches (case-insensitive)
@@ -6683,21 +6709,21 @@ runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, p
   const registryJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8');
 
   // 1. Assessment outlines fix: .cvr-u-padding--md has 0px padding in Liquid Glass only and is NOT display: none
-  assert.ok(themeCss.includes('[data-connectea-glass="true"]) .cvr-u-padding--md {\n  padding: 0 !important;'),
+  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-u-padding--md {\n  padding: 0 !important;'),
     'theme.css must set 0px padding on .cvr-u-padding--md in Liquid Glass');
-  assert.ok(!themeTilesCss.includes('.cvr-u-padding--md { display: none !important; }'),
+  assert.ok(!cssHas(themeTilesCss, '.cvr-u-padding--md { display: none !important; }'),
     'theme-tiles.css must not hide .cvr-u-padding--md');
 
   // 2. 16px panel & tile body curvature in Liquid Glass only
-  assert.ok(themeCss.includes('[data-connectea-glass="true"]) :is(.eds-c-tile__body, .cvr-c-tile__body, .eds-c-card__body, .cvr-c-card__body) {\n  border-bottom-left-radius: 16px !important;\n  border-bottom-right-radius: 16px !important;'),
+  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) :is(.eds-c-tile__body, .cvr-c-tile__body, .eds-c-card__body, .cvr-c-card__body) {\n  border-bottom-left-radius: 16px !important;\n  border-bottom-right-radius: 16px !important;'),
     'theme.css must round tile body bottom corners in Liquid Glass');
-  assert.ok(!themeTokensCss.includes(':is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .connectea-panel, .cx-compound-progress-bar, #ng-zone__classes-metrics-summary) { border-radius: 0 !important; }'),
+  assert.ok(!cssHas(themeTokensCss, ':is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .connectea-panel, .cx-compound-progress-bar, #ng-zone__classes-metrics-summary) { border-radius: 0 !important; }'),
     'theme-tokens.css must not force 0 border radius on panels when liquid glass is off');
-  assert.ok(themeMaterialCss.includes('.connectea-dark .v-panel-content') &&
-            themeMaterialCss.includes('background-color: transparent !important'),
+  assert.ok(cssHas(themeMaterialCss, '.connectea-dark .v-panel-content') &&
+            cssHas(themeMaterialCss, 'background-color: transparent !important'),
     'theme-material.css must make .v-panel-content transparent');
-  assert.ok(themeTilesCss.includes('.eds-c-tile__body') &&
-            !themeTilesCss.includes('border-bottom-left-radius: 16px !important'),
+  assert.ok(cssHas(themeTilesCss, '.eds-c-tile__body') &&
+            !cssHas(themeTilesCss, 'border-bottom-left-radius: 16px !important'),
     'theme-tiles.css must not round tile bodies outside Liquid Glass');
 
   // 3. Customizer Preview inspection data attributes and hover tooltip
@@ -6711,8 +6737,8 @@ runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, p
     'theme-customizer.js preview mockup must tag Action Button');
   assert.ok(customizerJs.includes('#cx-preview-tooltip'),
     'theme-customizer.js must contain #cx-preview-tooltip element');
-  assert.ok(customizerCss.includes('#cx-preview-tooltip') &&
-            customizerCss.includes('pointer-events: none'),
+  assert.ok(cssHas(customizerCss, '#cx-preview-tooltip') &&
+            cssHas(customizerCss, 'pointer-events: none'),
     'theme-customizer.css must style #cx-preview-tooltip with pointer-events: none');
 
   // 4. Robust theme saving and immediate application
@@ -6731,9 +6757,9 @@ runTest('Test 151: Custom theme colors reach body, View button stays square, and
   const themeJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme.js'), 'utf8');
 
   // 1. Base dark tokens live on <html> for every dark theme and are never redeclared on <body> for custom themes
-  assert.ok(themeTokensCss.includes('/* Base Dark Theme (v3.2.x parity)') && /\*\/\nhtml\.connectea-dark,\n\[data-connectea-theme="dark"\]\.connectea-dark,/.test(themeTokensCss),
+  assert.ok(themeTokensCss.indexOf('/* Base Dark Theme (v3.2.x parity)') >= 0 && /\*\/\nhtml\.connectea-dark,\n\[data-connectea-theme="dark"\]\.connectea-dark,/.test(themeTokensCss),
     'theme-tokens.css base dark rule must target html.connectea-dark and dark-themed elements only');
-  assert.ok(!themeTokensCss.includes('body.connectea-dark:not([data-connectea-theme])'),
+  assert.ok(!cssHas(themeTokensCss, 'body.connectea-dark:not([data-connectea-theme])'),
     'theme-tokens.css must not redeclare dark tokens on an unthemed body');
 
   // 2. Functional: custom tokens (incl. card and nav) apply to html AND body, the body carries the theme id,
@@ -6766,13 +6792,13 @@ runTest('Test 151: Custom theme colors reach body, View button stays square, and
   assert.ok(!/\[class\*="(card|panel|tile)"\]/.test(themeCss), 'curvature must not catch buttons through [class*=...] substring matches');
 
   // 4. Liquid Glass only: layout containers and tile-only wrappers are transparent; solid themes stay opaque
-  assert.ok(themeCss.includes('[data-connectea-glass="true"]):not([data-connectea-login]) :is(\n  #main-content'),
+  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]):not([data-connectea-login]) :is(\n  #main-content'),
     'theme.css must make layout containers transparent in Liquid Glass');
-  assert.ok(!themeCss.includes('html[data-connectea-has-custom-bg="true"].connectea-dark:not([data-connectea-login])'),
+  assert.ok(!cssHas(themeCss, 'html[data-connectea-has-custom-bg="true"].connectea-dark:not([data-connectea-login])'),
     'wallpaper pass-through must not apply outside Liquid Glass');
-  assert.ok(themeCss.includes(':has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile)'),
+  assert.ok(cssHas(themeCss, ':has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile)'),
     'theme.css must only clear wrappers that contain tiles, never the tiles themselves');
-  assert.ok(themeCss.includes('background-color: var(--cx-surface-bg, #1e2632) !important'),
+  assert.ok(cssHas(themeCss, 'background-color: var(--cx-surface-bg, #1e2632) !important'),
     'non-Liquid-Glass panels must remain opaque');
 });
 
@@ -6900,15 +6926,15 @@ runTest('Test 153: Theme CSS selectors are scoped to a theme hook (native Connec
   const tokensCss = fs.readFileSync(path.join(themeDir, 'theme-tokens.css'), 'utf8'); // all parts
   const controlsCss = fs.readFileSync(path.join(themeDir, 'theme-controls.css'), 'utf8'); // all parts
   const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
-  assert.ok(themeCss.includes(`${glass} :is(\n  .eds-c-card, .cvr-c-card, .eds-c-tile`) && /border-radius: 16px !important;/.test(themeCss),
+  assert.ok(cssHas(themeCss, `${glass} :is(\n  .eds-c-card, .cvr-c-card, .eds-c-tile`) && /border-radius: 16px !important;/.test(themeCss),
     'panel curvature must be scoped to Liquid Glass');
   assert.ok(!/\[class\*="(card|panel|tile)"\]/.test(themeCss + tokensCss), 'curvature must not use [class*=card/panel/tile] substring selectors');
-  assert.ok(!themeCss.includes('.mat-expansion-panel-header') && !tokensCss.includes('Universal Panel & Tile Background Curvature'),
+  assert.ok(!cssHas(themeCss, '.mat-expansion-panel-header') && !cssHas(tokensCss, 'Universal Panel & Tile Background Curvature'),
     'expansion panel headers must keep native geometry and curvature must live only in theme.css');
   assert.ok(!/:not\(\[data-connectea-[a-z-]+="[a-z-]+"\]\):not\(\[data-connectea-[a-z-]+="[a-z-]+"\]\)(\.connectea-dark|:is\(html\.connectea-dark, body)/.test(fs.readFileSync(path.join(themeDir, 'theme.css'), 'utf8')),
     'non-glass negations must be anchored on html, never matched on body');
-  assert.ok(!controlsCss.includes('font-size: 24px !important;\n  width: 24px !important;'), 'icon buttons must keep native icon sizes');
-  assert.ok(!controlsCss.includes('.mat-icon-button .mat-button-wrapper {'), 'icon button wrappers must keep native layout');
+  assert.ok(!cssHas(controlsCss, 'font-size: 24px !important;\n  width: 24px !important;'), 'icon buttons must keep native icon sizes');
+  assert.ok(!cssHas(controlsCss, '.mat-icon-button .mat-button-wrapper {'), 'icon button wrappers must keep native layout');
 });
 
 runTest('Test 154: Shared utilities, settings reset clears every baseline key, and no duplicated helpers', () => {
@@ -7030,6 +7056,50 @@ runTest('Test 155: Custom theme deletion, wallpaper storage fallback and customi
   // The picker drag listeners are registered once per page, not on every open
   const coreJs = origReadFileSync.call(fs, path.resolve(__dirname, 'src/theme/theme-customizer.js'), 'utf8');
   assert.ok(!coreJs.includes("addEventListener('mousemove'"), 'opening the customizer must not add window listeners');
+});
+
+runTest('Test 156: Sidebar sync leaves the DOM alone when nothing changed and keeps the open tool pressed', () => {
+  delete window.__connectifySidebarInitialized;
+  for (const id of ['connectify-sidebar', 'connectify-sidebar-handle', 'connectify-weakness']) {
+    document.querySelectorAll('#' + id).forEach(el => el.remove());
+  }
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8'));
+  const sidebar = document.getElementById('connectify-sidebar');
+  const toolMenu = sidebar.querySelector('.cx-tool-menu');
+  const workspace = sidebar.querySelector('.cx-workspace');
+  // Use the mounted weakness panel (an earlier test may have registered the real module)
+  let weaknessPanel = document.getElementById('connectify-weakness');
+  if (!weaknessPanel) {
+    weaknessPanel = Object.assign(document.createElement('section'), { id: 'connectify-weakness' });
+    workspace.append(weaknessPanel);
+  }
+  const weaknessBtn = () => toolMenu.querySelector('#connectify-weakness-toggle');
+  assert.ok(weaknessBtn(), 'weakness launcher must be mounted');
+
+  // An open tool stays pressed across periodic syncs; a closed one is released
+  window.ConnectifySidebar.syncState();
+  weaknessPanel.hidden = false;
+  weaknessBtn().setAttribute('aria-pressed', 'true');
+  window.ConnectifySidebar.syncState();
+  assert.strictEqual(weaknessBtn().getAttribute('aria-pressed'), 'true', 'the open tool must stay pressed after a sync');
+  weaknessPanel.hidden = true;
+  window.ConnectifySidebar.syncState();
+  assert.strictEqual(weaknessBtn().getAttribute('aria-pressed'), 'false', 'a closed tool must be released');
+
+  // A sync with nothing out of place must not move or rewrite anything
+  let moves = 0;
+  const countMoves = el => {
+    for (const fn of ['append', 'appendChild']) {
+      const orig = el[fn].bind(el);
+      el[fn] = (...args) => { moves++; return orig(...args); };
+    }
+  };
+  countMoves(toolMenu);
+  countMoves(document.body);
+  const labelsBefore = Array.from(toolMenu.children).map(b => b.textContent);
+  window.ConnectifySidebar.syncState();
+  assert.strictEqual(moves, 0, 'an idle sync must not re-append buttons, the sidebar or the handle');
+  assert.deepStrictEqual(Array.from(toolMenu.children).map(b => b.textContent), labelsBefore);
 });
 
 Promise.all(pendingTestPromises).then(() => {

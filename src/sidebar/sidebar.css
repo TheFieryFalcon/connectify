@@ -1,9 +1,0 @@
-/**
- * Connectify Sidebar CSS Entry Point
- *
- * Modular architecture:
- * - sidebar-drawer.css: Drawer shell, handle, layout, outcome performance meter & tooltip
- * - sidebar-notifications.css: Notifications engine, toasts & card flash animation
- * - sidebar-predictor.css: Predictor panel, tabs, chips, cards, result pills & ATAR table
- * - sidebar-settings.css: Settings modal, bulk expansion progress pill & responsive scaling
- */

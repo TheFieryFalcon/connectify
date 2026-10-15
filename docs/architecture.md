@@ -51,11 +51,16 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 36. `src/predictor/predictor-grade-view.js` (subject grade predictor sub-tab renderer)
 37. `src/predictor/predictor-ui.js` (predictor drawer controller)
 38. `src/atar/atar-features.js` (tools coordinator & expand buttons)
-39. `src/sidebar/sidebar-handle.js` (sidebar handle anchor & slide coordinator)
-40. `src/sidebar/sidebar.js` (slide-out tool drawer & launcher)
-41. `src/system/notifications.js` (vertical stacked toast engine)
-42. `src/system/new-grade.js` (grade change detector & jump-to-card dispatcher)
-43. `src/system/dom-sweeper.js` (health check & component restoration)
+39. `src/sidebar/sidebar-handle-position.js` (handle anchoring and viewport centring maths)
+40. `src/sidebar/sidebar-handle.js` (sidebar handle anchor & slide coordinator)
+41. `src/sidebar/sidebar-hover.js` (left-edge expand and hover collapse)
+42. `src/sidebar/sidebar-filter.js` (outline filter detection and Back to All notice)
+43. `src/sidebar/sidebar-tools.js` (launcher buttons, tool panels and pressed state)
+44. `src/sidebar/sidebar-shell.js` (drawer shell construction and attachment)
+45. `src/sidebar/sidebar.js` (slide-out tool drawer & launcher)
+46. `src/system/notifications.js` (vertical stacked toast engine)
+47. `src/system/new-grade.js` (grade change detector & jump-to-card dispatcher)
+48. `src/system/dom-sweeper.js` (health check & component restoration)
 
 ### SPA Navigation & DOM Sweeping
 Connect is built on Vaadin / Liferay SPA navigation where the DOM re-renders asynchronously on page transitions.

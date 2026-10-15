@@ -133,7 +133,8 @@ This document covers the user interface and analytics modules, including target 
 #### [`sidebar.js`](file:///Users/uwong/Downloads/2.1.14_0/src/sidebar/sidebar.js) & Submodules
 - **Role**: Slide-out drawer hosting all Connectify tools with responsive workspace expansion.
 - **Submodules**:
-  - [`sidebar-handle.js`](file:///Users/uwong/Downloads/2.1.14_0/src/sidebar/sidebar-handle.js): Dynamic toggle handle (`#connectify-sidebar-handle`) anchoring to Connect sidebar or centering below top navigation.
+  - `sidebar-handle-position.js` / `sidebar-handle.js` / `sidebar-hover.js`: handle (`#connectify-sidebar-handle`) anchoring to Connect's sidebar or centring below the top bar, the "just returned to menu" grace period, left-edge expand and hover collapse.
+  - `sidebar-filter.js`, `sidebar-tools.js`, `sidebar-shell.js`: filter notice, launcher/panel mounting (DOM only touched when out of place; launchers pressed only while their panel is open) and the drawer shell.
 - **Key Functions**:
   - Drawer slide synchronization and 900px workspace expansion (`.cx-tool-active`) with `← Back to Menu` navigation.
   - Canonical launcher buttons: Target ATAR, Target Grade, Predictor, Year in Progress, ATAR Estimate, Weakness Analyzer, Settings.

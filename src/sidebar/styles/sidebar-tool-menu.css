@@ -1,0 +1,217 @@
+/**
+ * Connectify Sidebar: dark launcher, back-to-menu, semester tabs and weakness filters
+ */
+
+.connectea-dark #connectify-sidebar .cx-tool-menu>button:hover,
+.connectea-dark #connectify-sidebar .cx-tool-menu>.cx-calculator-tool:hover {
+  background: var(--cx-surface-hover, #364e65);
+  border-color: var(--cx-border-hover, #6ba5d6);
+  color: var(--cx-button-text-hover, #ffffff);
+}
+
+.connectea-dark #connectify-sidebar.cx-tool-active .cx-calculator-tool[aria-pressed=true],
+.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu>button[aria-pressed=true] {
+  background: var(--cx-surface-active, #41627d);
+  color: #fff;
+  border-color: var(--cx-border-focus, #81acca);
+}
+
+#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+#connectify-sidebar .cx-tool-menu > .cx-secondary-tool,
+#connectify-sidebar .cx-back-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+#connectify-sidebar .cx-back-menu > .cx-secondary-tool {
+  background: #ffffff !important;
+  color: #245579 !important;
+  border: 1px solid #bacddd !important;
+  text-align: center !important;
+  justify-content: center !important;
+}
+
+#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle):hover {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #174c75 !important;
+}
+
+#connectify-sidebar.cx-tool-active .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)[aria-pressed=true] {
+  background: #e2e8f0 !important;
+  border-color: #64748b !important;
+  color: #174c75 !important;
+}
+
+.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+.connectea-dark #connectify-sidebar .cx-tool-menu > .cx-secondary-tool,
+.connectea-dark #connectify-sidebar .cx-back-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+.connectea-dark #connectify-sidebar .cx-back-menu > .cx-secondary-tool {
+  background: var(--cx-button-bg, var(--cx-surface-elevated, #18222d)) !important;
+  color: var(--cx-button-text, var(--cx-text-primary, #e1eaf3)) !important;
+  border: 1px solid var(--cx-button-border, var(--cx-border, #3b4d5e)) !important;
+}
+
+.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle):hover,
+.connectea-dark #connectify-sidebar .cx-tool-menu > .cx-secondary-tool:hover {
+  background: var(--cx-surface-hover, #24303e) !important;
+  border-color: var(--cx-border-hover, #556c84) !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
+}
+
+.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)[aria-pressed=true],
+.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu > .cx-secondary-tool[aria-pressed=true] {
+  background: var(--cx-surface-active, #2f3e50) !important;
+  border-color: var(--cx-border-focus, #6e88a3) !important;
+  color: #ffffff !important;
+}
+
+@media(max-width:650px) {
+  #connectify-sidebar.cx-tool-active .cx-tool-menu {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+
+#connectify-sidebar.cx-tool-active>.cx-tool-menu, #connectify-sidebar.cx-tool-active>.cx-outline-actions {
+  display: none !important;
+}
+
+#connectify-sidebar:not(.cx-tool-active) .cx-back-menu {
+  display: none !important;
+}
+
+#connectify-sidebar .cx-back-menu:hover {
+  background: #edf4fa !important;
+  border-color: #709fc4 !important;
+  color: #174c75 !important;
+}
+
+.connectea-dark #connectify-sidebar .cx-back-menu:hover {
+  background: var(--cx-surface-hover, #364e65) !important;
+  border-color: var(--cx-border-hover, #6ba5d6) !important;
+  color: #ffffff !important;
+}
+
+#connectify-sidebar .cta-semesters:not(.cta-tabs) .cta-semester {
+  text-align: left !important;
+  padding: 10px 14px !important;
+  border-left: 4px solid transparent !important;
+  border-radius: 6px !important;
+}
+
+#connectify-sidebar .cta-semester.cta-non-button {
+  cursor: default !important;
+  box-shadow: none !important;
+}
+
+#connectify-sidebar .cta-semesters:not(.cta-tabs) .cta-semester.cta-semester-indicator,
+#connectify-sidebar .cta-semester.cta-semester-indicator {
+  background: #edf4fa !important;
+  border: 1px solid #c8d9e8 !important;
+  border-left: 4px solid #24618c !important;
+  color: #1a3d5f !important;
+  font-weight: 600 !important;
+  cursor: default !important;
+  border-radius: 6px !important;
+  text-align: left !important;
+  padding: 10px 14px !important;
+}
+
+#connectify-sidebar .cta-semester.cta-semester-closed {
+  background: #f4f6f9 !important;
+  border: 1px dashed #cad5e2 !important;
+  border-left: 4px solid transparent !important;
+  color: #7c8e9f !important;
+  font-weight: 500 !important;
+  cursor: not-allowed !important;
+  border-radius: 6px !important;
+  text-align: left !important;
+  padding: 10px 14px !important;
+  opacity: .85 !important;
+}
+
+.connectea-dark #connectify-sidebar .cta-semesters:not(.cta-tabs) .cta-semester.cta-semester-indicator,
+.connectea-dark #connectify-sidebar .cta-semester.cta-semester-indicator {
+  background: var(--cx-surface-elevated, #253342) !important;
+  border-color: var(--cx-border, #3b5066) !important;
+  border-left: 4px solid var(--cx-accent, #6ba5d6) !important;
+  color: var(--cx-text-primary, #dceaf6) !important;
+}
+
+.connectea-dark #connectify-sidebar .cta-semester.cta-semester-closed {
+  background: var(--cx-surface-bg, #1e252e) !important;
+  border: 1px dashed var(--cx-border-subtle, #3f4e5e) !important;
+  border-left: 4px solid transparent !important;
+  color: var(--cx-text-muted, #6e8093) !important;
+}
+
+#cx-weakness-filters {
+  margin-top: 16px;
+  background: #edf4fa;
+  border: 1px solid #c8d9e8;
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+#cx-weakness-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 10px 18px;
+}
+
+@media(max-width:650px) {
+  #cx-weakness-checkboxes {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:420px) {
+  #cx-weakness-checkboxes {
+    grid-template-columns: 1fr;
+  }
+}
+
+#connectify-sidebar .cx-weakness-checkbox-label, .cx-weakness-checkbox-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+#connectify-sidebar .cx-weakness-checkbox-label input, .cx-weakness-checkbox-label input {
+  margin: 0 8px 0 0 !important;
+  cursor: pointer !important;
+  width: 15px !important;
+  height: 15px !important;
+  flex-shrink: 0 !important;
+}
+
+#connectify-sidebar .cx-weakness-checkbox-label span, .cx-weakness-checkbox-label span {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-weight: 500 !important;
+}
+
+#connectify-sidebar .cx-weakness-filter-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #24618c !important;
+  font-size: 11px !important;
+  padding: 2px 4px !important;
+  text-decoration: underline !important;
+  border-radius: 3px !important;
+  font-weight: 600;
+}
+
+#connectify-sidebar .cx-weakness-expand-btn, .cx-weakness-expand-btn {
+  background: #edf4fa !important;
+  border: 1px solid #c8d9e8 !important;
+  color: #24618c !important;
+  font-size: 11px !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: background-color .15s,border-color .15s;
+}

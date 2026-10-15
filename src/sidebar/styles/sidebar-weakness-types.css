@@ -1,0 +1,210 @@
+/**
+ * Connectify Sidebar: weakness analyzer, radar chart, type dropdowns and outcome bar
+ */
+
+#connectify-sidebar .cx-weakness-expand-btn:hover, .cx-weakness-expand-btn:hover {
+  background: #e2eef7 !important;
+  border-color: #a9c5df !important;
+}
+
+.connectea-dark #cx-weakness-filters {
+  background: var(--cx-surface-elevated, #253342) !important;
+  border-color: var(--cx-border, #3b5066) !important;
+}
+
+.connectea-dark #connectify-sidebar .cx-weakness-filter-btn {
+  color: var(--cx-accent-link, var(--cx-accent-hover, #83c3ff)) !important;
+}
+
+.connectea-dark #connectify-sidebar .cx-weakness-expand-btn, .connectea-dark .cx-weakness-expand-btn {
+  background: var(--cx-button-bg, var(--cx-surface-elevated, #253342)) !important;
+  border-color: var(--cx-button-border, var(--cx-border, #3b5066)) !important;
+  color: var(--cx-button-text, var(--cx-accent, #83c3ff)) !important;
+}
+
+.connectea-dark #connectify-sidebar .cx-weakness-expand-btn:hover,
+.connectea-dark .cx-weakness-expand-btn:hover {
+  background: var(--cx-surface-hover, #2d3e50) !important;
+  border-color: var(--cx-border-hover, #4f6b88) !important;
+}
+
+.connectea-dark #connectify-weakness label,
+.connectea-dark #cx-weakness-filters,
+.connectea-dark #cx-weakness-filters span,
+.connectea-dark .cx-weakness-checkbox-label,
+.connectea-dark .cx-weakness-checkbox-label span,
+html.connectea-dark #connectify-weakness label,
+html.connectea-dark #cx-weakness-filters,
+html.connectea-dark #cx-weakness-filters span,
+html.connectea-dark .cx-weakness-checkbox-label,
+html.connectea-dark .cx-weakness-checkbox-label span,
+html.connectea-dark #connectify-weakness {
+  color: var(--cx-text-primary, #e1eaf3) !important;
+}
+
+html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-mode {
+  background: var(--cx-input-bg, #2a3b4c) !important;
+  color: var(--cx-input-text, #e1eaf3) !important;
+  border-color: var(--cx-input-border, #496178) !important;
+}
+
+#connectify-radar-chart text, #connectify-radar-chart .highcharts-axis-labels text {
+  fill: #e1eaf3 !important;
+  color: #e1eaf3 !important;
+}
+
+#connectify-radar-chart .highcharts-yaxis-labels text {
+  fill: #8fa6bd !important;
+  color: #8fa6bd !important;
+}
+
+.connectea-dark #connectify-radar-chart text,
+.connectea-dark #connectify-radar-chart .highcharts-axis-labels text {
+  fill: #e1eaf3 !important;
+  color: #e1eaf3 !important;
+}
+
+.connectea-dark #connectify-radar-chart .highcharts-yaxis-labels text {
+  fill: #8fa6bd !important;
+  color: #8fa6bd !important;
+}
+
+.cvr-c-task__details {
+  overflow: visible !important;
+}
+
+.connectea-row-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex-wrap: nowrap !important;
+  margin: 4px 0 !important;
+  max-width: 100% !important;
+  clear: both !important;
+  overflow: visible !important;
+  zoom: var(--cx-display-scale, 1);
+  transform-origin: left center;
+}
+
+.connectea-row-wrapper>.connectea-panel {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: fit-content !important;
+  margin: 0 !important;
+}
+
+.connectea-type-container {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.connectea-type-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 12px/1.4 system-ui,-apple-system,sans-serif;
+  color: #4e6076;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.connectea-type-select {
+  box-sizing: border-box;
+  min-height: 26px;
+  padding: 2px 8px;
+  border: 1px solid #b9cbe1;
+  border-radius: 6px;
+  background: #f7f9fc;
+  color: #203c5e;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: border-color .2s,background-color .2s;
+}
+
+.connectea-type-select:hover {
+  border-color: #3575b9;
+  background: #fff;
+}
+
+.connectea-type-select:focus {
+  border-color: #3575b9;
+  outline: 2px solid #3575b9;
+  outline-offset: 1px;
+}
+
+.connectea-type-select.connectea-overridden {
+  border-color: #24618c;
+  background: #e9f2fb;
+  color: #174c75;
+  font-weight: 700;
+}
+
+.connectea-dark .connectea-type-label {
+  color: var(--cx-text-muted, #a0b2c6);
+}
+
+.connectea-dark .connectea-type-select {
+  background: var(--cx-input-bg, #2a3b4c);
+  color: var(--cx-input-text, #e1eaf3);
+  border-color: var(--cx-input-border, #496178);
+}
+
+.connectea-dark .connectea-type-select:hover {
+  border-color: var(--cx-border-hover, #6ba5d6);
+  background: var(--cx-surface-hover, #33485d);
+}
+
+.connectea-dark .connectea-type-select:focus {
+  border-color: var(--cx-border-focus, #6ba5d6);
+  outline: 2px solid var(--cx-accent, #6ba5d6);
+}
+
+.connectea-dark .connectea-type-select.connectea-overridden {
+  border-color: var(--cx-accent, #6ba5d6);
+  background: var(--cx-surface-elevated, #364e65);
+  color: var(--cx-text-primary, #fff);
+}
+
+/* Vertical Outcome & Breakout Performance Meter */
+.connectea-outcome-bar {
+  display: inline-flex !important;
+  flex-direction: column-reverse !important;
+  align-items: center !important;
+  width: 18px !important;
+  height: 56px !important;
+  gap: 3px !important;
+  padding: 3px !important;
+  box-sizing: border-box !important;
+  border-radius: 6px !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  cursor: help !important;
+  transition: transform 0.2s, box-shadow 0.2s !important;
+  flex: 0 0 auto !important;
+  position: relative !important;
+}
+
+.connectea-outcome-bar:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.connectea-outcome-bar.connectea-outcome-broken {
+  height: 70px !important;
+  margin-top: -14px !important;
+  background: rgba(168, 85, 247, 0.12) !important;
+  border-color: rgba(168, 85, 247, 0.5) !important;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.45) !important;
+}
+
+.connectea-outcome-bar.connectea-outcome-critical {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.8), inset 0 0 4px rgba(239, 68, 68, 0.3) !important;
+  animation: connectea-glow-critical 1.6s ease-in-out infinite alternate !important;
+}

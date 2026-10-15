@@ -1,0 +1,202 @@
+/**
+ * Connectify Sidebar: drawer shell, header and embedded tool panels
+ */
+
+#connectify-sidebar {
+  position: fixed;
+  left: 0;
+  right: auto;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  width: min(310px,calc(100vw - 38px));
+  z-index: 10040;
+  background: #f7f9fc;
+  color: #253b53;
+  border-right: 1px solid #c7d6e4;
+  box-shadow: 10px 0 40px #0b243521;
+  display: flex !important;
+  flex-direction: column;
+  font: 13px/1.5 system-ui;
+  box-sizing: border-box;
+  transform: translateX(0);
+  transition: transform 0.2s cubic-bezier(0.16,1,0.3,1),width 0.2s cubic-bezier(0.16,1,0.3,1),visibility 0.2s cubic-bezier(0.16,1,0.3,1);
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#connectify-sidebar[hidden] {
+  display: flex !important;
+  transform: translateX(-100%) !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+#connectify-sidebar.cx-tool-active {
+  width: min(900px,calc(100vw - 38px));
+  overflow-y: hidden !important;
+}
+
+#connectify-sidebar>header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #d8e3ee;
+}
+
+#connectify-sidebar>header strong {
+  font-size: 22px;
+  letter-spacing: -.6px;
+  flex: 1;
+}
+
+#connectify-sidebar button {
+  cursor: pointer;
+  font: 600 12px system-ui;
+  color: inherit;
+  border: 1px solid #bacddd;
+  background: #fff;
+  border-radius: 8px;
+  padding: 9px 12px;
+}
+
+#connectify-sidebar .cx-tool-menu {
+  display: grid;
+  gap: 10px;
+  padding: 16px 20px 10px;
+}
+
+#connectify-sidebar.cx-tool-active .cx-tool-menu {
+  grid-template-columns: repeat(3,minmax(0,1fr));
+}
+
+#connectify-sidebar #connectea-atar-toggle, #connectify-sidebar #connectify-progress-toggle {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto;
+  box-shadow: none;
+  padding: 13px;
+  text-align: left;
+  background: #e9f2fb;
+  color: #245579;
+}
+
+#connectify-sidebar .cx-outline-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 14px;
+  border-bottom: 1px solid #d8e3ee;
+}
+
+#connectify-sidebar .cx-outline-actions button {
+  flex: 1;
+  padding: 7px;
+}
+
+#connectify-sidebar .cx-workspace {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+#connectify-sidebar :is(#connectea-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel) {
+  position: static !important;
+  inset: auto !important;
+  width: 100% !important;
+  max-height: none !important;
+  overflow: visible !important;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 24px;
+  background: transparent;
+  color: inherit;
+  box-sizing: border-box;
+}
+
+#connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor,#connectify-progress) header {
+  margin-bottom: 16px;
+}
+
+#connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor) header strong {
+  font-size: 18px;
+  font-weight: 650;
+  color: inherit;
+}
+
+#connectify-sidebar #connectify-weakness #cx-radar-mode {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #bacddd;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+}
+
+.connectea-dark #connectify-sidebar #connectify-weakness #cx-radar-mode {
+  background: #2a3b4c;
+  color: #e1eaf3;
+  border-color: #496178;
+}
+
+#connectify-sidebar #connectify-categories .cx-cat-wrap {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+
+#connectify-sidebar #connectify-categories .cx-cat-wrap label {
+  width: 90px;
+  font-size: 12px;
+  font-weight: 600;
+  flex: none;
+}
+
+#connectify-sidebar #connectify-categories .cx-cat-wrap input {
+  flex: 1;
+  max-width: 280px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #bacddd;
+  font: inherit;
+  background: #fff;
+  color: inherit;
+}
+
+.connectea-dark #connectify-sidebar #connectify-categories .cx-cat-wrap input {
+  background: #2a3b4c;
+  color: #e1eaf3;
+  border-color: #496178;
+}
+
+#connectify-sidebar .cta-heading strong {
+  max-width: none;
+  font-size: 18px;
+}
+
+#connectify-sidebar .cta-courses {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  column-gap: 24px;
+}
+
+#connectify-sidebar .cta-include {
+  display: flex !important;
+  gap: 12px !important;
+  align-items: center;
+}
+
+#connectify-sidebar .cta-include input {
+  margin: 0 4px 0 0 !important;
+  flex: none;
+  width: 15px;
+  height: 15px;
+}
+
+#connectify-sidebar .cta-course {
+  padding: 12px 0;
+}

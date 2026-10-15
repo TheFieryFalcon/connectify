@@ -1,0 +1,160 @@
+/**
+ * Connectify Sidebar: settings contrast, weakness label and scroll freeze
+ */
+
+/* ==========================================================================
+   Connectify Settings, Baselines & Calibration Form Elements
+   ========================================================================== */
+.cx-settings-section {
+  border-top: 1px solid #d8e3ee;
+}
+.cx-settings-divider {
+  border-top: 1px solid #d8e3ee;
+}
+.cx-settings-heading {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #203c5e;
+  margin-bottom: 4px;
+}
+.cx-settings-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #203c5e;
+  margin-bottom: 4px;
+}
+.cx-settings-desc {
+  font-size: 11px;
+  color: #55667a;
+  margin: 3px 0 0 0;
+  line-height: 1.4;
+}
+.cx-settings-hint {
+  font-size: 11px;
+  color: #55667a;
+}
+.cx-settings-col-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: #55667a;
+  text-transform: uppercase;
+}
+.cx-settings-number-input,
+.cx-baseline-type-input,
+.cx-baseline-subj-input {
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #203c5e;
+  border: 1px solid #b9cbe1;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+.cx-settings-number-input:focus,
+.cx-baseline-type-input:focus,
+.cx-baseline-subj-input:focus {
+  border-color: #3575b9;
+  outline: 2px solid #3575b9;
+  outline-offset: 1px;
+}
+
+/* Settings Dark Mode High Contrast Rules (>= 5:1 contrast) */
+.connectea-dark .cx-settings-section,
+.connectea-dark .cx-settings-divider {
+  border-top-color: var(--cx-border, #3b4d5e) !important;
+}
+.connectea-dark .cx-settings-heading {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+.connectea-dark .cx-settings-label {
+  color: var(--cx-text-primary, #e2e8f0) !important;
+}
+.connectea-dark .cx-settings-desc,
+.connectea-dark .cx-settings-hint,
+.connectea-dark .cx-settings-col-header {
+  color: var(--cx-text-muted, #94a3b8) !important;
+}
+.connectea-dark :is(.cx-settings-number-input, .cx-baseline-type-input, .cx-baseline-subj-input) {
+  background: var(--cx-input-bg, #141a22) !important;
+  color: var(--cx-input-text, #f1f5f9) !important;
+  border-color: var(--cx-input-border, #496178) !important;
+}
+.connectea-dark :is(.cx-settings-number-input, .cx-baseline-type-input, .cx-baseline-subj-input):focus {
+  border-color: var(--cx-border-focus, #60a5fa) !important;
+  outline: 2px solid var(--cx-accent, #60a5fa) !important;
+}
+
+/* Weakness Mode Label */
+.cx-radar-mode-label {
+  color: inherit;
+}
+.connectea-dark .cx-radar-mode-label,
+.connectea-dark #connectify-sidebar .cx-radar-mode-label {
+  color: var(--cx-text-primary, #e2e8f0) !important;
+}
+
+/* Global High Contrast Net for Connectify Sidebar in Dark Mode (>= 5:1) */
+.connectea-dark #connectify-sidebar {
+  background: var(--cx-surface-bg, #202933) !important;
+  color: var(--cx-text-primary, #e1eaf3) !important;
+  border-color: var(--cx-border-strong, #5a7391) !important;
+}
+.connectea-dark #connectify-sidebar label:not(.cx-cat-name-label) {
+  color: var(--cx-text-primary, #e2e8f0) !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label,
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge {
+  color: var(--cx-cat-color-dark, var(--cx-cat-color, inherit)) !important;
+}
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge {
+  background-color: var(--cx-badge-bg, rgba(255, 255, 255, 0.12)) !important;
+  border: 0 !important;
+  box-shadow: inset 0 0 0 1px var(--cx-border-subtle, rgba(255, 255, 255, 0.18)) !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Essay"] {
+  color: #c084fc !important;
+}
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge[data-cat="Essay"] {
+  color: #d8b4fe !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Exam"] {
+  color: #f87171 !important;
+}
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge[data-cat="Exam"] {
+  color: #fca5a5 !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Application"] {
+  color: #60a5fa !important;
+}
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge[data-cat="Application"] {
+  color: #93c5fd !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Test"] {
+  color: #4ade80 !important;
+}
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge[data-cat="Test"] {
+  color: #86efac !important;
+}
+.connectea-dark #connectify-sidebar .cx-cat-name-label[data-cat="Take-Home"] {
+  color: #facc15 !important;
+}
+.connectea-dark #connectify-sidebar .cx-pred-task-type-badge[data-cat="Take-Home"] {
+  color: #fde047 !important;
+}
+.connectea-dark #connectify-sidebar strong {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+.connectea-dark #connectify-sidebar p {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+/* Freeze screen scrolling during bulk expansion */
+html.cx-freeze-scroll,
+body.cx-freeze-scroll {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
