@@ -106,7 +106,12 @@ const SPLIT_PARTS = {
   'theme-tables.css': ['theme-tables.css', 'theme-dialogs-paginator.css'],
   'theme-navigation.css': ['theme-navigation.css', 'theme-discussions.css'],
   'theme-surfaces.css': ['theme-surfaces.css', 'theme-search-scaling.css'],
-  'theme-customizer.css': ['theme-customizer.css', 'theme-color-picker.css', 'theme-customizer-preview.css']
+  'theme-customizer.css': ['theme-customizer.css', 'theme-color-picker.css', 'theme-customizer-preview.css'],
+  'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js'],
+  'theme-customizer.js': ['theme-color-utils.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
+  // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
+  'theme.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js',
+    'theme-surface-adapter.js', 'theme-toggle.js', 'theme-menu.js', 'theme.js']
 };
 for (const [name, files] of Object.entries(MODULE_BUNDLES)) {
   MODULE_BUNDLES[name] = files.flatMap(f => (SPLIT_PARTS[f] && f !== name ? SPLIT_PARTS[f] : [f]));
@@ -553,6 +558,13 @@ global.MutationObserver = class {
 
 // manifest.json loads src/system/utils.js before every other content script
 eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/utils.js'), 'utf8'));
+
+// The selectors the theme surface adapter queries for light surfaces and the dark text on them
+function surfaceAdapterSelectors() {
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-surface-adapter.js'), 'utf8'));
+  const { SURFACE_SELECTOR, INK_SELECTOR } = window.ConnectifyThemeSurfaceAdapter;
+  return { surface: SURFACE_SELECTOR, ink: INK_SELECTOR };
+}
 
 console.log('================================================================');
 console.log('       CONNECTIFY UNIFIED MASTER TEST SUITE EXECUTION           ');
@@ -2514,7 +2526,11 @@ runTest('Test 98: theme.css and theme.js protect Highcharts box plots on first c
   assert.ok(themeCss.includes('background: transparent !important;'), 'theme.css must enforce transparent background on task chart');
 
   // Verify theme.js excludes Highcharts and progress pill from surfaceCandidates and inkCandidates
-  assert.ok(themeJs.includes(':not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *)'), 'theme.js must exclude Highcharts from surfaceCandidates and inkCandidates');
+  const adapterSelectors = surfaceAdapterSelectors();
+  for (const exclusion of [':not(.cvr-c-task__chart *)', ':not(.highcharts-container *)', ':not(#cx-expand-progress)', ':not(#cx-expand-progress *)']) {
+    assert.ok(adapterSelectors.surface.includes(exclusion) && adapterSelectors.ink.includes(exclusion),
+      `surface and ink candidates must both include ${exclusion}`);
+  }
 });
 
 runTest('Test 99: assessment-data.js readiness polling and cohort-stats.js rePassPending guarantee robust Expand All execution', () => {
@@ -2556,7 +2572,9 @@ runTest('Test 101: Expand all progress pill adapts correctly across light and da
   assert.ok(themeCss.includes('color: #f8fafc !important;'), 'theme.css must use #f8fafc text for progress pill in dark mode');
 
   // Verify theme.js surface/ink exclusion
-  assert.ok(themeJs.includes(':not(#cx-expand-progress):not(#cx-expand-progress *)'), 'theme.js must exclude #cx-expand-progress from adaptSurfaces');
+  const { surface: surfaceSel, ink: inkSel } = surfaceAdapterSelectors();
+  assert.ok([surfaceSel, inkSel].every(sel => sel.includes(':not(#cx-expand-progress)') && sel.includes(':not(#cx-expand-progress *)')),
+    'theme surface adapter must exclude #cx-expand-progress from adaptSurfaces');
 });
 
 runTest('Test 103: Semester buttons maintain uniform left alignment and reserved 4px border geometry across states', () => {
@@ -4826,8 +4844,9 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   assert.ok(themeCoreCss.includes('box-sizing: border-box !important;'), 'theme-core.css must enforce box-sizing on cvr-c-primary-navigation');
 
   // 2. Static checks: theme.js excludes primary navigation from surface adaptation
-  assert.ok(themeJs.includes(':not(.cvr-c-primary-navigation):not(.cvr-c-primary-navigation *):not(.cvr-c-header):not(.cvr-c-header *)'),
-    'theme.js must exclude primary navigation from adaptSurfaces');
+  const navSurfaceSel = surfaceAdapterSelectors().surface;
+  assert.ok([':not(.cvr-c-primary-navigation)', ':not(.cvr-c-primary-navigation *)', ':not(.cvr-c-header)', ':not(.cvr-c-header *)'].every(x => navSurfaceSel.includes(x)),
+    'theme surface adapter must exclude primary navigation from adaptSurfaces');
 
   // 3. Static checks: theme-tokens.css defines custom properties and multiple palettes
   assert.ok(themeTokensCss.includes('--cx-canvas-bg:') && themeTokensCss.includes('--cx-surface-bg:'), 'theme-tokens.css must define CSS custom properties');
@@ -6697,11 +6716,11 @@ runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, p
     'theme-customizer.css must style #cx-preview-tooltip with pointer-events: none');
 
   // 4. Robust theme saving and immediate application
-  assert.ok(registryJs.includes('chrome.storage.local.get([STORAGE_CUSTOM_THEMES_LIST]') ||
-            registryJs.includes('chrome.storage.local.get([STORAGE_CUSTOM_THEMES_LIST'),
-    'theme-registry.js loadSavedCustomThemes must read from chrome.storage.local');
-  assert.ok(customizerJs.includes('window.ConnectifyTheme.applyTheme(true, saved.id)'),
-    'theme-customizer.js must call window.ConnectifyTheme.applyTheme on save');
+  assert.ok(registryJs.includes("typeof chrome !== 'undefined' && chrome.storage?.local") && registryJs.includes('store.get([STORAGE_CUSTOM_THEMES_LIST]'),
+    'loadSavedCustomThemes must read saved themes from chrome.storage.local');
+  // Saving goes through the registry; its connectea:themechange event makes the theme engine apply it once
+  assert.ok(customizerJs.includes('if (saved) reg.setTheme(saved.id);') && !customizerJs.includes('applyTheme(true, saved.id)'),
+    'theme-customizer.js must apply a saved theme through the registry exactly once');
 });
 
 runTest('Test 151: Custom theme colors reach body, View button stays square, and wallpaper shows through outline wrappers', () => {
@@ -6738,7 +6757,7 @@ runTest('Test 151: Custom theme colors reach body, View button stays square, and
   reg.setTheme('dark');
   assert.strictEqual(document.body.style.getPropertyValue('--cx-canvas-bg'), '', 'preset theme must clear body custom tokens');
   assert.strictEqual(document.body.dataset.connecteaTheme, 'dark', 'body must carry the preset theme id');
-  assert.ok(registryJs.includes('if (active?.isCustom && document.documentElement?.dataset.connecteaTheme !== active.id) setTheme(active.id);'),
+  assert.ok(registryJs.includes('if (active?.isCustom && document.documentElement?.dataset.connecteaTheme !== active.id) registry.setTheme(active.id);'),
     'loadSavedCustomThemes must re-apply a custom theme found only in chrome.storage');
 
   // 3. View / positive buttons are square; curvature only targets explicit panel, card and tile classes
@@ -6939,9 +6958,78 @@ runTest('Test 154: Shared utilities, settings reset clears every baseline key, a
   const progJs = origReadFileSync.call(fs, path.resolve(__dirname, 'src/progress/progress-graph.js'), 'utf8');
   assert.ok(!/setInterval\(\(\) => \{[^}]*cleanupImprovementArrows\(\)/.test(progJs), 'arrow cleanup must run once, not on an interval');
 
-  // Theme login-restore logic lives in one place
-  const themeJs = origReadFileSync.call(fs, path.resolve(__dirname, 'src/theme/theme.js'), 'utf8');
-  assert.strictEqual((themeJs.match(/localStorage\.removeItem\(RESTORE_THEME_KEY\)/g) || []).length, 1, 'restore consumption must be implemented once');
+  // Theme login-restore logic lives in one place across all theme scripts
+  const themeDir = path.resolve(__dirname, 'src/theme');
+  const allThemeJs = fs.readdirSync(themeDir).filter(f => f.endsWith('.js')).map(f => origReadFileSync.call(fs, path.join(themeDir, f), 'utf8')).join('\n');
+  assert.strictEqual((allThemeJs.match(/localStorage\.removeItem\(RESTORE_THEME_KEY\)/g) || []).length, 1, 'restore consumption must be implemented once');
+  assert.strictEqual((allThemeJs.match(/const isLoginUrl = /g) || []).length, 1, 'login URL detection must be implemented once');
+});
+
+runTest('Test 155: Custom theme deletion, wallpaper storage fallback and customizer input safety', () => {
+  const extStore = {};
+  global.chrome = {
+    storage: {
+      local: {
+        get: (keys, cb) => cb(Object.fromEntries(keys.filter(k => k in extStore).map(k => [k, extStore[k]]))),
+        set: obj => Object.assign(extStore, obj),
+        remove: key => { delete extStore[key]; }
+      }
+    }
+  };
+  try {
+    localStorage.clear();
+    window.location.href = 'https://connect.det.wa.edu.au/classes';
+    eval(fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8'));
+    let reg = window.ConnectifyThemeRegistry;
+
+    // A deleted theme must not come back from the extension-storage copy on the next page load
+    const saved = reg.saveCustomTheme({ name: 'Ocean', colors: { canvas: '#001122', surface: '#112233' } });
+    assert.ok(JSON.parse(extStore['connectea:custom_themes_list']).some(t => t.id === saved.id), 'saved themes must reach extension storage');
+    reg.deleteCustomTheme(saved.id);
+    assert.ok(!JSON.parse(extStore['connectea:custom_themes_list']).some(t => t.id === saved.id), 'deleting must also remove the extension-storage copy');
+    eval(fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8'));
+    reg = window.ConnectifyThemeRegistry;
+    assert.ok(!reg.getAvailableThemes().some(t => t.id === saved.id), 'a deleted theme must stay deleted after reload');
+
+    // A wallpaper too large for localStorage survives in extension storage and is restored on load
+    const origSetItem = localStorage.setItem;
+    localStorage.setItem = function(k, v) { if (k === 'connectea:custom_background') throw new Error('QuotaExceededError'); return origSetItem.call(this, k, v); };
+    try {
+      reg.setCustomBackground('data:image/png;base64,AAAA');
+      assert.strictEqual(extStore['connectea:custom_background'], 'data:image/png;base64,AAAA', 'over-quota wallpaper must be kept in extension storage');
+      assert.strictEqual(reg.getCustomBackground(), 'data:image/png;base64,AAAA', 'over-quota wallpaper must stay active for the session');
+    } finally {
+      localStorage.setItem = origSetItem;
+    }
+    eval(fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8'));
+    assert.strictEqual(window.ConnectifyThemeRegistry.getCustomBackground(), 'data:image/png;base64,AAAA', 'wallpaper must be restored from extension storage after reload');
+    assert.strictEqual(document.documentElement.getAttribute('data-connectea-has-custom-bg'), 'true');
+  } finally {
+    delete global.chrome;
+    localStorage.clear();
+  }
+
+  // Customizer: user-supplied names and imported colours are escaped and sanitised
+  eval(fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-customizer.js'), 'utf8'));
+  const markup = window.ConnectifyThemeCustomizerMarkup;
+  const html = markup.modalHtml({ mode: 'basic', tokens: {}, name: '"><img src=x onerror=alert(1)>', emoji: '<b>', liquidGlass: false,
+    wallpaper: null, glassBlur: 16, glassOpacity: 0.65, activeToken: 'canvas' }, { dark: { name: '<i>Dark</i>', icon: '🌙' } });
+  assert.ok(!html.includes('<img src=x') && html.includes('&quot;&gt;&lt;img src=x'), 'theme names must be HTML-escaped');
+  assert.ok(!html.includes('<i>Dark</i>') && !html.includes('<b>'), 'preset names and icons must be HTML-escaped');
+  const state = { tokens: { canvas: '#111111' }, name: 'A', emoji: '🎨', liquidGlass: false, glassBlur: 16, glassOpacity: 0.65, wallpaper: null };
+  window.ConnectifyThemeCustomizerControls.importTheme(state, {
+    name: 'Imported', glassBlur: 999, wallpaper: 'javascript:alert(1)',
+    colors: { canvas: '#222222', surface: 'red;}</style><script>', name: 'not-a-colour', accent: 'rgba(1, 2, 3, 0.5)' }
+  });
+  assert.strictEqual(state.name, 'Imported');
+  assert.strictEqual(state.glassBlur, 40, 'imported blur must be clamped');
+  assert.strictEqual(state.wallpaper, null, 'imported wallpapers must be image data URIs');
+  assert.deepStrictEqual(state.tokens, { canvas: '#222222', accent: 'rgba(1, 2, 3, 0.5)' }, 'only valid colour tokens may be imported');
+  assert.deepStrictEqual(window.ConnectifyThemeColors.parseHex('rgba(26, 36, 52, 0.72)'), { r: 26, g: 36, b: 52 }, 'Liquid Glass rgba() surfaces must parse');
+
+  // The picker drag listeners are registered once per page, not on every open
+  const coreJs = origReadFileSync.call(fs, path.resolve(__dirname, 'src/theme/theme-customizer.js'), 'utf8');
+  assert.ok(!coreJs.includes("addEventListener('mousemove'"), 'opening the customizer must not add window listeners');
 });
 
 Promise.all(pendingTestPromises).then(() => {

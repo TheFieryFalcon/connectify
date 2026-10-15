@@ -129,8 +129,18 @@
             "src/theme/styles/theme.css"
          ],
          "js": [
+            "src/theme/theme-auth.js",
+            "src/theme/theme-custom-tokens.js",
+            "src/theme/theme-palettes.js",
             "src/theme/theme-registry.js",
+            "src/theme/theme-custom-themes.js",
+            "src/theme/theme-color-utils.js",
+            "src/theme/theme-customizer-markup.js",
+            "src/theme/theme-customizer-controls.js",
             "src/theme/theme-customizer.js",
+            "src/theme/theme-surface-adapter.js",
+            "src/theme/theme-toggle.js",
+            "src/theme/theme-menu.js",
             "src/theme/theme.js"
          ],
          "run_at": "document_idle"

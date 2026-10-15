@@ -65,8 +65,8 @@ Connect is built on Vaadin / Liferay SPA navigation where the DOM re-renders asy
 
 ### Global Theme & Customization Pipeline
 Themes execute site-wide across all Connect pages (`https://connect.det.wa.edu.au/*`):
-- **Scripts**: `theme-registry.js` (palette registry) $\to$ `theme-customizer.js` (in-DOM designer modal) $\to$ `theme.js` (theme engine & toggle).
-- **Stylesheets Cascade**: `theme-tokens.css` $\to$ `theme-core.css` $\to$ `theme-tiles.css` $\to$ `theme-cards.css` $\to$ `theme-controls.css` $\to$ `theme-material.css` $\to$ `theme-feed.css` $\to$ `theme-tables.css` $\to$ `theme-navigation.css` $\to$ `theme-surfaces.css` $\to$ `theme-customizer.css` $\to$ `theme.css` (final cascade overrides for Liquid Glass 16px curvature & transparent accordions).
+- **Scripts**: `theme-auth.js` $\to$ `theme-custom-tokens.js` $\to$ `theme-palettes.js` $\to$ `theme-registry.js` $\to$ `theme-custom-themes.js` $\to$ customizer (`theme-color-utils.js`, `theme-customizer-markup.js`, `theme-customizer-controls.js`, `theme-customizer.js`) $\to$ `theme-surface-adapter.js` $\to$ `theme-toggle.js` $\to$ `theme-menu.js` $\to$ `theme.js`.
+- **Stylesheets**: `src/theme/styles/*.css` in manifest order, ending with `theme.css` (Liquid Glass geometry and opaque solid-theme panels).
 
 ---
 

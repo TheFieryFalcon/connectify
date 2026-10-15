@@ -1,4 +1,11 @@
-/** Connectify Dark Theme Engine - provides instant dark mode & surface adaptations */
+/**
+ * Connectify Theme Engine
+ *
+ * Applies the active theme to the page, restores it after login, keeps the navbar toggle mounted
+ * and re-adapts unstyled surfaces as Connect re-renders. Depends on theme-auth.js,
+ * theme-registry.js, theme-surface-adapter.js, theme-toggle.js and theme-menu.js.
+ * Exposes window.ConnectifyTheme.
+ */
 (() => {
   'use strict';
 
@@ -7,73 +14,34 @@
 
   const STORAGE_KEY = 'connectea:theme:v1';
   const RESTORE_KEY = 'connectea:theme:restore_dark';
-  const RESTORE_THEME_KEY = 'connectea:theme:restore_theme';
   const STORAGE_THEME_ID = 'connectea:theme:id';
+
+  const { isLoginUrl, isLogoutUrl, isAuthDisabled, markAuthPage, rememberThemeForLogin, takeThemeToRestore } = window.ConnectifyThemeAuth;
+  const registry = window.ConnectifyThemeRegistry;
+  const toggle = window.ConnectifyThemeToggle;
+  const menu = window.ConnectifyThemeMenu;
+  const surfaceAdapter = window.ConnectifyThemeSurfaceAdapter;
+  const toggleButton = toggle.button;
+
   let isDarkMode = false;
   let activeTheme = 'dark';
-  let toggleButton = null;
-  let themeMenu = null;
-  const closeThemeMenu = () => {
-    if (themeMenu) { themeMenu.remove(); themeMenu = null; }
-    if (toggleButton) toggleButton.setAttribute('aria-expanded', 'false');
-  };
-
-  const isLoginUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
-    try {
-      const loc = new URL(url);
-      const isConnect = loc.hostname === 'connect.det.wa.edu.au', isLoginHost = loc.hostname === 'login.det.wa.edu.au';
-      const isLoginPath = loc.pathname === '/login' || loc.pathname.startsWith('/login/') || loc.pathname.includes('/portal/login');
-      return (isConnect && isLoginPath) || isLoginHost;
-    } catch {
-      return typeof url === 'string' && (url === 'https://connect.det.wa.edu.au/login' || url.startsWith('https://connect.det.wa.edu.au/login') || url.includes('login.det.wa.edu.au'));
-    }
-  };
-
-  const isLogoutUrl = (url = (typeof window !== 'undefined' ? window.location?.href : '')) => {
-    try {
-      const loc = new URL(url, typeof window !== 'undefined' && window.location?.href ? window.location.href : 'https://connect.det.wa.edu.au');
-      const isConnect = loc.hostname === 'connect.det.wa.edu.au', path = loc.pathname.toLowerCase(), search = loc.search.toLowerCase();
-      const isPath = path === '/logout' || path.startsWith('/logout/') || path.includes('/portal/logout') || path.includes('/c/portal/logout') || path.includes('/web/guest/logout') || path.includes('/signout') || path.includes('/sign-out') || path.includes('loggedout') || path.includes('logged-out');
-      const isParam = search.includes('logout') || search.includes('logged_out') || search.includes('signed_out') || search.includes('session_expired');
-      if ((isConnect && (isPath || isParam)) || loc.hostname === 'logout.det.wa.edu.au' || isPath) return true;
-      if (typeof document !== 'undefined' && (!url || (typeof window !== 'undefined' && url === window.location?.href))) {
-        if (/logged out|signed out/i.test(document.title || '')) return true;
-        const msg = document.querySelector('.portlet-msg-info, .alert-info, .login-status, .cvr-c-status-message');
-        if (msg && /logged out|signed out|session.*expired/i.test(msg.textContent || '')) return true;
-      }
-      return false;
-    } catch { return typeof url === 'string' && /logout|signout|sign-out|loggedout/i.test(url); }
-  };
-
-  const isAuthDisabled = (url) => isLoginUrl(url) || isLogoutUrl(url);
 
   function updateDomThemeAttributes(dark, themeId, isAuth) {
-    const isLogout = isLogoutUrl();
-    if (isAuth || isLogout) {
-      document.documentElement.classList.remove('connectea-dark');
-      delete document.documentElement.dataset.connecteaTheme;
-      document.documentElement.removeAttribute('data-connectea-theme');
-      document.documentElement.setAttribute('data-connectea-login', 'true');
-      if (isLogout) document.documentElement.setAttribute('data-connectea-logout', 'true');
-      else document.documentElement.removeAttribute('data-connectea-logout');
-      if (document.body) {
-        document.body.classList.remove('connectea-dark');
-        delete document.body.dataset.connecteaTheme;
-        document.body.removeAttribute('data-connectea-theme');
-      }
-      if (window.ConnectifyThemeRegistry?.clearCustomTokens) window.ConnectifyThemeRegistry.clearCustomTokens();
-      if (toggleButton?.parentElement) toggleButton.remove();
-      if (themeMenu) closeThemeMenu();
-    } else {
-      document.documentElement.removeAttribute('data-connectea-login');
-      document.documentElement.removeAttribute('data-connectea-logout');
-      document.documentElement.classList.toggle('connectea-dark', dark);
-      if (document.body) document.body.classList.toggle('connectea-dark', dark);
-      const cur = themeId || (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (dark ? 'dark' : 'light'));
-      for (const el of [document.documentElement, document.body].filter(Boolean)) {
-        if (dark) el.dataset.connecteaTheme = cur;
-        else { delete el.dataset.connecteaTheme; el.removeAttribute('data-connectea-theme'); }
-      }
+    if (isAuth || isLogoutUrl()) {
+      markAuthPage();
+      registry.clearCustomTokens();
+      toggle.remove();
+      menu.close();
+      return;
+    }
+    const root = document.documentElement;
+    root.removeAttribute('data-connectea-login');
+    root.removeAttribute('data-connectea-logout');
+    const cur = themeId || registry.getTheme();
+    for (const el of [root, document.body].filter(Boolean)) {
+      el.classList.toggle('connectea-dark', dark);
+      if (dark) el.dataset.connecteaTheme = cur;
+      else { delete el.dataset.connecteaTheme; el.removeAttribute('data-connectea-theme'); }
     }
   }
 
@@ -91,213 +59,41 @@
     }
   } catch {}
 
-  toggleButton = document.getElementById('connectea-theme-toggle');
-  if (!toggleButton) {
-    toggleButton = document.createElement('button');
-    toggleButton.id = 'connectea-theme-toggle';
-    toggleButton.type = 'button';
-  }
-  toggleButton.className = 'connectea-theme-toggle';
-
   updateDomThemeAttributes(isDarkMode, activeTheme, isAuthDisabled());
-  if (isDarkMode && window.ConnectifyThemeRegistry) window.ConnectifyThemeRegistry.setTheme(activeTheme);
+  if (isDarkMode) registry.setTheme(activeTheme);
 
-  function cleanupDuplicateButtons() {
-    for (const btn of document.querySelectorAll('#connectea-theme-toggle, .connectea-theme-toggle')) if (btn !== toggleButton) btn.remove();
-    for (const btn of document.querySelectorAll('#connectea-theme-select-btn, .connectea-theme-select-btn')) btn.remove();
-    const containers = [document.querySelector('.cvr-c-primary-navigation'), document.body].filter(Boolean);
-    for (const container of containers) {
-      for (const btn of container.querySelectorAll('button:not(#connectea-theme-toggle):not(.cx-calculator-tool):not(.cx-back-menu):not(.cx-close-btn)')) {
-        if (btn.closest('#connectify-sidebar')) continue;
-        const text = (btn.textContent || '').trim().toLowerCase();
-        const aria = (btn.getAttribute('aria-label') || '').toLowerCase();
-        if (text.includes('dark mode') || text.includes('light mode') || aria.includes('dark mode') || aria.includes('light mode')) btn.remove();
-      }
-    }
-  }
-
-  const SVG_CHEVRON = '<svg width="12" height="12" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M2 3.75L5 6.75L8 3.75"/></svg>';
-
-  function updateToggleButtonLabel(dark) {
-    if (!toggleButton) return;
-    const label = dark ? 'Default' : 'Themes';
-    toggleButton.textContent = label;
-    toggleButton.setAttribute('aria-label', label);
-    toggleButton.setAttribute('aria-pressed', String(dark));
-    const arrow = document.createElement('span');
-    arrow.className = 'connectea-theme-arrow';
-    arrow.setAttribute('title', 'Theme options');
-    arrow.setAttribute('aria-label', 'Open theme menu');
-    arrow.innerHTML = SVG_CHEVRON;
-    arrow.onclick = (e) => {
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      if (themeMenu) closeThemeMenu(); else openThemeMenu(toggleButton);
-    };
-    toggleButton.appendChild(arrow);
-  }
-
-  cleanupDuplicateButtons();
-  updateToggleButtonLabel(isDarkMode);
-
-  let headerRightInset = null;
+  const updateToggleButtonLabel = dark => toggle.setLabel(dark, () => menu.toggle(toggleButton));
 
   function updateTogglePosition(forceReset = false) {
-    cleanupDuplicateButtons();
     if (isAuthDisabled()) {
-      if (toggleButton.parentElement) toggleButton.remove();
-      if (themeMenu) closeThemeMenu();
+      toggle.cleanupDuplicateButtons();
+      toggle.remove();
+      menu.close();
       return;
     }
-    if (forceReset) headerRightInset = null;
-    const nav = document.querySelector('.cvr-c-primary-navigation');
-    if (!nav) {
-      if (toggleButton.parentElement) toggleButton.remove();
-      return;
-    }
-    if (toggleButton.parentElement !== nav) nav.append(toggleButton);
-
-    const bell = nav.querySelector(':is(.cvr-c-icon--notification-hollow, .cvr-c-icon--notification, .cvr-c-icon--notification-solid, [class*="notification"])')?.closest('[role="button"], button') || nav.querySelector('[aria-label*="notification" i], [data-automation-id="notifications"]');
-    const bellRect = bell?.getBoundingClientRect();
-    const navRect = nav.getBoundingClientRect();
-    let computedInset = null;
-    if (bellRect?.width && bellRect.left > 60 && navRect.right >= bellRect.left) {
-      computedInset = Math.max(8, navRect.right - bellRect.left + 12);
-    } else {
-      const avatar = nav.querySelector('.cvr-c-primary-navigation__button--avatar, [class*="avatar"]')?.closest('[role="button"], button');
-      const avatarRect = avatar?.getBoundingClientRect();
-      if (avatarRect?.width && avatarRect.left > 60 && navRect.right >= avatarRect.left) {
-        computedInset = Math.max(8, navRect.right - avatarRect.left + 140);
-      }
-    }
-    if (computedInset !== null) headerRightInset = computedInset;
-    const baseInset = headerRightInset ?? 90;
-    toggleButton.style.right = `${baseInset}px`;
+    toggle.position(forceReset);
   }
 
-  function parseRgb(value, allowTranslucent = false) {
-    if (!value) return null;
-    const match = value.match(/^rgba?\(([^)]+)\)/);
-    if (!match) return null;
-    const parts = match[1].split(',').map(Number);
-    return (parts.length === 4 && (parts[3] === 0 || (!allowTranslucent && parts[3] < 0.9))) ? null : parts.slice(0, 3);
-  }
-  const isNeutralColor = rgb => rgb && Math.max(...rgb) - Math.min(...rgb) < 24;
-  function isDarkColor(rgb) {
-    if (!rgb) return false;
-    const lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
-    const isConnectRed = Math.abs(rgb[0] - 127) < 15 && Math.abs(rgb[1] - 55) < 15 && Math.abs(rgb[2] - 92) < 15;
-    return lum < 135 || (isNeutralColor(rgb) && Math.max(...rgb) < 140) || isConnectRed;
+  toggle.cleanupDuplicateButtons();
+  updateToggleButtonLabel(isDarkMode);
+
+  function checkReadingView() {
+    if (typeof document === 'undefined' || !document.documentElement) return;
+    const isReading = Boolean(document.querySelector('cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"], cnt-notice-item-view-dialog'));
+    if (isReading) document.documentElement.setAttribute('data-connectea-reading-view', 'true');
+    else document.documentElement.removeAttribute('data-connectea-reading-view');
   }
 
-  function adaptSurfaces() {
-    const isDark = isDarkMode || document.documentElement.classList.contains('connectea-dark');
-    if (!isDark || isAuthDisabled()) return;
-    try {
-      const surfaceCandidates = document.body.querySelectorAll(
-        ':is(header, nav, aside, .v-panel, .v-panel-content, .eds-c-card, .cvr-c-promo, .cvr-c-heading-bar, .cvr-c-page-header, .cvr-c-report-years, .cvr-c-year-selector, .eds-c-tile__action, .eds-c-standard-button, mat-toolbar, mat-tab-header, .mat-toolbar, .mat-tab-header, .eds-c-nav-list, .eds-c-nav-list__item, .portlet, .portlet-content, .portlet-body, .journal-content-article, .eds-c-tile__body, .cvr-c-tile__body, [class*="help"], [class*="guide"], [class*="resource"]):not([data-connectea-surface]):not(.cvr-c-primary-navigation):not(.cvr-c-primary-navigation *):not(.cvr-c-header):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *):not(.v-Notification-system):not(.v-Notification-system *)'
-      );
-      for (const el of surfaceCandidates) {
-        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by, [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning, .v-Notification-system') || el.matches('.portlet, .portlet-boundary, .portlet-layout, #main-content')) continue;
-        const bgRgb = parseRgb(window.getComputedStyle(el).backgroundColor);
-        if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) el.setAttribute('data-connectea-surface', '');
-      }
-      const inkCandidates = document.querySelectorAll(
-        '[data-connectea-surface] :is(p, span, div, h1, h2, h3, h4, h5, h6, label, strong, a, button, li, i):not([data-connectea-ink]):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(#connectify-sidebar *):not(#connectea-theme-toggle):not(.connectea-panel *):not(.cvr-c-task__chart *):not(.highcharts-container *):not(#cx-expand-progress):not(#cx-expand-progress *):not(.v-Notification-system):not(.v-Notification-system *)'
-      );
-      for (const el of inkCandidates) {
-        if (el.children.length > 2 || el.hasAttribute('data-connectea-surface')) continue;
-        if (el.closest('.cvr-c-task__chart, .highcharts-container, #cx-expand-progress, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-classes__sort, .cvr-c-sort-by, .eds-c-sort-by, [class*="timeout"], [class*="session"], [id*="timeout"], [id*="session"], .popup-alert-notice, .popup-alert-warning, .v-Notification-system')) continue;
-        const fgRgb = parseRgb(window.getComputedStyle(el).color, true);
-        if (isDarkColor(fgRgb)) el.setAttribute('data-connectea-ink', '');
-      }
-    } catch (e) {}
-  }
-
-  function openThemeMenu(anchorEl) {
-    closeThemeMenu();
-    if (isAuthDisabled()) return;
-    if (toggleButton) toggleButton.setAttribute('aria-expanded', 'true');
-    themeMenu = document.createElement('div');
-    themeMenu.id = 'connectea-theme-menu';
-    themeMenu.setAttribute('role', 'menu');
-
-    const reg = window.ConnectifyThemeRegistry;
-    const defaultList = [
-      { id: 'dark', name: 'Dark', icon: '🌙' }, { id: 'quantum', name: 'Quantum Dark', icon: '⚛️', swatch: ['#282828', '#32302f', '#fabd2f'] },
-      { id: 'amoled', name: 'AMOLED Black', icon: '🌑' }, { id: 'midnight', name: 'Midnight Navy', icon: '🌌' },
-      { id: 'forest', name: 'Emerald Forest', icon: '🌲' }, { id: 'sunset', name: 'Twilight Plum', icon: '🌅' },
-      { id: 'liquid-glass', name: 'Liquid Glass', icon: '🫧' }
-    ];
-    const available = reg ? reg.getAvailableThemes() : defaultList;
-    const themes = available.filter(t => t.id !== 'light' && t.id !== 'custom');
-    const activeId = reg ? reg.getTheme() : (localStorage.getItem(STORAGE_THEME_ID) || 'dark');
-
-    for (const t of themes) {
-      const opt = document.createElement('button');
-      opt.type = 'button';
-      opt.className = `connectea-theme-option${t.id === activeId ? ' eds-s-is-active' : ''}`;
-      opt.setAttribute('role', 'menuitem');
-      const swatch = document.createElement('span'); swatch.className = 'connectea-theme-swatch'; swatch.style.backgroundColor = (t.swatch && t.swatch[1]) || '#1e2632';
-      const icon = document.createElement('span'); icon.className = 'connectea-theme-icon'; icon.textContent = t.icon;
-      const name = document.createElement('span'); name.className = 'connectea-theme-name'; name.textContent = t.name;
-      opt.append(swatch, icon, name);
-      if (t.isCustom) {
-        const del = document.createElement('span'); del.className = 'connectea-theme-delete-btn'; del.textContent = '✕'; del.title = 'Delete theme';
-        del.onclick = (ev) => {
-          ev.stopPropagation();
-          if (reg?.deleteCustomTheme) { reg.deleteCustomTheme(t.id); openThemeMenu(anchorEl); }
-        };
-        opt.append(del);
-      }
-      opt.onclick = (e) => {
-        e.stopPropagation();
-        if (reg) reg.setTheme(t.id);
-        applyTheme(true, t.id);
-        closeThemeMenu();
-      };
-      themeMenu.appendChild(opt);
-    }
-
-    const customizerOpt = document.createElement('button');
-    customizerOpt.type = 'button';
-    customizerOpt.className = 'connectea-theme-customize-btn connectea-customize-action';
-    customizerOpt.setAttribute('role', 'menuitem');
-    customizerOpt.innerHTML = '<span class="connectea-customize-icon">✨</span><span class="connectea-theme-name">Customize Theme...</span>';
-    customizerOpt.onclick = (e) => {
-      e.stopPropagation();
-      closeThemeMenu();
-      if (window.ConnectifyThemeCustomizer) window.ConnectifyThemeCustomizer.open();
-    };
-    themeMenu.appendChild(customizerOpt);
-
-    const target = anchorEl || toggleButton;
-    const rect = target.getBoundingClientRect();
-    themeMenu.style.position = 'fixed';
-    themeMenu.style.top = `${Math.round(rect.bottom + 6)}px`;
-    themeMenu.style.right = `${Math.max(8, Math.round(window.innerWidth - rect.right))}px`;
-    document.body.appendChild(themeMenu);
-  }
-
-  // On the login/logout page: remember the active dark theme so it returns after signing in
-  function rememberThemeForLogin(themeId) {
-    try {
-      localStorage.setItem(RESTORE_KEY, 'true');
-      const cur = themeId || localStorage.getItem(STORAGE_THEME_ID);
-      if (cur && cur !== 'light') localStorage.setItem(RESTORE_THEME_KEY, cur);
-    } catch {}
-  }
-
-  // Back on a normal page: consumes the remembered theme and returns its id (null if none)
-  function takeThemeToRestore() {
-    try {
-      if (localStorage.getItem(RESTORE_KEY) !== 'true') return null;
-      const restored = localStorage.getItem(RESTORE_THEME_KEY) || 'dark';
-      localStorage.removeItem(RESTORE_KEY);
-      localStorage.removeItem(RESTORE_THEME_KEY);
-      localStorage.setItem(STORAGE_KEY, 'dark');
-      localStorage.setItem(STORAGE_THEME_ID, restored);
-      return restored;
-    } catch { return null; }
+  let adaptTimer = null;
+  const pageStartTime = Date.now();
+  function scheduleAdaptSurfaces(delay) {
+    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
+    clearTimeout(adaptTimer);
+    const effectiveDelay = delay ?? (Date.now() - pageStartTime < 2500 ? 1200 : 400);
+    adaptTimer = setTimeout(() => {
+      if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
+      if (isDarkMode && !isAuthDisabled()) surfaceAdapter.adaptSurfaces();
+    }, effectiveDelay);
   }
 
   function applyTheme(isDark, themeId) {
@@ -310,7 +106,7 @@
       if (restored) {
         isDark = true;
         themeId = restored;
-        if (window.ConnectifyThemeRegistry) window.ConnectifyThemeRegistry.setTheme(restored);
+        registry.setTheme(restored);
       }
     }
     isDarkMode = isDark;
@@ -321,11 +117,13 @@
     if (isDarkMode) scheduleAdaptSurfaces();
   }
 
+  // Clicking the button switches between Default and the last dark theme; the chevron opens the menu.
+  // registry.setTheme() fires connectea:themechange, whose listener below applies the theme.
   let lastToggleTime = 0;
-  toggleButton.onclick = (e) => {
+  toggleButton.onclick = e => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     if (e?.target?.closest?.('.connectea-theme-arrow')) {
-      if (themeMenu) closeThemeMenu(); else openThemeMenu(toggleButton);
+      menu.toggle(toggleButton);
       return;
     }
     const now = Date.now();
@@ -333,35 +131,15 @@
     lastToggleTime = now;
     if (isAuthDisabled()) { applyTheme(false); return; }
     try { localStorage.removeItem(RESTORE_KEY); } catch {}
-    const isCurrentlyDark = document.documentElement.classList.contains('connectea-dark');
-    const nextDark = !isCurrentlyDark;
+    const nextDark = !document.documentElement.classList.contains('connectea-dark');
     try { localStorage.setItem(STORAGE_KEY, nextDark ? 'dark' : 'light'); } catch {}
-    const reg = window.ConnectifyThemeRegistry;
-    const lastTheme = reg?.getLastTheme ? reg.getLastTheme() : (localStorage.getItem('connectea:last_theme_id') || 'dark');
-    const targetTheme = nextDark ? lastTheme : 'light';
-    if (reg) reg.setTheme(targetTheme);
-    applyTheme(nextDark, targetTheme);
+    registry.setTheme(nextDark ? registry.getLastTheme() : 'light');
   };
 
-  toggleButton.oncontextmenu = (e) => {
+  toggleButton.oncontextmenu = e => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
-    if (themeMenu) closeThemeMenu(); else openThemeMenu(toggleButton);
+    menu.toggle(toggleButton);
   };
-
-  document.addEventListener('click', (e) => { if (themeMenu && !themeMenu.contains(e.target) && !toggleButton.contains(e.target)) closeThemeMenu(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && themeMenu) closeThemeMenu(); });
-
-  let adaptTimer = null;
-  const pageStartTime = Date.now();
-  function scheduleAdaptSurfaces(delay) {
-    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-    clearTimeout(adaptTimer);
-    const effectiveDelay = delay ?? (Date.now() - pageStartTime < 2500 ? 1200 : 400);
-    adaptTimer = setTimeout(() => {
-      if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-      if (isDarkMode && !isAuthDisabled()) adaptSurfaces();
-    }, effectiveDelay);
-  }
 
   let syncScheduled = false;
   const debouncedSync = () => {
@@ -380,19 +158,12 @@
       const restored = takeThemeToRestore();
       if (restored) { applyTheme(true, restored); return; }
       checkReadingView();
-      cleanupDuplicateButtons();
+      toggle.cleanupDuplicateButtons();
       const nav = document.querySelector('.cvr-c-primary-navigation');
       updateTogglePosition(!nav || toggleButton.parentElement !== nav || !toggleButton.isConnected);
       if (isDarkMode) scheduleAdaptSurfaces();
     });
   };
-
-  function checkReadingView() {
-    if (typeof document === 'undefined' || !document.documentElement) return;
-    const isReading = Boolean(document.querySelector('cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"], cnt-notice-item-view-dialog'));
-    if (isReading) document.documentElement.setAttribute('data-connectea-reading-view', 'true');
-    else document.documentElement.removeAttribute('data-connectea-reading-view');
-  }
 
   new MutationObserver(records => {
     if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
@@ -409,9 +180,12 @@
   window.addEventListener('storage', e => { if (e.key === STORAGE_KEY && e.newValue) applyTheme(!isAuthDisabled() && e.newValue === 'dark'); });
   window.addEventListener('connectea:themechange', e => {
     if (isAuthDisabled()) return;
-    const tId = e.detail?.themeId || 'dark', isDark = e.detail?.theme ? e.detail.theme.isDark : (tId !== 'light');
-    activeTheme = tId; applyTheme(isDark, tId);
+    const tId = e.detail?.themeId || 'dark';
+    const isDark = e.detail?.theme ? e.detail.theme.isDark : (tId !== 'light');
+    activeTheme = tId;
+    applyTheme(isDark, tId);
   });
+
   updateTogglePosition();
   if (isDarkMode) scheduleAdaptSurfaces(600);
   if (document.readyState === 'loading') {
@@ -436,6 +210,7 @@
     });
   }
 
+  // Connect mounts its navbar late; poll briefly until the toggle is in place
   let mountPollCount = 0;
   const mountPollInterval = setInterval(() => {
     mountPollCount++;
@@ -453,22 +228,17 @@
 
   window.ConnectifyTheme = {
     isLoginUrl, isLogoutUrl, isLoginOrLogoutUrl: isAuthDisabled, isAuthDisabled, applyTheme,
-    isDarkMode: () => (isAuthDisabled() ? false : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.isDarkMode() : isDarkMode)),
-    getTheme: () => (isAuthDisabled() ? 'light' : (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getTheme() : (isDarkMode ? 'dark' : 'light'))),
-    getLastTheme: () => (window.ConnectifyThemeRegistry?.getLastTheme ? window.ConnectifyThemeRegistry.getLastTheme() : (localStorage.getItem('connectea:last_theme_id') || 'dark')),
-    setTheme: (id, colors) => {
-      if (isAuthDisabled()) return false;
-      const res = window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setTheme(id, colors) : true;
-      applyTheme(id !== 'light', id);
-      return res;
-    },
-    getAvailableThemes: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getAvailableThemes().filter(t => t.id !== 'light' && t.id !== 'custom') : [{ id: 'dark', name: 'Dark', icon: '☾' }]),
-    registerTheme: def => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.registerTheme(def) : false),
-    getCustomColors: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getCustomColors() : null),
-    setCustomColors: c => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setCustomColors(c) : false),
-    getCustomBackground: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.getCustomBackground() : null),
-    setCustomBackground: url => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setCustomBackground(url) : false),
-    clearCustomBackground: () => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.clearCustomBackground() : false),
-    setGlassDiffusion: en => (window.ConnectifyThemeRegistry ? window.ConnectifyThemeRegistry.setGlassDiffusion(en) : false)
+    isDarkMode: () => (isAuthDisabled() ? false : registry.isDarkMode()),
+    getTheme: () => (isAuthDisabled() ? 'light' : registry.getTheme()),
+    getLastTheme: () => registry.getLastTheme(),
+    setTheme: (id, colors) => (isAuthDisabled() ? false : registry.setTheme(id, colors)),
+    getAvailableThemes: () => registry.getAvailableThemes().filter(t => t.id !== 'light' && t.id !== 'custom'),
+    registerTheme: def => registry.registerTheme(def),
+    getCustomColors: () => registry.getCustomColors(),
+    setCustomColors: c => registry.setCustomColors(c),
+    getCustomBackground: () => registry.getCustomBackground(),
+    setCustomBackground: url => registry.setCustomBackground(url),
+    clearCustomBackground: () => registry.clearCustomBackground(),
+    setGlassDiffusion: en => registry.setGlassDiffusion(en)
   };
 })();

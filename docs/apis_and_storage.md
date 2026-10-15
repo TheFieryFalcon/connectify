@@ -38,7 +38,9 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyNotifications` | `notifications.js` | Universal toast and vertical stacked notifications engine |
 | `window.ConnectifyNewGrade` | `new-grade.js` | Grade change detection, auto-expansion, and jump-to-card navigation |
 | `window.ConnectifyDomSweeper` | `dom-sweeper.js` | DOM health monitor and component restoration |
-| `window.ConnectifyThemeRegistry` | `theme-registry.js` | Preset palettes, custom theme registry, and color validation |
+| `window.ConnectifyThemeAuth` | `theme-auth.js` | Login/logout detection and post-login theme restore |
+| `window.ConnectifyThemeTokens` | `theme-custom-tokens.js` | Custom tokens, wallpaper (with extension-storage fallback), glass |
+| `window.ConnectifyThemeRegistry` | `theme-registry.js` / `theme-custom-themes.js` | Theme registry, switching, saved custom themes |
 | `window.ConnectifyThemeCustomizer` | `theme-customizer.js` | In-DOM theme designer modal, 14-token preview, wallpaper upload |
 | `window.ConnectifyIsUserActive` | `navigation.js` | Returns boolean indicating recent user interaction (<90s) |
 

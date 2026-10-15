@@ -47,32 +47,14 @@ This document covers notifications, grade change tracking, DOM integrity monitor
   - Monitors session expiry modals and unloads while idle (> 5 min) to set `cx-session-expired`.
   - Intercepts manual logout clicks to set `cx-manual-logout`.
 
-#### [`theme-registry.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-registry.js)
-- **Role**: Canonical palette definitions and custom theme registry.
-- **Key Functions**:
-  - `BUILTIN_PALETTES`: Stores immutable definitions for 7 built-in presets: Dark, Quantum Dark, AMOLED Black, Midnight Navy, Emerald Forest, Sunset Orange, and Liquid Glass.
-  - `getPresetPalettes()`, `getCustomThemes()`, `saveCustomTheme()`, `deleteCustomTheme()`: CRUD operations on custom theme JSON objects across `localStorage` and `chrome.storage.local`. `saveCustomTheme` performs case-insensitive name matching to overwrite in place, safeguards against `QuotaExceededError` on large wallpapers, and immediately loads saved themes on startup (re-applying a custom theme found only in `chrome.storage.local`).
-  - `applyCustomTokens()` / `clearCustomTokens()`: Write custom tokens (incl. `--cx-card-bg`, `--cx-nav-bg`) inline on both `<html>` and `<body>`, clearing stale tokens first. `setTheme()` stamps `data-connectea-theme` on both; the base dark token rule only targets `html.connectea-dark` so `<body>` never shadows custom tokens.
-- **Export**: `window.ConnectifyThemeRegistry`.
-
-#### [`theme-customizer.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.js)
-- **Role**: In-DOM visual theme designer modal and static mockup preview.
-- **Key Functions**:
-  - `open(themeToEdit)` / `close()`: Mounts `#cx-customizer-modal` with Basic Mode (6 tokens) and Full Mode (14 tokens).
-  - Live Preview: Displays subject card mockup rendering all 14 tokens with 16px rounded curvature. Hovering over any element shows an interactive tooltip (`#cx-preview-tooltip`) stating the element name and coloring CSS token.
-  - Dual Sliders: Blur strength slider (0–40px, `#cx-glass-blur-slider`) and transparency slider (10%–100%, `#cx-glass-opacity-slider`) dynamically binding to `--cx-glass-blur` and `--cx-glass-opacity`.
-  - Save Theme: Persists theme definition and calls `window.ConnectifyTheme.applyTheme()` for instantaneous UI synchronization.
-  - HSV/HEX Color Picker, Wallpaper Upload, and JSON Import / Export.
-- **Export**: `window.ConnectifyThemeCustomizer`.
-
-#### [`theme.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.js)
-- **Role**: Zero-flicker multi-theme switcher and dynamic surface contrast adaptation.
-- **Key Functions**:
-  - Injects `#connectea-theme-toggle` into the navbar with enlarged 12x12 chevron dropdown trigger (`.connectea-theme-arrow`).
-  - Opens `#connectea-theme-menu` popover listing presets, custom themes, and "+ Customize Theme..." button meeting $\ge 5:1$ contrast.
-  - `applyTheme(id)`: Sets `data-connectea-theme`, handles custom wallpaper, and toggles Liquid Glass diffusion.
-  - `adaptSurfaces()`: Safely identifies unstyled surfaces across Connect and tags them with `data-connectea-surface`.
-  - Automatically suppresses dark themes on `/login` and restores the user's active theme upon successful login.
+#### Theme scripts (`src/theme/`, manifest order)
+- **`theme-auth.js`** (`ConnectifyThemeAuth`): login/logout URL detection, `markAuthPage()`, and `rememberThemeForLogin()` / `forgetThemeForLogin()` / `takeThemeToRestore()` for restoring the dark theme after sign-in.
+- **`theme-custom-tokens.js`** (`ConnectifyThemeTokens`): custom tokens (incl. `--cx-card-bg`, `--cx-nav-bg`) written inline on `<html>` and `<body>`, cleared before each apply; wallpaper stored in `localStorage` with a `chrome.storage.local` fallback for over-quota images (restored on load); glass toggle.
+- **`theme-palettes.js`** (`ConnectifyThemePalettes`): the 7 preset palettes (Dark, Quantum Dark, AMOLED, Midnight, Forest, Twilight Plum, Liquid Glass).
+- **`theme-registry.js`** (`ConnectifyThemeRegistry`): registry, `getTheme()`/`setTheme()`/`getLastTheme()`; `setTheme()` stamps classes and `data-connectea-theme` on `<html>` and `<body>` and fires `connectea:themechange`.
+- **`theme-custom-themes.js`**: saved custom themes (`getCustomThemes`, `saveCustomTheme` overwrites by case-insensitive name, `deleteCustomTheme` removes from both stores); re-applies a theme only found in extension storage.
+- **Customizer** (`ConnectifyThemeCustomizer`): `theme-color-utils.js` (colour maths, escaping, `pickColors`, Basic-mode derivation), `theme-customizer-markup.js` (escaped modal HTML, Basic 6 / Full 14 tokens, preview with `#cx-preview-tooltip`), `theme-customizer-controls.js` (picker, wallpaper, sanitised JSON import/export, blur 0–40px and transparency 10–100% sliders), `theme-customizer.js` (state, open/save via `registry.setTheme()`).
+- **Engine**: `theme-surface-adapter.js` tags unstyled light surfaces (`data-connectea-surface`/`-ink`); `theme-toggle.js` mounts `#connectea-theme-toggle`; `theme-menu.js` renders `#connectea-theme-menu`; `theme.js` (`ConnectifyTheme`) applies themes on `connectea:themechange`, disables them on login/logout and restores after sign-in.
 
 #### [`auto-login.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/auto-login.js)
 - **Role**: Auto-submits login credentials on `https://login.det.wa.edu.au/*` while respecting session expiry and manual logout.
@@ -89,19 +71,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 - **[`atar.css`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar.css)**: Styling for calculator modal (`#connectea-atar`), target planning forms, course tables, and dark theme variants.
 - **[`progress.css`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/progress.css)**: Progress graph modal layout and SVG stroke/fill rules.
 - **[`sidebar.css`](file:///Users/uwong/Downloads/2.1.14_0/src/sidebar/sidebar.css)** & Submodules: Modular stylesheet bundle comprising `sidebar-drawer.css`, `sidebar-notifications.css`, `sidebar-predictor.css`, and `sidebar-settings.css`.
-- **[`theme.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.css)** & Submodules: Modular multi-theme stylesheet cascade comprising:
-  - [`theme-tokens.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-tokens.css): Palette CSS custom properties for all presets and compact arrow trigger geometry.
-  - [`theme-core.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-core.css): Global variables, canvas, and base layout.
-  - [`theme-tiles.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-tiles.css): Subject tiles, headers, and scoped wallpaper-translucent bodies.
-  - [`theme-cards.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-cards.css): Assessment task cards, summary marks box, and detail rows.
-  - [`theme-controls.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-controls.css): High-contrast buttons ($\ge 5:1$), checkboxes, and dropdowns.
-  - [`theme-material.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-material.css): Angular Material class page contrast normalization.
-  - [`theme-feed.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-feed.css): Notices, feeds, forums, stream posts, and light mode container panel backgrounds (`rgba(255, 255, 255, 0.90)`).
-  - [`theme-tables.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-tables.css): Grade tables, attendance lists, and report summary tables.
-  - [`theme-navigation.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-navigation.css): Top navigation, active tabs, breadcrumbs, and menus.
-  - [`theme-surfaces.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-surfaces.css): Dynamic surface contrast adapters and display scaling.
-  - [`theme-customizer.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.css): In-DOM theme designer dialog, color picker, and high-contrast button styling ($\ge 5:1$).
-  - [`theme.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.css): Entry point enforcing solid opaque panels when Liquid Glass is off, 16px bottom curvature with transparent tile bodies when on, and preserving button/input styling.
+- **`src/theme/styles/`**: the theme cascade, one concern per file (<= 250 lines), loaded in manifest order: tokens and palettes (`theme-tokens.css`, `theme-surface-base.css`, `theme-component-base.css`), core and navigation, tiles, cards and task rows, controls and buttons, material, feed, tables and dialogs, navigation and discussions, surfaces and display scaling, customizer, and finally `theme.css` (Liquid Glass-only geometry, opaque solid-theme panels, glass-only outline pass-through). Every selector is scoped to a theme hook (Test 153).
 
 #### Manifest & Update Manifests
 - **[`manifest.json`](file:///Users/uwong/Downloads/2.1.14_0/manifest.json)**: Extension manifest (Manifest V3) declaring permissions (`storage`), browser settings for Firefox Gecko, modular stylesheets, content scripts in dependency order, and matched URL patterns.
