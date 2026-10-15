@@ -19,7 +19,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Functionality**:
   - Instant zero-flicker switching between 7 built-in themes: Dark (`dark`), Quantum Dark (`quantum` with Gruvbox bright green `#b8bb26` highlights), AMOLED Black (`amoled`), Midnight Navy (`midnight`), Emerald Forest (`forest`), Sunset Orange (`sunset`), and Apple Liquid Glass (`liquid-glass`).
   - In-DOM Theme Customizer: Basic Mode (6 tokens) and Full Mode (14 tokens) with live preview rendering all 14 tokens in authentic Connect mockup elements, interactive HSV/HEX color picker, and JSON import/export.
-  - Apple Liquid Glass Mode: 16px corner curvature on Connect panels, 12px on buttons, 10px on inputs, and frosted glass diffusion (`blur(16px)`).
+  - Apple Liquid Glass Mode: 16px corner curvature on Connect panels, cards, tiles and modals (buttons, inputs and expansion headers keep native geometry), frosted glass diffusion (`blur(16px)`), and transparent Assessment Outlines wrappers with 0px `.cvr-u-padding--md`. Other themes keep Connect's native geometry and padding.
   - Custom Wallpaper: User wallpaper upload with local persistence and translucent accordions/tile bodies allowing wallpaper pass-through.
   - Login page suppression: Dark themes temporarily disable on `/login` and automatically restore upon successful login (`connectea:theme:restore_theme`).
   - Persists active theme in `localStorage` (`connectea:theme:id`, `connectea:theme:last_theme`).

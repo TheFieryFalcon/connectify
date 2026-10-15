@@ -97,7 +97,7 @@
 .connectea-dark #connectify-sidebar {
   background: var(--cx-surface-bg, #202933) !important;
   color: var(--cx-text-primary, #e1eaf3) !important;
-  border-color: var(--cx-border, #425567) !important;
+  border-color: var(--cx-border-strong, #5a7391) !important;
 }
 .connectea-dark #connectify-sidebar label:not(.cx-cat-name-label) {
   color: var(--cx-text-primary, #e2e8f0) !important;

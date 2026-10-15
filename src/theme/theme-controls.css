@@ -348,37 +348,6 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
   fill: #ffffff !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-icon-button,
-.mat-icon-button {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  vertical-align: middle !important;
-}
-
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-icon-button .mat-button-wrapper,
-.mat-icon-button .mat-button-wrapper {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-  line-height: 1 !important;
-}
-
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-icon-button :is(mat-icon, .mat-icon, cnt-icon, .mat-ligature-font, [class*="icon"]) {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  line-height: 1 !important;
-  font-size: 24px !important;
-  width: 24px !important;
-  height: 24px !important;
-  margin: 0 !important;
-  vertical-align: middle !important;
-}
-
 /* Primary Action Buttons */
 .connectea-dark :is(
   .v-button--primary, .eds-c-button--primary, .cvr-c-button--primary,

@@ -141,11 +141,16 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
 }
 
-.connectea-dark :is(.v-tooltip, .v-tooltip-text) {
+.connectea-dark .v-tooltip {
   background-color: var(--cx-surface-elevated, #18202b) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
-  border: none !important;
+  border: 1px solid var(--cx-border-strong, #5a7391) !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+}
+
+.connectea-dark .v-tooltip .v-tooltip-text {
+  background-color: transparent !important;
+  color: inherit !important;
 }
 
 .connectea-dark .popover-header {

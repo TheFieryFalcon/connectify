@@ -2116,7 +2116,7 @@ runTest('theme.css and theme.js normalize class page red outlines and headers wi
 
   assert.ok(css.includes('.eds.cvr.ngm') && css.includes('.text-primary'), 'theme.css must normalize .text-primary in .eds.cvr.ngm');
   assert.ok(css.includes('.eds.cvr.ngm') && css.includes('.mat-divider--primary'), 'theme.css must normalize .mat-divider--primary in .eds.cvr.ngm');
-  assert.ok(!css.includes('background-color: transparent !important;\n  color: inherit !important;'), 'theme.css must not have generic transparent div.w-100 rule');
+  assert.ok(!/div\.w-100[^{}]*\{[^}]*background-color: transparent/.test(css), 'theme.css must not have generic transparent div.w-100 rule');
   assert.ok(js.includes('isDarkColor'), 'theme.js must implement isDarkColor helper');
   assert.ok(js.includes("el.hasAttribute('data-connectea-surface')"), 'theme.js must not tag surface containers as ink');
 });
@@ -2587,8 +2587,9 @@ runTest('Test 105: Aggressive accordion expand/collapse performance optimization
   assert.ok(dataJs.includes('if (window.ConnectifyIsAccordionAnimating) return;'), 'data.js MutationObserver must mute during accordion animation');
   assert.ok(dataJs.includes('requestAnimationFrame'), 'data.js must debounce syncAllCharts with requestAnimationFrame');
 
-  // Verify CSS compositor optimization
-  assert.ok(themeCss.includes('will-change: height, max-height;'), 'theme.css must include will-change on accordion panels');
+  // Accordion panels use layout containment; will-change on height is not compositable and only adds layers
+  assert.ok(themeCss.includes('contain: layout style;'), 'theme.css must contain layout on accordion panels');
+  assert.ok(!themeCss.includes('will-change: height, max-height;'), 'theme.css must not set will-change on accordion panels');
 });
 
 runTest('Test 106: All project JS files pass strict JavaScript syntax validation', () => {
@@ -6589,9 +6590,11 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   assert.ok(parityTestJs.includes('isPanelCardTileModal') && parityTestJs.includes("tid !== 'liquid-glass' || !isPanelCardTileModal"),
             'parity test must ignore only panels, cards, tiles, and modals for liquid-glass');
 
-  // 5. Element .cvr-u-padding--md has 0px padding
-  assert.ok(themeTilesCss.includes('.cvr-u-padding--md') && (themeTilesCss.includes('padding: 0 !important') || themeTilesCss.includes('padding: 0px !important')),
-            'theme-tiles.css must set padding: 0 on .cvr-u-padding--md');
+  // 5. .cvr-u-padding--md has 0px padding in Liquid Glass only; other modes keep native padding
+  assert.ok(themeCss.includes('[data-connectea-glass="true"]) .cvr-u-padding--md {\n  padding: 0 !important;'),
+            'theme.css must set padding: 0 on .cvr-u-padding--md only in Liquid Glass');
+  assert.ok(!themeTilesCss.includes('.cvr-u-padding--md { padding: 0 !important; }'),
+            'theme-tiles.css must not remove .cvr-u-padding--md padding in every mode');
 
   // 6. Theme Customizer dual sliders (blur strength & transparency)
   assert.ok(customizerJs.includes('cx-glass-blur-slider') && customizerJs.includes('cx-glass-opacity-slider'),
@@ -6634,24 +6637,23 @@ runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, p
   const customizerCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-customizer.css'), 'utf8');
   const registryJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8');
 
-  // 1. Assessment outlines fix: .cvr-u-padding--md has 0px padding and is NOT display: none
-  assert.ok(themeTilesCss.includes('.cvr-u-padding--md') && themeTilesCss.includes('padding: 0 !important'),
-    'theme-tiles.css must set 0px padding on .cvr-u-padding--md');
+  // 1. Assessment outlines fix: .cvr-u-padding--md has 0px padding in Liquid Glass only and is NOT display: none
+  assert.ok(themeCss.includes('[data-connectea-glass="true"]) .cvr-u-padding--md {\n  padding: 0 !important;'),
+    'theme.css must set 0px padding on .cvr-u-padding--md in Liquid Glass');
   assert.ok(!themeTilesCss.includes('.cvr-u-padding--md { display: none !important; }'),
     'theme-tiles.css must not hide .cvr-u-padding--md');
 
-  // 2. Universal 16px panel & tile body curvature
-  assert.ok(themeTokensCss.includes('border-bottom-left-radius: 16px !important') &&
-            themeTokensCss.includes('border-bottom-right-radius: 16px !important'),
-    'theme-tokens.css must round panel bottom corners with 16px radius');
+  // 2. 16px panel & tile body curvature in Liquid Glass only
+  assert.ok(themeCss.includes('[data-connectea-glass="true"]) :is(.eds-c-tile__body, .cvr-c-tile__body, .eds-c-card__body, .cvr-c-card__body) {\n  border-bottom-left-radius: 16px !important;\n  border-bottom-right-radius: 16px !important;'),
+    'theme.css must round tile body bottom corners in Liquid Glass');
   assert.ok(!themeTokensCss.includes(':is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .connectea-panel, .cx-compound-progress-bar, #ng-zone__classes-metrics-summary) { border-radius: 0 !important; }'),
     'theme-tokens.css must not force 0 border radius on panels when liquid glass is off');
   assert.ok(themeMaterialCss.includes('.connectea-dark .v-panel-content') &&
             themeMaterialCss.includes('background-color: transparent !important'),
     'theme-material.css must make .v-panel-content transparent');
   assert.ok(themeTilesCss.includes('.eds-c-tile__body') &&
-            themeTilesCss.includes('border-bottom-left-radius: 16px !important'),
-    'theme-tiles.css must round bottom corners of tile bodies');
+            !themeTilesCss.includes('border-bottom-left-radius: 16px !important'),
+    'theme-tiles.css must not round tile bodies outside Liquid Glass');
 
   // 3. Customizer Preview inspection data attributes and hover tooltip
   assert.ok(customizerJs.includes('data-cx-elem="Card Surface"') &&
@@ -6713,16 +6715,16 @@ runTest('Test 151: Custom theme colors reach body, View button stays square, and
   assert.ok(registryJs.includes('if (active?.isCustom && document.documentElement?.dataset.connecteaTheme !== active.id) setTheme(active.id);'),
     'loadSavedCustomThemes must re-apply a custom theme found only in chrome.storage');
 
-  // 3. View / positive buttons are square and excluded from the 16px panel curvature
+  // 3. View / positive buttons are square; curvature only targets explicit panel, card and tile classes
   assert.ok(/background-color: var\(--cx-positive-bg, #8cae04\) !important;[\s\S]{0,160}border-radius: 0 !important;/.test(themeFeedCss),
     'theme-feed.css positive (View) buttons must enforce border-radius: 0');
-  const buttonExclusion = ':not(button):not(a):not(.v-button):not(.eds-c-button):not([role="button"]):not([class*="button"]):not([class*="action"])';
-  assert.ok(themeCss.includes(buttonExclusion) && themeTokensCss.includes(buttonExclusion),
-    'theme.css and theme-tokens.css curvature rules must exclude buttons and action controls');
+  assert.ok(!/\[class\*="(card|panel|tile)"\]/.test(themeCss), 'curvature must not catch buttons through [class*=...] substring matches');
 
-  // 4. Wallpaper passes through layout containers and tile-only wrappers; tiles stay opaque without Liquid Glass
-  assert.ok(themeCss.includes('html[data-connectea-has-custom-bg="true"].connectea-dark:not([data-connectea-login]) :is(\n  #main-content'),
-    'theme.css must make layout containers transparent when a custom wallpaper is active');
+  // 4. Liquid Glass only: layout containers and tile-only wrappers are transparent; solid themes stay opaque
+  assert.ok(themeCss.includes('[data-connectea-glass="true"]):not([data-connectea-login]) :is(\n  #main-content'),
+    'theme.css must make layout containers transparent in Liquid Glass');
+  assert.ok(!themeCss.includes('html[data-connectea-has-custom-bg="true"].connectea-dark:not([data-connectea-login])'),
+    'wallpaper pass-through must not apply outside Liquid Glass');
   assert.ok(themeCss.includes(':has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile)'),
     'theme.css must only clear wrappers that contain tiles, never the tiles themselves');
   assert.ok(themeCss.includes('background-color: var(--cx-surface-bg, #1e2632) !important'),
@@ -6774,6 +6776,86 @@ runTest('Test 152: Theme auditor opens a visible browser only for login, then co
   const crawler = fs.readFileSync(path.resolve(__dirname, 'scripts/crawl-connect-directories.js'), 'utf8');
   assert.ok(auditor.includes("require('./puppeteer-auth')") && auditor.includes('launchAuthenticated({'), 'auditor must use launchAuthenticated');
   assert.ok(crawler.includes("require('./puppeteer-auth')") && crawler.includes('launchAuthenticated({'), 'crawler must use launchAuthenticated');
+});
+
+runTest('Test 153: Theme CSS selectors are scoped to a theme hook (native Connect stays untouched)', () => {
+  // Rule preludes at any nesting depth; @media/@supports/@layer are descended into, other at-rules skipped
+  function cssSelectors(css) {
+    css = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    const out = [];
+    let prelude = '', depth = 0, skipDepth = -1;
+    for (const ch of css) {
+      if (ch === '{') {
+        const p = prelude.trim();
+        prelude = '';
+        if (skipDepth < 0) {
+          if (p.startsWith('@')) { if (!/^@(media|supports|layer)\b/.test(p)) skipDepth = depth; }
+          else out.push(p);
+        }
+        depth++;
+      } else if (ch === '}') {
+        depth--;
+        if (depth === skipDepth) skipDepth = -1;
+        prelude = '';
+      } else if (ch === ';' && skipDepth < 0) prelude = '';
+      else prelude += ch;
+    }
+    return out;
+  }
+  function splitSelectorList(sel) {
+    const parts = [];
+    let parens = 0, cur = '';
+    for (const ch of sel) {
+      if (ch === '(') parens++;
+      if (ch === ')') parens--;
+      if (ch === ',' && parens === 0) { parts.push(cur.trim()); cur = ''; } else cur += ch;
+    }
+    if (cur.trim()) parts.push(cur.trim());
+    return parts;
+  }
+
+  const HOOK = /connectea|connectify|\bcx-|#cx|\.cx|data-cx/;
+  // Intentional rules that apply in every mode, including Default (native) styling
+  const ALLOWED = new Set([
+    ':root', // light token defaults and display-width scale variables
+    '.eds-c-accordion__panel', '.cvr-c-accordion__panel', // layout containment for accordion performance
+    '.cvr-c-primary-navigation', // theme toggle mount point (toggle exists in every mode)
+    ':is(.v-Notification-system, .v-Notification-system *)', // Connect timeout alerts are never themed
+    ':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)', // display-width scaling
+    '.cvr-c-task__details', // display-width scaling
+    '#ng-zone__classes-metrics-summary', // classes list back panel in all modes
+    'cnt-paginator', '.cnt-paginator', 'cnt-paginator .container-fluid', '.cnt-paginator .container-fluid', // paginator in all modes
+    ':is(cnt-paginator, .cnt-paginator) :is(.mat-paginator, mat-paginator, .connect-paginator-container, .mat-paginator-container, .mat-paginator-outer-container)'
+  ]);
+
+  const themeDir = path.resolve(__dirname, 'src/theme');
+  const offenders = [];
+  for (const file of fs.readdirSync(themeDir).filter(f => f.endsWith('.css')).sort()) {
+    const css = origReadFileSync.call(fs, path.join(themeDir, file), 'utf8');
+    for (const rule of cssSelectors(css)) {
+      for (const sel of splitSelectorList(rule)) {
+        const norm = sel.replace(/\s+/g, ' ');
+        if (/^(from|to|\d+%)$/.test(norm) || HOOK.test(norm) || ALLOWED.has(norm)) continue;
+        offenders.push(`${file}: ${norm}`);
+      }
+    }
+  }
+  assert.deepStrictEqual(offenders, [], `Unscoped theme selectors change native Connect styling:\n${offenders.join('\n')}`);
+
+  // Geometry is Liquid Glass only and anchored on <html>
+  const themeCss = origReadFileSync.call(fs, path.join(themeDir, 'theme.css'), 'utf8');
+  const tokensCss = origReadFileSync.call(fs, path.join(themeDir, 'theme-tokens.css'), 'utf8');
+  const controlsCss = origReadFileSync.call(fs, path.join(themeDir, 'theme-controls.css'), 'utf8');
+  const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  assert.ok(themeCss.includes(`${glass} :is(\n  .eds-c-card, .cvr-c-card, .eds-c-tile`) && /border-radius: 16px !important;/.test(themeCss),
+    'panel curvature must be scoped to Liquid Glass');
+  assert.ok(!/\[class\*="(card|panel|tile)"\]/.test(themeCss + tokensCss), 'curvature must not use [class*=card/panel/tile] substring selectors');
+  assert.ok(!themeCss.includes('.mat-expansion-panel-header') && !tokensCss.includes('Universal Panel & Tile Background Curvature'),
+    'expansion panel headers must keep native geometry and curvature must live only in theme.css');
+  assert.ok(!/:not\(\[data-connectea-[a-z-]+="[a-z-]+"\]\):not\(\[data-connectea-[a-z-]+="[a-z-]+"\]\)(\.connectea-dark|:is\(html\.connectea-dark, body)/.test(fs.readFileSync(path.join(themeDir, 'theme.css'), 'utf8')),
+    'non-glass negations must be anchored on html, never matched on body');
+  assert.ok(!controlsCss.includes('font-size: 24px !important;\n  width: 24px !important;'), 'icon buttons must keep native icon sizes');
+  assert.ok(!controlsCss.includes('.mat-icon-button .mat-button-wrapper {'), 'icon button wrappers must keep native layout');
 });
 
 Promise.all(pendingTestPromises).then(() => {

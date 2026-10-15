@@ -2120,16 +2120,14 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
             if (isDistinct) {
               const bgCr = getContrast(elBg, parentBg);
               if (bgCr <= 1.5) {
-                const bWidth = parseFloat(style.borderWidth) || parseFloat(style.borderTopWidth) || 0;
-                const bStyle = style.borderStyle || style.borderTopStyle || 'none';
-                const bColor = parseRgb(style.borderColor || style.borderTopColor);
-                const hasBorder = bWidth >= 0.75 && bStyle !== 'none' && bStyle !== 'hidden' && bColor && bColor.a > 0.3;
-                let hasSufficientBorderContrast = false;
-                if (hasBorder) {
-                  const bCrAgainstEl = getContrast(bColor, elBg);
-                  const bCrAgainstParent = getContrast(bColor, parentBg);
-                  hasSufficientBorderContrast = bCrAgainstEl >= 1.8 || bCrAgainstParent >= 1.8;
-                }
+                // A separator on any side counts (e.g. a thead bottom border or a sidebar right edge)
+                const hasSufficientBorderContrast = ['Top', 'Right', 'Bottom', 'Left'].some(side => {
+                  const bWidth = parseFloat(style[`border${side}Width`]) || 0;
+                  const bStyle = style[`border${side}Style`] || 'none';
+                  const bColor = parseRgb(style[`border${side}Color`]);
+                  if (bWidth < 0.75 || bStyle === 'none' || bStyle === 'hidden' || !bColor || bColor.a <= 0.3) return false;
+                  return getContrast(bColor, elBg) >= 1.8 || getContrast(bColor, parentBg) >= 1.8;
+                });
                 if (!hasSufficientBorderContrast) {
                   const isExempt = Boolean(el.closest?.(
                     '.v-Notification-system, [class*="progress"], [class*="chart"], [class*="box-plot"], .highcharts-container, .cvr-c-task__chart'

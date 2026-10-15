@@ -207,11 +207,6 @@
   contain: layout style;
 }
 
-.eds-c-accordion__panel,
-.cvr-c-accordion__panel {
-  will-change: height, max-height;
-}
-
 /* --------------------------------------------------------------------------
    11. Assessment Task Rows (.cvr-c-task)
    -------------------------------------------------------------------------- */

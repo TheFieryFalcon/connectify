@@ -14,8 +14,13 @@
  * - theme-surfaces.css: Learning content, badges & display-width scaling
  */
 
-/* Translucent Accordions & Subject Tile Bodies strictly over Glass */
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+/* Scope hooks are anchored on <html>: <body> never carries data-connectea-glass, so a body-level
+   negation would wrongly match while Liquid Glass is on.
+   Liquid Glass: html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])
+   Solid:        html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) */
+
+/* Liquid Glass: translucent accordions and tile bodies */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
   .eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, [data-subject-card], .v-panel, .mat-card, .cvr-c-dashboard-card, .portlet
 ) :is(
   .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content,
@@ -25,54 +30,57 @@
 ) {
   background: transparent !important;
   background-color: transparent !important;
-  border-bottom-left-radius: 16px !important;
-  border-bottom-right-radius: 16px !important;
 }
 
-/* Non-Liquid-Glass Panels: strictly opaque solid surfaces even with custom wallpapers */
-:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+/* Solid themes: panels stay opaque, even with a custom wallpaper */
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) :is(
   .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
   .v-panel, .mat-card, .cvr-c-dashboard-card, .connectea-panel, [data-subject-card]
 ) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
 }
 
-/* Universal Panel, Card, Tile & Modal Curvature */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
-  .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
-  .v-panel, .mat-card, .mat-expansion-panel, .mat-expansion-panel-header,
-  .connectea-panel, .cvr-c-dashboard-card, .portlet, .portlet-content, .portlet-body,
-  [class*="card"], [class*="panel"], [class*="tile"], #ng-zone__classes-metrics-summary
-):not(button):not(a):not(.v-button):not(.eds-c-button):not([role="button"]):not([class*="button"]):not([class*="action"]) {
+/* Liquid Glass: 16px curvature on panels, cards and tiles. Solid themes keep Connect's native geometry.
+   Explicit classes only: substring matches caught popups, tooltips, buttons and expansion headers. */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-reports-tile, [data-subject-card],
+  .v-panel, .mat-card, .mat-expansion-panel, .cvr-c-expansion-panel, .cvr-c-expandable-panel,
+  .cvr-c-resources-panel, .cvr-c-tree-panel, .cvr-c-folder-panel, .cvr-c-timeline-summary-data-panel,
+  .cvr-c-feedback-content-panel, .eds-c-page-feedback-panel, .connectea-panel, .cvr-c-dashboard-card,
+  .portlet, .file-card, .image-card, .user-card, #ng-zone__classes-metrics-summary
+) {
   border-radius: 16px !important;
-  border-bottom-left-radius: 16px !important;
-  border-bottom-right-radius: 16px !important;
+}
+
+/* Clip only tiles and cards to their corners; popups and menus must never be clipped */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .mat-card, .connectea-panel) {
   overflow: hidden !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
-  .eds-c-tile__body, .cvr-c-tile__body, .eds-c-card__body, .cvr-c-card__body
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.eds-c-tile__body, .cvr-c-tile__body, .eds-c-card__body, .cvr-c-card__body) {
   border-bottom-left-radius: 16px !important;
   border-bottom-right-radius: 16px !important;
 }
 
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.modal-content, .ui-dialog, mat-dialog-container) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.modal-content, .ui-dialog, mat-dialog-container) {
   border-radius: 20px !important;
 }
 
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cx-compound-progress-bar {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-compound-progress-bar {
   border-radius: 10px !important;
   overflow: hidden !important;
 }
 
-/* Custom wallpaper pass-through: layout containers and wrappers that only hold tiles (e.g. the Assessment
-   Outlines outer .v-panel) are transparent so their padding never paints over the wallpaper. Tiles, cards and
-   panels themselves stay opaque unless Liquid Glass is on. */
-html[data-connectea-has-custom-bg="true"].connectea-dark:not([data-connectea-login]) :is(
+/* Liquid Glass: Assessment Outlines wrappers drop their padding and become transparent so the
+   background shows between tiles. Solid themes keep native padding and opaque wrappers. */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-u-padding--md {
+  padding: 0 !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :is(
   #main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable
 ),
-html[data-connectea-has-custom-bg="true"].connectea-dark:not([data-connectea-login]) :is(
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :is(
   .v-panel, .v-panel-content, .cvr-u-padding--md
 ):has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile) {
   background: transparent !important;

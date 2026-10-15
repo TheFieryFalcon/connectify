@@ -191,10 +191,15 @@
   box-shadow: 0 11px 15px -7px rgba(0,0,0,0.5), 0 24px 38px 3px rgba(0,0,0,0.35), 0 9px 46px 8px rgba(0,0,0,0.3) !important;
 }
 
-.connectea-dark :is(.v-popupview-popup, .v-popupview-popup-cvr-js-popup-view-panel),
-.connectea-dark :is(.v-popupview-popup, .v-popupview-popup-cvr-js-popup-view-panel) .popupContent,
-.connectea-dark :is(.v-popupview-popup, .v-popupview-popup-cvr-js-popup-view-panel) .v-csslayout {
-  background-color: var(--cx-surface-bg, #1e2632) !important;
+/* Popups paint one elevated surface with a visible edge; inner wrappers inherit it */
+.connectea-dark :is(.v-popupview-popup, .v-popupview-popup-cvr-js-popup-view-panel) {
+  background-color: var(--cx-surface-elevated, #263242) !important;
+  border: 1px solid var(--cx-border-strong, #5a7391) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark :is(.v-popupview-popup, .v-popupview-popup-cvr-js-popup-view-panel) :is(.popupContent, .v-csslayout) {
+  background-color: transparent !important;
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
