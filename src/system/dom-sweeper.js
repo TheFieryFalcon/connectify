@@ -191,7 +191,6 @@
   }
 
   // Initial sweeps
-  setTimeout(sweep, 2000);
   setTimeout(sweep, 5000);
 
   // Periodic health check

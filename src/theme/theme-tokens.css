@@ -23,7 +23,7 @@
 }
 
 /* Base Dark Theme (v3.2.x parity) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark),
+:is(html.connectea-dark:not([data-connectea-theme]), body.connectea-dark:not([data-connectea-theme]), .connectea-dark:not([data-connectea-theme])),
 [data-connectea-theme="dark"].connectea-dark, [data-connectea-theme="dark"] .connectea-dark, html.connectea-dark[data-connectea-theme="dark"] {
   --cx-canvas-bg: #12171f; --cx-canvas-subtle: #0a0d12;
   --cx-surface-bg: #1e2632; --cx-surface-secondary: #18202b; --cx-surface-elevated: #263242;
