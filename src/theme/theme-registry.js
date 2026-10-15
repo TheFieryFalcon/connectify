@@ -124,6 +124,19 @@
     for (const t of getCustomThemes()) {
       if (t && t.id) registerTheme(t);
     }
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+      try {
+        chrome.storage.local.get([STORAGE_CUSTOM_THEMES_LIST], res => {
+          const raw = res?.[STORAGE_CUSTOM_THEMES_LIST];
+          if (raw) {
+            try {
+              const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
+              if (Array.isArray(list)) list.forEach(t => { if (t?.id) registerTheme(t); });
+            } catch {}
+          }
+        });
+      } catch {}
+    }
   }
 
   function saveCustomTheme(themeDef) {
@@ -156,7 +169,12 @@
     try {
       const list = existingList.filter(t => t.id !== id);
       list.push(entry);
-      localStorage.setItem(STORAGE_CUSTOM_THEMES_LIST, JSON.stringify(list));
+      try {
+        localStorage.setItem(STORAGE_CUSTOM_THEMES_LIST, JSON.stringify(list));
+      } catch {
+        const safeList = list.map(t => (t.wallpaper && t.wallpaper.length > 50000 ? { ...t, wallpaper: null } : t));
+        try { localStorage.setItem(STORAGE_CUSTOM_THEMES_LIST, JSON.stringify(safeList)); } catch {}
+      }
       if (typeof chrome !== 'undefined' && chrome.storage?.local) {
         try { chrome.storage.local.set({ [STORAGE_CUSTOM_THEMES_LIST]: JSON.stringify(list) }); } catch {}
       }

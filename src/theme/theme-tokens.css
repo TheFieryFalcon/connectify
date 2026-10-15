@@ -202,9 +202,9 @@
 [data-connectea-reading-view="true"]:is(html, body) { background-image: none !important; background-color: var(--cx-canvas-bg, #121820) !important; }
 [data-connectea-reading-view="true"] :is(cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"], cnt-notice-item-view-dialog, .cvr-c-app-layout, .cvr-c-app-layout__body, #main-content) { background-image: none !important; background-color: var(--cx-canvas-bg, #121820) !important; }
 
-/* Corner Rounding Rules: Strict 0 without Liquid Glass; Aggressive with Liquid Glass */
-:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .connectea-panel, .cx-compound-progress-bar, #ng-zone__classes-metrics-summary) { border-radius: 0 !important; }
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .v-panel-content, .mat-card, .mat-expansion-panel, .mat-expansion-panel-header, .connectea-panel, .cvr-c-dashboard-card, .portlet, .portlet-content, .portlet-body, [class*="card"], [class*="panel"], [class*="tile"], #ng-zone__classes-metrics-summary) { border-radius: 16px !important; border-bottom-left-radius: 16px !important; border-bottom-right-radius: 16px !important; overflow: hidden !important; }
+/* Universal Panel & Tile Background Curvature (16px) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .mat-expansion-panel-header, .connectea-panel, .cvr-c-dashboard-card, .portlet, .portlet-content, .portlet-body, [class*="card"], [class*="panel"], [class*="tile"], #ng-zone__classes-metrics-summary) { border-radius: 16px !important; border-bottom-left-radius: 16px !important; border-bottom-right-radius: 16px !important; overflow: hidden !important; }
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-tile__body, .cvr-c-tile__body, .eds-c-card__body, .cvr-c-card__body) { border-bottom-left-radius: 16px !important; border-bottom-right-radius: 16px !important; }
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.modal-content, .ui-dialog, mat-dialog-container) { border-radius: 20px !important; }
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cx-compound-progress-bar { border-radius: 10px !important; overflow: hidden !important; }
 
@@ -267,7 +267,7 @@
 
 /* Subject Tiles, Cards, Portlets & Dashboard Containers */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .v-panel, .v-panel-content, .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
+  .v-panel, .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
   [data-subject-card], .cvr-c-dashboard-card, [data-connectea-surface],
   .journal-content-article,
   .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content,

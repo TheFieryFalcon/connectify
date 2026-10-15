@@ -27,12 +27,7 @@
     r /= 255; g /= 255; b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
     let h = 0; const s = max === 0 ? 0 : d / max, v = max;
-    if (d !== 0) {
-      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
-      else if (max === g) h = (b - r) / d + 2;
-      else h = (r - g) / d + 4;
-      h /= 6;
-    }
+    if (d !== 0) h = (max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4) / 6;
     return { h: Math.round(h * 360), s, v };
   }
   function hsvToRgb(h, s, v) {
@@ -42,8 +37,7 @@
     return { r: Math.round(arr[0] * 255), g: Math.round(arr[1] * 255), b: Math.round(arr[2] * 255) };
   }
   function adjustLightness(hex, pct) {
-    const { r, g, b } = parseHex(hex);
-    const f = pct >= 0 ? 255 : 0, a = Math.abs(pct) / 100;
+    const { r, g, b } = parseHex(hex), f = pct >= 0 ? 255 : 0, a = Math.abs(pct) / 100;
     return toHex(r + (f - r) * a, g + (f - g) * a, b + (f - b) * a);
   }
 
@@ -62,14 +56,12 @@
     currentTokens.borderSubtle = adjustLightness(border, -12);
     currentTokens.borderStrong = adjustLightness(border, 15);
     currentTokens.accentHover = adjustLightness(accent, 15);
-    const { r, g, b } = parseHex(surface);
-    const lum = 0.2126 * (r / 255) + 0.7152 * (g / 255) + 0.0722 * (b / 255);
+    const { r, g, b } = parseHex(surface), lum = 0.2126 * (r / 255) + 0.7152 * (g / 255) + 0.0722 * (b / 255);
     if (!textPrimary) currentTokens.textPrimary = lum < 0.4 ? '#f8fafc' : '#0f172a';
     currentTokens.textSecondary = lum < 0.4 ? '#d1d5db' : '#475569';
     currentTokens.tileLinkColor = currentTokens.textPrimary;
     currentTokens.buttonHover = adjustLightness(button, 12);
-    const bRgb = parseHex(button);
-    const bLum = 0.2126 * (bRgb.r / 255) + 0.7152 * (bRgb.g / 255) + 0.0722 * (bRgb.b / 255);
+    const bRgb = parseHex(button), bLum = 0.2126 * (bRgb.r / 255) + 0.7152 * (bRgb.g / 255) + 0.0722 * (bRgb.b / 255);
     currentTokens.buttonText = bLum < 0.45 ? '#ffffff' : '#0f172a';
     currentTokens.inputBg = adjustLightness(canvas, -4);
     currentTokens.inputBorder = border;
@@ -81,11 +73,10 @@
     const pVars = {
       '--cx-canvas-bg': currentTokens.canvas, '--cx-canvas-subtle': currentTokens.canvasSubtle || currentTokens.canvas,
       '--cx-surface-bg': currentTokens.surface, '--cx-surface-secondary': currentTokens.surfaceSecondary || currentTokens.surface,
-      '--cx-surface-elevated': currentTokens.surfaceElevated || currentTokens.surface,
-      '--cx-border': currentTokens.border, '--cx-border-subtle': currentTokens.borderSubtle || currentTokens.border,
-      '--cx-accent': currentTokens.accent, '--cx-accent-hover': currentTokens.accentHover || currentTokens.accent,
-      '--cx-text-primary': currentTokens.textPrimary, '--cx-text-secondary': currentTokens.textSecondary,
-      '--cx-tile-link-color': currentTokens.tileLinkColor || currentTokens.textPrimary,
+      '--cx-surface-elevated': currentTokens.surfaceElevated || currentTokens.surface, '--cx-border': currentTokens.border,
+      '--cx-border-subtle': currentTokens.borderSubtle || currentTokens.border, '--cx-accent': currentTokens.accent,
+      '--cx-accent-hover': currentTokens.accentHover || currentTokens.accent, '--cx-text-primary': currentTokens.textPrimary,
+      '--cx-text-secondary': currentTokens.textSecondary, '--cx-tile-link-color': currentTokens.tileLinkColor || currentTokens.textPrimary,
       '--cx-button-bg': currentTokens.button, '--cx-button-hover': currentTokens.buttonHover || currentTokens.button,
       '--cx-button-text': currentTokens.buttonText || '#ffffff', '--cx-glass-blur': `${currentGlassBlur}px`, '--cx-glass-opacity': `${currentGlassOpacity}`
     };
@@ -93,7 +84,7 @@
     preview.style.backgroundImage = currentWallpaper ? `url("${currentWallpaper}")` : 'none';
     const card = preview.querySelector('.cx-mock-card');
     if (card) {
-      card.style.borderRadius = currentLiquidGlass ? '16px' : '0px';
+      card.style.borderRadius = '16px';
       card.style.backdropFilter = currentLiquidGlass ? `blur(${currentGlassBlur}px)` : 'none';
       card.style.backgroundColor = currentLiquidGlass ? `rgba(18, 26, 40, ${currentGlassOpacity})` : currentTokens.surface;
     }
@@ -102,8 +93,7 @@
   function open(themeToEdit = null) {
     close();
     if (themeToEdit) {
-      currentThemeName = themeToEdit.name || 'Custom Theme';
-      currentEmoji = themeToEdit.icon || '🎨';
+      currentThemeName = themeToEdit.name || 'Custom Theme'; currentEmoji = themeToEdit.icon || '🎨';
       currentLiquidGlass = Boolean(themeToEdit.liquidGlass);
       currentGlassBlur = typeof themeToEdit.glassBlur === 'number' ? themeToEdit.glassBlur : 16;
       currentGlassOpacity = typeof themeToEdit.glassOpacity === 'number' ? themeToEdit.glassOpacity : 0.65;
@@ -111,8 +101,7 @@
       currentTokens = { ...getDefaultTokens(), ...(themeToEdit.colors || {}) };
     } else {
       currentThemeName = 'My Theme'; currentEmoji = '🎨'; currentLiquidGlass = false;
-      currentGlassBlur = 16; currentGlassOpacity = 0.65;
-      currentWallpaper = null; currentTokens = getDefaultTokens();
+      currentGlassBlur = 16; currentGlassOpacity = 0.65; currentWallpaper = null; currentTokens = getDefaultTokens();
     }
     deriveSecondaryTokens();
 
@@ -140,14 +129,8 @@
         <div class="cx-customizer-body">
           <div class="cx-controls-pane">
             <div class="cx-identity-row">
-              <div>
-                <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">Theme Name</label>
-                <input class="cx-customizer-input" id="cx-name-input" value="${currentThemeName}" style="width: 100%; box-sizing: border-box;">
-              </div>
-              <div>
-                <label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">Icon</label>
-                <input class="cx-customizer-input" id="cx-emoji-input" value="${currentEmoji}" style="width: 48px; text-align: center;">
-              </div>
+              <div><label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">Theme Name</label><input class="cx-customizer-input" id="cx-name-input" value="${currentThemeName}" style="width: 100%; box-sizing: border-box;"></div>
+              <div><label style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px;">Icon</label><input class="cx-customizer-input" id="cx-emoji-input" value="${currentEmoji}" style="width: 48px; text-align: center;"></div>
             </div>
             <div class="cx-quick-emojis">
               ${['🎨', '⚡', '🌌', '💎', '🔮', '🪐', '🌿', '🌙', '🌸', '☕'].map(e => `<button class="cx-emoji-btn" data-emoji="${e}">${e}</button>`).join('')}
@@ -170,14 +153,8 @@
                 <span>Frosted Liquid Glass Mode (Diffusion & Rounded Corners)</span>
               </label>
               <div id="cx-glass-sliders-wrap" style="display:${currentLiquidGlass ? 'flex' : 'none'};flex-direction:column;gap:6px;margin:6px 0;padding:6px 8px;background:rgba(0,0,0,0.25);border-radius:6px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94a3b8;">
-                  <span>Blur Strength: <strong id="cx-glass-blur-val" style="color:#e2e8f0;">${currentGlassBlur}px</strong></span>
-                  <input type="range" id="cx-glass-blur-slider" min="0" max="40" value="${currentGlassBlur}" style="width:110px;cursor:pointer;">
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94a3b8;">
-                  <span>Transparency: <strong id="cx-glass-opacity-val" style="color:#e2e8f0;">${Math.round(currentGlassOpacity * 100)}%</strong></span>
-                  <input type="range" id="cx-glass-opacity-slider" min="10" max="100" value="${Math.round(currentGlassOpacity * 100)}" style="width:110px;cursor:pointer;">
-                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94a3b8;"><span>Blur Strength: <strong id="cx-glass-blur-val" style="color:#e2e8f0;">${currentGlassBlur}px</strong></span><input type="range" id="cx-glass-blur-slider" min="0" max="40" value="${currentGlassBlur}" style="width:110px;cursor:pointer;"></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94a3b8;"><span>Transparency: <strong id="cx-glass-opacity-val" style="color:#e2e8f0;">${Math.round(currentGlassOpacity * 100)}%</strong></span><input type="range" id="cx-glass-opacity-slider" min="10" max="100" value="${Math.round(currentGlassOpacity * 100)}" style="width:110px;cursor:pointer;"></div>
               </div>
               <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
                 <input type="file" id="cx-bg-file-input" accept="image/*" style="display:none">
@@ -189,30 +166,31 @@
           </div>
           <div class="cx-preview-pane">
             <h3 class="cx-preview-pane-title">Live Preview</h3>
-            <div id="cx-customizer-preview">
-              <div class="cx-mock-subtle-bar">
+            <div id="cx-customizer-preview" data-cx-elem="Canvas Background" data-cx-token="--cx-canvas-bg (canvas)">
+              <div class="cx-mock-subtle-bar" data-cx-elem="Subtle Bar" data-cx-token="--cx-canvas-subtle, --cx-text-secondary">
                 <span>Classes</span> &rsaquo; <span>Assessment Outlines</span>
               </div>
-              <div class="cx-mock-card">
+              <div class="cx-mock-card" data-cx-elem="Card Surface" data-cx-token="--cx-surface-bg (surface), --cx-border">
                 <div class="cx-mock-card-header">
-                  <span class="cx-mock-title" id="cx-preview-heading">${currentThemeName}</span>
-                  <span class="cx-mock-elevated"><span id="cx-preview-emoji">${currentEmoji}</span> Year 12</span>
+                  <span class="cx-mock-title" id="cx-preview-heading" data-cx-elem="Card Title" data-cx-token="--cx-tile-link-color (tileLinkColor)">${currentThemeName}</span>
+                  <span class="cx-mock-elevated" data-cx-elem="Elevated Badge" data-cx-token="--cx-surface-elevated (surfaceElevated)"><span id="cx-preview-emoji">${currentEmoji}</span> Year 12</span>
                 </div>
-                <div class="cx-mock-progress-bar">
-                  <div class="cx-mock-progress-fill"></div>
-                  <div class="cx-mock-accent-indicator"></div>
+                <div class="cx-mock-progress-bar" data-cx-elem="Progress Track" data-cx-token="--cx-surface-secondary">
+                  <div class="cx-mock-progress-fill" data-cx-elem="Progress Fill" data-cx-token="--cx-accent (accent)"></div>
+                  <div class="cx-mock-accent-indicator" data-cx-elem="Accent Indicator" data-cx-token="--cx-accent-hover (accentHover)"></div>
                 </div>
-                <div class="cx-mock-meta">Leon Harris &bull; Willetton Senior High School</div>
-                <div class="cx-mock-stats-panel">
+                <div class="cx-mock-meta" data-cx-elem="Secondary Text" data-cx-token="--cx-text-secondary (textSecondary)">Leon Harris &bull; Willetton Senior High School</div>
+                <div class="cx-mock-stats-panel" data-cx-elem="Statistics Panel" data-cx-token="--cx-surface-secondary, --cx-border">
                   Min 30.2% &bull; Q1 62.3% &bull; <strong>Med 70.8%</strong> &bull; Q3 79.1% &bull; <strong>Max 92.7%</strong>
                   <div class="cx-mock-divider"></div>
                   <strong>Z-Score 0.96</strong> &bull; <strong>Top 15%</strong> &bull; <span>35 / ~234</span>
                 </div>
                 <div style="display: flex; gap: 8px;">
-                  <button class="cx-mock-button">View Tasks</button>
-                  <button class="cx-mock-button cx-mock-button-hover">Details</button>
+                  <button class="cx-mock-button" data-cx-elem="Action Button" data-cx-token="--cx-button-bg (button), --cx-button-text">View Tasks</button>
+                  <button class="cx-mock-button cx-mock-button-hover" data-cx-elem="Button Hover" data-cx-token="--cx-button-hover, --cx-button-text">Details</button>
                 </div>
               </div>
+              <div id="cx-preview-tooltip" class="cx-preview-tooltip" style="display:none;"></div>
             </div>
           </div>
         </div>
@@ -422,18 +400,14 @@
 
     modalEl.querySelector('#cx-export-btn').onclick = () => {
       const data = {
-        version: 1, name: currentThemeName, icon: currentEmoji,
-        liquidGlass: currentLiquidGlass, glassBlur: currentGlassBlur, glassOpacity: currentGlassOpacity,
-        wallpaper: currentWallpaper,
-        swatch: [currentTokens.canvas, currentTokens.surface, currentTokens.accent],
-        colors: { ...currentTokens }
+        version: 1, name: currentThemeName, icon: currentEmoji, liquidGlass: currentLiquidGlass,
+        glassBlur: currentGlassBlur, glassOpacity: currentGlassOpacity, wallpaper: currentWallpaper,
+        swatch: [currentTokens.canvas, currentTokens.surface, currentTokens.accent], colors: { ...currentTokens }
       };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
       a.download = `connectea-theme-${currentThemeName.toLowerCase().replace(/\s+/g, '_')}.json`;
       a.click();
-      URL.revokeObjectURL(a.href);
     };
 
     const importFile = modalEl.querySelector('#cx-import-file');
@@ -444,14 +418,14 @@
       const r = new FileReader();
       r.onload = ev => {
         try {
-          const imported = JSON.parse(ev.target.result);
-          if (imported.name) currentThemeName = imported.name;
-          if (imported.icon) currentEmoji = imported.icon;
-          if (imported.liquidGlass !== undefined) currentLiquidGlass = Boolean(imported.liquidGlass);
-          if (imported.glassBlur !== undefined) currentGlassBlur = imported.glassBlur;
-          if (imported.glassOpacity !== undefined) currentGlassOpacity = imported.glassOpacity;
-          if (imported.wallpaper !== undefined) currentWallpaper = imported.wallpaper;
-          if (imported.colors) currentTokens = { ...currentTokens, ...imported.colors };
+          const imp = JSON.parse(ev.target.result);
+          if (imp.name) currentThemeName = imp.name;
+          if (imp.icon) currentEmoji = imp.icon;
+          if (imp.liquidGlass !== undefined) currentLiquidGlass = Boolean(imp.liquidGlass);
+          if (imp.glassBlur !== undefined) currentGlassBlur = imp.glassBlur;
+          if (imp.glassOpacity !== undefined) currentGlassOpacity = imp.glassOpacity;
+          if (imp.wallpaper !== undefined) currentWallpaper = imp.wallpaper;
+          if (imp.colors) currentTokens = { ...currentTokens, ...imp.colors };
           nameInput.value = currentThemeName; emojiInput.value = currentEmoji;
           modalEl.querySelector('#cx-header-icon').textContent = currentEmoji;
           modalEl.querySelector('#cx-glass-toggle').checked = currentLiquidGlass;
@@ -467,24 +441,43 @@
       r.readAsText(file);
     };
 
+    const preview = modalEl.querySelector('#cx-customizer-preview');
+    const tooltip = modalEl.querySelector('#cx-preview-tooltip');
+    if (preview && tooltip) {
+      preview.onmousemove = (e) => {
+        const target = e.target.closest('[data-cx-elem]');
+        if (!target) { tooltip.style.display = 'none'; return; }
+        const elem = target.getAttribute('data-cx-elem');
+        const token = target.getAttribute('data-cx-token');
+        tooltip.innerHTML = `<div class="cx-tooltip-elem">Element: ${elem}</div><div class="cx-tooltip-token">Token: ${token}</div>`;
+        tooltip.style.display = 'block';
+        const rect = preview.getBoundingClientRect();
+        let x = e.clientX - rect.left + 12, y = e.clientY - rect.top + 12;
+        if (x + 200 > rect.width) x = e.clientX - rect.left - 210;
+        if (y + 50 > rect.height) y = e.clientY - rect.top - 50;
+        tooltip.style.left = `${Math.max(4, x)}px`;
+        tooltip.style.top = `${Math.max(4, y)}px`;
+      };
+      preview.onmouseleave = () => { tooltip.style.display = 'none'; };
+    }
+
     modalEl.querySelector('#cx-save-btn').onclick = () => {
       deriveSecondaryTokens();
       const finalName = (modalEl.querySelector('#cx-name-input')?.value || currentThemeName || 'Custom Theme').trim();
       const finalIcon = (modalEl.querySelector('#cx-emoji-input')?.value || currentEmoji || '🎨').trim();
       const themeDef = {
-        name: finalName,
-        icon: finalIcon,
-        liquidGlass: currentLiquidGlass,
-        glassBlur: currentGlassBlur,
-        glassOpacity: currentGlassOpacity,
-        wallpaper: currentWallpaper,
-        swatch: [currentTokens.canvas, currentTokens.surface, currentTokens.accent],
-        colors: { ...currentTokens }
+        name: finalName, icon: finalIcon, liquidGlass: currentLiquidGlass,
+        glassBlur: currentGlassBlur, glassOpacity: currentGlassOpacity, wallpaper: currentWallpaper,
+        swatch: [currentTokens.canvas, currentTokens.surface, currentTokens.accent], colors: { ...currentTokens }
       };
       const reg = window.ConnectifyThemeRegistry;
       if (reg && reg.saveCustomTheme) {
         const saved = reg.saveCustomTheme(themeDef);
-        if (saved) reg.setTheme(saved.id);
+        if (saved) {
+          reg.setTheme(saved.id);
+          if (window.ConnectifyTheme?.applyTheme) window.ConnectifyTheme.applyTheme(true, saved.id);
+          try { window.dispatchEvent(new CustomEvent('connectea:themechange', { detail: { themeId: saved.id, theme: saved } })); } catch {}
+        }
       }
       close();
     };

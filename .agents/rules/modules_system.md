@@ -50,19 +50,18 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 #### [`theme-registry.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-registry.js)
 - **Role**: Canonical palette definitions and custom theme registry.
 - **Key Functions**:
-  - `BUILTIN_PALETTES`: Stores immutable definitions for 7 built-in presets: Dark, Quantum Dark (Gruvbox green `#b8bb26` secondary), AMOLED Black, Midnight Navy, Emerald Forest, Sunset Orange, and Apple Liquid Glass.
-  - `getPresetPalettes()`, `getCustomThemes()`, `saveCustomTheme()`, `deleteCustomTheme()`: CRUD operations on custom theme JSON objects in `localStorage`. `saveCustomTheme` performs case-insensitive name matching against existing custom themes to overwrite in place without creating duplicate IDs, persisting tokens, `glassBlur`, and `glassOpacity`.
+  - `BUILTIN_PALETTES`: Stores immutable definitions for 7 built-in presets: Dark, Quantum Dark, AMOLED Black, Midnight Navy, Emerald Forest, Sunset Orange, and Liquid Glass.
+  - `getPresetPalettes()`, `getCustomThemes()`, `saveCustomTheme()`, `deleteCustomTheme()`: CRUD operations on custom theme JSON objects across `localStorage` and `chrome.storage.local`. `saveCustomTheme` performs case-insensitive name matching to overwrite in place, safeguards against `QuotaExceededError` on large wallpapers, and immediately loads saved themes on startup.
 - **Export**: `window.ConnectifyThemeRegistry`.
 
 #### [`theme-customizer.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.js)
 - **Role**: In-DOM visual theme designer modal and static mockup preview.
 - **Key Functions**:
   - `open(themeToEdit)` / `close()`: Mounts `#cx-customizer-modal` with Basic Mode (6 tokens) and Full Mode (14 tokens).
-  - Live Preview: Displays subject card mockup rendering all 14 tokens in authentic Connect positions without mutating the host DOM.
+  - Live Preview: Displays subject card mockup rendering all 14 tokens with 16px rounded curvature. Hovering over any element shows an interactive tooltip (`#cx-preview-tooltip`) stating the element name and coloring CSS token.
   - Dual Sliders: Blur strength slider (0–40px, `#cx-glass-blur-slider`) and transparency slider (10%–100%, `#cx-glass-opacity-slider`) dynamically binding to `--cx-glass-blur` and `--cx-glass-opacity`.
-  - HSV/HEX Color Picker: Interactive saturation/value canvas, hue slider, and hex input.
-  - Wallpaper & Liquid Glass: Uploads, caches (`connectea:theme:wallpaper`), and toggles frosted glass diffusion mode.
-  - JSON Import / Export: Backup and restore theme definitions.
+  - Save Theme: Persists theme definition and calls `window.ConnectifyTheme.applyTheme()` for instantaneous UI synchronization.
+  - HSV/HEX Color Picker, Wallpaper Upload, and JSON Import / Export.
 - **Export**: `window.ConnectifyThemeCustomizer`.
 
 #### [`theme.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.js)

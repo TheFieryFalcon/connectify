@@ -338,7 +338,7 @@
 .cx-mock-card {
   background-color: var(--cx-surface-bg, #1e2632);
   border: 1px solid var(--cx-border, #455a73);
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -422,6 +422,15 @@
 }
 
 #cx-glass-sliders-wrap input[type="range"] { accent-color: #3b82f6; background: #1e2632; height: 6px; border-radius: 3px; }
+#cx-preview-tooltip {
+  position: absolute; pointer-events: none; z-index: 1000;
+  background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); border-radius: 6px; padding: 6px 10px;
+  font-size: 11px; line-height: 1.4; color: #f1f5f9; white-space: nowrap;
+}
+#cx-preview-tooltip .cx-tooltip-elem { font-weight: 700; color: #38bdf8; }
+#cx-preview-tooltip .cx-tooltip-token { color: #cbd5e1; font-family: monospace; }
+#cx-customizer-preview [data-cx-elem]:hover { outline: 1.5px dashed rgba(56, 189, 248, 0.7); outline-offset: 1px; }
 
 .cx-customizer-footer {
   display: flex;

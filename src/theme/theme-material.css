@@ -1,10 +1,15 @@
 /* --------------------------------------------------------------------------
    14. Cards, Popups, Modals & Material Panels
    -------------------------------------------------------------------------- */
-.connectea-dark :is(.mat-card, .v-window, .v-window-contents, .v-panel-content, .mat-dialog-container) {
+.connectea-dark :is(.mat-card, .v-window, .v-window-contents, .mat-dialog-container) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+.connectea-dark .v-panel-content {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .connectea-dark :is(th, td) {
@@ -430,7 +435,6 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
   .cvr-c-form-section,
   .cvr-c-form-group,
   .v-panel,
-  .v-panel-content,
   .v-panel-caption,
   .eds-c-card,
   .eds-c-card__body,

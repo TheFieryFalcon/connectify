@@ -334,12 +334,14 @@
   color: #e2e8f0 !important;
 }
 
-/* Layout parity: hide .cvr-u-padding--md */
-.cvr-u-padding--md { display: none !important; }
+/* Layout parity: 0px padding on .cvr-u-padding--md */
+.cvr-u-padding--md { padding: 0 !important; }
 
 :not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]).connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-tile__body, .cvr-c-tile__body) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
+  border-bottom-left-radius: 16px !important;
+  border-bottom-right-radius: 16px !important;
 }
 
 /* Generic Tile Bodies, Inner Containers, Nav Lists & Resource Rows (Connect Help, Resources) */

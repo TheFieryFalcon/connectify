@@ -6595,9 +6595,9 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   assert.ok(parityTestJs.includes('isPanelCardTileModal') && parityTestJs.includes("tid !== 'liquid-glass' || !isPanelCardTileModal"),
             'parity test must ignore only panels, cards, tiles, and modals for liquid-glass');
 
-  // 5. Element .cvr-u-padding--md hidden for parity
-  assert.ok(themeTilesCss.includes('.cvr-u-padding--md') && themeTilesCss.includes('display: none !important'),
-            'theme-tiles.css must hide .cvr-u-padding--md for parity');
+  // 5. Element .cvr-u-padding--md has 0px padding
+  assert.ok(themeTilesCss.includes('.cvr-u-padding--md') && (themeTilesCss.includes('padding: 0 !important') || themeTilesCss.includes('padding: 0px !important')),
+            'theme-tiles.css must set padding: 0 on .cvr-u-padding--md');
 
   // 6. Theme Customizer dual sliders (blur strength & transparency)
   assert.ok(customizerJs.includes('cx-glass-blur-slider') && customizerJs.includes('cx-glass-opacity-slider'),
@@ -6629,6 +6629,57 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   const saved = reg.getCustomThemes().find(t => t.id === t1.id);
   assert.strictEqual(saved.glassBlur, 25, 'Overwritten theme must have updated glassBlur');
   assert.strictEqual(saved.glassOpacity, 0.85, 'Overwritten theme must have updated glassOpacity');
+});
+
+runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, preview token tooltips, and save theme persistence', () => {
+  const themeCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme.css'), 'utf8');
+  const themeTokensCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-tokens.css'), 'utf8');
+  const themeTilesCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-tiles.css'), 'utf8');
+  const themeMaterialCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-material.css'), 'utf8');
+  const customizerJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-customizer.js'), 'utf8');
+  const customizerCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-customizer.css'), 'utf8');
+  const registryJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8');
+
+  // 1. Assessment outlines fix: .cvr-u-padding--md has 0px padding and is NOT display: none
+  assert.ok(themeTilesCss.includes('.cvr-u-padding--md') && themeTilesCss.includes('padding: 0 !important'),
+    'theme-tiles.css must set 0px padding on .cvr-u-padding--md');
+  assert.ok(!themeTilesCss.includes('.cvr-u-padding--md { display: none !important; }'),
+    'theme-tiles.css must not hide .cvr-u-padding--md');
+
+  // 2. Universal 16px panel & tile body curvature
+  assert.ok(themeTokensCss.includes('border-bottom-left-radius: 16px !important') &&
+            themeTokensCss.includes('border-bottom-right-radius: 16px !important'),
+    'theme-tokens.css must round panel bottom corners with 16px radius');
+  assert.ok(!themeTokensCss.includes(':is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .connectea-panel, .cx-compound-progress-bar, #ng-zone__classes-metrics-summary) { border-radius: 0 !important; }'),
+    'theme-tokens.css must not force 0 border radius on panels when liquid glass is off');
+  assert.ok(themeMaterialCss.includes('.connectea-dark .v-panel-content') &&
+            themeMaterialCss.includes('background-color: transparent !important'),
+    'theme-material.css must make .v-panel-content transparent');
+  assert.ok(themeTilesCss.includes('.eds-c-tile__body') &&
+            themeTilesCss.includes('border-bottom-left-radius: 16px !important'),
+    'theme-tiles.css must round bottom corners of tile bodies');
+
+  // 3. Customizer Preview inspection data attributes and hover tooltip
+  assert.ok(customizerJs.includes('data-cx-elem="Card Surface"') &&
+            customizerJs.includes('data-cx-token="--cx-surface-bg (surface), --cx-border"'),
+    'theme-customizer.js preview mockup must tag Card Surface with elem and token attributes');
+  assert.ok(customizerJs.includes('data-cx-elem="Card Title"') &&
+            customizerJs.includes('data-cx-token="--cx-tile-link-color (tileLinkColor)"'),
+    'theme-customizer.js preview mockup must tag Card Title with token');
+  assert.ok(customizerJs.includes('data-cx-elem="Action Button"'),
+    'theme-customizer.js preview mockup must tag Action Button');
+  assert.ok(customizerJs.includes('#cx-preview-tooltip'),
+    'theme-customizer.js must contain #cx-preview-tooltip element');
+  assert.ok(customizerCss.includes('#cx-preview-tooltip') &&
+            customizerCss.includes('pointer-events: none'),
+    'theme-customizer.css must style #cx-preview-tooltip with pointer-events: none');
+
+  // 4. Robust theme saving and immediate application
+  assert.ok(registryJs.includes('chrome.storage.local.get([STORAGE_CUSTOM_THEMES_LIST]') ||
+            registryJs.includes('chrome.storage.local.get([STORAGE_CUSTOM_THEMES_LIST'),
+    'theme-registry.js loadSavedCustomThemes must read from chrome.storage.local');
+  assert.ok(customizerJs.includes('window.ConnectifyTheme.applyTheme(true, saved.id)'),
+    'theme-customizer.js must call window.ConnectifyTheme.applyTheme on save');
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -2154,9 +2154,6 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
     for (const auditId of Object.keys(baseMap)) {
       if (!currentVisibleIds.has(auditId)) {
         const base = baseMap[auditId];
-        if (base.selector && (base.selector.includes('cvr-u-padding--md') || base.selector.includes('.cvr-u-padding--md'))) {
-          continue;
-        }
         issues.push({
           category: 'PARITY',
           type: 'ELEMENT_HIDDEN_IN_THEME',
