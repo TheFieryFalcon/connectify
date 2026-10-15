@@ -5532,16 +5532,10 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   const crawlerPath = path.resolve(__dirname, 'scripts/crawl-connect-directories.js');
   const pkgJsonPath = path.resolve(__dirname, 'package.json');
 
-  // 1. Files exist and satisfy line limit (tests exempt from 500-line rule)
+  // 1. Files exist (scripts/ test tooling is exempt from the src/ line limit)
   assert.ok(fs.existsSync(utilsPath), 'scripts/puppeteer-utils.js must exist');
   assert.ok(fs.existsSync(themeTesterPath), 'scripts/test-theme-styles.js must exist');
   assert.ok(fs.existsSync(crawlerPath), 'scripts/crawl-connect-directories.js must exist');
-
-  const utilsLines = fs.readFileSync(utilsPath, 'utf8').split('\n').length;
-  const crawlerLines = fs.readFileSync(crawlerPath, 'utf8').split('\n').length;
-
-  assert.ok(utilsLines <= 500, `puppeteer-utils.js must be <= 500 lines (got ${utilsLines})`);
-  assert.ok(crawlerLines <= 500, `crawl-connect-directories.js must be <= 500 lines (got ${crawlerLines})`);
 
   // 2. puppeteer-utils exports and WCAG calculations
   const utilsMod = require(utilsPath);
@@ -6733,6 +6727,53 @@ runTest('Test 151: Custom theme colors reach body, View button stays square, and
     'theme.css must only clear wrappers that contain tiles, never the tiles themselves');
   assert.ok(themeCss.includes('background-color: var(--cx-surface-bg, #1e2632) !important'),
     'non-Liquid-Glass panels must remain opaque');
+});
+
+runTest('Test 152: Theme auditor opens a visible browser only for login, then continues headless', async () => {
+  const { launchAuthenticated } = require(path.resolve(__dirname, 'scripts/puppeteer-auth.js'));
+  const makeHarness = (results) => {
+    const launches = [];
+    let call = 0;
+    const deps = {
+      log: () => {},
+      launchBrowser: async ({ headless }) => {
+        const browser = { headless, closed: false, close: async () => { browser.closed = true; },
+          newPage: async () => ({ setViewport: async () => {}, close: async () => {} }) };
+        launches.push(browser);
+        return browser;
+      },
+      authenticate: async (page, opts) => ({ ...results[call++], interactiveRequested: opts.interactive })
+    };
+    return { launches, deps };
+  };
+
+  // Expired session: headless attempt -> visible login window -> headless audit browser
+  let h = makeHarness([{ success: false }, { success: true, method: 'interactive' }, { success: true, method: 'session' }]);
+  let res = await launchAuthenticated({ headless: null }, h.deps);
+  assert.deepStrictEqual(h.launches.map(b => b.headless), [true, false, true], 'launch order must be headless, visible (login), headless');
+  assert.ok(h.launches[0].closed && h.launches[1].closed, 'the first headless and the login browsers must be closed');
+  assert.strictEqual(res.browser, h.launches[2], 'the audit must run in the relaunched headless browser');
+  assert.strictEqual(res.browser.headless, true);
+
+  // Valid session: stays in the first headless browser
+  h = makeHarness([{ success: true, method: 'session' }]);
+  res = await launchAuthenticated({ headless: null }, h.deps);
+  assert.deepStrictEqual(h.launches.map(b => b.headless), [true], 'a valid session must never open a window');
+
+  // --headful keeps one visible browser for the whole run
+  h = makeHarness([{ success: true, method: 'interactive' }]);
+  res = await launchAuthenticated({ headless: false }, h.deps);
+  assert.deepStrictEqual(h.launches.map(b => b.headless), [false], '--headful must stay visible');
+
+  // Explicit --headless with an expired session fails without opening a window
+  h = makeHarness([{ success: false }]);
+  await assert.rejects(() => launchAuthenticated({ headless: true }, h.deps), /--headless/);
+  assert.deepStrictEqual(h.launches.map(b => b.headless), [true]);
+
+  const auditor = fs.readFileSync(path.resolve(__dirname, 'scripts/test-theme-styles.js'), 'utf8');
+  const crawler = fs.readFileSync(path.resolve(__dirname, 'scripts/crawl-connect-directories.js'), 'utf8');
+  assert.ok(auditor.includes("require('./puppeteer-auth')") && auditor.includes('launchAuthenticated({'), 'auditor must use launchAuthenticated');
+  assert.ok(crawler.includes("require('./puppeteer-auth')") && crawler.includes('launchAuthenticated({'), 'crawler must use launchAuthenticated');
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -20,6 +20,7 @@ const path = require('path');
 const readline = require('readline');
 const crypto = require('crypto');
 const utils = require('./puppeteer-utils');
+const { launchAuthenticated } = require('./puppeteer-auth');
 
 const DEFAULT_PAGE = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
 
@@ -83,9 +84,10 @@ Audit & Browser Options:
   --screenshots-dir <dir>  Directory to save screenshots
   --output <file>          Save JSON audit report
   --report-md <file>       Save Markdown summary report
-  --headless               Run in headless mode
-  --headful, --no-headless Run with visible browser window
-  --interactive, -i        Prompt for login if needed
+  --headless               Never open a window (fails if the saved session expired)
+  --headful, --no-headless Keep a visible browser window for the whole run
+  --interactive, -i        Prompt for login if needed (default: a login window
+                           opens only when needed, then the audit runs headless)
   --username, -u, --user   Connect username
   --password, -p, --pass   Connect password
   --session <file>         Session cookies file (default: connect_session.json)
@@ -2197,67 +2199,27 @@ async function runThemeAudit(customOptions = {}) {
   const targetUrls = await resolveTargetUrls(options);
   console.log(`[ThemeAudit] Loaded ${targetUrls.length} page URL(s) to audit one by one.`);
 
-  // Determine headless mode: if targeting Connect and no session/credentials exist, launch visible browser
+  // Headless by default; a visible window opens only while logging in (--headful keeps it visible)
   const needsAuth = targetUrls.some(u => u.includes('connect.det.wa.edu.au'));
-  const hasSession = fs.existsSync(options.session);
-  const hasCreds = Boolean(options.username || process.env.CONNECT_USER || process.env.CONNECT_USERNAME);
-  const isHeadless = options.headless !== null
-    ? options.headless
-    : (options.headful ? false : (options.interactive ? false : ((needsAuth && !hasSession && !hasCreds) ? false : true)));
-
-  if (!isHeadless && !options.headful && needsAuth && !hasSession && !hasCreds) {
-    console.log('[ThemeAudit] No saved session or credentials found — launching visible browser window for login.');
-  }
-
-  let browser = await utils.launchBrowser({
-    headless: isHeadless,
-    loadExtension: true
-  });
-
-  // Handle authentication if any URL targets Connect
+  const headless = options.headless !== null ? options.headless : (options.headful ? false : null);
+  let browser;
   if (needsAuth) {
-    let authPage = await browser.newPage();
-    await authPage.setViewport({ width: 1280, height: 900 });
-    let authRes = await utils.authenticate(authPage, {
-      username: options.username,
-      password: options.password,
-      interactive: options.interactive || !isHeadless,
-      sessionFile: options.session
-    });
-    await authPage.close().catch(() => {});
-
-    // If authentication failed (e.g. session expired or invalid) and browser was headless,
-    // automatically relaunch in a visible browser window so user can interactively log in
-    if (!authRes?.success && isHeadless) {
-      if (options.headless === true) {
-        console.error('\n[ThemeAudit] Error: Saved session in ' + path.basename(options.session) + ' has expired, and explicit --headless was requested without valid credentials.');
-        console.error('[ThemeAudit] Please run with --interactive or provide --username and --password.');
-        await browser.close().catch(() => {});
-        process.exit(1);
-      }
-      console.log('\n[ThemeAudit] Saved session in ' + path.basename(options.session) + ' has expired.');
-      console.log('[ThemeAudit] Relaunching in a visible browser window for interactive login...');
-      await browser.close().catch(() => {});
-      browser = await utils.launchBrowser({
-        headless: false,
-        loadExtension: true
-      });
-      authPage = await browser.newPage();
-      await authPage.setViewport({ width: 1280, height: 900 });
-      authRes = await utils.authenticate(authPage, {
+    try {
+      const launched = await launchAuthenticated({
+        headless,
         username: options.username,
         password: options.password,
-        interactive: true,
-        sessionFile: options.session
+        sessionFile: options.session,
+        tag: 'ThemeAudit'
       });
-      await authPage.close().catch(() => {});
-    }
-
-    if (!authRes?.success) {
-      console.error('\n[ThemeAudit] Authentication failed or was cancelled. Exiting to avoid auditing unauthenticated login pages.');
-      await browser.close().catch(() => {});
+      browser = launched.browser;
+      await launched.page.close().catch(() => {});
+    } catch (err) {
+      console.error(`\n[ThemeAudit] ${err.message} Exiting to avoid auditing unauthenticated login pages.`);
       process.exit(1);
     }
+  } else {
+    browser = await utils.launchBrowser({ headless: headless !== false, loadExtension: true });
   }
 
   // Load available themes (excluding native/light as that is the baseline)
@@ -2441,7 +2403,7 @@ async function runThemeAudit(customOptions = {}) {
             console.log(`       └─ Skipping "${currentView.title}": exact same elements (${baseline.visibleCount} visible) as view "${existingTitle}".`);
             await page.evaluate(() => {
               if (window.ConnectifyThemeRegistry?.setTheme) {
-                window.ConnectifyThemeRegistry.setTheme('default');
+                window.ConnectifyThemeRegistry.setTheme('light');
               }
               document.documentElement.classList.remove('connectea-dark');
               delete document.documentElement.dataset.connecteaTheme;
@@ -2564,7 +2526,7 @@ async function runThemeAudit(customOptions = {}) {
               }
             }
             if (window.ConnectifyThemeRegistry?.setTheme) {
-              window.ConnectifyThemeRegistry.setTheme('default');
+              window.ConnectifyThemeRegistry.setTheme('light');
             }
             document.documentElement.classList.remove('connectea-dark');
             delete document.documentElement.dataset.connecteaTheme;

@@ -10,6 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const utils = require('./puppeteer-utils');
+const { launchAuthenticated } = require('./puppeteer-auth');
 
 const DEFAULT_START_URL = 'https://connect.det.wa.edu.au';
 const TARGET_HOST = 'connect.det.wa.edu.au';
@@ -280,29 +281,16 @@ async function crawl() {
   console.log('[ConnectCrawler] Initializing Connect Directory Crawler...');
   console.log(`[ConnectCrawler] Max depth: ${options.maxDepth} | Max pages: ${options.maxPages} | Delay: ${options.delay}ms`);
 
-  const hasSession = fs.existsSync(options.session);
-  const hasCreds = Boolean(options.username || process.env.CONNECT_USER || process.env.CONNECT_USERNAME);
-  let isHeadless = options.headless !== null ? options.headless : (options.headful ? false : (options.interactive ? false : (hasSession || hasCreds)));
-  let browser = await utils.launchBrowser({ headless: isHeadless, loadExtension: true });
-  let page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 900 });
-
   console.log('[ConnectCrawler] Verifying authentication...');
-  let auth = await utils.authenticate(page, { username: options.username, password: options.password, interactive: options.interactive || !isHeadless, sessionFile: options.session });
-
-  if (!auth.success && isHeadless && options.headless !== true) {
-    console.log('[ConnectCrawler] Saved session expired. Relaunching visible browser for interactive login...');
-    await browser.close().catch(() => {});
-    isHeadless = false;
-    browser = await utils.launchBrowser({ headless: false, loadExtension: true });
-    page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 900 });
-    auth = await utils.authenticate(page, { username: options.username, password: options.password, interactive: true, sessionFile: options.session });
-  }
-
-  if (!auth.success && !(await utils.isAuthenticated(page))) {
-    console.error('[ConnectCrawler] Authentication failed. Please provide credentials or use --interactive.');
-    await browser.close().catch(() => {});
+  const headless = options.headless !== null ? options.headless : (options.headful ? false : null);
+  let browser, page;
+  try {
+    ({ browser, page } = await launchAuthenticated({
+      headless, username: options.username, password: options.password,
+      sessionFile: options.session, tag: 'ConnectCrawler'
+    }));
+  } catch (err) {
+    console.error(`[ConnectCrawler] ${err.message}`);
     process.exit(1);
   }
 

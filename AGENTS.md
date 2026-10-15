@@ -10,7 +10,7 @@ All instructions, design constraints, and architectural standards in `design_rul
    - Outcome meter: 18px x 56px, 4-tier baseline track, secret purple breakout ($> 1.10 \times \text{High}$), 0-segment critical shortfall with pulsing red alarm. Suppressed on unmarked tasks and first task lacking baseline.
    - Logarithmic headroom compression above 80% ($\frac{100 - \text{Score}}{20}$). Calibrated variance scaling on volatile courses.
    - Subsystem cache versioning with independent keys (`connectify:cache_version:<subsystem>`).
-   - All code and CSS files $\le 500$ lines (except `test_suite.js`).
+   - All `src/` code and CSS files $\le 250$ lines (`test_suite.js` and `scripts/` test tooling exempt). New features go in new files.
    - All documentation markdown files $\le 150$ lines.
 
 2. **Pipeline & Execution (`docs/architecture.md`)**:
