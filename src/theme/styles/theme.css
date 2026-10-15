@@ -41,10 +41,11 @@ html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connect
 }
 
 /* Liquid Glass: 16px curvature on panels, cards and tiles. Solid themes keep Connect's native geometry.
-   Explicit classes only: substring matches caught popups, tooltips, buttons and expansion headers. */
+   Explicit classes only: substring matches caught popups, tooltips, buttons and expansion headers.
+   .mat-expansion-panel is left out because its header button inherits the panel's border-radius. */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
   .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-reports-tile, [data-subject-card],
-  .v-panel, .mat-card, .mat-expansion-panel, .cvr-c-expansion-panel, .cvr-c-expandable-panel,
+  .v-panel, .mat-card, .cvr-c-expansion-panel, .cvr-c-expandable-panel,
   .cvr-c-resources-panel, .cvr-c-tree-panel, .cvr-c-folder-panel, .cvr-c-timeline-summary-data-panel,
   .cvr-c-feedback-content-panel, .eds-c-page-feedback-panel, .connectea-panel, .cvr-c-dashboard-card,
   .portlet, .file-card, .image-card, .user-card, #ng-zone__classes-metrics-summary

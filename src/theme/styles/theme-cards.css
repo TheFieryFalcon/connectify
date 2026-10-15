@@ -1,0 +1,173 @@
+/**
+ * Connectify Theme: compound progress bars, cohort panels and summary marks
+ */
+
+/* --------------------------------------------------------------------------
+   7. Compound Subject Progress Bars (Preserve category segment colors!)
+   -------------------------------------------------------------------------- */
+.connectea-dark .cx-compound-progress-container {
+  background: transparent !important;
+}
+
+.connectea-dark .cx-compound-progress-bar {
+  background-color: var(--cx-surface-secondary, #151c26) !important;
+  border: 1px solid var(--cx-border, #3d526b) !important;
+  border-radius: 4px !important;
+}
+
+.connectea-dark .cx-compound-progress-label {
+  color: #94a3b8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   8. Cohort Statistics Panel (.connectea-panel) - PRESERVE BLUE IDENTITY
+   -------------------------------------------------------------------------- */
+.connectea-dark .connectea-panel {
+  background-color: var(--cx-surface-elevated, #15263a) !important;
+  border: 1px solid var(--cx-border, #3b6088) !important;
+  border-radius: 8px !important;
+  color: var(--cx-text-secondary, #d6e8f8) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
+}
+
+.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) {
+  font-weight: 400 !important;
+}
+
+.connectea-dark .connectea-panel-distribution {
+  color: var(--cx-text-secondary, #cfe2f5) !important;
+}
+
+:is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong,
+.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong {
+  font-family: inherit !important;
+  font-weight: 700 !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+.connectea-dark .connectea-panel-standing {
+  color: var(--cx-text-primary, #e2effa) !important;
+}
+
+.connectea-dark .connectea-controls {
+  color: var(--cx-text-muted, #b0d0ed) !important;
+}
+
+.connectea-dark .connectea-controls input {
+  background-color: var(--cx-input-bg, #0f1c2b) !important;
+  border: 1px solid var(--cx-input-border, #335985) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border-radius: 4px !important;
+}
+
+.connectea-dark .connectea-controls input:focus {
+  border-color: #60a5fa !important;
+  outline: 2px solid #60a5fa !important;
+}
+
+.connectea-dark .connectea-notice {
+  color: #7da8cf !important;
+}
+
+.connectea-dark .connectea-subject-controls {
+  border-top: 1px solid #3b6088 !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. Summary Total Mark & Grade Box (.cvr-c-task__marks)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.cvr-c-task__marks, .cvr-c-task__mark) {
+  background-color: var(--cx-surface-secondary, #161e29) !important;
+  border-color: var(--cx-border, #3d5066) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark .cvr-c-task__marks {
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid var(--cx-border, #3d5066) !important;
+  border-radius: 0 !important;
+}
+
+.connectea-dark :is(.cvr-c-task__marks.eds-s-is-last, .cvr-c-task__marks:last-child) {
+  border-bottom: none !important;
+}
+
+.connectea-dark .cvr-c-task__mark {
+  border-top: none !important;
+  border-left: none !important;
+  border-bottom: none !important;
+  border-right: 1px solid var(--cx-border, #3d5066) !important;
+  border-radius: 0 !important;
+}
+
+.connectea-dark :is(.cvr-c-task__mark.eds-s-is-last, .cvr-c-task__mark:last-child) {
+  border-right: none !important;
+}
+
+.connectea-dark :is(.c-scope-statistic, [class*="scope-statistic"]) {
+  background-color: var(--cx-surface-secondary, #161e29) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(mat-card-header, .mat-card-header) :is(.mat-card-button, button[class*="card-button"], .mat-button) {
+  height: 56px !important;
+  line-height: 56px !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-left: 1px solid var(--cx-border, #3d5066) !important;
+  padding: 0 16px !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(mat-card-header, .mat-card-header) :is(.mat-card-button, button[class*="card-button"], .mat-button):hover {
+  background-color: var(--cx-surface-hover, rgba(255, 255, 255, 0.06)) !important;
+}
+
+:is(.connectea-dark, body, html) .cvr-c-tasks :is(
+  .cvr-c-task__mark-score,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
+  .cvr-c-task__mark > :is(.v-label, span, div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)
+) {
+  font-weight: 700 !important;
+}
+
+:is(.connectea-dark, body, html) :is(
+  .cvr-c-task__score,
+  .cvr-c-task__grade,
+  .cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark, .cvr-c-task__mark *, .cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__marks, .cvr-c-task__marks *)
+) {
+  font-weight: 400 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-task__score,
+  .cvr-c-task__grade,
+  .cvr-c-task__mark-score,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
+  .cvr-c-task__mark > :is(.v-label, span, div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)
+) {
+  color: #f8fafc !important;
+}
+
+:is(.connectea-dark, body, html) :is(
+  .cvr-c-task__outof,
+  .cvr-c-task__mark-out-of,
+  .cvr-c-task__mark-label,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):nth-child(2)
+) {
+  font-weight: 400 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-task__outof,
+  .cvr-c-task__mark-out-of,
+  .cvr-c-task__mark-label,
+  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):nth-child(2)
+) {
+  color: #94a3b8 !important;
+}

@@ -1,0 +1,164 @@
+/**
+ * Connectify Theme: cards, popups, modals, material panels and lists
+ */
+
+/* --------------------------------------------------------------------------
+   14. Cards, Popups, Modals & Material Panels
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(.mat-card, .v-window, .v-window-contents, .mat-dialog-container) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+.connectea-dark .v-panel-content {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.connectea-dark :is(th, td) {
+  border-color: var(--cx-border, #36485e) !important;
+}
+
+.connectea-dark #main-content :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell),
+.connectea-dark :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell) {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+.connectea-dark :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, [class*="accent"], [class*="primary"]) *) {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  fill: currentColor !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, .eds-c-button--primary, .v-button--primary, [class*="primary"], [class*="accent"], cnt-floating-form-field-button) :is(.mat-icon, mat-icon, cnt-icon) {
+  color: var(--cx-accent-text, inherit) !important;
+  fill: currentColor !important;
+}
+
+/* Angular Material Accordions, Expansion Panels & Tree Nodes (Site-Wide & Classes Page) */
+.connectea-dark :is(
+  .mat-accordion,
+  .mat-expansion-panel,
+  .mat-expansion-panel-header,
+  .mat-expansion-panel-body,
+  .mat-expansion-panel-content,
+  .mat-tree,
+  .mat-tree-node,
+  .mat-nested-tree-node
+) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark .mat-expansion-panel {
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.connectea-dark :is(.mat-expansion-panel-header, .mat-tree-node):hover {
+  background-color: var(--cx-surface-hover, #24303f) !important;
+}
+
+.connectea-dark :is(
+  .mat-expansion-panel-header-title,
+  .mat-expansion-panel-header-description,
+  .mat-panel-title,
+  .mat-panel-description
+) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark .mat-expansion-indicator::after {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  border-color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+/* Material Lists & Category Menus (Classes, Side Drawers, etc.) */
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-category-menu__wrapper,
+  .cvr-c-category-menu__list,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) {
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: var(--cx-border, #36485e) !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) :is(.mat-list-item, .mat-mdc-list-item) {
+  background-color: transparent !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-bottom-color: var(--cx-border-subtle, #2a3749) !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) :is(.mat-list-item, .mat-mdc-list-item):hover {
+  background-color: var(--cx-surface-hover, #24303f) !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list,
+  .cvr-c-navigation,
+  .cvr-c-drawer
+) :is(
+  .mat-list-item,
+  .mat-mdc-list-item,
+  .mat-list-item-content,
+  .mat-list-text,
+  .mat-line,
+  .eds-c-nav-list__item,
+  .v-tree-node,
+  a,
+  span,
+  div,
+  p,
+  label
+) {
+  color: #cbd5e1 !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-action-list,
+  .mat-nav-list,
+  .mat-selection-list
+) :is(
+  .mat-list-item,
+  .mat-mdc-list-item,
+  .eds-c-nav-list__item,
+  a
+):hover :is(span, div, p, label, .mat-line, .mat-list-text) {
+  color: #ffffff !important;
+}

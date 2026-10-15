@@ -1,0 +1,175 @@
+/**
+ * Connectify Theme: classes page list items, homepage promos and preferences
+ */
+
+/* Classes Page List Items, Status, Sort Dropdown & Action Controls */
+.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) {
+  border-bottom: 1px solid #36485e !important;
+  border-bottom: 1px solid var(--cx-border, #36485e) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, .eds-c-selection-list__item, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) :is(h1, h2, h3, h4, [class*="title"], strong) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+  font-weight: 650 !important;
+}
+
+.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, .eds-c-selection-list__item, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) :is(span, p, small, [class*="subtitle"], [class*="code"], [class*="status"], [class*="badge"]) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+}
+
+.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, .eds-c-selection-list__item, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) :is(button:not(.mat-icon-button), a, [class*="action"], [class*="btn"]) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+}
+
+.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) svg {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  fill: currentColor !important;
+  stroke: none !important;
+}
+
+.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) :is(button, a, .mat-icon-button):hover svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-classes__sort,
+  .cvr-c-sort-by,
+  .eds-c-sort-by,
+  [class*="sort-by"],
+  .mat-form-field,
+  .mat-form-field-wrapper
+) :is(label, .mat-form-field-label, span) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+}
+
+.connectea-dark :is(
+  .mat-select,
+  .mat-select-value,
+  .mat-select-value-text,
+  .mat-select-arrow,
+  .mat-select-trigger
+) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+}
+
+.connectea-dark :is(.mat-select-panel, .mat-menu-panel, .mat-autocomplete-panel) {
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark :is(.mat-option, .mat-select-panel .mat-option) {
+  background-color: transparent !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+}
+
+.connectea-dark :is(.mat-option:hover, .mat-option.mat-active, .mat-option.mat-selected) {
+  background-color: var(--cx-surface-hover, #24303f) !important;
+  color: var(--cx-text-primary, #ffffff) !important;
+}
+
+/* --------------------------------------------------------------------------
+   15. Homepage Promos, Notices & Alerts (My Connect, etc.)
+   -------------------------------------------------------------------------- */
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white,
+.connectea-dark :is(.cvr-c-promo, .cvr-c-promo__body, .cvr-c-promo__content, .cvr-c-notice, .cvr-c-maintenance-notice, .eds-c-notice, .eds-c-alert, .eds-t-white) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+  border-radius: 8px !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .cvr-c-promo__body,
+.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) :is(.cvr-c-promo__body, .cvr-c-promo__content, .eds-c-notice__content) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white :is(.cvr-c-promo__title, p),
+.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) :is(p, span, div, .cvr-c-promo__title) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white strong,
+.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) strong {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button {
+  background-color: var(--cx-button-bg, #24303f) !important;
+  color: var(--cx-button-text, #e2e8f0) !important;
+  border-color: var(--cx-button-border, #4a617a) !important;
+}
+
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button:hover {
+  background-color: var(--cx-surface-hover, #2e3c4e) !important;
+  border-color: var(--cx-border-strong, #607996) !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   16. Preferences Page, Settings Cards & Form Layouts
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .cvr-c-preferences,
+  .cvr-c-preferences-section,
+  .cvr-c-preference-group,
+  .cvr-c-preferences__section,
+  .cvr-c-preferences__group,
+  .cvr-c-form-section,
+  .cvr-c-form-group,
+  .v-panel,
+  .v-panel-caption,
+  .eds-c-card,
+  .eds-c-card__body,
+  .eds-c-card__header,
+  .cvr-c-dashboard-card,
+  .v-formlayout,
+  .v-formlayout-row
+) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  border-color: var(--cx-border, #3d5066) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-preferences,
+  .cvr-c-preferences-section,
+  .cvr-c-preference-group,
+  .eds-c-card,
+  .v-panel
+) :is(h1, h2, h3, h4, .eds-c-heading, .v-panel-caption, .cvr-c-preference-group__title, .cvr-c-preferences-section__title, .eds-c-card__title) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-bottom-color: var(--cx-border, #36485e) !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-preferences,
+  .cvr-c-preferences-section,
+  .cvr-c-preference-group,
+  .eds-c-card,
+  .v-panel
+) :is(p, span, label, .v-label, .cvr-c-form__label, .eds-c-caption) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+.connectea-dark :is(
+  .v-filterselect,
+  .v-filterselect-input,
+  .v-select-select,
+  .v-textfield,
+  .eds-c-select,
+  .eds-c-form-control
+) {
+  background-color: var(--cx-input-bg, #141a22) !important;
+  border: 1px solid var(--cx-input-border, #42556d) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}

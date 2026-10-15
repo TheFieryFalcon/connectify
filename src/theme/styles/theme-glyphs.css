@@ -1,0 +1,154 @@
+/**
+ * Connectify Theme: Connect webfont glyphs and role switcher
+ */
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .cvr-c-service-menu,
+  .cvr-c-primary-menu,
+  .cvr-c-primary-navigation,
+  .cvr-c-branding,
+  .cvr-c-header,
+  .cvr-c-user-menu,
+  [class*="switch"],
+  [class*="role"],
+  [class*="user"],
+  .eds-c-nav-list
+) :is(svg, path, circle) {
+  color: #cbd5e1 !important;
+  fill: #cbd5e1 !important;
+  stroke: none !important;
+}
+
+.connectea-dark :is(.mat-list, .mat-nav-list) :is(svg, path, circle) {
+  color: #cbd5e1 !important;
+  fill: #cbd5e1 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .cvr-c-service-menu,
+  .cvr-c-primary-menu,
+  .cvr-c-primary-navigation,
+  .cvr-c-branding,
+  .cvr-c-header,
+  .cvr-c-user-menu,
+  [class*="switch"],
+  [class*="role"],
+  [class*="user"],
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-nav-list,
+  .v-icon
+) :is(.mat-icon, .v-icon, .eds-c-icon) {
+  color: #cbd5e1 !important;
+  stroke: none !important;
+  -webkit-text-stroke: 0px !important;
+}
+
+/* Connect Webfont Glyphs, Role/Student Switcher & Action Icons */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  [class^="cvr-c-icon--"]:before,
+  [class*=" cvr-c-icon--"]:before,
+  .cvr-c-icon:before,
+  .cvr-c-icon--switch:before,
+  [class*="switch"]:before,
+  [class*="role"]:before,
+  .eds-c-icon:before,
+  [class^="cvr-c-icon--"],
+  [class*=" cvr-c-icon--"],
+  .cvr-c-icon,
+  .cvr-c-icon--switch
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
+  .cvr-c-icon,
+  .cvr-c-icon--switch,
+  [class^="cvr-c-icon--"]:before,
+  [class*=" cvr-c-icon--"]:before
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .cvr-c-icon,
+  .cvr-c-icon--switch,
+  [class^="cvr-c-icon--"]:before,
+  [class*=" cvr-c-icon--"]:before
+) {
+  color: #cbd5e1 !important;
+  -webkit-text-fill-color: #cbd5e1 !important;
+  stroke: none !important;
+  -webkit-text-stroke: 0px !important;
+  opacity: 1 !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .cvr-c-service-menu,
+  .cvr-c-primary-menu,
+  .cvr-c-primary-navigation,
+  .cvr-c-branding,
+  .cvr-c-header,
+  .cvr-c-user-menu,
+  [class*="switch"],
+  [class*="role"],
+  [class*="user"],
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-nav-list,
+  .v-icon
+) :is(.mat-list-item:hover, a:hover, button:hover, div:hover, [class*="item"]:hover) :is(svg, path, circle),
+.connectea-dark :is([class*="switch"], [class*="role"]):hover :is(svg, path, circle) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  stroke: none !important;
+}
+
+.connectea-dark :is(
+  .c-category-menu,
+  .cvr-c-category-menu,
+  .cvr-c-classes-menu,
+  .cvr-c-side-menu,
+  .cvr-c-service-menu,
+  .cvr-c-primary-menu,
+  .cvr-c-primary-navigation,
+  .cvr-c-branding,
+  .cvr-c-header,
+  .cvr-c-user-menu,
+  [class*="switch"],
+  [class*="role"],
+  [class*="user"],
+  .eds-c-nav-list,
+  .mat-list,
+  .mat-nav-list,
+  .v-icon
+) :is(.mat-list-item:hover, a:hover, button:hover, div:hover, [class*="item"]:hover) :is(.mat-icon, .v-icon, .eds-c-icon),
+.connectea-dark :is([class*="switch"], [class*="role"]):hover :is(.mat-icon, .v-icon, .eds-c-icon),
+.connectea-dark :is(
+  [class^="cvr-c-icon--"]:hover:before,
+  [class*=" cvr-c-icon--"]:hover:before,
+  .cvr-c-icon:hover:before,
+  .cvr-c-icon--switch:hover:before,
+  [class*="switch"]:hover:before,
+  [class*="role"]:hover:before,
+  .eds-c-icon:hover:before
+),
+.connectea-dark :is(button, a):hover :is(
+  [class^="cvr-c-icon--"]:before,
+  [class*=" cvr-c-icon--"]:before,
+  .cvr-c-icon:before,
+  .cvr-c-icon--switch:before,
+  [class*="switch"]:before,
+  [class*="role"]:before
+) {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  stroke: none !important;
+  -webkit-text-stroke: 0px !important;
+}

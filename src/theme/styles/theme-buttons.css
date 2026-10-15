@@ -1,0 +1,144 @@
+/**
+ * Connectify Theme: button hierarchy, menu triggers, disabled parity and Clay utilities
+ */
+
+/* Polished Dark Mode Button Hierarchy */
+.connectea-dark :is(
+  .v-button,
+  .eds-c-button,
+  .eds-c-standard-button,
+  .cvr-c-button,
+  .btn,
+  input[type="button"],
+  input[type="submit"],
+  .eds-c-tile__action,
+  .eds-c-tile__action :is(a, button),
+  .eds-c-tile__actions :is(a, button),
+  .cvr-c-tile__action,
+  .cvr-c-tile__action :is(a, button),
+  .eds-c-card__action,
+  .eds-c-card__action :is(a, button),
+  .cvr-c-preferences__reset,
+  .cvr-c-preferences :is(button, .v-button)
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.c-toolbar-button):not(.mat-menu-trigger):not(.mat-tooltip-trigger):not([class*="toolbar"]):not([class*="service-bar"]):not([class*="action-button"]):not([class*="pagination"]):not(.quick-action-menu) {
+  background-color: #202c3b !important;
+  color: var(--cx-button-text, var(--cx-text-primary, #f1f5f9)) !important;
+  border: 1px solid #455a73 !important;
+  border-radius: 4px !important;
+  padding: 6px 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  background-image: none !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+}
+
+/* Action Menu Trigger & Pagination Buttons: Borderless Matching Light Mode */
+.connectea-dark :is(.eds-c-action-button, .cvr-c-action-button, .cvr-c-pagination-button-set button, .eds-c-pagination-button-set button, .eds-c-pagination-button, .quick-action-menu, button.action-button, a.action-button):not(.eds-o-button--positive):not(.eds-c-tile__footer *):not([class*="-set"]) {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border-radius: 4px !important;
+}
+
+.connectea-dark :is(.eds-c-action-button, .cvr-c-action-button, .cvr-c-pagination-button-set button, .eds-c-pagination-button-set button, .eds-c-pagination-button, .quick-action-menu, button.action-button, a.action-button):not(.eds-o-button--positive):not(.eds-c-tile__footer *):not([class*="-set"]):hover {
+  background-color: var(--cx-surface-hover, #24303f) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+/* Disabled Button Parity (Download button, inactive triggers) */
+.connectea-dark :is(.v-button, .eds-c-button, button, .btn):is(:disabled, [disabled], .v-disabled, .v-button-disabled, [aria-disabled="true"], .eds-s-is-disabled) {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  background-color: transparent !important;
+  border: 1px solid var(--cx-border-subtle, #334155) !important;
+  color: var(--cx-text-muted, #64748b) !important;
+  box-shadow: none !important;
+}
+.connectea-dark :is(.eds-o-button--square, [class*="button--square"]) {
+  border-radius: 0 !important;
+}
+
+.connectea-dark :is(button.mat-focus-indicator, .mat-button, .mat-raised-button, .mat-flat-button):not(.mat-stroked-button):not(.c-toolbar-button):not(.mat-menu-trigger):not(.mat-tooltip-trigger):not(.mat-icon-button):not([class*="toolbar"]):not([class*="service-bar"]):not(.mat-card-button):not(.mat-card-header *) {
+  background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
+  color: var(--cx-button-text, var(--cx-text-primary, #f1f5f9)) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  padding: 0 16px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+.connectea-dark :is(.mat-button, .mat-raised-button, .mat-flat-button, button.mat-focus-indicator:not([class*="border"]):not(.border-left)):not(.mat-stroked-button):not([class*="border"]):not(.border-left) {
+  border: none !important;
+}
+
+.connectea-dark :is(.mat-stroked-button, button.mat-focus-indicator.border, button.mat-focus-indicator[class*="border"]) {
+  border-color: var(--cx-button-border, var(--cx-border, #455a73)) !important;
+  padding: 0 15px !important;
+}
+
+.connectea-dark :is(
+  .v-button,
+  .eds-c-button,
+  .eds-c-standard-button,
+  .cvr-c-button,
+  .btn,
+  input[type="button"],
+  input[type="submit"],
+  .eds-c-tile__action,
+  .eds-c-tile__action :is(a, button),
+  .eds-c-tile__actions :is(a, button),
+  .cvr-c-tile__action,
+  .cvr-c-tile__action :is(a, button),
+  .eds-c-card__action,
+  .eds-c-card__action :is(a, button),
+  .cvr-c-preferences__reset,
+  .cvr-c-preferences :is(button, .v-button)
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):hover {
+  background-color: var(--cx-surface-hover, #2c3b4e) !important;
+  border-color: var(--cx-border-hover, #5b7594) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+.connectea-dark :is(
+  .v-button,
+  .eds-c-button,
+  .eds-c-standard-button,
+  .cvr-c-button,
+  .btn,
+  input[type="button"],
+  input[type="submit"]
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):active {
+  background-color: var(--cx-surface-active, #192432) !important;
+  transform: translateY(1px) !important;
+}
+
+.connectea-dark :is(.v-button, .eds-c-button, .eds-c-standard-button, .cvr-c-button, .btn, input[type="button"], input[type="submit"]):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):focus-visible {
+  border-color: var(--cx-accent, #3b82f6) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
+  outline: none !important;
+}
+
+.connectea-dark .mat-button-focus-overlay {
+  background: transparent !important;
+}
+
+/* Clay / Bootstrap Utility Flex Container Coverage */
+.connectea-dark div.w-100 {
+  border-color: var(--cx-border, #36485e) !important;
+}
+
+.connectea-dark :is(.cvr-c-reports, .cvr-c-report-years, .cvr-c-year-selector, mat-toolbar, .mat-toolbar, mat-tab-header, .mat-tab-header) div.w-100,
+.connectea-dark div.w-100:has([class*="year"], [class*="report"], mat-toolbar, .mat-toolbar) {
+  background-color: #1a222d !important;
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}

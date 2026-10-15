@@ -1,0 +1,182 @@
+/**
+ * Connectify Theme: circular, primary, secondary, expand/collapse and back-to-top buttons
+ */
+
+/* Circular Action Buttons (e.g. trash/delete, circular controls) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)) {
+  background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
+  background-image: none !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  border: 1px solid var(--cx-border, #455a73) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-icon-button,
+  .cvr-c-icon-button,
+  .cvr-c-pri-nav-icon-button,
+  .mat-icon-button,
+  .c-toolbar-button,
+  button.mat-menu-trigger,
+  button.mat-tooltip-trigger,
+  .v-button.eds-o-button--captionless
+):not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button) {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .mat-stroked-button,
+  button.mat-focus-indicator.border,
+  .mat-icon-button.border,
+  [class*="button"].border
+) {
+  border: 1px solid var(--cx-button-border, var(--cx-border, #455a73)) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.border-left, [class*="border-left"], .eds-u-separator--left, [class*="separator--left"]) {
+  border-left: 1px solid var(--cx-border, #455a73) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .c-toolbar-button,
+  .toggle--white-rounded,
+  .toggle--grey-light,
+  [class*="toggle--grey"],
+  button.mat-icon-button,
+  button.mat-menu-trigger,
+  button.mat-tooltip-trigger
+) {
+  background-color: var(--cx-surface-secondary, #202c3b) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-light :is(.mat-icon, mat-icon, cnt-icon),
+:is(html, body).connectea-dark :is(.toggle--grey-light, [class*="toggle--grey"], .c-toolbar-button) :is(.mat-icon, mat-icon, cnt-icon, .mat-ligature-font, .material-icons) {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  fill: currentColor !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)):hover {
+  background-color: var(--cx-surface-hover, #2c3b4e) !important;
+  border-color: var(--cx-border-hover, #6482a6) !important;
+  color: #ffffff !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)) :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], mat-icon, cnt-icon, [class^="cvr-c-icon--"]):not([data-original-color]) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  fill: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)):hover :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* Primary Action Buttons */
+.connectea-dark :is(
+  .v-button--primary, .eds-c-button--primary, .cvr-c-button--primary,
+  .eds-c-standard-button--primary, button[type="submit"], .cx-btn-primary
+) {
+  background-color: #2563eb !important;
+  background-color: var(--cx-accent, #2563eb) !important;
+  border-color: var(--cx-accent, #3b82f6) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.connectea-dark :is(
+  .v-button--primary, .eds-c-button--primary, .cvr-c-button--primary,
+  .eds-c-standard-button--primary, button[type="submit"], .cx-btn-primary
+):hover {
+  background-color: var(--cx-accent-hover, #1d4ed8) !important;
+  border-color: var(--cx-accent-hover, #60a5fa) !important;
+  color: #ffffff !important;
+}
+
+/* Secondary & Ghost Buttons */
+.connectea-dark :is(
+  .v-button--secondary, .eds-c-button--secondary, .v-button--flat, .eds-c-button--flat
+) {
+  background-color: transparent !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+.connectea-dark :is(
+  .v-button--secondary, .eds-c-button--secondary, .v-button--flat, .eds-c-button--flat
+):hover {
+  background-color: var(--cx-surface-hover, #202c3b) !important;
+  color: #ffffff !important;
+  border-color: var(--cx-border-hover, #5b7594) !important;
+}
+
+:is(html, body, .connectea-dark) :is(.cx-btn-secondary, button.cx-btn-secondary, #cx-customizer-modal .cx-btn-secondary) {
+  background-color: #243042 !important;
+  border: 1px solid #3b506c !important;
+  color: #e2e8f0 !important;
+}
+
+:is(html, body, .connectea-dark) :is(.cx-btn-secondary:hover, button.cx-btn-secondary:hover, #cx-customizer-modal .cx-btn-secondary:hover) {
+  background-color: #31425a !important;
+  border-color: #4f6b8f !important;
+  color: #ffffff !important;
+}
+
+/* Floating Expand / Collapse Buttons (#cx-expand-btn) */
+.connectea-dark #cx-expand-btn button {
+  background-color: var(--cx-surface-secondary, #24303f) !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
+}
+
+.connectea-dark #cx-expand-btn button:hover {
+  background-color: var(--cx-surface-hover, #2e3c4e) !important;
+  border-color: var(--cx-border-hover, #607996) !important;
+}
+
+/* Bulk Expansion Animated Loading Progress Pill in Dark Mode */
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(#cx-expand-progress, .cx-expand-progress-pill) {
+  background: #1e2632 !important;
+  background: var(--cx-surface-bg, #1e2632) !important;
+  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: #2e3c4e !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38) !important;
+}
+
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-spinner {
+  border-color: var(--cx-accent, #3b82f6) !important;
+  border-top-color: transparent !important;
+}
+
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-label {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-track {
+  background: var(--cx-canvas-bg, #12171f) !important;
+  border-color: var(--cx-border, #2e3c4e) !important;
+}
+
+:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-bar {
+  background: linear-gradient(90deg, var(--cx-accent, #3b82f6), var(--cx-accent-hover, #60a5fa)) !important;
+}
+
+/* Back to Top Button in Dark Mode (.cx-back-to-top-btn) */
+.connectea-dark .cx-back-to-top-btn {
+  background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #455a73) !important;
+  border-radius: 6px !important;
+  padding: 6px 14px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+}
+
+.connectea-dark .cx-back-to-top-btn:hover {
+  background-color: var(--cx-surface-hover, #2c3b4e) !important;
+  border-color: var(--cx-border-hover, #5d7899) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
+}

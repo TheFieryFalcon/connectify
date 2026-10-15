@@ -93,6 +93,28 @@ const MODULE_BUNDLES = {
   ]
 };
 
+// Files split to stay within the 250-line limit: original name -> parts in manifest order.
+// Reading an original name returns all of its parts; aggregate bundles expand through this map.
+const SPLIT_PARTS = {
+  'theme-tokens.css': ['theme-tokens.css', 'theme-surface-base.css', 'theme-component-base.css'],
+  'theme-core.css': ['theme-core.css', 'theme-core-navigation.css'],
+  'theme-tiles.css': ['theme-tiles.css', 'theme-tile-actions.css', 'theme-tile-bodies.css'],
+  'theme-cards.css': ['theme-cards.css', 'theme-task-rows.css', 'theme-charts-editor.css'],
+  'theme-controls.css': ['theme-controls.css', 'theme-buttons.css', 'theme-action-buttons.css'],
+  'theme-material.css': ['theme-material.css', 'theme-glyphs.css', 'theme-classes-promos.css'],
+  'theme-feed.css': ['theme-feed.css', 'theme-reports-menus.css'],
+  'theme-tables.css': ['theme-tables.css', 'theme-dialogs-paginator.css'],
+  'theme-navigation.css': ['theme-navigation.css', 'theme-discussions.css'],
+  'theme-surfaces.css': ['theme-surfaces.css', 'theme-search-scaling.css'],
+  'theme-customizer.css': ['theme-customizer.css', 'theme-color-picker.css', 'theme-customizer-preview.css']
+};
+for (const [name, files] of Object.entries(MODULE_BUNDLES)) {
+  MODULE_BUNDLES[name] = files.flatMap(f => (SPLIT_PARTS[f] && f !== name ? SPLIT_PARTS[f] : [f]));
+}
+for (const [orig, parts] of Object.entries(SPLIT_PARTS)) {
+  if (!MODULE_BUNDLES[orig]) MODULE_BUNDLES[orig] = parts;
+}
+
 const origReadFileSync = fs.readFileSync;
 fs.readFileSync = function(filePath, ...args) {
   if (typeof filePath !== 'string') return origReadFileSync.call(fs, filePath, ...args);
@@ -4818,8 +4840,8 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
 
   // 4. Manifest checks: theme-tokens.css, theme-registry.js, and theme-customizer files are registered
   const contentScript = manifest.content_scripts.find(s => s.matches && s.matches.includes('https://connect.det.wa.edu.au/*'));
-  assert.ok(contentScript.css.includes('src/theme/theme-tokens.css'), 'manifest.json must register theme-tokens.css');
-  assert.ok(contentScript.css.includes('src/theme/theme-customizer.css'), 'manifest.json must register theme-customizer.css');
+  assert.ok(contentScript.css.includes('src/theme/styles/theme-tokens.css'), 'manifest.json must register theme-tokens.css');
+  assert.ok(contentScript.css.includes('src/theme/styles/theme-customizer.css'), 'manifest.json must register theme-customizer.css');
   assert.ok(contentScript.js.includes('src/theme/theme-registry.js'), 'manifest.json must register theme-registry.js');
   assert.ok(contentScript.js.includes('src/theme/theme-customizer.js'), 'manifest.json must register theme-customizer.js');
 
@@ -6833,8 +6855,16 @@ runTest('Test 153: Theme CSS selectors are scoped to a theme hook (native Connec
   ]);
 
   const themeDir = path.resolve(__dirname, 'src/theme');
+  const cssFiles = [];
+  (function walk(dir) {
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (ent.isDirectory()) walk(path.join(dir, ent.name));
+      else if (ent.name.endsWith('.css')) cssFiles.push(path.relative(themeDir, path.join(dir, ent.name)));
+    }
+  })(themeDir);
+  assert.ok(cssFiles.length > 20, 'theme stylesheets must be found under src/theme');
   const offenders = [];
-  for (const file of fs.readdirSync(themeDir).filter(f => f.endsWith('.css')).sort()) {
+  for (const file of cssFiles.sort()) {
     const css = origReadFileSync.call(fs, path.join(themeDir, file), 'utf8');
     for (const rule of cssSelectors(css)) {
       for (const sel of splitSelectorList(rule)) {
@@ -6847,9 +6877,9 @@ runTest('Test 153: Theme CSS selectors are scoped to a theme hook (native Connec
   assert.deepStrictEqual(offenders, [], `Unscoped theme selectors change native Connect styling:\n${offenders.join('\n')}`);
 
   // Geometry is Liquid Glass only and anchored on <html>
-  const themeCss = origReadFileSync.call(fs, path.join(themeDir, 'theme.css'), 'utf8');
-  const tokensCss = origReadFileSync.call(fs, path.join(themeDir, 'theme-tokens.css'), 'utf8');
-  const controlsCss = origReadFileSync.call(fs, path.join(themeDir, 'theme-controls.css'), 'utf8');
+  const themeCss = origReadFileSync.call(fs, path.join(themeDir, 'styles/theme.css'), 'utf8');
+  const tokensCss = fs.readFileSync(path.join(themeDir, 'theme-tokens.css'), 'utf8'); // all parts
+  const controlsCss = fs.readFileSync(path.join(themeDir, 'theme-controls.css'), 'utf8'); // all parts
   const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
   assert.ok(themeCss.includes(`${glass} :is(\n  .eds-c-card, .cvr-c-card, .eds-c-tile`) && /border-radius: 16px !important;/.test(themeCss),
     'panel curvature must be scoped to Liquid Glass');

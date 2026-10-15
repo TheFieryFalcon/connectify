@@ -2120,14 +2120,23 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
             if (isDistinct) {
               const bgCr = getContrast(elBg, parentBg);
               if (bgCr <= 1.5) {
-                // A separator on any side counts (e.g. a thead bottom border or a sidebar right edge)
-                const hasSufficientBorderContrast = ['Top', 'Right', 'Bottom', 'Left'].some(side => {
-                  const bWidth = parseFloat(style[`border${side}Width`]) || 0;
+                // A separator counts on any side (e.g. a thead bottom border or a sidebar right edge),
+                // and so does an outline or a 1px box-shadow ring, which separate without changing layout
+                const separates = (color, width) => Boolean(color) && color.a > 0.3 && width >= 0.75 &&
+                  (getContrast(color, elBg) >= 1.8 || getContrast(color, parentBg) >= 1.8);
+                const borderSeparates = ['Top', 'Right', 'Bottom', 'Left'].some(side => {
                   const bStyle = style[`border${side}Style`] || 'none';
-                  const bColor = parseRgb(style[`border${side}Color`]);
-                  if (bWidth < 0.75 || bStyle === 'none' || bStyle === 'hidden' || !bColor || bColor.a <= 0.3) return false;
-                  return getContrast(bColor, elBg) >= 1.8 || getContrast(bColor, parentBg) >= 1.8;
+                  if (bStyle === 'none' || bStyle === 'hidden') return false;
+                  return separates(parseRgb(style[`border${side}Color`]), parseFloat(style[`border${side}Width`]) || 0);
                 });
+                const outlineSeparates = style.outlineStyle && style.outlineStyle !== 'none' &&
+                  separates(parseRgb(style.outlineColor), parseFloat(style.outlineWidth) || 0);
+                const ringSeparates = (style.boxShadow || '').split(/,(?![^(]*\))/).some(shadow => {
+                  const color = parseRgb(shadow);
+                  const lengths = (shadow.replace(/rgba?\([^)]*\)/, '').match(/-?[\d.]+px/g) || []).map(parseFloat);
+                  return lengths.length >= 4 && lengths[0] === 0 && lengths[1] === 0 && lengths[2] === 0 && separates(color, lengths[3]);
+                });
+                const hasSufficientBorderContrast = borderSeparates || outlineSeparates || ringSeparates;
                 if (!hasSufficientBorderContrast) {
                   const isExempt = Boolean(el.closest?.(
                     '.v-Notification-system, [class*="progress"], [class*="chart"], [class*="box-plot"], .highcharts-container, .cvr-c-task__chart'

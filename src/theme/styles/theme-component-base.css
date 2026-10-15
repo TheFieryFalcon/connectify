@@ -1,0 +1,166 @@
+/**
+ * Connectify Theme: base colours for nav lists, tables, menus, buttons, inputs, links and the theme menu
+ */
+
+/* Nav Lists, Resource Links, and Connect Help */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .eds-c-nav-list, .eds-c-nav-list__item, .eds-c-nav-list__link,
+  .cvr-c-resource, .cvr-c-resource-item, .eds-c-resource, [class*="guide"], [class*="help"]
+) {
+  background-color: var(--cx-surface-bg) !important;
+  border-color: var(--cx-border-subtle) !important;
+  color: var(--cx-text-secondary) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .eds-c-nav-list__item, .eds-c-nav-list__link, .cvr-c-resource-item
+):hover {
+  background-color: var(--cx-surface-hover) !important;
+  color: var(--cx-text-primary) !important;
+}
+
+/* Tables, Grids & Submission Marksbooks */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  table, .table, .table-striped, .table-hover, .table-bordered,
+  .cvr-c-table, .cvr-c-table--marksbook, .cvr-c-submission-students-table,
+  .v-table, .v-grid, .v-treetable
+):not(#connectify-sidebar *) {
+  background-color: var(--cx-surface-bg) !important;
+  color: var(--cx-text-secondary) !important;
+  border-color: var(--cx-table-border) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  thead, thead th, thead td, .v-table-header, .v-grid-header
+) {
+  background-color: var(--cx-table-header-bg) !important;
+  color: var(--cx-text-primary) !important;
+  border-color: var(--cx-table-border) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(tbody tr):hover {
+  background-color: var(--cx-table-row-hover) !important;
+}
+
+/* Dropdowns, Menubars, Context Menus & Popups */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .v-filterselect-suggestpopup, .v-menubar-popup, .v-contextmenu, .v-context-menu-container,
+  .v-popupview-popup, .dropdown-menu, .clay-dropdown-menu, .ui-menu, .ui-autocomplete,
+  .v-datefield-popup, .v-datefield-calendarpanel, .v-window, .v-window-contents, .mat-dialog-container
+):not(#connectify-sidebar *) {
+  background-color: var(--cx-surface-elevated) !important;
+  color: var(--cx-text-secondary) !important;
+  border-color: var(--cx-border-strong) !important;
+}
+
+/* Primary Navigation Bar (Matches Connect light mode Open Sans typography) */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .cvr-c-primary-navigation__links, .cvr-c-primary-navigation__title, .cvr-c-primary-navigation .v-button-caption
+):not(.eds-c-icon-button *):not([class*="icon"] *) {
+  font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
+}
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .cvr-c-primary-navigation, .cvr-c-service-menu, .cvr-c-primary-menu
+) {
+  background-color: var(--cx-nav-bg) !important;
+  border-bottom-color: var(--cx-nav-border) !important;
+}
+
+/* Buttons and Action Elements */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .v-button, .eds-c-button, .eds-c-standard-button
+):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
+  background-color: var(--cx-button-bg) !important;
+  color: var(--cx-button-text) !important;
+  border-color: var(--cx-button-border) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .v-button:hover, .eds-c-button:hover, .eds-c-standard-button:hover
+):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
+  background-color: var(--cx-surface-hover) !important;
+  border-color: var(--cx-border-strong) !important;
+}
+
+/* Form Inputs, Textareas & Selects */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not(.mat-input-element),
+  textarea, select, .connectea-type-select
+) {
+  background-color: var(--cx-input-bg) !important;
+  color: var(--cx-text-primary) !important;
+  border-color: var(--cx-input-border) !important;
+}
+
+/* Links & Accents */
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(
+  .eds-c-tile a, .cvr-c-tile a, .connectea-panel a, .portlet-body a
+):not(.eds-c-tile__action):not(.cvr-c-tile__action) {
+  color: var(--cx-tile-link-color, var(--cx-text-primary, #f8fafc)) !important;
+}
+
+/* Login & Logout Page Guard: Disable all themes completely */
+:is([data-connectea-login], [data-connectea-logout], [data-connectea-login] *, [data-connectea-logout] *) {
+  --cx-canvas-bg: initial !important; --cx-surface-bg: initial !important; --cx-surface-secondary: initial !important;
+  --cx-surface-elevated: initial !important; --cx-border: initial !important; --cx-border-subtle: initial !important;
+  --cx-text-primary: initial !important; --cx-text-secondary: initial !important; --cx-accent: initial !important;
+}
+
+[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu),
+[data-connectea-logout] :is(#connectea-theme-toggle, #connectea-theme-menu) {
+  display: none !important;
+}
+
+/* Theme Selector Popover Menu, Trigger Button & Swatches */
+.connectea-theme-arrow {
+  display: inline-block;
+  padding: 4px 6px; margin-left: 6px; font-size: 10px; opacity: 0.8; vertical-align: middle; line-height: 1;
+  background: transparent;
+  border: none;
+  cursor: pointer; transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.connectea-theme-arrow:hover { opacity: 1; }
+
+#connectea-theme-menu {
+  position: fixed; width: 250px; background: var(--cx-surface-bg, #1e2632) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important; border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65); padding: 10px; z-index: 10035;
+  display: flex; flex-direction: column; gap: 6px;
+  font-family: "Apple Symbols", "Segoe UI Symbol", Symbola, "Noto Sans Symbols", -apple-system, "system-ui", "Segoe UI", Roboto, sans-serif !important;
+  font-size: 13.5px; box-sizing: border-box;
+}
+
+#connectea-theme-menu .connectea-theme-option {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 40px;
+  border-radius: 8px; background: transparent !important; border: 1px solid transparent !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important; cursor: pointer; width: 100%;
+  text-align: left; box-sizing: border-box; font-size: 14px; font-weight: 500; font-family: inherit;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+#connectea-theme-menu .connectea-theme-option:hover {
+  background: var(--cx-surface-hover, #2b394b) !important; color: #ffffff !important;
+}
+#connectea-theme-menu .connectea-theme-option.eds-s-is-active,
+#connectea-theme-menu .connectea-theme-option[aria-selected="true"] {
+  background: var(--cx-surface-active, #121820) !important; color: #ffffff !important; font-weight: 600; border-color: var(--cx-border-subtle, #334155) !important;
+}
+.connectea-theme-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.connectea-theme-icon {
+  display: inline-flex; align-items: center; justify-content: center; font-size: 17px; width: 22px; height: 22px; flex-shrink: 0; color: var(--cx-text-primary, #f1f5f9) !important;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", sans-serif !important;
+}
+.connectea-theme-name {
+  color: inherit !important; font-size: 14px !important; font-weight: 600 !important; font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+.connectea-theme-toggle-icon {
+  display: inline-flex; align-items: center; justify-content: center; font-size: 15px; width: 18px; height: 18px; margin-right: 2px;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", sans-serif !important;
+}

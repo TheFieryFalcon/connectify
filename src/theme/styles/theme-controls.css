@@ -1,0 +1,141 @@
+/**
+ * Connectify Theme: form controls, checkboxes and dropdowns
+ */
+
+/* --------------------------------------------------------------------------
+   13. Form Controls & General Buttons
+   -------------------------------------------------------------------------- */
+/* Text Inputs & Textareas */
+.connectea-dark :is(input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not(.mat-input-element):not(.connectea-subject-cohort-input):not([class*="connectea-"]), textarea):not(#connectify-sidebar *):not(#connectify-sidebar-handle *) {
+  background-color: var(--cx-input-bg, #141a22) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #42556d) !important;
+  border-radius: 5px !important;
+  padding: 6px 10px !important;
+}
+
+.connectea-dark :is(input, textarea)::placeholder {
+  color: var(--cx-text-muted, #64748b) !important;
+  opacity: 1 !important;
+}
+
+.connectea-dark :is(input, textarea):focus {
+  border-color: var(--cx-accent, #3b82f6) !important;
+  outline: 2px solid var(--cx-accent, #3b82f6) !important;
+}
+
+/* High-Contrast Dark Checkboxes (Native, Clay, Material, Vaadin) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):not(#connectify-sidebar *):not([class*="connectea-"]) {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 17px !important;
+  height: 17px !important;
+  background-color: var(--cx-input-bg, #1a2330) !important;
+  border: 1.5px solid var(--cx-border, #4b6382) !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  display: inline-grid !important;
+  place-content: center !important;
+  vertical-align: middle !important;
+  margin: 0 6px 0 0 !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):hover {
+  border-color: var(--cx-accent-hover, #60a5fa) !important;
+  background-color: var(--cx-surface-hover, #222d3d) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):checked {
+  background-color: #2563eb !important;
+  background-color: var(--cx-accent, #2563eb) !important;
+  border-color: var(--cx-accent, #3b82f6) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3E%3Cpath d='M13.485 3.515a1 1 0 0 1 0 1.414l-7.071 7.071a1 1 0 0 1-1.414 0L1.515 8.515a1 1 0 1 1 1.414-1.414l2.778 2.778 6.364-6.364a1 1 0 0 1 1.414 0z'/%3E%3C/svg%3E") !important;
+  background-size: 11px 11px !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"], .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
+  outline: none !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.custom-control.custom-checkbox, .custom-checkbox, .custom-control) .custom-control-label::before {
+  background-color: var(--cx-input-bg, #1a2330) !important;
+  border: 1.5px solid var(--cx-border, #4b6382) !important;
+  border-radius: 4px !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.custom-control.custom-checkbox, .custom-checkbox, .custom-control) .custom-control-input:checked ~ .custom-control-label::before {
+  background-color: #2563eb !important;
+  background-color: var(--cx-accent, #2563eb) !important;
+  border-color: var(--cx-accent, #3b82f6) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.custom-control.custom-checkbox, .custom-checkbox, .custom-control) .custom-control-input:focus ~ .custom-control-label::before {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-checkbox-frame {
+  border-color: var(--cx-border, #4b6382) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-checkbox-checked .mat-checkbox-background {
+  background-color: var(--cx-accent, #2563eb) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-checkbox-checkmark-path {
+  stroke: #ffffff !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-checkbox, .mat-checkbox, .eds-c-checkbox, .custom-control) label,
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .custom-control-label,
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) label:has(input[type="checkbox"]) {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+  cursor: pointer !important;
+}
+
+/* High-Contrast Dark Dropdowns & Selects */
+.connectea-dark select:not(.connectea-type-select):not([class*="connectea-"]):not(#connectify-sidebar *),
+.connectea-dark .v-select select,
+.connectea-dark .eds-c-select select,
+.connectea-dark :is(.cvr-c-classes__sort, .cvr-c-sort-by) select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-color: var(--cx-input-bg, #1a2330) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #455a73) !important;
+  border-radius: 6px !important;
+  padding: 6px 32px 6px 12px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2394a3b8'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 16px 16px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.connectea-dark select:hover,
+.connectea-dark .v-select select:hover,
+.connectea-dark .eds-c-select select:hover {
+  border-color: var(--cx-border-hover, #5b7594) !important;
+}
+
+.connectea-dark select:focus,
+.connectea-dark .v-select select:focus,
+.connectea-dark .eds-c-select select:focus {
+  border-color: var(--cx-accent, #3b82f6) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
+  outline: none !important;
+}
+
+.connectea-dark select option {
+  background-color: #1a222d !important;
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  padding: 6px 10px !important;
+}

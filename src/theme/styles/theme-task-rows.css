@@ -1,0 +1,160 @@
+/**
+ * Connectify Theme: accordion headers, containment, task rows and type dropdowns
+ */
+
+/* --------------------------------------------------------------------------
+   10. Accordion Section Header ("Hide Details" / "Show Details")
+   -------------------------------------------------------------------------- */
+.connectea-dark .eds-c-accordion__section-heading {
+  background-color: transparent !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid var(--cx-border, #3d5066) !important;
+  color: #cbd5e1 !important;
+  transition: color 0.15s ease;
+}
+
+.connectea-dark :is(.eds-c-accordion__section.eds-s-is-active, [class*="section"].eds-s-is-active) .eds-c-accordion__section-heading {
+  border-bottom: none !important;
+}
+
+.connectea-dark .eds-c-accordion__section-heading :is(.v-label, .eds-c-accordion__section-label, span, div) {
+  background-color: transparent !important;
+  border: none !important;
+  color: inherit !important;
+}
+
+.connectea-dark .eds-c-accordion__section-heading:hover {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+.connectea-dark .eds-c-accordion__section-heading:hover :is(.v-label, .eds-c-accordion__section-label, span, div) {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+/* CSS Containment for Smooth Accordion Expansion & Layout Isolation */
+.eds-c-accordion__panel,
+.cvr-c-accordion__panel {
+  contain: layout style;
+}
+
+/* --------------------------------------------------------------------------
+   11. Assessment Task Rows (.cvr-c-task)
+   -------------------------------------------------------------------------- */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group) {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-accordion__panel,
+  .cvr-c-accordion__panel,
+  .eds-c-accordion__section-body
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .eds-c-accordion__panel,
+  .cvr-c-accordion__panel,
+  .eds-c-accordion__section-body
+) {
+  border-bottom: 1px solid var(--cx-border, #3d5066) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-accordion__panel:before,
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr .eds-c-accordion__panel:before {
+  display: none !important;
+  content: none !important;
+}
+
+.connectea-dark .cvr-c-task__details {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+.connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {
+  color: #f8fafc !important;
+  font-weight: 400 !important;
+}
+
+.connectea-dark .cvr-c-task {
+  border-top: 1px solid #2e3c4e !important;
+  border-bottom: 1px solid #2e3c4e !important;
+}
+
+.connectea-dark .cvr-c-task-group {
+  border-top: none !important;
+}
+
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(
+  .cvr-c-task-group__title,
+  .cvr-c-task__group-name,
+  .cvr-c-task-group h2,
+  .cvr-c-task-group h3,
+  .cvr-c-task-group h4,
+  .cvr-c-task-group :is(.v-label, span, strong):first-child,
+  [class*="task-group"] :is(h2, h3, h4, [class*="title"]),
+  .cvr-c-task__group-title,
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is(
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+) {
+  font-weight: 700 !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-task-group__title,
+  .cvr-c-task__group-name,
+  .cvr-c-task-group h2,
+  .cvr-c-task-group h3,
+  .cvr-c-task-group h4,
+  .cvr-c-task-group :is(.v-label, span, strong):first-child,
+  [class*="task-group"] :is(h2, h3, h4, [class*="title"]),
+  .cvr-c-task__group-title,
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is(
+  .cvr-c-task__title,
+  .cvr-c-task__details .v-label:first-child,
+  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
+) {
+  color: #f1f5f9 !important;
+}
+
+/* Assessment Type Dropdowns (.connectea-type-select) */
+.connectea-dark .connectea-type-label {
+  color: #94a3b8 !important;
+}
+
+.connectea-dark .connectea-type-select {
+  background-color: var(--cx-input-bg, #182330) !important;
+  border: 1px solid var(--cx-input-border, #385170) !important;
+  color: var(--cx-text-primary, #dceaf7) !important;
+  border-radius: 6px !important;
+}
+
+.connectea-dark .connectea-type-select:hover {
+  background-color: var(--cx-surface-hover, #202d3e) !important;
+  border-color: var(--cx-border-strong, #4b6a8f) !important;
+}
+
+.connectea-dark .connectea-type-select:focus {
+  border-color: var(--cx-accent, #60a5fa) !important;
+  outline: 2px solid var(--cx-accent, #60a5fa) !important;
+}
+
+.connectea-dark .connectea-type-select.connectea-overridden {
+  background-color: var(--cx-surface-elevated, #22374e) !important;
+  border-color: var(--cx-accent, #43719e) !important;
+  color: #ffffff !important;
+}

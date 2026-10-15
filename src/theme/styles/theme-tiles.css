@@ -1,0 +1,142 @@
+/**
+ * Connectify Theme: subject tiles, unified headers and native accent suppression
+ */
+
+/* --------------------------------------------------------------------------
+   6. Subject Course Card & Generic Tiles (.eds-c-tile, .cvr-c-tile, .c-tile)
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card,
+  .mat-card,
+  .cvr-c-dashboard-card
+) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+
+.connectea-dark :is(.eds-c-card, .cvr-c-card, .mat-card, .cvr-c-dashboard-card) {
+  border: 1px solid var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) {
+  border: none !important;
+}
+
+/* Unified Card & Tile Header: clean border, no colored accent stripes */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card,
+  .mat-card,
+  .cvr-c-dashboard-card
+) :is(
+  .eds-c-tile__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .eds-c-card__header,
+  .cvr-c-card__header
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
+  .eds-c-tile__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .eds-c-card__header,
+  .cvr-c-card__header
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .eds-c-tile__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .eds-c-card__header,
+  .cvr-c-card__header
+) {
+  background-color: transparent !important;
+  border-bottom: 1px solid #2e3c4e !important;
+  border-color: #2e3c4e !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  position: relative !important;
+}
+
+/* Suppress all native colored header divider lines (e.g. olive on Classes, red on Next Event) while preserving clearfix */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile__header,
+  .eds-t-grey-dark .eds-c-tile__header,
+  .eds-t-blue-dark .eds-c-tile__header,
+  .eds-t-blue-light .eds-c-tile__header,
+  .eds-t-green .eds-c-tile__header,
+  .eds-t-orange .eds-c-tile__header,
+  .eds-t-purple .eds-c-tile__header,
+  .eds-t-red .eds-c-tile__header,
+  .eds-t-teal .eds-c-tile__header,
+  .eds-c-tile--important .eds-c-tile__header,
+  .eds-c-tile__header--negative,
+  .eds-c-card__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .cvr-c-card__header
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
+  .eds-c-tile__header,
+  .eds-t-grey-dark .eds-c-tile__header,
+  .eds-t-blue-dark .eds-c-tile__header,
+  .eds-t-blue-light .eds-c-tile__header,
+  .eds-t-green .eds-c-tile__header,
+  .eds-t-orange .eds-c-tile__header,
+  .eds-t-purple .eds-c-tile__header,
+  .eds-t-red .eds-c-tile__header,
+  .eds-t-teal .eds-c-tile__header,
+  .eds-c-tile--important .eds-c-tile__header,
+  .eds-c-tile__header--negative,
+  .eds-c-card__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .cvr-c-card__header
+),
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+  .eds-c-tile__header,
+  .eds-t-grey-dark .eds-c-tile__header,
+  .eds-t-blue-dark .eds-c-tile__header,
+  .eds-t-blue-light .eds-c-tile__header,
+  .eds-t-green .eds-c-tile__header,
+  .eds-t-orange .eds-c-tile__header,
+  .eds-t-purple .eds-c-tile__header,
+  .eds-t-red .eds-c-tile__header,
+  .eds-t-teal .eds-c-tile__header,
+  .eds-c-tile--important .eds-c-tile__header,
+  .eds-c-tile__header--negative,
+  .eds-c-card__header,
+  .cvr-c-tile__header,
+  .c-tile__header,
+  .cvr-c-card__header
+) {
+  border-bottom: 1px solid #2e3c4e !important;
+  border-bottom-color: #2e3c4e !important;
+  border-color: #2e3c4e !important;
+}
+
+/* Suppress colored accent stripes and decorator pseudo-elements without breaking clearfix */
+.connectea-dark :is(
+  .eds-c-tile__accent,
+  .cvr-c-tile__accent,
+  .eds-c-tile__header-stripe,
+  .cvr-c-tile__header-stripe
+)::before,
+.connectea-dark :is(
+  .eds-c-tile__accent,
+  .cvr-c-tile__accent,
+  .eds-c-tile__header-stripe,
+  .cvr-c-tile__header-stripe
+)::after {
+  display: none !important;
+  content: none !important;
+}

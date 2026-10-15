@@ -1,0 +1,196 @@
+/**
+ * Connectify Theme: border restoration, tables, marksbooks and modals
+ */
+
+/* --------------------------------------------------------------------------
+   20. Universal Border Restoration & Structural Integrity
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  input:not([type="checkbox"]):not([type="radio"]):not(.mat-input-element):not(.cdk-visually-hidden):not(.mat-checkbox-input),
+  select,
+  textarea
+) {
+  border-style: solid !important;
+  border-width: 1px !important;
+}
+
+.connectea-dark :is(.cdk-visually-hidden, .mat-checkbox-input) {
+  border: 0 !important;
+  border-width: 0 !important;
+}
+/* --------------------------------------------------------------------------
+   21. Tables, Grids & Submission Marksbooks
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  table,
+  .table,
+  .table-striped,
+  .table-hover,
+  .table-bordered,
+  .table-list,
+  .table-responsive,
+  .cvr-c-table,
+  .cvr-c-table--marksbook,
+  .cvr-c-table--submission-students,
+  .cvr-c-table--list,
+  .cvr-c-submission-students-table,
+  .mat-table,
+  mat-table,
+  .cdk-table,
+  cdk-table,
+  .v-table,
+  .v-table-table,
+  .v-grid,
+  .v-treetable
+):not(#connectify-sidebar *) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+  border-color: var(--cx-border, #36485e) !important;
+}
+
+.connectea-dark :is(
+  thead,
+  thead th,
+  thead td,
+  .mat-header-row,
+  mat-header-row,
+  .mat-header-cell,
+  mat-header-cell,
+  .v-table-header,
+  .v-table-header-cell,
+  .v-grid-header,
+  .v-grid-column-header-content,
+  .cvr-c-submission-students-table table th,
+  .cvr-c-submission-students-table__header-element,
+  .cvr-c-submission-students-table__preheader-element,
+  .table thead th,
+  .table-list thead th,
+  .cvr-c-tree-panel > thead
+):not(#connectify-sidebar *) {
+  background-color: var(--cx-table-header-bg, var(--cx-surface-secondary, #18202b)) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: var(--cx-border, #36485e) !important;
+}
+
+.connectea-dark :is(
+  tbody th,
+  tbody td,
+  tfoot th,
+  tfoot td,
+  .mat-row,
+  mat-row,
+  .mat-cell,
+  mat-cell,
+  .v-table-cell-content,
+  .v-table-row,
+  .v-grid-row,
+  .v-grid-cell,
+  .table td,
+  .table th,
+  .table-list td,
+  .table-list th,
+  .cvr-c-submission-students-table table td,
+  .cvr-c-submission-students-table__element
+):not(#connectify-sidebar *) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
+}
+
+.connectea-dark :is(
+  table:not(.table-bordered):not(.mat-table):not(.cdk-table),
+  .table:not(.table-bordered):not(.mat-table):not(.cdk-table),
+  .table-list,
+  .cvr-c-table,
+  .cvr-c-table--list,
+  .cvr-c-tree-panel,
+  .cvr-c-submission-students-table,
+  .v-table,
+  .v-table-table
+) {
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.connectea-dark :is(
+  table:not(.table-bordered):not(.mat-table):not(.cdk-table),
+  .table:not(.table-bordered):not(.mat-table):not(.cdk-table),
+  .table-list,
+  .cvr-c-table,
+  .cvr-c-table--list,
+  .cvr-c-tree-panel,
+  .cvr-c-submission-students-table,
+  .v-table,
+  .v-table-table
+) :is(th, td):not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]) {
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.connectea-dark :is(
+  .table-striped tbody tr:nth-of-type(odd),
+  .table-list.table-striped tbody tr:nth-of-type(odd),
+  .v-table-row-odd,
+  .v-grid-row-stripe
+):not(#connectify-sidebar *) :is(td, th) {
+  background-color: var(--cx-table-row-alt, var(--cx-surface-secondary, #161e29)) !important;
+}
+
+.connectea-dark :is(
+  .table-hover tbody tr:hover,
+  .table-list.table-hover tbody tr:hover,
+  .v-table-row:hover,
+  .v-grid-row:hover
+):not(#connectify-sidebar *) :is(td, th) {
+  background-color: var(--cx-table-row-hover, var(--cx-surface-hover, #24303f)) !important;
+  color: #ffffff !important;
+}
+
+.connectea-dark :is(
+  tfoot,
+  .v-table-footer,
+  .v-table-footer-cell,
+  .v-grid-footer,
+  .table tfoot
+):not(#connectify-sidebar *) {
+  background-color: var(--cx-table-header-bg, var(--cx-surface-secondary, #18202b)) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: var(--cx-border, #36485e) !important;
+}
+
+.connectea-dark .quick-action-menu {
+  background-color: var(--cx-surface-hover, #24303f) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border-color: var(--cx-border-strong, #4a617a) !important;
+}
+
+/* --------------------------------------------------------------------------
+   22. Comprehensive Modals, Dialogs, Popups & Dark Modality Curtains
+   -------------------------------------------------------------------------- */
+.connectea-dark :is(
+  .v-window-modalitycurtain,
+  .modal-backdrop,
+  .yui3-widget-mask,
+  .ui-widget-overlay
+) {
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  opacity: 1 !important;
+}
+
+.connectea-dark :is(
+  .v-window,
+  .v-window-contents,
+  .ui-dialog,
+  .modal-content,
+  .modal-dialog,
+  .portal-popup,
+  .liferay-modal .modal-dialog,
+  .cvr-c-popup,
+  .v-reconnect-dialog
+):not(#connectify-sidebar *) {
+  background-color: var(--cx-surface-elevated, #1e2632) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55) !important;
+}

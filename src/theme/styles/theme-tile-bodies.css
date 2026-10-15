@@ -1,0 +1,163 @@
+/**
+ * Connectify Theme: tile bodies, nav lists, resource rows and high-contrast links
+ */
+
+.connectea-dark :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card
+) :is(
+  .eds-c-tile__action,
+  .cvr-c-tile__action,
+  .c-tile__action,
+  .eds-c-tile__actions,
+  .cvr-c-tile__actions,
+  .eds-c-tile__header .v-link,
+  .cvr-c-tile__header .v-link
+):hover :is(a, span, div, p) {
+  color: #ffffff !important;
+}
+
+.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-heading, .eds-c-tile__title, .cvr-c-tile__title, h2, h3, h4) {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-caption, .eds-c-tile__caption, .cvr-c-tile__caption, small) {
+  color: #94a3b8 !important;
+}
+
+.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-accordion__panel) {
+  background-color: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-tile__body, .cvr-c-tile__body) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+
+/* Generic Tile Bodies, Inner Containers, Nav Lists & Resource Rows (Connect Help, Resources) */
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) :is(
+  .eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .mat-card, .cvr-c-dashboard-card,
+  .portlet, .portlet-boundary, .portlet-content, .portlet-body, .journal-content-article
+) :is(
+  .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-card__body, .cvr-c-card__body,
+  .portlet-content, .portlet-body, .journal-content-article, .eds-c-nav-list, .eds-c-nav-list__item, .eds-c-nav-list__link,
+  .eds-c-list, .eds-c-list__item, .eds-c-tile-list, .eds-c-tile-list__item, .cvr-c-resource, .cvr-c-resource-item,
+  .cvr-c-resource-card, .eds-c-resource, .cvr-c-notice, .cvr-c-notice-card, .cvr-c-feed-item, [class*="guide"], [class*="help"], [class*="resource"], ul, ol
+) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .eds-c-nav-list__link,
+  .cvr-c-resource,
+  .cvr-c-resource-item,
+  .eds-c-resource,
+  [class*="guide"],
+  [class*="help"]
+) {
+  background-color: #1e2632 !important;
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  border-color: #2e3c4e !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
+  color: #e2e8f0 !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list__item,
+  .eds-c-nav-list__link,
+  .eds-c-list__item,
+  .eds-c-tile-list__item,
+  .cvr-c-resource-item,
+  [class*="guide"] li,
+  [class*="help"] li
+):hover {
+  background-color: #263344 !important;
+  background-color: var(--cx-surface-hover, #263344) !important;
+  color: #ffffff !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .cvr-c-resource,
+  .eds-c-resource,
+  [class*="guide"],
+  [class*="help"]
+) :is(a, span, p, div, label, strong) {
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-nav-list,
+  .eds-c-nav-list__item,
+  .cvr-c-resource,
+  .eds-c-resource
+) :is(.eds-c-icon, svg, path, circle) {
+  color: var(--cx-text-muted, #94a3b8) !important;
+  fill: currentColor !important;
+  stroke: none !important;
+}
+
+/* Explicit high-contrast tile and card links (Classes, Notices, Feeds, Help) */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card,
+  .cvr-c-dashboard-card
+) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *) {
+  color: var(--cx-tile-link-color, var(--cx-text-primary, #f8fafc)) !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+  .eds-c-tile,
+  .cvr-c-tile,
+  .c-tile,
+  .eds-c-card,
+  .cvr-c-card,
+  .cvr-c-dashboard-card
+) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *):hover {
+  color: var(--cx-accent-hover, #93c5fd) !important;
+  text-decoration: underline !important;
+}
+
+/* High contrast for class names, notice titles, and tile headings */
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(.eds-c-tile__title, .cvr-c-tile__title, .cvr-c-class__name, .cvr-c-classes-list__title, [class*="class-name"], [class*="class-title"], [class*="class__name"], [class*="notice__title"], [class*="feed-item__title"], h1, h2, h3, h4) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+  font-weight: 700 !important;
+}
+
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-caption, .v-label.eds-c-caption, .v-caption, :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(.eds-c-tile__caption, .cvr-c-tile__caption, .cvr-c-class__code, .cvr-c-class__teacher, .cvr-c-class__details, [class*="teacher"], [class*="code"], [class*="subtitle"], [class*="meta"], [class*="date"], small)):not(#connectify-sidebar *) {
+  color: var(--cx-text-muted, #94a3b8) !important;
+}
+
+.connectea-dark .eds-c-tile__footer {
+  border-top: 1px solid var(--cx-border, #2e3c4e) !important;
+}
+
+#ng-zone__classes-metrics-summary {
+  display: block !important;
+  background-color: var(--cx-card-bg, #ffffff) !important;
+  border: 1px solid var(--cx-border, #e2e8f0) !important;
+  box-shadow: var(--cx-card-shadow, 0 1px 3px rgba(0, 0, 0, 0.08)) !important;
+  padding: 16px !important;
+  margin-bottom: 24px !important;
+  box-sizing: border-box !important;
+}
+
+.connectea-dark #ng-zone__classes-metrics-summary {
+  background-color: var(--cx-surface-bg, #1a222d) !important;
+  border-color: var(--cx-border, #314256) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
