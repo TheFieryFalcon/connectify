@@ -11,7 +11,7 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Cohort Statistics Panel (`.connectea-panel`)**: Deep navy `#15263a`, border `#264669`, text `#d6e8f8`.
 - **Summary Marks Box (`.cvr-c-task__marks`)**: Box `#161e29`, divider `#2d3b4d`.
 - **Accordions & Section Headers**: `#222b39`, border `#2e3c4e`; transparent over custom wallpapers or Liquid Glass.
-- **Category Colors**: Exam (Gold `#d97706`), Test (Blue `#2563eb`), Application (Green `#059669`), Essay (Purple `#7c3aed`), Take-Home (Teal `#0d9488`). Labels bind to `--cx-cat-color` via `.cx-cat-name-label`.
+- **Category Colors**: Exam (Red `#e74c3c`), Test (Green `#2ecc71`), Application (Blue `#3498db`), Essay (Purple `#9b59b6`), Take-Home (Yellow `#f1c40f`); defined once in `src/cohort/category-store.js`. Labels bind to `--cx-cat-color` via `.cx-cat-name-label`.
 - **Assessment Type Label**: Always formatted as `"Type: "` with trailing colon and space.
 
 ## 2. Contrast & Typography Standards

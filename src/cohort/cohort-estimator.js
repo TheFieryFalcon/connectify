@@ -28,7 +28,7 @@
     const title = normalize(card?.querySelector?.('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent);
     if (!title) return null;
 
-    const student = new URL(location.href).searchParams.get('coisp') || 'current';
+    const student = window.ConnectifyUtils.accountKey();
     const subject = title.replace(/\s*[-–—]\s*Semester\s+[12]\s*$/i, '').trim();
     return `connectea:cohort:v3:${student}:${new Date().getFullYear()}:${subject}`;
   }

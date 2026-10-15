@@ -1,53 +1,17 @@
-/** Connectify Category Settings & Customizer */
+/**
+ * Connectify Settings panel & assessment categories
+ *
+ * Builds the Settings tool panel (markup in settings-markup.js, general preferences in
+ * settings-preferences.js) and owns the assessment category keyword editor.
+ * Exposes window.ConnectifyCategorySettings.
+ */
 (() => {
   'use strict';
 
   if (window.ConnectifyCategorySettings) return;
 
-  const defaultCategories = {
-    Exam: { color: '#e74c3c', keywords: ['exam', 'semester'] },
-    Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
-    Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
-    Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
-    'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'presentation', 'oral', 'creative'] }
-  };
-
-  if (!window.cxCategories) window.cxCategories = defaultCategories;
-
-  const getStorageApi = () => (typeof browser !== 'undefined' && browser?.storage) ? browser : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
-  const safeStorageGet = (keys, cb) => {
-    try {
-      const api = getStorageApi(); if (!api?.storage?.local) return;
-      let handled = false;
-      const callback = res => { if (!handled && res) { handled = true; cb(res); } };
-      const p = api.storage.local.get(keys, callback);
-      if (p && typeof p.then === 'function') p.then(callback).catch(() => {});
-    } catch {}
-  };
-  const safeStorageSet = obj => { try { const p = getStorageApi()?.storage?.local?.set(obj); if (p?.catch) p.catch(() => {}); } catch {} };
-  const safeStorageRemove = key => { try { const p = getStorageApi()?.storage?.local?.remove(key); if (p?.catch) p.catch(() => {}); } catch {} };
-
-  const resolveCategories = () => {
-    try {
-      const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
-      if (stored) window.cxCategories = JSON.parse(stored);
-    } catch (e) {}
-    safeStorageGet(['cx-categories'], res => {
-      if (res && res['cx-categories']) {
-        window.cxCategories = res['cx-categories'];
-        try {
-          localStorage.setItem('cx-categories', JSON.stringify(window.cxCategories));
-          localStorage.setItem('connectea:categories', JSON.stringify(window.cxCategories));
-        } catch (e) {}
-      }
-    });
-    if (window.cxCategories?.['Take-Home']?.keywords) {
-      window.cxCategories['Take-Home'].keywords = window.cxCategories['Take-Home'].keywords.filter(
-        k => k.toLowerCase() !== 'extended'
-      );
-    }
-  };
-  resolveCategories();
+  const store = window.ConnectifyCategoryStore;
+  const { defaultCategories, resolveCategories } = store;
 
   function renderCategoryInputs(panel, onCategoryChange) {
     const inputContainer = panel.querySelector('#cx-categories-inputs');
@@ -65,7 +29,6 @@
       label.textContent = cat;
       label.title = cat;
       label.dataset.cat = cat;
-      label.style.setProperty('--cx-cat-color', data.color || '#3498db');
       label.style.cssText = `width:90px;font-size:12px;font-weight:600;color:${data.color || '#3498db'};--cx-cat-color:${data.color || '#3498db'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;`;
 
       const input = document.createElement('input');
@@ -84,13 +47,12 @@
         delBtn.title = `Delete category "${cat}"`;
         delBtn.style.cssText = 'background:transparent;color:#e74c3c;border:1px solid #e74c3c;border-radius:4px;cursor:pointer;padding:2px 7px;font-size:11px;';
         delBtn.onclick = () => {
-          delete window.cxCategories[cat];
-          try {
-            localStorage.setItem('cx-categories', JSON.stringify(window.cxCategories));
-            localStorage.setItem('connectea:categories', JSON.stringify(window.cxCategories));
-          } catch {}
-          safeStorageSet({ 'cx-categories': window.cxCategories });
+          const remaining = { ...window.cxCategories };
+          delete remaining[cat];
+          store.saveCategories(remaining);
           wrap.remove();
+          // Tasks auto-detected as the deleted category need a new type
+          window.ConnectifyTaskTypes?.rescanAllAutoAssessments?.();
           if (typeof onCategoryChange === 'function') onCategoryChange();
         };
         wrap.append(delBtn);
@@ -114,227 +76,25 @@
     catPanel.id = 'connectify-categories';
     catPanel.hidden = true;
     catPanel.className = 'cx-workspace-panel';
-    catPanel.innerHTML = `
-      <header style="margin-bottom:20px;"><strong style="font-size:18px;">Settings</strong></header>
-      <section class="cx-settings-section" style="margin-bottom:28px;">
-        <header style="margin-bottom:8px;"><strong>General Preferences</strong></header>
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;margin-top:8px;">
-          <input type="checkbox" id="cx-auto-expand-toggle" style="width:16px;height:16px;cursor:pointer;"> Auto-expand class tabs on page load
-        </label>
-        <p class="cx-settings-desc" style="margin:4px 0 0 24px;">When enabled, Connectify automatically expands course outlines on load to scrape assessment data.</p>
-
-        <div class="cx-settings-divider" style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:14px;padding-top:12px;">
-          <div>
-            <label for="cx-general-cohort-input" class="cx-settings-label">General Cohort Size</label>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <input type="number" id="cx-general-cohort-input" class="cx-settings-number-input" min="1" step="1" placeholder="500" style="box-sizing:border-box;width:80px;padding:3px 6px;border-radius:4px;font-size:12px;">
-              <span class="cx-settings-hint">(default: 500)</span>
-            </div>
-            <p class="cx-settings-desc">Estimated total students in this year level.</p>
-          </div>
-          <div>
-            <label for="cx-atar-percentage-input" class="cx-settings-label">ATAR Percentage</label>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <input type="number" id="cx-atar-percentage-input" class="cx-settings-number-input" min="1" max="100" step="1" placeholder="60" style="box-sizing:border-box;width:75px;padding:3px 6px;border-radius:4px;font-size:12px;">
-              <span class="cx-settings-hint">% (default: 60%)</span>
-            </div>
-            <p class="cx-settings-desc">Proportion enrolled in the ATAR pathway.</p>
-          </div>
-          <div>
-            <label for="cx-theme-select-input" class="cx-settings-label">Color Theme</label>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <select id="cx-theme-select-input" class="cx-settings-select" style="box-sizing:border-box;padding:3px 8px;border-radius:4px;font-size:12px;cursor:pointer;">
-                <option value="dark">☾ Dark (v3.2.1 Parity)</option>
-                <option value="quantum">⚛ Quantum Dark (Legacy &le;3.1.14)</option>
-                <option value="amoled">🌑 AMOLED Black</option>
-                <option value="midnight">🌌 Midnight Navy</option>
-                <option value="forest">🌲 Emerald Forest</option>
-                <option value="sunset">🌅 Twilight Plum</option>
-                <option value="liquid-glass">🫧 Liquid Glass (Apple Frosted)</option>
-              </select>
-            </div>
-            <p class="cx-settings-desc">Interface theme and visual palette.</p>
-          </div>
-          <div id="cx-bg-settings-container" style="flex:1 1 100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
-            <label class="cx-settings-label" style="margin:0;">Custom Wallpaper:</label>
-            <input type="file" id="cx-bg-upload-input" accept="image/*" style="display:none;">
-            <button type="button" id="cx-bg-upload-btn" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">🖼 Upload Background</button>
-            <button type="button" id="cx-bg-remove-btn" class="eds-c-button" style="display:none;background:#64748b;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">✕ Remove</button>
-            <span id="cx-bg-status-label" class="cx-settings-hint" style="font-size:11px;">No custom background set</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="cx-settings-section" style="margin-bottom:28px;border-top:1px solid #d8e3ee;padding-top:20px;">
-        <header style="margin-bottom:8px;"><strong>Semester 1 Scaling Calibration</strong></header>
-        <p class="cx-settings-desc" style="font-size:12px;margin:0 0 14px 0;">Enter your school's Semester 1 scaled scores to calibrate the model to your cohort's historical distribution.</p>
-        <div id="cx-calibration-table" style="display:grid;grid-template-columns:minmax(140px, 220px) 85px 85px;gap:10px 14px;align-items:center;margin-top:12px;"></div>
-      </section>
-
-      <section class="cx-settings-section" style="margin-bottom:28px;border-top:1px solid #d8e3ee;padding-top:20px;">
-        <header style="margin-bottom:8px;"><strong>Previous Year Baselines (Cold-Start)</strong></header>
-        <p class="cx-settings-desc" style="font-size:12px;margin:0 0 14px 0;">Enter your previous year's assessment type averages and subject final marks to jumpstart the Grade and ATAR Predictors early in the year.</p>
-        <div id="cx-baselines-container"></div>
-      </section>
-
-      <section class="cx-settings-section" style="margin-top:36px;border-top:1px solid #d8e3ee;padding-top:24px;">
-        <header style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
-          <strong>Assessment Categories</strong>
-          <button type="button" id="cx-cat-add" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">+ Add Category</button>
-        </header>
-        <p class="cx-settings-desc" style="font-size:12px;margin:0 0 16px 0;">Customize the comma-separated keywords used to automatically detect your assessment types:</p>
-        <div id="cx-categories-inputs"></div>
-        <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
-           <button type="button" id="cx-cat-save" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Save Changes</button>
-           <button type="button" id="cx-cat-reset" class="eds-c-button" style="background:#4b5563;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Reset Defaults</button>
-        </div>
-      </section>
-
-      <section class="cx-settings-section" style="margin-top:36px;border-top:1px solid #d8e3ee;padding-top:24px;">
-        <header style="margin-bottom:8px;"><strong>Developer Settings</strong></header>
-        <p class="cx-settings-desc" style="font-size:12px;margin:0 0 16px 0;">Reset local caches and saved student assessment data.</p>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <button type="button" id="cx-clear-cache-btn" class="eds-c-button cx-clear-cache-btn" style="background:#e74c3c;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Clear Cache</button>
-          <span id="cx-clear-cache-feedback" style="display:none;font-size:12px;color:#27ae60;font-weight:600;">Cache cleared!</span>
-        </div>
-      </section>
-    `;
-
-    const clearCacheBtn = catPanel.querySelector('#cx-clear-cache-btn');
-    if (clearCacheBtn) {
-      clearCacheBtn.addEventListener('click', () => {
-        try {
-          if (window.ConnectifyCache?.clearResultsCache) window.ConnectifyCache.clearResultsCache();
-          if (window.ConnectifyCache?.clearCohortCache) window.ConnectifyCache.clearCohortCache();
-          if (window.ConnectifyCache?.clearPredictorCache) window.ConnectifyCache.clearPredictorCache();
-          if (window.ConnectifyData?.clearCache) window.ConnectifyData.clearCache();
-          try { localStorage.removeItem('connectify:stale_subjects'); } catch {}
-          const feedback = catPanel.querySelector('#cx-clear-cache-feedback');
-          if (feedback) { feedback.style.display = 'inline'; setTimeout(() => { feedback.style.display = 'none'; }, 3000); }
-        } catch (e) { console.warn('Failed to clear cache:', e); }
-      });
-    }
+    catPanel.innerHTML = window.ConnectifySettingsMarkup.panelHtml();
+    const refreshPreferences = window.ConnectifySettingsPreferences.bind(catPanel);
 
     catPanel.querySelector('#cx-cat-add').onclick = () => {
       const catName = prompt('Enter new assessment category name (e.g. Practical, Investigation):');
       if (!catName || !catName.trim()) return;
       const cleanName = catName.trim();
-      if (!window.cxCategories) window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
+      if (!window.cxCategories) window.cxCategories = store.copyDefaults();
       if (Object.keys(window.cxCategories).some(k => k.toLowerCase() === cleanName.toLowerCase())) {
         alert(`Category "${cleanName}" already exists!`); return;
       }
       const color = window.ConnectifyTaskTypes?.getCategoryColor ? window.ConnectifyTaskTypes.getCategoryColor(cleanName) : '#3498db';
-      window.cxCategories[cleanName] = { color, keywords: [cleanName.toLowerCase()] };
-      try {
-        localStorage.setItem('cx-categories', JSON.stringify(window.cxCategories));
-        localStorage.setItem('connectea:categories', JSON.stringify(window.cxCategories));
-      } catch {}
-      safeStorageSet({ 'cx-categories': window.cxCategories });
+      store.saveCategories({ ...window.cxCategories, [cleanName]: { color, keywords: [cleanName.toLowerCase()] } });
       renderCategoryInputs(catPanel, () => renderBaselines());
       renderBaselines();
-      const newInput = catPanel.querySelector(`#cx-cat-input-${cleanName.replace(/\s+/g, '_')}`);
+      const newId = `cx-cat-input-${cleanName.replace(/\s+/g, '_')}`;
+      const newInput = Array.from(catPanel.querySelectorAll('.cx-cat-keyword-input')).find(el => el.id === newId);
       if (newInput) newInput.focus();
     };
-
-    const autoExpandToggle = catPanel.querySelector('#cx-auto-expand-toggle');
-    if (autoExpandToggle) {
-      autoExpandToggle.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
-      autoExpandToggle.addEventListener('change', () => {
-        try { localStorage.setItem('connectify:auto_expand', String(autoExpandToggle.checked)); } catch {}
-        window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
-      });
-    }
-    const generalCohortInput = catPanel.querySelector('#cx-general-cohort-input');
-    if (generalCohortInput) {
-      const saved = localStorage.getItem('connectify:general_cohort_size');
-      if (saved) generalCohortInput.value = saved;
-      generalCohortInput.addEventListener('input', () => {
-        const val = generalCohortInput.value.trim();
-        try { if (val && Number(val) > 0) localStorage.setItem('connectify:general_cohort_size', val); else localStorage.removeItem('connectify:general_cohort_size'); } catch {}
-        window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
-      });
-    }
-    const atarPctInput = catPanel.querySelector('#cx-atar-percentage-input');
-    if (atarPctInput) {
-      const saved = localStorage.getItem('connectify:atar_percentage');
-      if (saved) atarPctInput.value = saved;
-      atarPctInput.addEventListener('input', () => {
-        const val = atarPctInput.value.trim();
-        try { if (val && Number(val) > 0 && Number(val) <= 100) localStorage.setItem('connectify:atar_percentage', val); else localStorage.removeItem('connectify:atar_percentage'); } catch {}
-        window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
-      });
-    }
-
-    const themeSelectInput = catPanel.querySelector('#cx-theme-select-input');
-    if (themeSelectInput) {
-      if (!themeSelectInput.querySelector('option[value="light"]')) {
-        const defOpt = document.createElement('option');
-        defOpt.value = 'light';
-        defOpt.textContent = '☀ Default';
-        if (typeof themeSelectInput.prepend === 'function') {
-          themeSelectInput.prepend(defOpt);
-        } else if (typeof themeSelectInput.insertBefore === 'function') {
-          themeSelectInput.insertBefore(defOpt, themeSelectInput.firstChild);
-        } else if (typeof themeSelectInput.replaceChildren === 'function') {
-          themeSelectInput.replaceChildren(defOpt, ...(themeSelectInput.children || []));
-        } else {
-          themeSelectInput.appendChild(defOpt);
-        }
-      }
-      const customThemes = window.ConnectifyThemeRegistry?.getCustomThemes ? window.ConnectifyThemeRegistry.getCustomThemes() : [];
-      for (const ct of customThemes) {
-        if (!themeSelectInput.querySelector(`option[value="${ct.id}"]`)) {
-          const opt = document.createElement('option');
-          opt.value = ct.id;
-          opt.textContent = `${ct.icon || '🎨'} ${ct.name}`;
-          themeSelectInput.appendChild(opt);
-        }
-      }
-      const rawTheme = window.ConnectifyTheme ? window.ConnectifyTheme.getTheme() : (localStorage.getItem('connectea:theme:id') || 'dark');
-      themeSelectInput.value = rawTheme || 'dark';
-      themeSelectInput.addEventListener('change', () => {
-        if (window.ConnectifyTheme) window.ConnectifyTheme.setTheme(themeSelectInput.value);
-      });
-    }
-
-    const bgUploadInput = catPanel.querySelector('#cx-bg-upload-input');
-    const bgUploadBtn = catPanel.querySelector('#cx-bg-upload-btn');
-    const bgRemoveBtn = catPanel.querySelector('#cx-bg-remove-btn');
-    const bgStatusLabel = catPanel.querySelector('#cx-bg-status-label');
-    function updateBgUI() {
-      const cur = window.ConnectifyTheme?.getCustomBackground?.();
-      if (bgRemoveBtn) bgRemoveBtn.style.display = cur ? 'inline-block' : 'none';
-      if (bgStatusLabel) bgStatusLabel.textContent = cur ? 'Custom wallpaper active' : 'No custom background set';
-    }
-    updateBgUI();
-    if (bgUploadBtn && bgUploadInput) {
-      bgUploadBtn.onclick = () => bgUploadInput.click();
-      bgUploadInput.onchange = () => {
-        const file = bgUploadInput.files?.[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-          const rawUrl = e.target?.result; if (!rawUrl) return;
-          const img = new Image();
-          img.onload = () => {
-            const maxDim = 2560; let w = img.width, h = img.height;
-            if (w > maxDim || h > maxDim) { const r = Math.min(maxDim / w, maxDim / h); w = Math.round(w * r); h = Math.round(h * r); }
-            const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            if (window.ConnectifyTheme) window.ConnectifyTheme.setCustomBackground(canvas.toDataURL('image/jpeg', 0.88));
-            updateBgUI();
-          };
-          img.src = rawUrl;
-        };
-        reader.readAsDataURL(file);
-      };
-    }
-    if (bgRemoveBtn) {
-      bgRemoveBtn.onclick = () => {
-        if (window.ConnectifyTheme) window.ConnectifyTheme.clearCustomBackground();
-        if (bgUploadInput) bgUploadInput.value = '';
-        updateBgUI();
-      };
-    }
 
     function renderCalib() {
       if (window.ConnectifyCalibration?.renderCalibTable) window.ConnectifyCalibration.renderCalibTable(catPanel);
@@ -350,16 +110,8 @@
       catPanel.hidden = false;
       catBtn.setAttribute('aria-pressed', 'true');
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'categories' }));
-      try {
-        if (autoExpandToggle) autoExpandToggle.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
-        if (generalCohortInput) generalCohortInput.value = localStorage.getItem('connectify:general_cohort_size') || '';
-        if (atarPctInput) atarPctInput.value = localStorage.getItem('connectify:atar_percentage') || '';
-        if (themeSelectInput && window.ConnectifyTheme) themeSelectInput.value = window.ConnectifyTheme.getTheme();
-        updateBgUI();
-        resolveCategories();
-      } catch (e) {
-        console.warn('Connectify settings preferences error:', e);
-      }
+      refreshPreferences();
+      try { resolveCategories(); } catch {}
       try { renderCategoryInputs(catPanel, () => renderBaselines()); renderCalib(); renderBaselines(); } catch (e) { console.warn('Settings sub-render error:', e); }
     }
 
@@ -403,12 +155,7 @@
         };
       });
 
-      window.cxCategories = updatedCats;
-      try {
-        localStorage.setItem('cx-categories', JSON.stringify(updatedCats));
-        localStorage.setItem('connectea:categories', JSON.stringify(updatedCats));
-      } catch (e) {}
-      safeStorageSet({ 'cx-categories': updatedCats });
+      store.saveCategories(updatedCats);
 
       if (window.ConnectifyTaskTypes?.rescanAllAutoAssessments) {
         window.ConnectifyTaskTypes.rescanAllAutoAssessments();
@@ -432,12 +179,7 @@
 
     catPanel.querySelector('#cx-cat-reset').onclick = () => {
       if (confirm('Reset assessment category keywords to factory defaults?')) {
-        safeStorageRemove('cx-categories');
-        try {
-          localStorage.removeItem('cx-categories');
-          localStorage.removeItem('connectea:categories');
-        } catch (e) {}
-        window.cxCategories = JSON.parse(JSON.stringify(defaultCategories));
+        store.resetCategories();
         renderCategoryInputs(catPanel, () => renderBaselines());
         renderBaselines();
         if (window.ConnectifyTaskTypes?.rescanAllAutoAssessments) {

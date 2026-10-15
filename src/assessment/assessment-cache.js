@@ -12,13 +12,7 @@
   const subjectsCache = new Map();
   const statsCache = new Map();
 
-  function getStudentId() {
-    try {
-      return new URL(location.href).searchParams.get('coisp') || 'current';
-    } catch {
-      return 'current';
-    }
-  }
+  const getStudentId = () => window.ConnectifyUtils.accountKey();
 
   function statsCacheKey(subjectName, taskName) {
     const s = normalize(subjectName).toLowerCase();

@@ -125,7 +125,7 @@
 
     // Ingest grade cache (e.g. connectify:grade_cache:current and connectify:grade_cache:<studentId>)
     try {
-      const studentId = new URL(location.href).searchParams.get('coisp') || 'current';
+      const studentId = window.ConnectifyUtils.accountKey();
       const cacheKeys = [
         'connectify:grade_cache:current',
         `connectify:grade_cache:${studentId}`

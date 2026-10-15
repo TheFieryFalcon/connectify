@@ -15,13 +15,7 @@
 
   const { normalize } = window.ConnectifyUtils;
 
-  function getStudentId() {
-    try {
-      return new URL(location.href).searchParams.get('coisp') || 'current';
-    } catch {
-      return 'current';
-    }
-  }
+  const getStudentId = () => window.ConnectifyUtils.accountKey();
 
   function getCacheKey() {
     return `connectify:grade_cache:${getStudentId()}`;

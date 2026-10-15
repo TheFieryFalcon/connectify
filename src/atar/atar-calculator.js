@@ -9,7 +9,7 @@
 
   if (window.ConnectifyAtarCalc) return;
 
-  const account = new URL(location.href).searchParams.get('coisp') || 'current';
+  const account = window.ConnectifyUtils.accountKey();
   const storageKey = `connectea:atar:2025:${account}:${new Date().getFullYear()}`;
   let savedPreferences = {};
 

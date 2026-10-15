@@ -65,9 +65,14 @@ const MODULE_BUNDLES = {
   ],
   'predictor-math.js': [
     'utils.js',
+    'predictor-baselines.js',
     'predictor-engine.js',
+    'predictor-history.js',
     'predictor-dates.js',
+    'predictor-store.js',
     'predictor-cache.js',
+    'predictor-grade-projection.js',
+    'predictor-atar-projection.js',
     'predictor-math.js'
   ],
   'sidebar.js': [
@@ -85,7 +90,10 @@ const MODULE_BUNDLES = {
     'cohort-view.js'
   ],
   'category-settings.js': [
+    'category-store.js',
     'category-baselines.js',
+    'settings-markup.js',
+    'settings-preferences.js',
     'category-settings.js'
   ],
   'predictor-ui.js': [
@@ -4028,7 +4036,7 @@ runTest('Test 128: Scoped top-bar handle centering, baseline removal outcome bar
   // 2. Verify JS signatures
   assert.ok(currentSidebarJs.includes('getTopBarBottom'), 'sidebar.js must define getTopBarBottom');
   assert.ok(currentSidebarJs.includes('justReturnedToMenu'), 'sidebar.js must define justReturnedToMenu guard');
-  assert.ok(currentPredMathJs.includes('candidateSubjKeys'), 'predictor-math.js must define candidateSubjKeys in saveBaselines');
+  assert.ok(currentPredMathJs.includes('for (const k of baselineKeys(kind, account))'), 'saveBaselines must purge every legacy baseline key');
   assert.ok(currentCohortStatsJs.includes('connectify-baselines-updated'), 'cohort-stats.js must listen to connectify-baselines-updated');
 
   // 3. Evaluate scripts to test functionality
@@ -5188,7 +5196,7 @@ runTest('Test 138: Dark theme v3.2.1 parity, Connect Help and tile contrast, abu
 
   // 4. Color Theme selector in Category Settings
   assert.ok(catSettingsJs.includes('#cx-theme-select-input'), 'category-settings.js must render #cx-theme-select-input');
-  assert.ok(catSettingsJs.includes('window.ConnectifyTheme.setTheme'), 'category-settings.js must invoke ConnectifyTheme.setTheme on change');
+  assert.ok(catSettingsJs.includes('window.ConnectifyTheme?.setTheme(themeSelect.value)'), 'category-settings.js must invoke ConnectifyTheme.setTheme on change');
 
   // 5. Strict line limits: all JS and CSS in src <= 500 lines, all markdown <= 150 lines
   function checkDir(dir) {
@@ -5260,8 +5268,9 @@ runTest('Test 139: Font stack enforcement, dark surfaces styled with theme token
   // 5. Default and Custom Theme removed from themes select in Category Settings
   assert.ok(!catSettingsJs.includes('<option value="light">'), 'category-settings.js must not include Default in themes select');
   assert.ok(!catSettingsJs.includes('<option value="custom">'), 'category-settings.js must not include Custom in themes select');
-  assert.ok(catSettingsJs.includes('<option value="dark">') && catSettingsJs.includes('<option value="quantum">'),
-    'category-settings.js must include dark themes');
+  // Theme options come from the registry (presets and saved custom themes), with Default first
+  assert.ok(catSettingsJs.includes("[{ id: 'light', name: 'Default', icon: '☀' }, ...(theme?.getAvailableThemes?.() || [])]"),
+    'settings theme select must list Default plus the registry themes');
 
   // 6. Custom theme option and color palettes removed from theme menu
   assert.ok(!cssHas(themeTokensCss, '.connectea-theme-custom-panel'), 'theme-tokens.css must not style custom color panel');

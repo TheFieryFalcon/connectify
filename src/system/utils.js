@@ -1,7 +1,7 @@
 /**
  * Connectify Shared Utilities
  *
- * Text normalisation, localStorage key scanning and legacy baseline key resolution
+ * Text normalisation, the current account key, localStorage key scanning and legacy baseline key resolution
  * shared by every content script. Loaded first in the assessment outlines pipeline.
  * Exposes window.ConnectifyUtils.
  */
@@ -10,6 +10,15 @@
   if (window.ConnectifyUtils) return;
 
   const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+
+  /** The student account in the current Connect URL (?coisp=...), or 'current'. */
+  function accountKey() {
+    try {
+      return new URL(location.href).searchParams.get('coisp') || 'current';
+    } catch {
+      return 'current';
+    }
+  }
 
   /** Returns every localStorage key accepted by predicate (keys are collected before any removal). */
   function storageKeys(predicate) {
@@ -54,5 +63,5 @@
 
   const isBaselineKey = key => BASELINE_PREFIXES.some(prefix => key.startsWith(prefix));
 
-  window.ConnectifyUtils = { normalize, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey };
+  window.ConnectifyUtils = { normalize, accountKey, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey };
 })();
