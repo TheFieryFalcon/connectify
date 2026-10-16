@@ -109,7 +109,7 @@ This document covers the user interface and analytics modules, including target 
 #### [`sidebar.js`](file:///Users/uwong/Downloads/2.1.14_0/src/sidebar/sidebar.js) & Submodules
 - **Role**: Slide-out drawer hosting all Connectify tools with responsive workspace expansion.
 - **Submodules**:
-  - `sidebar-handle-position.js` / `sidebar-handle.js` / `sidebar-hover.js`: handle (`#connectify-sidebar-handle`) anchoring to Connect's sidebar or centring below the top bar, the "just returned to menu" grace period, left-edge expand and hover collapse.
+  - `sidebar-handle-position.js` / `sidebar-handle.js` / `sidebar-hover.js`: handle (`#connectify-sidebar-handle`) anchoring to Connect's sidebar or centring below the top bar, the "just returned to menu" grace period, left-edge expand and hover collapse; a click-close holds the drawer shut until the pointer moves away (`isHoldingClosed`), so hover can't undo the click (Dia).
   - `sidebar-filter.js`, `sidebar-tools.js`, `sidebar-shell.js`: filter notice, launcher/panel mounting (DOM only touched when out of place; launchers pressed only while their panel is open) and the drawer shell.
 - **Key Functions**:
   - Drawer slide synchronization and 900px workspace expansion (`.cx-tool-active`) with `← Back to Menu` navigation.

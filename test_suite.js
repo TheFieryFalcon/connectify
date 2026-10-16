@@ -3165,6 +3165,42 @@ runTest('Test 162: Shared scheduler filters, mutes and gates its heartbeat', () 
   }
 });
 
+runTest('Test 163: Clicking the handle closed is not undone by hover (Dia)', () => {
+  const saved = { api: window.ConnectifySidebarHandle, open: window.ConnectifyOpenSidebar, close: window.ConnectifyCloseSidebar };
+  try {
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-handle-position.js'), 'utf8'));
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-handle.js'), 'utf8'));
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-hover.js'), 'utf8'));
+    const api = window.ConnectifySidebarHandle;
+    const sb = api.getSidebar();
+    window.ConnectifyOpenSidebar = () => { sb.hidden = false; };
+    window.ConnectifyCloseSidebar = () => { sb.hidden = true; };
+    const handle = api.handle;
+    const away = document.createElement('div');
+
+    sb.hidden = false;
+    handle.onclick();
+    assert.strictEqual(sb.hidden, true, 'Clicking the handle of an open drawer must close it');
+    api.handleMouseMove({ clientX: 5, clientY: 300, target: handle });
+    assert.strictEqual(sb.hidden, true, 'Moving over the handle right after the click must not reopen the drawer');
+    handle.dispatchEvent(new MockEvent('mouseenter'));
+    assert.strictEqual(sb.hidden, true, 'A mouseenter right after the click must not reopen the drawer');
+
+    api.handleMouseMove({ clientX: 400, clientY: 300, target: away });
+    api.handleMouseMove({ clientX: 5, clientY: 300, target: away });
+    assert.strictEqual(sb.hidden, false, 'Once the pointer has moved away, the left edge opens the drawer again');
+
+    handle.onclick();
+    assert.strictEqual(sb.hidden, false, 'A click in the same gesture as a hover-open keeps the drawer open');
+  } finally {
+    const sb = window.ConnectifySidebarHandle?.getSidebar?.();
+    if (sb) sb.hidden = true;
+    window.ConnectifySidebarHandle = saved.api;
+    window.ConnectifyOpenSidebar = saved.open;
+    window.ConnectifyCloseSidebar = saved.close;
+  }
+});
+
 runTest('Test 111: Typography parity (unbolded overall % and letter grade), startup auto-expand, outcome bar for first task of type, and complete render finalization', () => {
   const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');

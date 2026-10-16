@@ -158,20 +158,39 @@
     }
     window.addEventListener('load', updateHandlePosition);
 
+    // A click on the handle must win over hover, whatever order the browser sends its events in (Dia
+    // fires hover events around clicks differently): after a click-close the drawer stays closed until
+    // the pointer has left the handle and the left-edge zone, and a click that lands right after a
+    // hover-open belongs to the same gesture, so it keeps the drawer open.
+    const HOVER_CLICK_GRACE_MS = 400;
+    let holdClosed = false;
+    let hoverOpenedAt = 0;
+    const isHoldingClosed = () => holdClosed;
+    const releaseHold = () => { holdClosed = false; };
+    function hoverOpen() {
+      if (holdClosed) return false;
+      hoverOpenedAt = Date.now();
+      openSidebar();
+      return true;
+    }
+
     handle.onclick = () => {
       setJustReturnedToMenu(false);
       const sb = getSidebar();
       if (sb && sb.hidden) {
+        holdClosed = false;
         openSidebar();
-      } else {
+      } else if (Date.now() - hoverOpenedAt > HOVER_CLICK_GRACE_MS) {
+        holdClosed = true;
         closeSidebar();
       }
     };
 
     handle.addEventListener('mouseenter', () => {
       const sb = getSidebar();
-      if (sb && sb.hidden) openSidebar();
+      if (sb && sb.hidden) hoverOpen();
     });
+    handle.addEventListener('mouseleave', releaseHold);
 
     window.ConnectifySidebarHandle = {
       handle,
@@ -185,7 +204,10 @@
       openSidebar,
       closeSidebar,
       setJustReturnedToMenu,
-      isJustReturnedToMenu
+      isJustReturnedToMenu,
+      hoverOpen,
+      isHoldingClosed,
+      releaseHold
     };
   } catch (err) {
     console.error('Connectify error in sidebar-handle.js:', err);

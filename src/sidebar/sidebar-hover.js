@@ -10,10 +10,14 @@
 
   const api = window.ConnectifySidebarHandle;
   if (!api) return;
-  const { handle, sidebar, getSidebar, openSidebar, closeSidebar, setJustReturnedToMenu, isJustReturnedToMenu } = api;
+  const { handle, sidebar, getSidebar, closeSidebar, setJustReturnedToMenu, isJustReturnedToMenu } = api;
 
   // Edge push to expand & hover collapse when no panel is active
   let hoverCollapseTimeout = null;
+  const pointInRect = (e, el) => {
+    const r = typeof el.getBoundingClientRect === 'function' ? el.getBoundingClientRect() : null;
+    return Boolean(r && r.width > 0 && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom);
+  };
 
   if (window._connectifyMouseMoveAttached) {
     document.removeEventListener('mousemove', window._connectifyMouseMoveAttached);
@@ -24,13 +28,19 @@
 
     // 1. Moving mouse to the left edge of the screen expands the sidebar
     if (sb.hidden) {
-      if (e.clientX <= 12 || handle.contains(e.target)) {
+      const overHandle = handle.contains(e.target) || pointInRect(e, handle);
+      // After the handle was clicked closed, nothing reopens it until the pointer has moved away
+      if (api.isHoldingClosed?.()) {
+        if (!overHandle && e.clientX > 12) api.releaseHold();
+        return;
+      }
+      if (e.clientX <= 12 || overHandle) {
         setJustReturnedToMenu(false);
         if (hoverCollapseTimeout) {
           clearTimeout(hoverCollapseTimeout);
           hoverCollapseTimeout = null;
         }
-        openSidebar();
+        api.hoverOpen();
       }
       return;
     }
