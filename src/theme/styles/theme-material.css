@@ -141,7 +141,7 @@
   p,
   label
 ) {
-  color: #cbd5e1 !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
 .connectea-dark :is(
@@ -160,5 +160,5 @@
   .eds-c-nav-list__item,
   a
 ):hover :is(span, div, p, label, .mat-line, .mat-list-text) {
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
 }

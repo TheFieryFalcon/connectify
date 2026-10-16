@@ -19,7 +19,7 @@
 }
 
 .connectea-dark :is(.cvr-c-switch label:before, .eds-c-switch__slider:before, .custom-switch .custom-control-label::after) {
-  background-color: #f1f5f9 !important;
+  background-color: var(--cx-button-text, #f1f5f9) !important;
 }
 
 .connectea-dark :is(.cvr-c-wizard-steps, .cvr-c-wizard-step, .multi-step-item) {
@@ -74,7 +74,7 @@
 .connectea-dark :is(.v-multifileupload-dropzone:hover, .cvr-c-upload-control:hover) {
   background-color: var(--cx-surface-hover, #202c3b) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 .connectea-dark .cvr-c-attachment-row {
@@ -129,12 +129,12 @@
   .theme-multiplier .text-primary,
   .text-primary
 ) {
-  color: #f1f5f9 !important;
+  color: var(--cx-button-text, #f1f5f9) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds.cvr.ngm, .eds.cvr.ngm *) :is(.mat-divider:not(.mat-divider--primary), [class*="connect-"].theme-multiplier .mat-divider:not(.mat-divider--primary)) {
-  border-top-color: #3d5066 !important;
-  border-color: #3d5066 !important;
+  border-top-color: var(--cx-border-hover, #3d5066) !important;
+  border-color: var(--cx-border-hover, #3d5066) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-divider--primary {

@@ -1,73 +1,105 @@
 /**
  * Connectify Theme Token Derivation
  *
- * A custom theme edits at most 14 colour tokens (6 in Basic mode). Everything else the stylesheets read
- * (muted text, nav, table, badge, scrollbar, focus and input tokens ...) is derived here from those, so a
- * custom palette never falls back to the Dark preset's navy values. Exposes window.ConnectifyThemeDerive.
+ * Two layers, each fitted to how the preset palettes relate (OKLCH lightness offsets that keep the
+ * base colour's hue and chroma/lightness ratio; offsets flip direction on light themes):
+ *   deriveFull(basic)  the 6 Basic tokens -> the 20 Full-mode tokens
+ *   cssProps(full)     the Full tokens    -> every other --cx-* property the stylesheets read
+ * so every colour on the page traces back to a Basic token. Exposes window.ConnectifyThemeDerive.
  */
 (() => {
   'use strict';
 
-  const colors = window.ConnectifyThemeColors;
-  const lum = hex => {
-    const { r, g, b } = colors.parseHex(hex);
-    const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
-    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
-  };
-  const contrast = (a, b) => {
-    const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
-    return (hi + 0.05) / (lo + 0.05);
-  };
+  const ok = () => window.ConnectifyThemeOklch;
+  const BASIC_KEYS = ['canvas', 'surface', 'button', 'border', 'accent', 'textPrimary'];
+  const valid = v => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v.trim());
+  const isDark = surface => ok().toOklch(surface).L < 60;
+  // Canvas-based tokens step towards (+) or away from (-) the surface, which sits above the canvas
+  // in light and dark presets alike; surface, border and button steps go towards the text instead
+  const towardSurface = (canvas, surface) => Math.sign(ok().toOklch(surface).L - ok().toOklch(canvas).L) || 1;
   const mix = (a, b, t) => {
-    const x = colors.parseHex(a), y = colors.parseHex(b);
-    return colors.toHex(x.r + (y.r - x.r) * t, x.g + (y.g - x.g) * t, x.b + (y.b - x.b) * t);
+    const x = parseInt(a.slice(1), 16), y = parseInt(b.slice(1), 16);
+    const ch = (v, s) => (v >> s) & 255;
+    return '#' + [16, 8, 0].map(s => Math.round(ch(x, s) + (ch(y, s) - ch(x, s)) * t).toString(16).padStart(2, '0')).join('');
   };
-  /** Pushes fg towards white or black (whichever contrasts with bg) until the ratio reaches min. */
-  function ensureContrast(fg, bg, min) {
-    const target = lum(bg) < 0.4 ? '#ffffff' : '#000000';
-    for (let t = 0; t <= 1.001 && contrast(fg, bg) < min; t += 0.05) fg = mix(fg, target, 0.05);
-    return fg;
-  }
-  const readable = bg => (contrast('#ffffff', bg) >= contrast('#0f172a', bg) ? '#ffffff' : '#0f172a');
-  const valid = v => typeof v === 'string' && /^#[0-9a-f]{3,8}$/i.test(v.trim());
+  const rgba = (hex, a) => `rgba(${[1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(', ')}, ${a})`;
 
-  /** Fills the secondary tokens a theme left out (older Full themes, imports) without touching what it set. */
+  /** Text dL points towards the surface, in the surface's hue at a low chroma (muted / disabled text). */
+  function quietText(text, surface, dL, dark) {
+    const o = ok(), t = o.toOklch(text), s = o.toOklch(surface);
+    const L = t.L + (dark ? -dL : dL);
+    return o.withLch(L, s.L > 1 ? (s.C / s.L) * L * 0.5 : 0, s.h);
+  }
+
+  /** Basic -> Full: fills (and in Basic mode overwrites) the Full-mode tokens from the six basic ones. */
+  function deriveFull(tokens) {
+    const o = ok(), { canvas, surface, button, border, accent } = tokens;
+    const dark = isDark(surface), d = dark ? 1 : -1, up = (hex, dL, c) => o.shiftL(hex, d * dL, c);
+    const cd = towardSurface(canvas, surface);
+    const text = tokens.textPrimary || o.readable(surface);
+    Object.assign(tokens, {
+      textPrimary: text,
+      canvasSubtle: o.shiftL(canvas, -5 * cd), inputBg: o.shiftL(canvas, 1.5 * cd),
+      surfaceSecondary: up(surface, 4), surfaceElevated: up(surface, 7), surfaceHover: up(surface, 11),
+      borderSubtle: up(border, -10.5), borderStrong: up(border, 8.5), inputBorder: up(border, -7),
+      accentHover: up(accent, 8, 0.8),
+      textSecondary: o.ensureContrast(o.shiftL(text, -d * 7), surface, 5),
+      textMuted: quietText(text, surface, 26, dark), tileLinkColor: text,
+      buttonHover: up(button, 5.5), buttonText: o.ensureContrast(text, button, 5)
+    });
+    return tokens;
+  }
+
+  /** Fills the tokens a theme left out (older themes, imports) without touching what it set. */
   function complete(source) {
     const c = { ...source };
-    if (!valid(c.canvas) || !valid(c.surface) || !valid(c.border) || !valid(c.accent)) return c;
-    if (!valid(c.button)) c.button = colors.adjustLightness(c.surface, 4);
-    if (!valid(c.textPrimary)) c.textPrimary = readable(c.surface);
-    const filled = colors.deriveSecondaryTokens({ ...c });
+    if (!['canvas', 'surface', 'border', 'accent'].every(k => valid(c[k]))) return c;
+    if (!valid(c.button)) c.button = ok().shiftL(c.surface, isDark(c.surface) ? 2 : -2);
+    if (!valid(c.textPrimary)) c.textPrimary = ok().readable(c.surface);
+    const filled = deriveFull({ ...c });
     for (const key of Object.keys(filled)) if (!valid(c[key])) c[key] = filled[key];
     return c;
   }
 
-  /** Every CSS custom property a custom theme sets, for a (completed) token set. */
+  /** Full -> everything else: every derived CSS custom property for a (completed) token set. */
   function cssProps(source) {
     const c = complete(source);
     if (!valid(c.canvas) || !valid(c.surface)) return {};
-    const dark = lum(c.surface) < 0.18;
-    const toward = (hex, pct) => colors.adjustLightness(hex, dark ? pct : -pct);
-    const text = c.textPrimary, secondary = ensureContrast(c.textSecondary || text, c.surface, 5);
-    const muted = ensureContrast(mix(text, c.surface, 0.35), c.surface, 5);
-    const accentText = readable(c.accent);
-    const rgb = colors.parseHex(c.accent);
+    const o = ok(), dark = isDark(c.surface), d = dark ? 1 : -1, up = (hex, dL, cs) => o.shiftL(hex, d * dL, cs);
+    const cd = towardSurface(c.canvas, c.surface);
+    const text = c.textPrimary;
+    const secondary = o.ensureContrast(c.textSecondary, c.surface, 5);
+    const disabled = quietText(text, c.surface, 43, dark);
+    const accentActive = o.shiftL(c.accent, -9, 1.05);
+    // Presets keep a light accent's primary button light with dark text (Quantum); any other accent is
+    // darkened until white text reads on it (Dark, Midnight, Forest, Twilight Plum)
+    let primary = accentActive;
+    if (o.contrast('#0f172a', c.accent) < 8) {
+      for (let i = 0; i < 60 && o.contrast('#ffffff', primary) < 5; i++) primary = o.shiftL(primary, -1);
+    }
+    const buttonText = c.buttonText || o.readable(c.button);
     return {
-      '--cx-text-secondary': secondary, '--cx-text-muted': muted, '--cx-text-disabled': mix(text, c.surface, 0.55),
-      '--cx-surface-active': toward(c.surface, 18), '--cx-border-hover': c.borderStrong, '--cx-border-focus': c.accent,
-      '--cx-accent-active': toward(c.accent, -12), '--cx-accent-subtle': `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`,
-      '--cx-accent-text': accentText, '--cx-accent-link': ensureContrast(c.accent, c.surface, 5),
-      '--cx-nav-border': c.border, '--cx-nav-text': secondary, '--cx-nav-text-hover': text, '--cx-nav-item-active': c.canvasSubtle,
-      '--cx-button-active': toward(c.button, -8), '--cx-button-border': c.border, '--cx-button-border-hover': c.borderStrong,
-      '--cx-button-text-hover': c.buttonText, '--cx-button-primary-bg': c.accent, '--cx-button-primary-hover': c.accentHover,
-      '--cx-button-primary-text': accentText,
-      '--cx-input-text': text, '--cx-input-placeholder': muted, '--cx-input-border-focus': c.accent,
-      '--cx-table-header-bg': c.surfaceSecondary, '--cx-table-row-hover': c.surfaceHover,
-      '--cx-table-row-alt': mix(c.surface, c.canvas, 0.5), '--cx-table-border': c.borderSubtle,
-      '--cx-badge-bg': c.surfaceElevated, '--cx-badge-border': c.border, '--cx-badge-text': text,
-      '--cx-scrollbar-thumb': c.borderStrong, '--cx-scrollbar-track': c.canvas, '--cx-avatar-bg': c.surfaceElevated
+      '--cx-text-secondary': secondary, '--cx-text-muted': c.textMuted, '--cx-text-disabled': disabled,
+      '--cx-tile-link-color': c.tileLinkColor,
+      '--cx-surface-active': up(c.surfaceHover, 4),
+      '--cx-border-hover': c.borderStrong, '--cx-border-focus': c.accent,
+      '--cx-accent-active': accentActive, '--cx-accent-subtle': rgba(c.accent, 0.15),
+      '--cx-accent-text': o.readable(c.accent), '--cx-accent-link': o.ensureContrast(c.accent, c.surface, 5),
+      '--cx-nav-bg': o.shiftL(c.canvas, 2.5 * cd), '--cx-nav-border': c.borderSubtle, '--cx-nav-text': secondary,
+      '--cx-nav-text-hover': up(text, 3), '--cx-nav-item-active': o.shiftL(c.canvas, -2.5 * cd),
+      '--cx-button-active': up(c.button, -3.5), '--cx-button-border': c.border, '--cx-button-border-hover': c.borderStrong,
+      '--cx-button-text': buttonText, '--cx-button-text-hover': o.shiftL(buttonText, dark ? 3 : -3),
+      '--cx-button-primary-bg': primary, '--cx-button-primary-hover': o.shiftL(primary, -6.5),
+      '--cx-button-primary-text': o.readable(primary),
+      '--cx-input-bg': c.inputBg, '--cx-input-border': c.inputBorder,
+      '--cx-input-text': text, '--cx-input-placeholder': disabled, '--cx-input-border-focus': c.accent,
+      '--cx-table-header-bg': o.shiftL(c.surface, -1.5 * cd), '--cx-table-row-hover': up(c.surface, 5),
+      '--cx-table-row-alt': mix(c.surface, c.canvas, 0.5), '--cx-table-border': up(c.borderSubtle, -2),
+      '--cx-badge-bg': up(c.surface, 6), '--cx-badge-border': up(c.border, -2), '--cx-badge-text': text,
+      '--cx-scrollbar-thumb': up(c.border, -4), '--cx-scrollbar-track': c.canvas, '--cx-avatar-bg': c.surfaceElevated
     };
   }
 
-  window.ConnectifyThemeDerive = { complete, cssProps, ensureContrast, contrast };
+  const { contrast, ensureContrast } = window.ConnectifyThemeOklch || {};
+  window.ConnectifyThemeDerive = { BASIC_KEYS, deriveFull, complete, cssProps, contrast, ensureContrast };
 })();

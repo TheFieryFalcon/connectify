@@ -59,8 +59,8 @@
   .cvr-c-card__header
 ) {
   background-color: transparent !important;
-  border-bottom: 1px solid #2e3c4e !important;
-  border-color: #2e3c4e !important;
+  border-bottom: 1px solid var(--cx-border-subtle, #2e3c4e) !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
   border-top: none !important;
   border-left: none !important;
   border-right: none !important;
@@ -119,9 +119,9 @@
   .c-tile__header,
   .cvr-c-card__header
 ) {
-  border-bottom: 1px solid #2e3c4e !important;
-  border-bottom-color: #2e3c4e !important;
-  border-color: #2e3c4e !important;
+  border-bottom: 1px solid var(--cx-border-subtle, #2e3c4e) !important;
+  border-bottom-color: var(--cx-border-subtle, #2e3c4e) !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
 }
 
 /* Suppress colored accent stripes and decorator pseudo-elements without breaking clearfix */

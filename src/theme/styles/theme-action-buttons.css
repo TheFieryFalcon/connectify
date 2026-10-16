@@ -60,7 +60,7 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   border-color: var(--cx-border-hover, #6482a6) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)) :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], mat-icon, cnt-icon, [class^="cvr-c-icon--"]):not([data-original-color]) {
@@ -69,8 +69,8 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)):hover :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
-  color: #ffffff !important;
-  fill: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
+  fill: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 /* Primary Action Buttons */
@@ -78,10 +78,9 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
   .v-button--primary, .eds-c-button--primary, .cvr-c-button--primary,
   .eds-c-standard-button--primary, button[type="submit"], .cx-btn-primary
 ) {
-  background-color: #2563eb !important;
   background-color: var(--cx-accent, #2563eb) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
-  color: #ffffff !important;
+  color: var(--cx-accent-text, #ffffff) !important;
   font-weight: 600 !important;
 }
 
@@ -91,7 +90,7 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 ):hover {
   background-color: var(--cx-accent-hover, #1d4ed8) !important;
   border-color: var(--cx-accent-hover, #60a5fa) !important;
-  color: #ffffff !important;
+  color: var(--cx-accent-text, #ffffff) !important;
 }
 
 /* Secondary & Ghost Buttons */
@@ -107,20 +106,20 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
   .v-button--secondary, .eds-c-button--secondary, .v-button--flat, .eds-c-button--flat
 ):hover {
   background-color: var(--cx-surface-hover, #202c3b) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
   border-color: var(--cx-border-hover, #5b7594) !important;
 }
 
 :is(html, body, .connectea-dark) :is(.cx-btn-secondary, button.cx-btn-secondary, #cx-customizer-modal .cx-btn-secondary) {
-  background-color: #243042 !important;
-  border: 1px solid #3b506c !important;
-  color: #e2e8f0 !important;
+  background-color: var(--cx-button-bg, #243042) !important;
+  border: 1px solid var(--cx-border, #3b506c) !important;
+  color: var(--cx-button-text, #e2e8f0) !important;
 }
 
 :is(html, body, .connectea-dark) :is(.cx-btn-secondary:hover, button.cx-btn-secondary:hover, #cx-customizer-modal .cx-btn-secondary:hover) {
-  background-color: #31425a !important;
-  border-color: #4f6b8f !important;
-  color: #ffffff !important;
+  background-color: var(--cx-button-hover, #31425a) !important;
+  border-color: var(--cx-border-hover, #4f6b8f) !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 /* Floating Expand / Collapse Buttons (#cx-expand-btn) */
@@ -137,11 +136,9 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 
 /* Bulk Expansion Animated Loading Progress Pill in Dark Mode */
 :is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(#cx-expand-progress, .cx-expand-progress-pill) {
-  background: #1e2632 !important;
   background: var(--cx-surface-bg, #1e2632) !important;
-  color: #f8fafc !important;
   color: var(--cx-text-primary, #f8fafc) !important;
-  border-color: #2e3c4e !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38) !important;
 }
 
@@ -177,6 +174,6 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 .connectea-dark .cx-back-to-top-btn:hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   border-color: var(--cx-border-hover, #5d7899) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
 }

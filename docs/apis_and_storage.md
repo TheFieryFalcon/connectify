@@ -53,7 +53,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyThemeAuth` | `theme-auth.js` | Login/logout detection and post-login theme restore |
 | `window.ConnectifyThemeTokens` | `theme-custom-tokens.js` | Custom tokens, wallpaper (with extension-storage fallback), glass |
 | `window.ConnectifyThemeRegistry` | `theme-registry.js` / `theme-custom-themes.js` | Theme registry, switching, saved custom themes |
-| `window.ConnectifyThemeCustomizer` | `theme-customizer.js` | In-DOM theme designer modal, 14-token preview, wallpaper upload |
+| `window.ConnectifyThemeCustomizer` | `theme-customizer.js` | In-DOM theme designer modal, 20-token Full mode, preview naming text/fill tokens, wallpaper upload |
 | `window.ConnectifyIsUserActive` | `navigation.js` | Returns boolean indicating recent user interaction (<90s) |
 
 ---

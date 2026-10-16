@@ -27,7 +27,7 @@
   font-weight: 700 !important;
   height: 50px !important;
   line-height: 1.3571428571 !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
   border: none !important;
   outline: none !important;
   border-radius: 0 !important;
@@ -52,7 +52,7 @@
   line-height: 50px !important;
   height: 50px !important;
   max-height: 50px !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
   background-color: transparent !important;
   border: none !important;
   outline: none !important;
@@ -64,13 +64,13 @@
 .connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div:hover, .cvr-js-greedy__trigger > div:hover, .v-link a:hover),
 .connectea-dark .cvr-c-primary-navigation__button:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
 /* Active tab in top navigation matches light mode: pure background color, NO side/top borders, NO outlines, NO radius */
 .connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div, .v-link.eds-s-is-active a, .eds-s-is-active a, .v-link.eds-s-is-active, .eds-s-is-active) {
   background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
   border: none !important;
   box-shadow: none !important;
   border-radius: 0 !important;
@@ -80,7 +80,7 @@
 }
 
 .connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div, .v-link.eds-s-is-active a, .eds-s-is-active a, .v-link.eds-s-is-active, .eds-s-is-active) :is(a, span, div) {
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
   text-decoration: none !important;
 }
 
@@ -101,14 +101,14 @@
 
 .connectea-dark .cvr-c-service-menu__item:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
 /* Active item (e.g. Assessment Outlines) */
 .connectea-dark .cvr-c-service-menu__item.eds-s-is-active,
 .connectea-dark .cvr-c-service-menu__item.v-selected {
   background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
   box-shadow: inset 3px 0 var(--cx-accent, #3b82f6) !important;
   border-left-color: var(--cx-accent, #3b82f6) !important;
 }

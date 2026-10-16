@@ -27,11 +27,11 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 ) {
   background: transparent !important;
   background-color: transparent !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
+  border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
 }
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-card-header mat-divider {
-  border-top-color: rgba(255, 255, 255, 0.16) !important;
+  border-top-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 16%, transparent) !important;
 }
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-calendar-body-cell:not(.mat-calendar-body-selected) .mat-calendar-body-cell-content {

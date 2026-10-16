@@ -25,16 +25,16 @@
 
 .connectea-dark .cvr-c-task__chart [stroke="#A9A9A9"],
 .connectea-dark .cvr-c-task__chart [stroke="#000000"] {
-  stroke: #647b95 !important;
+  stroke: var(--cx-border-strong, #647b95) !important;
 }
 
 .connectea-dark .cvr-c-task__chart [fill="#000000"] {
-  fill: #f1f5f9 !important;
+  fill: var(--cx-button-text, #f1f5f9) !important;
 }
 
 .connectea-dark .cvr-c-task__chart text {
-  fill: #94a3b8 !important;
-  color: #94a3b8 !important;
+  fill: var(--cx-text-muted, #94a3b8) !important;
+  color: var(--cx-text-muted, #94a3b8) !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -81,7 +81,7 @@
 }
 
 .connectea-dark :is(a.eds-c-link, a.link--reversed, [class*="link--reversed"]):hover {
-  color: #93c5fd !important;
+  color: color-mix(in srgb, var(--cx-accent-link, #60a5fa) 70%, var(--cx-text-primary, #ffffff)) !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -121,7 +121,7 @@
 
 .connectea-dark :is(.ck.ck-button, .ck-button):hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 .connectea-dark :is(.ck.ck-button.ck-on, .ck-button.ck-on) {
@@ -144,7 +144,7 @@
 
 .connectea-dark :is(.ck.ck-editor__main > .ck-editor__editable:focus, .ck.ck-content:focus) {
   border-color: var(--cx-accent, #3b82f6) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--cx-accent, #3b82f6) 25%, transparent) !important;
 }
 .connectea-dark :is(.ck.ck-editor__main > .ck-editor__editable, .ck.ck-content) :is(p, span, div, li, h1, h2, h3, h4) {
   color: var(--cx-text-primary, #f1f5f9) !important;

@@ -11,7 +11,7 @@
   border-left: none !important;
   border-right: none !important;
   border-bottom: 1px solid var(--cx-border, #3d5066) !important;
-  color: #cbd5e1 !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
   transition: color 0.15s ease;
 }
 
@@ -27,12 +27,12 @@
 
 .connectea-dark .eds-c-accordion__section-heading:hover {
   background-color: transparent !important;
-  color: #f1f5f9 !important;
+  color: var(--cx-button-text, #f1f5f9) !important;
 }
 
 .connectea-dark .eds-c-accordion__section-heading:hover :is(.v-label, .eds-c-accordion__section-label, span, div) {
   background-color: transparent !important;
-  color: #f1f5f9 !important;
+  color: var(--cx-button-text, #f1f5f9) !important;
 }
 
 /* CSS Containment for Smooth Accordion Expansion & Layout Isolation */
@@ -48,7 +48,7 @@
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group) {
   background-color: transparent !important;
-  color: #e2e8f0 !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
@@ -72,17 +72,17 @@
 
 .connectea-dark .cvr-c-task__details {
   background-color: transparent !important;
-  color: #e2e8f0 !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
 .connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {
-  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
   font-weight: 400 !important;
 }
 
 .connectea-dark .cvr-c-task {
-  border-top: 1px solid #2e3c4e !important;
-  border-bottom: 1px solid #2e3c4e !important;
+  border-top: 1px solid var(--cx-border-subtle, #2e3c4e) !important;
+  border-bottom: 1px solid var(--cx-border-subtle, #2e3c4e) !important;
 }
 
 .connectea-dark .cvr-c-task-group {
@@ -128,12 +128,12 @@
   .cvr-c-task__details .v-label:first-child,
   .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
 ) {
-  color: #f1f5f9 !important;
+  color: var(--cx-button-text, #f1f5f9) !important;
 }
 
 /* Assessment Type Dropdowns (.connectea-type-select) */
 .connectea-dark .connectea-type-label {
-  color: #94a3b8 !important;
+  color: var(--cx-text-muted, #94a3b8) !important;
 }
 
 .connectea-dark .connectea-type-select {
@@ -156,5 +156,5 @@
 .connectea-dark .connectea-type-select.connectea-overridden {
   background-color: var(--cx-surface-elevated, #22374e) !important;
   border-color: var(--cx-accent, #43719e) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }

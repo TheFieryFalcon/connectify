@@ -44,12 +44,12 @@
 
 .connectea-dark :is(.v-tree-node-caption, .cvr-c-tree-row):hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
 .connectea-dark .v-tree-node-selected .v-tree-node-caption {
   background-color: var(--cx-accent, #2563eb) !important;
-  color: #ffffff !important;
+  color: var(--cx-accent-text, #ffffff) !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -181,7 +181,7 @@
 
 .connectea-dark :is(.badge-primary, .label-primary, .label-inverse-primary) {
   background-color: var(--cx-accent, #2563eb) !important;
-  color: #ffffff !important;
+  color: var(--cx-accent-text, #ffffff) !important;
   border-color: var(--cx-accent-hover, #3b82f6) !important;
 }
 
@@ -218,7 +218,7 @@
 
 .connectea-dark .cvr-c-status-label--draft {
   background-color: #334155 !important;
-  color: #e2e8f0 !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
 .connectea-dark .cvr-c-status-label--featured {

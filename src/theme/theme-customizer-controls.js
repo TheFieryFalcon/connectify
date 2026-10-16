@@ -129,20 +129,47 @@
     });
   }
 
+  /** The text node whose glyphs sit under the pointer, or null when the pointer is over a bare fill. */
+  function textUnderPointer(e) {
+    let node, offset;
+    if (document.caretPositionFromPoint) {
+      const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+      node = pos?.offsetNode; offset = pos?.offset;
+    } else if (document.caretRangeFromPoint) {
+      const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+      node = range?.startContainer; offset = range?.startOffset;
+    }
+    if (!node || node.nodeType !== 3 || !node.textContent.trim()) return null;
+    // The caret snaps to the nearest character, so check the glyph on either side really is under the pointer
+    const glyph = document.createRange();
+    for (const start of [offset - 1, offset]) {
+      if (start < 0 || start >= node.length) continue;
+      glyph.setStart(node, start); glyph.setEnd(node, start + 1);
+      for (const r of glyph.getClientRects()) {
+        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) return node;
+      }
+    }
+    return null;
+  }
+
   function bindPreviewTooltip(modal) {
     const preview = modal.querySelector('#cx-customizer-preview');
     const tooltip = modal.querySelector('#cx-preview-tooltip');
     if (!preview || !tooltip) return;
+    const row = (label, value) => `<div class="cx-tooltip-token">${label}: ${colors.escapeHtml(value)}</div>`;
     preview.onmousemove = e => {
-      const target = e.target.closest('[data-cx-elem]');
+      const textEl = textUnderPointer(e)?.parentElement?.closest('[data-cx-text]');
+      const target = textEl?.closest('[data-cx-elem]') || e.target.closest('[data-cx-elem]');
       if (!target) { tooltip.style.display = 'none'; return; }
+      const fillEl = e.target.closest('[data-cx-fill]');
       tooltip.innerHTML = `<div class="cx-tooltip-elem">Element: ${colors.escapeHtml(target.getAttribute('data-cx-elem'))}</div>` +
-        `<div class="cx-tooltip-token">Token: ${colors.escapeHtml(target.getAttribute('data-cx-token'))}</div>`;
+        (textEl ? row('Text', textEl.getAttribute('data-cx-text')) : '') +
+        (fillEl ? row('Fill', fillEl.getAttribute('data-cx-fill')) : '');
       tooltip.style.display = 'block';
       const rect = preview.getBoundingClientRect();
       let x = e.clientX - rect.left + 12, y = e.clientY - rect.top + 12;
-      if (x + 200 > rect.width) x = e.clientX - rect.left - 210;
-      if (y + 50 > rect.height) y = e.clientY - rect.top - 50;
+      if (x + 320 > rect.width) x = e.clientX - rect.left - 330;
+      if (y + 70 > rect.height) y = e.clientY - rect.top - 70;
       tooltip.style.left = `${Math.max(4, x)}px`;
       tooltip.style.top = `${Math.max(4, y)}px`;
     };

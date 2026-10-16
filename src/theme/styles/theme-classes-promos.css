@@ -4,7 +4,6 @@
 
 /* Classes Page List Items, Status, Sort Dropdown & Action Controls */
 .connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) {
-  border-bottom: 1px solid #36485e !important;
   border-bottom: 1px solid var(--cx-border, #36485e) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
 }
@@ -32,8 +31,8 @@
 }
 
 .connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) :is(button, a, .mat-icon-button):hover svg {
-  color: #ffffff !important;
-  fill: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
+  fill: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 .connectea-dark :is(
@@ -112,7 +111,7 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-button:hover {
   background-color: var(--cx-surface-hover, #2e3c4e) !important;
   border-color: var(--cx-border-strong, #607996) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 /* --------------------------------------------------------------------------

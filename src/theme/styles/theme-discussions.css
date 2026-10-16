@@ -27,7 +27,7 @@
   mat-tab-header, .mat-tab-header,
   mat-tab-nav-bar, .mat-tab-nav-bar
 ) :is(.mat-tab-label, .mat-tab-link):hover {
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
@@ -82,12 +82,12 @@
 
 .connectea-dark .nav-tabs .nav-link:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
 .connectea-dark .nav-tabs .nav-link.active {
   background-color: var(--cx-surface-bg, #1e2632) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
   border-color: var(--cx-border, #36485e) var(--cx-border, #36485e) transparent var(--cx-border, #36485e) !important;
   border-top: 2px solid var(--cx-accent, #3b82f6) !important;
 }
@@ -133,7 +133,7 @@
   .pagination-items-per-page > button
 ):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
   border-color: var(--cx-border-strong, #5b7594) !important;
 }
 
@@ -146,7 +146,7 @@
 
 .connectea-dark :is(.eds-c-pagination-button, .cvr-c-pagination-button-set button):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
   border: none !important;
 }
 
@@ -156,7 +156,7 @@
   .pagination-items-per-page > button.active
 ) {
   background-color: var(--cx-accent, #2563eb) !important;
-  color: #ffffff !important;
+  color: var(--cx-accent-text, #ffffff) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
 }
 

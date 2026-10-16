@@ -143,7 +143,7 @@
   .v-grid-row:hover
 ):not(#connectify-sidebar *) :is(td, th) {
   background-color: var(--cx-table-row-hover, var(--cx-surface-hover, #24303f)) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 .connectea-dark :is(

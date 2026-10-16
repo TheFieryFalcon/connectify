@@ -46,7 +46,7 @@
   .ui-menu-item-wrapper.ui-state-active
 ):not(#connectify-sidebar *) {
   background-color: var(--cx-surface-hover, #24303f) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
 .connectea-dark :is(.dropdown-divider, .v-menubar-separator) {
@@ -106,8 +106,8 @@
   .v-datefield-calendarpanel-body td:hover .v-datefield-calendarpanel-day,
   .ui-datepicker-calendar td a:hover
 ) {
-  background-color: #24303f !important;
-  color: #ffffff !important;
+  background-color: var(--cx-badge-bg, #24303f) !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 .connectea-dark :is(
@@ -116,9 +116,9 @@
   .ui-datepicker-today,
   .ui-state-highlight
 ) {
-  background-color: #1d334e !important;
-  color: #90c6f5 !important;
-  border: 1px solid #3b82f6 !important;
+  background-color: color-mix(in srgb, var(--cx-accent, #3b82f6) 22%, var(--cx-surface-bg, #1e2632)) !important;
+  color: color-mix(in srgb, var(--cx-accent-hover, #60a5fa) 70%, var(--cx-text-primary, #ffffff)) !important;
+  border: 1px solid var(--cx-accent, #3b82f6) !important;
   font-weight: 700 !important;
 }
 
@@ -128,9 +128,9 @@
   .ui-datepicker-current-day,
   .ui-state-active
 ) {
-  background-color: #2563eb !important;
-  color: #ffffff !important;
-  border-color: #3b82f6 !important;
+  background-color: var(--cx-button-primary-bg, #2563eb) !important;
+  color: var(--cx-button-primary-text, #ffffff) !important;
+  border-color: var(--cx-accent, #3b82f6) !important;
   font-weight: 700 !important;
 }
 
@@ -139,8 +139,8 @@
   .v-datefield-calendarpanel-day-offmonth,
   .ui-datepicker-other-month
 ) {
-  background-color: #151c26 !important;
-  color: #64748b !important;
+  background-color: var(--cx-table-row-alt, #151c26) !important;
+  color: var(--cx-text-disabled, #64748b) !important;
 }
 
 .connectea-dark :is(
@@ -148,8 +148,8 @@
   .v-inline-datefield-popup,
   .v-datefield-calendarpanel
 ) {
-  background-color: #1e2632 !important;
-  border: 1px solid #3d5066 !important;
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  border: 1px solid var(--cx-border-hover, #3d5066) !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
 }
@@ -162,9 +162,9 @@
   .ui-datepicker-prev,
   .ui-datepicker-next
 ) {
-  background-color: #24303f !important;
-  color: #f1f5f9 !important;
-  border: 1px solid #4a617a !important;
+  background-color: var(--cx-badge-bg, #24303f) !important;
+  color: var(--cx-button-text, #f1f5f9) !important;
+  border: 1px solid var(--cx-badge-border, #4a617a) !important;
   border-radius: 4px !important;
 }
 
@@ -173,9 +173,9 @@
   .v-calendar-event-content,
   .v-calendar-event-all-day
 ) {
-  background-color: #233852 !important;
-  color: #e2effa !important;
-  border: 1px solid #3b6088 !important;
+  background-color: color-mix(in srgb, var(--cx-accent, #3b82f6) 18%, var(--cx-surface-bg, #1e2632)) !important;
+  color: var(--cx-text-primary, #e2effa) !important;
+  border: 1px solid color-mix(in srgb, var(--cx-accent, #3b82f6) 40%, var(--cx-surface-bg, #1e2632)) !important;
   border-radius: 4px !important;
 }
 
@@ -201,12 +201,12 @@
 
 .connectea-dark .v-tabsheet-tabitem:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
 .connectea-dark .v-tabsheet-tabitem-selected {
   background-color: var(--cx-surface-bg, #1e2632) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
   border-bottom-color: var(--cx-surface-bg, #1e2632) !important;
   border-top: 2px solid var(--cx-accent, #3b82f6) !important;
 }
@@ -226,6 +226,6 @@
   .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-o-list__item .eds-c-tabs__tab.eds-s-is-active
 ) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
-  color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
   border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
 }

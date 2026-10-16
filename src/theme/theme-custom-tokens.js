@@ -70,10 +70,11 @@
       '--cx-surface-hover': c.surfaceHover, '--cx-nav-bg': c.surfaceSecondary || c.surface,
       '--cx-border': c.border, '--cx-border-subtle': c.borderSubtle, '--cx-border-strong': c.borderStrong,
       '--cx-accent': c.accent, '--cx-accent-hover': c.accentHover,
-      '--cx-text-primary': c.textPrimary, '--cx-text-secondary': c.textSecondary,
+      '--cx-text-primary': c.textPrimary, '--cx-text-secondary': c.textSecondary, '--cx-text-muted': c.textMuted,
       '--cx-tile-link-color': c.tileLinkColor || c.textPrimary,
       '--cx-button-bg': c.button, '--cx-button-hover': c.buttonHover, '--cx-button-text': c.buttonText,
       '--cx-input-bg': c.inputBg, '--cx-input-border': c.inputBorder,
+      // Every other token (nav, table, badge, focus, primary buttons ...) derived from the ones above
       ...(derive?.cssProps(c) || {})
     };
     // Clear first so a token the previous custom theme set but this one omits does not linger

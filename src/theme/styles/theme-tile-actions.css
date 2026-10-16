@@ -4,7 +4,7 @@
 
 /* Neutralize native Connect theme multiplier card and tile borders, headers, and text (.eds-t-*) */
 .connectea-dark :is([class*="eds-t-"], .eds-t-red, .eds-u-theme-multiplier) :is(.eds-c-tile, .eds-c-card, .cvr-c-card) {
-  border-color: #3d5066 !important;
+  border-color: var(--cx-border-hover, #3d5066) !important;
 }
 
 .connectea-dark :is([class*="eds-t-"], .eds-t-red, .eds-u-theme-multiplier) :is(
@@ -15,7 +15,7 @@
   .cvr-c-service-bar__title,
   .cvr-c-statistic__value
 ) {
-  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 .connectea-dark :is([class*="eds-t-"], .eds-t-purple, .eds-u-theme-multiplier) :is(a, .eds-c-link):not(.eds-o-button--positive):not([class*="button--positive"]) {
@@ -62,7 +62,7 @@
   .eds-c-message-container--current-theme
 ),
 .connectea-dark .eds-c-tile--important .eds-c-tile__header {
-  border-color: #2e3c4e !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
 }
 
 /* Tile Header Action Controls (e.g. "View All" button in Classes tile header) */
@@ -85,12 +85,9 @@
   .eds-c-tile__header a,
   .cvr-c-tile__header a
 ) {
-  background-color: #24303f !important;
   background-color: var(--cx-button-bg, var(--cx-surface-elevated, #24303f)) !important;
   background-image: none !important;
-  color: #f1f5f9 !important;
   color: var(--cx-button-text, var(--cx-text-primary, #f1f5f9)) !important;
-  border: 1px solid #4a617a !important;
   border: 1px solid var(--cx-button-border, var(--cx-border, #4a617a)) !important;
   border-radius: 4px !important;
   padding: 4px 12px !important;
@@ -138,11 +135,9 @@
   .eds-c-action-button-set .eds-c-action-button,
   .eds-c-action-button
 ):hover {
-  background-color: #2e3c4e !important;
   background-color: var(--cx-surface-hover, #2e3c4e) !important;
-  border-color: #607996 !important;
   border-color: var(--cx-border-hover, #607996) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
@@ -163,6 +158,6 @@
   .eds-c-tile__header .v-link,
   .cvr-c-tile__header .v-link
 ) :is(a, span, div, p, .v-button-wrap, .v-button-caption) {
-  color: #f1f5f9 !important;
+  color: var(--cx-button-text, #f1f5f9) !important;
   background: transparent !important;
 }

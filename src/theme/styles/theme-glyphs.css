@@ -18,14 +18,14 @@
   [class*="user"],
   .eds-c-nav-list
 ) :is(svg, path, circle) {
-  color: #cbd5e1 !important;
-  fill: #cbd5e1 !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
+  fill: var(--cx-nav-text, #cbd5e1) !important;
   stroke: none !important;
 }
 
 .connectea-dark :is(.mat-list, .mat-nav-list) :is(svg, path, circle) {
-  color: #cbd5e1 !important;
-  fill: #cbd5e1 !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
+  fill: var(--cx-nav-text, #cbd5e1) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
@@ -47,7 +47,7 @@
   .mat-nav-list,
   .v-icon
 ) :is(.mat-icon, .v-icon, .eds-c-icon) {
-  color: #cbd5e1 !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
   stroke: none !important;
   -webkit-text-stroke: 0px !important;
 }
@@ -78,8 +78,8 @@
   [class^="cvr-c-icon--"]:before,
   [class*=" cvr-c-icon--"]:before
 ) {
-  color: #cbd5e1 !important;
-  -webkit-text-fill-color: #cbd5e1 !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
+  -webkit-text-fill-color: var(--cx-nav-text, #cbd5e1) !important;
   stroke: none !important;
   -webkit-text-stroke: 0px !important;
   opacity: 1 !important;
@@ -105,8 +105,8 @@
   .v-icon
 ) :is(.mat-list-item:hover, a:hover, button:hover, div:hover, [class*="item"]:hover) :is(svg, path, circle),
 .connectea-dark :is([class*="switch"], [class*="role"]):hover :is(svg, path, circle) {
-  color: #ffffff !important;
-  fill: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
+  fill: var(--cx-nav-text-hover, #ffffff) !important;
   stroke: none !important;
 }
 
@@ -147,8 +147,8 @@
   [class*="switch"]:before,
   [class*="role"]:before
 ) {
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
+  -webkit-text-fill-color: var(--cx-nav-text-hover, #ffffff) !important;
   stroke: none !important;
   -webkit-text-stroke: 0px !important;
 }

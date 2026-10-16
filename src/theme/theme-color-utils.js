@@ -1,8 +1,8 @@
 /**
  * Connectify Theme: colour utilities for the theme customizer
  *
- * Colour parsing and conversion, HTML escaping, colour-token sanitising and the Basic-mode rules
- * that derive secondary tokens from the six basic ones. Exposes window.ConnectifyThemeColors.
+ * Colour parsing and conversion, HTML escaping and colour-token sanitising; Basic-mode derivation
+ * delegates to theme-token-derive.js. Exposes window.ConnectifyThemeColors.
  */
 (() => {
   'use strict';
@@ -13,7 +13,7 @@
   const COLOR_KEYS = [
     'canvas', 'canvasSubtle', 'surface', 'surfaceSecondary', 'surfaceElevated', 'surfaceHover',
     'border', 'borderSubtle', 'borderStrong', 'accent', 'accentHover', 'textPrimary', 'textSecondary',
-    'tileLinkColor', 'button', 'buttonHover', 'buttonText', 'inputBg', 'inputBorder'
+    'textMuted', 'tileLinkColor', 'button', 'buttonHover', 'buttonText', 'inputBg', 'inputBorder'
   ];
 
   /** Parses #rrggbb, or rgb()/rgba() as used by the Liquid Glass preset (alpha is ignored). */
@@ -51,11 +51,6 @@
     return toHex(r + (f - r) * a, g + (f - g) * a, b + (f - b) * a);
   }
 
-  function lightness(value) {
-    const { r, g, b } = parseHex(value);
-    return 0.2126 * (r / 255) + 0.7152 * (g / 255) + 0.0722 * (b / 255);
-  }
-
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
   ));
@@ -69,26 +64,8 @@
     return out;
   }
 
-  /** Basic mode: derives the secondary tokens from the six basic ones (mutates and returns tokens). */
-  function deriveSecondaryTokens(tokens) {
-    const { canvas, surface, button, border, accent, textPrimary } = tokens;
-    tokens.canvasSubtle = adjustLightness(canvas, -8);
-    tokens.surfaceSecondary = adjustLightness(surface, -5);
-    tokens.surfaceElevated = adjustLightness(surface, 8);
-    tokens.surfaceHover = adjustLightness(surface, 14);
-    tokens.borderSubtle = adjustLightness(border, -12);
-    tokens.borderStrong = adjustLightness(border, 15);
-    tokens.accentHover = adjustLightness(accent, 15);
-    const surfaceIsDark = lightness(surface) < 0.4;
-    if (!textPrimary) tokens.textPrimary = surfaceIsDark ? '#f8fafc' : '#0f172a';
-    tokens.textSecondary = surfaceIsDark ? '#d1d5db' : '#475569';
-    tokens.tileLinkColor = tokens.textPrimary;
-    tokens.buttonHover = adjustLightness(button, 12);
-    tokens.buttonText = lightness(button) < 0.45 ? '#ffffff' : '#0f172a';
-    tokens.inputBg = adjustLightness(canvas, -4);
-    tokens.inputBorder = border;
-    return tokens;
-  }
+  /** Basic mode: derives the Full-mode tokens from the six basic ones (theme-token-derive.js; mutates tokens). */
+  const deriveSecondaryTokens = tokens => window.ConnectifyThemeDerive.deriveFull(tokens);
 
   window.ConnectifyThemeColors = {
     COLOR_KEYS, parseHex, toHex, rgbToHsv, hsvToRgb, adjustLightness, escapeHtml, isColorValue, pickColors, deriveSecondaryTokens

@@ -41,16 +41,17 @@
   function renderMockup() {
     const preview = $('#cx-customizer-preview');
     if (!preview) return;
-    const t = state.tokens;
+    // Same tokens the page gets when the theme is saved (theme-token-derive.js fills what Full mode left out)
+    const t = window.ConnectifyThemeDerive?.complete(state.tokens) || state.tokens;
     const vars = {
       '--cx-canvas-bg': t.canvas, '--cx-canvas-subtle': t.canvasSubtle || t.canvas,
       '--cx-surface-bg': t.surface, '--cx-surface-secondary': t.surfaceSecondary || t.surface,
-      '--cx-surface-elevated': t.surfaceElevated || t.surface, '--cx-border': t.border,
-      '--cx-border-subtle': t.borderSubtle || t.border, '--cx-accent': t.accent,
-      '--cx-accent-hover': t.accentHover || t.accent, '--cx-text-primary': t.textPrimary,
-      '--cx-text-secondary': t.textSecondary, '--cx-tile-link-color': t.tileLinkColor || t.textPrimary,
+      '--cx-surface-elevated': t.surfaceElevated || t.surface, '--cx-surface-hover': t.surfaceHover || t.surface,
+      '--cx-border': t.border, '--cx-border-subtle': t.borderSubtle || t.border, '--cx-border-strong': t.borderStrong || t.border,
+      '--cx-accent': t.accent, '--cx-accent-hover': t.accentHover || t.accent, '--cx-text-primary': t.textPrimary,
       '--cx-button-bg': t.button, '--cx-button-hover': t.buttonHover || t.button,
-      '--cx-button-text': t.buttonText || '#ffffff', '--cx-glass-blur': `${state.glassBlur}px`, '--cx-glass-opacity': `${state.glassOpacity}`
+      ...(window.ConnectifyThemeDerive?.cssProps(t) || {}),
+      '--cx-glass-blur': `${state.glassBlur}px`, '--cx-glass-opacity': `${state.glassOpacity}`
     };
     for (const [k, v] of Object.entries(vars)) preview.style.setProperty(k, v);
     preview.style.backgroundImage = state.wallpaper ? `url("${state.wallpaper}")` : 'none';
@@ -58,7 +59,7 @@
     if (card) {
       card.style.borderRadius = '16px';
       card.style.backdropFilter = state.liquidGlass ? `blur(${state.glassBlur}px)` : 'none';
-      card.style.backgroundColor = state.liquidGlass ? `rgba(18, 26, 40, ${state.glassOpacity})` : t.surface;
+      card.style.backgroundColor = state.liquidGlass ? `color-mix(in srgb, ${t.surface} ${Math.round(state.glassOpacity * 100)}%, transparent)` : t.surface;
     }
   }
 

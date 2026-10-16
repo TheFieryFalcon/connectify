@@ -37,7 +37,7 @@
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 .connectea-dark :is(.cvr-c-feed__filter, .cvr-c-filter-button, .eds-c-filter-button, button[aria-label*="filter" i], .stream-filter-icon-button) :is(svg, mat-icon, [class*="icon"]) {
@@ -88,7 +88,7 @@
 .connectea-dark :is(mat-chip, .mat-chip, .mat-standard-chip, .eds-c-tag, .cvr-c-tag, .badge, .badge-pill, .label-pill, .cvr-c-feed-item__follow):not(mat-chip-list):not(.mat-chip-list):hover {
   background-color: var(--cx-surface-hover, #313f50) !important;
   border-color: var(--cx-border-strong, #6b88a5) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 .connectea-dark :is(mat-chip-list, .mat-chip-list) {

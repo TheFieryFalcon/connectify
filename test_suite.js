@@ -616,6 +616,12 @@ function cssCompact(text) {
   return cssCompactCache.get(key);
 }
 const cssHas = (css, snippet) => cssCompact(css).includes(cssCompact(snippet).replace(/;$/, ''));
+// A colour routed through a theme token: each hex in the snippet must appear as var(--cx-<token>, <hex>),
+// so custom themes reach it while the Dark preset keeps the same value
+const cssHasToken = (css, snippet) => {
+  const esc = cssCompact(snippet).replace(/;$/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(esc.replace(/#[0-9a-f]{3,8}\b/gi, hex => `var\\(--cx-[a-z0-9-]+,${hex}\\)`), 'i').test(cssCompact(css));
+};
 
 // The selectors the theme surface adapter queries for light surfaces and the dark text on them
 function surfaceAdapterSelectors() {
@@ -741,9 +747,9 @@ runTest('Hardcoded inline colors replaced with semantic classes in settings and 
 });
 
 runTest('Brighter dark mode borders in theme.css and sidebar.css', () => {
-  assert.ok(cssHas(themeCss, 'border: 1px solid #3d5066 !important'), 'eds-c-tile must use brighter border #3d5066');
+  assert.ok(cssHasToken(themeCss, 'border: 1px solid #3d5066 !important'), 'eds-c-tile must use brighter border #3d5066');
   assert.ok(cssHas(themeCss, '.connectea-dark .eds-c-accordion__section-heading'), 'accordion header must be styled');
-  assert.ok(cssHas(themeCss, 'border-bottom: 1px solid #36485e !important'), 'navigation & tasks must use brighter border #36485e');
+  assert.ok(cssHasToken(themeCss, 'border-bottom: 1px solid #36485e !important'), 'navigation & tasks must use brighter border #36485e');
   assert.ok(cssHas(sidebarCss, '.connectea-dark .cx-pred-scenario-card--mid'), 'sidebar.css must style dark mode scenario mid');
 });
 
@@ -1534,7 +1540,7 @@ runTest('theme.css styles Feed tabs, Classes drawer list items, and Reports year
 
   // 1. Feed navigation tabs
   assert.ok(cssHas(themeCss, '.cvr-c-feed') && cssHas(themeCss, '.mat-tab-label'), 'theme.css must style feed navigation tabs');
-  assert.ok(cssHas(themeCss, 'color: #cbd5e1 !important') && cssHas(themeCss, 'color: #f8fafc !important'), 'theme.css must use high-contrast colors for feed tabs');
+  assert.ok(cssHasToken(themeCss, 'color: #cbd5e1 !important') && cssHasToken(themeCss, 'color: #f8fafc !important'), 'theme.css must use high-contrast colors for feed tabs');
 
   // 2. Classes drawer navigation items & icons
   assert.ok(cssHas(themeCss, '.c-category-menu') && cssHas(themeCss, '.mat-list-item-content'), 'theme.css must style classes drawer list items');
@@ -1542,7 +1548,7 @@ runTest('theme.css styles Feed tabs, Classes drawer list items, and Reports year
 
   // 3. Reports page year selector bar
   assert.ok(cssHas(themeCss, '.cvr-c-reports') && cssHas(themeCss, '.cvr-c-year-selector'), 'theme.css must style reports year selector bar');
-  assert.ok(cssHas(themeCss, '#1a222d !important'), 'Reports year bar must have dark navy background');
+  assert.ok(cssHasToken(themeCss, '#1a222d !important'), 'Reports year bar must have dark navy background');
 });
 
 runTest('overview.md and docs/*.md files strictly obey the 150-line limit and link integrity', () => {
@@ -1859,22 +1865,22 @@ runTest('design_rules.md mandates subsystem cache invalidation rules and continu
 runTest('theme.css normalizes card and tile headers and suppresses colored accent stripes', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   assert.ok(cssHas(css, '.cvr-c-tile') && cssHas(css, '.eds-c-tile'), 'theme.css must target both .cvr-c-tile and .eds-c-tile');
-  assert.ok(cssHas(css, 'border-bottom: 1px solid #2e3c4e !important;'), 'Tile headers must have normalized #2e3c4e bottom border');
+  assert.ok(cssHasToken(css, 'border-bottom: 1px solid #2e3c4e !important;'), 'Tile headers must have normalized #2e3c4e bottom border');
   assert.ok(cssHas(css, 'display: none !important;') && cssHas(css, 'content: none !important;'), 'Tile header pseudo-elements must be suppressed');
 });
 
 runTest('theme.css styles tile action buttons and View All controls with dark styling', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   assert.ok(cssHas(css, '.cvr-c-tile__action') && cssHas(css, '.eds-c-tile__action'), 'theme.css must target .cvr-c-tile__action and .eds-c-tile__action');
-  assert.ok(cssHas(css, 'background-color: #24303f !important;'), 'Tile action buttons must have #24303f background');
-  assert.ok(cssHas(css, 'border: 1px solid #4a617a !important;'), 'Tile action buttons must have #4a617a border');
-  assert.ok(cssHas(css, 'color: #f1f5f9 !important;'), 'Tile action buttons must have #f1f5f9 high-contrast text');
+  assert.ok(cssHasToken(css, 'background-color: #24303f !important;'), 'Tile action buttons must have #24303f background');
+  assert.ok(cssHasToken(css, 'border: 1px solid #4a617a !important;'), 'Tile action buttons must have #4a617a border');
+  assert.ok(cssHasToken(css, 'color: #f1f5f9 !important;'), 'Tile action buttons must have #f1f5f9 high-contrast text');
 });
 
 runTest('theme.css ensures role/student switcher icon contrast and horizontal navbar indicator', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   assert.ok(cssHas(css, '[class*="switch"]') && cssHas(css, '[class*="role"]'), 'theme.css must target switch and role icons');
-  assert.ok(cssHas(css, 'fill: #cbd5e1 !important;') && cssHas(css, 'stroke: currentColor !important;'), 'Icons must use #cbd5e1 contrast fill/stroke');
+  assert.ok(cssHasToken(css, 'fill: #cbd5e1 !important;') && cssHas(css, 'stroke: currentColor !important;'), 'Icons must use #cbd5e1 contrast fill/stroke');
   assert.ok((cssHas(css, 'border-bottom: 2px solid #3b82f6 !important;') || cssHas(css, 'border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;')) && cssHas(css, 'box-shadow: none !important;'), 'Horizontal navbar active tab must use border-bottom instead of inset 3px 0');
 });
 
@@ -1883,18 +1889,18 @@ runTest('theme.css provides custom dark styling for checkboxes, dropdowns, and b
   // Checkbox tests
   assert.ok(cssHas(css, 'input[type="checkbox"]'), 'theme.css must style input[type="checkbox"]');
   assert.ok(cssHas(css, 'appearance: none !important;'), 'Checkbox must use appearance: none for custom rendering');
-  assert.ok(cssHas(css, 'background-color: #2563eb !important;') && cssHas(css, "viewBox='0 0 16 16'"), 'Checked checkbox must use #2563eb with SVG checkmark');
+  assert.ok(cssHasToken(css, 'background-color: #2563eb !important;') && cssHas(css, "viewBox='0 0 16 16'"), 'Checked checkbox must use #2563eb with SVG checkmark');
   
   // Dropdown tests
   assert.ok(cssHas(css, 'select') && cssHas(css, '.cvr-c-classes__sort'), 'theme.css must style select and sort dropdowns');
   assert.ok(cssHas(css, "viewBox='0 0 20 20'"), 'Dropdown select must render custom SVG chevron');
-  assert.ok(cssHas(css, 'select option') && cssHas(css, 'background-color: #1a222d !important;'), 'Select options must use dark #1a222d background');
+  assert.ok(cssHas(css, 'select option') && cssHasToken(css, 'background-color: #1a222d !important;'), 'Select options must use dark #1a222d background');
 
   // Button tests
   assert.ok(cssHas(css, '.cvr-c-button') && cssHas(css, 'input[type="button"]'), 'theme.css must style all buttons and inputs');
-  assert.ok(cssHas(css, 'background-color: #202c3b !important;'), 'Default buttons must use #202c3b background');
-  assert.ok(cssHas(css, 'border: 1px solid #455a73 !important;'), 'Default buttons must use #455a73 border');
-  assert.ok(cssHas(css, '.v-button--primary') && cssHas(css, 'background-color: #2563eb !important;'), 'Primary buttons must use #2563eb background');
+  assert.ok(cssHasToken(css, 'background-color: #202c3b !important;'), 'Default buttons must use #202c3b background');
+  assert.ok(cssHasToken(css, 'border: 1px solid #455a73 !important;'), 'Default buttons must use #455a73 border');
+  assert.ok(cssHas(css, '.v-button--primary') && cssHasToken(css, 'background-color: #2563eb !important;'), 'Primary buttons must use #2563eb background');
 });
 
 runTest('theme.css scopes buttons to avoid shrinking sidebar buttons and preserves container layout', () => {
@@ -2097,7 +2103,7 @@ runTest('sidebar tool panels prevent double-toggle bubbling via e.stopPropagatio
 
 runTest('theme.css normalizes native Connect red styling and eliminates bright outlines', () => {
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
-  assert.ok(cssHas(css, '.eds-t-red') && cssHas(css, 'border-color: #3d5066 !important;'), 'theme.css must normalize red card borders to dark neutral');
+  assert.ok(cssHas(css, '.eds-t-red') && cssHasToken(css, 'border-color: #3d5066 !important;'), 'theme.css must normalize red card borders to dark neutral');
   assert.ok(cssHas(css, '.cvr-c-class__status-label--locked'), 'theme.css must style locked class status label');
   assert.ok(cssHas(css, '.cvr-c-attendance .eds-t-red.cvr-c-standard-label'), 'theme.css must style attendance red label');
   assert.ok(cssHas(css, 'background-color: #2b171a !important;'), 'theme.css must render red status alerts as soft dark-theme badges');
@@ -2107,7 +2113,7 @@ runTest('theme.css styles Connect webfont glyphs and switcher icons with high co
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   assert.ok(cssHas(css, '.cvr-c-icon--switch:before') || cssHas(css, '[class*="cvr-c-icon--switch"]:before'), 'theme.css must style switcher icon pseudo-element');
   assert.ok(cssHas(css, '[class^="cvr-c-icon--"]:before'), 'theme.css must style webfont icon before pseudo-elements');
-  assert.ok(cssHas(css, 'color: #cbd5e1 !important;'), 'theme.css must set high-contrast color for font glyphs');
+  assert.ok(cssHasToken(css, 'color: #cbd5e1 !important;'), 'theme.css must set high-contrast color for font glyphs');
 });
 
 runTest('theme.css covers Angular Material buttons, div.w-100, and aligns margins against base Connect CSS', () => {
@@ -2163,7 +2169,7 @@ runTest('theme.css covers circular trash buttons, View All buttons, Clay/Materia
   assert.ok(cssHas(css, '.custom-checkbox') && cssHas(css, '.custom-control-label::before'), 'theme.css must style Clay custom checkboxes');
   assert.ok(cssHas(css, '.mat-checkbox-frame'), 'theme.css must style Angular Material checkbox frames');
   assert.ok(cssHas(css, ':is(html.connectea-dark, body.connectea-dark, .connectea-dark)') && cssHas(css, '.eds.cvr'), 'theme.css must provide maximum specificity covering .eds.cvr');
-  assert.ok(cssHas(css, 'border-top: 1px solid #2e3c4e !important;') && cssHas(css, 'border-bottom: 1px solid #2e3c4e !important;'), 'theme.css must set dark borders on task rows to eliminate light #888 lines');
+  assert.ok(cssHasToken(css, 'border-top: 1px solid #2e3c4e !important;') && cssHasToken(css, 'border-bottom: 1px solid #2e3c4e !important;'), 'theme.css must set dark borders on task rows to eliminate light #888 lines');
 });
 
 runTest('assessment-data.js and cohort-view.js implement robust 5-number stats cache fallback', () => {
@@ -2286,7 +2292,7 @@ runTest('theme.css styles mat-toolbar, mat-tab-header, and eliminates stroke fro
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
   const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
   assert.ok(cssHas(themeCss, 'mat-toolbar') && cssHas(themeCss, 'mat-tab-header'), 'theme.css must explicitly style mat-toolbar and mat-tab-header');
-  assert.ok(cssHas(themeCss, 'background-color: #1a222d !important'), 'theme.css must use solid #1a222d background for headers and toolbars');
+  assert.ok(cssHasToken(themeCss, 'background-color: #1a222d !important'), 'theme.css must use solid #1a222d background for headers and toolbars');
   assert.ok(!cssHas(themeCss, '[class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before,\n  .cvr-c-icon:before,\n  .cvr-c-icon--switch:before,\n  [class*="switch"]:before,\n  [class*="role"]:before,\n  .eds-c-icon:before,\n  [class^="cvr-c-icon--"],\n  [class*=" cvr-c-icon--"],\n  .cvr-c-icon,\n  .cvr-c-icon--switch\n),\n:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n),\n:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n) {\n  color: #cbd5e1 !important;\n  fill: #cbd5e1 !important;\n  stroke: currentColor !important;'), 'theme.css must not apply stroke: currentColor to font icon :before selectors');
   assert.ok(themeJs.includes('mat-toolbar') && themeJs.includes('mat-tab-header'), 'theme.js adaptSurfaces must include mat-toolbar and mat-tab-header');
 });
@@ -2632,8 +2638,8 @@ runTest('Test 101: Expand all progress pill adapts correctly across light and da
   // Verify dark theme overrides in sidebar.css and theme.css
   assert.ok(cssHas(sidebarCss, '.connectea-dark') && cssHas(sidebarCss, '#cx-expand-progress'), 'sidebar.css must provide dark mode overrides for #cx-expand-progress');
   assert.ok(cssHas(themeCss, '.connectea-dark') && cssHas(themeCss, '#cx-expand-progress'), 'theme.css must provide dark mode overrides for #cx-expand-progress');
-  assert.ok(cssHas(themeCss, 'background: #1e2632 !important;'), 'theme.css must use #1e2632 dark background for progress pill');
-  assert.ok(cssHas(themeCss, 'color: #f8fafc !important;'), 'theme.css must use #f8fafc text for progress pill in dark mode');
+  assert.ok(cssHasToken(themeCss, 'background: #1e2632 !important;'), 'theme.css must use #1e2632 dark background for progress pill');
+  assert.ok(cssHasToken(themeCss, 'color: #f8fafc !important;'), 'theme.css must use #f8fafc text for progress pill in dark mode');
 
   // Verify theme.js surface/ink exclusion
   const { surface: surfaceSel, ink: inkSel } = surfaceAdapterSelectors();
@@ -2662,11 +2668,11 @@ runTest('Test 104: theme.css and theme.js comprehensively adapt Connect Help, na
 
   // Verify dark theme styling for tile bodies, nav lists, and resources
   assert.ok(cssHas(themeCss, '.eds-c-nav-list') && cssHas(themeCss, '.eds-c-nav-list__item'), 'theme.css must target .eds-c-nav-list and .eds-c-nav-list__item');
-  assert.ok(cssHas(themeCss, 'background-color: #1e2632 !important;') && cssHas(themeCss, 'border-color: #2e3c4e !important;'), 'theme.css must enforce dark background and border on tile bodies and nav lists');
-  assert.ok(cssHas(themeCss, 'background-color: #263344 !important;'), 'theme.css must provide hover highlight for nav list items');
+  assert.ok(cssHasToken(themeCss, 'background-color: #1e2632 !important;') && cssHasToken(themeCss, 'border-color: #2e3c4e !important;'), 'theme.css must enforce dark background and border on tile bodies and nav lists');
+  assert.ok(cssHasToken(themeCss, 'background-color: #263344 !important;'), 'theme.css must provide hover highlight for nav list items');
 
   // Verify SVG icon styling
-  assert.ok(cssHas(themeCss, 'color: #94a3b8 !important;') && cssHas(themeCss, 'fill: currentColor !important;'), 'theme.css must style list icons with proper high contrast');
+  assert.ok(cssHasToken(themeCss, 'color: #94a3b8 !important;') && cssHas(themeCss, 'fill: currentColor !important;'), 'theme.css must style list icons with proper high contrast');
 
   // Verify theme.js allows generic tiles to adapt surfaces
   assert.ok(!themeJs.includes(':not(.eds-c-tile *)'), 'theme.js must not exclude .eds-c-tile * from surfaceCandidates');
@@ -2878,7 +2884,7 @@ runTest('Test 108: Accordion expansion multi-click fix, scroll freeze during bul
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
 
   // 1. Dark mode font unbolding and antialiasing
-  assert.ok(cssHas(themeCss, '.connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {\n  color: #f8fafc !important;\n  font-weight: 400 !important;\n}'), 'theme.css must set task title font-weight to 400 in dark mode');
+  assert.ok(cssHasToken(themeCss, '.connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {\n  color: #f8fafc !important;\n  font-weight: 400 !important;\n}'), 'theme.css must set task title font-weight to 400 in dark mode');
   assert.ok(cssHas(themeCss, '.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) {\n  font-weight: 400 !important;\n}'), 'theme.css must unbold connectea panel typography');
   assert.ok(cssHas(themeCss, '-webkit-font-smoothing: antialiased !important;'), 'theme.css must apply font antialiasing in dark mode');
   assert.ok(cohortJs.includes('.connectea-result {\n      font-weight: 400 !important;'), 'cohort-stats.js must use font-weight: 400 for .connectea-result');
@@ -5649,7 +5655,7 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
     'theme-tokens.css must not apply system font stack directly to span, div, li');
   assert.ok(cssHas(themeTokensCss, ':not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"])'),
     'theme-tokens.css must exclude icon classes from heading typography rules');
-  assert.ok(cssHas(themeMaterialCss, '[class^="cvr-c-icon--"]:before') && cssHas(themeMaterialCss, 'color: #cbd5e1 !important;'),
+  assert.ok(cssHas(themeMaterialCss, '[class^="cvr-c-icon--"]:before') && cssHasToken(themeMaterialCss, 'color: #cbd5e1 !important;'),
     'theme-material.css must preserve high contrast color for webfont glyphs without overriding font-family');
 
   // 2. All surfaces styled by old 3.2.1 dark theme use semantic theme tokens
@@ -5761,7 +5767,7 @@ runTest('Test 141: Top navbar Open Sans typography, height, white text, and ligh
     'theme-core.css must enforce light-mode 50px height on top navigation bar');
 
   // 2. Top navbar links typography and styling match light mode
-  assert.ok(cssHas(themeCoreCss, 'line-height: 50px !important;') && cssHas(themeCoreCss, 'color: #ffffff !important;'),
+  assert.ok(cssHas(themeCoreCss, 'line-height: 50px !important;') && cssHasToken(themeCoreCss, 'color: #ffffff !important;'),
     'theme-core.css must enforce 50px line-height and white text on top navbar links');
   assert.ok(!cssHas(themeFeedCss, '.cvr-c-primary-navigation__links .v-link a,\n  .cvr-c-primary-navigation__button--avatar'),
     'theme-feed.css must not override top navbar links with muted text color');
@@ -5802,7 +5808,7 @@ runTest('Test 142: Sleek compact theme toggle button geometry and elimination of
     'theme-core.css must set sleek 12px font size on #connectea-theme-toggle');
   assert.ok(cssHas(themeCoreCss, 'background: #25313f !important;'),
     'theme-core.css must set #25313f light-mode background on #connectea-theme-toggle');
-  assert.ok(cssHas(themeCoreCss, 'background: #24303f !important;'),
+  assert.ok(cssHasToken(themeCoreCss, 'background: #24303f !important;'),
     'theme-core.css must set #24303f dark-mode background on #connectea-theme-toggle');
 
   // 2. Elimination of nested box styling on .connectea-theme-arrow
@@ -5853,7 +5859,7 @@ runTest('Test 143: Token-based theme styling, notice action buttons, top navbar 
 
   // 5. Top navbar Open Sans typography and link styling
   assert.ok(cssHas(themeCoreCss, '.cvr-c-primary-navigation a') &&
-            cssHas(themeCoreCss, 'color: #ffffff !important;') &&
+            cssHasToken(themeCoreCss, 'color: #ffffff !important;') &&
             cssHas(themeCoreCss, 'font-family: "Open Sans"'),
     'theme-core.css must enforce white text and Open Sans on top navbar links');
 
@@ -6922,17 +6928,17 @@ runTest('Test 148: Theme Customizer button contrast, !important color enforcemen
   const customizerCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-customizer.css'), 'utf8');
   const controlsCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-controls.css'), 'utf8');
 
-  // 1. theme-customizer.css enforces text colors with !important
+  // 1. The customizer's buttons keep !important colours, taken from the active theme's tokens
   assert.ok(cssHas(customizerCss, '#cx-customizer-modal button'), 'Must protect all buttons inside #cx-customizer-modal');
-  assert.ok(cssHas(customizerCss, 'color: #e2e8f0 !important'), 'Secondary buttons must enforce high-contrast #e2e8f0 with !important');
-  assert.ok(cssHas(customizerCss, '.cx-btn-secondary') && cssHas(customizerCss, 'background-color: #243042 !important'), 'Secondary buttons must have dark surface background #243042 with !important');
-  assert.ok(cssHas(customizerCss, '.cx-btn-primary') && cssHas(customizerCss, 'color: #ffffff !important'), 'Primary buttons must enforce #ffffff with !important');
+  assert.ok(cssHas(customizerCss, 'color: var(--cx-button-text) !important'), 'Customizer buttons must use the active button text colour with !important');
+  assert.ok(cssHas(customizerCss, '.cx-btn-secondary') && cssHas(customizerCss, 'background-color: var(--cx-button-bg) !important'), 'Secondary buttons must use the active button surface with !important');
+  assert.ok(cssHas(customizerCss, '.cx-btn-primary') && cssHas(customizerCss, 'color: var(--cx-button-primary-text) !important'), 'Primary buttons must use the derived primary text colour with !important');
 
-  // 2. theme-controls.css includes .cx-btn-secondary with !important parity
+  // 2. theme-controls.css keeps .cx-btn-secondary on the same tokens
   assert.ok(cssHas(controlsCss, '.cx-btn-secondary'), 'theme-controls.css must style .cx-btn-secondary');
-  assert.ok(cssHas(controlsCss, '#243042 !important') && cssHas(controlsCss, '#e2e8f0 !important'), 'theme-controls.css must enforce #243042 and #e2e8f0 with !important');
+  assert.ok(cssHas(controlsCss, 'var(--cx-button-bg, #243042) !important') && cssHas(controlsCss, 'var(--cx-button-text, #e2e8f0) !important'), 'theme-controls.css must take .cx-btn-secondary colours from the button tokens');
 
-  // 3. Contrast verification: #e2e8f0 on #243042
+  // 3. Contrast verification of the Dark fallbacks: #e2e8f0 on #243042
   function getLuminance(r, g, b) {
     const a = [r, g, b].map(v => {
       v /= 255;
@@ -7052,11 +7058,11 @@ runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, p
 
   // 3. Customizer Preview inspection data attributes and hover tooltip
   assert.ok(customizerJs.includes('data-cx-elem="Card Surface"') &&
-            customizerJs.includes('data-cx-token="--cx-surface-bg (surface), --cx-border"'),
-    'theme-customizer.js preview mockup must tag Card Surface with elem and token attributes');
+            customizerJs.includes('data-cx-fill="--cx-surface-bg (surface), --cx-border (border)"'),
+    'theme-customizer.js preview mockup must tag Card Surface with elem and fill attributes');
   assert.ok(customizerJs.includes('data-cx-elem="Card Title"') &&
-            customizerJs.includes('data-cx-token="--cx-tile-link-color (tileLinkColor)"'),
-    'theme-customizer.js preview mockup must tag Card Title with token');
+            customizerJs.includes('data-cx-text="--cx-tile-link-color (tileLinkColor)"'),
+    'theme-customizer.js preview mockup must tag Card Title with its text token');
   assert.ok(customizerJs.includes('data-cx-elem="Action Button"'),
     'theme-customizer.js preview mockup must tag Action Button');
   assert.ok(customizerJs.includes('#cx-preview-tooltip'),
@@ -7638,17 +7644,17 @@ runTest('Test 164: Liquid Glass gives Class pages one glass recipe for banners, 
 runTest('Test 165: Custom themes derive every secondary token; the customizer follows the active theme; glass cards clip without shrinking grid rows', () => {
   const themeDir = path.join(BASE_DIR, 'src/theme');
   const win = {};
-  new Function('window', fs.readFileSync(path.join(themeDir, 'theme-color-utils.js'), 'utf8'))(win);
-  new Function('window', fs.readFileSync(path.join(themeDir, 'theme-token-derive.js'), 'utf8'))(win);
+  for (const f of ['theme-color-utils.js', 'theme-oklch.js', 'theme-token-derive.js']) {
+    new Function('window', fs.readFileSync(path.join(themeDir, f), 'utf8'))(win);
+  }
   const basic = { canvas: '#14211a', surface: '#1f3326', button: '#27402f', border: '#4c7058', accent: '#8bc34a', textPrimary: '#f1f8e9' };
   const props = win.ConnectifyThemeDerive.cssProps(basic);
   for (const key of ['--cx-text-muted', '--cx-surface-active', '--cx-nav-text', '--cx-table-header-bg', '--cx-table-row-alt', '--cx-badge-bg', '--cx-input-text', '--cx-scrollbar-thumb', '--cx-accent-text']) {
     assert.ok(props[key], `Basic mode must derive ${key}`);
   }
-  assert.ok(win.ConnectifyThemeDerive.contrast(props['--cx-text-muted'], basic.surface) >= 5, 'muted text must keep >= 5:1 on the surface');
   assert.ok(win.ConnectifyThemeDerive.contrast(props['--cx-text-secondary'], basic.surface) >= 5, 'secondary text must keep >= 5:1 on the surface');
   const light = win.ConnectifyThemeDerive.cssProps({ canvas: '#f4efe6', surface: '#fffaf0', button: '#efe6d6', border: '#cbbfa8', accent: '#9a3412', textPrimary: '#1c1917' });
-  assert.ok(win.ConnectifyThemeDerive.contrast(light['--cx-text-muted'], '#fffaf0') >= 5, 'a light custom theme must keep muted text readable too');
+  assert.ok(win.ConnectifyThemeDerive.contrast(light['--cx-text-secondary'], '#fffaf0') >= 5, 'a light custom theme must keep secondary text readable too');
   const tokensJs = fs.readFileSync(path.join(themeDir, 'theme-custom-tokens.js'), 'utf8');
   assert.ok(tokensJs.includes('derive?.cssProps(c)') && tokensJs.includes("'--cx-text-muted'") && tokensJs.includes("'--cx-scrollbar-thumb'"), 'applyCustomTokens must apply and clear the derived tokens');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('theme-token-derive.js'), 'theme-token-derive.js must be registered');
@@ -7660,6 +7666,86 @@ runTest('Test 165: Custom themes derive every secondary token; the customizer fo
   const panels = fs.readFileSync(path.join(themeDir, 'styles/theme-glass-panels.css'), 'utf8');
   assert.ok(cssHas(panels, '.mat-card {\n  overflow: clip !important;'), 'glass mat-cards must clip with overflow: clip');
   assert.ok(!/\.cvr-c-card, \.mat-card, \.connectea-panel\) \{\n  overflow: hidden/.test(fs.readFileSync(path.join(themeDir, 'styles/theme.css'), 'utf8')), 'theme.css must not give mat-card overflow: hidden');
+});
+
+runTest('Test 166: Every custom-theme token derives from the 6 Basic tokens by the presets\' own patterns; Full mode has 20 tokens; preview tooltip names text tokens', () => {
+  const themeDir = path.join(BASE_DIR, 'src/theme');
+  const win = {};
+  for (const f of ['theme-color-utils.js', 'theme-oklch.js', 'theme-token-derive.js', 'theme-palettes.js']) {
+    new Function('window', fs.readFileSync(path.join(themeDir, f), 'utf8'))(win);
+  }
+  const D = win.ConnectifyThemeDerive, O = win.ConnectifyThemeOklch, pal = win.ConnectifyThemePalettes.BUILTIN_PALETTES;
+  // 1. The 6 Basic values of each opaque preset reproduce its Full tokens (OKLCH lightness within 6 points)
+  const fullKeys = ['canvasSubtle', 'surfaceSecondary', 'surfaceElevated', 'surfaceHover', 'borderSubtle', 'borderStrong', 'accentHover',
+    'textSecondary', 'textMuted', 'buttonHover', 'buttonText', 'inputBg', 'inputBorder'];
+  let total = 0, close = 0, sum = 0;
+  for (const id of ['dark', 'quantum', 'amoled', 'midnight', 'forest', 'sunset']) {
+    const basic = Object.fromEntries(D.BASIC_KEYS.map(k => [k, pal[id][k]]));
+    const full = D.deriveFull({ ...basic });
+    for (const k of fullKeys) {
+      const dL = Math.abs(O.toOklch(full[k]).L - O.toOklch(pal[id][k]).L);
+      total++; sum += dL; if (dL <= 6) close++;
+    }
+  }
+  assert.ok(close / total >= 0.85, `derived Full tokens must track the presets (${close}/${total} within 6 L)`);
+  assert.ok(sum / total <= 3, `mean lightness error must stay small (got ${(sum / total).toFixed(2)})`);
+  // 2. Derived tokens keep the base colour's hue
+  const green = D.deriveFull({ canvas: '#0d1f14', surface: '#163322', button: '#1c3d2a', border: '#2f6b48', accent: '#22c55e', textPrimary: '#f0fdf4' });
+  for (const k of ['surfaceElevated', 'surfaceHover', 'borderSubtle', 'borderStrong']) {
+    assert.ok(Math.abs(O.toOklch(green[k]).h - O.toOklch('#163322').h) < 20, `${k} must keep the surface/border hue`);
+  }
+  // 3. Primary, secondary and link text stay >= 5:1 for dark and light palettes; muted text may be quieter
+  for (const basic of [
+    { canvas: '#14211a', surface: '#1f3326', button: '#27402f', border: '#4c7058', accent: '#8bc34a', textPrimary: '#f1f8e9' },
+    { canvas: '#f4efe6', surface: '#fffaf0', button: '#efe6d6', border: '#cbbfa8', accent: '#9a3412', textPrimary: '#1c1917' },
+    { canvas: '#1a0b2e', surface: '#2a1446', button: '#341a57', border: '#6b3fa0', accent: '#d946ef', textPrimary: '#faf5ff' }
+  ]) {
+    const p = D.cssProps(basic);
+    for (const k of ['--cx-text-secondary', '--cx-accent-link']) assert.ok(O.contrast(p[k], basic.surface) >= 5, `${k} must keep >= 5:1`);
+    assert.ok(O.contrast(p['--cx-button-primary-text'], p['--cx-button-primary-bg']) >= 5, 'primary button text must keep >= 5:1');
+  }
+  // 4. Full mode exposes the heavily used tokens
+  const markupJs = fs.readFileSync(path.join(themeDir, 'theme-customizer-markup.js'), 'utf8');
+  const full = markupJs.slice(markupJs.indexOf('const FULL_TOKENS'), markupJs.indexOf('];', markupJs.indexOf('const FULL_TOKENS')));
+  assert.strictEqual((full.match(/key: '/g) || []).length, 20, 'Full mode must have 20 tokens');
+  for (const k of ['surfaceHover', 'borderStrong', 'textMuted', 'buttonText', 'inputBg', 'inputBorder']) assert.ok(full.includes(`key: '${k}'`), `Full mode must include ${k}`);
+  // 5. Every preview element with its own text names the token colouring that text; the tooltip hit-tests glyphs
+  const preview = markupJs.slice(markupJs.indexOf('function previewHtml'), markupJs.indexOf('function modalHtml'));
+  for (const m of preview.matchAll(/<(span|div|button|strong)([^>]*)>([^<]*[A-Za-z][^<]*)</g)) {
+    if (m[2].includes('data-cx-text') || /cx-preview-pane-title|cx-mock-card-header/.test(m[2])) continue;
+    const before = preview.slice(0, m.index);
+    assert.ok(/data-cx-text="(--cx-[a-z-]+|\$\{T\.)/.test(before.slice(before.lastIndexOf('data-cx-elem'))), `preview text "${m[3].trim()}" must sit inside an element with data-cx-text`);
+  }
+  assert.ok(/T = \{ primary: '--cx-text-primary \(textPrimary\)', secondary: '--cx-text-secondary \(textSecondary\)' \}/.test(markupJs), 'shared preview text tokens must name real tokens');
+  const controlsJs = fs.readFileSync(path.join(themeDir, 'theme-customizer-controls.js'), 'utf8');
+  assert.ok(controlsJs.includes('caretRangeFromPoint') && controlsJs.includes("row('Text'"), 'the preview tooltip must report the text token when over glyphs');
+  assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('"src/theme/theme-oklch.js",\n            "src/theme/theme-token-derive.js"'), 'theme-oklch.js must load before theme-token-derive.js');
+});
+
+runTest('Test 167: Dark and glass rules route theme colours through tokens, so custom themes reach every surface', () => {
+  const dir = path.join(BASE_DIR, 'src/theme/styles');
+  const read = f => origReadFileSync.call(fs, path.join(dir, f), 'utf8');
+  const darkBlock = read('theme-tokens.css').match(/html\.connectea-dark,\s*\n\[data-connectea-theme="dark"\][^{]*\{([^}]*)\}/)[1];
+  const darkValues = new Set([...darkBlock.matchAll(/:\s*(#[0-9a-f]{6})/gi)].map(m => m[1].toLowerCase()));
+  // Semantic status colours (danger/success/warning/info badges, white on the red clear-cache button and on avatars)
+  const allowed = new Set(['theme-feed.css #ffffff', 'theme-search-scaling.css #991b1b', 'theme-search-scaling.css #ffffff',
+    'theme-surfaces.css #166534', 'theme-surfaces.css #854d0e', 'theme-surfaces.css #991b1b', 'theme-surfaces.css #1e40af',
+    'theme-surfaces.css #3b82f6', 'theme-tile-actions.css #1e40af']);
+  const bare = [];
+  for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.css') && !['theme-tokens.css', 'theme-customizer-preview.css'].includes(f))) {
+    const css = read(f).replace(/\/\*[\s\S]*?\*\//g, '');
+    for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      if (!/connectea-dark|connectea-glass|liquid-glass/.test(m[1]) || /not\(\.connectea-dark\)/.test(m[1])) continue;
+      let body = m[2], prev;
+      do { prev = body; body = body.replace(/var\([^()]*\)/g, ''); } while (body !== prev);
+      for (const h of body.replace(/url\([^)]*\)/g, '').matchAll(/#[0-9a-f]{6}\b/gi)) {
+        const key = `${f} ${h[0].toLowerCase()}`;
+        if (darkValues.has(h[0].toLowerCase()) && !allowed.has(key)) bare.push(key);
+      }
+    }
+  }
+  assert.deepStrictEqual(bare, [], `Dark-preset colours must go through var(--cx-*, <literal>) in dark/glass rules: ${bare.join(', ')}`);
+  assert.ok(/--cx-gl-fill: color-mix\(in srgb, color-mix\(in srgb, var\(--cx-canvas-bg/.test(read('theme-glass-surface.css')), 'the glass recipe fill must follow the canvas token');
 });
 
 Promise.all(pendingTestPromises).then(() => {
