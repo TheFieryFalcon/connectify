@@ -1,7 +1,7 @@
 /**
  * Connectify Theme: theme menu popover
  *
- * Lists the registered dark themes (with delete buttons on custom ones) and the customizer entry,
+ * Lists the registered dark themes (with Edit ✎ and Delete ✕ buttons on custom ones) and the customizer entry,
  * anchored under the navbar toggle. Selecting a theme goes through the registry, whose
  * connectea:themechange event lets theme.js apply it. Exposes window.ConnectifyThemeMenu.
  */
@@ -36,15 +36,32 @@
     name.textContent = theme.name;
     opt.append(swatch, icon, name);
     if (theme.isCustom) {
-      const del = document.createElement('span');
-      del.className = 'connectea-theme-delete-btn';
-      del.textContent = '✕';
-      del.title = 'Delete theme';
-      del.onclick = ev => {
-        ev.stopPropagation();
-        if (reg?.deleteCustomTheme) { reg.deleteCustomTheme(theme.id); open(anchorEl); }
+      const actionButton = (className, text, title, onClick) => {
+        const btn = document.createElement('span');
+        btn.className = className;
+        btn.textContent = text;
+        btn.title = title;
+        btn.setAttribute('role', 'button');
+        btn.setAttribute('aria-label', `${title}: ${theme.name}`);
+        btn.onclick = ev => {
+          ev.stopPropagation();
+          onClick();
+        };
+        return btn;
       };
-      opt.append(del);
+      const actions = document.createElement('span');
+      actions.className = 'connectea-theme-actions';
+      actions.append(
+        // Opens the customizer on this theme; saving updates it in place, even after a rename
+        actionButton('connectea-theme-edit-btn', '✎', 'Edit theme', () => {
+          close();
+          window.ConnectifyThemeCustomizer?.open(reg?.getThemeDefinition?.(theme.id) || theme);
+        }),
+        actionButton('connectea-theme-delete-btn', '✕', 'Delete theme', () => {
+          if (reg?.deleteCustomTheme) { reg.deleteCustomTheme(theme.id); open(anchorEl); }
+        })
+      );
+      opt.append(actions);
     }
     opt.onclick = e => {
       e.stopPropagation();

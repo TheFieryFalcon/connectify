@@ -3261,6 +3261,26 @@ runTest('Test 164: The outcome bar stays hidden on the first marked assessment o
   }
 });
 
+runTest('Test 165: Custom themes can be edited in place from the theme menu', () => {
+  const menuJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-menu.js'), 'utf8');
+  const customizerJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-customizer.js'), 'utf8');
+  assert.ok(menuJs.includes("actionButton('connectea-theme-edit-btn', '✎', 'Edit theme'"), 'Custom themes must have an Edit button in the theme menu');
+  assert.ok(menuJs.includes('window.ConnectifyThemeCustomizer?.open(reg?.getThemeDefinition?.(theme.id) || theme)'), 'Edit must open the customizer on that theme');
+  assert.ok(customizerJs.includes('editingId: themeToEdit?.isCustom ? themeToEdit.id : null') && customizerJs.includes('id: state.editingId || undefined'), 'Saving an edited theme must keep its id');
+
+  // Saving with the edited theme's id updates it, even under a new name
+  if (!window.ConnectifyThemeRegistry?.saveCustomTheme) eval(fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8'));
+  const reg = window.ConnectifyThemeRegistry;
+  const before = reg.getCustomThemes().length;
+  const created = reg.saveCustomTheme({ name: 'Ocean', colors: { canvas: '#001122' } });
+  const renamed = reg.saveCustomTheme({ id: created.id, name: 'Ocean Deep', colors: { canvas: '#002244' } });
+  const themes = reg.getCustomThemes();
+  assert.strictEqual(renamed.id, created.id, 'The edited theme keeps its id');
+  assert.strictEqual(themes.length, before + 1, 'Renaming while editing must not create a second theme');
+  assert.strictEqual(themes.find(t => t.id === created.id).name, 'Ocean Deep', 'The rename is saved on the same theme');
+  reg.deleteCustomTheme(created.id);
+});
+
 runTest('Test 111: Typography parity (unbolded overall % and letter grade), startup auto-expand, outcome bar for first task of type, and complete render finalization', () => {
   const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');

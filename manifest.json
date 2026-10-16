@@ -146,6 +146,7 @@
             "src/theme/styles/theme-tokens.css",
             "src/theme/styles/theme-surface-base.css",
             "src/theme/styles/theme-component-base.css",
+            "src/theme/styles/theme-menu-actions.css",
             "src/theme/styles/theme-core.css",
             "src/theme/styles/theme-core-navigation.css",
             "src/theme/styles/theme-tiles.css",

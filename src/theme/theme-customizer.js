@@ -177,6 +177,8 @@
   function save() {
     deriveSecondaryTokens();
     const themeDef = {
+      // An edited theme keeps its id, so renaming it updates it instead of saving a copy
+      id: state.editingId || undefined,
       name: ($('#cx-name-input')?.value || state.name || 'Custom Theme').trim(),
       icon: ($('#cx-emoji-input')?.value || state.emoji || '🎨').trim(),
       liquidGlass: state.liquidGlass,
@@ -196,6 +198,7 @@
   function open(themeToEdit = null) {
     close();
     Object.assign(state, {
+      editingId: themeToEdit?.isCustom ? themeToEdit.id : null,
       name: themeToEdit ? (themeToEdit.name || 'Custom Theme') : 'My Theme',
       emoji: themeToEdit?.icon || '🎨',
       liquidGlass: Boolean(themeToEdit?.liquidGlass),

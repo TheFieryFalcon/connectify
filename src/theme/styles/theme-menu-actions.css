@@ -1,0 +1,37 @@
+/**
+ * Theme menu: Edit (✎) and Delete (✕) buttons on custom themes.
+ */
+
+#connectea-theme-menu .connectea-theme-actions {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+#connectea-theme-menu :is(.connectea-theme-edit-btn, .connectea-theme-delete-btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1;
+  color: #cbd5e1 !important;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+#connectea-theme-menu .connectea-theme-edit-btn:hover,
+#connectea-theme-menu .connectea-theme-edit-btn:focus-visible {
+  background: #1e3a5f;
+  color: #ffffff !important;
+}
+
+#connectea-theme-menu .connectea-theme-delete-btn:hover,
+#connectea-theme-menu .connectea-theme-delete-btn:focus-visible {
+  background: #5c1f1f;
+  color: #ffffff !important;
+}
