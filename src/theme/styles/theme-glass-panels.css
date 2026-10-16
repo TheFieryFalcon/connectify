@@ -22,3 +22,10 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 html.eds.cvr.ngm.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-paginator.mat-paginator .mat-paginator-container {
   padding-inline: 16px !important;
 }
+
+/* Notice cards are subgrid items (mat-card spans rows of card-deck-grid). overflow: hidden makes a grid item's
+   minimum size 0 in Firefox, which shrank the shared rows and cut off the View footer; clip rounds the corners
+   without touching layout. */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card {
+  overflow: clip !important;
+}

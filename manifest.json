@@ -189,6 +189,7 @@
             "src/theme/theme-registry.js",
             "src/theme/theme-custom-themes.js",
             "src/theme/theme-color-utils.js",
+            "src/theme/theme-token-derive.js",
             "src/theme/theme-customizer-markup.js",
             "src/theme/theme-customizer-controls.js",
             "src/theme/theme-customizer.js",

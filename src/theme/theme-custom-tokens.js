@@ -23,7 +23,15 @@
     '--cx-surface-elevated', '--cx-surface-hover', '--cx-nav-bg', '--cx-border', '--cx-border-subtle',
     '--cx-border-strong', '--cx-accent', '--cx-accent-hover', '--cx-text-primary',
     '--cx-text-secondary', '--cx-tile-link-color', '--cx-button-bg', '--cx-button-hover',
-    '--cx-button-text', '--cx-input-bg', '--cx-input-border'
+    '--cx-button-text', '--cx-input-bg', '--cx-input-border',
+    // Derived by theme-token-derive.js
+    '--cx-text-muted', '--cx-text-disabled', '--cx-surface-active', '--cx-border-hover', '--cx-border-focus',
+    '--cx-accent-active', '--cx-accent-subtle', '--cx-accent-text', '--cx-accent-link', '--cx-nav-border',
+    '--cx-nav-text', '--cx-nav-text-hover', '--cx-nav-item-active', '--cx-button-active', '--cx-button-border',
+    '--cx-button-border-hover', '--cx-button-text-hover', '--cx-button-primary-bg', '--cx-button-primary-hover',
+    '--cx-button-primary-text', '--cx-input-text', '--cx-input-placeholder', '--cx-input-border-focus',
+    '--cx-table-header-bg', '--cx-table-row-hover', '--cx-table-row-alt', '--cx-table-border', '--cx-badge-bg',
+    '--cx-badge-border', '--cx-badge-text', '--cx-scrollbar-thumb', '--cx-scrollbar-track', '--cx-avatar-bg'
   ];
 
   const isAuthDisabled = () => Boolean(window.ConnectifyThemeAuth?.isAuthDisabled());
@@ -53,7 +61,8 @@
   }
 
   function applyCustomTokens(colors) {
-    const c = colors || getCustomColors();
+    const derive = window.ConnectifyThemeDerive;
+    const c = derive ? derive.complete(colors || getCustomColors()) : (colors || getCustomColors());
     const tokens = {
       '--cx-canvas-bg': c.canvas, '--cx-canvas-subtle': c.canvasSubtle,
       '--cx-surface-bg': c.surface, '--cx-card-bg': c.surface,
@@ -64,7 +73,8 @@
       '--cx-text-primary': c.textPrimary, '--cx-text-secondary': c.textSecondary,
       '--cx-tile-link-color': c.tileLinkColor || c.textPrimary,
       '--cx-button-bg': c.button, '--cx-button-hover': c.buttonHover, '--cx-button-text': c.buttonText,
-      '--cx-input-bg': c.inputBg, '--cx-input-border': c.inputBorder
+      '--cx-input-bg': c.inputBg, '--cx-input-border': c.inputBorder,
+      ...(derive?.cssProps(c) || {})
     };
     // Clear first so a token the previous custom theme set but this one omits does not linger
     clearCustomTokens();

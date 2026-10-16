@@ -7635,6 +7635,33 @@ runTest('Test 164: Liquid Glass gives Class pages one glass recipe for banners, 
   }
 });
 
+runTest('Test 165: Custom themes derive every secondary token; the customizer follows the active theme; glass cards clip without shrinking grid rows', () => {
+  const themeDir = path.join(BASE_DIR, 'src/theme');
+  const win = {};
+  new Function('window', fs.readFileSync(path.join(themeDir, 'theme-color-utils.js'), 'utf8'))(win);
+  new Function('window', fs.readFileSync(path.join(themeDir, 'theme-token-derive.js'), 'utf8'))(win);
+  const basic = { canvas: '#14211a', surface: '#1f3326', button: '#27402f', border: '#4c7058', accent: '#8bc34a', textPrimary: '#f1f8e9' };
+  const props = win.ConnectifyThemeDerive.cssProps(basic);
+  for (const key of ['--cx-text-muted', '--cx-surface-active', '--cx-nav-text', '--cx-table-header-bg', '--cx-table-row-alt', '--cx-badge-bg', '--cx-input-text', '--cx-scrollbar-thumb', '--cx-accent-text']) {
+    assert.ok(props[key], `Basic mode must derive ${key}`);
+  }
+  assert.ok(win.ConnectifyThemeDerive.contrast(props['--cx-text-muted'], basic.surface) >= 5, 'muted text must keep >= 5:1 on the surface');
+  assert.ok(win.ConnectifyThemeDerive.contrast(props['--cx-text-secondary'], basic.surface) >= 5, 'secondary text must keep >= 5:1 on the surface');
+  const light = win.ConnectifyThemeDerive.cssProps({ canvas: '#f4efe6', surface: '#fffaf0', button: '#efe6d6', border: '#cbbfa8', accent: '#9a3412', textPrimary: '#1c1917' });
+  assert.ok(win.ConnectifyThemeDerive.contrast(light['--cx-text-muted'], '#fffaf0') >= 5, 'a light custom theme must keep muted text readable too');
+  const tokensJs = fs.readFileSync(path.join(themeDir, 'theme-custom-tokens.js'), 'utf8');
+  assert.ok(tokensJs.includes('derive?.cssProps(c)') && tokensJs.includes("'--cx-text-muted'") && tokensJs.includes("'--cx-scrollbar-thumb'"), 'applyCustomTokens must apply and clear the derived tokens');
+  assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('theme-token-derive.js'), 'theme-token-derive.js must be registered');
+  for (const file of ['theme-customizer.css', 'theme-color-picker.css']) {
+    const css = origReadFileSync.call(fs, path.join(themeDir, 'styles', file), 'utf8');
+    assert.ok(!/#(182232|131b28|141d2a|0f1622|384e68|2d3e54|334458|111824|3b506c)\b/i.test(css), `${file} must take its surfaces from the active theme, not fixed navy`);
+    assert.ok(/var\(--cx-surface-bg\)|var\(--cx-input-bg\)/.test(css), `${file} must use theme tokens`);
+  }
+  const panels = fs.readFileSync(path.join(themeDir, 'styles/theme-glass-panels.css'), 'utf8');
+  assert.ok(cssHas(panels, '.mat-card {\n  overflow: clip !important;'), 'glass mat-cards must clip with overflow: clip');
+  assert.ok(!/\.cvr-c-card, \.mat-card, \.connectea-panel\) \{\n  overflow: hidden/.test(fs.readFileSync(path.join(themeDir, 'styles/theme.css'), 'utf8')), 'theme.css must not give mat-card overflow: hidden');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
