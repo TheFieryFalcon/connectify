@@ -23,7 +23,8 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 - **Key Functions**:
   - `checkGrades()`: Scrapes running subject marks on DOM load, groups cards by subject name with Semester 2 precedence whenever Semester 2 scores exist, and compares them against `localStorage` (`connectify:grade_cache:<student>`).
   - Empty cache handling: Quietly seeds the cache for first-time users without triggering a barrage of notifications.
-  - Upon grade delta detection ($\ge 0.05\%$):
+  - `hasSubjectChanged(prev, entry)`: the student's running mark moved $\ge 0.05\%$, or any boxplot quantile moved by more than `STATS_CHANGE_THRESHOLD` (1 point) — small shifts from other classes uploading results are ignored.
+  - Upon a detected change:
     1. Ignores auto-expand / collapse preferences to ensure **THAT SUBJECT ONLY** is definitely expanded, scraping and updating its task results into the results cache.
     2. If auto-expand is off, collapses that subject card again after scraping.
     3. Emits a stacked toast notification with title "Class Updated" and message "[Subject name] scores have been updated."

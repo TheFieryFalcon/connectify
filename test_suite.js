@@ -2987,6 +2987,27 @@ runTest('Test 110: Silent difference check, out-of-date cache prompt with one-ti
   assert.ok(atarUiCode.includes('isClosed = (isPlanningMode || isGradingMode) && isTargetClosed(i);'), 'atar-ui.js must close Semester 1 in Target Grade mode when completed');
 });
 
+runTest('Test 158: Grade notifications ignore small boxplot shifts from other classes uploading results', () => {
+  delete window.ConnectifyNewGrade;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'new-grade.js'), 'utf8'));
+  const { hasSubjectChanged, STATS_CHANGE_THRESHOLD } = window.ConnectifyNewGrade;
+  assert.strictEqual(STATS_CHANGE_THRESHOLD, 1, 'A boxplot quantile must move by more than 1 point to count');
+  const prev = { mark: 72.4, stats: [40, 55, 65, 75, 92] };
+
+  assert.strictEqual(hasSubjectChanged(prev, { mark: 72.4, stats: [40.6, 55.4, 65.9, 75.2, 92] }), false,
+    'Quantiles moving by under 1 point (another class uploading results) must not notify');
+  assert.strictEqual(hasSubjectChanged(prev, { mark: 72.4, stats: [40, 55, 66, 75, 92] }), false,
+    'A quantile moving by exactly 1 point must not notify');
+  assert.strictEqual(hasSubjectChanged(prev, { mark: 72.4, stats: [40, 55, 66.5, 75, 92] }), true,
+    'A quantile moving by more than 1 point must notify');
+  assert.strictEqual(hasSubjectChanged(prev, { mark: 72.5, stats: prev.stats }), true,
+    "The student's own running mark moving by 0.05 or more must still notify");
+  assert.strictEqual(hasSubjectChanged({ mark: 72.4 }, { mark: 72.4, stats: prev.stats }), true,
+    'Boxplot stats appearing for the first time must notify');
+  assert.strictEqual(hasSubjectChanged(undefined, { mark: 80, stats: prev.stats }), false,
+    'A subject missing from the cache is seeded quietly');
+});
+
 runTest('Test 111: Typography parity (unbolded overall % and letter grade), startup auto-expand, outcome bar for first task of type, and complete render finalization', () => {
   const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');

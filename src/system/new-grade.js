@@ -15,6 +15,22 @@
 
   const { normalize } = window.ConnectifyUtils;
 
+  // Percentage points a boxplot quantile must move by (more than) for a subject to count as updated
+  const STATS_CHANGE_THRESHOLD = 1;
+
+  /** Whether a subject's cached entry and its current entry differ enough to announce an update. */
+  function hasSubjectChanged(prev, entry) {
+    if (!prev) return false;
+    if (Number.isFinite(prev.mark) && Number.isFinite(entry.mark) && Math.abs(Math.round((entry.mark - prev.mark) * 100) / 100) >= 0.05) {
+      return true;
+    }
+    const hasStats = Array.isArray(entry.stats) && entry.stats.length === 5;
+    if (!hasStats) return false;
+    // Boxplot stats appearing for the first time count as an update
+    if (!Array.isArray(prev.stats) || prev.stats.length !== 5) return true;
+    return entry.stats.some((val, idx) => Math.abs(val - prev.stats[idx]) > STATS_CHANGE_THRESHOLD);
+  }
+
   const getStudentId = () => window.ConnectifyUtils.accountKey();
 
   function getCacheKey() {
@@ -267,31 +283,13 @@
     const prevCache = loadCachedGrades();
     const isFirstRun = !prevCache || Object.keys(prevCache).length === 0;
 
-    // First-time users with an empty cache must NOT receive a barrage of notifications;
-    // only notify when an existing cached grade or stats has changed by >= 0.05
+    // First-time users with an empty cache must NOT receive a barrage of notifications.
+    // A notice needs the student's own running mark to move by >= 0.05, or a boxplot quantile to move by
+    // more than STATS_CHANGE_THRESHOLD points: another class uploading results nudges the cohort boxplot
+    // slightly, and that alone must not announce an update
     if (!isFirstRun && prevCache) {
       for (const entry of currentEntries) {
-        const prev = prevCache[entry.subjectName];
-        const hasPrevMark = prev && Number.isFinite(prev.mark);
-        const hasPrevStats = prev && Array.isArray(prev.stats) && prev.stats.length === 5;
-
-        let markChanged = false;
-        let delta = 0;
-        if (hasPrevMark && Number.isFinite(entry.mark)) {
-          delta = Math.round((entry.mark - prev.mark) * 100) / 100;
-          if (Math.abs(delta) >= 0.05) {
-            markChanged = true;
-          }
-        }
-
-        let statsChanged = false;
-        if (hasPrevStats && Array.isArray(entry.stats) && entry.stats.length === 5) {
-          statsChanged = entry.stats.some((val, idx) => Math.abs(val - prev.stats[idx]) >= 0.05);
-        } else if (!hasPrevStats && Array.isArray(entry.stats) && entry.stats.length === 5 && prev) {
-          statsChanged = true;
-        }
-
-        if (markChanged || statsChanged) {
+        if (hasSubjectChanged(prevCache[entry.subjectName], entry)) {
           // 1. Process targeted invalidation: store as stale subject
           processChangedSubject(entry);
 
@@ -401,6 +399,8 @@
 
   window.ConnectifyNewGrade = {
     checkGrades,
+    hasSubjectChanged,
+    STATS_CHANGE_THRESHOLD,
     readSubjectStats,
     getCachedGrades: loadCachedGrades,
     setCachedGrade: (subjectName, mark, stats) => {
