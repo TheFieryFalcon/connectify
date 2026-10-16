@@ -96,6 +96,7 @@
             "src/predictor/predictor-grade-projection.js",
             "src/predictor/predictor-atar-projection.js",
             "src/predictor/predictor-math.js",
+            "src/predictor/year-rollover.js",
             "src/predictor/predictor-task-cards.js",
             "src/predictor/predictor-grade-view.js",
             "src/predictor/predictor-atar-view.js",

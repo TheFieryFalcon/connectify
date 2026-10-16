@@ -7113,6 +7113,68 @@ runTest('Test 156: Sidebar sync leaves the DOM alone when nothing changed and ke
   assert.deepStrictEqual(Array.from(toolMenu.children).map(b => b.textContent), labelsBefore);
 });
 
+runTest('Test 157: A new school year turns last year\'s averages into baselines for types and subjects still present', () => {
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/year-rollover.js'), 'utf8'));
+  const yr = window.ConnectifyYearRollover;
+
+  // Subjects match across years regardless of year level, ATAR suffix or semester
+  assert.strictEqual(yr.subjectKey('12 Chemistry ATAR - Semester 1'), 'chemistry');
+  assert.strictEqual(yr.subjectKey('Chemistry ATAR Year 11'), 'chemistry');
+  assert.strictEqual(yr.subjectKey('11 Mathematics Methods ATAR'), 'mathematics methods');
+
+  // Only a later (or never-seen) set of class names counts as a new year
+  const y11 = { classNames: ['11 Chemistry ATAR', '11 Physics ATAR'], seen: [] };
+  assert.strictEqual(yr.classifyYear(['12 Chemistry ATAR', '12 Physics ATAR'], y11), 'new-year');
+  assert.strictEqual(yr.classifyYear(['11 Chemistry ATAR', '11 English ATAR'], y11), 'same');
+  assert.strictEqual(yr.classifyYear(['10 Science', '10 English'], y11), 'other-year', 'viewing an earlier year must not roll over');
+  assert.strictEqual(yr.classifyYear(['Art', 'Drama'], { classNames: ['Chemistry', 'Physics'], seen: ['Art|Drama'] }), 'other-year');
+  assert.strictEqual(yr.classifyYear(['Art', 'Drama'], { classNames: ['Chemistry', 'Physics'], seen: [] }), 'new-year');
+  assert.strictEqual(yr.classifyYear(['12 Chemistry ATAR'], { classNames: [] }), 'first');
+
+  // Only types that are still categories and subjects that still exist are carried over
+  const snapshot = { types: { Exam: 71.26, Test: 80, Retired: 60 }, subjects: { chemistry: 83.5, literature: 59.6 } };
+  const next = yr.rolledBaselines(snapshot, ['12 Chemistry ATAR', '12 Physics ATAR'], { types: { Essay: 70 }, subjects: {} }, new Set(['Exam', 'Test', 'Essay']));
+  assert.deepStrictEqual(next.types, { Essay: 70, Exam: 71.3, Test: 80 });
+  assert.deepStrictEqual(next.subjects, { '12 Chemistry ATAR': 83.5 });
+  assert.strictEqual(next.subjectCount, 1);
+  assert.strictEqual(next.typeCount, 2);
+
+  // End to end: a snapshot taken in Year 11 becomes the baselines when Year 12 classes appear
+  const savedBaselines = [];
+  const origStore = window.ConnectifyPredictorBaselines;
+  const origQSA = document.querySelectorAll;
+  const origCache = window.ConnectifyCache;
+  let resultsCleared = false;
+  const tiles = titles => titles.map(t => ({ querySelector: () => ({ textContent: t }), getAttribute: () => null }));
+  try {
+    localStorage.clear();
+    window.ConnectifyPredictorBaselines = { getBaselines: () => ({ types: {}, subjects: {} }), saveBaselines: b => savedBaselines.push(b) };
+    window.ConnectifyCache = { clearResultsCache: () => { resultsCleared = true; } };
+    localStorage.setItem(`connectify:year_snapshot:${window.ConnectifyUtils.accountKey()}`, JSON.stringify({
+      classNames: ['11 Chemistry ATAR', '11 Literature ATAR', '11 Physics ATAR'], seen: [], snapshot
+    }));
+    document.querySelectorAll = sel => (sel.includes('eds-c-tile') ? tiles(['12 Chemistry ATAR - Semester 1', '12 Chemistry ATAR - Semester 2', '12 Physics ATAR - Semester 1']) : origQSA(sel));
+    yr.check();
+    assert.strictEqual(savedBaselines.length, 1, 'baselines must be saved once on the new year');
+    assert.deepStrictEqual(savedBaselines[0].subjects, { '12 Chemistry ATAR': 83.5 }, 'only subjects still present get a baseline');
+    assert.ok(Number.isFinite(savedBaselines[0].types.Exam), 'existing categories get type baselines');
+    assert.ok(resultsCleared, "last year's cached results must be cleared");
+    const after = JSON.parse(localStorage.getItem(`connectify:year_snapshot:${window.ConnectifyUtils.accountKey()}`));
+    assert.deepStrictEqual(after.classNames, ['12 Chemistry ATAR', '12 Physics ATAR']);
+    assert.strictEqual(after.snapshot, null, 'the old snapshot must not be applied twice');
+
+    // Browsing back to Year 11 afterwards changes nothing
+    document.querySelectorAll = sel => (sel.includes('eds-c-tile') ? tiles(['11 Chemistry ATAR - Semester 1', '11 Physics ATAR - Semester 1']) : origQSA(sel));
+    yr.check();
+    assert.strictEqual(savedBaselines.length, 1, 'viewing an earlier year must not save baselines');
+  } finally {
+    document.querySelectorAll = origQSA;
+    window.ConnectifyPredictorBaselines = origStore;
+    window.ConnectifyCache = origCache;
+    localStorage.clear();
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

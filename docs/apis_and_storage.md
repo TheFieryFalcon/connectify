@@ -76,6 +76,8 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify:grade_cache:<student>` | `localStorage` | `new-grade.js` | Cached running subject average marks for grade update notifications |
 | `connectify:baseline:types:<account>` | `localStorage` | `category-settings.js` / `predictor-math.js` | Previous-year assessment category percentage averages |
 | `connectify:baseline:subjects:<account>` | `localStorage` | `category-settings.js` / `predictor-math.js` | Previous-year enrolled subject final grade averages |
+| `connectify:year_snapshot:<account>` | `localStorage` | `year-rollover.js` | Class names seen this year and this year's type/subject averages, applied as baselines when a new year starts |
+| `connectify:baseline_backup:<account>` | `localStorage` | `year-rollover.js` | Baselines as they were before a new-year rollover replaced them |
 | `connectify:prediction:<account>:<subject>:<taskId>` | `localStorage` | `predictor-math.js` / `cohort-view.js` | Cached task prediction object (`{ low, mid, high, breakoutScore, type }`) |
 | `connectify:prediction_version` | `localStorage` | `predictor-math.js` | Calculation version incrementer tracking when chronological prediction cache must be re-populated |
 | `connectify:cache_version:<subsystem>` | `localStorage` | `assessment-data.js` | Independent invalidation keys (`predictor`, `results`, `settings`, `cohort`) |

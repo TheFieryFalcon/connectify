@@ -63,6 +63,7 @@ Extremely concise summary of the core visual design language, contrast standards
 ## 5. Cold-Start & Mathematical Modeling
 - **Logarithmic Headroom Above 80%**: Taper achievable gains proportionally to remaining headroom $\frac{100 - \text{Score}}{20}$.
 - **Calibrated Variance Scaling on Predictions**: Low delta scales moderately with variance ($\Delta_{\text{Low}} = \min(18, \max(1.5, \frac{\sigma^2}{20} + 0.45\sigma + \Delta_{\text{penalty}}))$) and high delta as $\Delta_{\text{High}} = \min(8.5, \max(1.5, 0.88\sigma))$, preventing excessive spread on volatile subjects while preserving realistic downside/upside bounds.
+- **New School Year Baselines** (`year-rollover.js`): when every class on the outlines page has a new name and the new set is a later year (by year level or calendar year, or never seen before when titles carry neither), last year's snapshot of assessment type and subject averages (grade cache marks preferred) becomes the baselines for types that are still categories and subjects still present (matched year-independently, e.g. `11 Chemistry ATAR` -> `12 Chemistry ATAR`). Previous baselines are backed up, last year's cached results are cleared, and viewing an earlier year never triggers it.
 - **Settings Cold-Start Guidance**: When a subject lacks scores or baselines, display guidance card with a direct "Go to Settings" shortcut. Dynamically inject baseline inputs when custom categories are created.
 
 ## 6. Runtime & DOM Safety
