@@ -56,7 +56,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `cohort-outcome.js`: outcome meter segments (0..5), 18px x 56px bar, secret purple breakout ($> 1.10 \times \text{High}$), singleton tooltip.
   - `cohort-row-readers.js` (`ConnectifyCohortRows`): `readMark(row)` (`%` and `X Out of Y`), `readStats(row)` (dataset bridge, then Highcharts, then stats cache), DOM helpers.
   - `cohort-panel.js`: `.connectea-panel`, `.connectea-row-wrapper`, `'Type: '` dropdown, cohort size input and `noticeText()`.
-  - `cohort-outcome-eval.js`: builds the predictor task from a row (semester, row position, week override, weight); hides the meter on the first row of Semester 1 without a subject baseline; pre-caches predictions for unmarked rows.
+  - `cohort-outcome-eval.js`: builds the predictor task from a row (semester, row position, week override, weight); hides the meter on a subject's first marked result (no earlier marked row; for Semester 2 no marked Semester 1 result) without a numeric subject baseline; pre-caches predictions for unmarked rows.
 - **Key Functions**: `render(...)`: distribution, $z$-score, standing, rank and outcome bar; memoised per row (`ui._memo`: mark, stats, cohort size, baselines signature, taskType, types version).
 - **Export**: `window.ConnectifyCohortView`.
 

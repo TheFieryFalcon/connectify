@@ -3201,6 +3201,66 @@ runTest('Test 163: Clicking the handle closed is not undone by hover (Dia)', () 
   }
 });
 
+runTest('Test 164: The outcome bar stays hidden on the first marked assessment of a class without a baseline', () => {
+  const saved = { rows: window.ConnectifyCohortRows, pred: window.ConnectifyPredictorMath, evalMod: window.ConnectifyCohortOutcomeEval };
+  let baselineSubjects = {};
+  window.ConnectifyCohortRows = { readMark: row => (row.dataset.mark ? Number(row.dataset.mark) : undefined) };
+  window.ConnectifyPredictorMath = {
+    getBaselines: () => ({ subjects: baselineSubjects, types: {} }),
+    cleanSubject: n => String(n).replace(/\s*-\s*Semester\s*[12].*$/i, '').trim(),
+    getCachedPrediction: () => ({ low: 60, mid: 70, high: 80 }),
+    evaluateOutcome: () => 'bar'
+  };
+  const cards = [];
+  const makeCard = (title, marks) => {
+    const card = document.createElement('div');
+    card.className = 'eds-c-tile';
+    const t = document.createElement('span');
+    t.className = 'eds-c-tile__title';
+    t.textContent = title;
+    card.appendChild(t);
+    const tasks = document.createElement('div');
+    tasks.className = 'cvr-c-tasks';
+    const rows = marks.map(m => {
+      const row = document.createElement('div');
+      row.className = 'cvr-c-task';
+      if (m !== null) row.dataset.mark = String(m);
+      tasks.appendChild(row);
+      return row;
+    });
+    card.appendChild(tasks);
+    document.body.appendChild(card);
+    cards.push(card);
+    return rows;
+  };
+  const meta = { subjectName: 'Chemistry', taskName: 'Task', labels: [], labelsKey: '' };
+  try {
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'cohort-outcome-eval.js'), 'utf8'));
+    const { evaluateRow } = window.ConnectifyCohortOutcomeEval;
+
+    const s1 = makeCard('Chemistry - Semester 1', [null, 72, 80]);
+    assert.strictEqual(evaluateRow(s1[1], 72, meta, []), null, 'The first marked task after unmarked rows must not show a bar');
+    assert.strictEqual(evaluateRow(s1[2], 80, meta, []), 'bar', 'A task after an earlier marked task shows the bar');
+
+    baselineSubjects = { Chemistry: '' };
+    assert.strictEqual(evaluateRow(s1[1], 72, meta, []), null, 'An empty baseline value is not a baseline');
+    baselineSubjects = { Chemistry: 70 };
+    assert.strictEqual(evaluateRow(s1[1], 72, meta, []), 'bar', 'A subject baseline lets the first task show the bar');
+    baselineSubjects = {};
+
+    cards.forEach(c => c.remove());
+    const s2 = makeCard('Chemistry - Semester 2', [65]);
+    assert.strictEqual(evaluateRow(s2[0], 65, meta, []), null, 'Semester 2 without any marked Semester 1 work must not show a bar');
+    const collected = [{ name: 'Chemistry', tasks: [{ semester: 1, score: 70, pending: false }] }];
+    assert.strictEqual(evaluateRow(s2[0], 65, meta, collected), 'bar', 'Semester 2 after marked Semester 1 results shows the bar');
+  } finally {
+    cards.forEach(c => c.remove());
+    window.ConnectifyCohortRows = saved.rows;
+    window.ConnectifyPredictorMath = saved.pred;
+    window.ConnectifyCohortOutcomeEval = saved.evalMod;
+  }
+});
+
 runTest('Test 111: Typography parity (unbolded overall % and letter grade), startup auto-expand, outcome bar for first task of type, and complete render finalization', () => {
   const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
@@ -3254,7 +3314,7 @@ runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, 
   // 2. First task outcome bar suppression via .cvr-c-tasks .cvr-c-task query
   assert.ok(cohortViewJs.includes("card.querySelectorAll('.cvr-c-tasks .cvr-c-task')"), 'cohort-view.js must index tasks inside .cvr-c-tasks');
   // Only the first row of the Semester 1 card lacks earlier work in the subject (the old per-task scan could never match)
-  assert.ok(cohortViewJs.includes('const hasPriorSubjectData = task.semester > 1 || task.sequence > 0;'), 'cohort-view.js must treat any later row or Semester 2 task as having prior subject data');
+  assert.ok(cohortViewJs.includes('const hasPriorSubjectData = hasPriorMarkedWork(task, row, meta, precollectedSubjects, predMath);'), 'cohort-view.js must count only earlier marked results as prior subject data (Test 164 checks the behaviour)');
 
   // 3. Panel formatting: entire score display bolded, Z-Score formatted, colons and equals and Rank removed
   assert.ok(cohortViewJs.includes('<strong>Score ${math().formatPercentage(mark)}%</strong>'), 'cohort-view.js must bold entire score display without colon');

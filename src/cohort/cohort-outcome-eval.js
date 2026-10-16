@@ -2,7 +2,7 @@
  * Connectify Cohort: outcome meter evaluation for a task row
  *
  * Builds the predictor's view of a marked task row (semester, position in the card, school week and
- * weight), hides the meter on the first task of a subject without a baseline, and evaluates the mark
+ * weight), hides the meter on a subject's first marked result without a baseline, and evaluates the mark
  * against the cached or freshly computed prediction. Unmarked rows get their prediction pre-cached.
  * Exposes window.ConnectifyCohortOutcomeEval.
  */
@@ -52,6 +52,31 @@
     };
   }
 
+  const hasMark = row => Number.isFinite(window.ConnectifyCohortRows?.readMark?.(row));
+  const isFiniteBaseline = v => v !== null && v !== '' && v !== undefined && Number.isFinite(Number(v));
+
+  /**
+   * Whether the subject has a marked result before this one: an earlier marked row in this card, or for
+   * Semester 2 a marked Semester 1 task (collected results first, then a Semester 1 card on the page).
+   * Unmarked and pending rows don't count, so the first marked assessment of a class has no precedent.
+   */
+  function hasPriorMarkedWork(task, row, meta, subjects, predMath) {
+    const card = row.closest(CARD_SELECTOR);
+    if (card && cardTaskRows(card, row).slice(0, task.sequence).some(hasMark)) return true;
+    if (task.semester <= 1) return false;
+    const clean = name => (predMath.cleanSubject ? predMath.cleanSubject(name) : normalize(name).replace(/\s*[-–—]\s*(Semester|Sem)\s*[12].*$/i, ''));
+    const subjectKey = clean(meta.subjectName);
+    const subject = (subjects || []).find(s => s.name === meta.subjectName || clean(s.name) === subjectKey);
+    if (subject?.tasks?.some(t => !t.pending && Number.isFinite(t.score) && (t.semester || 1) < task.semester)) return true;
+    for (const other of document.querySelectorAll(CARD_SELECTOR)) {
+      if (other === card) continue;
+      const title = normalize(other.querySelector(TITLE_SELECTOR)?.textContent);
+      if (!/Semester\s*1\b/i.test(title) || clean(title) !== subjectKey) continue;
+      if (Array.from(other.querySelectorAll('.cvr-c-tasks .cvr-c-task')).some(hasMark)) return true;
+    }
+    return false;
+  }
+
   /** The outcome for a marked row, or null when the meter stays hidden. */
   function evaluateRow(row, mark, meta, precollectedSubjects) {
     const predMath = window.ConnectifyPredictorMath;
@@ -59,10 +84,10 @@
     const task = taskFromRow(row, meta, mark);
     const cleanSubj = predMath.cleanSubject ? predMath.cleanSubject(meta.subjectName) : meta.subjectName;
     const baselines = predMath.getBaselines ? predMath.getBaselines() : { subjects: {}, types: {} };
-    const hasSubjectBaseline = Boolean(baselines?.subjects && (baselines.subjects[cleanSubj] !== undefined || baselines.subjects[meta.subjectName] !== undefined));
+    const hasSubjectBaseline = isFiniteBaseline(baselines?.subjects?.[cleanSubj]) || isFiniteBaseline(baselines?.subjects?.[meta.subjectName]);
 
-    // Only the first row of the Semester 1 card has no earlier work in the subject to be measured against
-    const hasPriorSubjectData = task.semester > 1 || task.sequence > 0;
+    // The first marked assessment of a class has nothing to be measured against unless a baseline is set
+    const hasPriorSubjectData = hasPriorMarkedWork(task, row, meta, precollectedSubjects, predMath);
     const isFirstOfSubject = !hasPriorSubjectData && !hasSubjectBaseline;
     if (isFirstOfSubject) return null;
 
