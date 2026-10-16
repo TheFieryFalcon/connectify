@@ -43,7 +43,7 @@ This document details user-facing features 11 through 20, covering Target ATAR a
 - **Source Modules**: [`notifications.js`](file:///Users/uwong/Downloads/2.1.14_0/notifications.js), [`new-grade.js`](file:///Users/uwong/Downloads/2.1.14_0/new-grade.js)
 - **DOM Insertion**: Fixed bottom-right toast stack (`#connectify-notifications-container`).
 - **UI Appearance**: Purple-accented toast card (`.cx-notification--grade`) with trending icon (`📈`), updated average, delta percentage, and "Jump to Subject" action button.
-- **Functionality**: Tracks running subject averages in `connectify:grade_cache:<student>`; detects grade updates (own running mark moves $\ge 0.05\%$, or a boxplot quantile moves by more than 1 point, so other classes uploading results stay quiet); temporarily expands and scrapes updated subject; scrolls to course card with outline glow pulse (`.cx-card-jump-highlight`).
+- **Functionality**: Tracks running subject averages in `connectify:grade_cache:<student>`; detects grade updates (own running mark moves $\ge 0.05\%$, or a boxplot quantile moves by more than 1 point, so other classes uploading results stay quiet); marks the subject stale for re-scraping on its next expansion; "Jump to Subject" expands it, scrolls to the card and pulses an outline glow (`.cx-card-jump-highlight`).
 
 ### 17. Multi-Store Publishing & Automated CI/CD (AMO & Chrome Web Store)
 - **Source Modules**: [`.github/workflows/publish.yml`](file:///Users/uwong/Downloads/2.1.14_0/.github/workflows/publish.yml), [`.github/scripts/publish-amo.js`](file:///Users/uwong/Downloads/2.1.14_0/.github/scripts/publish-amo.js), [`CHROMEWEBSTORE.md`](file:///Users/uwong/Downloads/2.1.14_0/CHROMEWEBSTORE.md), [`PRIVACY.md`](file:///Users/uwong/Downloads/2.1.14_0/PRIVACY.md)

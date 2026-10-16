@@ -47,11 +47,11 @@ This document covers the user interface and analytics modules, including target 
 - **Role**: Native SVG polyline chart generator.
 - **Key Functions**:
   - `renderChart(container, options)`: Generates responsive SVG line chart with dual polylines (blue: student score, red: cohort mean), grid lines, value ticks, interactive data points with hover tooltips, and plotted data detail table.
-  - Supports custom week timestamp overrides (focus-protected editing, commit on Enter/blur) and uncompleted task display directly within the plotted data table.
+  - `progress-week-editor.js` (`ConnectifyProgressWeekEditor.weekCell`): custom school week overrides (1–40 in 10-week terms; focus-protected editing, commit on Enter/blur, Escape restores) and uncompleted task display in the plotted data table.
 - **Export**: `window.ConnectifyProgressChart`.
 
 #### [`progress-graph.js`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/progress-graph.js)
-- **Role**: Progress Graph modal controller (`#connectify-progress`).
+- **Role**: Progress Graph modal controller (`#connectify-progress`); launcher and panel markup in `progress-panel.js`.
 - **Key Functions**:
   - Builds subject selector chips and "ATAR Progression" selector.
   - `render(data)`: Delegates plotting to `progress-chart.js`. `refresh(force)` guards against re-rendering while editing.
@@ -61,7 +61,8 @@ This document covers the user interface and analytics modules, including target 
 #### [`compound-progress.js`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/compound-progress.js)
 - **Role**: Injects multi-category weighted completion progress bars into each subject card header.
 - **Key Functions**:
-  - Renders horizontal segmented bar (`.cx-compound-bar`) across generic tile containers (`.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile`). Partitions Semester 1 vs Semester 2 chronologically and mutes during accordion animations.
+  - Renders horizontal segmented bar (`.cx-compound-bar`, styles in `compound-progress.css`) across generic tile containers (`.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile`). Partitions Semester 1 vs Semester 2 chronologically and mutes during accordion animations.
+  - `subjectForCard(title, subjects)`: one subject per card (exact cleaned name, then full name, then closest partial), so similar names never redraw each other's bars.
   - Reactive updates on `connectify-task-type-changed` and `connectify-settings-updated` without page reloads.
 - **Export**: `window.ConnectifyCompoundProgress`.
 
@@ -72,7 +73,7 @@ This document covers the user interface and analytics modules, including target 
 #### [`weakness-radar.js`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/weakness-radar.js)
 - **Role**: Implements the Weakness Analyzer native SVG spider/radar chart.
 - **Key Functions**:
-  - Plots multi-axis polygonal radar chart of student performance grouped by assessment type or subject.
+  - Plots multi-axis polygonal radar chart of student performance grouped by assessment type or subject (SVG, escaped labels and panel markup in `weakness-radar-view.js`); skips rendering while hidden.
   - Interactive subject filtering checkboxes (`#cx-weakness-checkboxes`) and Expand All Outlines button (`#cx-weakness-expand-all`).
   - Persists deselected subjects in `connectify:weakness_disabled_subjects`.
 - **Export**: `window.ConnectifyWeakness`.

@@ -142,6 +142,10 @@ const SPLIT_PARTS = {
   'atar-ui.js': ['target-ui-helpers.js', 'atar-ui-markup.js', 'atar-ui.js'],
   'atar-features.js': ['outline-controls.js', 'atar-features.js'],
   'atar.css': ['atar.css', 'atar-compact.css', 'atar-planner.css'],
+  'progress-chart.js': ['progress-chart.js', 'progress-week-editor.js'],
+  'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
+  'progress-graph.js': ['progress-panel.js', 'progress-graph.js'],
+  'new-grade.js': ['grade-snapshot.js', 'new-grade.js'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js'],
   'theme-customizer.js': ['theme-color-utils.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
   // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
@@ -3075,6 +3079,30 @@ runTest('Test 160: Progress Graph week overrides mean the same week to the scrap
   const captioned = dates.getTaskChronologicalStamp({ name: 'Captioned Task', semester: 1, sequence: 0, order: 19 }, 'Physics ATAR');
   assert.strictEqual(overridden, captioned, 'An override of 17 must sort exactly where the scraper places it (order 19)');
   mockLocalStorage.clear();
+});
+
+runTest('Test 161: Weakness radar escapes names and compound bars match each card to one subject', () => {
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'weakness-radar-view.js'), 'utf8'));
+  const svg = window.ConnectifyWeaknessView.radarSvg(['<img src=x onerror=alert(1)>', 'Test', 'Essay'], [70, 80, 90]);
+  assert.ok(!svg.includes('<img'), 'Category names must be escaped inside the radar SVG');
+  assert.ok(svg.includes('&lt;img'), 'Escaped category names must still be shown');
+
+  const savedData = window.ConnectifyData;
+  window.ConnectifyData = { collect: () => [] };
+  delete window.ConnectifyCompoundProgress;
+  try {
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'compound-progress.js'), 'utf8'));
+    const { subjectForCard } = window.ConnectifyCompoundProgress;
+    const subjects = [{ name: 'Human Biology ATAR' }, { name: 'Biology ATAR' }, { name: 'English ATAR' }, { name: 'English Literature ATAR' }];
+    // Each card used to take every subject whose name contained, or was contained in, its title
+    assert.strictEqual(subjectForCard('Biology ATAR - Semester 1', subjects).name, 'Biology ATAR', 'Biology card must show Biology');
+    assert.strictEqual(subjectForCard('Human Biology ATAR - Semester 1', subjects).name, 'Human Biology ATAR', 'Human Biology card must show Human Biology');
+    assert.strictEqual(subjectForCard('English ATAR - Semester 2', subjects).name, 'English ATAR', 'English card must show English');
+    assert.strictEqual(subjectForCard('Year 12 English Literature ATAR - Semester 2', subjects).name, 'English Literature ATAR', 'English Literature card must show English Literature');
+    assert.strictEqual(subjectForCard('Physics ATAR - Semester 1', subjects), null, 'A card with no matching subject gets no bar');
+  } finally {
+    window.ConnectifyData = savedData;
+  }
 });
 
 runTest('Test 111: Typography parity (unbolded overall % and letter grade), startup auto-expand, outcome bar for first task of type, and complete render finalization', () => {

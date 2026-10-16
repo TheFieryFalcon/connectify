@@ -34,8 +34,11 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyOutlineControls` | `outline-controls.js` | Floating Expand/Collapse All and Back to top button |
 | `window.ConnectifyProgressMath` | `progress-math.js` | Historical ATAR trajectory and monthly aggregation |
 | `window.ConnectifyProgressChart` | `progress-chart.js` | SVG polyline line chart and plotted data table renderer |
+| `window.ConnectifyProgressWeekEditor` | `progress-week-editor.js` | Week override cells in the progress table |
+| `window.ConnectifyProgressPanel` | `progress-panel.js` | Year in Progress launcher and panel markup |
 | `window.ConnectifyProgress` | `progress-graph.js` | Progress graph modal controller |
 | `window.ConnectifyCompoundProgress` | `compound-progress.js` | Weighted category progress bars on subject cards |
+| `window.ConnectifyWeaknessView` | `weakness-radar-view.js` | Radar SVG and panel markup |
 | `window.ConnectifyWeakness` | `weakness-radar.js` | SVG spider/radar chart analyzer |
 | `window.ConnectifyCalibration` | `scaling-calibration.js` | Semester 1 scaled scores calibration table |
 | `window.ConnectifyCategorySettings` | `category-settings.js` | Category keyword settings and custom category management |
@@ -43,7 +46,8 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyPredictorUI` | `predictor-ui.js` | Predictor sidebar tool panel coordinator (Grade & ATAR Predictors) |
 | `window.ConnectifyCountdown` | `wace-countdown.js` | Year 12 WACE exam countdown timer |
 | `window.ConnectifyNotifications` | `notifications.js` | Universal toast and vertical stacked notifications engine |
-| `window.ConnectifyNewGrade` | `new-grade.js` | Grade change detection, auto-expansion, and jump-to-card navigation |
+| `window.ConnectifyGradeSnapshot` | `grade-snapshot.js` | Subject marks and boxplots vs the grade cache, change threshold |
+| `window.ConnectifyNewGrade` | `new-grade.js` | Grade change notifications and jump-to-card navigation |
 | `window.ConnectifyDomSweeper` | `dom-sweeper.js` | DOM health monitor and component restoration |
 | `window.ConnectifyThemeAuth` | `theme-auth.js` | Login/logout detection and post-login theme restore |
 | `window.ConnectifyThemeTokens` | `theme-custom-tokens.js` | Custom tokens, wallpaper (with extension-storage fallback), glass |

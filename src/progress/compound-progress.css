@@ -1,0 +1,43 @@
+/**
+ * Connectify compound subject progress bars (.cx-compound-progress-container under each card header).
+ */
+
+.cx-compound-progress-container {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  padding: 10px 20px 0 20px !important;
+  margin: 0 !important;
+}
+.cx-compound-segment {
+  transition: filter 0.2s;
+  cursor: pointer;
+}
+.cx-compound-segment:hover {
+  filter: brightness(1.3);
+}
+.cx-compound-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 0 3px 0;
+  border: 1px solid #cbd5e1;
+  background: #e2e8f0;
+  box-sizing: border-box;
+  width: 100%;
+}
+.cx-compound-label {
+  font-size: 11px;
+  line-height: 1.25;
+  color: #64748b;
+  text-align: right;
+  margin: 0;
+  font-weight: 500;
+}
+.connectea-dark .cx-compound-bar {
+  border-color: #475569 !important;
+  background: #1e293b !important;
+}
+.connectea-dark .cx-compound-label {
+  color: #94a3b8 !important;
+}

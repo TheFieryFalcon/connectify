@@ -18,18 +18,12 @@ This document covers notifications, grade change tracking, DOM integrity monitor
   - `dismiss(id)` and `clearAll()`: Smoothly animates out and cleans up DOM elements.
 - **Export**: `window.ConnectifyNotifications`.
 
-#### [`new-grade.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/new-grade.js)
-- **Role**: Grade change detection engine tracking running subject averages against persistent local cache.
+#### [`new-grade.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/new-grade.js) & `grade-snapshot.js`
+- **Role**: Grade change detection against `connectify:grade_cache:<student>`, once per page.
 - **Key Functions**:
-  - `checkGrades()`: Scrapes running subject marks on DOM load, groups cards by subject name with Semester 2 precedence whenever Semester 2 scores exist, and compares them against `localStorage` (`connectify:grade_cache:<student>`).
-  - Empty cache handling: Quietly seeds the cache for first-time users without triggering a barrage of notifications.
-  - `hasSubjectChanged(prev, entry)`: the student's running mark moved $\ge 0.05\%$, or any boxplot quantile moved by more than `STATS_CHANGE_THRESHOLD` (1 point) — small shifts from other classes uploading results are ignored.
-  - Upon a detected change:
-    1. Ignores auto-expand / collapse preferences to ensure **THAT SUBJECT ONLY** is definitely expanded, scraping and updating its task results into the results cache.
-    2. If auto-expand is off, collapses that subject card again after scraping.
-    3. Emits a stacked toast notification with title "Class Updated" and message "[Subject name] scores have been updated."
-    4. Provides an interactive "Jump to Subject" action button that expands the card (if collapsed), smoothly scrolls to the course card (prioritizing Semester 2), and triggers an outline glow pulse (`.cx-card-jump-highlight`).
-  - Updates the running averages cache 1 second after page load/evaluation.
+  - `grade-snapshot.js` (`ConnectifyGradeSnapshot`): `currentEntries()` reads each subject's running mark and summary boxplot (cohort row readers), Semester 2 card first once it has results; `hasSubjectChanged(prev, entry)`: own mark moved $\ge 0.05\%$ or a quantile moved by more than `STATS_CHANGE_THRESHOLD` (1 point), so other classes uploading results stay quiet; boxplots appearing for the first time count.
+  - `checkGrades()`: an empty cache is seeded quietly; each changed subject is marked stale (re-scraped on its next expansion) and announced with a stacked "Class Updated" toast ("[Subject name] scores have been updated."). The cache is rewritten 1 second later.
+  - `jumpToSubject(card)`: on the student's click, expands the card if collapsed, re-scrapes it, refreshes its predictions, scrolls to it and pulses `.cx-card-jump-highlight`.
 - **Export**: `window.ConnectifyNewGrade`.
 
 #### [`dom-sweeper.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/dom-sweeper.js)
@@ -69,6 +63,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 ### Style Sheets & Extension Configuration
 
 #### Style Sheets
+- **`src/progress/progress.css`, `compound-progress.css`**: progress graph modal; compound subject bars.
 - **`src/atar/atar.css`, `atar-compact.css`, `atar-planner.css`** (in that order): calculator modal (`#connectea-atar`) base and dark mode; subject select, grade table and compact layout; planner controls, top-four selector and Back to top button.
 - **[`progress.css`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/progress.css)**: Progress graph modal layout and SVG stroke/fill rules.
 - **`src/sidebar/styles/`**: drawer, handle/menu, tool menu, weakness/types, outcome meter/filter, notifications, predictor and settings/progress-pill stylesheets (readable, one concern per file).
