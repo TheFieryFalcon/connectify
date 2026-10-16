@@ -21,13 +21,17 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyTaskTypes` | `task-types.js` | Category keyword detection, overrides, class category sharing |
 | `window.ConnectifyScalingData` | `scaling-data.js` | 2025 TISC scaling curves |
 | `window.ConnectifyMath` | `atar-math.js` | TEA-to-ATAR conversion, 10% bonus rules, scaled score model |
+| `window.ConnectifyTargetDifficulty` | `target-difficulty.js` | Difficulty-weighted task baselines, effort model and bisection |
 | `window.ConnectifyTargetSolver` | `target-solver.js` | Target Grade and difficulty-weighted Target ATAR solver |
 | `window.ConnectifyAtarScraper` | `atar-scraper.js` | Scrapes course titles and semester groupings |
 | `window.ConnectifyAtarCalc` | `atar-calculator.js` | Course state modeling and ATAR calculation results |
 | `window.ConnectifyTargetAtarUI` | `target-atar-ui.js` | Target ATAR planner modal form and breakdown view |
 | `window.ConnectifyTargetGradeUI` | `target-grade-ui.js` | Target Grade planner modal form and breakdown view |
+| `window.ConnectifyTargetUiHelpers` | `target-ui-helpers.js` | Planner element, rounding and preference helpers |
 | `window.ConnectifyTargetPlannerUI` | `target-planner-ui.js` | Planner facade delegating to Atar and Grade UI modules |
+| `window.ConnectifyAtarMarkup` | `atar-ui-markup.js` | Calculator panel markup and semester rules |
 | `window.ConnectifyAtar` | `atar-ui.js` | Calculator modal shell and tab coordinator |
+| `window.ConnectifyOutlineControls` | `outline-controls.js` | Floating Expand/Collapse All and Back to top button |
 | `window.ConnectifyProgressMath` | `progress-math.js` | Historical ATAR trajectory and monthly aggregation |
 | `window.ConnectifyProgressChart` | `progress-chart.js` | SVG polyline line chart and plotted data table renderer |
 | `window.ConnectifyProgress` | `progress-graph.js` | Progress graph modal controller |

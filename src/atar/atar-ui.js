@@ -1,10 +1,9 @@
 /**
  * Connectify ATAR UI & Calculator Interface
  *
- * Coordinates the ATAR estimate view, Target ATAR planner, and Target Grade planner modals.
- * Delegates data scraping to ConnectifyAtarScraper, calculations to ConnectifyAtarCalc,
- * and planner forms to ConnectifyTargetPlannerUI.
- * Provides `window.ConnectifyAtar`.
+ * Coordinates the ATAR estimate view, Target ATAR planner and Target Grade planner in one panel.
+ * Markup: atar-ui-markup.js; scraping: ConnectifyAtarScraper; calculations: ConnectifyAtarCalc;
+ * planner forms: ConnectifyTargetPlannerUI. Provides `window.ConnectifyAtar`.
  */
 (() => {
   'use strict';
@@ -38,71 +37,35 @@
     let isPlanningMode = false;
     let isGradingMode = false;
 
-    const createEl = (tag, className, text) => {
-      const el = document.createElement(tag);
-      if (className) el.className = className;
-      if (text) el.textContent = text;
-      return el;
-    };
-
-    const calculatorPanel = createEl('aside', '', '');
-    calculatorPanel.id = 'connectea-atar';
-    calculatorPanel.hidden = true;
-    calculatorPanel.setAttribute('aria-label', '2025 ATAR estimates');
-
-    const headingContainer = createEl('div', 'cta-heading');
-    const panelTitle = createEl('strong', '', 'Estimated ATAR');
-    panelTitle.tabIndex = -1;
-    headingContainer.append(panelTitle);
-
-    const estimateTab = createEl('button', 'cta-semester', 'ATAR Estimate');
-    const targetTab = createEl('button', 'cta-semester', 'Target ATAR');
-    const gradeTab = createEl('button', 'cta-semester', 'Target Grade');
-    estimateTab.type = targetTab.type = gradeTab.type = 'button';
-    estimateTab.id = 'connectify-estimate-toggle';
-    targetTab.id = 'connectify-target-toggle';
-    gradeTab.id = 'connectify-grade-toggle';
-
-    for (const button of [estimateTab, targetTab, gradeTab]) {
-      button.className = 'cx-calculator-tool';
-      button.setAttribute('aria-controls', 'connectea-atar');
-    }
+    const markupMod = window.ConnectifyAtarMarkup;
+    const {
+      calculatorPanel, panelTitle, estimateTab, targetTab, gradeTab,
+      semesterCardsContainer, courseListContainer, detailSummary, resetBtn, expandAllBtn, calculationDetails
+    } = markupMod.build();
+    const toolTabs = [estimateTab, targetTab, gradeTab];
 
     window.ConnectifyAtar.calculatorButtons = [estimateTab, targetTab, gradeTab];
-    window.ConnectifyAtar.toolButtons = [estimateTab, targetTab, gradeTab];
+    window.ConnectifyAtar.toolButtons = toolTabs;
     window.ConnectifyAtar.calculatorPanel = calculatorPanel;
     if (window.ConnectifyInitSidebar) window.ConnectifyInitSidebar();
 
-    const hasSemesterTwoStarted = () =>
-      (gradeCourses?.[0] || []).some(r => r?.finalLetter) ||
-      (gradeCourses?.[1] || []).some(r => r?.mark !== undefined && r?.mark > 0);
-    const isTargetClosed = semesterIdx => {
-      if ((gradeCourses?.[semesterIdx] || []).some(r => r?.finalLetter)) return true;
-      if (semesterIdx === 1 && (gradeCourses?.[1] || []).length === 0) return true;
-      return false;
-    };
+    // The tabs are the sidebar launchers, so their pressed state is the sidebar's too
+    function setPressed(mode) {
+      estimateTab.setAttribute('aria-pressed', String(mode === 'estimate'));
+      targetTab.setAttribute('aria-pressed', String(mode === 'target'));
+      gradeTab.setAttribute('aria-pressed', String(mode === 'grade'));
+    }
+    const currentMode = () => (isPlanningMode ? 'target' : isGradingMode ? 'grade' : 'estimate');
 
-    const semesterCardsContainer = createEl('div', 'cta-semesters');
-    const semesterButtons = [0, 1].map(semesterIdx => {
-      const btn = createEl('button', 'cta-semester', `Semester ${semesterIdx + 1}`);
-      btn.type = 'button';
-      btn.addEventListener('click', () => {
-        if ((isPlanningMode || isGradingMode) && isTargetClosed(semesterIdx)) {
-          return;
-        }
-        activeSemester = semesterIdx;
-        renderCourseRows();
-      });
-      semesterCardsContainer.append(btn);
-      return btn;
+    const hasSemesterTwoStarted = () => markupMod.hasSemesterTwoStarted(gradeCourses);
+    const isTargetClosed = semesterIdx => markupMod.isTargetClosed(gradeCourses, semesterIdx);
+
+    const semesterButtons = markupMod.semesterButtons(semesterCardsContainer, semesterIdx => {
+      if ((isPlanningMode || isGradingMode) && isTargetClosed(semesterIdx)) return;
+      activeSemester = semesterIdx;
+      renderCourseRows();
     });
 
-    const courseListContainer = createEl('div', 'cta-courses');
-    const detailSummary = createEl('p', 'cta-breakdown');
-    detailSummary.setAttribute('aria-live', 'polite');
-
-    const resetBtn = createEl('button', 'cta-reset', 'Reset to School Marks');
-    resetBtn.type = 'button';
     resetBtn.addEventListener('click', () => {
       if (calc?.resetPreferencesForSemester) {
         calc.resetPreferencesForSemester(courses[activeSemester], activeSemester);
@@ -110,32 +73,12 @@
       renderCourseRows();
     });
 
-    const expandAllBtn = createEl('button', 'cta-reset cta-expand-outlines', 'Expand All Outlines');
-    expandAllBtn.type = 'button';
-    expandAllBtn.style.marginLeft = '8px';
     expandAllBtn.addEventListener('click', () => {
       if (window.ConnectifyData?.expandAll) {
         window.ConnectifyData.expandAll(true);
       }
       plannerContext.scanAndRefresh();
     });
-
-    const calculationDetails = createEl('details', 'cta-method');
-    calculationDetails.append(createEl('summary', '', 'Calculation Methodology & Sources'));
-    calculationDetails.append(
-      createEl(
-        'p',
-        '',
-        'Scores round to whole numbers before the best four and bonuses are calculated; exact .5 values round down (69.9 → 70; 69.5 → 69). Best four included scaled-score assumptions, plus 10% of Methods, 10% of Specialist and 10% of the best language score. General and other non-ATAR courses are excluded. Estimates interpolate the published 2025 TISC table. Below the table range, <30 is shown.'
-      )
-    );
-    calculationDetails.append(
-      createEl(
-        'p',
-        '',
-        'Semester 2 uses the cumulative percentage shown by Connect. This does not check WACE eligibility, English competency or unacceptable course combinations. Exclude an incompatible course before calculating. No marks are sent to another website.'
-      )
-    );
 
     // Planner UI Context
     const plannerContext = {
@@ -144,16 +87,8 @@
       getCourses: () => courses,
       getGradeCourses: () => gradeCourses,
       isTargetClosed,
-      renderTargetOutput: () => {
-        if (plannerUI() && plannerRefs) {
-          plannerUI().renderTargetOutput(plannerRefs, plannerContext);
-        }
-      },
-      renderGradeOutput: () => {
-        if (plannerUI() && gradeRefs) {
-          plannerUI().renderGradeOutput(gradeRefs, plannerContext);
-        }
-      },
+      renderTargetOutput: () => plannerRefs && plannerUI()?.renderTargetOutput(plannerRefs, plannerContext),
+      renderGradeOutput: () => gradeRefs && plannerUI()?.renderGradeOutput(gradeRefs, plannerContext),
       scanAndRefresh: () => {
         setTimeout(() => {
           if (window.ConnectifyData?.collect) {
@@ -175,16 +110,6 @@
       gradeRefs = plannerUI().createGradeView(plannerContext);
     }
 
-    calculatorPanel.append(
-      headingContainer,
-      semesterCardsContainer,
-      courseListContainer,
-      detailSummary,
-      resetBtn,
-      expandAllBtn,
-      calculationDetails
-    );
-
     if (plannerRefs) calculatorPanel.append(plannerRefs.container);
     if (gradeRefs) calculatorPanel.append(gradeRefs.container);
 
@@ -194,11 +119,7 @@
       isPlanningMode = mode === 'target';
       isGradingMode = mode === 'grade';
 
-      panelTitle.textContent = isPlanningMode
-        ? 'Target ATAR Planner'
-        : isGradingMode
-        ? 'Target Grade Planner'
-        : 'Estimated ATAR';
+      panelTitle.textContent = isPlanningMode ? 'Target ATAR Planner' : isGradingMode ? 'Target Grade Planner' : 'Estimated ATAR';
 
       calculatorPanel.setAttribute('aria-label', panelTitle.textContent);
 
@@ -206,16 +127,7 @@
         activeSemester = 1;
       }
 
-      estimateTab.setAttribute('aria-pressed', String(!isPlanningMode && !isGradingMode));
-      targetTab.setAttribute('aria-pressed', String(isPlanningMode));
-      gradeTab.setAttribute('aria-pressed', String(isGradingMode));
-
-      const sidebarTarget = document.getElementById('connectify-target-toggle');
-      const sidebarGrade = document.getElementById('connectify-grade-toggle');
-      const sidebarEstimate = document.getElementById('connectify-estimate-toggle');
-      if (sidebarTarget && sidebarTarget !== targetTab) sidebarTarget.setAttribute('aria-pressed', String(isPlanningMode));
-      if (sidebarGrade && sidebarGrade !== gradeTab) sidebarGrade.setAttribute('aria-pressed', String(isGradingMode));
-      if (sidebarEstimate && sidebarEstimate !== estimateTab) sidebarEstimate.setAttribute('aria-pressed', String(!isPlanningMode && !isGradingMode));
+      setPressed(currentMode());
 
       courseListContainer.hidden = detailSummary.hidden = resetBtn.hidden = expandAllBtn.hidden = calculationDetails.hidden =
         isPlanningMode || isGradingMode;
@@ -241,9 +153,7 @@
     targetTab.addEventListener('click', () => openCalculator('target'));
     gradeTab.addEventListener('click', () => openCalculator('grade'));
     selectTab('estimate');
-    estimateTab.setAttribute('aria-pressed', 'false');
-    targetTab.setAttribute('aria-pressed', 'false');
-    gradeTab.setAttribute('aria-pressed', 'false');
+    setPressed(null);
 
     function updateResults() {
       if (isGradingMode && (hasSemesterTwoStarted() || isTargetClosed(0))) {
@@ -265,32 +175,8 @@
         const res = results[i] || {};
         const isClosed = (isPlanningMode || isGradingMode) && isTargetClosed(i);
 
-        let semesterLabel = '';
-        if (isGradingMode) {
-          semesterLabel = isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;
-        } else if (isPlanningMode) {
-          semesterLabel = isClosed ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`;
-        } else {
-          semesterLabel = `Semester ${i + 1} ATAR\n${res.error ? '—' : (res.finalAtar || res.atar || '—')}`;
-        }
-        semesterButtons[i].textContent = semesterLabel;
-
-        semesterButtons[i].hidden = false;
-        semesterButtons[i].disabled = Boolean(semesterButtons[i].hidden || isClosed);
-
-        if (isClosed) {
-          semesterButtons[i].className = 'cta-semester cta-semester-closed';
-        } else if (i === activeSemester) {
-          semesterButtons[i].className = 'cta-semester cta-semester-indicator';
-        } else {
-          semesterButtons[i].className = 'cta-semester';
-        }
-
-        semesterButtons[i].setAttribute('aria-pressed', String(i === activeSemester));
-
-        if (i === activeSemester) {
-          detailSummary.textContent = res.detailText || res.error || 'Calculating ATAR...';
-        }
+        markupMod.paintSemesterButton(semesterButtons[i], i, res, currentMode(), isClosed, i === activeSemester);
+        if (i === activeSemester) detailSummary.textContent = res.detailText || res.error || 'Calculating ATAR...';
       }
 
       if (isPlanningMode && plannerRefs) plannerContext.renderTargetOutput();
@@ -330,25 +216,13 @@
     window.addEventListener('connectify-open', e => {
       if (e.detail !== 'calculator') {
         calculatorPanel.hidden = true;
-        for (const b of [estimateTab, targetTab, gradeTab]) b.setAttribute('aria-pressed', 'false');
-        const sidebarTarget = document.getElementById('connectify-target-toggle');
-        const sidebarGrade = document.getElementById('connectify-grade-toggle');
-        const sidebarEstimate = document.getElementById('connectify-estimate-toggle');
-        if (sidebarTarget) sidebarTarget.setAttribute('aria-pressed', 'false');
-        if (sidebarGrade) sidebarGrade.setAttribute('aria-pressed', 'false');
-        if (sidebarEstimate) sidebarEstimate.setAttribute('aria-pressed', 'false');
+        setPressed(null);
       }
     });
 
     function closeCalculator() {
       calculatorPanel.hidden = true;
-      for (const b of [estimateTab, targetTab, gradeTab]) b.setAttribute('aria-pressed', 'false');
-      const sidebarTarget = document.getElementById('connectify-target-toggle');
-      const sidebarGrade = document.getElementById('connectify-grade-toggle');
-      const sidebarEstimate = document.getElementById('connectify-estimate-toggle');
-      if (sidebarTarget) sidebarTarget.setAttribute('aria-pressed', 'false');
-      if (sidebarGrade) sidebarGrade.setAttribute('aria-pressed', 'false');
-      if (sidebarEstimate) sidebarEstimate.setAttribute('aria-pressed', 'false');
+      setPressed(null);
       (isGradingMode ? gradeTab : isPlanningMode ? targetTab : estimateTab).focus();
     }
 

@@ -101,6 +101,16 @@
     return '';
   }
 
+  /** TEA bonus: 10% of each of the best two of Mathematics Methods, Mathematics Specialist and the best language. */
+  function teaBonus(rows) {
+    const best = type => Math.max(0, ...rows.filter(r => bonusType(r.name) === type).map(r => wholeScore(r.score) || 0));
+    const bonuses = [best('mathematics methods'), best('mathematics specialist'), best('language')]
+      .filter(score => score > 0)
+      .map(score => score * 0.1)
+      .sort((a, b) => b - a);
+    return (bonuses[0] || 0) + (bonuses[1] || 0);
+  }
+
   function calculate(rows, options = {}) {
     const eligible = rows.filter(r => !/\bGeneral\b|\bmathematics essentials?\b/i.test(r.name));
     const used = eligible.filter(r => r.include && scoreValue(r.score) !== undefined).map(r => ({ ...r, score: wholeScore(r.score) }));
@@ -113,17 +123,7 @@
     if (options?.fixedBonus !== undefined && Number.isFinite(Number(options.fixedBonus))) {
       bonusTEA = Number(options.fixedBonus);
     } else if (!options?.ignoreBonus) {
-      const bestLanguage = Math.max(0, ...used.filter(r => bonusType(r.name) === 'language').map(r => r.score));
-      const methods = Math.max(0, ...used.filter(r => bonusType(r.name) === 'mathematics methods').map(r => r.score));
-      const specialist = Math.max(0, ...used.filter(r => bonusType(r.name) === 'mathematics specialist').map(r => r.score));
-
-      // Maximum 2 bonus subjects (Methods, Specialist, or Languages)
-      const bonuses = [];
-      if (methods > 0) bonuses.push(methods * 0.1);
-      if (specialist > 0) bonuses.push(specialist * 0.1);
-      if (bestLanguage > 0) bonuses.push(bestLanguage * 0.1);
-      bonuses.sort((a, b) => b - a);
-      bonusTEA = (bonuses[0] || 0) + (bonuses[1] || 0);
+      bonusTEA = teaBonus(used);
     }
 
     const baseTEA = topFour.reduce((sum, r) => sum + r.score, 0);
@@ -240,6 +240,7 @@
       ];
       return knownAtar.some(sub => clean.includes(sub));
     },
-    bonusType
+    bonusType,
+    teaBonus
   });
 })();

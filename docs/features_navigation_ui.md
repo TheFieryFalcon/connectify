@@ -50,7 +50,7 @@ This document details user-facing visual features 1 through 10, covering direct 
   - **Navigation & Layout**: Expands drawer from 310px to 900px (`.cx-tool-active`) with prominent `← Back to Menu` navigation button at the top right of the header. Outside-click and Escape key handlers collapse the drawer safely.
 
 ### 5. Outline Accordion Expand / Collapse Controls
-- **Source Modules**: [`atar-features.js`](file:///Users/uwong/Downloads/2.1.14_0/atar-features.js), [`assessment-data.js`](file:///Users/uwong/Downloads/2.1.14_0/assessment-data.js)
+- **Source Modules**: `src/atar/outline-controls.js`, `src/atar/atar-features.js`, `src/assessment/assessment-expand.js`
 - **DOM Insertion**: Floating pill button container (`#cx-expand-btn`) anchored to bottom-right; animated loading pill (`#cx-expand-progress`) on first expand.
 - **UI Appearance**: Compact buttons: `Expand All` and `Collapse All`. Progress pill shows animated spinner, percentage, and blue fill bar.
 - **Functionality**: Clicks accordion headings staggered across animation frames; mounts `#cx-expand-progress` on bulk expand, freezes scroll (`.cx-freeze-scroll`), skips calculations when cache is valid, and persists pill through DOM refresh; silences background MutationObservers during animation (`window.ConnectifyIsAccordionAnimating`) and flushes deferred passes on settle; deduplicates headings per section/tile rather than outer dashboard wrappers to guarantee all cards collapse/expand; respects `connectify:auto_expand` setting on load.

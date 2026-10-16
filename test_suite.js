@@ -136,6 +136,12 @@ const SPLIT_PARTS = {
   'assessment-cache.js': ['cache-versions.js', 'assessment-cache.js'],
   'task-types.js': ['category-store.js', 'task-types.js', 'task-type-select.js'],
   'cohort-estimator.js': ['cohort-size-baselines.js', 'cohort-estimator.js'],
+  'target-solver.js': ['target-difficulty.js', 'target-solver.js'],
+  'target-atar-ui.js': ['target-ui-helpers.js', 'target-atar-breakdown.js', 'target-atar-ui.js'],
+  'target-grade-ui.js': ['target-ui-helpers.js', 'target-grade-ui.js'],
+  'atar-ui.js': ['target-ui-helpers.js', 'atar-ui-markup.js', 'atar-ui.js'],
+  'atar-features.js': ['outline-controls.js', 'atar-features.js'],
+  'atar.css': ['atar.css', 'atar-compact.css', 'atar-planner.css'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js'],
   'theme-customizer.js': ['theme-color-utils.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
   // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
@@ -2189,7 +2195,12 @@ runTest('target-solver.js and target-grade-ui.js support dynamic prior performan
 
 runTest('atar-ui.js eliminates ATAR text from grade panel buttons and applies canonical tab styling', () => {
   const uiCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
-  assert.ok(uiCode.includes("semesterLabel = isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;") || uiCode.includes("semesterLabel = `Semester ${i + 1}`;"), 'atar-ui.js updateResults must set plain Semester label without ATAR in grading mode and append (Closed) when closed');
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-ui-helpers.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui-markup.js'), 'utf8'));
+  const { semesterLabel } = window.ConnectifyAtarMarkup;
+  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'grade', false), 'Semester 1', 'Grade mode must show a plain Semester label without ATAR');
+  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'grade', true), 'Semester 1 (Closed)', 'Grade mode must append (Closed) when closed');
+  assert.strictEqual(semesterLabel(1, { atar: '95.00' }, 'estimate', false), 'Semester 2 ATAR\n95.00', 'Estimate mode must show the semester ATAR');
   assert.ok(!uiCode.includes("Semester ${i + 1} Target Grade"), 'atar-ui.js must not append extra redundant text to semester buttons');
   assert.ok(uiCode.includes('cta-semester-closed'), 'atar-ui.js must style closed semester tabs with cta-semester-closed');
   assert.ok(uiCode.includes('cta-semester-indicator'), 'atar-ui.js must style active semester tabs with cta-semester-indicator');

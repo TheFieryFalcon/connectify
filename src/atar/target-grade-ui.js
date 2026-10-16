@@ -10,14 +10,7 @@
 
   if (window.ConnectifyTargetGradeUI) return;
 
-  const createEl = (tag, className, text) => {
-    const el = document.createElement(tag);
-    if (className) el.className = className;
-    if (text) el.textContent = text;
-    return el;
-  };
-
-  const round = v => (Number.isFinite(v) ? Math.round(v * 10) / 10 : '—');
+  const { createEl, round, prefs, savePref, expandOutlinesButton } = window.ConnectifyTargetUiHelpers;
 
   function createGradeView(ctx) {
     const calc = ctx.calc;
@@ -32,8 +25,8 @@
     gradeTargetInput.min = '0';
     gradeTargetInput.max = '100';
     gradeTargetInput.step = 'any';
-    const prefs = calc?.getPreferences ? calc.getPreferences() : {};
-    gradeTargetInput.value = prefs.gradeTarget ?? '80';
+    const saved = prefs(calc);
+    gradeTargetInput.value = saved.gradeTarget ?? '80';
     gradeTargetLabel.append(gradeTargetInput);
 
     const calculateGradeBtn = createEl('button', 'cta-reset', 'Recalculate');
@@ -43,16 +36,14 @@
     const difficultyLabel = createEl('label', 'cta-difficulty-label');
     const difficultyCheckbox = createEl('input');
     difficultyCheckbox.type = 'checkbox';
-    difficultyCheckbox.checked = Boolean(prefs.gradeDifficultyWeighted);
+    difficultyCheckbox.checked = Boolean(saved.gradeDifficultyWeighted);
     difficultyLabel.append(
       difficultyCheckbox,
       document.createTextNode(' Dynamically adjust required grade based on prior performance')
     );
 
     difficultyCheckbox.addEventListener('change', () => {
-      const p = calc?.getPreferences ? calc.getPreferences() : {};
-      p.gradeDifficultyWeighted = difficultyCheckbox.checked;
-      if (calc?.persistPreferences) calc.persistPreferences();
+      savePref(calc, 'gradeDifficultyWeighted', difficultyCheckbox.checked);
       ctx.renderGradeOutput();
     });
 
@@ -71,9 +62,7 @@
     });
 
     gradeTargetInput.addEventListener('input', () => {
-      const p = calc?.getPreferences ? calc.getPreferences() : {};
-      p.gradeTarget = gradeTargetInput.value;
-      if (calc?.persistPreferences) calc.persistPreferences();
+      savePref(calc, 'gradeTarget', gradeTargetInput.value);
       ctx.renderGradeOutput();
     });
 
@@ -115,15 +104,7 @@
     gradeOutputContainer.replaceChildren();
 
     if (!selected) {
-      const expandBtn = createEl('button', 'cta-reset', 'Expand Subject Outlines');
-      expandBtn.type = 'button';
-      expandBtn.style.marginTop = '8px';
-      expandBtn.addEventListener('click', () => {
-        if (window.ConnectifyData?.expandAll) {
-          window.ConnectifyData.expandAll(true);
-        }
-        ctx.scanAndRefresh();
-      });
+      const expandBtn = expandOutlinesButton(ctx);
       gradeOutputContainer.append(
         createEl('p', '', 'No subjects found for this semester. Show all classes in Connect.'),
         expandBtn
@@ -138,19 +119,12 @@
     const isDifficulty = Boolean(difficultyCheckbox?.checked);
     const scoreValue = window.ConnectifyMath?.scoreValue || (v => (Number.isFinite(Number(v)) ? Number(v) : undefined));
     const plan = gradePlanFn(progress, scoreValue(gradeTargetInput.value), {
-      difficultyWeighted: isDifficulty
+      difficultyWeighted: isDifficulty,
+      subjectName: selected.name
     });
 
     if (plan.error) {
-      const expandBtn = createEl('button', 'cta-reset', 'Expand Subject Outlines');
-      expandBtn.type = 'button';
-      expandBtn.style.marginTop = '8px';
-      expandBtn.addEventListener('click', () => {
-        if (window.ConnectifyData?.expandAll) {
-          window.ConnectifyData.expandAll(true);
-        }
-        ctx.scanAndRefresh();
-      });
+      const expandBtn = expandOutlinesButton(ctx);
 
       gradeOutputContainer.append(
         createEl('p', '', plan.error),

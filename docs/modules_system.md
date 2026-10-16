@@ -69,7 +69,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 ### Style Sheets & Extension Configuration
 
 #### Style Sheets
-- **[`atar.css`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar.css)**: Styling for calculator modal (`#connectea-atar`), target planning forms, course tables, and dark theme variants.
+- **`src/atar/atar.css`, `atar-compact.css`, `atar-planner.css`** (in that order): calculator modal (`#connectea-atar`) base and dark mode; subject select, grade table and compact layout; planner controls, top-four selector and Back to top button.
 - **[`progress.css`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/progress.css)**: Progress graph modal layout and SVG stroke/fill rules.
 - **`src/sidebar/styles/`**: drawer, handle/menu, tool menu, weakness/types, outcome meter/filter, notifications, predictor and settings/progress-pill stylesheets (readable, one concern per file).
 - **`src/theme/styles/`**: the theme cascade, one concern per file (<= 250 lines), loaded in manifest order: tokens and palettes (`theme-tokens.css`, `theme-surface-base.css`, `theme-component-base.css`), core and navigation, tiles, cards and task rows, controls and buttons, material, feed, tables and dialogs, navigation and discussions, surfaces and display scaling, customizer, and finally `theme.css` (Liquid Glass-only geometry, opaque solid-theme panels, glass-only outline pass-through). Every selector is scoped to a theme hook (Test 153).

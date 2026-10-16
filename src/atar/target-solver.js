@@ -1,9 +1,9 @@
 /**
  * Connectify Target Solver & Grade Planner Math
  *
- * Implements assessment parsing, syllabus weight validation, target grade calculation,
- * and multi-subject difficulty-weighted optimization solver for Target ATAR.
- * Provides `window.ConnectifyTargetSolver`.
+ * Assessment parsing, syllabus weight validation, the score needed on remaining tasks for a target grade,
+ * and the Target ATAR solver across the top four subjects. Both solvers can weight each task by the
+ * student's record on its assessment type (target-difficulty.js). Provides `window.ConnectifyTargetSolver`.
  */
 (() => {
   'use strict';
@@ -11,6 +11,8 @@
   if (window.ConnectifyTargetSolver) return;
 
   const math = () => window.ConnectifyMath || {};
+  const D = window.ConnectifyTargetDifficulty;
+  const scoreVal = v => (math().scoreValue || (x => (Number.isFinite(Number(x)) ? Number(x) : undefined)))(v);
 
   function parseAssessment(rawScore, weightedMark, name) {
     const { normalize } = window.ConnectifyUtils;
@@ -35,7 +37,6 @@
     const remainingWeight = tasks.filter(t => t.pending).reduce((sum, t) => sum + t.weight, 0);
     const earnedWeight = tasks.reduce((sum, t) => sum + t.earned, 0);
     const completedWeight = totalWeight - remainingWeight;
-    const scoreVal = math().scoreValue || (v => (Number.isFinite(Number(v)) ? Number(v) : undefined));
 
     if (completedWeight > 0 && scoreVal(mark) !== undefined && Math.abs((earnedWeight / completedWeight) * 100 - mark) > 1.5) {
       return { error: 'Task weights do not reconcile with the displayed overall mark.' };
@@ -53,330 +54,142 @@
 
   function gradePlan(progress, target, options = {}) {
     if (progress.error) return { error: progress.error };
-    const scoreVal = math().scoreValue || (v => (Number.isFinite(Number(v)) ? Number(v) : undefined));
     if (scoreVal(target) === undefined) return { error: 'Enter an overall target percentage from 0 to 100.' };
     const maximum = progress.earned + progress.remaining;
     if (target > maximum + 1e-9) return { impossible: true, maximum };
     if (progress.remaining <= 1e-9) return { finished: true, maximum, final: progress.earned };
 
     const difficultyWeighted = Boolean(options.difficultyWeighted);
-
     if (!difficultyWeighted) {
       const exactRequired = Math.max(0, ((target - progress.earned) / progress.remaining) * 100);
       return { required: Math.min(100, Math.ceil((exactRequired - 1e-9) * 10) / 10), maximum };
     }
 
-    const getTaskType = (task) => {
-      if (window.ConnectifyTaskTypes?.getEffectiveType) {
-        return window.ConnectifyTaskTypes.getEffectiveType('', task);
-      }
-      const lower = (task?.name || '').toLowerCase();
-      if (lower.includes('exam') || lower.includes('semester')) return 'Exam';
-      if (lower.includes('test') || lower.includes('quiz') || lower.includes('in-class') || lower.includes('in class')) return 'Test';
-      if (lower.includes('essay') || lower.includes('short answer') || lower.includes('written response') || lower.includes('close reading')) return 'Essay';
-      if (lower.includes('application') || lower.includes('investigation') || lower.includes('portfolio') || lower.includes('validation') || lower.includes('practical') || lower.includes('speaking') || lower.includes('listening')) return 'Application';
-      return 'Take-Home';
-    };
-
-    const completed = (progress.allTasks || []).filter(t => !t.pending && Number.isFinite(t.score));
-    const courseAvg = completed.length && completed.reduce((s, t) => s + t.weight, 0) > 0
-      ? (completed.reduce((s, t) => s + (t.score / 100) * t.weight, 0) / completed.reduce((s, t) => s + t.weight, 0)) * 100
-      : 75;
-
-    const catTotals = {};
-    completed.forEach(t => {
-      const cat = getTaskType(t);
-      if (!catTotals[cat]) catTotals[cat] = { earned: 0, weight: 0 };
-      catTotals[cat].earned += (t.score / 100) * t.weight;
-      catTotals[cat].weight += t.weight;
+    // Type overrides are stored per subject, so the subject is needed to honour them
+    const subjectName = options.subjectName || '';
+    const courseAvg = D.weightedAverage(D.completedTasks(progress.allTasks)) ?? 75;
+    const totals = D.typeTotals(subjectName, progress.allTasks);
+    const taskMetaList = (progress.tasks || []).map(task => {
+      const category = D.taskType(subjectName, task);
+      return { task, category, weight: task.weight, baseline: D.clampBaseline(D.typeAverage(totals, category) ?? courseAvg) };
     });
+    const calcTaskScore = (meta, t) => D.scoreAt(meta.baseline, t);
+    const totalWeight = progress.total || 100;
+    const projectScoreAtT = t =>
+      ((progress.rawEarned || 0) + taskMetaList.reduce((sum, m) => sum + (calcTaskScore(m, t) / 100) * m.weight, 0)) / totalWeight * 100;
 
-    const pendingTasks = progress.tasks || [];
-    const taskMetaList = pendingTasks.map(task => {
-      const cat = getTaskType(task);
-      let baseline = courseAvg;
-      if (catTotals[cat] && catTotals[cat].weight > 0) {
-        baseline = (catTotals[cat].earned / catTotals[cat].weight) * 100;
-      }
-      baseline = Math.max(30, Math.min(99.5, baseline));
-      return { task, baseline, category: cat, weight: task.weight };
-    });
+    if (projectScoreAtT(1.0) < target - 1e-9) return { impossible: true, maximum, difficultyWeighted: true };
+    const finalT = D.bisect(t => projectScoreAtT(t) >= target, -1.0, 1.0);
 
-    const calcTaskScore = (meta, t) => {
-      const b = meta.baseline;
-      if (t >= 0) {
-        return Math.max(0, Math.min(100, b + t * (100 - b)));
-      } else {
-        return Math.max(0, Math.min(100, b * (1 + t)));
-      }
-    };
-
-    const projectScoreAtT = (t) => {
-      let earnedRemaining = 0;
-      taskMetaList.forEach(m => {
-        earnedRemaining += (calcTaskScore(m, t) / 100) * m.weight;
-      });
-      const totalWeight = progress.total || 100;
-      return ((progress.rawEarned || 0) + earnedRemaining) / totalWeight * 100;
-    };
-
-    if (projectScoreAtT(1.0) < target - 1e-9) {
-      return { impossible: true, maximum, difficultyWeighted: true };
-    }
-
-    let low = -1.0, high = 1.0;
-    if (projectScoreAtT(-1.0) >= target) {
-      high = -1.0;
-    } else {
-      for (let i = 0; i < 50; i++) {
-        const mid = (low + high) / 2;
-        if (projectScoreAtT(mid) >= target) {
-          high = mid;
-        } else {
-          low = mid;
-        }
-      }
-    }
-
-    const finalT = high;
     const taskRequirements = {};
     let totalReqSum = 0;
-    taskMetaList.forEach(m => {
-      let score = Math.round(calcTaskScore(m, finalT) * 10) / 10;
-      score = Math.min(100, Math.max(0, score));
-      taskRequirements[m.task.name] = {
-        required: score,
-        baseline: Math.round(m.baseline * 10) / 10,
-        category: m.category
-      };
+    for (const m of taskMetaList) {
+      const score = Math.min(100, Math.max(0, D.round1(calcTaskScore(m, finalT))));
+      taskRequirements[m.task.name] = { required: score, baseline: D.round1(m.baseline), category: m.category };
       totalReqSum += score;
-    });
+    }
+    const avgRequired = taskMetaList.length > 0 ? D.round1(totalReqSum / taskMetaList.length) : D.round1(finalT);
+    return { required: avgRequired, parameter: finalT, difficultyWeighted: true, maximum, taskRequirements };
+  }
 
-    const avgRequired = taskMetaList.length > 0
-      ? Math.round((totalReqSum / taskMetaList.length) * 10) / 10
-      : Math.round(finalT * 10) / 10;
+  // The TEA bonus is held at its current value while solving, so the solver moves raw marks only
+  function heldBonus(eligibleRows, options) {
+    for (const value of [options.currentBonus, options.fixedBonus]) {
+      if (value !== undefined && Number.isFinite(Number(value))) return Number(value);
+    }
+    const teaBonus = math().teaBonus;
+    return teaBonus ? teaBonus(eligibleRows.map(r => ({ name: r.name, score: r.score !== undefined ? r.score : r.mark }))) : 0;
+  }
 
-    return {
-      required: avgRequired,
-      parameter: finalT,
-      difficultyWeighted: true,
-      maximum,
-      taskRequirements
-    };
+  /**
+   * Pending tasks of the included courses with their baselines: the course's own average on that type,
+   * else halfway between the course average and that type's average across all courses, else the course average.
+   */
+  function difficultyTasks(eligibleRows) {
+    const overall = {};
+    for (const r of eligibleRows) D.typeTotals(r.name, r.progress?.allTasks, overall);
+    const list = [];
+    for (const r of eligibleRows) {
+      if (r.include === false) continue;
+      const courseAvg = Number.isFinite(r.mark) ? r.mark : (D.weightedAverage(D.completedTasks(r.progress?.allTasks)) ?? 75);
+      const course = D.typeTotals(r.name, r.progress?.allTasks);
+      for (const task of r.progress?.tasks || []) {
+        const category = D.taskType(r.name, task);
+        const overallAvg = D.typeAverage(overall, category);
+        const baseline = D.typeAverage(course, category) ?? (overallAvg !== undefined ? (courseAvg + overallAvg) / 2 : courseAvg);
+        list.push({ course: r.name, taskName: task.name, task, weight: task.weight, category, baseline: D.clampBaseline(baseline) });
+      }
+    }
+    return list;
   }
 
   function targetPlan(rows, target, options = {}) {
     if (!Number.isFinite(target) || target < 30 || target > 99.95) return { error: 'Enter a target ATAR from 30 to 99.95.' };
-
-    const m = math();
-    const calculate = m.calculate;
-    const bonusType = m.bonusType || (() => '');
-    const wholeScore = m.wholeScore || (v => (Number.isFinite(Number(v)) ? Math.round(Number(v)) : undefined));
+    const calculate = math().calculate;
 
     const eligibleRows = rows.filter(r => !/\bGeneral\b|\bmathematics essentials?\b/i.test(r.name));
-    const includedCount = eligibleRows.filter(r => r.include !== false).length;
-    if (includedCount < 4) return { error: 'Select at least four ATAR subjects to target for your top four.' };
-
+    if (eligibleRows.filter(r => r.include !== false).length < 4) return { error: 'Select at least four ATAR subjects to target for your top four.' };
     const missing = eligibleRows.filter(r => r.include !== false && (!r.progress || r.progress.error));
-    if (missing.length) {
-      return { error: missing.map(r => `${r.name}: ${r.progress.error}`).join('\n') };
-    }
+    if (missing.length) return { error: missing.map(r => `${r.name}: ${r.progress.error}`).join('\n') };
 
-    // Determine current TEA bonus to hold fixed during target projections
-    let currentBonus = 0;
-    if (options.currentBonus !== undefined && Number.isFinite(Number(options.currentBonus))) {
-      currentBonus = Number(options.currentBonus);
-    } else if (options.fixedBonus !== undefined && Number.isFinite(Number(options.fixedBonus))) {
-      currentBonus = Number(options.fixedBonus);
-    } else {
-      const currentRowsForBonus = eligibleRows.map(r => ({
-        name: r.name,
-        include: true,
-        score: r.score !== undefined ? r.score : r.mark
-      }));
-      const bestLanguage = Math.max(0, ...currentRowsForBonus.filter(r => bonusType(r.name) === 'language').map(r => wholeScore(r.score) || 0));
-      const methods = Math.max(0, ...currentRowsForBonus.filter(r => bonusType(r.name) === 'mathematics methods').map(r => wholeScore(r.score) || 0));
-      const specialist = Math.max(0, ...currentRowsForBonus.filter(r => bonusType(r.name) === 'mathematics specialist').map(r => wholeScore(r.score) || 0));
-      const bonuses = [];
-      if (methods > 0) bonuses.push(methods * 0.1);
-      if (specialist > 0) bonuses.push(specialist * 0.1);
-      if (bestLanguage > 0) bonuses.push(bestLanguage * 0.1);
-      bonuses.sort((a, b) => b - a);
-      currentBonus = (bonuses[0] || 0) + (bonuses[1] || 0);
-    }
-
+    const currentBonus = heldBonus(eligibleRows, options);
     const difficultyWeighted = Boolean(options.difficultyWeighted);
-
-    const getTaskType = (subjectName, task) => {
-      if (window.ConnectifyTaskTypes?.getEffectiveType) {
-        return window.ConnectifyTaskTypes.getEffectiveType(subjectName, task);
-      }
-      const lower = (task?.name || '').toLowerCase();
-      if (lower.includes('exam') || lower.includes('semester')) return 'Exam';
-      if (lower.includes('test') || lower.includes('quiz') || lower.includes('in-class') || lower.includes('in class')) return 'Test';
-      if (lower.includes('essay') || lower.includes('short answer') || lower.includes('written response') || lower.includes('close reading')) return 'Essay';
-      if (lower.includes('application') || lower.includes('investigation') || lower.includes('portfolio') || lower.includes('validation') || lower.includes('practical') || lower.includes('speaking') || lower.includes('listening')) return 'Application';
-      return 'Take-Home';
-    };
-
-    const taskMetaList = [];
-
-    if (difficultyWeighted) {
-      const catTotalsOverall = {};
-      eligibleRows.forEach(r => {
-        const completed = (r.progress?.allTasks || []).filter(t => !t.pending && Number.isFinite(t.score));
-        completed.forEach(t => {
-          const cat = getTaskType(r.name, t);
-          if (!catTotalsOverall[cat]) catTotalsOverall[cat] = { earned: 0, weight: 0 };
-          catTotalsOverall[cat].earned += (t.score / 100) * t.weight;
-          catTotalsOverall[cat].weight += t.weight;
-        });
-      });
-
-      eligibleRows.forEach(r => {
-        if (r.include === false) return;
-        const completed = (r.progress?.allTasks || []).filter(t => !t.pending && Number.isFinite(t.score));
-        const courseAvg = Number.isFinite(r.mark)
-          ? r.mark
-          : (completed.length && completed.reduce((s, t) => s + t.weight, 0) > 0)
-          ? (completed.reduce((s, t) => s + (t.score / 100) * t.weight, 0) / completed.reduce((s, t) => s + t.weight, 0)) * 100
-          : 75;
-
-        const catTotalsCourse = {};
-        completed.forEach(t => {
-          const cat = getTaskType(r.name, t);
-          if (!catTotalsCourse[cat]) catTotalsCourse[cat] = { earned: 0, weight: 0 };
-          catTotalsCourse[cat].earned += (t.score / 100) * t.weight;
-          catTotalsCourse[cat].weight += t.weight;
-        });
-
-        (r.progress?.tasks || []).forEach(task => {
-          const cat = getTaskType(r.name, task);
-          let baseline = courseAvg;
-          if (catTotalsCourse[cat] && catTotalsCourse[cat].weight > 0) {
-            baseline = (catTotalsCourse[cat].earned / catTotalsCourse[cat].weight) * 100;
-          } else if (catTotalsOverall[cat] && catTotalsOverall[cat].weight > 0) {
-            const overallCatAvg = (catTotalsOverall[cat].earned / catTotalsOverall[cat].weight) * 100;
-            baseline = (courseAvg + overallCatAvg) / 2;
-          }
-          baseline = Math.max(30, Math.min(99.5, baseline));
-          taskMetaList.push({
-            course: r.name,
-            taskName: task.name,
-            task,
-            weight: task.weight,
-            category: cat,
-            baseline
-          });
-        });
-      });
+    const taskMetaList = difficultyWeighted ? difficultyTasks(eligibleRows) : [];
+    const metaByTask = new Map();
+    for (const meta of taskMetaList) {
+      const key = `${meta.course}::${meta.taskName}`;
+      if (!metaByTask.has(key)) metaByTask.set(key, meta);
     }
+    const calcTaskScore = (meta, t) => D.scoreAt(meta.baseline, t);
+    const currentScore = r => (r.score !== undefined ? r.score : (r.mark !== undefined ? r.mark : 0));
 
-    const calcTaskScore = (meta, t) => {
-      const b = meta.baseline;
-      if (t >= 0) {
-        return Math.max(0, Math.min(100, b + t * (100 - b)));
-      } else {
-        return Math.max(0, Math.min(100, b * (1 + t)));
-      }
-    };
-
+    // A course's projected mark at effort t (difficulty weighted) or with p% on every remaining task
     const projectCourseScore = (r, pOrT) => {
-      if (r.include === false) {
-        return r.score !== undefined ? r.score : (r.mark !== undefined ? r.mark : 0);
-      }
-      if (!r.progress?.remaining || (r.progress?.tasks || []).length === 0) {
-        return r.score !== undefined ? r.score : (r.mark !== undefined ? r.mark : 0);
-      }
-
+      if (r.include === false || !r.progress?.remaining || (r.progress?.tasks || []).length === 0) return currentScore(r);
+      let rawScore;
       if (difficultyWeighted) {
-        const t = pOrT;
-        let earnedRemaining = 0;
-        (r.progress.tasks || []).forEach(task => {
-          const meta = taskMetaList.find(m => m.course === r.name && m.taskName === task.name);
-          const score = meta ? calcTaskScore(meta, t) : Math.max(0, Math.min(100, 75 + t * 25));
-          earnedRemaining += (score / 100) * task.weight;
-        });
-        const totalWeight = r.progress.total || 100;
-        const rawScore = ((r.progress.rawEarned || 0) + earnedRemaining) / totalWeight * 100;
-        return Math.max(0, Math.min(100, rawScore + (r.offset ?? 0)));
+        const earnedRemaining = r.progress.tasks.reduce((sum, task) => {
+          const meta = metaByTask.get(`${r.name}::${task.name}`);
+          const score = meta ? calcTaskScore(meta, pOrT) : Math.max(0, Math.min(100, 75 + pOrT * 25));
+          return sum + (score / 100) * task.weight;
+        }, 0);
+        rawScore = ((r.progress.rawEarned || 0) + earnedRemaining) / (r.progress.total || 100) * 100;
       } else {
-        const p = pOrT;
-        const rawScore = (r.progress.earned ?? 0) + ((r.progress.remaining ?? 0) * p) / 100;
-        return Math.max(0, Math.min(100, rawScore + (r.offset ?? 0)));
+        rawScore = (r.progress.earned ?? 0) + ((r.progress.remaining ?? 0) * pOrT) / 100;
       }
+      return Math.max(0, Math.min(100, rawScore + (r.offset ?? 0)));
     };
 
-    const projectedRows = pOrT =>
-      eligibleRows.map(r => ({
-        name: r.name,
-        include: r.include !== false,
-        score: projectCourseScore(r, pOrT)
-      }));
-
-    const calculateAtVal = pOrT => calculate ? calculate(projectedRows(pOrT), { fixedBonus: currentBonus }) : { error: 'Calculation unavailable' };
+    const projectedRows = pOrT => eligibleRows.map(r => ({ name: r.name, include: r.include !== false, score: projectCourseScore(r, pOrT) }));
+    const calculateAtVal = pOrT => (calculate ? calculate(projectedRows(pOrT), { fixedBonus: currentBonus }) : { error: 'Calculation unavailable' });
     const reachesTarget = res => !res.error && res.atar !== '<30' && Number(res.atar) >= target;
 
     const maxVal = difficultyWeighted ? 1.0 : 100.0;
     const minVal = difficultyWeighted ? -1.0 : 0.0;
-
     const maximumResult = calculateAtVal(maxVal);
     if (maximumResult.error) return { error: maximumResult.error };
     if (!reachesTarget(maximumResult)) {
-      return {
-        impossible: true,
-        maximum: maximumResult,
-        rows: projectedRows(maxVal),
-        difficultyWeighted,
-        bonus: currentBonus
-      };
+      return { impossible: true, maximum: maximumResult, rows: projectedRows(maxVal), difficultyWeighted, bonus: currentBonus };
     }
 
-    let low = minVal, high = maxVal;
-    if (reachesTarget(calculateAtVal(minVal))) {
-      high = minVal;
-    } else {
-      for (let i = 0; i < 50; i++) {
-        const mid = (low + high) / 2;
-        if (reachesTarget(calculateAtVal(mid))) {
-          high = mid;
-        } else {
-          low = mid;
-        }
-      }
-    }
-
-    let finalT = high;
-    let finalProjected = projectedRows(finalT);
-    let finalResult = calculate(finalProjected, { fixedBonus: currentBonus });
-
+    let finalT = D.bisect(v => reachesTarget(calculateAtVal(v)), minVal, maxVal);
     const taskRequirements = {};
     let totalReqSum = 0;
-    let totalReqCount = 0;
-
     if (difficultyWeighted) {
-      taskMetaList.forEach(meta => {
-        let score = Math.round(calcTaskScore(meta, finalT) * 10) / 10;
-        score = Math.min(100, Math.max(0, score));
-        taskRequirements[`${meta.course}::${meta.taskName}`] = {
-          required: score,
-          baseline: Math.round(meta.baseline * 10) / 10,
-          category: meta.category
-        };
+      for (const meta of taskMetaList) {
+        const score = Math.min(100, Math.max(0, D.round1(calcTaskScore(meta, finalT))));
+        taskRequirements[`${meta.course}::${meta.taskName}`] = { required: score, baseline: D.round1(meta.baseline), category: meta.category };
         totalReqSum += score;
-        totalReqCount++;
-      });
-    } else {
-      let req = Math.min(100, Math.ceil(high * 10) / 10);
-      if (!reachesTarget(calculateAtVal(req))) {
-        req = Math.min(100, req + 0.1);
       }
+    } else {
+      // Round the uniform requirement up to one decimal, nudging up once more if rounding fell short
+      let req = Math.min(100, Math.ceil(finalT * 10) / 10);
+      if (!reachesTarget(calculateAtVal(req))) req = Math.min(100, req + 0.1);
       finalT = req;
-      finalProjected = projectedRows(finalT);
-      finalResult = calculate(finalProjected, { fixedBonus: currentBonus });
     }
-
-    const avgRequired = totalReqCount > 0 ? Math.round((totalReqSum / totalReqCount) * 10) / 10 : Math.round(finalT * 10) / 10;
+    const finalProjected = projectedRows(finalT);
+    const finalResult = calculate(finalProjected, { fixedBonus: currentBonus });
+    const avgRequired = taskMetaList.length > 0 ? D.round1(totalReqSum / taskMetaList.length) : D.round1(finalT);
 
     return {
       required: difficultyWeighted ? avgRequired : finalT,
@@ -390,18 +203,7 @@
     };
   }
 
-  window.ConnectifyTargetSolver = {
-    parseAssessment,
-    taskProgress,
-    gradePlan,
-    targetPlan
-  };
-
+  window.ConnectifyTargetSolver = { parseAssessment, taskProgress, gradePlan, targetPlan };
   window.ConnectifyMath = window.ConnectifyMath || {};
-  Object.assign(window.ConnectifyMath, {
-    parseAssessment,
-    taskProgress,
-    gradePlan,
-    targetPlan
-  });
+  Object.assign(window.ConnectifyMath, { parseAssessment, taskProgress, gradePlan, targetPlan });
 })();

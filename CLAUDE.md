@@ -50,7 +50,7 @@ Isolated world content scripts run in the exact dependency order listed in `mani
 - `new-grade.js`: Running average grade delta detection ($\ge 0.05\%$; boxplot stats must move by more than 1 point) with single-card expand and "Jump to Subject" glow.
 - `dom-sweeper.js`: SPA DOM monitor and health restorer; panel mutation filter suppresses collapse loops.
 - Theme (`src/theme/`): `theme-auth.js`, `theme-custom-tokens.js`, `theme-palettes.js`, `theme-registry.js`, `theme-custom-themes.js`, customizer modules and `theme.js` engine (see `docs/modules_system.md`): 7 preset palettes, in-DOM customizer, wallpaper upload/caching, Liquid Glass, unstyled surface adaptation (`data-connectea-surface`).
-- Modular styles: `src/sidebar/sidebar-*.css`, `src/atar/atar.css`, `src/progress/progress.css`, and the theme cascade in `src/theme/styles/` (one concern per file, ending with `theme.css`).
+- Modular styles: `src/sidebar/sidebar-*.css`, `src/atar/atar.css` (+ `atar-compact.css`, `atar-planner.css`), `src/progress/progress.css`, and the theme cascade in `src/theme/styles/` (one concern per file, ending with `theme.css`).
 - Connect CSS reference: `./connect_css/` contains upstream Connect portal stylesheets (`main_aDnd.css`, `clay_aDnd.css`, etc.) providing native DOM selectors, layout classes, and UI structures.
 - Storage keys: `connectea:theme:v1`, `connectea:theme:id`, `connectea:theme:last_theme`, `connectea:theme:custom_themes`, `connectea:theme:wallpaper`, `connectea:theme:liquid_glass`, `connectea:task_type_overrides`, `connectea:class_categories:`, `cx-categories`, `connectify:prediction:`, `connectify:stats_cache:`, `connectify:grade_cache:`, `connectify:cache_version:<subsystem>`.
  

@@ -95,17 +95,18 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Key Functions**:
   - `convertTEAtoATAR(tea)`: Interpolates aggregate TEA across the published 50-point TISC table (down to `<30` and up to `99.95`).
   - `bonusType(name)`: Detects eligibility for the 10% TEA bonus (Mathematics Methods, Mathematics Specialist, or approved Languages).
-  - `calculate(rows, options)`: Selects top 4 ATAR subjects, computes base TEA, adds top two 10% bonuses (capped at 2 subjects), and returns estimated ATAR. Supports `fixedBonus` option.
+  - `calculate(rows, options)`: Selects top 4 ATAR subjects, computes base TEA, adds the TEA bonus, and returns estimated ATAR. Supports `fixedBonus` option.
+  - `teaBonus(rows)`: 10% of each of the best two of Methods, Specialist and the best language (also used by the Target ATAR solver).
   - `calculateShiftedScaledScore(name, liveRawMark, knownSem1Raw, knownSem1Scaled, year)`: Calibrates base TISC scaled score model using school Semester 1 calibration data ($\text{shift} = \text{actualScaled} - \text{modelScaled}$).
 - **Export**: `window.ConnectifyMath`.
 
-#### [`target-solver.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-solver.js) (304 lines)
-- **Role**: Mathematical optimization solver for Target ATAR and Target Grade projections.
+#### [`target-solver.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-solver.js) & `target-difficulty.js`
+- **Role**: Target ATAR and Target Grade solvers.
 - **Key Functions**:
-  - `parseAssessment(rawScore, weightedMark, name)`: Validates and parses raw marks, weights, and pending status.
-  - `taskProgress(tasks, mark, semesterNumber)`: Computes earned weight, remaining weight, and completed average.
-  - `gradePlan(progress, target, options)`: Solves uniform or category difficulty-weighted percentage required on remaining tasks.
-  - `targetPlan(rows, target, options)`: Solves required scores across remaining assessments to hit target ATAR. Supports difficulty-weighted optimization and holds current TEA bonus fixed.
+  - `parseAssessment(rawScore, weightedMark, name)` / `taskProgress(tasks, mark, semesterNumber)`: parse tasks; earned, remaining and completed weight.
+  - `gradePlan(progress, target, { difficultyWeighted, subjectName })`: uniform or difficulty-weighted score needed on remaining tasks (subject name lets type overrides apply).
+  - `targetPlan(rows, target, options)`: bisects one effort value across the top four to reach the target ATAR, holding the current TEA bonus fixed.
+  - `target-difficulty.js` (`ConnectifyTargetDifficulty`): task baseline = the student's average on that type in the course (else halfway to that type's average across courses, else the course average, clamped 30–99.5); effort $t \in [-1, 1]$ closes $t$ of the gap to 100 or scales the baseline down.
 - **Export**: `window.ConnectifyTargetSolver` (also merged into `window.ConnectifyMath`).
 
 #### [`atar-scraper.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-scraper.js) (115 lines)

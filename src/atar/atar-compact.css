@@ -1,0 +1,232 @@
+/**
+ * Connectify ATAR calculator: subject select, grade table and the compact results-first layout.
+ */
+
+.cta-subject-select {
+  min-width: 0;
+  max-width: 100%;
+  flex: 1;
+  padding: 7px;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid #9daebf;
+  border-radius: 5px;
+}
+
+.cta-grade-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 11px;
+}
+
+.cta-grade-table th, .cta-grade-table td {
+  text-align: left;
+  padding: 6px 4px;
+  border-bottom: 1px solid #aab9c7;
+}
+
+.cta-grade-table th {
+  font-weight: 700;
+}
+
+#connectea-atar [hidden] {
+  display: none !important;
+}
+
+.connectea-dark .cta-subject-select {
+  background: #202a35;
+  color: #e4edf6;
+}
+
+/* Compact calculator layout: results first, optional task detail below. */
+#connectea-atar {
+  width: min(540px,calc(100vw - 28px));
+  padding: 16px;
+  line-height: 1.4;
+  box-shadow: 0 12px 38px #15263830;
+}
+
+#connectea-atar .cta-heading {
+  gap: 16px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+
+#connectea-atar .cta-heading strong {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 650;
+  max-width: 420px;
+}
+
+.cta-heading strong:focus, #connectea-atar .cta-heading strong:focus {
+  outline: none !important;
+}
+
+#connectea-atar .cta-heading button {
+  flex: none;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+#connectea-atar .cta-tabs {
+  padding: 4px;
+  gap: 4px;
+  background: #edf2f7;
+  border-radius: 9px;
+  margin-bottom: 10px;
+}
+
+#connectea-atar .cta-tabs .cta-semester {
+  background: transparent;
+  border: 0;
+  padding: 7px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+#connectea-atar .cta-tabs .cta-semester[aria-pressed=true] {
+  background: white;
+  color: #215d90;
+  box-shadow: 0 1px 4px #17395420;
+}
+
+#connectea-atar .cta-semesters:not(.cta-tabs) {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#connectea-atar .cta-semesters:not(.cta-tabs) .cta-semester, .cta-semesters:not(.cta-tabs) .cta-semester {
+  padding: 10px 14px !important;
+  font-size: 12px;
+  border-width: 1px;
+  border-left: 4px solid transparent !important;
+  text-align: left !important;
+  border-radius: 6px !important;
+}
+
+#connectea-atar .cta-semester:disabled {
+  opacity: .5;
+  cursor: default;
+}
+
+.cta-semester.cta-non-button {
+  cursor: default !important;
+  box-shadow: none !important;
+}
+
+.cta-semesters:not(.cta-tabs) .cta-semester.cta-semester-indicator, .cta-semester.cta-semester-indicator {
+  background: #edf4fa !important;
+  border: 1px solid #c8d9e8 !important;
+  border-left: 4px solid #24618c !important;
+  color: #1a3d5f !important;
+  font-weight: 600 !important;
+  cursor: default !important;
+  border-radius: 6px !important;
+  text-align: left !important;
+  padding: 10px 14px !important;
+}
+
+.cta-semester.cta-semester-closed {
+  background: #f4f6f9 !important;
+  border: 1px dashed #cad5e2 !important;
+  border-left: 4px solid transparent !important;
+  color: #7c8e9f !important;
+  font-weight: 500 !important;
+  cursor: not-allowed !important;
+  border-radius: 6px !important;
+  text-align: left !important;
+  padding: 10px 14px !important;
+  opacity: .85 !important;
+}
+
+.connectea-dark .cta-semesters:not(.cta-tabs) .cta-semester.cta-semester-indicator,
+.connectea-dark .cta-semester.cta-semester-indicator {
+  background: #253342 !important;
+  border-color: #3b5066 !important;
+  border-left: 4px solid #6ba5d6 !important;
+  color: #dceaf6 !important;
+}
+
+.connectea-dark .cta-semester.cta-semester-closed {
+  background: #1e252e !important;
+  border: 1px dashed #3f4e5e !important;
+  border-left: 4px solid transparent !important;
+  color: #6e8093 !important;
+}
+
+#connectea-atar .cta-course {
+  padding: 7px 0;
+  gap: 1px 10px;
+  grid-template-columns: minmax(0,1fr) 72px;
+  align-items: center;
+}
+
+#connectea-atar .cta-course>.cta-score {
+  grid-column: 2;
+  grid-row: 1/3;
+}
+
+#connectea-atar .cta-course>small {
+  grid-column: 1;
+  margin-left: 22px;
+  font-size: 10px;
+}
+
+#connectea-atar .cta-include {
+  gap: 6px;
+  font-size: 12px;
+}
+
+#connectea-atar .cta-score {
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: right;
+}
+
+#connectea-atar .cta-breakdown {
+  background: #f2f6fa;
+  border-radius: 7px;
+  padding: 9px 11px;
+  margin: 10px 0;
+  font-size: 11px;
+  color: #506278;
+}
+
+#connectea-atar .cta-target-label {
+  font-size: 12px;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#connectea-atar .cta-planner {
+  margin-top: 10px;
+}
+
+#connectea-atar .cta-target-output {
+  margin-top: 12px;
+}
+
+#connectea-atar .cta-target-output>strong {
+  display: block;
+  background: #edf5fb;
+  border-left: 3px solid #528dbd;
+  border-radius: 5px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#connectea-atar .cta-note {
+  font-size: 11px;
+  margin: 8px 0;
+}
+
+#connectea-atar .cta-assessment-details {
+  border-top: 1px solid #d9e2eb;
+  padding-top: 9px;
+  margin-top: 10px;
+  white-space: normal;
+}

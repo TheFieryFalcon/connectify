@@ -10,14 +10,7 @@
 
   if (window.ConnectifyTargetAtarUI) return;
 
-  const createEl = (tag, className, text) => {
-    const el = document.createElement(tag);
-    if (className) el.className = className;
-    if (text) el.textContent = text;
-    return el;
-  };
-
-  const round = v => (Number.isFinite(v) ? Math.round(v * 10) / 10 : '—');
+  const { createEl, prefs, savePref, expandOutlinesButton } = window.ConnectifyTargetUiHelpers;
 
   function createPlannerView(ctx) {
     const calc = ctx.calc;
@@ -28,8 +21,8 @@
     targetInput.min = '30';
     targetInput.max = '99.95';
     targetInput.step = '0.05';
-    const prefs = calc?.getPreferences ? calc.getPreferences() : {};
-    targetInput.value = prefs.target ?? '98';
+    const saved = prefs(calc);
+    targetInput.value = saved.target ?? '98';
     targetLabel.append(targetInput);
 
     const calculateTargetBtn = createEl('button', 'cta-reset', 'Recalculate');
@@ -38,16 +31,14 @@
     const difficultyLabel = createEl('label', 'cta-difficulty-label');
     const difficultyCheckbox = createEl('input');
     difficultyCheckbox.type = 'checkbox';
-    difficultyCheckbox.checked = Boolean(prefs.targetDifficultyWeighted);
+    difficultyCheckbox.checked = Boolean(saved.targetDifficultyWeighted);
     difficultyLabel.append(
       difficultyCheckbox,
       document.createTextNode(' Adjust marks by subject & task type performance')
     );
 
     difficultyCheckbox.addEventListener('change', () => {
-      const p = calc?.getPreferences ? calc.getPreferences() : {};
-      p.targetDifficultyWeighted = difficultyCheckbox.checked;
-      if (calc?.persistPreferences) calc.persistPreferences();
+      savePref(calc, 'targetDifficultyWeighted', difficultyCheckbox.checked);
       ctx.renderTargetOutput();
     });
 
@@ -60,9 +51,7 @@
     plannerContainer.append(targetControls, topFourContainer, targetOutputContainer);
 
     targetInput.addEventListener('input', () => {
-      const p = calc?.getPreferences ? calc.getPreferences() : {};
-      p.target = targetInput.value;
-      if (calc?.persistPreferences) calc.persistPreferences();
+      savePref(calc, 'target', targetInput.value);
       ctx.renderTargetOutput();
     });
 
@@ -104,10 +93,8 @@
     );
 
     const calc = ctx.calc;
-    const prefsNow = calc?.getPreferences ? calc.getPreferences() : {};
-    const excludedSubjects = new Set(
-      Array.isArray(prefsNow.targetExcludedSubjects) ? prefsNow.targetExcludedSubjects : []
-    );
+    const excluded = prefs(calc).targetExcludedSubjects;
+    const excludedSubjects = new Set(Array.isArray(excluded) ? excluded : []);
 
     topFourContainer.replaceChildren();
     if (eligibleCourses.length > 0) {
@@ -141,9 +128,7 @@
           } else {
             excludedSubjects.add(key);
           }
-          const p = calc?.getPreferences ? calc.getPreferences() : {};
-          p.targetExcludedSubjects = [...excludedSubjects];
-          if (calc?.persistPreferences) calc.persistPreferences();
+          savePref(calc, 'targetExcludedSubjects', [...excludedSubjects]);
           renderTargetOutput(viewRefs, ctx);
         });
 
@@ -178,15 +163,7 @@
 
     if (eligibleCourses.length === 0) {
       topFourContainer.replaceChildren();
-      const expandBtn = createEl('button', 'cta-reset', 'Expand Subject Outlines');
-      expandBtn.type = 'button';
-      expandBtn.style.marginTop = '8px';
-      expandBtn.addEventListener('click', () => {
-        if (window.ConnectifyData?.expandAll) {
-          window.ConnectifyData.expandAll(true);
-        }
-        ctx.scanAndRefresh();
-      });
+      const expandBtn = expandOutlinesButton(ctx);
       targetOutputContainer.replaceChildren(
         createEl(
           'p',
@@ -245,15 +222,7 @@
     if (!plan) return;
 
     if (plan.error) {
-      const expandBtn = createEl('button', 'cta-reset', 'Expand Subject Outlines');
-      expandBtn.type = 'button';
-      expandBtn.style.marginTop = '8px';
-      expandBtn.addEventListener('click', () => {
-        if (window.ConnectifyData?.expandAll) {
-          window.ConnectifyData.expandAll(true);
-        }
-        ctx.scanAndRefresh();
-      });
+      const expandBtn = expandOutlinesButton(ctx);
 
       targetOutputContainer.append(
         createEl('p', '', plan.error),
@@ -267,110 +236,7 @@
       return;
     }
 
-    if (plan.impossible) {
-      targetOutputContainer.append(
-        createEl(
-          'strong',
-          '',
-          `Goal unattainable with remaining tasks. Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'} (assuming 100% on all remaining assessments).`
-        )
-      );
-    } else {
-      const bannerText =
-        plan.required === 0
-          ? 'Target secured under current assumptions.'
-          : difficultyCheckbox.checked
-          ? `Requires performance-adjusted scores (averaging ${round(plan.required)}%) on remaining assessments for an estimated ATAR of ${
-              plan.result?.atar ?? '—'
-            }.`
-          : `Requires ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
-              plan.result?.atar ?? '—'
-            }.`;
-
-      targetOutputContainer.append(createEl('strong', '', bannerText));
-    }
-
-    const bonusNote = plan.bonus > 0 ? ` (assumes current TEA bonus of ${round(plan.bonus)} points)` : '';
-    targetOutputContainer.append(
-      createEl(
-        'p',
-        'cta-note',
-        difficultyCheckbox.checked
-          ? `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}. Marks are scaled proportionally based on demonstrated subject and assessment type performance.`
-          : `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}. Assumes uniform performance across remaining tasks.`
-      )
-    );
-
-    const taskDetails = createEl('section', 'cta-assessment-details');
-    taskDetails.append(
-      createEl('strong', 'cta-breakdown-title', `Subject and assessment breakdown (${rows.length} subjects)`)
-    );
-    targetOutputContainer.append(taskDetails);
-
-    rows.forEach((course, idx) => {
-      const block = createEl('div', 'cta-course');
-      const projectedScore = plan.rows?.[idx]?.score ?? course.score ?? 0;
-
-      if (!course.include) {
-        block.style.opacity = '0.65';
-        block.append(
-          createEl('strong', '', `${course.name} (Excluded from top four target)`),
-          createEl(
-            'small',
-            '',
-            `Current score: ${
-              course.score !== undefined
-                ? wholeScore(course.score)
-                : course.mark !== undefined
-                ? wholeScore(course.mark)
-                : '—'
-            }`
-          )
-        );
-        taskDetails.append(block);
-        return;
-      }
-
-      block.append(
-        createEl('strong', '', course.name),
-        createEl(
-          'small',
-          '',
-          `Outline weight ${round(course.progress?.total ?? 0)}% · ${round(
-            course.progress?.earned ?? 0
-          )} normalized points earned · ${round(course.progress?.remaining ?? 0)}% of semester remaining · projected rounded score ${wholeScore(
-            projectedScore
-          )}`
-        )
-      );
-
-      for (const task of course.progress?.tasks || []) {
-        let reqText = '';
-        if (plan.impossible) {
-          reqText = 'max 100%';
-        } else if (difficultyCheckbox.checked) {
-          const meta = plan.taskRequirements?.[`${course.name}::${task.name}`];
-          const reqVal = meta ? meta.required : plan.required;
-          const baseVal = meta ? meta.baseline : null;
-          reqText = `required ${round(reqVal)}%${baseVal !== null ? ` (baseline: ${round(baseVal)}%)` : ''}`;
-        } else {
-          reqText = `required ${round(plan.required)}%`;
-        }
-
-        block.append(
-          createEl(
-            'small',
-            '',
-            `${task.name}: weight ${round(task.weight)}% · ${reqText}`
-          )
-        );
-      }
-
-      if (!course.progress?.remaining) {
-        block.append(createEl('small', '', 'All weighted tasks completed.'));
-      }
-      taskDetails.append(block);
-    });
+    window.ConnectifyTargetAtarBreakdown.renderPlan(targetOutputContainer, plan, rows, difficultyCheckbox.checked);
   }
 
   window.ConnectifyTargetAtarUI = {

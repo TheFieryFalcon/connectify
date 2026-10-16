@@ -10,12 +10,12 @@ This document covers the user interface and analytics modules, including target 
 
 #### [`target-atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-atar-ui.js)
 - **Role**: Builds and updates the Target ATAR Planner interface.
-- **Key Functions**: `createPlannerView(ctx)` constructs target score input, top-4 subject checkboxes, and difficulty toggle. `renderTargetOutput(viewRefs, ctx)` solves and renders per-task score requirement breakdown.
+- **Key Functions**: `createPlannerView(ctx)` constructs target score input, top-4 subject checkboxes, and difficulty toggle. `renderTargetOutput(viewRefs, ctx)` solves the plan; `target-atar-breakdown.js` renders the banner and per-task requirements. Shared planner helpers (preferences, Expand Subject Outlines button): `target-ui-helpers.js`.
 - **Export**: `window.ConnectifyTargetAtarUI`.
 
 #### [`target-grade-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-grade-ui.js)
 - **Role**: Builds and updates the Target Grade Planner interface.
-- **Key Functions**: `createGradeView(ctx)` constructs subject dropdown selector, target input, and prior performance adjustment checkbox. `renderGradeOutput(viewRefs, ctx)` computes required average and per-task baseline adjustments.
+- **Key Functions**: `createGradeView(ctx)` constructs subject dropdown selector, target input, and prior performance adjustment checkbox. `renderGradeOutput(viewRefs, ctx)` computes required average and per-task baseline adjustments (passing the subject so type overrides apply).
 - **Export**: `window.ConnectifyTargetGradeUI`.
 
 #### [`target-planner-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-planner-ui.js)
@@ -25,7 +25,7 @@ This document covers the user interface and analytics modules, including target 
 #### [`atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-ui.js)
 - **Role**: Coordinates the main calculator modal (`#connectea-atar`), tab switching, semester toggling, and data synchronization.
 - **Key Functions**:
-  - Builds calculator modal shell, title, methodology accordion, and reset button.
+  - `atar-ui-markup.js`: panel markup (tool tabs mounted as sidebar launchers, semester buttons, methodology), semester labels and closing rules.
   - `selectTab(mode)`: Switches between `'estimate'`, `'target'`, and `'grade'`.
   - `updateResults()`: Updates Semester 1 & 2 buttons with clean styling (ATAR text eliminated in grade mode).
   - `openCalculator(mode)` / `closeCalculator()`: Handles modal visibility, accessibility focus, and Escape key dismissal.
@@ -93,13 +93,10 @@ This document covers the user interface and analytics modules, including target 
 - **Projections**: `predictor-grade-projection.js` (`projectSubjectGrades`) and `predictor-atar-projection.js` (`projectATAR`); `predictor-math.js` (`ConnectifyPredictorMath`) is the facade with `evaluateOutcome` (secret 1.10 x High breakout).
 - **UI**: `predictor-ui.js` (`ConnectifyPredictorUI`, Grade/ATAR tabs, delegated clicks), `predictor-atar-view.js` (shell + ATAR cards/table), `predictor-grade-view.js` (subject sub-tabs, guidance, projected mark), `predictor-task-cards.js` (upcoming tasks). All names inserted into HTML are escaped (`ConnectifyUtils.escapeHtml`).
 
-#### [`atar-features.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-features.js)
-- **Role**: Coordinates sidebar tool buttons, floating controls, countdown, and periodic synchronization.
-- **Key Functions**:
-  - Injects fixed floating "Expand All" and "Collapse All" buttons (`#cx-expand-btn`).
-  - Mounts Weakness Analyzer and Settings toggles into `#connectify-sidebar`.
-  - Coordinates periodic refresh loops respecting `ConnectifyIsUserActive()`.
-- **Export**: `window.ConnectifySync`, `window.ConnectifyInitSidebar`.
+#### [`atar-features.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-features.js) & `outline-controls.js`
+- **Role**: Creates the Predictor, Weakness and Settings panels for `sidebar.js` to mount, runs startup auto-expand (only with `connectify:auto_expand`), and keeps outline controls, countdown and compound progress in sync.
+- **Key Functions**: `outline-controls.js` (`ConnectifyOutlineControls`): floating `Expand All` / `Collapse All` (`#cx-expand-btn`) and `#cx-back-to-top-container` after the last tile.
+- **Export**: `window.ConnectifySync`, `window.ConnectifyInitSidebar` (until `sidebar.js` replaces it).
 
 #### [`wace-countdown.js`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/wace-countdown.js)
 - **Role**: Displays days remaining until WACE examinations.

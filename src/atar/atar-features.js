@@ -1,8 +1,9 @@
 /**
  * Connectify ATAR Features & Tools Coordinator
  *
- * Coordinates the sidebar tools (Weakness Analyzer, Category Settings),
- * floating expand/collapse buttons, countdown timer, and compound progress bars.
+ * Creates the Predictor, Weakness Analyzer and Settings panels for the sidebar to mount, runs the
+ * startup auto-expand (only when the setting is on), and keeps the outline controls
+ * (outline-controls.js), countdown and compound progress bars in sync across Connect re-renders.
  */
 (() => {
   'use strict';
@@ -11,8 +12,9 @@
     if (window.__connectifyAtarFeaturesInitialized) return;
     window.__connectifyAtarFeaturesInitialized = true;
 
-    let hasInitializedSidebar = false;
     let hasAutoExpanded = false;
+    const controls = () => window.ConnectifyOutlineControls || {};
+    const syncBackToTop = () => controls().syncBackToTop?.();
 
     let weaknessInstance = null;
     let settingsInstance = null;
@@ -39,63 +41,6 @@
       }
     }
 
-    function syncBackToTop() {
-      try {
-        const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile');
-        const backToTopExisting = document.getElementById('cx-back-to-top-container');
-        if (tiles.length > 0) {
-          const lastTile = tiles[tiles.length - 1];
-          if (!backToTopExisting) {
-            const container = document.createElement('div');
-            container.id = 'cx-back-to-top-container';
-            container.className = 'cx-back-to-top-container';
-
-            const btn = document.createElement('button');
-            btn.id = 'cx-back-to-top-btn';
-            btn.type = 'button';
-            btn.className = 'cx-back-to-top-btn eds-c-button';
-            btn.textContent = '↑ Back to top';
-            btn.setAttribute('aria-label', 'Back to top of assessment outlines');
-
-            btn.onclick = () => {
-              const firstTile = document.querySelector('.eds-c-tile, .cvr-c-tile');
-              if (firstTile && typeof firstTile.scrollIntoView === 'function') {
-                firstTile.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }
-              if (typeof window.scrollTo === 'function') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-              if (document.documentElement && typeof document.documentElement.scrollTo === 'function') {
-                document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-              if (document.body && typeof document.body.scrollTo === 'function') {
-                document.body.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-            };
-
-            container.appendChild(btn);
-            if (lastTile.parentNode) {
-              if (lastTile.nextSibling) {
-                lastTile.parentNode.insertBefore(container, lastTile.nextSibling);
-              } else {
-                lastTile.parentNode.appendChild(container);
-              }
-            }
-          } else if (backToTopExisting.previousElementSibling !== lastTile && lastTile.parentNode) {
-            if (lastTile.nextSibling) {
-              lastTile.parentNode.insertBefore(backToTopExisting, lastTile.nextSibling);
-            } else {
-              lastTile.parentNode.appendChild(backToTopExisting);
-            }
-          }
-        } else if (backToTopExisting) {
-          backToTopExisting.remove();
-        }
-      } catch (err) {
-        console.error('Error syncing back to top button:', err);
-      }
-    }
-
     function syncFeatures() {
       initSidebarTools();
       syncBackToTop();
@@ -105,41 +50,12 @@
           checkStartupAutoExpand();
         }
 
-        // --- Expand/Collapse Floating Buttons ---
-        if (!document.getElementById('cx-expand-btn')) {
-          const btnContainer = document.createElement('div');
-          btnContainer.id = 'cx-expand-btn';
-          btnContainer.style.position = 'fixed';
-          btnContainer.style.bottom = '16px';
-          btnContainer.style.left = '16px';
-          btnContainer.style.display = 'flex';
-          btnContainer.style.flexDirection = 'column';
-          btnContainer.style.gap = '8px';
-          btnContainer.style.zIndex = '10000';
-
-          const createBtn = (text, isExpand) => {
-            const btn = document.createElement('button');
-            btn.textContent = text;
-            btn.type = 'button';
-            btn.className = 'eds-c-button';
-            btn.style.padding = '6px';
-            btn.style.fontSize = '11px';
-            btn.style.width = '100%';
-            btn.onclick = () => window.ConnectifyData.expandAll(isExpand);
-            return btn;
-          };
-          btnContainer.append(createBtn('Expand All', true), createBtn('Collapse All', false));
-          document.body.appendChild(btnContainer);
-        }
+        controls().ensureExpandButtons?.();
       }
 
       // --- WACE Countdown Timer ---
       if (window.ConnectifyCountdown?.update) {
         window.ConnectifyCountdown.update();
-      }
-
-      if (window.ConnectifyCategorySettings?.resolveCategories) {
-        window.ConnectifyCategorySettings.resolveCategories();
       }
 
       // --- Compound Progress Bars ---
@@ -180,23 +96,9 @@
         }
       }
 
+      // sidebar.js mounts the launchers and panels
       if (typeof window.ConnectifyInitSidebar === 'function' && window.ConnectifyInitSidebar !== initSidebarTools) {
         window.ConnectifyInitSidebar();
-      } else {
-        if (predictorInstance) {
-          if (!toolMenu.contains(predictorInstance.toggleBtn)) toolMenu.append(predictorInstance.toggleBtn);
-          if (!workspace.contains(predictorInstance.panel)) workspace.append(predictorInstance.panel);
-        }
-
-        if (weaknessInstance) {
-          if (!toolMenu.contains(weaknessInstance.toggleBtn)) toolMenu.append(weaknessInstance.toggleBtn);
-          if (!workspace.contains(weaknessInstance.panel)) workspace.append(weaknessInstance.panel);
-        }
-
-        if (settingsInstance) {
-          if (!toolMenu.contains(settingsInstance.catBtn)) toolMenu.append(settingsInstance.catBtn);
-          if (!workspace.contains(settingsInstance.catPanel)) workspace.append(settingsInstance.catPanel);
-        }
       }
     }
 
@@ -212,27 +114,17 @@
       }
     });
 
+    // Compound progress bars listen for type changes themselves
     window.addEventListener('connectify-task-type-changed', () => {
-      try {
-        if (window.ConnectifyCompoundProgress?.update) {
-          window.ConnectifyCompoundProgress.update();
-        }
-        if (window.ConnectifyWeakness?.renderChart) {
-          window.ConnectifyWeakness.renderChart();
-        }
-      } catch (e) {}
+      try { window.ConnectifyWeakness?.renderChart?.(); } catch {}
     });
 
-    window.addEventListener('hashchange', () => {
-      hasAutoExpanded = false;
-      hasInitializedSidebar = false;
-      setTimeout(syncFeatures, 500);
-    });
-    window.addEventListener('popstate', () => {
-      hasAutoExpanded = false;
-      hasInitializedSidebar = false;
-      setTimeout(syncFeatures, 500);
-    });
+    for (const evt of ['hashchange', 'popstate']) {
+      window.addEventListener(evt, () => {
+        hasAutoExpanded = false;
+        setTimeout(syncFeatures, 500);
+      });
+    }
 
     initSidebarTools();
     syncBackToTop();
