@@ -7622,7 +7622,17 @@ runTest('Test 164: Liquid Glass gives Class pages one glass recipe for banners, 
   assert.ok(cssHas(surface, 'cnt-paginator:has(.c-empty-content)'), 'empty states must become one glass card');
   const pages = fs.readFileSync(path.join(styles, 'theme-glass-class-pages.css'), 'utf8');
   assert.ok(cssHas(pages, '.cvr-c-pagination__body:has(> table.mat-table),\n  mat-accordion'), 'the Learners table and accordion must be rounded and clipped');
-  assert.ok(cssHas(pages, `${glass}:not([data-connectea-login]) :is(.v-ui.v-scrollable, .v-app):has(.cvr-c-thori-pnl)`), 'the Content canvas must be transparent only on the sections page');
+  assert.ok(cssHas(pages, `${glass}:not([data-connectea-login]) :is(#cx-specificity-anchor, .v-app.librarylearningcontentui, .v-app.librarylearningcontentui > .v-ui.v-scrollable)`),
+    'the Content canvas must be transparent with or without sections, scoped to the Content app');
+  const empty = fs.readFileSync(path.join(styles, 'theme-empty-states.css'), 'utf8');
+  assert.ok(cssHas(empty, '.connectea-dark cnt-paginator:has(.c-empty-content) {\n  justify-content: center !important;') && cssHas(empty, '.eds-c-empty-content'),
+    'empty states must be centred in every dark theme, not only Liquid Glass');
+  const bars = fs.readFileSync(path.join(styles, 'theme-control-bars.css'), 'utf8');
+  assert.ok(cssHas(bars, '.connectea-dark :is(mat-paginator, .connect-paginator-container, .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) {') && cssHas(bars, 'html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(mat-paginator'),
+    'paginators and the Select All row need their own surface in dark themes and in Light with a wallpaper');
+  for (const file of ['theme-empty-states.css', 'theme-control-bars.css']) {
+    assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes(file), `${file} must be registered in manifest.json`);
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -3,8 +3,9 @@
  * Blocks nested inside a glass card stay clear and use hairline dividers instead of a second opaque fill.
  */
 
-/* Content: the Vaadin canvas lets the wallpaper through only on the page that lists sections */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :is(.v-ui.v-scrollable, .v-app):has(.cvr-c-thori-pnl) {
+/* Content: the Vaadin canvas lets the wallpaper through, with sections or without. Connect's canvas rule lists
+   #main-content, so this :is() carries an unused id (#cx-specificity-anchor) to outrank it without changing what matches. */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :is(#cx-specificity-anchor, .v-app.librarylearningcontentui, .v-app.librarylearningcontentui > .v-ui.v-scrollable) {
   background: transparent !important;
   background-color: transparent !important;
 }

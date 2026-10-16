@@ -48,12 +48,6 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   padding-inline: 20px;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {
-  align-items: center;
-  margin-bottom: 12px;
-  padding: 4px 16px 0;
-}
-
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) p.mat-h2 {
   width: fit-content;
   margin-bottom: 12px !important;
@@ -73,12 +67,15 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 
 /* Empty states ("There are currently no ...") become one centred glass card */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-paginator:has(.c-empty-content) {
-  justify-content: center !important;
   overflow: hidden !important;
-  padding: 16px !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-paginator:has(.c-empty-content) :is(.c-empty-content, .c-empty-content p) {
-  margin-inline: auto !important;
-  text-align: center !important;
+/* Content (Vaadin) empty state: the card is the .eds-c-empty-content block, and its canvas lets the wallpaper through */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-empty-content {
+  background-color: var(--cx-gl-fill) !important;
+  backdrop-filter: var(--cx-gl-blur) !important;
+  -webkit-backdrop-filter: var(--cx-gl-blur) !important;
+  box-shadow: var(--cx-gl-edge) !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
 }
