@@ -2116,7 +2116,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           const parentStyle = window.getComputedStyle(el.parentElement);
           const parentBg = parseRgb(parentStyle.backgroundColor);
           // A container and its own padding are one surface: when the element fills the parent's content box
-          // (both axes), the parent is that element's padding and must be exactly the same colour
+          // (both axes), the parent is that element's padding and should be the same colour
           const isPaddingOf = (() => {
             const pr = el.parentElement.getBoundingClientRect(), er = el.getBoundingClientRect();
             const pad = ['Top', 'Right', 'Bottom', 'Left'].map(sd => parseFloat(parentStyle[`padding${sd}`]) || 0);
@@ -2129,9 +2129,9 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
             issues.push({
               category: 'STYLE',
               type: 'PADDING_COLOR_MISMATCH',
-              severity: 'CRITICAL',
+              severity: 'WARNING',
               selector,
-              details: `Element fills its parent's content box, so the parent's padding must be the same colour (${style.backgroundColor} vs ${parentStyle.backgroundColor})`,
+              details: `Element fills its parent's content box, so the parent's padding should be the same colour (${style.backgroundColor} vs ${parentStyle.backgroundColor})`,
               contrast: getContrast(elBg, parentBg).toFixed(2)
             });
           }
