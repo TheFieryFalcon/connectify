@@ -106,9 +106,21 @@
           return; // Do not auto-login: let session expiry or manual logout take effect
       }
 
+      // Only a saved password / browser autofill may log in: anything the user typed or pasted is left alone
+      let userTyped = false;
+      const markTyped = () => { userTyped = true; };
+      const isAutofilled = el => {
+        for (const sel of [':autofill', ':-webkit-autofill']) {
+          try { if (el.matches(sel)) return true; } catch (e) {}
+        }
+        return false;
+      };
+      // Chrome hides an autofilled password's value from scripts until the page is touched, so :autofill counts as filled
+      const isFilled = el => el.value.trim() !== '' || isAutofilled(el);
+
       const attemptLogin = () => {
         storageGet(['cx-autologin-enabled'], (res) => {
-            if (res['cx-autologin-enabled'] === false) return;
+            if (res['cx-autologin-enabled'] === false || userTyped) return;
             
             const userField = document.getElementById('ssousername');
             const passField = document.getElementById('password');
@@ -116,7 +128,7 @@
             const loginBtn = document.getElementById('login');
             
             if (userField && passField && loginBtn) {
-              if (userField.value.trim() !== '' && passField.value !== '') {
+              if (isFilled(userField) && isFilled(passField)) {
                 if (termsBox && !termsBox.checked) {
                   termsBox.checked = true;
                 }
@@ -137,6 +149,10 @@
       const userField = document.getElementById('ssousername');
       const passField = document.getElementById('password');
       if (userField && passField) {
+          for (const field of [userField, passField]) {
+              field.addEventListener('keydown', markTyped);
+              field.addEventListener('paste', markTyped);
+          }
           userField.addEventListener('input', attemptLogin);
           passField.addEventListener('input', attemptLogin);
           userField.addEventListener('change', attemptLogin);

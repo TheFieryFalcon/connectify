@@ -7575,6 +7575,15 @@ runTest('Test 161: A dialog and its padding regions share one surface; a table-w
   assert.ok(cssHas(bar, 'cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)),'), 'a cnt-paginator wrapping the table must not get flex/space-between layout');
 });
 
+runTest('Test 162: Auto-login only fires for a saved password or browser autofill, never for typed input', () => {
+  const js = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login.js'), 'utf8');
+  assert.ok(js.includes("':autofill'") && js.includes("':-webkit-autofill'"), 'auto-login must detect browser autofill in Firefox and Chrome');
+  assert.ok(js.includes('isFilled(userField) && isFilled(passField)'), 'auto-login must require both credential fields to be filled');
+  assert.ok(js.includes("field.addEventListener('keydown', markTyped)") && js.includes("field.addEventListener('paste', markTyped)"),
+    'typing or pasting in a credential field must mark the form as user-entered');
+  assert.ok(js.includes("=== false || userTyped) return;"), 'auto-login must not fire once the user typed');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
