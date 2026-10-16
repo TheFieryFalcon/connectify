@@ -160,7 +160,8 @@
 
     // A click on the handle must win over hover, whatever order the browser sends its events in (Dia
     // fires hover events around clicks differently): after a click-close the drawer stays closed until
-    // the pointer has left the handle and the left-edge zone, and a click that lands right after a
+    // the pointer moves somewhere off the handle and outside the left-edge zone (the handle sliding out
+    // from under a still pointer doesn't count), and a click that lands right after a
     // hover-open belongs to the same gesture, so it keeps the drawer open.
     const HOVER_CLICK_GRACE_MS = 400;
     let holdClosed = false;
@@ -190,7 +191,6 @@
       const sb = getSidebar();
       if (sb && sb.hidden) hoverOpen();
     });
-    handle.addEventListener('mouseleave', releaseHold);
 
     window.ConnectifySidebarHandle = {
       handle,
