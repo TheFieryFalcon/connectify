@@ -5,8 +5,8 @@
 /* Translucent Assessment Outline Accordions & Subject Cards */
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, [data-subject-card], .mat-card) {
   background-color: var(--cx-glass-card-bg, rgba(18, 26, 40, var(--cx-glass-opacity, 0.65))) !important;
-  backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) contrast(102%) !important;
-  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) contrast(102%) !important;
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
 }
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-accordion, .eds-c-accordion__panel, .v-panel-content, .cvr-c-tasks, .cvr-c-task-group, .cvr-c-task, .cvr-c-task__details, .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-accordion__section, .eds-c-accordion__section-body) {
   background: transparent !important; background-color: transparent !important;

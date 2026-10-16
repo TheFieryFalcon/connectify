@@ -87,7 +87,7 @@
       isCustom: true,
       tokenVersion: TOKEN_VERSION,
       liquidGlass: Boolean(themeDef.liquidGlass),
-      glassBlur: typeof themeDef.glassBlur === 'number' ? themeDef.glassBlur : (existing?.glassBlur ?? 16),
+      glassBlur: typeof themeDef.glassBlur === 'number' ? themeDef.glassBlur : (existing?.glassBlur ?? 12),
       glassOpacity: typeof themeDef.glassOpacity === 'number' ? themeDef.glassOpacity : (existing?.glassOpacity ?? 0.65),
       wallpaper: themeDef.wallpaper !== undefined ? themeDef.wallpaper : (existing ? existing.wallpaper : null),
       swatch: Array.isArray(themeDef.swatch) ? themeDef.swatch : [
@@ -119,6 +119,6 @@
     tokens.applyCustomBackground();
     tokens.restoreBackgroundFromExtensionStorage();
     const current = registry.getThemeDefinition(registry.getTheme());
-    if (isActiveCustomTheme(current)) tokens.applyCustomTokens(current.colors || tokens.getCustomColors());
+    if (isActiveCustomTheme(current)) tokens.applyCustomTokens(current.colors || tokens.getCustomColors(), current.liquidGlass ? { opacity: current.glassOpacity } : null);
   }
 })();

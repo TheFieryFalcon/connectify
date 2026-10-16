@@ -24,25 +24,25 @@
 }
 
 .connectea-dark #connectea-atar .cta-tabs {
-  background: #191f27;
+  background: var(--cx-table-row-alt, #191f27);
 }
 
 .connectea-dark #connectea-atar .cta-tabs .cta-semester[aria-pressed=true] {
-  background: #34485d;
-  color: #e0eefb;
+  background: color-mix(in srgb, var(--cx-accent, #3b82f6) 20%, var(--cx-surface-hover, #263344));
+  color: var(--cx-text-secondary, #e0eefb);
 }
 
 .connectea-dark #connectea-atar :is(.cta-breakdown,.cta-target-output>strong) {
-  background: #293746;
-  color: #d9e6f3;
+  background: var(--cx-surface-hover, #293746);
+  color: var(--cx-text-secondary, #d9e6f3);
 }
 
 .connectea-dark #connectea-atar .cta-assessment-details {
-  border-color: #414954;
+  border-color: var(--cx-nav-border, #414954);
 }
 
 .connectea-dark #connectea-atar .cta-assessment-details>summary {
-  color: #a9cbeb;
+  color: var(--cx-text-secondary, #a9cbeb);
 }
 
 @media(max-width:420px) {
@@ -100,7 +100,7 @@
 }
 
 .connectea-dark #connectea-atar .cta-breakdown-title {
-  color: #a9cbeb;
+  color: var(--cx-text-secondary, #a9cbeb);
 }
 
 @media(max-width:380px) {
@@ -141,9 +141,9 @@
 }
 
 .connectea-dark .cta-top-four-selector {
-  background: #253342 !important;
-  border-color: #3b5066 !important;
-  color: #e1eaf3 !important;
+  background: var(--cx-surface-elevated, #253342) !important;
+  border-color: var(--cx-input-border, #3b5066) !important;
+  color: var(--cx-text-secondary, #e1eaf3) !important;
 }
 
 .cta-top-four-grid {
@@ -224,5 +224,5 @@
 }
 
 .connectea-dark .cta-count-span {
-  color: #cbd5e1 !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
 }

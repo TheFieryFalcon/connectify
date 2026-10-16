@@ -191,6 +191,7 @@
             "src/theme/theme-color-utils.js",
             "src/theme/theme-oklch.js",
             "src/theme/theme-token-derive.js",
+            "src/theme/theme-glass-tokens.js",
             "src/theme/theme-customizer-markup.js",
             "src/theme/theme-customizer-controls.js",
             "src/theme/theme-customizer.js",

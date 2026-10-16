@@ -64,7 +64,7 @@
       isDark: themeDef.isDark !== false,
       isCustom: Boolean(themeDef.isCustom),
       liquidGlass: Boolean(themeDef.liquidGlass),
-      glassBlur: typeof themeDef.glassBlur === 'number' ? themeDef.glassBlur : 16,
+      glassBlur: typeof themeDef.glassBlur === 'number' ? themeDef.glassBlur : 12,
       glassOpacity: typeof themeDef.glassOpacity === 'number' ? themeDef.glassOpacity : 0.65,
       wallpaper: themeDef.wallpaper || null,
       swatch: Array.isArray(themeDef.swatch) ? themeDef.swatch : ['#1e2632', '#3b82f6'],
@@ -133,7 +133,7 @@
     const root = document.documentElement;
     if (theme.id === 'liquid-glass' || theme.liquidGlass || customColors?.glassDiffusion) {
       root.setAttribute('data-connectea-glass', 'true');
-      root.style.setProperty('--cx-glass-blur', `${theme.glassBlur ?? customColors?.glassBlur ?? 16}px`);
+      root.style.setProperty('--cx-glass-blur', `${theme.glassBlur ?? customColors?.glassBlur ?? 12}px`);
       root.style.setProperty('--cx-glass-opacity', `${theme.glassOpacity ?? customColors?.glassOpacity ?? 0.65}`);
     } else {
       root.removeAttribute('data-connectea-glass');
@@ -151,7 +151,8 @@
     if (isCustomTheme(theme) || customColors) {
       const colors = customColors || theme.colors;
       if (colors) setCustomColors(colors);
-      tokens.applyCustomTokens(colors || tokens.getCustomColors());
+      const glass = theme.liquidGlass || customColors?.glassDiffusion ? { opacity: theme.glassOpacity ?? customColors?.glassOpacity ?? 0.65 } : null;
+      tokens.applyCustomTokens(colors || tokens.getCustomColors(), glass);
     } else {
       tokens.clearCustomTokens();
     }

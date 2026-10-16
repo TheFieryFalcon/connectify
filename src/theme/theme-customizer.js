@@ -32,7 +32,7 @@
     emoji: '🎨',
     liquidGlass: false,
     wallpaper: null,
-    glassBlur: 16,
+    glassBlur: 12,
     glassOpacity: 0.65,
     activeToken: 'canvas',
     pickerH: 215,
@@ -59,6 +59,7 @@
       '--cx-accent': t.accent, '--cx-accent-hover': t.accentHover || t.accent, '--cx-text-primary': t.textPrimary,
       '--cx-button-bg': t.button, '--cx-button-hover': t.buttonHover || t.button,
       ...(window.ConnectifyThemeDerive?.cssProps(t) || {}),
+      ...(state.liquidGlass ? window.ConnectifyThemeGlassTokens?.props(t, state.glassOpacity) || {} : {}),
       '--cx-glass-blur': `${state.glassBlur}px`, '--cx-glass-opacity': `${state.glassOpacity}`
     };
     for (const [k, v] of Object.entries(vars)) preview.style.setProperty(k, v);
@@ -67,7 +68,7 @@
     if (card) {
       card.style.borderRadius = '16px';
       card.style.backdropFilter = state.liquidGlass ? `blur(${state.glassBlur}px)` : 'none';
-      card.style.backgroundColor = state.liquidGlass ? `color-mix(in srgb, ${t.surface} ${Math.round(state.glassOpacity * 100)}%, transparent)` : t.surface;
+      card.style.backgroundColor = vars['--cx-surface-bg'];
     }
   }
 
@@ -211,7 +212,7 @@
       name: themeToEdit ? (themeToEdit.name || 'Custom Theme') : 'My Theme',
       emoji: themeToEdit?.icon || '🎨',
       liquidGlass: Boolean(themeToEdit?.liquidGlass),
-      glassBlur: typeof themeToEdit?.glassBlur === 'number' ? themeToEdit.glassBlur : 16,
+      glassBlur: typeof themeToEdit?.glassBlur === 'number' ? themeToEdit.glassBlur : 12,
       glassOpacity: typeof themeToEdit?.glassOpacity === 'number' ? themeToEdit.glassOpacity : 0.65,
       wallpaper: themeToEdit?.wallpaper || null,
       tokens: themeToEdit?.colors ? themeTokens(themeToEdit.colors) : getDefaultTokens()

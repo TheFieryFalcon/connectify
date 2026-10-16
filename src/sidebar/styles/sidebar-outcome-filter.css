@@ -40,12 +40,12 @@
 }
 
 .connectea-dark .connectea-outcome-bar {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(255, 255, 255, 0.16) !important;
+  background: color-mix(in srgb, var(--cx-text-primary, #ffffff) 6%, transparent) !important;
+  border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 16%, transparent) !important;
 }
 
 .connectea-dark .connectea-outcome-segment:not([class*="connectea-active-"]) {
-  background: #334155 !important;
+  background: var(--cx-button-hover, #334155) !important;
   opacity: 0.4 !important;
 }
 
@@ -206,7 +206,7 @@
 .connectea-dark #connectify-sidebar .cx-back-to-all-btn {
   background: var(--cx-accent, #3b82f6) !important;
   border-color: var(--cx-accent-hover, #2563eb) !important;
-  color: #ffffff !important;
+  color: var(--cx-button-primary-text, #ffffff) !important;
 }
 
 .connectea-dark #connectify-sidebar .cx-back-to-all-btn:hover {

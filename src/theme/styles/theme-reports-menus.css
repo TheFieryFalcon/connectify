@@ -74,8 +74,8 @@
   .cvr-c-sub-header, .cvr-c-subheader, .eds-c-sub-header, .cvr-c-service-bar, .cvr-c-service-bar__container
 ) {
   background-color: rgba(255, 255, 255, var(--cx-glass-opacity, 0.75)) !important;
-  backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) !important;
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
 }
 
 :is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :is(
@@ -84,8 +84,8 @@
   .cvr-c-sub-header, .cvr-c-subheader, .eds-c-sub-header, .cvr-c-service-bar, .cvr-c-service-bar__container
 ) {
   background-color: color-mix(in srgb, color-mix(in srgb, var(--cx-canvas-bg, #0b1120) 92%, var(--cx-text-primary, #ffffff)) calc(var(--cx-glass-opacity, 0.75) * 100%), transparent) !important;
-  backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) !important;
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
 }
 
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(

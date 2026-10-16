@@ -31,7 +31,9 @@
     '--cx-button-border-hover', '--cx-button-text-hover', '--cx-button-primary-bg', '--cx-button-primary-hover',
     '--cx-button-primary-text', '--cx-input-text', '--cx-input-placeholder', '--cx-input-border-focus',
     '--cx-table-header-bg', '--cx-table-row-hover', '--cx-table-row-alt', '--cx-table-border', '--cx-badge-bg',
-    '--cx-badge-border', '--cx-badge-text', '--cx-scrollbar-thumb', '--cx-scrollbar-track', '--cx-avatar-bg'
+    '--cx-badge-border', '--cx-badge-text', '--cx-scrollbar-thumb', '--cx-scrollbar-track', '--cx-avatar-bg',
+    // Liquid Glass custom themes (theme-glass-tokens.js)
+    '--cx-shadow-sm', '--cx-shadow-md', '--cx-shadow-lg'
   ];
 
   const isAuthDisabled = () => Boolean(window.ConnectifyThemeAuth?.isAuthDisabled());
@@ -60,7 +62,8 @@
     for (const el of tokenTargets()) for (const prop of TOKEN_PROPS) el.style.removeProperty(prop);
   }
 
-  function applyCustomTokens(colors) {
+  /** glass: { opacity } when the theme has Liquid Glass on, so its panels take the translucent glass recipe. */
+  function applyCustomTokens(colors, glass = null) {
     const derive = window.ConnectifyThemeDerive;
     const c = derive ? derive.complete(colors || getCustomColors()) : (colors || getCustomColors());
     const tokens = {
@@ -75,7 +78,8 @@
       '--cx-button-bg': c.button, '--cx-button-hover': c.buttonHover, '--cx-button-text': c.buttonText,
       '--cx-input-bg': c.inputBg, '--cx-input-border': c.inputBorder,
       // Every other token (nav, table, badge, focus, primary buttons ...) derived from the ones above
-      ...(derive?.cssProps(c) || {})
+      ...(derive?.cssProps(c) || {}),
+      ...(glass ? window.ConnectifyThemeGlassTokens?.props(c, glass.opacity) || {} : {})
     };
     // Clear first so a token the previous custom theme set but this one omits does not linger
     clearCustomTokens();

@@ -163,32 +163,32 @@
 }
 
 .connectea-dark #connectea-atar {
-  background: #222830;
-  color: #dce2e8;
-  border-color: #496078;
+  background: var(--cx-surface-bg, #222830);
+  color: var(--cx-text-secondary, #dce2e8);
+  border-color: var(--cx-badge-border, #496078);
 }
 
 .connectea-dark #connectea-atar :is(.cta-note,.cta-course small) {
-  color: #b4c5d5;
+  color: var(--cx-text-secondary, #b4c5d5);
 }
 
 .connectea-dark .cta-semester {
-  background: #293746;
-  color: #dce2e8;
-  border-color: #496078;
+  background: var(--cx-surface-hover, #293746);
+  color: var(--cx-text-secondary, #dce2e8);
+  border-color: var(--cx-badge-border, #496078);
 }
 
 .connectea-dark .cta-semester[aria-pressed=true] {
-  background: #334c65;
-  border-color: #93bce0;
+  background: color-mix(in srgb, var(--cx-accent, #3b82f6) 20%, var(--cx-surface-hover, #263344));
+  border-color: var(--cx-accent-hover, #93bce0);
 }
 
 .connectea-dark .cta-course {
-  border-color: #414954;
+  border-color: var(--cx-nav-border, #414954);
 }
 
 .connectea-dark .cta-method a {
-  color: #a9cbeb;
+  color: var(--cx-text-secondary, #a9cbeb);
 }
 
 #connectea-atar :focus-visible, #connectea-atar-toggle:focus-visible {

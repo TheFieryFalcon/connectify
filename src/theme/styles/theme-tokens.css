@@ -163,8 +163,8 @@ html.connectea-dark,
   .connectea-panel, #connectify-sidebar, #connectea-theme-menu, .v-panel,
   .modal-content, .ui-dialog, .cvr-c-service-bar, .cvr-c-service-bar__container
 ) {
-  backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) contrast(102%) !important;
-  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 16px)) saturate(160%) contrast(102%) !important;
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
   box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 16px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -10px rgba(0, 0, 0, 0.45) !important;
 }
 
@@ -179,7 +179,9 @@ html.connectea-dark,
   opacity: 1 !important;
 }
 
-[data-connectea-has-custom-bg="true"] body {
+[data-connectea-has-custom-bg="true"] body,
+/* The root paints too, so a page shorter than the window shows wallpaper below it, not the canvas */
+html.connectea-dark[data-connectea-has-custom-bg="true"], html[data-connectea-has-custom-bg="true"]:not(.connectea-dark) {
   background: var(--cx-custom-bg-image) center center / cover no-repeat fixed !important;
 }
 [data-connectea-has-custom-bg="true"] :is(.cvr-c-app-layout, .cvr-c-app-layout__body, #main-content, .v-app, .v-ui, .v-scrollable):has(.eds-c-tile, .cvr-c-tile) {

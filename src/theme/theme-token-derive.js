@@ -44,7 +44,7 @@
       borderSubtle: up(border, -10.5), borderStrong: up(border, 8.5), inputBorder: up(border, -7),
       accentHover: up(accent, 8, 0.8),
       textSecondary: o.ensureContrast(o.shiftL(text, -d * 7), surface, 5),
-      textMuted: quietText(text, surface, 26, dark), tileLinkColor: text,
+      textMuted: o.ensureContrast(quietText(text, surface, 26, dark), surface, 5), tileLinkColor: text,
       buttonHover: up(button, 5.5), buttonText: o.ensureContrast(text, button, 5)
     });
     return tokens;
@@ -79,7 +79,7 @@
     }
     const buttonText = c.buttonText || o.readable(c.button);
     return {
-      '--cx-text-secondary': secondary, '--cx-text-muted': c.textMuted, '--cx-text-disabled': disabled,
+      '--cx-text-secondary': secondary, '--cx-text-muted': o.ensureContrast(c.textMuted, c.surface, 5), '--cx-text-disabled': disabled,
       '--cx-tile-link-color': c.tileLinkColor,
       '--cx-surface-active': up(c.surfaceHover, 4),
       '--cx-border-hover': c.borderStrong, '--cx-border-focus': c.accent,

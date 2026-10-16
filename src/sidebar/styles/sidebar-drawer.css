@@ -137,9 +137,9 @@
 }
 
 .connectea-dark #connectify-sidebar #connectify-weakness #cx-radar-mode {
-  background: #2a3b4c;
-  color: #e1eaf3;
-  border-color: #496178;
+  background: var(--cx-button-hover, #2a3b4c);
+  color: var(--cx-text-secondary, #e1eaf3);
+  border-color: var(--cx-badge-border, #496178);
 }
 
 #connectify-sidebar #connectify-categories .cx-cat-wrap {
@@ -168,9 +168,9 @@
 }
 
 .connectea-dark #connectify-sidebar #connectify-categories .cx-cat-wrap input {
-  background: #2a3b4c;
-  color: #e1eaf3;
-  border-color: #496178;
+  background: var(--cx-button-hover, #2a3b4c);
+  color: var(--cx-text-secondary, #e1eaf3);
+  border-color: var(--cx-badge-border, #496178);
 }
 
 #connectify-sidebar .cta-heading strong {

@@ -7653,6 +7653,7 @@ runTest('Test 165: Custom themes derive every secondary token; the customizer fo
     assert.ok(props[key], `Basic mode must derive ${key}`);
   }
   assert.ok(win.ConnectifyThemeDerive.contrast(props['--cx-text-secondary'], basic.surface) >= 5, 'secondary text must keep >= 5:1 on the surface');
+  assert.ok(win.ConnectifyThemeDerive.contrast(props['--cx-text-muted'], basic.surface) >= 5, 'muted text must keep >= 5:1 on the surface');
   const light = win.ConnectifyThemeDerive.cssProps({ canvas: '#f4efe6', surface: '#fffaf0', button: '#efe6d6', border: '#cbbfa8', accent: '#9a3412', textPrimary: '#1c1917' });
   assert.ok(win.ConnectifyThemeDerive.contrast(light['--cx-text-secondary'], '#fffaf0') >= 5, 'a light custom theme must keep secondary text readable too');
   const tokensJs = fs.readFileSync(path.join(themeDir, 'theme-custom-tokens.js'), 'utf8');
@@ -7694,14 +7695,14 @@ runTest('Test 166: Every custom-theme token derives from the 6 Basic tokens by t
   for (const k of ['surfaceElevated', 'surfaceHover', 'borderSubtle', 'borderStrong']) {
     assert.ok(Math.abs(O.toOklch(green[k]).h - O.toOklch('#163322').h) < 20, `${k} must keep the surface/border hue`);
   }
-  // 3. Primary, secondary and link text stay >= 5:1 for dark and light palettes; muted text may be quieter
+  // 3. Primary, secondary, muted and link text stay >= 5:1 for dark and light palettes
   for (const basic of [
     { canvas: '#14211a', surface: '#1f3326', button: '#27402f', border: '#4c7058', accent: '#8bc34a', textPrimary: '#f1f8e9' },
     { canvas: '#f4efe6', surface: '#fffaf0', button: '#efe6d6', border: '#cbbfa8', accent: '#9a3412', textPrimary: '#1c1917' },
     { canvas: '#1a0b2e', surface: '#2a1446', button: '#341a57', border: '#6b3fa0', accent: '#d946ef', textPrimary: '#faf5ff' }
   ]) {
     const p = D.cssProps(basic);
-    for (const k of ['--cx-text-secondary', '--cx-accent-link']) assert.ok(O.contrast(p[k], basic.surface) >= 5, `${k} must keep >= 5:1`);
+    for (const k of ['--cx-text-secondary', '--cx-text-muted', '--cx-accent-link']) assert.ok(O.contrast(p[k], basic.surface) >= 5, `${k} must keep >= 5:1`);
     assert.ok(O.contrast(p['--cx-button-primary-text'], p['--cx-button-primary-bg']) >= 5, 'primary button text must keep >= 5:1');
   }
   // 4. Full mode exposes the heavily used tokens
@@ -7760,6 +7761,59 @@ runTest('Test 167: Dark and glass rules route theme colours through tokens, so c
   }
   assert.deepStrictEqual(bare, [], `Dark-preset colours must go through var(--cx-*, <literal>) in dark/glass rules: ${bare.join(', ')}`);
   assert.ok(/--cx-gl-fill: color-mix\(in srgb, color-mix\(in srgb, var\(--cx-canvas-bg/.test(read('theme-glass-surface.css')), 'the glass recipe fill must follow the canvas token');
+  // Sidebar, ATAR, Predictor and Progress styles: no neutral (navy/grey) literal left in dark rules; only
+  // saturated semantic colours (outcome segments, success/warning cards, category colours) stay fixed
+  const toLin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const chroma = hex => {
+    const h = hex.length === 4 ? hex.slice(1).split('').map(x => x + x).join('') : hex.slice(1);
+    const [r, g, b] = [0, 2, 4].map(i => toLin(parseInt(h.slice(i, i + 2), 16)));
+    const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b), m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b), s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787835 * b);
+    return Math.hypot(1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s);
+  };
+  const semantic = new Set(['#143522', '#332a18']); // Predictor high (green) and unpredicted (amber) cards
+  const neutral = [];
+  for (const dirName of ['sidebar/styles', 'atar', 'progress']) {
+    const toolDir = path.join(BASE_DIR, 'src', dirName);
+    for (const f of fs.readdirSync(toolDir).filter(x => x.endsWith('.css'))) {
+      const css = origReadFileSync.call(fs, path.join(toolDir, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+      for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+        if (!/connectea-dark|connectea-glass|liquid-glass/.test(m[1]) || /not\(\.connectea-dark\)/.test(m[1])) continue;
+        let body = m[2], prev;
+        do { prev = body; body = body.replace(/var\([^()]*\)/g, ''); } while (body !== prev);
+        for (const h of body.matchAll(/#[0-9a-f]{6}\b|#[0-9a-f]{3}\b/gi)) {
+          if (chroma(h[0]) < 0.06 && !semantic.has(h[0].toLowerCase())) neutral.push(`${dirName}/${f} ${h[0]}`);
+        }
+      }
+    }
+  }
+  assert.deepStrictEqual(neutral, [], `sidebar/tool dark rules must route neutral colours through tokens: ${neutral.join(', ')}`);
+  const cohortStyles = fs.readFileSync(path.join(BASE_DIR, 'src/cohort/cohort-styles.js'), 'utf8');
+  assert.ok(cohortStyles.includes('background: var(--cx-input-bg, #2a3b4c);'), 'the dark Type dropdown must follow the input tokens');
+});
+
+runTest('Test 168: A custom theme with Liquid Glass on becomes a recoloured Liquid Glass theme; default blur is 12px', () => {
+  const themeDir = path.join(BASE_DIR, 'src/theme');
+  const win = {};
+  for (const f of ['theme-color-utils.js', 'theme-oklch.js', 'theme-token-derive.js', 'theme-glass-tokens.js']) {
+    new Function('window', fs.readFileSync(path.join(themeDir, f), 'utf8'))(win);
+  }
+  const c = win.ConnectifyThemeDerive.complete({ canvas: '#14211a', surface: '#1f3326', button: '#27402f', border: '#4c7058', accent: '#8bc34a', textPrimary: '#f1f8e9' });
+  const glass = win.ConnectifyThemeGlassTokens.props(c, 0.3);
+  assert.strictEqual(glass['--cx-surface-bg'], 'rgba(31, 51, 38, 0.3)', 'glass panels must be the theme surface at the Transparency opacity');
+  assert.strictEqual(glass['--cx-card-bg'], glass['--cx-surface-bg'], 'cards share the translucent surface');
+  assert.ok(/^rgba\(20, 33, 26, /.test(glass['--cx-nav-bg']) && /^rgba\(20, 33, 26, /.test(glass['--cx-input-bg']), 'nav and input fills must be the theme canvas, translucent');
+  assert.strictEqual(glass['--cx-border'], 'rgba(241, 248, 233, 0.22)', 'borders must be the theme text colour at the preset 22% overlay');
+  assert.strictEqual(glass['--cx-surface-hover'], 'rgba(241, 248, 233, 0.14)', 'hover must be the preset 14% overlay of the text colour');
+  const tokensJs = fs.readFileSync(path.join(themeDir, 'theme-custom-tokens.js'), 'utf8');
+  assert.ok(tokensJs.includes('ConnectifyThemeGlassTokens?.props(c, glass.opacity)'), 'applyCustomTokens must apply glass tokens when glass is on');
+  const registryJs = fs.readFileSync(path.join(themeDir, 'theme-registry.js'), 'utf8');
+  assert.ok(/theme\.liquidGlass \|\| customColors\?\.glassDiffusion \? \{ opacity:/.test(registryJs), 'the registry must pass the glass opacity for Liquid Glass custom themes');
+  assert.ok(registryJs.includes("themeDef.glassBlur : 12,") && registryJs.includes('glassBlur ?? 12}px'), 'default blur must be 12px');
+  assert.ok(fs.readFileSync(path.join(themeDir, 'theme-customizer.js'), 'utf8').includes('glassBlur: 12,'), 'the customizer must default blur to 12px');
+  const styles = fs.readdirSync(path.join(themeDir, 'styles')).map(f => origReadFileSync.call(fs, path.join(themeDir, 'styles', f), 'utf8')).join('\n');
+  assert.ok(!styles.includes('var(--cx-glass-blur, 16px)'), 'stylesheet blur fallbacks must be 12px');
+  const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.includes('"src/theme/theme-token-derive.js",\n            "src/theme/theme-glass-tokens.js"'), 'theme-glass-tokens.js must load after theme-token-derive.js');
 });
 
 Promise.all(pendingTestPromises).then(() => {

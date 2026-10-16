@@ -124,7 +124,7 @@
 }
 :is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-clear-cache-btn {
   background: #c0392b !important;
-  color: #ffffff !important;
+  color: var(--cx-text-primary, #ffffff) !important;
   border: 1px solid #962d22 !important;
 }
 :is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-clear-cache-btn:hover {

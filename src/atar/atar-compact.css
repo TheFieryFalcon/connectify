@@ -36,8 +36,8 @@
 }
 
 .connectea-dark .cta-subject-select {
-  background: #202a35;
-  color: #e4edf6;
+  background: var(--cx-button-bg, #202a35);
+  color: var(--cx-text-secondary, #e4edf6);
 }
 
 /* Compact calculator layout: results first, optional task detail below. */
@@ -144,17 +144,17 @@
 
 .connectea-dark .cta-semesters:not(.cta-tabs) .cta-semester.cta-semester-indicator,
 .connectea-dark .cta-semester.cta-semester-indicator {
-  background: #253342 !important;
-  border-color: #3b5066 !important;
-  border-left: 4px solid #6ba5d6 !important;
-  color: #dceaf6 !important;
+  background: var(--cx-surface-elevated, #253342) !important;
+  border-color: var(--cx-input-border, #3b5066) !important;
+  border-left: 4px solid var(--cx-accent-hover, #6ba5d6) !important;
+  color: var(--cx-text-secondary, #dceaf6) !important;
 }
 
 .connectea-dark .cta-semester.cta-semester-closed {
-  background: #1e252e !important;
-  border: 1px dashed #3f4e5e !important;
+  background: var(--cx-surface-bg, #1e252e) !important;
+  border: 1px dashed var(--cx-nav-border, #3f4e5e) !important;
   border-left: 4px solid transparent !important;
-  color: #6e8093 !important;
+  color: var(--cx-text-disabled, #6e8093) !important;
 }
 
 #connectea-atar .cta-course {

@@ -22,7 +22,7 @@
   color: #55667a;
 }
 .connectea-dark #connectify-predictor .cx-pred-subtitle {
-  color: #94a3b8;
+  color: var(--cx-text-muted, #94a3b8);
 }
 
 /* Primary Tabs (matching .cta-tabs pill bar design language) */
@@ -35,7 +35,7 @@
   margin-bottom: 16px;
 }
 .connectea-dark .cx-pred-main-tabs {
-  background: #191f27;
+  background: var(--cx-table-row-alt, #191f27);
 }
 .cx-pred-main-tab {
   flex: 1;
@@ -60,14 +60,14 @@
   font-weight: 700;
 }
 .connectea-dark .cx-pred-main-tab {
-  color: #a0b2c6;
+  color: var(--cx-text-muted, #a0b2c6);
 }
 .connectea-dark .cx-pred-main-tab:hover {
-  color: #e1eaf3;
+  color: var(--cx-text-secondary, #e1eaf3);
 }
 .connectea-dark .cx-pred-main-tab.active {
-  background: #34485d;
-  color: #e0eefb;
+  background: color-mix(in srgb, var(--cx-accent, #3b82f6) 20%, var(--cx-surface-hover, #263344));
+  color: var(--cx-text-secondary, #e0eefb);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -104,18 +104,18 @@
   box-shadow: 0 1px 3px rgba(36, 97, 140, 0.3);
 }
 .connectea-dark .cx-pred-subtab {
-  background: #253342;
-  border-color: #3b5066;
-  color: #dceaf6;
+  background: var(--cx-surface-elevated, #253342);
+  border-color: var(--cx-input-border, #3b5066);
+  color: var(--cx-text-secondary, #dceaf6);
 }
 .connectea-dark .cx-pred-subtab:hover {
-  background: #33485d;
-  color: #ffffff;
+  background: var(--cx-surface-hover, #33485d);
+  color: var(--cx-text-primary, #ffffff);
 }
 .connectea-dark .cx-pred-subtab.active {
-  background: #3575b9;
-  border-color: #6ba5d6;
-  color: #ffffff;
+  background: var(--cx-button-primary-bg, #3575b9);
+  border-color: var(--cx-accent-hover, #6ba5d6);
+  color: var(--cx-text-primary, #ffffff);
 }
 
 /* Cards & Containers */
@@ -128,9 +128,9 @@
   box-sizing: border-box;
 }
 .connectea-dark .cx-pred-card {
-  background: #253342;
-  border-color: #3b5066;
-  color: #e1eaf3;
+  background: var(--cx-surface-elevated, #253342);
+  border-color: var(--cx-input-border, #3b5066);
+  color: var(--cx-text-secondary, #e1eaf3);
 }
 
 .cx-pred-scenario-card {

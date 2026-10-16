@@ -36,10 +36,10 @@
 
 /* Dark mode overrides for notifications */
 .connectea-dark .cx-notification {
-  background: #1e293b !important;
-  background-color: #1e293b !important;
-  color: #e2e8f0 !important;
-  border-color: #334155 !important;
+  background: var(--cx-button-bg, #1e293b) !important;
+  background-color: var(--cx-button-bg, #1e293b) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+  border-color: var(--cx-border-subtle, #334155) !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
 }
 
@@ -56,7 +56,7 @@
 }
 
 .connectea-dark .cx-notification-title {
-  color: #f8fafc !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 .connectea-dark .cx-notification-close {
@@ -64,51 +64,51 @@
 }
 
 .connectea-dark .cx-notification-body {
-  color: #cbd5e1 !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
 .connectea-dark .cx-notification-details {
-  background: #0f172a !important;
-  color: #cbd5e1 !important;
+  background: var(--cx-nav-item-active, #0f172a) !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
 .connectea-dark .cx-notification-btn--primary {
-  background: #2563eb !important;
-  background-color: #2563eb !important;
-  color: #ffffff !important;
+  background: var(--cx-accent-active, #2563eb) !important;
+  background-color: var(--cx-accent-active, #2563eb) !important;
+  color: var(--cx-button-primary-text, #ffffff) !important;
   border-color: #1d4ed8 !important;
 }
 
 .connectea-dark .cx-notification-btn--primary:hover {
-  background: #1d4ed8 !important;
-  background-color: #1d4ed8 !important;
-  color: #ffffff !important;
+  background: var(--cx-button-primary-hover, #1d4ed8) !important;
+  background-color: var(--cx-button-primary-hover, #1d4ed8) !important;
+  color: var(--cx-button-primary-text, #ffffff) !important;
 }
 
 .connectea-dark .cx-notification-btn--secondary {
-  background: #334155 !important;
-  background-color: #334155 !important;
-  color: #e2e8f0 !important;
-  border-color: #475569 !important;
+  background: var(--cx-button-hover, #334155) !important;
+  background-color: var(--cx-button-hover, #334155) !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+  border-color: var(--cx-input-border, #475569) !important;
 }
 
 .connectea-dark .cx-notification-btn--secondary:hover {
-  background: #475569 !important;
-  background-color: #475569 !important;
-  color: #ffffff !important;
+  background: var(--cx-button-hover, #475569) !important;
+  background-color: var(--cx-button-hover, #475569) !important;
+  color: var(--cx-text-primary, #ffffff) !important;
 }
 
 .connectea-dark .cx-notification-btn--accent {
   background: #8b5cf6 !important;
   background-color: #8b5cf6 !important;
-  color: #ffffff !important;
+  color: var(--cx-text-primary, #ffffff) !important;
   border-color: #7c3aed !important;
 }
 
 .connectea-dark .cx-notification-btn--accent:hover {
   background: #7c3aed !important;
   background-color: #7c3aed !important;
-  color: #ffffff !important;
+  color: var(--cx-text-primary, #ffffff) !important;
 }
 
 /* Card Jump / Flash Animation */
@@ -132,4 +132,4 @@
   line-height: 1.5 !important;
   color: #4b647f !important;
 }
-.connectea-dark #connectify-sidebar .cx-tools-intro{color:#94a3b8!important}
+.connectea-dark #connectify-sidebar .cx-tools-intro{color:var(--cx-text-muted, #94a3b8)!important}

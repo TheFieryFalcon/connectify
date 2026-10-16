@@ -97,25 +97,25 @@
       font-weight: 700;
     }
     .connectea-dark .connectea-type-label {
-      color: #a0b2c6;
+      color: var(--cx-text-muted, #a0b2c6);
     }
     .connectea-dark .connectea-type-select {
-      background: #2a3b4c;
-      color: #e1eaf3;
-      border-color: #496178;
+      background: var(--cx-input-bg, #2a3b4c);
+      color: var(--cx-input-text, #e1eaf3);
+      border-color: var(--cx-input-border, #496178);
     }
     .connectea-dark .connectea-type-select:hover {
-      border-color: #6ba5d6;
-      background: #33485d;
+      border-color: var(--cx-accent-hover, #6ba5d6);
+      background: var(--cx-surface-hover, #33485d);
     }
     .connectea-dark .connectea-type-select:focus {
-      border-color: #6ba5d6;
-      outline: 2px solid #6ba5d6;
+      border-color: var(--cx-accent-hover, #6ba5d6);
+      outline: 2px solid var(--cx-accent-hover, #6ba5d6);
     }
     .connectea-dark .connectea-type-select.connectea-overridden {
-      border-color: #6ba5d6;
-      background: #364e65;
-      color: #ffffff;
+      border-color: var(--cx-accent-hover, #6ba5d6);
+      background: color-mix(in srgb, var(--cx-accent, #3b82f6) 22%, var(--cx-surface-bg, #1e2632));
+      color: var(--cx-text-primary, #ffffff);
     }
     .connectea-distribution {
       display: block !important;
