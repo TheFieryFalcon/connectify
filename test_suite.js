@@ -59,8 +59,12 @@ const MODULE_BUNDLES = {
   ],
   'assessment-data.js': [
     'assessment-cache.js',
+    'assessment-parse-helpers.js',
     'assessment-parser.js',
+    'assessment-expand-progress.js',
+    'assessment-accordion-watch.js',
     'assessment-expand.js',
+    'assessment-scrape.js',
     'assessment-data.js'
   ],
   'predictor-math.js': [
@@ -126,6 +130,7 @@ const SPLIT_PARTS = {
   'sidebar-notifications.css': ['sidebar-notifications.css', 'sidebar-notifications-dark.css'],
   'sidebar-predictor.css': ['sidebar-predictor.css', 'sidebar-predictor-results.css'],
   'sidebar-settings.css': ['sidebar-settings.css', 'sidebar-progress-scaling.css'],
+  'assessment-cache.js': ['cache-versions.js', 'assessment-cache.js'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js'],
   'theme-customizer.js': ['theme-color-utils.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
   // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
@@ -2266,7 +2271,7 @@ runTest('theme.css styles mat-toolbar, mat-tab-header, and eliminates stroke fro
 runTest('assessment-data.js expandAll defines pattern, supports heading fallback, and dispatches clicks safely', () => {
   const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
   assert.ok(dataJs.includes('const pattern = expand ? /show details/i : /hide details/i;'), 'expandAll must define pattern before matching headings');
-  assert.ok(dataJs.includes('heading.click()'), 'expandAll must fallback to clicking heading if no child button is found');
+  assert.ok(dataJs.includes('(btn || heading).click()'), 'expandAll must fallback to clicking heading if no child button is found');
 
   let clicked = false;
   const mockHeading = {
@@ -2345,7 +2350,7 @@ runTest('Test 91: expandAll() displays progress bar on repeated expansions and p
 
   assert.ok(!assessJs.includes("!sessionStorage.getItem('connectify:first_expand_done')"), 'expandAll must not suppress progress bar on repeated calls');
   assert.ok(assessJs.includes('setTimeout(clickNext, 65)'), 'expandAll must pace clicks with 65ms setTimeout to eliminate lag');
-  assert.ok(assessJs.includes('if (isBulkExpanding) return;'), 'assessment-data.js must guard click listeners during bulk expand');
+  assert.ok(assessJs.includes('if (!heading || isBulkExpanding()) return;'), 'accordion click listener must ignore clicks during bulk expand');
 });
 
 runTest('Test 92: readCourses() ingests connectify:grade_cache data and populates subjects across semesters', () => {
@@ -2865,16 +2870,16 @@ runTest('Test 108: Accordion expansion multi-click fix, scroll freeze during bul
   assert.ok(cssHas(sideCss, 'html.cx-freeze-scroll,\nbody.cx-freeze-scroll {\n  overflow: hidden !important;'), 'sidebar.css must define cx-freeze-scroll');
   assert.ok(assessJs.includes("classList.add('cx-freeze-scroll')"), 'assessment-data.js expandAll must add cx-freeze-scroll');
   assert.ok(assessJs.includes("classList.remove('cx-freeze-scroll')"), 'assessment-data.js finishProgress must remove cx-freeze-scroll');
-  assert.ok(assessJs.includes("updateProgress(95, 'Rendering statistics & outcome bars... 95%')") || assessJs.includes("updateProgress(95, 'Refreshing statistics & outcome bars... 95%')"), 'expandAll must persist progress pill through 95% refresh phase');
+  assert.ok(assessJs.includes("progress.update(95, 'Rendering statistics & outcome bars... 95%')"), 'expandAll must persist progress pill through 95% refresh phase');
 
   // 4. Accordion animation guard flushing and multi-click fix
   assert.ok(assessJs.includes('pendingCardsToUpdate'), 'assessment-data.js must track pendingCardsToUpdate');
-  assert.ok(assessJs.includes('window.ConnectifyCohort.schedule(true)'), 'triggerAccordionAnimationGuard must flush cohort schedule when animation settles');
+  assert.ok(assessJs.includes('window.ConnectifyCohort?.schedule?.(true)'), 'triggerAccordionAnimationGuard must flush cohort schedule when animation settles');
   assert.ok(cohortJs.includes('hasTaskNodes'), 'cohort-stats.js observer must detect task rows inserted into accordion panels');
 
   // 5. Predictor calculation skipping when valid cache is present
   assert.ok(assessJs.includes('if (!window.ConnectifyPredictorMath.isPredictionCacheCurrent?.())'), 'assessment-data.js must not pre-cache predictions when valid cache is present');
-  assert.ok(assessJs.includes('const hasValidCache = Boolean(window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.());'), 'expandAll must verify valid cache status');
+  assert.ok(assessJs.includes('if (!window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.()) {'), 'expandAll must only pre-cache predictions when the cache is not current');
   assert.ok(predMathJs.includes('if (!force && isPredictionCacheCurrent()) {\n      return;\n    }'), 'predictor-math.js must exit early when valid cache is present and force is false');
   assert.ok(cohortViewJs.includes('getCachedPrediction?.(meta.subjectName, meta.labelsKey)'), 'cohort-view.js must check cache before predicting');
 });
@@ -3018,7 +3023,7 @@ runTest('Test 111: Typography parity (unbolded overall % and letter grade), star
 
   // 6. Complete render finalization: synchronous pass and double requestAnimationFrame before scroll unlock
   assert.ok(assessJs.includes('window.ConnectifyCohort.pass()'), 'finalizeExpansion must synchronously run ConnectifyCohort.pass()');
-  assert.ok(assessJs.includes('requestAnimationFrame(completeFinalize)'), 'finalizeExpansion must wait for double requestAnimationFrame before finishProgress and scroll unlock');
+  assert.ok(assessJs.includes('requestAnimationFrame(() => requestAnimationFrame(complete))'), 'finalizeExpansion must wait for double requestAnimationFrame before finishProgress and scroll unlock');
 });
 
 runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, colon/equals/Rank removal, and flash prevention', () => {
@@ -3047,7 +3052,7 @@ runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, 
 
   // 4. Fast auto-expansion without collapsed flash
   assert.ok(atarFeatJs.includes('if (!hasAutoExpanded) {\n          checkStartupAutoExpand();\n        }'), 'atar-features.js MutationObserver must trigger checkStartupAutoExpand immediately on tile insertion');
-  assert.ok(assessJs.includes('clearTimeout(notifyUpdateTimer);'), 'assessment-data.js finalizeExpansion must clear notifyUpdateTimer to prevent delayed re-pass flash');
+  assert.ok(assessJs.includes('window.ConnectifyData?.cancelPendingNotify?.();') && assessJs.includes('cancelPendingNotify: () => clearTimeout(notifyUpdateTimer)'), 'Expand All must cancel the queued per-card update to prevent a delayed re-pass flash');
 });
 
 runTest('Test 113: Typography bolding parity between dark and light modes for task headers and details', () => {
@@ -3236,7 +3241,7 @@ runTest('Test 116: Accordion collapse performance guards, observer muting, cards
   assert.ok(domSweepJs.includes('if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;'), 'dom-sweeper.js MutationObserver must mute during accordion animation');
 
   // 4. Verify assessment-data.js expandMutationObserver mutes during animation and bulk expand
-  assert.ok(assessJs.includes('if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;'), 'assessment-data.js expandMutationObserver must mute during accordion animation');
+  assert.ok(assessJs.includes('if (window.ConnectifyIsAccordionAnimating || isBulkExpanding()) return;'), 'assessment-data.js expandMutationObserver must mute during accordion animation');
 
   // 5. Verify triggerAccordionAnimationGuard only invokes cohort, compound, and chart updates when cards.length > 0
   assert.ok(assessJs.includes('if (cards.length > 0)'), 'triggerAccordionAnimationGuard must guard updates behind cards.length > 0 check');
@@ -3433,10 +3438,10 @@ runTest('Test 120: In-memory prediction and category caching, chunked 95% bulk e
   assert.ok(taskTypesJs.includes('const cachedClassCategories = new Map();'), 'task-types.js must define cachedClassCategories Map');
 
   // 3. Verify chunked bulk expansion across 90%, 95%, 98%, and 100% in assessment-data.js
-  assert.ok(assessJs.includes("updateProgress(90, 'Caching predictions... 90%')"), 'assessment-data.js must yield at 90% prediction caching');
-  assert.ok(assessJs.includes("updateProgress(95, 'Rendering statistics & outcome bars... 95%')"), 'assessment-data.js must yield at 95% statistics rendering');
-  assert.ok(assessJs.includes("updateProgress(98, 'Updating progress bars... 98%')"), 'assessment-data.js must yield at 98% compound progress');
-  assert.ok(assessJs.includes("updateProgress(100, 'Ready! 100%')"), 'assessment-data.js must reach 100% completion');
+  assert.ok(assessJs.includes("progress.update(90, 'Caching predictions... 90%')"), 'assessment-data.js must yield at 90% prediction caching');
+  assert.ok(assessJs.includes("progress.update(95, 'Rendering statistics & outcome bars... 95%')"), 'assessment-data.js must yield at 95% statistics rendering');
+  assert.ok(assessJs.includes("progress.update(98, 'Updating progress bars... 98%')"), 'assessment-data.js must yield at 98% compound progress');
+  assert.ok(assessJs.includes("progress.update(100, 'Ready! 100%')"), 'assessment-data.js must reach 100% completion');
 
   // 4. Verify 450ms collapse animation guard
   assert.ok(assessJs.includes('triggerAccordionAnimationGuard(450, null);'), 'assessment-data.js must use 450ms guard on collapse click');
@@ -4699,10 +4704,10 @@ runTest('Test 132: expandAll unblocked click dispatch, capture-phase stability, 
   assert.ok(!assessJs.includes('addEventListener(\x27click\x27, stopBubble'), 'assessment-data.js must not attach capture phase listeners during expandAll');
 
   // 2. Verify section-first deduplication order
-  const dedupMatch = assessJs.match(/card\s*=\s*typeof h\.closest === ['"]function['"]\s*\?\s*\(([\s\S]*?)\)\s*:\s*null;/);
+  const dedupMatch = assessJs.match(/const card = (h\.closest\?\.\([\s\S]*?) \|\| null;/);
   assert.ok(dedupMatch, 'assessment-data.js must contain card deduplication logic');
   const dedupExpr = dedupMatch[1];
-  assert.ok(dedupExpr.indexOf('.eds-c-accordion__section') < dedupExpr.indexOf('.eds-c-tile'),
+  assert.ok(dedupExpr.indexOf('.eds-c-accordion__section') < dedupExpr.indexOf('CARD_SELECTOR'),
     'expandAll must prioritize accordion sections over outer tiles for multi-section course cards');
 
   // 3. Verify atar-features.js reactive check for cx-expand-btn
@@ -4823,7 +4828,7 @@ runTest('Test 134: expandAll performance caching integrity, non-blocking chunked
     'clearPredictorCache must remove version stamp so isPredictionCacheCurrent accurately reflects empty cache');
 
   // 2. Verify finalizeExpansion checks hasValidCache BEFORE calling collect(true)
-  const finalizeCachePattern = /try\s*\{\s*const\s+hasValidCache\s*=\s*Boolean\(window\.ConnectifyPredictorMath\?\.isPredictionCacheCurrent\?\.?\(\)\);\s*if\s*\(!hasValidCache\)\s*\{\s*const\s+all\s*=\s*collect\(true\);/;
+  const finalizeCachePattern = /try\s*\{\s*if\s*\(!window\.ConnectifyPredictorMath\?\.isPredictionCacheCurrent\?\.\(\)\)\s*\{\s*window\.ConnectifyPredictorMath\?\.populateChronologicalPredictions\?\.\(collect\(true\), true\);/;
   assert.ok(finalizeCachePattern.test(assessJs),
     'finalizeExpansion must verify cache validity before triggering synchronous collect(true)');
 
@@ -4832,7 +4837,7 @@ runTest('Test 134: expandAll performance caching integrity, non-blocking chunked
     'getOrComputeTaskPrediction must use passed allSubjects or empty array instead of triggering inline collect(true)');
 
   // 4. Verify stale-subjects re-scrape at 98% is deferred off critical path
-  assert.ok(assessJs.includes('// Defer stale-subjects re-scrape off the critical path'),
+  assert.ok(assessJs.includes('// Stale subjects are re-scraped off the critical path'),
     'assessment-data.js must defer stale subjects collect to prevent blocking progress pill completion');
 
   // 5. Functional test: verify prediction cache skipping when cache is current

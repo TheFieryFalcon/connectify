@@ -18,14 +18,19 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 
 #### [`assessment-data.js`](file:///Users/uwong/Downloads/2.1.14_0/src/assessment/assessment-data.js) & Submodules
 - **Role**: Scrapes assessment task rows, scores, weights, dates, and order hints from Connect DOM cards (`.eds-c-tile`), orchestrating submodules and managing persistent stats and subsystem cache invalidations.
-- **Submodules**:
-  - [`assessment-cache.js`](file:///Users/uwong/Downloads/2.1.14_0/src/assessment/assessment-cache.js): In-memory `subjectsCache` and persistent stats cache (`connectify:stats_cache:`, `connectify:subjects_cache:`).
-  - [`assessment-parser.js`](file:///Users/uwong/Downloads/2.1.14_0/src/assessment/assessment-parser.js): Parses card metadata, task rows, marks, syllabus weights, and chronological order hints.
-  - [`assessment-expand.js`](file:///Users/uwong/Downloads/2.1.14_0/src/assessment/assessment-expand.js): Paced accordion expansion (`expandAll`), deduplication by card container, re-entrancy protection, and non-blocking chunked finalization (90% -> 95% -> 98% -> 100%).
+- **Submodules** (manifest order):
+  - `cache-versions.js`: `ConnectifyCache` versions, keys and isolated per-subsystem clearing; runs `checkAndInvalidateAll()` first.
+  - `assessment-cache.js`: in-memory `subjectsCache` and persistent stats cache (`connectify:stats_cache:`, `connectify:subjects_cache:`).
+  - `assessment-parse-helpers.js` / `assessment-parser.js`: order hints, cohort mean, weighted mean; card metadata, task rows, marks and weights.
+  - `assessment-expand-progress.js`: `#cx-expand-progress` pill and scroll freeze (`start()` → `{ update, finish }`).
+  - `assessment-accordion-watch.js`: single-accordion animation guard (450ms) and refresh of the opened card.
+  - `assessment-expand.js`: paced `expandAll` (one heading per card, 65ms apart), instant collapse, staged finalization (90% -> 95% -> 98% -> 100%); every exit cancels its own 10s safety timer.
+  - `assessment-scrape.js`: per-card task scraping and chronological order resolution.
 - **Key Functions**:
   - `collect(includePending)`: Scrapes all cards; caches results in `subjectsCache` (Map) to prevent data loss on collapse.
   - `triggerAccordionAnimationGuard(duration)`: Sets `window.ConnectifyIsAccordionAnimating` (450ms) to mute background observers.
-  - `ConnectifyCache`: Subsystem cache manager (`VERSIONS`, `KEYS`, `clearPredictorCache`, `clearResultsCache`, `clearSettingsCache`, `clearCohortCache`, `checkAndInvalidateAll`).
+  - `cancelPendingNotify()`: Expand All drops a queued per-card update before its own statistics pass.
+  - `ConnectifyCache`: `VERSIONS`, `KEYS`, `clearPredictorCache`, `clearResultsCache`, `clearSettingsCache`, `clearCohortCache`, `checkAndInvalidateAll`.
 - **Export**: `window.ConnectifyData`, `window.ConnectifyCache`.
 
 ---

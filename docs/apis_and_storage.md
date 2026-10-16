@@ -10,7 +10,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 |---|---|---|
 | `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey` (load first) |
 | `window.ConnectifyData` | `assessment-data.js` | Scrapes assessment cards, caches tasks, and expands accordions |
-| `window.ConnectifyCache` | `assessment-data.js` | Subsystem cache versioning (predictor, results, settings, cohort) and clearing |
+| `window.ConnectifyCache` | `cache-versions.js` | Subsystem cache versioning (predictor, results, settings, cohort) and clearing |
 | `window.ConnectifyCohortMath` | `cohort-math.js` | PCHIP cubic Hermite interpolation, variance, z-score |
 | `window.ConnectifyCohortEstimator` | `cohort-estimator.js` | Baseline and empirical cohort size estimation |
 | `window.ConnectifyCohortView` | `cohort-view.js` | Injects stats panels and type selectors into assessment rows |
