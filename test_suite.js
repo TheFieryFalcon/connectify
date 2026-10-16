@@ -7601,6 +7601,30 @@ runTest('Test 163: Liquid Glass rounds the notice card host, Library table wrapp
     'bordered icon buttons (bookmark) must keep native padding so the glyph is not offset');
 });
 
+runTest('Test 164: Liquid Glass gives Class pages one glass recipe for banners, bars, headings and empty states', () => {
+  const styles = path.join(BASE_DIR, 'src/theme/styles');
+  const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
+  const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  for (const file of ['theme-glass-surface.css', 'theme-glass-class-pages.css']) {
+    const css = fs.readFileSync(path.join(styles, file), 'utf8');
+    assert.ok(manifest.includes(file) && manifest.indexOf(file) < manifest.indexOf('styles/theme.css'), `${file} must be registered before theme.css`);
+    assert.ok(css.split('\n').length <= 250, `${file} must stay <= 250 lines`);
+    assert.ok(!/\[class\*=/.test(css), `${file} must name explicit elements/classes`);
+    for (const sel of css.replace(/\/\*[\s\S]*?\*\//g, '').split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(b => b && !b.startsWith('@'))) {
+      assert.ok(sel.startsWith('html.connectea-dark') || sel.startsWith('html.eds'), `${file}: selector must be scoped to the theme hook: ${sel.slice(0, 60)}`);
+      assert.ok(sel.includes('liquid-glass'), `${file}: selector must be Liquid Glass only: ${sel.slice(0, 60)}`);
+    }
+  }
+  const surface = fs.readFileSync(path.join(styles, 'theme-glass-surface.css'), 'utf8');
+  assert.ok(cssHas(surface, 'cnt-scope-intro-class,') && cssHas(surface, '.connect-paginator-container,') && cssHas(surface, 'mat-toolbar.c-category-bar,') && cssHas(surface, 'p.mat-h2,'),
+    'the class banner, Page N of M box, category bars and section headings must share the glass recipe');
+  assert.ok(cssHas(surface, 'backdrop-filter: var(--cx-gl-blur) !important;') && cssHas(surface, 'border-radius: 16px !important;'), 'glass surfaces must blur and round to 16px');
+  assert.ok(cssHas(surface, 'cnt-paginator:has(.c-empty-content)'), 'empty states must become one glass card');
+  const pages = fs.readFileSync(path.join(styles, 'theme-glass-class-pages.css'), 'utf8');
+  assert.ok(cssHas(pages, '.cvr-c-pagination__body:has(> table.mat-table),\n  mat-accordion'), 'the Learners table and accordion must be rounded and clipped');
+  assert.ok(cssHas(pages, `${glass}:not([data-connectea-login]) :is(.v-ui.v-scrollable, .v-app):has(.cvr-c-thori-pnl)`), 'the Content canvas must be transparent only on the sections page');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

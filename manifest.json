@@ -175,6 +175,8 @@
             "src/theme/styles/theme-color-picker.css",
             "src/theme/styles/theme-customizer-preview.css",
             "src/theme/styles/theme-glass-panels.css",
+            "src/theme/styles/theme-glass-surface.css",
+            "src/theme/styles/theme-glass-class-pages.css",
             "src/theme/styles/theme.css"
          ],
          "js": [

@@ -1,0 +1,38 @@
+/**
+ * Connectify Theme: Liquid Glass on the Class menu pages (Summary, Content, Learners). Liquid Glass only.
+ * Blocks nested inside a glass card stay clear and use hairline dividers instead of a second opaque fill.
+ */
+
+/* Content: the Vaadin canvas lets the wallpaper through only on the page that lists sections */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :is(.v-ui.v-scrollable, .v-app):has(.cvr-c-thori-pnl) {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Learners: the table sits straight in .cvr-c-pagination__body, and Students are inside an accordion */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  .cvr-c-pagination__body:has(> table.mat-table),
+  mat-accordion
+) {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+/* Summary: stat tiles and the calendar are clear inside their glass card */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  .c-scope-statistic-control,
+  table.mat-calendar-table,
+  .mat-calendar-table-header
+) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-card-header mat-divider {
+  border-top-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-calendar-body-cell:not(.mat-calendar-body-selected) .mat-calendar-body-cell-content {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
