@@ -2,7 +2,8 @@
  * Connectify Theme: built-in palettes
  *
  * Colour sets for the preset themes, also used by the theme customizer to inherit colours.
- * The CSS custom properties for each preset live in styles/theme-tokens.css.
+ * The CSS custom properties for each preset live in styles/theme-tokens.css, except derived presets
+ * (Liquid Glass), whose tokens are derived from their basic colours at runtime.
  * Exposes window.ConnectifyThemePalettes.
  */
 (() => {
@@ -44,21 +45,27 @@
       textPrimary: '#ecfdf5', textSecondary: '#d1fae5', textMuted: '#6ee7b7', tileLinkColor: '#ecfdf5',
       button: '#132c24', buttonHover: '#1a3b30', buttonText: '#ecfdf5', inputBg: '#0d1f19', inputBorder: '#224a3b'
     },
-    sunset: {
-      name: 'Twilight Plum', icon: '🌅', isDark: true, swatch: ['#19111c', '#26182a', '#f43f5e'],
-      canvas: '#19111c', canvasSubtle: '#0d080e', surface: '#28182c', surfaceSecondary: '#351f3b', surfaceElevated: '#44274c', surfaceHover: '#4e2c56',
-      border: '#64396f', borderSubtle: '#412548', borderStrong: '#824b91', accent: '#f43f5e', accentHover: '#fb7185',
-      textPrimary: '#fdf2f8', textSecondary: '#fce7f3', textMuted: '#f472b6', tileLinkColor: '#fdf2f8',
-      button: '#2b1930', buttonHover: '#3a2241', buttonText: '#fdf2f8', inputBg: '#1e1322', inputBorder: '#4b2a54'
+    // A recoloured Liquid Glass theme built from six basic colours: every other token is derived at
+    // runtime (theme-token-derive.js) and the glass recipe applied at 30% (theme-glass-tokens.js)
+    'liquid-glass-clear': {
+      name: 'Liquid Glass', icon: '🫧', isDark: true, liquidGlass: true, glassBlur: 12, glassOpacity: 0.3,
+      swatch: ['#aeb4c2', '#8d99a6', '#38bdf8'],
+      canvas: '#aeb4c2', surface: '#8d99a6', button: '#949393', border: '#a3b2c0', accent: '#38bdf8', textPrimary: '#1d1c1c',
+      derived: true
     },
     'liquid-glass': {
-      name: 'Liquid Glass', icon: '🫧', isDark: true, liquidGlass: true, swatch: ['#0b1120', 'rgba(56, 189, 248, 0.25)', '#38bdf8'],
+      name: 'Liquid Tinted Glass', icon: '🫧', isDark: true, liquidGlass: true, swatch: ['#0b1120', 'rgba(56, 189, 248, 0.25)', '#38bdf8'],
       canvas: '#0b1120', canvasSubtle: '#080d19', surface: 'rgba(26, 36, 52, 0.72)', surfaceSecondary: 'rgba(18, 24, 38, 0.68)', surfaceElevated: 'rgba(38, 51, 72, 0.80)', surfaceHover: 'rgba(255, 255, 255, 0.14)',
       border: 'rgba(255, 255, 255, 0.22)', borderSubtle: 'rgba(255, 255, 255, 0.12)', borderStrong: 'rgba(255, 255, 255, 0.32)', accent: '#38bdf8', accentHover: '#7dd3fc',
       textPrimary: '#ffffff', textSecondary: '#dbeafe', textMuted: '#93c5fd', tileLinkColor: '#ffffff',
       button: 'rgba(255, 255, 255, 0.10)', buttonHover: 'rgba(255, 255, 255, 0.18)', buttonText: '#ffffff', inputBg: 'rgba(15, 23, 42, 0.60)', inputBorder: 'rgba(255, 255, 255, 0.14)'
     }
   };
+
+  // Derived presets carry their basic colours as the theme's colours, applied like a custom theme
+  for (const p of Object.values(BUILTIN_PALETTES)) {
+    if (p.derived) p.colors = { canvas: p.canvas, surface: p.surface, button: p.button, border: p.border, accent: p.accent, textPrimary: p.textPrimary };
+  }
 
   window.ConnectifyThemePalettes = { BUILTIN_PALETTES };
 })();

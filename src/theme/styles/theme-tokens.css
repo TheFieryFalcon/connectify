@@ -121,25 +121,8 @@ html.connectea-dark,
   --cx-scrollbar-thumb: #285444; --cx-scrollbar-track: #0a1914;
 }
 
-/* Twilight Plum */
-[data-connectea-theme="sunset"].connectea-dark, [data-connectea-theme="sunset"] .connectea-dark, html.connectea-dark[data-connectea-theme="sunset"] {
-  --cx-canvas-bg: #19111c; --cx-canvas-subtle: #0d080e;
-  --cx-surface-bg: #28182c; --cx-surface-secondary: #351f3b; --cx-surface-elevated: #44274c;
-  --cx-surface-hover: #4e2c56; --cx-surface-active: #5c3466;
-  --cx-border: #64396f; --cx-border-subtle: #412548; --cx-border-strong: #824b91; --cx-border-focus: #f43f5e;
-  --cx-text-primary: #fdf2f8; --cx-text-secondary: #fce7f3; --cx-text-muted: #f472b6; --cx-text-disabled: #9d507b; --cx-text-inverse: #19111c;
-  --cx-accent: #f43f5e; --cx-accent-hover: #fb7185; --cx-accent-active: #e11d48; --cx-accent-subtle: rgba(244, 63, 94, 0.15); --cx-accent-text: #ffffff;
-  --cx-nav-bg: #1f1423; --cx-nav-border: #43264b; --cx-nav-text: #fce7f3; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #130a17;
-  --cx-tile-link-color: #fdf2f8;
-  --cx-button-bg: #2b1930; --cx-button-hover: #3a2241; --cx-button-active: #211325; --cx-button-border: #6e3f7a; --cx-button-border-hover: #764483; --cx-button-text: #fdf2f8; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #e11d48; --cx-button-primary-hover: #be123c; --cx-button-primary-text: #ffffff;
-  --cx-input-bg: #1e1322; --cx-input-border: #4b2a54; --cx-input-border-focus: #f43f5e; --cx-input-text: #fdf2f8; --cx-input-placeholder: #9d507b;
-  --cx-table-header-bg: #221426; --cx-table-row-hover: #361f3c; --cx-table-row-alt: #28182d; --cx-table-border: #3c2143;
-  --cx-badge-bg: #3a2241; --cx-badge-border: #5c3566; --cx-badge-text: #fdf2f8;
-  --cx-card-bg: #28182c; --cx-positive-bg: #7b9900; --cx-positive-hover: #8fb200; --cx-positive-text: #ffffff; --cx-positive-border: #6b8500;
-  --cx-scrollbar-thumb: #55315e; --cx-scrollbar-track: #19111c;
-}
-
-/* Apple Liquid Glass (Translucent Frosted Palette) */
+/* Liquid Tinted Glass (Translucent Frosted Palette, id liquid-glass). The grey Liquid Glass preset
+   (liquid-glass-clear) has no block here: its tokens are derived from its basic colours at runtime. */
 [data-connectea-theme="liquid-glass"].connectea-dark, [data-connectea-theme="liquid-glass"] .connectea-dark, html.connectea-dark[data-connectea-theme="liquid-glass"] {
   --cx-canvas-bg: #0b1120; --cx-canvas-subtle: #080d19;
   --cx-surface-bg: rgba(26, 36, 52, 0.72); --cx-surface-secondary: rgba(18, 24, 38, 0.68); --cx-surface-elevated: rgba(38, 51, 72, 0.80);

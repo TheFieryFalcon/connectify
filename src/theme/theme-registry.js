@@ -20,7 +20,10 @@
   const { isLoginUrl, isLogoutUrl, isAuthDisabled } = auth;
 
   const BUILTIN_THEMES = [
-    ...Object.entries(BUILTIN_PALETTES).map(([id, p]) => ({ id, name: p.name, icon: p.icon, isDark: p.isDark, swatch: p.swatch })),
+    ...Object.entries(BUILTIN_PALETTES).map(([id, p]) => ({
+      id, name: p.name, icon: p.icon, isDark: p.isDark, swatch: p.swatch,
+      ...(p.derived ? { liquidGlass: p.liquidGlass, glassBlur: p.glassBlur, glassOpacity: p.glassOpacity, colors: p.colors } : {})
+    })),
     { id: 'light', name: 'Default', icon: '☀', isDark: false, swatch: ['#f8fafc', '#ffffff', '#3b82f6'] },
     { id: 'custom', name: 'Custom Theme', icon: '🎨', isDark: true, swatch: ['#111827', '#1f2937', '#6366f1'] }
   ];
@@ -148,9 +151,10 @@
       else { delete el.dataset.connecteaTheme; el.removeAttribute('data-connectea-theme'); }
     }
     applyGlass(theme, customColors);
-    if (isCustomTheme(theme) || customColors) {
+    if (isCustomTheme(theme) || customColors || theme.colors) {
       const colors = customColors || theme.colors;
-      if (colors) setCustomColors(colors);
+      // Derived presets (Liquid Glass) apply their colours without replacing the stored custom palette
+      if (colors && (isCustomTheme(theme) || customColors)) setCustomColors(colors);
       const glass = theme.liquidGlass || customColors?.glassDiffusion ? { opacity: theme.glassOpacity ?? customColors?.glassOpacity ?? 0.65 } : null;
       tokens.applyCustomTokens(colors || tokens.getCustomColors(), glass);
     } else {

@@ -75,7 +75,7 @@ Sidebar & View Options:
   --max-sub-pages <n>      Max navbar headings to audit per page (default: 8)
 
 Audit & Browser Options:
-  --theme <id>             Theme to test: dark, quantum, amoled, midnight, forest, sunset, liquid-glass, all (default: all)
+  --theme <id>             Theme to test: dark, quantum, amoled, midnight, forest, liquid-glass-clear, liquid-glass, all (default: all)
   --delay <ms>             Settling delay between views in ms (default: 1250)
   --no-click-buttons       Do not automatically expand accordions/panels
   --click-buttons          Automatically expand accordions/panels (default: true)
@@ -1770,7 +1770,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           );
 
           if (addedBorder || removedBorder) {
-            if (tid !== 'liquid-glass' || !isPanelCardTileModal) {
+            if (!['liquid-glass', 'liquid-glass-clear'].includes(tid) || !isPanelCardTileModal) {
               issues.push({
                 category: 'PARITY',
                 type: 'BORDER_MISMATCH',
@@ -1879,7 +1879,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           // 6. Container Outline Added (creating unwanted new segments)
           if (base.isContainer && baseBorderTop === 0 && baseBorderBottom === 0 && baseBorderLeft === 0 && baseBorderRight === 0 && (base.outline?.width || 0) === 0) {
             if (curBorderTop > 0 || curBorderBottom > 0 || curBorderLeft > 0 || curBorderRight > 0 || curOutlineWidth > 0) {
-              if (tid !== 'liquid-glass' || !isPanelCardTileModal) {
+              if (!['liquid-glass', 'liquid-glass-clear'].includes(tid) || !isPanelCardTileModal) {
                 issues.push({
                   category: 'PARITY',
                   type: 'CONTAINER_OUTLINE_ADDED',
@@ -2256,8 +2256,8 @@ async function runThemeAudit(customOptions = {}) {
     { id: 'amoled', name: 'AMOLED Black', isDark: true },
     { id: 'midnight', name: 'Midnight Navy', isDark: true },
     { id: 'forest', name: 'Emerald Forest', isDark: true },
-    { id: 'sunset', name: 'Twilight Plum', isDark: true },
-    { id: 'liquid-glass', name: 'Liquid Glass', isDark: true }
+    { id: 'liquid-glass-clear', name: 'Liquid Glass', isDark: true },
+    { id: 'liquid-glass', name: 'Liquid Tinted Glass', isDark: true }
   ];
 
   const themesToTest = options.theme === 'all'

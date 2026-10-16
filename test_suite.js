@@ -5207,8 +5207,8 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="amoled"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #000000;'), 'theme-tokens.css must define AMOLED black theme');
   assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="midnight"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0b132b;'), 'theme-tokens.css must define Midnight navy theme');
   assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="forest"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0a1914;'), 'theme-tokens.css must define Forest theme');
-  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="sunset"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #19111c;'), 'theme-tokens.css must define Sunset theme');
-  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="liquid-glass"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0b1120;'), 'theme-tokens.css must define Liquid Glass theme');
+  assert.ok(!cssHas(themeTokensCss, '[data-connectea-theme="sunset"]'), 'the Twilight Plum (sunset) theme was removed');
+  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="liquid-glass"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0b1120;'), 'theme-tokens.css must define Liquid Tinted Glass theme');
   assert.ok(cssHas(themeTokensCss, '#connectea-theme-menu'), 'theme-tokens.css must style the theme popover menu');
 
   // 4. Manifest checks: theme-tokens.css, theme-registry.js, and theme-customizer files are registered
@@ -5240,7 +5240,8 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   assert.ok(themeIds.includes('amoled'), 'Registry must include amoled theme');
   assert.ok(themeIds.includes('midnight'), 'Registry must include midnight theme');
   assert.ok(themeIds.includes('forest'), 'Registry must include forest theme');
-  assert.ok(themeIds.includes('sunset'), 'Registry must include sunset theme');
+  assert.ok(!themeIds.includes('sunset'), 'Registry must not include the removed sunset theme');
+  assert.ok(themeIds.includes('liquid-glass') && themeIds.includes('liquid-glass-clear'), 'Registry must include Liquid Tinted Glass and Liquid Glass');
   assert.ok(themeIds.includes('light'), 'Registry must include light theme');
   assert.ok(themeIds.includes('custom'), 'Registry must include custom theme');
 
@@ -5320,7 +5321,7 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), 'amoled', 'restore_theme must save amoled');
 
   // Setting theme on login page must be rejected
-  const loginSetThemeResult = window.ConnectifyTheme.setTheme('sunset');
+  const loginSetThemeResult = window.ConnectifyTheme.setTheme('forest');
   assert.strictEqual(loginSetThemeResult, false, 'setTheme on login page must return false');
   assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'theme must not activate on login page');
 
@@ -5703,7 +5704,7 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
   assert.ok(cssHas(themeSurfacesCss, 'var(--cx-surface-secondary'), 'theme-surfaces.css must style alerts with var(--cx-surface-secondary)');
 
   // 3. Every preset theme defines complete surface palettes in theme-tokens.css
-  const themes = ['dark', 'quantum', 'amoled', 'midnight', 'forest', 'sunset', 'liquid-glass'];
+  const themes = ['dark', 'quantum', 'amoled', 'midnight', 'forest', 'liquid-glass'];
   const requiredTokens = [
     '--cx-canvas-bg', '--cx-surface-bg', '--cx-surface-secondary', '--cx-surface-elevated',
     '--cx-border', '--cx-text-primary', '--cx-text-secondary', '--cx-accent',
@@ -6988,8 +6989,8 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
             'parity test must assert button circular outline across all themes including liquid-glass');
   assert.ok(!parityTestJs.includes("tid !== 'liquid-glass' && base.isButton && !base.isActionButton"),
             'parity test must assert button radius across all themes including liquid-glass');
-  assert.ok(parityTestJs.includes('isPanelCardTileModal') && parityTestJs.includes("tid !== 'liquid-glass' || !isPanelCardTileModal"),
-            'parity test must ignore only panels, cards, tiles, and modals for liquid-glass');
+  assert.ok(parityTestJs.includes('isPanelCardTileModal') && parityTestJs.includes("!['liquid-glass', 'liquid-glass-clear'].includes(tid) || !isPanelCardTileModal"),
+            'parity test must ignore only panels, cards, tiles, and modals for both Liquid Glass presets');
 
   // 5. .cvr-u-padding--md has 0px padding in Liquid Glass only; other modes keep native padding
   assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-u-padding--md {\n  padding: 0 !important;'),
@@ -7680,7 +7681,7 @@ runTest('Test 166: Every custom-theme token derives from the 6 Basic tokens by t
   const fullKeys = ['canvasSubtle', 'surfaceSecondary', 'surfaceElevated', 'surfaceHover', 'borderSubtle', 'borderStrong', 'accentHover',
     'textSecondary', 'textMuted', 'buttonHover', 'buttonText', 'inputBg', 'inputBorder'];
   let total = 0, close = 0, sum = 0;
-  for (const id of ['dark', 'quantum', 'amoled', 'midnight', 'forest', 'sunset']) {
+  for (const id of ['dark', 'quantum', 'amoled', 'midnight', 'forest']) {
     const basic = Object.fromEntries(D.BASIC_KEYS.map(k => [k, pal[id][k]]));
     const full = D.deriveFull({ ...basic });
     for (const k of fullKeys) {
@@ -7814,6 +7815,40 @@ runTest('Test 168: A custom theme with Liquid Glass on becomes a recoloured Liqu
   assert.ok(!styles.includes('var(--cx-glass-blur, 16px)'), 'stylesheet blur fallbacks must be 12px');
   const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.includes('"src/theme/theme-token-derive.js",\n            "src/theme/theme-glass-tokens.js"'), 'theme-glass-tokens.js must load after theme-token-derive.js');
+});
+
+runTest('Test 169: Liquid Glass presets (grey derived Liquid Glass, renamed Liquid Tinted Glass), Plum removed, preset wallpapers in Settings', () => {
+  const themeDir = path.join(BASE_DIR, 'src/theme');
+  const win = {};
+  for (const f of ['theme-color-utils.js', 'theme-oklch.js', 'theme-token-derive.js', 'theme-glass-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js']) {
+    new Function('window', 'document', fs.readFileSync(path.join(themeDir, f), 'utf8'))(win, undefined);
+  }
+  const pal = win.ConnectifyThemePalettes.BUILTIN_PALETTES;
+  assert.ok(!pal.sunset, 'Twilight Plum must be removed');
+  assert.strictEqual(pal['liquid-glass'].name, 'Liquid Tinted Glass', 'the translucent navy preset is Liquid Tinted Glass');
+  const grey = pal['liquid-glass-clear'];
+  assert.ok(grey && grey.name === 'Liquid Glass' && grey.liquidGlass && grey.glassOpacity === 0.3 && grey.glassBlur === 12 && grey.derived, 'Liquid Glass is the derived grey preset at 30% transparency');
+  assert.deepStrictEqual(Object.keys(grey.colors).sort(), ['accent', 'border', 'button', 'canvas', 'surface', 'textPrimary'], 'derived presets carry the six basic colours');
+  const D = win.ConnectifyThemeDerive;
+  const full = D.complete(grey.colors);
+  assert.ok(D.contrast(grey.textPrimary, grey.surface) >= 5, 'Liquid Glass primary text must reach 5:1 on its surface');
+  assert.ok(D.contrast(D.cssProps(full)['--cx-text-muted'], grey.surface) >= 5, 'Liquid Glass muted text must reach 5:1');
+  assert.ok(/^rgba\(141, 153, 166, 0\.3\)$/.test(win.ConnectifyThemeGlassTokens.props(full, grey.glassOpacity)['--cx-surface-bg']), 'Liquid Glass panels are its surface at 30%');
+  const registryJs = fs.readFileSync(path.join(themeDir, 'theme-registry.js'), 'utf8');
+  assert.ok(registryJs.includes('isCustomTheme(theme) || customColors || theme.colors') && registryJs.includes('...(p.derived ?'), 'the registry must apply derived presets through the custom-token path');
+  // Preset wallpapers: three dark and three light SVG gradients, shown in Settings
+  const W = win.ConnectifyWallpaperPresets;
+  assert.strictEqual(W.PRESETS.filter(p => p.tone === 'dark').length, 3, 'three dark preset wallpapers');
+  assert.strictEqual(W.PRESETS.filter(p => p.tone === 'light').length, 3, 'three light preset wallpapers');
+  for (const p of W.PRESETS) {
+    assert.ok(p.url.startsWith('data:image/svg+xml;utf8,') && p.url.length < 20000, `${p.name} must be a small SVG data URI`);
+    assert.ok(/linearGradient|polygon/.test(decodeURIComponent(p.url)), `${p.name} must be a geometric gradient`);
+  }
+  assert.strictEqual(W.find(W.PRESETS[1].url).id, W.PRESETS[1].id, 'find() maps a stored wallpaper back to its preset');
+  const markup = fs.readFileSync(path.join(BASE_DIR, 'src/predictor/settings-markup.js'), 'utf8');
+  const prefs = fs.readFileSync(path.join(BASE_DIR, 'src/predictor/settings-preferences.js'), 'utf8');
+  assert.ok(markup.includes('id="cx-bg-presets"') && prefs.includes('presets.mount(presetBox, p =>'), 'Settings must show the preset backgrounds');
+  assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('"src/theme/theme-wallpaper-presets.js"'), 'theme-wallpaper-presets.js must be registered');
 });
 
 Promise.all(pendingTestPromises).then(() => {

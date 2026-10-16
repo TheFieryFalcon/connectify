@@ -139,9 +139,12 @@
     $('#cx-preset-select').onchange = e => {
       const preset = getPresets()[e.target.value];
       if (!preset) return;
-      state.tokens = colors.pickColors(preset);
+      // Derived presets (Liquid Glass) carry only basic colours; the rest is derived from them
+      state.tokens = themeTokens(preset);
       state.emoji = preset.icon || preset.emoji || state.emoji;
       state.liquidGlass = Boolean(preset.liquidGlass);
+      if (typeof preset.glassBlur === 'number') state.glassBlur = preset.glassBlur;
+      if (typeof preset.glassOpacity === 'number') state.glassOpacity = preset.glassOpacity;
       syncControls();
       refresh();
       syncPickerToToken();

@@ -72,7 +72,7 @@
     const disabled = quietText(text, c.surface, 43, dark);
     const accentActive = o.shiftL(c.accent, -9, 1.05);
     // Presets keep a light accent's primary button light with dark text (Quantum); any other accent is
-    // darkened until white text reads on it (Dark, Midnight, Forest, Twilight Plum)
+    // darkened until white text reads on it (Dark, Midnight, Forest)
     let primary = accentActive;
     if (o.contrast('#0f172a', c.accent) < 8) {
       for (let i = 0; i < 60 && o.contrast('#ffffff', primary) < 5; i++) primary = o.shiftL(primary, -1);

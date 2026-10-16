@@ -48,6 +48,10 @@
             <button type="button" id="cx-bg-upload-btn" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">🖼 Upload Background</button>
             <button type="button" id="cx-bg-remove-btn" class="eds-c-button" style="display:none;background:#64748b;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">✕ Remove</button>
             <span id="cx-bg-status-label" class="cx-settings-hint" style="font-size:11px;">No custom background set</span>
+            <div style="flex:1 1 100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="cx-settings-label" style="margin:0;">Preset Backgrounds:</span>
+              <div id="cx-bg-presets" class="cx-bg-presets" role="group" aria-label="Preset backgrounds"></div>
+            </div>
           </div>
         </div>
       </section>

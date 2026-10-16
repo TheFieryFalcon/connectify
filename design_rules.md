@@ -5,7 +5,7 @@ Extremely concise summary of the core visual design language, contrast standards
 ---
 
 ## 1. Color Palette & Hierarchy
-- **Canvas / Background**: Light `#f7f9fc`, Dark `#12171f`, Quantum Dark `#282828` (Gruvbox bright green `#b8bb26` highlights), AMOLED `#000000`, Midnight `#0b132b`, Forest `#0a1914`, Sunset `#20101b`, Liquid Glass diffusion.
+- **Canvas / Background**: Light `#f7f9fc`, Dark `#12171f`, Quantum Dark `#282828` (Gruvbox bright green `#b8bb26` highlights), AMOLED `#000000`, Midnight `#0b132b`, Forest `#0a1914`, Liquid Glass (grey `#aeb4c2` canvas, `#8d99a6` panels at 30%) and Liquid Tinted Glass (navy `#0b1120`) diffusion.
 - **Top Navigation & Menus**: Light `#ffffff` / `#e9f2fb`, Dark `#1a222d`.
 - **Course Tiles (`.eds-c-tile`)**: Light `#ffffff` (border `#d8e3ee`), Dark `#1e2632` (border `#2e3c4e`, hover `#3d5066`). Translucent frosted glass (`rgba(18, 26, 40, 0.65)`) in Liquid Glass / custom background.
 - **Cohort Statistics Panel (`.connectea-panel`)**: Deep navy `#15263a`, border `#264669`, text `#d6e8f8`.

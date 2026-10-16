@@ -62,10 +62,21 @@
     const uploadBtn = panel.querySelector('#cx-bg-upload-btn');
     const removeBtn = panel.querySelector('#cx-bg-remove-btn');
     const status = panel.querySelector('#cx-bg-status-label');
+    // The theme scripts (and so the presets) load after this group, so thumbnails mount on first refresh
+    const presetBox = panel.querySelector('#cx-bg-presets');
     const refresh = () => {
+      const presets = window.ConnectifyWallpaperPresets;
+      if (presets && presetBox && !presetBox.childElementCount) {
+        presets.mount(presetBox, p => {
+          window.ConnectifyTheme?.setCustomBackground(p.url);
+          refresh();
+        });
+      }
       const current = window.ConnectifyTheme?.getCustomBackground?.();
+      const preset = current && presets?.find(current);
       if (removeBtn) removeBtn.style.display = current ? 'inline-block' : 'none';
-      if (status) status.textContent = current ? 'Custom wallpaper active' : 'No custom background set';
+      if (status) status.textContent = preset ? `Preset: ${preset.name}` : current ? 'Custom wallpaper active' : 'No custom background set';
+      panel.querySelectorAll('.cx-bg-preset').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.preset === preset?.id)));
     };
     if (uploadBtn && input) {
       uploadBtn.onclick = () => input.click();
