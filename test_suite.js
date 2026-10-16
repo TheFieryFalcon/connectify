@@ -7584,6 +7584,23 @@ runTest('Test 162: Auto-login only fires for a saved password or browser autofil
   assert.ok(js.includes("=== false || userTyped) return;"), 'auto-login must not fire once the user typed');
 });
 
+runTest('Test 163: Liquid Glass rounds the notice card host, Library table wrapper and paginator bars; icon buttons keep native padding', () => {
+  const styles = path.join(BASE_DIR, 'src/theme/styles');
+  const css = fs.readFileSync(path.join(styles, 'theme-glass-panels.css'), 'utf8');
+  const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  assert.ok(cssHas(css, `${glass} cnt-stream-notice-card {\n  border-radius: 16px !important;`), 'the notice card host must be rounded to match its mat-card');
+  assert.ok(!/cnt-stream-notice-card[^{]*\{[^}]*overflow/.test(css), 'the notice card host must not clip (it would cut off the elevation shadow)');
+  assert.ok(cssHas(css, '.cdk-drop-list:has(> table.mat-table),\n  mat-paginator\n) {\n  border-radius: 16px !important;\n  overflow: hidden !important;'),
+    'the Library table wrapper and paginator bars must be rounded and clipped');
+  assert.ok(cssHas(css, 'mat-paginator.mat-paginator .mat-paginator-container {\n  padding-inline: 16px !important;') && cssHas(css, 'html.eds.cvr.ngm.connectea-dark:is('),
+    'paginator bars need horizontal padding that outranks Connect\'s padding: 0 !important');
+  assert.ok(!/\[class\*=/.test(css), 'glass panel rules must name explicit elements/classes');
+  assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('theme-glass-panels.css'), 'theme-glass-panels.css must be registered in manifest.json');
+  const buttons = fs.readFileSync(path.join(styles, 'theme-buttons.css'), 'utf8');
+  assert.ok(cssHas(buttons, 'button.mat-focus-indicator[class*="border"]):not(.mat-icon-button) {\n  padding: 0 15px !important;'),
+    'bordered icon buttons (bookmark) must keep native padding so the glyph is not offset');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

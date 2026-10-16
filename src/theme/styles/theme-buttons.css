@@ -81,6 +81,10 @@
 
 .connectea-dark :is(.mat-stroked-button, button.mat-focus-indicator.border, button.mat-focus-indicator[class*="border"]) {
   border-color: var(--cx-button-border, var(--cx-border, #455a73)) !important;
+}
+
+/* Icon-only buttons keep Connect's padding: side padding pushes the glyph off-centre */
+.connectea-dark :is(.mat-stroked-button, button.mat-focus-indicator.border, button.mat-focus-indicator[class*="border"]):not(.mat-icon-button) {
   padding: 0 15px !important;
 }
 
