@@ -72,7 +72,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   overflow: hidden !important;
 }
 
-/* Liquid Glass: Assessment Outlines wrappers drop their padding and become transparent so the
+/* Liquid Glass: wrappers that hold tiles (Assessment Outlines) drop their padding and become transparent so the
    background shows between tiles. Solid themes keep native padding and opaque wrappers. */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-u-padding--md {
   padding: 0 !important;
@@ -80,7 +80,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :is(
   #main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable
-),
+):has(.eds-c-tile, .cvr-c-tile),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :is(
   .v-panel, .v-panel-content, .cvr-u-padding--md
 ):has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile) {

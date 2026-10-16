@@ -2116,7 +2116,8 @@ runTest('theme.css covers Angular Material buttons, div.w-100, and aligns margin
   assert.ok(cssHas(css, '.mat-stroked-button'), 'theme.css must style .mat-stroked-button');
   assert.ok(cssHas(css, 'div.w-100'), 'theme.css must style div.w-100');
   assert.ok(!cssHas(css, '.mat-expansion-panel {\n  border: 1px solid #3d5066 !important;\n  border-radius: 6px !important;\n  margin-bottom: 8px !important;'), 'theme.css must not have margin-bottom: 8px !important on mat-expansion-panel');
-  assert.ok(cssHas(css, ':not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced)'), 'theme.css must exclude icon-only buttons from button padding');
+  assert.ok(cssHas(css, ':not([class*="icon"]):not(.mat-icon-button):not(.btn-monospaced)'), 'theme.css must exclude every icon button (class containing "icon") from button padding so glyphs are not offset');
+  assert.ok(cssHas(css, '#main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable\n):has(.eds-c-tile, .cvr-c-tile)'), 'Liquid Glass may only make layout wrappers transparent when they hold tiles, so detail views (notices) keep an opaque surface');
 });
 
 runTest('atar-features.js injects and styles Back to top button at the bottom of assessment outlines', () => {

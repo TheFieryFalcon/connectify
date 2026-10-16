@@ -182,6 +182,6 @@ html.connectea-dark,
 [data-connectea-has-custom-bg="true"] body {
   background: var(--cx-custom-bg-image) center center / cover no-repeat fixed !important;
 }
-[data-connectea-has-custom-bg="true"] :is(.cvr-c-app-layout, .cvr-c-app-layout__body, #main-content, .v-app, .v-ui, .v-scrollable) {
+[data-connectea-has-custom-bg="true"] :is(.cvr-c-app-layout, .cvr-c-app-layout__body, #main-content, .v-app, .v-ui, .v-scrollable):has(.eds-c-tile, .cvr-c-tile) {
   background-color: transparent !important;
 }

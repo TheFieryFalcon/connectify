@@ -20,7 +20,7 @@
   .eds-c-card__action :is(a, button),
   .cvr-c-preferences__reset,
   .cvr-c-preferences :is(button, .v-button)
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-c-icon-button):not(.cvr-c-icon-button):not(.mat-icon-button):not(.btn-monospaced):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.c-toolbar-button):not(.mat-menu-trigger):not(.mat-tooltip-trigger):not([class*="toolbar"]):not([class*="service-bar"]):not([class*="action-button"]):not([class*="pagination"]):not(.quick-action-menu) {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not([class*="icon"]):not(.mat-icon-button):not(.btn-monospaced):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.c-toolbar-button):not(.mat-menu-trigger):not(.mat-tooltip-trigger):not([class*="toolbar"]):not([class*="service-bar"]):not([class*="action-button"]):not([class*="pagination"]):not(.quick-action-menu) {
   background-color: #202c3b !important;
   color: var(--cx-button-text, var(--cx-text-primary, #f1f5f9)) !important;
   border: 1px solid #455a73 !important;
@@ -101,7 +101,7 @@
   .eds-c-card__action :is(a, button),
   .cvr-c-preferences__reset,
   .cvr-c-preferences :is(button, .v-button)
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):hover {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not([class*="icon"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   border-color: var(--cx-border-hover, #5b7594) !important;
   color: #ffffff !important;
@@ -116,12 +116,12 @@
   .btn,
   input[type="button"],
   input[type="submit"]
-):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):active {
+):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not([class*="icon"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):active {
   background-color: var(--cx-surface-active, #192432) !important;
   transform: translateY(1px) !important;
 }
 
-.connectea-dark :is(.v-button, .eds-c-button, .eds-c-standard-button, .cvr-c-button, .btn, input[type="button"], input[type="submit"]):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):focus-visible {
+.connectea-dark :is(.v-button, .eds-c-button, .eds-c-standard-button, .cvr-c-button, .btn, input[type="button"], input[type="submit"]):not(#connectify-sidebar *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle):not(.eds-c-accordion__section-heading):not([class*="icon"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):focus-visible {
   border-color: var(--cx-accent, #3b82f6) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35) !important;
   outline: none !important;

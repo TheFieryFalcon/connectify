@@ -158,6 +158,7 @@
             "src/theme/styles/theme-controls.css",
             "src/theme/styles/theme-buttons.css",
             "src/theme/styles/theme-action-buttons.css",
+            "src/theme/styles/theme-icon-buttons.css",
             "src/theme/styles/theme-material.css",
             "src/theme/styles/theme-glyphs.css",
             "src/theme/styles/theme-classes-promos.css",

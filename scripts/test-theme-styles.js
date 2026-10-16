@@ -2115,7 +2115,15 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         if (isDark && elBg && elBg.a > 0.5 && el.parentElement && !isSvg && !el.closest?.('svg')) {
           const parentStyle = window.getComputedStyle(el.parentElement);
           const parentBg = parseRgb(parentStyle.backgroundColor);
-          if (parentBg && parentBg.a > 0.5) {
+          // A container and its own padding are one surface: when the element fills the parent's content box,
+          // the parent's colour is the element's padding and should stay very similar to it
+          const isPaddingOf = (() => {
+            const pr = el.parentElement.getBoundingClientRect(), er = el.getBoundingClientRect();
+            const pad = ['Top', 'Right', 'Bottom', 'Left'].map(sd => parseFloat(parentStyle[`padding${sd}`]) || 0);
+            const fills = Math.abs(er.width - (pr.width - pad[1] - pad[3])) <= 2 || Math.abs(er.height - (pr.height - pad[0] - pad[2])) <= 2;
+            return pad.some(v => v > 0) && fills;
+          })();
+          if (parentBg && parentBg.a > 0.5 && !isPaddingOf) {
             const isDistinct = Math.abs(elBg.r - parentBg.r) > 4 || Math.abs(elBg.g - parentBg.g) > 4 || Math.abs(elBg.b - parentBg.b) > 4;
             if (isDistinct) {
               const bgCr = getContrast(elBg, parentBg);
