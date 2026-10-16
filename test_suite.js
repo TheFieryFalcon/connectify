@@ -5335,14 +5335,15 @@ runTest('Test 138: Dark theme v3.2.1 parity, Connect Help and tile contrast, abu
   assert.ok(catSettingsJs.includes('#cx-theme-select-input'), 'category-settings.js must render #cx-theme-select-input');
   assert.ok(catSettingsJs.includes('window.ConnectifyTheme?.setTheme(themeSelect.value)'), 'category-settings.js must invoke ConnectifyTheme.setTheme on change');
 
-  // 5. Strict line limits: all JS and CSS in src <= 500 lines, all markdown <= 150 lines
+  // 5. Strict line limits: all JS and CSS in src <= 250 lines (test_suite.js and scripts/ are exempt), all markdown <= 150 lines
+  const countLines = text => text.split('\n').length - (text.endsWith('\n') ? 1 : 0);
   function checkDir(dir) {
     for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
       const full = path.join(dir, ent.name);
       if (ent.isDirectory()) checkDir(full);
       else if (ent.isFile() && (full.endsWith('.js') || full.endsWith('.css'))) {
-        const lines = origReadFileSync.call(fs, full, 'utf8').split('\n').length;
-        assert.ok(lines <= 500, `File ${full} has ${lines} lines, exceeding 500 line limit`);
+        const lines = countLines(origReadFileSync.call(fs, full, 'utf8'));
+        assert.ok(lines <= 250, `File ${full} has ${lines} lines, exceeding 250 line limit`);
       }
     }
   }
