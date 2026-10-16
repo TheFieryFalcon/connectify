@@ -13,11 +13,23 @@
 
   const STORAGE_CUSTOM_THEMES_LIST = 'connectea:custom_themes_list';
   const extensionStorage = () => (typeof chrome !== 'undefined' && chrome.storage?.local) || null;
+  // Version 2 themes were saved with the 20-token Full mode. Older ones never let the user edit these
+  // six, so their stored values are inherited preset leftovers (e.g. a near-black input background on a
+  // light theme): drop them and let theme-token-derive.js derive them from the theme's own colours.
+  const TOKEN_VERSION = 2;
+  const PRE_V2_HIDDEN = ['inputBg', 'inputBorder', 'surfaceHover', 'borderStrong', 'buttonText', 'textMuted'];
+
+  function migrate(theme) {
+    if (!theme?.colors || (theme.tokenVersion || 1) >= TOKEN_VERSION) return theme;
+    const colors = { ...theme.colors };
+    for (const key of PRE_V2_HIDDEN) delete colors[key];
+    return { ...theme, colors };
+  }
 
   function getCustomThemes() {
     try {
       const stored = localStorage.getItem(STORAGE_CUSTOM_THEMES_LIST);
-      return stored ? JSON.parse(stored) : [];
+      return stored ? JSON.parse(stored).map(migrate) : [];
     } catch { return []; }
   }
 
@@ -48,7 +60,7 @@
         if (!raw) return;
         try {
           const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
-          if (Array.isArray(list)) list.forEach(t => { if (t?.id) registry.registerTheme(t); });
+          if (Array.isArray(list)) list.forEach(t => { if (t?.id) registry.registerTheme(migrate(t)); });
         } catch {}
         // A custom theme only known to extension storage could not be applied at startup
         const active = registry.getThemeDefinition(registry.getTheme());
@@ -73,6 +85,7 @@
       icon: themeDef.icon || (existing ? existing.icon : '🎨'),
       isDark: themeDef.isDark !== false,
       isCustom: true,
+      tokenVersion: TOKEN_VERSION,
       liquidGlass: Boolean(themeDef.liquidGlass),
       glassBlur: typeof themeDef.glassBlur === 'number' ? themeDef.glassBlur : (existing?.glassBlur ?? 16),
       glassOpacity: typeof themeDef.glassOpacity === 'number' ? themeDef.glassOpacity : (existing?.glassOpacity ?? 0.65),

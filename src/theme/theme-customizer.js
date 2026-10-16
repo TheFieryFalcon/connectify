@@ -15,6 +15,14 @@
 
   const getPresets = () => window.ConnectifyThemeRegistry?.getPresetPalettes?.() || {};
   const getDefaultTokens = () => colors.pickColors(getPresets().dark);
+  // A theme's own colours, with only missing Basic tokens taken from Dark; every other missing token is
+  // derived from the theme's colours (never copied from Dark, which would bring its navy into the theme)
+  function themeTokens(own) {
+    const dark = getDefaultTokens();
+    const basics = Object.fromEntries(['canvas', 'surface', 'button', 'border', 'accent', 'textPrimary'].map(k => [k, dark[k]]));
+    const merged = { ...basics, ...colors.pickColors(own) };
+    return window.ConnectifyThemeDerive?.complete(merged) || { ...dark, ...merged };
+  }
 
   let modalEl = null;
   const state = {
@@ -206,7 +214,7 @@
       glassBlur: typeof themeToEdit?.glassBlur === 'number' ? themeToEdit.glassBlur : 16,
       glassOpacity: typeof themeToEdit?.glassOpacity === 'number' ? themeToEdit.glassOpacity : 0.65,
       wallpaper: themeToEdit?.wallpaper || null,
-      tokens: { ...getDefaultTokens(), ...colors.pickColors(themeToEdit?.colors) }
+      tokens: themeToEdit?.colors ? themeTokens(themeToEdit.colors) : getDefaultTokens()
     });
     deriveSecondaryTokens();
 

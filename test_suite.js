@@ -7720,6 +7720,20 @@ runTest('Test 166: Every custom-theme token derives from the 6 Basic tokens by t
   const controlsJs = fs.readFileSync(path.join(themeDir, 'theme-customizer-controls.js'), 'utf8');
   assert.ok(controlsJs.includes('caretRangeFromPoint') && controlsJs.includes("row('Text'"), 'the preview tooltip must report the text token when over glyphs');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('"src/theme/theme-oklch.js",\n            "src/theme/theme-token-derive.js"'), 'theme-oklch.js must load before theme-token-derive.js');
+  // 6. Themes saved before the 20-token Full mode drop the six tokens users could not edit (preset leftovers)
+  const store = { 'connectea:custom_themes_list': JSON.stringify([
+    { id: 'old', name: 'Old', isCustom: true, colors: { canvas: '#aeb4c2', surface: '#798693', inputBg: '#0e1830', textMuted: '#94a3b8' } },
+    { id: 'new', name: 'New', isCustom: true, tokenVersion: 2, colors: { canvas: '#aeb4c2', surface: '#798693', inputBg: '#a9afbd' } }
+  ]) };
+  const ls = { getItem: k => store[k] ?? null, setItem: (k, v) => { store[k] = v; } };
+  const reg = { registerTheme() {}, getThemeDefinition() {}, getTheme() {}, unregisterTheme() {}, notifyThemeListeners() {} };
+  new Function('window', 'localStorage', 'chrome', fs.readFileSync(path.join(themeDir, 'theme-custom-themes.js'), 'utf8'))({ ConnectifyThemeRegistry: reg, ConnectifyThemeTokens: { applyCustomBackground() {}, restoreBackgroundFromExtensionStorage() {}, applyCustomTokens() {}, getCustomColors: () => ({}) } }, ls, undefined);
+  const [oldTheme, newTheme] = reg.getCustomThemes();
+  assert.ok(!('inputBg' in oldTheme.colors) && !('textMuted' in oldTheme.colors) && oldTheme.colors.canvas === '#aeb4c2', 'pre-v2 themes must re-derive their hidden tokens');
+  assert.strictEqual(newTheme.colors.inputBg, '#a9afbd', 'v2 themes keep every token the user set');
+  assert.strictEqual(reg.saveCustomTheme({ name: 'Saved', colors: { canvas: '#111111' } }).tokenVersion, 2, 'new saves are stamped tokenVersion 2');
+  const customizerSrc = fs.readFileSync(path.join(themeDir, 'theme-customizer.js'), 'utf8');
+  assert.ok(customizerSrc.includes('themeTokens(themeToEdit.colors)') && !customizerSrc.includes('{ ...getDefaultTokens(), ...colors.pickColors(themeToEdit'), 'editing a theme must derive missing tokens, not copy Dark preset values');
 });
 
 runTest('Test 167: Dark and glass rules route theme colours through tokens, so custom themes reach every surface', () => {
