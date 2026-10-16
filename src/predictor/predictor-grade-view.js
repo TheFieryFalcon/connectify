@@ -1,14 +1,15 @@
 /**
  * Connectify Grade Predictor View
  *
- * Renders the Grade Predictor sub-tabs, projected mark cards,
- * and upcoming assessment task pills.
+ * Renders the Grade Predictor subject sub-tabs, the guidance card for subjects without marks or
+ * baselines, and the projected final mark card. Upcoming task cards come from predictor-task-cards.js.
  * Exposes window.ConnectifyPredictorGradeView.
  */
 (() => {
   'use strict';
 
   try {
+    const esc = (...args) => window.ConnectifyUtils.escapeHtml(...args);
     let lastSavedSubTabsScroll = 0;
 
     function renderGradePredictor(container, subjects, activeSubjectIndex, onSelectSubject, onRenderPanel) {
@@ -85,7 +86,7 @@
         subjectView.innerHTML = `
           <div class="cx-pred-no-average-card">
             <div style="font-size:28px; margin-bottom:10px;">📋</div>
-            <strong style="display:block; font-size:15px; margin-bottom:8px;">No Grades or Baselines for ${activeSubject.cleanName}</strong>
+            <strong style="display:block; font-size:15px; margin-bottom:8px;">No Grades or Baselines for ${esc(activeSubject.cleanName)}</strong>
             <p style="font-size:12px; line-height:1.55; max-width:420px; margin:0 auto 18px auto; opacity:0.85;">
               Connectify needs either completed assessment marks or a previous year grade to project your final mark. Please go to <strong>Settings</strong> to enter your baseline grade, or wait for assessments to be returned.
             </p>
@@ -119,7 +120,7 @@
       headerCard.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div>
-            <strong style="font-size:15px; font-weight:700;">${activeSubject.cleanName}</strong>
+            <strong style="font-size:15px; font-weight:700;">${esc(activeSubject.cleanName)}</strong>
             <div style="font-size:11px; opacity:0.8; margin-top:2px;">
               ${activeSubject.completedWeight}% completed (${activeSubject.completedCount} graded) • ${currentScoreLabel}
             </div>
@@ -146,102 +147,7 @@
 
       subjectView.append(headerCard);
 
-      // Upcoming Tasks Section
-      const upcomingContainer = document.createElement('div');
-      upcomingContainer.className = 'cx-pred-upcoming-container';
-
-      const upcomingTitle = document.createElement('strong');
-      upcomingTitle.style.display = 'block';
-      upcomingTitle.style.fontSize = '13px';
-      upcomingTitle.style.fontWeight = '650';
-      upcomingTitle.style.marginBottom = '10px';
-
-      const validUpcoming = (activeSubject.upcomingPredictions || []).filter(({ task }) => {
-        return task && task.weight > 0 && Number.isFinite(task.weight);
-      });
-      upcomingTitle.textContent = `Upcoming Assessments (${validUpcoming.length})`;
-
-      upcomingContainer.append(upcomingTitle);
-
-      if (validUpcoming.length === 0) {
-        const doneNote = document.createElement('div');
-        doneNote.className = 'cx-pred-card';
-        doneNote.style.textAlign = 'center';
-        doneNote.style.padding = '18px';
-        doneNote.style.fontSize = '12px';
-        doneNote.textContent = 'All scheduled assessments for this subject have been graded!';
-        upcomingContainer.append(doneNote);
-      } else {
-        validUpcoming.forEach(({ task, prediction }) => {
-          const pred = prediction || {};
-          const taskCard = document.createElement('div');
-          taskCard.className = 'cx-pred-task-card';
-
-          const taskType = pred.taskType || pred.type || 'Take-Home';
-          const typeColor = window.ConnectifyTaskTypes?.getCategoryColor
-            ? window.ConnectifyTaskTypes.getCategoryColor(taskType)
-            : '#3498db';
-          const isLightType = typeColor.toLowerCase() === '#f1c40f' || typeColor.toLowerCase() === '#f39c12' || typeColor.toLowerCase() === '#2ecc71';
-          const typeTextColor = isLightType ? '#111827' : '#ffffff';
-
-          const taskHeader = document.createElement('div');
-          taskHeader.style.display = 'flex';
-          taskHeader.style.justifyContent = 'space-between';
-          taskHeader.style.alignItems = 'center';
-          taskHeader.style.marginBottom = '8px';
-
-          taskHeader.innerHTML = `
-            <div>
-              <strong style="font-size:13px; font-weight:650;">${task?.name || 'Assessment'}</strong>
-              <div style="font-size:11px; opacity:0.75; margin-top:1px;">
-                ${task?.customDate || task?.dateDisplay || (window.ConnectifyProgressMath?.formatTimestamp && Number.isFinite(task?.order) ? window.ConnectifyProgressMath.formatTimestamp(task.order, task.caption) : task?.caption) || ''} • Weight: ${Number.isFinite(task?.weight) ? task.weight + '%' : '—'}
-              </div>
-            </div>
-            <span class="cx-pred-task-type-badge" data-cat="${taskType}" style="font-size:10.5px; font-weight:700; color:${typeTextColor}; background:${typeColor}; padding:2.5px 8px; border-radius:10px;">
-              ${taskType}
-            </span>
-          `;
-
-          taskCard.append(taskHeader);
-
-          if (pred.unpredicted) {
-            const notice = document.createElement('div');
-            notice.className = 'cx-pred-unpredicted-notice';
-            notice.innerHTML = `
-              <strong>No previous tasks of this type have been done, unable to make prediction</strong>
-              <div style="font-size:10.5px; opacity:0.9; margin-top:3px;">
-                Tip: Enter your previous year average for "${taskType}" in Settings to predict this task.
-              </div>
-            `;
-            taskCard.append(notice);
-          } else {
-            const predRow = document.createElement('div');
-            predRow.style.display = 'grid';
-            predRow.style.gridTemplateColumns = 'repeat(3, 1fr)';
-            predRow.style.gap = '8px';
-
-            predRow.innerHTML = `
-              <div class="cx-pred-pill cx-pred-pill--low">
-                <span style="font-size:9.5px; opacity:0.75; display:block; text-transform:uppercase;">Low</span>
-                <strong style="font-size:13.5px;">${pred.low ?? '—'}%</strong>
-              </div>
-              <div class="cx-pred-pill cx-pred-pill--mid">
-                <span style="font-size:9.5px; font-weight:700; display:block; text-transform:uppercase;">Middle</span>
-                <strong style="font-size:14px;">${pred.mid ?? '—'}%</strong>
-              </div>
-              <div class="cx-pred-pill cx-pred-pill--high">
-                <span style="font-size:9.5px; font-weight:700; display:block; text-transform:uppercase;">High</span>
-                <strong style="font-size:13.5px;">${pred.high ?? '—'}%</strong>
-              </div>
-            `;
-
-            taskCard.append(predRow);
-          }
-
-          upcomingContainer.append(taskCard);
-        });
-      }
-
+      const upcomingContainer = window.ConnectifyPredictorTaskCards.renderUpcoming(activeSubject);
       subjectView.append(upcomingContainer);
       container.append(subjectView);
     }

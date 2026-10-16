@@ -97,7 +97,9 @@ const MODULE_BUNDLES = {
     'category-settings.js'
   ],
   'predictor-ui.js': [
+    'predictor-task-cards.js',
     'predictor-grade-view.js',
+    'predictor-atar-view.js',
     'predictor-ui.js'
   ],
   'cohort-stats.js': [
@@ -3138,7 +3140,7 @@ runTest('Test 115: Prediction cache updates on task category change, category se
   // 1. Static checks:
   // Button color parity: #cx-cat-save and baselines saveBtn must both use #2563eb
   assert.ok(catCode.includes('id="cx-cat-save" class="eds-c-button" style="background:#2563eb;color:#fff;'), 'Category settings Save Changes button must use #2563eb background');
-  assert.ok(catCode.includes("saveBtn.style.background = '#2563eb'"), 'Baselines save button must use #2563eb background');
+  assert.ok(catCode.includes("Object.assign(saveBtn.style, { background: '#2563eb', color: '#fff', border: 'none', padding: '6px 14px'"), 'Baselines save button must use #2563eb background with the canonical 6px 14px padding');
 
   // Prediction cache update hooks:
   assert.ok(predMathCode.includes('clearSubjectPredictionCache') && predMathCode.includes('updatePredictionCache'), 'predictor-math.js must export clearSubjectPredictionCache and updatePredictionCache');

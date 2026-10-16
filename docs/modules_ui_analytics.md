@@ -84,36 +84,14 @@ This document covers the user interface and analytics modules, including target 
   - Saves calibration offsets to `localStorage` under `connectea:preferences` (`sem1_calibration:<courseId>`).
 - **Export**: `window.ConnectifyCalibration`.
 
-#### [`category-settings.js`](file:///Users/uwong/Downloads/2.1.14_0/src/predictor/category-settings.js) & Submodules
-- **Role**: Settings panel controller managing preferences, cohort defaults, calibration, categories, and baselines.
-- **Submodules**:
-  - [`category-baselines.js`](file:///Users/uwong/Downloads/2.1.14_0/src/predictor/category-baselines.js): Manages previous-year baseline averages by type and subject with legacy key purging.
-- **Key Functions**:
-  - Preferences (`connectify:auto_expand`), Cohort Size (default 500), and ATAR Percentage (default 60%).
-  - Synchronizes custom categories with `browser.storage.local` and `localStorage` (`cx-categories`).
-  - Triggers `rescanAllAutoAssessments()` and prediction cache sync upon save.
-- **Export**: `window.ConnectifyCategorySettings`.
+#### Settings (`src/predictor/`, `src/cohort/category-store.js`)
+- `settings-markup.js` (panel HTML), `settings-preferences.js` (auto-expand, cohort size 500, ATAR % 60, theme list rebuilt from the registry on open, wallpaper, cache clearing), `category-settings.js` (`ConnectifyCategorySettings`, category keyword editor; save/delete rescan assessments), `category-baselines.js` (baseline editor), `category-store.js` (`ConnectifyCategoryStore`: defaults and saved categories in `cx-categories` + extension storage).
 
-#### [`predictor-math.js`](file:///Users/uwong/Downloads/2.1.14_0/src/predictor/predictor-math.js) & Submodules
-- **Role**: Mathematical modeling engine for predictions, baselines, headroom compression, and Grade/ATAR projections.
-- **Submodules**:
-  - [`predictor-engine.js`](file:///Users/uwong/Downloads/2.1.14_0/src/predictor/predictor-engine.js): Core prediction formulas, logarithmic headroom compression above 80%, calibrated variance scaling, and outcome segment evaluation.
-  - [`predictor-dates.js`](file:///Users/uwong/Downloads/2.1.14_0/src/predictor/predictor-dates.js): Chronological task ordering, date parsing, and custom date override resolution.
-  - [`predictor-cache.js`](file:///Users/uwong/Downloads/2.1.14_0/src/predictor/predictor-cache.js): In-memory Map cache (`predictionMemoryCache`) and persistent prediction storage (`connectify:prediction:`).
-- **Key Functions**:
-  - `predictTask(subjectName, task, historical, baselines)`: Predicts Low/Mid/High and 10% breakout ($1.10 \times \text{High}$).
-  - `populateChronologicalPredictions(subjects, force)`: Pre-populates prediction cache across updates.
-  - `projectSubjectGrades(subjects)` & `projectATAR(projectedSubjects)`: Aggregates projections into Low/Mid/High marks, TEA, and ATAR.
-- **Export**: `window.ConnectifyPredictorMath`.
-
-#### [`predictor-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/predictor/predictor-ui.js) & Submodules
-- **Role**: Sidebar tool panel controller (`#connectify-predictor`) with button `Predictor`.
-- **Submodules**:
-  - [`predictor-grade-view.js`](file:///Users/uwong/Downloads/2.1.14_0/src/predictor/predictor-grade-view.js): Renders subject sub-tabs, guidance cards, upcoming task predictions, and horizontal scroll preservation.
-- **Key Functions**:
-  - `createPredictorPanel()`: Builds two-tab Predictor interface (Grade Predictor & ATAR Predictor).
-  - ATAR Predictor: Displays Low, Mid, High predicted ATAR hero cards, TEA breakdown, and contributing ATAR courses table.
-- **Export**: `window.ConnectifyPredictorUI`.
+#### Predictor (`src/predictor/`)
+- **Model**: `predictor-baselines.js` (baselines store; partial saves keep the other half), `predictor-engine.js` (`predictTask`, logarithmic headroom above 80%, calibrated variance), `predictor-history.js` (completed-result history, overall and prior to a task), `predictor-dates.js` (chronological order, custom week overrides).
+- **Cache**: `predictor-store.js` (`predictionMemoryCache`, `connectify:prediction:` keys, version stamp) and `predictor-cache.js` (`populateChronologicalPredictions`, `getOrComputeTaskPrediction`, `updatePredictionCache`).
+- **Projections**: `predictor-grade-projection.js` (`projectSubjectGrades`) and `predictor-atar-projection.js` (`projectATAR`); `predictor-math.js` (`ConnectifyPredictorMath`) is the facade with `evaluateOutcome` (secret 1.10 x High breakout).
+- **UI**: `predictor-ui.js` (`ConnectifyPredictorUI`, Grade/ATAR tabs, delegated clicks), `predictor-atar-view.js` (shell + ATAR cards/table), `predictor-grade-view.js` (subject sub-tabs, guidance, projected mark), `predictor-task-cards.js` (upcoming tasks). All names inserted into HTML are escaped (`ConnectifyUtils.escapeHtml`).
 
 #### [`atar-features.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-features.js)
 - **Role**: Coordinates sidebar tool buttons, floating controls, countdown, and periodic synchronization.
