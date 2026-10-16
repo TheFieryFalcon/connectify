@@ -8,7 +8,7 @@
 (() => {
   'use strict';
 
-  const { normalize } = window.ConnectifyUtils;
+  const { normalize, customWeekOrder, readTimeOverride } = window.ConnectifyUtils;
   const cache = window.ConnectifyCache;
   const parser = window.ConnectifyParser;
   const subjectsCache = cache.subjectsCache;
@@ -97,48 +97,22 @@
     saveSubjectsCache();
   }
 
+  // The generic name key belongs to the first task of that name; repeats need their own id key
+  function isFirstOfName(subjectName, task) {
+    const name = normalize(task.name).toLowerCase();
+    const cachedMap = subjectsCache.get(subjectName);
+    const sameName = cachedMap ? Array.from(cachedMap.values()).filter(t => t && normalize(t.name).toLowerCase() === name) : [];
+    return sameName.length <= 1 || sameName[0] === task;
+  }
+
   function resolveTaskOrder(subjectName, task) {
     if (!task) return null;
-    const taskName = task.name || '';
-    const taskId = task.id || '';
-
-    let customOrder = null;
-    if (taskId) {
-      customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskId}`) ||
-                    localStorage.getItem(`connectify:time_override:${subjectName}:${taskId}`);
-    }
-
-    if (customOrder === null || customOrder === '') {
-      const cachedMap = subjectsCache.get(subjectName);
-      const allTasks = cachedMap ? Array.from(cachedMap.values()) : [];
-      const duplicateTasks = (Array.isArray(allTasks) && taskName)
-        ? allTasks.filter(t => t && normalize(t.name).toLowerCase() === normalize(taskName).toLowerCase())
-        : [];
-      const isDuplicate = duplicateTasks.length > 1;
-      const isFirst = !isDuplicate || (duplicateTasks.length > 0 && duplicateTasks[0] === task);
-
-      if (isFirst && taskName) {
-        customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
-                      localStorage.getItem(`connectify:time_override:${subjectName}:${taskName}`);
-      }
-    }
-
-    if (customOrder !== null && customOrder !== '') {
-      const num = Number(customOrder);
-      if (Number.isFinite(num) && num > 0) {
-        const term = Math.floor((num - 1) / 10) + 1;
-        const week = ((num - 1) % 10) + 1;
-        return (term - 1) * 12 + week;
-      }
-      const twMatch = String(customOrder).match(/t(?:erm)?\s*(\d+)\s*[,;]?\s*w(?:eek)?\s*(\d+)/i);
-      if (twMatch) {
-        const term = parseInt(twMatch[1], 10);
-        const week = parseInt(twMatch[2], 10);
-        return (term - 1) * 12 + week;
-      }
-    }
+    const override = readTimeOverride([subjectName], [task.id]) ??
+      (task.name && isFirstOfName(subjectName, task) ? readTimeOverride([subjectName], [task.name]) : null);
+    const order = customWeekOrder(override);
+    if (order !== null) return order;
     if (Number.isFinite(task.order)) return task.order;
-    return (task.caption && typeof orderHint === 'function') ? orderHint(task.caption) : (task.order ?? null);
+    return task.caption ? orderHint(task.caption) : (task.order ?? null);
   }
 
   function formatCollectedSubjects(includePending) {

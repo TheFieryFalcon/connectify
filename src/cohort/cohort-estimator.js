@@ -1,8 +1,8 @@
 /**
  * Connectify Cohort Size Estimator
  *
- * Estimates cohort size dynamically from subject category baselines, course type,
- * Year 11/12 indicators, and empirical boxplot IQR spreads.
+ * Estimates cohort size from a sample count on the chart when Connect provides one, otherwise from the
+ * typical size for the subject and year level (cohort-size-baselines.js) refined by observed boxplot spreads.
  * Provides `window.ConnectifyCohortEstimator`.
  */
 (() => {
@@ -16,7 +16,6 @@
   const { normalize } = window.ConnectifyUtils;
 
   const math = () => window.ConnectifyCohortMath || {
-    toNumeric: v => (v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)) ? Number(v) : undefined),
     validCohortSize: v => (Number.isSafeInteger(Number(v)) && Number(v) >= 1 ? Number(v) : undefined),
     validStats: s => Array.isArray(s) && s.length === 5 && s.every(Number.isFinite)
   };
@@ -54,6 +53,8 @@
   function saveObservedSpread(key, taskId, ratio) {
     if (!key || !taskId || !Number.isFinite(ratio) || ratio <= 0) return;
     const map = loadObservedSpreads(key);
+    // Every pass re-observes each row; only a new or changed spread is written
+    if (map.get(taskId) === ratio) return;
     map.set(taskId, ratio);
     try {
       const obj = Object.fromEntries(map);
@@ -61,50 +62,8 @@
     } catch {}
   }
 
-  /**
-   * Reads 5-number boxplot summary from DOM bridge or Highcharts on the task row.
-   */
-  function readRowStats(row) {
-    if (window.ConnectifyCohortView?.readStats) {
-      return window.ConnectifyCohortView.readStats(row);
-    }
-    const host = row.querySelector('[data-highcharts-chart]') ||
-                 row.querySelector('.cvr-c-task__chart [data-highcharts-chart]') ||
-                 row.querySelector('.cvr-c-task__chart');
-    if (!host) return null;
-
-    if (host.dataset?.connectifyStats) {
-      try {
-        const stats = JSON.parse(host.dataset.connectifyStats);
-        if (math().validStats(stats)) return stats;
-      } catch {}
-    }
-
-    const hostWithDataset = host.querySelector?.('[data-connectify-stats]') || host.closest?.('[data-connectify-stats]');
-    if (hostWithDataset?.dataset?.connectifyStats) {
-      try {
-        const stats = JSON.parse(hostWithDataset.dataset.connectifyStats);
-        if (math().validStats(stats)) return stats;
-      } catch {}
-    }
-
-    const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
-    const chart = window.Highcharts?.charts?.[chartIndex];
-    if (chart) {
-      for (const series of chart.series || []) {
-        const dataPoints = [...(series.points || []), ...(series.options?.data || [])];
-        for (const point of dataPoints) {
-          const pointData = point?.options || point;
-          const stats = Array.isArray(pointData)
-            ? pointData.slice(-5).map(math().toNumeric)
-            : [pointData?.low, pointData?.q1, pointData?.median, pointData?.q3, pointData?.high].map(math().toNumeric);
-
-          if (math().validStats(stats)) return stats;
-        }
-      }
-    }
-    return null;
-  }
+  // The shared row reader (cohort-row-readers.js) loads later in the pipeline but before any estimate runs
+  const readRowStats = row => window.ConnectifyCohortRows?.readStats?.(row) ?? null;
 
   /**
    * Estimates cohort size dynamically from course characteristics and available boxplot data.
@@ -150,8 +109,7 @@
       }
     }
 
-    // 2. Derive dynamic baseline estimate from subject category, course type, and year level
-    let baseline = 50;
+    // 2. Typical size for this subject and year level, scaled to the General Cohort Size and ATAR % settings
     const isATAR = /\batar\b/i.test(cleanTitle);
     const isYear11 = /\b(?:year\s*11|11)\b/i.test(cleanTitle) || /\bAE[A-Z]{3}\b/i.test(cleanTitle);
     const isYear12Direct = /\b(?:year\s*12|12)\b/i.test(cleanTitle) || /\bAT[A-Z]{3}\b/i.test(cleanTitle);
@@ -167,66 +125,8 @@
       if (Number.isSafeInteger(storedTotal) && storedTotal >= 1) totalStudents = storedTotal;
       const storedAtar = Number(localStorage.getItem('connectify:atar_percentage'));
       if (Number.isFinite(storedAtar) && storedAtar > 0 && storedAtar <= 100) atarPct = storedAtar;
-    } catch (e) {}
-
-    const atarPool = totalStudents * (atarPct / 100);
-    const nonAtarPool = totalStudents * (1 - atarPct / 100);
-    const atarScale = atarPool / 300;
-    const nonAtarScale = nonAtarPool / 200;
-
-    if (/\b(methods|mathematics methods)\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? Math.round(180 * atarScale) : Math.round(219 * atarScale);
-    } else if (/\bchemistry\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? Math.round(170 * atarScale) : Math.round(224 * atarScale);
-    } else if (/\bhuman biolog(y|ical)\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? Math.round(140 * atarScale) : Math.round(183 * atarScale);
-    } else if (/\b(mathematics applications?|applications?)\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? Math.round(160 * atarScale) : Math.round(189 * atarScale);
-    } else if (/\benglish atar\b/i.test(cleanTitle) || (/\benglish\b/i.test(cleanTitle) && isATAR && !/\badditional\b/i.test(cleanTitle))) {
-      baseline = isYear12 ? Math.round(180 * atarScale) : Math.round(220 * atarScale);
-    } else if (/\b(mathematics essentials?|essentials?)\b/i.test(cleanTitle)) {
-      baseline = Math.round(117 * nonAtarScale);
-    } else if (/\bphysics\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? Math.round(90 * atarScale) : Math.round(111 * atarScale);
-    } else if (/\bmathematics specialist\b/i.test(cleanTitle)) {
-      baseline = isYear12 ? Math.round(45 * atarScale) : Math.round(64 * atarScale);
-    } else if (/\bbiology\b/i.test(cleanTitle)) {
-      baseline = Math.round(61 * atarScale);
-    } else if (/\bliterature\b/i.test(cleanTitle)) {
-      baseline = Math.round(52 * atarScale);
-    } else if (/\beconomics\b/i.test(cleanTitle)) {
-      baseline = Math.round(44 * atarScale);
-    } else if (/\b(accounting|accounting and finance)\b/i.test(cleanTitle)) {
-      baseline = Math.round(36 * atarScale);
-    } else if (/\b(politics and law|politics & law)\b/i.test(cleanTitle)) {
-      baseline = Math.round(35 * atarScale);
-    } else if (/\bpsychology\b/i.test(cleanTitle)) {
-      baseline = Math.round(45 * atarScale);
-    } else if (/\b(physical education studies|pes)\b/i.test(cleanTitle)) {
-      baseline = Math.round(38 * atarScale);
-    } else if (/\b(business management|bme)\b/i.test(cleanTitle)) {
-      baseline = Math.round(24 * atarScale);
-    } else if (/\bmodern history\b/i.test(cleanTitle)) {
-      baseline = Math.round(15 * atarScale);
-    } else if (/\bjapanese\b/i.test(cleanTitle)) {
-      baseline = Math.round(44 * atarScale);
-    } else if (/\bfrench\b/i.test(cleanTitle)) {
-      baseline = Math.round(21 * atarScale);
-    } else if (/\bitalian\b/i.test(cleanTitle)) {
-      baseline = Math.round(20 * atarScale);
-    } else if (/\b(german|chinese|indonesian)\b/i.test(cleanTitle)) {
-      baseline = Math.round(22 * atarScale);
-    } else if (/\bcomputer science\b/i.test(cleanTitle)) {
-      baseline = Math.round(11 * atarScale);
-    } else if (/\bmusic\b/i.test(cleanTitle)) {
-      baseline = Math.round(10 * atarScale);
-    } else if (/\b(eald|english as an additional)\b/i.test(cleanTitle)) {
-      baseline = Math.round(9 * atarScale);
-    } else if (isATAR) {
-      baseline = Math.round(50 * atarScale);
-    } else {
-      baseline = Math.max(5, Math.round(28 * nonAtarScale));
-    }
+    } catch {}
+    const baseline = window.ConnectifyCohortSizeBaselines.baselineSize(cleanTitle, { isYear12, isATAR, totalStudents, atarPct });
 
     // 3. Empirical refinement from Highcharts boxplot statistics if present
     if (key) {

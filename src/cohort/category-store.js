@@ -53,10 +53,14 @@
       if (stored) window.cxCategories = JSON.parse(stored);
     } catch {}
     extensionGet(['cx-categories'], res => {
-      if (res && res['cx-categories']) {
-        window.cxCategories = res['cx-categories'];
-        writeLocal(window.cxCategories);
-      }
+      const saved = res?.['cx-categories'];
+      if (!saved) return;
+      const changed = JSON.stringify(saved) !== JSON.stringify(window.cxCategories);
+      window.cxCategories = saved;
+      dropRetiredKeywords();
+      writeLocal(saved);
+      // Extension storage answers after the page has rendered: re-detect Auto rows with the saved keywords
+      if (changed) window.dispatchEvent(new CustomEvent('connectify-rescan-auto-types'));
     });
     dropRetiredKeywords();
   }
@@ -76,7 +80,8 @@
     window.cxCategories = copyDefaults();
   }
 
-  if (!window.cxCategories) window.cxCategories = defaultCategories;
+  // A copy, so editing the live set can never change the factory defaults
+  if (!window.cxCategories) window.cxCategories = copyDefaults();
   resolveCategories();
 
   window.ConnectifyCategoryStore = { defaultCategories, copyDefaults, resolveCategories, saveCategories, resetCategories };

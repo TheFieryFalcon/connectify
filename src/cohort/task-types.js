@@ -1,24 +1,17 @@
 /**
  * Connectify Task Type Categorizer & Override Manager
  *
- * Handles automated assessment categorization (Exam, Test, Application, Essay, Take-Home),
- * persistent student category overrides in localStorage, dynamic category colors,
- * class-level custom category sharing across Semesters 1 and 2,
- * and the interactive assessment type selector dropdown.
+ * Automated assessment categorization (Exam, Test, Application, Essay, Take-Home and custom categories),
+ * persistent student overrides, category colours and class-level custom categories shared across
+ * Semesters 1 and 2. Row metadata and the type dropdown: task-type-select.js.
+ * Exposes window.ConnectifyTaskTypes.
  */
 (() => {
   'use strict';
 
   if (window.ConnectifyTaskTypes) return;
 
-  const defaultCategories = {
-    Exam: { color: '#e74c3c', keywords: ['exam', 'semester'] },
-    Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
-    Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
-    Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
-    'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'presentation', 'oral', 'creative'] }
-  };
-
+  const { defaultCategories } = window.ConnectifyCategoryStore;
   const { normalize } = window.ConnectifyUtils;
 
   function cleanSubject(subjectName) {
@@ -29,35 +22,18 @@
   }
 
   let cachedOverrides = null;
-  let cachedCategories = null;
   const cachedClassCategories = new Map();
 
   function invalidateTypesMemoryCache() {
     cachedOverrides = null;
-    cachedCategories = null;
     cachedClassCategories.clear();
   }
 
+  // The category store keeps the live set in window.cxCategories and replaces it on every save, so it is
+  // read directly: a memoised copy would keep detecting tasks with the old keywords after a save
   function getCategories() {
-    if (cachedCategories) return cachedCategories;
-    let cats = defaultCategories;
-    if (window.cxCategories && Object.keys(window.cxCategories).length > 0) {
-      cats = window.cxCategories;
-    } else {
-      try {
-        const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
-        if (stored) {
-          window.cxCategories = JSON.parse(stored);
-          cats = window.cxCategories;
-        }
-      } catch {}
-    }
-    // Safeguard: Ensure 'extended' is never in Take-Home keywords as WA ATAR Extended Response is an in-class test/essay
-    if (cats?.['Take-Home']?.keywords) {
-      cats['Take-Home'].keywords = cats['Take-Home'].keywords.filter(k => k.toLowerCase() !== 'extended');
-    }
-    cachedCategories = cats;
-    return cats;
+    const live = window.cxCategories;
+    return live && Object.keys(live).length > 0 ? live : defaultCategories;
   }
 
   function getCustomCategoriesForClass(subjectName) {
@@ -221,113 +197,6 @@
     return palette[Math.abs(hash) % palette.length];
   }
 
-  function getTaskMeta(row) {
-    const card = row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
-    const titleEl = card?.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading');
-    const cardTitle = normalize(titleEl?.textContent || '');
-    const subjectName = cleanSubject(cardTitle);
-    const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
-      .map(e => normalize(e.textContent))
-      .filter(Boolean);
-    const taskName = (labels.length ? labels[labels.length - 1] : '') ||
-      normalize(row.querySelector('.cvr-c-task__details')?.childNodes[0]?.textContent) ||
-      'Assessment';
-    const labelsKey = labels.join('::');
-    return { subjectName, taskName, labels, labelsKey };
-  }
-
-  function updateTypeSelect(select, subjectName, taskName, labelsKey, allLabels) {
-    const autoType = categorizeTask(taskName, allLabels);
-    const savedOverride = getSavedTaskType(subjectName, taskName, labelsKey);
-    const categories = getCategories();
-    const classCustoms = getCustomCategoriesForClass(subjectName);
-
-    const currentSelection = savedOverride !== undefined ? savedOverride : '';
-
-    // Merge standard categories and class custom categories
-    const allCatList = [...Object.keys(categories)];
-    for (const cc of classCustoms) {
-      if (!allCatList.includes(cc)) allCatList.push(cc);
-    }
-    if (savedOverride && !allCatList.includes(savedOverride)) {
-      allCatList.push(savedOverride);
-    }
-
-    const optSignature = `${autoType}|${allCatList.join(',')}|${savedOverride || ''}`;
-    if (select.dataset.signature !== optSignature) {
-      select.dataset.signature = optSignature;
-      select.innerHTML = '';
-
-      const autoOpt = document.createElement('option');
-      autoOpt.value = '';
-      autoOpt.textContent = `Auto (${autoType})`;
-      select.appendChild(autoOpt);
-
-      for (const cat of allCatList) {
-        const opt = document.createElement('option');
-        opt.value = cat;
-        opt.textContent = cat;
-        select.appendChild(opt);
-      }
-
-      const addOpt = document.createElement('option');
-      addOpt.value = '__custom__';
-      addOpt.textContent = '+ Custom...';
-      select.appendChild(addOpt);
-    }
-
-    select.value = currentSelection;
-    if (currentSelection) {
-      select.classList.add('connectea-overridden');
-      select.title = `Assessment type manually set to "${currentSelection}". Click to change or reset to Auto.`;
-    } else {
-      select.classList.remove('connectea-overridden');
-      select.title = `Automatically detected as "${autoType}". Click to override.`;
-    }
-  }
-
-  function rescanAllAutoAssessments() {
-    const selects = Array.from(document.querySelectorAll('.connectea-type-select'));
-    for (const select of selects) {
-      const row = select.closest('.cvr-c-task');
-      if (!row) continue;
-      const meta = getTaskMeta(row);
-      delete select.dataset.signature;
-      updateTypeSelect(select, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
-    }
-
-    if (window.ConnectifyCompoundProgress?.update) {
-      window.ConnectifyCompoundProgress.update();
-    }
-    if (window.ConnectifyWeakness?.renderChart) {
-      window.ConnectifyWeakness.renderChart();
-    }
-    if (window.ConnectifyPredictorMath?.updatePredictionCache) {
-      try {
-        window.ConnectifyPredictorMath.updatePredictionCache();
-      } catch {}
-    }
-    window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
-  }
-
-  window.addEventListener('storage', e => {
-    if (e.key === 'cx-categories' || e.key === 'connectea:categories') {
-      try {
-        if (e.newValue) window.cxCategories = JSON.parse(e.newValue);
-      } catch {}
-      invalidateTypesMemoryCache();
-      rescanAllAutoAssessments();
-    } else if (e.key === 'connectea:task_type_overrides' || e.key?.startsWith('connectea:class_categories:')) {
-      invalidateTypesMemoryCache();
-    }
-  });
-
-  window.addEventListener('connectify-settings-updated', () => {
-    invalidateTypesMemoryCache();
-  });
-
-  window.addEventListener('connectify-rescan-auto-types', rescanAllAutoAssessments);
-
   window.ConnectifyTaskTypes = {
     defaultCategories,
     getCategories,
@@ -339,8 +208,7 @@
     categorizeTask,
     getEffectiveType,
     getCategoryColor,
-    getTaskMeta,
-    updateTypeSelect,
-    rescanAllAutoAssessments
+    cleanSubject,
+    invalidateTypesMemoryCache
   };
 })();

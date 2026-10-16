@@ -8,11 +8,14 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 
 | Global Object | Module | Primary Purpose |
 |---|---|---|
-| `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey` (load first) |
+| `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey`, `customWeekOrder`/`readTimeOverride` (load first) |
 | `window.ConnectifyData` | `assessment-data.js` | Scrapes assessment cards, caches tasks, and expands accordions |
 | `window.ConnectifyCache` | `cache-versions.js` | Subsystem cache versioning (predictor, results, settings, cohort) and clearing |
 | `window.ConnectifyCohortMath` | `cohort-math.js` | PCHIP cubic Hermite interpolation, variance, z-score |
 | `window.ConnectifyCohortEstimator` | `cohort-estimator.js` | Baseline and empirical cohort size estimation |
+| `window.ConnectifyCohortSizeBaselines` | `cohort-size-baselines.js` | Typical cohort size per subject and year level |
+| `window.ConnectifyCohortRows` | `cohort-row-readers.js` | Task row mark and boxplot readers, DOM helpers |
+| `window.ConnectifyCohortOutcomeEval` | `cohort-outcome-eval.js` | Outcome meter evaluation and prediction pre-caching for a row |
 | `window.ConnectifyCohortView` | `cohort-view.js` | Injects stats panels and type selectors into assessment rows |
 | `window.ConnectifyCohort` | `cohort-stats.js` | Controller orchestrating passes, mutation observer, styles |
 | `window.ConnectifyTaskTypes` | `task-types.js` | Category keyword detection, overrides, class category sharing |
@@ -67,7 +70,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectea:atar:2025:<account>:<year>` | `localStorage` | `atar-calculator.js` | ATAR score adjustments, top four selections, targets |
 | `connectea:preferences` | `localStorage` | `scaling-calibration.js` | Calibration table (`sem1_calibration:<courseId>`) |
 | `connectify:weakness_disabled_subjects` | `localStorage` | `weakness-radar.js` | Array of subjects excluded from Weakness Analyzer |
-| `connectea:time_override:<subject>:<task|taskId>` | `localStorage` | `progress-chart.js` | Manual school week overrides for assessments (disambiguated by task ID for duplicate names) |
+| `connectea:time_override:<subject>:<task|taskId>` | `localStorage` | `progress-chart.js` | Manual school week overrides: weeks 1-40 in 10-week terms (17 = Term 2 Week 7) or `t2w7`, read via `ConnectifyUtils.customWeekOrder` (disambiguated by task ID for duplicate names) |
 | `connectify:auto_expand` | `localStorage` | `category-settings.js` / `atar-features.js` | Boolean setting to auto-expand course outlines on load |
 | `connectify:stale_subjects` | `localStorage` | `assessment-data.js` / `new-grade.js` | Set of subjects whose collapsed grade/stats changed, awaiting targeted re-scrape upon expansion |
 | `connectify:subjects_cache:<student>` | `localStorage` | `assessment-data.js` | Persisted scraped subjects and tasks for instant collection without DOM rescrape |
@@ -95,6 +98,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 |---|---|---|---|
 | `connectify-open` | Tool toggles / sidebar | Tool panels | `detail: 'calculator' \| 'progress' \| 'weakness' \| 'categories' \| 'predictor' \| 'home'` — enforces single active tool |
 | `connectify-baselines-updated` | `category-settings.js` / `predictor-math.js` | `predictor-ui.js` | Emitted when previous-year baseline averages are saved in Settings |
+| `connectify-rescan-auto-types` | `category-store.js` | `task-type-select.js` | Re-detect Auto rows (extension storage returned different categories) |
 | `connectify-task-type-changed` | `task-types.js` | `cohort-stats.js`, `compound-progress.js`, `weakness-radar.js` | Dispatched when assessment category override changes |
 | `connectify-settings-updated` | `scaling-calibration.js` | `atar-ui.js`, `compound-progress.js`, `progress-graph.js` | Dispatched when calibration scores or categories change |
 | `connectify-cohort-invalidated` | `assessment-data.js` | `cohort-stats.js` | Dispatched when cohort caches are cleared to trigger refresh |

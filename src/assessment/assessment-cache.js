@@ -42,6 +42,9 @@
   function setTaskStats(subjectName, taskName, stats, n) {
     if (!subjectName || !taskName || !Array.isArray(stats) || stats.length !== 5) return;
     const memKey = `${normalize(subjectName).toLowerCase()}::${normalize(taskName).toLowerCase()}`;
+    // Every cohort pass reports each row's stats; only a change is written to storage
+    const previous = statsCache.get(memKey);
+    if (previous && previous.join(',') === stats.join(',')) return;
     statsCache.set(memKey, stats);
 
     try {

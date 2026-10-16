@@ -1,154 +1,23 @@
 /**
- * Connectify Cohort Panel & Task DOM Builder
+ * Connectify Cohort Panel
  *
- * Handles DOM element creation for statistics panels, type selectors, and cohorts.
- * Exposes window.ConnectifyCohortPanel.
+ * Builds a task row's statistics panel: the distribution and result lines, the "Type:" dropdown and
+ * outcome meter for assessments, and the cohort size input on the overall subject row.
+ * Row readers and DOM helpers: cohort-row-readers.js. Exposes window.ConnectifyCohortPanel.
  */
 (() => {
   'use strict';
 
   try {
-    const { normalize } = window.ConnectifyUtils;
-    const clearChildren = el => {
-      if (!el) return;
-      if (typeof el.replaceChildren === 'function') {
-        el.replaceChildren();
-      } else {
-        while (el.firstChild) el.removeChild(el.firstChild);
-      }
-    };
+    const rows = window.ConnectifyCohortRows;
+    const { readMark, createElement, setText, math, types, estimator } = rows;
 
-    const math = () => window.ConnectifyCohortMath || {
-      toNumeric: v => (v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)) ? Number(v) : undefined),
-      formatPercentage: v => (Number.isFinite(v) ? String(Math.round(v * 100) / 100) : 'unavailable'),
-      validCohortSize: v => (Number.isSafeInteger(Number(v)) && Number(v) >= 1 ? Number(v) : undefined),
-      validStats: s => Array.isArray(s) && s.length === 5 && s.every(Number.isFinite),
-      summary: () => null,
-      percentile: () => undefined,
-      standing: () => '',
-      rankString: () => ''
-    };
-
-    const types = () => {
-      const t = window.ConnectifyTaskTypes;
-      if (t && typeof t.getTaskMeta === 'function') return t;
-      return {
-        getTaskMeta: () => ({ subjectName: '', taskName: '', labels: [], labelsKey: '' }),
-        updateTypeSelect: () => {},
-        saveTaskTypeOverride: () => {},
-        ...(t || {})
-      };
-    };
-
-    const estimator = () => window.ConnectifyCohortEstimator || {
-      loadCohortSize: () => undefined,
-      saveCohortSize: () => false
-    };
-
-    function readMark(row) {
-      const cell = row.querySelector('.cvr-c-task__marks .cvr-c-task__mark') || row.querySelector('.cvr-c-task__mark');
-      const text = normalize(cell?.textContent);
-
-      let match = text.match(/^(-?\d+(?:\.\d+)?)\s*%$/);
-      if (match) return Number(match[1]);
-
-      match = text.match(/^(-?\d+(?:\.\d+)?)\s*Out\s+of\s+(\d+(?:\.\d+)?)$/i);
-      if (match && Number(match[2]) > 0) return (100 * Number(match[1])) / Number(match[2]);
-
-      match = text.match(/(-?\d+(?:\.\d+)?)\s*%/);
-      if (match) return Number(match[1]);
-
-      return undefined;
-    }
-
-    function readStats(row) {
-      const meta = types().getTaskMeta(row);
-      const host = row.querySelector('[data-highcharts-chart]') ||
-                   row.querySelector('.cvr-c-task__chart [data-highcharts-chart]') ||
-                   row.querySelector('.cvr-c-task__chart');
-
-      let foundStats = null;
-      let foundN = undefined;
-
-      if (host) {
-        if (host.dataset?.connectifyStats) {
-          try {
-            const stats = JSON.parse(host.dataset.connectifyStats);
-            if (math().validStats(stats)) {
-              foundStats = stats;
-              foundN = host.dataset.connectifyN;
-            }
-          } catch {}
-        }
-
-        if (!foundStats) {
-          const hostWithDataset = host.querySelector?.('[data-connectify-stats]') || host.closest?.('[data-connectify-stats]');
-          if (hostWithDataset?.dataset?.connectifyStats) {
-            try {
-              const stats = JSON.parse(hostWithDataset.dataset.connectifyStats);
-              if (math().validStats(stats)) {
-                foundStats = stats;
-                foundN = hostWithDataset.dataset.connectifyN;
-              }
-            } catch {}
-          }
-        }
-
-        if (!foundStats) {
-          const chartIndex = Number(host.getAttribute('data-highcharts-chart'));
-          const chart = window.Highcharts?.charts?.[chartIndex];
-          if (chart) {
-            for (const series of chart.series || []) {
-              const dataPoints = [...(series.points || []), ...(series.options?.data || [])];
-              for (const point of dataPoints) {
-                const pointData = point?.options || point;
-                const stats = Array.isArray(pointData)
-                  ? pointData.slice(-5).map(math().toNumeric)
-                  : [pointData?.low, pointData?.q1, pointData?.median, pointData?.q3, pointData?.high].map(math().toNumeric);
-
-                if (math().validStats(stats)) {
-                  foundStats = stats;
-                  break;
-                }
-              }
-              if (foundStats) break;
-            }
-          }
-        }
-      }
-
-      if (foundStats) {
-        if (meta?.subjectName && meta?.taskName && window.ConnectifyData?.setTaskStats) {
-          window.ConnectifyData.setTaskStats(meta.subjectName, meta.taskName, foundStats, foundN);
-        }
-        return foundStats;
-      }
-
-      if (meta?.subjectName && meta?.taskName && window.ConnectifyData?.getTaskStats) {
-        const cached = window.ConnectifyData.getTaskStats(meta.subjectName, meta.taskName);
-        if (math().validStats(cached)) return cached;
-      }
-
-      return null;
-    }
-
-    function setText(element, text) {
-      if (element.textContent !== text) {
-        element.textContent = text;
-      }
-    }
-
-    function setHTML(element, html) {
-      if (element.innerHTML !== html) {
-        element.innerHTML = html;
-      }
-    }
-
-    function createElement(tag, className, textContent) {
-      const el = document.createElement(tag);
-      if (className) el.className = className;
-      if (textContent) el.textContent = textContent;
-      return el;
+    const SMALL_COHORT = ' (Estimates under 50 students have reduced precision)';
+    /** The cohort size notice: the estimate, the small-cohort warning and whether the override was saved. */
+    function noticeText(estimatedSize, size, status = 'Saved.') {
+      const warning = estimatedSize < 50 ? SMALL_COHORT : '';
+      if (size === undefined) return warning ? warning.trim() : 'Enter custom size to override.';
+      return `Original Estimate ~${estimatedSize}${warning} • ${status}`;
     }
 
     const panels = window.ConnectifyCohortPanels || (window.ConnectifyCohortPanels = new WeakMap());
@@ -250,14 +119,7 @@
         input.value = saved !== undefined ? String(saved) : '';
         label.append(input);
 
-        const warningText = estimatedSize < 50 ? ' (Estimates under 50 students have reduced precision)' : '';
-        notice = createElement(
-          'span',
-          'connectea-notice',
-          saved !== undefined
-            ? `Original Estimate ~${estimatedSize}${warningText} • Saved.`
-            : warningText ? warningText.trim() : 'Enter custom size to override.'
-        );
+        notice = createElement('span', 'connectea-notice', noticeText(estimatedSize, saved));
         notice.setAttribute('aria-live', 'polite');
 
         const controls = createElement('div', 'connectea-subject-controls');
@@ -270,16 +132,12 @@
           input.setAttribute('aria-invalid', String(Boolean(isInvalid)));
 
           const currentEstimate = stateRef.state ? stateRef.state.estimatedSize : estimatedSize;
-          const currentWarning = currentEstimate < 50 ? ' (Estimates under 50 students have reduced precision)' : '';
-
           const persisted = estimator().saveCohortSize(key, size);
           setText(
             notice,
             isInvalid
               ? 'Enter a whole number of students, at least 1.'
-              : size !== undefined
-              ? `Original Estimate ~${currentEstimate}${currentWarning} • ${persisted ? 'Saved.' : 'Browser storage unavailable.'}`
-              : currentWarning ? currentWarning.trim() : 'Enter custom size to override.'
+              : noticeText(currentEstimate, size, persisted ? 'Saved.' : 'Browser storage unavailable.')
           );
           if (typeof onCohortChange === 'function') onCohortChange();
         });
@@ -293,9 +151,9 @@
       target.querySelectorAll('.connectea-panel, .connectea-row-wrapper').forEach(el => {
         if (el !== wrapper && el !== box) el.remove();
       });
-    if (!target.contains(wrapper)) {
-      target.append(wrapper);
-    }
+      if (!target.contains(wrapper)) {
+        target.append(wrapper);
+      }
 
       const state = {
         wrapper,
@@ -319,20 +177,7 @@
       return state;
     }
 
-    window.ConnectifyCohortPanel = {
-      readMark,
-      readStats,
-      createPanel,
-      createElement,
-      clearChildren,
-      setText,
-      setHTML,
-      normalize,
-      math,
-      types,
-      estimator,
-      panels
-    };
+    window.ConnectifyCohortPanel = { ...rows, createPanel, noticeText, panels };
   } catch (err) {
     console.error('Connectify error in cohort-panel.js:', err);
   }

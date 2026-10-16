@@ -8,7 +8,7 @@
   'use strict';
 
   try {
-  const { normalize } = window.ConnectifyUtils;
+  const { normalize, customWeekOrder, readTimeOverride } = window.ConnectifyUtils;
 
     const getTaskStats = (...args) => (window.ConnectifyCache?.getTaskStats || function() { return null; })(...args);
   const { orderHint, cohortMean } = window.ConnectifyParseHelpers;
@@ -160,28 +160,8 @@
         weight,
         mean: cohortMean(row),
         semester: parseSemester(card),
-        order: (() => {
-           let customOrder = null;
-           if (id) {
-              customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${id}`) ||
-                            localStorage.getItem(`connectea:time_override:${title}:${id}`) ||
-                            localStorage.getItem(`connectify:time_override:${subjectName}:${id}`);
-           }
-           if ((customOrder === null || customOrder === '') && occurrenceCount === 0 && taskName) {
-              customOrder = localStorage.getItem(`connectea:time_override:${subjectName}:${taskName}`) ||
-                            localStorage.getItem(`connectea:time_override:${title}:${taskName}`) ||
-                            localStorage.getItem(`connectify:time_override:${subjectName}:${taskName}`);
-           }
-           if (customOrder !== null && customOrder !== '') {
-              const num = Number(customOrder);
-              if (Number.isFinite(num) && num > 0) {
-                 const term = Math.floor((num - 1) / 10) + 1;
-                 const week = ((num - 1) % 10) + 1;
-                 return (term - 1) * 12 + week;
-              }
-           }
-           return orderHint(caption);
-        })(),
+        // A week override typed in the Progress Graph wins; the generic name key only applies to the first occurrence
+        order: customWeekOrder(readTimeOverride([subjectName, title], [id, occurrenceCount === 0 ? taskName : null])) ?? orderHint(caption),
         sequence: parsedTasks.length
       };
 

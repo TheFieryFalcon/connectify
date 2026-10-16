@@ -17,6 +17,7 @@
   const getHistoricalData = (...args) => engine().getHistoricalData(...args);
   const resolveCustomDate = (...args) => dates().resolveCustomDate(...args);
   const formatCustomWeek = (...args) => dates().formatCustomWeek(...args);
+  const formatOverrideWeek = (...args) => dates().formatOverrideWeek(...args);
   const hasParsableDate = (...args) => dates().hasParsableDate(...args);
   const getOrComputeTaskPrediction = (...args) => window.ConnectifyPredictorCache.getOrComputeTaskPrediction(...args);
 
@@ -77,7 +78,7 @@
               // Explicitly cleared or suppressed by user
               continue;
             }
-            const formatted = formatCustomWeek(customTime);
+            const formatted = formatOverrideWeek(customTime);
             if (formatted) {
               t.order = formatted.order;
               t.caption = formatted.display;

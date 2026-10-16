@@ -36,8 +36,8 @@ Isolated world content scripts run in the exact dependency order listed in `mani
 
 ## 3. Core & UI Submodules Summary (`docs/modules_core.md`, `docs/modules_ui_analytics.md`)
 - `assessment-data.js` & submodules (`assessment-cache.js`, `assessment-parser.js`, `assessment-expand.js`): In-memory subjects/task cache, card scraping, paced bulk expansion with non-blocking chunked finalization (90%->95%->98%->100%), 450ms animation guard.
-- `cohort-view.js` & submodules (`cohort-outcome.js`, `cohort-panel.js`): Stats panel injection, row memoization (`ui._memo`), outcome meter rendering with secret purple breakout.
-- `cohort-stats.js` & `cohort-styles.js`: Two-pass coordinator, `card._cxTaskRows` query caching, debounced scheduler.
+- `cohort-view.js` & submodules (`cohort-outcome.js`, `cohort-row-readers.js`, `cohort-panel.js`, `cohort-outcome-eval.js`): Stats panel injection, row memoization (`ui._memo`), outcome meter rendering with secret purple breakout.
+- `cohort-stats.js`, `cohort-styles.js` & `cohort-observer.js`: Two-pass coordinator, `card._cxTaskRows` query caching, debounced scheduler, page observer.
 - `category-settings.js` & `category-baselines.js`: Category keywords, custom categories, previous-year baselines with candidate key purging.
 - `predictor-math.js` & submodules (`predictor-engine.js`, `predictor-dates.js`, `predictor-cache.js`): `predictionMemoryCache` Map for zero-disk lookups, task prediction, grade/ATAR projections.
 - `predictor-ui.js` & `predictor-grade-view.js`: Predictor drawer panel, 6 subject tabs, upcoming task projections, ATAR hero cards.

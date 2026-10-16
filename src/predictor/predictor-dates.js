@@ -104,13 +104,22 @@
     return null;
   }
 
+  /** A Progress Graph override (school weeks 1-40 in 10-week terms, or "t2w7") as { term, week, order, display }. */
+  function formatOverrideWeek(val) {
+    const order = window.ConnectifyUtils.customWeekOrder(val);
+    if (order === null) return null;
+    const term = Math.floor((order - 1) / 12) + 1;
+    const week = ((order - 1) % 12) + 1;
+    return { term, week, order, display: `Term ${term}, Week ${week}` };
+  }
+
   function hasParsableDate(task, subjectName) {
     if (!task) return false;
     const sName = subjectName || task.subjectName;
     const customTime = resolveCustomDate(sName, task);
     if (customTime !== null) {
       if (customTime === '') return false;
-      const formatted = formatCustomWeek(customTime);
+      const formatted = formatOverrideWeek(customTime);
       return Boolean(formatted);
     }
     if (task.customDate) return true;
@@ -134,7 +143,7 @@
     if (subjectName && (task.name || task.id)) {
       const customTime = resolveCustomDate(subjectName, task);
       if (customTime !== null) {
-        const formatted = formatCustomWeek(customTime);
+        const formatted = formatOverrideWeek(customTime);
         if (formatted && Number.isFinite(formatted.order)) {
           order = formatted.order;
         }
@@ -167,6 +176,7 @@
     window.ConnectifyPredictorDates = {
       resolveCustomDate,
       formatCustomWeek,
+      formatOverrideWeek,
       hasParsableDate,
       getTaskChronologicalStamp
     };

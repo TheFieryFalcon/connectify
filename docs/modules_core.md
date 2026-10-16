@@ -45,48 +45,41 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `standing(p)`: Formats standing text (e.g., "Top 5%", "Top of cohort", "Bottom 20%").
 - **Export**: `window.ConnectifyCohortMath`.
 
-#### [`cohort-estimator.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-estimator.js) (314 lines)
-- **Role**: Dynamically estimates cohort sizes per subject using course baselines, user-configured general cohort size and ATAR percentage, and empirical boxplot IQR spreads.
-- **Key Functions**:
-  - `subjectKey(card)`: Constructs a unique key scoped by student ID, year, and subject name.
-  - `estimateCohortSize(card)`: Computes subject-specific baseline sizes (scaled from General Cohort Size, default 500, and ATAR percentage, default 60%) and refines them using observed IQR ratios ($\text{range} / \text{IQR}$).
-  - `loadCohortSize(key)` / `saveCohortSize(key, size)`: Manages user overrides for specific classes in `localStorage`.
-- **Export**: `window.ConnectifyCohortEstimator`.
+#### [`cohort-estimator.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-estimator.js) & `cohort-size-baselines.js`
+- **Role**: Cohort size per subject: a sample count on the chart if present, else the typical size for the subject and year level (`cohort-size-baselines.js` table, scaled from General Cohort Size 500 and ATAR 60%), refined by observed IQR ratios ($\text{range} / \text{IQR}$, written only when changed).
+- **Key Functions**: `subjectKey(card)` (student, year, subject), `estimateCohortSize(card)`, `loadCohortSize(key)` / `saveCohortSize(key, size)` (per-class overrides).
+- **Export**: `window.ConnectifyCohortEstimator`, `window.ConnectifyCohortSizeBaselines`.
 
 #### [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-view.js) & Submodules
-- **Role**: Creates and updates the DOM UI for assessment statistics panels and assessment type selector dropdowns.
-- **Submodules**:
-  - [`cohort-outcome.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-outcome.js): Evaluates outcome meter segments (0..5), renders 18px x 56px multi-tier outcome bar, and handles secret purple breakout ($> 1.10 \times \text{High}$) with singleton floating tooltip.
-  - [`cohort-panel.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-panel.js): Injects `.connectea-panel`, `.connectea-row-wrapper`, and `.connectea-type-select` DOM nodes with formatted `'Type: '` label.
-- **Key Functions**:
-  - `readMark(row)`: Parses raw percentage score from `.cvr-c-task__mark` (supporting `%` and `X Out of Y`).
-  - `readStats(row)`: Reads boxplot quantiles from DOM dataset bridge or Highcharts instance.
-  - `render(...)`: Renders distribution text, $z$-score, standing, rank, and outcome bar. Memoizes row render state (`ui._memo`) to eliminate scroll jank.
+- **Role**: Renders each task row's statistics panel, `Type:` dropdown and outcome meter.
+- **Submodules** (manifest order):
+  - `cohort-outcome.js`: outcome meter segments (0..5), 18px x 56px bar, secret purple breakout ($> 1.10 \times \text{High}$), singleton tooltip.
+  - `cohort-row-readers.js` (`ConnectifyCohortRows`): `readMark(row)` (`%` and `X Out of Y`), `readStats(row)` (dataset bridge, then Highcharts, then stats cache), DOM helpers.
+  - `cohort-panel.js`: `.connectea-panel`, `.connectea-row-wrapper`, `'Type: '` dropdown, cohort size input and `noticeText()`.
+  - `cohort-outcome-eval.js`: builds the predictor task from a row (semester, row position, week override, weight); hides the meter on the first row of Semester 1 without a subject baseline; pre-caches predictions for unmarked rows.
+- **Key Functions**: `render(...)`: distribution, $z$-score, standing, rank and outcome bar; memoised per row (`ui._memo`: mark, stats, cohort size, baselines signature, taskType, types version).
 - **Export**: `window.ConnectifyCohortView`.
 
 #### [`cohort-stats.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-stats.js) & Submodules
-- **Role**: Controller managing styling, DOM observation, pass scheduling, and page lifecycle.
-- **Submodules**:
-  - [`cohort-styles.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-styles.js): Injects component CSS (`#connectea-style`) and handles style helper utilities.
+- **Role**: Controller: styles, pass scheduling and page lifecycle.
+- **Submodules**: `cohort-styles.js` (component CSS `#connectea-style`); `cohort-observer.js` (MutationObserver, events, 8s heartbeat, `--cx-display-scale`).
 - **Key Functions**:
-  - `pass()`: Two-pass coordinator that unifies best cohort estimates across Semester 1 and 2 cards, then renders statistics on each task row. Caches `card._cxTaskRows` to eliminate quadratic DOM queries.
-  - `schedule(immediate)`: Trailing debounced runner (120ms) using `requestAnimationFrame` to prevent frame drops during scrolling.
-  - `MutationObserver`: Watches `.cvr-c-task` rows and Highcharts attribute mutations.
+  - `pass()`: unifies cohort estimates across Semester 1 and 2 cards, then renders every row. Caches `card._cxTaskRows` and `card._cxCohortKey`.
+  - `schedule(immediate)`: 250ms trailing debounce into `requestAnimationFrame`; `runPass()` drains queued re-passes.
+  - Observer: task rows added, mark text edits inside rows, and stats stamped on charts (`data-connectify-stats`, `data-highcharts-chart`); Connectify's own nodes and accordion animations are ignored.
 - **Export**: `window.ConnectifyCohort`.
 
 ---
 
 ### Assessment Types & Categorization
 
-#### [`task-types.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/task-types.js) (262 lines)
-- **Role**: Manages assessment categories (Exam, Test, Application, Essay, Take-Home), student overrides, dynamic category colors, and cross-semester class custom categories.
+#### [`task-types.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/task-types.js) & `task-type-select.js`
+- **Role**: Assessment categories (defaults from `category-store.js`: Exam, Test, Application, Essay, Take-Home), student overrides, category colours, and class custom categories shared across Semesters 1 and 2. Categories are read live from `window.cxCategories`, so saved keywords apply at once.
 - **Key Functions**:
-  - `categorizeTask(taskName, allLabels)`: Matches keywords against category definitions. Defaults to `'Take-Home'`.
-  - `saveTaskTypeOverride(subjectName, taskName, labelsKey, type)`: Updates task category override and synchronizes prediction cache.
-  - `getEffectiveType(subjectName, task, labelsKey)`: Returns student manual override if set, otherwise returns automated categorization.
-  - `getCustomCategoriesForClass(subjectName)` / `addCustomCategoryForClass(subjectName, categoryName)`: Persists custom categories per class so they appear in all assessment dropdowns in that class across Semesters 1 and 2.
-  - `updateTypeSelect(select, ...)`: Updates the `<select class="connectea-type-select">` options and marks overridden selections.
-  - `rescanAllAutoAssessments()`: Re-categorizes all assessments set to Auto when categories or keywords change and updates the prediction cache.
+  - `categorizeTask(taskName, allLabels)`: keyword then regex match on the name, then the labels; defaults to `'Take-Home'`.
+  - `saveTaskTypeOverride(...)` / `getEffectiveType(subjectName, task, labelsKey)`: override wins over detection; saving refreshes the prediction cache.
+  - `getCustomCategoriesForClass` / `addCustomCategoryForClass`: per-class custom categories.
+  - `task-type-select.js`: `getTaskMeta(row)`, `updateTypeSelect(select, ...)`, `rescanAllAutoAssessments()` (also on `connectify-rescan-auto-types`, fired when extension storage returns different categories).
 - **Export**: `window.ConnectifyTaskTypes`.
 
 ---

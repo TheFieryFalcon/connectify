@@ -90,7 +90,9 @@ const MODULE_BUNDLES = {
   ],
   'cohort-view.js': [
     'cohort-outcome.js',
+    'cohort-row-readers.js',
     'cohort-panel.js',
+    'cohort-outcome-eval.js',
     'cohort-view.js'
   ],
   'category-settings.js': [
@@ -108,7 +110,8 @@ const MODULE_BUNDLES = {
   ],
   'cohort-stats.js': [
     'cohort-styles.js',
-    'cohort-stats.js'
+    'cohort-stats.js',
+    'cohort-observer.js'
   ]
 };
 
@@ -131,6 +134,8 @@ const SPLIT_PARTS = {
   'sidebar-predictor.css': ['sidebar-predictor.css', 'sidebar-predictor-results.css'],
   'sidebar-settings.css': ['sidebar-settings.css', 'sidebar-progress-scaling.css'],
   'assessment-cache.js': ['cache-versions.js', 'assessment-cache.js'],
+  'task-types.js': ['category-store.js', 'task-types.js', 'task-type-select.js'],
+  'cohort-estimator.js': ['cohort-size-baselines.js', 'cohort-estimator.js'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js'],
   'theme-customizer.js': ['theme-color-utils.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
   // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
@@ -171,6 +176,7 @@ fs.readFileSync = function(filePath, ...args) {
 class MockElement {
   constructor(tag, className = '') {
     this.tagName = (tag || 'div').toUpperCase();
+    this.nodeType = 1;
     this.children = [];
     this.childNodes = [];
     this.parentElement = null;
@@ -2292,8 +2298,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v10_20261003_pred'"), 'predictor-math.js must use v10_20261003_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v10_20261003_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v10_20261003_pred');
+  assert.ok(predMathCode.includes("'v11_20261016_pred'"), 'predictor-math.js must use v11_20261016_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v11_20261016_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v11_20261016_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2386,9 +2392,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v10_20261003_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v11_20261016_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v10_20261003_pred'), 'predictor-math.js must bump version to v10_20261003_pred');
+  assert.ok(predMathJs.includes('v11_20261016_pred'), 'predictor-math.js must bump version to v11_20261016_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -3008,6 +3014,58 @@ runTest('Test 158: Grade notifications ignore small boxplot shifts from other cl
     'A subject missing from the cache is seeded quietly');
 });
 
+runTest('Test 159: Cohort observer re-runs when the main-world bridge stamps boxplot stats', () => {
+  const savedCohort = window.ConnectifyCohort;
+  const calls = [];
+  window.ConnectifyCohort = { schedule: immediate => calls.push(immediate), runPass: () => calls.push('run'), persistentEstimates: new Map() };
+  try {
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'cohort-observer.js'), 'utf8'));
+    const { isRelevant } = window.ConnectifyCohort;
+    assert.strictEqual(typeof isRelevant, 'function', 'cohort-observer.js must expose isRelevant');
+
+    const row = document.createElement('div');
+    row.className = 'cvr-c-task';
+    const host = document.createElement('div');
+    host.className = 'cvr-c-task__chart';
+    row.appendChild(host);
+    const panel = document.createElement('section');
+    panel.className = 'connectea-panel';
+    row.appendChild(panel);
+    const elsewhere = document.createElement('div');
+
+    // Attribute records have no added or removed nodes; they used to be dropped as "only our own nodes"
+    assert.strictEqual(isRelevant({ type: 'attributes', target: host, addedNodes: [], removedNodes: [] }), true,
+      'Stats stamped on a chart host must trigger a pass');
+    assert.strictEqual(isRelevant({ type: 'childList', target: row, addedNodes: [panel], removedNodes: [] }), false,
+      'Adding a Connectify panel must not trigger a pass');
+    assert.strictEqual(isRelevant({ type: 'characterData', target: { nodeType: 3, parentElement: elsewhere }, addedNodes: [], removedNodes: [] }), false,
+      'Text changes outside task rows must not trigger a pass');
+    assert.strictEqual(isRelevant({ type: 'characterData', target: { nodeType: 3, parentElement: panel }, addedNodes: [], removedNodes: [] }), false,
+      'Text changes inside Connectify panels must not trigger a pass');
+  } finally {
+    window.ConnectifyCohort = savedCohort;
+  }
+});
+
+runTest('Test 160: Progress Graph week overrides mean the same week to the scraper and the predictor', () => {
+  const { customWeekOrder } = window.ConnectifyUtils;
+  // Overrides are typed as school weeks 1-40 with 10-week terms (17 = Term 2 Week 7); order uses 12-week terms
+  assert.strictEqual(customWeekOrder('17'), 19, 'Week 17 must be Term 2 Week 7');
+  assert.strictEqual(customWeekOrder('t2w7'), 19, 't2w7 must be Term 2 Week 7');
+  assert.strictEqual(customWeekOrder('Term 3, Week 4'), 28, 'Term 3, Week 4 must be order 28');
+  assert.strictEqual(customWeekOrder(''), null, 'An empty override is not a week');
+  assert.strictEqual(customWeekOrder('soon'), null, 'Unreadable text is not a week');
+
+  const dates = window.ConnectifyPredictorDates;
+  assert.strictEqual(dates.formatOverrideWeek('17').display, 'Term 2, Week 7', 'The predictor must show week 17 as Term 2, Week 7');
+  mockLocalStorage.clear();
+  mockLocalStorage.setItem('connectea:time_override:Physics ATAR:Overridden Task', '17');
+  const overridden = dates.getTaskChronologicalStamp({ name: 'Overridden Task', semester: 1, sequence: 0 }, 'Physics ATAR');
+  const captioned = dates.getTaskChronologicalStamp({ name: 'Captioned Task', semester: 1, sequence: 0, order: 19 }, 'Physics ATAR');
+  assert.strictEqual(overridden, captioned, 'An override of 17 must sort exactly where the scraper places it (order 19)');
+  mockLocalStorage.clear();
+});
+
 runTest('Test 111: Typography parity (unbolded overall % and letter grade), startup auto-expand, outcome bar for first task of type, and complete render finalization', () => {
   const sideCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
   const themeCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme.css'), 'utf8');
@@ -3038,9 +3096,9 @@ runTest('Test 111: Typography parity (unbolded overall % and letter grade), star
   assert.ok(cohortViewJs.includes('card._cxTaskRows'), 'cohort-view.js must memoize card task rows to eliminate quadratic scans');
 
   // 5. Overall stats panel stability and MutationObserver loop elimination
-  assert.ok(cohortViewJs.includes('if (!target.contains(wrapper)) {\n      target.append(wrapper);\n    }'), 'cohort-view.js must not repeatedly re-append existing wrapper');
-  assert.ok(cohortViewJs.includes('} else if (ui.key !== key) {\n      ui.key = key;\n    }'), 'cohort-view.js must update ui.key in-place without destroying wrapper');
-  assert.ok(cohortStatsJs.includes('isConnectifyNode'), 'cohort-stats.js observer must ignore Connectify internal UI elements');
+  assert.ok(/if \(!target\.contains\(wrapper\)\) \{\s*target\.append\(wrapper\);\s*\}/.test(cohortViewJs), 'cohort-view.js must not repeatedly re-append existing wrapper');
+  assert.ok(/\} else if \(ui\.key !== key\) \{\s*ui\.key = key;\s*\}/.test(cohortViewJs), 'cohort-view.js must update ui.key in-place without destroying wrapper');
+  assert.ok(cohortStatsJs.includes('const isOwnNode = node =>') && cohortStatsJs.includes('if (onlyOwnNodes(r.addedNodes) && onlyOwnNodes(r.removedNodes)) return false;'), 'cohort-stats.js observer must ignore Connectify internal UI elements');
 
   // 6. Complete render finalization: synchronous pass and double requestAnimationFrame before scroll unlock
   assert.ok(assessJs.includes('window.ConnectifyCohort.pass()'), 'finalizeExpansion must synchronously run ConnectifyCohort.pass()');
@@ -3060,7 +3118,8 @@ runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, 
 
   // 2. First task outcome bar suppression via .cvr-c-tasks .cvr-c-task query
   assert.ok(cohortViewJs.includes("card.querySelectorAll('.cvr-c-tasks .cvr-c-task')"), 'cohort-view.js must index tasks inside .cvr-c-tasks');
-  assert.ok(cohortViewJs.includes('tSem < taskSemester || (tSem === taskSemester && tSeq < taskSeq)'), 'cohort-view.js must strictly check prior sequence for prior subject data');
+  // Only the first row of the Semester 1 card lacks earlier work in the subject (the old per-task scan could never match)
+  assert.ok(cohortViewJs.includes('const hasPriorSubjectData = task.semester > 1 || task.sequence > 0;'), 'cohort-view.js must treat any later row or Semester 2 task as having prior subject data');
 
   // 3. Panel formatting: entire score display bolded, Z-Score formatted, colons and equals and Rank removed
   assert.ok(cohortViewJs.includes('<strong>Score ${math().formatPercentage(mark)}%</strong>'), 'cohort-view.js must bold entire score display without colon');
@@ -3174,7 +3233,8 @@ runTest('Test 115: Prediction cache updates on task category change, category se
   assert.ok(typesCode.includes('updatePredictionCache'), 'task-types.js must call updatePredictionCache');
   assert.ok(catCode.includes('updatePredictionCache'), 'category-settings.js must call updatePredictionCache');
   assert.ok(assessCode.includes('updatePredictionCache'), 'assessment-data.js must call updatePredictionCache upon stale expansion');
-  assert.ok(cohortViewCode.includes('memo.taskType === taskType'), 'cohort-view.js must include taskType in memoization check');
+  // A task type change bumps typesVersion, which the memo compares; the row's taskType is recorded in the memo
+  assert.ok(cohortViewCode.includes('memo.typesVersion === typesVersion') && cohortViewCode.includes('ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType, typesVersion };'), 'cohort-view.js must memoise taskType and invalidate on type changes');
 
   // 2. Functional evaluation of predictor-math.js updatePredictionCache & clearSubjectPredictionCache
   eval(predMathCode);
@@ -3387,7 +3447,7 @@ runTest('Test 119: Immediate summary panel recovery, scoped surface adaptation, 
 
   // 1. Verify immediate recovery of missing summary row panels in cohort-stats.js
   assert.ok(cohortStatsJs.includes('hasMissingSummaryPanel'), 'cohort-stats.js observer must check for missing summary row panels');
-  assert.ok(cohortStatsJs.includes('if (hasMissingSummaryPanel) {\n        runPass();\n      }'), 'cohort-stats.js must invoke runPass immediately when a summary panel is missing');
+  assert.ok(cohortStatsJs.includes('if (hasMissingSummaryPanel()) runPass();'), 'cohort-stats.js must invoke runPass immediately when a summary panel is missing');
 
   // 2. Verify collapsed state suppresses collect(true) in cohort-stats.js
   assert.ok(cohortStatsJs.includes('hasDetailTasks = document.querySelector'), 'cohort-stats.js must check for detail tasks');
@@ -3455,7 +3515,17 @@ runTest('Test 120: In-memory prediction and category caching, chunked 95% bulk e
 
   // 2. Verify in-memory category and overrides cache in task-types.js
   assert.ok(taskTypesJs.includes('let cachedOverrides = null;'), 'task-types.js must define cachedOverrides');
-  assert.ok(taskTypesJs.includes('let cachedCategories = null;'), 'task-types.js must define cachedCategories');
+  // Categories are read live: a memoised copy kept detecting tasks with the old keywords after Settings saved new ones
+  assert.ok(!taskTypesJs.includes('let cachedCategories = null;'), 'task-types.js must read the live category set, not a memoised copy');
+  delete window.ConnectifyTaskTypes;
+  eval(taskTypesJs);
+  const savedCats = window.cxCategories;
+  try {
+    window.ConnectifyCategoryStore.saveCategories({ ...window.ConnectifyCategoryStore.copyDefaults(), Lab: { color: '#123456', keywords: ['lab report'] } });
+    assert.strictEqual(window.ConnectifyTaskTypes.categorizeTask('Lab report 2', []), 'Lab', 'Keywords saved in Settings must apply immediately');
+  } finally {
+    window.cxCategories = savedCats;
+  }
   assert.ok(taskTypesJs.includes('const cachedClassCategories = new Map();'), 'task-types.js must define cachedClassCategories Map');
 
   // 3. Verify chunked bulk expansion across 90%, 95%, 98%, and 100% in assessment-data.js
@@ -3667,7 +3737,7 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   // Verify code signatures
   assert.ok(chartJs.includes('const isDuplicateName = duplicateTasks.length > 1;'), 'progress-chart.js must detect duplicate-named tasks');
   assert.ok(chartJs.includes('const isFirstOccurrence = !isDuplicateName || (duplicateTasks.length > 0 && duplicateTasks[0] === point);'), 'progress-chart.js must distinguish first occurrence');
-  assert.ok(assessJs.includes('const isDuplicate = duplicateTasks.length > 1;'), 'assessment-data.js must detect duplicate-named tasks in resolveTaskOrder');
+  assert.ok(assessJs.includes('return sameName.length <= 1 || sameName[0] === task;'), 'assessment-data.js must detect duplicate-named tasks in resolveTaskOrder');
   assert.ok(predMathJs.includes('const actualTaskId = typeof taskOrName === \'object\' && taskOrName ? (taskOrName.id || taskId) : taskId;'), 'predictor-math.js must support taskId in resolveCustomDate');
 
   // Functional test:

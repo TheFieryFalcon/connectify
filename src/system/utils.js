@@ -1,7 +1,8 @@
 /**
  * Connectify Shared Utilities
  *
- * Text normalisation, HTML escaping, the current account key, localStorage key scanning and legacy baseline key resolution
+ * Text normalisation, HTML escaping, the current account key, localStorage key scanning, legacy baseline key resolution
+ * and Progress Graph week overrides
  * shared by every content script. Loaded first in the assessment outlines pipeline.
  * Exposes window.ConnectifyUtils.
  */
@@ -67,5 +68,38 @@
 
   const isBaselineKey = key => BASELINE_PREFIXES.some(prefix => key.startsWith(prefix));
 
-  window.ConnectifyUtils = { normalize, escapeHtml, accountKey, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey };
+  /**
+   * Converts a Progress Graph week override to the internal order (12-week terms, as formatTimestamp reads it).
+   * Overrides are typed as school weeks 1-40 with 10-week terms (17 = Term 2 Week 7) or as "t2w7".
+   */
+  function customWeekOrder(value) {
+    const str = String(value ?? '').trim();
+    const tw = str.match(/t(?:erm)?\s*(\d+)\s*[,;]?\s*w(?:eek)?\s*(\d+)/i);
+    if (tw) return (Number(tw[1]) - 1) * 12 + Number(tw[2]);
+    const num = Number(str);
+    if (!str || !Number.isFinite(num) || num <= 0) return null;
+    return Math.floor((num - 1) / 10) * 12 + ((num - 1) % 10) + 1;
+  }
+
+  /** First saved week override for any subject and task id/name pair (ids in priority order), or null. */
+  function readTimeOverride(subjects, ids) {
+    for (const id of ids) {
+      if (!id) continue;
+      for (const subject of subjects) {
+        if (!subject) continue;
+        for (const prefix of ['connectea', 'connectify']) {
+          try {
+            const value = localStorage.getItem(`${prefix}:time_override:${subject}:${id}`);
+            if (value !== null && value !== '') return value;
+          } catch {}
+        }
+      }
+    }
+    return null;
+  }
+
+  window.ConnectifyUtils = {
+    normalize, escapeHtml, accountKey, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
+    customWeekOrder, readTimeOverride
+  };
 })();

@@ -157,16 +157,12 @@
 
       store.saveCategories(updatedCats);
 
+      // The rescan re-detects Auto rows and refreshes the prediction cache
       if (window.ConnectifyTaskTypes?.rescanAllAutoAssessments) {
         window.ConnectifyTaskTypes.rescanAllAutoAssessments();
       } else {
         window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
-      }
-
-      if (window.ConnectifyPredictorMath?.updatePredictionCache) {
-        try {
-          window.ConnectifyPredictorMath.updatePredictionCache();
-        } catch {}
+        try { window.ConnectifyPredictorMath?.updatePredictionCache?.(); } catch {}
       }
 
       renderBaselines();
