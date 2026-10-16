@@ -2115,14 +2115,26 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         if (isDark && elBg && elBg.a > 0.5 && el.parentElement && !isSvg && !el.closest?.('svg')) {
           const parentStyle = window.getComputedStyle(el.parentElement);
           const parentBg = parseRgb(parentStyle.backgroundColor);
-          // A container and its own padding are one surface: when the element fills the parent's content box,
-          // the parent's colour is the element's padding and should stay very similar to it
+          // A container and its own padding are one surface: when the element fills the parent's content box
+          // (both axes), the parent is that element's padding and must be exactly the same colour
           const isPaddingOf = (() => {
             const pr = el.parentElement.getBoundingClientRect(), er = el.getBoundingClientRect();
             const pad = ['Top', 'Right', 'Bottom', 'Left'].map(sd => parseFloat(parentStyle[`padding${sd}`]) || 0);
-            const fills = Math.abs(er.width - (pr.width - pad[1] - pad[3])) <= 2 || Math.abs(er.height - (pr.height - pad[0] - pad[2])) <= 2;
+            const fills = Math.abs(er.width - (pr.width - pad[1] - pad[3])) <= 2 && Math.abs(er.height - (pr.height - pad[0] - pad[2])) <= 2;
             return pad.some(v => v > 0) && fills;
           })();
+          if (isPaddingOf && parentBg && parentBg.a > 0.9 && elBg.a > 0.9 &&
+              !el.closest?.('.v-Notification-system, [class*="progress"], [class*="chart"], [class*="box-plot"], .highcharts-container, .cvr-c-task__chart') &&
+              (Math.abs(elBg.r - parentBg.r) > 2 || Math.abs(elBg.g - parentBg.g) > 2 || Math.abs(elBg.b - parentBg.b) > 2)) {
+            issues.push({
+              category: 'STYLE',
+              type: 'PADDING_COLOR_MISMATCH',
+              severity: 'CRITICAL',
+              selector,
+              details: `Element fills its parent's content box, so the parent's padding must be the same colour (${style.backgroundColor} vs ${parentStyle.backgroundColor})`,
+              contrast: getContrast(elBg, parentBg).toFixed(2)
+            });
+          }
           if (parentBg && parentBg.a > 0.5 && !isPaddingOf) {
             const isDistinct = Math.abs(elBg.r - parentBg.r) > 4 || Math.abs(elBg.g - parentBg.g) > 4 || Math.abs(elBg.b - parentBg.b) > 4;
             if (isDistinct) {

@@ -109,10 +109,11 @@
 /* --------------------------------------------------------------------------
    25. Angular Material Paginator & Pagination Controls
    -------------------------------------------------------------------------- */
-cnt-paginator,
-.cnt-paginator,
-cnt-paginator .container-fluid,
-.cnt-paginator .container-fluid {
+/* Only the paging bar: a cnt-paginator that wraps the table (Library) keeps its native layout */
+cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)),
+.cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)),
+cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid,
+.cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -126,10 +127,10 @@ cnt-paginator .container-fluid,
 .connectea-dark :is(
   mat-paginator,
   .mat-paginator,
-  cnt-paginator,
-  .cnt-paginator,
-  cnt-paginator .container-fluid,
-  .cnt-paginator .container-fluid,
+  cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)),
+  .cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)),
+  cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid,
+  .cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid,
   .mat-paginator-container,
   .mat-paginator-outer-container,
   .connect-paginator-container

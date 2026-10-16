@@ -7219,7 +7219,8 @@ runTest('Test 153: Theme CSS selectors are scoped to a theme hook (native Connec
     ':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)', // display-width scaling
     '.cvr-c-task__details', // display-width scaling
     '#ng-zone__classes-metrics-summary', // classes list back panel in all modes
-    'cnt-paginator', '.cnt-paginator', 'cnt-paginator .container-fluid', '.cnt-paginator .container-fluid', // paginator in all modes
+    'cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body))', '.cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body))',
+    'cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid', '.cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid', // paging bar in all modes; a paginator wrapping the table keeps native layout
     ':is(cnt-paginator, .cnt-paginator) :is(.mat-paginator, mat-paginator, .connect-paginator-container, .mat-paginator-container, .mat-paginator-outer-container)'
   ]);
 
@@ -7562,6 +7563,16 @@ runTest('Test 160: Padding and margins that are 0px in the Default theme stay 0p
     const js = fs.readFileSync(path.join(BASE_DIR, 'src/theme', f), 'utf8');
     assert.ok(!/style\.(padding|margin)|setProperty\(\s*['"](padding|margin)/.test(js), `${f} must not set padding/margin inline`);
   }
+});
+
+runTest('Test 161: A dialog and its padding regions share one surface; a table-wrapping paginator keeps native layout', () => {
+  const dialogCss = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-dialog-surface.css'), 'utf8');
+  assert.ok(cssHas(dialogCss, 'mat-dialog-container) :is(div, section, header, footer') && cssHas(dialogCss, 'background-color: transparent !important'),
+    'dialog title, content and footer regions must be transparent so the container colour shows through');
+  assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('theme-dialog-surface.css'), 'theme-dialog-surface.css must be registered in the manifest');
+  const pagCss = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-dialogs-paginator.css'), 'utf8');
+  const bar = pagCss.slice(pagCss.indexOf('25. Angular Material Paginator'));
+  assert.ok(cssHas(bar, 'cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)),'), 'a cnt-paginator wrapping the table must not get flex/space-between layout');
 });
 
 Promise.all(pendingTestPromises).then(() => {

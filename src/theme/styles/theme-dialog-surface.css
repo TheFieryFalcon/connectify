@@ -1,0 +1,14 @@
+/**
+ * Connectify Theme: a dialog is one surface. Its title, content, footer and wrapper regions are the
+ * container's own padding, so they show the container's colour instead of painting their own shades.
+ * Controls, avatars, chips and icons keep their own colours.
+ */
+.connectea-dark :is(.mat-dialog-container, mat-dialog-container)
+  :is(div, section, header, footer, mat-dialog-content, mat-dialog-actions, cnt-notice-view, [mat-dialog-title], [mat-dialog-content], [mat-dialog-actions]):not([class*="avatar"]):not([class*="icon"]):not([class*="chip"]):not([class*="badge"]):not([class*="button"]):not([class*="btn"]):not([class*="progress"]):not([class*="chart"]):not(.mat-form-field-flex):not(.mat-select-panel):not(.cx-overlay) {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.connectea-dark :is(.mat-dialog-container, mat-dialog-container) :is(.mat-dialog-title, .mat-dialog-header, .mat-dialog-actions, [mat-dialog-title], [mat-dialog-actions]) {
+  border-top-color: var(--cx-border, #36485e) !important;
+}
