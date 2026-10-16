@@ -7491,6 +7491,78 @@ runTest('Test 157: A new school year turns last year\'s averages into baselines 
   }
 });
 
+runTest('Test 160: Padding and margins that are 0px in the Default theme stay 0px in every custom theme', () => {
+  // Default theme = native Connect (no theme hook), so its zero spacing comes from connect_css/.
+  const stripComments = css => css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const splitTop = (text, sep) => {
+    const parts = [];
+    let depth = 0, cur = '';
+    for (const ch of text) {
+      if (ch === '(' || ch === '[') depth++;
+      if (ch === ')' || ch === ']') depth--;
+      if (ch === sep && depth === 0) { parts.push(cur.trim()); cur = ''; } else cur += ch;
+    }
+    if (cur.trim()) parts.push(cur.trim());
+    return parts.filter(Boolean);
+  };
+  const lastCompound = sel => splitTop(sel.replace(/\s+/g, ' ').replace(/ ([>+~]) /g, '$1'), ' ').pop().replace(/^.*[>+~]/, '');
+  const ZERO = /^(?:0(?:px|em|rem|%)?\s*)+$/;
+  // [{ target, prop, value }] for every padding*/margin* declaration, descending into @media blocks
+  function spacing(css) {
+    const out = [];
+    const re = /([^{}]+)\{([^{}]*)\}/g;
+    let m;
+    while ((m = re.exec(stripComments(css)))) {
+      const sel = m[1].replace(/^[\s;]*/, '').trim();
+      if (sel.startsWith('@')) continue;
+      for (const decl of m[2].split(';')) {
+        const d = decl.match(/^\s*(padding|margin)(-(?:top|right|bottom|left))?\s*:\s*(.*?)\s*(?:!important)?\s*$/);
+        if (!d) continue;
+        for (const s of splitTop(sel, ',')) out.push({ target: lastCompound(s), prop: d[1] + (d[2] || ''), value: d[3], sel: s });
+      }
+    }
+    return out;
+  }
+
+  const connectDir = path.join(BASE_DIR, 'connect_css');
+  const nativeZero = new Map(); // "target|prop" -> source file
+  for (const f of fs.readdirSync(connectDir).filter(n => n.endsWith('.css'))) {
+    for (const r of spacing(origReadFileSync.call(fs, path.join(connectDir, f), 'utf8'))) {
+      if (ZERO.test(r.value) && /^[.#]/.test(r.target) && !r.target.includes(':')) nativeZero.set(`${r.target}|${r.prop}`, f);
+    }
+  }
+  assert.ok(nativeZero.size > 100, 'connect_css must yield native zero padding/margin declarations');
+
+  const themeDir = path.join(BASE_DIR, 'src/theme/styles');
+  const themeRules = [];
+  for (const f of fs.readdirSync(themeDir).filter(n => n.endsWith('.css'))) {
+    // Customizer UI chrome is Connectify's own markup (cx- ids/classes), not Connect containers
+    if (/customizer|color-picker|menu-actions/.test(f)) continue;
+    for (const r of spacing(origReadFileSync.call(fs, path.join(themeDir, f), 'utf8'))) themeRules.push({ ...r, file: f });
+  }
+  assert.ok(themeRules.length > 10, 'theme stylesheets must yield padding/margin declarations');
+
+  // Sanity: Liquid Glass drops outline wrapper padding to 0, which is also the Default's natural look
+  assert.ok(themeRules.some(r => r.target === '.cvr-u-padding--md' && ZERO.test(r.value)),
+    'the parser must see the Liquid Glass .cvr-u-padding--md zero padding rule');
+
+  const offenders = [];
+  for (const r of themeRules) {
+    if (ZERO.test(r.value)) continue;
+    // A rule that targets Connectify's own elements can never collide with native Connect spacing
+    if (/connectea|connectify|\bcx-|#cx|\.cx/.test(r.target) || !/^[.#]/.test(r.target)) continue; // bare element tags are too coarse to compare
+    const key = `${r.target}|${r.prop}`;
+    if (nativeZero.has(key)) offenders.push(`${r.file}: ${r.sel} { ${r.prop}: ${r.value} } (0 in ${nativeZero.get(key)})`);
+  }
+  assert.deepStrictEqual(offenders, [], `Themes must not give padding/margin to containers that are 0px by default:\n${offenders.join('\n')}`);
+
+  // Custom theme tokens/wallpaper code must never write spacing inline
+  for (const f of ['theme-custom-tokens.js', 'theme-custom-themes.js', 'theme-registry.js', 'theme.js']) {
+    const js = fs.readFileSync(path.join(BASE_DIR, 'src/theme', f), 'utf8');
+    assert.ok(!/style\.(padding|margin)|setProperty\(\s*['"](padding|margin)/.test(js), `${f} must not set padding/margin inline`);
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

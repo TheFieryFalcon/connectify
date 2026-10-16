@@ -75,6 +75,7 @@ This document details user-facing features 11 through 20, covering Target ATAR a
   - Section 4: Sidebar Navigation & Workspace Layout (order, expansion, categories).
   - Section 5: Grade Update Notifications & System Integrity (delta formatting, jump-to-card, lifecycle).
   - Section 6: Regression Verification (centering, first-assessment outcome rules, card scraping, predictor interactivity).
+  - Spacing parity (Test 160): class/id containers with 0px padding/margin in `connect_css/` (the Default theme) must not get non-zero spacing from any theme or custom theme stylesheet.
 
 ---
 
