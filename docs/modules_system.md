@@ -8,6 +8,10 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 
 ### System Health, Navigation & Theme
 
+#### `scheduler.js` (`ConnectifyScheduler`)
+- **Role**: One page-wide MutationObserver and one heartbeat shared by every isolated script; loaded first in each isolated group (first copy wins); disconnects on `pagehide`, resumes on a back/forward `pageshow`.
+- **Key Functions**: `onMutations(callback, { filter, mute = true })` (records batched per animation frame, per 100ms while hidden); `every(ms, fn, { whenActive = true, whenVisible = true, mute = false, when })`; `isMuted()`.
+
 #### [`notifications.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/notifications.js)
 - **Role**: Universal notification and toast manager for Connectify.
 - **Key Functions**:

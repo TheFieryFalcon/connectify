@@ -231,11 +231,8 @@
       }
     };
 
-    // refresh() is a no-op while the panel is hidden; data events refresh an open panel immediately
-    setInterval(() => {
-      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
-      refresh();
-    }, 1500);
+    // Only an open panel refreshes on the shared heartbeat; data events refresh it immediately
+    window.ConnectifyScheduler.every(1500, () => refresh(), { when: () => !panel.hidden });
     for (const evt of ['connectify-results-updated', 'connectify-task-type-changed', 'connectify-settings-updated']) {
       window.addEventListener(evt, () => refresh());
     }

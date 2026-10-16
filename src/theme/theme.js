@@ -165,16 +165,16 @@
     });
   };
 
-  new MutationObserver(records => {
-    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-    const shouldUpdate = records.some(r => {
+  // Page changes through the shared scheduler (muted during accordion animations): added or removed
+  // nodes and class changes outside the toggle, the sidebar, accordions and task rows
+  window.ConnectifyScheduler.onMutations(debouncedSync, {
+    mute: true,
+    filter: r => {
+      if (r.type === 'characterData' || (r.type === 'attributes' && r.attributeName !== 'class')) return false;
       if (r.target === toggleButton || r.target.parentElement?.closest('#connectea-theme-toggle') || r.target.closest?.('#connectify-sidebar')) return false;
-      if (r.type === 'attributes' && (r.attributeName === 'data-connectea-surface' || r.attributeName === 'data-connectea-ink' || r.attributeName === 'data-connectea-reading-view')) return false;
-      if (r.target?.closest?.('.eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectea-panel')) return false;
-      return true;
-    });
-    if (shouldUpdate) debouncedSync();
-  }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+      return !r.target?.closest?.('.eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectea-panel');
+    }
+  });
 
   window.addEventListener('resize', () => updateTogglePosition(true));
   window.addEventListener('storage', e => { if (e.key === STORAGE_KEY && e.newValue) applyTheme(!isAuthDisabled() && e.newValue === 'dark'); });

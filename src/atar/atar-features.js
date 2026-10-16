@@ -150,36 +150,16 @@
       }
     }, 25);
 
-    let bttTimer = null;
-    const debouncedSyncBackToTop = () => {
-      if (bttTimer) return;
-      bttTimer = requestAnimationFrame(() => {
-        bttTimer = null;
-        syncBackToTop();
-      });
-    };
+    // The scheduler batches page changes per frame and mutes them during accordion animations
+    const scheduler = window.ConnectifyScheduler;
+    scheduler.onMutations(() => {
+      if (!hasAutoExpanded) checkStartupAutoExpand();
+      syncBackToTop();
+      if (!document.getElementById('cx-expand-btn') && window.ConnectifyData) syncFeatures();
+    }, { filter: r => r.type === 'childList', mute: true });
 
-    if (typeof MutationObserver !== 'undefined' && document.body) {
-      new MutationObserver(() => {
-        if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-        if (!hasAutoExpanded) {
-          checkStartupAutoExpand();
-        }
-        debouncedSyncBackToTop();
-        if (!document.getElementById('cx-expand-btn') && window.ConnectifyData) {
-          syncFeatures();
-        }
-      }).observe(document.body, { childList: true, subtree: true });
-    }
-
-    setInterval(() => {
-      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
-      initSidebarTools();
-    }, 2000);
-    setInterval(() => {
-      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
-      syncFeatures();
-    }, 5000);
+    scheduler.every(2000, initSidebarTools);
+    scheduler.every(5000, syncFeatures);
 
     window.ConnectifySync = syncFeatures;
     window.ConnectifyIsAutoExpandEnabled = isAutoExpandEnabled;

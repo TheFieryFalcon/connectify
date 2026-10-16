@@ -179,12 +179,12 @@
     attributeFilter: ['data-highcharts-chart']
   });
 
+  // Isolated scripts ask for a resync after accordions open and on their shared heartbeat (chart data can
+  // arrive without a DOM change). This replaces a timer of our own, so idle and hidden tabs stay quiet.
+  document.addEventListener('connectify-sync-charts', debouncedSync);
+
   // Mark bridge readiness in shared DOM dataset
   document.documentElement.dataset.connectifyMainBridge = 'ready';
 
   syncAllCharts();
-  setInterval(() => {
-    if (window.ConnectifyIsAccordionAnimating) return;
-    syncAllCharts();
-  }, 2500);
 })();

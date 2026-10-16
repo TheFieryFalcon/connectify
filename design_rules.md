@@ -68,7 +68,7 @@ Extremely concise summary of the core visual design language, contrast standards
 
 ## 6. Runtime & DOM Safety
 - **World Isolation**: Respect `MAIN` world data bridge (`data.js` stamps `dataset.connectifyStats`) vs `ISOLATED` world UI scripts.
-- **Zero-Flicker Observers**: Use debounced `requestAnimationFrame` loops; filter out `style` attribute mutations; track user activity with `ConnectifyIsUserActive()`.
+- **Zero-Flicker Observers**: Page-wide observation and periodic work go through `ConnectifyScheduler` (`onMutations` with a filter and `mute`, `every` gated on activity, visibility and open panels), never a new body observer or `setInterval`; filter out `style` attribute mutations; track user activity with `ConnectifyIsUserActive()`.
 - **Strict Deduplication**: Purge redundant DOM elements on SPA transitions. Ensure all tool launchers and panels export standard `panelRefs` (`toggleBtn`, `panel`).
 
 ## 7. Panel Lifecycle & Backwards Compatibility

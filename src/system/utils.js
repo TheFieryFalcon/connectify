@@ -1,8 +1,8 @@
 /**
  * Connectify Shared Utilities
  *
- * Text normalisation, HTML escaping, the current account key, localStorage key scanning, legacy baseline key resolution
- * and Progress Graph week overrides
+ * Text normalisation, HTML escaping, the current account key, localStorage key scanning, legacy baseline key resolution,
+ * Progress Graph week overrides and the chart resync request to the main-world bridge
  * shared by every content script. Loaded first in the assessment outlines pipeline.
  * Exposes window.ConnectifyUtils.
  */
@@ -98,8 +98,15 @@
     return null;
   }
 
+  /**
+   * Asks the main-world bridge (data.js) to re-read every chart's boxplot. The bridge lives in the page's
+   * world, so a DOM event is the only way to reach it from here.
+   */
+  const syncCharts = () => document.dispatchEvent(new CustomEvent('connectify-sync-charts'));
+  window.ConnectifyDataSyncCharts = syncCharts;
+
   window.ConnectifyUtils = {
     normalize, escapeHtml, accountKey, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
-    customWeekOrder, readTimeOverride
+    customWeekOrder, readTimeOverride, syncCharts
   };
 })();

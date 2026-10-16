@@ -69,16 +69,9 @@
     }
   }
 
-  let scheduled = false;
-
-  new MutationObserver(() => {
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(() => {
-      scheduled = false;
-      addShortcut();
-    });
-  }).observe(document.documentElement, { childList: true, subtree: true });
+  // The shared scheduler batches page changes per frame; Connect re-renders its navigation at any time
+  const scheduler = window.ConnectifyScheduler;
+  scheduler.onMutations(addShortcut, { filter: m => m.type === 'childList', mute: false });
 
   addShortcut();
 
@@ -135,5 +128,6 @@
       } catch (err) {}
     }
   };
-  setInterval(checkSessionStatus, 10000);
+  // Session expiry is exactly what happens while the student is away, so this runs even when idle
+  scheduler.every(10000, checkSessionStatus, { whenActive: false, whenVisible: false });
 })();

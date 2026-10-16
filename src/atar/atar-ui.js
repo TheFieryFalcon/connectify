@@ -235,10 +235,8 @@
     window.ConnectifyAtar.refreshData = refreshData;
     window.ConnectifyAtar.updateResults = updateResults;
 
-    setInterval(() => {
-      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
-      refreshData();
-    }, 1500);
+    // Only an open calculator re-reads courses on the shared heartbeat
+    window.ConnectifyScheduler.every(1500, refreshData, { when: () => !calculatorPanel.hidden });
     refreshData();
   } catch (err) {
     console.error('Connectify error in atar-ui.js:', err);

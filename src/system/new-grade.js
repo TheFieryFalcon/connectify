@@ -174,26 +174,10 @@
   setTimeout(() => scheduleCheck(1500), 1500);
   setTimeout(() => scheduleCheck(3000), 3000);
 
-  // Observe DOM additions so check runs once tiles have settled
-  if (typeof MutationObserver !== 'undefined') {
-    const pageObserver = new MutationObserver(mutations => {
-      if (hasCheckedThisPage) return;
-      for (const m of mutations) {
-        if (m.addedNodes.length > 0) {
-          scheduleCheck(500);
-          break;
-        }
-      }
-    });
-
-    if (document.body) {
-      pageObserver.observe(document.body, { childList: true, subtree: true });
-    } else {
-      document.addEventListener('DOMContentLoaded', () => {
-        pageObserver.observe(document.body, { childList: true, subtree: true });
-      });
-    }
-  }
+  // Nodes being added (e.g. tiles arriving) re-arm the check until it has run on this page
+  window.ConnectifyScheduler.onMutations(() => {
+    if (!hasCheckedThisPage) scheduleCheck(500);
+  }, { filter: m => m.type === 'childList' && m.addedNodes.length > 0, mute: false });
 
   // Reset page check guard on navigation
   window.addEventListener('hashchange', () => {

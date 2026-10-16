@@ -48,24 +48,21 @@
     triggerAccordionAnimationGuard(380, heading.closest(CARD_SELECTOR));
   });
 
-  // Task rows added outside an animation (e.g. Connect expanding a card itself)
-  const expandMutationObserver = new MutationObserver(mutations => {
-    if (window.ConnectifyIsAccordionAnimating || isBulkExpanding()) return;
+  // Task rows added outside an animation (e.g. Connect expanding a card itself). The shared scheduler
+  // mutes this during animations and Expand All; every card that gained rows in the frame is refreshed
+  const addsTaskRows = m => m.type === 'childList' && Array.prototype.some.call(m.addedNodes, node =>
+    node.nodeType === 1 && (node.matches?.('.cvr-c-task') || node.querySelector?.('.cvr-c-task')));
+  window.ConnectifyScheduler.onMutations(mutations => {
+    const cards = new Set();
     for (const m of mutations) {
       for (const node of m.addedNodes) {
         if (node.nodeType !== 1 || !(node.matches?.('.cvr-c-task') || node.querySelector?.('.cvr-c-task'))) continue;
         const card = node.closest(CARD_SELECTOR);
-        if (card) {
-          notifyResultsUpdated(card);
-          return;
-        }
+        if (card) cards.add(card);
       }
     }
-  });
-
-  const observe = () => expandMutationObserver.observe(document.body, { childList: true, subtree: true });
-  if (document.body) observe();
-  else document.addEventListener('DOMContentLoaded', observe);
+    cards.forEach(notifyResultsUpdated);
+  }, { filter: addsTaskRows, mute: true });
 
   window.ConnectifyAccordionWatch = { triggerAccordionAnimationGuard, pendingCardsToUpdate };
 })();

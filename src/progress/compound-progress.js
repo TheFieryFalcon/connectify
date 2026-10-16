@@ -203,43 +203,17 @@
     }
   });
 
-  const observer = new MutationObserver(records => {
-    if (window.ConnectifyIsAccordionAnimating) return;
-    if (window.ConnectifyIsBulkExpanding) return;
-    let shouldRun = false;
-    for (const r of records) {
-      if (r.target?.classList?.contains('cx-compound-progress-container') || r.target?.closest?.('.cx-compound-progress-container')) {
-        continue;
-      }
-      // Strictly ignore task row additions/removals inside accordion panels
-      if (r.target?.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .eds-c-accordion, .cvr-c-accordion')) {
-        continue;
-      }
-      for (let i = 0; i < r.addedNodes.length; i++) {
-        const node = r.addedNodes[i];
-        if (node.nodeType === 1 && (node.matches?.('.eds-c-tile, .cvr-c-tile') || node.querySelector?.('.eds-c-tile, .cvr-c-tile'))) {
-          shouldRun = true;
-          break;
-        }
-      }
-      if (shouldRun) break;
-    }
-    if (shouldRun) scheduleUpdate();
-  });
-
-  if (document.body) {
-    observer.observe(document.body, { childList: true, subtree: true });
-  } else {
-    document.addEventListener('DOMContentLoaded', () => {
-      observer.observe(document.body, { childList: true, subtree: true });
-    });
-  }
-
-  setInterval(() => {
-    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-    if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
-    updateCompoundBars();
-  }, 2500);
+  // Subject tiles added outside accordion panels (task rows inside panels are left to the events above)
+  const addsTiles = r => {
+    if (r.type !== 'childList') return false;
+    if (r.target?.classList?.contains('cx-compound-progress-container') || r.target?.closest?.('.cx-compound-progress-container')) return false;
+    if (r.target?.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .eds-c-accordion, .cvr-c-accordion')) return false;
+    return Array.prototype.some.call(r.addedNodes, node => node.nodeType === 1 &&
+      (node.matches?.('.eds-c-tile, .cvr-c-tile') || node.querySelector?.('.eds-c-tile, .cvr-c-tile')));
+  };
+  const scheduler = window.ConnectifyScheduler;
+  scheduler.onMutations(scheduleUpdate, { filter: addsTiles, mute: true });
+  scheduler.every(2500, updateCompoundBars, { mute: true });
   updateCompoundBars();
 
   window.ConnectifyCompoundProgress = {

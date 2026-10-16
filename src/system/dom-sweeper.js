@@ -164,40 +164,15 @@
     sweepTimer = setTimeout(sweep, delay);
   }
 
-  // Observe SPA navigation mutations
-  const observer = new MutationObserver(mutations => {
-    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-    let relevantChange = false;
-    for (const m of mutations) {
-      if (m.addedNodes.length > 0 || m.removedNodes.length > 0) {
-        if (m.target?.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .connectea-panel, .connectea-row-wrapper, #connectify-sidebar')) {
-          continue;
-        }
-        relevantChange = true;
-        break;
-      }
-    }
-    if (relevantChange) {
-      scheduleSweep(1500);
-    }
-  });
+  // SPA navigation: nodes added or removed outside accordion panels and Connectify's own UI
+  const isNavigationChange = m => m.type === 'childList' && (m.addedNodes.length > 0 || m.removedNodes.length > 0) &&
+    !m.target?.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .connectea-panel, .connectea-row-wrapper, #connectify-sidebar');
+  const scheduler = window.ConnectifyScheduler;
+  scheduler.onMutations(() => scheduleSweep(1500), { filter: isNavigationChange, mute: true });
 
-  if (document.body) {
-    observer.observe(document.body, { childList: true, subtree: true });
-  } else {
-    document.addEventListener('DOMContentLoaded', () => {
-      observer.observe(document.body, { childList: true, subtree: true });
-    });
-  }
-
-  // Initial sweeps
+  // Initial sweep, then a periodic health check while the user is active
   setTimeout(sweep, 5000);
-
-  // Periodic health check
-  setInterval(() => {
-    if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
-    sweep();
-  }, 15000);
+  scheduler.every(15000, sweep);
 
   window.ConnectifyDomSweeper = {
     sweep,

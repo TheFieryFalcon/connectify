@@ -596,7 +596,8 @@ global.MutationObserver = class {
   takeRecords() { return []; }
 };
 
-// manifest.json loads src/system/utils.js before every other content script
+// manifest.json loads src/system/scheduler.js and src/system/utils.js before every other content script
+eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/scheduler.js'), 'utf8'));
 eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/utils.js'), 'utf8'));
 
 // CSS assertions compare rule text, not formatting: comments and whitespace around CSS punctuation are
@@ -2129,7 +2130,7 @@ runTest('atar-features.js injects and styles Back to top button at the bottom of
   assert.ok(cssHas(atarCss, '.cx-back-to-top-container') && cssHas(atarCss, '.cx-back-to-top-btn'), 'atar.css must style Back to top button');
   assert.ok(cssHas(themeCss, '.cx-back-to-top-btn'), 'theme.css must style Back to top button in dark mode');
   assert.ok(atarFeaturesCode.includes('syncBackToTop()'), 'atar-features.js must have dedicated syncBackToTop function');
-  assert.ok(atarFeaturesCode.includes('MutationObserver'), 'atar-features.js must observe DOM mutations to reactively mount Back to top button');
+  assert.ok(atarFeaturesCode.includes('scheduler.onMutations(') && atarFeaturesCode.includes('syncBackToTop();'), 'atar-features.js must observe DOM mutations (shared scheduler) to reactively mount Back to top button');
 });
 
 runTest('assessment-data.js parses 0 Out of 0 weighting as 0% and extracts syllabus weights correctly without NaN poisoning', () => {
@@ -2683,11 +2684,11 @@ runTest('Test 105: Aggressive accordion expand/collapse performance optimization
   assert.ok(assessJs.includes('window.ConnectifyIsAccordionAnimating = true'), 'assessment-data.js must set window.ConnectifyIsAccordionAnimating');
 
   // Verify compound-progress.js mutes during animation and filters panel mutations
-  assert.ok(compoundJs.includes('if (window.ConnectifyIsAccordionAnimating) return;'), 'compound-progress.js MutationObserver must mute during accordion animation');
+  assert.ok(compoundJs.includes('scheduler.onMutations(scheduleUpdate, { filter: addsTiles, mute: true });'), 'compound-progress.js page observer must mute during accordion animation (shared scheduler)');
   assert.ok(compoundJs.includes('.eds-c-accordion__panel'), 'compound-progress.js must ignore mutations inside accordion panels');
 
   // Verify cohort-stats.js mutes during animation and filters panel mutations
-  assert.ok(cohortJs.includes('if (window.ConnectifyIsAccordionAnimating) return;'), 'cohort-stats.js MutationObserver must mute during accordion animation');
+  assert.ok(cohortJs.includes('}, { filter: isRelevant, mute: true });'), 'cohort-stats.js page observer must mute during accordion animation (shared scheduler)');
 
   // Verify data.js debounces syncAllCharts and mutes during animation
   assert.ok(dataJs.includes('if (window.ConnectifyIsAccordionAnimating) return;'), 'data.js MutationObserver must mute during accordion animation');
@@ -3049,8 +3050,11 @@ runTest('Test 159: Cohort observer re-runs when the main-world bridge stamps box
     const elsewhere = document.createElement('div');
 
     // Attribute records have no added or removed nodes; they used to be dropped as "only our own nodes"
-    assert.strictEqual(isRelevant({ type: 'attributes', target: host, addedNodes: [], removedNodes: [] }), true,
+    assert.strictEqual(isRelevant({ type: 'attributes', attributeName: 'data-connectify-stats', target: host, addedNodes: [], removedNodes: [] }), true,
       'Stats stamped on a chart host must trigger a pass');
+    // The shared observer also reports class changes, which are not the cohort's concern
+    assert.strictEqual(isRelevant({ type: 'attributes', attributeName: 'class', target: host, addedNodes: [], removedNodes: [] }), false,
+      'Class changes must not trigger a pass');
     assert.strictEqual(isRelevant({ type: 'childList', target: row, addedNodes: [panel], removedNodes: [] }), false,
       'Adding a Connectify panel must not trigger a pass');
     assert.strictEqual(isRelevant({ type: 'characterData', target: { nodeType: 3, parentElement: elsewhere }, addedNodes: [], removedNodes: [] }), false,
@@ -3102,6 +3106,62 @@ runTest('Test 161: Weakness radar escapes names and compound bars match each car
     assert.strictEqual(subjectForCard('Physics ATAR - Semester 1', subjects), null, 'A card with no matching subject gets no bar');
   } finally {
     window.ConnectifyData = savedData;
+  }
+});
+
+runTest('Test 162: Shared scheduler filters, mutes and gates its heartbeat', () => {
+  const savedScheduler = window.ConnectifyScheduler;
+  const SavedObserver = global.MutationObserver;
+  let observerCallback = null;
+  global.MutationObserver = class { constructor(cb) { observerCallback = cb; } observe() {} disconnect() {} };
+  const savedActive = window.ConnectifyIsUserActive;
+  try {
+    window.ConnectifyIsAccordionAnimating = false;
+    window.ConnectifyIsBulkExpanding = false;
+    delete window.ConnectifyScheduler;
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'scheduler.js'), 'utf8'));
+    const scheduler = window.ConnectifyScheduler;
+
+    const seen = [];
+    const muted = [];
+    const stop = scheduler.onMutations(records => seen.push(...records), { filter: r => r.type === 'childList', mute: false });
+    scheduler.onMutations(records => muted.push(...records), { mute: true });
+    observerCallback([{ type: 'childList', addedNodes: [] }, { type: 'attributes', attributeName: 'class' }]);
+    scheduler.flush();
+    assert.strictEqual(seen.length, 1, 'A subscriber only receives records that pass its filter');
+    assert.strictEqual(muted.length, 2, 'A subscriber without a filter receives every record');
+
+    window.ConnectifyIsAccordionAnimating = true;
+    observerCallback([{ type: 'childList', addedNodes: [] }]);
+    scheduler.flush();
+    window.ConnectifyIsAccordionAnimating = false;
+    assert.strictEqual(muted.length, 2, 'Muted subscribers receive nothing while an accordion animates');
+    assert.strictEqual(seen.length, 2, 'Unmuted subscribers still receive records during animations');
+
+    stop();
+    observerCallback([{ type: 'childList', addedNodes: [] }]);
+    scheduler.flush();
+    assert.strictEqual(seen.length, 2, 'An unsubscribed callback receives nothing');
+
+    let open = false;
+    const runs = { panel: 0, active: 0, always: 0 };
+    scheduler.every(0, () => runs.panel++, { when: () => open });
+    scheduler.every(0, () => runs.active++);
+    scheduler.every(0, () => runs.always++, { whenActive: false });
+    window.ConnectifyIsUserActive = () => false;
+    scheduler.tick();
+    assert.deepStrictEqual(runs, { panel: 0, active: 0, always: 1 }, 'Idle users only get tasks that opt out of the activity check');
+    window.ConnectifyIsUserActive = () => true;
+    scheduler.tick();
+    assert.deepStrictEqual(runs, { panel: 0, active: 1, always: 2 }, 'A task with a condition waits for it');
+    open = true;
+    scheduler.tick();
+    assert.strictEqual(runs.panel, 1, 'A panel task runs once its panel is open');
+  } finally {
+    window.ConnectifyScheduler = savedScheduler;
+    global.MutationObserver = SavedObserver;
+    window.ConnectifyIsUserActive = savedActive;
+    window.ConnectifyIsAccordionAnimating = false;
   }
 });
 
@@ -3170,7 +3230,7 @@ runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, 
   assert.ok(cohortViewJs.includes('Original Estimate ~'), 'cohort-view.js must remove colon from Original Estimate');
 
   // 4. Fast auto-expansion without collapsed flash
-  assert.ok(atarFeatJs.includes('if (!hasAutoExpanded) {\n          checkStartupAutoExpand();\n        }'), 'atar-features.js MutationObserver must trigger checkStartupAutoExpand immediately on tile insertion');
+  assert.ok(atarFeatJs.includes('if (!hasAutoExpanded) checkStartupAutoExpand();'), 'atar-features.js MutationObserver must trigger checkStartupAutoExpand immediately on tile insertion');
   assert.ok(assessJs.includes('window.ConnectifyData?.cancelPendingNotify?.();') && assessJs.includes('cancelPendingNotify: () => clearTimeout(notifyUpdateTimer)'), 'Expand All must cancel the queued per-card update to prevent a delayed re-pass flash');
 });
 
@@ -3355,13 +3415,13 @@ runTest('Test 116: Accordion collapse performance guards, observer muting, cards
   assert.ok(themeJs.includes('if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;'), 'theme.js MutationObserver and scheduleAdaptSurfaces must mute during accordion animation');
 
   // 2. Verify atar-features.js mutes during accordion animation and bulk expand
-  assert.ok(atarFeatJs.includes('if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;'), 'atar-features.js MutationObserver must mute during accordion animation');
+  assert.ok(atarFeatJs.includes("{ filter: r => r.type === 'childList', mute: true }"), 'atar-features.js page observer must mute during accordion animation (shared scheduler)');
 
   // 3. Verify dom-sweeper.js mutes during accordion animation and bulk expand
-  assert.ok(domSweepJs.includes('if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;'), 'dom-sweeper.js MutationObserver must mute during accordion animation');
+  assert.ok(domSweepJs.includes('scheduler.onMutations(() => scheduleSweep(1500), { filter: isNavigationChange, mute: true });'), 'dom-sweeper.js page observer must mute during accordion animation (shared scheduler)');
 
   // 4. Verify assessment-data.js expandMutationObserver mutes during animation and bulk expand
-  assert.ok(assessJs.includes('if (window.ConnectifyIsAccordionAnimating || isBulkExpanding()) return;'), 'assessment-data.js expandMutationObserver must mute during accordion animation');
+  assert.ok(assessJs.includes('}, { filter: addsTaskRows, mute: true });'), 'assessment-data.js expandMutationObserver must mute during accordion animation (shared scheduler)');
 
   // 5. Verify triggerAccordionAnimationGuard only invokes cohort, compound, and chart updates when cards.length > 0
   assert.ok(assessJs.includes('if (cards.length > 0)'), 'triggerAccordionAnimationGuard must guard updates behind cards.length > 0 check');
@@ -3503,7 +3563,7 @@ runTest('Test 119: Immediate summary panel recovery, scoped surface adaptation, 
   assert.ok(themeJs.includes('scheduleAdaptSurfaces(600)'), 'theme.js must schedule startup surface adaptation without blocking render');
 
   // 5. Verify relaxed polling cadence in atar-features.js
-  assert.ok(atarFeatJs.includes('setInterval(() => {\n      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;\n      syncFeatures();\n    }, 5000);'), 'atar-features.js must use 5000ms cadence for periodic syncFeatures');
+  assert.ok(atarFeatJs.includes('scheduler.every(5000, syncFeatures);'), 'atar-features.js must use 5000ms cadence for periodic syncFeatures (shared heartbeat skips idle users)');
 
   // 6. Functional test: immediate summary panel restoration
   const card = document.createElement('div');
@@ -7125,7 +7185,11 @@ runTest('Test 154: Shared utilities, settings reset clears every baseline key, a
 
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
   const outlines = manifest.content_scripts.find(cs => (cs.js || []).includes('src/assessment/assessment-cache.js'));
-  assert.strictEqual(outlines.js[0], 'src/system/utils.js', 'utils.js must load before every other outlines content script');
+  // The shared scheduler comes first (it depends on nothing), then utils.js before every other outlines script
+  assert.deepStrictEqual(outlines.js.slice(0, 2), ['src/system/scheduler.js', 'src/system/utils.js'], 'scheduler.js then utils.js must load before every other outlines content script');
+  for (const cs of manifest.content_scripts.filter(c => c.world !== 'MAIN' && (c.js || []).some(f => !f.includes('auto-login')))) {
+    assert.strictEqual(cs.js[0], 'src/system/scheduler.js', 'Every isolated content-script group that uses the scheduler must load it first');
+  }
 
   // Year in Progress no longer sweeps the whole document every 1.5s
   const progJs = origReadFileSync.call(fs, path.resolve(__dirname, 'src/progress/progress-graph.js'), 'utf8');

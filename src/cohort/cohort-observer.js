@@ -3,8 +3,8 @@
  *
  * Re-runs the cohort pass when Connect adds task rows, a mark's text changes or the main-world bridge
  * stamps boxplot stats (ignoring Connectify's own panels and accordion animations), on navigation and
- * data events, and every 8s while the user is active. Keeps --cx-display-scale in step with the window
- * width. Extends window.ConnectifyCohort.
+ * data events, and every 8s while the user is active, all through the shared ConnectifyScheduler.
+ * Keeps --cx-display-scale in step with the window width. Extends window.ConnectifyCohort.
  */
 (() => {
   'use strict';
@@ -16,13 +16,7 @@
   const CARD_SELECTOR = '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile';
   const OWN_UI = '.connectea-panel, .connectea-type-container, .connectea-row-wrapper';
   const OWN_NODES = '.connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-outcome-bar, .connectea-subject-controls';
-  const OBSERVE_OPTIONS = {
-    childList: true,
-    subtree: true,
-    characterData: true,
-    attributes: true,
-    attributeFilter: ['data-highcharts-chart', 'data-connectify-stats']
-  };
+  const STATS_ATTRIBUTES = ['data-highcharts-chart', 'data-connectify-stats'];
 
   const isOwnNode = node => node.nodeType === 1 && Boolean(
     node.matches?.(OWN_NODES) || ['connectea-panel', 'connectea-row-wrapper', 'connectea-type-container'].some(c => node.classList?.contains(c))
@@ -35,8 +29,8 @@
     if (target.id === 'connectea-style') return false;
     const element = target.closest ? target : target.parentElement;
     if (element?.closest?.(OWN_UI)) return false;
-    // Stats stamped by the main-world bridge (only the filtered attributes are observed)
-    if (r.type === 'attributes') return true;
+    // Stats stamped by the main-world bridge; other attribute changes (e.g. class) are not ours
+    if (r.type === 'attributes') return STATS_ATTRIBUTES.includes(r.attributeName);
     // Text edits count only inside task rows, so unrelated live text elsewhere on the page stays quiet
     if (r.type === 'characterData') return Boolean(element?.closest?.('.cvr-c-task'));
     if (onlyOwnNodes(r.addedNodes) && onlyOwnNodes(r.removedNodes)) return false;
@@ -56,14 +50,12 @@
     return false;
   }
 
-  const observer = new MutationObserver(records => {
-    if (window.ConnectifyIsAccordionAnimating) return;
-    if (window.ConnectifyIsBulkExpanding) return;
-    if (!records.some(isRelevant)) return;
+  // Muted while an accordion animates or Expand All runs (they run their own pass afterwards)
+  const scheduler = window.ConnectifyScheduler;
+  const unsubscribe = scheduler.onMutations(() => {
     if (hasMissingSummaryPanel()) runPass();
     else schedule();
-  });
-  observer.observe(document.body, OBSERVE_OPTIONS);
+  }, { filter: isRelevant, mute: true });
 
   // Navigation replaces the outlines, so it re-runs at once
   window.addEventListener('hashchange', () => schedule(true));
@@ -86,16 +78,12 @@
     });
   }
 
-  let timer = setInterval(schedule, 8000);
-  window.addEventListener('pagehide', () => {
-    clearInterval(timer);
-    observer.disconnect();
-  });
+  // Heartbeat while the user is active: a cohort pass, and a request for the main-world bridge to
+  // re-read charts whose data arrived without a DOM change
+  scheduler.every(8000, () => schedule());
+  scheduler.every(2500, () => window.ConnectifyDataSyncCharts?.(), { mute: true });
   window.addEventListener('pageshow', e => {
-    if (!e.persisted) return;
-    observer.observe(document.body, OBSERVE_OPTIONS);
-    timer = setInterval(schedule, 8000);
-    schedule();
+    if (e.persisted) schedule();
   });
 
   function updateDisplayWidthScale() {
@@ -110,5 +98,5 @@
   window.addEventListener('resize', updateDisplayWidthScale, { passive: true });
 
   schedule(true);
-  Object.assign(cohort, { observer, isRelevant, updateDisplayWidthScale });
+  Object.assign(cohort, { observer: { unsubscribe }, isRelevant, updateDisplayWidthScale });
 })();

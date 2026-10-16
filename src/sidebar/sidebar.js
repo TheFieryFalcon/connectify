@@ -203,10 +203,7 @@
 
     window.ConnectifySidebar = { isOutlinesFilterRestricted, clickConnectAllButton, syncState, openSidebar, closeSidebar };
     window.ConnectifyInitSidebar = syncState;
-    setInterval(() => {
-      if (window.ConnectifyIsUserActive && !window.ConnectifyIsUserActive()) return;
-      syncState();
-    }, 1500);
+    window.ConnectifyScheduler.every(1500, syncState);
     syncState();
 
     window.ConnectifyOpenSidebar = openSidebar;
