@@ -2073,6 +2073,46 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           }
         }
 
+        // B2. Liquid Glass surface structure (design_rules.md, "One surface per block"): only the outermost painted
+        // element fills and blurs; a fill above a 12% tint inside another surface stacks into an opaque slab, a blur
+        // under a painted ancestor only sees that ancestor, a translucent outer surface needs its own blur, and
+        // full-width bars stay square. Controls, chips, avatars, active states, overlays and Connectify UI are exempt.
+        if (['liquid-glass', 'liquid-glass-clear'].includes(tid) && rect.width >= 80 && rect.height >= 20 &&
+            !['img', 'video', 'canvas', 'svg', 'button', 'input', 'select', 'textarea', 'a'].includes(tag) &&
+            !el.closest?.('button, a, [role="button"], [role="option"], mat-chip, .mat-chip, [class*="badge"], [class*="avatar"], .mat-progress-bar, .cdk-overlay-container, #connectify-sidebar, #connectify-sidebar-handle, #connectify-notifications-container, #connectea-theme-menu, #cx-customizer-modal, .connectea-outcome-bar') &&
+            !el.closest?.('.eds-s-is-active, .v-selected, [aria-selected="true"], .mat-calendar-body-selected') && !el.matches?.(':hover') &&
+            // Semantic colours (status pills, class-colour bands) are labels, not surfaces
+            !Array.from(el.classList || []).some(c => /^connect-(red|green|blue|purple|orange|yellow|grey|gray|teal|pink)/.test(c) || c === 'card-scope')) {
+          // The page canvas (opaque, the theme's canvas colour) is the page, not a surface to nest in
+          const isCanvasFill = bg => bg && bg.a >= 0.95 && Math.abs(bg.r - themeCanvas.r) <= 3 && Math.abs(bg.g - themeCanvas.g) <= 3 && Math.abs(bg.b - themeCanvas.b) <= 3;
+          const paintOf = node => { const cs = getComputedStyle(node); const bg = parseRgb(cs.backgroundColor); return { bg, blur: cs.backdropFilter !== 'none', fill: Boolean(bg && bg.a >= 0.05 && !isCanvasFill(bg)) }; };
+          const own = paintOf(el);
+          if (own.fill || own.blur) {
+            let anc = el.parentElement;
+            while (anc && anc !== document.body && anc !== document.documentElement && !(paintOf(anc).fill || paintOf(anc).blur)) anc = anc.parentElement;
+            const inSurface = Boolean(anc && anc !== document.body && anc !== document.documentElement);
+            const ancName = inSurface ? `${anc.tagName.toLowerCase()}${anc.classList?.[0] ? '.' + anc.classList[0] : ''}` : '';
+            if (inSurface && own.fill && own.bg.a > 0.12) {
+              issues.push({ category: 'STYLE', type: 'NESTED_SURFACE_FILL', severity: 'HIGH', selector,
+                details: `Fill ${style.backgroundColor} inside the painted ${ancName}: inner blocks must be clear (or a tint <= 12%)` });
+            }
+            if (inSurface && own.blur) {
+              issues.push({ category: 'STYLE', type: 'NESTED_BACKDROP_BLUR', severity: 'HIGH', selector,
+                details: `backdrop-filter under the painted ${ancName}: only the outermost surface blurs` });
+            }
+            if (!inSurface && own.fill && own.bg.a < 0.95 && !own.blur) {
+              issues.push({ category: 'STYLE', type: 'GLASS_WITHOUT_BLUR', severity: 'HIGH', selector,
+                details: `Translucent surface ${style.backgroundColor} without backdrop-filter` });
+            }
+            const radius = parseFloat(style.borderTopLeftRadius) || 0;
+            const parentWidth = el.parentElement?.getBoundingClientRect().width || window.innerWidth;
+            if (radius >= 10 && rect.height <= 90 && rect.width >= parentWidth * 0.9 && rect.width >= window.innerWidth * 0.5) {
+              issues.push({ category: 'STYLE', type: 'ROUNDED_FULL_WIDTH_BAR', severity: 'HIGH', selector,
+                details: `Full-width bar (${Math.round(rect.width)}x${Math.round(rect.height)}) rounded ${style.borderTopLeftRadius}: bars stay square` });
+            }
+          }
+        }
+
         // C. Background Bleed in Dark Mode
         if (isDark && elBg && elBg.a > 0.6 && !['img', 'video', 'canvas'].includes(tag)) {
           const bgLum = getLuminance(elBg.r, elBg.g, elBg.b);

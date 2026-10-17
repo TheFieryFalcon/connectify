@@ -8042,7 +8042,7 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   assert.ok(/border-radius: 0 !important/.test(bars), 'banner, category bars and toolbars must be square');
   assert.ok(surface.includes(G + ' cnt-paginator:has(.c-empty-content) {\n  border-radius: 16px !important;'), 'the empty-state card stays rounded');
   // Paginator pill: inner bar outranks the dark paginator surface
-  assert.ok(surface.includes(':is(#cx-specificity-anchor, mat-paginator, .mat-paginator)'), 'the paginator itself must be clear inside its glass pill');
+  assert.ok(surface.includes(':is(#cx-specificity-anchor, mat-paginator, .mat-paginator, .connect-paginator-container)'), 'paginators (Angular and Library) must be clear inside their glass pill');
   // Reading views beat the wallpaper and include discussion views
   const base = read('styles/theme-surface-base.css');
   assert.ok(base.includes('html.connectea-dark[data-connectea-reading-view="true"], html:not(.connectea-dark)[data-connectea-reading-view="true"]'), 'the reading canvas must outrank html.connectea-dark[data-connectea-has-custom-bg]');
@@ -8061,6 +8061,17 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   assert.ok(/\.cvr-c-service-bar__container \{[^}]*backdrop-filter: none/.test(nesting), 'the service bar container must not blur (it would trap the bar and menu blur)');
   assert.ok(/table :is\(\s*#cx-specificity-anchor, thead, tbody, tfoot, tr:not\(:hover\), th, td\s*\)/.test(nesting), 'table rows and cells must be clear inside the table surface');
   assert.ok(nesting.includes('.cvr-c-service-menu__item:not(.eds-s-is-active):not(.v-selected)'), 'menu items are clear except the active one');
+});
+
+runTest('Test 180: The theme audit enforces one surface per block, square bars and blur on glass surfaces', () => {
+  const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
+  for (const type of ['NESTED_SURFACE_FILL', 'NESTED_BACKDROP_BLUR', 'GLASS_WITHOUT_BLUR', 'ROUNDED_FULL_WIDTH_BAR']) {
+    assert.ok(audit.includes(`type: '${type}'`), `the audit must report ${type}`);
+  }
+  assert.ok(audit.includes("own.bg.a > 0.12"), 'tints up to 12% are allowed inside a surface');
+  assert.ok(audit.includes("['liquid-glass', 'liquid-glass-clear'].includes(tid) && rect.width >= 80"), 'the surface checks run for both Liquid Glass presets');
+  const crawled = fs.readFileSync(path.join(BASE_DIR, 'crawled_urls.txt'), 'utf8');
+  assert.ok(crawled.includes('DomainSchoolClass:6331155491'), 'the crawl list covers a class with discussions (Philosophy)');
 });
 
 Promise.all(pendingTestPromises).then(() => {

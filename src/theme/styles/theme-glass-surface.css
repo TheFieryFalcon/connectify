@@ -75,8 +75,11 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   pointer-events: none;
 }
 
+/* Learners section headings are bars: square, the glass starting 16px before the text at the column edge, not
+   reaching under the side menu */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) p.mat-h2::before {
-  inset: -6px -18px;
+  inset: -6px -18px -6px -16px;
+  border-radius: 0;
 }
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-empty-content::before {
@@ -88,7 +91,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
   #cx-specificity-anchor, .mat-paginator-outer-container, .mat-paginator-container
 ),
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, mat-paginator, .mat-paginator) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, mat-paginator, .mat-paginator, .connect-paginator-container) {
   background: transparent !important;
 }
 

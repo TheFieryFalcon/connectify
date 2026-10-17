@@ -64,3 +64,45 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.mat-card, .eds-c-card, .eds-c-tile, .cvr-c-tile, .v-panel) :is(#cx-specificity-anchor, table) {
   background-color: transparent !important;
 }
+
+/* Accordions (Learners, Notifications): the outermost accordion is the surface and blurs; its panels, their
+   content and bodies, nested accordions, tables and paginators inside stay clear */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(mat-accordion, .mat-accordion):not(:is(mat-accordion, .mat-accordion, .mat-card, .eds-c-tile) *) {
+  backdrop-filter: var(--cx-gl-blur) !important;
+  -webkit-backdrop-filter: var(--cx-gl-blur) !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(mat-accordion, .mat-accordion, mat-toolbar.c-category-bar) :is(
+  #cx-specificity-anchor, mat-expansion-panel, .mat-expansion-panel, .mat-expansion-panel-content, .mat-expansion-panel-body,
+  mat-accordion, .mat-accordion, table, .connect-paginator-container, mat-paginator
+) {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Feed notice cards: the inner mat-card is the glass surface; the host only keeps its rounded shadow */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-stream-notice-card {
+  background-color: transparent !important;
+}
+
+/* Right-hand category drawer: the menu paints, its wrapper and rows stay clear (the active row keeps its mark) */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  .cvr-c-category-menu__wrapper, .cvr-c-category-menu :is(.v-label, .v-link, .eds-u-interactive):not(.eds-s-is-active):not(.v-selected)
+) {
+  background-color: transparent !important;
+}
+
+/* Outermost tables, paginator bars and the Classes summary on the wallpaper blur like every glass surface */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  table.mat-table:not(:is(.mat-card, .eds-c-tile, .cvr-c-tile, .v-panel, mat-accordion, .mat-accordion) *),
+  #ng-zone__classes-metrics-summary
+) {
+  backdrop-filter: var(--cx-gl-blur) !important;
+  -webkit-backdrop-filter: var(--cx-gl-blur) !important;
+}
+
+/* Form fieldsets inside a card (Profile) are clear */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.mat-card, .eds-c-tile, .v-panel) :is(#cx-specificity-anchor, fieldset.c-floating-form-field) {
+  background-color: transparent !important;
+}

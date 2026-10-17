@@ -10,10 +10,11 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   --cx-gl-hairline: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent);
 }
 
-/* Statistics strip: one tinted pill, so "Type:" is grouped with the stats */
+/* Statistics strip: one tinted pill, so "Type:" is grouped with the stats. Horizontal padding only: rows keep
+   their native height (vertical padding made the outlines page ~370px taller) */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-row-wrapper {
   width: fit-content !important;
-  padding: 4px 14px 4px 4px !important;
+  padding: 0 14px 0 0 !important;
   background-color: var(--cx-gl-tint) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;

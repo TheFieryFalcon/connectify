@@ -31,11 +31,12 @@ html.connectea-dark {
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
-/* Universal High Contrast Typography Rules (WCAG AA Contrast >= 5:1) */
+/* Universal High Contrast Typography Rules (WCAG AA Contrast >= 5:1). Text a teacher styled inline (font-family in
+   style="") keeps its font, as on native Connect */
 .connectea-dark :is(
   h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, select, textarea, label, strong, small,
   .eds-c-heading, .v-caption, .v-label
-):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.material-icons):not(.connectea-theme-icon):not(.connectea-theme-arrow):not(.v-button-wrap):not(.v-button-caption):not(.eds-c-icon-button *):not(.cvr-c-icon-button *):not(.cvr-c-pri-nav-icon-button *):not(.avatar-content):not([class*="avatar"]):not(.connectea-panel *):not([class*="connectea-"]):not(#connectify-sidebar *):not(#connectify-sidebar-handle *) {
+):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.material-icons):not(.connectea-theme-icon):not(.connectea-theme-arrow):not(.v-button-wrap):not(.v-button-caption):not(.eds-c-icon-button *):not(.cvr-c-icon-button *):not(.cvr-c-pri-nav-icon-button *):not(.avatar-content):not([class*="avatar"]):not(.connectea-panel *):not([class*="connectea-"]):not(#connectify-sidebar *):not(#connectify-sidebar-handle *):not([style*="font-family"]):not([style*="font-family"] *) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 
