@@ -7907,6 +7907,35 @@ runTest('Test 173: The Theme Customizer dialog is always solid, even when glass 
   assert.ok(!/background: var\(--cx-surface-bg\)/.test(dialog) && /backdrop-filter: none;/.test(dialog), 'the dialog must not be a bare (translucent) surface fill or frosted');
 });
 
+runTest('Test 174: Grade Predictor shows a tab for every subject (a dropped plus a replacement course makes seven)', () => {
+  const sidebar = new MockElement('div');
+  sidebar.id = 'connectify-sidebar';
+  sidebar.appendChild(new MockElement('div', 'cx-workspace'));
+  document.body.appendChild(sidebar);
+  delete window.ConnectifyPredictorUI;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'predictor-ui.js'), 'utf8'));
+
+  const names = ['English', 'Methods', 'Specialist', 'Chemistry', 'Economics', 'Biology', 'Physics'];
+  const origMath = window.ConnectifyPredictorMath;
+  const origView = window.ConnectifyPredictorGradeView;
+  let rendered = null;
+  window.ConnectifyPredictorMath = { ...origMath, projectSubjectGrades: () => names.map(cleanName => ({ cleanName })) };
+  window.ConnectifyPredictorGradeView = { renderGradePredictor: (c, subjects) => { rendered = subjects; } };
+  try {
+    const instance = window.ConnectifyPredictorUI.ensurePredictorPanel();
+    instance.openPredictor();
+    assert.ok(Array.isArray(rendered), 'the Grade tab must render the subject tabs');
+    assert.deepStrictEqual(rendered.map(s => s.cleanName), names, 'every subject, including the seventh (Physics), must get a tab');
+    instance.closePredictor();
+  } finally {
+    window.ConnectifyPredictorMath = origMath;
+    window.ConnectifyPredictorGradeView = origView;
+    document.body.removeChild(sidebar);
+  }
+  const uiJs = fs.readFileSync(path.join(BASE_DIR, 'src/predictor/predictor-ui.js'), 'utf8');
+  assert.ok(!/slice\(0,\s*\d+\)/.test(uiJs), 'the Predictor must not cap the number of subject tabs');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

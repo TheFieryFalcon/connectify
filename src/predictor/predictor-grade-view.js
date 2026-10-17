@@ -42,7 +42,7 @@
         if (onSelectSubject) onSelectSubject(0);
       }
 
-      // Horizontal Sub-Tabs (Up to 6 subjects)
+      // Horizontal Sub-Tabs, one per subject (the bar scrolls; a dropped and a replacement course make 7+)
       const subTabsBar = document.createElement('div');
       subTabsBar.className = 'cx-pred-subtabs';
 

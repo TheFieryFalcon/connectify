@@ -40,7 +40,7 @@ Isolated world content scripts run in the exact dependency order listed in `mani
 - `cohort-stats.js`, `cohort-styles.js` & `cohort-observer.js`: Two-pass coordinator, `card._cxTaskRows` query caching, debounced scheduler, page observer.
 - `category-settings.js` & `category-baselines.js`: Category keywords, custom categories, previous-year baselines with candidate key purging.
 - `predictor-math.js` & submodules (`predictor-engine.js`, `predictor-dates.js`, `predictor-cache.js`): `predictionMemoryCache` Map for zero-disk lookups, task prediction, grade/ATAR projections.
-- `predictor-ui.js` & `predictor-grade-view.js`: Predictor drawer panel, 6 subject tabs, upcoming task projections, ATAR hero cards.
+- `predictor-ui.js` & `predictor-grade-view.js`: Predictor drawer panel, one tab per subject (no cap), upcoming task projections, ATAR hero cards.
 - `sidebar.js` & `sidebar-handle.js`: Canonical launcher sequence (Target ATAR, Target Grade, Predictor, Progress, Estimate, Weakness, Settings).
 
 ---

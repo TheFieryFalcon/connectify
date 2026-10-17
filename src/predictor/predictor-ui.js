@@ -51,15 +51,13 @@
         console.error('Error projecting subject grades in Predictor:', err);
         allProjectedSubjects = [];
       }
-      const displaySubjects = allProjectedSubjects.slice(0, 6);
-
       livePanel.innerHTML = views.panelHtml(activeMainTab);
 
       const content = livePanel.querySelector('#cx-pred-content');
       if (!content) return;
 
       if (activeMainTab === 'grade') {
-        renderGradePredictor(content, displaySubjects);
+        renderGradePredictor(content, allProjectedSubjects);
       } else {
         renderAtarPredictor(content, allProjectedSubjects);
       }

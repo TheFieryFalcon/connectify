@@ -55,7 +55,7 @@ This document details user-facing features 11 through 20, covering Target ATAR a
 - **Functionality**:
   - **Cold-Start Baselines**: Previous-year category and subject averages kickstart predictions; dynamically injects baseline inputs for custom categories.
   - **Logarithmic Ceiling**: Tapers gains above 80% proportionally to headroom $\frac{100 - \text{Score}}{20}$.
-  - **Grade Predictor**: Up to 6 subject sub-tabs with Low, Mid, High task estimates. Secret purple breakout threshold is strictly hidden. Unparsable dates excluded unless custom override exists in Progress Graph.
+  - **Grade Predictor**: one scrollable sub-tab per subject (no cap, so a dropped course plus its replacement still shows every class) with Low, Mid, High task estimates. Secret purple breakout threshold is strictly hidden. Unparsable dates excluded unless custom override exists in Progress Graph.
   - **ATAR Predictor**: Aggregates projected subject marks into Low, Mid, High ATAR and TEA without Year 11 scaling deductions.
   - **Dynamic Breakout Performance Meter**: 18px wide, 56px tall; 4 baseline segments: Red ($< \text{Low}$), Orange ($\text{Low} \le S < \text{Mid}$), Yellow ($\text{Mid} \le S < \text{High}$), Green ($S \ge \text{High}$). Suppressed on incomplete tasks and on first tasks lacking precedent/baseline. Secret double-height Purple breakout segment (height 20px) appears when $S > 1.10 \times \text{High}$. Critical shortfall ($S \le \text{Low} - 10\%$ additive) renders 0 segments with pulsing red alarm glow (`.connectea-outcome-critical`).
 
