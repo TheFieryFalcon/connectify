@@ -7899,6 +7899,14 @@ runTest('Test 172: Dark-classed themes with dark ink are marked light-tone and r
   assert.ok(!/:is\(a, \.eds-c-link\)[^{]*\{\s*color: var\(--cx-accent,/.test(tiles), 'page links must not use the raw accent');
 });
 
+runTest('Test 173: The Theme Customizer dialog is always solid, even when glass themes make the surface token translucent', () => {
+  const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-customizer.css'), 'utf8');
+  const dialog = (css.match(/#cx-customizer-dialog \{([^}]*)\}/) || [])[1] || '';
+  assert.ok(/background-color: var\(--cx-canvas-bg, #12171f\);/.test(dialog), 'the dialog must sit on the opaque canvas colour');
+  assert.ok(/background-image: linear-gradient\(var\(--cx-surface-bg, #1e2632\), var\(--cx-surface-bg, #1e2632\)\);/.test(dialog), 'the surface colour must be layered over the canvas');
+  assert.ok(!/background: var\(--cx-surface-bg\)/.test(dialog) && /backdrop-filter: none;/.test(dialog), 'the dialog must not be a bare (translucent) surface fill or frosted');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
