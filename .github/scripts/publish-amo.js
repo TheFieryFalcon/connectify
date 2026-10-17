@@ -6,6 +6,9 @@
  * Target: https://addons.mozilla.org/en-US/firefox/addon/connectify/
  *
  * Workflow:
+ * 0. Version guard (no network): exits before any AMO request when the manifest version equals
+ *    AMO_PREVIOUS_VERSION (set by the workflow from the previous commit), so unchanged versions never
+ *    spend the AMO rate limit.
  * 1. Generates HS256 JWT using AMO API Key (Issuer) and API Secret.
  * 2. Uploads packaged .xpi file to POST /api/v5/addons/upload/
  * 3. Polls GET /api/v5/addons/upload/<uuid>/ until processed and validated.
@@ -57,6 +60,14 @@ async function publishToAmo() {
   if (!issuer || !secret) {
     console.warn('⚠️ AMO credentials (AMO_JWT_ISSUER / AMO_JWT_SECRET or AMO_API_KEY / AMO_API_SECRET) not set.');
     console.warn('Skipping AMO Version Create upload. To enable automatic AMO publishing, add these secrets to your repository.');
+    process.exit(0);
+  }
+
+  // Version guard: decided from git before any request is sent
+  const manifestVersion = JSON.parse(fs.readFileSync('manifest.json', 'utf8')).version;
+  const previousVersion = (process.env.AMO_PREVIOUS_VERSION || '').trim();
+  if (previousVersion && previousVersion === manifestVersion && process.env.AMO_FORCE !== 'true') {
+    console.log(`⏭️ Version ${manifestVersion} unchanged since the previous commit; not contacting AMO.`);
     process.exit(0);
   }
 

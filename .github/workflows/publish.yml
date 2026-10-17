@@ -26,6 +26,21 @@ jobs:
         run: |
           VERSION=$(jq -r '.version // "unknown"' manifest.json)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          # Compare with the manifest before this push (git only, no store request). Store uploads run only
+          # when the version changed, so pushes without a version bump never hit the AMO/CWS rate limits.
+          BEFORE="${{ github.event.before }}"
+          PREV=""
+          if [[ -n "$BEFORE" && ! "$BEFORE" =~ ^0+$ ]] && git cat-file -e "$BEFORE" 2>/dev/null; then
+            PREV=$(git show "$BEFORE:manifest.json" 2>/dev/null | jq -r '.version // ""')
+          fi
+          echo "previous_version=$PREV" >> "$GITHUB_OUTPUT"
+          if [[ "$PREV" == "$VERSION" && "${{ github.event_name }}" != "workflow_dispatch" ]]; then
+            echo "version_changed=false" >> "$GITHUB_OUTPUT"
+            echo "Version $VERSION unchanged since $BEFORE: store publishing will be skipped."
+          else
+            echo "version_changed=true" >> "$GITHUB_OUTPUT"
+            echo "Version changed: '${PREV:-none}' -> '$VERSION'."
+          fi
           
       - name: Sync README Version
         run: |
@@ -89,8 +104,9 @@ jobs:
             connectify-${{ steps.meta.outputs.version }}.zip
 
       - name: Publish to AMO (Version Create API)
-        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') && steps.meta.outputs.version_changed == 'true'
         env:
+          AMO_PREVIOUS_VERSION: ${{ steps.meta.outputs.previous_version }}
           AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER || secrets.AMO_API_KEY }}
           AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET || secrets.AMO_API_SECRET }}
           AMO_ADDON_SLUG: ${{ vars.AMO_ADDON_SLUG || secrets.AMO_ADDON_SLUG || 'connectify' }}
@@ -99,7 +115,7 @@ jobs:
           node .github/scripts/publish-amo.js "connectify-${{ steps.meta.outputs.version }}.xpi"
 
       - name: Publish to Chrome Web Store
-        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') && env.CWS_CLIENT_ID != ''
+        if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') && steps.meta.outputs.version_changed == 'true' && env.CWS_CLIENT_ID != ''
         uses: mnao305/chrome-extension-upload@v5.0.0
         env:
           CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
