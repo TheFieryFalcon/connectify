@@ -10,7 +10,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   --cx-gl-edge: inset 0 1px 0 color-mix(in srgb, var(--cx-text-primary, #ffffff) 16%, transparent), 0 0 0 1px color-mix(in srgb, var(--cx-text-primary, #ffffff) 10%, transparent), 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
-/* Full-width bars and banners: the glass is painted on the element itself. Connect's own borders stay (as
+/* Full-width bars and banners: the glass is painted on the element itself, square like Connect's bars. Connect's own borders stay (as
    hairlines in the text colour) so every box keeps its native size and dividers (theme parity audit). */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
   cnt-scope-intro-class,
@@ -24,8 +24,13 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;
   box-shadow: var(--cx-gl-edge) !important;
   border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
-  border-radius: 16px !important;
+  border-radius: 0 !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+/* Full-width bars stay square like Connect's; only the empty-state card is rounded */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-paginator:has(.c-empty-content) {
+  border-radius: 16px !important;
 }
 
 /* The class banner is one full-width bar */
@@ -78,10 +83,12 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   inset: -16px -24px;
 }
 
-/* A "Page N of M" box is one pill: the bar and its labels paint nothing of their own */
+/* A "Page N of M" box is one pill: the bar and its labels paint nothing of their own. The unused id
+   (#cx-specificity-anchor) outranks the dark paginator surface rule, whose :not(:has()) arguments weigh more */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .mat-paginator-outer-container, .mat-paginator-container
-) {
+  #cx-specificity-anchor, .mat-paginator-outer-container, .mat-paginator-container
+),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, mat-paginator, .mat-paginator) {
   background: transparent !important;
 }
 

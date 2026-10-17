@@ -6992,9 +6992,10 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   assert.ok(parityTestJs.includes('isPanelCardTileModal') && parityTestJs.includes("!['liquid-glass', 'liquid-glass-clear'].includes(tid) || !isPanelCardTileModal"),
             'parity test must ignore only panels, cards, tiles, and modals for both Liquid Glass presets');
 
-  // 5. .cvr-u-padding--md has 0px padding in Liquid Glass only; other modes keep native padding
-  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-u-padding--md {\n  padding: 0 !important;'),
-            'theme.css must set padding: 0 on .cvr-u-padding--md only in Liquid Glass');
+  // 5. .cvr-u-padding--md has 0px padding in Liquid Glass only, and only on wrappers that hold tiles (Assessment
+  //    Outlines); every other padded block (User Activity, settings) keeps native padding
+  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-u-padding--md:has(.eds-c-tile, .cvr-c-tile) {\n  padding: 0 !important;'),
+            'theme.css must set padding: 0 on .cvr-u-padding--md only in Liquid Glass and only around tiles');
   assert.ok(!cssHas(themeTilesCss, '.cvr-u-padding--md { padding: 0 !important; }'),
             'theme-tiles.css must not remove .cvr-u-padding--md padding in every mode');
 
@@ -7040,8 +7041,8 @@ runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, p
   const registryJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8');
 
   // 1. Assessment outlines fix: .cvr-u-padding--md has 0px padding in Liquid Glass only and is NOT display: none
-  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-u-padding--md {\n  padding: 0 !important;'),
-    'theme.css must set 0px padding on .cvr-u-padding--md in Liquid Glass');
+  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-u-padding--md:has(.eds-c-tile, .cvr-c-tile) {\n  padding: 0 !important;'),
+    'theme.css must set 0px padding on .cvr-u-padding--md wrappers around tiles in Liquid Glass');
   assert.ok(!cssHas(themeTilesCss, '.cvr-u-padding--md { display: none !important; }'),
     'theme-tiles.css must not hide .cvr-u-padding--md');
 
@@ -7552,7 +7553,7 @@ runTest('Test 160: Padding and margins that are 0px in the Default theme stay 0p
   assert.ok(themeRules.length > 10, 'theme stylesheets must yield padding/margin declarations');
 
   // Sanity: Liquid Glass drops outline wrapper padding to 0, which is also the Default's natural look
-  assert.ok(themeRules.some(r => r.target === '.cvr-u-padding--md' && ZERO.test(r.value)),
+  assert.ok(themeRules.some(r => r.target.startsWith('.cvr-u-padding--md') && ZERO.test(r.value)),
     'the parser must see the Liquid Glass .cvr-u-padding--md zero padding rule');
 
   const offenders = [];
@@ -7936,7 +7937,7 @@ runTest('Test 174: Grade Predictor shows a tab for every subject (a dropped plus
   assert.ok(!/slice\(0,\s*\d+\)/.test(uiJs), 'the Predictor must not cap the number of subject tabs');
 });
 
-runTest('Test 175: Liquid Glass task rows are one glass surface each, never stacked translucent fills, with primary ink', () => {
+runTest('Test 175: Liquid Glass task rows are tinted blocks inside the glass tile, never a second fill or blur, with primary ink', () => {
   const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-task-rows.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('theme-glass-task-rows.css') > manifest.indexOf('theme-glass-surface.css') && manifest.indexOf('theme-glass-task-rows.css') < manifest.indexOf('"src/theme/styles/theme.css"'),
@@ -7944,11 +7945,14 @@ runTest('Test 175: Liquid Glass task rows are one glass surface each, never stac
   const sels = css.split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
   assert.ok(sels.every(sel => sel.startsWith('html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])')), 'every rule must be Liquid Glass only');
   const rule = re => (css.match(new RegExp(re + '\\s*\\{([^}]*)\\}')) || [])[1] || '';
-  assert.ok(/background-color: var\(--cx-gl-fill\)/.test(rule('\\.connectea-row-wrapper')), 'the statistics strip is the glass surface');
-  assert.ok(/background: transparent/.test(rule('\\.connectea-row-wrapper > \\.connectea-panel')) && /backdrop-filter: none/.test(rule('\\.connectea-row-wrapper > \\.connectea-panel')), 'the panel inside the strip must be clear');
-  assert.ok(/background-color: var\(--cx-gl-fill\)/.test(rule('\\.cvr-c-task__achievement')), 'the achievement column is one glass block');
+  for (const block of ['\\.connectea-row-wrapper', '\\.cvr-c-task__achievement']) {
+    const body = rule(block);
+    assert.ok(/background-color: var\(--cx-gl-tint\)/.test(body) && /backdrop-filter: none/.test(body), `${block} must be a tint without its own blur (the tile is the surface)`);
+    assert.ok(!/--cx-gl-fill/.test(body), `${block} must not add a second glass fill inside the tile`);
+  }
+  assert.ok(/background: transparent/.test(rule(':is\\(#cx-specificity-anchor, \\.connectea-row-wrapper\\) > \\.connectea-panel')), 'the panel inside the strip must be clear (and outrank the id-weighted glass blur rule)');
   assert.ok(/background: transparent/.test(rule(':is\\(\\.cvr-c-task__marks, \\.cvr-c-task__mark\\)')), 'marks must not add a second fill');
-  assert.ok(/\.cvr-c-task__mark \*\s*\)\s*\{\s*color: var\(--cx-text-primary/.test(css), 'text on the glass task-row surfaces must use the primary ink');
+  assert.ok(/\.cvr-c-task__mark \*\s*\)\s*\{\s*color: var\(--cx-text-primary/.test(css), 'text on the task-row blocks must use the primary ink');
 });
 
 runTest('Test 176: Boxplot decoration shapes stay invisible in dark and glass themes; only the box keeps a fill', () => {
@@ -8024,6 +8028,39 @@ runTest('Test 178: A cohort version bump clears derived stats but keeps the stud
   assert.ok(localStorage.getItem('connectea:cohort:v3:me:2026:physics'), 'cohort size overrides must survive a version bump');
   assert.strictEqual(localStorage.getItem('connectify:stats_cache:me:physics:overall s2'), null, 'derived stats are cleared on a version bump');
   localStorage.removeItem('connectea:cohort:v3:me:2026:physics');
+});
+
+runTest('Test 179: One surface per block in Liquid Glass; square bars; solid reading views; themed service bar plus; plain stat numbers', () => {
+  const read = f => fs.readFileSync(path.join(BASE_DIR, 'src/theme', f), 'utf8');
+  const G = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  // Class Summary numbers: the stat cell only, never a substring match that boxes the number span
+  const cards = read('styles/theme-cards.css');
+  assert.ok(!cards.includes('[class*="scope-statistic"]') && cards.includes('.connectea-dark .c-scope-statistic {'), 'stat cells must be named explicitly');
+  // Full-width bars square, the empty-state card rounded
+  const surface = read('styles/theme-glass-surface.css');
+  const bars = (surface.match(/cnt-scope-intro-class,\s*mat-toolbar\.c-category-bar[\s\S]*?\{([^}]*)\}/) || [])[1] || '';
+  assert.ok(/border-radius: 0 !important/.test(bars), 'banner, category bars and toolbars must be square');
+  assert.ok(surface.includes(G + ' cnt-paginator:has(.c-empty-content) {\n  border-radius: 16px !important;'), 'the empty-state card stays rounded');
+  // Paginator pill: inner bar outranks the dark paginator surface
+  assert.ok(surface.includes(':is(#cx-specificity-anchor, mat-paginator, .mat-paginator)'), 'the paginator itself must be clear inside its glass pill');
+  // Reading views beat the wallpaper and include discussion views
+  const base = read('styles/theme-surface-base.css');
+  assert.ok(base.includes('html.connectea-dark[data-connectea-reading-view="true"], html:not(.connectea-dark)[data-connectea-reading-view="true"]'), 'the reading canvas must outrank html.connectea-dark[data-connectea-has-custom-bg]');
+  assert.ok(base.includes('cnt-discussion-item-view, cnt-message-detail-view'), 'discussion views must get the solid reading canvas');
+  assert.ok(read('theme.js').includes('cnt-discussion-item-view'), 'discussion views must be detected as reading views');
+  // Service bar "+": theme colours, outranking Connect's !important class colour
+  assert.ok(read('styles/theme-action-buttons.css').includes(':is(#cx-specificity-anchor, .c-control-panel-button) .mat-icon-button--size-sm {\n  background-color: var(--cx-button-primary-bg'), 'the + circle must use the primary button colour');
+  // Nesting stylesheet: registered, glass only, outer surfaces blur and inner ones clear
+  const nesting = read('styles/theme-glass-nesting.css');
+  const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('theme-glass-nesting.css') > manifest.indexOf('theme-glass-task-rows.css') && manifest.indexOf('theme-glass-nesting.css') < manifest.indexOf('"src/theme/styles/theme.css"'), 'theme-glass-nesting.css must be registered before theme.css');
+  const sels = nesting.replace(/\/\*[\s\S]*?\*\//g, '').split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
+  assert.ok(sels.every(sel => sel.startsWith(G)), 'every nesting rule must be Liquid Glass only');
+  assert.ok(/\.v-app\.headerui[^{]*\{\s*background-color: transparent/.test(nesting), 'the header canvas must be clear so the top bars blur the page');
+  assert.ok(/\.cvr-c-thori-pnl\.cvr-c-primary-navigation[\s\S]*?backdrop-filter: var\(--cx-gl-blur\)/.test(nesting), 'the top navigation bar must blur');
+  assert.ok(/\.cvr-c-service-bar__container \{[^}]*backdrop-filter: none/.test(nesting), 'the service bar container must not blur (it would trap the bar and menu blur)');
+  assert.ok(/table :is\(\s*#cx-specificity-anchor, thead, tbody, tfoot, tr:not\(:hover\), th, td\s*\)/.test(nesting), 'table rows and cells must be clear inside the table surface');
+  assert.ok(nesting.includes('.cvr-c-service-menu__item:not(.eds-s-is-active):not(.v-selected)'), 'menu items are clear except the active one');
 });
 
 Promise.all(pendingTestPromises).then(() => {

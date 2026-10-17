@@ -182,3 +182,15 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
   color: var(--cx-button-text-hover, #ffffff) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
 }
+
+/* The service bar's "+" (cnt-navigation-reveal-menu): Connect paints the circle in the class colour; it takes the
+   theme's primary button colours instead, keeping its native 32px circle. Connect's class-colour rule
+   (.eds.cvr.ngm .connect-purple .bg-primary) is !important, so the unused id (#cx-specificity-anchor) outranks it */
+.connectea-dark :is(#cx-specificity-anchor, .c-control-panel-button) .mat-icon-button--size-sm {
+  background-color: var(--cx-button-primary-bg, #2563eb) !important;
+  color: var(--cx-button-primary-text, #ffffff) !important;
+}
+
+.connectea-dark :is(#cx-specificity-anchor, .c-control-panel-button) .mat-icon-button--size-sm :is(cnt-icon, mat-icon) {
+  color: var(--cx-button-primary-text, #ffffff) !important;
+}

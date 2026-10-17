@@ -28,6 +28,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 
 /* Summary: stat tiles and the calendar are clear inside their glass card */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  .c-scope-statistic,
   .c-scope-statistic-control,
   table.mat-calendar-table,
   .mat-calendar-table-header

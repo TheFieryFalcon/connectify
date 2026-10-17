@@ -180,6 +180,7 @@
             "src/theme/styles/theme-glass-surface.css",
             "src/theme/styles/theme-glass-class-pages.css",
             "src/theme/styles/theme-glass-task-rows.css",
+            "src/theme/styles/theme-glass-nesting.css",
             "src/theme/styles/theme-light-tone.css",
             "src/theme/styles/theme.css"
          ],

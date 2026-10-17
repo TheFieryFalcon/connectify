@@ -79,7 +79,7 @@
 
   function checkReadingView() {
     if (typeof document === 'undefined' || !document.documentElement) return;
-    const isReading = Boolean(document.querySelector('cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"], cnt-notice-item-view-dialog'));
+    const isReading = Boolean(document.querySelector('cnt-notice-view, [class*="notice-view"], cnt-discussion-view, cnt-discussion-item-view, [class*="discussion-view"], cnt-notice-item-view-dialog'));
     if (isReading) document.documentElement.setAttribute('data-connectea-reading-view', 'true');
     else document.documentElement.removeAttribute('data-connectea-reading-view');
   }

@@ -1,30 +1,37 @@
 /**
- * Connectify Theme: Liquid Glass assessment task rows. Each row's statistics strip (cohort panel, Type dropdown,
- * outcome meter) is one glass pill, and the achievement column (marks and boxplot) is one glass block, instead of
- * translucent layers stacked on each other. Uses the shared recipe from theme-glass-surface.css. Liquid Glass only.
+ * Connectify Theme: Liquid Glass assessment task rows. They sit inside the subject tile, which is the glass surface
+ * (fill and blur), so each row's statistics strip (cohort panel, Type dropdown, outcome meter) and its achievement
+ * column (marks and boxplot) are a faint tint of the text colour with a hairline edge: no second fill or blur,
+ * which inside the tile's blur rendered as an opaque slab. Liquid Glass only.
  */
 
-/* Statistics strip: the wrapper is the one surface, so "Type:" never sits bare on the wallpaper */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) {
+  --cx-gl-tint: color-mix(in srgb, var(--cx-text-primary, #ffffff) 7%, transparent);
+  --cx-gl-hairline: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent);
+}
+
+/* Statistics strip: one tinted pill, so "Type:" is grouped with the stats */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-row-wrapper {
   width: fit-content !important;
   padding: 4px 14px 4px 4px !important;
-  background-color: var(--cx-gl-fill) !important;
-  backdrop-filter: var(--cx-gl-blur) !important;
-  -webkit-backdrop-filter: var(--cx-gl-blur) !important;
-  box-shadow: var(--cx-gl-edge) !important;
+  background-color: var(--cx-gl-tint) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: inset 0 0 0 1px var(--cx-gl-hairline) !important;
   border: none !important;
   border-radius: 16px !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-/* The cohort panel inside the strip is clear, divided from the controls by a hairline */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-row-wrapper > .connectea-panel {
+/* The cohort panel inside the strip is clear, divided from the controls by a hairline. The glass blur rule in
+   theme-tokens.css lists #connectify-sidebar, so the unused id (#cx-specificity-anchor) is needed to outrank it */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, .connectea-row-wrapper) > .connectea-panel {
   background: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
   border: none !important;
-  border-right: 1px solid color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
+  border-right: 1px solid var(--cx-gl-hairline) !important;
   border-radius: 12px 0 0 12px !important;
 }
 
@@ -46,22 +53,31 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-/* Achievement column (marks above, boxplot below): one glass block with hairline dividers */
+/* Achievement column (marks above, boxplot below): one tinted block with hairline dividers */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__achievement {
-  background-color: var(--cx-gl-fill) !important;
-  backdrop-filter: var(--cx-gl-blur) !important;
-  -webkit-backdrop-filter: var(--cx-gl-blur) !important;
-  border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
+  background-color: var(--cx-gl-tint) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: var(--cx-gl-hairline) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-task__marks, .cvr-c-task__mark) {
   background: transparent !important;
-  border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
+  border-color: var(--cx-gl-hairline) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
 /* Boxplot box: a faint tint of the text colour instead of an opaque grey slab (decoration shapes stay clear) */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__chart .highcharts-series [fill="#FFFFFF"] {
   fill: color-mix(in srgb, var(--cx-text-primary, #ffffff) 7%, transparent) !important;
+}
+
+/* The subject's overall statistics panel (summary row, outside a strip) is the same tint inside the tile */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, .eds-c-tile, .cvr-c-tile) .connectea-panel:not(.connectea-row-wrapper > .connectea-panel) {
+  background-color: var(--cx-gl-tint) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: inset 0 0 0 1px var(--cx-gl-hairline) !important;
+  border-color: transparent !important;
 }
