@@ -24,7 +24,7 @@ The full rule set is always loaded into context via these imports:
 - **Runtime & Safety**: World isolation (MAIN `data.js` stamps dataset vs ISOLATED content scripts; cross-world requests are DOM events). Page observation and timers go through the shared `ConnectifyScheduler` with activity tracking (`ConnectifyIsUserActive`).
 - **Subsystem Invalidation**: Independent invalidation keys (`connectify:cache_version:<subsystem>`). Increment version on math changes. Isolated clearing.
 - **Brevity & Size Standards**: `src/` JS/CSS files $\le 250$ lines (`test_suite.js` and `scripts/` test tooling exempt). Markdown docs $\le 150$ lines each. New features go in new files.
-- **Geometry**: Panel rounding, 0px `.cvr-u-padding--md` padding and wallpaper pass-through apply only in Liquid Glass.
+- **Geometry**: Panel rounding applies only in Liquid Glass. `.cvr-u-padding--md` keeps its native 15px padding in every theme, clear around tiles (wallpaper pass-through in every dark theme).
 
 ---
 

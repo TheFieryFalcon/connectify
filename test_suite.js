@@ -2123,7 +2123,7 @@ runTest('theme.css covers Angular Material buttons, div.w-100, and aligns margin
   assert.ok(cssHas(css, 'div.w-100'), 'theme.css must style div.w-100');
   assert.ok(!cssHas(css, '.mat-expansion-panel {\n  border: 1px solid #3d5066 !important;\n  border-radius: 6px !important;\n  margin-bottom: 8px !important;'), 'theme.css must not have margin-bottom: 8px !important on mat-expansion-panel');
   assert.ok(cssHas(css, ':not([class*="icon"]):not(.mat-icon-button):not(.btn-monospaced)'), 'theme.css must exclude every icon button (class containing "icon") from button padding so glyphs are not offset');
-  assert.ok(cssHas(css, '#main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable\n):has(.eds-c-tile, .cvr-c-tile)'), 'Liquid Glass may only make layout wrappers transparent when they hold tiles, so detail views (notices) keep an opaque surface');
+  assert.ok(cssHas(css, '#main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable\n):has(.eds-c-tile, .cvr-c-tile)'), 'layout wrappers may only become clear when they hold tiles, so detail views (notices) keep an opaque surface');
 });
 
 runTest('atar-features.js injects and styles Back to top button at the bottom of assessment outlines', () => {
@@ -6992,10 +6992,8 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   assert.ok(parityTestJs.includes('isPanelCardTileModal') && parityTestJs.includes("!['liquid-glass', 'liquid-glass-clear'].includes(tid) || !isPanelCardTileModal"),
             'parity test must ignore only panels, cards, tiles, and modals for both Liquid Glass presets');
 
-  // 5. .cvr-u-padding--md has 0px padding in Liquid Glass only, and only on wrappers that hold tiles (Assessment
-  //    Outlines); every other padded block (User Activity, settings) keeps native padding
-  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-u-padding--md:has(.eds-c-tile, .cvr-c-tile) {\n  padding: 0 !important;'),
-            'theme.css must set padding: 0 on .cvr-u-padding--md only in Liquid Glass and only around tiles');
+  // 5. .cvr-u-padding--md keeps Connect's native 15px padding in every theme, Liquid Glass included
+  assert.ok(!/\.cvr-u-padding--md[^{]*\{\s*padding: 0/.test(themeCss), 'no theme may remove the native .cvr-u-padding--md padding');
   assert.ok(!cssHas(themeTilesCss, '.cvr-u-padding--md { padding: 0 !important; }'),
             'theme-tiles.css must not remove .cvr-u-padding--md padding in every mode');
 
@@ -7040,9 +7038,8 @@ runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, p
   const customizerCss = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-customizer.css'), 'utf8');
   const registryJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8');
 
-  // 1. Assessment outlines fix: .cvr-u-padding--md has 0px padding in Liquid Glass only and is NOT display: none
-  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-u-padding--md:has(.eds-c-tile, .cvr-c-tile) {\n  padding: 0 !important;'),
-    'theme.css must set 0px padding on .cvr-u-padding--md wrappers around tiles in Liquid Glass');
+  // 1. Assessment outlines: .cvr-u-padding--md keeps its native 15px padding (clear, not filled) and is NOT display: none
+  assert.ok(!/\.cvr-u-padding--md[^{]*\{\s*padding: 0/.test(themeCss), 'outline wrappers keep their native padding in every theme');
   assert.ok(!cssHas(themeTilesCss, '.cvr-u-padding--md { display: none !important; }'),
     'theme-tiles.css must not hide .cvr-u-padding--md');
 
@@ -7123,11 +7120,10 @@ runTest('Test 151: Custom theme colors reach body, View button stays square, and
     'theme-feed.css positive (View) buttons must enforce border-radius: 0');
   assert.ok(!/\[class\*="(card|panel|tile)"\]/.test(themeCss), 'curvature must not catch buttons through [class*=...] substring matches');
 
-  // 4. Liquid Glass only: layout containers and tile-only wrappers are transparent; solid themes stay opaque
-  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]):not([data-connectea-login]) :is(\n  #main-content'),
-    'theme.css must make layout containers transparent in Liquid Glass');
-  assert.ok(!cssHas(themeCss, 'html[data-connectea-has-custom-bg="true"].connectea-dark:not([data-connectea-login])'),
-    'wallpaper pass-through must not apply outside Liquid Glass');
+  // 4. Every dark theme: layout containers and tile-only wrappers are clear around tiles (the padding shows the
+  //    canvas or wallpaper, as in Default); the tiles themselves stay opaque outside Liquid Glass
+  assert.ok(cssHas(themeCss, 'html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) :is(\n  #main-content'),
+    'theme.css must make layout containers around tiles clear in every dark theme');
   assert.ok(cssHas(themeCss, ':has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile)'),
     'theme.css must only clear wrappers that contain tiles, never the tiles themselves');
   assert.ok(cssHas(themeCss, 'background-color: var(--cx-surface-bg, #1e2632) !important'),
@@ -7552,9 +7548,9 @@ runTest('Test 160: Padding and margins that are 0px in the Default theme stay 0p
   }
   assert.ok(themeRules.length > 10, 'theme stylesheets must yield padding/margin declarations');
 
-  // Sanity: Liquid Glass drops outline wrapper padding to 0, which is also the Default's natural look
-  assert.ok(themeRules.some(r => r.target.startsWith('.cvr-u-padding--md') && ZERO.test(r.value)),
-    'the parser must see the Liquid Glass .cvr-u-padding--md zero padding rule');
+  // Native outline padding (15px on .cvr-u-padding--md) is never zeroed by a theme
+  assert.ok(!themeRules.some(r => r.target.startsWith('.cvr-u-padding--md') && ZERO.test(r.value)),
+    'no theme stylesheet may zero the native .cvr-u-padding--md padding');
 
   const offenders = [];
   for (const r of themeRules) {
@@ -7945,7 +7941,10 @@ runTest('Test 175: Liquid Glass task rows are tinted blocks inside the glass til
   const sels = css.split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
   assert.ok(sels.every(sel => sel.startsWith('html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])')), 'every rule must be Liquid Glass only');
   const rule = re => (css.match(new RegExp(re + '\\s*\\{([^}]*)\\}')) || [])[1] || '';
-  for (const block of ['\\.connectea-row-wrapper', '\\.cvr-c-task__achievement']) {
+  const strip = rule('\\.connectea-row-wrapper::before');
+  assert.ok(/background-color: var\(--cx-gl-tint\)/.test(strip) && /inset: 0 -14px 0 0/.test(strip), 'the strip tint is a ::before reaching past the meter');
+  assert.ok(!/padding/.test(rule('\\.connectea-row-wrapper')) && !/border: none/.test(css), 'the strip adds no padding and keeps border boxes, so Connect rows keep their native size');
+  for (const block of ['\\.cvr-c-task__achievement']) {
     const body = rule(block);
     assert.ok(/background-color: var\(--cx-gl-tint\)/.test(body) && /backdrop-filter: none/.test(body), `${block} must be a tint without its own blur (the tile is the surface)`);
     assert.ok(!/--cx-gl-fill/.test(body), `${block} must not add a second glass fill inside the tile`);

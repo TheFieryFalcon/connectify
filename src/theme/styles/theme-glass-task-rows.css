@@ -10,18 +10,28 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   --cx-gl-hairline: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent);
 }
 
-/* Statistics strip: one tinted pill, so "Type:" is grouped with the stats. Horizontal padding only: rows keep
-   their native height (vertical padding made the outlines page ~370px taller) */
+/* Statistics strip: one tinted pill, so "Type:" is grouped with the stats. The tint is a ::before reaching 14px past
+   the meter, so the strip adds no padding and Connect's rows keep their native size */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-row-wrapper {
+  position: relative !important;
+  z-index: 0;
   width: fit-content !important;
-  padding: 0 14px 0 0 !important;
-  background-color: var(--cx-gl-tint) !important;
+  background: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  box-shadow: inset 0 0 0 1px var(--cx-gl-hairline) !important;
-  border: none !important;
-  border-radius: 16px !important;
+  box-shadow: none !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-row-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0 -14px 0 0;
+  z-index: -1;
+  background-color: var(--cx-gl-tint);
+  box-shadow: inset 0 0 0 1px var(--cx-gl-hairline);
+  border-radius: 16px;
+  pointer-events: none;
 }
 
 /* The cohort panel inside the strip is clear, divided from the controls by a hairline. The glass blur rule in
@@ -31,8 +41,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
-  border: none !important;
-  border-right: 1px solid var(--cx-gl-hairline) !important;
+  border-color: transparent var(--cx-gl-hairline) transparent transparent !important;
   border-radius: 12px 0 0 12px !important;
 }
 
