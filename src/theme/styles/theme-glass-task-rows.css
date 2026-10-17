@@ -61,7 +61,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-/* Boxplot plot area: a faint tint of the text colour instead of an opaque grey slab */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__chart [fill="#FFFFFF"] {
+/* Boxplot box: a faint tint of the text colour instead of an opaque grey slab (decoration shapes stay clear) */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__chart .highcharts-series [fill="#FFFFFF"] {
   fill: color-mix(in srgb, var(--cx-text-primary, #ffffff) 7%, transparent) !important;
 }

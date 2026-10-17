@@ -7951,6 +7951,15 @@ runTest('Test 175: Liquid Glass task rows are one glass surface each, never stac
   assert.ok(/\.cvr-c-task__mark \*\s*\)\s*\{\s*color: var\(--cx-text-primary/.test(css), 'text on the glass task-row surfaces must use the primary ink');
 });
 
+runTest('Test 176: Boxplot decoration shapes stay invisible in dark and glass themes; only the box keeps a fill', () => {
+  const charts = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-charts-editor.css'), 'utf8');
+  assert.ok(/\.connectea-dark \.cvr-c-task__chart svg > :is\(rect, path\)\[fill="#FFFFFF"\] \{\s*fill: transparent !important;/.test(charts),
+    'the chart background and white shapes drawn directly on the svg must be transparent');
+  const glass = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-task-rows.css'), 'utf8');
+  assert.ok(glass.includes('.cvr-c-task__chart .highcharts-series [fill="#FFFFFF"]') && !/\.cvr-c-task__chart \[fill="#FFFFFF"\]/.test(glass),
+    'the glass tint must apply to the boxplot series only, never the decoration shapes');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

@@ -23,6 +23,12 @@
   fill: var(--cx-surface-secondary, #161e29) !important;
 }
 
+/* The chart background and Connect's white decoration shapes (a strip and a left block) sit straight on the svg and
+   are invisible on Connect's white page; they stay invisible here, so only the boxplot's own box keeps a fill */
+.connectea-dark .cvr-c-task__chart svg > :is(rect, path)[fill="#FFFFFF"] {
+  fill: transparent !important;
+}
+
 .connectea-dark .cvr-c-task__chart [stroke="#A9A9A9"],
 .connectea-dark .cvr-c-task__chart [stroke="#000000"] {
   stroke: var(--cx-border-strong, #647b95) !important;
