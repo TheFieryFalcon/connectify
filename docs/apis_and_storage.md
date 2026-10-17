@@ -93,7 +93,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify:prediction:<account>:<subject>:<taskId>` | `localStorage` | `predictor-math.js` / `cohort-view.js` | Cached task prediction object (`{ low, mid, high, breakoutScore, type }`) |
 | `connectify:prediction_version` | `localStorage` | `predictor-math.js` | Calculation version incrementer tracking when chronological prediction cache must be re-populated |
 | `connectify:cache_version:<subsystem>` | `localStorage` | `assessment-data.js` | Independent invalidation keys (`predictor`, `results`, `settings`, `cohort`) |
-| `connectify:stats_cache:<student>:<subject>:<task>` | `localStorage` | `assessment-data.js` | Cached 5-number boxplot quantiles and sample size |
+| `connectify:stats_cache:<student>:<subject>:<task>` | `localStorage` | `assessment-data.js` | Cached 5-number boxplot quantiles and sample size; summary rows use task `Overall S1` / `Overall S2` (keys never include Connectify's own panel text) |
 | `cx-autologin-enabled` | `browser.storage.local` | `auto-login.js` | Boolean flag for auto-login on sign-in page |
 | `cx-session-expired` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user session expires while idle |
 | `cx-manual-logout` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user explicitly clicks logout |

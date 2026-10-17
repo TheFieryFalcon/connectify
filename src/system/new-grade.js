@@ -146,9 +146,11 @@
     setTimeout(() => {
       const updatedCache = loadCachedGrades() || {};
       for (const entry of currentEntries) {
+        const previous = updatedCache[entry.subjectName];
         updatedCache[entry.subjectName] = {
           mark: entry.mark,
-          stats: entry.stats,
+          // A chart that was not readable this time never erases the boxplot seen before
+          stats: entry.stats || previous?.stats,
           semester: entry.semester,
           updatedAt: Date.now()
         };
@@ -167,9 +169,26 @@
       if (hasCheckedThisPage) return;
       if (document.querySelectorAll('.eds-c-tile').length > 0) {
         hasCheckedThisPage = true;
-        checkGrades();
+        whenChartsStamped(checkGrades);
       }
     }, delay);
+  }
+
+  // Summary charts are stamped by the main-world bridge some time after the tiles appear; comparing earlier
+  // reads no boxplot, and the next visit would then report it as new. Waits up to CHART_WAIT_MS, then compares
+  // what is there (marks always are).
+  const CHART_WAIT_MS = 10000;
+  function summaryChartsPending() {
+    return Array.from(document.querySelectorAll('.eds-c-tile .cvr-c-task:not(.cvr-c-tasks *)')).some(row => {
+      // A chart host not drawn yet is pending too; subjects without results have no chart host at all
+      return row.querySelector('.cvr-c-task__chart') && !snapshot.readSubjectStats(row);
+    });
+  }
+
+  function whenChartsStamped(run, startedAt = Date.now()) {
+    if (!summaryChartsPending() || Date.now() - startedAt >= CHART_WAIT_MS) { run(); return; }
+    window.ConnectifyUtils.syncCharts();
+    setTimeout(() => whenChartsStamped(run, startedAt), 250);
   }
 
   // Trigger on page load after DOM tiles are present

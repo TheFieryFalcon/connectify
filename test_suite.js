@@ -3031,8 +3031,8 @@ runTest('Test 158: Grade notifications ignore small boxplot shifts from other cl
     'A quantile moving by more than 1 point must notify');
   assert.strictEqual(hasSubjectChanged(prev, { mark: 72.5, stats: prev.stats }), true,
     "The student's own running mark moving by 0.05 or more must still notify");
-  assert.strictEqual(hasSubjectChanged({ mark: 72.4 }, { mark: 72.4, stats: prev.stats }), true,
-    'Boxplot stats appearing for the first time must notify');
+  assert.strictEqual(hasSubjectChanged({ mark: 72.4 }, { mark: 72.4, stats: prev.stats }), false,
+    'A boxplot appearing (often a chart that rendered late on the last visit) must not notify on its own');
   assert.strictEqual(hasSubjectChanged(undefined, { mark: 80, stats: prev.stats }), false,
     'A subject missing from the cache is seeded quietly');
 });
@@ -7958,6 +7958,72 @@ runTest('Test 176: Boxplot decoration shapes stay invisible in dark and glass th
   const glass = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-task-rows.css'), 'utf8');
   assert.ok(glass.includes('.cvr-c-task__chart .highcharts-series [fill="#FFFFFF"]') && !/\.cvr-c-task__chart \[fill="#FFFFFF"\]/.test(glass),
     'the glass tint must apply to the boxplot series only, never the decoration shapes');
+});
+
+runTest('Test 177: Summary-row stats keys are per semester and never built from Connectify text; grade checks read live charts only', () => {
+  delete window.ConnectifyTaskTypes;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8'));
+  const makeTile = (title, withPanel) => {
+    const tile = document.createElement('div');
+    tile.className = 'eds-c-tile';
+    const titleEl = document.createElement('span');
+    titleEl.className = 'eds-c-tile__title';
+    titleEl.textContent = title;
+    tile.appendChild(titleEl);
+    const row = document.createElement('div');
+    row.className = 'cvr-c-task';
+    const details = document.createElement('div');
+    details.className = 'cvr-c-task__details';
+    if (withPanel) {
+      const panel = document.createElement('section');
+      panel.className = 'connectea-panel';
+      const injected = document.createElement('span');
+      injected.className = 'v-label';
+      injected.textContent = 'Min 24.1% • Q1 56%';
+      panel.appendChild(injected);
+      details.appendChild(panel);
+    }
+    row.appendChild(details);
+    tile.appendChild(row);
+    document.body.appendChild(tile);
+    return { tile, row };
+  };
+  const s1 = makeTile('Physics ATAR Year 11 - Semester 1', true);
+  const s2 = makeTile('Physics ATAR Year 11 - Semester 2', true);
+  try {
+    const m1 = window.ConnectifyTaskTypes.getTaskMeta(s1.row);
+    const m2 = window.ConnectifyTaskTypes.getTaskMeta(s2.row);
+    assert.strictEqual(m1.subjectName, m2.subjectName, 'both semesters belong to one subject');
+    assert.strictEqual(m1.taskName, 'Overall S1', 'Semester 1 summary row has its own key');
+    assert.strictEqual(m2.taskName, 'Overall S2', 'Semester 2 summary row has its own key');
+    assert.ok(!m1.labels.some(l => l.includes('Min')), 'Connectify panel text must never become a label or key');
+  } finally {
+    s1.tile.remove();
+    s2.tile.remove();
+  }
+  assert.strictEqual(window.ConnectifyUtils.cardSemester('Chemistry ATAR Year 11 - Sem 2'), 2);
+  assert.strictEqual(window.ConnectifyUtils.cardSemester('Chemistry ATAR Year 11'), 1);
+
+  const readers = fs.readFileSync(path.join(BASE_DIR, 'src/cohort/cohort-row-readers.js'), 'utf8');
+  assert.ok(readers.includes('function readStats(row, { live = false } = {})') && readers.includes('if (!live && meta?.subjectName'),
+    'readStats must skip the stats cache when asked for live data');
+  const snapshot = fs.readFileSync(path.join(BASE_DIR, 'src/system/grade-snapshot.js'), 'utf8');
+  assert.ok(snapshot.includes('readStats?.(row, { live: true })'), 'grade checks must read live chart stats only');
+  const newGrade = fs.readFileSync(path.join(BASE_DIR, 'src/system/new-grade.js'), 'utf8');
+  assert.ok(newGrade.includes('whenChartsStamped(checkGrades)') && /CHART_WAIT_MS = 10000/.test(newGrade), 'the grade check must wait for summary charts (bounded)');
+  assert.ok(newGrade.includes('stats: entry.stats || previous?.stats'), 'an unreadable chart must never erase cached stats');
+});
+
+runTest('Test 178: A cohort version bump clears derived stats but keeps the student cohort size overrides', () => {
+  window.__connectifyDataInitialized = false;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8'));
+  localStorage.setItem('connectea:cohort:v3:me:2026:physics', JSON.stringify({ size: 120 }));
+  localStorage.setItem('connectify:stats_cache:me:physics:overall s2', JSON.stringify({ stats: [1, 2, 3, 4, 5] }));
+  localStorage.setItem('connectify:cache_version:cohort', 'old');
+  window.ConnectifyCache.checkAndInvalidateAll();
+  assert.ok(localStorage.getItem('connectea:cohort:v3:me:2026:physics'), 'cohort size overrides must survive a version bump');
+  assert.strictEqual(localStorage.getItem('connectify:stats_cache:me:physics:overall s2'), null, 'derived stats are cleared on a version bump');
+  localStorage.removeItem('connectea:cohort:v3:me:2026:physics');
 });
 
 Promise.all(pendingTestPromises).then(() => {

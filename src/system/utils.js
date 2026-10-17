@@ -103,10 +103,16 @@
    * world, so a DOM event is the only way to reach it from here.
    */
   const syncCharts = () => document.dispatchEvent(new CustomEvent('connectify-sync-charts'));
+
+  /** Semester (1 or 2) named in a subject card title; 1 when the title names none. */
+  function cardSemester(title) {
+    const match = String(title || '').match(/\bSem(?:ester)?\s*([12])\b/i);
+    return match ? Number(match[1]) : 1;
+  }
   window.ConnectifyDataSyncCharts = syncCharts;
 
   window.ConnectifyUtils = {
     normalize, escapeHtml, accountKey, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
-    customWeekOrder, readTimeOverride, syncCharts
+    customWeekOrder, readTimeOverride, syncCharts, cardSemester
   };
 })();

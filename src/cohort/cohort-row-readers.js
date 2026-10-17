@@ -62,7 +62,8 @@
       return undefined;
     }
 
-    function readStats(row) {
+    /** Boxplot stats for a row: the dataset bridge, then Highcharts, then (unless live) the stats cache. */
+    function readStats(row, { live = false } = {}) {
       const meta = types().getTaskMeta(row);
       const host = row.querySelector('[data-highcharts-chart]') ||
                    row.querySelector('.cvr-c-task__chart [data-highcharts-chart]') ||
@@ -125,7 +126,7 @@
         return foundStats;
       }
 
-      if (meta?.subjectName && meta?.taskName && window.ConnectifyData?.getTaskStats) {
+      if (!live && meta?.subjectName && meta?.taskName && window.ConnectifyData?.getTaskStats) {
         const cached = window.ConnectifyData.getTaskStats(meta.subjectName, meta.taskName);
         if (math().validStats(cached)) return cached;
       }

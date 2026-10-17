@@ -25,8 +25,8 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 #### [`new-grade.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/new-grade.js) & `grade-snapshot.js`
 - **Role**: Grade change detection against `connectify:grade_cache:<student>`, once per page.
 - **Key Functions**:
-  - `grade-snapshot.js` (`ConnectifyGradeSnapshot`): `currentEntries()` reads each subject's running mark and summary boxplot (cohort row readers), Semester 2 card first once it has results; `hasSubjectChanged(prev, entry)`: own mark moved $\ge 0.05\%$ or a quantile moved by more than `STATS_CHANGE_THRESHOLD` (1 point), so other classes uploading results stay quiet; boxplots appearing for the first time count.
-  - `checkGrades()`: an empty cache is seeded quietly; each changed subject is marked stale (re-scraped on its next expansion) and announced with a stacked "Class Updated" toast ("[Subject name] scores have been updated."). The cache is rewritten 1 second later.
+  - `grade-snapshot.js` (`ConnectifyGradeSnapshot`): `currentEntries()` reads each subject's running mark and live summary boxplot (`readStats(row, { live: true })`, never the stats cache), Semester 2 card first once it has results; `hasSubjectChanged(prev, entry)`: own mark moved $\ge 0.05\%$ or a quantile of a boxplot seen on both visits moved by more than `STATS_CHANGE_THRESHOLD` (1 point), so other classes uploading results and late-rendering charts stay quiet.
+  - `checkGrades()`: waits up to 10s for summary charts to be stamped; an empty cache is seeded quietly; a missing boxplot never erases the cached one; each changed subject is marked stale (re-scraped on its next expansion) and announced with a stacked "Class Updated" toast ("[Subject name] scores have been updated."). The cache is rewritten 1 second later.
   - `jumpToSubject(card)`: on the student's click, expands the card if collapsed, scrolls to it and pulses `.cx-card-jump-highlight` at once; the re-scrape and prediction refresh run 500ms later when idle (after the accordion animation), so the click never janks.
 - **Export**: `window.ConnectifyNewGrade`.
 

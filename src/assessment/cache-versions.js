@@ -13,9 +13,9 @@
 
   const CACHE_VERSIONS = {
     PREDICTOR: 'v11_20261016_pred',
-    RESULTS: 'v6_20261001_results',
+    RESULTS: 'v7_20261018_results',
     SETTINGS: 'v4_20261001_settings',
-    COHORT: 'v5_20261001_cohort'
+    COHORT: 'v6_20261018_cohort'
   };
 
   const CACHE_KEYS = {
@@ -78,10 +78,11 @@
       }
     },
 
-    clearCohortCache() {
+    // keepOverrides: a version bump clears derived data only; the student's cohort size overrides stay
+    clearCohortCache({ keepOverrides = false } = {}) {
       try {
         ConnectifyCache.statsCache?.clear();
-        removeStorageKeys(k => k.startsWith('connectea:cohort:v3:') || k.startsWith('connectify:stats_cache:'));
+        removeStorageKeys(k => (!keepOverrides && k.startsWith('connectea:cohort:v3:')) || k.startsWith('connectify:stats_cache:'));
         if (window.ConnectifyCohortEstimator?.memory) {
           window.ConnectifyCohortEstimator.memory.clear();
         }
@@ -129,7 +130,7 @@
           this.clearSettingsCache();
         }
         if (localStorage.getItem(CACHE_KEYS.COHORT) !== CACHE_VERSIONS.COHORT) {
-          this.clearCohortCache();
+          this.clearCohortCache({ keepOverrides: true });
         }
       } catch {}
     }

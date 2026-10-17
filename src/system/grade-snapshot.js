@@ -19,10 +19,9 @@
     if (Number.isFinite(prev.mark) && Number.isFinite(entry.mark) && Math.abs(Math.round((entry.mark - prev.mark) * 100) / 100) >= 0.05) {
       return true;
     }
+    // Only a boxplot seen on both visits can move: one appearing is usually a chart that rendered late last time
     const hasStats = Array.isArray(entry.stats) && entry.stats.length === 5;
-    if (!hasStats) return false;
-    // Boxplot stats appearing for the first time count as an update
-    if (!Array.isArray(prev.stats) || prev.stats.length !== 5) return true;
+    if (!hasStats || !Array.isArray(prev.stats) || prev.stats.length !== 5) return false;
     return entry.stats.some((val, idx) => Math.abs(val - prev.stats[idx]) > STATS_CHANGE_THRESHOLD);
   }
 
@@ -55,15 +54,13 @@
     return row ? window.ConnectifyCohortRows?.readMark?.(row) : undefined;
   }
 
+  // Live chart data only: the stats cache could hold another card's boxplot before this chart is stamped
   function readSubjectStats(row) {
-    const stats = row ? window.ConnectifyCohortRows?.readStats?.(row) : null;
+    const stats = row ? window.ConnectifyCohortRows?.readStats?.(row, { live: true }) : null;
     return Array.isArray(stats) && stats.length === 5 && stats.every(Number.isFinite) ? stats : undefined;
   }
 
-  function parseCardSemester(rawTitle) {
-    const match = rawTitle.match(/\bSem(?:ester)?\s*([12])\b/i) || rawTitle.match(/Semester\s*([12])/i);
-    return match ? Number(match[1]) : 1;
-  }
+  const parseCardSemester = rawTitle => window.ConnectifyUtils.cardSemester(rawTitle);
 
   function extractSubjectName(rawTitle) {
     if (!rawTitle) return '';

@@ -13,16 +13,25 @@
   const { normalize } = window.ConnectifyUtils;
   const { cleanSubject, categorizeTask, getSavedTaskType, getCategories, getCustomCategoriesForClass, invalidateTypesMemoryCache } = types;
 
+  // Connectify's own panel inside a row: its text must never become part of a task key
+  const INJECTED = '.connectea-row-wrapper, .connectea-panel, .connectea-type-container, .connectea-outcome-bar';
+
   function getTaskMeta(row) {
     const card = row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
     const titleEl = card?.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading');
     const cardTitle = normalize(titleEl?.textContent || '');
     const subjectName = cleanSubject(cardTitle);
     const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
+      .filter(e => !e.closest(INJECTED))
       .map(e => normalize(e.textContent))
       .filter(Boolean);
-    const taskName = (labels.length ? labels[labels.length - 1] : '') ||
-      normalize(row.querySelector('.cvr-c-task__details')?.childNodes[0]?.textContent) ||
+    // The subject summary row (outside .cvr-c-tasks) is keyed by semester: Semester 1 and 2 share a subject name
+    const isSummary = !labels.length && !row.closest('.cvr-c-tasks');
+    const firstOwnText = Array.from(row.querySelector('.cvr-c-task__details')?.childNodes || [])
+      .find(n => !(n.nodeType === 1 && n.matches(INJECTED)))?.textContent;
+    const taskName = (isSummary ? `Overall S${window.ConnectifyUtils.cardSemester(cardTitle)}` : '') ||
+      (labels.length ? labels[labels.length - 1] : '') ||
+      normalize(firstOwnText) ||
       'Assessment';
     const labelsKey = labels.join('::');
     return { subjectName, taskName, labels, labelsKey };
