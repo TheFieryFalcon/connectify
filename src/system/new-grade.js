@@ -41,17 +41,16 @@
   }
 
   /**
-   * Smoothly scrolls to a subject card, expands it, scrapes tasks,
-   * unstores it from stale cache, and plays a visual pulse highlight.
+   * Smoothly scrolls to a subject card, expands it and pulses a highlight straight away; the heavy
+   * refresh (re-scrape, prediction rebuild over every subject, results notify) waits until the accordion
+   * animation and smooth scroll have settled, then runs when the browser is idle, so the click never janks.
    */
-  function jumpToSubject(card) {
-    if (!card) return;
-    expandSubjectCard(card);
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const JUMP_REFRESH_DELAY = 500;
+  const whenIdle = fn => (window.requestIdleCallback ? window.requestIdleCallback(fn, { timeout: 1000 }) : setTimeout(fn, 0));
 
+  function refreshJumpedSubject(card) {
     const rawTitle = normalize(card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, h1, h2, h3, h4')?.textContent);
     const subjectName = extractSubjectName(rawTitle);
-
     if (window.ConnectifyData?.scrapeSubjectTasks) {
       window.ConnectifyData.scrapeSubjectTasks(card, true);
     }
@@ -66,11 +65,20 @@
     if (window.ConnectifyData?.notifyResultsUpdated) {
       window.ConnectifyData.notifyResultsUpdated(card);
     }
+  }
+
+  function jumpToSubject(card) {
+    if (!card) return;
+    expandSubjectCard(card);
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     card.classList.remove('cx-card-jump-highlight');
     // Force DOM reflow to restart CSS keyframe animation
     void card.offsetWidth;
     card.classList.add('cx-card-jump-highlight');
+
+    clearTimeout(card._cxJumpRefresh);
+    card._cxJumpRefresh = setTimeout(() => whenIdle(() => refreshJumpedSubject(card)), JUMP_REFRESH_DELAY);
 
     setTimeout(() => {
       card.classList.remove('cx-card-jump-highlight');

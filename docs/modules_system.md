@@ -27,7 +27,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 - **Key Functions**:
   - `grade-snapshot.js` (`ConnectifyGradeSnapshot`): `currentEntries()` reads each subject's running mark and summary boxplot (cohort row readers), Semester 2 card first once it has results; `hasSubjectChanged(prev, entry)`: own mark moved $\ge 0.05\%$ or a quantile moved by more than `STATS_CHANGE_THRESHOLD` (1 point), so other classes uploading results stay quiet; boxplots appearing for the first time count.
   - `checkGrades()`: an empty cache is seeded quietly; each changed subject is marked stale (re-scraped on its next expansion) and announced with a stacked "Class Updated" toast ("[Subject name] scores have been updated."). The cache is rewritten 1 second later.
-  - `jumpToSubject(card)`: on the student's click, expands the card if collapsed, re-scrapes it, refreshes its predictions, scrolls to it and pulses `.cx-card-jump-highlight`.
+  - `jumpToSubject(card)`: on the student's click, expands the card if collapsed, scrolls to it and pulses `.cx-card-jump-highlight` at once; the re-scrape and prediction refresh run 500ms later when idle (after the accordion animation), so the click never janks.
 - **Export**: `window.ConnectifyNewGrade`.
 
 #### [`dom-sweeper.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/dom-sweeper.js)
