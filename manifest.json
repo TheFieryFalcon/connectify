@@ -179,6 +179,7 @@
             "src/theme/styles/theme-glass-panels.css",
             "src/theme/styles/theme-glass-surface.css",
             "src/theme/styles/theme-glass-class-pages.css",
+            "src/theme/styles/theme-light-tone.css",
             "src/theme/styles/theme.css"
          ],
          "js": [
@@ -199,7 +200,8 @@
             "src/theme/theme-surface-adapter.js",
             "src/theme/theme-toggle.js",
             "src/theme/theme-menu.js",
-            "src/theme/theme.js"
+            "src/theme/theme.js",
+            "src/theme/theme-request.js"
          ],
          "run_at": "document_idle"
       },

@@ -162,3 +162,9 @@
 ):hover :is(span, div, p, label, .mat-line, .mat-list-text) {
   color: var(--cx-nav-text-hover, #ffffff) !important;
 }
+
+/* Category menu drawers (Attendance terms): Connect paints expanded panels #363636 !important on
+   .toggle-drawer.toggle--grey-dark; the panel's header and content follow the menu surface instead */
+html.eds.cvr.ngm.connectea-dark .toggle-drawer.toggle--grey-dark .c-expansion-panel :is(.mat-expansion-panel-header, .mat-expansion-panel-content) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+}

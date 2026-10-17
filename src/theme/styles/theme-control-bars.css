@@ -1,17 +1,12 @@
 /**
  * Connectify Theme: paginators, the Select All / Download row and their dropdowns sit on their own surface so
  * they stay readable on any canvas or wallpaper (dark themes use the surface token; Light uses a near-opaque
- * white panel only when a custom wallpaper is set). Geometry stays native; Liquid Glass rounds them elsewhere.
+ * white panel only when a custom wallpaper is set). Only colours change here: margins, padding and sizes stay
+ * native in every theme (Liquid Glass pads and rounds the paginator pills in theme-glass-panels.css).
  */
 .connectea-dark :is(mat-paginator, .connect-paginator-container, .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
-}
-
-.connectea-dark .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {
-  align-items: center;
-  margin-bottom: 12px;
-  padding: 4px 16px 0;
 }
 
 html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(mat-paginator, .connect-paginator-container, .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) {
@@ -25,25 +20,10 @@ html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(mat-paginator
   color: #334155 !important;
 }
 
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {
-  align-items: center;
-  margin-bottom: 12px;
-  padding: 4px 16px 0;
-}
-
 /* A disabled Download button reads as disabled, not as a faint ghost */
 .connectea-dark .cvr-c-pagination__body button.mat-stroked-button.mat-button-disabled {
   background-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 6%, transparent) !important;
   border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 22%, transparent) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   opacity: 0.65 !important;
-}
-
-/* The bar's own padding: Connect zeroes the container's with !important */
-html.eds.cvr.ngm.connectea-dark mat-paginator.mat-paginator .mat-paginator-container {
-  padding-inline: 16px !important;
-}
-
-html.eds.cvr.ngm:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator.mat-paginator .mat-paginator-container {
-  padding-inline: 16px !important;
 }

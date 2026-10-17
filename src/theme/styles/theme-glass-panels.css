@@ -1,6 +1,6 @@
 /**
  * Connectify Theme: Liquid Glass curvature for Angular panels that theme.css's class list cannot name
- * (notice card host, Library table wrapper, paginator bars). Liquid Glass only; solid themes keep native geometry.
+ * (notice card host, Library table wrapper). Liquid Glass only; solid themes keep native geometry.
  */
 
 /* The notice card host paints its own background around the 16px mat-card, so it needs the same radius.
@@ -9,18 +9,12 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   border-radius: 16px !important;
 }
 
-/* Library: the wrapper around the file table and the paginator bars are panels */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .cdk-drop-list:has(> table.mat-table),
-  mat-paginator
-) {
+/* Library: the wrapper around the file table is a panel (paginator pills are drawn in theme-glass-surface.css).
+   clip, not hidden: hidden starts a formatting context, so the table's margin stopped collapsing and the
+   wrapper grew 17px */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cdk-drop-list:has(> table.mat-table) {
   border-radius: 16px !important;
-  overflow: hidden !important;
-}
-
-/* Connect sets padding: 0 !important on .eds.cvr.ngm .mat-paginator .mat-paginator-container, so match its classes */
-html.eds.cvr.ngm.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-paginator.mat-paginator .mat-paginator-container {
-  padding-inline: 16px !important;
+  overflow: clip !important;
 }
 
 /* Notice cards are subgrid items (mat-card spans rows of card-deck-grid). overflow: hidden makes a grid item's

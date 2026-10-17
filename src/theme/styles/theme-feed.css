@@ -72,7 +72,7 @@
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(.avatar-content, [class*="avatar-content"]),
 :is(html, body).connectea-dark :is(.avatar-content, [class*="avatar-content"]) {
   font-family: Helvetica, Arial, sans-serif !important;
-  color: #ffffff !important;
+  color: var(--cx-avatar-text, #ffffff) !important;
   background-color: var(--cx-avatar-bg, #24303f) !important;
 }
 
@@ -220,7 +220,7 @@
 }
 
 .connectea-dark :is(cnt-notice-view, mat-dialog-container) a.link--reversed {
-  color: var(--cx-link, #60a5fa) !important;
+  color: var(--cx-accent-link, #60a5fa) !important;
 }
 
 .connectea-dark :is(cnt-notice-view, mat-dialog-container) u {

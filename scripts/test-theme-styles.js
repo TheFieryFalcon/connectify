@@ -1177,11 +1177,12 @@ async function activateSidebarView(page, currentView, delay = 1250) {
  * state from the Connect Native Theme (untouched native styling).
  */
 async function captureNativeBaseline(page, options = {}) {
+  await clearFocus(page);
   // Ensure Connect Native Theme is active (no dark mode, no theme tokens)
   await page.evaluate((opts) => {
-    if (window.ConnectifyThemeRegistry?.setTheme) {
-      window.ConnectifyThemeRegistry.setTheme('light');
-    }
+    // The registry lives in the extension's isolated world: request the theme across worlds (theme-request.js)
+    document.documentElement.setAttribute('data-connectify-theme-request', 'light');
+    document.dispatchEvent(new CustomEvent('connectify-request-theme'));
     document.documentElement.classList.remove('connectea-dark');
     document.documentElement.removeAttribute('data-connectea-theme');
     delete document.documentElement.dataset.connecteaTheme;
@@ -1189,9 +1190,6 @@ async function captureNativeBaseline(page, options = {}) {
       document.body.classList.remove('connectea-dark');
       document.body.removeAttribute('data-connectea-theme');
       delete document.body.dataset.connecteaTheme;
-    }
-    if (window.ConnectifyThemeRegistry?.clearCustomTokens) {
-      window.ConnectifyThemeRegistry.clearCustomTokens();
     }
     if (opts?.auditScope === 'sidebar') {
       const sidebar = document.getElementById('connectify-sidebar');
@@ -1204,6 +1202,9 @@ async function captureNativeBaseline(page, options = {}) {
   return await page.evaluate((opts) => {
     function parseRgb(colorStr) {
       if (!colorStr) return null;
+      // color-mix() computes to color(srgb r g b / a) with 0-1 channels
+      const srgb = colorStr.match(/color\(srgb\s+([\d.e-]+)\s+([\d.e-]+)\s+([\d.e-]+)(?:\s*\/\s*([\d.e-]+))?\s*\)/i);
+      if (srgb) return { r: parseFloat(srgb[1]) * 255, g: parseFloat(srgb[2]) * 255, b: parseFloat(srgb[3]) * 255, a: srgb[4] !== undefined ? parseFloat(srgb[4]) : 1.0 };
       const match = colorStr.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
       if (!match) return null;
       return {
@@ -1407,12 +1408,24 @@ async function captureNativeBaseline(page, options = {}) {
 }
 
 /**
+ * Clears keyboard focus so focus rings (e.g. the sidebar handle's :focus-visible outline) are compared in the
+ * same state on the baseline and every theme pass, not whichever element the last click happened to focus.
+ */
+async function clearFocus(page) {
+  await page.evaluate(() => { try { document.activeElement?.blur?.(); } catch {} }).catch(() => {});
+}
+
+/**
  * Audits the current theme against the Connect Native Theme baseline.
  */
 async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineData, options) {
+  await clearFocus(page);
   return await page.evaluate((tid, isDark, baseline, opts) => {
     function parseRgb(colorStr) {
       if (!colorStr) return null;
+      // color-mix() computes to color(srgb r g b / a) with 0-1 channels
+      const srgb = colorStr.match(/color\(srgb\s+([\d.e-]+)\s+([\d.e-]+)\s+([\d.e-]+)(?:\s*\/\s*([\d.e-]+))?\s*\)/i);
+      if (srgb) return { r: parseFloat(srgb[1]) * 255, g: parseFloat(srgb[2]) * 255, b: parseFloat(srgb[3]) * 255, a: srgb[4] !== undefined ? parseFloat(srgb[4]) : 1.0 };
       const match = colorStr.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
       if (!match) return null;
       return {
@@ -1457,14 +1470,33 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
       };
     }
 
+    // The theme's own canvas (--cx-canvas-bg), not a fixed navy: the grey Liquid Glass preset is a dark-classed
+    // theme with a light canvas and dark text, so assuming #12171f flagged all of its text as dark-on-dark
+    const themeCanvas = (() => {
+      const fallback = { r: 18, g: 23, b: 31, a: 1 };
+      if (!isDark || !document.body) return fallback;
+      try {
+        const token = String(getComputedStyle(document.documentElement).getPropertyValue?.('--cx-canvas-bg') || '').trim();
+        if (!token) return fallback;
+        const probe = document.createElement('span');
+        probe.style.color = token;
+        document.body.appendChild(probe);
+        const c = parseRgb(getComputedStyle(probe).color);
+        probe.remove();
+        return c && c.a > 0.95 ? { ...c, a: 1 } : fallback;
+      } catch {
+        return fallback;
+      }
+    })();
+
     function getEffectiveBg(el) {
-      const defaultBg = isDark ? { r: 18, g: 23, b: 31, a: 1 } : { r: 255, g: 255, b: 255, a: 1 };
+      const defaultBg = isDark ? themeCanvas : { r: 255, g: 255, b: 255, a: 1 };
       const layers = [];
       let curr = el;
       while (curr && curr !== document.documentElement) {
         if (curr === document.body) {
           if (isDark) {
-            layers.unshift({ r: 18, g: 23, b: 31, a: 1 });
+            layers.unshift(themeCanvas);
             break;
           }
           const bStyle = window.getComputedStyle(curr);
@@ -1476,7 +1508,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         const bg = parseRgb(style.backgroundColor);
         if (bg && bg.a > 0.01) {
           if (isDark && bg.r > 200 && bg.g > 200 && bg.b > 200 && (curr.id === 'main-content' || curr.classList?.contains?.('portlet-layout') || curr.classList?.contains?.('portlet-dropzone'))) {
-            layers.unshift({ r: 18, g: 23, b: 31, a: 1 });
+            layers.unshift(themeCanvas);
             break;
           }
           layers.unshift(bg);
@@ -2045,7 +2077,11 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         if (isDark && elBg && elBg.a > 0.6 && !['img', 'video', 'canvas'].includes(tag)) {
           const bgLum = getLuminance(elBg.r, elBg.g, elBg.b);
           const isLightBg = bgLum > 0.45 || (elBg.r > 165 && elBg.g > 165 && elBg.b > 165);
-          if (isLightBg) {
+          // The theme's own canvas is never a bleed (the grey Liquid Glass preset has a light canvas)
+          const isThemeCanvas = Math.abs(elBg.r - themeCanvas.r) <= 3 && Math.abs(elBg.g - themeCanvas.g) <= 3 && Math.abs(elBg.b - themeCanvas.b) <= 3;
+          // A dark-classed theme on a light canvas (grey Liquid Glass) paints light fills by design
+          const isLightCanvasTheme = getLuminance(themeCanvas.r, themeCanvas.g, themeCanvas.b) > 0.3;
+          if (isLightBg && !isThemeCanvas && !isLightCanvasTheme) {
             const isControlOrWidget = ['input', 'button'].includes(tag) ||
               el.classList?.contains?.('mat-ink-bar') ||
               el.classList?.contains?.('mat-checkbox-background') ||
@@ -2154,7 +2190,10 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
                 const ringSeparates = (style.boxShadow || '').split(/,(?![^(]*\))/).some(shadow => {
                   const color = parseRgb(shadow);
                   const lengths = (shadow.replace(/rgba?\([^)]*\)/, '').match(/-?[\d.]+px/g) || []).map(parseFloat);
-                  return lengths.length >= 4 && lengths[0] === 0 && lengths[1] === 0 && lengths[2] === 0 && separates(color, lengths[3]);
+                  if (lengths.length >= 4 && lengths[0] === 0 && lengths[1] === 0 && lengths[2] === 0 && separates(color, lengths[3])) return true;
+                  // An unblurred inset shadow offset on one axis (e.g. inset 3px 0 accent on an active menu item) is a side border
+                  const [x = 0, y = 0, blur = 0] = lengths;
+                  return /\binset\b/.test(shadow) && blur === 0 && (x === 0) !== (y === 0) && separates(color, Math.abs(x || y));
                 });
                 const hasSufficientBorderContrast = borderSeparates || outlineSeparates || ringSeparates;
                 if (!hasSufficientBorderContrast) {
@@ -2429,9 +2468,9 @@ async function runThemeAudit(customOptions = {}) {
             const existingTitle = seenViewSignatures.get(viewSignature);
             console.log(`       └─ Skipping "${currentView.title}": exact same elements (${baseline.visibleCount} visible) as view "${existingTitle}".`);
             await page.evaluate(() => {
-              if (window.ConnectifyThemeRegistry?.setTheme) {
-                window.ConnectifyThemeRegistry.setTheme('light');
-              }
+              // The registry lives in the extension's isolated world: request the theme across worlds (theme-request.js)
+              document.documentElement.setAttribute('data-connectify-theme-request', 'light');
+              document.dispatchEvent(new CustomEvent('connectify-request-theme'));
               document.documentElement.classList.remove('connectea-dark');
               delete document.documentElement.dataset.connecteaTheme;
               document.documentElement.removeAttribute('data-connectea-theme');
@@ -2451,9 +2490,9 @@ async function runThemeAudit(customOptions = {}) {
           // E. Audit all themes
           for (const t of themesToTest) {
             await page.evaluate((tid) => {
-              if (window.ConnectifyThemeRegistry?.setTheme) {
-                window.ConnectifyThemeRegistry.setTheme(tid);
-              }
+              // The registry lives in the extension's isolated world: request the theme across worlds (theme-request.js)
+              document.documentElement.setAttribute('data-connectify-theme-request', tid);
+              document.dispatchEvent(new CustomEvent('connectify-request-theme'));
               document.documentElement.classList.add('connectea-dark');
               document.documentElement.dataset.connecteaTheme = tid;
               if (document.body) {
@@ -2552,9 +2591,9 @@ async function runThemeAudit(customOptions = {}) {
                 try { homeBtn.click(); } catch {}
               }
             }
-            if (window.ConnectifyThemeRegistry?.setTheme) {
-              window.ConnectifyThemeRegistry.setTheme('light');
-            }
+            // The registry lives in the extension's isolated world: request the theme across worlds (theme-request.js)
+            document.documentElement.setAttribute('data-connectify-theme-request', 'light');
+            document.dispatchEvent(new CustomEvent('connectify-request-theme'));
             document.documentElement.classList.remove('connectea-dark');
             delete document.documentElement.dataset.connecteaTheme;
             document.documentElement.removeAttribute('data-connectea-theme');

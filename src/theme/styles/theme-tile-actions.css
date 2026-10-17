@@ -18,8 +18,10 @@
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
+/* Links take the contrast-checked link token (5:1 on the surface), not the raw accent: <body> carries
+   eds-t-grey-dark, so this reaches every link on the page */
 .connectea-dark :is([class*="eds-t-"], .eds-t-purple, .eds-u-theme-multiplier) :is(a, .eds-c-link):not(.eds-o-button--positive):not([class*="button--positive"]) {
-  color: var(--cx-accent, #60a5fa) !important;
+  color: var(--cx-accent-link, #60a5fa) !important;
 }
 
 .connectea-dark :is(

@@ -40,7 +40,7 @@
             Ensure at least four Year 11/12 ATAR course outlines are expanded on Connect.
           </div>
           <div style="margin-top:14px;">
-            <button type="button" class="cx-pred-expand-outlines-btn" style="background:#24618c; color:#fff; border:none; padding:8px 18px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer;">
+            <button type="button" class="cx-pred-expand-outlines-btn">
               Expand All Outlines
             </button>
           </div>
@@ -55,7 +55,7 @@
           <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;">
             Predicted Final ATAR
           </div>
-          <button type="button" class="cx-pred-expand-outlines-btn" style="background:transparent; border:1px solid #3b82f6; color:#60a5fa; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer; font-weight:600;">
+          <button type="button" class="cx-pred-expand-outlines-btn cx-pred-expand-outlines-btn--compact">
             Expand All Outlines
           </button>
         </div>

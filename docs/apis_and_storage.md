@@ -111,6 +111,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify-task-type-changed` | `task-types.js` | `cohort-stats.js`, `compound-progress.js`, `weakness-radar.js` | Dispatched when assessment category override changes |
 | `connectify-settings-updated` | `scaling-calibration.js` | `atar-ui.js`, `compound-progress.js`, `progress-graph.js` | Dispatched when calibration scores or categories change |
 | `connectify-cohort-invalidated` | `assessment-data.js` | `cohort-stats.js` | Dispatched when cohort caches are cleared to trigger refresh |
+| `connectify-request-theme` | Page-world code (theme audit) | `theme-request.js` | Applies the theme id in `<html data-connectify-theme-request>` through the registry |
 | `connectify-sync-charts` | `ConnectifyDataSyncCharts()` (`utils.js`) | `data.js` (`MAIN` world) | Re-read every chart's boxplot (after accordions open, on the heartbeat) |
 | `connectify-render-radar` | `weakness-radar.js` | `data.js` (`MAIN` world) | Highcharts chart options payload |
 | `connectify-destroy-radar` | `weakness-radar.js` | `data.js` (`MAIN` world) | Cleans up Highcharts radar instance |

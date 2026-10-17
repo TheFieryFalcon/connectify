@@ -32,9 +32,11 @@
   color: var(--cx-text-secondary, #e0eefb);
 }
 
+/* Primary text: a coloured secondary text (Quantum's green) falls under 5:1 on the hover surface. !important
+   outranks the sidebar's blanket paragraph colour (.connectea-dark #connectify-sidebar p) */
 .connectea-dark #connectea-atar :is(.cta-breakdown,.cta-target-output>strong) {
   background: var(--cx-surface-hover, #293746);
-  color: var(--cx-text-secondary, #d9e6f3);
+  color: var(--cx-text-primary, #d9e6f3) !important;
 }
 
 .connectea-dark #connectea-atar .cta-assessment-details {

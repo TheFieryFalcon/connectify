@@ -51,6 +51,11 @@
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
+/* Icon buttons inside table cells (row ⋯ menus) are clear like Connect's: a fill a shade off the row read as a smudge */
+:is(html.connectea-dark, body.connectea-dark) :is(td, .mat-cell) button.mat-icon-button {
+  background-color: transparent !important;
+}
+
 html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-light :is(.mat-icon, mat-icon, cnt-icon),
 :is(html, body).connectea-dark :is(.toggle--grey-light, [class*="toggle--grey"], .c-toolbar-button) :is(.mat-icon, mat-icon, cnt-icon, .mat-ligature-font, .material-icons) {
   color: var(--cx-text-primary, #f1f5f9) !important;

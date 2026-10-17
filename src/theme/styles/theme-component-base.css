@@ -31,7 +31,7 @@
 }
 
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  thead, thead th, thead td, .v-table-header, .v-grid-header
+  thead th, thead td, .v-table-header, .v-grid-header
 ) {
   background-color: var(--cx-table-header-bg) !important;
   color: var(--cx-text-primary) !important;
@@ -66,10 +66,10 @@
   border-bottom-color: var(--cx-nav-border) !important;
 }
 
-/* Buttons and Action Elements */
+/* Buttons and Action Elements (top-bar icon buttons such as the Connect home logo stay on the nav surface) */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   .v-button, .eds-c-button, .eds-c-standard-button
-):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
+):not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
   background-color: var(--cx-button-bg) !important;
   color: var(--cx-button-text) !important;
   border-color: var(--cx-button-border) !important;

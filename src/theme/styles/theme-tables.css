@@ -48,12 +48,11 @@
   border-color: var(--cx-border, #36485e) !important;
 }
 
+/* The header colour sits on the header cells, not on thead or the header row: a filled band a shade off the
+   table body with nothing separating it reads as a smudge (adjacent-colour audit) */
 .connectea-dark :is(
-  thead,
   thead th,
   thead td,
-  .mat-header-row,
-  mat-header-row,
   .mat-header-cell,
   mat-header-cell,
   .v-table-header,

@@ -31,7 +31,7 @@
     '--cx-button-border-hover', '--cx-button-text-hover', '--cx-button-primary-bg', '--cx-button-primary-hover',
     '--cx-button-primary-text', '--cx-input-text', '--cx-input-placeholder', '--cx-input-border-focus',
     '--cx-table-header-bg', '--cx-table-row-hover', '--cx-table-row-alt', '--cx-table-border', '--cx-badge-bg',
-    '--cx-badge-border', '--cx-badge-text', '--cx-scrollbar-thumb', '--cx-scrollbar-track', '--cx-avatar-bg',
+    '--cx-badge-border', '--cx-badge-text', '--cx-scrollbar-thumb', '--cx-scrollbar-track', '--cx-avatar-bg', '--cx-avatar-text',
     // Liquid Glass custom themes (theme-glass-tokens.js)
     '--cx-shadow-sm', '--cx-shadow-md', '--cx-shadow-lg'
   ];
@@ -60,6 +60,15 @@
 
   function clearCustomTokens() {
     for (const el of tokenTargets()) for (const prop of TOKEN_PROPS) el.style.removeProperty(prop);
+    if (typeof document !== 'undefined') document.documentElement?.removeAttribute('data-connectea-tone');
+  }
+
+  /** Dark-classed themes with dark ink (the grey Liquid Glass preset, light custom themes): data colours made for
+   *  dark surfaces are re-inked for light surfaces by theme-light-tone.css */
+  function markTone(textPrimary) {
+    const lum = window.ConnectifyThemeOklch?.luminance;
+    if (!lum || !/^#[0-9a-f]{6}$/i.test(textPrimary || '') || lum(textPrimary) >= 0.2) return;
+    document.documentElement.setAttribute('data-connectea-tone', 'light');
   }
 
   /** glass: { opacity } when the theme has Liquid Glass on, so its panels take the translucent glass recipe. */
@@ -86,6 +95,7 @@
     for (const el of tokenTargets()) {
       for (const [prop, value] of Object.entries(tokens)) if (value) el.style.setProperty(prop, value);
     }
+    markTone(c.textPrimary);
   }
 
   function getCustomBackground() {

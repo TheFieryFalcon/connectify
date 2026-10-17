@@ -1,7 +1,7 @@
 /**
  * Connectify Theme: the shared Liquid Glass recipe for bars, banners and section headings that Connect leaves
  * flat or without any surface (class banner, "Page N of M" paginator, category bars, Library toolbar,
- * Learners headings, empty states). Liquid Glass only; solid themes keep native geometry.
+ * Learners headings, empty states). Liquid Glass only; no margins or padding, so boxes keep their native size.
  */
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) {
@@ -10,52 +10,72 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   --cx-gl-edge: inset 0 1px 0 color-mix(in srgb, var(--cx-text-primary, #ffffff) 16%, transparent), 0 0 0 1px color-mix(in srgb, var(--cx-text-primary, #ffffff) 10%, transparent), 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
+/* Full-width bars and banners: the glass is painted on the element itself. Connect's own borders stay (as
+   hairlines in the text colour) so every box keeps its native size and dividers (theme parity audit). */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
   cnt-scope-intro-class,
-  .connect-paginator-container,
   mat-toolbar.c-category-bar,
-  mat-paginator,
   .cvr-c-category-toolbar__container > .cvr-c-thori-pnl,
   .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox),
-  p.mat-h2,
   cnt-paginator:has(.c-empty-content)
 ) {
   background-color: var(--cx-gl-fill) !important;
   backdrop-filter: var(--cx-gl-blur) !important;
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;
   box-shadow: var(--cx-gl-edge) !important;
-  border: none !important;
+  border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
   border-radius: 16px !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-/* Category bars sit inset like the cards under them; the right edge stays put because the category drawer
-   toggle (cnt-category-menu) positions its off-canvas drawer from it */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar {
-  margin: 8px 0 12px 16px;
-  width: auto !important;
-}
-
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-category-toolbar__container > .cvr-c-thori-pnl {
-  margin: 8px 16px 12px;
-  width: auto !important;
-}
-
-/* The banner and toolbar row are full-width bars; the rest size to their content */
+/* The class banner is one full-width bar */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-scope-intro-class {
   display: block;
   margin-bottom: 16px;
   padding-inline: 20px;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) p.mat-h2 {
-  width: fit-content;
-  margin-bottom: 12px !important;
-  padding: 6px 18px;
+/* Pills that hug their content ("Page N of M", paginator bars, Learners headings, the Content empty state): the
+   glass is a ::before reaching past the box, so the text gets breathing room from the 16px corners without any
+   padding or margin that would move Connect's layout */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  .connect-paginator-container,
+  mat-paginator,
+  p.mat-h2,
+  .eds-c-empty-content
+) {
+  position: relative;
+  z-index: 0;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connect-paginator-container {
-  padding-inline: 16px;
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  .connect-paginator-container,
+  mat-paginator,
+  p.mat-h2,
+  .eds-c-empty-content
+)::before {
+  content: '';
+  position: absolute;
+  inset: 0 -16px;
+  z-index: -1;
+  background-color: var(--cx-gl-fill);
+  backdrop-filter: var(--cx-gl-blur);
+  -webkit-backdrop-filter: var(--cx-gl-blur);
+  box-shadow: var(--cx-gl-edge);
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) p.mat-h2::before {
+  inset: -6px -18px;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-empty-content::before {
+  inset: -16px -24px;
 }
 
 /* A "Page N of M" box is one pill: the bar and its labels paint nothing of their own */
@@ -68,14 +88,4 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 /* Empty states ("There are currently no ...") become one centred glass card */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-paginator:has(.c-empty-content) {
   overflow: hidden !important;
-}
-
-/* Content (Vaadin) empty state: the card is the .eds-c-empty-content block, and its canvas lets the wallpaper through */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-empty-content {
-  background-color: var(--cx-gl-fill) !important;
-  backdrop-filter: var(--cx-gl-blur) !important;
-  -webkit-backdrop-filter: var(--cx-gl-blur) !important;
-  box-shadow: var(--cx-gl-edge) !important;
-  border-radius: 16px !important;
-  padding: 24px !important;
 }

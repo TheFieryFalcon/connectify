@@ -5507,7 +5507,7 @@ runTest('Test 138: Dark theme v3.2.1 parity, Connect Help and tile contrast, abu
   assert.ok(cssHas(themeTilesCss, '.eds-c-tile__body') && cssHas(themeTilesCss, '.cvr-c-tile__body'), 'theme-tiles.css must target tile bodies');
   assert.ok(cssHas(themeTilesCss, '.portlet-body') && cssHas(themeTilesCss, '.journal-content-article'), 'theme-tiles.css must target portlet containers for Connect Help');
   assert.ok(cssHas(themeTilesCss, 'var(--cx-surface-bg, #1e2632) !important;'), 'theme-tiles.css must set surface-bg for tile bodies');
-  assert.ok(cssHas(themeTilesCss, 'var(--cx-accent, #60a5fa) !important;'), 'theme-tiles.css must set high-contrast accent links');
+  assert.ok(cssHas(themeTilesCss, 'var(--cx-accent-link, #60a5fa) !important;'), 'theme-tiles.css must set high-contrast links (the contrast-checked link token, not the raw accent)');
   assert.ok(cssHas(themeTilesCss, '.cvr-c-class__name') && cssHas(themeTilesCss, '.cvr-c-classes-list__title'), 'theme-tiles.css must target class title elements');
   assert.ok(cssHas(themeTilesCss, 'var(--cx-text-primary, #f8fafc) !important;'), 'theme-tiles.css must set high contrast primary text on headings');
 
@@ -7591,16 +7591,19 @@ runTest('Test 162: Auto-login only fires for a saved password or browser autofil
   assert.ok(js.includes("=== false || userTyped) return;"), 'auto-login must not fire once the user typed');
 });
 
-runTest('Test 163: Liquid Glass rounds the notice card host, Library table wrapper and paginator bars; icon buttons keep native padding', () => {
+runTest('Test 163: Liquid Glass rounds the notice card host and Library table wrapper, draws paginator pills without changing their box; icon buttons keep native padding', () => {
   const styles = path.join(BASE_DIR, 'src/theme/styles');
   const css = fs.readFileSync(path.join(styles, 'theme-glass-panels.css'), 'utf8');
   const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
   assert.ok(cssHas(css, `${glass} cnt-stream-notice-card {\n  border-radius: 16px !important;`), 'the notice card host must be rounded to match its mat-card');
   assert.ok(!/cnt-stream-notice-card[^{]*\{[^}]*overflow/.test(css), 'the notice card host must not clip (it would cut off the elevation shadow)');
-  assert.ok(cssHas(css, '.cdk-drop-list:has(> table.mat-table),\n  mat-paginator\n) {\n  border-radius: 16px !important;\n  overflow: hidden !important;'),
-    'the Library table wrapper and paginator bars must be rounded and clipped');
-  assert.ok(cssHas(css, 'mat-paginator.mat-paginator .mat-paginator-container {\n  padding-inline: 16px !important;') && cssHas(css, 'html.eds.cvr.ngm.connectea-dark:is('),
-    'paginator bars need horizontal padding that outranks Connect\'s padding: 0 !important');
+  assert.ok(cssHas(css, `${glass} .cdk-drop-list:has(> table.mat-table) {\n  border-radius: 16px !important;\n  overflow: clip !important;`),
+    'the Library table wrapper must be rounded and clipped with overflow: clip (hidden changes margin collapsing and its height)');
+  // Paginator pills keep their native box (theme parity audit): no padding or clip; the glass is a ::before past the edges
+  assert.ok(!/padding/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')) && !/mat-paginator[^{]*\{[^}]*overflow/.test(css), 'paginator bars must not be padded or clipped');
+  const surface = fs.readFileSync(path.join(styles, 'theme-glass-surface.css'), 'utf8');
+  assert.ok(/mat-paginator,[\s\S]*?\)::before \{[\s\S]*?inset: 0 -16px;[\s\S]*?border-radius: 16px;/.test(surface),
+    'paginator pills must be drawn by a ::before reaching 16px past the box');
   assert.ok(!/\[class\*=/.test(css), 'glass panel rules must name explicit elements/classes');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('theme-glass-panels.css'), 'theme-glass-panels.css must be registered in manifest.json');
   const buttons = fs.readFileSync(path.join(styles, 'theme-buttons.css'), 'utf8');
@@ -7849,6 +7852,51 @@ runTest('Test 169: Liquid Glass presets (grey derived Liquid Glass, renamed Liqu
   const prefs = fs.readFileSync(path.join(BASE_DIR, 'src/predictor/settings-preferences.js'), 'utf8');
   assert.ok(markup.includes('id="cx-bg-presets"') && prefs.includes('presets.mount(presetBox, p =>'), 'Settings must show the preset backgrounds');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('"src/theme/theme-wallpaper-presets.js"'), 'theme-wallpaper-presets.js must be registered');
+});
+
+runTest('Test 170: Source files contain no NUL bytes (a scripted \\0 replacement once blanked sidebar colours)', () => {
+  const walk = dir => fs.readdirSync(dir, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]);
+  for (const file of walk(path.join(BASE_DIR, 'src')).filter(f => /\.(js|css)$/.test(f))) {
+    assert.ok(!String(fs.readFileSync(file, 'latin1')).includes('\u0000'), `${path.relative(BASE_DIR, file)} must not contain NUL bytes`);
+  }
+});
+
+runTest('Test 171: The theme audit applies themes through the cross-world request, and solid themes keep native spacing on control bars and empty states', () => {
+  const bridge = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-request.js'), 'utf8');
+  assert.ok(bridge.includes("addEventListener('connectify-request-theme'") && bridge.includes('data-connectify-theme-request') && bridge.includes('registry.setTheme(id)'),
+    'theme-request.js must apply a theme requested from the page world through the registry');
+  const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('"src/theme/theme-request.js"') > manifest.indexOf('"src/theme/theme.js"'), 'theme-request.js must load after theme.js');
+  const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
+  assert.ok(!audit.includes('ConnectifyThemeRegistry'), 'the audit runs in the page world and must not call the isolated-world registry');
+  assert.ok(audit.includes("new CustomEvent('connectify-request-theme')") && audit.includes('async function clearFocus(page)'), 'the audit must request themes across worlds and clear focus before each capture');
+  const styles = path.join(BASE_DIR, 'src/theme/styles');
+  const strip = css => css.replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const file of ['theme-control-bars.css', 'theme-empty-states.css']) {
+    assert.ok(!/\b(margin|padding)[\w-]*\s*:/.test(strip(fs.readFileSync(path.join(styles, file), 'utf8'))), `${file} must not change margins or padding`);
+  }
+  const surface = strip(fs.readFileSync(path.join(styles, 'theme-glass-surface.css'), 'utf8'));
+  assert.ok(!/c-category-bar\s*\{[^}]*margin/.test(surface) && !/thori-pnl\s*\{[^}]*margin/.test(surface) && !/p\.mat-h2\s*\{[^}]*(margin|padding|width)/.test(surface),
+    'Liquid Glass bars and headings must keep their native margins, padding and width');
+  assert.ok(!/border:\s*none/.test(surface), 'glass bars turn borders transparent instead of removing them, so boxes keep their size');
+});
+
+runTest('Test 172: Dark-classed themes with dark ink are marked light-tone and re-ink data colours; links use the contrast-checked token', () => {
+  const tokensJs = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-custom-tokens.js'), 'utf8');
+  assert.ok(tokensJs.includes("setAttribute('data-connectea-tone', 'light')") && tokensJs.includes("removeAttribute('data-connectea-tone')") && tokensJs.includes('markTone(c.textPrimary)'),
+    'applyCustomTokens must mark dark-ink themes light-tone and clearCustomTokens must unmark them');
+  const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-light-tone.css'), 'utf8');
+  const sels = css.replace(/\/\*[\s\S]*?\*\//g, '').split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
+  assert.ok(sels.length > 0 && sels.every(sel => sel.startsWith('html.connectea-dark[data-connectea-tone="light"]')), 'every light-tone rule must be scoped to the tone hook');
+  for (const cls of ['.cx-cat-name-label', '.cx-pred-scenario-label--mid', '.cx-pred-pill--high strong', '.cx-red-key', '.cx-blue-key', '.cx-date-warning', '.connect-green-light']) {
+    assert.ok(css.includes(cls), `light tone must re-ink ${cls}`);
+  }
+  assert.ok((css.match(/oklch\(from .+ 0\.34 c h\)/g) || []).length >= 6, 'data colours keep hue and chroma at OKLCH lightness 0.34');
+  assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('"src/theme/styles/theme-light-tone.css"'), 'theme-light-tone.css must be registered');
+  const derive = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-token-derive.js'), 'utf8');
+  assert.ok(derive.includes("'--cx-avatar-text': o.readable(c.surfaceElevated)"), 'avatar initials must be readable on the derived avatar fill');
+  const tiles = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-tile-actions.css'), 'utf8');
+  assert.ok(!/:is\(a, \.eds-c-link\)[^{]*\{\s*color: var\(--cx-accent,/.test(tiles), 'page links must not use the raw accent');
 });
 
 Promise.all(pendingTestPromises).then(() => {

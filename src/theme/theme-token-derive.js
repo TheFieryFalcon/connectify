@@ -96,7 +96,8 @@
       '--cx-table-header-bg': o.shiftL(c.surface, -1.5 * cd), '--cx-table-row-hover': up(c.surface, 5),
       '--cx-table-row-alt': mix(c.surface, c.canvas, 0.5), '--cx-table-border': up(c.borderSubtle, -2),
       '--cx-badge-bg': up(c.surface, 6), '--cx-badge-border': up(c.border, -2), '--cx-badge-text': text,
-      '--cx-scrollbar-thumb': up(c.border, -4), '--cx-scrollbar-track': c.canvas, '--cx-avatar-bg': c.surfaceElevated
+      '--cx-scrollbar-thumb': up(c.border, -4), '--cx-scrollbar-track': c.canvas, '--cx-avatar-bg': c.surfaceElevated,
+      '--cx-avatar-text': o.readable(c.surfaceElevated)
     };
   }
 

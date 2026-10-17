@@ -15,9 +15,10 @@
   background-color: var(--cx-glass-panel-bg, rgba(22, 34, 52, var(--cx-glass-opacity, 0.65))) !important;
 }
 
-/* Reading View Wallpaper Suppression (Notice & Discussion Detail Views - DOM Detected) */
+/* Reading View Wallpaper Suppression (Notice & Discussion Detail Views - DOM Detected). Inside a dialog the
+   views sit on the dialog's own surface (theme-dialog-surface.css), so they are left out here */
 [data-connectea-reading-view="true"]:is(html, body) { background-image: none !important; background-color: var(--cx-canvas-bg, #121820) !important; }
-[data-connectea-reading-view="true"] :is(cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"], cnt-notice-item-view-dialog, .cvr-c-app-layout, .cvr-c-app-layout__body, #main-content) {
+[data-connectea-reading-view="true"] :is(cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"], cnt-notice-item-view-dialog, .cvr-c-app-layout, .cvr-c-app-layout__body, #main-content):not(mat-dialog-container *):not(.mat-dialog-container *) {
   background-image: none !important;
   background-color: var(--cx-canvas-bg, #121820) !important;
 }

@@ -1,0 +1,86 @@
+/**
+ * Connectify Theme: light-tone re-inking. A dark-classed theme with dark ink (the grey Liquid Glass preset, or a
+ * custom theme with dark text) puts content on light surfaces, where data colours tuned for dark surfaces (light
+ * tints of red, blue, green, yellow and the accent) wash out to ~1.2:1. theme-custom-tokens.js marks those themes
+ * with data-connectea-tone="light"; each colour here keeps its hue and chroma at OKLCH lightness 0.34, dark enough
+ * for 5:1 on the light glass. Browsers without relative colours keep the theme's text colour (first declaration).
+ */
+
+/* Category names and task-type badges (Settings, Predictor) */
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar :is(.cx-cat-name-label, .cx-pred-task-type-badge) {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from var(--cx-cat-color, #3498db) 0.34 c h) !important;
+}
+
+/* Middle (expected) scenario label: accent family */
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-pred-scenario-label--mid {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from var(--cx-accent, #38bdf8) 0.34 c h) !important;
+}
+
+/* High scenario card and pill: a light green tint with dark green ink instead of the dark-surface card */
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar :is(.cx-pred-scenario-card--high, .cx-pred-pill--high) {
+  background: color-mix(in srgb, #22c55e 16%, transparent) !important;
+  border-color: color-mix(in srgb, #15803d 45%, transparent) !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar :is(
+  .cx-pred-scenario-label--high, .cx-pred-scenario-value--high, .cx-pred-scenario-sub--high,
+  .cx-pred-pill--high, .cx-pred-pill--high strong
+) {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #22c55e 0.34 c h) !important;
+}
+
+/* Year in Progress: chart legend keys match their line colours, and the missing-date warning stays red */
+html.connectea-dark[data-connectea-tone="light"] .cx-red-key {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #d64b58 0.34 c h) !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"] .cx-blue-key {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #368bd0 0.34 c h) !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"] .cx-date-warning {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #dc2626 0.34 c h) !important;
+}
+
+/* Connect's Attendance "present" label paints light green text straight on the surface */
+html.connectea-dark[data-connectea-tone="light"] .standard-label.connect-green-light {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #9cb800 0.34 c h) !important;
+}
+
+/* The sidebar handle (the theme's primary button) needs an edge in the ink colour to stand off a light canvas */
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar-handle {
+  border-color: var(--cx-text-primary, #1d1c1c);
+}
+
+/* Connect status labels (Overdue, locked, reported, blue-light #0092c9) are dark pills in the dark themes; on a light tone
+   they become light tints with dark ink, and their children (em, span) follow the pill's ink */
+html.connectea-dark[data-connectea-tone="light"] :is(
+  .cvr-c-class__status-label--locked, span.standard-label.connect-red, div.standard-label.connect-red, span.connect-red,
+  .cvr-c-submission__status-label--overdue, .cvr-c-entitystatus--reported, .cvr-c-status-label--reported
+) {
+  background-color: color-mix(in srgb, #ef4444 14%, transparent) !important;
+  border-color: color-mix(in srgb, #b91c1c 45%, transparent) !important;
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #dc2626 0.34 c h) !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"] :is(.standard-label.connect-blue-light, .connect-blue-light) {
+  background-color: color-mix(in srgb, #0092c9 14%, transparent) !important;
+  border-color: color-mix(in srgb, #00739e 45%, transparent) !important;
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #0092c9 0.34 c h) !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"] :is(
+  .cvr-c-class__status-label--locked, .connect-red, .cvr-c-submission__status-label--overdue, .cvr-c-entitystatus--reported,
+  .cvr-c-status-label--reported, .connect-blue-light
+) :is(em, span, i, b, strong) {
+  color: inherit !important;
+}

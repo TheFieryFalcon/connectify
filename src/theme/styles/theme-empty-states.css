@@ -1,18 +1,18 @@
 /**
  * Connectify Theme: empty states ("There are currently no ... available") sit centred, with the icon ring and
  * message on one axis, in every dark theme. Connect right-aligns them inside the paginator wrapper.
+ * Only alignment changes: margins, padding and box sizes stay native (theme parity audit).
  */
 .connectea-dark cnt-paginator:has(.c-empty-content) {
   justify-content: center !important;
-  padding: 16px !important;
 }
 
 .connectea-dark :is(.c-empty-content, .c-empty-content p, .eds-c-empty-content) {
-  margin-inline: auto !important;
   text-align: center !important;
 }
 
-.connectea-dark :is(.c-empty-content, .eds-c-empty-content) {
+/* Angular empty state: icon ring and message on one centred column (the Vaadin block is already centred natively) */
+.connectea-dark .c-empty-content {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
