@@ -8056,9 +8056,9 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   assert.ok(manifest.indexOf('theme-glass-nesting.css') > manifest.indexOf('theme-glass-task-rows.css') && manifest.indexOf('theme-glass-nesting.css') < manifest.indexOf('"src/theme/styles/theme.css"'), 'theme-glass-nesting.css must be registered before theme.css');
   const sels = nesting.replace(/\/\*[\s\S]*?\*\//g, '').split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
   assert.ok(sels.every(sel => sel.startsWith(G)), 'every nesting rule must be Liquid Glass only');
-  assert.ok(/\.v-app\.headerui[^{]*\{\s*background-color: transparent/.test(nesting), 'the header canvas must be clear so the top bars blur the page');
+  assert.ok(/:is\(#cx-specificity-anchor, \.v-app\.headerui, \.v-app\.headerui > \.v-ui\) \{\s*background-color: transparent/.test(nesting), 'the header canvas must be clear (outranking the #main-content canvas rule) so the top bars blur the page');
   assert.ok(/\.cvr-c-thori-pnl\.cvr-c-primary-navigation[\s\S]*?backdrop-filter: var\(--cx-gl-blur\)/.test(nesting), 'the top navigation bar must blur');
-  assert.ok(/\.cvr-c-service-bar__container \{[^}]*backdrop-filter: none/.test(nesting), 'the service bar container must not blur (it would trap the bar and menu blur)');
+  assert.ok(/:is\(#cx-specificity-anchor, \.cvr-c-service-bar__container\) \{[^}]*backdrop-filter: none/.test(nesting), 'the service bar container must not blur (it would trap the bar and menu blur), outranking the id-weighted glass rule');
   assert.ok(/table :is\(\s*#cx-specificity-anchor, thead, tbody, tfoot, tr:not\(:hover\), th, td\s*\)/.test(nesting), 'table rows and cells must be clear inside the table surface');
   assert.ok(nesting.includes('.cvr-c-service-menu__item:not(.eds-s-is-active):not(.v-selected)'), 'menu items are clear except the active one');
 });

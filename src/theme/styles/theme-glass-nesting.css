@@ -5,8 +5,9 @@
  * page. Here only the outermost surface paints and blurs; everything inside it is clear. Liquid Glass only.
  */
 
-/* Header: the Vaadin header app paints the canvas under the bars, so their blur had nothing to show */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.v-app.headerui, .v-app.headerui > .v-ui) {
+/* Header: the Vaadin header app paints the canvas under the bars, so their blur had nothing to show. The canvas
+   rule lists #main-content, so the unused id (#cx-specificity-anchor) is needed to outrank it */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, .v-app.headerui, .v-app.headerui > .v-ui) {
   background-color: transparent !important;
 }
 
@@ -24,15 +25,18 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 }
 
 /* Service bar: the fixed container is only a positioner; the bar and the side menu (which overflows the
-   container) are the two surfaces, so each blurs the page itself */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-bar__container {
+   container) are the two surfaces, so each blurs the page itself. The glass blur rule (theme-tokens.css) lists
+   #connectify-sidebar, so the container needs the unused id to drop its blur */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, .cvr-c-service-bar__container) {
   background-color: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-service-bar__container > .cvr-c-service-bar, .cvr-c-service-menu) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  .cvr-c-service-bar__container > .cvr-c-service-bar, .cvr-c-service-menu, .cvr-c-category-menu, .v-popupview-popup
+) {
   backdrop-filter: var(--cx-gl-blur) !important;
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;
 }
@@ -104,5 +108,10 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 
 /* Form fieldsets inside a card (Profile) are clear */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.mat-card, .eds-c-tile, .v-panel) :is(#cx-specificity-anchor, fieldset.c-floating-form-field) {
+  background-color: transparent !important;
+}
+
+/* Vaadin popup panels are one surface: their labels stay clear */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-popupview-popup :is(#cx-specificity-anchor, .v-label) {
   background-color: transparent !important;
 }
