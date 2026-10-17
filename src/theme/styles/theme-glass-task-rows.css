@@ -1,0 +1,67 @@
+/**
+ * Connectify Theme: Liquid Glass assessment task rows. Each row's statistics strip (cohort panel, Type dropdown,
+ * outcome meter) is one glass pill, and the achievement column (marks and boxplot) is one glass block, instead of
+ * translucent layers stacked on each other. Uses the shared recipe from theme-glass-surface.css. Liquid Glass only.
+ */
+
+/* Statistics strip: the wrapper is the one surface, so "Type:" never sits bare on the wallpaper */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-row-wrapper {
+  width: fit-content !important;
+  padding: 4px 14px 4px 4px !important;
+  background-color: var(--cx-gl-fill) !important;
+  backdrop-filter: var(--cx-gl-blur) !important;
+  -webkit-backdrop-filter: var(--cx-gl-blur) !important;
+  box-shadow: var(--cx-gl-edge) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+/* The cohort panel inside the strip is clear, divided from the controls by a hairline */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-row-wrapper > .connectea-panel {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-right: 1px solid color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
+  border-radius: 12px 0 0 12px !important;
+}
+
+/* Lines inside any cohort panel never add a second fill */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel :is(
+  .connectea-distribution, .connectea-result, .connectea-result-row, .connectea-panel-distribution, .connectea-panel-standing
+) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Text on these glass surfaces uses the primary ink (secondary ink drops below 5:1 over a black wallpaper in
+   grey Liquid Glass); the 700/400 weights keep the hierarchy */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  .connectea-row-wrapper :is(.connectea-panel, .connectea-panel *, .connectea-type-label, .connectea-type-title),
+  .cvr-c-task__mark, .cvr-c-task__mark *
+) {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+/* Achievement column (marks above, boxplot below): one glass block with hairline dividers */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__achievement {
+  background-color: var(--cx-gl-fill) !important;
+  backdrop-filter: var(--cx-gl-blur) !important;
+  -webkit-backdrop-filter: var(--cx-gl-blur) !important;
+  border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-task__marks, .cvr-c-task__mark) {
+  background: transparent !important;
+  border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+/* Boxplot plot area: a faint tint of the text colour instead of an opaque grey slab */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__chart [fill="#FFFFFF"] {
+  fill: color-mix(in srgb, var(--cx-text-primary, #ffffff) 7%, transparent) !important;
+}

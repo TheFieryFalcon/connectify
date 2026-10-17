@@ -7936,6 +7936,21 @@ runTest('Test 174: Grade Predictor shows a tab for every subject (a dropped plus
   assert.ok(!/slice\(0,\s*\d+\)/.test(uiJs), 'the Predictor must not cap the number of subject tabs');
 });
 
+runTest('Test 175: Liquid Glass task rows are one glass surface each, never stacked translucent fills, with primary ink', () => {
+  const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-task-rows.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('theme-glass-task-rows.css') > manifest.indexOf('theme-glass-surface.css') && manifest.indexOf('theme-glass-task-rows.css') < manifest.indexOf('"src/theme/styles/theme.css"'),
+    'theme-glass-task-rows.css must load after the shared glass recipe and before theme.css');
+  const sels = css.split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
+  assert.ok(sels.every(sel => sel.startsWith('html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])')), 'every rule must be Liquid Glass only');
+  const rule = re => (css.match(new RegExp(re + '\\s*\\{([^}]*)\\}')) || [])[1] || '';
+  assert.ok(/background-color: var\(--cx-gl-fill\)/.test(rule('\\.connectea-row-wrapper')), 'the statistics strip is the glass surface');
+  assert.ok(/background: transparent/.test(rule('\\.connectea-row-wrapper > \\.connectea-panel')) && /backdrop-filter: none/.test(rule('\\.connectea-row-wrapper > \\.connectea-panel')), 'the panel inside the strip must be clear');
+  assert.ok(/background-color: var\(--cx-gl-fill\)/.test(rule('\\.cvr-c-task__achievement')), 'the achievement column is one glass block');
+  assert.ok(/background: transparent/.test(rule(':is\\(\\.cvr-c-task__marks, \\.cvr-c-task__mark\\)')), 'marks must not add a second fill');
+  assert.ok(/\.cvr-c-task__mark \*\s*\)\s*\{\s*color: var\(--cx-text-primary/.test(css), 'text on the glass task-row surfaces must use the primary ink');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
