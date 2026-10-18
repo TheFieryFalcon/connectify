@@ -76,10 +76,11 @@ jobs:
           path: connectify-${{ steps.meta.outputs.version }}.zip
 
       - name: Upload to Chrome Web Store
-        uses: mnao305/chrome-extension-upload@v5.0.0
+        uses: mnao305/chrome-extension-upload@v7.0.0
         with:
           file-path: connectify-${{ steps.meta.outputs.version }}.zip
           extension-id: ${{ secrets.CWS_EXTENSION_ID || 'cmdpfgdabplmlflhechpifkonkjaiohm' }}
+          publisher-id: ${{ vars.CWS_PUBLISHER_ID || secrets.CWS_PUBLISHER_ID }}
           client-id: ${{ secrets.CWS_CLIENT_ID }}
           client-secret: ${{ secrets.CWS_CLIENT_SECRET }}
           refresh-token: ${{ secrets.CWS_REFRESH_TOKEN }}
