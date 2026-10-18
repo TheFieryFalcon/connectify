@@ -46,7 +46,7 @@
       let missingPanelCount = 0;
       taskRows.forEach(row => {
         const isOverall = !row.closest('.cvr-c-tasks');
-        const readMark = window.ConnectifyCohortView?.readMark;
+        const readMark = window.ConnectifyCohortRows?.readMark || window.ConnectifyCohortView?.readMark;
         const mark = typeof readMark === 'function' ? readMark(row) : undefined;
         const isMarked = Number.isFinite(mark);
 
@@ -142,21 +142,38 @@
     }
   }
 
+  // A component counts as missing only if it is still missing after the cohort pass has had a chance to run: right
+  // after an accordion opens or Connect re-renders rows, the pass (debounced, muted during animations) has not drawn
+  // the new rows' panels yet, and reporting then was a false positive
+  const CONFIRM_DELAY_MS = 3000;
+  let confirmTimer = null;
+
+  const isBusy = () => Boolean(window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding || document.hidden);
+
+  function clearNotice() {
+    if (window.ConnectifyNotifications?.dismiss) window.ConnectifyNotifications.dismiss(HEALTH_NOTIFICATION_ID);
+  }
+
   /**
-   * Performs a sweep of the DOM and prompts or clears accordingly.
+   * Performs a sweep of the DOM; a miss is confirmed by a second sweep after a cohort pass before prompting.
    */
   function sweep() {
-    // Only sweep on actual Connect pages with content
+    // Only sweep on actual Connect pages with content, and never mid-expansion
     if (!document.body || (!document.querySelector('.eds-c-tile') && !document.querySelector('.cvr-c-task') && !document.querySelector('.cvr-c-overview'))) {
       return;
     }
+    if (isBusy()) { scheduleSweep(1500); return; }
 
-    const missing = inspectDOM();
-    if (missing.length > 0) {
-      promptUser(missing);
-    } else if (window.ConnectifyNotifications?.dismiss) {
-      window.ConnectifyNotifications.dismiss(HEALTH_NOTIFICATION_ID);
-    }
+    if (inspectDOM().length === 0) { clearTimeout(confirmTimer); confirmTimer = null; clearNotice(); return; }
+    if (confirmTimer) return;
+    window.ConnectifyCohort?.schedule?.(true);
+    confirmTimer = setTimeout(() => {
+      confirmTimer = null;
+      if (isBusy()) { scheduleSweep(1500); return; }
+      const missing = inspectDOM();
+      if (missing.length > 0) promptUser(missing);
+      else clearNotice();
+    }, CONFIRM_DELAY_MS);
   }
 
   function scheduleSweep(delay = 1200) {

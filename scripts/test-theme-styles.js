@@ -2077,7 +2077,8 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         // element fills and blurs; a fill above a 12% tint inside another surface stacks into an opaque slab, a blur
         // under a painted ancestor only sees that ancestor, a translucent outer surface needs its own blur, and
         // full-width bars stay square. Controls, chips, avatars, active states, overlays and Connectify UI are exempt.
-        if (['liquid-glass', 'liquid-glass-clear'].includes(tid) && rect.width >= 80 && rect.height >= 20 &&
+        const isGlassTheme = ['liquid-glass', 'liquid-glass-clear'].includes(tid);
+        if (isDark && rect.width >= 80 && rect.height >= 20 &&
             !['img', 'video', 'canvas', 'svg', 'button', 'input', 'select', 'textarea', 'a'].includes(tag) &&
             !el.closest?.('button, a, [role="button"], [role="option"], mat-chip, .mat-chip, [class*="badge"], [class*="avatar"], .mat-progress-bar, .cdk-overlay-container, #connectify-sidebar, #connectify-sidebar-handle, #connectify-notifications-container, #connectea-theme-menu, #cx-customizer-modal, .connectea-outcome-bar') &&
             !el.closest?.('.eds-s-is-active, .v-selected, [aria-selected="true"], .mat-calendar-body-selected') && !el.matches?.(':hover') &&
@@ -2092,21 +2093,24 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
             while (anc && anc !== document.body && anc !== document.documentElement && !(paintOf(anc).fill || paintOf(anc).blur)) anc = anc.parentElement;
             const inSurface = Boolean(anc && anc !== document.body && anc !== document.documentElement);
             const ancName = inSurface ? `${anc.tagName.toLowerCase()}${anc.classList?.[0] ? '.' + anc.classList[0] : ''}` : '';
-            if (inSurface && own.fill && own.bg.a > 0.12) {
+            // Solid themes: a nested fill is only visible (a box behind text) when its colour differs from the surface's
+            const ancBg = inSurface ? parseRgb(getComputedStyle(anc).backgroundColor) : null;
+            const differs = ancBg && (Math.abs(own.bg.r - ancBg.r) > 4 || Math.abs(own.bg.g - ancBg.g) > 4 || Math.abs(own.bg.b - ancBg.b) > 4 || Math.abs(own.bg.a - ancBg.a) > 0.05);
+            if (inSurface && own.fill && own.bg.a > 0.12 && (isGlassTheme || differs)) {
               issues.push({ category: 'STYLE', type: 'NESTED_SURFACE_FILL', severity: 'HIGH', selector,
                 details: `Fill ${style.backgroundColor} inside the painted ${ancName}: inner blocks must be clear (or a tint <= 12%)` });
             }
-            if (inSurface && own.blur) {
+            if (isGlassTheme && inSurface && own.blur) {
               issues.push({ category: 'STYLE', type: 'NESTED_BACKDROP_BLUR', severity: 'HIGH', selector,
                 details: `backdrop-filter under the painted ${ancName}: only the outermost surface blurs` });
             }
-            if (!inSurface && own.fill && own.bg.a < 0.95 && !own.blur) {
+            if (isGlassTheme && !inSurface && own.fill && own.bg.a < 0.95 && !own.blur) {
               issues.push({ category: 'STYLE', type: 'GLASS_WITHOUT_BLUR', severity: 'HIGH', selector,
                 details: `Translucent surface ${style.backgroundColor} without backdrop-filter` });
             }
             const radius = parseFloat(style.borderTopLeftRadius) || 0;
             const parentWidth = el.parentElement?.getBoundingClientRect().width || window.innerWidth;
-            if (radius >= 10 && rect.height <= 90 && rect.width >= parentWidth * 0.9 && rect.width >= window.innerWidth * 0.5) {
+            if (isGlassTheme && radius >= 10 && rect.height <= 90 && rect.width >= parentWidth * 0.9 && rect.width >= window.innerWidth * 0.5) {
               issues.push({ category: 'STYLE', type: 'ROUNDED_FULL_WIDTH_BAR', severity: 'HIGH', selector,
                 details: `Full-width bar (${Math.round(rect.width)}x${Math.round(rect.height)}) rounded ${style.borderTopLeftRadius}: bars stay square` });
             }

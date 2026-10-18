@@ -8057,7 +8057,8 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   assert.ok(read('theme.js').includes('cnt-discussion-item-view'), 'discussion views must be detected as reading views');
   // Service bar "+": theme colours, outranking Connect's !important class colour
   assert.ok(read('styles/theme-action-buttons.css').includes(':is(#cx-specificity-anchor, .c-control-panel-button) .mat-icon-button--size-sm {\n  background-color: var(--cx-button-primary-bg'), 'the + circle must use the primary button colour');
-  // Nesting stylesheet: registered, glass only, outer surfaces blur and inner ones clear
+  // Nesting: inner layers are clear in every dark theme (theme-surface-nesting.css); blur placement is glass only
+  const surfaceNesting = read('styles/theme-surface-nesting.css');
   const nesting = read('styles/theme-glass-nesting.css');
   const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('theme-glass-nesting.css') > manifest.indexOf('theme-glass-task-rows.css') && manifest.indexOf('theme-glass-nesting.css') < manifest.indexOf('"src/theme/styles/theme.css"'), 'theme-glass-nesting.css must be registered before theme.css');
@@ -8066,8 +8067,12 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   assert.ok(/:is\(#cx-specificity-anchor, \.v-app\.headerui, \.v-app\.headerui > \.v-ui\) \{\s*background-color: transparent/.test(nesting), 'the header canvas must be clear (outranking the #main-content canvas rule) so the top bars blur the page');
   assert.ok(/\.cvr-c-thori-pnl\.cvr-c-primary-navigation[\s\S]*?backdrop-filter: var\(--cx-gl-blur\)/.test(nesting), 'the top navigation bar must blur');
   assert.ok(/:is\(#cx-specificity-anchor, \.cvr-c-service-bar__container\) \{[^}]*backdrop-filter: none/.test(nesting), 'the service bar container must not blur (it would trap the bar and menu blur), outranking the id-weighted glass rule');
-  assert.ok(/table :is\(\s*#cx-specificity-anchor, thead, tbody, tfoot, tr:not\(:hover\), th, td\s*\)/.test(nesting), 'table rows and cells must be clear inside the table surface');
-  assert.ok(nesting.includes('.cvr-c-service-menu__item:not(.eds-s-is-active):not(.v-selected)'), 'menu items are clear except the active one');
+  assert.ok(/table :is\(\s*#cx-specificity-anchor, thead, tbody, tfoot, tr:not\(:hover\), th, td\s*\)/.test(surfaceNesting), 'table rows and cells must be clear inside the table surface');
+  assert.ok(surfaceNesting.includes('.cvr-c-service-menu__item:not(.eds-s-is-active):not(.v-selected)'), 'menu items are clear except the active one');
+  const surfaceSels = surfaceNesting.replace(/\/\*[\s\S]*?\*\//g, '').split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
+  assert.ok(surfaceSels.length >= 10 && surfaceSels.every(sel => sel.startsWith('html.connectea-dark[data-connectea-theme]')), 'inner-layer clearing applies to every dark theme with the glass hook weight');
+  assert.ok(manifest.indexOf('theme-surface-nesting.css') > -1 && manifest.indexOf('theme-surface-nesting.css') < manifest.indexOf('theme-glass-nesting.css'), 'theme-surface-nesting.css must be registered before the glass nesting');
+  assert.ok(!/background-color: transparent/.test(nesting.replace(/headerui[\s\S]*?\}/, '').replace(/service-bar__container\) \{[\s\S]*?\}/, '')), 'clearing rules live in theme-surface-nesting.css, not the glass file');
 });
 
 runTest('Test 180: The theme audit enforces one surface per block, square bars and blur on glass surfaces', () => {
@@ -8076,7 +8081,8 @@ runTest('Test 180: The theme audit enforces one surface per block, square bars a
     assert.ok(audit.includes(`type: '${type}'`), `the audit must report ${type}`);
   }
   assert.ok(audit.includes("own.bg.a > 0.12"), 'tints up to 12% are allowed inside a surface');
-  assert.ok(audit.includes("['liquid-glass', 'liquid-glass-clear'].includes(tid) && rect.width >= 80"), 'the surface checks run for both Liquid Glass presets');
+  assert.ok(audit.includes("const isGlassTheme = ['liquid-glass', 'liquid-glass-clear'].includes(tid);") && audit.includes('if (isDark && rect.width >= 80'), 'the surface checks run in every dark theme (blur and bar checks in Liquid Glass only)');
+  assert.ok(audit.includes('(isGlassTheme || differs)'), 'solid themes flag a nested fill only when its colour differs from the surface (a visible box behind text)');
   const crawled = fs.readFileSync(path.join(BASE_DIR, 'crawled_urls.txt'), 'utf8');
   assert.ok(crawled.includes('DomainSchoolClass:6331155491'), 'the crawl list covers a class with discussions (Philosophy)');
 });
@@ -8096,6 +8102,41 @@ runTest('Test 181: The customizer colour picker is a popover beside the token be
   const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-color-picker.css'), 'utf8');
   const rule = (css.match(/\.cx-color-picker-box\.cx-picker-popover \{([^}]*)\}/) || [])[1] || '';
   assert.ok(/position: fixed;/.test(rule) && /background-color: var\(--cx-canvas-bg, #12171f\);/.test(rule) && /background-image: linear-gradient\(var\(--cx-surface-elevated/.test(rule), 'the popover is fixed and always solid like the dialog');
+});
+
+runTest('Test 182: The DOM sweeper confirms a missing component after a cohort pass before warning', () => {
+  delete window.ConnectifyDomSweeper;
+  const shows = []; let scheduled = 0;
+  const origNotes = window.ConnectifyNotifications, origCohort = window.ConnectifyCohort, origRows = window.ConnectifyCohortRows;
+  const origTimeout = global.setTimeout; const timers = [];
+  const origQSA = document.querySelectorAll; document.querySelectorAll = sel => document.body.querySelectorAll(sel);
+  window.ConnectifyNotifications = { show: o => shows.push(o), dismiss: () => {} };
+  window.ConnectifyCohort = { schedule: () => { scheduled++; } };
+  window.ConnectifyCohortRows = { readMark: () => 80 };
+  const tile = document.createElement('div'); tile.className = 'eds-c-tile';
+  const row = document.createElement('div'); row.className = 'cvr-c-task';
+  tile.appendChild(row); document.body.appendChild(tile);
+  for (const id of ['connectify-sidebar', 'connectify-sidebar-handle']) { const el = document.createElement('div'); el.id = id; document.body.appendChild(el); }
+  document.documentElement.dataset.connectifyMainBridge = 'ready';
+  try {
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'dom-sweeper.js'), 'utf8'));
+    global.setTimeout = (fn, ms) => { timers.push({ fn, ms }); return timers.length; };
+    window.ConnectifyDomSweeper.sweep();
+    assert.strictEqual(shows.length, 0, 'a first miss must not warn');
+    assert.strictEqual(scheduled, 1, 'a first miss asks the cohort pass to run');
+    const confirm = timers.find(t => t.ms === 3000);
+    assert.ok(confirm, 'a confirmation sweep is scheduled');
+    const panel = document.createElement('section'); panel.className = 'connectea-panel'; row.appendChild(panel);
+    confirm.fn();
+    assert.strictEqual(shows.length, 0, 'a panel drawn by the pass clears the suspected miss');
+    const src = fs.readFileSync(path.join(BASE_DIR, 'src/system/dom-sweeper.js'), 'utf8');
+    assert.ok(src.includes('window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding'), 'no sweep while accordions animate or Expand All runs');
+    assert.ok(src.includes('window.ConnectifyCohortRows?.readMark'), 'marks are read through the current row readers');
+  } finally {
+    global.setTimeout = origTimeout; document.querySelectorAll = origQSA;
+    window.ConnectifyNotifications = origNotes; window.ConnectifyCohort = origCohort; window.ConnectifyCohortRows = origRows;
+    tile.remove();
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

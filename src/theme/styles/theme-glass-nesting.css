@@ -19,11 +19,6 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;
 }
 
-/* The active top tab: its inner block carries the highlight, the item around it stays clear */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-primary-navigation__links .cvr-js-greedy__item.eds-s-is-active {
-  background-color: transparent !important;
-}
-
 /* Service bar: the fixed container is only a positioner; the bar and the side menu (which overflows the
    container) are the two surfaces, so each blurs the page itself. The glass blur rule (theme-tokens.css) lists
    #connectify-sidebar, so the container needs the unused id to drop its blur */
@@ -41,34 +36,6 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .cvr-c-service-menu__wrapper, .cvr-c-service-menu__list,
-  .cvr-c-service-menu__item:not(.eds-s-is-active):not(.v-selected)
-) {
-  background-color: transparent !important;
-}
-
-/* Lists and activity feeds inside a card or tile are clear (Reports lists, User Activity and its rows) */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.mat-card, .eds-c-tile, .cvr-c-tile, .v-panel) :is(
-  .mat-list-base, .cvr-c-recent-event-activity, .eds-c-selection-list, .eds-o-list__item
-) {
-  background-color: transparent !important;
-}
-
-/* Tables: the table is the surface; rows and cells (each given the surface fill by the dark table rules, whose
-   :is() lists outrank a plain selector) stay clear so three translucent layers never stack. Hovered rows keep
-   their highlight. */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) table :is(
-  #cx-specificity-anchor, thead, tbody, tfoot, tr:not(:hover), th, td
-) {
-  background-color: transparent !important;
-}
-
-/* A table inside a card or tile (Summary calendar) is clear too: the card is the surface */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.mat-card, .eds-c-card, .eds-c-tile, .cvr-c-tile, .v-panel) :is(#cx-specificity-anchor, table) {
-  background-color: transparent !important;
-}
-
 /* Accordions (Learners, Notifications): the outermost accordion is the surface and blurs; its panels, their
    content and bodies, nested accordions, tables and paginators inside stay clear */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(mat-accordion, .mat-accordion):not(:is(mat-accordion, .mat-accordion, .mat-card, .eds-c-tile) *) {
@@ -80,21 +47,8 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   #cx-specificity-anchor, mat-expansion-panel, .mat-expansion-panel, .mat-expansion-panel-content, .mat-expansion-panel-body,
   mat-accordion, .mat-accordion, table, .connect-paginator-container, mat-paginator
 ) {
-  background-color: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-}
-
-/* Feed notice cards: the inner mat-card is the glass surface; the host only keeps its rounded shadow */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-stream-notice-card {
-  background-color: transparent !important;
-}
-
-/* Right-hand category drawer: the menu paints, its wrapper and rows stay clear (the active row keeps its mark) */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .cvr-c-category-menu__wrapper, .cvr-c-category-menu :is(.v-label, .v-link, .eds-u-interactive):not(.eds-s-is-active):not(.v-selected)
-) {
-  background-color: transparent !important;
 }
 
 /* Outermost tables, paginator bars and the Classes summary on the wallpaper blur like every glass surface */
@@ -106,14 +60,8 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;
 }
 
-/* Form fieldsets inside a card (Profile) are clear */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.mat-card, .eds-c-tile, .v-panel) :is(#cx-specificity-anchor, fieldset.c-floating-form-field) {
-  background-color: transparent !important;
-}
-
-/* Vaadin popup panels are one surface: their bars and labels stay clear and do not blur again */
+/* Vaadin popup panels are one surface: their bars and labels do not blur again (clearing: theme-surface-nesting.css) */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-popupview-popup :is(#cx-specificity-anchor, .v-csslayout, .v-label) {
-  background-color: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }

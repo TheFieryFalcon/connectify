@@ -175,15 +175,21 @@
   color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
+/* Menu rows show their menu's own surface (the category drawer uses the elevated surface, not the nav colour), so
+   no row draws a box behind its label; hover and active states below still highlight */
 .connectea-dark :is(
   .cvr-c-service-menu__item,
   .cvr-c-primary-menu__item,
-  .cvr-c-category-menu .eds-u-interactive,
-  .cvr-c-primary-navigation__button--avatar
+  .cvr-c-category-menu .eds-u-interactive
 ) {
-  background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
+  background-color: transparent !important;
   color: var(--cx-nav-text, #cbd5e1) !important;
   transition: background-color 0.15s ease;
+}
+
+.connectea-dark .cvr-c-primary-navigation__button--avatar {
+  background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
 .connectea-dark :is(

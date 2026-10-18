@@ -70,12 +70,14 @@
   function jumpToSubject(card) {
     if (!card) return;
     expandSubjectCard(card);
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
+    // Scroll and highlight in the next frame: scrolling straight after the expand click (and forcing a reflow to
+    // restart the pulse) laid the freshly expanded card out synchronously, a ~60ms hitch on the click. The pulse
+    // restarts by re-adding its class a frame after removing it
     card.classList.remove('cx-card-jump-highlight');
-    // Force DOM reflow to restart CSS keyframe animation
-    void card.offsetWidth;
-    card.classList.add('cx-card-jump-highlight');
+    requestAnimationFrame(() => {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      requestAnimationFrame(() => card.classList.add('cx-card-jump-highlight'));
+    });
 
     clearTimeout(card._cxJumpRefresh);
     card._cxJumpRefresh = setTimeout(() => whenIdle(() => refreshJumpedSubject(card)), JUMP_REFRESH_DELAY);
