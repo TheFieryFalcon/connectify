@@ -77,6 +77,7 @@ This document details user-facing features 11 through 20, covering Target ATAR a
   - Section 6: Regression Verification (centering, first-assessment outcome rules, card scraping, predictor interactivity).
   - Theme audit (`scripts/test-theme-styles.js`): applies themes through `connectify-request-theme` (the registry is isolated-world), clears focus before each capture, composites contrast over the theme's own `--cx-canvas-bg`, and counts unblurred one-axis inset shadows (accent bars) as separators.
   - Glass surface structure (Test 180): `NESTED_SURFACE_FILL` (a fill > 12% inside another surface), `NESTED_BACKDROP_BLUR`, `GLASS_WITHOUT_BLUR` (translucent outer surface) and `ROUNDED_FULL_WIDTH_BAR`, both glass presets; controls, chips, avatars, active states, overlays and Connectify UI exempt.
+  - Contrast coverage and tool data (Test 185): SVG `<text>`/`<tspan>` (chart labels) are measured by fill against the CSS background behind the `<svg>` plus SVG shapes painted under them; Connectify UI on page views (cohort panels, type selects, outcome meters, theme menu) skips parity but is contrast-checked; `TOOL_SUBJECTS_MISSING` (once per drawer tool) flags Predictor tabs, Weakness checkboxes or Year in Progress chips missing a subject with marked tasks, listed under "Tool Data Completeness" in the report.
   - Spacing parity (Test 160): class/id containers with 0px padding/margin in `connect_css/` (the Default theme) must not get non-zero spacing from any theme or custom theme stylesheet.
 
 ---

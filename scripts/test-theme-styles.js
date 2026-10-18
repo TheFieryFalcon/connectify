@@ -1176,6 +1176,44 @@ async function activateSidebarView(page, currentView, delay = 1250) {
  * Stamps all DOM elements with persistent audit IDs and captures the baseline
  * state from the Connect Native Theme (untouched native styling).
  */
+/**
+ * Data completeness for the drawer tools: every subject with a marked task on the page (a row with a cohort
+ * panel) must appear in the Predictor's subject tabs, the Weakness Analyzer's checkboxes and the Year in Progress
+ * chips. Catches a partially filled subject cache (tools listing only the subjects scraped first). Theme
+ * independent, so it runs once per tool. Returns TOOL_SUBJECTS_MISSING issues.
+ */
+async function auditToolSubjects(page, toolId) {
+  return page.evaluate((id) => {
+    const lists = {
+      'connectify-predictor-toggle': { panel: '#connectify-predictor', items: '.cx-pred-subtabs button', name: 'Predictor' },
+      'connectify-weakness-toggle': { panel: '#connectify-weakness', items: '#cx-weakness-checkboxes label', name: 'Weakness Analyzer' },
+      'connectify-progress-toggle': { panel: '#connectify-progress', items: 'button', name: 'Year in Progress' }
+    };
+    const cfg = lists[id];
+    const panel = cfg && document.querySelector(cfg.panel);
+    if (!panel) return [];
+    // "Chemistry ATAR Year 11 - Semester 2", "Chemistry Year 11" and "Chemistry" all reduce to "chemistry"
+    const key = s => String(s || '').toLowerCase().replace(/\s*[-–—]\s*semester\s*[12].*$/, '')
+      .replace(/\b(atar|general|year\s*\d+)\b/g, ' ').replace(/[^a-z0-9& ]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const listed = new Set(Array.from(panel.querySelectorAll(cfg.items)).map(e => key(e.textContent)).filter(Boolean));
+    if (!listed.size) return [];
+    const expected = new Map();
+    for (const tile of document.querySelectorAll('.eds-c-tile')) {
+      const title = tile.querySelector('.eds-c-tile__title')?.textContent?.trim();
+      if (title && tile.querySelector('.cvr-c-tasks .cvr-c-task .connectea-panel')) expected.set(key(title), title.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, ''));
+    }
+    const missing = Array.from(expected.entries()).filter(([k]) => !listed.has(k)).map(([, name]) => name);
+    if (!missing.length) return [];
+    return [{
+      category: 'DATA',
+      type: 'TOOL_SUBJECTS_MISSING',
+      severity: 'CRITICAL',
+      selector: cfg.panel,
+      details: `${cfg.name} lists ${listed.size} subject(s) but ${missing.length} subject(s) with marked tasks on the page are missing: ${missing.join(', ')}`
+    }];
+  }, toolId).catch(() => []);
+}
+
 async function captureNativeBaseline(page, options = {}) {
   await clearFocus(page);
   // Ensure Connect Native Theme is active (no dark mode, no theme tokens)
@@ -1621,6 +1659,99 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
     const currentVisibleIds = new Set();
     let currentVisibleCount = 0;
 
+    // What sits behind SVG text: the CSS background behind the <svg>, then every SVG shape painted before the text
+    // (document order) whose fill covers the text's centre. Chart backdrops are often one of the two.
+    function svgBackdrop(textEl, rect) {
+      const svg = textEl.ownerSVGElement || textEl.closest?.('svg');
+      let bg = getEffectiveBg(svg || textEl.parentElement || textEl);
+      if (!svg || typeof svg.querySelectorAll !== 'function') return bg;
+      const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+      for (const shape of svg.querySelectorAll('rect, circle, ellipse, polygon, path')) {
+        if (!(shape.compareDocumentPosition?.(textEl) & 4)) continue; // painted after the text
+        const st = window.getComputedStyle(shape);
+        if (st.display === 'none' || st.visibility === 'hidden') continue;
+        const fill = parseRgb(st.fill);
+        if (!fill) continue; // none or a gradient
+        const a = (fill.a ?? 1) * parseFloat(st.fillOpacity || 1) * parseFloat(st.opacity || 1);
+        if (a < 0.05) continue;
+        let inside = false;
+        try {
+          const ctm = shape.getScreenCTM?.();
+          if (ctm && typeof shape.isPointInFill === 'function') inside = shape.isPointInFill(new DOMPoint(cx, cy).matrixTransform(ctm.inverse()));
+        } catch {}
+        if (inside) bg = blendRgb({ ...fill, a }, bg);
+      }
+      return bg;
+    }
+
+    // WCAG text contrast for one element with direct text. HTML text uses its colour on the effective CSS
+    // background; SVG <text>/<tspan> (chart labels) uses its fill on svgBackdrop().
+    function checkTextContrast(el, style, rect, selector, text) {
+      const hasDirectText = Array.from(el.childNodes || []).some(n => n.nodeType === 3 && n.textContent?.trim().length > 0);
+      if (!hasDirectText) return;
+      const tag = (el.tagName || '').toLowerCase();
+      const inSvg = Boolean(el.ownerSVGElement || el.closest?.('svg'));
+      if (inSvg && tag !== 'text' && tag !== 'tspan') return;
+      let elColor, effectiveBg;
+      if (inSvg) {
+        const fill = parseRgb(style.fill);
+        if (!fill) return;
+        elColor = { ...fill, a: (fill.a ?? 1) * parseFloat(style.fillOpacity || 1) * parseFloat(style.opacity || 1) };
+        effectiveBg = svgBackdrop(el, rect);
+      } else {
+        elColor = parseRgb(style.color);
+        effectiveBg = getEffectiveBg(el);
+      }
+      if (!elColor || !effectiveBg) return;
+      const alpha = elColor.a !== undefined ? elColor.a : 1.0;
+      const compColor = {
+        r: Math.round(elColor.r * alpha + effectiveBg.r * (1.0 - alpha)),
+        g: Math.round(elColor.g * alpha + effectiveBg.g * (1.0 - alpha)),
+        b: Math.round(elColor.b * alpha + effectiveBg.b * (1.0 - alpha)),
+        a: 1.0
+      };
+      const cr = getContrast(compColor, effectiveBg);
+      const fontSize = parseFloat(style.fontSize) || 14;
+      const isBold = normalizeWeight(style.fontWeight) >= 600;
+      const isLarge = fontSize >= 18 || (fontSize >= 14 && isBold);
+      const minCr = isLarge ? 3.0 : 4.5;
+      const isUnadaptedPurple = isDark && elColor.r > 100 && elColor.r < 150 && elColor.g < 80 && elColor.b < 120;
+      const effBgLum = getLuminance(effectiveBg.r, effectiveBg.g, effectiveBg.b);
+      const isUnadaptedDarkOnDark = isDark && effBgLum < 0.15 && (compColor.r < 95 && compColor.g < 95 && compColor.b < 95);
+      const what = inSvg ? 'SVG text' : 'text';
+      const colourName = inSvg ? `fill ${style.fill}` : `color: ${style.color}`;
+
+      if (cr < 3.0 || (isUnadaptedPurple && cr < 4.5) || isUnadaptedDarkOnDark) {
+        issues.push({
+          category: 'STYLE',
+          type: 'CRITICAL_CONTRAST_VIOLATION',
+          severity: 'CRITICAL',
+          selector,
+          details: isUnadaptedPurple
+            ? `Illegible unadapted purple ${what} ${colourName} on dark background (contrast ${cr.toFixed(2)}:1)`
+            : (isUnadaptedDarkOnDark
+              ? `Illegible unadapted dark ${what} ${colourName} on dark background (contrast ${cr.toFixed(2)}:1)`
+              : `Illegible ${what} contrast ratio ${cr.toFixed(2)}:1 (${colourName})`),
+          contrast: cr.toFixed(2),
+          textSnippet: text
+        });
+      } else if (cr < minCr) {
+        issues.push({
+          category: 'STYLE',
+          type: 'LOW_CONTRAST_WARNING',
+          severity: 'WARNING',
+          selector,
+          details: `Sub-standard ${what} contrast ratio ${cr.toFixed(2)}:1 < ${minCr}:1`,
+          contrast: cr.toFixed(2),
+          textSnippet: text
+        });
+      }
+    }
+
+    // Connectify's own UI on page views (cohort panels, type selects, outcome meters, compound progress, theme
+    // menu) has no native baseline to compare with, so it skips the parity checks but is still contrast-checked
+    const ownUiElements = [];
+
     for (let i = 0; i < currentElements.length; i++) {
       const el = currentElements[i];
       const auditId = el.dataset?.cxAuditId || ('cx_aud_' + i);
@@ -1633,7 +1764,13 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         if (!inSidebar) continue;
         if (el.id === 'connectea-theme-toggle' || (typeof el.closest === 'function' && el.closest('#connectea-theme-toggle'))) continue;
       } else {
-        if (el.closest?.('#cx-expand-progress, #cx-expand-btn, [id*="cx-expand-"], [class*="cx-expand-"], mat-progress-bar, .mat-progress-bar, mat-spinner, .mat-spinner, mat-progress-spinner, #connectea-theme-toggle, #connectea-theme-menu, #connectify-sidebar, #connectify-sidebar-handle, [class*="connectify-"], [id*="connectify-"], .connectify-cohort-panel, .cx-compound-progress-container, .cx-workspace-panel, .cx-refresh-btn, .highcharts-container, svg.highcharts-root, .connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-type-select, .connectea-outcome-bar, .connectea-subject-controls')) continue;
+        // Progress pills, spinners and Connect's own Highcharts are transient or native: not audited
+        if (el.closest?.('#cx-expand-progress, #cx-expand-btn, [id*="cx-expand-"], [class*="cx-expand-"], mat-progress-bar, .mat-progress-bar, mat-spinner, .mat-spinner, mat-progress-spinner, .highcharts-container, svg.highcharts-root, #connectify-sidebar, #connectify-sidebar-handle')) continue;
+        // Connectify UI: contrast only (the drawer is audited in full in sidebar scope)
+        if (el.closest?.('#connectea-theme-toggle, #connectea-theme-menu, [class*="connectify-"], [id*="connectify-"], .connectify-cohort-panel, .cx-compound-progress-container, .cx-workspace-panel, .cx-refresh-btn, .connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-type-select, .connectea-outcome-bar, .connectea-subject-controls')) {
+          ownUiElements.push(el);
+          continue;
+        }
       }
 
       const style = window.getComputedStyle(el);
@@ -2145,51 +2282,8 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           }
         }
 
-        // D. Contrast Checks (Including unadapted native plum/purple #7f375c and dark-on-dark text)
-        const hasDirectText = Array.from(el.childNodes || []).some(n => n.nodeType === 3 && n.textContent?.trim().length > 0);
-        if (hasDirectText && elColor && effectiveBg && !isSvg && !el.closest?.('svg')) {
-          const alpha = elColor.a !== undefined ? elColor.a : 1.0;
-          const compColor = {
-            r: Math.round(elColor.r * alpha + effectiveBg.r * (1.0 - alpha)),
-            g: Math.round(elColor.g * alpha + effectiveBg.g * (1.0 - alpha)),
-            b: Math.round(elColor.b * alpha + effectiveBg.b * (1.0 - alpha)),
-            a: 1.0
-          };
-          const cr = getContrast(compColor, effectiveBg);
-          const fontSize = parseFloat(style.fontSize) || 14;
-          const isBold = normalizeWeight(style.fontWeight) >= 600;
-          const isLarge = fontSize >= 18 || (fontSize >= 14 && isBold);
-          const minCr = isLarge ? 3.0 : 4.5;
-          const isUnadaptedPurple = isDark && elColor.r > 100 && elColor.r < 150 && elColor.g < 80 && elColor.b < 120;
-          const effBgLum = getLuminance(effectiveBg.r, effectiveBg.g, effectiveBg.b);
-          const isUnadaptedDarkOnDark = isDark && effBgLum < 0.15 && (compColor.r < 95 && compColor.g < 95 && compColor.b < 95);
-
-          if (cr < 3.0 || (isUnadaptedPurple && cr < 4.5) || isUnadaptedDarkOnDark) {
-            issues.push({
-              category: 'STYLE',
-              type: 'CRITICAL_CONTRAST_VIOLATION',
-              severity: 'CRITICAL',
-              selector,
-              details: isUnadaptedPurple
-                ? `Illegible unadapted purple text ${style.color} on dark background (contrast ${cr.toFixed(2)}:1)`
-                : (isUnadaptedDarkOnDark
-                  ? `Illegible unadapted dark text ${style.color} on dark background (contrast ${cr.toFixed(2)}:1)`
-                  : `Illegible contrast ratio ${cr.toFixed(2)}:1 (color: ${style.color})`),
-              contrast: cr.toFixed(2),
-              textSnippet: text
-            });
-          } else if (cr < minCr) {
-            issues.push({
-              category: 'STYLE',
-              type: 'LOW_CONTRAST_WARNING',
-              severity: 'WARNING',
-              selector,
-              details: `Sub-standard contrast ratio ${cr.toFixed(2)}:1 < ${minCr}:1`,
-              contrast: cr.toFixed(2),
-              textSnippet: text
-            });
-          }
-        }
+        // D. Contrast Checks (unadapted native plum/purple #7f375c, dark-on-dark text, SVG chart labels)
+        checkTextContrast(el, style, rect, selector, text);
 
         // E. Adjacent Container Contrast Standard (<= 1.5:1)
         if (isDark && elBg && elBg.a > 0.5 && el.parentElement && !isSvg && !el.closest?.('svg')) {
@@ -2260,6 +2354,14 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           }
         }
       }
+    }
+
+    for (const el of ownUiElements) {
+      const style = window.getComputedStyle(el);
+      if (style.visibility === 'hidden' || style.display === 'none' || parseFloat(style.opacity) === 0) continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) continue;
+      checkTextContrast(el, style, rect, getSelector(el), (el.innerText || el.textContent || '').slice(0, 30).trim());
     }
 
     // Elements that were visible in native baseline but hidden in theme
@@ -2437,11 +2539,13 @@ async function runThemeAudit(customOptions = {}) {
       }
 
       const seenViewSignatures = new Map();
+      const checkedTools = new Set();
 
       // Audit each view / content state under targetUrl
       for (let vIdx = 0; vIdx < viewsToAudit.length; vIdx++) {
         const currentView = viewsToAudit[vIdx];
         const isSidebar = currentView.auditScope === 'sidebar';
+        let dataIssues = [];
         console.log(`\n  ┌───────────────────────────────────────────────────────────────`);
         console.log(`  │ [View ${vIdx + 1}/${viewsToAudit.length}] Auditing: ${currentView.title}`);
         console.log(`  │ Scope: ${currentView.auditScope || 'page'} | URL: ${targetUrl}`);
@@ -2454,6 +2558,11 @@ async function runThemeAudit(customOptions = {}) {
             if (!activated) {
               console.warn(`    └─ Could not activate sidebar view "${currentView.title}", skipping.`);
               continue;
+            }
+            if (currentView.toolId && !checkedTools.has(currentView.toolId)) {
+              checkedTools.add(currentView.toolId);
+              dataIssues = await auditToolSubjects(page, currentView.toolId);
+              for (const d of dataIssues) console.warn(`    └─ ❌ ${d.type}: ${d.details}`);
             }
           } else {
             // Ensure sidebar is closed during standard page auditing so page parity is preserved
@@ -2599,6 +2708,7 @@ async function runThemeAudit(customOptions = {}) {
             viewTitle: currentView.title,
             auditScope: currentView.auditScope || 'page',
             baselineVisibleCount: baseline.visibleCount,
+            dataIssues,
             themes: viewThemeResults
           };
 
@@ -2710,6 +2820,12 @@ async function runThemeAudit(customOptions = {}) {
     md += `| \`${r.urlDisplay}\` | **${r.themeName}** | ${r.visible} | ${r.pDiff} | ${r.cCrit} | ${r.status} |\n`;
   }
 
+  const dataRows = Object.values(allPageResults).flatMap(v => (v.dataIssues || []).map(d => ({ view: v.viewTitle, ...d })));
+  md += `\n## Tool Data Completeness\n\n`;
+  md += dataRows.length
+    ? dataRows.map(d => `- ❌ **${d.type}** (${d.view}): ${d.details}`).join('\n') + '\n'
+    : `All drawer tools list every subject with marked tasks. ✅\n`;
+
   const mdLines = md.split('\n');
   const finalMd = mdLines.length > 145 ? mdLines.slice(0, 140).join('\n') + '\n\n*Truncated to 150 lines.*' : md;
   fs.writeFileSync(options.outputMd, finalMd, 'utf8');
@@ -2805,6 +2921,7 @@ module.exports = {
   activateNavbarHeading,
   discoverSidebarViews,
   activateSidebarView,
+  auditToolSubjects,
   computeElementsSignature,
   scrollEntirePage
 };

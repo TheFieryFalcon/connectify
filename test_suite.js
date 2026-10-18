@@ -8190,6 +8190,42 @@ runTest('Test 183: Expand All adds every expanded subject to a cache that alread
   }
 });
 
+runTest('Test 185: The theme audit measures SVG chart labels, contrast-checks Connectify UI and finds tools missing subjects', async () => {
+  const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
+  assert.ok(audit.includes('function checkTextContrast(el, style, rect, selector, text)') && audit.includes('checkTextContrast(el, style, rect, selector, text);'), 'every audited element goes through the shared contrast check');
+  assert.ok(!audit.includes("hasDirectText && elColor && effectiveBg && !isSvg && !el.closest?.('svg')"), 'SVG text is no longer skipped by the contrast check');
+  assert.ok(audit.includes('const fill = parseRgb(style.fill);') && audit.includes('effectiveBg = svgBackdrop(el, rect);'), 'SVG text is measured with its fill against what is painted behind it');
+  assert.ok(audit.includes('shape.isPointInFill(new DOMPoint(cx, cy).matrixTransform(ctm.inverse()))'), 'SVG shapes under the label count towards its backdrop');
+  assert.ok(audit.includes('ownUiElements.push(el);') && /for \(const el of ownUiElements\) \{[\s\S]*?checkTextContrast\(/.test(audit), 'Connectify UI on page views skips parity but is contrast-checked');
+  assert.ok(audit.includes("type: 'TOOL_SUBJECTS_MISSING'") && audit.includes('dataIssues = await auditToolSubjects(page, currentView.toolId);'), 'drawer tools are checked for subjects missing from their lists');
+  const { auditToolSubjects } = require(path.join(BASE_DIR, 'scripts/test-theme-styles.js'));
+  assert.strictEqual(typeof auditToolSubjects, 'function', 'auditToolSubjects must be exported');
+
+  // Two subjects with marked tasks on the page, only one in the Weakness Analyzer list
+  const el = (tag, cls, text, id) => { const e = document.createElement(tag); if (cls) e.className = cls; if (id) e.id = id; if (text) e.textContent = text; return e; };
+  const root = el('div');
+  for (const [title, marked] of [['Chemistry ATAR Year 11 - Semester 2', true], ['Physics ATAR Year 11 - Semester 2', true], ['Literature ATAR Year 11 - Semester 2', false]]) {
+    const tile = el('div', 'eds-c-tile'); tile.appendChild(el('div', 'eds-c-tile__title', title));
+    if (marked) { const tasks = el('div', 'cvr-c-tasks'), row = el('div', 'cvr-c-task'); row.appendChild(el('section', 'connectea-panel')); tasks.appendChild(row); tile.appendChild(tasks); }
+    root.appendChild(tile);
+  }
+  const weakness = el('div', '', '', 'connectify-weakness'), boxes = el('div', '', '', 'cx-weakness-checkboxes');
+  boxes.appendChild(el('label', '', 'Chemistry Year 11')); weakness.appendChild(boxes); root.appendChild(weakness);
+  // Queries are scoped to the fixture only while the (synchronous) page function runs: other async tests share
+  // the mock DOM, and earlier tests leave their own Weakness panels in it
+  const page = { evaluate: async (fn, arg) => {
+    const origQSA = document.querySelectorAll, origQS = document.querySelector;
+    document.querySelectorAll = sel => root.querySelectorAll(sel);
+    document.querySelector = sel => root.querySelector(sel);
+    try { return fn(arg); } finally { document.querySelectorAll = origQSA; document.querySelector = origQS; }
+  } };
+  const missing = await auditToolSubjects(page, 'connectify-weakness-toggle');
+  assert.strictEqual(missing.length, 1, 'a subject missing from the tool list is reported');
+  assert.ok(missing[0].type === 'TOOL_SUBJECTS_MISSING' && /Physics ATAR Year 11/.test(missing[0].details) && !/Literature/.test(missing[0].details), 'only subjects with marked tasks are expected');
+  boxes.appendChild(el('label', '', 'Physics Year 11'));
+  assert.strictEqual((await auditToolSubjects(page, 'connectify-weakness-toggle')).length, 0, 'a complete list passes');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
