@@ -2978,8 +2978,8 @@ runTest('Test 110: Silent difference check, out-of-date cache prompt with one-ti
   assert.strictEqual(defineError, null, 'setTaskRow property definition must be re-configurable without throwing TypeError');
   assert.strictEqual(testTask.row, mockRow2, 'Task row must be updated to new row element');
 
-  // 3. collect() stops scrape when valid cache exists and no subjects are stale
-  assert.ok(assessJs.includes('if (!forceRefresh && staleSet.size === 0 && hasCachedSubjects())'), 'collect must check hasCachedSubjects and staleSet');
+  // 3. collect() stops scrape when valid cache exists, no subjects are stale and every expanded card was read (Test 183)
+  assert.ok(assessJs.includes('const refreshAll = forceRefresh || staleSet.size > 0 || !hasCachedSubjects();') && assessJs.includes('cards.filter(needsScrape)'), 'collect must check hasCachedSubjects, staleSet and unread expanded cards');
   assert.ok(assessJs.includes('function hasCachedSubjects()'), 'assessment-data.js must define hasCachedSubjects');
   assert.ok(assessJs.includes('parseCardSubjectTasks'), 'assessment-data.js must separate card task parsing into parseCardSubjectTasks');
 
@@ -5150,7 +5150,7 @@ runTest('Test 134: expandAll performance caching integrity, non-blocking chunked
     'getOrComputeTaskPrediction must use passed allSubjects or empty array instead of triggering inline collect(true)');
 
   // 4. Verify stale-subjects re-scrape at 98% is deferred off critical path
-  assert.ok(assessJs.includes('// Stale subjects are re-scraped off the critical path'),
+  assert.ok(assessJs.includes('// Stale subjects and cards that mounted after the statistics pass are re-scraped off the critical path'),
     'assessment-data.js must defer stale subjects collect to prevent blocking progress pill completion');
 
   // 5. Functional test: verify prediction cache skipping when cache is current
@@ -8136,6 +8136,57 @@ runTest('Test 182: The DOM sweeper confirms a missing component after a cohort p
     global.setTimeout = origTimeout; document.querySelectorAll = origQSA;
     window.ConnectifyNotifications = origNotes; window.ConnectifyCohort = origCohort; window.ConnectifyCohortRows = origRows;
     tile.remove();
+  }
+});
+
+runTest('Test 183: Expand All adds every expanded subject to a cache that already holds one', () => {
+  const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const origQSA = document.querySelectorAll;
+  let titleReads = 0;
+  const makeCard = (name, task, mark) => {
+    const card = new MockElement('div', 'eds-c-tile');
+    const title = new MockElement('div', 'eds-c-tile__title');
+    Object.defineProperty(title, 'textContent', { get: () => { titleReads++; return name; }, configurable: true });
+    card.appendChild(title);
+    const tasks = new MockElement('div', 'cvr-c-tasks');
+    const row = new MockElement('div', 'cvr-c-task');
+    const details = new MockElement('div', 'cvr-c-task__details');
+    for (const text of [task, 'Term 1 Week 4']) { const l = new MockElement('span', 'v-label'); l.textContent = text; details.appendChild(l); }
+    const marks = new MockElement('div', 'cvr-c-task__marks');
+    const mk = new MockElement('div', 'cvr-c-task__mark'); mk.textContent = mark;
+    marks.appendChild(mk); row.appendChild(details); row.appendChild(marks);
+    tasks.appendChild(row); card.appendChild(tasks);
+    return card;
+  };
+  const load = () => { window.__connectifyDataInitialized = false; eval(dataJs); };
+  const names = () => window.ConnectifyData.collect(true).map(s => s.name).sort();
+  try {
+    mockLocalStorage.clear();
+    load();
+    window.ConnectifyCache.subjectsCache.clear();
+    const chem = makeCard('12 Chemistry ATAR - Semester 2', 'Chemistry Test 1', '80%');
+    let cards = [chem];
+    document.querySelectorAll = sel => (sel.includes('eds-c-tile') ? cards : []);
+    // The student opens Chemistry by hand: its per-card update puts it in the cache
+    window.ConnectifyData.scrapeSubjectTasks(chem);
+    assert.deepStrictEqual(names(), ['12 Chemistry ATAR'], 'only the opened subject is cached');
+    // Expand All opens the rest without per-card updates
+    const physics = makeCard('12 Physics ATAR - Semester 2', 'Physics Test 1', '70%');
+    const phil = makeCard('12 Philosophy and Ethics ATAR - Semester 2', 'Essay 1', '75%');
+    cards = [chem, physics, phil];
+    assert.deepStrictEqual(names(), ['12 Chemistry ATAR', '12 Philosophy and Ethics ATAR', '12 Physics ATAR'], 'collect reads expanded cards the cache has not seen');
+    titleReads = 0;
+    names();
+    assert.strictEqual(titleReads, 0, 'a cache that already holds every expanded card is used without re-reading the DOM');
+    // A reload restores the persisted cache: it already holds every subject
+    load();
+    cards = [];
+    assert.deepStrictEqual(names(), ['12 Chemistry ATAR', '12 Philosophy and Ethics ATAR', '12 Physics ATAR'], 'the persisted cache keeps every subject');
+    const src = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/cache-versions.js'), 'utf8');
+    assert.ok(src.includes("RESULTS: 'v8_20261018_results'"), 'partial subject caches from earlier versions are invalidated');
+  } finally {
+    document.querySelectorAll = origQSA;
+    mockLocalStorage.clear();
   }
 });
 

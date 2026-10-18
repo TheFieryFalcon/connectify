@@ -39,12 +39,12 @@
     const getStaleSubjects = (...args) => (window.ConnectifyCache?.getStaleSubjects || cache.getStaleSubjects)(...args);
     const hasCachedSubjects = (...args) => (window.ConnectifyCache?.hasCachedSubjects || cache.hasCachedSubjects)();
 
-    const { scrapeSubjectTasks, formatCollectedSubjects } = window.ConnectifyAssessmentScrape;
+    const { scrapeSubjectTasks, needsScrape, formatCollectedSubjects } = window.ConnectifyAssessmentScrape;
 
   /**
    * Scrape all subject assessment cards currently present in the DOM.
    * Caches results so data persists even when cards are collapsed by the user.
-   * Uses cache and stops DOM scraping if a valid cache exists.
+   * A warm cache skips DOM scraping, except for expanded cards that have never been read.
    *
    * @param {boolean} includePending - Whether to include pending/unmarked assessments
    * @param {boolean} forceRefresh - Whether to force re-scraping from the DOM
@@ -56,18 +56,20 @@
       return formatCollectedSubjects(includePending);
     }
     const staleSet = getStaleSubjects();
-    // Use the cache if there is a cache, no forced refresh, and no subjects are marked stale
-    if (!forceRefresh && staleSet.size === 0 && hasCachedSubjects()) {
+    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'));
+    // Every card is read on a forced refresh, a stale subject or an empty cache; otherwise only
+    // expanded cards the cache has not seen (subjects opened during Expand All, or missing after a reload)
+    const refreshAll = forceRefresh || staleSet.size > 0 || !hasCachedSubjects();
+    const targets = (refreshAll ? cards : cards.filter(needsScrape))
+      .sort((a, b) => parseSemester(a) - parseSemester(b));
+    if (!refreshAll && targets.length === 0) {
       return formatCollectedSubjects(includePending);
     }
 
     isCollecting = true;
     const updatedStaleSubjects = new Set();
     try {
-      const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'))
-        .sort((a, b) => parseSemester(a) - parseSemester(b));
-
-      for (const card of cards) {
+      for (const card of targets) {
         scrapeSubjectTasks(card, forceRefresh, updatedStaleSubjects);
       }
     } finally {

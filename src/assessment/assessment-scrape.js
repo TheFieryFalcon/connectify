@@ -14,6 +14,15 @@
   const subjectsCache = cache.subjectsCache;
   const { orderHint, setTaskRow, parseCardSubjectTasks } = parser;
   const { setTaskStats, saveSubjectsCache, unmarkSubjectStale, isSubjectStale } = cache;
+  const TASK_ROWS = '.cvr-c-tasks .cvr-c-task';
+
+  // Task rows each card had when it was last read, so collect() can find expanded cards it never read
+  // (Expand All skips the per-card update) without re-reading cards whose subjects are already complete
+  const scrapedRows = new WeakMap();
+  function needsScrape(card) {
+    const rows = card.querySelectorAll(TASK_ROWS).length;
+    return rows > 0 && scrapedRows.get(card) !== rows;
+  }
 
   /**
    * Scrapes tasks from a single subject card and updates subjectsCache.
@@ -23,6 +32,7 @@
     const parsed = parseCardSubjectTasks(card);
     if (!parsed) return;
     const { title, subjectName, tasks: parsedTasks } = parsed;
+    if (parsedTasks.length > 0) scrapedRows.set(card, card.querySelectorAll(TASK_ROWS).length);
 
     const isStale = isSubjectStale(subjectName);
     const hasCache = subjectsCache.has(subjectName) && subjectsCache.get(subjectName).size > 0;
@@ -138,5 +148,5 @@
     });
   }
 
-  window.ConnectifyAssessmentScrape = { scrapeSubjectTasks, resolveTaskOrder, formatCollectedSubjects };
+  window.ConnectifyAssessmentScrape = { scrapeSubjectTasks, needsScrape, resolveTaskOrder, formatCollectedSubjects };
 })();

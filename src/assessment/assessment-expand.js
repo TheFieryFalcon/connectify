@@ -79,9 +79,9 @@
           try {
             window.ConnectifyCompoundProgress?.update?.();
             window.ConnectifyDataSyncCharts?.();
-            // Stale subjects are re-scraped off the critical path
+            // Stale subjects and cards that mounted after the statistics pass are re-scraped off the critical path
             setTimeout(() => {
-              try { if (getStaleSubjects().size > 0) collect(true, true); } catch {}
+              try { collect(true, getStaleSubjects().size > 0); } catch {}
             }, 200);
           } catch {}
           const complete = () => {
