@@ -198,6 +198,7 @@
             "src/theme/theme-glass-tokens.js",
             "src/theme/theme-wallpaper-presets.js",
             "src/theme/theme-customizer-markup.js",
+            "src/theme/theme-customizer-popover.js",
             "src/theme/theme-customizer-controls.js",
             "src/theme/theme-customizer.js",
             "src/theme/theme-surface-adapter.js",

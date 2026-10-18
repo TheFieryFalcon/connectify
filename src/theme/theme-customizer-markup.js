@@ -52,7 +52,7 @@
             </div>
             <div class="cx-token-grid" id="cx-token-grid"></div>
             <div class="cx-color-picker-box" id="cx-picker-box">
-              <div style="font-size: 12px; font-weight: 600; color: var(--cx-text-secondary); margin-bottom: 8px;">Edit: <span id="cx-active-token-name">${esc(s.activeToken)}</span></div>
+              <div class="cx-picker-head">Edit: <span id="cx-active-token-name">${esc(s.activeToken)}</span><button type="button" class="cx-picker-close" aria-label="Close colour picker">✕</button></div>
               <div class="cx-picker-sv" id="cx-picker-sv"><div class="cx-picker-sv-cursor" id="cx-picker-cursor"></div></div>
               <input type="range" min="0" max="360" class="cx-picker-hue" id="cx-picker-hue">
               <div style="display: flex; gap: 8px; align-items: center;">

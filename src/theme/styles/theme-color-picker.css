@@ -53,7 +53,8 @@
   transform: scale(1.12);
 }
 
-/* Custom in-DOM Color Picker */
+/* Custom in-DOM Color Picker: a popover beside the token being edited (theme-customizer-popover.js). Always solid,
+   like the dialog: the elevated surface layered over the opaque canvas */
 .cx-color-picker-box {
   background: var(--cx-input-bg);
   border: 1px solid var(--cx-border);
@@ -61,6 +62,52 @@
   padding: 12px;
   margin-top: 6px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.cx-color-picker-box.cx-picker-popover {
+  position: fixed;
+  z-index: 5;
+  width: 352px;
+  max-width: calc(100vw - 16px);
+  box-sizing: border-box;
+  margin: 0;
+  background-color: var(--cx-canvas-bg, #12171f);
+  background-image: linear-gradient(var(--cx-surface-elevated, #253342), var(--cx-surface-elevated, #253342));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+.cx-color-picker-box.cx-picker-popover[hidden] {
+  display: none;
+}
+
+.cx-picker-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cx-text-secondary);
+}
+
+.cx-picker-head #cx-active-token-name {
+  flex: 1;
+}
+
+.cx-picker-close {
+  border: none;
+  background: transparent;
+  color: var(--cx-text-secondary);
+  font-size: 13px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cx-picker-close:hover {
+  background-color: var(--cx-surface-hover, rgba(255, 255, 255, 0.08));
+  color: var(--cx-text-primary);
 }
 
 .cx-picker-sv {

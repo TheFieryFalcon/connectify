@@ -181,6 +181,7 @@
     bindWallpaper(ctx);
     bindJson(ctx);
     bindPreviewTooltip(ctx.modal);
+    window.ConnectifyCustomizerPopover?.bind(ctx.modal);
   }
 
   window.ConnectifyThemeCustomizerControls = { bind, importTheme };

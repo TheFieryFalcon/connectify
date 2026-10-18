@@ -8081,6 +8081,23 @@ runTest('Test 180: The theme audit enforces one surface per block, square bars a
   assert.ok(crawled.includes('DomainSchoolClass:6331155491'), 'the crawl list covers a class with discussions (Philosophy)');
 });
 
+runTest('Test 181: The customizer colour picker is a popover beside the token being edited', () => {
+  const pop = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-customizer-popover.js'), 'utf8');
+  const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('theme-customizer-popover.js') > -1 && manifest.indexOf('theme-customizer-popover.js') < manifest.indexOf('theme-customizer-controls.js'), 'the popover module must load before the controls that bind it');
+  assert.ok(fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-customizer-controls.js'), 'utf8').includes('window.ConnectifyCustomizerPopover?.bind(ctx.modal);'), 'the controls must bind the popover');
+  assert.ok(pop.includes("box.classList.add('cx-picker-popover')") && pop.includes('box.hidden = true;'), 'the picker starts hidden as a popover');
+  assert.ok(/a\.bottom \+ GAP/.test(pop) && /a\.top - GAP - height/.test(pop), 'it opens below the token, or above when there is no room below');
+  assert.ok(pop.includes("e.key === 'Escape' && !box.hidden") && pop.includes("document.addEventListener('keydown', onKey, true)") && pop.includes('e.stopPropagation()'), 'Escape closes only the popover');
+  assert.ok(pop.includes('if (!box.isConnected) { document.removeEventListener'), 'the document listener is removed once the customizer closes');
+  assert.ok(pop.includes('containingRect(box)'), 'positions account for the overlay containing block (backdrop-filter)');
+  const markup = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-customizer-markup.js'), 'utf8');
+  assert.ok(markup.includes('class="cx-picker-close" aria-label="Close colour picker"'), 'the popover has a close button');
+  const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-color-picker.css'), 'utf8');
+  const rule = (css.match(/\.cx-color-picker-box\.cx-picker-popover \{([^}]*)\}/) || [])[1] || '';
+  assert.ok(/position: fixed;/.test(rule) && /background-color: var\(--cx-canvas-bg, #12171f\);/.test(rule) && /background-image: linear-gradient\(var\(--cx-surface-elevated/.test(rule), 'the popover is fixed and always solid like the dialog');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
