@@ -1,35 +1,26 @@
-Connectify 3.2.3 - Making Study Rewarding with Data Visualization
+Connectify turns Western Australia's Connect portal into a study dashboard for Year 11 and 12 students. See where you stand in your cohort, predict your ATAR, and find out exactly what you need on your next assessments. Works for every WA high school, right inside the pages you already use.
 
-Connectify is the ultimate unofficial extension for Western Australia's Department of Education Connect portal. Built for ATAR students, it instantly upgrades the default Connect interface with powerful, real-time analytics to help you track your progress, identify weaknesses, and predict your final ATAR.
+📈 KNOW WHERE YOU STAND
+• Cohort rank: estimates your percentile and rank on every assessment (e.g. Top 4.2%) from the published boxplots.
+• Outcome meter: a colour-coded bar beside each mark shows how the result compares with what was expected of you.
+• Grade alerts: get notified when a class's results change, with one click to jump straight to it.
 
-Thanks to Yanxi Li, Arya Byndoor, Hiruja Basnayaka, Lodinu Kalugalge, Oscar Ingram, Gemini 3.8 Flash, GPT-5.5, and Amrut Deshpande for making this extension possible. Thank you all who crowdfunded our launch to the Chrome Web Store.
+🔮 PLAN AHEAD
+• ATAR predictor: applies published TISC scaling data to your school marks, with Low, Mid and High scenarios.
+• Grade predictions: forecasts your upcoming results from how you've done in that subject and on that type of task.
+• Target planner: enter your dream ATAR or subject grade and see the score you need on every remaining assessment.
 
+📊 SPOT YOUR WEAKNESSES
+• Weakness Analyzer: a radar chart of your results by assessment type, so you know what to study first.
+• Progress bars on every subject show how much of the year's weighting is already done.
+• Year in Progress graphs track your trajectory across the year.
 
-WHAT'S NEW IN VERSION 3
+🎨 MAKE IT YOURS
+• Seven themes, including AMOLED Black and frosted Liquid Glass, or build your own from just 6 colours.
+• Pick a preset wallpaper or upload your own.
 
-Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, school-specific data so Connectify now works universally for every high school in WA, while injecting an entirely new suite of ATAR tracking features directly into your LMS. Now updates automatically and quickly!
+🔒 PRIVATE BY DESIGN
+Everything runs locally. Your marks never leave your browser: no accounts, no tracking, no servers.
 
-POWERFUL ANALYTICS & PREDICTIONS
-• Live ATAR Predictor: Automatically scrapes your unscaled school marks, applies historical TISC scaling algorithms, and predicts your final ATAR. It even dynamically detects if you're in Year 11 or Year 12, applying a mathematical penalty to Year 11 unscaled marks for a more realistic projection. Also allows you to input your known Semester 1 scaled marks and shifting the interpolation to align with official data.
-• Dynamic Cohort & Rank Estimator: Instantly estimates your exact rank and percentile within your cohort (e.g. Top 4.2%) using an advanced polynomial spline applied to Connect's published boxplot data.
-• Target Grade Planner: Input your dream ATAR, and Connectify will reverse-engineer exactly what percentage you need to score on every remaining assessment to achieve it.
-• Estimated Grade: Connectify realistically forecasts your upcoming assessment scores with calibrated Low, Mid, and High scenarios, based on data about not only that subject and its volatility, but also how well you did on assessments like that in the past. When a new school year starts, last year's averages carry over automatically as your starting baselines.
-• Four-Segment Outcome Bar: Visualizes where your score lands relative to your cohort's distribution across 4 distinct quantile segments (Min, 25th, Median, 75th, and Max) directly alongside each assessment.
-
-BEAUTIFUL VISUALIZATIONS
-• Weakness Analyzer Radar Chart: A brand new interactive tool that categorizes every assessment you've taken (Exams, Tests, Essays, Take-Home) and plots your performance on a sleek radar chart, instantly revealing your study weaknesses.
-• Compound Progress Bars: Every subject card now features a vibrant, color-coded progress bar that breaks down your syllabus weighting (e.g. 50% Test, 30% Exam). It dynamically lowers the opacity of assessments you haven't completed yet, doubling as a Weighting Tracker so you know exactly how much of the year is left.
-• WACE Exam Countdown: A beautifully integrated countdown widget that tracks exactly how many days are left until the WACE exams for Year 12 students.
-• Adaptive Progress Timelines: Custom SVG line graphs that track your ATAR trajectory over the year, dynamically scaling the y-axis to match your specific performance range for maximum detail.
-
-TOTAL UI OVERHAUL
-• Seven Preset Themes: Switch instantly from the top header bar between Dark, Quantum Dark (with Gruvbox green highlights), AMOLED Black, Midnight Navy, Emerald Forest, Liquid Glass and Liquid Tinted Glass, each with crisp contrast across every Connect page (course cards, tables, submission marksbooks, and dialogs).
-• Liquid Glass: Frosted, translucent panels that blur whatever sits behind them, in a grey or navy tint. Adjust the blur strength and transparency to taste, or turn any custom theme into a glass theme.
-• Theme Customizer: Design your own theme right inside Connect. Pick just 6 colours and the rest are derived for you with readable contrast, or fine-tune all 20 with a live preview. Save, edit, import and export your themes.
-• Custom Wallpapers: Choose one of six built-in gradient wallpapers or upload your own to set behind the whole portal.
-• Retractable Tools Drawer: Fast access to all your analytics (ATAR Predictor, Target Grade, Weakness Analyzer, Target ATAR, and Year in Progress) via a smooth sliding drawer anchored to Connect's sidebar.
-• Assessment Outline Controls: One-click floating Expand All and Collapse All buttons with live progress feedback, plus a smooth "Back to top" shortcut.
-• Blazingly Fast: Completely rewritten to be modular, efficient, and deeply integrated into Connect's native rendering engine, ensuring UI widgets instantly sync without lag, and pausing background work while you're idle or the tab is hidden.
-
-SEAMLESS SSO AUTO-LOGIN
-• Instant Authentication: Automatically detects when you are redirected to the Department of Education Single Sign-On portal, reads your natively saved credentials, checks the terms box, and submits the login form in a fraction of a millisecond. It seamlessly bypasses manual logouts.
+❤️ THANK YOU
+To our contributors and everyone who crowdfunded our Chrome Web Store launch. Connectify is open source: github.com/TheFieryFalcon/connectify
