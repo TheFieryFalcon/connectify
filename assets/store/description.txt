@@ -1,0 +1,70 @@
+Connectify 3.2.3 - Making Study Rewarding with Data Visualization
+
+Connectify is the ultimate unofficial extension for Western Australia's Department of Education Connect portal. Built for ATAR students, it instantly upgrades the default Connect interface with powerful, real-time analytics to help you track your progress, identify weaknesses, and predict your final ATAR.
+
+Thanks to Yanxi Li, Arya Byndoor, Hiruja Basnayaka, Lodinu Kalugalge, Oscar Ingram, Gemini 3.8 Flash, GPT-5.5, and Amrut Deshpande for making this extension possible. Thank you all who crowdfunded our launch to the Chrome Web Store.
+
+
+WHAT'S NEW IN VERSION 3
+
+Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, school-specific data so Connectify now works universally for every high school in WA, while injecting an entirely new suite of ATAR tracking features directly into your LMS. Now updates automatically and quickly!
+
+POWERFUL ANALYTICS & PREDICTIONS
+• Live ATAR Predictor: Automatically scrapes your unscaled school marks, applies historical TISC scaling algorithms, and predicts your final ATAR. It even dynamically detects if you're in Year 11 or Year 12, applying a mathematical penalty to Year 11 unscaled marks for a more realistic projection. Also allows you to input your known Semester 1 scaled marks and shifting the interpolation to align with official data.
+• Dynamic Cohort & Rank Estimator: Instantly estimates your exact rank and percentile within your cohort (e.g. Top 4.2%) using an advanced polynomial spline applied to Connect's published boxplot data.
+• Target Grade Planner: Input your dream ATAR, and Connectify will reverse-engineer exactly what percentage you need to score on every remaining assessment to achieve it.
+• Estimated Grade: Connectify can predict your future assessment grades based on data about not only that subject, but also how well you did on assessments like that in the past.
+
+BEAUTIFUL VISUALIZATIONS
+• Weakness Analyzer Radar Chart: An interactive tool that categorizes every assessment you've taken (Exams, Tests, Essays, Take-Home) and plots your performance on a sleek radar chart, instantly revealing your study weaknesses.
+• Compound Progress Bars: Every subject card features a vibrant, color-coded progress bar that breaks down your syllabus weighting (e.g. 50% Test, 30% Exam). It dynamically lowers the opacity of assessments you haven't completed yet, doubling as a Weighting Tracker so you know exactly how much of the year is left.
+• WACE Exam Countdown: A beautifully integrated countdown widget that tracks exactly how many days are left until the WACE exams for Year 12 students.
+• Adaptive Progress Timelines: Custom SVG line graphs that track your ATAR trajectory over the year, dynamically scaling the y-axis to match your specific performance range for maximum detail.
+
+TOTAL UI OVERHAUL
+• Multi-Theme System & In-Page Customizer: Switch instantly between 7 preset palettes (Dark, Quantum Dark with Gruvbox green highlights, AMOLED Black, Midnight Navy, Emerald Forest, Liquid Glass and Liquid Tinted Glass) or design your own theme with custom wallpaper upload, frosted glass diffusion, and a live 20-token preview.
+• Blazingly Fast: Completely rewritten to be modular, efficient, and deeply integrated into Connect's native rendering engine, ensuring UI widgets instantly sync without lag.
+
+SEAMLESS SSO AUTO-LOGIN
+• Instant Authentication: Automatically detects when you are redirected to the Department of Education Single Sign-On portal, reads your natively saved credentials, checks the terms box, and submits the login form in a fraction of a millisecond. It seamlessly bypasses manual logouts.
+
+
+WHAT'S NEW IN VERSION 3.2.3
+• Every Subject in Every Tool: Predictor, Weakness Analyzer and Year in Progress now list all of your subjects after Expand All, even if you had already opened one subject by hand (previously they could show just that one).
+• Readable Weakness Analyzer in Liquid Glass: The radar chart's labels, ring percentages and scores are now crisp and readable in the grey Liquid Glass theme, along with the Settings delete button and "Cache cleared!" note.
+• Chrome Web Store Updates Fixed: Publishing moved to the new Chrome Web Store API, so new versions reach Chrome users through the store again. The store listing also has fresh screenshots.
+
+
+WHAT'S NEW IN VERSION 3.2.2
+
+Themes & Liquid Glass
+• New Liquid Glass Preset: A grey frosted-glass theme joins the lineup, and the translucent navy theme is now called Liquid Tinted Glass. Twilight Plum has been retired (if you used it, you'll be switched to Dark).
+• Preset Wallpapers: Six built-in geometric gradient wallpapers (three dark, three light) in Settings, right next to Upload Background.
+• Smarter Theme Customizer: Pick just 6 Basic colours and every other colour is derived for you, keeping text readable (5:1 contrast), or fine-tune all 20 in Full mode. The colour picker now pops up right beside the colour you're editing, and hovering the live preview tells you exactly which colour paints the text and background under your pointer.
+• Edit Your Themes: Custom themes in the theme menu now have an Edit button. Renaming a theme updates it instead of saving a duplicate, and themes made in older versions are automatically upgraded.
+• Glass Custom Themes: Turning on Liquid Glass for a custom theme makes it a true recoloured glass theme, with Blur Strength (0-40px, default 12px) and Transparency sliders.
+• Liquid Glass Everywhere: Class pages (banners, category bars, headings, Learners tables, Summary tiles), notices and discussions (a strong-blur reading panel that keeps your wallpaper visible), paginators and popups are all properly frosted.
+• Cleaner Dark Themes: No more mismatched boxes behind text in any dark theme, Connect's native spacing around course tiles is preserved, boxplot backgrounds stay invisible, and empty pages are neatly centred.
+
+Analytics & Accuracy
+• New School Year Baselines: When a new school year starts, last year's assessment type and subject averages automatically become your Predictor baselines (your old baselines are backed up).
+• No More False "Class Updated" Alerts: Other classes uploading their results, or semester mix-ups, no longer trigger update notifications, and Jump to Subject now scrolls and highlights instantly.
+• A Grade Predictor Tab for Every Subject: No more six-subject cap, so a dropped course and its replacement both show up.
+• Fairer Outcome Bars: The outcome bar stays hidden on a class's first marked assessment until there's earlier data or a baseline to compare against.
+• Accurate Week Overrides: Custom school weeks set in the Progress Graph are now placed correctly by the Predictor.
+• Settings That Stick: Saved category keywords apply immediately, Reset restores the real defaults, resetting clears baselines too, and Target Grade's difficulty-weighted mode now respects your assessment type overrides.
+• Correct Progress Bars: Similar subject names (e.g. Biology and Human Biology) no longer redraw each other's progress bars.
+
+Speed & Reliability
+• Lighter on Your Computer: Eight separate page watchers and nine timers were merged into one of each, and background work pauses while you're idle or the tab is hidden.
+• Sidebar Behaves: Clicking the handle to close the drawer keeps it closed (no more hover reopening it), and the sidebar shows a "Back to All" notice when your outlines are filtered.
+• Safer Auto-Login: Auto-login now only fires for saved passwords or browser autofill, never while you're typing.
+• Fewer Glitches: No more false "missing component" notices, deleted themes no longer come back, and large wallpapers are no longer lost.
+
+
+WHAT'S NEW IN VERSION 3.2.0
+• Four-Segment Outcome Bar: Visualizes where your score lands relative to your cohort's distribution across 4 distinct quantile segments (Min, 25th, Median, 75th, and Max) directly alongside each assessment.
+• Grade Prediction (Low, Mid & High Scenarios): Realistically forecasts your upcoming assessment scores with calibrated Low, Mid, and High scenario projections based on your past performance and subject volatility.
+• Complete Dark Theme Overhaul: Full site-wide dark mode with crisp contrast across every Connect page (course cards, tables, submission marksbooks, and dialogs), toggled directly from the top header bar.
+• Retractable Tools Drawer: Fast access to all your analytics (ATAR Predictor, Target Grade, Weakness Analyzer, Target ATAR, and Year in Progress) via a smooth sliding drawer anchored to Connect's sidebar.
+• Assessment Outline Controls: One-click floating Expand All and Collapse All buttons with live progress feedback, plus a smooth "Back to top" shortcut.

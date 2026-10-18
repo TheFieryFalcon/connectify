@@ -35,11 +35,41 @@ Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, scho
 - **Adaptive Progress Timelines**: Custom SVG line graphs that track your ATAR trajectory over the year, dynamically scaling the y-axis to match your specific performance range for maximum detail.
 
 ### 🎨 Total UI Overhaul
-- **Multi-Theme System & In-DOM Customizer**: Switch instantly between 7 preset palettes (Dark, Quantum Dark with Gruvbox green highlights, AMOLED Black, Midnight Navy, Emerald Forest, Sunset Orange, and Apple Liquid Glass) or design custom themes with custom wallpaper upload, frosted glass diffusion, and live 14-token preview.
+- **Multi-Theme System & In-DOM Customizer**: Switch instantly between 7 preset palettes (Dark, Quantum Dark with Gruvbox green highlights, AMOLED Black, Midnight Navy, Emerald Forest, Liquid Glass and Liquid Tinted Glass) or design your own theme with custom wallpaper upload, frosted glass diffusion, and a live 20-token preview.
 - **Blazingly Fast**: Completely rewritten to be modular, efficient, and deeply integrated into Connect's native rendering engine, ensuring UI widgets instantly sync without lag.
 
 ### ⚡ Seamless SSO Auto-Login
 - **Instant Authentication**: Automatically detects when you are redirected to the Department of Education Single Sign-On portal, reads your natively saved credentials, checks the terms box, and submits the login form in a fraction of a millisecond. It seamlessly bypasses manual logouts.
+
+### 🚀 What's New in Version 3.2.3
+- **Every Subject in Every Tool**: Predictor, Weakness Analyzer and Year in Progress now list all of your subjects after Expand All, even if you had already opened one subject by hand (previously they could show just that one).
+- **Readable Weakness Analyzer in Liquid Glass**: The radar chart's labels, ring percentages and scores are now crisp and readable in the grey Liquid Glass theme, along with the Settings delete button and "Cache cleared!" note.
+- **Chrome Web Store Updates Fixed**: Publishing moved to the new Chrome Web Store API, so new versions reach Chrome users through the store again. The store listing also has fresh screenshots.
+
+### 🚀 What's New in Version 3.2.2
+#### 🎨 Themes & Liquid Glass
+- **New Liquid Glass Preset**: A grey frosted-glass theme joins the lineup, and the translucent navy theme is now called **Liquid Tinted Glass**. Twilight Plum has been retired (if you used it, you'll be switched to Dark).
+- **Preset Wallpapers**: Six built-in geometric gradient wallpapers (three dark, three light) in Settings, right next to Upload Background.
+- **Smarter Theme Customizer**: Pick just 6 Basic colours and every other colour is derived for you, keeping text readable (5:1 contrast), or fine-tune all 20 in Full mode. The colour picker now pops up right beside the colour you're editing, and hovering the live preview tells you exactly which colour paints the text and background under your pointer.
+- **Edit Your Themes**: Custom themes in the theme menu now have an Edit (✎) button. Renaming a theme updates it instead of saving a duplicate, and themes made in older versions are automatically upgraded.
+- **Glass Custom Themes**: Turning on Liquid Glass for a custom theme makes it a true recoloured glass theme, with Blur Strength (0–40px, default 12px) and Transparency sliders.
+- **Liquid Glass Everywhere**: Class pages (banners, category bars, headings, Learners tables, Summary tiles), notices and discussions (a strong-blur reading panel that keeps your wallpaper visible), paginators and popups are all properly frosted.
+- **Cleaner Dark Themes**: No more mismatched boxes behind text in any dark theme, Connect's native spacing around course tiles is preserved, boxplot backgrounds stay invisible, and empty pages are neatly centred.
+
+#### 📈 Analytics & Accuracy
+- **New School Year Baselines**: When a new school year starts, last year's assessment type and subject averages automatically become your Predictor baselines (your old baselines are backed up).
+- **No More False "Class Updated" Alerts**: Other classes uploading their results, or semester mix-ups, no longer trigger update notifications, and **Jump to Subject** now scrolls and highlights instantly.
+- **A Grade Predictor Tab for Every Subject**: No more six-subject cap, so a dropped course and its replacement both show up.
+- **Fairer Outcome Bars**: The outcome bar stays hidden on a class's first marked assessment until there's earlier data or a baseline to compare against.
+- **Accurate Week Overrides**: Custom school weeks set in the Progress Graph are now placed correctly by the Predictor.
+- **Settings That Stick**: Saved category keywords apply immediately, Reset restores the real defaults, resetting clears baselines too, and Target Grade's difficulty-weighted mode now respects your assessment type overrides.
+- **Correct Progress Bars**: Similar subject names (e.g. Biology and Human Biology) no longer redraw each other's progress bars.
+
+#### ⚡ Speed & Reliability
+- **Lighter on Your Computer**: Eight separate page watchers and nine timers were merged into one of each, and background work pauses while you're idle or the tab is hidden.
+- **Sidebar Behaves**: Clicking the handle to close the drawer keeps it closed (no more hover reopening it), and the sidebar shows a "Back to All" notice when your outlines are filtered.
+- **Safer Auto-Login**: Auto-login now only fires for saved passwords or browser autofill, never while you're typing.
+- **Fewer Glitches**: No more false "missing component" notices, deleted themes no longer come back, and large wallpapers are no longer lost.
 
 ### 🚀 What's New in Version 3.2.0
 - **Four-Segment Outcome Bar**: Visualizes where your score lands relative to your cohort's distribution across 4 distinct quantile segments (Min, 25th, Median, 75th, and Max) directly alongside each assessment.

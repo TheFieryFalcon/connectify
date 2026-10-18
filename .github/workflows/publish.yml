@@ -49,10 +49,11 @@ jobs:
         run: |
           VERSION="${{ steps.meta.outputs.version }}"
           sed -i -E "s/^# Connectify [0-9]+\.[0-9]+\.[0-9]+ - Making Study Rewarding with Data Visualization/# Connectify $VERSION - Making Study Rewarding with Data Visualization/g" README.md
-          if ! git diff --quiet README.md; then
+          sed -i -E "s/^Connectify [0-9]+\.[0-9]+\.[0-9]+ - Making Study Rewarding with Data Visualization/Connectify $VERSION - Making Study Rewarding with Data Visualization/" assets/store/description.txt
+          if ! git diff --quiet README.md assets/store/description.txt; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add README.md
+            git add README.md assets/store/description.txt
             git commit -m "chore: Sync README version to $VERSION [skip ci]"
             git push origin HEAD:${{ github.ref_name }}
           fi
