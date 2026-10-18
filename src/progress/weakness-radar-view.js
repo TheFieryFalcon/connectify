@@ -10,9 +10,9 @@
 
   const { escapeHtml } = window.ConnectifyUtils;
 
-  const message = text => `<div style="padding:20px;color:#999;text-align:center;display:flex;align-items:center;justify-content:center;height:100%;">${escapeHtml(text)}</div>`;
+  const message = text => `<div class="cx-radar-message" style="padding:20px;text-align:center;display:flex;align-items:center;justify-content:center;height:100%;">${escapeHtml(text)}</div>`;
 
-  const warning = text => `<div style="padding:30px 20px;color:#d4b483;text-align:center;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;box-sizing:border-box;"><span style="font-size:26px;margin-bottom:8px;">⚠️</span><span>${escapeHtml(text)}</span></div>`;
+  const warning = text => `<div class="cx-radar-warning" style="padding:30px 20px;text-align:center;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;box-sizing:border-box;"><span style="font-size:26px;margin-bottom:8px;">⚠️</span><span>${escapeHtml(text)}</span></div>`;
 
   /** SVG markup: 20-100% grid rings, spokes, the score polygon, vertex markers and outer labels. */
   function radarSvg(labels, data) {
@@ -119,7 +119,7 @@
          </select>
          <button type="button" id="cx-weakness-expand-all" class="cx-weakness-expand-btn" style="margin-left:auto;">Expand All Outlines</button>
       </div>
-      <div id="connectify-radar-chart" style="width:100%;height:350px;background:#333333;border-radius:8px;border:1px solid #3a3a3a;overflow:hidden;"></div>
+      <div id="connectify-radar-chart" style="width:100%;height:350px;overflow:hidden;"></div>
       <div id="cx-weakness-filters">
          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <strong style="font-size:12px;">Include in Analyzer:</strong>

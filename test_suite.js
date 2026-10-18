@@ -7896,6 +7896,41 @@ runTest('Test 172: Dark-classed themes with dark ink are marked light-tone and r
   assert.ok(!/:is\(a, \.eds-c-link\)[^{]*\{\s*color: var\(--cx-accent,/.test(tiles), 'page links must not use the raw accent');
 });
 
+runTest('Test 186: Light-tone themes never leave dark-ink radar labels on the dark plot surface; drawer data colours reach 5:1', () => {
+  const win = { ConnectifyUtils: { escapeHtml: s => String(s) } };
+  for (const f of ['src/theme/theme-oklch.js', 'src/theme/theme-token-derive.js', 'src/theme/theme-glass-tokens.js', 'src/theme/theme-palettes.js', 'src/progress/weakness-radar-view.js']) {
+    new Function('window', fs.readFileSync(path.join(BASE_DIR, f), 'utf8'))(win);
+  }
+  const O = win.ConnectifyThemeOklch, pal = win.ConnectifyThemePalettes.BUILTIN_PALETTES;
+  const chartTag = win.ConnectifyWeaknessView.PANEL_HTML.match(/<div id="connectify-radar-chart"[^>]*>/)[0];
+  assert.ok(!/background|border:/.test(chartTag), 'the plot surface lives in CSS so a light tone can restyle it (no inline background)');
+  const sideCss = fs.readFileSync(path.join(BASE_DIR, 'src/sidebar/styles/sidebar-weakness-types.css'), 'utf8');
+  assert.ok(cssHas(sideCss, '#connectify-radar-chart {\n  background: #333333;'), 'the plot keeps its dark surface outside light tones');
+  const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-light-tone.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const rule = sel => (css.split('}').find(b => b.split('{')[0].trim().endsWith(sel)) || '').split('{')[1] || '';
+  const tone = 'html.connectea-dark[data-connectea-tone="light"] ';
+  assert.ok(/background: transparent !important/.test(rule(`${tone}#connectify-radar-chart`)), 'light tone clears the dark plot surface');
+  assert.ok(/fill: var\(--cx-text-primary, #1d1c1c\) !important/.test(rule(`${tone}#connectify-radar-chart :is(text, .cx-radar-message)`)) &&
+    /opacity: 1 !important/.test(rule(`${tone}#connectify-radar-chart :is(text, .cx-radar-message)`)), 'labels, ring percentages and messages take the ink at full opacity');
+  // Contrast on the grey Liquid Glass drawer: its surface at the glass opacity over the canvas
+  const glass = pal['liquid-glass-clear'];
+  const [r, g, b, a] = win.ConnectifyThemeGlassTokens.props(win.ConnectifyThemeDerive.complete(glass.colors), glass.glassOpacity)['--cx-surface-bg'].match(/[\d.]+/g).map(Number);
+  const canvas = [1, 3, 5].map(i => parseInt(glass.canvas.slice(i, i + 2), 16));
+  const drawer = '#' + [r, g, b].map((v, i) => Math.round(v * a + canvas[i] * (1 - a)).toString(16).padStart(2, '0')).join('');
+  assert.ok(O.contrast(glass.textPrimary, drawer) >= 5, `ink must reach 5:1 on the drawer glass (${O.contrast(glass.textPrimary, drawer).toFixed(2)})`);
+  for (const sel of ['#connectify-radar-chart tspan', '#connectify-radar-chart .cx-radar-warning', '#connectify-sidebar .cx-cat-delete-btn', '#connectify-sidebar #cx-clear-cache-feedback']) {
+    const m = rule(tone + sel).match(/oklch\(from (#[0-9a-f]{6}) ([\d.]+) c h\)/);
+    assert.ok(m, `${sel} must be re-inked under light tone`);
+    const src = O.toOklch(m[1]), ink = O.fromOklch(Number(m[2]) * 100, src.C, src.h);
+    assert.ok(O.contrast(ink, drawer) >= 5, `${sel} must reach 5:1 on the drawer glass (${O.contrast(ink, drawer).toFixed(2)})`);
+  }
+  // Outside light tones the labels take the theme's secondary text on the dark plot
+  for (const [id, p] of Object.entries(pal)) {
+    if (/^#[0-9a-f]{6}$/i.test(p.textSecondary || '')) assert.ok(O.contrast(p.textSecondary, '#333333') >= 5, `${id} radar labels must reach 5:1 on the dark plot`);
+  }
+  assert.ok(O.contrast('#a8a8a8', '#333333') >= 5 && cssHas(sideCss, '.cx-radar-message {\n  color: #a8a8a8;'), 'radar messages must reach 5:1 on the dark plot');
+});
+
 runTest('Test 173: The Theme Customizer dialog is always solid, even when glass themes make the surface token translucent', () => {
   const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-customizer.css'), 'utf8');
   const dialog = (css.match(/#cx-customizer-dialog \{([^}]*)\}/) || [])[1] || '';

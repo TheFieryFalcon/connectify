@@ -73,7 +73,7 @@ This document covers the user interface and analytics modules, including target 
 #### [`weakness-radar.js`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/weakness-radar.js)
 - **Role**: Implements the Weakness Analyzer native SVG spider/radar chart.
 - **Key Functions**:
-  - Plots multi-axis polygonal radar chart of student performance grouped by assessment type or subject (SVG, escaped labels and panel markup in `weakness-radar-view.js`); skips rendering while hidden.
+  - Plots multi-axis polygonal radar chart of student performance grouped by assessment type or subject (SVG, escaped labels and panel markup in `weakness-radar-view.js`); skips rendering while hidden. The dark plot surface and message colours live in `sidebar-weakness-types.css` (`.cx-radar-message`, `.cx-radar-warning`), so light-tone themes can clear it.
   - Interactive subject filtering checkboxes (`#cx-weakness-checkboxes`) and Expand All Outlines button (`#cx-weakness-expand-all`).
   - Persists deselected subjects in `connectify:weakness_disabled_subjects`.
 - **Export**: `window.ConnectifyWeakness`.

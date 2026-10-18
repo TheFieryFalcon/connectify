@@ -48,6 +48,46 @@ html.connectea-dark[data-connectea-tone="light"] .cx-date-warning {
   color: oklch(from #dc2626 0.34 c h) !important;
 }
 
+/* Weakness Analyzer radar: the dark plot surface would leave dark-ink labels at ~1.3:1, so the plot is clear on the drawer's
+   own surface (one surface per block) with an ink hairline; labels, ring percentages and messages take the ink, and the
+   scores and warning go to OKLCH 0.30 (the drawer glass over the grey canvas is darker than a tile, 0.34 lands at 4.9:1) */
+html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart {
+  background: transparent !important;
+  border-color: color-mix(in srgb, var(--cx-text-primary, #1d1c1c) 22%, transparent) !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart :is(text, .cx-radar-message) {
+  fill: var(--cx-text-primary, #1d1c1c) !important;
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  opacity: 1 !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart :is(line, polygon[fill="none"]) {
+  stroke: color-mix(in srgb, var(--cx-text-primary, #1d1c1c) 45%, transparent) !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart tspan {
+  fill: var(--cx-text-primary, #1d1c1c) !important;
+  fill: oklch(from #2ecc71 0.30 c h) !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart .cx-radar-warning {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #d4b483 0.30 c h) !important;
+}
+
+/* Settings: the category delete ✕ and the "Cache cleared!" note are red and green text straight on the drawer glass */
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-cat-delete-btn {
+  border-color: currentColor !important;
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #e74c3c 0.30 c h) !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar #cx-clear-cache-feedback {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #27ae60 0.30 c h) !important;
+}
+
 /* Connect's Attendance "present" label paints light green text straight on the surface */
 html.connectea-dark[data-connectea-tone="light"] .standard-label.connect-green-light {
   color: var(--cx-text-primary, #1d1c1c) !important;

@@ -43,6 +43,7 @@
       if (!defaultCategories[cat]) {
         const delBtn = document.createElement('button');
         delBtn.type = 'button';
+        delBtn.className = 'cx-cat-delete-btn';
         delBtn.textContent = '✕';
         delBtn.title = `Delete category "${cat}"`;
         delBtn.style.cssText = 'background:transparent;color:#e74c3c;border:1px solid #e74c3c;border-radius:4px;cursor:pointer;padding:2px 7px;font-size:11px;';

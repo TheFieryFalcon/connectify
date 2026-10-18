@@ -48,6 +48,21 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
   border-color: var(--cx-input-border, #496178) !important;
 }
 
+/* Plot surface: dark in every theme (theme-light-tone.css clears it for dark-ink themes) */
+#connectify-radar-chart {
+  background: #333333;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+}
+
+#connectify-radar-chart .cx-radar-message {
+  color: #a8a8a8;
+}
+
+#connectify-radar-chart .cx-radar-warning {
+  color: #d4b483;
+}
+
 #connectify-radar-chart text, #connectify-radar-chart .highcharts-axis-labels text {
   fill: #e1eaf3 !important;
   color: #e1eaf3 !important;
