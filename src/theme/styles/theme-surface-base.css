@@ -17,9 +17,11 @@
 
 /* Reading View Wallpaper Suppression (Notice & Discussion Detail Views - DOM Detected). Inside a dialog the
    views sit on the dialog's own surface (theme-dialog-surface.css), so they are left out here */
-/* html.class[attr] outranks the wallpaper rule on the root (html.connectea-dark[data-connectea-has-custom-bg]) */
-html.connectea-dark[data-connectea-reading-view="true"], html:not(.connectea-dark)[data-connectea-reading-view="true"],
-html[data-connectea-reading-view="true"] body { background-image: none !important; background-color: var(--cx-canvas-bg, #121820) !important; }
+/* html.class[attr] outranks the wallpaper rule on the root (html.connectea-dark[data-connectea-has-custom-bg]). Liquid
+   Glass keeps the wallpaper and reads on a strong-blur glass panel instead (theme-glass-reading.css) */
+html.connectea-dark[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]),
+html:not(.connectea-dark)[data-connectea-reading-view="true"],
+html[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) body { background-image: none !important; background-color: var(--cx-canvas-bg, #121820) !important; }
 [data-connectea-reading-view="true"] :is(cnt-notice-view, [class*="notice-view"], cnt-discussion-view, [class*="discussion-view"], cnt-discussion-item-view, cnt-message-detail-view, cnt-notice-item-view-dialog, .cvr-c-app-layout, .cvr-c-app-layout__body, #main-content):not(mat-dialog-container *):not(.mat-dialog-container *) {
   background-image: none !important;
   background-color: var(--cx-canvas-bg, #121820) !important;

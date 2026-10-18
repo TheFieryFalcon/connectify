@@ -1,0 +1,32 @@
+/**
+ * Connectify Theme: Liquid Glass reading views (a notice or discussion opened from a class). The page stays clear,
+ * so the wallpaper shows around the view, and the view itself is one glass panel with a much stronger blur and an
+ * 88% fill: every theme text colour keeps >= 5:1 over any wallpaper, even pure black (design_rules.md).
+ * Solid themes keep the opaque reading canvas (theme-surface-base.css). Liquid Glass only.
+ */
+
+/* The page around the view is clear; the unused id outranks the reading canvas rule (it lists #main-content) */
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :is(
+  #cx-specificity-anchor, .cvr-c-app-layout, .cvr-c-app-layout__body, #main-content
+):not(mat-dialog-container *):not(.mat-dialog-container *) {
+  background-color: transparent !important;
+}
+
+/* The view is the reading surface: strong blur, near-opaque fill. The view elements are inline by default (custom
+   elements), which paints a background only on an empty line box, so they become blocks to carry the panel */
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :is(
+  #cx-specificity-anchor, cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view
+):not(mat-dialog-container *):not(.mat-dialog-container *) {
+  display: block !important;
+  background-color: color-mix(in srgb, color-mix(in srgb, var(--cx-canvas-bg, #0b1120) 96%, var(--cx-text-primary, #ffffff)) 88%, transparent) !important;
+  backdrop-filter: blur(max(36px, calc(var(--cx-glass-blur, 12px) * 3))) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(max(36px, calc(var(--cx-glass-blur, 12px) * 3))) saturate(140%) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
+}
+
+/* The discussion's message body sits inside that surface and stays clear */
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :is(
+  #cx-specificity-anchor, cnt-discussion-item-view
+) cnt-message-detail-view {
+  background-color: transparent !important;
+}
