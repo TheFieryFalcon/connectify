@@ -43,6 +43,7 @@ jobs:
             --exclude='_metadata*' \
             --exclude='.DS_Store' \
             --exclude='README.md' \
+            --exclude='CHANGELOG.md' \
             --exclude='2.0.0_changelog.md' \
             --exclude='ATAR-REFERENCE.md' \
             --exclude='overview.md' \

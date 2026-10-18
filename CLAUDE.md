@@ -23,7 +23,7 @@ The full rule set is always loaded into context via these imports:
 - **Math Modeling**: Logarithmic headroom compression above 80% ($\frac{100 - \text{Score}}{20}$). Calibrated variance scaling preventing spread explosion on volatile subjects.
 - **Runtime & Safety**: World isolation (MAIN `data.js` stamps dataset vs ISOLATED content scripts; cross-world requests are DOM events). Page observation and timers go through the shared `ConnectifyScheduler` with activity tracking (`ConnectifyIsUserActive`).
 - **Subsystem Invalidation**: Independent invalidation keys (`connectify:cache_version:<subsystem>`). Increment version on math changes. Isolated clearing.
-- **Brevity & Size Standards**: `src/` JS/CSS files $\le 250$ lines (`test_suite.js` and `scripts/` test tooling exempt). Markdown docs $\le 150$ lines each. New features go in new files.
+- **Brevity & Size Standards**: `src/` JS/CSS files $\le 250$ lines (`test_suite.js` and `scripts/` test tooling exempt). Markdown in `docs/` $\le 150$ lines each (other Markdown exempt). New features go in new files.
 - **Geometry**: Panel rounding applies only in Liquid Glass. `.cvr-u-padding--md` keeps its native 15px padding in every theme, clear around tiles (wallpaper pass-through in every dark theme).
 
 ---

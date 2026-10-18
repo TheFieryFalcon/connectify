@@ -11,7 +11,7 @@ All instructions, design constraints, and architectural standards in `design_rul
    - Logarithmic headroom compression above 80% ($\frac{100 - \text{Score}}{20}$). Calibrated variance scaling on volatile courses.
    - Subsystem cache versioning with independent keys (`connectify:cache_version:<subsystem>`).
    - All `src/` code and CSS files $\le 250$ lines (`test_suite.js` and `scripts/` test tooling exempt). New features go in new files.
-   - All documentation markdown files $\le 150$ lines.
+   - Markdown files in `docs/` $\le 150$ lines (other Markdown exempt).
 
 2. **Pipeline & Execution (`docs/architecture.md`)**:
    - MAIN world `src/system/data.js` stamps Highcharts boxplot quantiles onto DOM `dataset.connectifyStats`.
