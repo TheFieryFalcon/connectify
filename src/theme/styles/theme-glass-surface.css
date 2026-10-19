@@ -4,8 +4,9 @@
  * Learners headings, empty states). Liquid Glass only; no margins or padding, so boxes keep their native size.
  */
 
+/* The fill is the tables' and tiles' own glass surface, so bars, pills and the table they belong to read as one material */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) {
-  --cx-gl-fill: color-mix(in srgb, color-mix(in srgb, var(--cx-canvas-bg, #0b1120) 96%, var(--cx-text-primary, #ffffff)) 82%, transparent);
+  --cx-gl-fill: var(--cx-surface-bg, rgba(26, 36, 52, 0.72));
   --cx-gl-blur: blur(var(--cx-glass-blur, 12px)) saturate(160%);
   --cx-gl-edge: inset 0 1px 0 color-mix(in srgb, var(--cx-text-primary, #ffffff) 16%, transparent), 0 0 0 1px color-mix(in srgb, var(--cx-text-primary, #ffffff) 10%, transparent), 0 8px 24px rgba(0, 0, 0, 0.18);
 }
@@ -41,7 +42,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 }
 
 /* Pills that hug their content ("Page N of M", paginator bars, Learners headings, the Content empty state): the
-   glass is a ::before reaching past the box, so the text gets breathing room from the 16px corners without any
+   glass is a ::before reaching past the box, so the text gets breathing room from the 12px corners without any
    padding or margin that would move Connect's layout */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
   .connect-paginator-container,
@@ -71,15 +72,37 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   backdrop-filter: var(--cx-gl-blur);
   -webkit-backdrop-filter: var(--cx-gl-blur);
   box-shadow: var(--cx-gl-edge);
-  border-radius: 16px;
+  border-radius: 12px;
   pointer-events: none;
 }
 
-/* Learners section headings are bars: square, the glass starting 16px before the text at the column edge, not
-   reaching under the side menu */
+/* Paginator bars end flush with the table's right edge and keep Connect's own space after "Showing ...", so the
+   glass only reaches left: reaching right ran past the table and off the page (Library) */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-paginator.mat-paginator::before {
+  inset: 0 0 0 -16px;
+}
+
+/* "Page N of M" followed by its paginator is one segmented pill: the two halves meet in Connect's gap between them
+   instead of overlapping, and only the outer corners are rounded */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connect-paginator-container:has(+ mat-paginator)::before {
+  inset: 0 -10px 0 -16px;
+  border-radius: 12px 0 0 12px;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connect-paginator-container + mat-paginator::before {
+  inset: 0 0 0 -16px;
+  border-radius: 0 12px 12px 0;
+  box-shadow: var(--cx-gl-edge), inset 1px 0 0 color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent);
+}
+
+/* Learners section headings are pills that hug the title (the Teachers heading was a full-width block while
+   Students, in its accordion header, was not; both now match), starting 16px before the text */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) p.mat-h2 {
+  width: fit-content;
+}
+
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) p.mat-h2::before {
-  inset: -6px -18px -6px -16px;
-  border-radius: 0;
+  inset: -6px -16px;
 }
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-empty-content::before {
