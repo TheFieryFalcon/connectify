@@ -1,0 +1,70 @@
+/**
+ * Connectify Theme: Connect's top-right user area, every dark theme. The avatar button sits on the bar with no fill
+ * of its own; the user dropdown (a Vaadin popup outside the bar) is one surface, so its header (avatar, name, role)
+ * and Sign Out row are clear and use the theme ink. Sign Out keeps Connect's geometry (full-width 50px bar, no
+ * border or radius, bold caption): the generic button rules skip it and only colours are set here. The unused
+ * #cx-specificity-anchor outranks Connect's #383838 / #4f4f4f fills and the id-weighted button colour rule.
+ */
+
+/* Avatar button: the bar shows through; hover, focus and the open state highlight like the other bar buttons */
+html.connectea-dark :is(
+  #cx-specificity-anchor, .cvr-c-primary-navigation__button--avatar, .cvr-c-primary-navigation .v-popupview:has(.cvr-c-avatar)
+) {
+  background-color: transparent !important;
+  background-image: none !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
+}
+
+html.connectea-dark :is(
+  #cx-specificity-anchor, .cvr-c-primary-navigation__button--avatar, .cvr-c-primary-navigation .v-popupview:has(.cvr-c-avatar)
+):is(:hover, :focus-visible, .eds-s-is-active) {
+  background-color: var(--cx-surface-hover, #24303f) !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
+}
+
+/* Dropdown header: Connect fills it #383838 under white text; here it is the popup's surface in the theme ink,
+   with its divider in the border colour. The avatar keeps its own colours */
+html.connectea-dark :is(#cx-specificity-anchor, .cvr-c-primary-navigation__user-display) {
+  background-color: transparent !important;
+  background-image: none !important;
+  border-bottom-color: var(--cx-border, #36485e) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+html.connectea-dark .cvr-c-primary-navigation__user-display :is(
+  #cx-specificity-anchor, div, span, label, p, a, strong, .v-label
+):not([class*="avatar"]):not([class*="avatar"] *) {
+  background-color: transparent !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+/* Sign Out row: clear on the popup surface (or the side menu on narrow screens) */
+html.connectea-dark :is(
+  #cx-specificity-anchor, .cvr-c-primary-navigation__user-controls, .cvr-c-primary-navigation__user-controls > *, .cvr-c-primary-menu__footer
+) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+html.connectea-dark :is(
+  #cx-specificity-anchor, .cvr-c-primary-navigation__button--sign-out, .cvr-c-primary-navigation__user-controls .eds-o-button
+) {
+  background-color: transparent !important;
+  background-image: none !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  box-shadow: none !important;
+}
+
+html.connectea-dark :is(
+  #cx-specificity-anchor, .cvr-c-primary-navigation__button--sign-out, .cvr-c-primary-navigation__user-controls .eds-o-button
+):is(:hover, :focus, :active, .eds-s-is-active) {
+  background-color: var(--cx-surface-hover, #24303f) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+html.connectea-dark :is(
+  .cvr-c-primary-navigation__button--sign-out, .cvr-c-primary-navigation__user-controls .eds-o-button
+) :is(#cx-specificity-anchor, .v-button-wrap, .v-button-caption) {
+  background-color: transparent !important;
+  color: inherit !important;
+}

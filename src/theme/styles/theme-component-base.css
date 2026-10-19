@@ -69,7 +69,7 @@
 /* Buttons and Action Elements (top-bar icon buttons such as the Connect home logo stay on the nav surface) */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   .v-button, .eds-c-button, .eds-c-standard-button
-):not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
+):not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(#connectify-sidebar *):not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
   background-color: var(--cx-button-bg) !important;
   color: var(--cx-button-text) !important;
   border-color: var(--cx-button-border) !important;
@@ -77,7 +77,7 @@
 
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   .v-button:hover, .eds-c-button:hover, .eds-c-standard-button:hover
-):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
+):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
   background-color: var(--cx-surface-hover) !important;
   border-color: var(--cx-border-strong) !important;
 }

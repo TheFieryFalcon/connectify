@@ -168,6 +168,7 @@
             "src/theme/styles/theme-classes-promos.css",
             "src/theme/styles/theme-feed.css",
             "src/theme/styles/theme-reports-menus.css",
+            "src/theme/styles/theme-user-menu.css",
             "src/theme/styles/theme-tables.css",
             "src/theme/styles/theme-dialogs-paginator.css",
             "src/theme/styles/theme-dialog-surface.css",

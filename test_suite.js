@@ -8573,6 +8573,63 @@ runTest('Test 192: The first Semester 1 task listed on a Semester 2 panel gets n
   }
 });
 
+runTest('Test 194: The top-right user area keeps the bar and popup surfaces, readable ink and a native-geometry Sign Out', () => {
+  const read = f => fs.readFileSync(path.join(BASE_DIR, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const manifestCss = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8')).content_scripts.flatMap(c => c.css || []);
+  const at = manifestCss.indexOf('src/theme/styles/theme-user-menu.css');
+  assert.ok(at > manifestCss.indexOf('src/theme/styles/theme-reports-menus.css'), 'theme-user-menu.css loads after the menu styles');
+  const userCss = read('src/theme/styles/theme-user-menu.css');
+  const blocks = css => css.split('}').map(b => b.split('{')).filter(p => p.length === 2).map(([sel, body]) => ({ sel: sel.trim(), body }));
+  const user = blocks(userCss);
+  const find = (needle, state) => user.filter(b => b.sel.includes(needle) && (state ? b.sel.includes(state) : !/:hover/.test(b.sel)));
+  // Colours only: nothing in the user area changes Connect's size, spacing, borders or radius
+  for (const b of user) {
+    assert.ok(b.sel.startsWith('html.connectea-dark '), `user-area rules are scoped to the theme hook: ${b.sel}`);
+    assert.ok(!/(^|\s|;)(border|border-width|border-style|border-radius|padding[\w-]*|margin[\w-]*|height|width|line-height|font-size|font-weight|display):/.test(b.body),
+      `user-area rules set colours only: ${b.sel}`);
+  }
+  const avatar = find('.cvr-c-primary-navigation__button--avatar');
+  assert.ok(avatar.some(b => /background-color: transparent !important/.test(b.body) && b.sel.includes('#cx-specificity-anchor')),
+    'the avatar button has no fill of its own (the bar shows through), outranking Connect and the id-weighted button rule');
+  assert.ok(find('.cvr-c-primary-navigation__button--avatar', ':hover').some(b => /var\(--cx-surface-hover/.test(b.body)), 'the avatar button highlights on hover');
+  assert.ok(!/cvr-c-primary-navigation__button--avatar/.test(read('src/theme/styles/theme-reports-menus.css')),
+    'the old nav-bg fill on the avatar button is gone (a second translucent fill on the bar)');
+  const header = find('.cvr-c-primary-navigation__user-display');
+  assert.ok(header.some(b => /background-color: transparent !important/.test(b.body) && /color: var\(--cx-text-primary, #f8fafc\) !important/.test(b.body)),
+    'the dropdown header sits on the popup surface in the theme ink');
+  assert.ok(header.some(b => /:not\(\[class\*="avatar"\]\)/.test(b.sel) && /color: var\(--cx-text-primary/.test(b.body)), 'the name and role take the ink; the avatar keeps its colours');
+  const signOut = find('.cvr-c-primary-navigation__button--sign-out');
+  assert.ok(signOut.some(b => /background-color: transparent !important/.test(b.body) && /color: var\(--cx-text-primary/.test(b.body)), 'Sign Out is clear on the popup surface');
+  assert.ok(find('.cvr-c-primary-navigation__button--sign-out', ':hover').some(b => /var\(--cx-surface-hover/.test(b.body)), 'Sign Out highlights on hover');
+  assert.ok(find('.cvr-c-primary-navigation__user-controls').some(b => /background-color: transparent/.test(b.body)), 'the Sign Out row is clear');
+  // The generic button rules (border, 4px radius, 6px 14px padding, button fill) skip the user-area buttons
+  const skip = ':not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *)';
+  for (const f of ['src/theme/styles/theme-buttons.css', 'src/theme/styles/theme-component-base.css']) {
+    for (const b of blocks(read(f)).filter(b => /\.v-button/.test(b.sel) && !/:disabled/.test(b.sel) && /background-color: var\(--cx-(button-bg|surface-hover|surface-active)|border-color: var\(--cx-accent/.test(b.body))) {
+      assert.ok(cssCompact(b.sel).includes(cssCompact(skip)), `${f}: generic button rule must skip Sign Out and the avatar: ${b.sel.slice(0, 60)}`);
+    }
+  }
+  // Ink reaches 5:1 on the popup surface (and its hover) in every preset; glass layers composite over the canvas
+  const win = {};
+  for (const f of ['src/theme/theme-oklch.js', 'src/theme/theme-token-derive.js', 'src/theme/theme-glass-tokens.js', 'src/theme/theme-palettes.js']) {
+    new Function('window', fs.readFileSync(path.join(BASE_DIR, f), 'utf8'))(win);
+  }
+  const O = win.ConnectifyThemeOklch;
+  const rgba = v => v.startsWith('#') ? [1, 3, 5].map(i => parseInt(v.slice(i, i + 2), 16)).concat(1) : v.match(/[\d.]+/g).map(Number).concat(1).slice(0, 4);
+  const over = (top, under) => { const [r, g, b, a] = rgba(top), u = rgba(under); return '#' + [r, g, b].map((c, i) => Math.round(c * a + u[i] * (1 - a)).toString(16).padStart(2, '0')).join(''); };
+  for (const [id, p] of Object.entries(win.ConnectifyThemePalettes.BUILTIN_PALETTES)) {
+    let elevated, hover, ink;
+    if (p.derived) {
+      const c = win.ConnectifyThemeDerive.complete(p.colors), g = win.ConnectifyThemeGlassTokens.props(c, p.glassOpacity);
+      elevated = over(g['--cx-surface-elevated'], p.canvas); hover = over(g['--cx-surface-hover'], elevated); ink = c.textPrimary;
+    } else {
+      elevated = over(p.surfaceElevated || p.surface, p.canvas); hover = over(p.surfaceHover || p.surfaceElevated, elevated); ink = p.textPrimary;
+    }
+    assert.ok(O.contrast(ink, elevated) >= 5, `${id}: dropdown name must reach 5:1 on the popup (${O.contrast(ink, elevated).toFixed(2)})`);
+    assert.ok(O.contrast(ink, hover) >= 5, `${id}: Sign Out must reach 5:1 when hovered (${O.contrast(ink, hover).toFixed(2)})`);
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

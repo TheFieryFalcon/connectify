@@ -187,16 +187,10 @@
   transition: background-color 0.15s ease;
 }
 
-.connectea-dark .cvr-c-primary-navigation__button--avatar {
-  background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
-  color: var(--cx-nav-text, #cbd5e1) !important;
-}
-
 .connectea-dark :is(
   .cvr-c-service-menu__item,
   .cvr-c-primary-menu__item,
-  .cvr-c-category-menu .eds-u-interactive,
-  .cvr-c-primary-navigation__button--avatar
+  .cvr-c-category-menu .eds-u-interactive
 ):hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
