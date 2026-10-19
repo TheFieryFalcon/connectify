@@ -86,7 +86,7 @@ This document covers the user interface and analytics modules, including target 
 - **Export**: `window.ConnectifyCalibration`.
 
 #### Settings (`src/predictor/`, `src/cohort/category-store.js`)
-- `settings-markup.js` (panel HTML), `settings-preferences.js` (auto-expand, cohort size 500, ATAR % 60, theme list rebuilt from the registry on open, wallpaper, cache clearing), `category-settings.js` (`ConnectifyCategorySettings`, category keyword editor; save/delete rescan assessments), `category-baselines.js` (baseline editor), `category-store.js` (`ConnectifyCategoryStore`: defaults and saved categories in `cx-categories` + extension storage).
+- `settings-markup.js` (panel HTML), `settings-semester-filter.js` ("Show [Semester 1|2] classes only": checkbox + dropdown, "Detected: Semester N" hint; a change re-hides tiles, re-collects and fires `connectify-settings-updated`), `settings-preferences.js` (auto-expand, cohort size 500, ATAR % 60, theme list rebuilt from the registry on open, wallpaper, cache clearing), `category-settings.js` (`ConnectifyCategorySettings`, category keyword editor; save/delete rescan assessments), `category-baselines.js` (baseline editor), `category-store.js` (`ConnectifyCategoryStore`: defaults and saved categories in `cx-categories` + extension storage).
 
 #### Predictor (`src/predictor/`)
 - **Model**: `predictor-baselines.js` (baselines store; partial saves keep the other half), `predictor-engine.js` (`predictTask`, logarithmic headroom above 80%, calibrated variance), `predictor-history.js` (completed-result history, overall and prior to a task), `predictor-dates.js` (chronological order, custom week overrides).

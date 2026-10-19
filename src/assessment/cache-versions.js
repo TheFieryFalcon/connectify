@@ -13,7 +13,7 @@
 
   const CACHE_VERSIONS = {
     PREDICTOR: 'v11_20261016_pred',
-    RESULTS: 'v8_20261018_results',
+    RESULTS: 'v9_20261019_results',
     SETTINGS: 'v4_20261001_settings',
     COHORT: 'v6_20261018_cohort'
   };
@@ -46,7 +46,8 @@
     clearResultsCache() {
       try {
         ConnectifyCache.subjectsCache?.clear();
-        removeStorageKeys(k => k.startsWith('connectify:grade_cache:') || k.startsWith('connectify:subjects_cache'));
+        window.ConnectifyClassSemesters?.clear?.();
+        removeStorageKeys(k => k.startsWith('connectify:grade_cache:') || k.startsWith('connectify:subjects_cache') || k.startsWith('connectify:class_semesters:'));
         localStorage.setItem(CACHE_KEYS.RESULTS, CACHE_VERSIONS.RESULTS);
         window.dispatchEvent(new CustomEvent('connectify-results-updated'));
       } catch (e) {
@@ -64,7 +65,8 @@
           'connectify:preferences',
           'connectify:general_cohort_size',
           'connectify:atar_percentage',
-          'connectify:auto_expand'
+          'connectify:auto_expand',
+          'connectify:semester_filter'
         ];
         for (const k of directKeys) localStorage.removeItem(k);
         // Baselines live under singular and legacy plural prefixes (see ConnectifyUtils.BASELINE_PREFIXES)

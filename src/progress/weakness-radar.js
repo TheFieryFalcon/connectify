@@ -47,7 +47,9 @@
     return subjects;
   }
 
-  const getSubjectList = () => subjectList(window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+  // The classes "Show [Semester N] classes only" keeps, from the centralized cache
+  const collectClasses = () => (window.ConnectifyData?.collectClasses || window.ConnectifyData?.collect || (() => []))(true);
+  const getSubjectList = () => subjectList(collectClasses());
 
   let currentChart = null;
 
@@ -65,7 +67,7 @@
     // Opening the analyzer renders it, so a hidden panel is left alone
     if (chartDiv.closest?.('#connectify-weakness')?.hidden) return;
 
-    const collected = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+    const collected = collectClasses();
     const subjectMap = subjectList(collected);
     const isDisabled = (cleanName, rawName) => disabledWeaknessSubjects.has(cleanName) || (rawName && disabledWeaknessSubjects.has(rawName));
     const selectedCount = [...subjectMap].filter(([cleanName, rawName]) => !isDisabled(cleanName, rawName)).length;

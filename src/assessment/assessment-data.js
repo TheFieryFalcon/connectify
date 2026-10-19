@@ -55,20 +55,27 @@
     if (isCollecting) {
       return formatCollectedSubjects(includePending);
     }
-    const staleSet = getStaleSubjects();
-    const cards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'));
-    // Every card is read on a forced refresh, a stale subject or an empty cache; otherwise only
-    // expanded cards the cache has not seen (subjects opened during Expand All, or missing after a reload)
-    const refreshAll = forceRefresh || staleSet.size > 0 || !hasCachedSubjects();
-    const targets = (refreshAll ? cards : cards.filter(needsScrape))
-      .sort((a, b) => parseSemester(a) - parseSemester(b));
-    if (!refreshAll && targets.length === 0) {
-      return formatCollectedSubjects(includePending);
-    }
+    const allCards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'));
+    // "Show [Semester N] classes only": only that semester's cards refresh the cache; the other
+    // semester's cached results stay as they are (semester-filter.js)
+    const filter = window.ConnectifySemesterFilter;
+    const cards = filter ? filter.allowedCards(allCards) : allCards;
+    const classes = window.ConnectifyClassSemesters;
 
     isCollecting = true;
     const updatedStaleSubjects = new Set();
     try {
+      // Class titles, overall marks and final letters (cheap; written only on change). A wholly new
+      // class set reaches the new-year rollover from here, which may clear last year's cache.
+      classes?.recordCards?.(cards);
+      // Every card is read on a forced refresh, a stale subject or an empty cache; otherwise only
+      // expanded cards the cache has not seen (subjects opened during Expand All, or missing after a reload).
+      // A stale class whose cards are not refreshed (hidden semester) must not force a full read every time.
+      const staleSet = getStaleSubjects();
+      const hasStale = staleSet.size > 0 && (cards === allCards || cards.some(c => isSubjectStale(classes?.cardInfo(c).subject || '')));
+      const refreshAll = forceRefresh || hasStale || !hasCachedSubjects();
+      const targets = (refreshAll ? cards : cards.filter(needsScrape))
+        .sort((a, b) => parseSemester(a) - parseSemester(b));
       for (const card of targets) {
         scrapeSubjectTasks(card, forceRefresh, updatedStaleSubjects);
       }
@@ -101,7 +108,9 @@
           ''
         ).replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').trim();
 
-        if (!subjectsCache.has(cardTitle) || isSubjectStale(cardTitle)) {
+        if (window.ConnectifySemesterFilter && !window.ConnectifySemesterFilter.allowsCard(card)) {
+          // A hidden semester's card never refreshes the cache
+        } else if (!subjectsCache.has(cardTitle) || isSubjectStale(cardTitle)) {
           scrapeSubjectTasks(card, isSubjectStale(cardTitle));
         } else {
           scrapeSubjectTasks(card, false);
@@ -145,9 +154,16 @@
   }
 
 
+  /** collect() limited to the classes "Show [Semester N] classes only" keeps; for sidebar tools. */
+  function collectClasses(includePending = false, forceRefresh = false) {
+    const subjects = collect(includePending, forceRefresh);
+    return window.ConnectifySemesterFilter ? window.ConnectifySemesterFilter.filterSubjects(subjects) : subjects;
+  }
+
     // Publish public API
     window.ConnectifyData = {
       collect,
+      collectClasses,
       cohortMean,
       orderHint,
       correctedCaption,
@@ -171,6 +187,7 @@
       clearCache: () => {
         subjectsCache.clear();
         statsCache.clear();
+        window.ConnectifyClassSemesters?.clear?.();
         try {
           localStorage.removeItem(cache.getSubjectsCacheKey ? cache.getSubjectsCacheKey() : 'connectify:subjects_cache:current');
           localStorage.removeItem('connectify:subjects_cache:current');

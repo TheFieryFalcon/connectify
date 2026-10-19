@@ -1,15 +1,21 @@
 /**
  * Connectify ATAR Scraper
  *
- * Scrapes course information, assessment tasks, weights, scores, and semester groupings
- * from Connect's DOM (.eds-c-tile).
+ * Course information, assessment tasks, weights, scores and semester groupings for the ATAR tools,
+ * read from the centralized cache (class registry, subjects cache, grade cache), not the tiles.
  */
 (() => {
   'use strict';
 
   if (window.ConnectifyAtarScraper) return;
 
+  const ELIGIBLE_TITLE = /\b(?:Year|Yr|Y)\s*(?:11|12)\b|\bATAR\b|\b(?:11|12)\s+[A-Z]|\bUnit(?:s)?\s*[1-4]\b|\bWACE\b/i;
+
   function isAtarEligible() {
+    // Class titles the registry has seen first, then the page text
+    const registry = window.ConnectifyClassSemesters?.get?.() || {};
+    const titles = Object.values(registry).flatMap(s => [s?.[1]?.title, s?.[2]?.title]).filter(Boolean);
+    if (titles.some(t => ELIGIBLE_TITLE.test(t))) return true;
     const tiles = document.querySelectorAll(
       '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], .eds-c-tile, .cvr-c-tile, h1, h2, h3, h4, [data-subject-card], .c-tile'
     );
@@ -28,99 +34,87 @@
            /\bATAR\b/i.test(docText);
   }
 
+  const cleanCourseName = title => window.ConnectifyUtils.normalize(
+    String(title || '')
+      .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
+      .replace(/\bATAR\b/gi, '')
+      .replace(/\bYear\s*\d+\b/gi, '')
+  );
+
+  // Cached task -> the { name, weight, pending, score, earned } shape taskProgress() expects
+  function toAssessment(t) {
+    const isPending = Boolean(t.pending || t.score === null || t.score === undefined);
+    const scorePct = isPending ? undefined : Number(t.score);
+    const weightVal = Number(t.weight) || 0;
+    const earnedWeight = (!isPending && Number.isFinite(scorePct)) ? (scorePct / 100) * weightVal : 0;
+    return { name: t.name, weight: weightVal, pending: isPending, score: scorePct, earned: earnedWeight };
+  }
+
+  const usableTask = t => t && t.name && (t.weight > 0 || !/^Assessment\s+\d+$/i.test(t.name));
+
+  // The subject's cached tasks, limited to those one semester's outline listed when it was scraped
+  function cachedTasks(subject, entry) {
+    const { normalize } = window.ConnectifyUtils;
+    const exact = window.ConnectifyCache?.subjectsCache?.get?.(subject);
+    const all = exact ? Array.from(exact.values()) : (window.ConnectifyData?.getSubjectTasks?.(subject) || []);
+    if (!entry?.tasks?.length) return all;
+    const byId = new Map(all.map(t => [t.id, t]));
+    const sameName = name => all.find(t => normalize(t.name).toLowerCase() === normalize(name).toLowerCase());
+    const listed = [...new Set(entry.tasks.map(([id, name]) => byId.get(id) || sameName(name)).filter(Boolean))];
+    return listed.length ? listed : all;
+  }
+
+  /**
+   * [[Semester 1 courses], [Semester 2 courses]] from the centralized cache: the class registry
+   * (class-semesters.js) for each semester's classes, overall marks and final letters, the subjects
+   * cache for tasks and the grade cache for classes not on this page. Outline tiles are never read
+   * here; collect() refreshes the cache first. "Show [Semester N] classes only" applies.
+   */
   function readCourses(atarOnly = true) {
     const math = window.ConnectifyMath || {};
-    const { normalize } = window.ConnectifyUtils;
     const isAtarCourse = math.isAtarCourse || (t => /\bATAR\b/i.test(t));
     const scoreValue = math.scoreValue || (v => {
       const n = Number(v);
       return Number.isFinite(n) ? n : undefined;
     });
-    const parseAssessment = math.parseAssessment;
     const taskProgress = math.taskProgress || (() => ({}));
 
     const result = [[], []];
     const seen = [new Set(), new Set()];
 
-    for (const card of document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, [class*="subject-card"]')) {
-      const title = normalize(
-        card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent ||
-        card.getAttribute('data-subject-title') ||
-        card.getAttribute('aria-label') ||
-        ''
-      );
-      const semesterMatch = title.match(/\bSemester\s*([12])\b/i) || title.match(/\bSem\s*([12])\b/i);
-      if (!semesterMatch || (atarOnly && !isAtarCourse(title))) continue;
+    try { window.ConnectifyData?.collect?.(true); } catch {}
+    const registry = window.ConnectifyClassSemesters?.get?.() || {};
 
-      const name = normalize(
-        title
-          .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
-          .replace(/\bATAR\b/gi, '')
-          .replace(/\bYear\s*\d+\b/gi, '')
-      );
-      const index = Number(semesterMatch[1]) - 1;
-      const id = name.toLowerCase();
+    for (const [subject, semesters] of Object.entries(registry)) {
+      for (const semNumber of [1, 2]) {
+        const entry = semesters?.[semNumber];
+        if (!entry) continue;
+        const title = entry.title || subject;
+        if (atarOnly && !isAtarCourse(title)) continue;
+        const name = cleanCourseName(title);
+        const id = name.toLowerCase();
+        const index = semNumber - 1;
+        if (!name || seen[index].has(id)) continue;
+        seen[index].add(id);
 
-      if (seen[index].has(id)) continue;
-      seen[index].add(id);
-
-      const summaryRow = Array.from(card.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.cvr-c-tasks'));
-      const summaryText = normalize(summaryRow?.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
-      const markMatch = summaryText.match(/(-?\d+(?:\.\d+)?)\s*%/);
-
-      let tasks = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'))
-        .filter(r => r.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card)
-        .map((r, i) => {
-          const cells = r.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark');
-          const labels = Array.from(r.querySelectorAll('.cvr-c-task__details .v-label'))
-            .map(e => normalize(e.textContent))
-            .filter(Boolean);
-          const taskLabel = (labels.length ? labels[labels.length - 1] : '') || `Assessment ${i + 1}`;
-          return parseAssessment ? parseAssessment(cells[0]?.textContent, cells[1]?.textContent, taskLabel) : null;
-        }).filter(Boolean);
-
-      if (tasks.length === 0 && window.ConnectifyData?.getSubjectTasks) {
-        const cachedTasks = window.ConnectifyData.getSubjectTasks(title) || window.ConnectifyData.getSubjectTasks(name);
-        if (cachedTasks && cachedTasks.length > 0) {
-          tasks = cachedTasks
-            .filter(t => t && t.name && (t.weight > 0 || !/^Assessment\s+\d+$/i.test(t.name)))
-            .map(t => {
-              const isPending = Boolean(t.pending || t.score === null || t.score === undefined);
-              const scorePct = isPending ? undefined : Number(t.score);
-              const weightVal = Number(t.weight) || 0;
-              const earnedWeight = (!isPending && Number.isFinite(scorePct)) ? (scorePct / 100) * weightVal : 0;
-              return {
-                name: t.name,
-                weight: weightVal,
-                pending: isPending,
-                score: scorePct,
-                earned: earnedWeight
-              };
-            });
+        const tasks = cachedTasks(subject, entry).filter(usableTask).map(toAssessment);
+        let markValue = entry.mark !== null && entry.mark !== undefined ? scoreValue(entry.mark) : undefined;
+        if (markValue === undefined && tasks.length > 0) {
+          const completedTasks = tasks.filter(t => !t.pending && Number.isFinite(t.score) && t.weight > 0);
+          const totalCompletedWeight = completedTasks.reduce((sum, t) => sum + t.weight, 0);
+          if (totalCompletedWeight > 0) {
+            markValue = (completedTasks.reduce((sum, t) => sum + (t.score / 100) * t.weight, 0) / totalCompletedWeight) * 100;
+          }
         }
+
+        result[index].push({
+          id,
+          name,
+          mark: markValue,
+          finalLetter: Boolean(entry.finalLetter),
+          progress: taskProgress(tasks, markValue, semNumber)
+        });
       }
-
-      let markValue = markMatch ? scoreValue(markMatch[1]) : undefined;
-      if (markValue === undefined && tasks.length > 0) {
-        const completedTasks = tasks.filter(t => !t.pending && Number.isFinite(t.score) && t.weight > 0);
-        const totalCompletedWeight = completedTasks.reduce((s, t) => s + t.weight, 0);
-        if (totalCompletedWeight > 0) {
-          const earnedWeight = completedTasks.reduce((s, t) => s + (t.score / 100) * t.weight, 0);
-          markValue = (earnedWeight / totalCompletedWeight) * 100;
-        }
-      }
-
-      const hasFinalLetter = Array.from(
-        summaryRow?.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark') || []
-      ).some(c => /^[ABCDE]$/i.test(normalize(c.textContent)));
-
-      result[index].push({
-        id,
-        name,
-        mark: markValue,
-        finalLetter: hasFinalLetter,
-        progress: taskProgress(tasks, markValue, index + 1)
-      });
     }
 
     // Ingest grade cache (e.g. connectify:grade_cache:current and connectify:grade_cache:<studentId>)
@@ -142,16 +136,11 @@
 
           const semNumber = Number(entry.semester) === 1 ? 1 : 2;
           const semIdx = semNumber - 1;
-          const cleanName = normalize(
-            subjName
-              .replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '')
-              .replace(/\bATAR\b/gi, '')
-              .replace(/\bYear\s*\d+\b/gi, '')
-          );
+          const cleanName = cleanCourseName(subjName);
           const id = cleanName.toLowerCase();
 
           if (seen[semIdx].has(id)) {
-            // Complement mark if DOM record lacked one
+            // Complement mark if the registry lacked one
             const existing = result[semIdx].find(r => r.id === id);
             if (existing && existing.mark === undefined && Number.isFinite(entry.mark)) {
               existing.mark = entry.mark;
@@ -162,27 +151,9 @@
           seen[semIdx].add(id);
 
           const markVal = Number.isFinite(entry.mark) ? entry.mark : undefined;
-          let tasks = [];
-          if (window.ConnectifyData?.getSubjectTasks) {
-            const cachedTasks = window.ConnectifyData.getSubjectTasks(subjName) || window.ConnectifyData.getSubjectTasks(cleanName);
-            if (cachedTasks && cachedTasks.length > 0) {
-              tasks = cachedTasks
-                .filter(t => t && t.name && (t.weight > 0 || !/^Assessment\s+\d+$/i.test(t.name)))
-                .map(t => {
-                  const isPending = Boolean(t.pending || t.score === null || t.score === undefined);
-                  const scorePct = isPending ? undefined : Number(t.score);
-                  const weightVal = Number(t.weight) || 0;
-                  const earnedWeight = (!isPending && Number.isFinite(scorePct)) ? (scorePct / 100) * weightVal : 0;
-                  return {
-                    name: t.name,
-                    weight: weightVal,
-                    pending: isPending,
-                    score: scorePct,
-                    earned: earnedWeight
-                  };
-                });
-            }
-          }
+          const byName = window.ConnectifyData?.getSubjectTasks?.(subjName) || [];
+          const cached = byName.length ? byName : (window.ConnectifyData?.getSubjectTasks?.(cleanName) || []);
+          const tasks = cached.filter(usableTask).map(toAssessment);
 
           result[semIdx].push({
             id,
@@ -197,7 +168,8 @@
       console.warn('Connectify failed to ingest grade cache into courses:', e);
     }
 
-    return result;
+    const filter = window.ConnectifySemesterFilter;
+    return filter ? filter.filterCourses(result) : result;
   }
 
   function scanOutlineDetails() {

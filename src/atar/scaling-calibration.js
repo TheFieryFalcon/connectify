@@ -31,7 +31,7 @@
       }
     }
     if (courseList.size === 0 && window.ConnectifyData?.collect) {
-      const collected = window.ConnectifyData.collect(true);
+      const collected = (window.ConnectifyData.collectClasses || window.ConnectifyData.collect)(true);
       collected.forEach(c => {
         if (c.name && !courseList.has(c.name)) {
           courseList.set(c.name, { id: c.name.toLowerCase(), name: c.name, mark: c.score });

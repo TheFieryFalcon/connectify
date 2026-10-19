@@ -22,13 +22,16 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `cache-versions.js`: `ConnectifyCache` versions, keys and isolated per-subsystem clearing; runs `checkAndInvalidateAll()` first.
   - `assessment-cache.js`: in-memory `subjectsCache` and persistent stats cache (`connectify:stats_cache:`, `connectify:subjects_cache:`).
   - `assessment-parse-helpers.js` / `assessment-parser.js`: order hints, cohort mean, weighted mean; card metadata, task rows, marks and weights.
+  - `class-semesters.js`: class registry per semester (each card read once, re-read when scraped); `detectSemester()` (2 once a Semester 2 card has a mark or a Semester 1 card a final letter); a wholly new class set goes to `ConnectifyYearRollover.handleClassChange` first.
+  - `semester-filter.js`: "Show [Semester N] classes only" (off by default): other semester's tiles get `.cx-semester-hidden`, only allowed cards refresh the cache (the other semester stays frozen), `filterSubjects` / `filterCourses` for tools.
   - `assessment-expand-progress.js`: `#cx-expand-progress` pill and scroll freeze (`start()` → `{ update, finish }`).
   - `assessment-accordion-watch.js`: single-accordion animation guard (450ms) and refresh of the opened card.
   - `assessment-expand.js`: paced `expandAll` (one heading per card, 65ms apart), instant collapse, staged finalization (90% -> 95% -> 98% -> 100%); every exit cancels its own 10s safety timer.
   - `assessment-scrape.js`: per-card task scraping and chronological order resolution.
 - **Key Functions**:
-  - `collect(includePending)`: Scrapes all cards; caches results in `subjectsCache` (Map) to prevent data loss on collapse. A warm cache is used without DOM reads, except expanded cards never read (row count differs from the last scrape, `needsScrape`), so subjects opened by Expand All join a cache that already held others; Expand All re-collects 200ms after finishing.
+  - `collect(includePending)`: Records the class registry, then scrapes cards (only the semester filter's allowed cards; a stale class on a hidden card never forces a full read); caches results in `subjectsCache` (Map) to prevent data loss on collapse. A warm cache is used without DOM reads, except expanded cards never read (row count differs from the last scrape, `needsScrape`), so subjects opened by Expand All join a cache that already held others; Expand All re-collects 200ms after finishing.
   - `triggerAccordionAnimationGuard(duration)`: Sets `window.ConnectifyIsAccordionAnimating` (450ms) to mute background observers.
+  - `collectClasses(includePending)`: `collect()` through `filterSubjects`; every sidebar tool (Predictor, Weakness, Progress, Settings) reads this, page features use `collect()`.
   - `cancelPendingNotify()`: Expand All drops a queued per-card update before its own statistics pass.
   - `ConnectifyCache`: `VERSIONS`, `KEYS`, `clearPredictorCache`, `clearResultsCache`, `clearSettingsCache`, `clearCohortCache`, `checkAndInvalidateAll`.
 - **Export**: `window.ConnectifyData`, `window.ConnectifyCache`.
@@ -109,11 +112,11 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `target-difficulty.js` (`ConnectifyTargetDifficulty`): task baseline = the student's average on that type in the course (else halfway to that type's average across courses, else the course average, clamped 30–99.5); effort $t \in [-1, 1]$ closes $t$ of the gap to 100 or scales the baseline down.
 - **Export**: `window.ConnectifyTargetSolver` (also merged into `window.ConnectifyMath`).
 
-#### [`atar-scraper.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-scraper.js) (115 lines)
-- **Role**: Scrapes course titles, semester cards, assessment tasks, and marks specifically for ATAR calculation.
+#### [`atar-scraper.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-scraper.js)
+- **Role**: ATAR courses for the sidebar tools, from the centralized cache only.
 - **Key Functions**:
-  - `isAtarEligible()`: Checks whether student is enrolled in Year 11/12 ATAR subjects across tiles and DOM.
-  - `readCourses(atarOnly)`: Reads courses grouped into `[Semester1Courses, Semester2Courses]` from `.eds-c-tile` and `.cvr-c-tile`; falls back to cached tasks for collapsed cards.
+  - `isAtarEligible()`: Year 11/12 or ATAR in registry class titles, else the page text.
+  - `readCourses(atarOnly)`: `collect(true)`, then `[Semester1Courses, Semester2Courses]` from the class registry (mark, final letter, each outline's own tasks from the subjects cache) plus grade-cache classes; passed through `filterCourses`.
   - `scanOutlineDetails()`: Safe no-op complying with Rule 7; users are prompted via explicit "Expand Subject Outlines" buttons.
 - **Export**: `window.ConnectifyAtarScraper`.
 

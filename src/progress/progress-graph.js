@@ -33,7 +33,7 @@
     function refresh(force = false) {
       if (panel.hidden) return;
       if (!force && panel.contains(document.activeElement) && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
-      const data = dataAPI ? dataAPI.collect(true) : [];
+      const data = dataAPI ? (dataAPI.collectClasses || dataAPI.collect)(true) : [];
       const sig = JSON.stringify(data);
       if (sig === lastDataSignature) return;
       lastDataSignature = sig;

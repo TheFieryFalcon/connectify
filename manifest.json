@@ -53,7 +53,8 @@
             "src/sidebar/styles/sidebar-predictor.css",
             "src/sidebar/styles/sidebar-predictor-results.css",
             "src/sidebar/styles/sidebar-settings.css",
-            "src/sidebar/styles/sidebar-progress-scaling.css"
+            "src/sidebar/styles/sidebar-progress-scaling.css",
+            "src/assessment/semester-filter.css"
          ],
          "js": [
             "src/system/scheduler.js",
@@ -62,6 +63,8 @@
             "src/assessment/assessment-cache.js",
             "src/assessment/assessment-parse-helpers.js",
             "src/assessment/assessment-parser.js",
+            "src/assessment/class-semesters.js",
+            "src/assessment/semester-filter.js",
             "src/assessment/assessment-expand-progress.js",
             "src/assessment/assessment-accordion-watch.js",
             "src/assessment/assessment-expand.js",
@@ -106,6 +109,7 @@
             "src/atar/scaling-calibration.js",
             "src/predictor/category-baselines.js",
             "src/predictor/settings-markup.js",
+            "src/predictor/settings-semester-filter.js",
             "src/predictor/settings-preferences.js",
             "src/predictor/category-settings.js",
             "src/predictor/predictor-baselines.js",

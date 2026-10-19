@@ -61,6 +61,8 @@ const MODULE_BUNDLES = {
     'assessment-cache.js',
     'assessment-parse-helpers.js',
     'assessment-parser.js',
+    'class-semesters.js',
+    'semester-filter.js',
     'assessment-expand-progress.js',
     'assessment-accordion-watch.js',
     'assessment-expand.js',
@@ -99,6 +101,7 @@ const MODULE_BUNDLES = {
     'category-store.js',
     'category-baselines.js',
     'settings-markup.js',
+    'settings-semester-filter.js',
     'settings-preferences.js',
     'category-settings.js'
   ],
@@ -2183,10 +2186,56 @@ runTest('assessment-data.js and cohort-view.js implement robust 5-number stats c
   assert.ok(viewCode.includes('setTaskStats'), 'cohort-view.js readStats must store parsed stats in setTaskStats');
 });
 
-runTest('atar-scraper.js readCourses falls back to cached subject tasks when accordion is collapsed', () => {
+runTest('atar-scraper.js readCourses reads semester groupings, marks and tasks from the centralized cache', () => {
   const scraperCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-scraper.js'), 'utf8');
-  assert.ok(scraperCode.includes('tasks.length === 0') && scraperCode.includes('getSubjectTasks'), 'atar-scraper.js must query getSubjectTasks when live tasks are empty');
-  assert.ok(scraperCode.includes('pending: isPending'), 'atar-scraper.js must map cached tasks with pending status');
+  const readCoursesSrc = scraperCode.slice(scraperCode.indexOf('function readCourses'), scraperCode.indexOf('function scanOutlineDetails'));
+  assert.ok(!readCoursesSrc.includes('document.querySelectorAll'), 'readCourses must not read outline tiles; sidebar tools work off the cache');
+  assert.ok(readCoursesSrc.includes('ConnectifyClassSemesters') && readCoursesSrc.includes('collect'), 'readCourses must refresh the cache and read the class registry');
+
+  const saved = {
+    classes: window.ConnectifyClassSemesters, data: window.ConnectifyData, cache: window.ConnectifyCache,
+    filter: window.ConnectifySemesterFilter, scraper: window.ConnectifyAtarScraper
+  };
+  try {
+    localStorage.clear();
+    const chem = new Map([
+      ['a', { id: 'a', name: 'Test 1', score: 80, weight: 50, pending: false }],
+      ['b', { id: 'b', name: 'Exam', score: null, weight: 50, pending: true }],
+      ['c', { id: 'c', name: 'Test 2', score: 90, weight: 40, pending: false }],
+      ['d', { id: 'd', name: 'Final Exam', score: null, weight: 60, pending: true }]
+    ]);
+    let collected = 0;
+    window.ConnectifyCache = { ...(saved.cache || {}), subjectsCache: new Map([['12 Chemistry ATAR', chem]]) };
+    window.ConnectifyData = { collect: () => { collected++; return []; }, getSubjectTasks: () => [] };
+    window.ConnectifyClassSemesters = { get: () => ({
+      '12 Chemistry ATAR': {
+        1: { title: '12 Chemistry ATAR - Semester 1', mark: 80, finalLetter: true, tasks: [['a', 'Test 1'], ['b', 'Exam']] },
+        2: { title: '12 Chemistry ATAR - Semester 2', mark: 90, finalLetter: false, tasks: [['c', 'Test 2'], ['d', 'Final Exam']] }
+      }
+    }) };
+    delete window.ConnectifySemesterFilter;
+    delete window.ConnectifyAtarScraper;
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8'));
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-scraper.js'), 'utf8'));
+    const courses = window.ConnectifyAtarScraper.readCourses(true);
+    assert.ok(collected > 0, 'readCourses must refresh the cache through collect() first');
+    assert.deepStrictEqual(courses.map(list => list.map(c => c.id)), [['12 chemistry'], ['12 chemistry']], 'each semester outline is its own course entry');
+    assert.strictEqual(courses[0][0].mark, 80);
+    assert.strictEqual(courses[0][0].finalLetter, true, 'final letters come from the registry');
+    assert.strictEqual(courses[1][0].mark, 90);
+    const sem2Tasks = courses[1][0].progress?.allTasks;
+    if (sem2Tasks) {
+      assert.deepStrictEqual(sem2Tasks.map(t => t.name), ['Test 2', 'Final Exam'], "a semester's progress uses only the tasks its outline listed");
+      assert.strictEqual(sem2Tasks[1].pending, true, 'cached tasks keep their pending status');
+    }
+  } finally {
+    window.ConnectifyClassSemesters = saved.classes;
+    window.ConnectifyData = saved.data;
+    window.ConnectifyCache = saved.cache;
+    if (saved.filter) window.ConnectifySemesterFilter = saved.filter;
+    window.ConnectifyAtarScraper = saved.scraper;
+    localStorage.clear();
+  }
 });
 
 runTest('cohort-stats.js schedule does not block immediate execution when user is inactive', () => {
@@ -2271,11 +2320,10 @@ runTest('atar-ui.js scanAndRefresh awaits DOM expansion and theme.css uses high-
   assert.ok(cssHas(css, '.cvr-c-reports') && cssHas(css, '#1a222d'), 'theme.css must style Reports container with solid #1a222d background');
 });
 
-runTest('atar-scraper.js readCourses supports cvr-c-tile and semester parsing across both semesters', () => {
+runTest('atar-scraper.js isAtarEligible reads class titles from the registry before the page and never auto-expands', () => {
   const scraperJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-scraper.js'), 'utf8');
-  assert.ok(scraperJs.includes('.cvr-c-tile'), 'atar-scraper.js must query .cvr-c-tile');
-  assert.ok(scraperJs.includes('.cvr-c-tile__title') || scraperJs.includes('[class*="tile__title"]'), 'atar-scraper.js must extract titles from .cvr-c-tile__title');
   assert.ok(scraperJs.includes('isAtarEligible'), 'atar-scraper.js must define isAtarEligible');
+  assert.ok(/function isAtarEligible\(\) \{[\s\S]*?ConnectifyClassSemesters[\s\S]*?\.cvr-c-tile/.test(scraperJs), 'isAtarEligible checks registry titles, then .cvr-c-tile titles on the page');
   assert.ok(!scraperJs.includes('btn.click()'), 'atar-scraper.js scanOutlineDetails must not programmatically click buttons without user action');
 });
 
@@ -2979,7 +3027,8 @@ runTest('Test 110: Silent difference check, out-of-date cache prompt with one-ti
   assert.strictEqual(testTask.row, mockRow2, 'Task row must be updated to new row element');
 
   // 3. collect() stops scrape when valid cache exists, no subjects are stale and every expanded card was read (Test 183)
-  assert.ok(assessJs.includes('const refreshAll = forceRefresh || staleSet.size > 0 || !hasCachedSubjects();') && assessJs.includes('cards.filter(needsScrape)'), 'collect must check hasCachedSubjects, staleSet and unread expanded cards');
+  // Only stale classes whose cards refresh count, so a hidden semester's stale class cannot force a full read on every collect
+  assert.ok(assessJs.includes('const refreshAll = forceRefresh || hasStale || !hasCachedSubjects();') && assessJs.includes('staleSet.size > 0 && (cards === allCards') && assessJs.includes('cards.filter(needsScrape)'), 'collect must check hasCachedSubjects, stale refreshed classes and unread expanded cards');
   assert.ok(assessJs.includes('function hasCachedSubjects()'), 'assessment-data.js must define hasCachedSubjects');
   assert.ok(assessJs.includes('parseCardSubjectTasks'), 'assessment-data.js must separate card task parsing into parseCardSubjectTasks');
 
@@ -3793,8 +3842,8 @@ runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, g
   const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
   const progressCss = fs.readFileSync(path.resolve(BASE_DIR, 'progress.css'), 'utf8');
 
-  // 1. Verify progress-graph.js calls collect(true) to include uncompleted tasks
-  assert.ok(progressGraphJs.includes('dataAPI ? dataAPI.collect(true) : []'), 'progress-graph.js refresh must call collect(true)');
+  // 1. Verify progress-graph.js collects pending tasks too, limited to the semester filter's classes
+  assert.ok(progressGraphJs.includes('dataAPI ? (dataAPI.collectClasses || dataAPI.collect)(true) : []'), 'progress-graph.js refresh must call collectClasses(true)');
 
   // 2. Verify progress-chart.js handles pending tasks, edit button for valid dates, and dash score
   assert.ok(progressChartJs.includes("row.className = 'cx-task-pending'"), 'progress-chart.js must assign cx-task-pending to uncompleted rows');
@@ -8211,7 +8260,7 @@ runTest('Test 183: Expand All adds every expanded subject to a cache that alread
     cards = [];
     assert.deepStrictEqual(names(), ['12 Chemistry ATAR', '12 Philosophy and Ethics ATAR', '12 Physics ATAR'], 'the persisted cache keeps every subject');
     const src = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/cache-versions.js'), 'utf8');
-    assert.ok(src.includes("RESULTS: 'v8_20261018_results'"), 'partial subject caches from earlier versions are invalidated');
+    assert.ok(src.includes("RESULTS: 'v9_20261019_results'"), 'caches from before the class registry are invalidated');
   } finally {
     document.querySelectorAll = origQSA;
     mockLocalStorage.clear();
@@ -8252,6 +8301,212 @@ runTest('Test 185: The theme audit measures SVG chart labels, contrast-checks Co
   assert.ok(missing[0].type === 'TOOL_SUBJECTS_MISSING' && /Physics ATAR Year 11/.test(missing[0].details) && !/Literature/.test(missing[0].details), 'only subjects with marked tasks are expected');
   boxes.appendChild(el('label', '', 'Physics Year 11'));
   assert.strictEqual((await auditToolSubjects(page, 'connectify-weakness-toggle')).length, 0, 'a complete list passes');
+});
+
+// Outline card fixture: title, optional overall row (outside .cvr-c-tasks) and task rows [[name, mark]]
+function makeOutlineCard(title, { overall = null, tasks = [] } = {}) {
+  const card = new MockElement('div', 'eds-c-tile');
+  const head = new MockElement('div', 'eds-c-tile__title'); head.textContent = title; card.appendChild(head);
+  if (overall !== null) {
+    const row = new MockElement('div', 'cvr-c-task'), marks = new MockElement('div', 'cvr-c-task__marks');
+    for (const text of [].concat(overall)) { const cell = new MockElement('div', 'cvr-c-task__mark'); cell.textContent = text; marks.appendChild(cell); }
+    row.appendChild(marks); card.appendChild(row);
+  }
+  const list = new MockElement('div', 'cvr-c-tasks');
+  for (const [name, mark] of tasks) {
+    const row = new MockElement('div', 'cvr-c-task'), details = new MockElement('div', 'cvr-c-task__details');
+    for (const text of ['Term 1 Week 4', name]) { const l = new MockElement('span', 'v-label'); l.textContent = text; details.appendChild(l); }
+    const marks = new MockElement('div', 'cvr-c-task__marks'), cell = new MockElement('div', 'cvr-c-task__mark');
+    cell.textContent = mark; marks.appendChild(cell); row.appendChild(details); row.appendChild(marks); list.appendChild(row);
+  }
+  card.appendChild(list);
+  return card;
+}
+
+function loadSemesterModules() {
+  // window may inherit earlier copies, so shadow them instead of deleting
+  window.ConnectifyClassSemesters = undefined;
+  window.ConnectifySemesterFilter = undefined;
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/class-semesters.js'), 'utf8'));
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/semester-filter.js'), 'utf8'));
+  return { classes: window.ConnectifyClassSemesters, filter: window.ConnectifySemesterFilter };
+}
+
+runTest('Test 187: The class registry records each semester outline and detects the current semester', () => {
+  const origQSA = document.querySelectorAll, origNow = Date.now;
+  let now = 1e12;
+  Date.now = () => (now += 5000); // detection is memoised for a second
+  try {
+    mockLocalStorage.clear();
+    const { classes } = loadSemesterModules();
+    const chem1 = makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: ['80%', 'A'] });
+    const chem2 = makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '85%' });
+    const art1 = makeOutlineCard('12 Art - Semester 1', { overall: '70%' });
+    let cards = [chem1, chem2, art1];
+    document.querySelectorAll = sel => (sel.includes('eds-c-tile') ? cards : origQSA(sel));
+    classes.recordCards(cards);
+    const reg = classes.get();
+    assert.deepStrictEqual(Object.keys(reg).sort(), ['12 Art', '12 Chemistry ATAR']);
+    assert.deepStrictEqual([reg['12 Chemistry ATAR'][1].mark, reg['12 Chemistry ATAR'][1].finalLetter, reg['12 Chemistry ATAR'][2].mark], [80, true, 85]);
+    assert.ok(!reg['12 Art'][2], 'a class without a Semester 2 outline has no Semester 2 entry');
+    assert.deepStrictEqual(classes.classesIn(2), ['12 Chemistry ATAR']);
+    const stored = JSON.parse(mockLocalStorage.getItem(`connectify:class_semesters:${window.ConnectifyUtils.accountKey()}`));
+    assert.strictEqual(stored['12 Art'][1].mark, 70, 'the registry is persisted');
+
+    assert.strictEqual(classes.detectSemester(), 2, 'Semester 2 results or final Semester 1 letters mean Semester 2');
+    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%' }), makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '-' })];
+    assert.strictEqual(classes.detectSemester(), 1, 'no Semester 2 results and no final letters mean Semester 1');
+    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: ['78%', 'B'] })];
+    assert.strictEqual(classes.detectSemester(), 2, 'a final Semester 1 letter means Semester 2 has started');
+
+    // A card element is read once; a scrape re-reads it
+    const before = JSON.stringify(classes.get());
+    chem1.querySelector('.cvr-c-task__mark').textContent = '90%';
+    classes.recordCards([chem1]);
+    assert.strictEqual(JSON.stringify(classes.get()), before, 'an already-recorded card is not re-read on every collect');
+    classes.recordCards([chem1], true);
+    assert.strictEqual(classes.get()['12 Chemistry ATAR'][1].mark, 90, 'a scraped card is re-read');
+  } finally {
+    document.querySelectorAll = origQSA; Date.now = origNow; mockLocalStorage.clear();
+  }
+});
+
+runTest('Test 188: "Show [Semester N] classes only" hides the other semester, refreshes only its cards and filters sidebar data', () => {
+  const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
+  const origQSA = document.querySelectorAll;
+  try {
+    mockLocalStorage.clear();
+    const { filter } = loadSemesterModules();
+    window.__connectifyDataInitialized = false;
+    eval(dataJs);
+    window.ConnectifyCache.subjectsCache.clear();
+    const chem1 = makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%', tasks: [['Chem Test 1', '80%']] });
+    const chem2 = makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '84%', tasks: [['Chem Test 2', '88%']] });
+    const art1 = makeOutlineCard('12 Art - Semester 1', { overall: '70%', tasks: [['Art Essay', '70%']] });
+    const cards = [chem1, chem2, art1];
+    document.querySelectorAll = sel => (sel.includes('eds-c-tile') ? cards : sel.includes('cx-semester-hidden') ? cards.filter(c => c.classList.contains('cx-semester-hidden')) : origQSA(sel));
+
+    // Off by default: everything as before
+    assert.strictEqual(filter.isEnabled(), false, 'the option is off by default');
+    assert.strictEqual(filter.activeSemester(), null);
+    assert.strictEqual(filter.allowedCards(cards), cards);
+    const names = list => list.map(s => s.name).sort();
+    assert.deepStrictEqual(names(window.ConnectifyData.collect(true)), ['12 Art', '12 Chemistry ATAR']);
+    assert.deepStrictEqual(names(window.ConnectifyData.collectClasses(true)), ['12 Art', '12 Chemistry ATAR']);
+
+    // Semester 2 only
+    filter.save(true, 2);
+    assert.strictEqual(filter.activeSemester(), 2);
+    filter.applyToPage();
+    assert.deepStrictEqual(cards.map(c => c.classList.contains('cx-semester-hidden')), [true, false, true], "the other semester's tiles are hidden");
+    assert.deepStrictEqual(filter.allowedCards(cards), [chem2]);
+
+    // Semester 1 is frozen: its cards no longer refresh the cache, but their results stay
+    art1.querySelector('.cvr-c-tasks .cvr-c-task__mark').textContent = '95%';
+    const all = window.ConnectifyData.collect(true, true);
+    const art = all.find(s => s.name === '12 Art');
+    assert.strictEqual(Math.round(art.tasks[0].score), 70, 'a hidden semester card never refreshes the cache');
+    const chem = all.find(s => s.name === '12 Chemistry ATAR');
+    assert.deepStrictEqual(chem.tasks.map(t => t.name).sort(), ['Chem Test 1', 'Chem Test 2'], "a continuing class keeps its cached Semester 1 results");
+    assert.deepStrictEqual(names(window.ConnectifyData.collectClasses(true)), ['12 Chemistry ATAR'], 'sidebar tools list only Semester 2 classes');
+    const courses = filter.filterCourses([[{ id: 'chemistry' }, { id: 'art' }], [{ id: 'chemistry' }]]);
+    assert.deepStrictEqual(courses.map(l => l.map(c => c.id)), [['chemistry'], ['chemistry']], 'Semester 1 keeps only the classes continuing into Semester 2');
+
+    // Turning it off shows every tile again
+    filter.save(false, 2);
+    filter.applyToPage();
+    assert.ok(cards.every(c => !c.classList.contains('cx-semester-hidden')), 'turning the option off shows every tile');
+
+    // A pick lasts for the school period it was made in
+    mockLocalStorage.setItem(filter.KEY, JSON.stringify({ enabled: true, semester: 1, period: '1999-2' }));
+    assert.strictEqual(filter.chosenSemester(), window.ConnectifyClassSemesters.detectSemester(), "a pick from an earlier period follows detection");
+
+    const expandJs = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/assessment-expand.js'), 'utf8');
+    assert.ok(expandJs.includes("h.closest?.('.cx-semester-hidden')"), 'Expand All skips hidden tiles');
+    const css = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/semester-filter.css'), 'utf8');
+    assert.ok(/\.cx-semester-hidden\s*\{\s*display:\s*none !important;/.test(css));
+  } finally {
+    document.querySelectorAll = origQSA; mockLocalStorage.clear();
+  }
+});
+
+runTest('Test 189: Settings offers "Show [Semester 1|2] classes only" and every sidebar tool reads the filtered cache', () => {
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'settings-markup.js'), 'utf8'));
+  const html = window.ConnectifySettingsMarkup.panelHtml();
+  assert.ok(/id="cx-semester-filter-toggle"[^>]*> Show\s*<select id="cx-semester-filter-select"[\s\S]*?<option value="1">Semester 1<\/option>\s*<option value="2">Semester 2<\/option>\s*<\/select> classes only/.test(html),
+    'a checkbox reading "Show [Semester 1|2] classes only" with a semester dropdown');
+  const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const js = manifest.content_scripts.flatMap(g => g.js || []);
+  const at = f => js.indexOf(f);
+  assert.ok(at('src/assessment/assessment-parser.js') < at('src/assessment/class-semesters.js') && at('src/assessment/class-semesters.js') < at('src/assessment/semester-filter.js') && at('src/assessment/semester-filter.js') < at('src/assessment/assessment-data.js'), 'registry and filter load before the data coordinator');
+  assert.ok(at('src/predictor/settings-semester-filter.js') > -1 && at('src/predictor/settings-semester-filter.js') < at('src/predictor/settings-preferences.js'));
+  assert.ok(manifest.content_scripts.some(g => (g.css || []).includes('src/assessment/semester-filter.css')));
+  const read = f => fs.readFileSync(path.join(BASE_DIR, f), 'utf8');
+  for (const f of ['src/progress/weakness-radar.js', 'src/progress/progress-graph.js', 'src/predictor/predictor-ui.js', 'src/predictor/category-baselines.js', 'src/atar/scaling-calibration.js']) {
+    assert.ok(read(f).includes('collectClasses'), `${f} must read the classes the semester filter keeps`);
+  }
+  assert.ok(read('src/atar/atar-scraper.js').includes('filter.filterCourses(result)'), 'ATAR tools read filtered courses');
+  const versions = read('src/assessment/cache-versions.js');
+  assert.ok(versions.includes("'connectify:semester_filter'"), 'clearing settings removes the semester filter');
+  assert.ok(versions.includes("k.startsWith('connectify:class_semesters:')"), 'clearing results removes the class registry');
+});
+
+runTest('Test 190: A wholly new class registry rolls last year\'s cached averages into baselines and archives last year', () => {
+  const origQSA = document.querySelectorAll;
+  const saved = {
+    cache: window.ConnectifyCache, scrape: window.ConnectifyAssessmentScrape, history: window.ConnectifyPredictorHistory,
+    store: window.ConnectifyPredictorBaselines, sidebarFilter: window.ConnectifySidebarFilter, notes: window.ConnectifyNotifications
+  };
+  try {
+    mockLocalStorage.clear();
+    const { classes } = loadSemesterModules();
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/year-rollover.js'), 'utf8'));
+    const account = window.ConnectifyUtils.accountKey();
+    const savedBaselines = [];
+    let cleared = 0;
+    window.ConnectifySidebarFilter = { isOutlinesFilterRestricted: () => false };
+    window.ConnectifyNotifications = { show: () => {} };
+    window.ConnectifyPredictorBaselines = { getBaselines: () => ({ types: {}, subjects: {} }), saveBaselines: b => savedBaselines.push(b) };
+    window.ConnectifyCache = {
+      subjectsCache: new Map([['11 Chemistry ATAR', new Map([['t', { id: 't', name: 'Test 1', score: 80 }]])]]),
+      serializeSubjects: m => Object.fromEntries([...m].map(([k, v]) => [k, [...v.values()]])),
+      clearResultsCache: () => { cleared++; classes.clear(); mockLocalStorage.removeItem(`connectify:grade_cache:${account}`); }
+    };
+    window.ConnectifyAssessmentScrape = { formatCollectedSubjects: () => [{ name: '11 Chemistry ATAR', tasks: [] }, { name: '11 Physics ATAR', tasks: [] }] };
+    window.ConnectifyPredictorHistory = { getHistoricalData: subjects => ({ types: { Exam: 71.26 }, subjects: Object.fromEntries(subjects.map(s => [s.name, 75])) }) };
+
+    // Last year's classes are in the registry
+    classes.recordCards([makeOutlineCard('11 Chemistry ATAR - Semester 2', { overall: '83%' }), makeOutlineCard('11 Physics ATAR - Semester 2', { overall: '77%' })]);
+    // The grade notifier already wrote a new-year mark under a year-independent key
+    mockLocalStorage.setItem(`connectify:grade_cache:${account}`, JSON.stringify({ '11 Chemistry': { mark: 83.5 }, '12 Chemistry': { mark: 50 } }));
+
+    // Every class is new and a year later
+    const y12 = [makeOutlineCard('12 Chemistry ATAR - Semester 1'), makeOutlineCard('12 Physics ATAR - Semester 1')];
+    document.querySelectorAll = sel => (sel.includes('eds-c-tile') ? y12 : origQSA(sel));
+    classes.recordCards(y12);
+    assert.strictEqual(savedBaselines.length, 1, 'the new year saves baselines once');
+    assert.deepStrictEqual(savedBaselines[0].subjects, { '12 Chemistry ATAR': 83.5, '12 Physics ATAR': 75 }, "last year's final marks become this year's subject baselines (never the new year's marks)");
+    assert.strictEqual(savedBaselines[0].types.Exam, 71.3, 'assessment type averages carry over');
+    assert.strictEqual(cleared, 1, "last year's results are cleared once");
+    const archive = JSON.parse(mockLocalStorage.getItem(`connectify:year_archive:${account}`));
+    assert.ok(Array.isArray(archive) && archive.length === 1, "last year's results are archived (Connect no longer shows them)");
+    assert.strictEqual(archive[0].grades['11 Chemistry'].mark, 83.5);
+    assert.deepStrictEqual(Object.keys(archive[0].subjects), ['11 Chemistry ATAR']);
+    assert.deepStrictEqual(Object.keys(archive[0].classSemesters).sort(), ['11 Chemistry ATAR', '11 Physics ATAR']);
+    assert.deepStrictEqual(Object.keys(classes.get()).sort(), ['12 Chemistry ATAR', '12 Physics ATAR'], 'the registry starts again with the new classes');
+
+    // Viewing last year afterwards changes nothing
+    const y11 = [makeOutlineCard('11 Chemistry ATAR - Semester 2'), makeOutlineCard('11 Physics ATAR - Semester 2')];
+    document.querySelectorAll = sel => (sel.includes('eds-c-tile') ? y11 : origQSA(sel));
+    classes.recordCards(y11);
+    assert.strictEqual(savedBaselines.length, 1, 'an earlier year never rolls over');
+    assert.deepStrictEqual(Object.keys(classes.get()).sort(), ['12 Chemistry ATAR', '12 Physics ATAR'], 'an earlier year is not recorded');
+  } finally {
+    document.querySelectorAll = origQSA;
+    window.ConnectifyCache = saved.cache; window.ConnectifyAssessmentScrape = saved.scrape; window.ConnectifyPredictorHistory = saved.history;
+    window.ConnectifyPredictorBaselines = saved.store; window.ConnectifySidebarFilter = saved.sidebarFilter; window.ConnectifyNotifications = saved.notes;
+    mockLocalStorage.clear();
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

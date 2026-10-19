@@ -1,8 +1,9 @@
 /**
  * Connectify Settings: general preferences
  *
- * Wires the General Preferences and Developer Settings controls: auto-expand, cohort size, ATAR
- * percentage, colour theme, custom wallpaper and cache clearing. bind(panel) returns refresh(),
+ * Wires the General Preferences and Developer Settings controls: auto-expand, the semester filter
+ * (settings-semester-filter.js), cohort size, ATAR percentage, colour theme, custom wallpaper and
+ * cache clearing. bind(panel) returns refresh(),
  * which reloads every control from storage and rebuilds the theme list from the registry (the theme
  * scripts load after the outlines scripts, and custom themes can be added or deleted at any time).
  * Exposes window.ConnectifySettingsPreferences.
@@ -134,6 +135,7 @@
     const themeSelect = panel.querySelector('#cx-theme-select-input');
     themeSelect?.addEventListener('change', () => window.ConnectifyTheme?.setTheme(themeSelect.value));
     const refreshWallpaper = bindWallpaper(panel);
+    const refreshSemesterFilter = window.ConnectifySettingsSemesterFilter?.bind(panel) || (() => {});
     bindClearCache(panel);
 
     const refresh = () => {
@@ -143,6 +145,7 @@
         refreshAtarPct();
         if (themeSelect) renderThemeOptions(themeSelect);
         refreshWallpaper();
+        refreshSemesterFilter();
       } catch (e) {
         console.warn('Connectify settings preferences error:', e);
       }

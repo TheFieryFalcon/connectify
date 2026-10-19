@@ -10,7 +10,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 |---|---|---|
 | `window.ConnectifyScheduler` | `scheduler.js` | Shared page observer (`onMutations`) and heartbeat (`every`) |
 | `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey`, `customWeekOrder`/`readTimeOverride` (load first) |
-| `window.ConnectifyData` | `assessment-data.js` | Scrapes assessment cards, caches tasks, and expands accordions |
+| `window.ConnectifyData` | `assessment-data.js` | Scrapes assessment cards, caches tasks, expands accordions; `collectClasses()` for sidebar tools |
 | `window.ConnectifyCache` | `cache-versions.js` | Subsystem cache versioning (predictor, results, settings, cohort) and clearing |
 | `window.ConnectifyCohortMath` | `cohort-math.js` | PCHIP cubic Hermite interpolation, variance, z-score |
 | `window.ConnectifyCohortEstimator` | `cohort-estimator.js` | Baseline and empirical cohort size estimation |
@@ -24,7 +24,9 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyMath` | `atar-math.js` | TEA-to-ATAR conversion, 10% bonus rules, scaled score model |
 | `window.ConnectifyTargetDifficulty` | `target-difficulty.js` | Difficulty-weighted task baselines, effort model and bisection |
 | `window.ConnectifyTargetSolver` | `target-solver.js` | Target Grade and difficulty-weighted Target ATAR solver |
-| `window.ConnectifyAtarScraper` | `atar-scraper.js` | Scrapes course titles and semester groupings |
+| `window.ConnectifyAtarScraper` | `atar-scraper.js` | ATAR courses per semester from the cache (registry, subjects, grade cache); `readCourses` never reads tiles |
+| `window.ConnectifyClassSemesters` | `class-semesters.js` | Class registry per semester (title, mark, final letter, tasks), `detectSemester()`, new-year trigger |
+| `window.ConnectifySemesterFilter` | `semester-filter.js` | "Show [Semester N] classes only": `activeSemester`, `allowedCards`, `filterSubjects`, `filterCourses`, `applyToPage` |
 | `window.ConnectifyAtarCalc` | `atar-calculator.js` | Course state modeling and ATAR calculation results |
 | `window.ConnectifyTargetAtarUI` | `target-atar-ui.js` | Target ATAR planner modal form and breakdown view |
 | `window.ConnectifyTargetGradeUI` | `target-grade-ui.js` | Target Grade planner modal form and breakdown view |
@@ -90,6 +92,9 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify:baseline:subjects:<account>` | `localStorage` | `category-settings.js` / `predictor-math.js` | Previous-year enrolled subject final grade averages |
 | `connectify:year_snapshot:<account>` | `localStorage` | `year-rollover.js` | Class names seen this year and this year's type/subject averages, applied as baselines when a new year starts |
 | `connectify:baseline_backup:<account>` | `localStorage` | `year-rollover.js` | Baselines as they were before a new-year rollover replaced them |
+| `connectify:year_archive:<account>` | `localStorage` | `year-rollover.js` | Last two years' cached results (subjects, grade cache, registry, averages): Connect no longer shows them |
+| `connectify:class_semesters:<student>` | `localStorage` | `class-semesters.js` | Each class's outlines per semester: title, overall mark, final letter, task ids (results cache) |
+| `connectify:semester_filter` | `localStorage` | `semester-filter.js` | `{ enabled, semester, period }`; off by default; a pick lasts for its year-semester period (settings) |
 | `connectify:prediction:<account>:<subject>:<taskId>` | `localStorage` | `predictor-math.js` / `cohort-view.js` | Cached task prediction object (`{ low, mid, high, breakoutScore, type }`) |
 | `connectify:prediction_version` | `localStorage` | `predictor-math.js` | Calculation version incrementer tracking when chronological prediction cache must be re-populated |
 | `connectify:cache_version:<subsystem>` | `localStorage` | `assessment-data.js` | Independent invalidation keys (`predictor`, `results`, `settings`, `cohort`) |

@@ -33,6 +33,10 @@
     if (!parsed) return;
     const { title, subjectName, tasks: parsedTasks } = parsed;
     if (parsedTasks.length > 0) scrapedRows.set(card, card.querySelectorAll(TASK_ROWS).length);
+    // The class registry keeps which tasks each semester's outline lists (the cache merges both)
+    const classes = window.ConnectifyClassSemesters;
+    classes?.recordCards?.([card], true);
+    classes?.recordTasks?.(subjectName, classes.cardInfo(card).semester, parsedTasks);
 
     const isStale = isSubjectStale(subjectName);
     const hasCache = subjectsCache.has(subjectName) && subjectsCache.get(subjectName).size > 0;

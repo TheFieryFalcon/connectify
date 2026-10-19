@@ -1,0 +1,4 @@
+/* "Show [Semester N] classes only" (semester-filter.js): the other semester's outline tiles */
+.cx-semester-hidden {
+  display: none !important;
+}

@@ -58,7 +58,7 @@
 
   function enrolledSubjects(baselines) {
     const names = new Set();
-    const subjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+    const subjects = (window.ConnectifyData?.collectClasses || window.ConnectifyData?.collect || (() => []))(true);
     for (const s of subjects) {
       const clean = window.ConnectifyPredictorMath?.cleanSubject
         ? window.ConnectifyPredictorMath.cleanSubject(s.name)

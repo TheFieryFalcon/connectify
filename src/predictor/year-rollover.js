@@ -4,7 +4,10 @@
  * Keeps a snapshot of this year's assessment type and subject averages. When every class on the
  * assessment outlines page has a new name (a new school year), the snapshot becomes the previous-year
  * baselines for the assessment types and subjects still present, and last year's cached results are
- * cleared. Viewing an earlier year never triggers it. Exposes window.ConnectifyYearRollover.
+ * cleared. Connect never shows last year's marks again, so before clearing, the final cached averages
+ * (last year's classes only) are taken and the cached results are archived. The class registry
+ * (class-semesters.js) calls handleClassChange() as soon as it sees a wholly new class set. Viewing an
+ * earlier year never triggers it. Exposes window.ConnectifyYearRollover.
  */
 (() => {
   'use strict';
@@ -13,6 +16,8 @@
   const TITLE_SELECTOR = '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading';
   const { normalize, accountKey } = window.ConnectifyUtils;
   const stateKey = () => `connectify:year_snapshot:${accountKey()}`;
+  const archiveKey = () => `connectify:year_archive:${accountKey()}`;
+  const readJson = key => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
   const round1 = n => Math.round(n * 10) / 10;
 
   /** Class names on the page without the semester suffix, e.g. "12 Chemistry ATAR". */
@@ -65,8 +70,15 @@
     return (state.seen || []).includes(signature(liveNames)) ? 'other-year' : 'new-year';
   }
 
-  /** This year's averages: per assessment type, and per subject keyed by subjectKey(). */
-  function currentAverages(subjects) {
+  /**
+   * This year's averages: per assessment type, and per subject keyed by subjectKey(). With classNames,
+   * only those classes' grade-cache marks count (a new year's "12 Chemistry" must not replace last
+   * year's "11 Chemistry").
+   */
+  function currentAverages(subjects, classNames = null) {
+    // Grade-cache keys drop ATAR and "Year N" from the title (grade-snapshot.js extractSubjectName)
+    const gradeName = n => normalize(String(n).replace(/\s*[-–—]\s*Sem(?:ester)?\s*[12].*$/i, '').replace(/\bATAR\b/gi, '').replace(/\bYear\s*\d+\b/gi, ''));
+    const gradeNames = classNames ? new Set(classNames.map(gradeName)) : null;
     const history = window.ConnectifyPredictorHistory?.getHistoricalData?.(subjects) || {};
     const types = {};
     for (const [type, avg] of Object.entries(history.types || {})) if (Number.isFinite(avg)) types[type] = avg;
@@ -75,7 +87,10 @@
     // Connect's own running subject marks (kept by the grade-change notifier) are the most accurate
     try {
       const grades = JSON.parse(localStorage.getItem(`connectify:grade_cache:${accountKey()}`) || '{}');
-      for (const [name, entry] of Object.entries(grades || {})) if (Number.isFinite(entry?.mark)) bySubject[subjectKey(name)] = entry.mark;
+      for (const [name, entry] of Object.entries(grades || {})) {
+        if (gradeNames && !gradeNames.has(gradeName(name))) continue;
+        if (Number.isFinite(entry?.mark)) bySubject[subjectKey(name)] = entry.mark;
+      }
     } catch {}
     return { types, subjects: bySubject };
   }
@@ -96,23 +111,54 @@
     return { types, subjects, typeCount, subjectCount };
   }
 
-  function loadState() {
-    try { return JSON.parse(localStorage.getItem(stateKey()) || 'null'); } catch { return null; }
-  }
+  const loadState = () => readJson(stateKey());
 
   function saveState(state) {
     try { localStorage.setItem(stateKey(), JSON.stringify(state)); } catch {}
   }
 
-  function rollOver(snapshot, liveNames) {
+  /** Last year's averages from the cache as it stands now, over the last saved snapshot. */
+  function finalAverages(state) {
+    const names = state.classNames || [];
+    // Straight from the cache: collect() would scrape this year's cards and re-enter the rollover
+    const cached = window.ConnectifyAssessmentScrape?.formatCollectedSubjects?.(true) || [];
+    const final = currentAverages(cached.filter(s => names.includes(s.name)), names);
+    const snapshot = state.snapshot || {};
+    return { types: { ...(snapshot.types || {}), ...final.types }, subjects: { ...(snapshot.subjects || {}), ...final.subjects } };
+  }
+
+  // The cache is the only copy of last year's marks once Connect moves on: keep the last two years
+  function archiveYear(state, averages) {
+    const cache = window.ConnectifyCache;
+    const entry = {
+      classNames: state.classNames || [],
+      averages,
+      subjects: cache?.serializeSubjects?.(cache.subjectsCache) || {},
+      grades: readJson(`connectify:grade_cache:${accountKey()}`) || {},
+      classSemesters: window.ConnectifyClassSemesters?.get?.() || {},
+      archivedAt: Date.now()
+    };
+    const previous = Array.isArray(readJson(archiveKey())) ? readJson(archiveKey()) : [];
+    try {
+      localStorage.setItem(archiveKey(), JSON.stringify([...previous, entry].slice(-2)));
+    } catch {
+      // Over quota: the averages, marks and class list still fit without the task lists
+      try { localStorage.setItem(archiveKey(), JSON.stringify([...previous.slice(-1), { ...entry, subjects: {} }])); } catch {}
+    }
+  }
+
+  function rollOver(state, liveNames) {
     const store = window.ConnectifyPredictorBaselines;
-    if (!store) return;
+    const averages = finalAverages(state);
+    archiveYear(state, averages);
+    // Last year's scraped results, grade cache and class registry belong to classes that are gone
+    window.ConnectifyCache?.clearResultsCache?.();
+    const hasAverages = Object.keys(averages.types).length > 0 || Object.keys(averages.subjects).length > 0;
+    if (!store || !hasAverages) return;
     const current = store.getBaselines();
     try { localStorage.setItem(`connectify:baseline_backup:${accountKey()}`, JSON.stringify(current)); } catch {}
     const categoryNames = new Set([...Object.keys(window.ConnectifyCategoryStore?.defaultCategories || {}), ...Object.keys(window.cxCategories || {})]);
-    const next = rolledBaselines(snapshot, liveNames, current, categoryNames);
-    // Last year's scraped results and grade cache belong to classes that are gone
-    window.ConnectifyCache?.clearResultsCache?.();
+    const next = rolledBaselines(averages, liveNames, current, categoryNames);
     store.saveBaselines({ types: next.types, subjects: next.subjects });
     window.ConnectifyNotifications?.show?.({
       id: 'cx-new-year-baselines',
@@ -120,6 +166,27 @@
       title: 'New school year',
       message: `Last year's averages were added as baselines for ${next.subjectCount} subject(s) and ${next.typeCount} assessment type(s). You can change them in Settings.`
     });
+  }
+
+  let rollingOver = false;
+  function startNewYear(state, liveNames) {
+    rollingOver = true;
+    try { rollOver(state, liveNames); } finally { rollingOver = false; }
+    saveState({ classNames: liveNames, seen: [...new Set([...(state.seen || []), signature(state.classNames || []), signature(liveNames)])].slice(-8), snapshot: null });
+  }
+
+  /**
+   * Called by the class registry when every class on the page is new to it; previousNames are the
+   * registry's classes, used when no year snapshot was saved yet. Returns the classifyYear() kind,
+   * or 'restricted' while a Connect filter hides classes or a rollover is running.
+   */
+  function handleClassChange(liveNames, previousNames = []) {
+    if (rollingOver || window.ConnectifySidebarFilter?.isOutlinesFilterRestricted?.()) return 'restricted';
+    const state = loadState() || { classNames: [], seen: [], snapshot: null };
+    if (!state.classNames?.length && previousNames.length) state.classNames = previousNames;
+    const kind = classifyYear(liveNames, state);
+    if (kind === 'new-year') startNewYear(state, liveNames);
+    return kind;
   }
 
   function check() {
@@ -132,8 +199,7 @@
     if (kind === 'other-year') return;
 
     if (kind === 'new-year') {
-      if (state.snapshot) rollOver(state.snapshot, liveNames);
-      saveState({ classNames: liveNames, seen: [...new Set([...(state.seen || []), signature(state.classNames), sig])].slice(-8), snapshot: null });
+      startNewYear(state, liveNames);
       return;
     }
 
@@ -156,5 +222,5 @@
   window.addEventListener('connectify-results-updated', () => scheduleCheck());
   scheduleCheck(4000);
 
-  window.ConnectifyYearRollover = { check, subjectKey, yearMarker, classifyYear, currentAverages, rolledBaselines };
+  window.ConnectifyYearRollover = { check, handleClassChange, subjectKey, yearMarker, classifyYear, currentAverages, finalAverages, rolledBaselines };
 })();
