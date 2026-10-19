@@ -196,10 +196,7 @@
       }
     });
 
-    window.addEventListener('connectify-task-type-changed', e => {
-      try {
-        updatePredictionCache(e?.detail?.subject);
-      } catch (e) {}
-    });
+    // Type changes refresh the cache where they are made (saveTaskTypeOverride, rescanAllAutoAssessments),
+    // so listening for connectify-task-type-changed here would recompute every prediction a second time
   }
 })();

@@ -8779,13 +8779,13 @@ runTest('Test 195: Liquid Glass Library and Learners bars share the table glass;
 
 runTest('Test 196: One Type change recomputes predictions once, after the dropdown closes, and runs one cohort pass', () => {
   const keys = ['ConnectifyPredictorStore', 'ConnectifyPredictorEngine', 'ConnectifyPredictorBaselines', 'ConnectifyPredictorDates',
-    'ConnectifyPredictorHistory', 'ConnectifyPredictorCache', 'ConnectifyPredictorMath', 'ConnectifyData', 'ConnectifyTaskTypes'];
+    'ConnectifyPredictorHistory', 'ConnectifyPredictorCache', 'ConnectifyPredictorMath', 'ConnectifyData', 'ConnectifyTaskTypes',
+    'ConnectifyCompoundProgress', 'ConnectifyWeakness'];
   const saved = Object.fromEntries(keys.map(k => [k, window[k]]));
   const origSetTimeout = global.setTimeout;
   const timers = [];
-  let counting = false;
+  const origDispatch = window.dispatchEvent;
   const updates = [];
-  window.addEventListener('connectify-predictions-updated', e => { if (counting) updates.push(e.detail?.subject); });
   try {
     const cleared = [];
     let predictCalls = 0, collectCalls = 0;
@@ -8801,12 +8801,19 @@ runTest('Test 196: One Type change recomputes predictions once, after the dropdo
       { name: 'Chemistry', tasks: [{ name: 'Test 1', order: 1, score: 70 }, { name: 'Exam', order: 9 }] },
       { name: 'Physics', tasks: [{ name: 'Lab', order: 4, score: 80 }] }
     ]; } };
-    global.setTimeout = (cb, ms) => { timers.push(cb); return timers.length; };
+    // The rescan also redraws the compound bars and radar; only the prediction work is counted here
+    window.ConnectifyCompoundProgress = { update: () => {} };
+    window.ConnectifyWeakness = { renderChart: () => {} };
+    // Listeners left by earlier tests queue their own debounces; only the prediction refresh is collected
+    global.setTimeout = (cb, ms) => { if (cb.name === 'flushPredictionRefresh') timers.push(cb); return timers.length; };
     eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/predictor-cache.js'), 'utf8'));
     const cache = window.ConnectifyPredictorCache;
     window.ConnectifyPredictorMath = { updatePredictionCache: cache.updatePredictionCache };
     eval(fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8'));
-    counting = true;
+    window.dispatchEvent = e => {
+      if (e.type === 'connectify-predictions-updated') updates.push(e.detail?.subject);
+      return true;
+    };
 
     // A custom type: the override is saved, and Settings may rescan every Auto row in the same task
     window.ConnectifyTaskTypes.saveTaskTypeOverride('Chemistry', 'Exam', null, 'Mock Exam');
@@ -8832,7 +8839,7 @@ runTest('Test 196: One Type change recomputes predictions once, after the dropdo
     const settings = fs.readFileSync(path.resolve(SRC_DIR, 'predictor/category-settings.js'), 'utf8');
     assert.ok(settings.includes('if (!catPanel.hidden) renderBaselines();'), 'a hidden Settings panel is not rebuilt on type changes');
   } finally {
-    counting = false;
+    window.dispatchEvent = origDispatch;
     global.setTimeout = origSetTimeout;
     for (const k of keys) window[k] = saved[k];
   }

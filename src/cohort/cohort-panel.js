@@ -78,15 +78,9 @@
           if (val === '__custom__') {
             const custom = prompt('Enter custom assessment type:');
             if (custom && custom.trim()) {
-              const cleanCustom = custom.trim();
-              if (types().addCustomCategoryForClass) {
-                types().addCustomCategoryForClass(currentMeta.subjectName, cleanCustom);
-              }
-              types().saveTaskTypeOverride(currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, cleanCustom);
+              // Saving adds the class category; the cohort pass that follows re-syncs every row's dropdown
+              types().saveTaskTypeOverride(currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, custom.trim());
               types().updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
-              if (types().rescanAllAutoAssessments) {
-                types().rescanAllAutoAssessments();
-              }
             } else {
               types().updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
             }

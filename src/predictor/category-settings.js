@@ -187,8 +187,9 @@
       }
     };
 
+    // Opening Settings renders the baselines, so a hidden panel is left alone
     window.addEventListener('connectify-task-type-changed', () => {
-      renderBaselines();
+      if (!catPanel.hidden) renderBaselines();
     });
 
     const refs = {

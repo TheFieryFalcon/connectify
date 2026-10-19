@@ -70,7 +70,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Key Functions**:
   - `pass()`: unifies cohort estimates across Semester 1 and 2 cards, then renders every row. Caches `card._cxTaskRows` and `card._cxCohortKey`.
   - `schedule(immediate)`: 250ms trailing debounce into `requestAnimationFrame`; `runPass()` drains queued re-passes.
-  - Observer: task rows added, mark text edits inside rows, and stats stamped on charts (`data-connectify-stats`, `data-highcharts-chart`); Connectify's own nodes and accordion animations are ignored.
+  - Observer: task rows added, mark text edits inside rows, and stats stamped on charts (`data-connectify-stats`, `data-highcharts-chart`); Connectify's own nodes and accordion animations are ignored. A Type change or baseline save with a prediction refresh queued leaves the pass to `connectify-predictions-updated` (one pass, never one with stale predictions).
 - **Export**: `window.ConnectifyCohort`.
 
 ---

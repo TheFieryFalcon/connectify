@@ -55,6 +55,7 @@
     }
 
     setPredictionCacheCurrent();
+    needsRecompute = false;
   }
 
   /**
@@ -99,39 +100,49 @@
   }
 
   let isUpdatingPredictionCache = false;
+  // Type averages span every course, so a refresh recomputes every task. Refreshes requested in
+  // one task (a Type change, a rescan, a baseline save) share a single recompute and event.
+  let refreshTimer = null;
+  let refreshSubject = null;
+  let needsRecompute = false;
 
-  function updatePredictionCache(subjectName = null) {
-    if (isUpdatingPredictionCache) return;
+  function flushPredictionRefresh() {
+    refreshTimer = null;
+    const subjectName = refreshSubject;
     isUpdatingPredictionCache = true;
     try {
-      if (subjectName) {
-        clearSubjectPredictionCache(subjectName);
-      } else {
-        predictionMemoryCache.clear();
-        if (window.ConnectifyCache?.clearPredictorCache) {
-          window.ConnectifyCache.clearPredictorCache();
-        } else {
-          window.ConnectifyUtils.removeStorageKeys(k => k.startsWith('connectify:prediction:') || k === LEGACY_PREDICTION_VERSION_KEY);
-        }
+      // A row read since the request may already have recomputed everything (a cleared version key)
+      const rawSubjects = needsRecompute && window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
+      if (rawSubjects && rawSubjects.length > 0) {
+        populateChronologicalPredictions(rawSubjects, true);
       }
-
-      try {
-        const rawSubjects = window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : [];
-        if (rawSubjects && rawSubjects.length > 0) {
-          populateChronologicalPredictions(rawSubjects, true);
-        }
-      } catch (e) {
-        console.warn('ConnectifyPredictorMath: failed to re-populate predictions', e);
-      }
-
-      if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
-        window.dispatchEvent(new CustomEvent('connectify-predictions-updated', {
-          detail: { subject: subjectName }
-        }));
-      }
+    } catch (e) {
+      console.warn('ConnectifyPredictorMath: failed to re-populate predictions', e);
     } finally {
       isUpdatingPredictionCache = false;
     }
+    window.dispatchEvent(new CustomEvent('connectify-predictions-updated', {
+      detail: { subject: subjectName }
+    }));
+  }
+
+  // Stale predictions are dropped at once (a row read before the recompute computes its own);
+  // the recompute runs after the current task, so the dropdown that changed closes without waiting
+  function updatePredictionCache(subjectName = null) {
+    if (isUpdatingPredictionCache) return;
+    if (subjectName) {
+      clearSubjectPredictionCache(subjectName);
+    } else {
+      predictionMemoryCache.clear();
+      if (window.ConnectifyCache?.clearPredictorCache) {
+        window.ConnectifyCache.clearPredictorCache();
+      } else {
+        window.ConnectifyUtils.removeStorageKeys(k => k.startsWith('connectify:prediction:') || k === LEGACY_PREDICTION_VERSION_KEY);
+      }
+    }
+    needsRecompute = true;
+    refreshSubject = refreshTimer && refreshSubject !== subjectName ? null : subjectName;
+    if (!refreshTimer) refreshTimer = setTimeout(flushPredictionRefresh, 0);
   }
 
   window.ConnectifyPredictorCache = {
@@ -139,6 +150,8 @@
     getHistoricalDataPriorTo,
     populateChronologicalPredictions,
     getOrComputeTaskPrediction,
-    updatePredictionCache
+    updatePredictionCache,
+    // true until the queued recompute dispatches connectify-predictions-updated
+    isRefreshPending: () => refreshTimer !== null
   };
 })();

@@ -68,8 +68,13 @@
       schedule(true);
     }
   });
+  // A Type change or baseline save queues a prediction refresh; its connectify-predictions-updated
+  // runs the one pass, so rows are not rebuilt twice (once with stale predictions)
   for (const evt of ['connectify-task-type-changed', 'connectify-baselines-updated', 'connectify-predictions-updated']) {
-    window.addEventListener(evt, () => schedule(true));
+    window.addEventListener(evt, () => {
+      if (evt !== 'connectify-predictions-updated' && window.ConnectifyPredictorCache?.isRefreshPending?.()) return;
+      schedule(true);
+    });
   }
   for (const evt of ['connectify-settings-updated', 'connectify-cohort-invalidated']) {
     window.addEventListener(evt, () => {
