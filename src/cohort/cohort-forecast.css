@@ -7,6 +7,9 @@
   white-space: nowrap !important;
 }
 
+/* Low and High are semibold; Mid (a strong, 700 from the panel's strong rules) stays the heaviest */
+.connectea-row-wrapper :is(.connectea-forecast-value--low, .connectea-forecast-value--high) { font-weight: 600 !important; }
+
 /* Low / Mid / High ink matches the Predictor's pills and scenario values (sidebar-predictor*.css). The glass
    task-row rule inks everything in the strip with the primary text, so the unused id outranks it */
 :is(#cx-specificity-anchor, .connectea-row-wrapper) .connectea-forecast-value--low { color: #475569 !important; }

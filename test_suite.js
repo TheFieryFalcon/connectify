@@ -3501,7 +3501,8 @@ runTest('Test 115: Prediction cache updates on task category change, category se
 
   // Prediction cache update hooks:
   assert.ok(predMathCode.includes('clearSubjectPredictionCache') && predMathCode.includes('updatePredictionCache'), 'predictor-math.js must export clearSubjectPredictionCache and updatePredictionCache');
-  assert.ok(predMathCode.includes("window.addEventListener('connectify-task-type-changed'"), 'predictor-math.js must listen for connectify-task-type-changed');
+  // Every type change refreshes the cache where it is made; a listener here would recompute it twice (Test 196)
+  assert.ok(!predMathCode.includes("window.addEventListener('connectify-task-type-changed'"), 'predictor-math.js must not refresh the cache a second time on connectify-task-type-changed');
   assert.ok(typesCode.includes('updatePredictionCache'), 'task-types.js must call updatePredictionCache');
   assert.ok(catCode.includes('updatePredictionCache'), 'category-settings.js must call updatePredictionCache');
   assert.ok(assessCode.includes('updatePredictionCache'), 'assessment-data.js must call updatePredictionCache upon stale expansion');
@@ -8734,6 +8735,7 @@ runTest('Unmarked task rows show a compact Low / Mid / High prediction panel, hi
   const forecastCss = fs.readFileSync(path.join(SRC_DIR, 'cohort/cohort-forecast.css'), 'utf8');
   const ink = (scope, level) => new RegExp(`${scope}:is\\(#cx-specificity-anchor, \\.connectea-row-wrapper\\) \\.connectea-forecast-value--${level} \\{[^}]*`, 'm');
   const block = (scope, level) => (forecastCss.match(ink(scope, level)) || [''])[0];
+  assert.ok(/\.connectea-row-wrapper :is\(\.connectea-forecast-value--low, \.connectea-forecast-value--high\) \{ font-weight: 600 !important; \}/.test(forecastCss), 'Low and High are semibold (600), below the 700 Mid strong');
   assert.ok(block('^', 'low').includes('#475569') && block('^', 'mid').includes('#174c75') && block('^', 'high').includes('#15803d'), 'Light ink matches the Predictor pills');
   assert.ok(block('html\\.connectea-dark ', 'mid').includes('var(--cx-accent-hover') && block('html\\.connectea-dark ', 'high').includes('#4ade80'), 'Dark ink matches the Predictor scenario values');
   assert.ok(block('html\\.connectea-dark\\[data-connectea-tone="light"\\] ', 'high').includes('oklch(from #22c55e 0.34 c h)'), 'Light-tone ink matches the Predictor re-inking');
@@ -8773,6 +8775,67 @@ runTest('Test 195: Liquid Glass Library and Learners bars share the table glass;
   const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
   assert.ok(audit.includes("const glassHeading = ['liquid-glass', 'liquid-glass-clear'].includes(tid) && el.matches?.('p.mat-h2');") &&
     audit.includes('!(glassHeading && curWidth < base.size.width)'), 'the size audit exempts only a shrinking glass heading width');
+});
+
+runTest('Test 196: One Type change recomputes predictions once, after the dropdown closes, and runs one cohort pass', () => {
+  const keys = ['ConnectifyPredictorStore', 'ConnectifyPredictorEngine', 'ConnectifyPredictorBaselines', 'ConnectifyPredictorDates',
+    'ConnectifyPredictorHistory', 'ConnectifyPredictorCache', 'ConnectifyPredictorMath', 'ConnectifyData', 'ConnectifyTaskTypes'];
+  const saved = Object.fromEntries(keys.map(k => [k, window[k]]));
+  const origSetTimeout = global.setTimeout;
+  const timers = [];
+  let counting = false;
+  const updates = [];
+  window.addEventListener('connectify-predictions-updated', e => { if (counting) updates.push(e.detail?.subject); });
+  try {
+    const cleared = [];
+    let predictCalls = 0, collectCalls = 0;
+    window.ConnectifyPredictorStore = {
+      predictionMemoryCache: new Map(), isPredictionCacheCurrent: () => true, setPredictionCacheCurrent: () => {},
+      cacheTaskPrediction: () => {}, getCachedPrediction: () => null, clearSubjectPredictionCache: s => cleared.push(s)
+    };
+    window.ConnectifyPredictorEngine = { predictTask: () => { predictCalls++; return { low: 60, mid: 70, high: 80 }; } };
+    window.ConnectifyPredictorBaselines = { getBaselines: () => ({ types: {}, subjects: {} }) };
+    window.ConnectifyPredictorDates = { getTaskChronologicalStamp: t => t.order };
+    window.ConnectifyPredictorHistory = { getHistoricalDataPriorTo: () => ({}) };
+    window.ConnectifyData = { collect: () => { collectCalls++; return [
+      { name: 'Chemistry', tasks: [{ name: 'Test 1', order: 1, score: 70 }, { name: 'Exam', order: 9 }] },
+      { name: 'Physics', tasks: [{ name: 'Lab', order: 4, score: 80 }] }
+    ]; } };
+    global.setTimeout = (cb, ms) => { timers.push(cb); return timers.length; };
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/predictor-cache.js'), 'utf8'));
+    const cache = window.ConnectifyPredictorCache;
+    window.ConnectifyPredictorMath = { updatePredictionCache: cache.updatePredictionCache };
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8'));
+    counting = true;
+
+    // A custom type: the override is saved, and Settings may rescan every Auto row in the same task
+    window.ConnectifyTaskTypes.saveTaskTypeOverride('Chemistry', 'Exam', null, 'Mock Exam');
+    window.ConnectifyTaskTypes.rescanAllAutoAssessments();
+    assert.deepStrictEqual(cleared, ['Chemistry'], 'the changed subject\'s stale predictions are dropped at once');
+    assert.strictEqual(predictCalls + collectCalls, 0, 'nothing is recomputed while the change handler runs');
+    assert.strictEqual(cache.isRefreshPending(), true, 'a refresh is queued');
+    assert.strictEqual(timers.length, 1, 'both requests share one queued refresh');
+    timers.shift()();
+    assert.strictEqual(collectCalls, 1, 'subjects are collected once');
+    assert.strictEqual(predictCalls, 3, 'every task (type averages span courses) is predicted exactly once');
+    assert.deepStrictEqual(updates, [null], 'one connectify-predictions-updated, for every subject');
+    assert.strictEqual(cache.isRefreshPending(), false, 'nothing is left pending');
+
+    // The observer waits for that event instead of also passing on the type change itself
+    const observer = fs.readFileSync(path.resolve(SRC_DIR, 'cohort/cohort-observer.js'), 'utf8');
+    assert.ok(observer.includes("if (evt !== 'connectify-predictions-updated' && window.ConnectifyPredictorCache?.isRefreshPending?.()) return;"),
+      'a type change with a refresh queued leaves the pass to connectify-predictions-updated');
+    // The custom path no longer rescans every row (the pass re-syncs the dropdowns) or adds the category twice
+    const panel = fs.readFileSync(path.resolve(SRC_DIR, 'cohort/cohort-panel.js'), 'utf8');
+    assert.ok(!panel.includes('rescanAllAutoAssessments') && !panel.includes('addCustomCategoryForClass'), 'a custom type is one saveTaskTypeOverride');
+    // Hidden Settings is rendered on open, never on every type change
+    const settings = fs.readFileSync(path.resolve(SRC_DIR, 'predictor/category-settings.js'), 'utf8');
+    assert.ok(settings.includes('if (!catPanel.hidden) renderBaselines();'), 'a hidden Settings panel is not rebuilt on type changes');
+  } finally {
+    counting = false;
+    global.setTimeout = origSetTimeout;
+    for (const k of keys) window[k] = saved[k];
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {
