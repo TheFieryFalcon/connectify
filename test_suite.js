@@ -8546,9 +8546,13 @@ runTest('Test 192: The first Semester 1 task listed on a Semester 2 panel gets n
     const evalApi = window.ConnectifyCohortOutcomeEval;
     const card = new MockElement('div', 'eds-c-tile');
     const title = new MockElement('div', 'eds-c-tile__title'); title.textContent = 'Literature ATAR Year 11 - Semester 2'; card.appendChild(title);
+    // The overall row ("Semester 2 Cumulative Percent") sits outside .cvr-c-tasks and has a mark of its own
+    const overall = new MockElement('div', 'cvr-c-task'); overall._mark = 58.7; card.appendChild(overall);
     const list = new MockElement('div', 'cvr-c-tasks'); card.appendChild(list);
     const makeRow = mark => { const row = new MockElement('div', 'cvr-c-task'); row._mark = mark; list.appendChild(row); return row; };
     const first = makeRow(64), second = makeRow(80);
+    // cohort-stats caches every row of the card, the overall row first
+    card._cxTaskRows = [overall, first, second];
     window.ConnectifyCohortRows = { readMark: row => row._mark };
     window.ConnectifyData = { orderHint: window.ConnectifyParseHelpers.orderHint };
     window.ConnectifyPredictorMath = {
@@ -8566,7 +8570,7 @@ runTest('Test 192: The first Semester 1 task listed on a Semester 2 panel gets n
     const firstTask = evalApi.taskFromRow(first, meta('Short written response - Play', 'Term 1, Week 5'), 64);
     assert.strictEqual(firstTask.semester, 1, 'a Term 1 task on a Semester 2 panel is a Semester 1 task');
     assert.strictEqual(evalApi.evaluateRow(first, 64, meta('Short written response - Play', 'Term 1, Week 5'), subjects), null,
-      'the first marked task of the class has nothing before it, so no meter (it must not be measured against itself)');
+      'the first marked task of the class has nothing before it (the overall row and its own Semester 1 copy never count), so no meter');
     assert.ok(evalApi.evaluateRow(second, 80, meta('Extended written response - Prose', 'Term 2, Week 1'), subjects), 'the next task has the first one before it');
   } finally {
     window.ConnectifyCohortRows = saved.rows; window.ConnectifyPredictorMath = saved.pred; window.ConnectifyData = saved.data;

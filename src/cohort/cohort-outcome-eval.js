@@ -13,12 +13,16 @@
   const TITLE_SELECTOR = '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading';
   const { normalize, customWeekOrder, readTimeOverride } = window.ConnectifyUtils;
 
-  /** The card's task rows, memoised on the card and re-queried once a row is missing. */
+  /**
+   * The card's task rows (inside .cvr-c-tasks), memoised on the card and re-queried once a row is missing.
+   * Its own memo: cohort-stats' card._cxTaskRows also holds the overall row ("Semester 2 Cumulative
+   * Percent"), whose mark would count as earlier work and give every first task a meter.
+   */
   function cardTaskRows(card, row) {
-    if (card._cxTaskRows && card._cxTaskRows.includes(row)) return card._cxTaskRows;
+    if (card._cxDetailRows && card._cxDetailRows.includes(row)) return card._cxDetailRows;
     const insideTasks = card.querySelectorAll('.cvr-c-tasks .cvr-c-task');
-    card._cxTaskRows = insideTasks.length > 0 ? Array.from(insideTasks) : Array.from(card.querySelectorAll('.cvr-c-task'));
-    return card._cxTaskRows;
+    card._cxDetailRows = insideTasks.length > 0 ? Array.from(insideTasks) : Array.from(card.querySelectorAll('.cvr-c-task'));
+    return card._cxDetailRows;
   }
 
   function rowWeight(row) {
