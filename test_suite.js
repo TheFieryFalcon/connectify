@@ -7642,7 +7642,7 @@ runTest('Test 163: Liquid Glass rounds the notice card host and Library table wr
   // Paginator pills keep their native box (theme parity audit): no padding or clip; the glass is a ::before past the edges
   assert.ok(!/padding/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')) && !/mat-paginator[^{]*\{[^}]*overflow/.test(css), 'paginator bars must not be padded or clipped');
   const surface = fs.readFileSync(path.join(styles, 'theme-glass-surface.css'), 'utf8');
-  assert.ok(/mat-paginator,[\s\S]*?\)::before \{[\s\S]*?inset: 0 -16px;[\s\S]*?border-radius: 16px;/.test(surface),
+  assert.ok(/mat-paginator,[\s\S]*?\)::before \{[\s\S]*?inset: 0 -16px;[\s\S]*?border-radius: 12px;/.test(surface),
     'paginator pills must be drawn by a ::before reaching 16px past the box');
   assert.ok(!/\[class\*=/.test(css), 'glass panel rules must name explicit elements/classes');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('theme-glass-panels.css'), 'theme-glass-panels.css must be registered in manifest.json');
@@ -7804,7 +7804,7 @@ runTest('Test 167: Dark and glass rules route theme colours through tokens, so c
     }
   }
   assert.deepStrictEqual(bare, [], `Dark-preset colours must go through var(--cx-*, <literal>) in dark/glass rules: ${bare.join(', ')}`);
-  assert.ok(/--cx-gl-fill: color-mix\(in srgb, color-mix\(in srgb, var\(--cx-canvas-bg/.test(read('theme-glass-surface.css')), 'the glass recipe fill must follow the canvas token');
+  assert.ok(/--cx-gl-fill: var\(--cx-surface-bg, /.test(read('theme-glass-surface.css')), 'the glass recipe fill must be the tables\' glass surface token');
   // Sidebar, ATAR, Predictor and Progress styles: no neutral (navy/grey) literal left in dark rules; only
   // saturated semantic colours (outcome segments, success/warning cards, category colours) stay fixed
   const toLin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
@@ -7916,8 +7916,8 @@ runTest('Test 171: The theme audit applies themes through the cross-world reques
     assert.ok(!/\b(margin|padding)[\w-]*\s*:/.test(strip(fs.readFileSync(path.join(styles, file), 'utf8'))), `${file} must not change margins or padding`);
   }
   const surface = strip(fs.readFileSync(path.join(styles, 'theme-glass-surface.css'), 'utf8'));
-  assert.ok(!/c-category-bar\s*\{[^}]*margin/.test(surface) && !/thori-pnl\s*\{[^}]*margin/.test(surface) && !/p\.mat-h2\s*\{[^}]*(margin|padding|width)/.test(surface),
-    'Liquid Glass bars and headings must keep their native margins, padding and width');
+  assert.ok(!/c-category-bar\s*\{[^}]*margin/.test(surface) && !/thori-pnl\s*\{[^}]*margin/.test(surface) && !/p\.mat-h2\s*\{[^}]*(margin|padding)/.test(surface),
+    'Liquid Glass bars and headings must keep their native margins and padding');
   assert.ok(!/border:\s*none/.test(surface), 'glass bars turn borders transparent instead of removing them, so boxes keep their size');
 });
 
@@ -8751,6 +8751,28 @@ runTest('Unmarked task rows show a compact Low / Mid / High prediction panel, hi
   const outlineJs = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-view.js')).js;
   assert.ok(outlineJs.indexOf('src/cohort/cohort-forecast.js') !== -1 && outlineJs.indexOf('src/cohort/cohort-forecast.js') < outlineJs.indexOf('src/cohort/cohort-view.js'), 'cohort-forecast.js loads before cohort-view.js');
   assert.ok(manifest.content_scripts.some(g => (g.css || []).includes('src/cohort/cohort-forecast.css')), 'cohort-forecast.css is registered');
+});
+
+runTest('Test 195: Liquid Glass Library and Learners bars share the table glass; paginator pills never overlap or run off the page', () => {
+  const surface = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-surface.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const G = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  const rule = sel => (surface.split('}').find(b => b.split('{')[0].trim() === `${G} ${sel}`) || '').split('{')[1] || '';
+  // One material: the bars, pills and headings use the tables' surface token, not a denser canvas mix
+  assert.ok(/--cx-gl-fill: var\(--cx-surface-bg, /.test(surface) && !/--cx-gl-fill: color-mix/.test(surface), 'glass bars use the table glass fill');
+  // Paginator bars reach left only (their right edge stays with the table and on the page)
+  assert.ok(/inset: 0 0 0 -16px;/.test(rule('mat-paginator.mat-paginator::before')), 'paginator pills reach left only');
+  // "Page N of M" + paginator: one segmented pill meeting in Connect's gap, outer corners rounded
+  assert.ok(/inset: 0 -10px 0 -16px;/.test(rule('.connect-paginator-container:has(+ mat-paginator)::before')) &&
+    /border-radius: 12px 0 0 12px;/.test(rule('.connect-paginator-container:has(+ mat-paginator)::before')), 'the Page box is the left half of the pill');
+  assert.ok(/inset: 0 0 0 -16px;/.test(rule('.connect-paginator-container + mat-paginator::before')) &&
+    /border-radius: 0 12px 12px 0;/.test(rule('.connect-paginator-container + mat-paginator::before')), 'the paginator after it is the right half');
+  // Section headings hug their title: Teachers and Students match, and the pill never spans the row under the paginator
+  assert.ok(/width: fit-content;/.test(rule('p.mat-h2')) && /inset: -6px -16px;/.test(rule('p.mat-h2::before')), 'headings are pills hugging their title');
+  assert.ok(!/border-radius: 0;/.test(rule('p.mat-h2::before')), 'headings are no longer square bars of different widths');
+  // The parity audit allows only that width shrink, and only for glass headings
+  const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
+  assert.ok(audit.includes("const glassHeading = ['liquid-glass', 'liquid-glass-clear'].includes(tid) && el.matches?.('p.mat-h2');") &&
+    audit.includes('!(glassHeading && curWidth < base.size.width)'), 'the size audit exempts only a shrinking glass heading width');
 });
 
 Promise.all(pendingTestPromises).then(() => {
