@@ -92,9 +92,10 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 77. `src/sidebar/sidebar-shell.js` (drawer shell construction and attachment)
 78. `src/sidebar/sidebar.js` (slide-out tool drawer & launcher)
 79. `src/system/notifications.js` (vertical stacked toast engine)
-80. `src/system/grade-snapshot.js` (subject marks and boxplots compared with the grade cache)
-81. `src/system/new-grade.js` (grade change detector & jump-to-card dispatcher)
-82. `src/system/dom-sweeper.js` (health check & component restoration)
+80. `src/system/update-notice.js` ("Connectify updated" toast linking to the changelog)
+81. `src/system/grade-snapshot.js` (subject marks and boxplots compared with the grade cache)
+82. `src/system/new-grade.js` (grade change detector & jump-to-card dispatcher)
+83. `src/system/dom-sweeper.js` (health check & component restoration)
 
 ### SPA Navigation & DOM Sweeping
 Connect is built on Vaadin / Liferay SPA navigation where the DOM re-renders asynchronously on page transitions.

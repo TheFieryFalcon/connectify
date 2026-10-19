@@ -48,7 +48,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyPredictorMath` | `predictor-math.js` | Logarithmic ceiling modeling, task prediction, outcome evaluation, ATAR projections |
 | `window.ConnectifyPredictorUI` | `predictor-ui.js` | Predictor sidebar tool panel coordinator (Grade & ATAR Predictors) |
 | `window.ConnectifyCountdown` | `wace-countdown.js` | Year 12 WACE exam countdown timer |
-| `window.ConnectifyNotifications` | `notifications.js` | Universal toast and vertical stacked notifications engine |
+| `window.ConnectifyNotifications` / `ConnectifyUpdateNotice` | `notifications.js` / `update-notice.js` | Stacked toast engine; one "Connectify updated" toast per newer version, "What's new" opens CHANGELOG.md |
 | `window.ConnectifyGradeSnapshot` | `grade-snapshot.js` | Subject marks and boxplots vs the grade cache, change threshold |
 | `window.ConnectifyNewGrade` | `new-grade.js` | Grade change notifications and jump-to-card navigation |
 | `window.ConnectifyDomSweeper` | `dom-sweeper.js` | DOM health monitor and component restoration |
@@ -70,8 +70,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectea:theme:custom_themes` | `localStorage` & `storage.local` | `theme-registry.js` | Array of custom theme configurations (tokens, `tokenVersion`, glassBlur, glassOpacity, wallpaper) with name-based overwrite |
 | `connectea:theme:wallpaper` | `localStorage` | `theme.js` | Data URI of custom background wallpaper |
 | `connectea:theme:liquid_glass` | `localStorage` | `theme.js` | Boolean flag enabling Liquid Glass diffusion mode |
-| `connectea:theme:restore_dark` | `localStorage` | `theme.js` | Flag to restore dark mode after navigating away from login page |
-| `connectea:theme:restore_theme` | `localStorage` | `theme-registry.js` | Saved theme ID to restore after navigating away from login page |
+| `connectea:theme:restore_dark` / `restore_theme` | `localStorage` | `theme.js` / `theme-registry.js` | Dark-mode flag and saved theme ID restored after navigating away from the login page |
 | `connectea:theme:custom_colors` | `localStorage` | `theme-registry.js` | Custom theme JSON palette (`canvas`, `surface`, `accent`) |
 | `connectea:cohort:v3:<student>:<year>:<subject>` | `localStorage` | `cohort-estimator.js` | Custom user-override cohort size |
 | `connectea:observed_spreads:<key>` | `sessionStorage` | `cohort-estimator.js` | Cached empirical IQR ratios |
@@ -103,6 +102,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `cx-session-expired` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user session expires while idle |
 | `cx-manual-logout` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user explicitly clicks logout |
 | `cx-last-autologin` | `browser.storage.local` | `auto-login.js` | Timestamp to prevent rapid login loops (<30s) |
+| `connectify:seen_version` | `localStorage` | `update-notice.js` | Last extension version seen; a newer manifest version shows the update notice once (fresh installs only record it) |
 
 ---
 
