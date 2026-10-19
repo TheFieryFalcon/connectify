@@ -8845,6 +8845,81 @@ runTest('Test 196: One Type change recomputes predictions once, after the dropdo
   }
 });
 
+runTest('Test 197: Uploaded wallpapers are centre-cropped to the screen and scaled down before they are stored', async () => {
+  const src = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-wallpaper-fit.js'), 'utf8');
+  const drawn = [], bitmaps = [];
+  class FakeBitmap {
+    constructor(w, h) { this.width = w; this.height = h; this.closed = false; bitmaps.push(this); }
+    close() { this.closed = true; }
+  }
+  const createImageBitmap = async (source, ...args) => {
+    if (!args.length) return new FakeBitmap(source.w, source.h);
+    const opts = args[4];
+    return new FakeBitmap(opts.resizeWidth, opts.resizeHeight);
+  };
+  class OffscreenCanvas {
+    constructor(w, h) { this.width = w; this.height = h; }
+    getContext() { return { drawImage: (img, ...a) => drawn.push({ img, a }) }; }
+    async convertToBlob(o) { return { type: o.type, w: this.width, h: this.height }; }
+  }
+  class FileReader {
+    readAsDataURL(b) { this.result = b.type === 'image/jpeg' && b.w ? `data:image/jpeg;fit=${b.w}x${b.h}` : `data:${b.type};original`; this.onload(); }
+  }
+  // A 1440x900 screen at 2x: the most a fixed `cover` background ever shows is 2880x1800 device pixels
+  const win = { devicePixelRatio: 2, screen: { width: 1440, height: 900 }, innerWidth: 1440, innerHeight: 800 };
+  new Function('window', 'createImageBitmap', 'OffscreenCanvas', 'FileReader', src)(win, createImageBitmap, OffscreenCanvas, FileReader);
+  const F = win.ConnectifyWallpaperFit;
+
+  assert.deepStrictEqual(F.targetSize(win), { width: 2880, height: 1800 }, 'target is the screen in device pixels');
+  assert.deepStrictEqual(F.targetSize({ devicePixelRatio: 3, screen: { width: 3000, height: 2000 } }), { width: 3840, height: 2560 },
+    'device pixel ratio is capped at 2 and the long edge at 4K');
+  // A 12000x4000 panorama: centre crop at 16:10, scaled to the target
+  const r = F.fitRect(12000, 4000, 2880, 1800);
+  assert.deepStrictEqual([r.sw, r.sh, r.sx, r.sy, r.width, r.height], [6400, 4000, 2800, 0, 2880, 1800], 'wide images lose their sides, centred');
+  const tall = F.fitRect(3000, 9000, 2880, 1800);
+  assert.deepStrictEqual([tall.sw, tall.sh, tall.sx, tall.sy, tall.width, tall.height], [3000, 1875, 0, 3562.5, 2880, 1800], 'tall images lose top and bottom, centred');
+  const small = F.fitRect(1600, 1600, 2880, 1800);
+  assert.deepStrictEqual([small.sw, small.sh, small.width, small.height], [1600, 1000, 1600, 1000], 'small images are cropped to the aspect but never upscaled');
+
+  // A 9000x6000 photo is decoded, cropped and resized off-thread, then stored as a screen-sized JPEG
+  const huge = await F.fromFile({ w: 9000, h: 6000, size: 30e6, type: 'image/png' });
+  assert.strictEqual(huge, 'data:image/jpeg;fit=2880x1800', 'huge wallpapers are stored at the screen size as JPEG');
+  assert.ok(bitmaps.every(b => b.closed), 'decoded bitmaps are released');
+  assert.deepStrictEqual(drawn[0].a, [0, 0, 2880, 1800, 0, 0, 2880, 1800], 'the already-fitted bitmap is drawn 1:1');
+  // A small image that already fits the screen exactly keeps its own encoding (PNG transparency, GIF frames)
+  const fits = await F.fromFile({ w: 1440, h: 900, size: 400e3, type: 'image/png' });
+  assert.strictEqual(fits, 'data:image/png;original', 'small images that already fit are stored untouched');
+
+  // Both upload paths fit the image first and never store the raw file
+  const prefs = fs.readFileSync(path.join(BASE_DIR, 'src/predictor/settings-preferences.js'), 'utf8');
+  const controls = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-customizer-controls.js'), 'utf8');
+  for (const [name, code] of [['Settings', prefs], ['Theme Customizer', controls]]) {
+    assert.ok(code.includes('window.ConnectifyWallpaperFit.fromFile(file).then('), `${name} wallpaper upload must go through ConnectifyWallpaperFit`);
+    assert.ok(!code.includes('readAsDataURL'), `${name} must not store the raw image file`);
+  }
+  const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('"src/theme/theme-wallpaper-fit.js"') > manifest.indexOf('"src/theme/theme-wallpaper-presets.js"')
+    && manifest.indexOf('"src/theme/theme-wallpaper-fit.js"') < manifest.indexOf('"src/theme/theme-customizer-controls.js"'),
+    'theme-wallpaper-fit.js is registered before the customizer controls');
+});
+
+runTest('Test 198: Home page portlets are one surface: no square wrapper behind the tile, no box behind the promo text', () => {
+  const nesting = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-surface-nesting.css'), 'utf8');
+  const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
+  const rule = sel => { const i = nesting.indexOf(sel); return i < 0 ? '' : nesting.slice(i, nesting.indexOf('}', i)); };
+  // The Liferay article wrapper sits 2px outside the tile with square corners; only the tile paints
+  assert.ok(/background-color: transparent !important;/.test(rule('.journal-content-article:has(> :is(.eds-c-tile, .cvr-c-tile))')),
+    'the article wrapper around a tile is clear (no square box behind the rounded glass tile)');
+  // A promo inside a tile is the tile body: clear, no border or corners of its own (Connect has neither)
+  const promo = rule(':is(.eds-c-tile, .cvr-c-tile) :is(#cx-specificity-anchor, .cvr-c-promo),');
+  assert.ok(/background-color: transparent !important;/.test(promo) && /border: 0 !important;/.test(promo) && /border-radius: 0 !important;/.test(promo),
+    'the promo and its body sit on the tile with native geometry');
+  // The body selector goes through .cvr-c-promo so it beats the id-weighted `#main-content .cvr-c-promo.eds-t-white .cvr-c-promo__body`
+  assert.ok(nesting.includes(':is(.eds-c-tile, .cvr-c-tile) .cvr-c-promo :is(#cx-specificity-anchor, .cvr-c-promo__body, .cvr-c-promo__content)'),
+    'the promo body rule outranks the promo body fill');
+  assert.ok(manifest.indexOf('theme-classes-promos.css') < manifest.indexOf('theme-surface-nesting.css'), 'nesting loads after the promo fills, so ties go to it');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

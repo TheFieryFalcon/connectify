@@ -57,13 +57,12 @@
     });
   }
 
-  function readFile(input, asText, onLoad) {
+  function readText(input, onLoad) {
     const file = input.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = ev => onLoad(ev.target.result, file);
-    if (asText) reader.readAsText(file);
-    else reader.readAsDataURL(file);
+    reader.onload = ev => onLoad(ev.target.result);
+    reader.readAsText(file);
     input.value = ''; // picking the same file again must fire change
   }
 
@@ -73,12 +72,19 @@
     const status = modal.querySelector('#cx-bg-status');
     const clearBtn = modal.querySelector('#cx-clear-bg-btn');
     modal.querySelector('#cx-upload-bg-btn').onclick = () => fileInput.click();
-    fileInput.onchange = () => readFile(fileInput, false, (dataUrl, file) => {
-      state.wallpaper = dataUrl;
-      status.textContent = file.name;
-      clearBtn.disabled = false;
-      ctx.renderMockup();
-    });
+    fileInput.onchange = () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      fileInput.value = ''; // picking the same file again must fire change
+      // Cropped and scaled to the screen first (theme-wallpaper-fit.js), so huge photos never lag the page
+      status.textContent = 'Preparing wallpaper...';
+      window.ConnectifyWallpaperFit.fromFile(file).then(dataUrl => {
+        state.wallpaper = dataUrl;
+        status.textContent = file.name;
+        clearBtn.disabled = false;
+        ctx.renderMockup();
+      }).catch(() => { status.textContent = 'That image could not be read'; });
+    };
     clearBtn.onclick = () => {
       state.wallpaper = null;
       status.textContent = 'Default background';
@@ -116,7 +122,7 @@
     modal.querySelector('#cx-export-btn').onclick = () => exportTheme(state);
     const importFile = modal.querySelector('#cx-import-file');
     modal.querySelector('#cx-import-btn').onclick = () => importFile.click();
-    importFile.onchange = () => readFile(importFile, true, text => {
+    importFile.onchange = () => readText(importFile, text => {
       try {
         importTheme(state, JSON.parse(text));
       } catch {

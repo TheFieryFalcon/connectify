@@ -206,6 +206,7 @@
             "src/theme/theme-token-derive.js",
             "src/theme/theme-glass-tokens.js",
             "src/theme/theme-wallpaper-presets.js",
+            "src/theme/theme-wallpaper-fit.js",
             "src/theme/theme-customizer-markup.js",
             "src/theme/theme-customizer-popover.js",
             "src/theme/theme-customizer-controls.js",

@@ -84,3 +84,18 @@ html.connectea-dark[data-connectea-theme] :is(.c-scope-statistic, .c-scope-stati
 html.connectea-dark[data-connectea-theme] :is(.mat-card, .eds-c-tile, .cvr-c-tile) :is(#cx-specificity-anchor, mat-tab-header, .mat-tab-header) {
   background-color: transparent !important;
 }
+
+/* Home page portlets: the Liferay article wrapper around a tile sits 2px outside it with square corners, so its
+   fill showed as a square box behind the rounded glass tile (Connect Help, notice promo). The tile is the surface. */
+html.connectea-dark[data-connectea-theme] .journal-content-article:has(> :is(.eds-c-tile, .cvr-c-tile)) {
+  background-color: transparent !important;
+}
+
+/* A promo inside a tile (notice of the month) is the tile's body: clear, with Connect's native geometry (no border
+   or corners of its own), so its text sits on the tile instead of a darker box. Beats the id-weighted promo rule. */
+html.connectea-dark[data-connectea-theme] :is(.eds-c-tile, .cvr-c-tile) :is(#cx-specificity-anchor, .cvr-c-promo),
+html.connectea-dark[data-connectea-theme] :is(.eds-c-tile, .cvr-c-tile) .cvr-c-promo :is(#cx-specificity-anchor, .cvr-c-promo__body, .cvr-c-promo__content) {
+  background-color: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+}

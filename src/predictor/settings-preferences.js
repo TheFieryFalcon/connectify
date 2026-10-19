@@ -37,27 +37,6 @@
     select.value = theme ? theme.getTheme() : (localStorage.getItem('connectea:theme:id') || 'dark');
   }
 
-  // Wallpapers are downscaled to 2560px JPEGs so they fit in storage
-  function readWallpaper(file, onReady) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const rawUrl = e.target?.result;
-      if (!rawUrl) return;
-      const img = new Image();
-      img.onload = () => {
-        const maxDim = 2560;
-        const ratio = Math.min(1, maxDim / img.width, maxDim / img.height);
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.round(img.width * ratio);
-        canvas.height = Math.round(img.height * ratio);
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-        onReady(canvas.toDataURL('image/jpeg', 0.88));
-      };
-      img.src = rawUrl;
-    };
-    reader.readAsDataURL(file);
-  }
-
   function bindWallpaper(panel) {
     const input = panel.querySelector('#cx-bg-upload-input');
     const uploadBtn = panel.querySelector('#cx-bg-upload-btn');
@@ -84,9 +63,15 @@
       input.onchange = () => {
         const file = input.files?.[0];
         if (!file) return;
-        readWallpaper(file, dataUrl => {
+        input.value = ''; // picking the same file again must fire change
+        // Cropped and scaled to the screen first (theme-wallpaper-fit.js), so huge photos never lag the page
+        if (status) status.textContent = 'Preparing wallpaper...';
+        window.ConnectifyWallpaperFit.fromFile(file).then(dataUrl => {
           window.ConnectifyTheme?.setCustomBackground(dataUrl);
           refresh();
+        }).catch(() => {
+          refresh();
+          if (status) status.textContent = 'That image could not be read';
         });
       };
     }
