@@ -3,6 +3,7 @@
  *
  * Renders a task row's statistics panel: distribution summary, score, z-score, standing and rank, the
  * cohort size notice on the overall row, and the outcome meter (evaluated in cohort-outcome-eval.js).
+ * Unmarked rows show their Low / Mid / High prediction instead (cohort-forecast.js).
  * Each row memoises its inputs so unchanged rows are skipped while scrolling.
  * Provides `window.ConnectifyCohortView`.
  */
@@ -16,6 +17,7 @@
     const { readMark, readStats, clearChildren, setText, setHTML, math, types, estimator } = rows;
     const { createPanel, noticeText } = panelMod;
     const renderOutcomeBar = (bar, outcome) => window.ConnectifyCohortOutcome?.renderOutcomeBar?.(bar, outcome);
+    const forecast = () => window.ConnectifyCohortForecast;
 
     const panels = window.ConnectifyCohortPanels || (window.ConnectifyCohortPanels = new WeakMap());
 
@@ -127,6 +129,7 @@
         memo.key === key &&
         memo.isOverall === isOverall &&
         memo.baselinesSig === baselinesSig &&
+        !memo.retry &&
         ui.wrapper?.isConnected
       ) {
         return;
@@ -148,19 +151,22 @@
         taskType = types().getEffectiveType(meta.subjectName, meta.taskName, meta.labelsKey);
         if (ui.typeSelect) types().updateTypeSelect(ui.typeSelect, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
       }
-      const remember = () => {
-        ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType, typesVersion };
+      // retry: an unmarked row without a prediction yet is re-evaluated once results are collected
+      const remember = (retry = false) => {
+        ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType, typesVersion, retry };
       };
 
-      // Unmarked assessments show only the type dropdown; their prediction is pre-cached
+      // Unmarked assessments show their Low / Mid / High prediction instead of statistics
       if (!isOverall && !Number.isFinite(mark)) {
         showPanel(ui, isOverall, false);
         if (ui.outcomeBar) hide(ui.outcomeBar);
-        outcomeEval.precacheUpcoming(row, meta, precollectedSubjects);
-        remember();
+        const prediction = outcomeEval.precacheUpcoming(row, meta, precollectedSubjects);
+        if (window.ConnectifyPredictorMath) forecast()?.show(ui, prediction);
+        remember(!forecast()?.isPredicted(prediction));
         return;
       }
 
+      forecast()?.hide(ui);
       showPanel(ui, isOverall, true);
       if (!isOverall && ui.outcomeBar) {
         if (window.ConnectifyPredictorMath) renderOutcome(ui, row, mark, meta, precollectedSubjects);

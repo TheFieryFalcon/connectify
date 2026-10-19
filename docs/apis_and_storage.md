@@ -17,6 +17,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyCohortSizeBaselines` | `cohort-size-baselines.js` | Typical cohort size per subject and year level |
 | `window.ConnectifyCohortRows` | `cohort-row-readers.js` | Task row mark and boxplot readers, DOM helpers |
 | `window.ConnectifyCohortOutcomeEval` | `cohort-outcome-eval.js` | Outcome meter evaluation and prediction pre-caching for a row |
+| `window.ConnectifyCohortForecast` | `cohort-forecast.js` | Low / Mid / High prediction panel on unmarked task rows |
 | `window.ConnectifyCohortView` | `cohort-view.js` | Injects stats panels and type selectors into assessment rows |
 | `window.ConnectifyCohort` | `cohort-stats.js` | Controller orchestrating passes, mutation observer, styles |
 | `window.ConnectifyTaskTypes` | `task-types.js` | Category keyword detection, overrides, class category sharing |

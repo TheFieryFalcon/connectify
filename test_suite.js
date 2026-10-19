@@ -95,6 +95,7 @@ const MODULE_BUNDLES = {
     'cohort-row-readers.js',
     'cohort-panel.js',
     'cohort-outcome-eval.js',
+    'cohort-forecast.js',
     'cohort-view.js'
   ],
   'category-settings.js': [
@@ -2958,7 +2959,7 @@ runTest('Test 108: Accordion expansion multi-click fix, scroll freeze during bul
   assert.ok(assessJs.includes('if (!window.ConnectifyPredictorMath.isPredictionCacheCurrent?.())'), 'assessment-data.js must not pre-cache predictions when valid cache is present');
   assert.ok(assessJs.includes('if (!window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.()) {'), 'expandAll must only pre-cache predictions when the cache is not current');
   assert.ok(predMathJs.includes('if (!force && isPredictionCacheCurrent()) {\n      return;\n    }'), 'predictor-math.js must exit early when valid cache is present and force is false');
-  assert.ok(cohortViewJs.includes('getCachedPrediction?.(meta.subjectName, meta.labelsKey)'), 'cohort-view.js must check cache before predicting');
+  assert.ok(cohortViewJs.includes('const cached = key && predMath.getCachedPrediction?.(meta.subjectName, key);') && cohortViewJs.includes('if (cached) return cached;'), 'cohort-view.js must check cache before predicting');
 });
 
 runTest('Test 109: Text bolding parity across light and dark modes for Test headers, marks 20 and 5, Med, Max, Mean, z, Top, and Rank', () => {
@@ -3505,7 +3506,7 @@ runTest('Test 115: Prediction cache updates on task category change, category se
   assert.ok(catCode.includes('updatePredictionCache'), 'category-settings.js must call updatePredictionCache');
   assert.ok(assessCode.includes('updatePredictionCache'), 'assessment-data.js must call updatePredictionCache upon stale expansion');
   // A task type change bumps typesVersion, which the memo compares; the row's taskType is recorded in the memo
-  assert.ok(cohortViewCode.includes('memo.typesVersion === typesVersion') && cohortViewCode.includes('ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType, typesVersion };'), 'cohort-view.js must memoise taskType and invalidate on type changes');
+  assert.ok(cohortViewCode.includes('memo.typesVersion === typesVersion') && cohortViewCode.includes('ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType, typesVersion, retry };'), 'cohort-view.js must memoise taskType and invalidate on type changes');
 
   // 2. Functional evaluation of predictor-math.js updatePredictionCache & clearSubjectPredictionCache
   eval(predMathCode);
@@ -8676,6 +8677,69 @@ runTest('Test 194: The top-right user area keeps the bar and popup surfaces, rea
     assert.ok(O.contrast(ink, elevated) >= 5, `${id}: dropdown name must reach 5:1 on the popup (${O.contrast(ink, elevated).toFixed(2)})`);
     assert.ok(O.contrast(ink, hover) >= 5, `${id}: Sign Out must reach 5:1 when hovered (${O.contrast(ink, hover).toFixed(2)})`);
   }
+});
+
+runTest('Unmarked task rows show a compact Low / Mid / High prediction panel, hidden once marked', () => {
+  localStorage.clear();
+  delete window.ConnectifyTaskTypes;
+  delete window.ConnectifyCohortView;
+  delete window.ConnectifyCohortForecast;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8'));
+  const view = window.ConnectifyCohortView;
+  assert.ok(window.ConnectifyCohortForecast, 'cohort-forecast.js must load with the cohort view');
+
+  const card = new MockElement('div', 'eds-c-tile');
+  const title = new MockElement('div', 'eds-c-tile__title');
+  title.textContent = '12 Literature ATAR - Semester 2';
+  card.appendChild(title);
+  const row = new MockElement('div', 'cvr-c-task');
+  row.closest = sel => sel.includes('eds-c-tile') ? card : null;
+  card.appendChild(row);
+  const details = new MockElement('div', 'cvr-c-task__details');
+  for (const text of ['Examination', 'Term 4, Week 3', 'Extended response 1']) {
+    const label = new MockElement('span', 'v-label');
+    label.textContent = text;
+    details.appendChild(label);
+  }
+  row.appendChild(details);
+  const marks = new MockElement('div', 'cvr-c-task__marks');
+  const markCell = new MockElement('div', 'cvr-c-task__mark');
+  marks.appendChild(markCell);
+  row.appendChild(marks);
+
+  // No results and no baseline: the panel says what the prediction needs and the row is retried next pass
+  window.ConnectifyPredictorMath.saveBaselines({ types: {}, subjects: {} });
+  view.render(row, false, 'lit-key', 50, null, []);
+  let ui = view.panels.get(row);
+  assert.strictEqual(ui.box.hidden, true, 'An unmarked row keeps its statistics panel hidden');
+  assert.ok(ui.forecast && !ui.forecast.hidden, 'An unmarked row shows the prediction panel');
+  assert.ok(ui.forecast.classList.contains('connectea-panel'), 'The prediction panel uses the statistics panel style');
+  assert.strictEqual(ui.forecast.textContent, window.ConnectifyCohortForecast.NEEDS, 'Without data the panel names what the prediction needs');
+  assert.strictEqual(ui._memo.retry, true, 'A row without a prediction is re-evaluated on the next pass');
+
+  // With a subject baseline the panel shows Low / Mid / High and never the breakout threshold
+  window.ConnectifyPredictorMath.saveBaselines({ types: { Exam: 70 }, subjects: { '12 Literature ATAR': 70 } });
+  window.dispatchEvent(new MockEvent('connectify-baselines-updated'));
+  view.render(row, false, 'lit-key', 50, null, []);
+  ui = view.panels.get(row);
+  const html = ui.forecast.innerHTML;
+  assert.ok(/Predicted/.test(html) && /Low \d+%/.test(html) && /<strong>Mid \d+%<\/strong>/.test(html) && /High \d+%/.test(html), `Prediction panel lists Low, Mid and High: ${html}`);
+  assert.ok(!/breakout|purple|110/i.test(html), 'The breakout threshold stays secret');
+  assert.strictEqual(ui._memo.retry, false, 'A predicted row is memoised');
+
+  // Once marked, the statistics panel replaces the prediction panel
+  markCell.textContent = '72 Out of 100';
+  view.render(row, false, 'lit-key', 50, null, []);
+  ui = view.panels.get(row);
+  assert.strictEqual(ui.forecast.hidden, true, 'A marked row hides the prediction panel');
+  assert.notStrictEqual(ui.box.hidden, true, 'A marked row shows its statistics panel');
+
+  const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const outlineJs = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-view.js')).js;
+  assert.ok(outlineJs.indexOf('src/cohort/cohort-forecast.js') !== -1 && outlineJs.indexOf('src/cohort/cohort-forecast.js') < outlineJs.indexOf('src/cohort/cohort-view.js'), 'cohort-forecast.js loads before cohort-view.js');
+  assert.ok(manifest.content_scripts.some(g => (g.css || []).includes('src/cohort/cohort-forecast.css')), 'cohort-forecast.css is registered');
 });
 
 Promise.all(pendingTestPromises).then(() => {

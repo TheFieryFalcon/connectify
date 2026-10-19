@@ -114,22 +114,26 @@
     return predMath.evaluateOutcome(mark, prediction);
   }
 
-  /** Unmarked rows: makes sure the upcoming task has a cached prediction. */
+  /** Unmarked rows: the upcoming task's prediction, cached (computed and cached when missing), or null. */
   function precacheUpcoming(row, meta, precollectedSubjects) {
     const predMath = window.ConnectifyPredictorMath;
-    if (!predMath) return;
+    if (!predMath) return null;
     try {
-      const cached = predMath.getCachedPrediction?.(meta.subjectName, meta.labelsKey) ||
-                     predMath.getCachedPrediction?.(meta.subjectName, meta.taskName);
-      if (cached) return;
-      const task = { id: meta.labelsKey ? `${meta.labelsKey}:0` : undefined, name: meta.taskName, caption: meta.labels?.[1] || '', labelsKey: meta.labelsKey, row };
-      if (predMath.getOrComputeTaskPrediction) {
-        predMath.getOrComputeTaskPrediction(meta.subjectName, task, precollectedSubjects);
-      } else {
-        const pred = predMath.predictTask(meta.subjectName, task);
-        if (!pred.unpredicted) predMath.cachePrediction(meta.subjectName, meta.labelsKey || meta.taskName, pred);
+      const id = meta.labelsKey ? `${meta.labelsKey}:0` : undefined;
+      for (const key of [id, meta.labelsKey, meta.taskName]) {
+        const cached = key && predMath.getCachedPrediction?.(meta.subjectName, key);
+        if (cached) return cached;
       }
-    } catch {}
+      const task = { id, name: meta.taskName, caption: meta.labels?.[1] || '', labelsKey: meta.labelsKey, row };
+      if (predMath.getOrComputeTaskPrediction) {
+        return predMath.getOrComputeTaskPrediction(meta.subjectName, task, precollectedSubjects) || null;
+      }
+      const pred = predMath.predictTask(meta.subjectName, task);
+      if (!pred.unpredicted) predMath.cachePrediction(meta.subjectName, meta.labelsKey || meta.taskName, pred);
+      return pred;
+    } catch {
+      return null;
+    }
   }
 
   window.ConnectifyCohortOutcomeEval = { taskFromRow, evaluateRow, precacheUpcoming, cardTaskRows };
