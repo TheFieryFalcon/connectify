@@ -9174,9 +9174,11 @@ runTest('Test 201: Target ATAR and Target Grade inputs are left-aligned; course 
   assert.ok(/#connectea-atar \.cta-score\s*\{[^}]*text-align:\s*right;/.test(compact), 'course list score inputs keep right alignment');
 });
 
-runTest('Test 202: Year in Progress weights: subject heading 700, subject chips 600, legend 400', () => {
+runTest('Test 202: Year in Progress: no subject heading (the pressed chip names it); ATAR Progression heading 700, chips 600, legend 400', () => {
+  const graph = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress-graph.js'), 'utf8');
+  assert.ok(!graph.includes("createElement('h3', current.name)"), 'subject views have no subject name heading');
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress.css'), 'utf8');
-  assert.ok(css.includes('#connectify-progress h3{font-weight:700}'), 'the subject heading is bold, not Connect\'s 400 h3');
+  assert.ok(css.includes('#connectify-progress h3{font-weight:700}'), 'the ATAR Progression heading is bold, not Connect\'s 400 h3');
   assert.ok(css.includes('#connectify-progress .cx-subjects button{font-weight:600}'), 'subject chips match the Refresh button weight');
   assert.ok(css.includes('#connectify-progress .cx-legend{font-weight:400}'), 'the chart legend stays regular');
 });

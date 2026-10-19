@@ -129,7 +129,7 @@
         // Single tasks, running weighted average or rolling average of the last three (progress-modes.js)
         mode = modes.read();
         points = modes.apply(current.tasks, mode);
-        chartContainer.append(createElement('h3', current.name), modes.select(mode, () => render(data)));
+        chartContainer.append(modes.select(mode, () => render(data)));
       }
 
       const chartRenderer = chartAPI?.renderChart || window.ConnectifyProgressChart?.renderChart;
