@@ -46,7 +46,7 @@
 
       let allProjectedSubjects = [];
       try {
-        // Only the classes "Show [Semester N] classes only" keeps, from the centralized cache
+        // Only the classes "Show this semester's classes only" keeps, from the centralized cache
         allProjectedSubjects = predMath.projectSubjectGrades(window.ConnectifyData?.collectClasses?.(true)) || [];
       } catch (err) {
         console.error('Error projecting subject grades in Predictor:', err);

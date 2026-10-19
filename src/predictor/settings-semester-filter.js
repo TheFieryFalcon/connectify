@@ -1,46 +1,39 @@
 /**
- * Connectify Settings: "Show [Semester N] classes only"
+ * Connectify Settings: "Show this semester's classes only"
  *
- * Wires the checkbox and semester dropdown in General Preferences to ConnectifySemesterFilter. The
- * dropdown shows the saved pick, or the detected semester. A change hides or shows outline tiles,
- * refreshes the cache from the chosen semester's cards, redraws the page statistics and tells the
- * tools (connectify-settings-updated). bind(panel) returns refresh(). Exposes
- * window.ConnectifySettingsSemesterFilter.
+ * Wires the General Preferences checkbox to ConnectifySemesterFilter and names the detected semester
+ * beside it. A change hides or shows outline tiles, refreshes the cache from this semester's cards,
+ * redraws the page statistics and tells the tools (connectify-settings-updated). bind(panel) returns
+ * refresh(). Exposes window.ConnectifySettingsSemesterFilter.
  */
 (() => {
   'use strict';
 
   function apply() {
-    const filter = window.ConnectifySemesterFilter;
-    filter?.applyToPage?.();
+    window.ConnectifySemesterFilter?.applyToPage?.();
     try { window.ConnectifyData?.collect?.(true); } catch {}
     window.ConnectifyCohort?.schedule?.();
     window.ConnectifyCompoundProgress?.update?.();
     window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
   }
 
-  /** Wires the controls and returns refresh(), which reloads them from storage. */
+  /** Wires the checkbox and returns refresh(), which reloads it from storage. */
   function bind(panel) {
     const toggle = panel.querySelector('#cx-semester-filter-toggle');
-    const select = panel.querySelector('#cx-semester-filter-select');
     const detectedLabel = panel.querySelector('#cx-semester-filter-detected');
     const filter = () => window.ConnectifySemesterFilter;
-    if (!toggle || !select) return () => {};
+    if (!toggle) return () => {};
 
-    const onChange = () => {
-      filter()?.save?.(toggle.checked, select.value);
+    toggle.addEventListener('change', () => {
+      filter()?.save?.(toggle.checked);
       apply();
-    };
-    toggle.addEventListener('change', onChange);
-    select.addEventListener('change', onChange);
+    });
 
     const refresh = () => {
       const f = filter();
       if (!f) return;
       toggle.checked = f.isEnabled();
-      select.value = String(f.chosenSemester());
-      const detected = window.ConnectifyClassSemesters?.detectSemester?.();
-      if (detectedLabel) detectedLabel.textContent = detected ? `Detected: Semester ${detected}.` : '';
+      if (detectedLabel) detectedLabel.textContent = `This semester: Semester ${f.currentSemester()}.`;
     };
     refresh();
     return refresh;

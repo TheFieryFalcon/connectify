@@ -47,7 +47,7 @@
     return subjects;
   }
 
-  // The classes "Show [Semester N] classes only" keeps, from the centralized cache
+  // The classes "Show this semester's classes only" keeps, from the centralized cache
   const collectClasses = () => (window.ConnectifyData?.collectClasses || window.ConnectifyData?.collect || (() => []))(true);
   const getSubjectList = () => subjectList(collectClasses());
 

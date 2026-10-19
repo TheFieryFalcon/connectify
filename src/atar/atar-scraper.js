@@ -68,7 +68,7 @@
    * [[Semester 1 courses], [Semester 2 courses]] from the centralized cache: the class registry
    * (class-semesters.js) for each semester's classes, overall marks and final letters, the subjects
    * cache for tasks and the grade cache for classes not on this page. Outline tiles are never read
-   * here; collect() refreshes the cache first. "Show [Semester N] classes only" applies.
+   * here; collect() refreshes the cache first. "Show this semester's classes only" applies.
    */
   function readCourses(atarOnly = true) {
     const math = window.ConnectifyMath || {};

@@ -32,7 +32,7 @@ This document details user-facing features 11 through 20, covering Target ATAR a
 - **DOM Insertion**: Standalone panel (`#connectify-categories`).
 - **UI Appearance**: Three distinct sections: General Preferences (`connectify:auto_expand`, `connectify:general_cohort_size`, `connectify:atar_percentage`), Semester 1 Scaling Calibration grid table (`connectea:preferences`), and Assessment Categories editor (`+ Add Category`, custom colors, keyword editor).
 - **Functionality**: Synchronizes custom categories across storage; triggers `rescanAllAutoAssessments()` upon saving.
-- **Show [Semester 1|2] classes only** (`connectify:semester_filter`, off by default; dropdown starts on the detected semester): hides the other semester's outlines, refreshes the cache from the chosen semester's cards only (the other semester's cached results stay frozen and are still used, e.g. final Semester 1 marks) and lists only the chosen semester's classes in every sidebar tool.
+- **Show this semester's classes only** (`connectify:semester_filter`, off by default; always the detected semester): hides the other semester's outlines, refreshes the cache from this semester's cards only (the other semester's cached results stay frozen and are still used, e.g. final Semester 1 marks) and lists only this semester's classes in every sidebar tool.
 
 ### 15. DOM Sweeper & Health Monitor
 - **Source Module**: [`dom-sweeper.js`](file:///Users/uwong/Downloads/2.1.14_0/dom-sweeper.js)

@@ -8371,7 +8371,7 @@ runTest('Test 187: The class registry records each semester outline and detects 
   }
 });
 
-runTest('Test 188: "Show [Semester N] classes only" hides the other semester, refreshes only its cards and filters sidebar data', () => {
+runTest('Test 188: "Show this semester\'s classes only" hides the other semester, refreshes only its cards and filters sidebar data', () => {
   const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
   const origQSA = document.querySelectorAll;
   try {
@@ -8394,8 +8394,9 @@ runTest('Test 188: "Show [Semester N] classes only" hides the other semester, re
     assert.deepStrictEqual(names(window.ConnectifyData.collect(true)), ['12 Art', '12 Chemistry ATAR']);
     assert.deepStrictEqual(names(window.ConnectifyData.collectClasses(true)), ['12 Art', '12 Chemistry ATAR']);
 
-    // Semester 2 only
-    filter.save(true, 2);
+    // This semester only: a Semester 2 card with a mark means Semester 2
+    filter.save(true);
+    assert.strictEqual(filter.currentSemester(), 2, 'the semester is always the detected one');
     assert.strictEqual(filter.activeSemester(), 2);
     filter.applyToPage();
     assert.deepStrictEqual(cards.map(c => c.classList.contains('cx-semester-hidden')), [true, false, true], "the other semester's tiles are hidden");
@@ -8413,13 +8414,13 @@ runTest('Test 188: "Show [Semester N] classes only" hides the other semester, re
     assert.deepStrictEqual(courses.map(l => l.map(c => c.id)), [['chemistry'], ['chemistry']], 'Semester 1 keeps only the classes continuing into Semester 2');
 
     // Turning it off shows every tile again
-    filter.save(false, 2);
+    filter.save(false);
     filter.applyToPage();
     assert.ok(cards.every(c => !c.classList.contains('cx-semester-hidden')), 'turning the option off shows every tile');
 
-    // A pick lasts for the school period it was made in
-    mockLocalStorage.setItem(filter.KEY, JSON.stringify({ enabled: true, semester: 1, period: '1999-2' }));
-    assert.strictEqual(filter.chosenSemester(), window.ConnectifyClassSemesters.detectSemester(), "a pick from an earlier period follows detection");
+    // A semester picked in an earlier version is ignored: the detected semester always wins
+    mockLocalStorage.setItem(filter.KEY, JSON.stringify({ enabled: true, semester: 1, period: '2026-1' }));
+    assert.strictEqual(filter.activeSemester(), 2, 'an old saved pick never overrides detection');
 
     const expandJs = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/assessment-expand.js'), 'utf8');
     assert.ok(expandJs.includes("h.closest?.('.cx-semester-hidden')"), 'Expand All skips hidden tiles');
@@ -8430,11 +8431,11 @@ runTest('Test 188: "Show [Semester N] classes only" hides the other semester, re
   }
 });
 
-runTest('Test 189: Settings offers "Show [Semester 1|2] classes only" and every sidebar tool reads the filtered cache', () => {
+runTest('Test 189: Settings offers "Show this semester\'s classes only" and every sidebar tool reads the filtered cache', () => {
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'settings-markup.js'), 'utf8'));
   const html = window.ConnectifySettingsMarkup.panelHtml();
-  assert.ok(/id="cx-semester-filter-toggle"[^>]*> Show\s*<select id="cx-semester-filter-select"[\s\S]*?<option value="1">Semester 1<\/option>\s*<option value="2">Semester 2<\/option>\s*<\/select> classes only/.test(html),
-    'a checkbox reading "Show [Semester 1|2] classes only" with a semester dropdown');
+  assert.ok(/id="cx-semester-filter-toggle"[^>]*> Show this semester's classes only\s*<\/label>/.test(html), 'a checkbox reading "Show this semester\'s classes only"');
+  assert.ok(!html.includes('cx-semester-filter-select'), 'there is no semester dropdown: the detected semester is always used');
   const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
   const js = manifest.content_scripts.flatMap(g => g.js || []);
   const at = f => js.indexOf(f);

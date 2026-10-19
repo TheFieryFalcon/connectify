@@ -1,12 +1,10 @@
 /**
- * Connectify Assessment: "Show [Semester N] classes only"
+ * Connectify Assessment: "Show this semester's classes only"
  *
- * Setting connectify:semester_filter = { enabled, semester, period } (off by default). While on, the
- * other semester's outline tiles are hidden, only the chosen semester's cards refresh the cache (the
- * other semester's cached results stay, frozen) and sidebar tools list only the chosen semester's
- * classes. A saved pick lasts for the school period (year and detected semester) it was made in, then
- * the dropdown follows detection again.
- * Exposes window.ConnectifySemesterFilter.
+ * Setting connectify:semester_filter = { enabled } (off by default). While on, the current semester is
+ * always the detected one (ConnectifyClassSemesters.detectSemester): the other semester's outline tiles
+ * are hidden, only this semester's cards refresh the cache (the other semester's cached results stay,
+ * frozen) and sidebar tools list only this semester's classes. Exposes window.ConnectifySemesterFilter.
  */
 (() => {
   'use strict';
@@ -17,9 +15,8 @@
   const HIDDEN = 'cx-semester-hidden';
   const CARD_SELECTOR = '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile';
   const registry = () => window.ConnectifyClassSemesters;
-  const detect = () => registry()?.detectSemester?.() || 1;
-  // With two semesters, "detection changed" alone cannot tell a new year from the same semester
-  const period = semester => `${new Date().getFullYear()}-${semester}`;
+  /** The current semester (1 or 2), detected from the outlines. */
+  const currentSemester = () => registry()?.detectSemester?.() || 1;
 
   function readSetting() {
     try {
@@ -29,22 +26,12 @@
     return { enabled: false };
   }
 
-  /** The semester shown in the dropdown: the saved pick, unless the school period has moved on. */
-  function chosenSemester() {
-    const setting = readSetting();
-    const detected = detect();
-    const pick = Number(setting.semester);
-    return (pick === 1 || pick === 2) && setting.period === period(detected) ? pick : detected;
-  }
-
   const isEnabled = () => readSetting().enabled === true;
   /** The semester being filtered to, or null when the option is off. */
-  const activeSemester = () => (isEnabled() ? chosenSemester() : null);
+  const activeSemester = () => (isEnabled() ? currentSemester() : null);
 
-  function save(enabled, semester) {
-    try {
-      localStorage.setItem(KEY, JSON.stringify({ enabled: Boolean(enabled), semester: Number(semester) === 2 ? 2 : 1, period: period(detect()) }));
-    } catch {}
+  function save(enabled) {
+    try { localStorage.setItem(KEY, JSON.stringify({ enabled: Boolean(enabled) })); } catch {}
   }
 
   // Tiles naming no semester belong to both
@@ -110,7 +97,7 @@
   applyToPage();
 
   window.ConnectifySemesterFilter = {
-    KEY, HIDDEN, readSetting, isEnabled, chosenSemester, activeSemester, save,
+    KEY, HIDDEN, readSetting, isEnabled, currentSemester, activeSemester, save,
     allowsCard, allowedCards, filterSubjects, filterCourses, applyToPage
   };
 })();

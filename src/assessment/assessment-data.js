@@ -56,7 +56,7 @@
       return formatCollectedSubjects(includePending);
     }
     const allCards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'));
-    // "Show [Semester N] classes only": only that semester's cards refresh the cache; the other
+    // "Show this semester's classes only": only this semester's cards refresh the cache; the other
     // semester's cached results stay as they are (semester-filter.js)
     const filter = window.ConnectifySemesterFilter;
     const cards = filter ? filter.allowedCards(allCards) : allCards;
@@ -154,7 +154,7 @@
   }
 
 
-  /** collect() limited to the classes "Show [Semester N] classes only" keeps; for sidebar tools. */
+  /** collect() limited to the classes "Show this semester's classes only" keeps; for sidebar tools. */
   function collectClasses(includePending = false, forceRefresh = false) {
     const subjects = collect(includePending, forceRefresh);
     return window.ConnectifySemesterFilter ? window.ConnectifySemesterFilter.filterSubjects(subjects) : subjects;

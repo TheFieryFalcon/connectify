@@ -1,7 +1,7 @@
 /**
  * Connectify Settings: panel markup
  *
- * Static HTML for the Settings panel: general preferences (incl. "Show [Semester N] classes only"), scaling calibration, previous-year
+ * Static HTML for the Settings panel: general preferences (incl. "Show this semester's classes only"), scaling calibration, previous-year
  * baselines, assessment categories and developer settings. The theme options are filled in from the
  * theme registry when the panel opens. Exposes window.ConnectifySettingsMarkup.
  */
@@ -17,11 +17,7 @@
         </label>
         <p class="cx-settings-desc" style="margin:4px 0 0 24px;">When enabled, Connectify automatically expands course outlines on load to scrape assessment data.</p>
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;margin-top:12px;">
-          <input type="checkbox" id="cx-semester-filter-toggle" style="width:16px;height:16px;cursor:pointer;"> Show
-          <select id="cx-semester-filter-select" class="cx-settings-select" aria-label="Semester to show" style="box-sizing:border-box;padding:2px 6px;border-radius:4px;font-size:12px;cursor:pointer;">
-            <option value="1">Semester 1</option>
-            <option value="2">Semester 2</option>
-          </select> classes only
+          <input type="checkbox" id="cx-semester-filter-toggle" style="width:16px;height:16px;cursor:pointer;"> Show this semester's classes only
         </label>
         <p class="cx-settings-desc" style="margin:4px 0 0 24px;">Hides the other semester's outlines. Only this semester's classes refresh the cache and appear in the sidebar tools; the other semester's results are kept from the cache. <span id="cx-semester-filter-detected"></span></p>
 

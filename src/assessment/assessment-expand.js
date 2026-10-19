@@ -36,7 +36,7 @@
     const headings = [];
     for (const h of document.querySelectorAll(HEADING_SELECTOR)) {
       if (!pattern.test(h.textContent)) continue;
-      // The other semester's tiles are hidden by "Show [Semester N] classes only"
+      // The other semester's tiles are hidden by "Show this semester's classes only"
       if (h.closest?.('.cx-semester-hidden')) continue;
       const card = h.closest?.('.eds-c-accordion__section, .cvr-c-accordion__section') || h.closest?.(CARD_SELECTOR) || null;
       if (card && seenCards.has(card)) continue;

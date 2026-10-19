@@ -26,7 +26,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyTargetSolver` | `target-solver.js` | Target Grade and difficulty-weighted Target ATAR solver |
 | `window.ConnectifyAtarScraper` | `atar-scraper.js` | ATAR courses per semester from the cache (registry, subjects, grade cache); `readCourses` never reads tiles |
 | `window.ConnectifyClassSemesters` | `class-semesters.js` | Class registry per semester (title, mark, final letter, tasks), `detectSemester()`, new-year trigger |
-| `window.ConnectifySemesterFilter` | `semester-filter.js` | "Show [Semester N] classes only": `activeSemester`, `allowedCards`, `filterSubjects`, `filterCourses`, `applyToPage` |
+| `window.ConnectifySemesterFilter` | `semester-filter.js` | "Show this semester's classes only": `currentSemester`, `activeSemester`, `allowedCards`, `filterSubjects`, `filterCourses`, `applyToPage` |
 | `window.ConnectifyAtarCalc` | `atar-calculator.js` | Course state modeling and ATAR calculation results |
 | `window.ConnectifyTargetAtarUI` | `target-atar-ui.js` | Target ATAR planner modal form and breakdown view |
 | `window.ConnectifyTargetGradeUI` | `target-grade-ui.js` | Target Grade planner modal form and breakdown view |
@@ -94,7 +94,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify:baseline_backup:<account>` | `localStorage` | `year-rollover.js` | Baselines as they were before a new-year rollover replaced them |
 | `connectify:year_archive:<account>` | `localStorage` | `year-rollover.js` | Last two years' cached results (subjects, grade cache, registry, averages): Connect no longer shows them |
 | `connectify:class_semesters:<student>` | `localStorage` | `class-semesters.js` | Each class's outlines per semester: title, overall mark, final letter, task ids (results cache) |
-| `connectify:semester_filter` | `localStorage` | `semester-filter.js` | `{ enabled, semester, period }`; off by default; a pick lasts for its year-semester period (settings) |
+| `connectify:semester_filter` | `localStorage` | `semester-filter.js` | `{ enabled }`; off by default; the semester is always the detected one (settings) |
 | `connectify:prediction:<account>:<subject>:<taskId>` | `localStorage` | `predictor-math.js` / `cohort-view.js` | Cached task prediction object (`{ low, mid, high, breakoutScore, type }`) |
 | `connectify:prediction_version` | `localStorage` | `predictor-math.js` | Calculation version incrementer tracking when chronological prediction cache must be re-populated |
 | `connectify:cache_version:<subsystem>` | `localStorage` | `assessment-data.js` | Independent invalidation keys (`predictor`, `results`, `settings`, `cohort`) |
