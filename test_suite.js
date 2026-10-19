@@ -2369,8 +2369,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v11_20261016_pred'"), 'predictor-math.js must use v11_20261016_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v11_20261016_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v11_20261016_pred');
+  assert.ok(predMathCode.includes("'v12_20261019_pred'"), 'predictor-math.js must use v12_20261019_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v12_20261019_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v12_20261019_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2463,9 +2463,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v11_20261016_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v12_20261019_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v11_20261016_pred'), 'predictor-math.js must bump version to v11_20261016_pred');
+  assert.ok(predMathJs.includes('v12_20261019_pred'), 'predictor-math.js must bump version to v12_20261019_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -8260,7 +8260,7 @@ runTest('Test 183: Expand All adds every expanded subject to a cache that alread
     cards = [];
     assert.deepStrictEqual(names(), ['12 Chemistry ATAR', '12 Philosophy and Ethics ATAR', '12 Physics ATAR'], 'the persisted cache keeps every subject');
     const src = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/cache-versions.js'), 'utf8');
-    assert.ok(src.includes("RESULTS: 'v9_20261019_results'"), 'caches from before the class registry are invalidated');
+    assert.ok(src.includes("RESULTS: 'v10_20261019_results'"), 'caches from before per-task semesters are invalidated');
   } finally {
     document.querySelectorAll = origQSA;
     mockLocalStorage.clear();
@@ -8359,7 +8359,7 @@ runTest('Test 187: The class registry records each semester outline and detects 
     cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%' }), makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '85%', tasks: [['Chem Test 2', '88%']] })];
     assert.strictEqual(classes.detectSemester(), 1, 'a marked Semester 2 task before Semester 1 grades are final stays Semester 1');
     cards = [makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: ['82%', 'A'] })];
-    assert.strictEqual(classes.detectSemester(), 2, 'a Semester 1 grade shown on a Semester 2 panel means Semester 2');
+    assert.strictEqual(classes.detectSemester(), 2, 'a final grade on a Semester 2 card (the year is over) is still Semester 2');
     // A card element is read once; a scrape re-reads it
     const before = JSON.stringify(classes.get());
     chem1.querySelector('.cvr-c-task__mark').textContent = '90%';
@@ -8508,6 +8508,68 @@ runTest('Test 190: A wholly new class registry rolls last year\'s cached average
     window.ConnectifyCache = saved.cache; window.ConnectifyAssessmentScrape = saved.scrape; window.ConnectifyPredictorHistory = saved.history;
     window.ConnectifyPredictorBaselines = saved.store; window.ConnectifySidebarFilter = saved.sidebarFilter; window.ConnectifyNotifications = saved.notes;
     mockLocalStorage.clear();
+  }
+});
+
+runTest('Test 191: Semester 1 is every task before Term 2 Week 7, and the planners start Semester 2 only on a final Semester 1 grade', () => {
+  const helpersSrc = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/assessment-parse-helpers.js'), 'utf8');
+  eval(helpersSrc);
+  const { taskSemester, SEMESTER_TWO_ORDER } = window.ConnectifyParseHelpers;
+  assert.strictEqual(SEMESTER_TWO_ORDER, 19, 'chronological week 19 (12 weeks per term) = school week 17 = Term 2 Week 7');
+  assert.strictEqual(window.ConnectifyUtils.customWeekOrder('17'), 19, 'school week 17 is chronological week 19');
+  assert.strictEqual(taskSemester(2, 'Term 1, Week 5'), 1, 'a Semester 1 task listed on a Semester 2 panel stays Semester 1');
+  assert.strictEqual(taskSemester(2, 'Term 2, Week 6'), 1, 'Term 2 Week 6 is the last Semester 1 week');
+  assert.strictEqual(taskSemester(2, 'Term 2, Week 7'), 2, 'Term 2 Week 7 starts Semester 2');
+  assert.strictEqual(taskSemester(2, 'Term 3, Week 2'), 2);
+  assert.strictEqual(taskSemester(2, 'Term 1'), 1, 'a bare Term 1 caption is Semester 1');
+  assert.strictEqual(taskSemester(2, 'Term 2'), 2, 'a bare Term 2 caption spans both semesters, so the card decides');
+  assert.strictEqual(taskSemester(2, 'Week 4'), 2, 'a week with no term is ambiguous, so the card decides');
+  assert.strictEqual(taskSemester(1, 'Term 3, Week 2'), 1, 'a task is never later than its own card');
+  assert.strictEqual(taskSemester(2, 'Term 3, Week 2', 5), 1, 'a week override wins over the caption');
+
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-ui-helpers.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui-markup.js'), 'utf8'));
+  const { hasSemesterTwoStarted, isTargetClosed } = window.ConnectifyAtarMarkup;
+  const course = (finalLetter, mark = 88) => ({ id: 'literature', mark, finalLetter });
+  assert.strictEqual(hasSemesterTwoStarted([[course(false)], [course(false, 58.7)]]), false, 'a Semester 2 cumulative percent or marked task never starts Semester 2');
+  assert.strictEqual(hasSemesterTwoStarted([[course(true)], [course(false)]]), true, 'a final Semester 1 grade starts Semester 2');
+  assert.strictEqual(isTargetClosed([[course(true)], [course(false, 58.7)]], 1), false, 'Semester 1 marks on a Semester 2 panel never close the Semester 2 targets');
+  assert.strictEqual(isTargetClosed([[course(true)], [course(false)]], 0), true, 'a final Semester 1 grade closes the Semester 1 targets');
+  assert.strictEqual(isTargetClosed([[], [course(true)]], 1), true, 'a final Semester 2 grade closes them');
+});
+
+runTest('Test 192: The first Semester 1 task listed on a Semester 2 panel gets no outcome meter', () => {
+  const saved = { rows: window.ConnectifyCohortRows, pred: window.ConnectifyPredictorMath, data: window.ConnectifyData };
+  try {
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/assessment-parse-helpers.js'), 'utf8'));
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'cohort/cohort-outcome-eval.js'), 'utf8'));
+    const evalApi = window.ConnectifyCohortOutcomeEval;
+    const card = new MockElement('div', 'eds-c-tile');
+    const title = new MockElement('div', 'eds-c-tile__title'); title.textContent = 'Literature ATAR Year 11 - Semester 2'; card.appendChild(title);
+    const list = new MockElement('div', 'cvr-c-tasks'); card.appendChild(list);
+    const makeRow = mark => { const row = new MockElement('div', 'cvr-c-task'); row._mark = mark; list.appendChild(row); return row; };
+    const first = makeRow(64), second = makeRow(80);
+    window.ConnectifyCohortRows = { readMark: row => row._mark };
+    window.ConnectifyData = { orderHint: window.ConnectifyParseHelpers.orderHint };
+    window.ConnectifyPredictorMath = {
+      cleanSubject: n => n.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, ''),
+      getBaselines: () => ({ subjects: {}, types: {} }),
+      getCachedPrediction: () => ({ low: 50, mid: 60, high: 70 }),
+      evaluateOutcome: () => ({ segments: 4 })
+    };
+    // The Semester 1 copies of both tasks are cached (marked) from the Semester 1 outline
+    const subjects = [{ name: 'Literature ATAR Year 11', tasks: [
+      { name: 'Short written response - Play', score: 64, pending: false, semester: 1 },
+      { name: 'Extended written response - Prose', score: 80, pending: false, semester: 1 }
+    ] }];
+    const meta = (name, caption) => ({ subjectName: 'Literature ATAR Year 11', taskName: name, labels: [name.split(' - ')[0], caption, name], labelsKey: name });
+    const firstTask = evalApi.taskFromRow(first, meta('Short written response - Play', 'Term 1, Week 5'), 64);
+    assert.strictEqual(firstTask.semester, 1, 'a Term 1 task on a Semester 2 panel is a Semester 1 task');
+    assert.strictEqual(evalApi.evaluateRow(first, 64, meta('Short written response - Play', 'Term 1, Week 5'), subjects), null,
+      'the first marked task of the class has nothing before it, so no meter (it must not be measured against itself)');
+    assert.ok(evalApi.evaluateRow(second, 80, meta('Extended written response - Prose', 'Term 2, Week 1'), subjects), 'the next task has the first one before it');
+  } finally {
+    window.ConnectifyCohortRows = saved.rows; window.ConnectifyPredictorMath = saved.pred; window.ConnectifyData = saved.data;
   }
 });
 

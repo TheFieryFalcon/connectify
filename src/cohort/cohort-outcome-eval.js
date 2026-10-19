@@ -35,7 +35,10 @@
     const id = meta.labelsKey ? `${meta.labelsKey}:0` : undefined;
     const caption = meta.labels?.[1] || '';
     // A week typed in the Progress Graph wins over the week in the caption
-    const override = readTimeOverride([meta.subjectName, cardTitle], [id, meta.taskName]);
+    const overrideOrder = customWeekOrder(readTimeOverride([meta.subjectName, cardTitle], [id, meta.taskName]));
+    // A Semester 1 task listed on a Semester 2 panel is still a Semester 1 task
+    const cardSemester = semMatch ? Number(semMatch[1]) : 1;
+    const taskSemester = window.ConnectifyParseHelpers?.taskSemester;
     return {
       id,
       name: meta.taskName,
@@ -45,9 +48,9 @@
       score: mark,
       mark,
       pending: false,
-      semester: semMatch ? Number(semMatch[1]) : 1,
+      semester: taskSemester ? taskSemester(cardSemester, caption, overrideOrder) : cardSemester,
       sequence: card ? Math.max(0, cardTaskRows(card, row).indexOf(row)) : 0,
-      order: customWeekOrder(override) ?? window.ConnectifyData?.orderHint?.(caption) ?? null,
+      order: overrideOrder ?? window.ConnectifyData?.orderHint?.(caption) ?? null,
       weight: rowWeight(row)
     };
   }
@@ -57,8 +60,9 @@
 
   /**
    * Whether the subject has a marked result before this one: an earlier marked row in this card, or for
-   * Semester 2 a marked Semester 1 task (collected results first, then a Semester 1 card on the page).
-   * Unmarked and pending rows don't count, so the first marked assessment of a class has no precedent.
+   * a Semester 2 task a marked Semester 1 task (collected results first, then a Semester 1 card on the page).
+   * A Semester 1 task listed on a Semester 2 panel is a Semester 1 task (taskSemester), so only rows above
+   * it count. Unmarked and pending rows don't count, so the first marked assessment of a class has no precedent.
    */
   function hasPriorMarkedWork(task, row, meta, subjects, predMath) {
     const card = row.closest(CARD_SELECTOR);

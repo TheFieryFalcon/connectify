@@ -111,5 +111,28 @@
     return null;
   }
 
-  window.ConnectifyParseHelpers = { orderHint, cohortMean, weightedMean };
+  // Semester 1 is every task before Term 2 Week 7: chronological week 19 (12 per term), school week 17
+  const SEMESTER_TWO_ORDER = 19;
+  const TERM_AND_WEEK = /term\s*\d[\s\S]*?weeks?\s*\d|weeks?\s*\d+[\s\S]*?term\s*\d/i;
+
+  /**
+   * The semester a task belongs to. Semester 2 outlines also list the Semester 1 tasks, so the card title
+   * alone is not enough: a week override (order) or a "Term N, Week W" caption decides first (a bare
+   * "Term 1" / "Term 3|4" too; Term 2 spans both), never later than the card's own semester.
+   */
+  function taskSemester(cardSemester, caption, overrideOrder = null) {
+    const card = Number(cardSemester) === 2 ? 2 : 1;
+    const text = String(caption || '');
+    const order = Number.isFinite(overrideOrder) ? overrideOrder : (TERM_AND_WEEK.test(text) ? orderHint(text) : null);
+    let semester = null;
+    if (Number.isFinite(order)) semester = order < SEMESTER_TWO_ORDER ? 1 : 2;
+    else {
+      const term = Number(text.match(/\bterm\s*([1-4])\b/i)?.[1]);
+      if (term === 1) semester = 1;
+      else if (term >= 3) semester = 2;
+    }
+    return semester ? Math.min(semester, card) : card;
+  }
+
+  window.ConnectifyParseHelpers = { orderHint, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_ORDER };
 })();

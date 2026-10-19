@@ -60,7 +60,7 @@
   /** The card's weighted tasks in chronological order, limited to the card's semester. */
   function cardTasks(subject, cardSemester) {
     const hasSem2Tasks = subject.tasks.some(
-      t => t.semester === 2 || (t.caption && /Term\s*[34]/i.test(t.caption)) || (t.order !== null && t.order > 24)
+      t => t.semester === 2 || (t.caption && /Term\s*[34]/i.test(t.caption)) || (t.order !== null && t.order >= (window.ConnectifyParseHelpers?.SEMESTER_TWO_ORDER || 19))
     );
 
     // Semester 1 cards display only Semester 1 tasks.

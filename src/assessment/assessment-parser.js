@@ -151,6 +151,7 @@
 
       const id = `${identityKey}:${occurrenceCount}`;
 
+      const overrideOrder = customWeekOrder(readTimeOverride([subjectName, title], [id, occurrenceCount === 0 ? taskName : null]));
       const record = {
         id,
         name: taskName,
@@ -159,9 +160,10 @@
         pending: !isCompleted,
         weight,
         mean: cohortMean(row),
-        semester: parseSemester(card),
+        // Semester 2 outlines list the Semester 1 tasks too: the task's own week decides, not the card
+        semester: window.ConnectifyParseHelpers.taskSemester(parseSemester(card), caption, overrideOrder),
         // A week override typed in the Progress Graph wins; the generic name key only applies to the first occurrence
-        order: customWeekOrder(readTimeOverride([subjectName, title], [id, occurrenceCount === 0 ? taskName : null])) ?? orderHint(caption),
+        order: overrideOrder ?? orderHint(caption),
         sequence: parsedTasks.length
       };
 

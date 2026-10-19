@@ -124,9 +124,9 @@
   /** Subject names with an outline in the given semester. */
   const classesIn = semester => Object.keys(load()).filter(s => load()[s]?.[semester]);
 
-  // Semester 2 starts only once a Semester 1 class has a final A–E grade: a Semester 2 task can be marked
-  // before Semester 1 grades are final. Semester 1 grades also show on Semester 2 panels, so a final
-  // grade on either semester's card counts.
+  // Semester 2 starts only once a class has a final A–E grade. Marks never count: a Semester 2 panel's
+  // cumulative percent and its Semester 1 task rows are marked from day one, and a Semester 2 task can
+  // be marked before Semester 1 grades are final. (A letter on a Semester 2 card means the year is over.)
   function evidenceFromPage() {
     const cards = Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester);
     if (!cards.length) return null;

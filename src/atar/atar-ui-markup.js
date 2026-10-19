@@ -67,12 +67,17 @@
     };
   }
 
-  /** Semester 2 has begun once Semester 1 grades are final or a Semester 2 mark exists. */
+  // Semester 2 starts only once a class has a final A–E grade. Semester 2 marks never count: the
+  // cumulative percent and the Semester 1 task rows on a Semester 2 panel are marked from day one, and a
+  // Semester 2 task can be marked before Semester 1 grades are final.
   const hasSemesterTwoStarted = gradeCourses =>
     (gradeCourses?.[0] || []).some(r => r?.finalLetter) ||
-    (gradeCourses?.[1] || []).some(r => r?.mark !== undefined && r?.mark > 0);
+    (gradeCourses?.[1] || []).some(r => r?.finalLetter);
 
-  /** Targets close for a semester once its grades are final; Semester 2 stays closed until it has classes. */
+  /**
+   * Targets close for a semester once its A–E grades are final (Semester 1 task marks on a Semester 2
+   * panel never close it); Semester 2 stays closed until it has classes.
+   */
   function isTargetClosed(gradeCourses, semesterIdx) {
     if ((gradeCourses?.[semesterIdx] || []).some(r => r?.finalLetter)) return true;
     return semesterIdx === 1 && (gradeCourses?.[1] || []).length === 0;
