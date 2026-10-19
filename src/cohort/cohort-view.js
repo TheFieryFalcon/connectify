@@ -3,7 +3,8 @@
  *
  * Renders a task row's statistics panel: distribution summary, score, z-score, standing and rank, the
  * cohort size notice on the overall row, and the outcome meter (evaluated in cohort-outcome-eval.js).
- * Unmarked rows show their Low / Mid / High prediction instead (cohort-forecast.js).
+ * Unmarked rows show their Low / Mid / High prediction instead (cohort-forecast.js); a class without a
+ * final letter lists its uncompleted tasks on the overall row (cohort-upcoming.js).
  * Each row memoises its inputs so unchanged rows are skipped while scrolling.
  * Provides `window.ConnectifyCohortView`.
  */
@@ -18,6 +19,7 @@
     const { createPanel, noticeText } = panelMod;
     const renderOutcomeBar = (bar, outcome) => window.ConnectifyCohortOutcome?.renderOutcomeBar?.(bar, outcome);
     const forecast = () => window.ConnectifyCohortForecast;
+    const upcoming = () => window.ConnectifyCohortUpcoming;
 
     const panels = window.ConnectifyCohortPanels || (window.ConnectifyCohortPanels = new WeakMap());
 
@@ -116,6 +118,7 @@
       const baselinesSig = getBaselinesSig();
       const userSize = estimator().loadCohortSize(key);
       const cohortSize = userSize ?? estimatedSize;
+      const pendingSig = isOverall ? (upcoming()?.signature(row) ?? '') : '';
 
       // Fast path: nothing that affects this row has changed. A task type change bumps typesVersion,
       // so the memoised taskType never needs recomputing here
@@ -129,6 +132,7 @@
         memo.key === key &&
         memo.isOverall === isOverall &&
         memo.baselinesSig === baselinesSig &&
+        memo.pendingSig === pendingSig &&
         !memo.retry &&
         ui.wrapper?.isConnected
       ) {
@@ -146,6 +150,7 @@
       let meta = null;
       if (isOverall) {
         syncCohortInput(ui, userSize, estimatedSize);
+        if (window.ConnectifyPredictorMath) upcoming()?.show(ui, row, precollectedSubjects);
       } else {
         meta = types().getTaskMeta(row);
         taskType = types().getEffectiveType(meta.subjectName, meta.taskName, meta.labelsKey);
@@ -153,7 +158,7 @@
       }
       // retry: an unmarked row without a prediction yet is re-evaluated once results are collected
       const remember = (retry = false) => {
-        ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType, typesVersion, retry };
+        ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, pendingSig, taskType, typesVersion, retry };
       };
 
       // Unmarked assessments show their Low / Mid / High prediction instead of statistics

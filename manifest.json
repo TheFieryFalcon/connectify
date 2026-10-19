@@ -55,7 +55,8 @@
             "src/sidebar/styles/sidebar-settings.css",
             "src/sidebar/styles/sidebar-progress-scaling.css",
             "src/assessment/semester-filter.css",
-            "src/cohort/cohort-forecast.css"
+            "src/cohort/cohort-forecast.css",
+            "src/cohort/cohort-upcoming.css"
          ],
          "js": [
             "src/system/scheduler.js",
@@ -82,6 +83,7 @@
             "src/cohort/cohort-panel.js",
             "src/cohort/cohort-outcome-eval.js",
             "src/cohort/cohort-forecast.js",
+            "src/cohort/cohort-upcoming.js",
             "src/cohort/cohort-view.js",
             "src/cohort/cohort-styles.js",
             "src/cohort/cohort-stats.js",

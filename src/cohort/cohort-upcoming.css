@@ -1,0 +1,28 @@
+/* Uncompleted tasks panel on a class's overall row (cohort-upcoming.js): the statistics panel's style (theme
+   fills and glass strip come from the .connectea-panel rules); values use the Predictor's Low / Mid / High ink */
+.connectea-panel.connectea-upcoming { line-height: 1.6 !important; margin-top: 6px !important; }
+.connectea-upcoming-title { font-weight: 700 !important; }
+.connectea-upcoming-row { white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; }
+.connectea-upcoming-name { font-weight: 700 !important; }
+.connectea-upcoming .connectea-forecast-value--low, .connectea-upcoming .connectea-forecast-value--high { font-weight: 600 !important; }
+.connectea-upcoming .connectea-forecast-value--mid { font-weight: 700 !important; }
+
+:is(#cx-specificity-anchor, .connectea-upcoming) .connectea-forecast-value--low { color: #475569 !important; }
+:is(#cx-specificity-anchor, .connectea-upcoming) .connectea-forecast-value--mid { color: #174c75 !important; }
+:is(#cx-specificity-anchor, .connectea-upcoming) .connectea-forecast-value--high { color: #15803d !important; }
+
+html.connectea-dark :is(#cx-specificity-anchor, .connectea-upcoming) .connectea-forecast-value--low { color: var(--cx-text-secondary, #cbd5e1) !important; }
+html.connectea-dark :is(#cx-specificity-anchor, .connectea-upcoming) .connectea-forecast-value--mid {
+  color: color-mix(in srgb, var(--cx-accent-hover, #93c5fd) 60%, var(--cx-text-primary, #ffffff)) !important;
+}
+html.connectea-dark :is(#cx-specificity-anchor, .connectea-upcoming) .connectea-forecast-value--high { color: #4ade80 !important; }
+
+html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-upcoming) .connectea-forecast-value--low { color: var(--cx-text-primary, #1d1c1c) !important; }
+html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-upcoming) .connectea-forecast-value--mid {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from var(--cx-accent, #38bdf8) 0.34 c h) !important;
+}
+html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-upcoming) .connectea-forecast-value--high {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from #22c55e 0.34 c h) !important;
+}

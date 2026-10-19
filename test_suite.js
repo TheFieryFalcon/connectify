@@ -96,6 +96,7 @@ const MODULE_BUNDLES = {
     'cohort-panel.js',
     'cohort-outcome-eval.js',
     'cohort-forecast.js',
+    'cohort-upcoming.js',
     'cohort-view.js'
   ],
   'category-settings.js': [
@@ -3507,7 +3508,7 @@ runTest('Test 115: Prediction cache updates on task category change, category se
   assert.ok(catCode.includes('updatePredictionCache'), 'category-settings.js must call updatePredictionCache');
   assert.ok(assessCode.includes('updatePredictionCache'), 'assessment-data.js must call updatePredictionCache upon stale expansion');
   // A task type change bumps typesVersion, which the memo compares; the row's taskType is recorded in the memo
-  assert.ok(cohortViewCode.includes('memo.typesVersion === typesVersion') && cohortViewCode.includes('ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, taskType, typesVersion, retry };'), 'cohort-view.js must memoise taskType and invalidate on type changes');
+  assert.ok(cohortViewCode.includes('memo.typesVersion === typesVersion') && cohortViewCode.includes('ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, pendingSig, taskType, typesVersion, retry };'), 'cohort-view.js must memoise taskType and invalidate on type changes');
 
   // 2. Functional evaluation of predictor-math.js updatePredictionCache & clearSubjectPredictionCache
   eval(predMathCode);
@@ -8753,6 +8754,67 @@ runTest('Unmarked task rows show a compact Low / Mid / High prediction panel, hi
   const outlineJs = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-view.js')).js;
   assert.ok(outlineJs.indexOf('src/cohort/cohort-forecast.js') !== -1 && outlineJs.indexOf('src/cohort/cohort-forecast.js') < outlineJs.indexOf('src/cohort/cohort-view.js'), 'cohort-forecast.js loads before cohort-view.js');
   assert.ok(manifest.content_scripts.some(g => (g.css || []).includes('src/cohort/cohort-forecast.css')), 'cohort-forecast.css is registered');
+});
+
+runTest('Classes without a final letter list their uncompleted tasks with predictions on the overall row', () => {
+  localStorage.clear();
+  delete window.ConnectifyTaskTypes;
+  delete window.ConnectifyCohortView;
+  delete window.ConnectifyCohortUpcoming;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8'));
+  const view = window.ConnectifyCohortView;
+  assert.ok(window.ConnectifyCohortUpcoming, 'cohort-upcoming.js must load with the cohort view');
+  window.ConnectifyPredictorMath.saveBaselines({ types: { Exam: 70 }, subjects: { '12 Literature ATAR': 70 } });
+
+  const card = new MockElement('div', 'eds-c-tile');
+  const title = new MockElement('div', 'eds-c-tile__title');
+  title.textContent = '12 Literature ATAR - Semester 2';
+  card.appendChild(title);
+  const makeRow = (inTasks, labels, markText) => {
+    const row = new MockElement('div', 'cvr-c-task');
+    row.closest = sel => sel.includes('eds-c-tile') ? card : (sel === '.cvr-c-tasks' && inTasks ? card : null);
+    const details = new MockElement('div', 'cvr-c-task__details');
+    for (const text of labels) {
+      const label = new MockElement('span', 'v-label');
+      label.textContent = text;
+      details.appendChild(label);
+    }
+    row.appendChild(details);
+    const marks = new MockElement('div', 'cvr-c-task__marks');
+    const cell = new MockElement('div', 'cvr-c-task__mark');
+    cell.textContent = markText;
+    marks.appendChild(cell);
+    row.appendChild(marks);
+    card.appendChild(row);
+    return { row, cell };
+  };
+  const overall = makeRow(false, ['Semester 2 Cumulative Percent'], '61%');
+  const task = makeRow(true, ['Examination', 'Term 4, Week 3', 'Extended response 1'], '');
+
+  view.render(overall.row, true, 'lit-key', 50, null, []);
+  let ui = view.panels.get(overall.row);
+  assert.ok(ui.upcoming && !ui.upcoming.hidden, 'A class without a letter shows the uncompleted tasks panel');
+  assert.ok(ui.upcoming.classList.contains('connectea-panel'), 'The panel uses the statistics panel style');
+  assert.ok(ui.upcoming.innerHTML.includes('Extended response 1') && /Low \d+%/.test(ui.upcoming.innerHTML) && /Mid \d+%/.test(ui.upcoming.innerHTML) && /High \d+%/.test(ui.upcoming.innerHTML), `Panel lists the task with Low / Mid / High: ${ui.upcoming.innerHTML}`);
+  assert.ok(!/breakout|purple/i.test(ui.upcoming.innerHTML), 'The breakout threshold stays secret');
+
+  // A final letter on the overall row hides it
+  overall.cell.textContent = 'B';
+  view.render(overall.row, true, 'lit-key', 50, null, []);
+  assert.strictEqual(ui.upcoming.hidden, true, 'A class with a letter grade hides the panel');
+
+  // Marking the last task hides it as well
+  overall.cell.textContent = '61%';
+  task.cell.textContent = '72 Out of 100';
+  view.render(overall.row, true, 'lit-key', 50, null, []);
+  assert.strictEqual(ui.upcoming.hidden, true, 'Nothing left to mark hides the panel');
+
+  const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const js = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-view.js')).js;
+  assert.ok(js.indexOf('src/cohort/cohort-upcoming.js') !== -1 && js.indexOf('src/cohort/cohort-upcoming.js') < js.indexOf('src/cohort/cohort-view.js'), 'cohort-upcoming.js loads before cohort-view.js');
+  assert.ok(manifest.content_scripts.some(g => (g.css || []).includes('src/cohort/cohort-upcoming.css')), 'cohort-upcoming.css is registered');
 });
 
 runTest('Test 195: Liquid Glass Library and Learners bars share the table glass; paginator pills never overlap or run off the page', () => {
