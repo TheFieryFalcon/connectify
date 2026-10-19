@@ -2,9 +2,10 @@
  * Connectify Cohort: prediction panel for unmarked task rows
  *
  * An unmarked assessment shows one compact line in the statistics panel's style next to its Type
- * dropdown: the task's Low / Mid / High prediction (cached chronological prediction, computed by
- * precacheUpcoming when missing), or what the prediction still needs. The breakout threshold is never
- * shown. The panel is hidden again once the row is marked. Exposes window.ConnectifyCohortForecast.
+ * dropdown: the task's Low / Mid / High prediction in the Predictor's colours (cached chronological
+ * prediction, computed by precacheUpcoming when missing), or what the prediction still needs. The breakout
+ * threshold is never shown. The panel is hidden again once the row is marked.
+ * Exposes window.ConnectifyCohortForecast.
  */
 (() => {
   'use strict';
@@ -31,11 +32,14 @@
       const predicted = isPredicted(prediction);
       box.classList.toggle('connectea-forecast--empty', !predicted);
       if (predicted) {
-        const pct = v => `${Math.round(v)}%`;
+        // Coloured like the Predictor's Low / Mid / High pills (cohort-forecast.css)
+        const value = (level, text, v) => {
+          const tag = level === 'mid' ? 'strong' : 'span';
+          return `<${tag} class="connectea-forecast-value connectea-forecast-value--${level}">${text} ${Math.round(v)}%</${tag}>`;
+        };
         setHTML(
           box,
-          `<span class="connectea-forecast-label">Predicted</span>Low ${pct(prediction.low)}  •  ` +
-          `<strong>Mid ${pct(prediction.mid)}</strong>  •  High ${pct(prediction.high)}`
+          `${value('low', 'Low', prediction.low)}  •  ${value('mid', 'Mid', prediction.mid)}  •  ${value('high', 'High', prediction.high)}`
         );
       } else {
         setText(box, NEEDS);
