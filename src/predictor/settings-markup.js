@@ -19,7 +19,7 @@
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;margin-top:12px;">
           <input type="checkbox" id="cx-semester-filter-toggle" style="width:16px;height:16px;cursor:pointer;"> Show this semester's classes only
         </label>
-        <p class="cx-settings-desc" style="margin:4px 0 0 24px;">Hides the other semester's outlines. Only this semester's classes refresh the cache and appear in the sidebar tools; the other semester's results are kept from the cache. <span id="cx-semester-filter-detected"></span></p>
+        <p class="cx-settings-desc" style="margin:4px 0 0 24px;">Hides the other semester's classes from the outlines and sidebar tools. <span id="cx-semester-filter-detected"></span></p>
 
         <div class="cx-settings-divider" style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:14px;padding-top:12px;">
           <div>
@@ -67,7 +67,7 @@
       </section>
 
       <section class="cx-settings-section" style="margin-bottom:28px;border-top:1px solid #d8e3ee;padding-top:20px;">
-        <header style="margin-bottom:8px;"><strong>Previous Year Baselines (Cold-Start)</strong></header>
+        <header style="margin-bottom:8px;"><strong>Previous Year Baselines</strong></header>
         <p class="cx-settings-desc" style="font-size:12px;margin:0 0 14px 0;">Enter your previous year's assessment type averages and subject final marks to jumpstart the Grade and ATAR Predictors early in the year.</p>
         <div id="cx-baselines-container"></div>
       </section>
