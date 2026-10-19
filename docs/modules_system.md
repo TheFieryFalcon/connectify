@@ -76,7 +76,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 ### Style Sheets & Extension Configuration
 
 #### Style Sheets
-- **`src/progress/progress.css`, `compound-progress.css`**: progress graph modal; compound subject bars.
+- **`src/progress/progress.css`, `compound-progress.css`**: progress graph modal (subject heading 700, chips 600, legend 400); compound subject bars.
 - **`src/atar/atar.css`, `atar-compact.css`, `atar-planner.css`** (in that order): calculator modal (`#connectea-atar`) base and dark mode; subject select, grade table and compact layout; planner controls (target inputs left-aligned), top-four selector and Back to top button.
 - **[`progress.css`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/progress.css)**: Progress graph modal layout and SVG stroke/fill rules.
 - **`src/sidebar/styles/`**: drawer, handle/menu, tool menu, weakness/types, outcome meter/filter, notifications, predictor and settings/progress-pill stylesheets (readable, one concern per file).

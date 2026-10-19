@@ -9174,6 +9174,13 @@ runTest('Test 201: Target ATAR and Target Grade inputs are left-aligned; course 
   assert.ok(/#connectea-atar \.cta-score\s*\{[^}]*text-align:\s*right;/.test(compact), 'course list score inputs keep right alignment');
 });
 
+runTest('Test 202: Year in Progress weights: subject heading 700, subject chips 600, legend 400', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress.css'), 'utf8');
+  assert.ok(css.includes('#connectify-progress h3{font-weight:700}'), 'the subject heading is bold, not Connect\'s 400 h3');
+  assert.ok(css.includes('#connectify-progress .cx-subjects button{font-weight:600}'), 'subject chips match the Refresh button weight');
+  assert.ok(css.includes('#connectify-progress .cx-legend{font-weight:400}'), 'the chart legend stays regular');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
