@@ -4,6 +4,30 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
+## 3.2.4 (2026-10-19)
+
+### Additions
+- **Predictions on upcoming assessments**: each unmarked task shows a one-line Low • Mid • High panel beside its Type dropdown, in the Predictor's colours. If there isn't enough data yet, it says what the prediction still needs. The panel disappears once the task is marked.
+- **Show this semester's classes only** (Settings, off by default): hides the other semester's outlines and lists only this semester's classes in every sidebar tool. Connectify switches to Semester 2 once a class shows a final Semester 1 grade, and your Semester 1 results are kept and still used.
+- A "Connectify updated" notice after each update, with a "What's new" button that opens this changelog.
+
+### Changes
+- Every sidebar tool (Predictor, Weakness Analyzer, Year in Progress, ATAR Estimate, Target ATAR, Target Grade and Calibration) now reads your saved results instead of the outline tiles.
+- New school year: last year's saved results are archived before they're cleared, because Connect no longer shows them. The new-year switch now starts as soon as every class is new.
+- Uploaded wallpapers are cropped and scaled to your screen before they're saved, from both Settings and the Theme Customizer, so they take far less storage.
+- Changing an assessment's Type no longer lags: predictions are recalculated once, after the dropdown closes, instead of up to four times while it's still open.
+- Liquid Glass Library and Learners bars use the same glass as their tables, "Page N of M" and its page controls form one pill, and Learners headings fit their titles.
+- Shorter description for the semester filter in Settings, and the baselines header is now "Previous Year Baselines".
+- Saved predictions and results are rebuilt once after updating.
+
+### Fixes
+- The outcome meter appeared on every subject's first marked assessment.
+- Semester 1 tasks listed on Semester 2 panels were treated as Semester 2 tasks, and the first of them got an outcome meter measured against itself.
+- The Target ATAR and Target Grade planners started Semester 2 before Semester 1 grades were final.
+- The user menu's Sign Out button had a border and rounded corners, and its header could be dark text on a dark background. Both now follow the theme and keep Connect's shape.
+- Liquid Glass page controls ran off the page in the Library and overlapped "Page N of M", and Learners headings were bars of different widths.
+- Liquid Glass home page: a square box showed behind Connect Help and other tiles, and the notice of the month's text sat on a darker box.
+
 ## 3.2.3 (2026-10-18)
 
 ### Additions
