@@ -64,7 +64,7 @@
       if (p) {
         const value = (level, text, v) => {
           const tag = level === 'mid' ? 'strong' : 'span';
-          return `<${tag} class="connectea-forecast-value connectea-forecast-value--${level}">${text} ${Math.round(v)}%</${tag}>`;
+          return `<${tag} class="connectea-forecast-value connectea-forecast-value--${level}">${text} ${v.toFixed(1)}%</${tag}>`;
         };
         setHTML(ui.upcoming, `Predicted class result: ${value('low', 'Low', p.low)}  •  ${value('mid', 'Mid', p.mid)}  •  ${value('high', 'High', p.high)}`);
       } else {

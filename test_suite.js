@@ -8798,7 +8798,7 @@ runTest('Classes without a final letter show their predicted Low / Mid / High re
   let ui = view.panels.get(overall.row);
   assert.ok(ui.upcoming && !ui.upcoming.hidden, 'A class without a letter shows its prediction panel');
   assert.ok(ui.upcoming.classList.contains('connectea-panel'), 'The panel uses the statistics panel style');
-  for (const level of ['Low', 'Mid', 'High']) assert.ok(new RegExp(`${level} \\d+%`).test(ui.upcoming.innerHTML), `Class prediction lists ${level}: ${ui.upcoming.innerHTML} / ${ui.upcoming.textContent}`);
+  for (const level of ['Low', 'Mid', 'High']) assert.ok(new RegExp(`${level} \\d+\\.\\d%`).test(ui.upcoming.innerHTML), `Class prediction lists ${level}: ${ui.upcoming.innerHTML} / ${ui.upcoming.textContent}`);
   assert.ok(!/Extended response/.test(ui.upcoming.innerHTML), 'The panel predicts the class, not its tasks');
   assert.ok(!/breakout|purple/i.test(ui.upcoming.innerHTML), 'The breakout threshold stays secret');
 
