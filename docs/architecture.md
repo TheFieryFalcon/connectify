@@ -37,7 +37,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 22. `src/cohort/cohort-panel.js` (statistics panel, Type dropdown and cohort size input)
 23. `src/cohort/cohort-outcome-eval.js` (outcome meter evaluation and first-task suppression)
 24. `src/cohort/cohort-forecast.js` (Low / Mid / High prediction panel on unmarked rows)
-24b. `src/cohort/cohort-upcoming.js` (uncompleted tasks panel on the overall row of a class without a letter)
+24b. `src/cohort/cohort-upcoming.js` (class prediction panel on the overall row of a class without a letter)
 25. `src/cohort/cohort-view.js` (row rendering with memoised inputs)
 26. `src/cohort/cohort-styles.js` (cohort styles & DOM utilities)
 27. `src/cohort/cohort-stats.js` (two-pass cohort controller and pass scheduler)

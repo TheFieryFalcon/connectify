@@ -8756,7 +8756,7 @@ runTest('Unmarked task rows show a compact Low / Mid / High prediction panel, hi
   assert.ok(manifest.content_scripts.some(g => (g.css || []).includes('src/cohort/cohort-forecast.css')), 'cohort-forecast.css is registered');
 });
 
-runTest('Classes without a final letter list their uncompleted tasks with predictions on the overall row', () => {
+runTest('Classes without a final letter show their predicted Low / Mid / High result on the overall row', () => {
   localStorage.clear();
   delete window.ConnectifyTaskTypes;
   delete window.ConnectifyCohortView;
@@ -8790,26 +8790,28 @@ runTest('Classes without a final letter list their uncompleted tasks with predic
     card.appendChild(row);
     return { row, cell };
   };
+  const subjects = [{ name: '12 Literature ATAR - Semester 2', tasks: [] }];
   const overall = makeRow(false, ['Semester 2 Cumulative Percent'], '61%');
   const task = makeRow(true, ['Examination', 'Term 4, Week 3', 'Extended response 1'], '');
 
-  view.render(overall.row, true, 'lit-key', 50, null, []);
+  view.render(overall.row, true, 'lit-key', 50, null, subjects);
   let ui = view.panels.get(overall.row);
-  assert.ok(ui.upcoming && !ui.upcoming.hidden, 'A class without a letter shows the uncompleted tasks panel');
+  assert.ok(ui.upcoming && !ui.upcoming.hidden, 'A class without a letter shows its prediction panel');
   assert.ok(ui.upcoming.classList.contains('connectea-panel'), 'The panel uses the statistics panel style');
-  assert.ok(ui.upcoming.innerHTML.includes('Extended response 1') && /Low \d+%/.test(ui.upcoming.innerHTML) && /Mid \d+%/.test(ui.upcoming.innerHTML) && /High \d+%/.test(ui.upcoming.innerHTML), `Panel lists the task with Low / Mid / High: ${ui.upcoming.innerHTML}`);
+  for (const level of ['Low', 'Mid', 'High']) assert.ok(new RegExp(`${level} \\d+%`).test(ui.upcoming.innerHTML), `Class prediction lists ${level}: ${ui.upcoming.innerHTML} / ${ui.upcoming.textContent}`);
+  assert.ok(!/Extended response/.test(ui.upcoming.innerHTML), 'The panel predicts the class, not its tasks');
   assert.ok(!/breakout|purple/i.test(ui.upcoming.innerHTML), 'The breakout threshold stays secret');
 
   // A final letter on the overall row hides it
   overall.cell.textContent = 'B';
-  view.render(overall.row, true, 'lit-key', 50, null, []);
+  view.render(overall.row, true, 'lit-key', 50, null, subjects);
   assert.strictEqual(ui.upcoming.hidden, true, 'A class with a letter grade hides the panel');
 
-  // Marking the last task hides it as well
+  // A new result refreshes the projection
   overall.cell.textContent = '61%';
   task.cell.textContent = '72 Out of 100';
-  view.render(overall.row, true, 'lit-key', 50, null, []);
-  assert.strictEqual(ui.upcoming.hidden, true, 'Nothing left to mark hides the panel');
+  view.render(overall.row, true, 'lit-key', 50, null, subjects);
+  assert.strictEqual(ui.upcoming.hidden, false, 'A class still without a letter keeps its prediction after a task is marked');
 
   const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
   const js = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-view.js')).js;

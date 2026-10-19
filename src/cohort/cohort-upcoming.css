@@ -1,9 +1,6 @@
-/* Uncompleted tasks panel on a class's overall row (cohort-upcoming.js): the statistics panel's style (theme
+/* Class prediction on a class's overall row (cohort-upcoming.js): the statistics panel's style (theme
    fills and glass strip come from the .connectea-panel rules); values use the Predictor's Low / Mid / High ink */
-.connectea-panel.connectea-upcoming { line-height: 1.6 !important; margin-top: 6px !important; }
-.connectea-upcoming-title { font-weight: 700 !important; }
-.connectea-upcoming-row { white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; }
-.connectea-upcoming-name { font-weight: 700 !important; }
+.connectea-panel.connectea-upcoming { line-height: 1.5 !important; margin-top: 6px !important; }
 .connectea-upcoming .connectea-forecast-value--low, .connectea-upcoming .connectea-forecast-value--high { font-weight: 600 !important; }
 .connectea-upcoming .connectea-forecast-value--mid { font-weight: 700 !important; }
 

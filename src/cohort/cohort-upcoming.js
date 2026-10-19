@@ -1,19 +1,19 @@
 /**
- * Connectify Cohort: uncompleted tasks panel on a class's overall row
+ * Connectify Cohort: class prediction on the overall row
  *
- * A class without a final A-E letter lists its unmarked assessments under the overall statistics, each with
- * the Low / Mid / High prediction of the task row (same values and colours as the row's own forecast line,
- * or what the prediction still needs). Hidden once the class shows a letter or has nothing left to mark.
- * Exposes window.ConnectifyCohortUpcoming.
+ * A class without a final A-E letter shows its projected final mark under the overall statistics: one
+ * line in the task forecast's style, Low / Mid / High from the Predictor's subject projection (completed
+ * results plus predictions for the uncompleted tasks), or what the projection still needs. Hidden once the
+ * class shows a letter. Exposes window.ConnectifyCohortUpcoming.
  */
 (() => {
   'use strict';
 
   try {
-    const { createElement, setHTML, types } = window.ConnectifyCohortRows;
-    const getTaskMeta = row => types().getTaskMeta(row);
-    const esc = (...args) => window.ConnectifyUtils.escapeHtml(...args);
-    const hasMark = row => Number.isFinite(window.ConnectifyCohortRows.readMark(row));
+    const { createElement, setHTML, setText, readMark } = window.ConnectifyCohortRows;
+    const CARD = '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile';
+    const TITLE = '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading';
+    const NEEDS = 'No class prediction yet: needs a marked result or a subject baseline in Settings';
 
     /** Whether the overall row shows a final A-E letter (the class is finished). */
     function hasLetter(overallRow) {
@@ -21,23 +21,28 @@
       return Array.from(cells).some(cell => /^[ABCDE]$/i.test((cell.textContent || '').trim()));
     }
 
-    /** The card's unmarked task rows; empty when the class already has a letter grade. */
-    function pendingRows(overallRow) {
-      if (hasLetter(overallRow)) return [];
-      const card = overallRow.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
-      if (!card) return [];
-      return window.ConnectifyCohortOutcomeEval.cardTaskRows(card, overallRow).filter(r => r !== overallRow && r.closest('.cvr-c-tasks') && !hasMark(r));
+    const cardOf = overallRow => overallRow.closest(CARD);
+
+    /** Memo signature: letter state and every task mark, so a new result refreshes the projection. */
+    function signature(overallRow) {
+      if (hasLetter(overallRow)) return 'letter';
+      const card = cardOf(overallRow);
+      if (!card) return '';
+      return window.ConnectifyCohortOutcomeEval.cardTaskRows(card, overallRow)
+        .filter(r => r !== overallRow).map(r => readMark(r)).join('|');
     }
 
-    /** Memo signature: which rows are still unmarked (a mark or a letter changes it). */
-    const signature = overallRow => pendingRows(overallRow).map(r => getTaskMeta(r).taskName).join('|');
-
-    function line(meta, prediction) {
-      const forecast = window.ConnectifyCohortForecast;
-      const name = `<strong class="connectea-upcoming-name">${esc(meta.taskName)}</strong>`;
-      if (!forecast.isPredicted(prediction)) return `<div class="connectea-upcoming-row">${name}: ${esc(forecast.NEEDS)}</div>`;
-      const value = (level, text, v) => `<span class="connectea-forecast-value connectea-forecast-value--${level}">${text} ${Math.round(v)}%</span>`;
-      return `<div class="connectea-upcoming-row">${name}: ${value('low', 'Low', prediction.low)}  •  ${value('mid', 'Mid', prediction.mid)}  •  ${value('high', 'High', prediction.high)}</div>`;
+    /** The class's projection from the Predictor, or null when it has no marks or baseline. */
+    function projection(overallRow, subjects) {
+      const predMath = window.ConnectifyPredictorMath;
+      const card = cardOf(overallRow);
+      const title = window.ConnectifyUtils.normalize(card?.querySelector(TITLE)?.textContent);
+      if (!predMath?.projectSubjectGrades || !title) return null;
+      const list = subjects?.length ? subjects : (window.ConnectifyData?.hasCachedSubjects?.() ? window.ConnectifyData.collect(true) : []);
+      const clean = predMath.cleanSubject ? predMath.cleanSubject(title) : title;
+      const found = predMath.projectSubjectGrades(list).find(s => s.cleanName === clean);
+      const p = found?.projected;
+      return found?.hasSubjectAverage && p && [p.low, p.mid, p.high].every(Number.isFinite) ? p : null;
     }
 
     function hide(ui) {
@@ -49,23 +54,27 @@
 
     function show(ui, overallRow, subjects) {
       if (!ui?.box) return;
-      const rows = pendingRows(overallRow);
-      if (!rows.length) return hide(ui);
+      if (hasLetter(overallRow)) return hide(ui);
       if (!ui.upcoming?.isConnected) {
         ui.upcoming = createElement('section', 'connectea-panel connectea-upcoming');
-        ui.upcoming.setAttribute('aria-label', 'Connectify uncompleted tasks');
+        ui.upcoming.setAttribute('aria-label', 'Connectify predicted class result');
         ui.box.insertAdjacentElement('afterend', ui.upcoming);
       }
-      const lines = rows.map(r => {
-        const meta = getTaskMeta(r);
-        return line(meta, window.ConnectifyCohortOutcomeEval.precacheUpcoming(r, meta, subjects));
-      });
-      setHTML(ui.upcoming, `<div class="connectea-upcoming-title">Uncompleted tasks (${rows.length})</div>${lines.join('')}`);
+      const p = projection(overallRow, subjects);
+      if (p) {
+        const value = (level, text, v) => {
+          const tag = level === 'mid' ? 'strong' : 'span';
+          return `<${tag} class="connectea-forecast-value connectea-forecast-value--${level}">${text} ${Math.round(v)}%</${tag}>`;
+        };
+        setHTML(ui.upcoming, `Predicted class result: ${value('low', 'Low', p.low)}  •  ${value('mid', 'Mid', p.mid)}  •  ${value('high', 'High', p.high)}`);
+      } else {
+        setText(ui.upcoming, NEEDS);
+      }
       ui.upcoming.hidden = false;
       ui.upcoming.style.setProperty('display', 'block', 'important');
     }
 
-    window.ConnectifyCohortUpcoming = { show, hide, signature, pendingRows, hasLetter };
+    window.ConnectifyCohortUpcoming = { show, hide, signature, hasLetter, projection, NEEDS };
   } catch (err) {
     console.error('Connectify error in cohort-upcoming.js:', err);
   }
