@@ -36,12 +36,16 @@
    * @param {Array<Object>} options.points
    * @param {boolean} options.isHistory
    * @param {boolean} options.byAssessment
+   * @param {string} [options.mode] - ConnectifyProgressModes id; average modes rename the series
    * @param {string} options.subjectName
    * @param {Function} [options.onRefresh]
    */
   function renderChart(container, options) {
-    const { points, isHistory, byAssessment, subjectName, onRefresh } = options;
+    const { points, isHistory, byAssessment, subjectName, onRefresh, mode } = options;
     const math = window.ConnectifyProgressMath;
+    const modeInfo = window.ConnectifyProgressModes?.find(mode);
+    const scoreLabel = modeInfo?.score || 'Your score';
+    const meanLabel = modeInfo?.mean || 'Cohort mean';
 
     container.replaceChildren();
 
@@ -59,8 +63,8 @@
 
     if (!isHistory) {
       const legend = createElement('div', null, 'cx-legend');
-      const redKey = createElement('span', 'Red: Cohort Mean', 'cx-red-key');
-      const blueKey = createElement('span', 'Blue: Student Score', 'cx-blue-key');
+      const redKey = createElement('span', modeInfo?.mean ? `Red: ${meanLabel}` : 'Red: Cohort Mean', 'cx-red-key');
+      const blueKey = createElement('span', modeInfo?.score ? `Blue: ${scoreLabel}` : 'Blue: Student Score', 'cx-blue-key');
       legend.append(redKey, blueKey);
       container.append(legend);
     }
@@ -74,6 +78,8 @@
         ? byAssessment
           ? 'Estimated ATAR progression by assessment round'
           : 'Estimated ATAR progression over months'
+        : modeInfo?.score
+        ? `${subjectName}: ${scoreLabel.toLowerCase()} and ${meanLabel.toLowerCase()}`
         : `${subjectName}: your assessment scores and estimated cohort means`
     });
 
@@ -119,7 +125,7 @@
 
         const circle = createSvgElement('circle', { cx, cy, r: 4.5, tabindex: 0, class: `${className}-point` });
 
-        const labelType = key === 'mean' ? 'Cohort mean' : isHistory ? 'Estimated ATAR' : 'Your score';
+        const labelType = key === 'mean' ? meanLabel : isHistory ? 'Estimated ATAR' : scoreLabel;
         const formattedValue = Number(point[key].toFixed(2)) + (isHistory ? '' : '%');
 
         circle.append(createSvgElement('title', {}, `${point.name}: ${labelType} ${formattedValue}`));
@@ -180,7 +186,7 @@
     const headerRow = createElement('tr');
     const headers = isHistory
       ? ['When', 'Estimated ATAR']
-      : ['#', 'Assessment', 'When', 'Your score', 'Cohort mean'];
+      : ['#', 'Assessment', 'When', scoreLabel, meanLabel];
 
     headers.forEach(h => headerRow.append(createElement('th', h)));
     table.append(headerRow);

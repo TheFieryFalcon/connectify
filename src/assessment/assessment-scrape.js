@@ -24,6 +24,23 @@
     return rows > 0 && scrapedRows.get(card) !== rows;
   }
 
+  /** Copies cohort statistics (mean, boxplot) from source onto target where target has none; true if any. */
+  function keepCohortStats(target, source) {
+    let changed = false;
+    if (!Number.isFinite(target.mean) && Number.isFinite(source.mean)) { target.mean = source.mean; changed = true; }
+    if (!Array.isArray(target.stats) && Array.isArray(source.stats)) { target.stats = source.stats; changed = true; }
+    return changed;
+  }
+
+  // The cohort mean from the task's boxplot, else from the stats cache the cohort pass keeps for every row
+  function cohortMeanOf(subjectName, task) {
+    if (Number.isFinite(task.mean)) return task.mean;
+    const stats = Array.isArray(task.stats) ? task.stats : cache.getTaskStats?.(subjectName, task.name);
+    return Array.isArray(stats) && stats.length === 5 && stats.every(Number.isFinite)
+      ? window.ConnectifyParseHelpers.weightedMean(stats)
+      : task.mean;
+  }
+
   /**
    * Scrapes tasks from a single subject card and updates subjectsCache.
    */
@@ -46,12 +63,16 @@
       const existingMap = subjectsCache.get(subjectName);
       const allTasksPresent = parsedTasks.every(t => existingMap.has(t.id));
       if (allTasksPresent) {
+        let filled = false;
         for (const t of parsedTasks) {
           const cached = existingMap.get(t.id);
           if (cached && t.row && !cached.row) {
             setTaskRow(cached, t.row);
           }
+          // A card read before its charts were stamped cached no cohort statistics: fill them in now
+          if (cached && keepCohortStats(cached, t)) filled = true;
         }
+        if (filled) saveSubjectsCache();
         return;
       }
     }
@@ -85,6 +106,8 @@
       if (existingTask) {
         record.semester = Math.min(record.semester, existingTask.semester ?? 2);
         record.sequence = existingTask.sequence ?? tasks.size;
+        // A copy without a chart (or not stamped yet) never erases the statistics already cached
+        keepCohortStats(record, existingTask);
       }
 
       if (record.stats && record.row) {
@@ -138,7 +161,8 @@
         tasks: taskList
           .map(t => {
             const resolvedOrder = resolveTaskOrder(name, t);
-            return resolvedOrder !== t.order ? { ...t, order: resolvedOrder } : t;
+            const mean = cohortMeanOf(name, t);
+            return resolvedOrder !== t.order || mean !== t.mean ? { ...t, order: resolvedOrder, mean } : t;
           })
           .filter(t => {
             if (/^Assessment\s+\d+$/i.test(t.name) && !t.caption && (t.weight === null || t.weight === 0)) return false;

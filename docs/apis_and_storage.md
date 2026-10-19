@@ -36,7 +36,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyAtar` | `atar-ui.js` | Calculator modal shell and tab coordinator |
 | `window.ConnectifyOutlineControls` | `outline-controls.js` | Floating Expand/Collapse All and Back to top button |
 | `window.ConnectifyProgressMath` | `progress-math.js` | Historical ATAR trajectory and monthly aggregation |
-| `window.ConnectifyProgressChart` | `progress-chart.js` | SVG polyline line chart and plotted data table renderer |
+| `window.ConnectifyProgressChart` / `ConnectifyProgressModes` | `progress-chart.js` / `progress-modes.js` | SVG polyline line chart and plotted data table renderer; single task / weighted / rolling average data points |
 | `window.ConnectifyProgressWeekEditor` | `progress-week-editor.js` | Week override cells in the progress table |
 | `window.ConnectifyProgressPanel` | `progress-panel.js` | Year in Progress launcher and panel markup |
 | `window.ConnectifyProgress` | `progress-graph.js` | Progress graph modal controller |
@@ -79,7 +79,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `cx-categories` / `connectea:categories` | `localStorage` & `browser.storage.local` | `category-settings.js` | Custom category definitions, keywords, colors |
 | `connectea:atar:2025:<account>:<year>` | `localStorage` | `atar-calculator.js` | ATAR score adjustments, top four selections, targets |
 | `connectea:preferences` | `localStorage` | `scaling-calibration.js` | Calibration table (`sem1_calibration:<courseId>`) |
-| `connectify:weakness_disabled_subjects` | `localStorage` | `weakness-radar.js` | Array of subjects excluded from Weakness Analyzer |
+| `connectify:weakness_disabled_subjects` / `connectify:progress_mode` | `localStorage` | `weakness-radar.js` / `progress-modes.js` | Subjects excluded from Weakness Analyzer; Year in Progress data point mode (`tasks`, `weighted`, `rolling`) |
 | `connectea:time_override:<subject>:<task|taskId>` | `localStorage` | `progress-chart.js` | Manual school week overrides: weeks 1-40 in 10-week terms (17 = Term 2 Week 7) or `t2w7`, read via `ConnectifyUtils.customWeekOrder` (disambiguated by task ID for duplicate names) |
 | `connectify:auto_expand` | `localStorage` | `category-settings.js` / `atar-features.js` | Boolean setting to auto-expand course outlines on load |
 | `connectify:stale_subjects` | `localStorage` | `assessment-data.js` / `new-grade.js` | Set of subjects whose collapsed grade/stats changed, awaiting targeted re-scrape upon expansion |

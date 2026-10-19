@@ -47,6 +47,7 @@ This document covers the user interface and analytics modules, including target 
 - **Role**: Native SVG polyline chart generator.
 - **Key Functions**:
   - `renderChart(container, options)`: Generates responsive SVG line chart with dual polylines (blue: student score, red: cohort mean), grid lines, value ticks, interactive data points with hover tooltips, and plotted data detail table.
+  - `progress-modes.js` (`ConnectifyProgressModes`): "Show:" dropdown on subject views (`connectify:progress_mode`): Single tasks, Weighted average (running weight-weighted mean of completed tasks) or Rolling average (weight-weighted mean of the last 3); the cohort mean is averaged alike, unknown weights count as the mean known weight, all-zero weights fall back to a plain mean. Average modes rename the legend, tooltips and table headers.
   - `progress-week-editor.js` (`ConnectifyProgressWeekEditor.weekCell`): custom school week overrides (1–40 in 10-week terms; focus-protected editing, commit on Enter/blur, Escape restores) and uncompleted task display in the plotted data table.
 - **Export**: `window.ConnectifyProgressChart`.
 

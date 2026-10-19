@@ -22,6 +22,7 @@
     const dataAPI = window.ConnectifyData;
     const mathAPI = window.ConnectifyProgressMath;
     const chartAPI = window.ConnectifyProgressChart;
+    const modes = window.ConnectifyProgressModes;
 
     const createElement = chartAPI.createElement;
 
@@ -89,6 +90,7 @@
       let points;
       let byAssessment = false;
       let titleSubject = current.name;
+      let mode = 'tasks';
 
       if (isHistory) {
         const result = (mathAPI?.history || window.ConnectifyProgressMath?.history)(data);
@@ -124,8 +126,10 @@
       } else {
         selectedSubject = current.name;
         titleSubject = current.name;
-        points = current.tasks;
-        chartContainer.append(createElement('h3', current.name));
+        // Single tasks, running weighted average or rolling average of the last three (progress-modes.js)
+        mode = modes.read();
+        points = modes.apply(current.tasks, mode);
+        chartContainer.append(createElement('h3', current.name), modes.select(mode, () => render(data)));
       }
 
       const chartRenderer = chartAPI?.renderChart || window.ConnectifyProgressChart?.renderChart;
@@ -136,6 +140,7 @@
           points,
           isHistory,
           byAssessment,
+          mode,
           subjectName: titleSubject,
           onRefresh: (force = true) => {
             lastDataSignature = '';

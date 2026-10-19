@@ -149,7 +149,7 @@ const SPLIT_PARTS = {
   'atar.css': ['atar.css', 'atar-compact.css', 'atar-planner.css'],
   'progress-chart.js': ['progress-chart.js', 'progress-week-editor.js'],
   'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
-  'progress-graph.js': ['progress-panel.js', 'progress-graph.js'],
+  'progress-graph.js': ['progress-modes.js', 'progress-panel.js', 'progress-graph.js'],
   'new-grade.js': ['grade-snapshot.js', 'new-grade.js'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js'],
   'theme-customizer.js': ['theme-color-utils.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
@@ -9073,6 +9073,98 @@ runTest('Test 199: Large stored and imported wallpapers are fitted to the screen
   const at = f => manifest.indexOf(`"src/theme/${f}"`);
   assert.ok(at('theme-wallpaper-migrate.js') > at('theme-wallpaper-fit.js') && at('theme-wallpaper-migrate.js') > at('theme-custom-themes.js'),
     'the migration loads after the fit module and the custom theme store');
+});
+
+runTest('Test 200: Year in Progress keeps cohort means under the semester filter and plots single tasks, weighted or rolling averages', () => {
+  // 1. Cohort mean fallback: a task cached before its chart was stamped gets its mean from its boxplot or the stats cache
+  window.__connectifyDataInitialized = false;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8'));
+  const cache = window.ConnectifyCache;
+  const subject = 'Chemistry ATAR Year 11';
+  const parser = window.ConnectifyParser;
+  let parsed = [];
+  window.ConnectifyParser = { ...parser, parseCardSubjectTasks: () => ({ title: subject, subjectName: subject, tasks: parsed }) };
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/assessment-scrape.js'), 'utf8'));
+  const scrape = window.ConnectifyAssessmentScrape;
+  window.ConnectifyParser = parser;
+  const task = (id, name, extra) => ({ id, name, caption: '', score: 80, pending: false, weight: 10, mean: null, semester: 1, order: null, sequence: 0, ...extra });
+  try {
+    cache.subjectsCache.set(subject, new Map([
+      ['a', task('a', 'Test 1', { stats: [40, 50, 60, 70, 80] })],
+      ['b', task('b', 'Test 2', { sequence: 1 })]
+    ]));
+    cache.setTaskStats(subject, 'Test 2', [50, 60, 70, 80, 90], 30);
+    const means = () => scrape.formatCollectedSubjects(true).find(s => s.name === subject).tasks.map(t => t.mean);
+    assert.deepStrictEqual(means(), [60, 70], 'means come from the task boxplot, else the stats cache');
+    assert.strictEqual(cache.subjectsCache.get(subject).get('a').mean, null, 'formatting never mutates the cached task');
+
+    // Early return (every task already cached): a now-stamped row fills the missing mean
+    const card = document.createElement('div');
+    parsed = [task('a', 'Test 1', { mean: 61 }), task('b', 'Test 2', { mean: 72, stats: [1, 2, 3, 4, 5] })];
+    scrape.scrapeSubjectTasks(card);
+    assert.strictEqual(cache.subjectsCache.get(subject).get('a').mean, 61, 'a cached null mean is filled from the fresh row');
+    assert.deepStrictEqual(cache.subjectsCache.get(subject).get('b').stats, [1, 2, 3, 4, 5], 'missing cached stats are filled too');
+
+    // Overwrite: a copy of the same task without a chart (Semester 2 outline, unstamped) keeps the cached mean
+    parsed = [task('a', 'Test 1', { mean: null, stats: undefined }), task('c', 'Test 3', { sequence: 2 })];
+    scrape.scrapeSubjectTasks(card);
+    assert.strictEqual(cache.subjectsCache.get(subject).get('a').mean, 61, 'a record without a mean never erases the cached one');
+  } finally {
+    cache.subjectsCache.delete(subject);
+    window.ConnectifyAssessmentScrape = scrape;
+  }
+
+  // 2. Modes: weighted running average and weighted rolling average of the last three, cohort mean alike
+  delete window.ConnectifyProgressModes;
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress-modes.js'), 'utf8'));
+  const modes = window.ConnectifyProgressModes;
+  const pts = [
+    { name: 'A', score: 50, mean: 40, weight: 10 },
+    { name: 'B', score: 60, mean: 50, weight: 20 },
+    { name: 'P', score: null, mean: null, weight: 5, pending: true },
+    { name: 'C', score: 70, mean: null, weight: 30 },
+    { name: 'D', score: 80, mean: 60, weight: 40 }
+  ];
+  const round = v => (v === null ? null : Math.round(v * 100) / 100);
+  assert.strictEqual(modes.apply(pts, 'tasks'), pts, 'Single tasks plots the marks as they are');
+  const weighted = modes.apply(pts, 'weighted');
+  assert.deepStrictEqual(weighted.map(p => round(p.score)), [50, 56.67, null, 63.33, 70], 'weighted running average of completed tasks');
+  assert.deepStrictEqual(weighted.map(p => round(p.mean)), [40, 46.67, null, null, 54.29], 'cohort means are averaged over tasks that have one');
+  const rolling = modes.apply(pts, 'rolling');
+  assert.strictEqual(round(rolling[4].score), 72.22, 'rolling average weights the last three completed tasks: (60*20 + 70*30 + 80*40) / 90');
+  assert.strictEqual(round(rolling[4].mean), 54.29, 'rolling cohort mean covers the last three tasks with a mean');
+  assert.ok(rolling[2].pending && rolling[2].score === null, 'pending tasks stay listed without a value');
+  assert.strictEqual(round(modes.apply([{ score: 50, weight: 0 }, { score: 70, weight: 0 }], 'weighted')[1].score), 60, 'all-zero weights fall back to a plain mean');
+
+  // 3. The dropdown saves the choice; the chart renames its series in average modes
+  localStorage.removeItem(modes.KEY);
+  assert.strictEqual(modes.read(), 'tasks', 'Single tasks is the default');
+  let picked = null;
+  const label = modes.select('tasks', m => { picked = m; });
+  const dropdown = label.querySelector('select');
+  assert.deepStrictEqual(Array.from(dropdown.querySelectorAll('option')).map(o => o.textContent), ['Single tasks', 'Weighted average', 'Rolling average (last 3)']);
+  dropdown.value = 'rolling';
+  dropdown.dispatchEvent(new Event('change'));
+  assert.strictEqual(picked, 'rolling');
+  assert.strictEqual(modes.read(), 'rolling', 'the choice is kept in connectify:progress_mode');
+  localStorage.removeItem(modes.KEY);
+
+  delete window.ConnectifyProgressMath;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'progress-math.js'), 'utf8'));
+  delete window.ConnectifyProgressChart;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'progress-chart.js'), 'utf8'));
+  const container = document.createElement('div');
+  window.ConnectifyProgressChart.renderChart(container, { points: weighted, isHistory: false, byAssessment: false, subjectName: 'English ATAR', mode: 'weighted' });
+  const headers = Array.from(container.querySelectorAll('th')).map(th => th.textContent);
+  assert.deepStrictEqual(headers.slice(3), ['Your weighted average', 'Cohort weighted average'], 'table headers name the plotted averages');
+  assert.ok(container.querySelector('.cx-red-key').textContent === 'Red: Cohort weighted average', 'the legend names the averaged cohort line');
+
+  const graph = fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8');
+  assert.ok(graph.includes('points = modes.apply(current.tasks, mode)') && graph.includes('modes.select(mode, () => render(data))'), 'subject views plot the selected mode with its dropdown');
+  const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('"src/progress/progress-modes.js"') > -1 && manifest.indexOf('"src/progress/progress-modes.js"') < manifest.indexOf('"src/progress/progress-graph.js"'), 'progress-modes.js loads before progress-graph.js');
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'progress.css'), 'utf8');
+  assert.ok(css.includes('.connectea-dark #connectify-progress .cx-progress-mode select{background:var(--cx-nav-bg'), 'the dropdown is token-routed in dark themes');
 });
 
 Promise.all(pendingTestPromises).then(() => {

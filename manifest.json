@@ -104,6 +104,7 @@
             "src/progress/progress-math.js",
             "src/progress/progress-chart.js",
             "src/progress/progress-week-editor.js",
+            "src/progress/progress-modes.js",
             "src/progress/progress-panel.js",
             "src/progress/progress-graph.js",
             "src/progress/wace-countdown.js",

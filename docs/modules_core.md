@@ -27,7 +27,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `assessment-expand-progress.js`: `#cx-expand-progress` pill and scroll freeze (`start()` → `{ update, finish }`).
   - `assessment-accordion-watch.js`: single-accordion animation guard (450ms) and refresh of the opened card.
   - `assessment-expand.js`: paced `expandAll` (one heading per card, 65ms apart), instant collapse, staged finalization (90% -> 95% -> 98% -> 100%); every exit cancels its own 10s safety timer.
-  - `assessment-scrape.js`: per-card task scraping and chronological order resolution.
+  - `assessment-scrape.js`: per-card task scraping and chronological order resolution. Cohort statistics survive scraping before charts are stamped: a cached task missing `mean`/`stats` is filled from a later read, a same-id copy without them keeps the cached ones, and `formatCollectedSubjects` derives a missing mean from the task's boxplot or the stats cache (frozen hidden-semester tasks too).
 - **Key Functions**:
   - `collect(includePending)`: Records the class registry, then scrapes cards (only the semester filter's allowed cards; a stale class on a hidden card never forces a full read); caches results in `subjectsCache` (Map) to prevent data loss on collapse. A warm cache is used without DOM reads, except expanded cards never read (row count differs from the last scrape, `needsScrape`), so subjects opened by Expand All join a cache that already held others; Expand All re-collects 200ms after finishing.
   - `triggerAccordionAnimationGuard(duration)`: Sets `window.ConnectifyIsAccordionAnimating` (450ms) to mute background observers.

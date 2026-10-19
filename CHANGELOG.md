@@ -9,6 +9,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ### Additions
 - **Predictions on upcoming assessments**: each unmarked task shows a one-line Low • Mid • High panel beside its Type dropdown, in the Predictor's colours. If there isn't enough data yet, it says what the prediction still needs. The panel disappears once the task is marked.
 - **Show this semester's classes only** (Settings, off by default): hides the other semester's outlines and lists only this semester's classes in every sidebar tool. Connectify switches to Semester 2 once a class shows a final Semester 1 grade, and your Semester 1 results are kept and still used.
+- **Year in Progress data point modes**: a "Show:" dropdown switches each subject's graph between single tasks, a running weighted average and a weighted rolling average of the last three tasks. The cohort mean line is averaged the same way.
 - A "Connectify updated" notice after each update, with a "What's new" button that opens this changelog.
 
 ### Changes
@@ -21,6 +22,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Saved predictions and results are rebuilt once after updating.
 
 ### Fixes
+- Year in Progress lost its cohort mean line with "Show this semester's classes only" on, when a class was read before its charts had loaded. Means now come from the saved cohort statistics.
 - The outcome meter appeared on every subject's first marked assessment.
 - Semester 1 tasks listed on Semester 2 panels were treated as Semester 2 tasks, and the first of them got an outcome meter measured against itself.
 - The Target ATAR and Target Grade planners started Semester 2 before Semester 1 grades were final.
