@@ -113,8 +113,26 @@
     if (imp.liquidGlass !== undefined) state.liquidGlass = Boolean(imp.liquidGlass);
     if (Number.isFinite(imp.glassBlur)) state.glassBlur = Math.max(0, Math.min(40, imp.glassBlur));
     if (Number.isFinite(imp.glassOpacity)) state.glassOpacity = Math.max(0.1, Math.min(1, imp.glassOpacity));
-    if (imp.wallpaper === null || (typeof imp.wallpaper === 'string' && imp.wallpaper.startsWith('data:image/'))) state.wallpaper = imp.wallpaper;
     if (imp.colors) state.tokens = { ...state.tokens, ...colors.pickColors(imp.colors) };
+    if (imp.wallpaper !== null && !(typeof imp.wallpaper === 'string' && imp.wallpaper.startsWith('data:image/'))) return null;
+    // A large imported wallpaper is fitted to the screen before it is previewed or saved (returned for bindJson)
+    if (window.ConnectifyWallpaperFit?.needsFit(imp.wallpaper)) return imp.wallpaper;
+    state.wallpaper = imp.wallpaper;
+    return null;
+  }
+
+  function fitImportedWallpaper(ctx, url) {
+    const { state, modal } = ctx;
+    const status = modal.querySelector('#cx-bg-status');
+    const before = state.wallpaper;
+    status.textContent = 'Preparing wallpaper...';
+    window.ConnectifyWallpaperFit.fromDataUrl(url).then(dataUrl => {
+      if (state.wallpaper !== before) return; // replaced or cleared meanwhile
+      state.wallpaper = dataUrl;
+      status.textContent = 'Wallpaper active';
+      modal.querySelector('#cx-clear-bg-btn').disabled = false;
+      ctx.renderMockup();
+    }).catch(() => { status.textContent = 'That image could not be read'; });
   }
 
   function bindJson(ctx) {
@@ -123,8 +141,9 @@
     const importFile = modal.querySelector('#cx-import-file');
     modal.querySelector('#cx-import-btn').onclick = () => importFile.click();
     importFile.onchange = () => readText(importFile, text => {
+      let largeWallpaper;
       try {
-        importTheme(state, JSON.parse(text));
+        largeWallpaper = importTheme(state, JSON.parse(text));
       } catch {
         alert('Invalid theme JSON file.');
         return;
@@ -132,6 +151,7 @@
       ctx.syncControls();
       ctx.refresh();
       ctx.syncPicker();
+      if (largeWallpaper) fitImportedWallpaper(ctx, largeWallpaper);
     });
   }
 

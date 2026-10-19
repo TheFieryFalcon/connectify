@@ -14,7 +14,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ### Changes
 - Every sidebar tool (Predictor, Weakness Analyzer, Year in Progress, ATAR Estimate, Target ATAR, Target Grade and Calibration) now reads your saved results instead of the outline tiles.
 - New school year: last year's saved results are archived before they're cleared, because Connect no longer shows them. The new-year switch now starts as soon as every class is new.
-- Uploaded wallpapers are cropped and scaled to your screen before they're saved, from both Settings and the Theme Customizer, so they take far less storage.
+- Uploaded wallpapers are cropped and scaled to your screen before they're saved, from both Settings and the Theme Customizer, so they take far less storage. Large wallpapers saved before this update, inside custom themes, or in imported theme files are shrunk the same way.
 - Changing an assessment's Type no longer lags: predictions are recalculated once, after the dropdown closes, instead of up to four times while it's still open.
 - Liquid Glass Library and Learners bars use the same glass as their tables, "Page N of M" and its page controls form one pill, and Learners headings fit their titles.
 - Shorter description for the semester filter in Settings, and the baselines header is now "Previous Year Baselines".

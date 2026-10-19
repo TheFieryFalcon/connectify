@@ -55,7 +55,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyThemeAuth` | `theme-auth.js` | Login/logout detection and post-login theme restore |
 | `window.ConnectifyThemeTokens` | `theme-custom-tokens.js` | Custom tokens, wallpaper (with extension-storage fallback), glass |
 | `window.ConnectifyThemeRegistry` | `theme-registry.js` / `theme-custom-themes.js` | Theme registry, switching, saved custom themes |
-| `window.ConnectifyThemeCustomizer` / `ConnectifyWallpaperFit` | `theme-customizer.js` / `theme-wallpaper-fit.js` | In-DOM theme designer modal, 20-token Full mode, preview naming text/fill tokens, wallpaper upload; `fromFile(file)` crops and scales wallpaper uploads to the screen before storing |
+| `window.ConnectifyThemeCustomizer` / `ConnectifyWallpaperFit` / `ConnectifyWallpaperMigrate` | `theme-customizer.js` / `theme-wallpaper-fit.js` / `theme-wallpaper-migrate.js` | In-DOM theme designer modal, 20-token Full mode, preview naming text/fill tokens, wallpaper upload; `fromFile(file)` / `fromDataUrl(url)` crop and scale wallpapers to the screen before storing, `needsFit(url)` (raster data URL > 1.5 MB); `run()` fits large stored wallpapers once |
 | `window.ConnectifyIsUserActive` | `navigation.js` | Returns boolean indicating recent user interaction (<90s) |
 
 ---
@@ -68,7 +68,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectea:theme:id` | `localStorage` | `theme-registry.js` | Active theme identifier (`'dark'`, `'quantum'`, `'amoled'`, `'midnight'`, `'forest'`, `'liquid-glass-clear'`, `'liquid-glass'`, `'custom'`, `'light'`) |
 | `connectea:theme:last_theme` | `localStorage` | `theme.js` | Identifier of active theme restored on startup |
 | `connectea:theme:custom_themes` | `localStorage` & `storage.local` | `theme-registry.js` | Array of custom theme configurations (tokens, `tokenVersion`, glassBlur, glassOpacity, wallpaper) with name-based overwrite |
-| `connectea:theme:wallpaper` | `localStorage` | `theme.js` | Data URI of custom background wallpaper |
+| `connectea:custom_background` | `localStorage` & `storage.local` | `theme-custom-tokens.js` | Data URI of the active wallpaper (extension storage keeps it when over quota); `connectify:wallpaper_fit_done` (`theme-wallpaper-migrate.js`) is set once large stored wallpapers were fitted |
 | `connectea:theme:liquid_glass` | `localStorage` | `theme.js` | Boolean flag enabling Liquid Glass diffusion mode |
 | `connectea:theme:restore_dark` / `restore_theme` | `localStorage` | `theme.js` / `theme-registry.js` | Dark-mode flag and saved theme ID restored after navigating away from the login page |
 | `connectea:theme:custom_colors` | `localStorage` | `theme-registry.js` | Custom theme JSON palette (`canvas`, `surface`, `accent`) |

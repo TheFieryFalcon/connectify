@@ -11,6 +11,7 @@
   const MAX_DPR = 2;
   const QUALITY = 0.86;
   const KEEP_BYTES = 1.5 * 1024 * 1024; // small images that already fit keep their original encoding
+  const FIT_OVER = 1.5 * 1024 * 1024;   // stored data URLs longer than this are fitted (SVG presets never)
 
   /** Device-pixel size of the screen (the most a fixed `cover` background can show), capped at 4K. */
   function targetSize(win = window) {
@@ -106,5 +107,32 @@
     }
   }
 
-  window.ConnectifyWallpaperFit = { MAX_EDGE, targetSize, fitRect, fromFile };
+  /** A raster image data URL large enough to be worth fitting (wallpapers stored before uploads were fitted, imports). */
+  function needsFit(url) {
+    return typeof url === 'string' && url.length > FIT_OVER && /^data:image\//i.test(url) && !/^data:image\/svg/i.test(url);
+  }
+
+  // fetch() decodes the base64 off the main thread; atob is the fallback where a page blocks it
+  async function toBlob(url) {
+    if (typeof fetch === 'function') {
+      try { return await (await fetch(url)).blob(); } catch {}
+    }
+    const comma = url.indexOf(',');
+    const meta = url.slice(5, comma);
+    const body = url.slice(comma + 1);
+    const type = meta.split(';')[0];
+    if (!/;base64$/i.test(meta)) return new Blob([decodeURIComponent(body)], { type });
+    const bin = atob(body);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type });
+  }
+
+  /** fromFile for a stored data URL; resolves to the original when fitting would not make it smaller. */
+  async function fromDataUrl(url) {
+    const fitted = await fromFile(await toBlob(url));
+    return fitted.length < url.length ? fitted : url;
+  }
+
+  window.ConnectifyWallpaperFit = { MAX_EDGE, FIT_OVER, targetSize, fitRect, fromFile, needsFit, fromDataUrl };
 })();

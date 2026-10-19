@@ -112,7 +112,7 @@
     return true;
   }
 
-  Object.assign(registry, { getCustomThemes, saveCustomTheme, deleteCustomTheme });
+  Object.assign(registry, { getCustomThemes, saveCustomTheme, deleteCustomTheme, writeCustomThemes });
 
   loadSavedCustomThemes();
   if (typeof document !== 'undefined') {

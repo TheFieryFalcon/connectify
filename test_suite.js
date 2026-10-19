@@ -8920,6 +8920,97 @@ runTest('Test 198: Home page portlets are one surface: no square wrapper behind 
   assert.ok(manifest.indexOf('theme-classes-promos.css') < manifest.indexOf('theme-surface-nesting.css'), 'nesting loads after the promo fills, so ties go to it');
 });
 
+runTest('Test 199: Large stored and imported wallpapers are fitted to the screen once, in place; SVG presets never', async () => {
+  const fitSrc = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-wallpaper-fit.js'), 'utf8');
+  const migrateSrc = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-wallpaper-migrate.js'), 'utf8');
+  const HUGE_A = 'data:image/png;base64,' + 'A'.repeat(2e6);
+  const HUGE_B = 'data:image/jpeg;base64,' + 'B'.repeat(2e6);
+  const SVG = 'data:image/svg+xml,' + '<svg/>'.repeat(4e5);
+  const SMALL = 'data:image/png;base64,AAAA';
+
+  // fromDataUrl: the stored URL becomes a Blob (fetch, or atob where the page blocks it) and goes through fromFile
+  const createImageBitmap = async (source, ...args) => (args.length
+    ? { width: args[4].resizeWidth, height: args[4].resizeHeight, close() {} } : { width: source.w, height: source.h, close() {} });
+  class OffscreenCanvas {
+    constructor(w, h) { this.width = w; this.height = h; }
+    getContext() { return { drawImage() {} }; }
+    async convertToBlob(o) { return { type: o.type, w: this.width, h: this.height }; }
+  }
+  class FileReader { readAsDataURL(b) { this.result = `data:image/jpeg;fit=${b.w}x${b.h}`; this.onload(); } }
+  class Blob { constructor(parts, o) { this.type = o.type; this.size = parts[0].length; this.w = 9000; this.h = 6000; } }
+  let fetchFails = false;
+  const fetch = async () => { if (fetchFails) throw new Error('CSP'); return { blob: async () => ({ w: 9000, h: 6000, size: 30e6, type: 'image/png' }) }; };
+  const atob = b => 'x'.repeat(b.length);
+  const win = { devicePixelRatio: 2, screen: { width: 1440, height: 900 }, innerWidth: 1440, innerHeight: 800 };
+  new Function('window', 'createImageBitmap', 'OffscreenCanvas', 'FileReader', 'fetch', 'atob', 'Blob', fitSrc)(win, createImageBitmap, OffscreenCanvas, FileReader, fetch, atob, Blob);
+  const F = win.ConnectifyWallpaperFit;
+  assert.ok(F.needsFit(HUGE_A) && F.needsFit(HUGE_B), 'large raster data URLs need fitting');
+  assert.ok(!F.needsFit(SVG) && !F.needsFit(SMALL) && !F.needsFit(null) && !F.needsFit('data:text/plain,' + 'x'.repeat(2e6)),
+    'SVG presets, small images and non-images are never fitted');
+  assert.strictEqual(await F.fromDataUrl(HUGE_A), 'data:image/jpeg;fit=2880x1800', 'a stored wallpaper is cropped and scaled like an upload');
+  fetchFails = true;
+  assert.strictEqual(await F.fromDataUrl(HUGE_A), 'data:image/jpeg;fit=2880x1800', 'atob decodes the URL where fetch is blocked');
+  assert.strictEqual(await F.fromDataUrl('data:x'), 'data:x', 'a fit that is not smaller keeps the original');
+
+  // Migration: active wallpaper (extension-storage fallback) and theme wallpapers, each distinct image fitted once
+  function migrator(opts = {}) {
+    const ext = { 'connectea:custom_background': HUGE_A, 'connectea:custom_themes_list': JSON.stringify([
+      { id: 't1', wallpaper: HUGE_A }, { id: 't2', wallpaper: SVG }, { id: 't3', wallpaper: SMALL }, { id: 't4', wallpaper: HUGE_B }]) };
+    const local = new Map([['connectea:custom_themes_list', JSON.stringify([{ id: 't1', wallpaper: null }, { id: 't5', wallpaper: HUGE_B }])]]);
+    const env = { calls: [], bg: null, written: null, defs: { t1: { id: 't1', wallpaper: HUGE_A } }, ext, local };
+    const w = {
+      ConnectifyWallpaperFit: { needsFit: F.needsFit, fromDataUrl: async url => {
+        env.calls.push(url);
+        if (opts.clearDuring) { delete ext['connectea:custom_background']; env.bg = null; }
+        return `data:image/jpeg;small-${env.calls.length}`;
+      } },
+      ConnectifyThemeTokens: { getCustomBackground: () => env.bg, setCustomBackground: u => { env.bg = u; env.setCalls = (env.setCalls || 0) + 1; } },
+      ConnectifyThemeRegistry: { writeCustomThemes: l => { env.written = l; }, getThemeDefinition: id => env.defs[id] || null },
+      ConnectifyThemeAuth: { isAuthDisabled: () => false }
+    };
+    const ls = { getItem: k => (local.has(k) ? local.get(k) : null), setItem: (k, v) => local.set(k, String(v)) };
+    const chrome = { storage: { local: { get: (keys, cb) => cb(Object.fromEntries(keys.filter(k => k in ext).map(k => [k, ext[k]]))) } } };
+    new Function('window', 'localStorage', 'chrome', 'document', migrateSrc)(w, ls, chrome, undefined);
+    env.M = w.ConnectifyWallpaperMigrate;
+    return env;
+  }
+  const env = migrator();
+  assert.strictEqual(await env.M.run(), true, 'large stored wallpapers are migrated');
+  assert.deepStrictEqual(env.calls, [HUGE_A, HUGE_B], 'each distinct large wallpaper is fitted once; SVG and small ones never');
+  assert.strictEqual(env.bg, 'data:image/jpeg;small-1', 'the active wallpaper (only in extension storage) is stored back fitted');
+  assert.deepStrictEqual(env.written.map(t => [t.id, t.wallpaper]), [['t1', 'data:image/jpeg;small-1'], ['t2', SVG], ['t3', SMALL],
+    ['t4', 'data:image/jpeg;small-2'], ['t5', 'data:image/jpeg;small-2']], 'theme wallpapers are replaced in place; a localStorage-only theme is kept');
+  assert.strictEqual(env.defs.t1.wallpaper, 'data:image/jpeg;small-1', 'registered themes apply the fitted wallpaper');
+  assert.strictEqual(env.local.get('connectify:wallpaper_fit_done'), '1', 'the migration is recorded');
+  assert.strictEqual(await env.M.run(), false, 'it runs once');
+  assert.strictEqual(env.calls.length, 2, 'a finished migration never decodes again');
+  const cleared = migrator({ clearDuring: true });
+  await cleared.M.run();
+  assert.ok(!cleared.setCalls && cleared.bg === null, 'a wallpaper cleared while fitting is not brought back');
+
+  // JSON import: a large wallpaper is fitted before it is previewed or saved; small ones are taken as they are
+  eval(fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-customizer.js'), 'utf8'));
+  const prevFit = window.ConnectifyWallpaperFit;
+  window.ConnectifyWallpaperFit = F;
+  try {
+    const state = { tokens: {}, wallpaper: null };
+    assert.strictEqual(window.ConnectifyThemeCustomizerControls.importTheme(state, { wallpaper: HUGE_A }), HUGE_A, 'a large import is returned for fitting');
+    assert.strictEqual(state.wallpaper, null, 'the raw large import is never put in the customizer state');
+    assert.strictEqual(window.ConnectifyThemeCustomizerControls.importTheme(state, { wallpaper: SMALL }), null);
+    assert.strictEqual(state.wallpaper, SMALL, 'small imported wallpapers are used directly');
+  } finally {
+    window.ConnectifyWallpaperFit = prevFit;
+  }
+  const controls = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-customizer-controls.js'), 'utf8');
+  assert.ok(controls.includes('window.ConnectifyWallpaperFit.fromDataUrl(url).then('), 'imports go through ConnectifyWallpaperFit.fromDataUrl');
+  const customThemes = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-custom-themes.js'), 'utf8');
+  assert.ok(customThemes.includes('deleteCustomTheme, writeCustomThemes }'), 'the theme list writer is shared with the migration');
+  const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
+  const at = f => manifest.indexOf(`"src/theme/${f}"`);
+  assert.ok(at('theme-wallpaper-migrate.js') > at('theme-wallpaper-fit.js') && at('theme-wallpaper-migrate.js') > at('theme-custom-themes.js'),
+    'the migration loads after the fit module and the custom theme store');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
