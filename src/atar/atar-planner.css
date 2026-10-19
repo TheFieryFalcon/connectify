@@ -77,6 +77,10 @@
   white-space: nowrap;
 }
 
+#connectea-atar .cta-target-label>.cta-score {
+  text-align: left;
+}
+
 #connectea-atar .cta-form-controls .cta-subject-label {
   grid-column: 1/-1;
   white-space: normal;

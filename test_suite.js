@@ -9167,6 +9167,13 @@ runTest('Test 200: Year in Progress keeps cohort means under the semester filter
   assert.ok(css.includes('.connectea-dark #connectify-progress .cx-progress-mode select{background:var(--cx-nav-bg'), 'the dropdown is token-routed in dark themes');
 });
 
+runTest('Test 201: Target ATAR and Target Grade inputs are left-aligned; course score inputs stay right-aligned', () => {
+  const planner = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/atar-planner.css'), 'utf8');
+  assert.ok(/#connectea-atar \.cta-target-label>\.cta-score\s*\{\s*text-align:\s*left;/.test(planner), 'planner target inputs are left-aligned');
+  const compact = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/atar-compact.css'), 'utf8');
+  assert.ok(/#connectea-atar \.cta-score\s*\{[^}]*text-align:\s*right;/.test(compact), 'course list score inputs keep right alignment');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
