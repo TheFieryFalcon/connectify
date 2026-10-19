@@ -8573,6 +8573,50 @@ runTest('Test 192: The first Semester 1 task listed on a Semester 2 panel gets n
   }
 });
 
+runTest('Test 193: An update to a newer version shows one notice whose "What\'s new" button opens the changelog', () => {
+  const saved = { chrome: global.chrome, notes: window.ConnectifyNotifications, open: window.open, timeout: global.setTimeout, notice: window.ConnectifyUpdateNotice };
+  let version = '3.2.3';
+  const shown = [], opened = [];
+  try {
+    mockLocalStorage.clear();
+    global.chrome = { runtime: { getManifest: () => ({ version }) } };
+    window.ConnectifyNotifications = { show: opts => { shown.push(opts); } };
+    window.open = (...args) => { opened.push(args); };
+    global.setTimeout = () => 0; // the module's startup check is driven by hand here
+    window.ConnectifyUpdateNotice = undefined;
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/update-notice.js'), 'utf8'));
+    const notice = window.ConnectifyUpdateNotice;
+
+    assert.strictEqual(notice.check(), false, 'a fresh install only records the version');
+    assert.strictEqual(mockLocalStorage.getItem(notice.KEY), '3.2.3');
+    assert.strictEqual(notice.check(), false, 'the same version shows nothing');
+
+    version = '3.2.10';
+    assert.strictEqual(notice.check(), true, 'a newer version shows the notice');
+    assert.strictEqual(shown.length, 1);
+    assert.strictEqual(shown[0].title, 'Connectify updated to 3.2.10');
+    assert.ok(shown[0].message.includes('3.2.3'), 'the notice names the previous version');
+    assert.strictEqual(shown[0].duration, 0, 'it stays until dismissed');
+    const whatsNew = shown[0].actions.find(a => a.text === "What's new");
+    let closed = false;
+    whatsNew.onClick({ close: () => { closed = true; } });
+    assert.deepStrictEqual(opened, [['https://github.com/TheFieryFalcon/connectify/blob/main/CHANGELOG.md', '_blank', 'noopener']], 'the button opens the changelog in a new tab');
+    assert.ok(closed, 'and closes the notice');
+    assert.strictEqual(notice.check(), false, 'the notice shows once per version');
+
+    version = '3.2.9';
+    assert.strictEqual(notice.check(), false, 'a downgrade never notifies');
+    assert.ok(notice.compareVersions('3.2.10', '3.2.9') > 0 && notice.compareVersions('3.3', '3.3.0') === 0);
+
+    const js = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8')).content_scripts.flatMap(g => g.js || []);
+    assert.ok(js.indexOf('src/system/notifications.js') > -1 && js.indexOf('src/system/notifications.js') < js.indexOf('src/system/update-notice.js'), 'the notice loads after the notification engine');
+  } finally {
+    global.chrome = saved.chrome; window.ConnectifyNotifications = saved.notes; window.open = saved.open;
+    global.setTimeout = saved.timeout; window.ConnectifyUpdateNotice = saved.notice;
+    mockLocalStorage.clear();
+  }
+});
+
 runTest('Test 194: The top-right user area keeps the bar and popup surfaces, readable ink and a native-geometry Sign Out', () => {
   const read = f => fs.readFileSync(path.join(BASE_DIR, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   const manifestCss = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8')).content_scripts.flatMap(c => c.css || []);

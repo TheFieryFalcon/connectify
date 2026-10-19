@@ -136,6 +136,7 @@
             "src/sidebar/sidebar-shell.js",
             "src/sidebar/sidebar.js",
             "src/system/notifications.js",
+            "src/system/update-notice.js",
             "src/system/grade-snapshot.js",
             "src/system/new-grade.js",
             "src/system/dom-sweeper.js"
