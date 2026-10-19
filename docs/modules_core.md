@@ -22,7 +22,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `cache-versions.js`: `ConnectifyCache` versions, keys and isolated per-subsystem clearing; runs `checkAndInvalidateAll()` first.
   - `assessment-cache.js`: in-memory `subjectsCache` and persistent stats cache (`connectify:stats_cache:`, `connectify:subjects_cache:`).
   - `assessment-parse-helpers.js` / `assessment-parser.js`: order hints, cohort mean, weighted mean; card metadata, task rows, marks and weights.
-  - `class-semesters.js`: class registry per semester (each card read once, re-read when scraped); `detectSemester()` (2 once a Semester 2 card has a mark or a Semester 1 card a final letter); a wholly new class set goes to `ConnectifyYearRollover.handleClassChange` first.
+  - `class-semesters.js`: class registry per semester (each card read once, re-read when scraped); `detectSemester()` (2 only once a class shows a final Semester 1 A–E grade, on its Semester 1 or Semester 2 card; marked Semester 2 tasks never count); a wholly new class set goes to `ConnectifyYearRollover.handleClassChange` first.
   - `semester-filter.js`: "Show this semester's classes only" (off by default; always the detected semester): other semester's tiles get `.cx-semester-hidden`, only allowed cards refresh the cache (the other semester stays frozen), `filterSubjects` / `filterCourses` for tools.
   - `assessment-expand-progress.js`: `#cx-expand-progress` pill and scroll freeze (`start()` → `{ update, finish }`).
   - `assessment-accordion-watch.js`: single-accordion animation guard (450ms) and refresh of the opened card.

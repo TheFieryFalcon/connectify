@@ -8353,12 +8353,13 @@ runTest('Test 187: The class registry records each semester outline and detects 
     const stored = JSON.parse(mockLocalStorage.getItem(`connectify:class_semesters:${window.ConnectifyUtils.accountKey()}`));
     assert.strictEqual(stored['12 Art'][1].mark, 70, 'the registry is persisted');
 
-    assert.strictEqual(classes.detectSemester(), 2, 'Semester 2 results or final Semester 1 letters mean Semester 2');
+    assert.strictEqual(classes.detectSemester(), 2, 'a final Semester 1 grade means Semester 2');
     cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%' }), makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '-' })];
-    assert.strictEqual(classes.detectSemester(), 1, 'no Semester 2 results and no final letters mean Semester 1');
-    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: ['78%', 'B'] })];
-    assert.strictEqual(classes.detectSemester(), 2, 'a final Semester 1 letter means Semester 2 has started');
-
+    assert.strictEqual(classes.detectSemester(), 1, 'no final grades mean Semester 1');
+    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%' }), makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '85%', tasks: [['Chem Test 2', '88%']] })];
+    assert.strictEqual(classes.detectSemester(), 1, 'a marked Semester 2 task before Semester 1 grades are final stays Semester 1');
+    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: ['82%', 'A'] })];
+    assert.strictEqual(classes.detectSemester(), 2, 'a Semester 1 grade shown on a Semester 2 panel means Semester 2');
     // A card element is read once; a scrape re-reads it
     const before = JSON.stringify(classes.get());
     chem1.querySelector('.cvr-c-task__mark').textContent = '90%';
@@ -8380,7 +8381,7 @@ runTest('Test 188: "Show this semester\'s classes only" hides the other semester
     window.__connectifyDataInitialized = false;
     eval(dataJs);
     window.ConnectifyCache.subjectsCache.clear();
-    const chem1 = makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%', tasks: [['Chem Test 1', '80%']] });
+    const chem1 = makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: ['80%', 'A'], tasks: [['Chem Test 1', '80%']] });
     const chem2 = makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '84%', tasks: [['Chem Test 2', '88%']] });
     const art1 = makeOutlineCard('12 Art - Semester 1', { overall: '70%', tasks: [['Art Essay', '70%']] });
     const cards = [chem1, chem2, art1];
@@ -8394,7 +8395,7 @@ runTest('Test 188: "Show this semester\'s classes only" hides the other semester
     assert.deepStrictEqual(names(window.ConnectifyData.collect(true)), ['12 Art', '12 Chemistry ATAR']);
     assert.deepStrictEqual(names(window.ConnectifyData.collectClasses(true)), ['12 Art', '12 Chemistry ATAR']);
 
-    // This semester only: a Semester 2 card with a mark means Semester 2
+    // This semester only: a final Semester 1 grade means Semester 2
     filter.save(true);
     assert.strictEqual(filter.currentSemester(), 2, 'the semester is always the detected one');
     assert.strictEqual(filter.activeSemester(), 2);

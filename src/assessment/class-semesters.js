@@ -5,7 +5,8 @@
  * tasks it lists: { subject: { 1: { title, mark, finalLetter, tasks: [[id, name]] }, 2: {...} } },
  * persisted at connectify:class_semesters:<student> (written only on change). The subjects cache merges
  * both semesters under one name, so sidebar tools read semester groupings from here instead of the
- * outline tiles. Also detects the current semester. Exposes window.ConnectifyClassSemesters.
+ * outline tiles. Also detects the current semester (Semester 2 once any class shows a final Semester 1
+ * grade). Exposes window.ConnectifyClassSemesters.
  */
 (() => {
   'use strict';
@@ -123,25 +124,17 @@
   /** Subject names with an outline in the given semester. */
   const classesIn = semester => Object.keys(load()).filter(s => load()[s]?.[semester]);
 
-  // Semester 2 has started once a Semester 2 card shows results or Semester 1 grades are final
-  // (the evidence ConnectifyAtarMarkup.hasSemesterTwoStarted uses for the planners)
+  // Semester 2 starts only once a Semester 1 class has a final A–E grade: a Semester 2 task can be marked
+  // before Semester 1 grades are final. Semester 1 grades also show on Semester 2 panels, so a final
+  // grade on either semester's card counts.
   function evidenceFromPage() {
-    const cards = Array.from(document.querySelectorAll(CARD_SELECTOR));
+    const cards = Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester);
     if (!cards.length) return null;
-    let second = false;
-    for (const card of cards) {
-      const { semester } = cardInfo(card);
-      const { mark, finalLetter } = cardSummary(card);
-      if (semester === 2 && mark !== null && mark > 0) second = true;
-      if (semester === 1 && finalLetter) second = true;
-    }
-    return second ? 2 : 1;
+    return cards.some(card => cardSummary(card).finalLetter) ? 2 : 1;
   }
 
   function evidenceFromRegistry() {
-    const entries = Object.values(load());
-    if (!entries.length) return 1;
-    return entries.some(e => (e?.[2]?.mark > 0) || e?.[1]?.finalLetter) ? 2 : 1;
+    return Object.values(load()).some(e => e?.[1]?.finalLetter || e?.[2]?.finalLetter) ? 2 : 1;
   }
 
   let detected = null;
