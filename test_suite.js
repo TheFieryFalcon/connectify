@@ -9318,7 +9318,7 @@ runTest('Test 206: The customizer colour picker captures its drag, so sweeping p
   assert.ok(/\.cx-picker-popover \{[^}]*user-select: none;/.test(css) && /\.cx-picker-popover input:not\(\[type="range"\]\) \{\s*user-select: text;/.test(css), 'the popover text is not selectable, its hex input is');
 });
 
-runTest('Test 207: Full-mode tokens the user set win over the Basic tokens in both modes and survive save and reopen', () => {
+runTest('Test 207: Full-mode tokens the user set stay until a Basic token they derive from changes, and survive save and reopen', () => {
   const themeDir = path.join(SRC_DIR, 'theme');
   const win = {};
   for (const f of ['theme-color-utils.js', 'theme-oklch.js', 'theme-token-derive.js', 'theme-customizer-tokens.js']) {
@@ -9330,11 +9330,17 @@ runTest('Test 207: Full-mode tokens the user set win over the Basic tokens in bo
   T.apply(state);
   T.set(state, 'surfaceHover', '#ff0000');
   T.set(state, 'textMuted', '#00ff00');
+  T.set(state, 'accentHover', '#0000ff');
   state.mode = 'basic';
-  T.set(state, 'surface', '#203040');
+  T.set(state, 'accent', '#ffc107');
   T.apply(state);
-  assert.strictEqual(state.tokens.surfaceHover, '#ff0000', 'switching to Basic and editing a Basic token keeps a Full token the user set');
+  assert.strictEqual(state.tokens.surfaceHover, '#ff0000', 'switching to Basic and editing an unrelated Basic token keeps a Full token the user set');
   assert.strictEqual(state.tokens.textMuted, '#00ff00');
+  assert.strictEqual(state.tokens.accentHover, T.derived(state.tokens).accentHover, 'editing the accent re-derives the accent hover the user set');
+  assert.ok(!state.overrides.has('accentHover'), 'it is no longer an override');
+  T.set(state, 'canvas', '#101a14');
+  T.apply(state);
+  assert.strictEqual(state.tokens.surfaceHover, '#ff0000', 'the surface hover does not derive from the canvas');
   assert.strictEqual(state.tokens.surfaceElevated, T.derived(state.tokens).surfaceElevated, 'tokens the user never set still follow the Basic tokens');
   const saved = T.savedColors(state);
   assert.deepStrictEqual(Object.keys(saved).sort(), [...T.BASIC, 'surfaceHover', 'textMuted'].sort(), 'a theme saves its Basic tokens and overrides only');
@@ -9342,12 +9348,20 @@ runTest('Test 207: Full-mode tokens the user set win over the Basic tokens in bo
   Object.assign(reopened.tokens, saved);
   reopened.overrides = T.overridesOf(reopened.tokens);
   assert.deepStrictEqual([...reopened.overrides].sort(), ['surfaceHover', 'textMuted'], 'reopening a theme recovers its overrides');
+  T.track(reopened, reopened.overrides);
+  T.set(reopened, 'surface', '#203040');
+  T.apply(reopened);
+  for (const key of ['surfaceHover', 'textMuted']) {
+    assert.strictEqual(reopened.tokens[key], T.derived(reopened.tokens)[key], `editing the surface re-derives the reopened theme's ${key}`);
+  }
+  assert.strictEqual(reopened.overrides.size, 0, 'neither is an override any more');
+  T.set(reopened, 'surfaceHover', '#ff0000');
   T.reset(reopened, 'surfaceHover');
   assert.strictEqual(reopened.tokens.surfaceHover, T.derived(reopened.tokens).surfaceHover, 'reset hands a token back to the Basic tokens');
   const markup = origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer-markup.js'), 'utf8');
   assert.ok(markup.includes("state.mode === 'full' && state.overrides?.has(t.key)") && markup.includes('cx-token-reset'), 'Full mode marks overrides with a reset button');
   const core = origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer.js'), 'utf8');
-  assert.ok(!core.includes('deriveSecondaryTokens') && core.includes('colors: tokenSet.savedColors(state)') && core.includes('tokenSet.overridesOf(state.tokens)'), 'the customizer derives through the override set');
+  assert.ok(!core.includes('deriveSecondaryTokens') && core.includes('colors: tokenSet.savedColors(state)') && core.includes('tokenSet.track(state, themeToEdit?.colors ? tokenSet.overridesOf(state.tokens) : [])'), 'the customizer derives through the override set');
   const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('theme-customizer-tokens.js') > manifest.indexOf('theme-token-derive.js') && manifest.indexOf('theme-customizer-tokens.js') < manifest.indexOf('theme-customizer-controls.js'), 'registered between derive and the controls');
 });
@@ -9565,19 +9579,23 @@ runTest('Test 215: A preset picked in the customizer keeps every colour it sets 
   T.set(state, 'surface', '#3a3634');
   T.apply(state);
   assert.strictEqual(state.tokens.surfaceHover, T.derived(state.tokens).surfaceHover, 'changing the surface re-derives the surface tokens');
-  // Colours the user sets still win over the Basic tokens, and ↺ hands a preset colour back to them
+  // Colours the user sets re-derive the same way, and ↺ hands a preset colour back to the Basic tokens
   const own = pick(quantum);
   T.set(own, 'textMuted', '#00ff00');
+  T.set(own, 'surfaceHover', '#ff0000');
   T.set(own, 'textPrimary', '#ffffff');
   T.apply(own);
-  assert.strictEqual(own.tokens.textMuted, '#00ff00', 'a colour the user set survives a Basic change');
+  assert.strictEqual(own.tokens.textMuted, T.derived(own.tokens).textMuted, 'a colour the user set derives again once the primary text changes');
+  assert.strictEqual(own.tokens.surfaceHover, '#ff0000', 'a colour the user set that does not derive from the primary text stays');
+  T.reset(own, 'surfaceElevated');
+  assert.strictEqual(own.tokens.surfaceElevated, T.derived(own.tokens).surfaceElevated, 'reset derives a preset colour from the Basic tokens');
   T.reset(own, 'surfaceHover');
-  assert.strictEqual(own.tokens.surfaceHover, T.derived(own.tokens).surfaceHover, 'reset derives a preset colour from the Basic tokens');
+  assert.strictEqual(own.tokens.surfaceHover, T.derived(own.tokens).surfaceHover, 'reset derives a colour the user set from the Basic tokens');
   // A derived preset (Liquid Glass) sets only Basic tokens, so nothing is an override
   assert.strictEqual(pick(presets['liquid-glass-clear']).overrides.size, 0, 'a derived preset starts with no overrides');
   assert.ok(!('keeps' in quantum), 'no per-preset list of kept tokens');
   const core = origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer.js'), 'utf8');
-  assert.ok(core.includes('tokenSet.fromPreset(state, preset, themeTokens(preset))') && core.includes('state.presetBase = {};'), 'the preset select goes through fromPreset; opening clears the preset colours');
+  assert.ok(core.includes('tokenSet.fromPreset(state, preset, themeTokens(preset))') && core.includes('tokenSet.track(state, '), 'the preset select goes through fromPreset; opening tracks the theme\'s own colours');
 });
 
 Promise.all(pendingTestPromises).then(() => {

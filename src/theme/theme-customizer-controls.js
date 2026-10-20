@@ -164,8 +164,7 @@
         // Imported colours merge over this theme's own (Basic + overrides); imported Full tokens become overrides
         state.tokens = tokenSet.savedColors(state);
         largeWallpaper = importTheme(state, theme);
-        state.overrides = tokenSet.overridesOf(state.tokens);
-        state.presetBase = {};
+        tokenSet.track(state, tokenSet.overridesOf(state.tokens));
       } catch (err) {
         tokenSet.apply(state);
         alert(window.ConnectifyThemeImport.failText(err));

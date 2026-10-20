@@ -29,7 +29,8 @@
   const state = {
     mode: 'basic',
     tokens: getDefaultTokens(),
-    overrides: new Set(), // Full tokens the user set; they win over the Basic tokens in both modes
+    overrides: new Set(), // Full tokens set by the user or a preset; derived again once their Basic tokens change
+    bases: {},
     name: 'My Theme',
     emoji: '🎨',
     liquidGlass: false,
@@ -217,9 +218,8 @@
       wallpaper: window.ConnectifyWallpaperPresets?.byId(themeToEdit?.wallpaperPreset)?.url || themeToEdit?.wallpaper || null,
       tokens: themeToEdit?.colors ? themeTokens(themeToEdit.colors) : getDefaultTokens()
     });
-    // Saved Full tokens that differ from what the Basic tokens derive stay as the user set them
-    state.overrides = themeToEdit?.colors ? tokenSet.overridesOf(state.tokens) : new Set();
-    state.presetBase = {};
+    // Saved Full tokens that differ from what the Basic tokens derive stay as set until their Basic tokens change
+    tokenSet.track(state, themeToEdit?.colors ? tokenSet.overridesOf(state.tokens) : []);
     tokenSet.apply(state);
 
     modalEl = document.createElement('div');

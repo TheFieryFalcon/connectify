@@ -28,9 +28,9 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Bars, banners, headings, empty states, paginators and the Select All row no longer get panels or glass pills of their own. They sit straight on the page.
 - Liquid Glass notices and discussions sit straight on your wallpaper instead of on a frosted reading panel.
 - Notice and dialog text uses the theme's main text colour (cream in Quantum Dark) instead of its secondary colour.
-- Full-mode colours you set in the Theme Customizer win over the Basic colours and are kept when you switch back to Basic mode.
+- Full-mode colours you set in the Theme Customizer are kept when you switch back to Basic mode.
 - Picking a preset in the Theme Customizer keeps all of its colours (e.g. Quantum Dark's green secondary text) instead of deriving them from its six Basic colours.
-- Changing a Basic colour re-derives the preset colours that come from it.
+- Changing a Basic colour re-derives every Full colour based on it, including preset colours and ones you set yourself.
 - Text colours you set in a custom theme are used exactly as set.
 - Classes "View All" buttons use the theme's button colours.
 - The coloured line under card headers uses the theme's border colour.
