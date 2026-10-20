@@ -59,6 +59,12 @@
     return saved;
   }
 
+  /** The alert for a failed import: says why, so a report shows what went wrong (also logged). */
+  function failText(err) {
+    console.warn('[Connectify] Theme import failed', err);
+    return `Invalid theme file.\n\n${(err && err.message) || err || 'Unknown error'}`;
+  }
+
   /** Opens the file picker; the chosen theme is saved and applied, an unreadable file is reported. */
   function pick() {
     const input = document.createElement('input');
@@ -66,10 +72,10 @@
     input.accept = '.ctme,.json';
     input.onchange = () => {
       const file = input.files?.[0];
-      if (file) importFile(file).catch(() => alert('Invalid theme file.'));
+      if (file) importFile(file).catch(err => alert(failText(err)));
     };
     input.click();
   }
 
-  window.ConnectifyThemeImport = { sanitize, wallpaperFields, importFile, pick };
+  window.ConnectifyThemeImport = { sanitize, wallpaperFields, importFile, pick, failText };
 })();

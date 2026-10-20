@@ -9458,6 +9458,9 @@ runTest('Test 212: Theme menu Import Theme; .ctme files read in Firefox content 
   assert.deepStrictEqual(applied, ['custom_1'], 'the imported theme is applied');
   w.ConnectifyThemeCtme.unpackFile = async () => ({ name: 'No colours' });
   await assert.rejects(I.importFile({}), /no colours/, 'a file without colours is reported, never saved');
+  const origWarn = console.warn; console.warn = () => {};
+  try { assert.strictEqual(I.failText(new Error('Permission denied')), 'Invalid theme file.\n\nPermission denied', 'the import alert says why it failed'); } finally { console.warn = origWarn; }
+  assert.ok(read('theme-customizer-controls.js').includes('alert(window.ConnectifyThemeImport.failText(err))'), 'the customizer import alert says why too');
   // 5. The registry, the store and the customizer resolve wallpaperPreset; the customizer shows the six thumbnails
   assert.ok(read('theme-registry.js').includes("window.ConnectifyWallpaperPresets?.byId(theme.wallpaperPreset)?.url || theme.wallpaper"), 'a theme\'s preset wallpaper is applied by id');
   assert.ok(read('theme-registry.js').includes("wallpaperPreset: typeof themeDef.wallpaperPreset === 'string'") && read('theme-custom-themes.js').includes('wallpaperPreset: themeDef.wallpaperPreset !== undefined'), 'wallpaperPreset is registered and stored');
