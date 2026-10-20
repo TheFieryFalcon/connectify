@@ -69,9 +69,9 @@
         window.ConnectifyWallpaperFit.fromFile(file).then(dataUrl => {
           window.ConnectifyTheme?.setCustomBackground(dataUrl);
           refresh();
-        }).catch(() => {
+        }).catch(err => {
           refresh();
-          if (status) status.textContent = 'That image could not be read';
+          if (status) status.textContent = window.ConnectifyWallpaperFit.errorText(err);
         });
       };
     }

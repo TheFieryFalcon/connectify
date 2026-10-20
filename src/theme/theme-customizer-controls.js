@@ -83,7 +83,7 @@
         status.textContent = file.name;
         clearBtn.disabled = false;
         ctx.renderMockup();
-      }).catch(() => { status.textContent = 'That image could not be read'; });
+      }).catch(err => { status.textContent = window.ConnectifyWallpaperFit.errorText(err); });
     };
     clearBtn.onclick = () => {
       state.wallpaper = null;

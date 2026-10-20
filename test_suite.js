@@ -8909,7 +8909,7 @@ runTest('Test 196: One Type change recomputes predictions once, after the dropdo
   }
 });
 
-runTest('Test 197: Uploaded wallpapers are centre-cropped to the screen and scaled down before they are stored', async () => {
+runTest('Test 197: Uploaded wallpapers are centre-cropped to the screen and scaled down before they are stored; GIFs stay animated', async () => {
   const src = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-wallpaper-fit.js'), 'utf8');
   const drawn = [], bitmaps = [];
   class FakeBitmap {
@@ -8950,9 +8950,19 @@ runTest('Test 197: Uploaded wallpapers are centre-cropped to the screen and scal
   assert.strictEqual(huge, 'data:image/jpeg;fit=2880x1800', 'huge wallpapers are stored at the screen size as JPEG');
   assert.ok(bitmaps.every(b => b.closed), 'decoded bitmaps are released');
   assert.deepStrictEqual(drawn[0].a, [0, 0, 2880, 1800, 0, 0, 2880, 1800], 'the already-fitted bitmap is drawn 1:1');
-  // A small image that already fits the screen exactly keeps its own encoding (PNG transparency, GIF frames)
+  // A small image that already fits the screen exactly keeps its own encoding (PNG transparency)
   const fits = await F.fromFile({ w: 1440, h: 900, size: 400e3, type: 'image/png' });
   assert.strictEqual(fits, 'data:image/png;original', 'small images that already fit are stored untouched');
+  // GIFs keep every frame: any size or aspect is stored as uploaded (cover crops it on screen), up to 4 MB
+  const drawnBefore = drawn.length;
+  const gif = await F.fromFile({ w: 4000, h: 3000, size: 3.5e6, type: 'image/gif' });
+  assert.strictEqual(gif, 'data:image/gif;original', 'animated GIF wallpapers are never re-encoded to a still JPEG');
+  assert.strictEqual(drawn.length, drawnBefore, 'a GIF is never drawn to a canvas');
+  const big = await F.fromFile({ w: 800, h: 600, size: 5 * 1024 * 1024, type: 'image/gif' }).catch(e => e);
+  assert.strictEqual(big.code, 'gif-too-large', 'GIFs over 4 MB are refused (they cannot be shrunk to fit storage)');
+  assert.strictEqual(F.errorText(big), 'GIF wallpapers must be 4 MB or smaller (this one is 5.0 MB)', 'the size limit is explained');
+  assert.strictEqual(F.errorText(new Error('decode')), 'That image could not be read');
+  assert.ok(!F.needsFit('data:image/gif;base64,' + 'A'.repeat(2e6)), 'stored and imported GIFs are never flattened by the migration');
 
   // Both upload paths fit the image first and never store the raw file
   const prefs = fs.readFileSync(path.join(BASE_DIR, 'src/predictor/settings-preferences.js'), 'utf8');
@@ -8960,6 +8970,7 @@ runTest('Test 197: Uploaded wallpapers are centre-cropped to the screen and scal
   for (const [name, code] of [['Settings', prefs], ['Theme Customizer', controls]]) {
     assert.ok(code.includes('window.ConnectifyWallpaperFit.fromFile(file).then('), `${name} wallpaper upload must go through ConnectifyWallpaperFit`);
     assert.ok(!code.includes('readAsDataURL'), `${name} must not store the raw image file`);
+    assert.ok(code.includes('window.ConnectifyWallpaperFit.errorText(err)'), `${name} shows why an upload was refused`);
   }
   const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('"src/theme/theme-wallpaper-fit.js"') > manifest.indexOf('"src/theme/theme-wallpaper-presets.js"')

@@ -3,6 +3,7 @@
  * Uploaded wallpapers are painted `center / cover fixed` (theme-tokens.css), so only a screen-sized,
  * centre-cropped part of the image is ever visible. Huge photos are cropped to the screen's aspect ratio
  * and scaled down to its device pixels before they are stored or painted, so every page paints a small JPEG.
+ * GIFs are stored as uploaded: re-encoding would keep only the first frame, so animated wallpapers keep moving.
  */
 (function () {
   'use strict';
@@ -12,6 +13,17 @@
   const QUALITY = 0.86;
   const KEEP_BYTES = 1.5 * 1024 * 1024; // small images that already fit keep their original encoding
   const FIT_OVER = 1.5 * 1024 * 1024;   // stored data URLs longer than this are fitted (SVG presets never)
+  const GIF_MAX = 4 * 1024 * 1024;      // GIFs cannot be shrunk, so they must fit extension storage as they are
+
+  const isGif = file => /^image\/gif$/i.test(file?.type || '');
+
+  function gifTooLarge(file) {
+    const mb = (file.size / 1024 / 1024).toFixed(1);
+    return Object.assign(new Error(`GIF wallpapers must be 4 MB or smaller (this one is ${mb} MB)`), { code: 'gif-too-large' });
+  }
+
+  /** Status text for a failed upload. */
+  const errorText = err => (err?.code === 'gif-too-large' ? err.message : 'That image could not be read');
 
   /** Device-pixel size of the screen (the most a fixed `cover` background can show), capped at 4K. */
   function targetSize(win = window) {
@@ -88,12 +100,14 @@
 
   /** Resolves to a data URL of the wallpaper cropped and scaled to the screen; rejects if it cannot be decoded. */
   async function fromFile(file) {
+    if (isGif(file) && file.size > GIF_MAX) throw gifTooLarge(file);
     const image = await decode(file);
     const iw = image.naturalWidth || image.width;
     const ih = image.naturalHeight || image.height;
     const t = targetSize();
     const r = fitRect(iw, ih, t.width, t.height);
     try {
+      if (isGif(file)) return await readAsDataUrl(file); // every frame kept; `cover` crops it on screen
       if (r.width === iw && r.height === ih && file.size <= KEEP_BYTES) return await readAsDataUrl(file);
       const small = await cropped(image, r);
       if (!small) return await encode(image, r);
@@ -107,9 +121,9 @@
     }
   }
 
-  /** A raster image data URL large enough to be worth fitting (wallpapers stored before uploads were fitted, imports). */
+  /** A raster image data URL large enough to be worth fitting (wallpapers stored before uploads were fitted, imports); never a GIF. */
   function needsFit(url) {
-    return typeof url === 'string' && url.length > FIT_OVER && /^data:image\//i.test(url) && !/^data:image\/svg/i.test(url);
+    return typeof url === 'string' && url.length > FIT_OVER && /^data:image\//i.test(url) && !/^data:image\/(svg|gif)/i.test(url);
   }
 
   // fetch() decodes the base64 off the main thread; atob is the fallback where a page blocks it
@@ -134,5 +148,5 @@
     return fitted.length < url.length ? fitted : url;
   }
 
-  window.ConnectifyWallpaperFit = { MAX_EDGE, FIT_OVER, targetSize, fitRect, fromFile, needsFit, fromDataUrl };
+  window.ConnectifyWallpaperFit = { MAX_EDGE, FIT_OVER, GIF_MAX, targetSize, fitRect, fromFile, needsFit, fromDataUrl, errorText };
 })();
