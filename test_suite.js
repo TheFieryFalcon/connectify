@@ -7050,9 +7050,9 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   assert.ok(cssHas(customizerCss, '#cx-glass-sliders-wrap'),
             'theme-customizer.css must style #cx-glass-sliders-wrap');
 
-  // 7. Light mode container panel backgrounds
-  assert.ok(cssHas(themeFeedCss, 'cvr-c-feed-header') && cssHas(themeFeedCss, 'rgba(255, 255, 255, 0.90)'),
-            'theme-feed.css must supply light container panel backgrounds in light mode');
+  // 7. Light mode over a wallpaper: tabs, headers and toolbars have no panel (the wallpaper is brightened instead)
+  assert.ok(!cssHas(themeFeedCss, 'rgba(255, 255, 255, 0.90)'),
+            'light mode must not paint white contrast panels behind tabs and headers over a wallpaper');
 
   // 8. Functional test: saveCustomTheme overwrites if name matches (case-insensitive)
   eval(registryJs);
@@ -7652,7 +7652,7 @@ runTest('Test 163: Liquid Glass rounds the notice card host and Library table wr
     'bordered icon buttons (bookmark) must keep native padding so the glyph is not offset');
 });
 
-runTest('Test 164: Liquid Glass gives Class pages one glass recipe for banners, bars, headings and empty states', () => {
+runTest('Test 164: Liquid Glass Class page banners, bars, headings and empty states sit on the page with no panel', () => {
   const styles = path.join(BASE_DIR, 'src/theme/styles');
   const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
   const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
@@ -7667,10 +7667,13 @@ runTest('Test 164: Liquid Glass gives Class pages one glass recipe for banners, 
     }
   }
   const surface = fs.readFileSync(path.join(styles, 'theme-glass-surface.css'), 'utf8');
-  assert.ok(cssHas(surface, 'cnt-scope-intro-class,') && cssHas(surface, 'mat-toolbar.c-category-bar,') && cssHas(surface, 'p.mat-h2,'),
-    'the class banner, category bars and section headings must share the glass recipe');
-  assert.ok(cssHas(surface, 'backdrop-filter: var(--cx-gl-blur) !important;') && cssHas(surface, 'border-radius: 16px !important;'), 'glass surfaces must blur and round to 16px');
-  assert.ok(cssHas(surface, 'cnt-paginator:has(.c-empty-content)'), 'empty states must become one glass card');
+  const clearRule = surface.replace(/\/\*[\s\S]*?\*\//g, '').split('}').find(b => b.includes('cnt-scope-intro-class')) || '';
+  for (const sel of ['cnt-scope-intro-class,', 'mat-toolbar.c-category-bar,', '.cvr-c-category-toolbar__container > .cvr-c-thori-pnl,', '.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox),', 'cnt-paginator:has(.c-empty-content),', 'p.mat-h2,', '.eds-c-empty-content']) {
+    assert.ok(clearRule.includes(sel), `${sel} sits on the page in Liquid Glass`);
+  }
+  assert.ok(/background: transparent !important;/.test(clearRule) && /backdrop-filter: none !important;/.test(clearRule) && /box-shadow: none !important;/.test(clearRule),
+    'the former contrast panels paint no fill, blur or shadow');
+  assert.ok(!/::before/.test(surface) && !/--cx-gl-fill/.test(surface) && !/border-radius/.test(surface), 'no glass pills, cards or panels remain');
   const pages = fs.readFileSync(path.join(styles, 'theme-glass-class-pages.css'), 'utf8');
   assert.ok(cssHas(pages, '.cvr-c-pagination__body:has(> table.mat-table),\n  mat-accordion'), 'the Learners table and accordion must be rounded and clipped');
   assert.ok(cssHas(pages, `${glass}:not([data-connectea-login]) :is(#cx-specificity-anchor, .v-app.librarylearningcontentui, .v-app.librarylearningcontentui > .v-ui.v-scrollable)`),
@@ -7679,12 +7682,11 @@ runTest('Test 164: Liquid Glass gives Class pages one glass recipe for banners, 
   assert.ok(cssHas(empty, '.connectea-dark cnt-paginator:has(.c-empty-content) {\n  justify-content: center !important;') && cssHas(empty, '.eds-c-empty-content'),
     'empty states must be centred in every dark theme, not only Liquid Glass');
   const bars = fs.readFileSync(path.join(styles, 'theme-control-bars.css'), 'utf8');
-  assert.ok(cssHas(bars, '.connectea-dark .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {') && cssHas(bars, 'html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {'),
-    'the Select All row needs its own surface in dark themes and in Light with a wallpaper');
-  // Paginators have no panel: bar, Page N of M box and the bar wrapper are clear (empty-state and table wrappers keep theirs)
+  assert.ok(!/(surface-bg|rgba\(255, 255, 255, 0\.9\))/.test(bars.replace(/\/\*[\s\S]*?\*\//g, '')), 'the Select All row has no surface of its own in any theme');
+  // Paginators and the Select All row have no panel: bar, Page N of M box, bar wrapper and Select All row are clear (empty-state and table wrappers keep theirs)
   const clear = (bars.split('}').find(b => b.includes('#cx-specificity-anchor, mat-paginator')) || '');
   assert.ok(clear.includes(':is(html.connectea-dark, html[data-connectea-has-custom-bg="true"])') && clear.includes('.connect-paginator-container') &&
-    clear.includes('cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))') &&
+    clear.includes('cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))') && clear.includes('.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)') &&
     /background-color: transparent !important;/.test(clear) && /box-shadow: none !important;/.test(clear), 'paginators sit on the page with no panel');
   assert.ok(!/(mat-paginator|paginator-container)[^{}]*\{[^}]*rgba\(255, 255, 255, 0\.9\)/.test(bars), 'Light with a wallpaper puts no white panel behind paginators');
   for (const file of ['theme-empty-states.css', 'theme-control-bars.css']) {
@@ -7811,7 +7813,6 @@ runTest('Test 167: Dark and glass rules route theme colours through tokens, so c
     }
   }
   assert.deepStrictEqual(bare, [], `Dark-preset colours must go through var(--cx-*, <literal>) in dark/glass rules: ${bare.join(', ')}`);
-  assert.ok(/--cx-gl-fill: var\(--cx-surface-bg, /.test(read('theme-glass-surface.css')), 'the glass recipe fill must be the tables\' glass surface token');
   // Sidebar, ATAR, Predictor and Progress styles: no neutral (navy/grey) literal left in dark rules; only
   // saturated semantic colours (outcome segments, success/warning cards, category colours) stay fixed
   const toLin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
@@ -8121,13 +8122,9 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   // Class Summary numbers: the stat cell only, never a substring match that boxes the number span
   const cards = read('styles/theme-cards.css');
   assert.ok(!cards.includes('[class*="scope-statistic"]') && cards.includes('.connectea-dark .c-scope-statistic {'), 'stat cells must be named explicitly');
-  // Full-width bars square, the empty-state card rounded
+  // Banner, category bars, toolbars and empty states have no panel at all (they sit on the page)
   const surface = read('styles/theme-glass-surface.css');
-  const bars = (surface.match(/cnt-scope-intro-class,\s*mat-toolbar\.c-category-bar[\s\S]*?\{([^}]*)\}/) || [])[1] || '';
-  assert.ok(/border-radius: 0 !important/.test(bars), 'banner, category bars and toolbars must be square');
-  assert.ok(surface.includes(G + ' cnt-paginator:has(.c-empty-content) {\n  border-radius: 16px !important;'), 'the empty-state card stays rounded');
-  // Paginators (Angular and Library) have no glass pill: they sit on the page (theme-control-bars.css)
-  assert.ok(!/mat-paginator/.test(surface.replace(/\/\*[\s\S]*?\*\//g, '')), 'paginators must not get a glass pill');
+  assert.ok(!/border-radius/.test(surface) && !/mat-paginator/.test(surface.replace(/\/\*[\s\S]*?\*\//g, '')), 'no rounded bars, cards or paginator pills');
   // Reading views beat the wallpaper and include discussion views
   const base = read('styles/theme-surface-base.css');
   assert.ok(base.includes('html.connectea-dark[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]),'),
@@ -8825,22 +8822,14 @@ runTest('Classes without a final letter show their predicted Low / Mid / High re
   assert.ok(manifest.content_scripts.some(g => (g.css || []).includes('src/cohort/cohort-upcoming.css')), 'cohort-upcoming.css is registered');
 });
 
-runTest('Test 195: Liquid Glass Library and Learners bars share the table glass; paginators have no pill', () => {
+runTest('Test 195: Liquid Glass headings and paginators have no pill; boxes keep their native size', () => {
   const surface = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-surface.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-  const G = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
-  const rule = sel => (surface.split('}').find(b => b.split('{')[0].trim() === `${G} ${sel}`) || '').split('{')[1] || '';
-  // One material: the bars, pills and headings use the tables' surface token, not a denser canvas mix
-  assert.ok(/--cx-gl-fill: var\(--cx-surface-bg, /.test(surface) && !/--cx-gl-fill: color-mix/.test(surface), 'glass bars use the table glass fill');
-  // Paginators sit on the page: no pill, no segmented "Page N of M" pill
-  assert.ok(!rule('mat-paginator.mat-paginator::before') && !rule('.connect-paginator-container:has(+ mat-paginator)::before') &&
-    !rule('.connect-paginator-container + mat-paginator::before'), 'paginators have no glass pill');
-  // Section headings hug their title: Teachers and Students match, and the pill never spans the row under the paginator
-  assert.ok(/width: fit-content;/.test(rule('p.mat-h2')) && /inset: -6px -16px;/.test(rule('p.mat-h2::before')), 'headings are pills hugging their title');
-  assert.ok(!/border-radius: 0;/.test(rule('p.mat-h2::before')), 'headings are no longer square bars of different widths');
-  // The parity audit allows only that width shrink, and only for glass headings
+  // Paginators and section headings sit on the page: no pill, no segmented "Page N of M" pill, no title-hugging width
+  assert.ok(!/::before/.test(surface) && !/mat-paginator/.test(surface), 'paginators have no glass pill');
+  assert.ok(!/fit-content/.test(surface) && !/\b(margin|padding)[\w-]*\s*:/.test(surface), 'headings keep their native box');
+  // The parity audit no longer exempts any heading width
   const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
-  assert.ok(audit.includes("const glassHeading = ['liquid-glass', 'liquid-glass-clear'].includes(tid) && el.matches?.('p.mat-h2');") &&
-    audit.includes('!(glassHeading && curWidth < base.size.width)'), 'the size audit exempts only a shrinking glass heading width');
+  assert.ok(!audit.includes('glassHeading'), 'the size audit has no heading exemption');
 });
 
 runTest('Test 196: One Type change recomputes predictions once, after the dropdown closes, and runs one cohort pass', () => {
@@ -9265,7 +9254,7 @@ runTest('Test 204: The customizer hue slider covers 0-360 across the whole track
   }
 });
 
-runTest('Test 205: The wallpaper is a fixed 2px-blurred layer dimmed to keep white text >= 4.5:1; labels get a 1px shadow', () => {
+runTest('Test 205: The wallpaper is a fixed 2px-blurred layer dimmed (light text) or brightened (dark text) to keep text >= 4.5:1; labels get a 1px shadow', () => {
   const win = {};
   new Function('window', 'document', 'localStorage', origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-wallpaper-dim.js'), 'utf8'))(win, {}, {});
   const D = win.ConnectifyWallpaperDim;
@@ -9281,14 +9270,31 @@ runTest('Test 205: The wallpaper is a fixed 2px-blurred layer dimmed to keep whi
     assert.ok(contrastWithWhite(brightest, a - 0.03) < 4.6, `the dim is the least that works, not a blanket darkening (${a})`);
   }
   assert.notStrictEqual(D.keyOf('data:image/png;base64,AAAA'), D.keyOf('data:image/png;base64,AAAB'), 'each wallpaper is cached under its own key');
+  // Dark-text themes: the least white overlay that keeps the theme's ink >= 4.5:1 on the darkest pixel
+  const contrastWithInk = (rgb, a, ink) => {
+    const L = c => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+    const bg = rgb.map(c => c + (255 - c) * a), fg = [1, 3, 5].map(i => parseInt(ink.slice(i, i + 2), 16));
+    return (L(bg) + 0.05) / (L(fg) + 0.05);
+  };
+  assert.strictEqual(D.brightenFor(px([[248, 250, 252], [230, 235, 240]]), '#0f172a'), 0, 'a light wallpaper is not brightened');
+  for (const [pixels, ink] of [[[[0, 0, 0]], '#0f172a'], [[[40, 30, 60], [200, 200, 200]], '#1e293b'], [[[120, 90, 160]], '#0f172a']]) {
+    const a = D.brightenFor(px(pixels), ink);
+    assert.ok(a > 0 && a < 1, `dark wallpapers are brightened (${a})`);
+    for (const rgb of pixels) assert.ok(contrastWithInk(rgb, a, ink) >= 4.5, `${ink} text keeps >= 4.5:1 on ${rgb} at brighten ${a}`);
+    const darkest = pixels.reduce((m, c) => (contrastWithInk(c, 0, ink) < contrastWithInk(m, 0, ink) ? c : m));
+    assert.ok(contrastWithInk(darkest, a - 0.03, ink) < 4.6, `the brighten is the least that works (${a})`);
+  }
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-wallpaper-layer.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-  const rule = sel => (css.split('}').find(b => b.split('{')[0].trim() === sel) || '').split('{')[1] || '';
+  const rule = sel => css.split('}').filter(b => b.split('{')[0].trim() === sel).map(b => b.split('{')[1]).join('\n');
   const layer = rule('html[data-connectea-has-custom-bg="true"]::before');
   assert.ok(/position: fixed;/.test(layer) && /inset: -6px;/.test(layer) && /z-index: -1;/.test(layer) && /filter: blur\(2px\);/.test(layer) &&
     /rgba\(0, 0, 0, var\(--cx-wallpaper-dim-active, 0\)\)/.test(layer) && /var\(--cx-custom-bg-image\) center center \/ cover no-repeat;/.test(layer),
     'the wallpaper is one fixed layer, blurred 2px, under a black overlay at the measured dim');
   assert.ok(/--cx-wallpaper-dim-active: var\(--cx-wallpaper-dim, /.test(rule('html.connectea-dark[data-connectea-has-custom-bg="true"]:not([data-connectea-tone="light"])')),
     'only light-ink themes dim the wallpaper');
+  assert.ok(/rgba\(255, 255, 255, var\(--cx-wallpaper-brighten-active, 0\)\)/.test(layer) &&
+    /--cx-wallpaper-brighten-active: var\(--cx-wallpaper-brighten, /.test(rule('html[data-connectea-has-custom-bg="true"]:is(:not(.connectea-dark), [data-connectea-tone="light"])')),
+    'dark-ink themes brighten the wallpaper with a white overlay');
   assert.ok(/background: transparent !important;/.test(rule('html[data-connectea-has-custom-bg="true"]:not(#cx-specificity-anchor) :is(#cx-specificity-anchor, body)')), 'body never covers the layer');
   // body's clearing rule must outrank the dark canvas rule on body (theme-surface-base.css weighs (1,2,1)); it once lost and hid the wallpaper
   const base = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-surface-base.css'), 'utf8');

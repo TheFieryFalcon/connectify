@@ -1,92 +1,27 @@
 /**
- * Connectify Theme: the shared Liquid Glass recipe for bars, banners and section headings that Connect leaves
- * flat or without any surface (class banner, category bars, Library toolbar, Learners headings, empty
- * states). Paginators have no panel (theme-control-bars.css). Liquid Glass only; no margins or padding, so boxes keep their native size.
+ * Connectify Theme: bars, banners, section headings and empty states that Connect leaves flat (class banner,
+ * category bars, Library toolbar, Select All row, Learners headings, empty states) have no panel in Liquid
+ * Glass: they sit straight on the page like the paginators, and the wallpaper is dimmed or brightened for the
+ * theme's text instead (theme-wallpaper-dim.js). Liquid Glass only; boxes keep their native size.
  */
 
-/* The fill is the tables' and tiles' own glass surface, so bars, pills and the table they belong to read as one material */
+/* Shared glass blur for the surfaces theme-glass-nesting.css paints */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) {
-  --cx-gl-fill: var(--cx-surface-bg, rgba(26, 36, 52, 0.72));
   --cx-gl-blur: blur(var(--cx-glass-blur, 12px)) saturate(160%);
-  --cx-gl-edge: inset 0 1px 0 color-mix(in srgb, var(--cx-text-primary, #ffffff) 16%, transparent), 0 0 0 1px color-mix(in srgb, var(--cx-text-primary, #ffffff) 10%, transparent), 0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
-/* Full-width bars and banners: the glass is painted on the element itself, square like Connect's bars. Connect's own borders stay (as
-   hairlines in the text colour) so every box keeps its native size and dividers (theme parity audit). */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
   cnt-scope-intro-class,
   mat-toolbar.c-category-bar,
   .cvr-c-category-toolbar__container > .cvr-c-thori-pnl,
   .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox),
-  cnt-paginator:has(.c-empty-content)
-) {
-  background-color: var(--cx-gl-fill) !important;
-  backdrop-filter: var(--cx-gl-blur) !important;
-  -webkit-backdrop-filter: var(--cx-gl-blur) !important;
-  box-shadow: var(--cx-gl-edge) !important;
-  border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
-  border-radius: 0 !important;
-  color: var(--cx-text-primary, #f1f5f9) !important;
-}
-
-/* Full-width bars stay square like Connect's; only the empty-state card is rounded */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-paginator:has(.c-empty-content) {
-  border-radius: 16px !important;
-}
-
-/* The class banner is one full-width bar */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-scope-intro-class {
-  display: block;
-  margin-bottom: 16px;
-  padding-inline: 20px;
-}
-
-/* Pills that hug their content (Learners headings, the Content empty state): the
-   glass is a ::before reaching past the box, so the text gets breathing room from the 12px corners without any
-   padding or margin that would move Connect's layout */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  cnt-paginator:has(.c-empty-content),
   p.mat-h2,
   .eds-c-empty-content
 ) {
-  position: relative;
-  z-index: 0;
   background: transparent !important;
-  border-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
-}
-
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  p.mat-h2,
-  .eds-c-empty-content
-)::before {
-  content: '';
-  position: absolute;
-  inset: 0 -16px;
-  z-index: -1;
-  background-color: var(--cx-gl-fill);
-  backdrop-filter: var(--cx-gl-blur);
-  -webkit-backdrop-filter: var(--cx-gl-blur);
-  box-shadow: var(--cx-gl-edge);
-  border-radius: 12px;
-  pointer-events: none;
-}
-
-/* Learners section headings are pills that hug the title (the Teachers heading was a full-width block while
-   Students, in its accordion header, was not; both now match), starting 16px before the text */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) p.mat-h2 {
-  width: fit-content;
-}
-
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) p.mat-h2::before {
-  inset: -6px -16px;
-}
-
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-empty-content::before {
-  inset: -16px -24px;
-}
-
-/* Empty states ("There are currently no ...") become one centred glass card */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-paginator:has(.c-empty-content) {
-  overflow: hidden !important;
 }

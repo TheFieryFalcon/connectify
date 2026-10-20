@@ -48,17 +48,8 @@
   border-color: var(--cx-border, #36485e) !important;
 }
 
-/* Light Mode Container Panel Backgrounds: Feed Tabs, Headers & Sub-Headers over Wallpaper */
-:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(
-  mat-toolbar, .mat-toolbar, mat-tab-header, .mat-tab-header, .mat-tab-nav-bar,
-  .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs,
-  .cvr-c-sub-header, .cvr-c-subheader, .eds-c-sub-header, .cvr-c-service-bar, .cvr-c-service-bar__container,
-  .cvr-c-reports, .cvr-c-report-years, .cvr-c-year-selector, .cvr-c-page-header, .cvr-c-heading-bar
-) {
-  background-color: rgba(255, 255, 255, 0.90) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
-  color: #1e293b !important;
-}
+/* Light mode over a wallpaper: tabs, headers and toolbars have no panel of their own (the wallpaper is brightened
+   for dark text instead, theme-wallpaper-dim.js); their labels keep the dark ink */
 :is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(.cvr-c-feed, .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs, .mat-tab-header, .mat-tab-nav-bar, [class*="feed"] [class*="tab"]) :is(.mat-tab-label, .mat-tab-link, .eds-c-tabs__tab, .cvr-c-feed-tab, .cvr-c-feed__tab, .mat-tab-label-content) {
   color: #334155 !important;
 }

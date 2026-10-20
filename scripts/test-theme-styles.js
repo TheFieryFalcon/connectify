@@ -1877,9 +1877,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           const curHeight = Math.round(rect.height * 10) / 10;
           const sTol = opts.sizeTolerance || 2.0;
 
-          // Liquid Glass section headings are pills that hug their title (p.mat-h2 width: fit-content): only their width may shrink
-          const glassHeading = ['liquid-glass', 'liquid-glass-clear'].includes(tid) && el.matches?.('p.mat-h2');
-          const widthOff = Math.abs(curWidth - base.size.width) > sTol && !(glassHeading && curWidth < base.size.width);
+          const widthOff = Math.abs(curWidth - base.size.width) > sTol;
           if (widthOff || Math.abs(curHeight - base.size.height) > sTol) {
             issues.push({
               category: 'PARITY',

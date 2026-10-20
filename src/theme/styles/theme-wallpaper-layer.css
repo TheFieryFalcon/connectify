@@ -1,7 +1,8 @@
 /**
- * Connectify Theme: the wallpaper is one fixed layer under the page (html::before), blurred 2px and, when the
- * theme's text is light, dimmed by --cx-wallpaper-dim (theme-wallpaper-dim.js: the least black overlay that
- * keeps white text >= 4.5:1 on the wallpaper's brightest area). Labels get a 1px shadow against the wallpaper.
+ * Connectify Theme: the wallpaper is one fixed layer under the page (html::before), blurred 2px and overlaid so
+ * text can sit straight on it (theme-wallpaper-dim.js): light-text themes dim it by --cx-wallpaper-dim (white
+ * text >= 4.5:1 on its brightest area), dark-text themes brighten it by --cx-wallpaper-brighten (the theme's
+ * text >= 4.5:1 on its darkest area). Labels get a 1px shadow against the wallpaper.
  */
 
 /* The root and body paint only the canvas (seen until the image loads); the layer sits between them and the page */
@@ -25,13 +26,18 @@ html[data-connectea-has-custom-bg="true"]::before {
   pointer-events: none;
   background:
     linear-gradient(rgba(0, 0, 0, var(--cx-wallpaper-dim-active, 0)), rgba(0, 0, 0, var(--cx-wallpaper-dim-active, 0))),
+    linear-gradient(rgba(255, 255, 255, var(--cx-wallpaper-brighten-active, 0)), rgba(255, 255, 255, var(--cx-wallpaper-brighten-active, 0))),
     var(--cx-custom-bg-image) center center / cover no-repeat;
   filter: blur(2px);
 }
 
-/* Dimming is for light text only: Light and light-tone themes (dark ink) keep the wallpaper's own brightness */
+/* Light text dims the wallpaper; dark text (Light and light-tone themes) brightens it */
 html.connectea-dark[data-connectea-has-custom-bg="true"]:not([data-connectea-tone="light"]) {
   --cx-wallpaper-dim-active: var(--cx-wallpaper-dim, 0.45);
+}
+
+html[data-connectea-has-custom-bg="true"]:is(:not(.connectea-dark), [data-connectea-tone="light"]) {
+  --cx-wallpaper-brighten-active: var(--cx-wallpaper-brighten, 0.45);
 }
 
 /* Solid themes' reading views sit on the opaque canvas (theme-surface-base.css); Liquid Glass keeps the wallpaper */
