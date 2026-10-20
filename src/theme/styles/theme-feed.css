@@ -211,8 +211,13 @@
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-.connectea-dark :is(cnt-notice-view, mat-dialog-container, .cvr-c-feed-card, .cvr-c-feed-item) :is(p, span, div, u, em, li) {
+.connectea-dark :is(.cvr-c-feed-card, .cvr-c-feed-item) :is(p, span, div, u, em, li) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+/* Detail views read in the primary ink (cream in Quantum Dark), never the secondary accent */
+.connectea-dark :is(cnt-notice-view, mat-dialog-container) :is(p, span, div, u, em, li) {
+  color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 .connectea-dark :is(cnt-notice-view, mat-dialog-container, .cvr-c-feed-card, .cvr-c-feed-item) :is(h1, h2, h3, h4, h5, h6, strong, b, a:not(.btn):not(.mat-button-base)) {

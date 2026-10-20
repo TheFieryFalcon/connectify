@@ -9513,6 +9513,17 @@ runTest('Test 213: A theme\'s own wallpaper shows only while that theme is activ
   delete document.documentElement.dataset.connecteaTheme;
 });
 
+runTest('Test 214: Notice and dialog detail views read in the primary ink (cream in Quantum Dark); feed cards keep the secondary ink', () => {
+  const feed = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-feed.css'), 'utf8');
+  assert.ok(/\.connectea-dark :is\(cnt-notice-view, mat-dialog-container\) :is\(p, span, div, u, em, li\) \{\s*color: var\(--cx-text-primary, #f8fafc\) !important;/.test(feed),
+    'detail view text uses --cx-text-primary');
+  assert.ok(/\.connectea-dark :is\(\.cvr-c-feed-card, \.cvr-c-feed-item\) :is\(p, span, div, u, em, li\) \{\s*color: var\(--cx-text-secondary/.test(feed),
+    'feed cards keep --cx-text-secondary');
+  assert.ok(!/:is\(cnt-notice-view, mat-dialog-container, \.cvr-c-feed-card[^{]*\{\s*color: var\(--cx-text-secondary/.test(feed), 'detail views never use the secondary ink');
+  const tokens = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-tokens.css'), 'utf8');
+  assert.ok(/data-connectea-theme="quantum"[^}]*--cx-text-primary: #fbf1c7;/.test(tokens), 'Quantum Dark\'s primary ink is cream');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
