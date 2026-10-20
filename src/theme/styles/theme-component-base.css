@@ -84,7 +84,7 @@
 
 /* Form Inputs, Textareas & Selects */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not(.mat-input-element),
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not(.mat-input-element),
   textarea, select, .connectea-type-select
 ) {
   background-color: var(--cx-input-bg) !important;

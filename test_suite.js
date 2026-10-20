@@ -9224,6 +9224,45 @@ runTest('Test 203: Important tiles (Maintenance Notice) keep their red tint in d
   assert.ok(!/\.eds-c-tile, \.cvr-c-tile, \.c-tile, \.eds-c-card, \.cvr-c-card, \.connectea-panel\) \{\n  overflow: hidden/.test(theme), 'glass tiles never use overflow: hidden (the list margin showed as an extra strip under the notice)');
 });
 
+runTest('Test 204: The customizer hue slider covers 0-360 across the whole track; gradient, thumb and picked colour agree', () => {
+  const win = {};
+  new Function('window', origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-color-utils.js'), 'utf8'))(win);
+  const C = win.ConnectifyThemeColors, hex = h => { const c = C.hsvToRgb(h, 1, 1); return C.toHex(c.r, c.g, c.b); };
+  const HUES = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff', '#ff0000'];
+  HUES.forEach((want, k) => assert.strictEqual(hex(k * 60), want, `hue ${k * 60} picks ${want}`));
+  for (const h of [0, 1, 90, 200, 359, 360]) {
+    const back = C.rgbToHsv(...Object.values(C.parseHex(hex(h)))).h;
+    assert.ok(back >= 0 && back <= 360 && Math.min(Math.abs(back - h), 360 - Math.abs(back - h)) <= 1, `hue ${h} round-trips (got ${back})`);
+  }
+  const markup = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-customizer-markup.js'), 'utf8');
+  assert.ok(markup.includes('<input type="range" min="0" max="360" class="cx-picker-hue"'), 'the slider reports 0-360');
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-color-picker.css'), 'utf8');
+  const rule = (css.match(/\n\.cx-picker-hue \{([^}]*)\}/) || [])[1] || '';
+  assert.ok(/padding: 0;/.test(rule) && /border: 0;/.test(rule) && /box-sizing: border-box;/.test(rule), 'the track is the whole element: no padding or border insets the thumb');
+  const inset = parseFloat((rule.match(/--cx-hue-inset: ([\d.]+)px;/) || [])[1]);
+  for (const thumb of ['::-webkit-slider-thumb', '::-moz-range-thumb']) {
+    const t = (css.match(new RegExp(`\\.cx-picker-hue${thumb} \\{([^}]*)\\}`)) || [])[1] || '';
+    assert.ok(/box-sizing: border-box;/.test(t) && parseFloat((t.match(/width: ([\d.]+)px;/) || [])[1]) === inset * 2, `${thumb} is ${inset * 2}px wide (border included), twice the gradient inset`);
+  }
+  // The thumb centre for value h sits at inset + (W - 2 * inset) * h / 360; each gradient stop must sit there too
+  const stops = [...rule.matchAll(/(#[0-9a-f]{6}) (var\(--cx-hue-inset\)|calc\(([^;\n]*)\))[,)]/gi)];
+  assert.strictEqual(stops.length, 7, 'seven hue stops, red to red');
+  for (const W of [180, 240, 320]) {
+    stops.forEach(([, color, , expr], k) => {
+      const js = (expr || 'var(--cx-hue-inset)').replace(/var\(--cx-hue-inset\)/g, String(inset)).replace(/100%/g, String(W));
+      const at = Function(`return (${js});`)();
+      assert.ok(Math.abs(at - (inset + (W - 2 * inset) * k / 6)) < 0.01, `stop ${k} sits under the thumb at hue ${k * 60} on a ${W}px track`);
+      assert.strictEqual(color.toLowerCase(), HUES[k], `the stop under hue ${k * 60} is the colour it picks`);
+    });
+  }
+  // Dark themes' text-input box (padding 6px 10px, border) must skip range sliders, or the thumb stops short of the ends
+  for (const file of ['theme-controls.css', 'theme-component-base.css', 'theme-tables.css']) {
+    const text = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles', file), 'utf8');
+    const generic = text.match(/input:not\(\[type="checkbox"\]\)[^,{]*/g) || [];
+    assert.ok(generic.length && generic.every(sel => sel.includes(':not([type="range"])')), `${file} leaves range sliders out of its text-input rule`);
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

@@ -131,20 +131,49 @@
   pointer-events: none;
 }
 
+/* The thumb's centre travels from half a thumb inside each end, so the hue gradient spans that same path:
+   hue = 360 * (centre - inset) / (width - 2 * inset), the value the slider reports. No padding or border
+   (dark themes exclude range inputs from their text-input box) so the track is the whole element. */
 .cx-picker-hue {
+  --cx-hue-inset: 8px;
+  box-sizing: border-box;
   width: 100%;
   height: 14px;
+  padding: 0;
+  border: 0;
   border-radius: 7px;
   margin: 10px 0 8px 0;
   outline: none;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
-  background: linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%);
+  background: linear-gradient(to right,
+    #ff0000 var(--cx-hue-inset),
+    #ffff00 calc(var(--cx-hue-inset) + (100% - 2 * var(--cx-hue-inset)) * 1 / 6),
+    #00ff00 calc(var(--cx-hue-inset) + (100% - 2 * var(--cx-hue-inset)) * 2 / 6),
+    #00ffff calc(var(--cx-hue-inset) + (100% - 2 * var(--cx-hue-inset)) * 3 / 6),
+    #0000ff calc(var(--cx-hue-inset) + (100% - 2 * var(--cx-hue-inset)) * 4 / 6),
+    #ff00ff calc(var(--cx-hue-inset) + (100% - 2 * var(--cx-hue-inset)) * 5 / 6),
+    #ff0000 calc(100% - var(--cx-hue-inset)));
+}
+.cx-picker-hue::-moz-range-track {
+  background: transparent;
+  border: 0;
 }
 .cx-picker-hue::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  background: transparent;
+  cursor: pointer;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+}
+.cx-picker-hue::-moz-range-thumb {
+  box-sizing: border-box;
   width: 16px;
   height: 16px;
   border-radius: 50%;

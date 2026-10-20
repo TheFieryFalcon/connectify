@@ -6,7 +6,7 @@
    20. Universal Border Restoration & Structural Integrity
    -------------------------------------------------------------------------- */
 .connectea-dark :is(
-  input:not([type="checkbox"]):not([type="radio"]):not(.mat-input-element):not(.cdk-visually-hidden):not(.mat-checkbox-input),
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.mat-input-element):not(.cdk-visually-hidden):not(.mat-checkbox-input),
   select,
   textarea
 ) {
