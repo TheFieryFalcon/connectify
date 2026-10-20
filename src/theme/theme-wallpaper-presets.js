@@ -3,7 +3,7 @@
  *
  * Simple geometric gradient wallpapers (three dark, three light) generated as small SVG data URIs, so
  * they need no image files and fit easily in storage. mount(container, onPick) renders a row of
- * thumbnails for the Settings panel. Exposes window.ConnectifyWallpaperPresets.
+ * thumbnails for the Settings panel and the customizer; a theme names one by id (wallpaperPreset). Exposes window.ConnectifyWallpaperPresets.
  */
 (() => {
   'use strict';
@@ -63,6 +63,8 @@
   ];
 
   const find = url => PRESETS.find(p => p.url === url) || null;
+  // A theme names a preset by id (wallpaperPreset), so it never stores or ships the SVG itself
+  const byId = id => PRESETS.find(p => p.id === id) || null;
 
   /** Renders the preset thumbnails into container; onPick(preset) runs when one is chosen. */
   function mount(container, onPick) {
@@ -82,5 +84,5 @@
     }
   }
 
-  window.ConnectifyWallpaperPresets = { PRESETS, find, mount };
+  window.ConnectifyWallpaperPresets = { PRESETS, find, byId, mount };
 })();

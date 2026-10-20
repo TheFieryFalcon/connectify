@@ -152,7 +152,7 @@ const SPLIT_PARTS = {
   'progress-graph.js': ['progress-modes.js', 'progress-panel.js', 'progress-graph.js'],
   'new-grade.js': ['grade-snapshot.js', 'new-grade.js'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js'],
-  'theme-customizer.js': ['theme-color-utils.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
+  'theme-customizer.js': ['theme-color-utils.js', 'theme-import.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
   // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
   'theme.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js',
     'theme-surface-adapter.js', 'theme-toggle.js', 'theme-menu.js', 'theme.js']
@@ -9421,6 +9421,48 @@ runTest('Test 211: Customizer headings and labels take the theme ink in every th
   const lum = hex => hex.match(/[0-9a-f]{2}/gi).map(h => parseInt(h, 16) / 255).map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)).reduce((a, c, i) => a + c * [0.2126, 0.7152, 0.0722][i], 0);
   const ratio = (a, b) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
   assert.ok(ratio('#334155', '#ffffff') >= 5 && ratio('#e2e8f0', '#1e2632') >= 5, 'secondary ink keeps >= 5:1 on the Light and Dark surfaces');
+});
+
+runTest('Test 212: Theme menu Import Theme; .ctme files read in Firefox content scripts; themes name a preset wallpaper by id', async () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme', f), 'utf8');
+  // 1. Firefox hands content scripts a page-owned buffer from file.arrayBuffer() ("Permission denied"); files go through a Response
+  assert.ok(read('theme-ctme.js').includes('unpack(await new Response(file).arrayBuffer())'), 'theme files are read through a Response the extension owns');
+  assert.ok(!read('theme-customizer-controls.js').includes('file.arrayBuffer()') && read('theme-customizer-controls.js').includes('ConnectifyThemeCtme.unpackFile(file)'), 'the customizer imports with unpackFile');
+  // 2. The menu offers Import Theme below Customize Theme
+  const menu = read('theme-menu.js');
+  assert.ok(menu.indexOf("'Customize Theme...'") < menu.indexOf("'Import Theme...'") && menu.includes('ConnectifyThemeImport?.pick()'), 'Import Theme sits below Customize Theme');
+  const manifest = origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('theme-ctme.js') < manifest.indexOf('theme-import.js') && manifest.indexOf('theme-import.js') < manifest.indexOf('theme-customizer-controls.js'), 'theme-import.js loads after theme-ctme.js, before the customizer controls');
+  // 3. Sanitising: a known preset id is kept, a preset URL becomes its id, unknown ids and non-image wallpapers are dropped
+  const w = { ConnectifyThemeColors: { pickColors: c => Object.fromEntries(Object.entries(c || {}).filter(([, v]) => /^#[0-9a-f]{6}$/i.test(v))) } };
+  new Function('window', read('theme-wallpaper-presets.js'))(w);
+  new Function('window', 'document', 'alert', read('theme-import.js'))(w, {}, () => {});
+  const I = w.ConnectifyThemeImport, aurora = w.ConnectifyWallpaperPresets.byId('aurora');
+  assert.ok(aurora && w.ConnectifyWallpaperPresets.PRESETS.length === 6, 'presets are found by id');
+  assert.deepStrictEqual(I.wallpaperFields(aurora.url), { wallpaper: null, wallpaperPreset: 'aurora' }, 'a preset wallpaper is saved by id, not as an image');
+  assert.deepStrictEqual(I.wallpaperFields('data:image/png;base64,AA'), { wallpaper: 'data:image/png;base64,AA', wallpaperPreset: null });
+  assert.strictEqual(I.sanitize({ wallpaperPreset: 'ember', wallpaper: 'wallpaper.jpg' }).wallpaperPreset, 'ember');
+  const bad = I.sanitize({ wallpaperPreset: 'nope', wallpaper: 'javascript:alert(1)', glassBlur: 99, colors: { canvas: '#111111', surface: 'red;}' } });
+  assert.ok(!('wallpaper' in bad) && !('wallpaperPreset' in bad) && bad.glassBlur === 40 && !('surface' in bad.colors), 'untrusted fields are dropped or clamped');
+  // 4. Import Theme saves the file as a custom theme (missing Basic tokens from Dark) and applies it
+  const saved = [], applied = [];
+  w.ConnectifyThemeCtme = { unpackFile: async () => ({ name: 'Mint Theme', icon: '🌿', wallpaperPreset: 'mint', colors: { canvas: '#0d1f14', accent: '#22c55e' } }) };
+  w.ConnectifyThemeRegistry = {
+    getPresetPalettes: () => ({ dark: { canvas: '#12171f', surface: '#1e2632', button: '#202c3b', border: '#455a73', accent: '#3b82f6', textPrimary: '#f8fafc' } }),
+    saveCustomTheme: def => { saved.push(def); return { ...def, id: 'custom_1' }; }, setTheme: id => applied.push(id)
+  };
+  await I.importFile({});
+  assert.strictEqual(saved[0].wallpaperPreset, 'mint', 'the preset wallpaper is kept by id');
+  assert.strictEqual(saved[0].colors.canvas, '#0d1f14', 'the theme\'s own colours win');
+  assert.strictEqual(saved[0].colors.textPrimary, '#f8fafc', 'missing Basic tokens come from Dark');
+  assert.deepStrictEqual(applied, ['custom_1'], 'the imported theme is applied');
+  w.ConnectifyThemeCtme.unpackFile = async () => ({ name: 'No colours' });
+  await assert.rejects(I.importFile({}), /no colours/, 'a file without colours is reported, never saved');
+  // 5. The registry, the store and the customizer resolve wallpaperPreset; the customizer shows the six thumbnails
+  assert.ok(read('theme-registry.js').includes("window.ConnectifyWallpaperPresets?.byId(theme.wallpaperPreset)?.url || theme.wallpaper"), 'a theme\'s preset wallpaper is applied by id');
+  assert.ok(read('theme-registry.js').includes("wallpaperPreset: typeof themeDef.wallpaperPreset === 'string'") && read('theme-custom-themes.js').includes('wallpaperPreset: themeDef.wallpaperPreset !== undefined'), 'wallpaperPreset is registered and stored');
+  assert.ok(read('theme-customizer-markup.js').includes('id="cx-bg-presets"') && read('theme-customizer-controls.js').includes("ConnectifyWallpaperPresets?.mount(modal.querySelector('#cx-bg-presets')"), 'the customizer offers the preset wallpapers');
+  assert.ok(read('theme-customizer.js').includes('...window.ConnectifyThemeImport.wallpaperFields(state.wallpaper)') && read('theme-customizer-controls.js').includes('...window.ConnectifyThemeImport.wallpaperFields(state.wallpaper)'), 'save and export name a preset by id');
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -1,5 +1,5 @@
 /**
- * Connectify Theme Customizer: picker, wallpaper, JSON import/export and preview tooltip
+ * Connectify Theme Customizer: picker, wallpaper (upload or preset), .ctme import/export and preview tooltip
  *
  * Wires the interactive controls of an open customizer. bind(ctx) receives the customizer context:
  * { state, modal, refresh, syncPicker, renderMockup, syncControls }.
@@ -60,11 +60,27 @@
     });
   }
 
+  /** Status text, ✕ and the pressed preset thumbnail follow state.wallpaper. */
+  function showWallpaper(ctx, text) {
+    const { state, modal } = ctx;
+    const preset = window.ConnectifyWallpaperPresets?.find(state.wallpaper);
+    modal.querySelector('#cx-bg-status').textContent = text || (preset ? `Preset: ${preset.name}` : state.wallpaper ? 'Wallpaper active' : 'Default background');
+    modal.querySelector('#cx-clear-bg-btn').disabled = !state.wallpaper;
+    modal.querySelectorAll('.cx-bg-preset').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.preset === preset?.id)));
+  }
+
   function bindWallpaper(ctx) {
     const { state, modal } = ctx;
     const fileInput = modal.querySelector('#cx-bg-file-input');
     const status = modal.querySelector('#cx-bg-status');
     const clearBtn = modal.querySelector('#cx-clear-bg-btn');
+    // The six preset wallpapers; a theme saves the one picked by id (wallpaperPreset)
+    window.ConnectifyWallpaperPresets?.mount(modal.querySelector('#cx-bg-presets'), p => {
+      state.wallpaper = p.url;
+      showWallpaper(ctx);
+      ctx.renderMockup();
+    });
+    showWallpaper(ctx);
     modal.querySelector('#cx-upload-bg-btn').onclick = () => fileInput.click();
     fileInput.onchange = () => {
       const file = fileInput.files?.[0];
@@ -74,15 +90,13 @@
       status.textContent = 'Preparing wallpaper...';
       window.ConnectifyWallpaperFit.fromFile(file).then(dataUrl => {
         state.wallpaper = dataUrl;
-        status.textContent = file.name;
-        clearBtn.disabled = false;
+        showWallpaper(ctx, file.name);
         ctx.renderMockup();
       }).catch(err => { status.textContent = window.ConnectifyWallpaperFit.errorText(err); });
     };
     clearBtn.onclick = () => {
       state.wallpaper = null;
-      status.textContent = 'Default background';
-      clearBtn.disabled = true;
+      showWallpaper(ctx);
       ctx.renderMockup();
     };
   }
@@ -91,7 +105,8 @@
   function exportTheme(state) {
     const data = {
       version: 1, name: state.name, icon: state.emoji, liquidGlass: state.liquidGlass,
-      glassBlur: state.glassBlur, glassOpacity: state.glassOpacity, wallpaper: state.wallpaper,
+      glassBlur: state.glassBlur, glassOpacity: state.glassOpacity,
+      ...window.ConnectifyThemeImport.wallpaperFields(state.wallpaper), // a preset ships as its id, no image
       swatch: [state.tokens.canvas, state.tokens.surface, state.tokens.accent],
       colors: window.ConnectifyCustomizerTokens.savedColors(state)
     };
@@ -103,18 +118,20 @@
     setTimeout(() => URL.revokeObjectURL(a.href), 0);
   }
 
-  // Imported files are untrusted: only strings, numbers in range and valid colour values are taken
+  // Imported files are untrusted: only what ConnectifyThemeImport.sanitize keeps is taken
   function importTheme(state, imp) {
-    if (typeof imp.name === 'string' && imp.name.trim()) state.name = imp.name.trim().slice(0, 60);
-    if (typeof imp.icon === 'string' && imp.icon.trim()) state.emoji = imp.icon.trim().slice(0, 8);
-    if (imp.liquidGlass !== undefined) state.liquidGlass = Boolean(imp.liquidGlass);
-    if (Number.isFinite(imp.glassBlur)) state.glassBlur = Math.max(0, Math.min(40, imp.glassBlur));
-    if (Number.isFinite(imp.glassOpacity)) state.glassOpacity = Math.max(0.1, Math.min(1, imp.glassOpacity));
-    if (imp.colors) state.tokens = { ...state.tokens, ...colors.pickColors(imp.colors) };
-    if (imp.wallpaper !== null && !(typeof imp.wallpaper === 'string' && imp.wallpaper.startsWith('data:image/'))) return null;
+    const t = window.ConnectifyThemeImport.sanitize(imp);
+    if (t.name) state.name = t.name;
+    if (t.icon) state.emoji = t.icon;
+    if (t.liquidGlass !== undefined) state.liquidGlass = t.liquidGlass;
+    if (t.glassBlur !== undefined) state.glassBlur = t.glassBlur;
+    if (t.glassOpacity !== undefined) state.glassOpacity = t.glassOpacity;
+    if (t.colors) state.tokens = { ...state.tokens, ...t.colors };
+    if (t.wallpaperPreset) state.wallpaper = window.ConnectifyWallpaperPresets.byId(t.wallpaperPreset).url;
+    if (t.wallpaper === undefined || t.wallpaperPreset) return null;
     // A large imported wallpaper is fitted to the screen before it is previewed or saved (returned for bindJson)
-    if (window.ConnectifyWallpaperFit?.needsFit(imp.wallpaper)) return imp.wallpaper;
-    state.wallpaper = imp.wallpaper;
+    if (window.ConnectifyWallpaperFit?.needsFit(t.wallpaper)) return t.wallpaper;
+    state.wallpaper = t.wallpaper;
     return null;
   }
 
@@ -126,8 +143,7 @@
     window.ConnectifyWallpaperFit.fromDataUrl(url).then(dataUrl => {
       if (state.wallpaper !== before) return; // replaced or cleared meanwhile
       state.wallpaper = dataUrl;
-      status.textContent = 'Wallpaper active';
-      modal.querySelector('#cx-clear-bg-btn').disabled = false;
+      showWallpaper(ctx);
       ctx.renderMockup();
     }).catch(() => { status.textContent = 'That image could not be read'; });
   }
@@ -144,7 +160,7 @@
       const tokenSet = window.ConnectifyCustomizerTokens;
       let largeWallpaper;
       try {
-        const theme = await window.ConnectifyThemeCtme.unpack(await file.arrayBuffer());
+        const theme = await window.ConnectifyThemeCtme.unpackFile(file);
         // Imported colours merge over this theme's own (Basic + overrides); imported Full tokens become overrides
         state.tokens = tokenSet.savedColors(state);
         largeWallpaper = importTheme(state, theme);
@@ -157,6 +173,7 @@
       ctx.syncControls();
       ctx.refresh();
       ctx.syncPicker();
+      showWallpaper(ctx);
       if (largeWallpaper) fitImportedWallpaper(ctx, largeWallpaper);
     };
   }

@@ -85,6 +85,7 @@
                 <button class="cx-btn cx-btn-secondary" id="cx-clear-bg-btn" style="padding: 4px 8px; font-size: 12px;" ${s.wallpaper ? '' : 'disabled'}>✕</button>
                 <span id="cx-bg-status" style="font-size: 11px; color: var(--cx-text-muted);">${s.wallpaper ? 'Wallpaper active' : 'Default background'}</span>
               </div>
+              <div id="cx-bg-presets" class="cx-bg-presets" role="group" aria-label="Preset backgrounds"></div>
             </div>`;
   }
 

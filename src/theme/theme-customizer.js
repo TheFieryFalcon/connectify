@@ -194,7 +194,7 @@
       liquidGlass: state.liquidGlass,
       glassBlur: state.glassBlur,
       glassOpacity: state.glassOpacity,
-      wallpaper: state.wallpaper,
+      ...window.ConnectifyThemeImport.wallpaperFields(state.wallpaper), // a preset is saved by id
       swatch: [state.tokens.canvas, state.tokens.surface, state.tokens.accent],
       // Basic tokens plus the Full tokens the user set; the rest is derived when the theme is applied
       colors: tokenSet.savedColors(state)
@@ -215,7 +215,7 @@
       liquidGlass: Boolean(themeToEdit?.liquidGlass),
       glassBlur: typeof themeToEdit?.glassBlur === 'number' ? themeToEdit.glassBlur : 12,
       glassOpacity: typeof themeToEdit?.glassOpacity === 'number' ? themeToEdit.glassOpacity : 0.65,
-      wallpaper: themeToEdit?.wallpaper || null,
+      wallpaper: window.ConnectifyWallpaperPresets?.byId(themeToEdit?.wallpaperPreset)?.url || themeToEdit?.wallpaper || null,
       tokens: themeToEdit?.colors ? themeTokens(themeToEdit.colors) : getDefaultTokens()
     });
     // Saved Full tokens that differ from what the Basic tokens derive stay as the user set them

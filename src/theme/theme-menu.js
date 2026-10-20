@@ -1,7 +1,7 @@
 /**
  * Connectify Theme: theme menu popover
  *
- * Lists the registered dark themes (with Edit ✎ and Delete ✕ buttons on custom ones) and the customizer entry,
+ * Lists the registered dark themes (with Edit ✎ and Delete ✕ buttons on custom ones), Customize Theme and Import Theme,
  * anchored under the navbar toggle. Selecting a theme goes through the registry, whose
  * connectea:themechange event lets theme.js apply it. Exposes window.ConnectifyThemeMenu.
  */
@@ -85,17 +85,23 @@
       themeMenu.appendChild(createOption(theme, activeId, anchorEl));
     }
 
-    const customizerOpt = document.createElement('button');
-    customizerOpt.type = 'button';
-    customizerOpt.className = 'connectea-theme-customize-btn connectea-customize-action';
-    customizerOpt.setAttribute('role', 'menuitem');
-    customizerOpt.innerHTML = '<span class="connectea-customize-icon">✨</span><span class="connectea-theme-name">Customize Theme...</span>';
-    customizerOpt.onclick = e => {
-      e.stopPropagation();
-      close();
-      window.ConnectifyThemeCustomizer?.open();
+    const action = (id, icon, label, run) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = id;
+      btn.className = 'connectea-theme-customize-btn connectea-customize-action';
+      btn.setAttribute('role', 'menuitem');
+      btn.innerHTML = `<span class="connectea-customize-icon">${icon}</span><span class="connectea-theme-name">${label}</span>`;
+      btn.onclick = e => {
+        e.stopPropagation();
+        close();
+        run();
+      };
+      themeMenu.appendChild(btn);
     };
-    themeMenu.appendChild(customizerOpt);
+    action('connectea-theme-customize', '✨', 'Customize Theme...', () => window.ConnectifyThemeCustomizer?.open());
+    // A .ctme (or older .json) file is saved as a custom theme and applied (theme-import.js)
+    action('connectea-theme-import', '📥', 'Import Theme...', () => window.ConnectifyThemeImport?.pick());
 
     const rect = (anchorEl || toggleButton()).getBoundingClientRect();
     themeMenu.style.position = 'fixed';

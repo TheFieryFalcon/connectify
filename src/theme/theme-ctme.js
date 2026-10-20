@@ -151,5 +151,9 @@
     return theme;
   }
 
-  window.ConnectifyThemeCtme = { fileName, zip, unzip, pack, unpack, crc32 };
+  /** Theme object from a picked file. Firefox gives content scripts a page-owned buffer from file.arrayBuffer(),
+      which they may not read ("Permission denied to access property"); a Response made here returns our own. */
+  const unpackFile = async file => unpack(await new Response(file).arrayBuffer());
+
+  window.ConnectifyThemeCtme = { fileName, zip, unzip, pack, unpack, unpackFile, crc32 };
 })();

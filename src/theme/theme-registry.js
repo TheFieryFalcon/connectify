@@ -70,6 +70,7 @@
       glassBlur: typeof themeDef.glassBlur === 'number' ? themeDef.glassBlur : 12,
       glassOpacity: typeof themeDef.glassOpacity === 'number' ? themeDef.glassOpacity : 0.65,
       wallpaper: themeDef.wallpaper || null,
+      wallpaperPreset: typeof themeDef.wallpaperPreset === 'string' ? themeDef.wallpaperPreset : null,
       swatch: Array.isArray(themeDef.swatch) ? themeDef.swatch : ['#1e2632', '#3b82f6'],
       colors: themeDef.colors || null
     });
@@ -160,7 +161,9 @@
     } else {
       tokens.clearCustomTokens();
     }
-    if (theme.wallpaper !== undefined && theme.wallpaper !== null) tokens.setCustomBackground(theme.wallpaper);
+    // A theme's preset wallpaper (by id, theme-wallpaper-presets.js) wins over a stored image
+    const wallpaper = window.ConnectifyWallpaperPresets?.byId(theme.wallpaperPreset)?.url || theme.wallpaper;
+    if (wallpaper) tokens.setCustomBackground(wallpaper);
     else tokens.applyCustomBackground(tokens.getCustomBackground());
   }
 
