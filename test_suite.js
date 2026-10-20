@@ -7017,8 +7017,8 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   assert.ok(cssHas(themeCss, 'border-bottom-left-radius: 16px !important') &&
             cssHas(themeCss, 'border-bottom-right-radius: 16px !important'),
             'theme.css must round bottom corners with 16px radius');
-  assert.ok(cssHas(themeCss, 'overflow: hidden !important'),
-            'theme.css must have overflow: hidden on liquid glass panels');
+  assert.ok(cssHas(themeCss, '.eds-c-card, .cvr-c-card, .connectea-panel) {\n  overflow: clip !important;'),
+            'theme.css must clip liquid glass tiles and cards with overflow: clip (hidden stops margins collapsing)');
   assert.ok(cssHas(themeCss, '.eds-c-tile__body') &&
             cssHas(themeCss, 'background-color: transparent !important'),
             'theme.css must make tile body transparent in Liquid Glass mode');
@@ -9181,6 +9181,20 @@ runTest('Test 202: Year in Progress: no subject heading (the pressed chip names 
   assert.ok(css.includes('#connectify-progress h3{font-weight:700}'), 'the ATAR Progression heading is bold, not Connect\'s 400 h3');
   assert.ok(css.includes('#connectify-progress .cx-subjects button{font-weight:600}'), 'subject chips match the Refresh button weight');
   assert.ok(css.includes('#connectify-progress .cx-legend{font-weight:400}'), 'the chart legend stays regular');
+});
+
+runTest('Test 203: Important tiles (Maintenance Notice) keep their red tint in dark themes; glass tiles keep native height', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-alert-tiles.css'), 'utf8');
+  const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('"src/theme/styles/theme-alert-tiles.css"') > manifest.indexOf('"src/theme/styles/theme-tiles.css"') &&
+    manifest.indexOf('"src/theme/styles/theme-alert-tiles.css"') < manifest.indexOf('"src/theme/styles/theme.css"'), 'theme-alert-tiles.css loads after the tile rules it overrides');
+  assert.ok(css.includes('html.connectea-dark[data-connectea-theme] :is(#cx-specificity-anchor, .eds-c-tile__header--negative) {\n  background-color: color-mix(in srgb, #dc2626 16%, transparent) !important;'), 'negative headers keep a red tint in dark themes');
+  assert.ok(css.includes(':is(#cx-specificity-anchor, .eds-c-tile--important > .eds-c-tile__header) {\n  border-bottom-color: #dc2626 !important;'), 'important headers keep a red divider');
+  assert.ok(/#f87171 !important;\n  -webkit-text-fill-color: #f87171 !important;/.test(css), 'red icons beat the glyph ink (text-fill too)');
+  assert.ok(css.includes('html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .eds-c-tile__header--negative) {\n  background-color: color-mix(in srgb, #9d000b 10%, transparent) !important;'), 'light-tone themes use Connect\'s own red');
+  assert.ok(!/:is\([^)]*::before/.test(css), 'pseudo-elements stay outside :is() (an invalid :is drops the rule)');
+  const theme = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme.css'), 'utf8');
+  assert.ok(!/\.eds-c-tile, \.cvr-c-tile, \.c-tile, \.eds-c-card, \.cvr-c-card, \.connectea-panel\) \{\n  overflow: hidden/.test(theme), 'glass tiles never use overflow: hidden (the list margin showed as an extra strip under the notice)');
 });
 
 Promise.all(pendingTestPromises).then(() => {

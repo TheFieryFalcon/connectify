@@ -195,6 +195,7 @@
             "src/theme/styles/theme-glass-nesting.css",
             "src/theme/styles/theme-glass-reading.css",
             "src/theme/styles/theme-light-tone.css",
+            "src/theme/styles/theme-alert-tiles.css",
             "src/theme/styles/theme.css"
          ],
          "js": [
