@@ -33,10 +33,13 @@
   function tokenGridHtml(state) {
     return (state.mode === 'basic' ? BASIC_TOKENS : FULL_TOKENS).map(t => {
       const value = esc(state.tokens[t.key] || '#000');
+      // A Full token the user set wins over the Basic tokens until it is reset
+      const reset = state.mode === 'full' && state.overrides?.has(t.key)
+        ? '<button type="button" class="cx-token-reset" title="Derive from the Basic tokens again" aria-label="Reset to derived colour">↺</button>' : '';
       return `
       <div class="cx-token-item ${state.activeToken === t.key ? 'is-active' : ''}" data-key="${t.key}">
         <span class="cx-token-label">${t.label}</span>
-        <div class="cx-token-control-wrap"><span class="cx-token-val">${value}</span><div class="cx-token-chip" style="background-color:${value};"></div></div>
+        <div class="cx-token-control-wrap">${reset}<span class="cx-token-val">${value}</span><div class="cx-token-chip" style="background-color:${value};"></div></div>
       </div>`;
     }).join('');
   }
@@ -152,9 +155,9 @@
         </div>
         <div class="cx-customizer-footer">
           <div class="cx-btn-group">
-            <input type="file" id="cx-import-file" accept=".json" style="display:none">
-            <button class="cx-btn cx-btn-secondary" id="cx-import-btn">📥 Import JSON</button>
-            <button class="cx-btn cx-btn-secondary" id="cx-export-btn">📤 Export JSON</button>
+            <input type="file" id="cx-import-file" accept=".ctme,.json" style="display:none">
+            <button class="cx-btn cx-btn-secondary" id="cx-import-btn">📥 Import Theme</button>
+            <button class="cx-btn cx-btn-secondary" id="cx-export-btn">📤 Export Theme</button>
           </div>
           <div class="cx-btn-group">
             <button class="cx-btn cx-btn-secondary" id="cx-cancel-btn">Cancel</button>

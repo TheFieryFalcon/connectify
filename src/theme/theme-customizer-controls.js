@@ -19,7 +19,7 @@
     const updateColorFromPicker = () => {
       const rgb = colors.hsvToRgb(state.pickerH, state.pickerS, state.pickerV);
       const hex = colors.toHex(rgb.r, rgb.g, rgb.b);
-      state.tokens[state.activeToken] = hex;
+      window.ConnectifyCustomizerTokens.set(state, state.activeToken, hex);
       if (hexInput !== document.activeElement) hexInput.value = hex;
       ctx.refresh();
     };
@@ -47,7 +47,7 @@
       updateColorFromPicker();
     };
     const setActiveColor = value => {
-      state.tokens[state.activeToken] = value;
+      window.ConnectifyCustomizerTokens.set(state, state.activeToken, value);
       ctx.syncPicker();
       ctx.refresh();
     };
@@ -58,15 +58,6 @@
     modal.querySelectorAll('.cx-swatch-chip').forEach(chip => {
       chip.onclick = () => setActiveColor(chip.dataset.color);
     });
-  }
-
-  function readText(input, onLoad) {
-    const file = input.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => onLoad(ev.target.result);
-    reader.readAsText(file);
-    input.value = ''; // picking the same file again must fire change
   }
 
   function bindWallpaper(ctx) {
@@ -96,15 +87,18 @@
     };
   }
 
+  // A .ctme theme file (theme-ctme.js): theme.json plus the wallpaper image, named after the theme
   function exportTheme(state) {
     const data = {
       version: 1, name: state.name, icon: state.emoji, liquidGlass: state.liquidGlass,
       glassBlur: state.glassBlur, glassOpacity: state.glassOpacity, wallpaper: state.wallpaper,
-      swatch: [state.tokens.canvas, state.tokens.surface, state.tokens.accent], colors: { ...state.tokens }
+      swatch: [state.tokens.canvas, state.tokens.surface, state.tokens.accent],
+      colors: window.ConnectifyCustomizerTokens.savedColors(state)
     };
+    const ctme = window.ConnectifyThemeCtme;
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
-    a.download = `connectea-theme-${String(state.name).toLowerCase().replace(/\s+/g, '_')}.json`;
+    a.href = URL.createObjectURL(new Blob([ctme.pack(data)], { type: 'application/zip' }));
+    a.download = ctme.fileName(state.name);
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 0);
   }
@@ -143,19 +137,28 @@
     modal.querySelector('#cx-export-btn').onclick = () => exportTheme(state);
     const importFile = modal.querySelector('#cx-import-file');
     modal.querySelector('#cx-import-btn').onclick = () => importFile.click();
-    importFile.onchange = () => readText(importFile, text => {
+    importFile.onchange = async () => {
+      const file = importFile.files?.[0];
+      if (!file) return;
+      importFile.value = ''; // picking the same file again must fire change
+      const tokenSet = window.ConnectifyCustomizerTokens;
       let largeWallpaper;
       try {
-        largeWallpaper = importTheme(state, JSON.parse(text));
+        const theme = await window.ConnectifyThemeCtme.unpack(await file.arrayBuffer());
+        // Imported colours merge over this theme's own (Basic + overrides); imported Full tokens become overrides
+        state.tokens = tokenSet.savedColors(state);
+        largeWallpaper = importTheme(state, theme);
+        state.overrides = tokenSet.overridesOf(state.tokens);
       } catch {
-        alert('Invalid theme JSON file.');
+        tokenSet.apply(state);
+        alert('Invalid theme file.');
         return;
       }
       ctx.syncControls();
       ctx.refresh();
       ctx.syncPicker();
       if (largeWallpaper) fitImportedWallpaper(ctx, largeWallpaper);
-    });
+    };
   }
 
   /** The text node whose glyphs sit under the pointer, or null when the pointer is over a bare fill. */

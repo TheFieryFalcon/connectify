@@ -12,6 +12,7 @@
   const colors = window.ConnectifyThemeColors;
   const markup = window.ConnectifyThemeCustomizerMarkup;
   const controls = window.ConnectifyThemeCustomizerControls;
+  const tokenSet = window.ConnectifyCustomizerTokens;
 
   const getPresets = () => window.ConnectifyThemeRegistry?.getPresetPalettes?.() || {};
   const getDefaultTokens = () => colors.pickColors(getPresets().dark);
@@ -28,6 +29,7 @@
   const state = {
     mode: 'basic',
     tokens: getDefaultTokens(),
+    overrides: new Set(), // Full tokens the user set; they win over the Basic tokens in both modes
     name: 'My Theme',
     emoji: '🎨',
     liquidGlass: false,
@@ -41,10 +43,6 @@
   };
 
   const $ = selector => modalEl?.querySelector(selector) || null;
-
-  function deriveSecondaryTokens() {
-    if (state.mode === 'basic') colors.deriveSecondaryTokens(state.tokens);
-  }
 
   function renderMockup() {
     const preview = $('#cx-customizer-preview');
@@ -77,6 +75,12 @@
     if (!grid) return;
     grid.innerHTML = markup.tokenGridHtml(state);
     grid.querySelectorAll('.cx-token-item').forEach(el => {
+      el.querySelector('.cx-token-reset')?.addEventListener('click', e => {
+        e.stopPropagation();
+        tokenSet.reset(state, el.dataset.key);
+        refresh();
+        syncPickerToToken();
+      });
       el.onclick = () => {
         state.activeToken = el.dataset.key;
         grid.querySelectorAll('.cx-token-item').forEach(x => x.classList.remove('is-active'));
@@ -87,7 +91,7 @@
   }
 
   function refresh() {
-    deriveSecondaryTokens();
+    tokenSet.apply(state);
     renderTokens();
     renderMockup();
   }
@@ -139,8 +143,9 @@
     $('#cx-preset-select').onchange = e => {
       const preset = getPresets()[e.target.value];
       if (!preset) return;
-      // Derived presets (Liquid Glass) carry only basic colours; the rest is derived from them
+      // A preset is a starting point of 6 Basic colours: every other token follows them (no overrides)
       state.tokens = themeTokens(preset);
+      state.overrides = new Set();
       state.emoji = preset.icon || preset.emoji || state.emoji;
       state.liquidGlass = Boolean(preset.liquidGlass);
       if (typeof preset.glassBlur === 'number') state.glassBlur = preset.glassBlur;
@@ -156,18 +161,10 @@
       $('#cx-preview-heading').textContent = state.name;
     };
     const emojiInput = $('#cx-emoji-input');
-    emojiInput.oninput = () => {
-      state.emoji = emojiInput.value || '🎨';
-      showEmoji();
-      renderMockup();
-    };
+    const setEmoji = emoji => { state.emoji = emoji; showEmoji(); renderMockup(); };
+    emojiInput.oninput = () => setEmoji(emojiInput.value || '🎨');
     modalEl.querySelectorAll('.cx-emoji-btn').forEach(btn => {
-      btn.onclick = () => {
-        state.emoji = btn.dataset.emoji;
-        emojiInput.value = state.emoji;
-        showEmoji();
-        renderMockup();
-      };
+      btn.onclick = () => { emojiInput.value = btn.dataset.emoji; setEmoji(btn.dataset.emoji); };
     });
 
     $('#cx-glass-toggle').onchange = e => {
@@ -188,7 +185,7 @@
   }
 
   function save() {
-    deriveSecondaryTokens();
+    tokenSet.apply(state);
     const themeDef = {
       // An edited theme keeps its id, so renaming it updates it instead of saving a copy
       id: state.editingId || undefined,
@@ -199,7 +196,8 @@
       glassOpacity: state.glassOpacity,
       wallpaper: state.wallpaper,
       swatch: [state.tokens.canvas, state.tokens.surface, state.tokens.accent],
-      colors: { ...state.tokens }
+      // Basic tokens plus the Full tokens the user set; the rest is derived when the theme is applied
+      colors: tokenSet.savedColors(state)
     };
     const reg = window.ConnectifyThemeRegistry;
     const saved = reg?.saveCustomTheme?.(themeDef);
@@ -220,7 +218,9 @@
       wallpaper: themeToEdit?.wallpaper || null,
       tokens: themeToEdit?.colors ? themeTokens(themeToEdit.colors) : getDefaultTokens()
     });
-    deriveSecondaryTokens();
+    // Saved Full tokens that differ from what the Basic tokens derive stay as the user set them
+    state.overrides = themeToEdit?.colors ? tokenSet.overridesOf(state.tokens) : new Set();
+    tokenSet.apply(state);
 
     modalEl = document.createElement('div');
     modalEl.id = 'cx-customizer-modal';

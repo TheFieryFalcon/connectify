@@ -68,7 +68,11 @@
     const o = ok(), dark = isDark(c.surface), d = dark ? 1 : -1, up = (hex, dL, cs) => o.shiftL(hex, d * dL, cs);
     const cd = towardSurface(c.canvas, c.surface);
     const text = c.textPrimary;
-    const secondary = o.ensureContrast(c.textSecondary, c.surface, 5);
+    // Text tokens are used as given: deriveFull already keeps derived ones >= 5:1, and a colour the user set
+    // themselves in Full mode must never be swapped for a contrast fix
+    const secondary = c.textSecondary;
+    // Ink on fills that have no text token of their own: the theme's own text colours when they read (>= 5:1)
+    const ink = (fill, ...own) => own.find(t => valid(t) && o.contrast(t, fill) >= 5) || o.readable(fill);
     const disabled = quietText(text, c.surface, 43, dark);
     const accentActive = o.shiftL(c.accent, -9, 1.05);
     // Presets keep a light accent's primary button light with dark text (Quantum); any other accent is
@@ -79,25 +83,25 @@
     }
     const buttonText = c.buttonText || o.readable(c.button);
     return {
-      '--cx-text-secondary': secondary, '--cx-text-muted': o.ensureContrast(c.textMuted, c.surface, 5), '--cx-text-disabled': disabled,
+      '--cx-text-secondary': secondary, '--cx-text-muted': c.textMuted, '--cx-text-disabled': disabled,
       '--cx-tile-link-color': c.tileLinkColor,
       '--cx-surface-active': up(c.surfaceHover, 4),
       '--cx-border-hover': c.borderStrong, '--cx-border-focus': c.accent,
       '--cx-accent-active': accentActive, '--cx-accent-subtle': rgba(c.accent, 0.15),
-      '--cx-accent-text': o.readable(c.accent), '--cx-accent-link': o.ensureContrast(c.accent, c.surface, 5),
+      '--cx-accent-text': ink(c.accent, text), '--cx-accent-link': o.ensureContrast(c.accent, c.surface, 5),
       '--cx-nav-bg': o.shiftL(c.canvas, 2.5 * cd), '--cx-nav-border': c.borderSubtle, '--cx-nav-text': secondary,
       '--cx-nav-text-hover': up(text, 3), '--cx-nav-item-active': o.shiftL(c.canvas, -2.5 * cd),
       '--cx-button-active': up(c.button, -3.5), '--cx-button-border': c.border, '--cx-button-border-hover': c.borderStrong,
       '--cx-button-text': buttonText, '--cx-button-text-hover': o.shiftL(buttonText, dark ? 3 : -3),
       '--cx-button-primary-bg': primary, '--cx-button-primary-hover': o.shiftL(primary, -6.5),
-      '--cx-button-primary-text': o.readable(primary),
+      '--cx-button-primary-text': ink(primary, c.buttonText, text),
       '--cx-input-bg': c.inputBg, '--cx-input-border': c.inputBorder,
       '--cx-input-text': text, '--cx-input-placeholder': disabled, '--cx-input-border-focus': c.accent,
       '--cx-table-header-bg': o.shiftL(c.surface, -1.5 * cd), '--cx-table-row-hover': up(c.surface, 5),
       '--cx-table-row-alt': mix(c.surface, c.canvas, 0.5), '--cx-table-border': up(c.borderSubtle, -2),
       '--cx-badge-bg': up(c.surface, 6), '--cx-badge-border': up(c.border, -2), '--cx-badge-text': text,
       '--cx-scrollbar-thumb': up(c.border, -4), '--cx-scrollbar-track': c.canvas, '--cx-avatar-bg': c.surfaceElevated,
-      '--cx-avatar-text': o.readable(c.surfaceElevated)
+      '--cx-avatar-text': ink(c.surfaceElevated, text)
     };
   }
 

@@ -137,9 +137,10 @@
   border-color: var(--cx-border-hover, #3d5066) !important;
 }
 
+/* The class-coloured rule under card headers (Connect's green) takes the theme's strong border */
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-divider--primary {
-  border-top-color: #9cb800 !important;
-  border-color: #9cb800 !important;
+  border-top-color: var(--cx-border-strong, #5a7391) !important;
+  border-color: var(--cx-border-strong, #5a7391) !important;
 }
 
 /* Developer Settings Clear Cache button */

@@ -7941,7 +7941,8 @@ runTest('Test 172: Dark-classed themes with dark ink are marked light-tone and r
   assert.ok((css.match(/oklch\(from .+ 0\.34 c h\)/g) || []).length >= 6, 'data colours keep hue and chroma at OKLCH lightness 0.34');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('"src/theme/styles/theme-light-tone.css"'), 'theme-light-tone.css must be registered');
   const derive = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-token-derive.js'), 'utf8');
-  assert.ok(derive.includes("'--cx-avatar-text': o.readable(c.surfaceElevated)"), 'avatar initials must be readable on the derived avatar fill');
+  assert.ok(derive.includes("'--cx-avatar-text': ink(c.surfaceElevated, text)") && derive.includes('o.contrast(t, fill) >= 5) || o.readable(fill)'),
+    'avatar initials take the theme text when it reads on the avatar fill, else a readable ink');
   const tiles = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-tile-actions.css'), 'utf8');
   assert.ok(!/:is\(a, \.eds-c-link\)[^{]*\{\s*color: var\(--cx-accent,/.test(tiles), 'page links must not use the raw accent');
 });
@@ -9299,6 +9300,110 @@ runTest('Test 205: The wallpaper is a fixed 2px-blurred layer dimmed to keep whi
   assert.ok(tokens.includes('window.ConnectifyWallpaperDim?.update('), 'every wallpaper change is measured');
   const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('theme-wallpaper-dim.js') > manifest.indexOf('theme-custom-tokens.js') && manifest.indexOf('theme-wallpaper-layer.css') > manifest.indexOf('styles/theme-tokens.css'), 'registered after the token files');
+});
+
+runTest('Test 206: The customizer colour picker captures its drag, so sweeping past a corner never selects text or scrolls the page', () => {
+  const controls = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-customizer-controls.js'), 'utf8');
+  assert.ok(/svBox\.onpointerdown = e => \{[\s\S]*?e\.preventDefault\(\);[\s\S]*?setPointerCapture/.test(controls), 'the SV box cancels the pointerdown default and captures the pointer');
+  assert.ok(controls.includes('svBox.onpointermove') && !controls.includes("addEventListener('mousemove'") && !controls.includes('onmousedown'), 'no window mouse listeners or mousedown drag');
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-color-picker.css'), 'utf8');
+  const sv = css.slice(css.indexOf('.cx-picker-sv {'), css.indexOf('}', css.indexOf('.cx-picker-sv {')));
+  assert.ok(/touch-action: none;/.test(sv) && /user-select: none;/.test(sv), 'the SV box blocks touch scrolling and selection');
+  assert.ok(/\.cx-picker-popover \{[^}]*user-select: none;/.test(css) && /\.cx-picker-popover input:not\(\[type="range"\]\) \{\s*user-select: text;/.test(css), 'the popover text is not selectable, its hex input is');
+});
+
+runTest('Test 207: Full-mode tokens the user set win over the Basic tokens in both modes and survive save and reopen', () => {
+  const themeDir = path.join(SRC_DIR, 'theme');
+  const win = {};
+  for (const f of ['theme-color-utils.js', 'theme-oklch.js', 'theme-token-derive.js', 'theme-customizer-tokens.js']) {
+    new Function('window', origReadFileSync.call(fs, path.join(themeDir, f), 'utf8'))(win);
+  }
+  const T = win.ConnectifyCustomizerTokens;
+  const basic = { canvas: '#14211a', surface: '#1f3326', button: '#27402f', border: '#4c7058', accent: '#8bc34a', textPrimary: '#f1f8e9' };
+  const state = { mode: 'full', tokens: { ...basic }, overrides: new Set() };
+  T.apply(state);
+  T.set(state, 'surfaceHover', '#ff0000');
+  T.set(state, 'textMuted', '#00ff00');
+  state.mode = 'basic';
+  T.set(state, 'surface', '#203040');
+  T.apply(state);
+  assert.strictEqual(state.tokens.surfaceHover, '#ff0000', 'switching to Basic and editing a Basic token keeps a Full token the user set');
+  assert.strictEqual(state.tokens.textMuted, '#00ff00');
+  assert.strictEqual(state.tokens.surfaceElevated, T.derived(state.tokens).surfaceElevated, 'tokens the user never set still follow the Basic tokens');
+  const saved = T.savedColors(state);
+  assert.deepStrictEqual(Object.keys(saved).sort(), [...T.BASIC, 'surfaceHover', 'textMuted'].sort(), 'a theme saves its Basic tokens and overrides only');
+  const reopened = { tokens: { ...saved, ...T.derived(saved) }, overrides: new Set() };
+  Object.assign(reopened.tokens, saved);
+  reopened.overrides = T.overridesOf(reopened.tokens);
+  assert.deepStrictEqual([...reopened.overrides].sort(), ['surfaceHover', 'textMuted'], 'reopening a theme recovers its overrides');
+  T.reset(reopened, 'surfaceHover');
+  assert.strictEqual(reopened.tokens.surfaceHover, T.derived(reopened.tokens).surfaceHover, 'reset hands a token back to the Basic tokens');
+  const markup = origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer-markup.js'), 'utf8');
+  assert.ok(markup.includes("state.mode === 'full' && state.overrides?.has(t.key)") && markup.includes('cx-token-reset'), 'Full mode marks overrides with a reset button');
+  const core = origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer.js'), 'utf8');
+  assert.ok(!core.includes('deriveSecondaryTokens') && core.includes('colors: tokenSet.savedColors(state)') && core.includes('tokenSet.overridesOf(state.tokens)'), 'the customizer derives through the override set');
+  const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('theme-customizer-tokens.js') > manifest.indexOf('theme-token-derive.js') && manifest.indexOf('theme-customizer-tokens.js') < manifest.indexOf('theme-customizer-controls.js'), 'registered between derive and the controls');
+});
+
+runTest('Test 208: Text tokens a custom theme sets are used as given; only text without a token of its own is contrast-picked', () => {
+  const win = {};
+  for (const f of ['theme-oklch.js', 'theme-token-derive.js']) new Function('window', origReadFileSync.call(fs, path.join(SRC_DIR, 'theme', f), 'utf8'))(win);
+  const keys = ['canvas', 'canvasSubtle', 'surface', 'surfaceSecondary', 'surfaceElevated', 'surfaceHover', 'border', 'borderSubtle', 'borderStrong', 'accent', 'accentHover',
+    'textPrimary', 'textSecondary', 'textMuted', 'tileLinkColor', 'button', 'buttonHover', 'buttonText', 'inputBg', 'inputBorder'];
+  const white = win.ConnectifyThemeDerive.cssProps(Object.fromEntries(keys.map(k => [k, '#ffffff'])));
+  for (const k of ['--cx-text-secondary', '--cx-text-muted', '--cx-nav-text', '--cx-button-text', '--cx-input-text', '--cx-badge-text', '--cx-tile-link-color']) {
+    assert.strictEqual(white[k], '#ffffff', `${k} must keep the colour the theme set (an all-white theme was greyed out)`);
+  }
+  const dark = win.ConnectifyThemeDerive.cssProps({ canvas: '#12171f', surface: '#1e2632', button: '#202c3b', border: '#2e3c4e', accent: '#3b82f6', textPrimary: '#f1f5f9' });
+  assert.strictEqual(dark['--cx-avatar-text'], '#f1f5f9', 'avatar initials take the theme text when it reads');
+});
+
+runTest('Test 209: Card header buttons (View All) use the button tokens and the class-coloured divider uses the strong border', () => {
+  const cards = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-cards.css'), 'utf8');
+  const sel = ':is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(mat-card-header, .mat-card-header) :is(#cx-specificity-anchor, .mat-card-button, button[class*="card-button"], .mat-button)';
+  const rule = cards.slice(cards.indexOf(sel + ' {'), cards.indexOf('}', cards.indexOf(sel + ' {')));
+  assert.ok(rule && /background-color: var\(--cx-button-bg, #202c3b\) !important;/.test(rule) && /color: var\(--cx-button-text, #f1f5f9\) !important;/.test(rule), 'View All takes the button background and text');
+  assert.ok(cards.includes(sel + ':hover {\n  background-color: var(--cx-button-hover, #2c3b4e) !important;'), 'and the button hover');
+  const scaling = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-search-scaling.css'), 'utf8');
+  assert.ok(/\.mat-divider--primary \{\s*border-top-color: var\(--cx-border-strong, #5a7391\) !important;/.test(scaling) && !scaling.includes('#9cb800'), 'the green card divider takes the strong border');
+});
+
+runTest('Test 210: Themes export as <name>.ctme ZIPs holding theme.json and the wallpaper; .ctme (stored or deflated) and old .json files import', async () => {
+  const win = {};
+  new Function('window', origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-ctme.js'), 'utf8'))(win);
+  const C = win.ConnectifyThemeCtme;
+  assert.strictEqual(C.fileName('Test Theme'), 'test_theme.ctme');
+  assert.strictEqual(C.fileName('  My  Cool—Theme! '), 'my_cool_theme.ctme');
+  assert.strictEqual(C.crc32(new TextEncoder().encode('123456789')), 0xcbf43926, 'standard CRC-32');
+  const png = 'data:image/png;base64,' + Buffer.from([137, 80, 78, 71, 1, 2, 3, 250]).toString('base64');
+  const theme = { version: 1, name: 'Test Theme', colors: { canvas: '#111111' }, wallpaper: png };
+  const zip = C.pack(theme);
+  const files = await C.unzip(zip.buffer);
+  assert.deepStrictEqual([...files.keys()], ['theme.json', 'wallpaper.png'], 'the archive holds theme.json and the wallpaper image');
+  assert.strictEqual(JSON.parse(new TextDecoder().decode(files.get('theme.json'))).wallpaper, 'wallpaper.png', 'theme.json names the wallpaper file');
+  const back = await C.unpack(zip.buffer);
+  assert.strictEqual(back.wallpaper, png, 'the wallpaper comes back as the same data URL');
+  assert.strictEqual(back.colors.canvas, '#111111');
+  const noWall = await C.unpack(C.pack({ name: 'X', colors: {}, wallpaper: null }).buffer);
+  assert.strictEqual(noWall.wallpaper, null);
+  const svg = await C.unpack(C.pack({ name: 'S', wallpaper: 'data:image/svg+xml;utf8,%3Csvg%2F%3E' }).buffer);
+  assert.strictEqual(Buffer.from(svg.wallpaper.split(',')[1], 'base64').toString(), '<svg/>', 'SVG preset wallpapers survive');
+  // A file re-zipped by the operating system (deflated entries)
+  const zlib = require('zlib');
+  const json = Buffer.from(JSON.stringify({ name: 'Deflated', wallpaper: null }));
+  const packed = zlib.deflateRawSync(json), name = Buffer.from('theme.json');
+  const local = Buffer.alloc(30); local.writeUInt32LE(0x04034b50, 0); local.writeUInt16LE(8, 8); local.writeUInt32LE(packed.length, 18); local.writeUInt32LE(json.length, 22); local.writeUInt16LE(name.length, 26);
+  const dir = Buffer.alloc(46); dir.writeUInt32LE(0x02014b50, 0); dir.writeUInt16LE(8, 10); dir.writeUInt32LE(packed.length, 20); dir.writeUInt32LE(json.length, 24); dir.writeUInt16LE(name.length, 28);
+  const body = Buffer.concat([local, name, packed]);
+  const end = Buffer.alloc(22); end.writeUInt32LE(0x06054b50, 0); end.writeUInt16LE(1, 8); end.writeUInt16LE(1, 10); end.writeUInt32LE(46 + name.length, 12); end.writeUInt32LE(body.length, 16);
+  const deflated = Buffer.concat([body, dir, name, end]);
+  assert.strictEqual((await C.unpack(deflated)).name, 'Deflated', 'deflated archives import');
+  assert.strictEqual((await C.unpack(Buffer.from('{"name":"Old","wallpaper":null}'))).name, 'Old', 'older .json theme files still import');
+  const markup = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-customizer-markup.js'), 'utf8');
+  assert.ok(markup.includes('accept=".ctme,.json"') && markup.includes('Export Theme'), 'the customizer imports .ctme and .json and exports a theme file');
+  const controls = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-customizer-controls.js'), 'utf8');
+  assert.ok(controls.includes('ctme.pack(data)') && controls.includes('a.download = ctme.fileName(state.name)'), 'export writes <name>.ctme');
 });
 
 Promise.all(pendingTestPromises).then(() => {

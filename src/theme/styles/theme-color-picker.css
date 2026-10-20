@@ -34,6 +34,21 @@
   gap: 8px;
 }
 
+.cx-token-reset {
+  border: none;
+  background: transparent;
+  color: var(--cx-text-secondary);
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.cx-token-reset:hover {
+  background-color: var(--cx-surface-hover, rgba(255, 255, 255, 0.08));
+  color: var(--cx-text-primary);
+}
+
 .cx-token-val {
   font-family: monospace;
   font-size: 12px;

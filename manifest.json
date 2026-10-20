@@ -215,6 +215,8 @@
             "src/theme/theme-wallpaper-presets.js",
             "src/theme/theme-wallpaper-fit.js",
             "src/theme/theme-wallpaper-migrate.js",
+            "src/theme/theme-customizer-tokens.js",
+            "src/theme/theme-ctme.js",
             "src/theme/theme-customizer-markup.js",
             "src/theme/theme-customizer-popover.js",
             "src/theme/theme-customizer-controls.js",
