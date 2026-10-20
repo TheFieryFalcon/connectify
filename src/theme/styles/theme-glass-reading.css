@@ -1,8 +1,8 @@
 /**
- * Connectify Theme: Liquid Glass reading views (a notice or discussion opened from a class). The page stays clear,
- * so the wallpaper shows around the frame, and the frame holding the view is one glass panel, flush with the side
- * menu and bar, with a much stronger blur and an 88% fill: every theme text colour keeps >= 5:1 over any wallpaper, even pure black (design_rules.md).
- * Solid themes keep the opaque reading canvas (theme-surface-base.css). Liquid Glass only.
+ * Connectify Theme: Liquid Glass reading views (a notice or discussion opened from a class) have no panel: the page,
+ * the frame holding the view and the view itself are clear, so the text sits straight on the wallpaper, which is
+ * dimmed or brightened for the theme's text (theme-wallpaper-dim.js). Solid themes keep the opaque reading canvas
+ * (theme-surface-base.css). Liquid Glass only.
  */
 
 /* The page around the view is clear; the unused id outranks the reading canvas rule (it lists #main-content) */
@@ -12,18 +12,17 @@ html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass
   background-color: transparent !important;
 }
 
-/* The reading surface is Connect's frame around the view (the .cnt-ng-zone wrapper that spans from the side menu
-   to the right edge, right under the bar), so the panel is flush with the frame and no wallpaper shows in its
-   padding: strong blur, near-opaque fill */
+/* Connect's frame around the view (the .cnt-ng-zone wrapper from the side menu to the right edge) paints no fill
+   or blur of its own */
 html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :is(
   #cx-specificity-anchor, .cnt-ng-zone > div:has(cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view)
 ):not(mat-dialog-container *):not(.mat-dialog-container *) {
-  background-color: color-mix(in srgb, color-mix(in srgb, var(--cx-canvas-bg, #0b1120) 96%, var(--cx-text-primary, #ffffff)) 88%, transparent) !important;
-  backdrop-filter: blur(max(36px, calc(var(--cx-glass-blur, 12px) * 3))) saturate(140%) !important;
-  -webkit-backdrop-filter: blur(max(36px, calc(var(--cx-glass-blur, 12px) * 3))) saturate(140%) !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-/* The views themselves (and a discussion's message body) sit inside that surface and stay clear */
+/* The views themselves (and a discussion's message body) stay clear */
 html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :is(
   #cx-specificity-anchor, cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view, cnt-message-detail-view
 ) {

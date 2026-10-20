@@ -8129,11 +8129,12 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   const base = read('styles/theme-surface-base.css');
   assert.ok(base.includes('html.connectea-dark[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]),'),
     'solid dark themes: the opaque reading canvas outranks html.connectea-dark[data-connectea-has-custom-bg]');
-  // Liquid Glass: the wallpaper stays and the view is one strong-blur glass panel (88% fill keeps every theme text >= 5:1)
+  // Liquid Glass: the wallpaper stays and the view has no panel (the wallpaper is dimmed or brightened for the text)
   const reading = read('styles/theme-glass-reading.css');
   const manifestJson = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifestJson.indexOf('theme-glass-reading.css') > manifestJson.indexOf('theme-glass-nesting.css') && manifestJson.indexOf('theme-glass-reading.css') < manifestJson.indexOf('"src/theme/styles/theme.css"'), 'theme-glass-reading.css must be registered before theme.css');
-  assert.ok(/\.cnt-ng-zone > div:has\(cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view\)[\s\S]*?88%, transparent\) !important;\s*backdrop-filter: blur\(max\(36px/.test(reading), 'the frame holding a glass reading view gets an 88% fill and a much stronger (>= 36px) blur, flush with the side menu and bar');
+  assert.ok(/\.cnt-ng-zone > div:has\(cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view\)[^{]*\{\s*background-color: transparent !important;\s*backdrop-filter: none !important;/.test(reading) && !/88%|blur\(/.test(reading),
+    'the frame holding a glass reading view has no fill or blur: the text sits on the wallpaper');
   assert.ok(/cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view, cnt-message-detail-view\s*\) \{\s*background-color: transparent/.test(reading), 'the views inside the reading frame stay clear');
   assert.ok(/#main-content\s*\):not\(mat-dialog-container \*\)[^{]*\{\s*background-color: transparent/.test(reading), 'the page around a glass reading view stays clear');
   assert.ok(base.includes('cnt-discussion-item-view, cnt-message-detail-view'), 'discussion views must get the solid reading canvas');
