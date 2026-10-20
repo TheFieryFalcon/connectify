@@ -9425,8 +9425,16 @@ runTest('Test 211: Customizer headings and labels take the theme ink in every th
 
 runTest('Test 212: Theme menu Import Theme; .ctme files read in Firefox content scripts; themes name a preset wallpaper by id', async () => {
   const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme', f), 'utf8');
-  // 1. Firefox hands content scripts a page-owned buffer from file.arrayBuffer() ("Permission denied"); files go through a Response
-  assert.ok(read('theme-ctme.js').includes('unpack(await new Response(file).arrayBuffer())'), 'theme files are read through a Response the extension owns');
+  // 1. Firefox hands MV3 content scripts page-owned buffers ("Permission denied to access property"), from file.arrayBuffer()
+  //    and from a Response alike: picked files are read as a data URL string, which is always copied into the extension
+  const ctmeSrc = read('theme-ctme.js');
+  assert.ok(ctmeSrc.includes('reader.readAsDataURL(file)') && !/file\.arrayBuffer\(\)|new Response\(file\)/.test(ctmeSrc), 'theme files are read as a data URL, never as a page-owned buffer');
+  class FakeReader { readAsDataURL(f) { setTimeout(() => { this.result = 'data:application/octet-stream;base64,' + Buffer.from(f.bytes).toString('base64'); this.onload(); }); } }
+  const cw = {};
+  new Function('window', 'FileReader', 'atob', 'btoa', ctmeSrc)(cw, FakeReader, atob, btoa);
+  const packed = cw.ConnectifyThemeCtme.pack({ name: 'Read Me', colors: { canvas: '#101010' }, wallpaper: 'data:image/png;base64,iVBORw0KGgo=' });
+  const roundTrip = await cw.ConnectifyThemeCtme.unpackFile({ bytes: packed });
+  assert.ok(roundTrip.name === 'Read Me' && roundTrip.wallpaper === 'data:image/png;base64,iVBORw0KGgo=', 'a picked .ctme file reads back with its wallpaper');
   assert.ok(!read('theme-customizer-controls.js').includes('file.arrayBuffer()') && read('theme-customizer-controls.js').includes('ConnectifyThemeCtme.unpackFile(file)'), 'the customizer imports with unpackFile');
   // 2. The menu offers Import Theme below Customize Theme
   const menu = read('theme-menu.js');

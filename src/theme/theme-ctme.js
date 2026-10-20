@@ -151,9 +151,26 @@
     return theme;
   }
 
-  /** Theme object from a picked file. Firefox gives content scripts a page-owned buffer from file.arrayBuffer(),
-      which they may not read ("Permission denied to access property"); a Response made here returns our own. */
-  const unpackFile = async file => unpack(await new Response(file).arrayBuffer());
+  /** A picked file's bytes. Firefox hands Manifest V3 content scripts page-owned buffers they may not read ("Permission
+      denied to access property"), from a File's arrayBuffer() and from a Response alike; the file is read as a data URL
+      instead, because a string is always copied into the extension's own memory. */
+  function readFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const url = String(reader.result || '');
+        const bin = atob(url.slice(url.indexOf(',') + 1));
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        resolve(bytes);
+      };
+      reader.onerror = () => reject(new Error('The file could not be read'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /** Theme object from a picked .ctme or older .json file. */
+  const unpackFile = async file => unpack((await readFile(file)).buffer);
 
   window.ConnectifyThemeCtme = { fileName, zip, unzip, pack, unpack, unpackFile, crc32 };
 })();
