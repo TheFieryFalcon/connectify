@@ -44,6 +44,14 @@
     return apply(state);
   }
 
+  /** A preset picked as a starting point: its Basic tokens drive the rest, except the Full tokens it keeps. */
+  function fromPreset(state, preset, tokens) {
+    state.tokens = { ...tokens };
+    state.overrides = new Set((preset?.keeps || []).filter(k => !isBasic(k) && preset[k]));
+    state.overrides.forEach(k => { state.tokens[k] = preset[k]; });
+    return apply(state);
+  }
+
   /** A colour picked for a token; a Full token becomes an override. */
   function set(state, key, value) {
     state.tokens[key] = value;
@@ -65,5 +73,5 @@
     return out;
   }
 
-  window.ConnectifyCustomizerTokens = { BASIC, isBasic, derived, overridesOf, apply, adopt, set, reset, savedColors };
+  window.ConnectifyCustomizerTokens = { BASIC, isBasic, derived, overridesOf, apply, adopt, fromPreset, set, reset, savedColors };
 })();

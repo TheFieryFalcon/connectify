@@ -22,7 +22,9 @@
       canvas: '#282828', canvasSubtle: '#191b1c', surface: '#32302f', surfaceSecondary: '#282828', surfaceElevated: '#3c3836', surfaceHover: '#504944',
       border: '#5a524c', borderSubtle: '#3c3836', borderStrong: '#665c54', accent: '#fabd2f', accentHover: '#fcd34d',
       textPrimary: '#fbf1c7', textSecondary: '#b8bb26', textMuted: '#bdae93', tileLinkColor: '#fbf1c7',
-      button: '#3c3836', buttonHover: '#504944', buttonText: '#fbf1c7', inputBg: '#1d2021', inputBorder: '#504944'
+      button: '#3c3836', buttonHover: '#504944', buttonText: '#fbf1c7', inputBg: '#1d2021', inputBorder: '#504944',
+      // Full tokens the customizer keeps when this preset is picked: the green is no lightness step of the cream
+      keeps: ['textSecondary']
     },
     amoled: {
       name: 'AMOLED Black', icon: '🌑', isDark: true, swatch: ['#000000', '#0a0a0a', '#38bdf8'],

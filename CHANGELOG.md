@@ -61,6 +61,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - The Theme Customizer's hue slider stopped short of both ends of its track.
 - In Light mode, the Theme Customizer's title and Live Preview heading took Connect's maroon heading colour.
 - In Light mode, the Theme Customizer's labels took Connect's grey label colour.
+- Picking Quantum Dark as a starting point in the Theme Customizer lost its green secondary text.
 - The Maintenance Notice lost its red header in dark themes.
 - Liquid Glass drew an extra strip under the Maintenance Notice.
 

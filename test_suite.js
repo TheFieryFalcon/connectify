@@ -9524,6 +9524,34 @@ runTest('Test 214: Notice and dialog detail views read in the primary ink (cream
   assert.ok(/data-connectea-theme="quantum"[^}]*--cx-text-primary: #fbf1c7;/.test(tokens), 'Quantum Dark\'s primary ink is cream');
 });
 
+runTest('Test 215: Picking the Quantum Dark preset in the customizer keeps its green secondary text as a Full-mode override', () => {
+  const themeDir = path.join(SRC_DIR, 'theme');
+  const win = {};
+  for (const f of ['theme-color-utils.js', 'theme-oklch.js', 'theme-token-derive.js', 'theme-palettes.js', 'theme-customizer-tokens.js']) {
+    new Function('window', origReadFileSync.call(fs, path.join(themeDir, f), 'utf8'))(win);
+  }
+  const T = win.ConnectifyCustomizerTokens;
+  const presets = win.ConnectifyThemePalettes.BUILTIN_PALETTES || win.ConnectifyThemePalettes;
+  const quantum = presets.quantum;
+  assert.deepStrictEqual(quantum.keeps, ['textSecondary'], 'Quantum Dark keeps its secondary text in the customizer');
+  const tokens = win.ConnectifyThemeColors.pickColors(quantum);
+  assert.notStrictEqual(T.derived(tokens).textSecondary, '#b8bb26', 'the cream primary text alone would derive a different secondary');
+  const state = { mode: 'basic', tokens: {}, overrides: new Set() };
+  T.fromPreset(state, quantum, tokens);
+  assert.strictEqual(state.tokens.textSecondary, '#b8bb26', 'the preset\'s green secondary text is inherited');
+  assert.deepStrictEqual([...state.overrides], ['textSecondary'], 'it is a Full-mode override (↺ resets it)');
+  T.set(state, 'textPrimary', '#ffffff');
+  T.apply(state);
+  assert.strictEqual(state.tokens.textSecondary, '#b8bb26', 'editing a Basic token keeps it');
+  assert.strictEqual(state.tokens.surfaceHover, T.derived(state.tokens).surfaceHover, 'tokens the preset does not keep still follow the Basic tokens');
+  assert.ok(T.savedColors(state).textSecondary === '#b8bb26', 'a theme saved from the preset stores it');
+  const dark = { mode: 'basic', tokens: {}, overrides: new Set() };
+  T.fromPreset(dark, presets.dark, win.ConnectifyThemeColors.pickColors(presets.dark));
+  assert.strictEqual(dark.overrides.size, 0, 'presets that keep nothing start with no overrides');
+  const core = origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer.js'), 'utf8');
+  assert.ok(core.includes('tokenSet.fromPreset(state, preset, themeTokens(preset))'), 'the preset select goes through fromPreset');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

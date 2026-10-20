@@ -143,9 +143,8 @@
     $('#cx-preset-select').onchange = e => {
       const preset = getPresets()[e.target.value];
       if (!preset) return;
-      // A preset is a starting point of 6 Basic colours: every other token follows them (no overrides)
-      state.tokens = themeTokens(preset);
-      state.overrides = new Set();
+      // A preset is a starting point of 6 Basic colours: every other token follows them, except the ones it keeps
+      tokenSet.fromPreset(state, preset, themeTokens(preset));
       state.emoji = preset.icon || preset.emoji || state.emoji;
       state.liquidGlass = Boolean(preset.liquidGlass);
       if (typeof preset.glassBlur === 'number') state.glassBlur = preset.glassBlur;
