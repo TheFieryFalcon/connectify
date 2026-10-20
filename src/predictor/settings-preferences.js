@@ -55,7 +55,9 @@
       const current = window.ConnectifyTheme?.getCustomBackground?.();
       const preset = current && presets?.find(current);
       if (removeBtn) removeBtn.style.display = current ? 'inline-block' : 'none';
-      if (status) status.textContent = preset ? `Preset: ${preset.name}` : current ? 'Custom wallpaper active' : 'No custom background set';
+      // A theme with its own wallpaper shows it while active; this one returns in every other theme
+      const own = window.ConnectifyThemeTokens?.getThemeBackground?.() ? ' (the current theme shows its own wallpaper)' : '';
+      if (status) status.textContent = (preset ? `Preset: ${preset.name}` : current ? 'Custom wallpaper active' : 'No custom background set') + own;
       panel.querySelectorAll('.cx-bg-preset').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.preset === preset?.id)));
     };
     if (uploadBtn && input) {

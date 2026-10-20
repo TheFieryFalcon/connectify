@@ -1,8 +1,9 @@
 /**
  * Connectify Theme: custom colour tokens, wallpaper and glass diffusion
  *
- * Writes custom palette tokens inline on <html> and <body>, stores the custom wallpaper
- * (falling back to extension storage when localStorage is full) and toggles Liquid Glass.
+ * Writes custom palette tokens inline on <html> and <body>, stores the student's own wallpaper
+ * (falling back to extension storage when localStorage is full), shows the active theme's own
+ * wallpaper over it without storing it, and toggles Liquid Glass.
  * Exposes window.ConnectifyThemeTokens.
  */
 (() => {
@@ -39,6 +40,8 @@
   const isAuthDisabled = () => Boolean(window.ConnectifyThemeAuth?.isAuthDisabled());
   // Wallpapers too large for localStorage live here (and in extension storage) for the session
   let memoryBackground = null;
+  // The active theme's own wallpaper: shown only while that theme is active, never stored over the student's own
+  let themeBackground = null;
   const extensionStorage = () => (typeof chrome !== 'undefined' && chrome.storage?.local) || null;
 
   function getCustomColors() {
@@ -102,7 +105,11 @@
     try { return localStorage.getItem(STORAGE_CUSTOM_BG) || memoryBackground; } catch { return memoryBackground; }
   }
 
-  function applyCustomBackground(bgUrl = getCustomBackground()) {
+  const getThemeBackground = () => themeBackground;
+  /** The wallpaper on screen: the active theme's own, else the one picked in Settings. */
+  const getActiveBackground = () => themeBackground || getCustomBackground();
+
+  function applyCustomBackground(bgUrl = getActiveBackground()) {
     if (typeof document === 'undefined' || !document.documentElement) return;
     const root = document.documentElement;
     if (bgUrl && !isAuthDisabled()) {
@@ -120,7 +127,13 @@
     memoryBackground = null;
     try { localStorage.removeItem(STORAGE_CUSTOM_BG); } catch {}
     try { extensionStorage()?.remove(STORAGE_CUSTOM_BG); } catch {}
-    applyCustomBackground(null);
+    applyCustomBackground();
+  }
+
+  /** Called by the registry on every theme apply: a theme without a wallpaper shows the student's own again. */
+  function setThemeBackground(url) {
+    themeBackground = url || null;
+    applyCustomBackground();
   }
 
   function setCustomBackground(dataUrl) {
@@ -132,7 +145,7 @@
     memoryBackground = dataUrl;
     try { localStorage.setItem(STORAGE_CUSTOM_BG, dataUrl); } catch {}
     try { extensionStorage()?.set({ [STORAGE_CUSTOM_BG]: dataUrl }); } catch {}
-    applyCustomBackground(dataUrl);
+    applyCustomBackground();
   }
 
   /** Restores a wallpaper that only extension storage could hold. */
@@ -144,7 +157,7 @@
         const url = res?.[STORAGE_CUSTOM_BG];
         if (!url || getCustomBackground()) return;
         memoryBackground = url;
-        applyCustomBackground(url);
+        applyCustomBackground();
       });
     } catch {}
   }
@@ -163,6 +176,9 @@
     clearCustomTokens,
     tokenTargets,
     getCustomBackground,
+    getThemeBackground,
+    getActiveBackground,
+    setThemeBackground,
     setCustomBackground,
     clearCustomBackground,
     applyCustomBackground,

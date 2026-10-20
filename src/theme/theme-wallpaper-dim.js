@@ -155,6 +155,6 @@
 
   // theme-custom-tokens.js ran first: measure the wallpaper it already applied
   if (document.documentElement?.hasAttribute('data-connectea-has-custom-bg')) {
-    update(window.ConnectifyThemeTokens?.getCustomBackground?.());
+    update(window.ConnectifyThemeTokens?.getActiveBackground?.());
   }
 })();

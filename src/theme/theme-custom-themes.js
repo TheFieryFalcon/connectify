@@ -65,6 +65,7 @@
         // A custom theme only known to extension storage could not be applied at startup
         const active = registry.getThemeDefinition(registry.getTheme());
         if (active?.isCustom && document.documentElement?.dataset.connecteaTheme !== active.id) registry.setTheme(active.id);
+        else if (active?.isCustom) tokens.setThemeBackground(registry.themeWallpaper(active)); // a wallpaper only extension storage held
       });
     } catch {}
   }
@@ -117,9 +118,9 @@
 
   loadSavedCustomThemes();
   if (typeof document !== 'undefined') {
-    tokens.applyCustomBackground();
-    tokens.restoreBackgroundFromExtensionStorage();
     const current = registry.getThemeDefinition(registry.getTheme());
+    tokens.setThemeBackground(registry.themeWallpaper(current)); // the active theme's own wallpaper, else the student's
+    tokens.restoreBackgroundFromExtensionStorage();
     if (isActiveCustomTheme(current)) tokens.applyCustomTokens(current.colors || tokens.getCustomColors(), current.liquidGlass ? { opacity: current.glassOpacity } : null);
   }
 })();

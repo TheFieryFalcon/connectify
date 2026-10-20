@@ -151,10 +151,10 @@ const SPLIT_PARTS = {
   'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
   'progress-graph.js': ['progress-modes.js', 'progress-panel.js', 'progress-graph.js'],
   'new-grade.js': ['grade-snapshot.js', 'new-grade.js'],
-  'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js'],
+  'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-registry.js', 'theme-custom-themes.js'],
   'theme-customizer.js': ['theme-color-utils.js', 'theme-import.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
   // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
-  'theme.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-registry.js', 'theme-custom-themes.js',
+  'theme.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-registry.js', 'theme-custom-themes.js',
     'theme-surface-adapter.js', 'theme-toggle.js', 'theme-menu.js', 'theme.js']
 };
 for (const [name, files] of Object.entries(MODULE_BUNDLES)) {
@@ -7780,8 +7780,8 @@ runTest('Test 166: Every custom-theme token derives from the 6 Basic tokens by t
     { id: 'new', name: 'New', isCustom: true, tokenVersion: 2, colors: { canvas: '#aeb4c2', surface: '#798693', inputBg: '#a9afbd' } }
   ]) };
   const ls = { getItem: k => store[k] ?? null, setItem: (k, v) => { store[k] = v; } };
-  const reg = { registerTheme() {}, getThemeDefinition() {}, getTheme() {}, unregisterTheme() {}, notifyThemeListeners() {} };
-  new Function('window', 'localStorage', 'chrome', fs.readFileSync(path.join(themeDir, 'theme-custom-themes.js'), 'utf8'))({ ConnectifyThemeRegistry: reg, ConnectifyThemeTokens: { applyCustomBackground() {}, restoreBackgroundFromExtensionStorage() {}, applyCustomTokens() {}, getCustomColors: () => ({}) } }, ls, undefined);
+  const reg = { registerTheme() {}, getThemeDefinition() {}, getTheme() {}, unregisterTheme() {}, notifyThemeListeners() {}, themeWallpaper: () => null };
+  new Function('window', 'localStorage', 'chrome', fs.readFileSync(path.join(themeDir, 'theme-custom-themes.js'), 'utf8'))({ ConnectifyThemeRegistry: reg, ConnectifyThemeTokens: { setThemeBackground() {}, restoreBackgroundFromExtensionStorage() {}, applyCustomTokens() {}, getCustomColors: () => ({}) } }, ls, undefined);
   const [oldTheme, newTheme] = reg.getCustomThemes();
   assert.ok(!('inputBg' in oldTheme.colors) && !('textMuted' in oldTheme.colors) && oldTheme.colors.canvas === '#aeb4c2', 'pre-v2 themes must re-derive their hidden tokens');
   assert.strictEqual(newTheme.colors.inputBg, '#a9afbd', 'v2 themes keep every token the user set');
@@ -9470,10 +9470,47 @@ runTest('Test 212: Theme menu Import Theme; .ctme files read in Firefox content 
   try { assert.strictEqual(I.failText(new Error('Permission denied')), 'Invalid theme file.\n\nPermission denied', 'the import alert says why it failed'); } finally { console.warn = origWarn; }
   assert.ok(read('theme-customizer-controls.js').includes('alert(window.ConnectifyThemeImport.failText(err))'), 'the customizer import alert says why too');
   // 5. The registry, the store and the customizer resolve wallpaperPreset; the customizer shows the six thumbnails
-  assert.ok(read('theme-registry.js').includes("window.ConnectifyWallpaperPresets?.byId(theme.wallpaperPreset)?.url || theme.wallpaper"), 'a theme\'s preset wallpaper is applied by id');
+  assert.ok(read('theme-registry.js').includes("window.ConnectifyWallpaperPresets?.byId(theme?.wallpaperPreset)?.url || theme?.wallpaper"), 'a theme\'s preset wallpaper is applied by id');
   assert.ok(read('theme-registry.js').includes("wallpaperPreset: typeof themeDef.wallpaperPreset === 'string'") && read('theme-custom-themes.js').includes('wallpaperPreset: themeDef.wallpaperPreset !== undefined'), 'wallpaperPreset is registered and stored');
   assert.ok(read('theme-customizer-markup.js').includes('id="cx-bg-presets"') && read('theme-customizer-controls.js').includes("ConnectifyWallpaperPresets?.mount(modal.querySelector('#cx-bg-presets')"), 'the customizer offers the preset wallpapers');
   assert.ok(read('theme-customizer.js').includes('...window.ConnectifyThemeImport.wallpaperFields(state.wallpaper)') && read('theme-customizer-controls.js').includes('...window.ConnectifyThemeImport.wallpaperFields(state.wallpaper)'), 'save and export name a preset by id');
+});
+
+runTest('Test 213: A theme\'s own wallpaper shows only while that theme is active; switching away restores the Settings wallpaper', () => {
+  localStorage.clear();
+  window.location.href = 'https://connect.det.wa.edu.au/classes';
+  const load = () => { eval(fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8')); return window.ConnectifyThemeRegistry; };
+  let reg = load();
+  const shown = () => document.documentElement.style.getPropertyValue('--cx-custom-bg-image');
+  const mint = window.ConnectifyWallpaperPresets.byId('mint').url;
+  reg.setCustomBackground('data:image/png;base64,MINE');
+  const presetTheme = reg.saveCustomTheme({ id: 'custom_mint_wall', name: 'Mint Wall', wallpaperPreset: 'mint', colors: { canvas: '#0d1f14' } });
+  const imageTheme = reg.saveCustomTheme({ id: 'custom_own_wall', name: 'Own Wall', wallpaper: 'data:image/png;base64,THEIRS', colors: { canvas: '#101010' } });
+  reg.setTheme(presetTheme.id);
+  assert.strictEqual(shown(), `url("${mint}")`, 'a theme\'s preset wallpaper shows while it is active');
+  assert.strictEqual(localStorage.getItem('connectea:custom_background'), 'data:image/png;base64,MINE', 'a theme\'s wallpaper is never stored over the Settings one');
+  reg.setTheme('dark');
+  assert.strictEqual(shown(), 'url("data:image/png;base64,MINE")', 'switching to a theme without a wallpaper restores the Settings wallpaper');
+  reg.setTheme(imageTheme.id);
+  assert.strictEqual(shown(), 'url("data:image/png;base64,THEIRS")', 'a theme\'s own image shows while it is active');
+  assert.strictEqual(reg.getCustomBackground(), 'data:image/png;base64,MINE', 'Settings still reads the student\'s own wallpaper');
+  reg.setTheme('quantum');
+  assert.strictEqual(shown(), 'url("data:image/png;base64,MINE")');
+  // The Settings wallpaper picked or cleared under a theme with its own keeps that theme's on screen
+  reg.setTheme(imageTheme.id);
+  reg.clearCustomBackground();
+  assert.strictEqual(shown(), 'url("data:image/png;base64,THEIRS")', 'clearing the Settings wallpaper leaves the theme\'s own on screen');
+  reg.setTheme('dark');
+  assert.ok(!shown() && !document.documentElement.hasAttribute('data-connectea-has-custom-bg'), 'with no Settings wallpaper, other themes show none');
+  // Reload with the preset theme active: its wallpaper is shown at startup (presets load before the registry)
+  reg.setTheme(presetTheme.id);
+  reg = load();
+  assert.strictEqual(shown(), `url("${mint}")`, 'the active theme\'s wallpaper is shown after a reload');
+  const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('"src/theme/theme-wallpaper-presets.js"') < manifest.indexOf('"src/theme/theme-registry.js"'), 'preset wallpapers load before the registry');
+  assert.ok(fs.readFileSync(path.join(BASE_DIR, 'src/predictor/settings-preferences.js'), 'utf8').includes('(the current theme shows its own wallpaper)'), 'Settings says when the theme\'s own wallpaper is on screen');
+  localStorage.clear();
+  delete document.documentElement.dataset.connecteaTheme;
 });
 
 Promise.all(pendingTestPromises).then(() => {

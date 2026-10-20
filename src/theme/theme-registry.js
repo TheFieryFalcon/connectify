@@ -144,6 +144,11 @@
     }
   }
 
+  /** A theme's own wallpaper: a preset by id (theme-wallpaper-presets.js) wins over a stored image. */
+  function themeWallpaper(theme) {
+    return window.ConnectifyWallpaperPresets?.byId(theme?.wallpaperPreset)?.url || theme?.wallpaper || null;
+  }
+
   function applyToDocument(theme, customColors) {
     const isDark = theme.isDark;
     for (const el of tokens.tokenTargets()) {
@@ -161,10 +166,8 @@
     } else {
       tokens.clearCustomTokens();
     }
-    // A theme's preset wallpaper (by id, theme-wallpaper-presets.js) wins over a stored image
-    const wallpaper = window.ConnectifyWallpaperPresets?.byId(theme.wallpaperPreset)?.url || theme.wallpaper;
-    if (wallpaper) tokens.setCustomBackground(wallpaper);
-    else tokens.applyCustomBackground(tokens.getCustomBackground());
+    // A theme's own wallpaper shows only while it is active; it never replaces the one picked in Settings
+    tokens.setThemeBackground(themeWallpaper(theme));
   }
 
   function setTheme(themeId, customColors) {
@@ -212,7 +215,9 @@
     applyCustomTokens: tokens.applyCustomTokens,
     clearCustomTokens: tokens.clearCustomTokens,
     onThemeChange,
+    themeWallpaper,
     getCustomBackground: tokens.getCustomBackground,
+    getThemeBackground: tokens.getThemeBackground,
     setCustomBackground: tokens.setCustomBackground,
     clearCustomBackground: tokens.clearCustomBackground,
     applyCustomBackground: tokens.applyCustomBackground,
