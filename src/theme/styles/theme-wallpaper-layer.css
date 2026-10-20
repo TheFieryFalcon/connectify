@@ -2,7 +2,8 @@
  * Connectify Theme: the wallpaper is one fixed layer under the page (html::before), blurred 2px and overlaid so
  * text can sit straight on it (theme-wallpaper-dim.js): light-text themes dim it by --cx-wallpaper-dim (white
  * text >= 4.5:1 on its brightest area), dark-text themes brighten it by --cx-wallpaper-brighten (the theme's
- * text >= 4.5:1 on its darkest area). Labels get a 1px shadow against the wallpaper.
+ * text >= 4.5:1 on its darkest area). Text has no shadow: the
+ * overlays alone keep it readable.
  */
 
 /* The root and body paint only the canvas (seen until the image loads); the layer sits between them and the page */
@@ -44,16 +45,4 @@ html[data-connectea-has-custom-bg="true"]:is(:not(.connectea-dark), [data-connec
 html.connectea-dark[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"])::before,
 html:not(.connectea-dark)[data-connectea-reading-view="true"]::before {
   display: none;
-}
-
-/* Labels: a 1px shadow opposite to the ink (dark under light text, light under dark text) */
-html[data-connectea-has-custom-bg="true"] :is(
-  label, .v-label, mat-label, .mat-form-field-label, .mat-checkbox-label, .mat-select-value,
-  .mat-paginator-page-size-label, .mat-paginator-range-label, .connect-paginator-label
-) {
-  text-shadow: 0 1px 1px var(--cx-label-shadow, rgba(0, 0, 0, 0.65)) !important;
-}
-
-html[data-connectea-has-custom-bg="true"]:is(:not(.connectea-dark), [data-connectea-tone="light"]) {
-  --cx-label-shadow: rgba(255, 255, 255, 0.7);
 }

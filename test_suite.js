@@ -9255,7 +9255,7 @@ runTest('Test 204: The customizer hue slider covers 0-360 across the whole track
   }
 });
 
-runTest('Test 205: The wallpaper is a fixed 2px-blurred layer dimmed (light text) or brightened (dark text) to keep text >= 4.5:1; labels get a 1px shadow', () => {
+runTest('Test 205: The wallpaper is a fixed 2px-blurred layer dimmed (light text) or brightened (dark text) to keep text >= 4.5:1; no text shadow', () => {
   const win = {};
   new Function('window', 'document', 'localStorage', origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-wallpaper-dim.js'), 'utf8'))(win, {}, {});
   const D = win.ConnectifyWallpaperDim;
@@ -9300,8 +9300,7 @@ runTest('Test 205: The wallpaper is a fixed 2px-blurred layer dimmed (light text
   // body's clearing rule must outrank the dark canvas rule on body (theme-surface-base.css weighs (1,2,1)); it once lost and hid the wallpaper
   const base = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-surface-base.css'), 'utf8');
   assert.ok(base.includes(':is(html, body).connectea-dark:not([data-connectea-login]) :is(body, #main-content,'), 'the canvas rule this outranks is still (1,2,1)');
-  assert.ok(/text-shadow: 0 1px 1px var\(--cx-label-shadow, /.test(css) && /\.mat-paginator-range-label, \.connect-paginator-label/.test(css), 'labels (paginators included) get a 1px shadow with a wallpaper');
-  assert.ok(/--cx-label-shadow: rgba\(255, 255, 255/.test(rule('html[data-connectea-has-custom-bg="true"]:is(:not(.connectea-dark), [data-connectea-tone="light"])')), 'dark ink gets a light shadow');
+  assert.ok(!/text-shadow|--cx-label-shadow/.test(css), 'text gets no shadow over the wallpaper (it made text hard to read)');
   assert.ok(!/custom-bg-image\) center center \/ cover no-repeat fixed/.test(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-tokens.css'), 'utf8')), 'html and body no longer paint the wallpaper themselves');
   const tokens = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-custom-tokens.js'), 'utf8');
   assert.ok(tokens.includes('window.ConnectifyWallpaperDim?.update('), 'every wallpaper change is measured');
