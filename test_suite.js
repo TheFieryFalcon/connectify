@@ -9288,7 +9288,10 @@ runTest('Test 205: The wallpaper is a fixed 2px-blurred layer dimmed to keep whi
     'the wallpaper is one fixed layer, blurred 2px, under a black overlay at the measured dim');
   assert.ok(/--cx-wallpaper-dim-active: var\(--cx-wallpaper-dim, /.test(rule('html.connectea-dark[data-connectea-has-custom-bg="true"]:not([data-connectea-tone="light"])')),
     'only light-ink themes dim the wallpaper');
-  assert.ok(/background: transparent !important;/.test(rule('html[data-connectea-has-custom-bg="true"] :is(#cx-specificity-anchor, body)')), 'body never covers the layer');
+  assert.ok(/background: transparent !important;/.test(rule('html[data-connectea-has-custom-bg="true"]:not(#cx-specificity-anchor) :is(#cx-specificity-anchor, body)')), 'body never covers the layer');
+  // body's clearing rule must outrank the dark canvas rule on body (theme-surface-base.css weighs (1,2,1)); it once lost and hid the wallpaper
+  const base = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-surface-base.css'), 'utf8');
+  assert.ok(base.includes(':is(html, body).connectea-dark:not([data-connectea-login]) :is(body, #main-content,'), 'the canvas rule this outranks is still (1,2,1)');
   assert.ok(/text-shadow: 0 1px 1px var\(--cx-label-shadow, /.test(css) && /\.mat-paginator-range-label, \.connect-paginator-label/.test(css), 'labels (paginators included) get a 1px shadow with a wallpaper');
   assert.ok(/--cx-label-shadow: rgba\(255, 255, 255/.test(rule('html[data-connectea-has-custom-bg="true"]:is(:not(.connectea-dark), [data-connectea-tone="light"])')), 'dark ink gets a light shadow');
   assert.ok(!/custom-bg-image\) center center \/ cover no-repeat fixed/.test(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-tokens.css'), 'utf8')), 'html and body no longer paint the wallpaper themselves');

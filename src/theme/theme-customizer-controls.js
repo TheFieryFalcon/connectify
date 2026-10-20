@@ -10,11 +10,6 @@
 
   const colors = window.ConnectifyThemeColors;
 
-  // One pair of window listeners for the whole page; opening the modal only swaps the drag target
-  let drag = null;
-  window.addEventListener('mousemove', e => { if (drag) drag(e); });
-  window.addEventListener('mouseup', () => { drag = null; });
-
   function bindPicker(ctx) {
     const { state, modal } = ctx;
     const svBox = modal.querySelector('#cx-picker-sv');
@@ -36,7 +31,15 @@
       if (cursor) { cursor.style.left = `${state.pickerS * 100}%`; cursor.style.top = `${(1 - state.pickerV) * 100}%`; }
       updateColorFromPicker();
     };
-    svBox.onmousedown = e => { drag = handleSV; handleSV(e); };
+    // The drag is captured by the box (no window listeners) and its default is cancelled, so sweeping out past a
+    // corner never starts a text selection, which made the page select text and auto-scroll
+    svBox.onpointerdown = e => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      svBox.setPointerCapture?.(e.pointerId);
+      handleSV(e);
+    };
+    svBox.onpointermove = e => { if (svBox.hasPointerCapture?.(e.pointerId)) handleSV(e); };
 
     hueInput.oninput = () => {
       state.pickerH = parseInt(hueInput.value, 10);

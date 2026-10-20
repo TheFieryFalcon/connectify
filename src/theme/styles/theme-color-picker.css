@@ -74,6 +74,13 @@
   background-color: var(--cx-canvas-bg, #12171f);
   background-image: linear-gradient(var(--cx-surface-elevated, #253342), var(--cx-surface-elevated, #253342));
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.cx-color-picker-box.cx-picker-popover input:not([type="range"]) {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .cx-color-picker-box.cx-picker-popover[hidden] {
@@ -116,6 +123,9 @@
   position: relative;
   border-radius: 6px;
   cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
   background: linear-gradient(to bottom, transparent, #000), linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
   background-color: #ff0000;
 }

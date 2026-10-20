@@ -9,8 +9,10 @@ html[data-connectea-has-custom-bg="true"] {
   background: var(--cx-canvas-bg, #12171f) !important;
 }
 
-/* The unused id outranks any canvas fill on body, which would cover the layer */
-html[data-connectea-has-custom-bg="true"] :is(#cx-specificity-anchor, body) {
+/* body must stay clear or it covers the layer. The dark canvas rule in theme-surface-base.css weighs (1,2,1)
+   (:is(body, #main-content, ...) under :is(html, body).connectea-dark:not([data-connectea-login])), so two unused
+   ids (2,1,1) outrank it and every other canvas fill on body */
+html[data-connectea-has-custom-bg="true"]:not(#cx-specificity-anchor) :is(#cx-specificity-anchor, body) {
   background: transparent !important;
 }
 
