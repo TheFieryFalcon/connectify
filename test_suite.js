@@ -9412,6 +9412,17 @@ runTest('Test 210: Themes export as <name>.ctme ZIPs holding theme.json and the 
   assert.ok(controls.includes('ctme.pack(data)') && controls.includes('a.download = ctme.fileName(state.name)'), 'export writes <name>.ctme');
 });
 
+runTest('Test 211: Customizer headings and labels take the theme ink in every theme, never Connect\'s heading or label colours', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-customizer.css'), 'utf8');
+  const preview = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-customizer-preview.css'), 'utf8');
+  assert.ok(cssHas(css, '#cx-customizer-modal .cx-customizer-title, #cx-customizer-modal .cx-toggle-label {\n  color: var(--cx-text-primary) !important;'), 'the title and Liquid Glass toggle use the primary ink');
+  assert.ok(cssHas(css, '#cx-customizer-modal .cx-preset-picker-wrap label {\n  color: var(--cx-text-secondary) !important;'), 'Inherit Preset uses the secondary ink');
+  assert.ok(/#cx-customizer-modal \.cx-preview-pane-title \{[^}]*color: var\(--cx-text-secondary\) !important;/.test(preview), 'Live Preview uses the secondary ink, not Connect\'s heading colour');
+  const lum = hex => hex.match(/[0-9a-f]{2}/gi).map(h => parseInt(h, 16) / 255).map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)).reduce((a, c, i) => a + c * [0.2126, 0.7152, 0.0722][i], 0);
+  const ratio = (a, b) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
+  assert.ok(ratio('#334155', '#ffffff') >= 5 && ratio('#e2e8f0', '#1e2632') >= 5, 'secondary ink keeps >= 5:1 on the Light and Dark surfaces');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

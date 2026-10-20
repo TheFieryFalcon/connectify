@@ -57,6 +57,15 @@
   margin: 0;
 }
 
+/* Connect colours its own headings (class colour) and labels (#4f4f4f), which reached the customizer in
+   Light; its headings and labels take the theme ink in every theme */
+#cx-customizer-modal .cx-customizer-title, #cx-customizer-modal .cx-toggle-label {
+  color: var(--cx-text-primary) !important;
+}
+#cx-customizer-modal .cx-preset-picker-wrap label {
+  color: var(--cx-text-secondary) !important;
+}
+
 .cx-customizer-close {
   background: transparent !important;
   border: none !important;

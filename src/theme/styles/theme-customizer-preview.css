@@ -9,10 +9,10 @@
   gap: 10px;
 }
 
-.cx-preview-pane-title {
+#cx-customizer-modal .cx-preview-pane-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--cx-text-muted);
+  color: var(--cx-text-secondary) !important;
   margin: 0;
 }
 
