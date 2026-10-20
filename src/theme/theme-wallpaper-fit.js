@@ -13,13 +13,26 @@
   const QUALITY = 0.86;
   const KEEP_BYTES = 1.5 * 1024 * 1024; // small images that already fit keep their original encoding
   const FIT_OVER = 1.5 * 1024 * 1024;   // stored data URLs longer than this are fitted (SVG presets never)
-  const GIF_MAX = 4 * 1024 * 1024;      // GIFs cannot be shrunk, so they must fit extension storage as they are
+  // GIFs cannot be shrunk, so they must fit extension storage as they are: 40 MB with `unlimitedStorage`,
+  // 4 MB in Chrome Web Store builds (the permission is stripped there, leaving Chrome's 10 MB storage.local quota)
+  const MB = 1024 * 1024;
+  const GIF_MAX_UNLIMITED = 40 * MB;
+  const GIF_MAX_LIMITED = 4 * MB;
+
+  function gifMax() {
+    try {
+      const perms = (typeof chrome !== 'undefined' && chrome.runtime?.getManifest?.().permissions) || [];
+      return perms.includes('unlimitedStorage') ? GIF_MAX_UNLIMITED : GIF_MAX_LIMITED;
+    } catch {
+      return GIF_MAX_LIMITED;
+    }
+  }
 
   const isGif = file => /^image\/gif$/i.test(file?.type || '');
 
-  function gifTooLarge(file) {
-    const mb = (file.size / 1024 / 1024).toFixed(1);
-    return Object.assign(new Error(`GIF wallpapers must be 4 MB or smaller (this one is ${mb} MB)`), { code: 'gif-too-large' });
+  function gifTooLarge(file, max) {
+    const msg = `GIF wallpapers must be ${max / MB} MB or smaller (this one is ${(file.size / MB).toFixed(1)} MB)`;
+    return Object.assign(new Error(msg), { code: 'gif-too-large' });
   }
 
   /** Status text for a failed upload. */
@@ -100,7 +113,7 @@
 
   /** Resolves to a data URL of the wallpaper cropped and scaled to the screen; rejects if it cannot be decoded. */
   async function fromFile(file) {
-    if (isGif(file) && file.size > GIF_MAX) throw gifTooLarge(file);
+    if (isGif(file) && file.size > gifMax()) throw gifTooLarge(file, gifMax());
     const image = await decode(file);
     const iw = image.naturalWidth || image.width;
     const ih = image.naturalHeight || image.height;
@@ -148,5 +161,5 @@
     return fitted.length < url.length ? fitted : url;
   }
 
-  window.ConnectifyWallpaperFit = { MAX_EDGE, FIT_OVER, GIF_MAX, targetSize, fitRect, fromFile, needsFit, fromDataUrl, errorText };
+  window.ConnectifyWallpaperFit = { MAX_EDGE, FIT_OVER, gifMax, targetSize, fitRect, fromFile, needsFit, fromDataUrl, errorText };
 })();

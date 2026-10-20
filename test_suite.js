@@ -8931,7 +8931,9 @@ runTest('Test 197: Uploaded wallpapers are centre-cropped to the screen and scal
   }
   // A 1440x900 screen at 2x: the most a fixed `cover` background ever shows is 2880x1800 device pixels
   const win = { devicePixelRatio: 2, screen: { width: 1440, height: 900 }, innerWidth: 1440, innerHeight: 800 };
-  new Function('window', 'createImageBitmap', 'OffscreenCanvas', 'FileReader', src)(win, createImageBitmap, OffscreenCanvas, FileReader);
+  let permissions = ['storage', 'unlimitedStorage'];
+  const chrome = { runtime: { getManifest: () => ({ permissions }) } };
+  new Function('window', 'createImageBitmap', 'OffscreenCanvas', 'FileReader', 'chrome', src)(win, createImageBitmap, OffscreenCanvas, FileReader, chrome);
   const F = win.ConnectifyWallpaperFit;
 
   assert.deepStrictEqual(F.targetSize(win), { width: 2880, height: 1800 }, 'target is the screen in device pixels');
@@ -8953,14 +8955,28 @@ runTest('Test 197: Uploaded wallpapers are centre-cropped to the screen and scal
   // A small image that already fits the screen exactly keeps its own encoding (PNG transparency)
   const fits = await F.fromFile({ w: 1440, h: 900, size: 400e3, type: 'image/png' });
   assert.strictEqual(fits, 'data:image/png;original', 'small images that already fit are stored untouched');
-  // GIFs keep every frame: any size or aspect is stored as uploaded (cover crops it on screen), up to 4 MB
+  // GIFs keep every frame: any size or aspect is stored as uploaded (cover crops it on screen),
+  // up to 40 MB with unlimitedStorage and 4 MB in Chrome Web Store builds, which strip that permission
+  const MB = 1024 * 1024;
   const drawnBefore = drawn.length;
-  const gif = await F.fromFile({ w: 4000, h: 3000, size: 3.5e6, type: 'image/gif' });
+  assert.strictEqual(F.gifMax(), 40 * MB, 'builds with unlimitedStorage take GIFs up to 40 MB');
+  const gif = await F.fromFile({ w: 4000, h: 3000, size: 39 * MB, type: 'image/gif' });
   assert.strictEqual(gif, 'data:image/gif;original', 'animated GIF wallpapers are never re-encoded to a still JPEG');
   assert.strictEqual(drawn.length, drawnBefore, 'a GIF is never drawn to a canvas');
-  const big = await F.fromFile({ w: 800, h: 600, size: 5 * 1024 * 1024, type: 'image/gif' }).catch(e => e);
+  const huge41 = await F.fromFile({ w: 800, h: 600, size: 41 * MB, type: 'image/gif' }).catch(e => e);
+  assert.strictEqual(F.errorText(huge41), 'GIF wallpapers must be 40 MB or smaller (this one is 41.0 MB)', 'GIFs over 40 MB are refused');
+  permissions = ['storage'];
+  assert.strictEqual(F.gifMax(), 4 * MB, 'without unlimitedStorage (Chrome Web Store) GIFs are capped at 4 MB');
+  assert.strictEqual(await F.fromFile({ w: 800, h: 600, size: 3.5 * MB, type: 'image/gif' }), 'data:image/gif;original');
+  const big = await F.fromFile({ w: 800, h: 600, size: 5 * MB, type: 'image/gif' }).catch(e => e);
   assert.strictEqual(big.code, 'gif-too-large', 'GIFs over 4 MB are refused (they cannot be shrunk to fit storage)');
   assert.strictEqual(F.errorText(big), 'GIF wallpapers must be 4 MB or smaller (this one is 5.0 MB)', 'the size limit is explained');
+  const manifestJson = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  assert.ok(manifestJson.permissions.includes('unlimitedStorage'), 'GitHub and Firefox builds request unlimitedStorage');
+  for (const wf of ['publish.yml', 'publish-cws.yml']) {
+    const yml = fs.readFileSync(path.join(BASE_DIR, '.github/workflows', wf), 'utf8');
+    assert.ok(yml.includes('.permissions -= ["unlimitedStorage"]'), `${wf} strips unlimitedStorage from the Chrome Web Store zip`);
+  }
   assert.strictEqual(F.errorText(new Error('decode')), 'That image could not be read');
   assert.ok(!F.needsFit('data:image/gif;base64,' + 'A'.repeat(2e6)), 'stored and imported GIFs are never flattened by the migration');
 

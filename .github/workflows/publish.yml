@@ -89,8 +89,9 @@ jobs:
           # Build self-hosted CRX with private key
           npx -y crx3 -p /tmp/key.pem -o "connectify-${VERSION}.crx" /tmp/chrome-build
           
-          # Prepare clean ZIP for Chrome Web Store submission (no update_url, no key, no browser_specific_settings)
-          jq 'del(.key)' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.cws.json
+          # Prepare clean ZIP for Chrome Web Store submission (no update_url, no key, no browser_specific_settings).
+          # The store build drops unlimitedStorage; GIF wallpapers are then capped at 4 MB (theme-wallpaper-fit.js).
+          jq 'del(.key) | .permissions -= ["unlimitedStorage"]' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.cws.json
           mv /tmp/chrome-build/manifest.cws.json /tmp/chrome-build/manifest.json
 
           cd /tmp/chrome-build

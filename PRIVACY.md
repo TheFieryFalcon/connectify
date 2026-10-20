@@ -24,6 +24,8 @@ Connectify requests only the minimum permissions necessary to deliver its featur
 - **`storage` Permission (`chrome.storage.local` / `localStorage`):**
   - **Purpose:** Used strictly to save user interface preferences (such as auto-expand toggles, dark/light theme choice), course include/exclude selections for ATAR calculation, and local cache of running subject averages to detect grade updates.
   - **Location:** All data is stored locally in your browser's private extension storage and never leaves your computer.
+- **`unlimitedStorage` Permission (Firefox and GitHub builds only; not requested by the Chrome Web Store version):**
+  - **Purpose:** Lifts the browser's local storage quota so animated GIF wallpapers up to 40 MB can be kept. Nothing else is stored, and everything stays on your computer.
 
 - **Host Permissions & Content Scripts (`connect.det.wa.edu.au`, `login.det.wa.edu.au`):**
   - **Purpose:** Content scripts run only on Western Australia Department of Education student portal pages to read assessment marks from the DOM, render statistical graphs (boxplots, radar charts, running averages), and apply optional CSS theme enhancements.

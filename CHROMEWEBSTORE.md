@@ -61,6 +61,8 @@ English
 
 Google Web Store reviewers require an explicit, plain-English justification for every requested permission. Copy and paste these exact justifications into the Developer Dashboard:
 
+The Chrome Web Store zip does not request `unlimitedStorage` (both publish workflows strip it from `manifest.json`), so GIF wallpapers are capped at 4 MB in that build. Do not list it in the dashboard.
+
 | Permission / Host | Type | Justification for Reviewer |
 | :--- | :--- | :--- |
 | **`storage`** | `permissions` | Connectify uses `chrome.storage.local` exclusively to persist user interface preferences (such as dark mode selection, auto-expand preferences), user course inclusion toggles for ATAR calculations, and a local cache of running subject averages to detect grade updates on the Connect portal. All data is strictly kept on the user's local machine. |
