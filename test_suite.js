@@ -7633,7 +7633,7 @@ runTest('Test 162: Auto-login only fires for a saved password or browser autofil
   assert.ok(js.includes("=== false || userTyped) return;"), 'auto-login must not fire once the user typed');
 });
 
-runTest('Test 163: Liquid Glass rounds the notice card host and Library table wrapper, draws paginator pills without changing their box; icon buttons keep native padding', () => {
+runTest('Test 163: Liquid Glass rounds the notice card host and Library table wrapper, paginators have no pill; icon buttons keep native padding', () => {
   const styles = path.join(BASE_DIR, 'src/theme/styles');
   const css = fs.readFileSync(path.join(styles, 'theme-glass-panels.css'), 'utf8');
   const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
@@ -7641,11 +7641,10 @@ runTest('Test 163: Liquid Glass rounds the notice card host and Library table wr
   assert.ok(!/cnt-stream-notice-card[^{]*\{[^}]*overflow/.test(css), 'the notice card host must not clip (it would cut off the elevation shadow)');
   assert.ok(cssHas(css, `${glass} .cdk-drop-list:has(> table.mat-table) {\n  border-radius: 16px !important;\n  overflow: clip !important;`),
     'the Library table wrapper must be rounded and clipped with overflow: clip (hidden changes margin collapsing and its height)');
-  // Paginator pills keep their native box (theme parity audit): no padding or clip; the glass is a ::before past the edges
+  // Paginators keep their native box (theme parity audit): no padding or clip, and no glass pill around them
   assert.ok(!/padding/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')) && !/mat-paginator[^{]*\{[^}]*overflow/.test(css), 'paginator bars must not be padded or clipped');
-  const surface = fs.readFileSync(path.join(styles, 'theme-glass-surface.css'), 'utf8');
-  assert.ok(/mat-paginator,[\s\S]*?\)::before \{[\s\S]*?inset: 0 -16px;[\s\S]*?border-radius: 12px;/.test(surface),
-    'paginator pills must be drawn by a ::before reaching 16px past the box');
+  const surface = fs.readFileSync(path.join(styles, 'theme-glass-surface.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.ok(!/paginator-container|mat-paginator/.test(surface), 'paginators sit on the page: no glass pill or segmented pill');
   assert.ok(!/\[class\*=/.test(css), 'glass panel rules must name explicit elements/classes');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('theme-glass-panels.css'), 'theme-glass-panels.css must be registered in manifest.json');
   const buttons = fs.readFileSync(path.join(styles, 'theme-buttons.css'), 'utf8');
@@ -7668,8 +7667,8 @@ runTest('Test 164: Liquid Glass gives Class pages one glass recipe for banners, 
     }
   }
   const surface = fs.readFileSync(path.join(styles, 'theme-glass-surface.css'), 'utf8');
-  assert.ok(cssHas(surface, 'cnt-scope-intro-class,') && cssHas(surface, '.connect-paginator-container,') && cssHas(surface, 'mat-toolbar.c-category-bar,') && cssHas(surface, 'p.mat-h2,'),
-    'the class banner, Page N of M box, category bars and section headings must share the glass recipe');
+  assert.ok(cssHas(surface, 'cnt-scope-intro-class,') && cssHas(surface, 'mat-toolbar.c-category-bar,') && cssHas(surface, 'p.mat-h2,'),
+    'the class banner, category bars and section headings must share the glass recipe');
   assert.ok(cssHas(surface, 'backdrop-filter: var(--cx-gl-blur) !important;') && cssHas(surface, 'border-radius: 16px !important;'), 'glass surfaces must blur and round to 16px');
   assert.ok(cssHas(surface, 'cnt-paginator:has(.c-empty-content)'), 'empty states must become one glass card');
   const pages = fs.readFileSync(path.join(styles, 'theme-glass-class-pages.css'), 'utf8');
@@ -7680,8 +7679,14 @@ runTest('Test 164: Liquid Glass gives Class pages one glass recipe for banners, 
   assert.ok(cssHas(empty, '.connectea-dark cnt-paginator:has(.c-empty-content) {\n  justify-content: center !important;') && cssHas(empty, '.eds-c-empty-content'),
     'empty states must be centred in every dark theme, not only Liquid Glass');
   const bars = fs.readFileSync(path.join(styles, 'theme-control-bars.css'), 'utf8');
-  assert.ok(cssHas(bars, '.connectea-dark :is(mat-paginator, .connect-paginator-container, .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) {') && cssHas(bars, 'html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(mat-paginator'),
-    'paginators and the Select All row need their own surface in dark themes and in Light with a wallpaper');
+  assert.ok(cssHas(bars, '.connectea-dark .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {') && cssHas(bars, 'html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {'),
+    'the Select All row needs its own surface in dark themes and in Light with a wallpaper');
+  // Paginators have no panel: bar, Page N of M box and the bar wrapper are clear (empty-state and table wrappers keep theirs)
+  const clear = (bars.split('}').find(b => b.includes('#cx-specificity-anchor, mat-paginator')) || '');
+  assert.ok(clear.includes(':is(html.connectea-dark, html[data-connectea-has-custom-bg="true"])') && clear.includes('.connect-paginator-container') &&
+    clear.includes('cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))') &&
+    /background-color: transparent !important;/.test(clear) && /box-shadow: none !important;/.test(clear), 'paginators sit on the page with no panel');
+  assert.ok(!/(mat-paginator|paginator-container)[^{}]*\{[^}]*rgba\(255, 255, 255, 0\.9\)/.test(bars), 'Light with a wallpaper puts no white panel behind paginators');
   for (const file of ['theme-empty-states.css', 'theme-control-bars.css']) {
     assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes(file), `${file} must be registered in manifest.json`);
   }
@@ -8120,8 +8125,8 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   const bars = (surface.match(/cnt-scope-intro-class,\s*mat-toolbar\.c-category-bar[\s\S]*?\{([^}]*)\}/) || [])[1] || '';
   assert.ok(/border-radius: 0 !important/.test(bars), 'banner, category bars and toolbars must be square');
   assert.ok(surface.includes(G + ' cnt-paginator:has(.c-empty-content) {\n  border-radius: 16px !important;'), 'the empty-state card stays rounded');
-  // Paginator pill: inner bar outranks the dark paginator surface
-  assert.ok(surface.includes(':is(#cx-specificity-anchor, mat-paginator, .mat-paginator, .connect-paginator-container)'), 'paginators (Angular and Library) must be clear inside their glass pill');
+  // Paginators (Angular and Library) have no glass pill: they sit on the page (theme-control-bars.css)
+  assert.ok(!/mat-paginator/.test(surface.replace(/\/\*[\s\S]*?\*\//g, '')), 'paginators must not get a glass pill');
   // Reading views beat the wallpaper and include discussion views
   const base = read('styles/theme-surface-base.css');
   assert.ok(base.includes('html.connectea-dark[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]),'),
@@ -8819,19 +8824,15 @@ runTest('Classes without a final letter show their predicted Low / Mid / High re
   assert.ok(manifest.content_scripts.some(g => (g.css || []).includes('src/cohort/cohort-upcoming.css')), 'cohort-upcoming.css is registered');
 });
 
-runTest('Test 195: Liquid Glass Library and Learners bars share the table glass; paginator pills never overlap or run off the page', () => {
+runTest('Test 195: Liquid Glass Library and Learners bars share the table glass; paginators have no pill', () => {
   const surface = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-surface.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   const G = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
   const rule = sel => (surface.split('}').find(b => b.split('{')[0].trim() === `${G} ${sel}`) || '').split('{')[1] || '';
   // One material: the bars, pills and headings use the tables' surface token, not a denser canvas mix
   assert.ok(/--cx-gl-fill: var\(--cx-surface-bg, /.test(surface) && !/--cx-gl-fill: color-mix/.test(surface), 'glass bars use the table glass fill');
-  // Paginator bars reach left only (their right edge stays with the table and on the page)
-  assert.ok(/inset: 0 0 0 -16px;/.test(rule('mat-paginator.mat-paginator::before')), 'paginator pills reach left only');
-  // "Page N of M" + paginator: one segmented pill meeting in Connect's gap, outer corners rounded
-  assert.ok(/inset: 0 -10px 0 -16px;/.test(rule('.connect-paginator-container:has(+ mat-paginator)::before')) &&
-    /border-radius: 12px 0 0 12px;/.test(rule('.connect-paginator-container:has(+ mat-paginator)::before')), 'the Page box is the left half of the pill');
-  assert.ok(/inset: 0 0 0 -16px;/.test(rule('.connect-paginator-container + mat-paginator::before')) &&
-    /border-radius: 0 12px 12px 0;/.test(rule('.connect-paginator-container + mat-paginator::before')), 'the paginator after it is the right half');
+  // Paginators sit on the page: no pill, no segmented "Page N of M" pill
+  assert.ok(!rule('mat-paginator.mat-paginator::before') && !rule('.connect-paginator-container:has(+ mat-paginator)::before') &&
+    !rule('.connect-paginator-container + mat-paginator::before'), 'paginators have no glass pill');
   // Section headings hug their title: Teachers and Students match, and the pill never spans the row under the paginator
   assert.ok(/width: fit-content;/.test(rule('p.mat-h2')) && /inset: -6px -16px;/.test(rule('p.mat-h2::before')), 'headings are pills hugging their title');
   assert.ok(!/border-radius: 0;/.test(rule('p.mat-h2::before')), 'headings are no longer square bars of different widths');

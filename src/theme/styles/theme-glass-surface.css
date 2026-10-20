@@ -1,7 +1,7 @@
 /**
  * Connectify Theme: the shared Liquid Glass recipe for bars, banners and section headings that Connect leaves
- * flat or without any surface (class banner, "Page N of M" paginator, category bars, Library toolbar,
- * Learners headings, empty states). Liquid Glass only; no margins or padding, so boxes keep their native size.
+ * flat or without any surface (class banner, category bars, Library toolbar, Learners headings, empty
+ * states). Paginators have no panel (theme-control-bars.css). Liquid Glass only; no margins or padding, so boxes keep their native size.
  */
 
 /* The fill is the tables' and tiles' own glass surface, so bars, pills and the table they belong to read as one material */
@@ -41,12 +41,10 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   padding-inline: 20px;
 }
 
-/* Pills that hug their content ("Page N of M", paginator bars, Learners headings, the Content empty state): the
+/* Pills that hug their content (Learners headings, the Content empty state): the
    glass is a ::before reaching past the box, so the text gets breathing room from the 12px corners without any
    padding or margin that would move Connect's layout */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .connect-paginator-container,
-  mat-paginator,
   p.mat-h2,
   .eds-c-empty-content
 ) {
@@ -59,8 +57,6 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 }
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .connect-paginator-container,
-  mat-paginator,
   p.mat-h2,
   .eds-c-empty-content
 )::before {
@@ -76,25 +72,6 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   pointer-events: none;
 }
 
-/* Paginator bars end flush with the table's right edge and keep Connect's own space after "Showing ...", so the
-   glass only reaches left: reaching right ran past the table and off the page (Library) */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-paginator.mat-paginator::before {
-  inset: 0 0 0 -16px;
-}
-
-/* "Page N of M" followed by its paginator is one segmented pill: the two halves meet in Connect's gap between them
-   instead of overlapping, and only the outer corners are rounded */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connect-paginator-container:has(+ mat-paginator)::before {
-  inset: 0 -10px 0 -16px;
-  border-radius: 12px 0 0 12px;
-}
-
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connect-paginator-container + mat-paginator::before {
-  inset: 0 0 0 -16px;
-  border-radius: 0 12px 12px 0;
-  box-shadow: var(--cx-gl-edge), inset 1px 0 0 color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent);
-}
-
 /* Learners section headings are pills that hug the title (the Teachers heading was a full-width block while
    Students, in its accordion header, was not; both now match), starting 16px before the text */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) p.mat-h2 {
@@ -107,15 +84,6 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-empty-content::before {
   inset: -16px -24px;
-}
-
-/* A "Page N of M" box is one pill: the bar and its labels paint nothing of their own. The unused id
-   (#cx-specificity-anchor) outranks the dark paginator surface rule, whose :not(:has()) arguments weigh more */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  #cx-specificity-anchor, .mat-paginator-outer-container, .mat-paginator-container
-),
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, mat-paginator, .mat-paginator, .connect-paginator-container) {
-  background: transparent !important;
 }
 
 /* Empty states ("There are currently no ...") become one centred glass card */

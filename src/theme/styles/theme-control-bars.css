@@ -1,15 +1,15 @@
 /**
- * Connectify Theme: paginators, the Select All / Download row and their dropdowns sit on their own surface so
- * they stay readable on any canvas or wallpaper (dark themes use the surface token; Light uses a near-opaque
- * white panel only when a custom wallpaper is set). Only colours change here: margins, padding and sizes stay
- * native in every theme (Liquid Glass pads and rounds the paginator pills in theme-glass-panels.css).
+ * Connectify Theme: paginators have no panel of their own and sit straight on the page; the Select All / Download
+ * row and its dropdowns keep their own surface so they stay readable on any canvas or wallpaper (dark themes use
+ * the surface token; Light uses a near-opaque white panel only when a custom wallpaper is set). Only colours
+ * change here: margins, padding and sizes stay native in every theme.
  */
-.connectea-dark :is(mat-paginator, .connect-paginator-container, .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) {
+.connectea-dark .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(mat-paginator, .connect-paginator-container, .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) {
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {
   background-color: rgba(255, 255, 255, 0.9) !important;
   color: #334155 !important;
 }
@@ -18,6 +18,19 @@ html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(mat-paginator
   .mat-paginator-page-size-label, .mat-paginator-range-label, .connect-paginator-label, .mat-select-value, .mat-checkbox-label
 ) {
   color: #334155 !important;
+}
+
+/* Paginators sit on the page: the paging bar, its "Page N of M" box and the bar's wrapper paint no fill, edge or
+   shadow in every dark theme and in Light with a wallpaper (a wrapper holding a table or an empty state keeps its
+   own). The unused id outranks the paging bar fills in theme-dialogs-paginator.css, whose :not(:has()) weigh more */
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :is(
+  #cx-specificity-anchor, mat-paginator, .mat-paginator, .mat-paginator-container, .mat-paginator-outer-container, .connect-paginator-container,
+  cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content)),
+  cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content)) .container-fluid
+) {
+  background-color: transparent !important;
+  border-top-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* A disabled Download button reads as disabled, not as a faint ghost */
