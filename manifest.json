@@ -155,6 +155,7 @@
          ],
          "css": [
             "src/theme/styles/theme-tokens.css",
+            "src/theme/styles/theme-wallpaper-layer.css",
             "src/theme/styles/theme-surface-base.css",
             "src/theme/styles/theme-component-base.css",
             "src/theme/styles/theme-menu-actions.css",
@@ -203,6 +204,7 @@
             "src/system/scheduler.js",
             "src/theme/theme-auth.js",
             "src/theme/theme-custom-tokens.js",
+            "src/theme/theme-wallpaper-dim.js",
             "src/theme/theme-palettes.js",
             "src/theme/theme-registry.js",
             "src/theme/theme-custom-themes.js",

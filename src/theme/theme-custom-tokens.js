@@ -112,6 +112,8 @@
       root.removeAttribute('data-connectea-has-custom-bg');
       root.style.removeProperty('--cx-custom-bg-image');
     }
+    // Dim the wallpaper just enough for white text (theme-wallpaper-dim.js loads after this script and measures on its own)
+    window.ConnectifyWallpaperDim?.update(bgUrl && !isAuthDisabled() ? bgUrl : null);
   }
 
   function clearCustomBackground() {

@@ -109,7 +109,7 @@ Connect is built on Vaadin / Liferay SPA navigation where the DOM re-renders asy
 
 ### Global Theme & Customization Pipeline
 Themes execute site-wide across all Connect pages (`https://connect.det.wa.edu.au/*`):
-- **Scripts**: `theme-auth.js` $\to$ `theme-custom-tokens.js` $\to$ `theme-palettes.js` $\to$ `theme-registry.js` $\to$ `theme-custom-themes.js` $\to$ customizer (`theme-color-utils.js`, `theme-oklch.js`, `theme-token-derive.js`, `theme-glass-tokens.js`, `theme-wallpaper-presets.js`, `theme-wallpaper-fit.js`, `theme-wallpaper-migrate.js`, `theme-customizer-markup.js`, `theme-customizer-popover.js`, `theme-customizer-controls.js`, `theme-customizer.js`) $\to$ `theme-surface-adapter.js` $\to$ `theme-toggle.js` $\to$ `theme-menu.js` $\to$ `theme.js` $\to$ `theme-request.js` (page-world theme requests, used by the audit).
+- **Scripts**: `theme-auth.js` $\to$ `theme-custom-tokens.js` $\to$ `theme-wallpaper-dim.js` $\to$ `theme-palettes.js` $\to$ `theme-registry.js` $\to$ `theme-custom-themes.js` $\to$ customizer (`theme-color-utils.js`, `theme-oklch.js`, `theme-token-derive.js`, `theme-glass-tokens.js`, `theme-wallpaper-presets.js`, `theme-wallpaper-fit.js`, `theme-wallpaper-migrate.js`, `theme-customizer-markup.js`, `theme-customizer-popover.js`, `theme-customizer-controls.js`, `theme-customizer.js`) $\to$ `theme-surface-adapter.js` $\to$ `theme-toggle.js` $\to$ `theme-menu.js` $\to$ `theme.js` $\to$ `theme-request.js` (page-world theme requests, used by the audit).
 - **Stylesheets**: `src/theme/styles/*.css` in manifest order, ending with `theme.css` (Liquid Glass geometry and opaque solid-theme panels).
 
 ---

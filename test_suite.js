@@ -9264,6 +9264,40 @@ runTest('Test 204: The customizer hue slider covers 0-360 across the whole track
   }
 });
 
+runTest('Test 205: The wallpaper is a fixed 2px-blurred layer dimmed to keep white text >= 4.5:1; labels get a 1px shadow', () => {
+  const win = {};
+  new Function('window', 'document', 'localStorage', origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-wallpaper-dim.js'), 'utf8'))(win, {}, {});
+  const D = win.ConnectifyWallpaperDim;
+  const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const contrastWithWhite = (rgb, a) => 1.05 / (0.2126 * lin(rgb[0] * (1 - a)) + 0.7152 * lin(rgb[1] * (1 - a)) + 0.0722 * lin(rgb[2] * (1 - a)) + 0.05);
+  const px = list => Uint8ClampedArray.from(list.flatMap(c => [...c, 255]));
+  assert.strictEqual(D.dimFor(px([[20, 24, 32], [60, 40, 30]])), 0, 'a wallpaper already dark enough is not dimmed');
+  for (const pixels of [[[255, 255, 255]], [[246, 213, 184], [242, 217, 230]], [[255, 255, 0], [10, 10, 10]], [[120, 200, 255]]]) {
+    const a = D.dimFor(px(pixels));
+    assert.ok(a > 0 && a < 1, `bright wallpapers are dimmed (${a})`);
+    for (const rgb of pixels) assert.ok(contrastWithWhite(rgb, a) >= 4.5, `white text keeps >= 4.5:1 on ${rgb} at dim ${a}`);
+    const brightest = pixels.reduce((m, c) => (contrastWithWhite(c, 0) < contrastWithWhite(m, 0) ? c : m));
+    assert.ok(contrastWithWhite(brightest, a - 0.03) < 4.6, `the dim is the least that works, not a blanket darkening (${a})`);
+  }
+  assert.notStrictEqual(D.keyOf('data:image/png;base64,AAAA'), D.keyOf('data:image/png;base64,AAAB'), 'each wallpaper is cached under its own key');
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-wallpaper-layer.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const rule = sel => (css.split('}').find(b => b.split('{')[0].trim() === sel) || '').split('{')[1] || '';
+  const layer = rule('html[data-connectea-has-custom-bg="true"]::before');
+  assert.ok(/position: fixed;/.test(layer) && /inset: -6px;/.test(layer) && /z-index: -1;/.test(layer) && /filter: blur\(2px\);/.test(layer) &&
+    /rgba\(0, 0, 0, var\(--cx-wallpaper-dim-active, 0\)\)/.test(layer) && /var\(--cx-custom-bg-image\) center center \/ cover no-repeat;/.test(layer),
+    'the wallpaper is one fixed layer, blurred 2px, under a black overlay at the measured dim');
+  assert.ok(/--cx-wallpaper-dim-active: var\(--cx-wallpaper-dim, /.test(rule('html.connectea-dark[data-connectea-has-custom-bg="true"]:not([data-connectea-tone="light"])')),
+    'only light-ink themes dim the wallpaper');
+  assert.ok(/background: transparent !important;/.test(rule('html[data-connectea-has-custom-bg="true"] :is(#cx-specificity-anchor, body)')), 'body never covers the layer');
+  assert.ok(/text-shadow: 0 1px 1px var\(--cx-label-shadow, /.test(css) && /\.mat-paginator-range-label, \.connect-paginator-label/.test(css), 'labels (paginators included) get a 1px shadow with a wallpaper');
+  assert.ok(/--cx-label-shadow: rgba\(255, 255, 255/.test(rule('html[data-connectea-has-custom-bg="true"]:is(:not(.connectea-dark), [data-connectea-tone="light"])')), 'dark ink gets a light shadow');
+  assert.ok(!/custom-bg-image\) center center \/ cover no-repeat fixed/.test(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-tokens.css'), 'utf8')), 'html and body no longer paint the wallpaper themselves');
+  const tokens = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-custom-tokens.js'), 'utf8');
+  assert.ok(tokens.includes('window.ConnectifyWallpaperDim?.update('), 'every wallpaper change is measured');
+  const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('theme-wallpaper-dim.js') > manifest.indexOf('theme-custom-tokens.js') && manifest.indexOf('theme-wallpaper-layer.css') > manifest.indexOf('styles/theme-tokens.css'), 'registered after the token files');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

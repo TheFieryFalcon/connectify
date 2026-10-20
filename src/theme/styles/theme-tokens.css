@@ -162,11 +162,7 @@ html.connectea-dark,
   opacity: 1 !important;
 }
 
-[data-connectea-has-custom-bg="true"] body,
-/* The root paints too, so a page shorter than the window shows wallpaper below it, not the canvas */
-html.connectea-dark[data-connectea-has-custom-bg="true"], html[data-connectea-has-custom-bg="true"]:not(.connectea-dark) {
-  background: var(--cx-custom-bg-image) center center / cover no-repeat fixed !important;
-}
+/* The wallpaper itself is a fixed, blurred and dimmed layer under the page (theme-wallpaper-layer.css) */
 [data-connectea-has-custom-bg="true"] :is(.cvr-c-app-layout, .cvr-c-app-layout__body, #main-content, .v-app, .v-ui, .v-scrollable):has(.eds-c-tile, .cvr-c-tile) {
   background-color: transparent !important;
 }
