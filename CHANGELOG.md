@@ -29,6 +29,8 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Liquid Glass notices and discussions sit straight on your wallpaper instead of on a frosted reading panel.
 - Notice and dialog text uses the theme's main text colour (cream in Quantum Dark) instead of its secondary colour.
 - Full-mode colours you set in the Theme Customizer win over the Basic colours and are kept when you switch back to Basic mode.
+- Picking a preset in the Theme Customizer keeps all of its colours (e.g. Quantum Dark's green secondary text) instead of deriving them from its six Basic colours.
+- Changing a Basic colour re-derives the preset colours that come from it.
 - Text colours you set in a custom theme are used exactly as set.
 - Classes "View All" buttons use the theme's button colours.
 - The coloured line under card headers uses the theme's border colour.
@@ -61,7 +63,6 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - The Theme Customizer's hue slider stopped short of both ends of its track.
 - In Light mode, the Theme Customizer's title and Live Preview heading took Connect's maroon heading colour.
 - In Light mode, the Theme Customizer's labels took Connect's grey label colour.
-- Picking Quantum Dark as a starting point in the Theme Customizer lost its green secondary text.
 - The Maintenance Notice lost its red header in dark themes.
 - Liquid Glass drew an extra strip under the Maintenance Notice.
 

@@ -9524,32 +9524,60 @@ runTest('Test 214: Notice and dialog detail views read in the primary ink (cream
   assert.ok(/data-connectea-theme="quantum"[^}]*--cx-text-primary: #fbf1c7;/.test(tokens), 'Quantum Dark\'s primary ink is cream');
 });
 
-runTest('Test 215: Picking the Quantum Dark preset in the customizer keeps its green secondary text as a Full-mode override', () => {
+runTest('Test 215: A preset picked in the customizer keeps every colour it sets until a Basic token it derives from changes', () => {
   const themeDir = path.join(SRC_DIR, 'theme');
   const win = {};
   for (const f of ['theme-color-utils.js', 'theme-oklch.js', 'theme-token-derive.js', 'theme-palettes.js', 'theme-customizer-tokens.js']) {
     new Function('window', origReadFileSync.call(fs, path.join(themeDir, f), 'utf8'))(win);
   }
   const T = win.ConnectifyCustomizerTokens;
-  const presets = win.ConnectifyThemePalettes.BUILTIN_PALETTES || win.ConnectifyThemePalettes;
+  const C = win.ConnectifyThemeColors;
+  const presets = win.ConnectifyThemePalettes.BUILTIN_PALETTES;
+  const pick = preset => {
+    const state = { mode: 'basic', tokens: {}, overrides: new Set() };
+    T.fromPreset(state, preset, C.pickColors(preset));
+    return state;
+  };
+  // Every preset's own colours are kept as set (overrides), not derived from its six Basic tokens
+  for (const [id, preset] of Object.entries(presets)) {
+    const state = pick(preset);
+    for (const [key, value] of Object.entries(C.pickColors(preset))) {
+      assert.strictEqual(state.tokens[key], value, `${id} keeps its ${key}`);
+      if (!T.isBasic(key)) assert.ok(state.overrides.has(key), `${id}'s ${key} counts as a colour you set`);
+    }
+  }
   const quantum = presets.quantum;
-  assert.deepStrictEqual(quantum.keeps, ['textSecondary'], 'Quantum Dark keeps its secondary text in the customizer');
-  const tokens = win.ConnectifyThemeColors.pickColors(quantum);
-  assert.notStrictEqual(T.derived(tokens).textSecondary, '#b8bb26', 'the cream primary text alone would derive a different secondary');
-  const state = { mode: 'basic', tokens: {}, overrides: new Set() };
-  T.fromPreset(state, quantum, tokens);
-  assert.strictEqual(state.tokens.textSecondary, '#b8bb26', 'the preset\'s green secondary text is inherited');
-  assert.deepStrictEqual([...state.overrides], ['textSecondary'], 'it is a Full-mode override (↺ resets it)');
+  assert.notStrictEqual(T.derived(C.pickColors(quantum)).textSecondary, '#b8bb26', 'the cream primary text alone would derive a different secondary');
+  const state = pick(quantum);
+  assert.strictEqual(state.tokens.textSecondary, '#b8bb26', 'Quantum Dark\'s green secondary text is inherited');
+  assert.strictEqual(T.savedColors(state).textSecondary, '#b8bb26', 'a theme saved from the preset stores its colours');
+  // Changing a Basic token re-derives the Full tokens derived from it; the rest keep the preset's colours
   T.set(state, 'textPrimary', '#ffffff');
   T.apply(state);
-  assert.strictEqual(state.tokens.textSecondary, '#b8bb26', 'editing a Basic token keeps it');
-  assert.strictEqual(state.tokens.surfaceHover, T.derived(state.tokens).surfaceHover, 'tokens the preset does not keep still follow the Basic tokens');
-  assert.ok(T.savedColors(state).textSecondary === '#b8bb26', 'a theme saved from the preset stores it');
-  const dark = { mode: 'basic', tokens: {}, overrides: new Set() };
-  T.fromPreset(dark, presets.dark, win.ConnectifyThemeColors.pickColors(presets.dark));
-  assert.strictEqual(dark.overrides.size, 0, 'presets that keep nothing start with no overrides');
+  const d = T.derived(state.tokens);
+  for (const key of ['textSecondary', 'textMuted', 'tileLinkColor', 'buttonText']) {
+    assert.strictEqual(state.tokens[key], d[key], `${key} follows the new primary text`);
+    assert.ok(!state.overrides.has(key), `${key} is derived again`);
+  }
+  for (const key of ['surfaceHover', 'surfaceElevated', 'borderSubtle', 'canvasSubtle', 'buttonHover']) {
+    assert.strictEqual(state.tokens[key], quantum[key], `${key} does not derive from the primary text, so it keeps the preset colour`);
+  }
+  T.set(state, 'surface', '#3a3634');
+  T.apply(state);
+  assert.strictEqual(state.tokens.surfaceHover, T.derived(state.tokens).surfaceHover, 'changing the surface re-derives the surface tokens');
+  // Colours the user sets still win over the Basic tokens, and ↺ hands a preset colour back to them
+  const own = pick(quantum);
+  T.set(own, 'textMuted', '#00ff00');
+  T.set(own, 'textPrimary', '#ffffff');
+  T.apply(own);
+  assert.strictEqual(own.tokens.textMuted, '#00ff00', 'a colour the user set survives a Basic change');
+  T.reset(own, 'surfaceHover');
+  assert.strictEqual(own.tokens.surfaceHover, T.derived(own.tokens).surfaceHover, 'reset derives a preset colour from the Basic tokens');
+  // A derived preset (Liquid Glass) sets only Basic tokens, so nothing is an override
+  assert.strictEqual(pick(presets['liquid-glass-clear']).overrides.size, 0, 'a derived preset starts with no overrides');
+  assert.ok(!('keeps' in quantum), 'no per-preset list of kept tokens');
   const core = origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer.js'), 'utf8');
-  assert.ok(core.includes('tokenSet.fromPreset(state, preset, themeTokens(preset))'), 'the preset select goes through fromPreset');
+  assert.ok(core.includes('tokenSet.fromPreset(state, preset, themeTokens(preset))') && core.includes('state.presetBase = {};'), 'the preset select goes through fromPreset; opening clears the preset colours');
 });
 
 Promise.all(pendingTestPromises).then(() => {

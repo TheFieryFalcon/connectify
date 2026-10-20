@@ -165,6 +165,7 @@
         state.tokens = tokenSet.savedColors(state);
         largeWallpaper = importTheme(state, theme);
         state.overrides = tokenSet.overridesOf(state.tokens);
+        state.presetBase = {};
       } catch (err) {
         tokenSet.apply(state);
         alert(window.ConnectifyThemeImport.failText(err));

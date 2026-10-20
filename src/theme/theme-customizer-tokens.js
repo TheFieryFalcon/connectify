@@ -4,7 +4,8 @@
  * The 6 Basic tokens drive every other token (theme-token-derive.js), except the Full-mode tokens the user set
  * themselves: those are overrides and win in both modes, so switching to Basic and editing a Basic token never
  * replaces them. A theme is saved as its Basic tokens plus its overrides; whatever it leaves out is derived again
- * when it is applied or reopened. Exposes window.ConnectifyCustomizerTokens.
+ * when it is applied or reopened. A picked preset's own colours are overrides too, but each gives way to the
+ * derived value once a Basic token it derives from changes (state.presetBase). Exposes window.ConnectifyCustomizerTokens.
  */
 (() => {
   'use strict';
@@ -30,9 +31,13 @@
   /** Re-derives every Full token that is not an override (called on each refresh, in Basic and Full mode). */
   function apply(state) {
     const overrides = state.overrides || (state.overrides = new Set());
+    const base = state.presetBase || {};
     const d = derived(state.tokens);
     for (const key of COLOR_KEYS()) {
-      if (!isBasic(key) && !overrides.has(key) && d[key]) state.tokens[key] = d[key];
+      if (isBasic(key) || !d[key]) continue;
+      // A preset colour stays until a Basic token it derives from changes what it derives to
+      if (base[key] && !same(base[key], d[key])) { overrides.delete(key); delete base[key]; }
+      if (!overrides.has(key)) state.tokens[key] = d[key];
     }
     return state.tokens;
   }
@@ -41,26 +46,32 @@
   function adopt(state, tokens) {
     state.tokens = { ...tokens };
     state.overrides = overridesOf(state.tokens);
+    state.presetBase = {};
     return apply(state);
   }
 
-  /** A preset picked as a starting point: its Basic tokens drive the rest, except the Full tokens it keeps. */
+  /** A preset picked as a starting point: every colour it sets is kept as set, until its Basic tokens change. */
   function fromPreset(state, preset, tokens) {
     state.tokens = { ...tokens };
-    state.overrides = new Set((preset?.keeps || []).filter(k => !isBasic(k) && preset[k]));
-    state.overrides.forEach(k => { state.tokens[k] = preset[k]; });
+    const own = window.ConnectifyThemeColors.pickColors(preset);
+    const d = derived(state.tokens);
+    state.overrides = new Set(Object.keys(own).filter(k => !isBasic(k) && d[k]));
+    state.presetBase = Object.fromEntries([...state.overrides].map(k => [k, d[k]]));
     return apply(state);
   }
 
   /** A colour picked for a token; a Full token becomes an override. */
   function set(state, key, value) {
     state.tokens[key] = value;
-    if (!isBasic(key)) (state.overrides || (state.overrides = new Set())).add(key);
+    if (isBasic(key)) return;
+    (state.overrides || (state.overrides = new Set())).add(key);
+    if (state.presetBase) delete state.presetBase[key]; // the user's own colour, no longer the preset's
   }
 
   /** Hands a Full token back to the Basic tokens. */
   function reset(state, key) {
     state.overrides?.delete(key);
+    if (state.presetBase) delete state.presetBase[key];
     apply(state);
   }
 

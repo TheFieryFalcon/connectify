@@ -143,7 +143,7 @@
     $('#cx-preset-select').onchange = e => {
       const preset = getPresets()[e.target.value];
       if (!preset) return;
-      // A preset is a starting point of 6 Basic colours: every other token follows them, except the ones it keeps
+      // Every colour the preset sets is kept as set, until a Basic token it derives from changes
       tokenSet.fromPreset(state, preset, themeTokens(preset));
       state.emoji = preset.icon || preset.emoji || state.emoji;
       state.liquidGlass = Boolean(preset.liquidGlass);
@@ -219,6 +219,7 @@
     });
     // Saved Full tokens that differ from what the Basic tokens derive stay as the user set them
     state.overrides = themeToEdit?.colors ? tokenSet.overridesOf(state.tokens) : new Set();
+    state.presetBase = {};
     tokenSet.apply(state);
 
     modalEl = document.createElement('div');
