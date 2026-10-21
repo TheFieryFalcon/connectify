@@ -7626,8 +7626,11 @@ runTest('Test 161: A dialog and its padding regions share one surface; a table-w
 
 runTest('Test 162: Auto-login only fires for a saved password or browser autofill, never for typed input', () => {
   const js = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login.js'), 'utf8');
-  assert.ok(js.includes("':autofill'") && js.includes("':-webkit-autofill'"), 'auto-login must detect browser autofill in Firefox and Chrome');
+  // Chromium (Chrome, Dia) matches :autofill while it still withholds the password value: submitting then sends an empty password
+  assert.ok(!/['"]:(-webkit-)?autofill['"]/.test(js) && js.includes("const isFilled = el => el.value.trim() !== '';"),
+    'auto-login must wait for readable credential values, never treat :autofill alone as filled');
   assert.ok(js.includes('isFilled(userField) && isFilled(passField)'), 'auto-login must require both credential fields to be filled');
+  assert.ok(js.includes("passField.addEventListener('input', attemptLogin)"), 'the browser releasing an autofilled value must retry the login');
   assert.ok(js.includes("field.addEventListener('keydown', markTyped)") && js.includes("field.addEventListener('paste', markTyped)"),
     'typing or pasting in a credential field must mark the form as user-entered');
   assert.ok(js.includes("=== false || userTyped) return;"), 'auto-login must not fire once the user typed');

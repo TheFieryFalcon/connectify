@@ -65,6 +65,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - In Light mode, the Theme Customizer's labels took Connect's grey label colour.
 - The Maintenance Notice lost its red header in dark themes.
 - Liquid Glass drew an extra strip under the Maintenance Notice.
+- Auto-login failed with saved passwords in Chrome, Dia and other Chromium browsers: it pressed Log in before the browser had handed over the password.
 
 ## 3.2.3 (2026-10-18)
 

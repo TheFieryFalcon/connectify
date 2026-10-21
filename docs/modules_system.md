@@ -70,7 +70,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
   - Injects "Auto-login" toggle checkbox next to the login button.
   - Detects session timeout URLs and inactivity messages; pauses auto-login and displays warning notice `(Paused: session expired)`.
   - Prevents rapid looping via a 30-second loop guard.
-  - Fires only for a saved password / browser autofill (`:autofill`, `:-webkit-autofill`, or prefilled values); typing or pasting in a credential field disables it for that page.
+  - Fires only for a saved password / browser autofill once both values are readable (Chromium matches `:autofill` before releasing the password to the page; the release fires `input`, which retries); typing or pasting in a credential field disables it for that page.
 
 ---
 

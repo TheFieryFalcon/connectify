@@ -109,14 +109,9 @@
       // Only a saved password / browser autofill may log in: anything the user typed or pasted is left alone
       let userTyped = false;
       const markTyped = () => { userTyped = true; };
-      const isAutofilled = el => {
-        for (const sel of [':autofill', ':-webkit-autofill']) {
-          try { if (el.matches(sel)) return true; } catch (e) {}
-        }
-        return false;
-      };
-      // Chrome hides an autofilled password's value from scripts until the page is touched, so :autofill counts as filled
-      const isFilled = el => el.value.trim() !== '' || isAutofilled(el);
+      // Chromium matches :autofill before it releases a saved password's value to the page (and to a submitted form):
+      // only a readable value counts, and the release fires 'input', which retries the login
+      const isFilled = el => el.value.trim() !== '';
 
       const attemptLogin = () => {
         storageGet(['cx-autologin-enabled'], (res) => {
