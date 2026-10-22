@@ -53,7 +53,7 @@
       try { arr = JSON.parse(localStorage.getItem(key)); } catch {} // one bad entry must not hide the rest
       if (Array.isArray(arr)) arr.forEach(c => { if (typeof c === 'string' && c.trim()) names.add(c.trim()); });
     }
-    return Array.from(names);
+    return Array.from(names).filter(window.ConnectifyCategoryStore.isCategoryName);
   }
 
   function enrolledSubjects(baselines) {

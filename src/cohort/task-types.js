@@ -11,7 +11,7 @@
 
   if (window.ConnectifyTaskTypes) return;
 
-  const { defaultCategories } = window.ConnectifyCategoryStore;
+  const { defaultCategories, isCategoryName } = window.ConnectifyCategoryStore;
   const { normalize } = window.ConnectifyUtils;
 
   function cleanSubject(subjectName) {
@@ -47,7 +47,7 @@
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          const res = parsed.filter(Boolean);
+          const res = parsed.filter(isCategoryName);
           cachedClassCategories.set(subjKey, res);
           return res;
         }
@@ -59,7 +59,7 @@
 
   function addCustomCategoryForClass(subjectName, categoryName) {
     const cat = normalize(categoryName);
-    if (!cat) return;
+    if (!isCategoryName(cat)) return;
     const subjKey = cleanSubject(subjectName).toLowerCase();
     if (!subjKey) return;
 
@@ -87,10 +87,11 @@
   function getSavedTaskType(subjectName, taskName, labelsKey) {
     const overrides = getTaskTypeOverrides();
     const cleanSubj = cleanSubject(subjectName);
-    if (labelsKey && overrides[`${cleanSubj}::${labelsKey}`]) {
+    // An override picked from a damaged category list ("undefined") reads as Auto
+    if (labelsKey && isCategoryName(overrides[`${cleanSubj}::${labelsKey}`])) {
       return overrides[`${cleanSubj}::${labelsKey}`];
     }
-    if (taskName && overrides[`${cleanSubj}::${taskName}`]) {
+    if (taskName && isCategoryName(overrides[`${cleanSubj}::${taskName}`])) {
       return overrides[`${cleanSubj}::${taskName}`];
     }
     return undefined;

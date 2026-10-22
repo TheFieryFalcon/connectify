@@ -10236,6 +10236,73 @@ runTest('Test 226: Connect\'s missing overall row is restored in its own contain
   loadCohortViewIn(null);
 });
 
+runTest('Test 227: Settings saves each category under its own name; a set saved as "undefined" is repaired on load', () => {
+  const saved = {
+    Store: window.ConnectifyCategoryStore, Settings: window.ConnectifyCategorySettings, Types: window.ConnectifyTaskTypes, cats: window.cxCategories,
+    chrome: global.chrome, browser: global.browser
+  };
+  const ext = {};
+  global.chrome = { storage: { local: {
+    get: (keys, cb) => cb(Object.fromEntries(keys.filter(k => k in ext).map(k => [k, JSON.parse(JSON.stringify(ext[k]))]))),
+    set: obj => Object.assign(ext, JSON.parse(JSON.stringify(obj))),
+    remove: key => { delete ext[key]; }
+  } } };
+  delete global.browser;
+  const defaults = ['Exam', 'Test', 'Application', 'Essay', 'Take-Home'];
+  try {
+    // A student's storage after the old Save Changes: every row was written to updatedCats[undefined]
+    mockLocalStorage.clear();
+    const damaged = JSON.stringify({ undefined: { color: '#3498db', keywords: ['oral'] } });
+    mockLocalStorage.setItem('cx-categories', damaged);
+    mockLocalStorage.setItem('connectea:categories', damaged);
+    ext['cx-categories'] = JSON.parse(damaged);
+    mockLocalStorage.setItem('connectea:class_categories:economics atar year 11', JSON.stringify(['undefined', 'Fieldwork']));
+    mockLocalStorage.setItem('connectea:task_type_overrides', JSON.stringify({ 'Economics ATAR Year 11::Extended Answer': 'undefined' }));
+    // Shadowed, not deleted: an earlier test leaves window inheriting these from a prototype
+    window.ConnectifyCategoryStore = window.ConnectifyCategorySettings = window.ConnectifyTaskTypes = window.cxCategories = undefined;
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8'));
+    eval(fs.readFileSync(path.resolve(SRC_DIR, 'cohort/task-types.js'), 'utf8'));
+
+    const store = window.ConnectifyCategoryStore;
+    assert.deepStrictEqual(Object.keys(window.cxCategories), defaults, 'the damaged set loads as the defaults');
+    for (const key of ['cx-categories', 'connectea:categories']) {
+      assert.deepStrictEqual(Object.keys(JSON.parse(mockLocalStorage.getItem(key))), defaults, `${key} is repaired in place`);
+    }
+    assert.deepStrictEqual(Object.keys(ext['cx-categories']), defaults, 'the extension storage copy is repaired too');
+    const types = window.ConnectifyTaskTypes;
+    assert.deepStrictEqual(Object.keys(types.getCategories()), defaults, 'the Type dropdown lists the real categories');
+    assert.deepStrictEqual(types.getCustomCategoriesForClass('Economics ATAR Year 11 - Semester 2'), ['Fieldwork'], '"undefined" is no class category');
+    assert.strictEqual(types.getSavedTaskType('Economics ATAR Year 11', 'Extended Answer'), undefined, 'an "undefined" override reads as Auto');
+    types.addCustomCategoryForClass('Biology', 'undefined');
+    assert.deepStrictEqual(types.getCustomCategoriesForClass('Biology'), [], 'an "undefined" class category is never stored');
+    for (const bad of ['undefined', 'null', ' ', '', undefined, 3]) assert.strictEqual(store.isCategoryName(bad), false, `${String(bad)} is no category name`);
+    assert.deepStrictEqual(Object.keys(store.sanitize({ Fieldwork: { color: '#000', keywords: ['field'] }, undefined: {} })), ['Fieldwork', ...defaults], 'custom categories stay, defaults come back');
+    assert.strictEqual(store.sanitize(['Exam']), null, 'an array is no category set');
+
+    // Save Changes keeps every row under its own name with the keywords typed for it
+    store.saveCategories({ ...window.cxCategories, Fieldwork: { color: '#16a085', keywords: ['field'] } });
+    const settings = window.ConnectifyCategorySettings.createSettingsPanel();
+    settings.openCategories();
+    const wraps = settings.catPanel.querySelectorAll('.cx-cat-wrap');
+    assert.deepStrictEqual(wraps.map(w => w.dataset.cat), [...defaults, 'Fieldwork'], 'each row carries its category');
+    wraps.find(w => w.dataset.cat === 'Essay').querySelector('.cx-cat-keyword-input').value = 'essay, source analysis';
+    settings.catPanel.querySelector('#cx-cat-save').onclick();
+    const stored = JSON.parse(mockLocalStorage.getItem('cx-categories'));
+    assert.deepStrictEqual(Object.keys(stored), [...defaults, 'Fieldwork'], 'no category is lost or saved as "undefined"');
+    assert.deepStrictEqual(stored.Essay.keywords, ['essay', 'source analysis']);
+    assert.strictEqual(stored.Essay.color, '#9b59b6', 'colours are kept');
+    assert.deepStrictEqual(stored.Fieldwork.keywords, ['field']);
+    store.saveCategories({ undefined: { keywords: ['x'] } });
+    assert.deepStrictEqual(Object.keys(window.cxCategories), defaults, 'a save can never store "undefined"');
+  } finally {
+    window.ConnectifyCategoryStore = saved.Store; window.ConnectifyCategorySettings = saved.Settings;
+    window.ConnectifyTaskTypes = saved.Types; window.cxCategories = saved.cats;
+    global.chrome = saved.chrome;
+    if (saved.browser !== undefined) global.browser = saved.browser;
+    mockLocalStorage.clear();
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

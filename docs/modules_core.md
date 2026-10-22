@@ -85,7 +85,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Key Functions**:
   - `categorizeTask(taskName, allLabels)`: keyword then regex match on the name, then the labels; defaults to `'Take-Home'`.
   - `saveTaskTypeOverride(...)` / `getEffectiveType(subjectName, task, labelsKey)`: override wins over detection; saving refreshes the prediction cache.
-  - `getCustomCategoriesForClass` / `addCustomCategoryForClass`: per-class custom categories.
+  - `getCustomCategoriesForClass` / `addCustomCategoryForClass`: per-class custom categories. Names failing `ConnectifyCategoryStore.isCategoryName` (blank, `undefined`, `null`) are never stored or listed, and such an override reads as Auto.
   - `task-type-select.js`: `getTaskMeta(row)`, `updateTypeSelect(select, ...)`, `rescanAllAutoAssessments()` (also on `connectify-rescan-auto-types`, fired when extension storage returns different categories).
 - **Export**: `window.ConnectifyTaskTypes`.
 

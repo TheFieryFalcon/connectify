@@ -45,6 +45,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Saved predictions and results are rebuilt once after updating.
 
 ### Fixes
+- Saving assessment categories in Settings stored all of them as one category called "undefined", so every Type dropdown offered only "undefined". Categories now save under their own names, and a set damaged by this is repaired the next time a page loads (the five standard categories come back; a custom category saved over can't be recovered, so add it again).
 - Connect sometimes shows a class's "Semester 2 Cumulative Percent" heading with nothing under it (seen in Economics, with or without Connectify), so there was no subject average. Connectify now restores the row in Connect's own style with your average worked out from your marked tasks and their weightings, noted as worked out by Connectify, plus the usual statistics panel and class prediction. It shows even while the class is collapsed, and goes away as soon as Connect shows its own row.
 - Year in Progress lost its cohort mean line with "Show this semester's classes only" on, when a class was read before its charts had loaded. Means now come from the saved cohort statistics.
 - The outcome meter appeared on every subject's first marked assessment.

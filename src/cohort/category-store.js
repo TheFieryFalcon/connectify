@@ -19,6 +19,26 @@
   };
   const copyDefaults = () => JSON.parse(JSON.stringify(defaultCategories));
 
+  // Settings once saved every category under the key "undefined" (the save read a data-cat its rows never
+  // had), so "undefined" and "null" are never category names, wherever they were stored
+  const isCategoryName = name => typeof name === 'string' && !!name.trim() && !/^(?:undefined|null)$/i.test(name.trim());
+
+  /**
+   * A usable category set from stored data: entries without a real name or settings are dropped and missing
+   * defaults come back (Settings cannot delete a default, so a set without one was damaged). Null if unusable.
+   */
+  function sanitize(categories) {
+    if (!categories || typeof categories !== 'object' || Array.isArray(categories)) return null;
+    const clean = {};
+    for (const [name, data] of Object.entries(categories)) {
+      if (isCategoryName(name) && data && typeof data === 'object') clean[name] = data;
+    }
+    for (const [name, data] of Object.entries(defaultCategories)) {
+      if (!clean[name]) clean[name] = JSON.parse(JSON.stringify(data));
+    }
+    return clean;
+  }
+
   const getStorageApi = () => (typeof browser !== 'undefined' && browser?.storage) ? browser : (typeof chrome !== 'undefined' && chrome?.storage ? chrome : null);
   const extensionGet = (keys, cb) => {
     try {
@@ -50,11 +70,17 @@
   function resolveCategories() {
     try {
       const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
-      if (stored) window.cxCategories = JSON.parse(stored);
+      const parsed = stored ? JSON.parse(stored) : null;
+      const clean = sanitize(parsed);
+      if (clean) window.cxCategories = clean;
+      // A damaged set is repaired in place, so every later read gets the repaired one
+      if (parsed && JSON.stringify(clean) !== stored) writeLocal(clean || copyDefaults());
     } catch {}
     extensionGet(['cx-categories'], res => {
-      const saved = res?.['cx-categories'];
+      const raw = res?.['cx-categories'];
+      const saved = sanitize(raw);
       if (!saved) return;
+      if (JSON.stringify(saved) !== JSON.stringify(raw)) extensionSet({ 'cx-categories': saved });
       const changed = JSON.stringify(saved) !== JSON.stringify(window.cxCategories);
       window.cxCategories = saved;
       dropRetiredKeywords();
@@ -66,6 +92,7 @@
   }
 
   function saveCategories(categories) {
+    categories = sanitize(categories) || copyDefaults();
     window.cxCategories = categories;
     writeLocal(categories);
     extensionSet({ 'cx-categories': categories });
@@ -84,5 +111,5 @@
   if (!window.cxCategories) window.cxCategories = copyDefaults();
   resolveCategories();
 
-  window.ConnectifyCategoryStore = { defaultCategories, copyDefaults, resolveCategories, saveCategories, resetCategories };
+  window.ConnectifyCategoryStore = { defaultCategories, copyDefaults, isCategoryName, sanitize, resolveCategories, saveCategories, resetCategories };
 })();

@@ -114,7 +114,8 @@
   window.addEventListener('storage', e => {
     if (e.key === 'cx-categories' || e.key === 'connectea:categories') {
       try {
-        if (e.newValue) window.cxCategories = JSON.parse(e.newValue);
+        const saved = e.newValue && window.ConnectifyCategoryStore.sanitize(JSON.parse(e.newValue));
+        if (saved) window.cxCategories = saved;
       } catch {}
       invalidateTypesMemoryCache();
       rescanAllAutoAssessments();

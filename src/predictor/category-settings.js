@@ -22,6 +22,7 @@
     for (const [cat, data] of Object.entries(currentCats)) {
       const wrap = document.createElement('div');
       wrap.className = 'cx-cat-wrap';
+      wrap.dataset.cat = cat; // Save Changes reads each row's category from here
       wrap.style.cssText = 'display:flex;align-items:center;margin-bottom:10px;gap:8px;';
 
       const label = document.createElement('label');
