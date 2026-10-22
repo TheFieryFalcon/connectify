@@ -18,9 +18,9 @@
 
 /* One column grid for the whole card: Score / Rank / Average, then the five quantiles, then the meter (subgrid;
    browsers without it keep each group's fallback columns). On overall cards the head and prediction wrappers
-   step aside (display: contents) and SD joins the quantiles: one row of six without a class prediction; with
-   one, Predicted Low / Mid / High sit under wider Score / Rank / Average and the quantiles fill two rows of
-   three beside them (Minimum, Lower Quartile, Median / Upper Quartile, Maximum, SD) */
+   step aside (display: contents) and Minimum goes to the footer: one row of four quartile values without a
+   class prediction; with one, Predicted Low / Mid / High sit under wider Score / Rank / Average and the
+   quartile values sit two by two beside them (Lower Quartile, Median / Upper Quartile, Maximum) */
 .connectea-panel.connectea-xp-stats {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(5, minmax(60px, max-content)) auto !important;
@@ -28,10 +28,10 @@
   align-items: end !important;
 }
 .connectea-panel.connectea-xp-stats.connectea-xp-overall {
-  grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(6, minmax(48px, max-content)) !important;
+  grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(4, minmax(60px, max-content)) !important;
 }
 .connectea-panel.connectea-xp-stats.connectea-xp-overall:has(> .connectea-xp-prediction:not([hidden])) {
-  grid-template-columns: repeat(3, minmax(150px, max-content)) repeat(3, minmax(60px, max-content)) !important;
+  grid-template-columns: repeat(3, minmax(150px, max-content)) repeat(2, minmax(130px, max-content)) !important;
 }
 .connectea-xp-stats :is(.connectea-xp-head, .connectea-xp-prediction) {
   grid-column: 1 / -1 !important;

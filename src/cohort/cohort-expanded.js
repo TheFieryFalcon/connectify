@@ -4,11 +4,11 @@
  * With the Settings "Statistics Panels" option expanded (cohort-panel-view.js), a statistics panel is a wide,
  * short card: one row of Score / Rank / Average beside the five boxplot values (outcome meter at its end on
  * task rows), then a footer with SD, z-score and standing (Type dropdown, or the cohort size input on overall
- * rows). The quantile the result has reached is faintly tinted. Overall rows hold SD as a sixth cell beside
- * the quantiles (footer: z-score and standing) and put the class prediction's Low / Mid / High under Score /
- * Rank / Average, the quantiles then in two rows beside them; unmarked rows are one line of Low / Mid / High
- * beside what the prediction is based on. Skeletons are built once per
- * panel; fills only touch text and the Score colour step.
+ * rows). The quantile the result has reached is faintly tinted. Overall rows show the four quartile values
+ * (Minimum joins SD in the footer; below Q1 the tint stays on Q1) and put the class prediction's Low / Mid /
+ * High under Score / Rank / Average, the quartiles then two by two beside them; unmarked rows are one line
+ * of Low / Mid / High beside what the prediction is based on. Skeletons are built once per panel; fills only
+ * touch text and the Score colour step.
  * Exposes window.ConnectifyCohortExpanded.
  */
 (() => {
@@ -51,8 +51,9 @@
       score.classList.add('connectea-xp-score');
       const rankValue = createElement('span', 'connectea-xp-rank-value');
       rank.append(rankValue);
-      const quantiles = grid(overall ? [...QUANTILES, 'SD'] : QUANTILES, 'connectea-xp-grid--quantiles');
-      const sd = overall ? quantiles.values.pop() : null;
+      // Overall cards leave Minimum to the footer: quantile cells start at stats[first]
+      const first = overall ? 1 : 0;
+      const quantiles = grid(QUANTILES.slice(first), 'connectea-xp-grid--quantiles');
       head.append(top.dl, quantiles.dl);
       if (meter) head.append(meter);
       const { foot, summary } = footer();
@@ -66,7 +67,7 @@
         box.append(prediction);
       }
       box.append(foot);
-      return { score, rankValue, average, quantiles: quantiles.values, sd, foot, summary, prediction };
+      return { score, rankValue, average, quantiles: quantiles.values, first, foot, summary, prediction };
     }
 
     /** The prediction card on an unmarked row: Low / Mid / High beside the basis and the Type dropdown. */
@@ -97,10 +98,17 @@
       else if (el.getAttribute('data-cx-score-step') !== step) el.setAttribute('data-cx-score-step', step);
     }
 
-    /** Tints the highest quantile the mark has reached (none below the minimum or without statistics). */
-    function markReached(cells, mark, stats) {
+    /**
+     * Tints the highest quantile cell the mark has reached; cells start at stats[first]. Without statistics
+     * nothing is tinted; below the first cell, task cards (first 0: below the minimum) tint nothing and
+     * overall cards (first 1) keep the tint on Q1.
+     */
+    function markReached(cells, mark, stats, first = 0) {
       let reached = -1;
-      if (Number.isFinite(mark) && stats) stats.forEach((v, i) => { if (Number.isFinite(v) && mark >= v) reached = i; });
+      if (Number.isFinite(mark) && stats) {
+        stats.forEach((v, i) => { if (Number.isFinite(v) && mark >= v) reached = i; });
+        reached = first ? Math.max(reached, first) - first : reached;
+      }
       cells.forEach((el, i) => el.parentElement.classList.toggle('connectea-xp-cell--reached', i === reached));
     }
 
@@ -121,18 +129,16 @@
       setStep(xp.score, Number.isFinite(mark) ? step : null);
       const parts = Number.isFinite(mark) ? [] : ['Not marked'];
       if (!data) {
-        for (const el of [xp.rankValue, xp.average, ...xp.quantiles, xp.sd]) if (el) setText(el, DASH);
+        for (const el of [xp.rankValue, xp.average, ...xp.quantiles]) setText(el, DASH);
         markReached(xp.quantiles, NaN, null);
         parts.push('Cohort statistics unavailable');
       } else {
-        xp.quantiles.forEach((el, i) => setText(el, percent(stats[i])));
-        markReached(xp.quantiles, mark, stats);
+        xp.quantiles.forEach((el, i) => setText(el, percent(stats[i + xp.first])));
+        markReached(xp.quantiles, mark, stats, xp.first);
         setText(xp.average, percent(data.mean));
         setText(xp.rankValue, rankText(data, isOverall, userSize, estimatedSize, cohortSize));
-        // Overall cards show SD as a cell beside the quantiles
-        if (xp.sd) setText(xp.sd, math().formatPercentage(data.sd));
-        else parts.push(`SD ${math().formatPercentage(data.sd)}`);
-        parts.push(`Z-Score ${Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A'}`);
+        if (xp.first) parts.push(`Minimum ${percent(stats[0])}`);
+        parts.push(`SD ${math().formatPercentage(data.sd)}`, `Z-Score ${Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A'}`);
         const standing = math().standing(data.p);
         if (standing) parts.push(standing);
         if (data.rank === undefined) parts.push('Cohort size needed');

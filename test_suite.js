@@ -10007,7 +10007,7 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   loadCohortViewIn(null);
 });
 
-runTest('Test 223: Expanded overall cards hold SD beside the quantiles, the cohort input in the footer and the class prediction; subjects mode keeps tasks compact', () => {
+runTest('Test 223: Expanded overall cards show the four quartile values, Minimum, SD and the cohort input in the footer, and the class prediction; subjects mode keeps tasks compact', () => {
   const { view } = loadCohortViewIn('subjects');
   window.ConnectifyPredictorMath.saveBaselines({ types: { Exam: 70 }, subjects: { '12 Literature ATAR': 70 } });
   const { makeRow } = expandedFixture();
@@ -10017,9 +10017,19 @@ runTest('Test 223: Expanded overall cards hold SD beside the quantiles, the coho
   assert.ok(ui.box.classList.contains('connectea-panel--expanded'));
   assert.strictEqual(ui.input.parentElement.parentElement.parentElement, ui.xp.foot, 'the cohort size input sits in the footer');
   assert.strictEqual(ui.xp.rankValue.parentElement.children.length, 1, 'the Rank cell holds only its value');
-  assert.ok(/^[\d.]+$/.test(ui.xp.sd.textContent) && ui.xp.sd.parentElement.parentElement === ui.xp.quantiles[0].parentElement.parentElement, `SD is a sixth cell beside the quantiles: ${ui.xp.sd.textContent}`);
-  assert.ok(/^Z-Score -?[\d.]+/.test(ui.xp.summary.textContent), `the overall footer leaves SD to its cell: ${ui.xp.summary.textContent}`);
-  assert.strictEqual(ui.xp.quantiles.length, 5, 'the five quantiles are still the reached-tint cells');
+  const cellLabels = descendants(ui.xp.quantiles[0].parentElement.parentElement).filter(e => e.classList.contains('connectea-xp-label')).map(e => e.textContent);
+  assert.deepStrictEqual(cellLabels, ['Lower Quartile', 'Median', 'Upper Quartile', 'Maximum'], 'the four quartile values, two by two beside the prediction');
+  assert.deepStrictEqual(ui.xp.quantiles.map(e => e.textContent), ['58%', '68.85%', '79.9%', '96.7%']);
+  assert.ok(/^Minimum 32\.5% · SD [\d.]+ · Z-Score -?[\d.]+/.test(ui.xp.summary.textContent), `Minimum and SD sit in the footer: ${ui.xp.summary.textContent}`);
+  const tinted = () => ui.xp.quantiles.map(e => e.parentElement.classList.contains('connectea-xp-cell--reached'));
+  assert.deepStrictEqual(tinted(), [false, false, true, false], '81.2% has reached the Upper Quartile');
+  for (const low of ['40%', '20%']) {
+    overall.querySelector('.cvr-c-task__mark').textContent = low;
+    view.render(overall, true, 'lit-key', 219, null, []);
+    assert.deepStrictEqual(tinted(), [true, false, false, false], `${low} (below Q1) keeps the tint on Q1`);
+  }
+  overall.querySelector('.cvr-c-task__mark').textContent = '81.2%';
+  view.render(overall, true, 'lit-key', 219, null, []);
   assert.deepStrictEqual(Array.from(ui.box.children, e => e.className), ['connectea-xp-head', 'connectea-xp-prediction', 'connectea-xp-foot'], 'values, class prediction, footer');
   assert.ok(!ui.upcoming, 'no separate class prediction line');
   assert.ok(!ui.xp.prediction.hidden, 'the class prediction is a section of the card');
