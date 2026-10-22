@@ -1,7 +1,7 @@
 /**
  * Connectify ATAR Mathematics & Subject Scaling Model
  *
- * Implements published 2025 TISC table interpolation, best four ATAR calculation,
+ * Implements the TEA-to-ATAR table, best four ATAR calculation, TISC Average Marks Scaling,
  * 10% TEA bonus rules (Methods, Specialist, Languages), subject alias normalization,
  * and empirical Semester 1 scaling calibration shift.
  * Provides `window.ConnectifyMath`.
@@ -162,55 +162,29 @@
     return Object.entries(data[year].subjects).find(([label]) => normalizeSubject(label) === wanted)?.[1];
   }
 
-  function estimateScaledScore(name, percentile, year = 2025) {
-    const curve = getSubjectData(name, year)?.curve;
-    if (!curve || !Number.isFinite(percentile)) return undefined;
-    if (percentile <= 0) return curve[0][1];
-    if (percentile >= 1) return curve[curve.length - 1][1];
-    for (let i = 1; i < curve.length; i++) {
-      const [a, x] = curve[i - 1], [b, z] = curve[i];
-      if (percentile <= b) return x + (percentile - a) / (b - a) * (z - x);
-    }
-    return undefined;
-  }
+  // TISC Average Marks Scaling is linear in each course: scaled = 60 + d + 14c * z, where 60 + d and 14c are
+  // the course's published scaled mean and SD (average-marks-scaling.pdf, equation 2). z is the student's place in
+  // the course's standardised combined marks, which SCSA sets to a mean of 60 and an SD of 14 in every course.
+  const STANDARDISED_MEAN = 60;
+  const STANDARDISED_SD = 14;
 
-  // Default WA ATAR mark distribution approximation (Min, Q1, Median, Q3, Max)
-  const DEFAULT_BOXPLOT = [25, 48, 60, 72, 95];
-
-  function getBasePercentile(rawMark) {
-    if (!Number.isFinite(rawMark)) return undefined;
-    if (rawMark <= DEFAULT_BOXPLOT[0]) return 0;
-    if (rawMark >= DEFAULT_BOXPLOT[4]) return 1;
-    for (let i = 0; i < 4; i++) {
-      if (rawMark >= DEFAULT_BOXPLOT[i] && rawMark <= DEFAULT_BOXPLOT[i + 1]) {
-        return (i + (rawMark - DEFAULT_BOXPLOT[i]) / (DEFAULT_BOXPLOT[i + 1] - DEFAULT_BOXPLOT[i])) / 4;
-      }
-    }
-    return 0.5;
+  function estimateScaledScore(name, rawMark, year = 2025) {
+    const course = getSubjectData(name, year);
+    if (!Number.isFinite(rawMark) || !Number.isFinite(course?.mean)) return undefined;
+    const z = (rawMark - STANDARDISED_MEAN) / STANDARDISED_SD;
+    const sd = Number.isFinite(course.sd) ? course.sd : STANDARDISED_SD;
+    return Math.max(0, Math.min(100, course.mean + sd * z));
   }
 
   function calculateShiftedScaledScore(name, liveRawMark, knownSem1Raw, knownSem1Scaled, year = 2025) {
     if (!Number.isFinite(liveRawMark)) return undefined;
 
-    // 1. Calculate the base TISC scaled score using the standard percentile mapping
-    const basePercentile = getBasePercentile(liveRawMark);
-    let modelScaled = estimateScaledScore(name, basePercentile, year);
+    // Courses TISC publishes no statistics for keep the raw mark.
+    const modelScaled = estimateScaledScore(name, liveRawMark, year) ?? liveRawMark;
 
-    // If we don't have TISC data for this subject, default to the raw mark directly
-    if (modelScaled === undefined) {
-      modelScaled = liveRawMark;
-    }
-
-    // 2. Apply calibration shift if the user has provided their school's actual Semester 1 scaled score
+    // The school's actual Semester 1 scaled score shifts the model by however far it was out for that mark.
     if (scoreValue(knownSem1Raw) !== undefined && scoreValue(knownSem1Scaled) !== undefined) {
-      const sem1BasePercentile = getBasePercentile(knownSem1Raw);
-      let sem1ModelScaled = estimateScaledScore(name, sem1BasePercentile, year);
-
-      if (sem1ModelScaled === undefined) {
-        sem1ModelScaled = knownSem1Raw;
-      }
-
-      // The shift represents the difference between our base model and the school's actual historical cohort performance
+      const sem1ModelScaled = estimateScaledScore(name, Number(knownSem1Raw), year) ?? Number(knownSem1Raw);
       const shift = knownSem1Scaled - sem1ModelScaled;
       return Math.max(0, Math.min(100, modelScaled + shift));
     }

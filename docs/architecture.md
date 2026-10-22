@@ -46,7 +46,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 26. `src/cohort/cohort-styles.js` (cohort styles & DOM utilities)
 27. `src/cohort/cohort-stats.js` (two-pass cohort controller and pass scheduler)
 28. `src/cohort/cohort-observer.js` (page observer, lifecycle and display scale)
-29. `src/atar/scaling-data.js` (2025 TISC scaling curves)
+29. `src/atar/scaling-data.js` (TISC scaled-score statistics per course)
 30. `src/atar/atar-math.js` (TEA/ATAR conversions & bonus rules)
 31. `src/atar/target-difficulty.js` (difficulty-weighted task model shared by both solvers)
 32. `src/atar/target-solver.js` (goal optimization solver)

@@ -20,8 +20,8 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyCohortView` / `ConnectifyCohortForecast` / `ConnectifyCohortUpcoming` | `cohort-view.js` / `cohort-forecast.js` / `cohort-upcoming.js` | Injects stats panels and type selectors into assessment rows; Low / Mid / High prediction panel on unmarked rows; class Low / Mid / High prediction on the overall row of a class without a letter; `ConnectifyPanelView` (`cohort-panel-view.js`: `mode()`, `expandsOverall()`, `expandsTasks()`, read once per load) and `ConnectifyCohortExpanded` (`cohort-expanded.js`: expanded cards, `scoreStep`, `basisText`); `ConnectifyCohortSubjectAverage` (`cohort-subject-average.js`: `sync(card)`, `average(card)`) |
 | `window.ConnectifyCohort` | `cohort-stats.js` | Controller orchestrating passes, mutation observer, styles |
 | `window.ConnectifyTaskTypes` | `task-types.js` | Category keyword detection, overrides, class category sharing |
-| `window.ConnectifyScalingData` | `scaling-data.js` | 2025 TISC scaling curves |
-| `window.ConnectifyMath` | `atar-math.js` | TEA-to-ATAR conversion, 10% bonus rules, scaled score model |
+| `window.ConnectifyScalingData` | `scaling-data.js` | TISC scaled-score statistics per course (mean, SD, percentiles) |
+| `window.ConnectifyMath` | `atar-math.js` | TEA-to-ATAR conversion, 10% bonus rules, TISC Average Marks Scaling model |
 | `window.ConnectifyTargetDifficulty` | `target-difficulty.js` | Difficulty-weighted task baselines, effort model and bisection |
 | `window.ConnectifyTargetSolver` | `target-solver.js` | Target Grade and difficulty-weighted Target ATAR solver |
 | `window.ConnectifyAtarScraper` | `atar-scraper.js` | ATAR courses per semester from the cache (registry, subjects, grade cache); `readCourses` never reads tiles |

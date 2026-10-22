@@ -42,7 +42,7 @@
   const getOrComputeTaskPrediction = viaCache('getOrComputeTaskPrediction');
   const clearSubjectPredictionCache = viaCache('clearSubjectPredictionCache');
   const updatePredictionCache = viaCache('updatePredictionCache');
-  const PREDICTOR_ALGO_VERSION = cacheModule.PREDICTOR_ALGO_VERSION || 'v17_20261022_pred';
+  const PREDICTOR_ALGO_VERSION = cacheModule.PREDICTOR_ALGO_VERSION || 'v18_20261022_pred';
 
   const projectSubjectGrades = viaProjection('projectSubjectGrades');
   const projectATAR = viaProjection('projectATAR');

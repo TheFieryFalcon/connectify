@@ -94,17 +94,18 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 ### ATAR Calculation & Projection Engine
 
 #### [`scaling-data.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/scaling-data.js) (2 lines)
-- **Role**: Static dataset containing 2025 TISC scaling curve polynomials and percentile-to-scaled-score tables for all WA ATAR courses.
+- **Role**: Static 2025 (and 2023/2024) TISC scaled-score statistics per WA ATAR course: mean, SD, min, max, percentiles, populations.
 - **Export**: `window.ConnectifyScalingData`.
 
-#### [`atar-math.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-math.js) (234 lines)
-- **Role**: Calculates ATAR from TEA, computes 10% TEA bonuses, and interpolates TISC scaled scores with school calibration shift.
+#### [`atar-math.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-math.js) (220 lines)
+- **Role**: Calculates ATAR from TEA, computes 10% TEA bonuses, and estimates TISC scaled scores (Average Marks Scaling) with school calibration shift.
 - **Key Functions**:
   - `convertTEAtoATAR(tea)`: Interpolates aggregate TEA across the published 50-point TISC table (down to `<30` and up to `99.95`).
   - `bonusType(name)`: Detects eligibility for the 10% TEA bonus (Mathematics Methods, Mathematics Specialist, or approved Languages).
   - `calculate(rows, options)`: Selects top 4 ATAR subjects, computes base TEA, adds the TEA bonus, and returns estimated ATAR. Supports `fixedBonus` option.
   - `teaBonus(rows)`: 10% of each of the best two of Methods, Specialist and the best language (also used by the Target ATAR solver).
-  - `calculateShiftedScaledScore(name, liveRawMark, knownSem1Raw, knownSem1Scaled, year)`: Calibrates base TISC scaled score model using school Semester 1 calibration data ($\text{shift} = \text{actualScaled} - \text{modelScaled}$).
+  - `estimateScaledScore(name, rawMark)`: TISC Average Marks Scaling (`average-marks-scaling.pdf`, eq. 2), linear per course: scaled $= \mu_c + \sigma_c z$, $\mu_c$ / $\sigma_c$ the course's published scaled mean and SD, $z = (\text{raw} - 60)/14$ (SCSA standardises combined marks to mean 60, SD 14); clamped 0–100; courses without statistics keep the raw mark.
+  - `calculateShiftedScaledScore(name, liveRawMark, knownSem1Raw, knownSem1Scaled, year)`: that model shifted by the school's Semester 1 calibration ($\text{shift} = \text{actualScaled} - \text{modelScaled}$).
 - **Export**: `window.ConnectifyMath`.
 
 #### [`target-solver.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-solver.js) & `target-difficulty.js`

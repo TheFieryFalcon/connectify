@@ -2384,8 +2384,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v17_20261022_pred'"), 'predictor-math.js must use v17_20261022_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v17_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v17_20261022_pred');
+  assert.ok(predMathCode.includes("'v18_20261022_pred'"), 'predictor-math.js must use v18_20261022_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v18_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v18_20261022_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2478,9 +2478,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v17_20261022_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v18_20261022_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v17_20261022_pred'), 'predictor-math.js must bump version to v17_20261022_pred');
+  assert.ok(predMathJs.includes('v18_20261022_pred'), 'predictor-math.js must bump version to v18_20261022_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -10472,6 +10472,40 @@ runTest('Test 230: The account key stays the same whether the outlines were open
     location.href = savedHref;
     window.ConnectifyUtils = savedUtils;
   }
+});
+
+runTest('Test 232: Scaled scores follow TISC Average Marks Scaling: course scaled mean + course scaled SD x z, z from the standardised 60 / 14', () => {
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'scaling-data.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8'));
+  const math = window.ConnectifyMath;
+  const course = name => window.ConnectifyScalingData['2025'].subjects[name];
+  const near = (actual, expected, message) => assert.ok(Math.abs(actual - expected) < 1e-9, `${message}: ${actual} != ${expected}`);
+
+  const spec = course('Mathematics Specialist');
+  near(math.calculateShiftedScaledScore('Mathematics Specialist ATAR Year 11', 60), spec.mean, 'a standardised 60 scales to the course mean');
+  near(math.calculateShiftedScaledScore('Mathematics Specialist ATAR Year 11', 74), spec.mean + spec.sd, 'one SD up adds one scaled SD');
+  const lit = course('Literature');
+  near(math.calculateShiftedScaledScore('Literature ATAR Year 11', 58.6), lit.mean + lit.sd * (58.6 - 60) / 14, 'Literature uses its own mean and SD');
+
+  const marks = [['Chemistry', 83.4], ['Literature', 58.6], ['Mathematics Methods', 92.8], ['Mathematics Specialist', 82.4], ['Philosophy and Ethics', 76.6], ['Physics', 87.3]];
+  const scaled = marks.map(([name, raw]) => math.calculateShiftedScaledScore(`${name} ATAR Year 11`, raw));
+  for (let i = 0; i < marks.length; i++) {
+    for (let j = 0; j < marks.length; j++) {
+      const [a, rawA] = marks[i];
+      const [b, rawB] = marks[j];
+      if (course(a).mean === course(b).mean && rawA > rawB) assert.ok(scaled[i] > scaled[j], `${a} above ${b}`);
+    }
+  }
+  assert.ok(scaled[3] > 82.4, 'Specialist (scaled mean 69.2) scales a strong mark up, never down');
+  assert.ok(scaled[2] > scaled[3] && scaled[5] > scaled[0], 'a higher mark in a similar course never scales lower');
+
+  assert.strictEqual(math.calculateShiftedScaledScore('Mathematics Specialist', 100), 100, 'scaled scores stop at 100');
+  assert.strictEqual(math.calculateShiftedScaledScore('Bengali ATAR', 70), 70, 'a course without published statistics keeps the raw mark');
+  near(math.calculateShiftedScaledScore('Physics', 87.3, 80, 75), math.calculateShiftedScaledScore('Physics', 87.3) + 75 - math.calculateShiftedScaledScore('Physics', 80),
+    'a school Semester 1 scaled score shifts the model by its error at that mark');
+
+  const source = fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8');
+  assert.ok(!/DEFAULT_BOXPLOT|getBasePercentile/.test(source), 'no generic raw-mark distribution decides the percentile');
 });
 
 Promise.all(pendingTestPromises).then(() => {
