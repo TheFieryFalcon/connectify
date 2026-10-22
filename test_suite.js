@@ -10413,6 +10413,44 @@ runTest('Test 229: The Weakness Analyzer types cached tasks from their stored la
   assert.ok(!read('assessment/assessment-data.js').includes('ConnectifyWeakness.render('), 'no call to the missing ConnectifyWeakness.render');
 });
 
+runTest('Test 230: The account key stays the same whether the outlines were opened with or without ?coisp', () => {
+  const savedUtils = window.ConnectifyUtils;
+  const savedHref = location.href;
+  const savedStore = localStorage.store;
+  const outlines = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
+  try {
+    localStorage.store = {
+      'connectea:cohort:v3:current:2026:12 Economics ATAR': '232',
+      'connectea:cohort:v3:current:2026:12 Chemistry ATAR': '150',
+      'connectea:cohort:v3:DomainConnectUser:42:2026:12 Chemistry ATAR': '180',
+      'connectea:theme:id': 'dark'
+    };
+    const load = href => {
+      location.href = href;
+      window.ConnectifyUtils = undefined;
+      eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/utils.js'), 'utf8'));
+      return window.ConnectifyUtils;
+    };
+
+    assert.strictEqual(load(outlines).accountKey(), 'current', 'no account seen yet: the placeholder');
+    let utils = load(`${outlines}?coisp=DomainConnectUser:42`);
+    assert.strictEqual(utils.accountKey(), 'DomainConnectUser:42', 'the URL account is used');
+    assert.strictEqual(localStorage.getItem('connectea:cohort:v3:DomainConnectUser:42:2026:12 Economics ATAR'), '232',
+      'a cohort size saved under the placeholder moves to the account');
+    assert.strictEqual(localStorage.getItem('connectea:cohort:v3:DomainConnectUser:42:2026:12 Chemistry ATAR'), '180',
+      'a value already saved for the account is never overwritten');
+
+    utils = load(outlines);
+    assert.strictEqual(utils.accountKey(), 'DomainConnectUser:42', 'the shortcut (no coisp) reads the remembered account');
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/class/summary?coisp=DomainSchoolClass:27866513';
+    assert.strictEqual(utils.accountKey(), 'DomainConnectUser:42', 'a class id in coisp is never an account');
+  } finally {
+    localStorage.store = savedStore;
+    location.href = savedHref;
+    window.ConnectifyUtils = savedUtils;
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

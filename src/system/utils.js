@@ -16,13 +16,45 @@
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
   ));
 
-  /** The student account in the current Connect URL (?coisp=...), or 'current'. */
-  function accountKey() {
-    try {
-      return new URL(location.href).searchParams.get('coisp') || 'current';
-    } catch {
-      return 'current';
+  // Connect's own menu opens the outlines with ?coisp=<account>, the Connectify shortcut without it,
+  // so the account is remembered: every per-student key stays the same however the page was opened
+  const ACCOUNT_STORE = 'connectify:account';
+  let knownAccount;
+
+  function rememberedAccount() {
+    if (knownAccount === undefined) {
+      try { knownAccount = localStorage.getItem(ACCOUNT_STORE) || null; } catch { knownAccount = null; }
     }
+    return knownAccount;
+  }
+
+  /** Copies what was saved under the 'current' placeholder to the first real account seen (never overwriting). */
+  function adoptPlaceholderKeys(account) {
+    for (const key of storageKeys(k => /^(connectify|connectea):.*:current(:|$)/.test(k))) {
+      const target = key.replace(/:current(?=:|$)/, `:${account}`);
+      try {
+        if (localStorage.getItem(target) === null) localStorage.setItem(target, localStorage.getItem(key));
+      } catch {}
+    }
+  }
+
+  function rememberAccount(account) {
+    const previous = rememberedAccount();
+    if (previous === account) return;
+    knownAccount = account;
+    try { localStorage.setItem(ACCOUNT_STORE, account); } catch {}
+    if (!previous) adoptPlaceholderKeys(account);
+  }
+
+  /** The student account: ?coisp=... (class ids excluded), else the last account seen, else 'current'. */
+  function accountKey() {
+    let coisp = null;
+    try { coisp = new URL(location.href).searchParams.get('coisp'); } catch {}
+    if (coisp && !/^DomainSchool/i.test(coisp)) {
+      rememberAccount(coisp);
+      return coisp;
+    }
+    return rememberedAccount() || 'current';
   }
 
   /** Returns every localStorage key accepted by predicate (keys are collected before any removal). */

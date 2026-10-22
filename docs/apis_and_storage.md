@@ -9,7 +9,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | Global Object | Module | Primary Purpose |
 |---|---|---|
 | `window.ConnectifyScheduler` | `scheduler.js` | Shared page observer (`onMutations`) and heartbeat (`every`) |
-| `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey`, `customWeekOrder`/`readTimeOverride` (load first) |
+| `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `accountKey` (URL `coisp`, else the remembered account, else `current`), `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey`, `customWeekOrder`/`readTimeOverride` (load first) |
 | `window.ConnectifyData` | `assessment-data.js` | Scrapes assessment cards, caches tasks, expands accordions; `collectClasses()` for sidebar tools |
 | `window.ConnectifyCache` | `cache-versions.js` | Subsystem cache versioning (predictor, results, settings, cohort) and clearing |
 | `window.ConnectifyCohortMath` | `cohort-math.js` | PCHIP cubic Hermite interpolation, variance, z-score |
@@ -102,6 +102,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `cx-session-expired` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user session expires while idle |
 | `cx-manual-logout` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user explicitly clicks logout |
 | `cx-last-autologin` | `browser.storage.local` | `auto-login.js` | Timestamp to prevent rapid login loops (<30s) |
+| `connectify:account` | `localStorage` | `utils.js` | Last student account seen in a `coisp` URL (never a class id): Connectify's shortcut opens the outlines without `coisp`, so every per-student key uses it; the first account seen copies keys saved under `current` it lacks |
 | `connectify:seen_version` | `localStorage` | `update-notice.js` | Last extension version seen; a newer manifest version shows the update notice once (fresh installs only record it) |
 
 ---
