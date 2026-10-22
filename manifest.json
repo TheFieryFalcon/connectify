@@ -58,7 +58,8 @@
             "src/assessment/semester-filter.css",
             "src/cohort/cohort-forecast.css",
             "src/cohort/cohort-upcoming.css",
-            "src/cohort/cohort-expanded.css"
+            "src/cohort/cohort-expanded.css",
+            "src/cohort/cohort-subject-average.css"
          ],
          "js": [
             "src/system/scheduler.js",

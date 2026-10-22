@@ -85,7 +85,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 ### 10. Overall Subject Cohort Controls
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`cohort-estimator.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-estimator.js)
 - **DOM Insertion**: Overall subject summary row (top row of each `.eds-c-tile` card).
-- **UI Appearance**: Full-width statistics card with cohort size override input (`Cohort Size: [ ~170 ]`). A class Connect shows no Cumulative Percent row for gets Connectify's own "Subject average" row (worked out from the task marks) carrying the same panel.
+- **UI Appearance**: Full-width statistics card with cohort size override input (`Cohort Size: [ ~170 ]`). When Connect renders a class's Cumulative Percent heading with no row under it (Economics), Connectify restores the row in Connect's own markup with the average worked out from the task marks (noted as such, no boxplot), carrying the same panel.
 - **Functionality**: Student override for course cohort baseline; persists to `localStorage` (`connectea:cohort:v3:<student>:<year>:<subject>`); immediately recalculates rank and standing across assessments.
 
 ---

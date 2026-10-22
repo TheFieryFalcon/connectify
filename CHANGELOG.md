@@ -45,7 +45,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Saved predictions and results are rebuilt once after updating.
 
 ### Fixes
-- Classes that Connect shows no Cumulative Percent row for (seen in Economics) had no subject average anywhere on the outlines page. Connectify now adds its own "Subject average" row, worked out from your marked tasks and their weightings, with the usual statistics panel and class prediction. It goes away as soon as Connect shows its own row.
+- Connect sometimes shows a class's "Semester 2 Cumulative Percent" heading with nothing under it (seen in Economics, with or without Connectify), so there was no subject average. Connectify now restores the row in Connect's own style with your average worked out from your marked tasks and their weightings, noted as worked out by Connectify, plus the usual statistics panel and class prediction. It shows even while the class is collapsed, and goes away as soon as Connect shows its own row.
 - Year in Progress lost its cohort mean line with "Show this semester's classes only" on, when a class was read before its charts had loaded. Means now come from the saved cohort statistics.
 - The outcome meter appeared on every subject's first marked assessment.
 - Semester 1 tasks listed on Semester 2 panels were treated as Semester 2 tasks.

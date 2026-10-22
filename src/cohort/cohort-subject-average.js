@@ -1,22 +1,25 @@
 /**
- * Connectify Cohort: subject average when Connect leaves it out
+ * Connectify Cohort: restores Connect's overall row when Connect leaves it out
  *
- * Some classes (seen in Economics) have no "Semester N Cumulative Percent" row at all, so students only
- * learn their average from their teacher. When a card has marked tasks but no overall row, Connectify adds
- * its own, labelled as worked out by Connectify, before the task list: the weight-weighted mean of the
- * card's marked tasks (each task's percent times the weight its weighted-mark cell is out of; a plain mean
- * when a weight is missing), or of its cached tasks while the card shows no rows. The row sits outside
- * .cvr-c-tasks like Connect's own, so the overall panel, class prediction and expanded card all use it. It
- * is removed as soon as Connect shows its own row. Exposes window.ConnectifyCohortSubjectAverage.
+ * Connect sometimes renders a card's "Semester 2 Cumulative Percent" heading with nothing under it (seen in
+ * Economics, with or without Connectify): the summary row is missing, so students have no subject average.
+ * Connectify fills Connect's own empty container with a row in Connect's native markup (marks cell with the
+ * percent, no boxplot: Connect gives no cohort data for it): the weight-weighted mean of the card's marked
+ * tasks (each task's percent times the weight its weighted-mark cell is out of; a plain mean when a weight is
+ * missing), or of its cached tasks while the card is collapsed. A note in the row says Connectify worked it
+ * out. The overall panel, class prediction and expanded card then attach to it as to Connect's row, and it is
+ * removed as soon as Connect renders its own. Exposes window.ConnectifyCohortSubjectAverage.
  */
 (() => {
   'use strict';
 
   try {
-    const { readMark, createElement, setText, normalize, math } = window.ConnectifyCohortRows;
+    const { readMark, createElement, setText, normalize } = window.ConnectifyCohortRows;
     const ROW_CLASS = 'connectea-subject-average-row';
-    const LABEL = 'Subject average (worked out by Connectify: Connect shows none for this class)';
+    const NOTE = 'Worked out by Connectify from your marked tasks (Connect shows no average for this class)';
+    const HEADING = /\b(?:Cumulative Percent|Total Percent)\b/i;
     const TITLE = '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading';
+    const LABEL = 'v-label v-widget eds-u-white-space--normal v-label-eds-u-white-space--normal v-label-undef-w';
 
     /** The weight a task counts for: what its weighted-mark cell ("7.4 Out of 10", "10%") is out of. */
     function rowWeight(row) {
@@ -49,41 +52,63 @@
         .map(t => ({ score: t.score, weight: t.weight > 0 ? t.weight : null })));
     }
 
-    const isOwn = row => row.classList.contains(ROW_CLASS);
-    const hasConnectRow = card => Array.from(card.querySelectorAll('.cvr-c-task')).some(row => !row.closest('.cvr-c-tasks') && !isOwn(row));
-
     /** The card's average from its marked tasks, or null. */
     function average(card) {
       const rows = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'));
       return rows.length ? fromRows(rows) : fromCache(card);
     }
 
+    /** Connect's container for the overall row: the layout right after the "... Percent" heading. */
+    function summarySlot(card) {
+      for (const heading of card.querySelectorAll('.eds-c-text--bold')) {
+        if (!HEADING.test(normalize(heading.textContent))) continue;
+        const siblings = Array.from(heading.parentElement?.children || []);
+        const slot = siblings[siblings.indexOf(heading) + 1];
+        return slot?.classList.contains('v-csslayout') ? slot : null;
+      }
+      return null;
+    }
+
+    /** Connect's summary row markup (as Chemistry's), with an empty second cell and no chart. */
     function buildRow() {
-      const row = createElement('div', `cvr-c-task ${ROW_CLASS}`);
-      const details = createElement('div', 'cvr-c-task__details');
-      details.append(createElement('span', 'v-label', LABEL));
-      const marks = createElement('div', 'cvr-c-task__marks');
-      marks.append(createElement('div', 'cvr-c-task__mark'));
-      row.append(details, marks);
+      const row = createElement('div', `cvr-c-task v-layout v-widget eds-s-is-first cvr-c-task-eds-s-is-first eds-s-is-last cvr-c-task-eds-s-is-last ${ROW_CLASS}`);
+      const details = createElement('div', 'cvr-c-task__details v-layout v-widget');
+      details.append(createElement('div', 'connectea-subject-average-note', NOTE));
+      const achievement = createElement('div', 'cvr-c-task__achievement v-layout v-widget');
+      const marks = createElement('div', 'cvr-c-task__marks v-layout v-widget');
+      for (let i = 0; i < 2; i++) {
+        const mark = createElement('div', 'cvr-c-task__mark v-layout v-widget');
+        const grade = createElement('div', 'cvr-c-task__grade v-layout v-widget');
+        grade.append(createElement('div', LABEL));
+        mark.append(grade);
+        marks.append(mark);
+      }
+      achievement.append(marks);
+      row.append(details, createElement('div', 'cvr-c-task-mark__headers v-layout v-widget'), achievement);
       return row;
     }
 
-    /** Adds, updates or removes the card's own subject average row; returns it (or null). */
+    const isOwn = row => row.classList.contains(ROW_CLASS);
+
+    /** Fills, updates or clears Connect's empty overall row container; returns the restored row (or null). */
     function sync(card) {
-      const own = card.querySelector(`.${ROW_CLASS}`);
-      const tasks = card.querySelector('.cvr-c-tasks');
-      const avg = hasConnectRow(card) || !tasks ? null : average(card);
+      const slot = summarySlot(card);
+      if (!slot) return null;
+      const own = slot.querySelector(`.${ROW_CLASS}`);
+      const native = Array.from(slot.querySelectorAll('.cvr-c-task')).some(row => !isOwn(row));
+      const avg = native ? null : average(card);
       if (!avg) {
         own?.remove();
         return null;
       }
       const row = own || buildRow();
-      if (!own) tasks.insertAdjacentElement('beforebegin', row);
-      setText(row.querySelector('.cvr-c-task__mark'), `${math().formatPercentage(avg.mark)}%`);
+      if (!own) slot.append(row);
+      // Connect's own format: one decimal place ("86.1%")
+      setText(row.querySelector('.cvr-c-task__mark .v-label'), `${Number(avg.mark.toFixed(1))}%`);
       return row;
     }
 
-    window.ConnectifyCohortSubjectAverage = { ROW_CLASS, LABEL, sync, average, rowWeight };
+    window.ConnectifyCohortSubjectAverage = { ROW_CLASS, NOTE, sync, average, rowWeight, summarySlot };
   } catch (err) {
     console.error('Connectify error in cohort-subject-average.js:', err);
   }

@@ -1,0 +1,11 @@
+/* Restored overall row (cohort-subject-average.js): a small note above its statistics panel says Connectify
+   worked the average out; the row itself is Connect's markup and takes Connect's and the theme's styling */
+.connectea-subject-average-row .connectea-subject-average-note {
+  margin: 0 0 4px !important;
+  font: 11px/1.4 system-ui, -apple-system, sans-serif !important;
+  font-weight: 400 !important;
+  color: #4e6076 !important;
+}
+html.connectea-dark .connectea-subject-average-row .connectea-subject-average-note {
+  color: var(--cx-text-secondary, #d6e8f8) !important;
+}
