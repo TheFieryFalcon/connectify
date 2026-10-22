@@ -12,7 +12,7 @@
   const { removeStorageKeys, isBaselineKey } = window.ConnectifyUtils;
 
   const CACHE_VERSIONS = {
-    PREDICTOR: 'v15_20261022_pred',
+    PREDICTOR: 'v16_20261022_pred',
     RESULTS: 'v10_20261019_results',
     SETTINGS: 'v4_20261001_settings',
     COHORT: 'v6_20261018_cohort'

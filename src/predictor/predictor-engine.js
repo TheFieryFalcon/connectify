@@ -1,8 +1,8 @@
 /**
  * Connectify Predictor Engine
  *
- * Core prediction model: the subject's own results (recent ones count more) shifted by the student's
- * type average across all subjects, a spread from the subject's results, logarithmic headroom, and per-task
+ * Core prediction model: the subject's own results (recent ones count more) shifted by how the student
+ * does on the type across all subjects (each result against its own subject's average), a spread from the subject's results, logarithmic headroom, and per-task
  * low / mid / high predictions. Baselines are stored by predictor-baselines.js.
  * Exposes window.ConnectifyPredictorEngine.
  */
@@ -98,6 +98,24 @@
     return null;
   }
 
+  /**
+   * How the student does on a type compared with each subject's own average, pooled across every subject:
+   * a weak subject full of one type says nothing about the type, so its results only count against that subject.
+   */
+  function typeShift(historical, taskType) {
+    let sw = 0, sx = 0, count = 0;
+    for (const [name, list] of Object.entries(historical?.subjectResults || {})) {
+      const mean = historical.subjects?.[name];
+      if (!Number.isFinite(mean)) continue;
+      for (const r of list) {
+        if (r.type !== taskType) continue;
+        const w = r.weight > 0 ? r.weight : 1;
+        sw += w; sx += w * (r.score - mean); count++;
+      }
+    }
+    return count ? { shift: sx / sw, count } : null;
+  }
+
   function predictTask(subjectName, task, customHistorical, customBaselines, customIsCompleted = false) {
     const cleanSubj = cleanSubject(subjectName);
     const baselines = customBaselines || getBaselines();
@@ -122,14 +140,18 @@
       subject = { mean: base, sd: null, nEff: 0, count: 0 };
     }
 
-    // 2. The type: how the student does on it across all subjects (or last year's type average)
-    //    relative to their overall level, at half strength
-    const typeCount = historical?.typeCounts?.[taskType] || 0;
+    // 2. The type: how the student does on it across all subjects, each result against its own subject's
+    //    average (else the type average against the overall one, or last year's type average), at half strength
+    const shifted = typeShift(historical, taskType);
+    const typeCount = shifted ? shifted.count : (historical?.typeCounts?.[taskType] || 0);
     const overall = Number.isFinite(historical?.overallAverage) ? historical.overallAverage : subject.mean;
     const typeBaseline = Number(baselines?.types?.[taskType]);
     let typeSource = 'subject';
     let affinity = 0;
-    if (typeCount > 0 && Number.isFinite(historical?.types?.[taskType])) {
+    if (shifted) {
+      typeSource = 'history';
+      affinity = shifted.shift;
+    } else if (typeCount > 0 && Number.isFinite(historical?.types?.[taskType])) {
       typeSource = 'history';
       affinity = historical.types[taskType] - overall;
     } else if (baselines?.types?.[taskType] !== undefined && Number.isFinite(typeBaseline)) {

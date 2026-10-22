@@ -109,7 +109,11 @@
       }
       const isEstimated = userSize === undefined && estimatedSize !== undefined;
       const totalDisplay = isEstimated ? `~${cohortSize}` : `${cohortSize}`;
-      parts.push(`<strong>${data.rank} / ${totalDisplay}</strong>`);
+      // Compact panels name first and last place; expanded cards always show the rank (cohort-expanded.js)
+      const scope = isOverall ? 'subject' : 'assessment';
+      const rankStr = data.rank === 1 ? `Top of ${scope}`
+        : data.rank >= cohortSize ? `Bottom of ${scope}` : `${data.rank} / ${totalDisplay}`;
+      parts.push(`<strong>${rankStr}</strong>`);
       return parts;
     }
 
@@ -215,7 +219,7 @@
       remember();
     }
 
-    window.ConnectifyCohortView = { readMark, readStats, createPanel, render, panels };
+    window.ConnectifyCohortView = { readMark, readStats, createPanel, render, panels, resultParts };
   } catch (err) {
     console.error('Connectify error in cohort-view.js:', err);
   }

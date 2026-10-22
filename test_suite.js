@@ -2379,8 +2379,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v15_20261022_pred'"), 'predictor-math.js must use v15_20261022_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v15_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v15_20261022_pred');
+  assert.ok(predMathCode.includes("'v16_20261022_pred'"), 'predictor-math.js must use v16_20261022_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v16_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v16_20261022_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2473,9 +2473,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v15_20261022_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v16_20261022_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v15_20261022_pred'), 'predictor-math.js must bump version to v15_20261022_pred');
+  assert.ok(predMathJs.includes('v16_20261022_pred'), 'predictor-math.js must bump version to v16_20261022_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -2984,7 +2984,7 @@ runTest('Test 109: Text bolding parity across light and dark modes for Test head
   assert.ok(cohortViewJs.includes('<strong>Z-Score ${zStr}</strong>'), 'cohort-view.js must format Z-Score in strong tag');
   assert.ok(cohortViewJs.includes('<strong>Score ${math().formatPercentage(mark)}%</strong>'), 'cohort-view.js must bold entire score display');
   assert.ok(cohortViewJs.includes('<strong>${standingText}</strong>'), 'cohort-view.js must wrap Top standing in strong tag');
-  assert.ok(cohortViewJs.includes('<strong>${data.rank} / ${totalDisplay}</strong>'), 'cohort-view.js must wrap Rank in strong tag');
+  assert.ok(cohortViewJs.includes('<strong>${rankStr}</strong>'), 'cohort-view.js must wrap Rank in strong tag');
 
   // 2. Verify cohort-stats.js styles panel strong tags with font-weight 700
   assert.ok(cohortStatsJs.includes('.connectea-distribution strong,\n    .connectea-result strong,\n    .connectea-panel strong {\n      font-weight: 700 !important;'), 'cohort-stats.js must style strong tags with font-weight 700');
@@ -4000,6 +4000,7 @@ runTest('Test 123: Predictions come from the subject\'s own cached results, with
   assert.ok(pred && !pred.unpredicted && Number.isFinite(pred.mid), 'the Oral is predicted');
   console.log(`    Literature Oral: ${pred.low} / ${pred.mid} / ${pred.high}`);
   assert.strictEqual(pred.basis.subjectCount, 3, 'the prediction rests on the subject\'s three results');
+  assert.strictEqual(pred.subjectName, '12 Literature ATAR', 'the cached prediction keeps its subject, so the card names it (never "subject")');
   assert.strictEqual(pred.basis.typeCount, 4, 'the Take-Home average spans every subject');
   assert.ok(pred.mid >= 55 && pred.mid <= 64, `Mid (${pred.mid}%) sits near the subject's results (mean 60%, latest 54%)`);
   assert.ok(pred.low >= 42 && pred.low <= 50, `Low (${pred.low}%) stays near the lowest result (47%), never far below it`);
@@ -4010,6 +4011,14 @@ runTest('Test 123: Predictions come from the subject\'s own cached results, with
   const exam = predMath.predictTask('12 Literature ATAR', { name: 'Exam', caption: 'Term 4, Week 5' }, predMath.getHistoricalData(subjects), { types: {}, subjects: {} });
   assert.deepStrictEqual([exam.basis.typeSource, exam.basis.typeCount], ['history', 1], 'an Exam is shifted by the Exam results in other subjects');
   assert.ok(exam.mid < pred.mid, `a weaker type across subjects lowers Mid (${exam.mid} < ${pred.mid})`);
+
+  // A weak subject that holds every result of a type never drags that type down on top of its own average
+  const confounded = [
+    { name: '11 Literature ATAR', tasks: [80, 47, 54, 50, 55, 52].map((score, i) => ({ id: `l${i}`, name: i < 3 ? `Essay ${i}` : `Exam ${i}`, order: 3 + i * 5, sequence: i, weight: 10, score, pending: false })) },
+    { name: '11 Physics ATAR', tasks: [88, 86, 90].map((score, i) => ({ id: `p${i}`, name: `Exam ${i}`, order: 4 + i * 5, sequence: i, weight: 20, score, pending: false })) }
+  ];
+  const poem = predMath.predictTask('11 Literature ATAR', { name: 'Oral', caption: 'Term 4, Week 3' }, predMath.getHistoricalData(confounded), { types: {}, subjects: {} });
+  assert.ok(poem.mid >= 53 && poem.mid <= 60, `Mid (${poem.mid}%) stays near Literature's own results (56%), not pulled towards ~47% by Physics`);
 
   // A consistent subject gets a tighter range than a volatile one with the same average
   const results = scores => scores.map((score, i) => ({ score, weight: 10, type: 'Take-Home', stamp: i }));
@@ -9994,10 +10003,15 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   assert.deepStrictEqual(ui.xp.quantiles.map(e => e.textContent), ['32.5%', '58%', '68.85%', '79.9%', '96.7%']);
   assert.ok(/%$/.test(ui.xp.average.textContent), 'the cohort mean is shown');
   assert.ok(/^\d+ \/ ~219$/.test(ui.xp.rankValue.textContent), `an estimated cohort size reads ~: ${ui.xp.rankValue.textContent}`);
-  // First and last place read as ranks too, never "Top of assessment"
+  // Expanded cards read first and last place as ranks; compact panels name them
   assert.strictEqual(window.ConnectifyCohortExpanded.rankText({ rank: 1 }, undefined, 232, 232), '1 / ~232');
   assert.strictEqual(window.ConnectifyCohortExpanded.rankText({ rank: 1 }, 150, 232, 150), '1 / 150');
   assert.strictEqual(window.ConnectifyCohortExpanded.rankText({ rank: 232 }, undefined, 232, 232), '232 / ~232');
+  const compactRank = (rank, isOverall) => window.ConnectifyCohortView.resultParts({ rank, z: 0, p: 0.5 }, 70, isOverall, undefined, 232, 232).pop();
+  assert.strictEqual(compactRank(1, false), '<strong>Top of assessment</strong>');
+  assert.strictEqual(compactRank(232, false), '<strong>Bottom of assessment</strong>');
+  assert.strictEqual(compactRank(1, true), '<strong>Top of subject</strong>');
+  assert.strictEqual(compactRank(40, false), '<strong>40 / ~232</strong>');
   assert.ok(/^SD [\d.]+ · Z-Score -?[\d.]+( · .+)?$/.test(ui.xp.summary.textContent), `footer: ${ui.xp.summary.textContent}`);
   assert.ok(ui.outcomeBar.parentElement.classList.contains('connectea-xp-head'), 'the outcome meter sits in the header');
   assert.strictEqual(ui.xp.quantiles[0].parentElement.parentElement.parentElement, ui.outcomeBar.parentElement, 'the five quantiles share the header row (wide, short card)');

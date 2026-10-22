@@ -12,7 +12,7 @@
   const cleanSubject = (...args) => window.ConnectifyPredictorEngine.cleanSubject(...args);
   const getAccountKey = () => window.ConnectifyUtils.accountKey();
 
-  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v15_20261022_pred';
+  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v16_20261022_pred';
   const PREDICTOR_CACHE_VERSION_KEY = window.ConnectifyCache?.KEYS?.PREDICTOR || 'connectify:cache_version:predictor';
   const LEGACY_PREDICTION_VERSION_KEY = 'connectify:prediction_version';
 
@@ -51,8 +51,9 @@
         breakoutScore: prediction.breakoutScore || round(1.10 * prediction.high, 2),
         taskType: prediction.taskType || prediction.type,
         type: prediction.type || prediction.taskType,
-        // Kept so the prediction card names what fed it when read back from the cache
+        // Kept so the prediction card names what fed it (and the subject) when read back from the cache
         ...(prediction.basis ? { basis: prediction.basis } : {}),
+        ...(prediction.subjectName ? { subjectName: prediction.subjectName } : {}),
         timestamp: Date.now()
       };
       predictionMemoryCache.set(key, payload);
