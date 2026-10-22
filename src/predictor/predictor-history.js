@@ -1,7 +1,7 @@
 /**
  * Connectify Predictor: historical performance
  *
- * Averages completed results per subject and per assessment type (with spread), the history every
+ * Averages and counts completed results per subject and per assessment type (with spread), the history every
  * task prediction is built from, overall or only from results before a given task. Exposes window.ConnectifyPredictorHistory.
  */
 (() => {
@@ -55,7 +55,9 @@
 
     const subjectAverages = {};
     const subjectSpreads = {};
+    const subjectCounts = {};
     for (const [name, data] of Object.entries(subjectStats)) {
+      subjectCounts[name] = data.tasks.length;
       if (data.weight > 0) {
         subjectAverages[name] = round((data.earned / data.weight) * 100, 2);
       }
@@ -86,6 +88,7 @@
     return {
       subjects: subjectAverages,
       subjectSpreads,
+      subjectCounts,
       types: typeAverages,
       typeCounts,
       overallAverage,
@@ -163,7 +166,9 @@
 
     const subjectAverages = {};
     const subjectSpreads = {};
+    const subjectCounts = {};
     for (const [name, data] of Object.entries(subjectStats)) {
+      subjectCounts[name] = data.tasks.length;
       if (data.weight > 0) {
         subjectAverages[name] = round((data.earned / data.weight) * 100, 2);
       }
@@ -193,6 +198,7 @@
     return {
       subjects: subjectAverages,
       subjectSpreads,
+      subjectCounts,
       types: typeAverages,
       typeCounts,
       overallAverage,

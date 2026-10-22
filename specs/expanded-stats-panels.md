@@ -53,7 +53,7 @@ All cards keep the `.connectea-panel` element (dom-sweeper, Test 185 and existin
 ### 3.3 Unmarked task row — forecast (`all` only)
 ```
 │ Low 71%            Mid 78%            High 84%   │
-│ From your 3 earlier Exam results   Type: [Auto (Exam) ▾] │
+│ From your 3 previous Exam results  Type: [Auto (Exam) ▾] │
 ```
 - Three hero cells in Predictor colours (rounded integers as today); breakout threshold never shown; no meter.
 - Footer: basis text (§5) left, Type dropdown right.
@@ -80,12 +80,9 @@ Only the **Score** value is tinted; everything else uses theme ink.
 - **Explanation**: the outcome meter's singleton tooltip (`#connectea-outcome-tooltip`) gains one line in expanded modes: "The Score colour grows more vivid the further your result sits above your predicted range." ("vivid", not "brightens": light themes go darker). It never mentions the glow, purple or any threshold. No `title` attributes.
 
 ## 5. Prediction basis (engine change)
-- `predictTask` adds `basis: { source, count }` to predicted results:
-  - `type-history` — `completedTypeCount > 0` (`count` = completed tasks of the type) → "From your 3 earlier Exam results" ("From your earlier Exam result" when 1; no pluralising of custom type names).
-  - `type-baseline` — previous-year type baseline used → "From your previous-year Exam average".
-  - `subject-history` — type average fell back to this year's subject average → "From your results in this subject".
-  - `subject-baseline` — fell back to the previous-year subject baseline → "From your previous-year subject result".
-- Type names come from `prediction.type`, written with `textContent` (never parsed as HTML).
+- `predictTask` adds `basis: { typeSource, typeCount, subjectSource, subjectCount }` to predicted results: the type average comes from this year's results (`history`, `typeCount` of them), the previous-year type baseline (`baseline`) or falls back to the subject average (`subject`); the subject average comes from this year's results (`history`, `subjectCount` from the new `subjectCounts` in predictor-history.js) or the previous-year subject baseline (`baseline`).
+- The footer names only what fed the prediction, in the form "From your previous-year Exam and Literature averages, your 3 previous Exam results and your 5 previous Literature results": previous-year averages first (type, then subject), then this year's type results, then this year's subject results, joined "a, b and c". A baseline and this year's results never feed the same average, so a sentence holds at most two of the parts, e.g. "From your previous-year Exam average and your 5 previous Literature results". The subject drops its year level and course type ("12 Literature ATAR" -> "Literature"); 1 reads "your 1 previous Exam result".
+- Text is written with `textContent` (never parsed as HTML).
 - Bump `PREDICTOR` in `cache-versions.js` (data model change) so cached predictions gain `basis`. A prediction without `basis` shows "Predicted from your <Type> results".
 
 ## 6. Theming, geometry, scaling
@@ -121,10 +118,10 @@ Performance: skeletons are built once; repaints only touch text nodes and one da
 - Settings dropdown writes `connectify:panel_view`; Clear Cache keeps it, a settings reset clears it.
 - Skeletons: marked card has Score/Rank/Average, five quantile labels (Minimum, Lower Quartile, Median, Upper Quartile, Maximum), footer with Type select; meter inside header; no `.v-label` inside cards; no highlighted cell.
 - Overall card: cohort input under Rank; merged prediction present without a letter, absent with one; no `.connectea-upcoming` in expanded modes.
-- Forecast card: three cells with Predictor classes, basis text per `basis.source`, NEEDS text when unpredicted.
+- Forecast card: three cells with Predictor classes, basis sentence from `basis`, NEEDS text when unpredicted.
 - Missing data renders `—` and the compact wording.
 - `scoreStep`: clamping, 11 steps, `0.5 → 5` when no comparison, `breakout` only for task rows with `broken`.
-- `predictTask` `basis` for all four sources; PREDICTOR version changed.
+- `predictTask` `basis` for each type and subject source; sentence wording for every combination; PREDICTOR version changed.
 - Tooltip line present in expanded modes and never contains "purple", "glow", "1.1" or "breakout".
 - CSS: step 0 ink >= 5:1 on every preset's panel (light and dark); only `.connectea-panel--expanded` value selectors use `text-shadow`; Tests 153 / 167 / 219 still pass.
 - Theme audit run with `connectify:panel_view = all`.

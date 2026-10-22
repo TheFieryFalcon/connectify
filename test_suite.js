@@ -2375,8 +2375,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v13_20261022_pred'"), 'predictor-math.js must use v13_20261022_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v13_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v13_20261022_pred');
+  assert.ok(predMathCode.includes("'v14_20261022_pred'"), 'predictor-math.js must use v14_20261022_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v14_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v14_20261022_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2469,9 +2469,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v13_20261022_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v14_20261022_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v13_20261022_pred'), 'predictor-math.js must bump version to v13_20261022_pred');
+  assert.ok(predMathJs.includes('v14_20261022_pred'), 'predictor-math.js must bump version to v14_20261022_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -10046,28 +10046,39 @@ runTest('Test 224: Expanded unmarked rows show Low / Mid / High with what the pr
     assert.ok(new RegExp(`<dd class="connectea-xp-value connectea-forecast-value connectea-forecast-value--${level}">\\d+%</dd>`).test(html), `${level} in the Predictor colour class`);
   }
   assert.ok(!/breakout|purple|110/i.test(html), 'the breakout threshold stays secret');
-  assert.ok(/^From your previous-year .+ average$|^From your/.test(ui.xpForecast.summary.textContent), `basis: ${ui.xpForecast.summary.textContent}`);
+  assert.strictEqual(ui.xpForecast.summary.textContent, 'From your previous-year Exam and Literature averages', `basis: ${ui.xpForecast.summary.textContent}`);
 
   row.querySelector('.cvr-c-task__mark').textContent = '72 Out of 100';
   view.render(row, false, 'lit-key', 50, null, []);
   assert.strictEqual(ui.typeContainer.parentElement, ui.xp.foot, 'once marked the Type dropdown returns to the statistics card');
 
   // Basis wording, and the engine records it for every path
-  assert.strictEqual(xp.basisText({ type: 'Exam', basis: { source: 'type-history', count: 3 } }), 'From your 3 earlier Exam results');
-  assert.strictEqual(xp.basisText({ type: 'Exam', basis: { source: 'type-history', count: 1 } }), 'From your earlier Exam result');
-  assert.strictEqual(xp.basisText({ type: 'Exam', basis: { source: 'type-baseline', count: 0 } }), 'From your previous-year Exam average');
-  assert.strictEqual(xp.basisText({ type: 'Exam', basis: { source: 'subject-history', count: 0 } }), 'From your results in this subject');
-  assert.strictEqual(xp.basisText({ type: 'Exam', basis: { source: 'subject-baseline', count: 0 } }), 'From your previous-year subject result');
+  // The sentence names only what fed the prediction (a baseline and this year's results never feed the same average)
+  const said = (typeSource, typeCount, subjectSource, subjectCount) =>
+    xp.basisText({ type: 'Exam', subjectName: '12 Literature ATAR', basis: { typeSource, typeCount, subjectSource, subjectCount } });
+  assert.strictEqual(said('baseline', 0, 'baseline', 0), 'From your previous-year Exam and Literature averages');
+  assert.strictEqual(said('history', 3, 'history', 5), 'From your 3 previous Exam results and your 5 previous Literature results');
+  assert.strictEqual(said('baseline', 0, 'history', 5), 'From your previous-year Exam average and your 5 previous Literature results');
+  assert.strictEqual(said('history', 1, 'baseline', 0), 'From your previous-year Literature average and your 1 previous Exam result');
+  assert.strictEqual(said('subject', 0, 'history', 2), 'From your 2 previous Literature results', 'a type with neither results nor a baseline is left out');
+  assert.strictEqual(xp.basisText({ type: 'Test', subjectName: 'Year 11 Mathematics Methods General', basis: { typeSource: 'baseline', typeCount: 0, subjectSource: 'baseline', subjectCount: 0 } }),
+    'From your previous-year Test and Mathematics Methods averages', 'year level and course type are dropped from the subject');
   assert.strictEqual(xp.basisText({ type: 'Exam' }), 'Predicted from your Exam results', 'predictions cached before basis existed');
   const pm = window.ConnectifyPredictorMath;
   const task = { name: 'Final Exam', caption: '' };
   const type = window.ConnectifyTaskTypes.getEffectiveType('Art', task);
-  const hist = (subjects, types, typeCounts) => ({ subjects, types, typeCounts, overallAverage: 75, spread: 6 });
+  const hist = (subjects, types, typeCounts, subjectCounts) => ({ subjects, types, typeCounts, subjectCounts, overallAverage: 75, spread: 6 });
   const none = { types: {}, subjects: {} };
-  assert.deepStrictEqual(pm.predictTask('Art', task, hist({ Art: 75 }, { [type]: 80 }, { [type]: 3 }), none).basis, { source: 'type-history', count: 3 });
-  assert.deepStrictEqual(pm.predictTask('Art', task, hist({ Art: 75 }, {}, {}), { types: { [type]: 70 }, subjects: {} }).basis, { source: 'type-baseline', count: 0 });
-  assert.deepStrictEqual(pm.predictTask('Art', task, hist({ Art: 75 }, {}, {}), none).basis, { source: 'subject-history', count: 0 });
-  assert.deepStrictEqual(pm.predictTask('Art', task, hist({}, {}, {}), { types: {}, subjects: { Art: 70 } }).basis, { source: 'subject-baseline', count: 0 });
+  assert.deepStrictEqual(pm.predictTask('Art', task, hist({ Art: 75 }, { [type]: 80 }, { [type]: 3 }, { Art: 5 }), none).basis,
+    { typeSource: 'history', typeCount: 3, subjectSource: 'history', subjectCount: 5 });
+  assert.deepStrictEqual(pm.predictTask('Art', task, hist({ Art: 75 }, {}, {}, { Art: 4 }), { types: { [type]: 70 }, subjects: {} }).basis,
+    { typeSource: 'baseline', typeCount: 0, subjectSource: 'history', subjectCount: 4 });
+  assert.deepStrictEqual(pm.predictTask('Art', task, hist({ Art: 75 }, {}, {}, { Art: 4 }), none).basis,
+    { typeSource: 'subject', typeCount: 0, subjectSource: 'history', subjectCount: 4 });
+  assert.deepStrictEqual(pm.predictTask('Art', task, hist({}, {}, {}, {}), { types: { [type]: 72 }, subjects: { Art: 70 } }).basis,
+    { typeSource: 'baseline', typeCount: 0, subjectSource: 'baseline', subjectCount: 0 });
+  const counted = window.ConnectifyPredictorHistory.getHistoricalData([{ name: 'Art - Semester 1', tasks: [{ name: 'A', score: 80, weight: 10 }, { name: 'B', score: 70, weight: 10 }, { name: 'C', pending: true, weight: 10 }] }]);
+  assert.strictEqual(counted.subjectCounts.Art, 2, 'history counts each subject\'s completed results');
   const outcome = pm.evaluateOutcome(80, { low: 60, mid: 70, high: 78, breakoutScore: 85.8 });
   assert.deepStrictEqual([outcome.low, outcome.high, outcome.segments], [60, 78, 4], 'the outcome carries the prediction range');
   loadCohortViewIn(null);

@@ -131,18 +131,34 @@
       return `<dl class="connectea-xp-grid connectea-xp-grid--hero">${cell('low', 'Low')}${cell('mid', 'Mid')}${cell('high', 'High')}</dl>`;
     }
 
-    /** What a prediction is based on (predictor-engine.js basis). */
-    function basisText(prediction) {
+    /** "Literature" from "12 Literature ATAR": no year level or course type. */
+    const shortSubject = name => String(name || '')
+      .replace(/^\s*(?:Year\s*)?\d{1,2}\s+/i, '')
+      .replace(/\s+(?:ATAR|General|Foundation|Preliminary)\s*$/i, '')
+      .trim() || 'subject';
+
+    /** "a, b and c" */
+    const listJoin = items => (items.length > 1 ? `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}` : items[0] || '');
+
+    /**
+     * What a prediction is based on (predictor-engine.js basis), naming only what fed it: e.g. "From your
+     * previous-year Exam and Literature averages", "From your 3 previous Exam results and your 5 previous
+     * Literature results". A baseline and this year's results never both feed the same average.
+     */
+    function basisText(prediction, subjectName) {
       const type = prediction?.type || 'assessment';
       const basis = prediction?.basis;
-      switch (basis?.source) {
-        case 'type-history':
-          return basis.count === 1 ? `From your earlier ${type} result` : `From your ${basis.count} earlier ${type} results`;
-        case 'type-baseline': return `From your previous-year ${type} average`;
-        case 'subject-history': return 'From your results in this subject';
-        case 'subject-baseline': return 'From your previous-year subject result';
-        default: return `Predicted from your ${type} results`;
-      }
+      if (!basis?.subjectSource) return `Predicted from your ${type} results`;
+      const subject = shortSubject(subjectName || prediction.subjectName);
+      const averages = [];
+      if (basis.typeSource === 'baseline') averages.push(type);
+      if (basis.subjectSource === 'baseline') averages.push(subject);
+      const items = [];
+      if (averages.length) items.push(`your previous-year ${listJoin(averages)} average${averages.length > 1 ? 's' : ''}`);
+      const results = (n, name) => `your ${n} previous ${name} result${n === 1 ? '' : 's'}`;
+      if (basis.typeSource === 'history' && basis.typeCount > 0) items.push(results(basis.typeCount, type));
+      if (basis.subjectSource === 'history' && basis.subjectCount > 0) items.push(results(basis.subjectCount, subject));
+      return items.length ? `From ${listJoin(items)}` : `Predicted from your ${type} results`;
     }
 
     /** Fills the prediction card on an unmarked row, or says what the prediction needs. */

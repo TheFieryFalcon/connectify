@@ -88,9 +88,9 @@
 
     // 1. Resolve subject performance:
     let subjectAvg = historical?.subjects?.[cleanSubj];
-    let subjectSource = 'subject-history';
+    let subjectSource = 'history';
     if (subjectAvg === undefined && baselines?.subjects) {
-      subjectSource = 'subject-baseline';
+      subjectSource = 'baseline';
       if (baselines.subjects[cleanSubj] !== undefined) {
         subjectAvg = Number(baselines.subjects[cleanSubj]);
       } else if (baselines.subjects[subjectName] !== undefined) {
@@ -111,16 +111,23 @@
     // 2. Resolve assessment type performance:
     const completedTypeCount = historical?.typeCounts?.[taskType] || 0;
     let typeAvg = historical?.types?.[taskType];
-    // What the prediction rests on, for the expanded prediction card (cohort-expanded.js)
-    let basis = { source: 'type-history', count: completedTypeCount };
+    // Where the type average came from: this year's results, last year's baseline, or the subject average
+    let typeSource = 'history';
 
     if (completedTypeCount === 0 && baselines?.types?.[taskType] !== undefined) {
       typeAvg = Number(baselines.types[taskType]);
-      basis = { source: 'type-baseline', count: 0 };
+      typeSource = 'baseline';
     } else if (typeAvg === undefined || !Number.isFinite(typeAvg) || completedTypeCount === 0) {
       typeAvg = subjectAvg;
-      basis = { source: subjectSource, count: 0 };
+      typeSource = 'subject';
     }
+    // What the prediction rests on, for the expanded prediction card (cohort-expanded.js)
+    const basis = {
+      typeSource,
+      typeCount: typeSource === 'history' ? completedTypeCount : 0,
+      subjectSource,
+      subjectCount: subjectSource === 'history' ? (historical?.subjectCounts?.[cleanSubj] || 0) : 0
+    };
 
     if (typeAvg === undefined || !Number.isFinite(typeAvg)) {
       return {
