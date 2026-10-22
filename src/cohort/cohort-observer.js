@@ -15,7 +15,7 @@
 
   const CARD_SELECTOR = '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile';
   const OWN_UI = '.connectea-panel, .connectea-type-container, .connectea-row-wrapper';
-  const OWN_NODES = '.connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-outcome-bar, .connectea-subject-controls';
+  const OWN_NODES = '.connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-outcome-bar, .connectea-subject-controls, .connectea-subject-average-row';
   const STATS_ATTRIBUTES = ['data-highcharts-chart', 'data-connectify-stats'];
 
   const isOwnNode = node => node.nodeType === 1 && Boolean(

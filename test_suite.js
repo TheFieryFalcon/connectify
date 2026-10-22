@@ -100,6 +100,7 @@ const MODULE_BUNDLES = {
     'cohort-outcome-eval.js',
     'cohort-forecast.js',
     'cohort-upcoming.js',
+    'cohort-subject-average.js',
     'cohort-view.js'
   ],
   'category-settings.js': [
@@ -10138,6 +10139,88 @@ runTest('Test 225: The Score colour steps from Low to High, stays >= 5:1 and onl
     assert.ok(O.contrast(step('#1d4ed8', light(1)), bg) > O.contrast(step('#1d4ed8', light(0)), bg), 'Light inverts: better results are darker');
   }
   assert.ok(css.includes('calc(0.34 * (1 - 0.12 * var(--cx-score-t)))') && css.includes('0.27 calc(c * 1.3)'), 'light tone only darkens from the Predictor\'s 0.34 ink');
+  loadCohortViewIn(null);
+});
+
+runTest('Test 226: A class Connect shows no Cumulative Percent row for gets Connectify\'s own subject average row', () => {
+  const { view } = loadCohortViewIn(null);
+  const avg = window.ConnectifyCohortSubjectAverage;
+  assert.ok(avg, 'cohort-subject-average.js loads with the cohort view');
+  // Economics: no overall row at all; the first task is 29.71 Out of 40 with a weighted mark of 7.4 Out of 10
+  const card = new MockElement('div', 'eds-c-tile');
+  const title = new MockElement('div', 'eds-c-tile__title');
+  title.textContent = '12 Economics ATAR - Semester 1';
+  card.appendChild(title);
+  const list = new MockElement('div', 'cvr-c-tasks');
+  // The mock has no beforebegin: put the row before the task list in the card, as the browser does
+  list.insertAdjacentElement = (pos, el) => {
+    assert.strictEqual(pos, 'beforebegin');
+    card.append(el);
+    const kids = card.children;
+    kids.splice(kids.indexOf(el), 1);
+    kids.splice(kids.indexOf(list), 0, el);
+    return el;
+  };
+  card.appendChild(list);
+  const addTask = (name, mark, weighted) => {
+    const row = new MockElement('div', 'cvr-c-task');
+    row.closest = sel => (sel === '.cvr-c-tasks' ? list : sel.includes('eds-c-tile') ? card : null);
+    const details = new MockElement('div', 'cvr-c-task__details');
+    for (const text of ['Test', 'Term 1, Week 6', name]) { const l = new MockElement('span', 'v-label'); l.textContent = text; details.appendChild(l); }
+    const marks = new MockElement('div', 'cvr-c-task__marks');
+    for (const text of [mark, weighted]) { const c = new MockElement('div', 'cvr-c-task__mark'); c.textContent = text; marks.appendChild(c); }
+    row.appendChild(details); row.appendChild(marks); list.appendChild(row);
+    return row;
+  };
+  addTask('Market structures test', '29.71 Out of 40', '7.4 Out of 10');
+  addTask('Elasticity investigation', '18 Out of 20', '13.5 Out of 15');
+  addTask('Macro exam', '- Out of 50', '- Out of 25');
+  const own = card._own = avg.sync(card);
+  assert.ok(own && own.classList.contains(avg.ROW_CLASS) && own.classList.contains('cvr-c-task'), 'the card gets its own subject average row');
+  assert.strictEqual(card.children.indexOf(own), card.children.indexOf(list) - 1, 'it sits before the task list, outside .cvr-c-tasks');
+  assert.strictEqual(own.querySelector('.v-label').textContent, avg.LABEL, 'labelled as worked out by Connectify');
+  assert.ok(/Connectify/.test(avg.LABEL) && /Connect shows none/.test(avg.LABEL));
+  // (74.275% x 10 + 90% x 15) / 25; the unmarked exam does not count
+  assert.strictEqual(own.querySelector('.cvr-c-task__mark').textContent, '83.71%', 'weight-weighted mean of the marked tasks');
+  assert.strictEqual(avg.sync(card), own, 'a later pass updates the same row');
+  assert.strictEqual(card.querySelectorAll(`.${avg.ROW_CLASS}`).length, 1);
+
+  // The overall panel renders on it like Connect's own row
+  own.closest = sel => (sel.includes('eds-c-tile') ? card : null);
+  view.render(own, true, 'econ-key', 120, null, []);
+  const ui = view.panels.get(own);
+  assert.ok(ui && ui.isOverall && ui.input, 'the overall panel (with cohort size) attaches to the row');
+
+  // Connect's own row comes back: Connectify's is removed
+  const connectRow = new MockElement('div', 'cvr-c-task');
+  connectRow.closest = () => null;
+  card.appendChild(connectRow);
+  assert.strictEqual(avg.sync(card), null);
+  assert.strictEqual(card.querySelectorAll(`.${avg.ROW_CLASS}`).length, 0, 'never two overall rows');
+  card.removeChild(connectRow);
+
+  // A card showing no task rows uses its cached tasks up to the card's semester; nothing marked means no row
+  const origData = window.ConnectifyData;
+  try {
+    for (const row of [...list.children]) list.removeChild(row);
+    window.ConnectifyData = { getSubjectTasks: () => [
+      { score: 80, weight: 20, semester: 1 }, { score: 60, weight: 20, semester: 1 }, { score: 10, weight: 50, semester: 2 }, { score: null, pending: true, weight: 30, semester: 1 }
+    ] };
+    assert.strictEqual(avg.sync(card).querySelector('.cvr-c-task__mark').textContent, '70%', 'Semester 1 counts only Semester 1 results');
+    window.ConnectifyData = { getSubjectTasks: () => [] };
+    assert.strictEqual(avg.sync(card), null, 'no marked tasks, no row');
+  } finally {
+    window.ConnectifyData = origData;
+  }
+  assert.strictEqual(avg.rowWeight({ querySelectorAll: () => [{}, { textContent: '10%' }] }), 10, 'a percent weighting counts too');
+
+  const stats = origReadFileSync.call(fs, path.join(SRC_DIR, 'cohort/cohort-stats.js'), 'utf8');
+  assert.ok(stats.indexOf('ConnectifyCohortSubjectAverage?.sync(card)') < stats.indexOf("card._cxTaskRows = rows"), 'the pass adds the row before it lists the card\'s rows');
+  const observer = origReadFileSync.call(fs, path.join(SRC_DIR, 'cohort/cohort-observer.js'), 'utf8');
+  assert.ok(observer.includes('.connectea-subject-average-row'), 'adding the row is Connectify\'s own mutation, so it never loops the observer');
+  const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const js = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-stats.js')).js;
+  assert.ok(js.indexOf('src/cohort/cohort-row-readers.js') < js.indexOf('src/cohort/cohort-subject-average.js') && js.indexOf('src/cohort/cohort-subject-average.js') < js.indexOf('src/cohort/cohort-stats.js'));
   loadCohortViewIn(null);
 });
 

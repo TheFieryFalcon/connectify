@@ -49,6 +49,8 @@
     // Pass 1: Group and find best estimates per subject key (retaining empirical refinements)
     const subjectEstimates = {};
     for (const card of cards) {
+      // A class Connect shows no overall row for gets Connectify's own subject average row first
+      try { window.ConnectifyCohortSubjectAverage?.sync(card); } catch {}
       const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
         row => row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card
       );
