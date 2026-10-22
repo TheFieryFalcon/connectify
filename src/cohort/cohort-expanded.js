@@ -1,11 +1,12 @@
 /**
  * Connectify Cohort: expanded statistics cards
  *
- * With the Settings "Statistics Panels" option expanded (cohort-panel-view.js), a statistics panel is a card:
- * Score / Rank / Average (outcome meter beside them on task rows), the five boxplot values, and a footer with
- * SD, z-score and standing (Type dropdown on task rows). Overall rows hold the cohort size input under Rank
- * and the class prediction below a divider; unmarked rows show Low / Mid / High with what the prediction is
- * based on. Skeletons are built once per panel; fills only touch text and the Score colour step.
+ * With the Settings "Statistics Panels" option expanded (cohort-panel-view.js), a statistics panel is a wide,
+ * short card: one row of Score / Rank / Average beside the five boxplot values (outcome meter at its end on
+ * task rows), then a footer with SD, z-score and standing (Type dropdown, or the cohort size input on overall
+ * rows). Overall rows put the class prediction's Low / Mid / High under Score / Rank / Average; unmarked rows
+ * are one line of Low / Mid / High beside what the prediction is based on. Skeletons are built once per
+ * panel; fills only touch text and the Score colour step.
  * Exposes window.ConnectifyCohortExpanded.
  */
 (() => {
@@ -38,9 +39,9 @@
       return { foot, summary };
     }
 
-    /** The statistics card in a panel: the meter joins the header, the Type dropdown the footer. */
+    /** The statistics card in a panel: one row of values (meter at its end), then the footer. */
     function buildStats(box, { overall, meter, type, controls }) {
-      box.classList.add('connectea-panel--expanded');
+      box.classList.add('connectea-panel--expanded', 'connectea-xp-stats');
       if (overall) box.classList.add('connectea-xp-overall');
       const head = createElement('div', 'connectea-xp-head');
       const top = grid(HEAD, 'connectea-xp-grid--head');
@@ -48,25 +49,26 @@
       score.classList.add('connectea-xp-score');
       const rankValue = createElement('span', 'connectea-xp-rank-value');
       rank.append(rankValue);
-      if (controls) rank.append(controls);
-      head.append(top.dl);
-      if (meter) head.append(meter);
       const quantiles = grid(QUANTILES, 'connectea-xp-grid--quantiles');
+      head.append(top.dl, quantiles.dl);
+      if (meter) head.append(meter);
       const { foot, summary } = footer();
       if (type) foot.append(type);
-      box.append(head, quantiles.dl, foot);
+      if (controls) foot.append(controls);
+      box.append(head);
       let prediction = null;
       if (overall) {
         prediction = createElement('div', 'connectea-xp-prediction');
         prediction.hidden = true;
         box.append(prediction);
       }
+      box.append(foot);
       return { score, rankValue, average, quantiles: quantiles.values, foot, summary, prediction };
     }
 
-    /** The prediction card on an unmarked row: Low / Mid / High, then the basis and the Type dropdown. */
+    /** The prediction card on an unmarked row: Low / Mid / High beside the basis and the Type dropdown. */
     function buildForecast(box) {
-      box.classList.add('connectea-panel--expanded');
+      box.classList.add('connectea-panel--expanded', 'connectea-xp-forecast');
       const body = createElement('div', 'connectea-xp-body');
       const { foot, summary } = footer();
       box.append(body, foot);
@@ -170,10 +172,11 @@
       setText(card.summary, predicted ? basisText(prediction) : '');
     }
 
-    /** The overall card's class prediction section (hidden by the caller once the class has a letter). */
+    /** The overall card's class prediction row: Low / Mid / High under Score / Rank / Average, titled beside
+     *  them (hidden by the caller once the class has a letter). */
     function fillPrediction(section, p, needs) {
       const title = '<div class="connectea-xp-title">Predicted class result</div>';
-      setHTML(section, p ? `${title}${heroCells(p, 1)}` : `${title}<div class="connectea-xp-needs">${needs}</div>`);
+      setHTML(section, p ? `${heroCells(p, 1)}${title}` : `<div class="connectea-xp-needs">${needs}</div>${title}`);
       section.hidden = false;
     }
 

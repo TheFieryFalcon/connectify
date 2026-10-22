@@ -9980,6 +9980,7 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   assert.ok(/^(Top of assessment|\d+ \/ ~219)$/.test(ui.xp.rankValue.textContent), `an estimated cohort size reads ~: ${ui.xp.rankValue.textContent}`);
   assert.ok(/^SD [\d.]+ · Z-Score -?[\d.]+( · .+)?$/.test(ui.xp.summary.textContent), `footer: ${ui.xp.summary.textContent}`);
   assert.ok(ui.outcomeBar.parentElement.classList.contains('connectea-xp-head'), 'the outcome meter sits in the header');
+  assert.strictEqual(ui.xp.quantiles[0].parentElement.parentElement.parentElement, ui.outcomeBar.parentElement, 'the five quantiles share the header row (wide, short card)');
   assert.strictEqual(ui.typeContainer.parentElement, ui.xp.foot, 'the Type dropdown sits in the footer');
   assert.ok(/^(10|\d)$/.test(ui.xp.score.getAttribute('data-cx-score-step')), 'the Score has a colour step');
   assert.ok(ui.outcomeBar.dataset.connecteaTooltip.endsWith(xp.SCORE_NOTE), 'the meter tooltip explains the Score colour');
@@ -10000,7 +10001,7 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   loadCohortViewIn(null);
 });
 
-runTest('Test 223: Expanded overall cards hold the cohort input under Rank and the class prediction; subjects mode keeps tasks compact', () => {
+runTest('Test 223: Expanded overall cards hold the cohort input in the footer and the class prediction; subjects mode keeps tasks compact', () => {
   const { view } = loadCohortViewIn('subjects');
   window.ConnectifyPredictorMath.saveBaselines({ types: { Exam: 70 }, subjects: { '12 Literature ATAR': 70 } });
   const { makeRow } = expandedFixture();
@@ -10008,7 +10009,9 @@ runTest('Test 223: Expanded overall cards hold the cohort input under Rank and t
   view.render(overall, true, 'lit-key', 219, null, []);
   const ui = view.panels.get(overall);
   assert.ok(ui.box.classList.contains('connectea-panel--expanded'));
-  assert.strictEqual(ui.input.parentElement.parentElement.parentElement, ui.xp.rankValue.parentElement, 'the cohort size input sits under the Rank value');
+  assert.strictEqual(ui.input.parentElement.parentElement.parentElement, ui.xp.foot, 'the cohort size input sits in the footer');
+  assert.strictEqual(ui.xp.rankValue.parentElement.children.length, 1, 'the Rank cell holds only its value');
+  assert.deepStrictEqual(Array.from(ui.box.children, e => e.className), ['connectea-xp-head', 'connectea-xp-prediction', 'connectea-xp-foot'], 'values, class prediction, footer');
   assert.ok(!ui.upcoming, 'no separate class prediction line');
   assert.ok(!ui.xp.prediction.hidden && /Predicted class result/.test(ui.xp.prediction.innerHTML), 'the class prediction is a section of the card');
   assert.ok(!ui.outcomeBar, 'overall rows have no meter');

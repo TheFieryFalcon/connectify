@@ -1,8 +1,9 @@
 /* Expanded statistics cards (cohort-expanded.js, Settings "Statistics Panels"). The card keeps the statistics
-   panel's surface in every theme (.connectea-panel rules); everything inside it is clear, rows divided by
-   hairlines (one surface per block). The --cx-display-scale zoom still applies; the grid never reflows. */
+   panel's surface in every theme (.connectea-panel rules); everything inside it is clear, groups divided by
+   hairlines (one surface per block). Wide and short: one row of values, the footer below. The
+   --cx-display-scale zoom still applies; the grid never reflows. */
 .connectea-panel.connectea-panel--expanded {
-  padding: 10px 14px !important;
+  padding: 10px 16px !important;
   line-height: 1.4 !important;
   white-space: nowrap !important;
   overflow-wrap: normal !important;
@@ -12,30 +13,51 @@
 .connectea-row-wrapper > .connectea-panel.connectea-panel--expanded,
 .connectea-row-wrapper > .connectea-panel.connectea-forecast.connectea-panel--expanded {
   max-width: none !important;
-  padding: 10px 14px !important;
+  padding: 10px 16px !important;
 }
 
-.connectea-panel--expanded :is(.connectea-xp-head, .connectea-xp-foot) {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 18px !important;
-}
-.connectea-panel--expanded .connectea-xp-grid {
+/* One column grid for the whole card: Score / Rank / Average, then the five quantiles, then the meter. Rows
+   share it (subgrid), so the class prediction's Low / Mid / High sit under Score / Rank / Average. Browsers
+   without subgrid keep the fallback columns of each group */
+.connectea-panel.connectea-xp-stats {
   display: grid !important;
-  gap: 2px 18px !important;
+  grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(5, minmax(60px, max-content)) auto !important;
+  column-gap: 20px !important;
+  align-items: end !important;
+}
+.connectea-panel.connectea-xp-stats.connectea-xp-overall {
+  grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(5, minmax(60px, max-content)) !important;
+}
+.connectea-xp-stats :is(.connectea-xp-head, .connectea-xp-prediction) {
+  grid-column: 1 / -1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(9, max-content) !important;
+  grid-template-columns: subgrid !important;
+  align-items: end !important;
+}
+.connectea-xp-stats .connectea-xp-grid {
+  display: grid !important;
+  column-gap: 20px !important;
   margin: 0 !important;
   padding: 0 !important;
+  align-items: end !important;
 }
-/* Columns line up across rows; a longer value ("Top of assessment") widens its own column instead of overlapping */
-.connectea-panel--expanded :is(.connectea-xp-grid--head, .connectea-xp-grid--hero) { grid-template-columns: repeat(3, minmax(150px, max-content)) !important; }
-.connectea-panel--expanded .connectea-xp-grid--head { align-items: start !important; }
-.connectea-panel--expanded .connectea-xp-grid--quantiles {
-  grid-template-columns: repeat(5, minmax(104px, max-content)) !important;
-  margin-top: 10px !important;
-  padding-top: 8px !important;
-  border-top: 1px solid #d3dfed !important;
+.connectea-xp-stats :is(.connectea-xp-grid--head, .connectea-xp-grid--hero) {
+  grid-column: 1 / 4 !important;
+  grid-template-columns: repeat(3, max-content) !important;
+  grid-template-columns: subgrid !important;
 }
+/* The quantiles and the prediction title start after a hairline */
+.connectea-xp-stats :is(.connectea-xp-grid--quantiles, .connectea-xp-title) {
+  grid-column: 4 / 9 !important;
+  padding-left: 20px !important;
+  border-left: 1px solid #d3dfed !important;
+}
+.connectea-xp-stats .connectea-xp-grid--quantiles {
+  grid-template-columns: repeat(5, max-content) !important;
+  grid-template-columns: subgrid !important;
+}
+.connectea-xp-stats .connectea-xp-head > .connectea-outcome-bar { grid-column: 9 !important; align-self: center !important; justify-self: end !important; }
 .connectea-panel--expanded :is(.connectea-xp-cell, .connectea-xp-label, .connectea-xp-value) {
   margin: 0 !important;
   padding: 0 !important;
@@ -57,50 +79,83 @@
   color: #203c5e !important;
 }
 .connectea-panel--expanded :is(.connectea-xp-grid--head, .connectea-xp-grid--hero) .connectea-xp-value { font-size: 20px !important; }
-.connectea-panel--expanded .connectea-xp-grid--quantiles .connectea-xp-value { font-size: 14px !important; }
+.connectea-panel--expanded .connectea-xp-grid--quantiles .connectea-xp-value { font-size: 15px !important; line-height: 1.6 !important; }
 /* Predictor Low / Mid / High cells: Mid heaviest, Low and High semibold (colours: cohort-forecast.css, cohort-upcoming.css) */
 .connectea-panel--expanded .connectea-xp-value:is(.connectea-forecast-value--low, .connectea-forecast-value--high) { font-weight: 600 !important; }
 
-.connectea-panel--expanded .connectea-xp-foot,
-.connectea-panel--expanded .connectea-xp-prediction {
-  margin-top: 10px !important;
-  padding-top: 8px !important;
+/* Class prediction row: below a hairline, the title beside the values in the label style */
+.connectea-xp-stats .connectea-xp-prediction {
+  margin: 8px 0 0 !important;
+  padding: 0 !important;
   border-top: 1px solid #d3dfed !important;
-  font-size: 12px !important;
-  font-weight: 400 !important;
 }
-.connectea-panel--expanded .connectea-xp-body + .connectea-xp-foot { margin-top: 6px !important; }
-.connectea-panel--expanded .connectea-xp-summary:empty { display: none !important; }
+.connectea-xp-stats .connectea-xp-prediction > * { padding-top: 8px !important; }
+.connectea-xp-stats .connectea-xp-prediction > .connectea-xp-needs { grid-column: 1 / 4 !important; align-self: start !important; }
 .connectea-panel--expanded .connectea-xp-prediction[hidden] { display: none !important; }
-.connectea-panel--expanded .connectea-xp-needs { white-space: normal !important; }
 .connectea-panel--expanded .connectea-xp-title {
-  margin-bottom: 2px !important;
+  align-self: stretch !important;
   font-size: 11px !important;
   font-weight: 700 !important;
 }
 
-/* Overall card: the cohort size input and its notice sit under the Rank value */
-.connectea-panel--expanded .connectea-xp-rank-value { display: block !important; }
-.connectea-panel--expanded .connectea-xp-value .connectea-subject-controls {
+/* Footer: the summary, then the Type dropdown or the cohort size input */
+.connectea-panel--expanded .connectea-xp-foot {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+}
+.connectea-xp-stats .connectea-xp-foot {
+  grid-column: 1 / -1 !important;
+  margin-top: 8px !important;
+  padding-top: 6px !important;
+  border-top: 1px solid #d3dfed !important;
+}
+.connectea-panel--expanded .connectea-xp-summary:empty { display: none !important; }
+.connectea-panel--expanded .connectea-xp-needs { white-space: normal !important; }
+
+/* Unmarked rows: one line, Low / Mid / High beside the basis and the Type dropdown */
+.connectea-panel.connectea-xp-forecast {
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+}
+.connectea-xp-forecast .connectea-xp-grid--hero {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(64px, max-content)) !important;
+  column-gap: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.connectea-xp-forecast .connectea-xp-foot { padding-left: 20px !important; border-left: 1px solid #d3dfed !important; }
+.connectea-xp-forecast .connectea-xp-summary { max-width: 320px !important; white-space: normal !important; }
+
+/* Overall card: the cohort size input sits in the footer, its notice beside it */
+.connectea-panel--expanded .connectea-xp-foot .connectea-subject-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
   width: auto !important;
-  margin-top: 4px !important;
-  padding-top: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
   border-top: none !important;
   font-size: 11px !important;
   font-weight: 400 !important;
-  line-height: 1.4 !important;
 }
-.connectea-panel--expanded .connectea-xp-value .connectea-controls { margin: 0 !important; }
-.connectea-panel--expanded .connectea-xp-value .connectea-notice {
-  max-width: 150px !important;
+.connectea-panel--expanded .connectea-xp-foot .connectea-controls { margin: 0 !important; }
+.connectea-panel--expanded .connectea-xp-foot .connectea-notice {
+  max-width: 240px !important;
+  margin: 0 !important;
   white-space: normal !important;
   font-weight: 400 !important;
 }
 
 html.connectea-dark .connectea-panel--expanded .connectea-xp-label { color: var(--cx-text-secondary, #d6e8f8) !important; }
 html.connectea-dark .connectea-panel--expanded .connectea-xp-value { color: var(--cx-text-primary, #f1f5f9) !important; }
-html.connectea-dark .connectea-panel--expanded :is(.connectea-xp-grid--quantiles, .connectea-xp-foot, .connectea-xp-prediction) {
-  border-top-color: var(--cx-border, #3b6088) !important;
+html.connectea-dark .connectea-panel--expanded :is(.connectea-xp-grid--quantiles, .connectea-xp-foot, .connectea-xp-prediction, .connectea-xp-title) {
+  border-color: var(--cx-border, #3b6088) !important;
 }
 
 /* Liquid Glass: the card is the whole strip, so it has no edge of its own; labels take the primary ink
@@ -113,8 +168,8 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel--expanded .connectea-xp-label {
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel--expanded :is(.connectea-xp-grid--quantiles, .connectea-xp-foot, .connectea-xp-prediction) {
-  border-top-color: var(--cx-gl-hairline, rgba(255, 255, 255, 0.14)) !important;
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel--expanded :is(.connectea-xp-grid--quantiles, .connectea-xp-foot, .connectea-xp-prediction, .connectea-xp-title) {
+  border-color: var(--cx-gl-hairline, rgba(255, 255, 255, 0.14)) !important;
 }
 
 /* Score colour: the theme accent, more vivid the further the result sits above the predicted range.
