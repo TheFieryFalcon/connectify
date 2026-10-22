@@ -84,7 +84,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Role**: Assessment categories (defaults from `category-store.js`: Exam, Test, Application, Essay, Take-Home), student overrides, category colours, and class custom categories shared across Semesters 1 and 2. Categories are read live from `window.cxCategories`, so saved keywords apply at once.
 - **Key Functions**:
   - `categorizeTask(taskName, allLabels)`: keyword then regex match on the name, then the labels; defaults to `'Take-Home'`.
-  - `saveTaskTypeOverride(...)` / `getEffectiveType(subjectName, task, labelsKey)`: override wins over detection; saving refreshes the prediction cache.
+  - `saveTaskTypeOverride(...)` / `getEffectiveType(subjectName, task, labelsKey)`: override wins over detection; saving refreshes the prediction cache. Cached tasks carry `labelsKey` (every label, set by the parser; older caches read it from the task id), so tools type them like the Type dropdown without the DOM.
   - `getCustomCategoriesForClass` / `addCustomCategoryForClass`: per-class custom categories. Names failing `ConnectifyCategoryStore.isCategoryName` (blank, `undefined`, `null`) are never stored or listed, and such an override reads as Auto.
   - `task-type-select.js`: `getTaskMeta(row)`, `updateTypeSelect(select, ...)`, `rescanAllAutoAssessments()` (also on `connectify-rescan-auto-types`, fired when extension storage returns different categories).
 - **Export**: `window.ConnectifyTaskTypes`.

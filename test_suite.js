@@ -2379,8 +2379,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v16_20261022_pred'"), 'predictor-math.js must use v16_20261022_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v16_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v16_20261022_pred');
+  assert.ok(predMathCode.includes("'v17_20261022_pred'"), 'predictor-math.js must use v17_20261022_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v17_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v17_20261022_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2473,9 +2473,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v16_20261022_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v17_20261022_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v16_20261022_pred'), 'predictor-math.js must bump version to v16_20261022_pred');
+  assert.ok(predMathJs.includes('v17_20261022_pred'), 'predictor-math.js must bump version to v17_20261022_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -10386,6 +10386,31 @@ runTest('Test 228: Shown statistics panels carry no inline display, so expanded 
     assert.ok(!/setProperty\('display', (visible \? )?'block'/.test(js), `${f} never writes display: block on a panel`);
   }
   loadCohortViewIn(null);
+});
+
+runTest('Test 229: The Weakness Analyzer types cached tasks from their stored labels, never the DOM, and redraws when open', () => {
+  // Cached tasks have no row: their type used to fall back to the week caption alone, unlike the Type dropdown
+  localStorage.clear();
+  delete window.ConnectifyTaskTypes;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8'));
+  const types = window.ConnectifyTaskTypes;
+  const labels = ['Validation Test', 'Term 1, Week 4', 'Part B'];
+  const onPage = types.categorizeTask('Part B', labels);
+  assert.notStrictEqual(onPage, 'Take-Home', 'the bold title label decides the type on the page');
+  const id = `${JSON.stringify([labels, 40])}:0`;
+  const cached = { id, name: 'Part B', caption: 'Term 1, Week 4', labelsKey: labels.join('::') };
+  assert.strictEqual(types.getEffectiveType('12 Chemistry ATAR', cached), onPage, 'a cached task with labelsKey gets the dropdown\'s type');
+  const older = { id, name: 'Part B', caption: 'Term 1, Week 4' };
+  assert.strictEqual(types.getEffectiveType('12 Chemistry ATAR', older), onPage, 'a task cached before labelsKey reads its labels from its id');
+  types.saveTaskTypeOverride('12 Chemistry ATAR', 'Part B', labels.join('::'), 'Essay');
+  assert.strictEqual(types.getEffectiveType('12 Chemistry ATAR', older), 'Essay', 'a dropdown override applies to the cached task');
+
+  const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
+  assert.ok(read('assessment/assessment-parser.js').includes("labelsKey: labels.join('::')"), 'parsed tasks store every label');
+  const weak = read('progress/weakness-radar.js');
+  assert.ok(weak.includes("'connectify-task-type-changed', refreshOpen") && weak.includes("'connectify-results-updated', refreshOpen"), 'an open analyzer redraws on type and result changes');
+  assert.ok(!weak.includes('ConnectifyData.collect(true)'), 'opening the analyzer reads the cache through collectClasses only');
+  assert.ok(!read('assessment/assessment-data.js').includes('ConnectifyWeakness.render('), 'no call to the missing ConnectifyWeakness.render');
 });
 
 Promise.all(pendingTestPromises).then(() => {

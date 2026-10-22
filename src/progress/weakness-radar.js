@@ -186,9 +186,6 @@
       panel.hidden = false;
       toggleBtn.setAttribute('aria-pressed', 'true');
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'weakness' }));
-      if (window.ConnectifyData?.collect) {
-        window.ConnectifyData.collect(true);
-      }
       updateCheckboxes(panel);
       setTimeout(renderChart, 50);
     }
@@ -214,6 +211,10 @@
         closeWeakness();
       }
     });
+    // Everything comes from the cache, so an open analyzer redraws when a type or a cached result changes
+    const refreshOpen = () => { if (!panel.hidden) { updateCheckboxes(panel); renderChart(); } };
+    window.addEventListener('connectify-task-type-changed', refreshOpen);
+    window.addEventListener('connectify-results-updated', refreshOpen);
 
     const refs = {
       toggleBtn,

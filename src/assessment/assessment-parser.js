@@ -156,6 +156,8 @@
         id,
         name: taskName,
         caption,
+        // Every label, as the Type dropdown keys overrides and detects types, so cached tasks need no row
+        labelsKey: labels.join('::'),
         score: isCompleted ? score : null,
         pending: !isCompleted,
         weight,

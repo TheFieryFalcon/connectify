@@ -137,11 +137,7 @@
         window.ConnectifyCohort.schedule();
       }
 
-      // Only refresh tool views that are open (Year in Progress refreshes itself on the event below)
-      const weaknessPanel = document.getElementById('connectify-weakness');
-      if (weaknessPanel && !weaknessPanel.hidden && window.ConnectifyWeakness?.render) {
-        window.ConnectifyWeakness.render();
-      }
+      // Year in Progress and the Weakness Analyzer refresh themselves on the event below when open
       if (window.ConnectifyCompoundProgress?.update) {
         window.ConnectifyCompoundProgress.update();
       }

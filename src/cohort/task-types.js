@@ -162,12 +162,22 @@
     return 'Take-Home';
   }
 
+  // Task ids are JSON.stringify([labels, maxScore]) + ':n', so tasks cached before labelsKey existed still carry their labels
+  function labelsFromId(id) {
+    try {
+      const labels = JSON.parse(String(id).replace(/:\d+$/, ''))?.[0];
+      return Array.isArray(labels) && labels.length ? labels.join('::') : '';
+    } catch { return ''; }
+  }
+
   function getEffectiveType(subjectName, task, labelsKey) {
     const taskName = typeof task === 'string' ? task : task?.name;
     let actualLabelsKey = labelsKey;
     if (!actualLabelsKey && task && typeof task === 'object') {
       if (task.labelsKey) {
         actualLabelsKey = task.labelsKey;
+      } else if (labelsFromId(task.id)) {
+        actualLabelsKey = labelsFromId(task.id);
       } else if (task.row) {
         const labels = Array.from(task.row.querySelectorAll('.cvr-c-task__details .v-label'))
           .map(e => (e.textContent || '').replace(/\s+/g, ' ').trim())
