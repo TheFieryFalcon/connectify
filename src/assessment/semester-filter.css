@@ -2,3 +2,66 @@
 .cx-semester-hidden {
   display: none !important;
 }
+
+/* semester-filter-notice.js: shown in place of the outlines when the option hides every one in view.
+   An empty state: it sits straight on the page (no panel) in the theme ink, centred */
+.cx-semester-notice {
+  max-width: 560px;
+  margin: 32px auto;
+  padding: 0 16px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.cx-semester-notice-title {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cx-semester-notice-text {
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #334155;
+}
+
+.cx-semester-notice-btn {
+  padding: 8px 16px;
+  background: #24618c;
+  color: #ffffff;
+  border: 1px solid #1a4d70;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cx-semester-notice-btn:hover {
+  background: #1a4d70;
+}
+
+.cx-semester-notice-btn[hidden] {
+  display: none;
+}
+
+.connectea-dark .cx-semester-notice-title {
+  color: var(--cx-text-primary, #f8fafc);
+}
+
+.connectea-dark .cx-semester-notice-text {
+  color: var(--cx-text-secondary, #e2e8f0);
+}
+
+.connectea-dark .cx-semester-notice-btn {
+  background: var(--cx-button-primary-bg, #2563eb);
+  color: var(--cx-button-primary-text, #ffffff);
+  border-color: var(--cx-button-primary-bg, #2563eb);
+}
+
+.connectea-dark .cx-semester-notice-btn:hover {
+  background: var(--cx-button-primary-hover, #1d4ed8);
+}

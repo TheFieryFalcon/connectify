@@ -127,10 +127,20 @@
   // Semester 2 starts only once a class has a final A–E grade. Marks never count: a Semester 2 panel's
   // cumulative percent and its Semester 1 task rows are marked from day one, and a Semester 2 task can
   // be marked before Semester 1 grades are final. (A letter on a Semester 2 card means the year is over.)
+  // A page showing only some of this year's classes (a Connect filter, or tiles still rendering) can
+  // prove Semester 2 but not Semester 1: the filtered class may simply have no final letter, so the
+  // registry decides. Classes the registry has never seen (a new year) are a whole page.
   function evidenceFromPage() {
     const cards = Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester);
     if (!cards.length) return null;
-    return cards.some(card => cardSummary(card).finalLetter) ? 2 : 1;
+    if (cards.some(card => cardSummary(card).finalLetter)) return 2;
+    return isPartialPage(cards) ? null : 1;
+  }
+
+  function isPartialPage(cards) {
+    const known = Object.keys(load());
+    const live = new Set(cards.map(card => cardInfo(card).subject));
+    return [...live].every(s => known.includes(s)) && known.some(s => !live.has(s));
   }
 
   function evidenceFromRegistry() {

@@ -62,6 +62,7 @@ const MODULE_BUNDLES = {
     'assessment-parse-helpers.js',
     'assessment-parser.js',
     'class-semesters.js',
+    'semester-filter-notice.js',
     'semester-filter.js',
     'assessment-expand-progress.js',
     'assessment-accordion-watch.js',
@@ -8336,10 +8337,12 @@ function makeOutlineCard(title, { overall = null, tasks = [] } = {}) {
 function loadSemesterModules() {
   // window may inherit earlier copies, so shadow them instead of deleting
   window.ConnectifyClassSemesters = undefined;
+  window.ConnectifySemesterFilterNotice = undefined;
   window.ConnectifySemesterFilter = undefined;
-  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/class-semesters.js'), 'utf8'));
-  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/semester-filter.js'), 'utf8'));
-  return { classes: window.ConnectifyClassSemesters, filter: window.ConnectifySemesterFilter };
+  for (const f of ['class-semesters.js', 'semester-filter-notice.js', 'semester-filter.js']) {
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment', f), 'utf8'));
+  }
+  return { classes: window.ConnectifyClassSemesters, filter: window.ConnectifySemesterFilter, notice: window.ConnectifySemesterFilterNotice };
 }
 
 runTest('Test 187: The class registry records each semester outline and detects the current semester', () => {
@@ -8364,10 +8367,16 @@ runTest('Test 187: The class registry records each semester outline and detects 
     assert.strictEqual(stored['12 Art'][1].mark, 70, 'the registry is persisted');
 
     assert.strictEqual(classes.detectSemester(), 2, 'a final Semester 1 grade means Semester 2');
-    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%' }), makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '-' })];
+    const art = makeOutlineCard('12 Art - Semester 1', { overall: '70%' });
+    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%' }), makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '-' }), art];
     assert.strictEqual(classes.detectSemester(), 1, 'no final grades mean Semester 1');
-    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%' }), makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '85%', tasks: [['Chem Test 2', '88%']] })];
+    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%' }), makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '85%', tasks: [['Chem Test 2', '88%']] }), art];
     assert.strictEqual(classes.detectSemester(), 1, 'a marked Semester 2 task before Semester 1 grades are final stays Semester 1');
+    // A Connect filter showing some of the classes: no letter there proves nothing, the registry decides
+    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '85%' })];
+    assert.strictEqual(classes.detectSemester(), 2, 'a filtered page without final letters keeps the registry\'s Semester 2');
+    cards = [makeOutlineCard('11 Biology - Semester 1', { overall: '75%' })];
+    assert.strictEqual(classes.detectSemester(), 1, 'classes the registry has never seen (a new year) are a whole page');
     cards = [makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: ['82%', 'A'] })];
     assert.strictEqual(classes.detectSemester(), 2, 'a final grade on a Semester 2 card (the year is over) is still Semester 2');
     // A card element is read once; a scrape re-reads it
@@ -9611,6 +9620,88 @@ runTest('Test 216: Dark-ink glass themes brighten the page behind a dialog inste
   assert.ok(css('theme-tokens.css').includes('background-color: rgba(11, 17, 32, 0.45) !important'), 'light-ink glass themes keep the navy dim');
   const order = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8')).content_scripts.flatMap(g => g.css || []);
   assert.ok(order.findIndex(f => f.endsWith('theme-light-tone.css')) > order.findIndex(f => f.endsWith('theme-tokens.css')), 'the light-tone backdrop loads after the glass dim');
+});
+
+runTest('Test 217: Filtering Assessment Outlines with "Show this semester\'s classes only" keeps the filtered class visible, or says why it is hidden', () => {
+  const origQSA = document.querySelectorAll, origById = document.getElementById, origNow = Date.now, origSidebarFilter = window.ConnectifySidebarFilter;
+  let now = 2e12;
+  Date.now = () => (now += 5000); // detection is memoised for a second
+  // The mock DOM has no ChildNode.before / previousElementSibling
+  const page = new MockElement('div', 'v-verticallayout');
+  const place = card => {
+    page.appendChild(card);
+    card.before = node => { node.remove(); const i = page.children.indexOf(card); page.children.splice(i, 0, node); node.parentElement = node.parentNode = page; };
+    Object.defineProperty(card, 'previousElementSibling', { configurable: true, get: () => page.children[page.children.indexOf(card) - 1] || null });
+    return card;
+  };
+  try {
+    mockLocalStorage.clear();
+    const { classes, filter, notice } = loadSemesterModules();
+    const chem1 = makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: ['80%', 'A'] });
+    const chem2 = makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '85%' });
+    const art1 = makeOutlineCard('12 Art - Semester 1', { overall: ['70%', 'B'] });
+    let cards = [chem1, chem2, art1];
+    document.querySelectorAll = sel => (sel.includes('eds-c-tile') ? cards : sel.includes('cx-semester-hidden') ? cards.filter(c => c.classList.contains('cx-semester-hidden')) : origQSA(sel));
+    document.getElementById = id => (id === notice.ID ? page.children.find(c => c.id === id) || null : origById(id));
+    let filterTitle = '', clickedAll = false;
+    window.ConnectifySidebarFilter = { activeFilterTitle: () => filterTitle, clickConnectAllButton: () => { clickedAll = true; return true; } };
+    classes.recordCards(cards);
+    filter.save(true);
+
+    // Filtered to a Semester 2 class: its card shows no final letter, but the registry knows it is Semester 2
+    filterTitle = '12 Chemistry ATAR';
+    cards = [place(makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '85%' }))];
+    filter.applyToPage();
+    assert.strictEqual(filter.activeSemester(), 2, 'a filtered page never flips the semester back to 1');
+    assert.ok(!cards[0].classList.contains('cx-semester-hidden'), 'the filtered class\'s Semester 2 outline stays visible');
+    assert.strictEqual(document.getElementById(notice.ID), null, 'no notice while an outline is shown');
+
+    // Filtered to a class with no Semester 2 outline: its tile is hidden and a notice takes its place
+    filterTitle = '12 Art';
+    const art = place(makeOutlineCard('12 Art - Semester 1', { overall: ['70%', 'B'] }));
+    cards = [art];
+    filter.applyToPage();
+    assert.ok(art.classList.contains('cx-semester-hidden'), 'the other semester\'s outline is hidden');
+    const shown = document.getElementById(notice.ID);
+    assert.ok(shown && art.previousElementSibling === shown, 'the notice sits where the hidden outline was');
+    const [title, text, button] = shown.children;
+    assert.strictEqual(title.textContent, '12 Art has no Semester 2 outline');
+    assert.ok(text.textContent.includes('"Show this semester\'s classes only" is on, so its Semester 1 outline is hidden'), text.textContent);
+    assert.ok(text.textContent.includes('Connectify Settings'), 'the notice says where to turn the option off');
+    assert.strictEqual(button.hidden, false, 'Back to All is offered while a Connect filter is applied');
+    button.onclick({ preventDefault() {} });
+    assert.ok(clickedAll, 'Back to All clicks Connect\'s own All filter');
+
+    // Later passes (Connect re-renders) change nothing, so hidden tiles never flash
+    let writes = 0;
+    const count = (fn) => (...a) => { writes++; return fn(...a); };
+    art.classList.add = count(art.classList.add); art.classList.remove = count(art.classList.remove);
+    filter.applyToPage();
+    assert.strictEqual(writes, 0, 'a pass with nothing to change touches no tile');
+    assert.strictEqual(page.children.filter(c => c.id === notice.ID).length, 1, 'one notice, never duplicated');
+
+    // Without a Connect filter there is no Back to All
+    filterTitle = '';
+    filter.applyToPage();
+    assert.strictEqual(shown.children[0].textContent, 'No Semester 2 outlines to show');
+    assert.strictEqual(shown.children[2].hidden, true, 'Back to All only with a Connect filter applied');
+
+    // Turning the option off shows the outline and removes the notice
+    filter.save(false);
+    filter.applyToPage();
+    assert.strictEqual(document.getElementById(notice.ID), null, 'the notice goes when the option is off');
+    assert.strictEqual(writes, 1, 'the hidden tile is shown again');
+
+    const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+    const js = manifest.content_scripts.flatMap(g => g.js || []);
+    assert.strictEqual(js.indexOf('src/assessment/semester-filter-notice.js') + 1, js.indexOf('src/assessment/semester-filter.js'), 'the notice loads just before the filter');
+    const css = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/semester-filter.css'), 'utf8');
+    assert.ok(css.includes('.connectea-dark .cx-semester-notice-title {\n  color: var(--cx-text-primary'), 'dark themes ink the notice with the theme tokens');
+    assert.ok(!/\.cx-semester-notice\s*\{[^}]*background/.test(css), 'the notice is an empty state with no panel of its own');
+  } finally {
+    document.querySelectorAll = origQSA; document.getElementById = origById; Date.now = origNow;
+    window.ConnectifySidebarFilter = origSidebarFilter; mockLocalStorage.clear();
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

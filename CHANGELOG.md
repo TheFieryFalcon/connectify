@@ -66,6 +66,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - The Maintenance Notice lost its red header in dark themes.
 - Liquid Glass drew an extra strip under the Maintenance Notice.
 - Auto-login failed with saved passwords in Chrome, Dia and other Chromium browsers: it pressed Log in before the browser had handed over the password.
+- With "Show this semester's classes only" on, filtering Assessment Outlines to a class showed a blank page: the filtered view made Connectify think it was the other semester and hid the class. A class with no outline this semester now shows a message saying why, with a Back to All button.
 
 ## 3.2.3 (2026-10-18)
 

@@ -20,6 +20,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 5. `src/assessment/assessment-parse-helpers.js` (order hints, cohort mean, weighted mean)
 6. `src/assessment/assessment-parser.js` (task row & score parser)
 7. `src/assessment/class-semesters.js` (class registry by semester, current-semester detection, new-year trigger)
+7b. `src/assessment/semester-filter-notice.js` (message in place of outlines the semester filter hides entirely)
 8. `src/assessment/semester-filter.js` ("Show this semester's classes only": hidden tiles, refreshed cards, filtered tool data)
 9. `src/assessment/assessment-expand-progress.js` (Expand All progress pill and scroll freeze)
 10. `src/assessment/assessment-accordion-watch.js` (single accordion animation guard and card refresh)

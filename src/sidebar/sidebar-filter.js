@@ -33,14 +33,18 @@
     return false;
   }
 
+  /** The name of the Connect outline filter applied (e.g. a class), or '' when showing All. */
+  function activeFilterTitle() {
+    const toolbarTitle = (document.querySelector('.cvr-c-category-toolbar__title .v-label, .cvr-c-category-toolbar__title')?.textContent || '').trim();
+    return toolbarTitle.toLowerCase() === 'all' ? '' : toolbarTitle;
+  }
+
   /** True on the outlines page when a filter is applied or fewer than four courses are visible. */
   function isOutlinesFilterRestricted() {
     const outlinesRoot = document.querySelector('.assessmentoutlinesui, [class*="assessmentoutline"], .cvr-c-category-toolbar, .eds-c-accordion--dark');
     if (!outlinesRoot) return false;
     const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, [class*="subject-card"]');
-    const toolbarTitle = (document.querySelector('.cvr-c-category-toolbar__title .v-label, .cvr-c-category-toolbar__title')?.textContent || '').trim();
-    const filterApplied = Boolean(toolbarTitle && toolbarTitle.toLowerCase() !== 'all');
-    return filterApplied || tiles.length < 4;
+    return Boolean(activeFilterTitle()) || tiles.length < 4;
   }
 
   /** The sidebar notice with a "Back to All" button; onBackToAll runs after the filter is cleared. */
@@ -66,5 +70,5 @@
     return notice;
   }
 
-  window.ConnectifySidebarFilter = { clickConnectAllButton, isOutlinesFilterRestricted, createFilterNotice };
+  window.ConnectifySidebarFilter = { clickConnectAllButton, activeFilterTitle, isOutlinesFilterRestricted, createFilterNotice };
 })();

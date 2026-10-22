@@ -26,7 +26,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyTargetSolver` | `target-solver.js` | Target Grade and difficulty-weighted Target ATAR solver |
 | `window.ConnectifyAtarScraper` | `atar-scraper.js` | ATAR courses per semester from the cache (registry, subjects, grade cache); `readCourses` never reads tiles |
 | `window.ConnectifyClassSemesters` | `class-semesters.js` | Class registry per semester (title, mark, final letter, tasks), `detectSemester()`, new-year trigger |
-| `window.ConnectifySemesterFilter` | `semester-filter.js` | "Show this semester's classes only": `currentSemester`, `activeSemester`, `allowedCards`, `filterSubjects`, `filterCourses`, `applyToPage` |
+| `window.ConnectifySemesterFilter` | `semester-filter.js` | "Show this semester's classes only": `currentSemester`, `activeSemester`, `allowedCards`, `filterSubjects`, `filterCourses`, `applyToPage`; `ConnectifySemesterFilterNotice` (`semester-filter-notice.js`): `update(anchor, active, hidden)` |
 | `window.ConnectifyAtarCalc` | `atar-calculator.js` | Course state modeling and ATAR calculation results |
 | `window.ConnectifyTargetAtarUI` | `target-atar-ui.js` | Target ATAR planner modal form and breakdown view |
 | `window.ConnectifyTargetGradeUI` | `target-grade-ui.js` | Target Grade planner modal form and breakdown view |

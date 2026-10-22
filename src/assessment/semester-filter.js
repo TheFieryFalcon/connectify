@@ -81,15 +81,29 @@
     return lonelySlot ? [tile, slot] : [tile];
   }
 
-  /** Hides the other semester's outline tiles (and shows them all when the option is off). */
+  /**
+   * Hides the other semester's outline tiles (and shows them all when the option is off). Only tiles
+   * whose state changes are touched, so re-renders never make hidden tiles flash. When every outline in
+   * view is hidden (e.g. a Connect filter picked a class with no outline this semester), a notice
+   * takes their place (ConnectifySemesterFilterNotice).
+   */
   function applyToPage() {
     const active = activeSemester();
-    for (const el of document.querySelectorAll(`.${HIDDEN}`)) el.classList.remove(HIDDEN);
-    if (!active) return;
-    for (const tile of document.querySelectorAll(CARD_SELECTOR)) {
-      if (tile.parentElement?.closest?.(CARD_SELECTOR)) continue;
-      if (!allowsCardIn(tile, active)) hideTargets(tile).forEach(el => el.classList.add(HIDDEN));
+    const hide = new Set();
+    let firstHidden = null, shown = 0, hidden = 0;
+    if (active) {
+      for (const tile of document.querySelectorAll(CARD_SELECTOR)) {
+        if (tile.parentElement?.closest?.(CARD_SELECTOR)) continue;
+        if (allowsCardIn(tile, active)) { shown++; continue; }
+        hidden++;
+        const targets = hideTargets(tile);
+        targets.forEach(el => hide.add(el));
+        firstHidden = firstHidden || targets[targets.length - 1];
+      }
     }
+    for (const el of document.querySelectorAll(`.${HIDDEN}`)) if (!hide.has(el)) el.classList.remove(HIDDEN);
+    for (const el of hide) if (!el.classList.contains(HIDDEN)) el.classList.add(HIDDEN);
+    window.ConnectifySemesterFilterNotice?.update?.(shown ? null : firstHidden, active, hidden);
   }
 
   const addsElements = rec => rec.type === 'childList' && Array.from(rec.addedNodes || []).some(n => n.nodeType === 1);
