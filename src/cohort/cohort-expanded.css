@@ -98,7 +98,7 @@
   inset: -4px -8px;
   z-index: -1;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--cx-accent, #2563eb) 10%, transparent);
+  background: color-mix(in srgb, var(--cx-accent, #2563eb) 5%, transparent);
 }
 /* Predictor Low / Mid / High cells: Mid heaviest, Low and High semibold (colours: cohort-forecast.css, cohort-upcoming.css) */
 .connectea-panel--expanded .connectea-xp-value:is(.connectea-forecast-value--low, .connectea-forecast-value--high) { font-weight: 600 !important; }

@@ -9977,7 +9977,7 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   assert.deepStrictEqual(reached(), [false, false, true, false, false], '70% has reached the Median (68.85%): only that cell is tinted');
   const css = fs.readFileSync(path.join(SRC_DIR, 'cohort/cohort-expanded.css'), 'utf8');
   const tint = css.match(/\.connectea-xp-cell--reached::before \{[^}]*background: color-mix\(in srgb, var\(--cx-accent, #[0-9a-f]{6}\) (\d+)%, transparent\)/);
-  assert.ok(tint && Number(tint[1]) <= 12, 'the tint is the theme accent at a low opacity, behind the cell');
+  assert.ok(tint && Number(tint[1]) <= 6, 'the tint is the theme accent at a very low opacity, behind the cell');
   assert.strictEqual(ui.xp.score.textContent, '70%');
   assert.deepStrictEqual(ui.xp.quantiles.map(e => e.textContent), ['32.5%', '58%', '68.85%', '79.9%', '96.7%']);
   assert.ok(/%$/.test(ui.xp.average.textContent), 'the cohort mean is shown');
