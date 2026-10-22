@@ -2,7 +2,7 @@
  * Connectify Shared Utilities
  *
  * Text normalisation, HTML escaping, the current account key, localStorage key scanning, legacy baseline key resolution,
- * Progress Graph week overrides and the chart resync request to the main-world bridge
+ * Progress Graph week overrides, the outlines page check and the chart resync request to the main-world bridge
  * shared by every content script. Loaded first in the assessment outlines pipeline.
  * Exposes window.ConnectifyUtils.
  */
@@ -136,6 +136,12 @@
    */
   const syncCharts = () => document.dispatchEvent(new CustomEvent('connectify-sync-charts'));
 
+  // The sidebar runs on every Connect page; only the outlines page holds class cards to read
+  const OUTLINES_URL = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
+  function isOutlinesPage() {
+    try { return new URL(location.href).pathname.startsWith(new URL(OUTLINES_URL).pathname); } catch { return true; }
+  }
+
   /** Semester (1 or 2) named in a subject card title; 1 when the title names none. */
   function cardSemester(title) {
     const match = String(title || '').match(/\bSem(?:ester)?\s*([12])\b/i);
@@ -145,6 +151,6 @@
 
   window.ConnectifyUtils = {
     normalize, escapeHtml, accountKey, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
-    customWeekOrder, readTimeOverride, syncCharts, cardSemester
+    customWeekOrder, readTimeOverride, syncCharts, cardSemester, OUTLINES_URL, isOutlinesPage
   };
 })();

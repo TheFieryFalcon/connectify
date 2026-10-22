@@ -55,7 +55,9 @@
     if (isCollecting) {
       return formatCollectedSubjects(includePending);
     }
-    const allCards = Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'));
+    // Other pages' tiles (home page notices, class promos) are never class cards: there the cache is read as is
+    const allCards = window.ConnectifyUtils.isOutlinesPage()
+      ? Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile')) : [];
     // "Show this semester's classes only": only this semester's cards refresh the cache; the other
     // semester's cached results stay as they are (semester-filter.js)
     const filter = window.ConnectifySemesterFilter;

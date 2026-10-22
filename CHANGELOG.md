@@ -21,6 +21,8 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ### Changes
 - Every sidebar tool (Predictor, Weakness Analyzer, Year in Progress, ATAR Estimate, Target ATAR, Target Grade and Calibration) now reads your saved results instead of the outline tiles.
+- The sidebar is on every Connect page. Away from Assessment Outlines only Settings works; the other tools are greyed out under a notice with a link to the outlines.
+- A Connect filter on Assessment Outlines no longer greys out the sidebar tools, since they read your saved results.
 - New school year: last year's saved results are archived before they're cleared, because Connect no longer shows them.
 - The new-year switch now starts as soon as every class is new.
 - Uploaded wallpapers are cropped and scaled to your screen before they're saved, from both Settings and the Theme Customizer, so they take far less storage.
@@ -70,6 +72,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Liquid Glass drew an extra strip under the Maintenance Notice.
 - Auto-login failed with saved passwords in Chrome, Dia and other Chromium browsers: it pressed Log in before the browser had handed over the password.
 - With "Show this semester's classes only" on, filtering Assessment Outlines to a class showed a blank page: the filtered view made Connectify think it was the other semester and hid the class. A class with no outline this semester now shows a message saying why, with a Back to All button.
+- The Color Theme and Statistics Panels dropdowns in Settings were grey boxes with a heavy dark border in the Default theme (and unstyled in dark themes). They now match the number inputs beside them.
 - "Back to All" did nothing, in the sidebar's filter notice too. It now presses Connect's top-level All filter the way a mouse does, never a semester's own All.
 
 ## 3.2.3 (2026-10-18)

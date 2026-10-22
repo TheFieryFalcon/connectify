@@ -132,17 +132,15 @@
   box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.55), 0 8px 12px -6px rgba(0, 0, 0, 0.45) !important;
 }
 
-/* Filter-applied disabled state in sidebar */
-#connectify-sidebar.cx-filter-disabled .cx-tool-menu > button,
-#connectify-sidebar.cx-filter-disabled .cx-tool-menu > .cx-calculator-tool,
-#connectify-sidebar.cx-filter-disabled .cx-tool-menu > .cx-secondary-tool {
+/* Off the outlines page every launcher but Settings is disabled (sidebar-page-notice.js) */
+#connectify-sidebar.cx-page-limited .cx-tool-menu > button:disabled {
   opacity: 0.38 !important;
   cursor: not-allowed !important;
   pointer-events: none !important;
   filter: grayscale(0.85) !important;
 }
 
-#connectify-sidebar .cx-filter-notice {
+#connectify-sidebar .cx-page-notice {
   margin: 14px 20px 8px;
   padding: 14px 16px;
   background: #f1f5f9;
@@ -152,13 +150,13 @@
   box-sizing: border-box;
 }
 
-.connectea-dark #connectify-sidebar .cx-filter-notice {
+.connectea-dark #connectify-sidebar .cx-page-notice {
   background: var(--cx-surface-elevated, #1a222d);
   border-color: var(--cx-border, #3b4d5e);
   border-left: 4px solid var(--cx-border-focus, #5f7a99);
 }
 
-#connectify-sidebar .cx-filter-title {
+#connectify-sidebar .cx-page-notice-title {
   display: block;
   font-size: 13px;
   font-weight: 700;
@@ -167,26 +165,26 @@
   letter-spacing: -0.2px;
 }
 
-.connectea-dark #connectify-sidebar .cx-filter-title {
+.connectea-dark #connectify-sidebar .cx-page-notice-title {
   color: var(--cx-text-muted, #94a3b8);
 }
 
-#connectify-sidebar .cx-filter-text {
+#connectify-sidebar .cx-page-notice-text {
   font-size: 12px;
   line-height: 1.5;
   color: #64748b;
   margin: 0 0 12px 0;
 }
 
-.connectea-dark #connectify-sidebar .cx-filter-text {
+.connectea-dark #connectify-sidebar .cx-page-notice-text {
   color: var(--cx-text-secondary, #94a3b8);
 }
 
-#connectify-sidebar .cx-back-to-all-btn {
-  display: inline-flex !important;
+#connectify-sidebar .cx-page-notice-link {
+  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 6px !important;
+  box-sizing: border-box !important;
   width: 100% !important;
   padding: 9px 14px !important;
   background: #24618c !important;
@@ -195,20 +193,21 @@
   border-radius: 6px !important;
   font-weight: 600 !important;
   font-size: 12px !important;
+  text-decoration: none !important;
   cursor: pointer !important;
-  transition: background-color 0.15s ease, transform 0.1s ease !important;
+  transition: background-color 0.15s ease !important;
 }
 
-#connectify-sidebar .cx-back-to-all-btn:hover {
+#connectify-sidebar .cx-page-notice-link:hover {
   background: #1a4d70 !important;
 }
 
-.connectea-dark #connectify-sidebar .cx-back-to-all-btn {
+.connectea-dark #connectify-sidebar .cx-page-notice-link {
   background: var(--cx-accent, #3b82f6) !important;
   border-color: var(--cx-accent-hover, #2563eb) !important;
   color: var(--cx-button-primary-text, #ffffff) !important;
 }
 
-.connectea-dark #connectify-sidebar .cx-back-to-all-btn:hover {
+.connectea-dark #connectify-sidebar .cx-page-notice-link:hover {
   background: var(--cx-accent-hover, #2563eb) !important;
 }

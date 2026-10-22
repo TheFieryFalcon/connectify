@@ -1,9 +1,9 @@
 /**
  * Connectify Sidebar: outline filter detection
  *
- * Connectify's tools need every course outline on the page. Detects when a Connect filter (or a
- * different year) hides courses, builds the notice shown in the sidebar, and clicks Connect's own
- * "All" filter to recover. Exposes window.ConnectifySidebarFilter.
+ * Detects when a Connect filter (or a different year) hides courses, which the new-year rollover must
+ * never mistake for a new class set, and presses Connect's own "All" filter for the semester filter's
+ * "Back to All". Exposes window.ConnectifySidebarFilter.
  */
 (() => {
   'use strict';
@@ -60,7 +60,7 @@
     return toolbarTitle.toLowerCase() === 'all' ? '' : toolbarTitle;
   }
 
-  /** True on the outlines page when a filter is applied or fewer than four courses are visible. */
+  /** True on the outlines page when a filter is applied or fewer than four courses are visible (year-rollover.js). */
   function isOutlinesFilterRestricted() {
     const outlinesRoot = document.querySelector('.assessmentoutlinesui, [class*="assessmentoutline"], .cvr-c-category-toolbar, .eds-c-accordion--dark');
     if (!outlinesRoot) return false;
@@ -68,28 +68,5 @@
     return Boolean(activeFilterTitle()) || tiles.length < 4;
   }
 
-  /** The sidebar notice with a "Back to All" button; onBackToAll runs after the filter is cleared. */
-  function createFilterNotice(onBackToAll) {
-    const make = (tag, className, text) => Object.assign(document.createElement(tag), { className, textContent: text || '' });
-    const notice = make('div', 'cx-filter-notice');
-    notice.hidden = true;
-    const backToAllBtn = Object.assign(make('button', 'cx-back-to-all-btn', '← Back to All'), {
-      type: 'button',
-      id: 'cx-back-to-all-btn',
-      onclick: e => {
-        e.preventDefault();
-        e.stopPropagation();
-        clickConnectAllButton();
-        onBackToAll?.();
-      }
-    });
-    notice.append(
-      make('strong', 'cx-filter-title', 'Filter Applied'),
-      make('p', 'cx-filter-text', 'A course outline filter is currently active. Connectify features require all courses to be visible. Please return to "All" to re-enable tools.'),
-      backToAllBtn
-    );
-    return notice;
-  }
-
-  window.ConnectifySidebarFilter = { findAllFilter, clickConnectAllButton, activeFilterTitle, isOutlinesFilterRestricted, createFilterNotice };
+  window.ConnectifySidebarFilter = { findAllFilter, clickConnectAllButton, activeFilterTitle, isOutlinesFilterRestricted };
 })();

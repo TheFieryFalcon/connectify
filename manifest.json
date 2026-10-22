@@ -145,6 +145,7 @@
             "src/sidebar/sidebar-handle.js",
             "src/sidebar/sidebar-hover.js",
             "src/sidebar/sidebar-filter.js",
+            "src/sidebar/sidebar-page-notice.js",
             "src/sidebar/sidebar-tools.js",
             "src/sidebar/sidebar-shell.js",
             "src/sidebar/sidebar.js",
@@ -255,6 +256,67 @@
             "src/system/auto-login.js"
          ],
          "run_at": "document_end"
+      },
+      {
+         "matches": [
+            "https://connect.det.wa.edu.au/*"
+         ],
+         "exclude_matches": [
+            "https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*"
+         ],
+         "css": [
+            "src/sidebar/styles/sidebar-drawer.css",
+            "src/sidebar/styles/sidebar-handle-menu.css",
+            "src/sidebar/styles/sidebar-tool-menu.css",
+            "src/sidebar/styles/sidebar-weakness-types.css",
+            "src/sidebar/styles/sidebar-outcome-filter.css",
+            "src/sidebar/styles/sidebar-settings.css",
+            "src/sidebar/styles/sidebar-progress-scaling.css"
+         ],
+         "js": [
+            "src/system/scheduler.js",
+            "src/system/utils.js",
+            "src/assessment/cache-versions.js",
+            "src/assessment/assessment-cache.js",
+            "src/assessment/assessment-parse-helpers.js",
+            "src/assessment/assessment-parser.js",
+            "src/assessment/class-semesters.js",
+            "src/assessment/semester-filter-notice.js",
+            "src/assessment/semester-filter.js",
+            "src/assessment/assessment-scrape.js",
+            "src/assessment/assessment-data.js",
+            "src/cohort/category-store.js",
+            "src/cohort/task-types.js",
+            "src/cohort/cohort-panel-view.js",
+            "src/atar/scaling-data.js",
+            "src/atar/atar-math.js",
+            "src/progress/progress-math.js",
+            "src/atar/scaling-calibration.js",
+            "src/predictor/category-baselines.js",
+            "src/predictor/settings-markup.js",
+            "src/predictor/settings-semester-filter.js",
+            "src/predictor/settings-panel-view.js",
+            "src/predictor/settings-preferences.js",
+            "src/predictor/category-settings.js",
+            "src/predictor/predictor-baselines.js",
+            "src/predictor/predictor-engine.js",
+            "src/predictor/predictor-history.js",
+            "src/predictor/predictor-dates.js",
+            "src/predictor/predictor-store.js",
+            "src/predictor/predictor-cache.js",
+            "src/predictor/predictor-grade-projection.js",
+            "src/predictor/predictor-atar-projection.js",
+            "src/predictor/predictor-math.js",
+            "src/sidebar/sidebar-handle-position.js",
+            "src/sidebar/sidebar-handle.js",
+            "src/sidebar/sidebar-hover.js",
+            "src/sidebar/sidebar-filter.js",
+            "src/sidebar/sidebar-page-notice.js",
+            "src/sidebar/sidebar-tools.js",
+            "src/sidebar/sidebar-shell.js",
+            "src/sidebar/sidebar.js"
+         ],
+         "run_at": "document_idle"
       }
    ],
    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwloUCzVE+Fw/IiHtROGdlXlOlCB0vM62SRRN62Nn0h8/yZJoNlz1MpjolldoN/NtuOMiUkplgz+/OOsbZS31T/5jg75k79yvBpzUTaLBBXIB3ps9ZrT2eC9RQ+z+OYiY1Sdl0t/3KGWOx2/1NnlEmTqMCB8OS59CcQaFmKNhV9M9XrkLXv74Yzlc7jy7+EfnbjTMOviTvQLvlmSSy1YHXbU/RsMsxn4s7O9D0lp4JveoWu53rR74QxWL3oXtiG2KUROlcelU/nHXUxZvso5+jOaCa7GLED0d6G4A7rdnNHcmzeoYaJrUE9xJvcBFOxp/kZjTc6AwxzdwqUW36F4kgwIDAQAB",

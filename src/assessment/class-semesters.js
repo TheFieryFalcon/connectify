@@ -131,6 +131,7 @@
   // prove Semester 2 but not Semester 1: the filtered class may simply have no final letter, so the
   // registry decides. Classes the registry has never seen (a new year) are a whole page.
   function evidenceFromPage() {
+    if (!window.ConnectifyUtils.isOutlinesPage()) return null;
     const cards = Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester);
     if (!cards.length) return null;
     if (cards.some(card => cardSummary(card).finalLetter)) return 2;

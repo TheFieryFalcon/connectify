@@ -33,7 +33,8 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Functionality**: Automatically checks the mandatory terms box, submits saved credentials, pauses upon manual logout or session timeout, and enforces 30-second rapid-loop protection.
 
 ### 4. Floating Tools Drawer & Sidebar
-- **Source Modules**: `src/sidebar/` (`sidebar.js` and its shell, tools, filter, handle and hover modules) and `src/sidebar/styles/`
+- **Source Modules**: `src/sidebar/` (`sidebar.js` and its shell, tools, page notice, handle and hover modules) and `src/sidebar/styles/`
+- **Every Page**: the drawer is on every Connect page. Away from Assessment Outlines every launcher but Settings is greyed out under an "Assessment Outlines Only" notice with an `Open Assessment Outlines →` link; on the outlines page every tool works, filtered or not (tools read the cache).
 - **DOM Insertion**: Anchored to Connect's native sidebar (`#connectify-sidebar-handle`) and fixed to viewport (`#connectify-sidebar`).
 - **UI Appearance**: Compact 30px width handle with directional arrow icon (`❮` / `❯`) without text or excess whitespace. Anchors directly to Connect's left menu when closed; centers vertically on drawer edge when open.
 - **Canonical Tools**:

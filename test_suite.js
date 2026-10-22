@@ -87,6 +87,7 @@ const MODULE_BUNDLES = {
     'sidebar-handle.js',
     'sidebar-hover.js',
     'sidebar-filter.js',
+    'sidebar-page-notice.js',
     'sidebar-tools.js',
     'sidebar-shell.js',
     'sidebar.js'
@@ -649,8 +650,12 @@ let totalTests = 0;
 let passedTests = 0;
 const pendingTestPromises = [];
 
+// Every test starts on the outlines page (the default above): Connectify reads class cards only there
+const OUTLINES_HREF = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines?coisp=12345';
+
 function runTest(name, fn) {
   totalTests++;
+  location.href = OUTLINES_HREF;
   try {
     const res = fn();
     if (res && typeof res.then === 'function') {
@@ -6709,120 +6714,123 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   assert.strictEqual(pkg.scripts['crawl'], 'node scripts/crawl-connect-directories.js', 'package.json must define crawl script');
 });
 
-runTest('Test 146: Sidebar disabled state, notice banner, and Back to All button on filtered course outlines', async () => {
+runTest('Test 146: The sidebar works on every page: off Assessment Outlines only Settings is enabled, and a Connect filter never disables tools', async () => {
   await Promise.all(pendingTestPromises);
   const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
   const drawerCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-drawer.css'), 'utf8');
 
-  // 1. Static CSS verification
-  assert.ok(cssHas(drawerCss, '.cx-filter-disabled'), 'sidebar-drawer.css must define .cx-filter-disabled');
-  assert.ok(cssHas(drawerCss, '.cx-filter-notice'), 'sidebar-drawer.css must define .cx-filter-notice');
-  assert.ok(cssHas(drawerCss, '.cx-filter-title'), 'sidebar-drawer.css must define .cx-filter-title');
-  assert.ok(cssHas(drawerCss, '.cx-filter-text'), 'sidebar-drawer.css must define .cx-filter-text');
-  assert.ok(cssHas(drawerCss, '.cx-back-to-all-btn'), 'sidebar-drawer.css must define .cx-back-to-all-btn');
+  // 1. Static CSS: the off-outlines notice and the disabled launchers
+  for (const sel of ['.cx-page-limited', '.cx-page-notice', '.cx-page-notice-title', '.cx-page-notice-text', '.cx-page-notice-link']) {
+    assert.ok(cssHas(drawerCss, sel), `sidebar styles must define ${sel}`);
+  }
+  assert.ok(!drawerCss.includes('cx-filter-notice') && !sidebarJs.includes('cx-filter-disabled'), 'the filter notice and filter-disabled state are gone');
 
-  // 2. Static JS verification
-  assert.ok(sidebarJs.includes('clickConnectAllButton'), 'sidebar.js must define clickConnectAllButton');
-  assert.ok(sidebarJs.includes('isOutlinesFilterRestricted'), 'sidebar.js must define isOutlinesFilterRestricted');
-  assert.ok(sidebarJs.includes('cx-back-to-all-btn'), 'sidebar.js must render back-to-all button');
-  assert.ok(sidebarJs.includes('cx-filter-disabled'), 'sidebar.js must toggle cx-filter-disabled');
+  // 2. The manifest loads the sidebar everywhere: a sidebar-only group on every other page
+  const manifest = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'manifest.json'), 'utf8'));
+  const outlinesMatch = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*';
+  const elsewhere = manifest.content_scripts.find(g => (g.exclude_matches || []).includes(outlinesMatch));
+  assert.ok(elsewhere && elsewhere.matches.includes('https://connect.det.wa.edu.au/*'), 'a group covers every other Connect page');
+  for (const f of ['src/sidebar/sidebar.js', 'src/sidebar/sidebar-page-notice.js', 'src/predictor/category-settings.js', 'src/assessment/assessment-data.js']) {
+    assert.ok(elsewhere.js.includes(f), `${f} loads off the outlines page`);
+  }
+  for (const f of ['src/system/data.js', 'src/cohort/cohort-observer.js', 'src/atar/atar-features.js', 'src/system/new-grade.js', 'src/system/dom-sweeper.js', 'src/assessment/assessment-expand.js']) {
+    assert.ok(!elsewhere.js.includes(f), `${f} stays on the outlines page`);
+  }
+  const outlinesJs = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-view.js')).js;
+  assert.deepStrictEqual(elsewhere.js, outlinesJs.filter(f => elsewhere.js.includes(f)), 'the sidebar-only group keeps the outlines dependency order');
+  assert.ok(elsewhere.css.includes('src/sidebar/styles/sidebar-settings.css') && elsewhere.css.includes('src/sidebar/styles/sidebar-outcome-filter.css'), 'Settings and notice styles load everywhere');
 
-  // 3. Functional tests
+  // 3. Functional: on the outlines page a Connect filter (one class, two tiles) leaves every tool enabled
+  const origHref = location.href;
   const outlinesRoot = document.createElement('div');
   outlinesRoot.className = 'assessmentoutlinesui';
-
-  const toolbar = document.createElement('div');
-  toolbar.className = 'cvr-c-category-toolbar';
   const toolbarTitle = document.createElement('span');
   toolbarTitle.className = 'cvr-c-category-toolbar__title';
   toolbarTitle.textContent = 'Chemistry';
-  toolbar.appendChild(toolbarTitle);
-  outlinesRoot.appendChild(toolbar);
-
-  const accordion = document.createElement('div');
-  accordion.className = 'eds-c-accordion--dark';
-  const allSectionHeading = document.createElement('div');
-  allSectionHeading.className = 'eds-c-accordion__section-heading';
-  const allLabel = document.createElement('span');
-  allLabel.className = 'eds-c-accordion__section-label';
-  allLabel.textContent = 'All';
-  allSectionHeading.appendChild(allLabel);
-  accordion.appendChild(allSectionHeading);
-  outlinesRoot.appendChild(accordion);
-
-  let allClicked = false;
-  allSectionHeading.addEventListener('click', () => {
-    allClicked = true;
-  });
-
-  // Only 2 tiles initially (< 4 classes)
-  const tilesContainer = document.createElement('div');
+  outlinesRoot.appendChild(toolbarTitle);
   for (let i = 0; i < 2; i++) {
     const tile = document.createElement('div');
     tile.className = 'eds-c-tile';
-    tilesContainer.appendChild(tile);
+    outlinesRoot.appendChild(tile);
   }
-  outlinesRoot.appendChild(tilesContainer);
   document.body.appendChild(outlinesRoot);
 
   delete window.__connectifySidebarInitialized;
-  delete global.__connectifySidebarInitialized;
   window.__connectifySidebarInitialized = false;
-  if (global.window) global.window.__connectifySidebarInitialized = false;
   document.querySelectorAll('#connectify-sidebar').forEach(el => el.remove());
   document.querySelectorAll('#connectify-sidebar-handle').forEach(el => el.remove());
 
   try {
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines?coisp=12345';
     eval(sidebarJs);
-
     const sidebar = document.getElementById('connectify-sidebar');
     assert.ok(sidebar, 'Sidebar element must exist');
+    const notice = sidebar.querySelector('.cx-page-notice');
+    assert.ok(notice, 'the page notice exists');
+    const toolBtns = Array.from(sidebar.querySelectorAll('.cx-tool-menu button'));
+    assert.strictEqual(toolBtns.length, 7, 'all seven launchers are mounted');
 
-    // With filter applied and only 2 tiles, sidebar must be in disabled state
-    assert.strictEqual(window.ConnectifySidebar.isOutlinesFilterRestricted(), true, 'Outlines must be detected as restricted');
-    assert.ok(sidebar.classList.contains('cx-filter-disabled'), 'Sidebar must have cx-filter-disabled class');
-
-    const notice = sidebar.querySelector('.cx-filter-notice');
-    assert.ok(notice, 'Filter notice must exist in sidebar');
-    assert.strictEqual(notice.hidden, false, 'Filter notice must be visible');
-
-    const backBtn = sidebar.querySelector('.cx-back-to-all-btn');
-    assert.ok(backBtn, 'Back to All button must exist in notice');
-
-    // Tool launcher buttons must be disabled
-    const toolBtns = sidebar.querySelectorAll('.cx-tool-menu button');
-    assert.ok(toolBtns.length > 0, 'Tool buttons must exist');
+    assert.strictEqual(window.ConnectifySidebar.isLimited(), false, 'the outlines page is never limited, filtered or not');
+    assert.strictEqual(sidebar.classList.contains('cx-page-limited'), false);
+    assert.strictEqual(notice.hidden, true, 'no notice on the outlines page');
     toolBtns.forEach(btn => {
-      assert.strictEqual(btn.disabled, true, `Button #${btn.id} must be disabled`);
-      assert.strictEqual(btn.getAttribute('aria-disabled'), 'true', `Button #${btn.id} must have aria-disabled="true"`);
+      assert.strictEqual(btn.disabled, false, `#${btn.id} is enabled on the outlines page`);
+      assert.strictEqual(btn.getAttribute('aria-disabled'), null);
     });
 
-    // Clicking Back to All button dispatches click to Connect All accordion heading
-    backBtn.click();
-    assert.strictEqual(allClicked, true, 'Clicking Back to All button must click Connect All section');
-
-    // Simulate Connect restoring all 12 classes and resetting toolbar title
-    toolbarTitle.textContent = 'All';
-    for (let i = 0; i < 10; i++) {
-      const tile = document.createElement('div');
-      tile.className = 'eds-c-tile';
-      tilesContainer.appendChild(tile);
-    }
+    // 4. Any other page: only Settings is enabled, under a notice linking to the outlines
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-connect';
     window.ConnectifySidebar.syncState();
-
-    assert.strictEqual(window.ConnectifySidebar.isOutlinesFilterRestricted(), false, 'Outlines must now be unrestricted');
-    assert.strictEqual(sidebar.classList.contains('cx-filter-disabled'), false, 'cx-filter-disabled must be removed');
-    assert.strictEqual(notice.hidden, true, 'Filter notice must be hidden when unrestricted');
+    assert.strictEqual(window.ConnectifySidebar.isLimited(), true);
+    assert.ok(sidebar.classList.contains('cx-page-limited'), 'the sidebar is marked limited');
+    assert.strictEqual(notice.hidden, false, 'the notice shows');
+    assert.strictEqual(notice.querySelector('.cx-page-notice-title')?.textContent, 'Assessment Outlines Only', 'the notice is titled');
+    const link = notice.querySelector('.cx-page-notice-link');
+    assert.ok(link && link.tagName.toLowerCase() === 'a' && link.href === window.ConnectifyUtils.OUTLINES_URL, 'the notice links to the outlines');
+    assert.strictEqual(sidebar.querySelector('.cx-tools-intro').hidden, true, 'the outlines intro is hidden');
     toolBtns.forEach(btn => {
-      assert.strictEqual(btn.disabled, false, `Button #${btn.id} must be enabled when unrestricted`);
-      assert.strictEqual(btn.getAttribute('aria-disabled'), null, `Button #${btn.id} must not have aria-disabled`);
+      const settings = btn.id === 'connectify-categories-toggle';
+      assert.strictEqual(btn.disabled, !settings, `#${btn.id} is ${settings ? 'enabled' : 'disabled'} off the outlines page`);
+      assert.strictEqual(btn.getAttribute('aria-disabled'), settings ? null : 'true');
     });
+
+    // Back on the outlines page every tool comes back
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
+    window.ConnectifySidebar.syncState();
+    assert.strictEqual(notice.hidden, true);
+    toolBtns.forEach(btn => assert.strictEqual(btn.disabled, false, `#${btn.id} is enabled again`));
   } finally {
+    location.href = origHref;
     outlinesRoot.remove();
     document.querySelectorAll('#connectify-sidebar').forEach(el => el.remove());
     document.querySelectorAll('#connectify-sidebar-handle').forEach(el => el.remove());
     delete window.__connectifySidebarInitialized;
   }
+});
+
+runTest('Test 231: Off the outlines page the cache is read as is: no tile is scraped, recorded or hidden, and Settings dropdowns are styled', () => {
+  const utils = window.ConnectifyUtils;
+  const origHref = location.href;
+  try {
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines?coisp=12345';
+    assert.strictEqual(utils.isOutlinesPage(), true);
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-connect';
+    assert.strictEqual(utils.isOutlinesPage(), false);
+  } finally {
+    location.href = origHref;
+  }
+  const read = f => fs.readFileSync(path.resolve(__dirname, f), 'utf8');
+  assert.ok(/const allCards = window\.ConnectifyUtils\.isOutlinesPage\(\)\s*\?/.test(read('src/assessment/assessment-data.js')), 'collect() reads no cards off the outlines page');
+  assert.ok(read('src/assessment/class-semesters.js').includes('if (!window.ConnectifyUtils.isOutlinesPage()) return null;'), 'semester detection ignores other pages\' tiles');
+  assert.ok(read('src/assessment/semester-filter.js').includes('isOutlinesPage?.() === false ? null'), 'the semester filter hides nothing off the outlines page');
+
+  // Settings dropdowns: styled like the number inputs, no inline styles
+  const markup = read('src/predictor/settings-markup.js');
+  assert.strictEqual((markup.match(/<select id="[^"]+" class="cx-settings-select">/g) || []).length, 2, 'both Settings dropdowns use the class alone');
+  const settingsCss = read('src/sidebar/styles/sidebar-settings.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  const light = settingsCss.match(/#connectify-sidebar \.cx-settings-select \{([^}]*)\}/);
+  assert.ok(light && /background-color: #ffffff/.test(light[1]) && /border: 1px solid #b9cbe1/.test(light[1]) && /border-radius: 4px/.test(light[1]), 'light dropdowns are white with the inputs\' border');
+  assert.ok(/\.connectea-dark #connectify-sidebar \.cx-settings-select \{[^}]*var\(--cx-input-bg/.test(settingsCss), 'dark dropdowns use the input tokens');
 });
 
 runTest('Test 147: Style test JSON manifest aggregates all audited views under pages and views', async () => {

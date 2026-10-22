@@ -88,7 +88,8 @@
    * takes their place (ConnectifySemesterFilterNotice).
    */
   function applyToPage() {
-    const active = activeSemester();
+    // Off the outlines page (the sidebar runs everywhere) no tile is a class outline
+    const active = window.ConnectifyUtils?.isOutlinesPage?.() === false ? null : activeSemester();
     const hide = new Set();
     let firstHidden = null, shown = 0, hidden = 0;
     if (active) {

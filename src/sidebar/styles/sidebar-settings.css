@@ -61,6 +61,26 @@
   outline: 2px solid #3575b9;
   outline-offset: 1px;
 }
+/* Settings dropdowns match the number inputs (Connect leaves selects unstyled, which drew native grey boxes) */
+#connectify-sidebar .cx-settings-select {
+  box-sizing: border-box;
+  max-width: 100%;
+  background-color: #ffffff;
+  color: #203c5e;
+  border: 1px solid #b9cbe1;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+#connectify-sidebar .cx-settings-select:hover { border-color: #3575b9; }
+#connectify-sidebar .cx-settings-select:focus {
+  border-color: #3575b9;
+  outline: 2px solid #3575b9;
+  outline-offset: 1px;
+}
 
 /* Settings Dark Mode High Contrast Rules (>= 5:1 contrast) */
 .connectea-dark .cx-settings-section,
@@ -78,12 +98,14 @@
 .connectea-dark .cx-settings-col-header {
   color: var(--cx-text-muted, #94a3b8) !important;
 }
-.connectea-dark :is(.cx-settings-number-input, .cx-baseline-type-input, .cx-baseline-subj-input) {
+.connectea-dark :is(.cx-settings-number-input, .cx-baseline-type-input, .cx-baseline-subj-input),
+.connectea-dark #connectify-sidebar .cx-settings-select {
   background: var(--cx-input-bg, #141a22) !important;
   color: var(--cx-input-text, #f1f5f9) !important;
   border-color: var(--cx-input-border, #496178) !important;
 }
-.connectea-dark :is(.cx-settings-number-input, .cx-baseline-type-input, .cx-baseline-subj-input):focus {
+.connectea-dark :is(.cx-settings-number-input, .cx-baseline-type-input, .cx-baseline-subj-input):focus,
+.connectea-dark #connectify-sidebar .cx-settings-select:focus {
   border-color: var(--cx-border-focus, #60a5fa) !important;
   outline: 2px solid var(--cx-accent, #60a5fa) !important;
 }

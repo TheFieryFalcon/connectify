@@ -41,7 +41,7 @@
           <div>
             <label for="cx-theme-select-input" class="cx-settings-label">Color Theme</label>
             <div style="display:flex;align-items:center;gap:6px;">
-              <select id="cx-theme-select-input" class="cx-settings-select" style="box-sizing:border-box;padding:3px 8px;border-radius:4px;font-size:12px;cursor:pointer;">
+              <select id="cx-theme-select-input" class="cx-settings-select">
               </select>
             </div>
             <p class="cx-settings-desc">Interface theme and visual palette.</p>
@@ -49,7 +49,7 @@
           <div>
             <label for="cx-panel-view-select" class="cx-settings-label">Statistics Panels</label>
             <div style="display:flex;align-items:center;gap:6px;">
-              <select id="cx-panel-view-select" class="cx-settings-select" style="box-sizing:border-box;padding:3px 8px;border-radius:4px;font-size:12px;cursor:pointer;">
+              <select id="cx-panel-view-select" class="cx-settings-select">
                 <option value="compact">Compact view</option>
                 <option value="subjects">Expanded view on subject panels only</option>
                 <option value="all">Expanded view on all panels</option>

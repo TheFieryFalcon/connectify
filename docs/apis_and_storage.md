@@ -9,7 +9,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | Global Object | Module | Primary Purpose |
 |---|---|---|
 | `window.ConnectifyScheduler` | `scheduler.js` | Shared page observer (`onMutations`) and heartbeat (`every`) |
-| `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `accountKey` (URL `coisp`, else the remembered account, else `current`), `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey`, `customWeekOrder`/`readTimeOverride` (load first) |
+| `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `accountKey` (URL `coisp`, else the remembered account, else `current`), `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey`, `customWeekOrder`/`readTimeOverride`, `OUTLINES_URL`/`isOutlinesPage()` (load first) |
 | `window.ConnectifyData` | `assessment-data.js` | Scrapes assessment cards, caches tasks, expands accordions; `collectClasses()` for sidebar tools |
 | `window.ConnectifyCache` | `cache-versions.js` | Subsystem cache versioning (predictor, results, settings, cohort) and clearing |
 | `window.ConnectifyCohortMath` | `cohort-math.js` | PCHIP cubic Hermite interpolation, variance, z-score |
@@ -70,8 +70,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectea:theme:custom_themes` | `localStorage` & `storage.local` | `theme-registry.js` | Array of custom theme configurations (tokens, `tokenVersion`, glassBlur, glassOpacity, wallpaper, or `wallpaperPreset`: a preset wallpaper id) with name-based overwrite |
 | `connectea:custom_background` | `localStorage` & `storage.local` | `theme-custom-tokens.js` | Data URI of the wallpaper picked in Settings (extension storage keeps it when over quota); a theme's own wallpaper is shown over it only while that theme is active, never stored here; `connectify:wallpaper_fit_done` (`theme-wallpaper-migrate.js`) is set once large stored wallpapers were fitted; `connectify:wallpaper_dim` (`theme-wallpaper-dim.js`) caches `{ key, dim, brighten: { <ink>: value } }` for the active wallpaper |
 | `connectea:theme:liquid_glass` | `localStorage` | `theme.js` | Boolean flag enabling Liquid Glass diffusion mode |
-| `connectea:theme:restore_dark` / `restore_theme` | `localStorage` | `theme.js` / `theme-registry.js` | Dark-mode flag and saved theme ID restored after navigating away from the login page |
-| `connectea:theme:custom_colors` | `localStorage` | `theme-registry.js` | Custom theme JSON palette (`canvas`, `surface`, `accent`) |
+| `connectea:theme:restore_dark` / `restore_theme` / `custom_colors` | `localStorage` | `theme.js` / `theme-registry.js` | Dark-mode flag and saved theme ID restored after navigating away from the login page; custom theme JSON palette (`canvas`, `surface`, `accent`) |
 | `connectea:cohort:v3:<student>:<year>:<subject>` | `localStorage` | `cohort-estimator.js` | Custom user-override cohort size |
 | `connectea:observed_spreads:<key>` | `sessionStorage` | `cohort-estimator.js` | Cached empirical IQR ratios |
 | `connectea:task_type_overrides` | `localStorage` | `task-types.js` | Map of assessment manual category overrides |

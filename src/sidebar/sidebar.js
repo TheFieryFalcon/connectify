@@ -1,9 +1,10 @@
 /**
  * Connectify Sidebar Drawer & Tool Launcher Workspace
  *
- * The slide-out drawer hosting Connectify's tools: builds the shell, opens and closes it, keeps the
- * active tool in sync and disables tools while an outline filter hides courses. The shell is built in
- * sidebar-shell.js, tools are mounted and launched by sidebar-tools.js, filters detected by sidebar-filter.js.
+ * The slide-out drawer hosting Connectify's tools on every Connect page: builds the shell, opens and
+ * closes it, keeps the active tool in sync and, away from Assessment Outlines, leaves only Settings
+ * enabled under a notice linking there (sidebar-page-notice.js). The shell is built in sidebar-shell.js,
+ * tools are mounted and launched by sidebar-tools.js.
  */
 (() => {
   'use strict';
@@ -13,16 +14,17 @@
     window.__connectifySidebarInitialized = true;
 
     const tools = window.ConnectifySidebarTools;
-    const { clickConnectAllButton, isOutlinesFilterRestricted } = window.ConnectifySidebarFilter;
+    const { ANYWHERE_TOOLS } = window.ConnectifySidebarPageNotice;
+    const onOutlines = () => window.ConnectifyUtils.isOutlinesPage();
+    // Off the outlines page only Settings opens
+    const isLimited = () => !onOutlines();
+    const allowsTool = id => !isLimited() || ANYWHERE_TOOLS.has(id);
 
     const updateHandlePosition = () => (window._connectifyUpdateHandlePosition || window.ConnectifySidebarHandle?.updateHandlePosition || function() {})();
     const updateHandleState = (isOpen) => (window.ConnectifySidebarHandle?.updateHandleState || function() {})(isOpen);
 
-    const shell = window.ConnectifySidebarShell.build(() => {
-      setTimeout(syncState, 250);
-      setTimeout(syncState, 800);
-    });
-    const { sidebar, handle, homeBtn, toolMenu, workspace, introText, filterNotice } = shell;
+    const shell = window.ConnectifySidebarShell.build();
+    const { sidebar, handle, homeBtn, toolMenu, workspace, introText, pageNotice } = shell;
     const attachSidebar = shell.attach;
 
     attachSidebar();
@@ -44,7 +46,7 @@
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
       for (const child of workspace.children) child.hidden = true;
       sidebar.classList.remove('cx-tool-active');
-      introText.hidden = isOutlinesFilterRestricted();
+      introText.hidden = isLimited();
       toolMenu.querySelectorAll('button').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
       if (handle) {
         handle.dataset.toolActive = 'false';
@@ -86,9 +88,9 @@
 
     // Central delegated tool launcher listener
     const handleToolLaunchClick = e => {
-      if (e._connectifyToolHandled || sidebar.classList.contains('cx-filter-disabled')) return;
+      if (e._connectifyToolHandled) return;
       const toggle = e.target.closest(tools.LAUNCHER_SELECTOR);
-      if (!toggle) return;
+      if (!toggle || !allowsTool(toggle.id)) return;
       e._connectifyToolHandled = true;
       setJustReturnedToMenu(false);
       tools.launchTool(toggle);
@@ -103,7 +105,7 @@
     document.addEventListener('click', handleToolLaunchClick);
 
     const handleConnectifyOpen = e => {
-      if (sidebar.classList.contains('cx-filter-disabled')) return;
+      if (isLimited() && e.detail !== 'home' && e.detail !== 'categories') return;
       if (e.detail !== 'home') openSidebar();
       const activeTool = e.detail;
       const btnMap = {
@@ -140,30 +142,24 @@
         tools.mountTools(toolMenu, workspace);
         tools.syncPressedState(toolMenu);
 
-        const isRestricted = isOutlinesFilterRestricted();
-        sidebar.classList.toggle('cx-filter-disabled', isRestricted);
-        if (filterNotice) filterNotice.hidden = !isRestricted;
-
-        if (isRestricted) {
-          for (const child of workspace.children) child.hidden = true;
-          sidebar.classList.remove('cx-tool-active');
-          introText.hidden = true;
-          toolMenu.querySelectorAll('button').forEach(btn => {
-            btn.disabled = true;
-            btn.setAttribute('aria-disabled', 'true');
-            btn.setAttribute('aria-pressed', 'false');
-          });
-        } else {
-          toolMenu.querySelectorAll('button').forEach(btn => {
-            btn.disabled = false;
-            btn.removeAttribute('aria-disabled');
-          });
-          const hasActiveTool = Array.from(workspace.children).some(p => !p.hidden);
-          sidebar.classList.toggle('cx-tool-active', hasActiveTool);
-          introText.hidden = hasActiveTool;
+        const limited = isLimited();
+        sidebar.classList.toggle('cx-page-limited', limited);
+        if (pageNotice && pageNotice.hidden !== !limited) pageNotice.hidden = !limited;
+        for (const btn of toolMenu.querySelectorAll('button')) {
+          const off = !allowsTool(btn.id);
+          if (btn.disabled !== off) btn.disabled = off;
+          // Written only on change: this runs every 1.5s
+          if (off && btn.getAttribute('aria-disabled') !== 'true') btn.setAttribute('aria-disabled', 'true');
+          if (off && btn.getAttribute('aria-pressed') === 'true') btn.setAttribute('aria-pressed', 'false');
+          if (!off && btn.hasAttribute('aria-disabled')) btn.removeAttribute('aria-disabled');
         }
+        if (limited) {
+          for (const child of workspace.children) if (child.id !== 'connectify-categories' && !child.hidden) child.hidden = true;
+        }
+        const hasActiveTool = Array.from(workspace.children).some(p => !p.hidden);
+        sidebar.classList.toggle('cx-tool-active', hasActiveTool);
+        introText.hidden = hasActiveTool || limited;
 
-        const hasActiveTool = !isRestricted && Array.from(workspace.children).some(p => !p.hidden);
         if (handle) {
           handle.dataset.toolActive = hasActiveTool ? 'true' : 'false';
           if (!sidebar.hidden) {
@@ -201,7 +197,7 @@
       }
     });
 
-    window.ConnectifySidebar = { isOutlinesFilterRestricted, clickConnectAllButton, syncState, openSidebar, closeSidebar };
+    window.ConnectifySidebar = { isLimited, syncState, openSidebar, closeSidebar };
     window.ConnectifyInitSidebar = syncState;
     window.ConnectifyScheduler.every(1500, syncState);
     syncState();

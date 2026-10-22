@@ -95,7 +95,8 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 73. `src/sidebar/sidebar-handle-position.js` (handle anchoring and viewport centring maths)
 74. `src/sidebar/sidebar-handle.js` (sidebar handle anchor & slide coordinator)
 75. `src/sidebar/sidebar-hover.js` (left-edge expand and hover collapse)
-76. `src/sidebar/sidebar-filter.js` (outline filter detection, Back to All notice; presses the top-level "All" with a full mouse press)
+76. `src/sidebar/sidebar-filter.js` (outline filter detection for the new-year rollover; presses the top-level "All" with a full mouse press)
+76b. `src/sidebar/sidebar-page-notice.js` (off-outlines notice; Settings is the only tool that works on every page)
 77. `src/sidebar/sidebar-tools.js` (launcher buttons, tool panels and pressed state)
 78. `src/sidebar/sidebar-shell.js` (drawer shell construction and attachment)
 79. `src/sidebar/sidebar.js` (slide-out tool drawer & launcher)
@@ -104,6 +105,8 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 82. `src/system/grade-snapshot.js` (subject marks and boxplots compared with the grade cache)
 83. `src/system/new-grade.js` (grade change detector & jump-to-card dispatcher)
 84. `src/system/dom-sweeper.js` (health check & component restoration)
+
+**Other Connect pages** load a sidebar-only group (`exclude_matches` the outlines page): scheduler, utils, the assessment cache and data modules, categories, the predictor model, Settings (calibration, baselines, preferences) and the sidebar, in the order above. `ConnectifyUtils.isOutlinesPage()` keeps `collect()`, semester detection and the semester filter off other pages' tiles there, so tools read only the cache.
 
 ### SPA Navigation & DOM Sweeping
 Connect is built on Vaadin / Liferay SPA navigation where the DOM re-renders asynchronously on page transitions.

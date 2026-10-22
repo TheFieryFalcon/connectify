@@ -1,15 +1,15 @@
 /**
  * Connectify Sidebar: drawer shell
  *
- * Builds (or adopts) the drawer, its handle, header with "Back to Menu", the filter notice, intro
+ * Builds (or adopts) the drawer, its handle, header with "Back to Menu", the off-outlines notice, intro
  * text, tool menu and workspace, and keeps them attached to the page.
  * Exposes window.ConnectifySidebarShell.
  */
 (() => {
   'use strict';
 
-  /** Builds or adopts the drawer elements; onBackToAll runs after the "Back to All" filter button. */
-  function build(onBackToAll) {
+  /** Builds or adopts the drawer elements. */
+  function build() {
     const createElement = (tag, text) => {
       const el = document.createElement(tag);
       if (text) el.textContent = text;
@@ -65,9 +65,9 @@
       { className: 'cx-tools-intro' }
     );
 
-    const filterNotice = sidebar.querySelector('.cx-filter-notice') || window.ConnectifySidebarFilter.createFilterNotice(onBackToAll);
+    const pageNotice = sidebar.querySelector('.cx-page-notice') || window.ConnectifySidebarPageNotice.create();
 
-    [header, filterNotice, introText, toolMenu, workspace].forEach(el => {
+    [header, pageNotice, introText, toolMenu, workspace].forEach(el => {
       if (el && !sidebar.contains(el)) sidebar.append(el);
     });
 
@@ -86,7 +86,7 @@
       if (handle.parentElement !== parent) parent.appendChild(handle);
     }
 
-    return { sidebar, handle, header, homeBtn, toolMenu, workspace, introText, filterNotice, attach: attachSidebar };
+    return { sidebar, handle, header, homeBtn, toolMenu, workspace, introText, pageNotice, attach: attachSidebar };
   }
 
   window.ConnectifySidebarShell = { build };
