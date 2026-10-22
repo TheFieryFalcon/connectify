@@ -9669,7 +9669,7 @@ runTest('Test 217: Filtering Assessment Outlines with "Show this semester\'s cla
     assert.ok(text.textContent.includes('"Show this semester\'s classes only" is on, so its Semester 1 outline is hidden'), text.textContent);
     assert.ok(text.textContent.includes('Connectify Settings'), 'the notice says where to turn the option off');
     assert.strictEqual(button.hidden, false, 'Back to All is offered while a Connect filter is applied');
-    button.onclick({ preventDefault() {} });
+    button.click();
     assert.ok(clickedAll, 'Back to All clicks Connect\'s own All filter');
 
     // Later passes (Connect re-renders) change nothing, so hidden tiles never flash
@@ -9701,6 +9701,52 @@ runTest('Test 217: Filtering Assessment Outlines with "Show this semester\'s cla
   } finally {
     document.querySelectorAll = origQSA; document.getElementById = origById; Date.now = origNow;
     window.ConnectifySidebarFilter = origSidebarFilter; mockLocalStorage.clear();
+  }
+});
+
+runTest('Test 218: Back to All presses Connect\'s top-level "All" filter with a whole mouse press, once', () => {
+  window.ConnectifySidebarFilter = undefined;
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/sidebar-filter.js'), 'utf8'));
+  const { findAllFilter, clickConnectAllButton } = window.ConnectifySidebarFilter;
+  const el = (cls, text) => { const e = document.createElement('div'); e.className = cls; if (text) e.textContent = text; return e; };
+  // Connect's filter menu: a top-level "All" heading, then semester sections whose tree lists start with their own "All"
+  const menu = el('cvr-c-category-menu eds-c-accordion eds-c-accordion--dark');
+  const heading = el('eds-c-accordion__section-heading'), label = el('eds-c-accordion__section-label', 'All');
+  heading.appendChild(label); menu.appendChild(heading);
+  for (const name of ['Semester 1 Classes', 'Semester 2 Classes']) {
+    const section = el('eds-c-accordion__section-heading'); section.appendChild(el('eds-c-accordion__section-label', name)); menu.appendChild(section);
+    const panel = el('eds-c-accordion__panel'), tree = el('cvr-c-tree-list');
+    for (const item of ['All', 'Chemistry ATAR Year 11']) { const row = el('cvr-c-tree-list__item'); row.appendChild(el('v-label', item)); tree.appendChild(row); }
+    panel.appendChild(tree); menu.appendChild(panel);
+  }
+  const own = el('cx-semester-notice'); own.id = 'cx-semester-notice'; own.appendChild(el('eds-c-accordion__section-label', 'All'));
+  // Async tests leave their own outlines in the shared mock DOM, so queries stay on this page
+  const page = el('cvr-page'), origQSA = document.querySelectorAll;
+  page.appendChild(own); page.appendChild(menu);
+  document.querySelectorAll = sel => page.querySelectorAll(sel);
+  // Node's own MouseEvent never bubbles through the mock DOM
+  const origMouse = window.MouseEvent, origPointer = window.PointerEvent;
+  window.MouseEvent = MockEvent; window.PointerEvent = MockEvent;
+  // Vaadin's layout click: fires on mouseup over the element that got the mousedown, never on click()
+  let pressed = 0, clicks = 0, downTarget = null;
+  heading.addEventListener('mousedown', e => { downTarget = e.target; });
+  heading.addEventListener('mouseup', e => { if (e.target === downTarget && (e.button ?? 0) === 0) pressed++; downTarget = null; });
+  heading.addEventListener('click', () => { clicks++; });
+  try {
+    // Elements are compared by identity: a failed deepStrictEqual would print the whole mock DOM
+    assert.ok(findAllFilter() === label, 'the top-level "All", never a semester section\'s "All" or Connectify\'s own UI');
+    assert.strictEqual(clickConnectAllButton(), true);
+    assert.strictEqual(pressed, 1, 'a mousedown + mouseup pair reaches Vaadin\'s layout click listener');
+    assert.strictEqual(clicks, 1, 'one press only (an accordion heading toggles on every press)');
+    label.textContent = 'Everything';
+    assert.ok(findAllFilter() === null, 'a semester section\'s "All" is never pressed instead');
+    assert.strictEqual(clickConnectAllButton(), false);
+    const src = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/sidebar-filter.js'), 'utf8');
+    assert.ok(!src.includes('match.parentElement.click()'), 'no repeated bare click() calls');
+    const notice = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/semester-filter-notice.js'), 'utf8');
+    assert.ok(notice.includes("Pick All in Connect\\'s filter menu"), 'the notice says what to do when no All filter is found');
+  } finally {
+    document.querySelectorAll = origQSA; window.MouseEvent = origMouse; window.PointerEvent = origPointer;
   }
 });
 

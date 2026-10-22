@@ -3,7 +3,7 @@
  *
  * When the option hides every outline in view (a Connect filter picked a class with no outline this
  * semester), a message takes the outlines' place naming the semester that is hidden and how to see it,
- * with "← Back to All" while a Connect filter is applied. semester-filter.js calls update() after each
+ * with "← Back to All" when Connect's top-level All filter can be pressed. semester-filter.js calls update() after each
  * pass. Exposes window.ConnectifySemesterFilterNotice.
  */
 (() => {
@@ -12,6 +12,7 @@
   if (window.ConnectifySemesterFilterNotice) return;
 
   const ID = 'cx-semester-notice';
+  const NOT_FOUND = 'Connect\'s All filter could not be found. Pick All in Connect\'s filter menu.';
   const make = (tag, className, text) => Object.assign(document.createElement(tag), { className, textContent: text || '' });
   const sidebarFilter = () => window.ConnectifySidebarFilter;
 
@@ -19,14 +20,16 @@
     const notice = make('div', 'cx-semester-notice');
     notice.id = ID;
     notice.setAttribute('role', 'status');
-    const backToAll = Object.assign(make('button', 'cx-semester-notice-btn', '← Back to All'), {
-      type: 'button',
-      onclick: e => {
-        e.preventDefault();
-        sidebarFilter()?.clickConnectAllButton?.();
-      }
+    const backToAll = Object.assign(make('button', 'cx-semester-notice-btn', '← Back to All'), { type: 'button' });
+    const text = make('p', 'cx-semester-notice-text');
+    backToAll.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (sidebarFilter()?.clickConnectAllButton?.()) return;
+      notice.dataset.allMissing = 'true';
+      text.textContent = `${text.textContent} ${NOT_FOUND}`;
     });
-    notice.append(make('strong', 'cx-semester-notice-title'), make('p', 'cx-semester-notice-text'), backToAll);
+    notice.append(make('strong', 'cx-semester-notice-title'), text, backToAll);
     return notice;
   }
 
@@ -53,11 +56,15 @@
     }
     notice = notice || build();
     const filterTitle = sidebarFilter()?.activeFilterTitle?.() || '';
-    const { title, text } = texts(active, filterTitle, hiddenCount);
+    const { title, text: base } = texts(active, filterTitle, hiddenCount);
+    const text = notice.dataset.allMissing && filterTitle ? `${base} ${NOT_FOUND}` : base;
     const [titleEl, textEl, button] = notice.children;
     if (titleEl.textContent !== title) titleEl.textContent = title;
     if (textEl.textContent !== text) textEl.textContent = text;
-    if (button.hidden !== !filterTitle) button.hidden = !filterTitle;
+    // A semester section's own "All" may leave the toolbar reading All: offer the button whenever
+    // Connect's top-level All filter is there to press
+    const canReset = Boolean(filterTitle || sidebarFilter()?.findAllFilter?.());
+    if (button.hidden !== !canReset) button.hidden = !canReset;
     if (anchor.previousElementSibling !== notice) anchor.before(notice);
   }
 

@@ -91,7 +91,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 73. `src/sidebar/sidebar-handle-position.js` (handle anchoring and viewport centring maths)
 74. `src/sidebar/sidebar-handle.js` (sidebar handle anchor & slide coordinator)
 75. `src/sidebar/sidebar-hover.js` (left-edge expand and hover collapse)
-76. `src/sidebar/sidebar-filter.js` (outline filter detection and Back to All notice)
+76. `src/sidebar/sidebar-filter.js` (outline filter detection, Back to All notice; presses the top-level "All" with a full mouse press)
 77. `src/sidebar/sidebar-tools.js` (launcher buttons, tool panels and pressed state)
 78. `src/sidebar/sidebar-shell.js` (drawer shell construction and attachment)
 79. `src/sidebar/sidebar.js` (slide-out tool drawer & launcher)
