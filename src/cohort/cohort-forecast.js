@@ -50,7 +50,8 @@
         setText(box, NEEDS);
       }
       box.hidden = false;
-      box.style.setProperty('display', 'block', 'important');
+      // The stylesheet decides how it shows (the expanded card is a flex row), never an inline display
+      box.style.removeProperty('display');
     }
 
     function hide(ui) {

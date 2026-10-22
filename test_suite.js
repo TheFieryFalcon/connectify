@@ -10327,6 +10327,37 @@ runTest('Test 227: Settings saves each category under its own name; a set saved 
   }
 });
 
+runTest('Test 228: Shown statistics panels carry no inline display, so expanded cards keep their grid and flex layout', () => {
+  // An inline display: block !important beat the card's display: grid and stacked every value in one column
+  const { view } = loadCohortViewIn('all');
+  window.ConnectifyPredictorMath.saveBaselines({ types: { Exam: 70 }, subjects: { '12 Literature ATAR': 70 } });
+  const { makeRow } = expandedFixture();
+  const stats = [32.5, 58, 68.85, 79.9, 96.7];
+  const overall = makeRow(false, ['Semester 2 Cumulative Percent'], '81.2%', stats);
+  view.render(overall, true, 'lit-key', 219, null, []);
+  const o = view.panels.get(overall);
+  assert.ok(!o.box.hidden && o.box.style.display === undefined, `the overall card has no inline display: ${o.box.style.display}`);
+
+  const task = makeRow(true, ['Examination', 'Term 1, Week 4', 'Extended response 1'], '21 Out of 30', stats);
+  view.render(task, false, 'lit-key', 219, null, []);
+  assert.strictEqual(view.panels.get(task).box.style.display, undefined, 'a marked task card has no inline display');
+
+  const unmarked = makeRow(true, ['Examination', 'Term 4, Week 3', 'Extended response 1'], '');
+  view.render(unmarked, false, 'lit-key', 219, null, []);
+  const u = view.panels.get(unmarked);
+  assert.strictEqual(u.box.style.display, 'none', 'the hidden statistics card is still hidden inline');
+  assert.ok(!u.forecast.hidden && u.forecast.style.display === undefined, `the shown prediction card has no inline display: ${u.forecast.style.display}`);
+  unmarked.querySelector('.cvr-c-task__mark').textContent = '72 Out of 100';
+  view.render(unmarked, false, 'lit-key', 219, null, []);
+  assert.ok(u.box.style.display === undefined && u.forecast.style.display === 'none', 'once marked the statistics card shows and the prediction hides');
+
+  for (const f of ['cohort/cohort-view.js', 'cohort/cohort-forecast.js']) {
+    const js = origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
+    assert.ok(!/setProperty\('display', (visible \? )?'block'/.test(js), `${f} never writes display: block on a panel`);
+  }
+  loadCohortViewIn(null);
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

@@ -62,7 +62,9 @@
     function showPanel(ui, isOverall, visible) {
       ui.box.hidden = !visible;
       ui.box.classList.toggle('connectea-hidden', !visible);
-      ui.box.style.setProperty('display', visible ? 'block' : 'none', 'important');
+      // Shown panels take their display from the stylesheet (expanded cards are grid / flex), never inline
+      if (visible) ui.box.style.removeProperty('display');
+      else ui.box.style.setProperty('display', 'none', 'important');
       if (ui.typeContainer) ui.typeContainer.style.setProperty('display', 'inline-flex', 'important');
       if (!isOverall && ui.wrapper) ui.wrapper.style.setProperty('display', 'flex', 'important');
     }
