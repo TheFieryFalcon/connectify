@@ -22,7 +22,7 @@
     });
     notice.append(
       make('strong', 'cx-page-notice-title', 'Assessment Outlines Only'),
-      make('p', 'cx-page-notice-text', 'Connectify\'s tools open on the Assessment Outlines page. Settings works here too.'),
+      make('p', 'cx-page-notice-text', 'Connectify\'s tools open on the Assessment Outlines page.'),
       link
     );
     return notice;
