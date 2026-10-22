@@ -9810,6 +9810,47 @@ runTest('Test 219: No stylesheet tests a class substring on an ancestor, so a cl
   assert.ok(!ancestorSubstring('.connectea-dark :is(.a, [class*="feed"])', true) && !ancestorSubstring('.x:not([class*="icon"])', true), 'a substring on the subject is allowed');
 });
 
+runTest('Test 220: On Assessment Outlines the shortcut, not My Connect, is the highlighted navigation tab', () => {
+  window.__connectifyNavInitialized = false;
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/navigation.js'), 'utf8'));
+  const { markActive } = window.ConnectifyNavigation;
+  const el = (cls, text) => { const e = document.createElement('div'); e.className = cls; if (text) e.textContent = text; return e; };
+  // Desktop greedy bar: Connect marks My Connect active on the outlines page; the shortcut sits after it
+  const bar = el('cvr-c-primary-navigation__links');
+  const myConnect = el('cvr-js-greedy__item eds-s-is-active'), link = document.createElement('a');
+  link.setAttribute('href', '/group/students/ui/my-connect'); myConnect.appendChild(link);
+  const classes = el('cvr-js-greedy__item');
+  const shortcut = el('cvr-js-greedy__item'); shortcut.dataset.connecteaShortcut = '';
+  // Mobile drawer: the same pair
+  const drawer = el('cvr-c-primary-menu__list');
+  const mobileMy = el('cvr-c-primary-menu__item eds-s-is-active'); mobileMy.appendChild(el('cvr-c-primary-menu__item-label', 'My Connect'));
+  const mobileShortcut = el('cvr-c-primary-menu__item'); mobileShortcut.dataset.connecteaShortcut = '';
+  for (const e of [classes, myConnect, shortcut]) bar.appendChild(e);
+  for (const e of [mobileMy, mobileShortcut]) drawer.appendChild(e);
+  const page = el('cvr-page'), origQSA = document.querySelectorAll, origHref = location.href;
+  page.appendChild(bar); page.appendChild(drawer);
+  document.querySelectorAll = sel => page.querySelectorAll(sel);
+  const active = e => e.classList.contains('eds-s-is-active');
+  try {
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines?coisp=12345';
+    markActive();
+    assert.ok(active(shortcut) && active(mobileShortcut), 'the shortcut takes Connect\'s own active class on the outlines page');
+    assert.ok(!active(myConnect) && !active(mobileMy), 'My Connect is no longer highlighted there');
+    assert.ok(!active(classes), 'other tabs are untouched');
+    myConnect.classList.add('eds-s-is-active');
+    markActive();
+    assert.ok(!active(myConnect) && active(shortcut), 'Connect re-marking My Connect is undone');
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-connect';
+    markActive();
+    assert.ok(!active(shortcut) && !active(mobileShortcut), 'the shortcut is not highlighted on other pages');
+    assert.ok(active(myConnect) && active(mobileMy), 'My Connect gets its highlight back');
+    markActive();
+    assert.ok(active(myConnect), 'a later pass leaves Connect\'s own highlight alone');
+  } finally {
+    document.querySelectorAll = origQSA; location.href = origHref;
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

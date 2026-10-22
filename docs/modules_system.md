@@ -44,6 +44,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 - **Role**: Injects direct "Assessment Outlines" shortcut into Connect navigation bar, tracks user activity, and detects session timeouts.
 - **Key Functions**:
   - Injects link into desktop greedy navigation and mobile drawer.
+  - `ConnectifyNavigation.markActive()`: on the outlines page moves Connect's `eds-s-is-active` from My Connect to the shortcut (desktop and drawer), restoring it elsewhere; re-run on nav re-renders and class changes.
   - Tracks user activity (`mousemove`, `keydown`, `scroll`) to update `window.__connectifyLastActive` and provide `window.ConnectifyIsUserActive()`.
   - Monitors session expiry modals and unloads while idle (> 5 min) to set `cx-session-expired`.
   - Intercepts manual logout clicks to set `cx-manual-logout`.

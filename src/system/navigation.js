@@ -12,6 +12,8 @@
 
   const DESTINATION_URL = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
   const SHORTCUT_LABEL = 'Assessment Outlines';
+  const OUTLINES_PATH = '/group/students/ui/my-settings/assessment-outlines';
+  const ACTIVE = 'eds-s-is-active';
 
   function addShortcut() {
     // Do not remove the shortcut on the assessment-outlines page.
@@ -69,11 +71,39 @@
     }
   }
 
-  // The shared scheduler batches page changes per frame; Connect re-renders its navigation at any time
-  const scheduler = window.ConnectifyScheduler;
-  scheduler.onMutations(addShortcut, { filter: m => m.type === 'childList', mute: false });
+  const isMyConnect = item => !!item.querySelector('a[href="/group/students/ui/my-connect"]') ||
+    item.querySelector('.cvr-c-primary-menu__item-label')?.textContent.trim() === 'My Connect';
 
-  addShortcut();
+  // Connect files Assessment Outlines under My Connect and highlights that tab; on the outlines page the
+  // shortcut takes Connect's own active class instead, and My Connect gets it back on any other page
+  function markActive() {
+    const onOutlines = new URL(location.href).pathname.startsWith(OUTLINES_PATH);
+    for (const item of document.querySelectorAll('.cvr-js-greedy__item, .cvr-c-primary-menu__item')) {
+      let want;
+      if ('connecteaShortcut' in item.dataset) want = onOutlines;
+      else if (onOutlines && isMyConnect(item)) {
+        if (item.classList.contains(ACTIVE)) item.dataset.connecteaActiveMoved = '';
+        want = false;
+      } else if ('connecteaActiveMoved' in item.dataset) {
+        delete item.dataset.connecteaActiveMoved;
+        want = true;
+      } else continue;
+      if (item.classList.contains(ACTIVE) !== want) item.classList.toggle(ACTIVE, want);
+    }
+  }
+  window.ConnectifyNavigation = { markActive };
+
+  const update = () => { addShortcut(); markActive(); };
+
+  // The shared scheduler batches page changes per frame; Connect re-renders its navigation (and re-marks
+  // its active tab) at any time
+  const scheduler = window.ConnectifyScheduler;
+  scheduler.onMutations(update, {
+    filter: m => m.type === 'childList' || (m.attributeName === 'class' && !!m.target.classList?.contains('cvr-js-greedy__item')),
+    mute: false
+  });
+
+  update();
 
   // User activity tracking to allow quiet idle periods and detect session timeouts
   window.__connectifyLastActive = Date.now();

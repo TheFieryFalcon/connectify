@@ -10,7 +10,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Source Module**: [`navigation.js`](file:///Users/uwong/Downloads/2.1.14_0/navigation.js)
 - **DOM Insertion**: Desktop: Appended after "My Connect" link in `.cvr-c-primary-navigation__links` (`.cvr-js-greedy__item`). Mobile/Drawer: Appended after "My Connect" item in `.cvr-c-primary-menu__list`.
 - **UI Appearance**: Matches native Connect navigation link styling seamlessly (`[Assessment Outlines]`).
-- **Functionality**: One-click direct link to `/group/students/ui/my-settings/assessment-outlines`, bypassing nested user menus. Automatically reinjects across client-side SPA route transitions.
+- **Functionality**: One-click direct link to `/group/students/ui/my-settings/assessment-outlines`, bypassing nested user menus. Automatically reinjects across client-side SPA route transitions. On the outlines page the shortcut is the highlighted tab: it takes Connect's own `eds-s-is-active` from My Connect (which Connect highlights there), and My Connect gets it back on any other page.
 
 ### 2. Site-Wide Multi-Theme System & In-DOM Customizer
 - **Source Modules**: [`theme.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.js), [`theme-registry.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-registry.js), [`theme-customizer.js`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme-customizer.js), [`theme.css`](file:///Users/uwong/Downloads/2.1.14_0/src/theme/theme.css)
