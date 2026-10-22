@@ -11,7 +11,7 @@ This document details user-facing features 11 through 20, covering Target ATAR a
 - **DOM Insertion**: Full-screen modal overlay (`#connectea-atar`) opened via sidebar or floating button.
 - **UI Appearance**: Clean tabbed interface with Course Marks Table, Target ATAR Planner, and Target Grade Planner.
 - **Functionality**:
-  - **ATAR Calculator**: Aggregates scaled scores across enrolled ATAR courses using TISC Average Marks Scaling (each course's 2025 scaled mean + SD x z, z from the standardised mean 60 / SD 14); selects top 4 subjects for Tertiary Entrance Aggregate (TEA); applies 10% bonus for Methods, Specialist, and Languages (up to 2 bonus courses); calculates projected ATAR.
+  - **ATAR Calculator**: Aggregates scaled scores across enrolled ATAR courses using TISC Average Marks Scaling (each course's 2025 scaled mean + SD x z, z from the standardised mean 60 / SD 14); selects top 4 subjects for Tertiary Entrance Aggregate (TEA); applies 10% bonus for Methods, Specialist, and Languages (up to 2 bonus courses); calculates projected ATAR. Each course takes a school mark (Connect's by default) and shows its scaled score; a semester with final grades is Closed.
   - **Target ATAR Planner**: Input target ATAR; toggles top 4 course inclusion; difficulty-weighted optimization adjusts required marks based on historical strengths across subjects and categories (`Adjust marks by subject & task type performance`).
   - **Target Grade Planner**: Select course, enter target percentage, dynamic prior performance adjustment option (`Dynamically adjust required grade based on prior performance`), clean semester tabs eliminating ATAR text.
 

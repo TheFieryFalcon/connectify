@@ -125,12 +125,12 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
   - `scanOutlineDetails()`: Safe no-op complying with Rule 7; users are prompted via explicit "Expand Subject Outlines" buttons.
 - **Export**: `window.ConnectifyAtarScraper`.
 
-#### [`atar-calculator.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-calculator.js) (201 lines)
-- **Role**: State manager for ATAR calculations and score overrides.
+#### [`atar-calculator.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-calculator.js) (209 lines)
+- **Role**: State manager for ATAR calculations and school mark overrides.
 - **Key Functions**:
-  - `getCourseState(row, semesterIdx, coursesList)`: Returns course inclusion state and score (with manual override or calibrated scaled score).
+  - `getCourseState(row, semesterIdx, coursesList)`: Returns course inclusion state, `raw` (the typed school mark, else Connect's) and `score` (that mark scaled, calibration shift included; a scaled `score` saved before school marks were typed still wins until the row is edited).
   - `calculateResults(courses)`: Calculates ATAR for Semester 1 and Semester 2 with -15 TEA adjustment for Year 11 unscaled courses.
-  - `renderCourseList(container, courses, activeSemester, onChange)`: Renders list of courses with include checkboxes, manual score inputs, and school mark indicators.
+  - `renderCourseList(container, courses, activeSemester, onChange)`: Renders each course with an include checkbox, a school mark input (placeholder: Connect's mark; saved as `raw`) and the scaled score under it (`Scaled 86`, updated as the student types).
 - **Export**: `window.ConnectifyAtarCalc`.
 
 ---

@@ -155,9 +155,9 @@
         score: current.score,
         progress:
           current.score === undefined
-            ? { error: 'Enter a valid scaled-score assumption in the ATAR estimate tab.' }
+            ? { error: 'Enter a valid school mark in the ATAR Estimate tab.' }
             : r.progress,
-        offset: current.score === undefined || r.mark === undefined ? 0 : current.score - wholeScore(r.mark)
+        offset: current.score === undefined || current.raw === undefined ? 0 : current.score - wholeScore(current.raw)
       };
     });
 

@@ -2,7 +2,7 @@
  * Connectify ATAR Calculator Engine
  *
  * Course state modeling, scaled score projections, TEA summation,
- * Year 11 TEA scaling adjustments, and score override persistence.
+ * Year 11 TEA scaling adjustments, and school mark override persistence.
  */
 (() => {
   'use strict';
@@ -47,24 +47,28 @@
     const entry = savedPreferences[`${semesterIdx}:${row.id}`];
     const calibration = savedPreferences[`sem1_calibration:${row.id}`];
     const math = window.ConnectifyMath || {};
+    // The student enters a school mark; a scaled score saved before the fields were flipped still applies.
+    const legacyScaled = entry?.raw === undefined ? entry?.score : undefined;
+    const raw = entry?.raw ?? row.mark;
 
     let finalScore;
-    if (entry?.score !== undefined) {
-      finalScore = entry.score; // Fallback to manual override
-    } else if (row.mark !== undefined) {
+    if (legacyScaled !== undefined) {
+      finalScore = legacyScaled;
+    } else if (raw !== undefined) {
       const knownSem1Raw = calibration?.raw !== undefined
         ? calibration.raw
         : (semesterIdx === 1 ? coursesList[0]?.find(r => r.id === row.id)?.mark : undefined);
       const knownSem1Scaled = calibration?.scaled;
       if (math.calculateShiftedScaledScore) {
-        finalScore = math.calculateShiftedScaledScore(row.name, row.mark, knownSem1Raw, knownSem1Scaled, 2025);
+        finalScore = math.calculateShiftedScaledScore(row.name, raw, knownSem1Raw, knownSem1Scaled, 2025);
       } else {
-        finalScore = row.mark;
+        finalScore = raw;
       }
     }
 
     return {
       ...row,
+      raw,
       include: entry?.include ?? row.mark !== undefined,
       score: math.wholeScore ? math.wholeScore(finalScore) : (finalScore !== undefined ? Math.round(finalScore) : undefined)
     };
@@ -118,7 +122,6 @@
 
   function renderCourseList(container, courses, activeSemester, onChange) {
     const math = window.ConnectifyMath || {};
-    const wholeScore = math.wholeScore || (v => (Number.isFinite(Number(v)) ? Math.round(Number(v)) : undefined));
     const scoreValue = math.scoreValue || (v => {
       const n = Number(v);
       return Number.isFinite(n) ? n : undefined;
@@ -153,45 +156,41 @@
       span.textContent = course.name;
       label.append(checkbox, span);
 
-      const estMark = state.score !== undefined ? state.score : course.mark;
-
       const input = document.createElement('input');
       input.type = 'number';
       input.className = 'cta-score';
       input.min = '0';
       input.max = '100';
       input.step = 'any';
-      input.placeholder = estMark !== undefined ? String(estMark) : '';
-      input.value = entry.score !== undefined ? entry.score : '';
+      input.placeholder = course.mark !== undefined ? String(Math.round(course.mark * 10) / 10) : '';
+      input.value = entry.raw !== undefined ? entry.raw : '';
       input.disabled = !checkbox.checked;
-      input.setAttribute('aria-label', `${course.name} semester ${activeSemester + 1} estimated scaled score`);
+      input.setAttribute('aria-label', `${course.name} semester ${activeSemester + 1} school mark (%)`);
 
       const source = document.createElement('small');
-      source.textContent = course.mark === undefined ? 'No school mark' : `School ${Math.round(course.mark * 10) / 10}%`;
+      const showScaled = () => {
+        const score = getCourseState(course, activeSemester, courses).score;
+        source.textContent = score !== undefined ? `Scaled ${score}` : course.mark === undefined ? 'No school mark' : 'Scaled —';
+      };
+      showScaled();
 
-      const updateCourse = () => {
-        savedPreferences[`${activeSemester}:${course.id}`] = {
-          include: checkbox.checked,
-          score: scoreValue(input.value)
-        };
-        input.setAttribute('aria-invalid', String(checkbox.checked && scoreValue(input.value) === undefined));
+      const updateCourse = fromInput => {
+        const key = `${activeSemester}:${course.id}`;
+        const next = { ...savedPreferences[key], include: checkbox.checked, raw: scoreValue(input.value) };
+        if (fromInput) delete next.score; // a typed school mark replaces an old scaled score
+        savedPreferences[key] = next;
+        input.setAttribute('aria-invalid', String(checkbox.checked && input.value !== '' && next.raw === undefined));
         persistPreferences();
+        showScaled();
         if (typeof onChange === 'function') onChange();
       };
 
       checkbox.addEventListener('change', () => {
-        updateCourse();
+        updateCourse(false);
         input.disabled = !checkbox.checked;
       });
 
-      input.addEventListener('input', updateCourse);
-      input.addEventListener('change', () => {
-        const score = wholeScore(input.value);
-        if (score !== undefined) {
-          input.value = score;
-          updateCourse();
-        }
-      });
+      input.addEventListener('input', () => updateCourse(true));
 
       wrapper.append(label, input, source);
       container.append(wrapper);

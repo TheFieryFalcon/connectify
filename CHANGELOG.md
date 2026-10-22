@@ -23,6 +23,8 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Every sidebar tool (Predictor, Weakness Analyzer, Year in Progress, ATAR Estimate, Target ATAR, Target Grade and Calibration) now reads your saved results instead of the outline tiles.
 - The sidebar is on every Connect page. Away from Assessment Outlines only Settings works; the other tools are greyed out under a notice with a link to the outlines.
 - A Connect filter on Assessment Outlines no longer greys out the sidebar tools, since they read your saved results.
+- ATAR Estimate: each subject's box now takes your school mark (Connect's mark until you change it), and the scaled score it gives is shown underneath.
+- ATAR Estimate shows a finished semester as Closed and greyed out, like Target ATAR and Target Grade.
 - New school year: last year's saved results are archived before they're cleared, because Connect no longer shows them.
 - The new-year switch now starts as soon as every class is new.
 - Uploaded wallpapers are cropped and scaled to your screen before they're saved, from both Settings and the Theme Customizer, so they take far less storage.
@@ -47,6 +49,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Saved predictions and results are rebuilt once after updating.
 
 ### Fixes
+- The unselected semester button no longer looks cut off on its left edge.
 - Saving assessment categories in Settings stored all of them as one category called "undefined", so every Type dropdown offered only "undefined". Categories now save under their own names, and a set damaged by this is repaired the next time a page loads (the five standard categories come back; a custom category saved over can't be recovered, so add it again).
 - Connect sometimes shows a class's "Semester 2 Cumulative Percent" heading with nothing under it (seen in Economics, with or without Connectify), so there was no subject average. Connectify now restores the row in Connect's own style with your average worked out from your marked tasks and their weightings, noted as worked out by Connectify, plus the usual statistics panel and class prediction. It shows even while the class is collapsed, and goes away as soon as Connect shows its own row.
 - Year in Progress lost its cohort mean line with "Show this semester's classes only" on, when a class was read before its charts had loaded. Means now come from the saved cohort statistics.

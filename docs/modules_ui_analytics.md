@@ -27,7 +27,7 @@ This document covers the user interface and analytics modules, including target 
 - **Key Functions**:
   - `atar-ui-markup.js`: panel markup (tool tabs mounted as sidebar launchers, semester buttons, methodology), semester labels and closing rules.
   - `selectTab(mode)`: Switches between `'estimate'`, `'target'`, and `'grade'`.
-  - `updateResults()`: Updates Semester 1 & 2 buttons with clean styling (ATAR text eliminated in grade mode).
+  - `updateResults()`: Updates Semester 1 & 2 buttons with clean styling (ATAR text eliminated in grade mode). A semester whose A–E grades are final is Closed (`.cta-semester-closed`, disabled) in every mode, Estimate included; unselected and closed buttons keep a whole 1px border (text aligned with the indicator's 4px bar by padding).
   - `openCalculator(mode)` / `closeCalculator()`: Handles modal visibility, accessibility focus, and Escape key dismissal.
 - **Export**: `window.ConnectifyAtar`.
 

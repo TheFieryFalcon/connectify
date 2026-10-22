@@ -2710,15 +2710,15 @@ runTest('Test 101: Expand all progress pill adapts correctly across light and da
     'theme surface adapter must exclude #cx-expand-progress from adaptSurfaces');
 });
 
-runTest('Test 103: Semester buttons maintain uniform left alignment and reserved 4px border geometry across states', () => {
+runTest('Test 103: Semester buttons keep their text aligned across states, and unselected buttons keep a whole border', () => {
   const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
   const atarCss = fs.readFileSync(path.resolve(BASE_DIR, 'atar.css'), 'utf8');
 
-  // Verify sidebar.css enforces left alignment, 10px 14px padding, and 4px transparent border on all semester buttons
-  assert.ok(cssHas(sidebarCss, '#connectify-sidebar .cta-semesters:not(.cta-tabs) .cta-semester{text-align:left!important;padding:10px 14px!important;border-left:4px solid transparent!important;border-radius:6px!important}'), 'sidebar.css must enforce stable left alignment and 4px transparent border geometry');
-
-  // Verify atar.css enforces left alignment, 10px 14px padding, and 4px transparent border
-  assert.ok(cssHas(atarCss, '.cta-semesters:not(.cta-tabs) .cta-semester{padding:10px 14px!important;') && cssHas(atarCss, 'border-left:4px solid transparent!important;text-align:left!important;'), 'atar.css must enforce stable left alignment and 4px transparent border geometry');
+  // Unselected and closed buttons keep a 1px border all round (a transparent 4px left edge looked cut off at the
+  // rounded corners); 17px + 1px lines their text up with the indicator's 14px + 4px bar.
+  assert.ok(cssHas(sidebarCss, '#connectify-sidebar .cta-semesters:not(.cta-tabs) .cta-semester{text-align:left!important;padding:10px 14px 10px 17px!important;border-radius:6px!important}'), 'sidebar.css semester buttons keep a whole border with text aligned to the indicator');
+  assert.ok(cssHas(atarCss, '.cta-semesters:not(.cta-tabs) .cta-semester{padding:10px 14px 10px 17px!important;font-size:12px;border-width:1px;text-align:left!important;'), 'atar.css semester buttons keep a whole border with text aligned to the indicator');
+  assert.ok(!/border-left:\s*4px solid transparent/.test(sidebarCss + atarCss), 'no semester button has a transparent left edge');
 
   // Verify active state retains matching padding and left alignment
   assert.ok(cssHas(sidebarCss, '.cta-semester.cta-semester-indicator{background:#edf4fa!important;border:1px solid #c8d9e8!important;border-left:4px solid #24618c!important;color:#1a3d5f!important;font-weight:600!important;cursor:default!important;border-radius:6px!important;text-align:left!important;padding:10px 14px!important}'), 'sidebar.css active semester must maintain 10px 14px padding and left text alignment');
@@ -3077,7 +3077,7 @@ runTest('Test 110: Silent difference check, out-of-date cache prompt with one-ti
   // 7. Target Grade panel Semester 1 (Closed) parity
   const atarUiCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
   assert.ok(atarUiCode.includes('isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;'), 'atar-ui.js must append (Closed) to Semester 1 in Target Grade mode');
-  assert.ok(atarUiCode.includes('isClosed = (isPlanningMode || isGradingMode) && isTargetClosed(i);'), 'atar-ui.js must close Semester 1 in Target Grade mode when completed');
+  assert.ok(atarUiCode.includes('const isClosed = isTargetClosed(i);'), 'atar-ui.js must close a finished semester in every mode, Target Grade included');
 });
 
 runTest('Test 158: Grade notifications ignore small boxplot shifts from other classes uploading results', () => {
@@ -10506,6 +10506,53 @@ runTest('Test 232: Scaled scores follow TISC Average Marks Scaling: course scale
 
   const source = fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8');
   assert.ok(!/DEFAULT_BOXPLOT|getBasePercentile/.test(source), 'no generic raw-mark distribution decides the percentile');
+});
+
+runTest('Test 234: ATAR Estimate takes the school mark and shows the scaled score; a finished semester is Closed in Estimate too', () => {
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'scaling-data.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8'));
+  delete window.ConnectifyAtarCalc;
+  delete global.ConnectifyAtarCalc; // an earlier test may leave window inheriting from global
+  const account = window.ConnectifyUtils.accountKey();
+  const storageKey = `connectea:atar:2025:${account}:${new Date().getFullYear()}`;
+  localStorage.setItem(storageKey, JSON.stringify({ '0:physics': { include: true, score: 91 } }));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-calculator.js'), 'utf8'));
+  const calc = window.ConnectifyAtarCalc;
+  const math = window.ConnectifyMath;
+  const courses = [[{ id: 'chemistry', name: 'Chemistry', mark: 83.5 }, { id: 'physics', name: 'Physics', mark: 87.7 }], []];
+
+  const box = document.createElement('div');
+  calc.renderCourseList(box, courses, 0, () => {});
+  const [chem, phys] = box.querySelectorAll('.cta-course');
+  const chemInput = chem.querySelector('input.cta-score');
+  assert.strictEqual(chemInput.placeholder, '83.5', 'the input shows the school mark');
+  assert.strictEqual(chemInput.getAttribute('aria-label'), 'Chemistry semester 1 school mark (%)');
+  assert.strictEqual(chem.querySelector('small').textContent, `Scaled ${math.wholeScore(math.calculateShiftedScaledScore('Chemistry', 83.5))}`, 'the scaled score is displayed under it');
+  assert.strictEqual(phys.querySelector('small').textContent, 'Scaled 91', 'a scaled score saved before the flip still applies');
+
+  chemInput.value = '90';
+  chemInput.dispatchEvent(new Event('input'));
+  const scaled90 = math.wholeScore(math.calculateShiftedScaledScore('Chemistry', 90));
+  assert.strictEqual(chem.querySelector('small').textContent, `Scaled ${scaled90}`, 'typing a school mark rescales it at once');
+  assert.deepStrictEqual(calc.getPreferences()['0:chemistry'], { include: true, raw: 90 }, 'the typed school mark is saved');
+  assert.strictEqual(calc.getCourseState(courses[0][0], 0, courses).score, scaled90, 'the ATAR uses the scaled typed mark');
+
+  const physInput = phys.querySelector('input.cta-score');
+  physInput.value = '80';
+  physInput.dispatchEvent(new Event('input'));
+  assert.ok(!('score' in calc.getPreferences()['0:physics']), 'a typed school mark replaces the old scaled score');
+  localStorage.removeItem(storageKey);
+
+  const ui = fs.readFileSync(path.resolve(SRC_DIR, 'atar/atar-ui.js'), 'utf8');
+  assert.ok(!ui.includes('(isPlanningMode || isGradingMode) && isTargetClosed'), 'closing a semester never depends on the mode');
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-ui-helpers.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui-markup.js'), 'utf8'));
+  const markup = window.ConnectifyAtarMarkup;
+  assert.strictEqual(markup.semesterLabel(0, { finalAtar: '99.80' }, 'estimate', true), 'Semester 1 ATAR (Closed)\n99.80', 'Estimate shows a closed semester as Closed');
+  const btn = document.createElement('button');
+  markup.paintSemesterButton(btn, 0, { finalAtar: '99.80' }, 'estimate', true, false);
+  assert.ok(btn.disabled && btn.classList.contains('cta-semester-closed'), 'and disables it');
+  assert.ok(markup.isTargetClosed([[{ finalLetter: 'A' }], [{}]], 0), 'Semester 1 closes once its grades are final');
 });
 
 runTest('Test 233: After an install or update, open Connect tabs are reloaded (GitHub and Firefox builds; stripped from the Chrome Web Store zip)', async () => {

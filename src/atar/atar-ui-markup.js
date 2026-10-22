@@ -12,7 +12,7 @@
   const { createEl } = window.ConnectifyTargetUiHelpers;
 
   const METHOD_NOTES = [
-    'Scores round to whole numbers before the best four and bonuses are calculated; exact .5 values round down (69.9 → 70; 69.5 → 69). Best four included scaled-score assumptions, plus 10% of Methods, 10% of Specialist and 10% of the best language score. General and other non-ATAR courses are excluded. Estimates interpolate the published 2025 TISC table. Below the table range, <30 is shown.',
+    'Scores round to whole numbers before the best four and bonuses are calculated; exact .5 values round down (69.9 → 70; 69.5 → 69). Each school mark (entered or from Connect) is scaled with TISC Average Marks Scaling; best four included scaled scores, plus 10% of Methods, 10% of Specialist and 10% of the best language score. General and other non-ATAR courses are excluded. Estimates interpolate the published 2025 TISC table. Below the table range, <30 is shown.',
     'Semester 2 uses the cumulative percentage shown by Connect. This does not check WACE eligibility, English competency or unacceptable course combinations. Exclude an incompatible course before calculating. No marks are sent to another website.'
   ];
 
@@ -75,8 +75,8 @@
     (gradeCourses?.[1] || []).some(r => r?.finalLetter);
 
   /**
-   * Targets close for a semester once its A–E grades are final (Semester 1 task marks on a Semester 2
-   * panel never close it); Semester 2 stays closed until it has classes.
+   * A semester closes in every mode (Estimate, Target ATAR, Target Grade) once its A–E grades are final
+   * (Semester 1 task marks on a Semester 2 panel never close it); Semester 2 stays closed until it has classes.
    */
   function isTargetClosed(gradeCourses, semesterIdx) {
     if ((gradeCourses?.[semesterIdx] || []).some(r => r?.finalLetter)) return true;
@@ -87,7 +87,8 @@
   function semesterLabel(i, res, mode, isClosed) {
     if (mode === 'grade') return isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;
     if (mode === 'target') return isClosed ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`;
-    return `Semester ${i + 1} ATAR\n${res.error ? '—' : (res.finalAtar || res.atar || '—')}`;
+    const atar = res.error ? '—' : (res.finalAtar || res.atar || '—');
+    return isClosed ? `Semester ${i + 1} ATAR (Closed)\n${atar}` : `Semester ${i + 1} ATAR\n${atar}`;
   }
 
   /** Label, state and style of one semester button. */

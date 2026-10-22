@@ -99,10 +99,9 @@
 }
 
 #connectea-atar .cta-semesters:not(.cta-tabs) .cta-semester, .cta-semesters:not(.cta-tabs) .cta-semester {
-  padding: 10px 14px !important;
+  padding: 10px 14px 10px 17px !important;
   font-size: 12px;
   border-width: 1px;
-  border-left: 4px solid transparent !important;
   text-align: left !important;
   border-radius: 6px !important;
 }
@@ -132,13 +131,12 @@
 .cta-semester.cta-semester-closed {
   background: #f4f6f9 !important;
   border: 1px dashed #cad5e2 !important;
-  border-left: 4px solid transparent !important;
   color: #7c8e9f !important;
   font-weight: 500 !important;
   cursor: not-allowed !important;
   border-radius: 6px !important;
   text-align: left !important;
-  padding: 10px 14px !important;
+  padding: 10px 14px 10px 17px !important;
   opacity: .85 !important;
 }
 
@@ -153,7 +151,6 @@
 .connectea-dark .cta-semester.cta-semester-closed {
   background: var(--cx-surface-bg, #1e252e) !important;
   border: 1px dashed var(--cx-nav-border, #3f4e5e) !important;
-  border-left: 4px solid transparent !important;
   color: var(--cx-text-disabled, #6e8093) !important;
 }
 

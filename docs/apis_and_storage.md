@@ -76,7 +76,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectea:task_type_overrides` | `localStorage` | `task-types.js` | Map of assessment manual category overrides |
 | `connectea:class_categories:<subjectKey>` | `localStorage` | `task-types.js` | Custom categories shared across Sem 1 & 2 for a class |
 | `cx-categories` / `connectea:categories` | `localStorage` & `browser.storage.local` | `category-settings.js` | Custom category definitions, keywords, colors |
-| `connectea:atar:2025:<account>:<year>` | `localStorage` | `atar-calculator.js` | ATAR score adjustments, top four selections, targets |
+| `connectea:atar:2025:<account>:<year>` | `localStorage` | `atar-calculator.js` | `<semester>:<course>`: `{ include, raw }` (typed school mark; older entries hold a scaled `score`), top four selections, targets |
 | `connectea:preferences` | `localStorage` | `scaling-calibration.js` | Calibration table (`sem1_calibration:<courseId>`) |
 | `connectify:weakness_disabled_subjects` / `connectify:progress_mode` | `localStorage` | `weakness-radar.js` / `progress-modes.js` | Subjects excluded from Weakness Analyzer; Year in Progress data point mode (`tasks`, `weighted`, `rolling`) |
 | `connectea:time_override:<subject>:<task|taskId>` | `localStorage` | `progress-chart.js` | Manual school week overrides: weeks 1-40 in 10-week terms (17 = Term 2 Week 7) or `t2w7`, read via `ConnectifyUtils.customWeekOrder` (disambiguated by task ID for duplicate names) |

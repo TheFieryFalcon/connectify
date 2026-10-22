@@ -61,7 +61,7 @@
     const isTargetClosed = semesterIdx => markupMod.isTargetClosed(gradeCourses, semesterIdx);
 
     const semesterButtons = markupMod.semesterButtons(semesterCardsContainer, semesterIdx => {
-      if ((isPlanningMode || isGradingMode) && isTargetClosed(semesterIdx)) return;
+      if (isTargetClosed(semesterIdx)) return;
       activeSemester = semesterIdx;
       renderCourseRows();
     });
@@ -159,7 +159,7 @@
       if (isGradingMode && (hasSemesterTwoStarted() || isTargetClosed(0))) {
         activeSemester = 1;
       }
-      if ((isPlanningMode || isGradingMode) && isTargetClosed(activeSemester) && !isTargetClosed(1 - activeSemester)) {
+      if (isTargetClosed(activeSemester) && !isTargetClosed(1 - activeSemester)) {
         activeSemester = 1 - activeSemester;
       }
 
@@ -173,7 +173,7 @@
 
       for (let i = 0; i < 2; i++) {
         const res = results[i] || {};
-        const isClosed = (isPlanningMode || isGradingMode) && isTargetClosed(i);
+        const isClosed = isTargetClosed(i);
 
         markupMod.paintSemesterButton(semesterButtons[i], i, res, currentMode(), isClosed, i === activeSemester);
         if (i === activeSemester) detailSummary.textContent = res.detailText || res.error || 'Calculating ATAR...';
