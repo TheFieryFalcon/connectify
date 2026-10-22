@@ -9973,7 +9973,11 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   const labels = parts.filter(e => e.classList.contains('connectea-xp-label')).map(e => e.textContent);
   assert.deepStrictEqual(labels, ['Score', 'Rank', 'Average', 'Minimum', 'Lower Quartile', 'Median', 'Upper Quartile', 'Maximum']);
   assert.ok(parts.every(e => e.tagName !== 'SPAN' || !e.classList.contains('v-label')) && !parts.some(e => e.classList.contains('v-label')), 'no .v-label inside the card (task labels stay Connect\'s)');
-  assert.ok(parts.filter(e => e.classList.contains('connectea-xp-cell')).every(e => e.className === 'connectea-xp-cell'), 'no quantile cell is highlighted');
+  const reached = () => ui.xp.quantiles.map(e => e.parentElement.classList.contains('connectea-xp-cell--reached'));
+  assert.deepStrictEqual(reached(), [false, false, true, false, false], '70% has reached the Median (68.85%): only that cell is tinted');
+  const css = fs.readFileSync(path.join(SRC_DIR, 'cohort/cohort-expanded.css'), 'utf8');
+  const tint = css.match(/\.connectea-xp-cell--reached::before \{[^}]*background: color-mix\(in srgb, var\(--cx-accent, #[0-9a-f]{6}\) (\d+)%, transparent\)/);
+  assert.ok(tint && Number(tint[1]) <= 12, 'the tint is the theme accent at a low opacity, behind the cell');
   assert.strictEqual(ui.xp.score.textContent, '70%');
   assert.deepStrictEqual(ui.xp.quantiles.map(e => e.textContent), ['32.5%', '58%', '68.85%', '79.9%', '96.7%']);
   assert.ok(/%$/.test(ui.xp.average.textContent), 'the cohort mean is shown');
@@ -9989,6 +9993,7 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   row.querySelector('.cvr-c-task__mark').textContent = '30 Out of 30';
   view.render(row, false, 'lit-key', 219, null, []);
   assert.strictEqual(ui.xp.score.getAttribute('data-cx-score-step'), 'breakout');
+  assert.deepStrictEqual(reached(), [false, false, false, false, true], '100% has reached the Maximum');
   assert.ok(!/purple|glow|1\.1|breakout/i.test(xp.SCORE_NOTE), 'the tooltip note never discloses the breakout');
 
   // No boxplot: the skeleton stays with dashes and the compact view's wording
@@ -9998,6 +10003,7 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   assert.ok([b.rankValue, b.average, ...b.quantiles].every(e => e.textContent === '—'), 'unavailable values are dashes');
   assert.strictEqual(b.summary.textContent, 'Cohort statistics unavailable');
   assert.strictEqual(b.score.textContent, '80%', 'the Score is still shown');
+  assert.ok(b.quantiles.every(e => !e.parentElement.classList.contains('connectea-xp-cell--reached')), 'no tint without statistics');
   loadCohortViewIn(null);
 });
 
@@ -10013,7 +10019,12 @@ runTest('Test 223: Expanded overall cards hold the cohort input in the footer an
   assert.strictEqual(ui.xp.rankValue.parentElement.children.length, 1, 'the Rank cell holds only its value');
   assert.deepStrictEqual(Array.from(ui.box.children, e => e.className), ['connectea-xp-head', 'connectea-xp-prediction', 'connectea-xp-foot'], 'values, class prediction, footer');
   assert.ok(!ui.upcoming, 'no separate class prediction line');
-  assert.ok(!ui.xp.prediction.hidden && /Predicted class result/.test(ui.xp.prediction.innerHTML), 'the class prediction is a section of the card');
+  assert.ok(!ui.xp.prediction.hidden, 'the class prediction is a section of the card');
+  assert.ok(!/Predicted class result|connectea-xp-title/.test(ui.xp.prediction.innerHTML), 'no "Predicted class result" title while it needs data');
+  window.ConnectifyCohortExpanded.fillPrediction(ui.xp.prediction, { low: 79.7, mid: 83.6, high: 85.8 }, '');
+  const predLabels = [...ui.xp.prediction.innerHTML.matchAll(/<dt class="connectea-xp-label">([^<]*)<\/dt>/g)].map(m => m[1]);
+  assert.deepStrictEqual(predLabels, ['Predicted Low', 'Predicted Mid', 'Predicted High'], 'its cells name it, with no title of their own');
+  assert.ok(!/Predicted class result|connectea-xp-title/.test(ui.xp.prediction.innerHTML), 'no "Predicted class result" title');
   assert.ok(!ui.outcomeBar, 'overall rows have no meter');
   assert.ok(ui.xp.score.getAttribute('data-cx-score-step') !== 'breakout', 'overall rows never glow');
 

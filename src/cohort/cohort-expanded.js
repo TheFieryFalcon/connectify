@@ -4,8 +4,9 @@
  * With the Settings "Statistics Panels" option expanded (cohort-panel-view.js), a statistics panel is a wide,
  * short card: one row of Score / Rank / Average beside the five boxplot values (outcome meter at its end on
  * task rows), then a footer with SD, z-score and standing (Type dropdown, or the cohort size input on overall
- * rows). Overall rows put the class prediction's Low / Mid / High under Score / Rank / Average; unmarked rows
- * are one line of Low / Mid / High beside what the prediction is based on. Skeletons are built once per
+ * rows). The quantile the result has reached is faintly tinted. Overall rows put the class prediction's Low /
+ * Mid / High under Score / Rank / Average, the quantiles beside both rows; unmarked rows are one line of
+ * Low / Mid / High beside what the prediction is based on. Skeletons are built once per
  * panel; fills only touch text and the Score colour step.
  * Exposes window.ConnectifyCohortExpanded.
  */
@@ -94,6 +95,13 @@
       else if (el.getAttribute('data-cx-score-step') !== step) el.setAttribute('data-cx-score-step', step);
     }
 
+    /** Tints the highest quantile the mark has reached (none below the minimum or without statistics). */
+    function markReached(cells, mark, stats) {
+      let reached = -1;
+      if (Number.isFinite(mark) && stats) stats.forEach((v, i) => { if (Number.isFinite(v) && mark >= v) reached = i; });
+      cells.forEach((el, i) => el.parentElement.classList.toggle('connectea-xp-cell--reached', i === reached));
+    }
+
     const percent = v => (Number.isFinite(v) ? `${math().formatPercentage(v)}%` : DASH);
 
     function rankText(data, isOverall, userSize, estimatedSize, cohortSize) {
@@ -112,9 +120,11 @@
       const parts = Number.isFinite(mark) ? [] : ['Not marked'];
       if (!data) {
         for (const el of [xp.rankValue, xp.average, ...xp.quantiles]) setText(el, DASH);
+        markReached(xp.quantiles, NaN, null);
         parts.push('Cohort statistics unavailable');
       } else {
         xp.quantiles.forEach((el, i) => setText(el, percent(stats[i])));
+        markReached(xp.quantiles, mark, stats);
         setText(xp.average, percent(data.mean));
         setText(xp.rankValue, rankText(data, isOverall, userSize, estimatedSize, cohortSize));
         parts.push(`SD ${math().formatPercentage(data.sd)}`, `Z-Score ${Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A'}`);
@@ -126,10 +136,12 @@
     }
 
     /** Low / Mid / High cells in the Predictor's colours (cohort-forecast.css, cohort-upcoming.css). */
-    function heroCells(p, digits) {
-      const cell = (level, label) =>
-        `<div class="connectea-xp-cell"><dt class="connectea-xp-label">${label}</dt>` +
-        `<dd class="connectea-xp-value connectea-forecast-value connectea-forecast-value--${level}">${p[level].toFixed(digits)}%</dd></div>`;
+    function heroCells(p, digits, prefix = '') {
+      const cell = (level, name) => {
+        const label = prefix ? `${prefix} ${name}` : name;
+        return `<div class="connectea-xp-cell"><dt class="connectea-xp-label">${label}</dt>` +
+          `<dd class="connectea-xp-value connectea-forecast-value connectea-forecast-value--${level}">${p[level].toFixed(digits)}%</dd></div>`;
+      };
       return `<dl class="connectea-xp-grid connectea-xp-grid--hero">${cell('low', 'Low')}${cell('mid', 'Mid')}${cell('high', 'High')}</dl>`;
     }
 
@@ -172,11 +184,10 @@
       setText(card.summary, predicted ? basisText(prediction) : '');
     }
 
-    /** The overall card's class prediction row: Low / Mid / High under Score / Rank / Average, titled beside
-     *  them (hidden by the caller once the class has a letter). */
+    /** The overall card's class prediction: Predicted Low / Mid / High under Score / Rank / Average (hidden
+     *  by the caller once the class has a letter). */
     function fillPrediction(section, p, needs) {
-      const title = '<div class="connectea-xp-title">Predicted class result</div>';
-      setHTML(section, p ? `${heroCells(p, 1)}${title}` : `<div class="connectea-xp-needs">${needs}</div>${title}`);
+      setHTML(section, p ? heroCells(p, 1, 'Predicted') : `<div class="connectea-xp-needs">${needs}</div>`);
       section.hidden = false;
     }
 
