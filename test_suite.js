@@ -1076,17 +1076,20 @@ runTest('Low estimate variance scaling penalizes volatile performers appropriate
   const historicalConsistent = {
     subjects: { 'Physics': 95 },
     subjectSpreads: { 'Physics': 1.0 },
+    subjectCounts: { 'Physics': 3 },
     types: { 'Test': 95 },
     typeCounts: { 'Test': 3 },
     overallAverage: 95,
     spread: 1.0
   };
   const predConsistent = predMath.predictTask('Physics', { name: 'Test 4' }, historicalConsistent);
-  assert.ok(predConsistent.low >= 92, `Consistent student Low (${predConsistent.low}%) should be tight (>= 92%)`);
+  // Three results leave some uncertainty, so even a consistent student's Low sits a few points below Mid
+  assert.ok(predConsistent.low >= 90, `Consistent student Low (${predConsistent.low}%) should be tight (>= 90%)`);
 
   const historicalVolatile = {
     subjects: { 'Physics': 85 },
     subjectSpreads: { 'Physics': 10.0 },
+    subjectCounts: { 'Physics': 3 },
     types: { 'Test': 85 },
     typeCounts: { 'Test': 3 },
     overallAverage: 85,
@@ -2376,8 +2379,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v14_20261022_pred'"), 'predictor-math.js must use v14_20261022_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v14_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v14_20261022_pred');
+  assert.ok(predMathCode.includes("'v15_20261022_pred'"), 'predictor-math.js must use v15_20261022_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v15_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v15_20261022_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2470,9 +2473,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v14_20261022_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v15_20261022_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v14_20261022_pred'), 'predictor-math.js must bump version to v14_20261022_pred');
+  assert.ok(predMathJs.includes('v15_20261022_pred'), 'predictor-math.js must bump version to v15_20261022_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -2484,7 +2487,7 @@ runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICT
   };
   const pred = predMath.predictTask('Mathematics Methods', { name: 'Test 4' }, historicalHigh);
   assert.ok(pred.mid >= 90, `Mid prediction (${pred.mid}%) for a 93.5% student must preserve momentum and stay >= 90%`);
-  assert.ok(pred.low <= 88, `Low prediction (${pred.low}%) must reflect downside spread`);
+  assert.ok(pred.mid - pred.low >= 3 && pred.low >= 85, `Low prediction (${pred.low}%) must reflect a downside in proportion to a 4-point spread`);
 });
 
 runTest('Test 94: Chemistry integer weeks parse as valid dates and format via Progress Graph formatTimestamp', () => {
@@ -3964,48 +3967,57 @@ runTest('Test 122: Back to top button styling parity, expandAll multi-card dedup
   assert.ok(!cssHas(sidebarCss, '.cvr-c-task__details{flex:1 1 auto!important'), 'sidebar.css must not force flex: 1 1 auto on .cvr-c-task__details');
 });
 
-runTest('Test 123: Calibrated variance scaling prevents excessive spread on volatile subjects (~73% Low and ~81% High)', () => {
+runTest('Test 123: Predictions come from the subject\'s own cached results, with a range that reflects their spread', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('(sigma * sigma) / 20 + 0.45 * sigma'), 'predictor-math.js must use dialed-back quadratic variance scaling / 20 + 0.45 * sigma');
-  assert.ok(predMathJs.includes('0.88 * sigma'), 'predictor-math.js must use 0.88 * sigma for high delta scaling');
+  assert.ok(predMathJs.includes('subjectResults'), 'the history keeps each subject\'s own results in date order');
+  assert.ok(predMathJs.includes('RANGE_Z * predictive'), 'Low and High sit the same predictive distance either side of Mid');
   assert.ok(predMathJs.includes('minSubjectSpread = Math.max(2.0, round(7.5 * remainingRatio, 1))'), 'predictor-math.js must use calibrated minSubjectSpread');
 
-  // Functional test with Chemistry student scenario:
-  // 61% completed at 78% average, sigma = 11.5
-  // Upcoming tasks: Practical Investigation 2 (9%, mid 77), 11 ATAR EXAM (30%, mid 79)
-  window.ConnectifyTaskTypes = {
-    getEffectiveType: (subj, task) => task.name.includes('Investigation') ? 'Application' : 'Exam'
-  };
+  // Literature Take-Home results of 80, 47 and 54 (two in Semester 2); type averages span every subject
+  window.ConnectifyTaskTypes = { getEffectiveType: (subj, task) => (/exam/i.test(task.name) ? 'Exam' : 'Take-Home') };
+  mockLocalStorage.clear();
+  predMath.saveBaselines({ types: {}, subjects: {} });
+  const oral = { id: 'lit-oral', name: 'Oral', caption: 'Term 4, Week 3', weight: 15, score: null, pending: true, sequence: 3 };
+  const subjects = [
+    { name: '12 Literature ATAR', tasks: [
+      { id: 'lit-1', name: 'Essay 1', caption: 'Term 1, Week 5', order: 5, semester: 1, sequence: 0, weight: 15, score: 80, pending: false },
+      { id: 'lit-2', name: 'Essay 2', caption: 'Term 3, Week 2', order: 22, semester: 2, sequence: 1, weight: 15, score: 47, pending: false },
+      { id: 'lit-3', name: 'Essay 3', caption: 'Term 3, Week 7', order: 27, semester: 2, sequence: 2, weight: 15, score: 54, pending: false },
+      oral
+    ] },
+    { name: '12 Chemistry ATAR', tasks: [
+      { id: 'ch-1', name: 'Report 1', caption: 'Term 1, Week 6', order: 6, semester: 1, sequence: 0, weight: 10, score: 90, pending: false },
+      { id: 'ch-2', name: 'Exam 1', caption: 'Term 2, Week 8', order: 18, semester: 1, sequence: 1, weight: 30, score: 60, pending: false }
+    ] }
+  ];
 
-  const historical = {
-    subjects: { 'Chemistry ATAR': 78 },
-    subjectSpreads: { 'Chemistry ATAR': 11.5 },
-    types: { 'Application': 76, 'Exam': 80 },
-    typeCounts: { 'Application': 2, 'Exam': 1 },
-    overallAverage: 78,
-    spread: 11.5
-  };
+  // An unmarked row read from the page has no semester: a Term 4 task still comes after Semester 2's results
+  const prior = predMath.getHistoricalDataPriorTo(subjects, '12 Literature ATAR', { name: 'Oral', caption: 'Term 4, Week 3' });
+  assert.strictEqual(prior.subjectCounts['12 Literature ATAR'], 3, 'every earlier Literature result counts, Semester 2 included');
+  assert.deepStrictEqual(prior.subjectResults['12 Literature ATAR'].map(r => r.score), [80, 47, 54], 'the subject\'s results are kept in date order');
 
-  const pred1 = predMath.predictTask('Chemistry ATAR', { name: 'Practical Investigation 2', weight: 9 }, historical);
-  const pred2 = predMath.predictTask('Chemistry ATAR', { name: '11 ATAR EXAM', weight: 30 }, historical);
+  const pred = predMath.getOrComputeTaskPrediction('12 Literature ATAR', oral, subjects);
+  assert.ok(pred && !pred.unpredicted && Number.isFinite(pred.mid), 'the Oral is predicted');
+  console.log(`    Literature Oral: ${pred.low} / ${pred.mid} / ${pred.high}`);
+  assert.strictEqual(pred.basis.subjectCount, 3, 'the prediction rests on the subject\'s three results');
+  assert.strictEqual(pred.basis.typeCount, 4, 'the Take-Home average spans every subject');
+  assert.ok(pred.mid >= 55 && pred.mid <= 64, `Mid (${pred.mid}%) sits near the subject's results (mean 60%, latest 54%)`);
+  assert.ok(pred.low >= 42 && pred.low <= 50, `Low (${pred.low}%) stays near the lowest result (47%), never far below it`);
+  assert.ok(pred.high >= 68, `High (${pred.high}%) reflects the 80% already reached`);
+  assert.ok(Math.abs((pred.mid - pred.low) - (pred.high - pred.mid)) <= 1, `below 80% the range is symmetric (${pred.low} / ${pred.mid} / ${pred.high})`);
 
-  assert.strictEqual(pred1.low, 65, 'Task 1 low must be 65%');
-  assert.strictEqual(pred1.mid, 77, 'Task 1 mid must be 77%');
-  assert.strictEqual(pred1.high, 85, 'Task 1 high must be 85%');
+  // The type shift comes from the type across all subjects: Literature has no exam, Chemistry's is below its level
+  const exam = predMath.predictTask('12 Literature ATAR', { name: 'Exam', caption: 'Term 4, Week 5' }, predMath.getHistoricalData(subjects), { types: {}, subjects: {} });
+  assert.deepStrictEqual([exam.basis.typeSource, exam.basis.typeCount], ['history', 1], 'an Exam is shifted by the Exam results in other subjects');
+  assert.ok(exam.mid < pred.mid, `a weaker type across subjects lowers Mid (${exam.mid} < ${pred.mid})`);
 
-  assert.strictEqual(pred2.low, 66, 'Task 2 low must be 66%');
-  assert.strictEqual(pred2.mid, 79, 'Task 2 mid must be 79%');
-  assert.strictEqual(pred2.high, 86, 'Task 2 high must be 86%');
-
-  // Test subject grade aggregation
-  const completedEarned = 47.58; // 61% @ 78%
-  const upcomingLowEarned = (pred1.low / 100) * 9 + (pred2.low / 100) * 30;
-  const upcomingHighEarned = (pred1.high / 100) * 9 + (pred2.high / 100) * 30;
-  const projLow = Math.round(((completedEarned + upcomingLowEarned) / 100) * 1000) / 10;
-  const projHigh = Math.round(((completedEarned + upcomingHighEarned) / 100) * 1000) / 10;
-
-  assert.ok(projLow >= 72.5 && projLow <= 73.5, `Projected subject Low (${projLow}%) must be ~73%`);
-  assert.ok(projHigh >= 80.5 && projHigh <= 81.5, `Projected subject High (${projHigh}%) must be ~81%`);
+  // A consistent subject gets a tighter range than a volatile one with the same average
+  const results = scores => scores.map((score, i) => ({ score, weight: 10, type: 'Take-Home', stamp: i }));
+  const hist = scores => ({ subjects: { Art: 70 }, subjectResults: { Art: results(scores) }, types: { 'Take-Home': 70 }, typeCounts: { 'Take-Home': scores.length }, overallAverage: 70, spread: 8 });
+  const steady = predMath.predictTask('Art', { name: 'Folio' }, hist([69, 71, 70, 70, 70]), { types: {}, subjects: {} });
+  const swingy = predMath.predictTask('Art', { name: 'Folio' }, hist([55, 85, 60, 80, 70]), { types: {}, subjects: {} });
+  assert.ok(swingy.high - swingy.low > steady.high - steady.low + 6, `volatile results widen the range (${swingy.low}-${swingy.high} vs ${steady.low}-${steady.high})`);
+  mockLocalStorage.clear();
 });
 
 runTest('Test 124: Tasks of the same name have independent date overrides and are not double counted', () => {
@@ -8868,7 +8880,7 @@ runTest('Test 196: One Type change recomputes predictions once, after the dropdo
     window.ConnectifyPredictorEngine = { predictTask: () => { predictCalls++; return { low: 60, mid: 70, high: 80 }; } };
     window.ConnectifyPredictorBaselines = { getBaselines: () => ({ types: {}, subjects: {} }) };
     window.ConnectifyPredictorDates = { getTaskChronologicalStamp: t => t.order };
-    window.ConnectifyPredictorHistory = { getHistoricalDataPriorTo: () => ({}) };
+    window.ConnectifyPredictorHistory = { getHistoricalDataPriorTo: () => ({}), getHistoricalData: () => ({}) };
     window.ConnectifyData = { collect: () => { collectCalls++; return [
       { name: 'Chemistry', tasks: [{ name: 'Test 1', order: 1, score: 70 }, { name: 'Exam', order: 9 }] },
       { name: 'Physics', tasks: [{ name: 'Lab', order: 4, score: 80 }] }

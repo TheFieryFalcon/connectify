@@ -94,7 +94,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify:year_archive:<account>` | `localStorage` | `year-rollover.js` | Last two years' cached results (subjects, grade cache, registry, averages): Connect no longer shows them |
 | `connectify:class_semesters:<student>` | `localStorage` | `class-semesters.js` | Each class's outlines per semester: title, overall mark, final letter, task ids (results cache) |
 | `connectify:semester_filter` / `connectify:panel_view` | `localStorage` | `semester-filter.js` / `cohort-panel-view.js` | `{ enabled }`; off by default; the semester is always the detected one (settings). Statistics Panels: `subjects` or `all` (missing = `compact`); applies on next load |
-| `connectify:prediction:<account>:<subject>:<taskId>` | `localStorage` | `predictor-math.js` / `cohort-view.js` | Cached task prediction object (`{ low, mid, high, breakoutScore, type }`) |
+| `connectify:prediction:<account>:<subject>:<taskId>` | `localStorage` | `predictor-math.js` / `cohort-view.js` | Cached task prediction object (`{ low, mid, high, breakoutScore, type, basis }`) |
 | `connectify:prediction_version` | `localStorage` | `predictor-math.js` | Calculation version incrementer tracking when chronological prediction cache must be re-populated |
 | `connectify:cache_version:<subsystem>` | `localStorage` | `assessment-data.js` | Independent invalidation keys (`predictor`, `results`, `settings`, `cohort`) |
 | `connectify:stats_cache:<student>:<subject>:<task>` | `localStorage` | `assessment-data.js` | Cached 5-number boxplot quantiles and sample size; summary rows use task `Overall S1` / `Overall S2` (keys never include Connectify's own panel text) |

@@ -1,7 +1,7 @@
 /**
  * Connectify Predictor: chronological prediction pipeline
  *
- * Predicts every task in date order from only the results before it, caches the results in the
+ * Predicts every marked task in date order from only the results before it (unmarked tasks from every result), caches the results in the
  * prediction store, and recomputes them when results, categories or baselines change.
  * Exposes window.ConnectifyPredictorCache (including the store and prior-history functions).
  */
@@ -17,6 +17,12 @@
   const getBaselines = (...args) => window.ConnectifyPredictorBaselines.getBaselines(...args);
   const getTaskChronologicalStamp = (...args) => window.ConnectifyPredictorDates.getTaskChronologicalStamp(...args);
   const getHistoricalDataPriorTo = (...args) => window.ConnectifyPredictorHistory.getHistoricalDataPriorTo(...args);
+  const getHistoricalData = (...args) => window.ConnectifyPredictorHistory.getHistoricalData(...args);
+  const isCompletedTask = t => Number.isFinite(t?.score) || Number.isFinite(t?.mark) || (t?.pending === false && t?.weight > 0);
+  // A marked task is predicted from the results before it; an unmarked one from every result in the cache
+  const historyFor = (rawSubjects, subjectName, task, everything) => (isCompletedTask(task)
+    ? getHistoricalDataPriorTo(rawSubjects, subjectName, task)
+    : everything || getHistoricalData(rawSubjects));
 
   /**
    * Pre-populates the historical prediction cache for all tasks across all subjects
@@ -45,10 +51,10 @@
     allTasks.sort((a, b) => a.stamp - b.stamp);
 
     const baselines = getBaselines();
+    const everything = getHistoricalData(rawSubjects);
     for (const item of allTasks) {
-      const priorHistorical = getHistoricalDataPriorTo(rawSubjects, item.subjectName, item.task);
-      const isCompleted = Number.isFinite(item.task?.score) || Number.isFinite(item.task?.mark) || (item.task?.pending === false && item.task?.weight > 0);
-      const pred = predictTask(item.subjectName, item.task, priorHistorical, baselines, isCompleted);
+      const history = historyFor(rawSubjects, item.subjectName, item.task, everything);
+      const pred = predictTask(item.subjectName, item.task, history, baselines, isCompletedTask(item.task));
       if (!pred.unpredicted) {
         cacheTaskPrediction(item.subjectName, item.task, pred);
       }
@@ -84,14 +90,9 @@
       }
     }
 
-    const isCompleted = Number.isFinite(task.score) || Number.isFinite(task.mark) || (task.pending === false && task.weight > 0);
-    const priorHistorical = getHistoricalDataPriorTo(rawSubjects, subjectName, task);
-    const baselines = getBaselines();
-    let fresh = predictTask(subjectName, task, priorHistorical, baselines, isCompleted);
-
-    if (fresh && fresh.unpredicted && isCompleted) {
-      fresh = predictTask(subjectName, task, priorHistorical, baselines, true);
-    }
+    const isCompleted = isCompletedTask(task);
+    const history = historyFor(rawSubjects, subjectName, task);
+    const fresh = predictTask(subjectName, task, history, getBaselines(), isCompleted);
 
     if (fresh && !fresh.unpredicted) {
       cacheTaskPrediction(subjectName, task, fresh);

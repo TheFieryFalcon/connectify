@@ -161,11 +161,13 @@
       }
     }
 
+    // The school week (1-40) already spans the year, so it alone orders dated tasks: an unmarked row read
+    // from the page carries no semester, and must not sort a Term 4 task before Semester 2's results
     const seq = Number.isFinite(task.sequence) ? task.sequence : 0;
     if (order !== null) {
-      return semester * 1000 + order * 10 + seq * 0.01;
+      return order * 10 + seq * 0.01;
     }
-    return semester * 1000 + seq * 10;
+    return (semester === 2 ? 190 : 0) + seq * 10;
   }
 
   /**

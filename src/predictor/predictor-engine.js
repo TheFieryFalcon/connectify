@@ -1,7 +1,8 @@
 /**
  * Connectify Predictor Engine
  *
- * Core prediction model: logarithmic headroom, historical subject/type averages and per-task
+ * Core prediction model: the subject's own results (recent ones count more) shifted by the student's
+ * type average across all subjects, a spread from the subject's results, logarithmic headroom, and per-task
  * low / mid / high predictions. Baselines are stored by predictor-baselines.js.
  * Exposes window.ConnectifyPredictorEngine.
  */
@@ -70,110 +71,97 @@
 
 
   // --- TASK PREDICTION ENGINE ---
+  const RECENCY = 0.85;     // each later result in the subject makes an earlier one count this much less
+  const SPREAD_PRIOR = 3;   // results' worth of the student's typical spread blended into the subject's own
+  const RANGE_Z = 0.85;     // Low / High sit near the 20th / 80th percentiles of the predicted result
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+  /** Weighted mean, spread and effective count: recent and heavier results count more. */
+  function summarise(results) {
+    let sw = 0, sw2 = 0, sx = 0;
+    for (const r of results) { sw += r.w; sw2 += r.w * r.w; sx += r.w * r.score; }
+    if (!(sw > 0)) return null;
+    const mean = sx / sw;
+    const denom = sw - sw2 / sw;
+    const sd = results.length >= 2 && denom > 0
+      ? Math.sqrt(results.reduce((acc, r) => acc + r.w * Math.pow(r.score - mean, 2), 0) / denom)
+      : null;
+    return { mean, sd, nEff: (sw * sw) / sw2, count: results.length };
+  }
+
+  /** This subject's results (date order) with their weights, from the history (or its averages alone). */
+  function subjectResults(historical, cleanSubj) {
+    const list = historical?.subjectResults?.[cleanSubj];
+    if (Array.isArray(list) && list.length) {
+      return list.map((r, i) => ({ ...r, w: Math.pow(RECENCY, list.length - 1 - i) * Math.sqrt(r.weight > 0 ? r.weight : 1) }));
+    }
+    return null;
+  }
+
   function predictTask(subjectName, task, customHistorical, customBaselines, customIsCompleted = false) {
     const cleanSubj = cleanSubject(subjectName);
     const baselines = customBaselines || getBaselines();
     const historical = customHistorical || getHistoricalData();
-
-    const isCompleted = Boolean(
-      customIsCompleted ||
-      (task && Number.isFinite(task.score)) ||
-      (task && Number.isFinite(task.mark)) ||
-      (task && task.pending === false && Number.isFinite(task.weight) && task.weight > 0)
-    );
-
     const taskType = window.ConnectifyTaskTypes?.getEffectiveType
       ? window.ConnectifyTaskTypes.getEffectiveType(subjectName, task)
       : 'Take-Home';
+    const unpredicted = reason => ({ unpredicted: true, reason, taskType, type: taskType, subjectName: cleanSubj });
 
-    // 1. Resolve subject performance:
-    let subjectAvg = historical?.subjects?.[cleanSubj];
-    let subjectSource = 'history';
-    if (subjectAvg === undefined && baselines?.subjects) {
-      subjectSource = 'baseline';
-      if (baselines.subjects[cleanSubj] !== undefined) {
-        subjectAvg = Number(baselines.subjects[cleanSubj]);
-      } else if (baselines.subjects[subjectName] !== undefined) {
-        subjectAvg = Number(baselines.subjects[subjectName]);
-      }
+    // 1. The subject: its own results, else its averages, else last year's baseline
+    const results = subjectResults(historical, cleanSubj);
+    let subject = results ? summarise(results) : null;
+    if (!subject && Number.isFinite(historical?.subjects?.[cleanSubj])) {
+      const sd = historical.subjectSpreads?.[cleanSubj];
+      const count = historical.subjectCounts?.[cleanSubj] || (Number.isFinite(sd) ? 2 : 1);
+      subject = { mean: historical.subjects[cleanSubj], sd: Number.isFinite(sd) ? sd : null, nEff: count, count };
+    }
+    const subjectSource = subject ? 'history' : 'baseline';
+    if (!subject) {
+      const base = Number(baselines?.subjects?.[cleanSubj] ?? baselines?.subjects?.[subjectName]);
+      if (!Number.isFinite(base)) return unpredicted('missing_subject_baseline');
+      subject = { mean: base, sd: null, nEff: 0, count: 0 };
     }
 
-    if (subjectAvg === undefined || !Number.isFinite(subjectAvg)) {
-      return {
-        unpredicted: true,
-        reason: 'missing_subject_baseline',
-        taskType,
-        type: taskType,
-        subjectName: cleanSubj
-      };
-    }
-
-    // 2. Resolve assessment type performance:
-    const completedTypeCount = historical?.typeCounts?.[taskType] || 0;
-    let typeAvg = historical?.types?.[taskType];
-    // Where the type average came from: this year's results, last year's baseline, or the subject average
-    let typeSource = 'history';
-
-    if (completedTypeCount === 0 && baselines?.types?.[taskType] !== undefined) {
-      typeAvg = Number(baselines.types[taskType]);
+    // 2. The type: how the student does on it across all subjects (or last year's type average)
+    //    relative to their overall level, at half strength
+    const typeCount = historical?.typeCounts?.[taskType] || 0;
+    const overall = Number.isFinite(historical?.overallAverage) ? historical.overallAverage : subject.mean;
+    const typeBaseline = Number(baselines?.types?.[taskType]);
+    let typeSource = 'subject';
+    let affinity = 0;
+    if (typeCount > 0 && Number.isFinite(historical?.types?.[taskType])) {
+      typeSource = 'history';
+      affinity = historical.types[taskType] - overall;
+    } else if (baselines?.types?.[taskType] !== undefined && Number.isFinite(typeBaseline)) {
       typeSource = 'baseline';
-    } else if (typeAvg === undefined || !Number.isFinite(typeAvg) || completedTypeCount === 0) {
-      typeAvg = subjectAvg;
-      typeSource = 'subject';
+      affinity = typeBaseline - overall;
     }
+    const expected = subject.mean + 0.5 * affinity;
+
     // What the prediction rests on, for the expanded prediction card (cohort-expanded.js)
     const basis = {
       typeSource,
-      typeCount: typeSource === 'history' ? completedTypeCount : 0,
+      typeCount: typeSource === 'history' ? typeCount : 0,
       subjectSource,
-      subjectCount: subjectSource === 'history' ? (historical?.subjectCounts?.[cleanSubj] || 0) : 0
+      subjectCount: subjectSource === 'history' ? subject.count : 0
     };
 
-    if (typeAvg === undefined || !Number.isFinite(typeAvg)) {
-      return {
-        unpredicted: true,
-        reason: 'No previous tasks of this type have been done, unable to make prediction',
-        taskType,
-        type: taskType,
-        subjectName: cleanSubj
-      };
-    }
+    // 3. Spread: the subject's own spread, blended with the student's typical spread across subjects;
+    //    a prediction from few results is less certain, so it widens further
+    const typical = Number.isFinite(historical?.spread) ? clamp(historical.spread, 4, 14) : 8;
+    const df = subject.sd !== null ? Math.max(1, subject.nEff - 1) : 0;
+    const sigma = Math.sqrt((SPREAD_PRIOR * typical * typical + df * Math.pow(subject.sd || 0, 2)) / (SPREAD_PRIOR + df));
+    const predictive = sigma * Math.sqrt(1 + 1 / Math.max(1, subject.nEff));
 
-    // 3. Overall student baseline anchor:
-    const overallAnchor = historical.overallAverage !== null
-      ? historical.overallAverage
-      : subjectAvg;
-
-    // 4. Assessment Type relative modifier (affinity):
-    const typeModifier = typeAvg - overallAnchor;
-
-    // 5. Middle Prediction (Expected Momentum):
-    // High scores have an outsized upward leverage on arithmetic averages.
-    // When variance is present, apply a gentle regression adjustment above 82% to protect student momentum
-    // while accounting for regression to typical performance on upcoming high-stakes tasks:
-    let sigma = historical.spread || 6.5;
-    if (historical.subjectSpreads && Number.isFinite(historical.subjectSpreads[cleanSubj])) {
-      sigma = historical.subjectSpreads[cleanSubj];
-    }
+    // 4. Mid: very high averages regress slightly when results vary
     const varianceDampener = Math.min(1.0, Math.max(0, (sigma - 1.0) / 4.0));
-    const highScoreElevation = Math.max(0, subjectAvg - 82);
-    const effectiveSubjectAvg = subjectAvg - (highScoreElevation * 0.10 * varianceDampener);
+    const elevated = expected - Math.max(0, expected - 82) * 0.10 * varianceDampener;
+    const mid = clamp(round(elevated, 1), 10, 99.5);
 
-    // Blend subject ability with half of type bias, passed through logarithmic ceiling:
-    const rawMid = applyLogarithmicCeiling(effectiveSubjectAvg, 0.5 * typeModifier);
-    const mid = Math.min(99.5, Math.max(10, round(rawMid, 1)));
-
-    // 6. Low & High Spreads:
-    // Scale Low and High moderately with variance, avoiding excessive spreads on volatile subjects
-    // while reflecting realistic downside and upside potential:
-    const lowHighScorePenalty = Math.max(0, mid - 75) * 0.20 * varianceDampener;
-    const lowDelta = Math.min(18.0, Math.max(1.5, (sigma * sigma) / 20 + 0.45 * sigma + lowHighScorePenalty));
-    const low = Math.max(0, round(mid - lowDelta, 1));
-    const highDelta = Math.min(8.5, Math.max(1.5, 0.88 * sigma));
-    const high = Math.min(100, round(applyLogarithmicCeiling(mid, highDelta), 1));
-
-    // 7. Multiplicative 10% Breakout Score threshold (Score > 1.10 * High):
-    const breakoutScore = round(1.10 * high, 2);
+    // 5. Low / High: the same distance either side, gains above 80% through the logarithmic headroom
+    const delta = clamp(RANGE_Z * predictive, 2.5, 22);
+    const low = Math.max(0, round(mid - delta, 1));
+    const high = Math.min(100, round(applyLogarithmicCeiling(mid, delta), 1));
 
     return {
       unpredicted: false,
@@ -181,7 +169,8 @@
       low: Math.round(low),
       mid: Math.round(mid),
       high: Math.round(high),
-      breakoutScore,
+      // Multiplicative 10% breakout threshold (Score > 1.10 * High)
+      breakoutScore: round(1.10 * high, 2),
       taskType,
       type: taskType,
       subjectName: cleanSubj,
