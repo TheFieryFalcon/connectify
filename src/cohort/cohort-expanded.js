@@ -4,9 +4,10 @@
  * With the Settings "Statistics Panels" option expanded (cohort-panel-view.js), a statistics panel is a wide,
  * short card: one row of Score / Rank / Average beside the five boxplot values (outcome meter at its end on
  * task rows), then a footer with SD, z-score and standing (Type dropdown, or the cohort size input on overall
- * rows). The quantile the result has reached is faintly tinted. Overall rows put the class prediction's Low /
- * Mid / High under Score / Rank / Average, the quantiles beside both rows; unmarked rows are one line of
- * Low / Mid / High beside what the prediction is based on. Skeletons are built once per
+ * rows). The quantile the result has reached is faintly tinted. Overall rows hold SD as a sixth cell beside
+ * the quantiles (footer: z-score and standing) and put the class prediction's Low / Mid / High under Score /
+ * Rank / Average, the quantiles then in two rows beside them; unmarked rows are one line of Low / Mid / High
+ * beside what the prediction is based on. Skeletons are built once per
  * panel; fills only touch text and the Score colour step.
  * Exposes window.ConnectifyCohortExpanded.
  */
@@ -50,7 +51,8 @@
       score.classList.add('connectea-xp-score');
       const rankValue = createElement('span', 'connectea-xp-rank-value');
       rank.append(rankValue);
-      const quantiles = grid(QUANTILES, 'connectea-xp-grid--quantiles');
+      const quantiles = grid(overall ? [...QUANTILES, 'SD'] : QUANTILES, 'connectea-xp-grid--quantiles');
+      const sd = overall ? quantiles.values.pop() : null;
       head.append(top.dl, quantiles.dl);
       if (meter) head.append(meter);
       const { foot, summary } = footer();
@@ -64,7 +66,7 @@
         box.append(prediction);
       }
       box.append(foot);
-      return { score, rankValue, average, quantiles: quantiles.values, foot, summary, prediction };
+      return { score, rankValue, average, quantiles: quantiles.values, sd, foot, summary, prediction };
     }
 
     /** The prediction card on an unmarked row: Low / Mid / High beside the basis and the Type dropdown. */
@@ -119,7 +121,7 @@
       setStep(xp.score, Number.isFinite(mark) ? step : null);
       const parts = Number.isFinite(mark) ? [] : ['Not marked'];
       if (!data) {
-        for (const el of [xp.rankValue, xp.average, ...xp.quantiles]) setText(el, DASH);
+        for (const el of [xp.rankValue, xp.average, ...xp.quantiles, xp.sd]) if (el) setText(el, DASH);
         markReached(xp.quantiles, NaN, null);
         parts.push('Cohort statistics unavailable');
       } else {
@@ -127,7 +129,10 @@
         markReached(xp.quantiles, mark, stats);
         setText(xp.average, percent(data.mean));
         setText(xp.rankValue, rankText(data, isOverall, userSize, estimatedSize, cohortSize));
-        parts.push(`SD ${math().formatPercentage(data.sd)}`, `Z-Score ${Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A'}`);
+        // Overall cards show SD as a cell beside the quantiles
+        if (xp.sd) setText(xp.sd, math().formatPercentage(data.sd));
+        else parts.push(`SD ${math().formatPercentage(data.sd)}`);
+        parts.push(`Z-Score ${Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A'}`);
         const standing = math().standing(data.p);
         if (standing) parts.push(standing);
         if (data.rank === undefined) parts.push('Cohort size needed');

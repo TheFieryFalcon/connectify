@@ -10007,7 +10007,7 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   loadCohortViewIn(null);
 });
 
-runTest('Test 223: Expanded overall cards hold the cohort input in the footer and the class prediction; subjects mode keeps tasks compact', () => {
+runTest('Test 223: Expanded overall cards hold SD beside the quantiles, the cohort input in the footer and the class prediction; subjects mode keeps tasks compact', () => {
   const { view } = loadCohortViewIn('subjects');
   window.ConnectifyPredictorMath.saveBaselines({ types: { Exam: 70 }, subjects: { '12 Literature ATAR': 70 } });
   const { makeRow } = expandedFixture();
@@ -10017,6 +10017,9 @@ runTest('Test 223: Expanded overall cards hold the cohort input in the footer an
   assert.ok(ui.box.classList.contains('connectea-panel--expanded'));
   assert.strictEqual(ui.input.parentElement.parentElement.parentElement, ui.xp.foot, 'the cohort size input sits in the footer');
   assert.strictEqual(ui.xp.rankValue.parentElement.children.length, 1, 'the Rank cell holds only its value');
+  assert.ok(/^[\d.]+$/.test(ui.xp.sd.textContent) && ui.xp.sd.parentElement.parentElement === ui.xp.quantiles[0].parentElement.parentElement, `SD is a sixth cell beside the quantiles: ${ui.xp.sd.textContent}`);
+  assert.ok(/^Z-Score -?[\d.]+/.test(ui.xp.summary.textContent), `the overall footer leaves SD to its cell: ${ui.xp.summary.textContent}`);
+  assert.strictEqual(ui.xp.quantiles.length, 5, 'the five quantiles are still the reached-tint cells');
   assert.deepStrictEqual(Array.from(ui.box.children, e => e.className), ['connectea-xp-head', 'connectea-xp-prediction', 'connectea-xp-foot'], 'values, class prediction, footer');
   assert.ok(!ui.upcoming, 'no separate class prediction line');
   assert.ok(!ui.xp.prediction.hidden, 'the class prediction is a section of the card');
