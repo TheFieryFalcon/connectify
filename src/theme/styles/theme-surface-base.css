@@ -41,7 +41,7 @@ html[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   h1, h2, h3, h4, h5, h6, strong, .eds-c-heading, .v-caption,
   .cvr-c-class__name, .cvr-c-classes-list__title,
-  :is(.cvr-c-classes, .cvr-c-classes-list, .eds-c-selection-list, .cvr-c-class, [class*="class-"]) :is(span, p, a, div, label, small)
+  :is(.cvr-c-classes, .cvr-c-classes-list, .eds-c-selection-list, .cvr-c-class) :is(span, p, a, div, label, small)
 ):not([class*="icon"]):not([class*="icon-"]):not([class*="cvr-c-icon"]):not([class*="eds-c-icon"]):not(.v-icon):not(i):not([data-icon]):not(.connectea-panel *):not([class*="connectea-"]):not(#connectify-sidebar *):not(#connectify-sidebar-handle *):not(#connectea-atar *):not([class*="cta-"]) {
   color: var(--cx-text-primary) !important;
   font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;

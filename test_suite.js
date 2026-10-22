@@ -9750,6 +9750,66 @@ runTest('Test 218: Back to All presses Connect\'s top-level "All" filter with a 
   }
 });
 
+runTest('Test 219: No stylesheet tests a class substring on an ancestor, so a class change restyles only what it can affect', () => {
+  // Chrome cannot key [class*="..."] to a class name: on an ancestor (or inside :not(... *)) every class change on
+  // any element restyles its whole subtree against every rule. Connect rewrites classes ~20 times per click (the
+  // outline filter menu took 115ms per open), so ancestors are named by class; the subject may still use substrings
+  const splitTop = (s, seps) => {
+    const out = []; let depth = 0, quote = null, cur = '';
+    for (const c of s) {
+      if (quote) { cur += c; if (c === quote) quote = null; continue; }
+      if (c === '"' || c === "'") { quote = c; cur += c; continue; }
+      if (c === '(' || c === '[') depth++;
+      if (c === ')' || c === ']') depth--;
+      if (depth === 0 && seps.includes(c)) { out.push(cur); cur = ''; } else cur += c;
+    }
+    out.push(cur);
+    return out.filter(x => x.trim());
+  };
+  // True when a [class...=] sits in a compound that is not the subject, through :is/:where/:not arguments
+  const ancestorSubstring = (sel, subjectContext) => {
+    const compounds = splitTop(sel.trim().replace(/\s*([>+~])\s*/g, '$1').replace(/\s+/g, ' '), ' >+~');
+    return compounds.some((comp, i) => {
+      const isSubject = subjectContext && i === compounds.length - 1;
+      for (let j = 0; j < comp.length; j++) {
+        if (comp[j] === '[') {
+          const end = comp.indexOf(']', j);
+          if (!isSubject && /^\[class\s*[*^$~|]?=/.test(comp.slice(j, end + 1))) return true;
+          j = end;
+        } else if (comp[j] === '(') {
+          let depth = 1, k = j + 1;
+          for (; k < comp.length && depth; k++) depth += comp[k] === '(' ? 1 : comp[k] === ')' ? -1 : 0;
+          const pseudo = comp.slice(0, j).match(/:([\w-]+)$/)?.[1];
+          if (/^(is|where|not)$/.test(pseudo || '') && splitTop(comp.slice(j + 1, k - 1), ',').some(a => ancestorSubstring(a, isSubject))) return true;
+          j = k - 1;
+        }
+      }
+      return false;
+    });
+  };
+  const offenders = [];
+  (function walk(dir) {
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) { walk(full); continue; }
+      if (!ent.name.endsWith('.css')) continue;
+      const css = origReadFileSync.call(fs, full, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+      let prelude = '';
+      for (const ch of css) {
+        if (ch === '{') {
+          const p = prelude.trim();
+          if (p && !p.startsWith('@')) for (const sel of splitTop(p, ',')) if (ancestorSubstring(sel, true)) offenders.push(`${path.relative(SRC_DIR, full)}: ${sel.replace(/\s+/g, ' ').trim()}`);
+          prelude = '';
+        } else if (ch === '}' || ch === ';') prelude = '';
+        else prelude += ch;
+      }
+    }
+  })(SRC_DIR);
+  assert.deepStrictEqual(offenders, [], 'ancestors are named by class, never by a class substring');
+  assert.ok(ancestorSubstring('.connectea-dark :is(.a, [class*="feed"]) span', true) && ancestorSubstring('.x:not([class*="icon"] *)', true), 'the check catches both forms');
+  assert.ok(!ancestorSubstring('.connectea-dark :is(.a, [class*="feed"])', true) && !ancestorSubstring('.x:not([class*="icon"])', true), 'a substring on the subject is allowed');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

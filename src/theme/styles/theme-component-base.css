@@ -56,7 +56,7 @@
 /* Primary Navigation Bar (Matches Connect light mode Open Sans typography) */
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(
   .cvr-c-primary-navigation__links, .cvr-c-primary-navigation__title, .cvr-c-primary-navigation .v-button-caption
-):not(.eds-c-icon-button *):not([class*="icon"] *) {
+):not(.eds-c-icon-button *):not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(

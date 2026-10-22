@@ -133,7 +133,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
 }
 
-:is(html, body).connectea-dark :is(.popup-alert-notice, .popup-alert-warning, .session-timeout, .portal-session-warning, .alert-session, .liferay-session-warning, [class*="session-timeout"], [class*="session-warning"], [class*="timeout-alert"], [id*="sessionTimeout"], [id*="session-timeout"], [id*="sessionWarning"], .cvr-c-timeout-alert, .cvr-c-session-alert) :is(span, p, div, label, strong, h1, h2, h3, h4) {
+:is(html, body).connectea-dark :is(.popup-alert-notice, .popup-alert-warning, .session-timeout, .portal-session-warning, .alert-session, .liferay-session-warning, [id*="sessionTimeout"], [id*="session-timeout"], [id*="sessionWarning"], .cvr-c-timeout-alert, .cvr-c-session-alert) :is(span, p, div, label, strong, h1, h2, h3, h4) {
   color: #856404 !important;
 }
 

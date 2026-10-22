@@ -15,7 +15,7 @@
   transition: color 0.15s ease;
 }
 
-.connectea-dark :is(.eds-c-accordion__section.eds-s-is-active, [class*="section"].eds-s-is-active) .eds-c-accordion__section-heading {
+.connectea-dark :is(.eds-c-accordion__section, .eds-c-accordion__section-heading, .autofit-section).eds-s-is-active .eds-c-accordion__section-heading {
   border-bottom: none !important;
 }
 
@@ -96,7 +96,7 @@
   .cvr-c-task-group h3,
   .cvr-c-task-group h4,
   .cvr-c-task-group :is(.v-label, span, strong):first-child,
-  [class*="task-group"] :is(h2, h3, h4, [class*="title"]),
+  :is(.cvr-c-task-group, .cvr-c-task-group__header, .cvr-c-task-group__headers, .cvr-c-task-group__heading) :is(h2, h3, h4, [class*="title"]),
   .cvr-c-task__group-title,
   .cvr-c-task__title,
   .cvr-c-task__details .v-label:first-child,
@@ -117,7 +117,7 @@
   .cvr-c-task-group h3,
   .cvr-c-task-group h4,
   .cvr-c-task-group :is(.v-label, span, strong):first-child,
-  [class*="task-group"] :is(h2, h3, h4, [class*="title"]),
+  :is(.cvr-c-task-group, .cvr-c-task-group__header, .cvr-c-task-group__headers, .cvr-c-task-group__heading) :is(h2, h3, h4, [class*="title"]),
   .cvr-c-task__group-title,
   .cvr-c-task__title,
   .cvr-c-task__details .v-label:first-child,

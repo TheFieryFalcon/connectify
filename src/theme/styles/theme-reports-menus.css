@@ -22,11 +22,11 @@
   background-color: transparent !important;
 }
 
-.connectea-dark :is(.cvr-c-feed, .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs, .mat-tab-header, .mat-tab-nav-bar, [class*="feed"] [class*="tab"]) :is(.mat-tab-label, .mat-tab-link, .eds-c-tabs__tab, .cvr-c-feed-tab, .cvr-c-feed__tab, .mat-tab-label-content, button, a, span, div.mat-tab-label, div.mat-tab-label-content, li) {
+.connectea-dark :is(.cvr-c-feed, .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs, .mat-tab-header, .mat-tab-nav-bar, .cvr-c-feed .cvr-c-feed__tabs) :is(.mat-tab-label, .mat-tab-link, .eds-c-tabs__tab, .cvr-c-feed-tab, .cvr-c-feed__tab, .mat-tab-label-content, button, a, span, div.mat-tab-label, div.mat-tab-label-content, li) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark :is(.cvr-c-feed, .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs, .mat-tab-header, .mat-tab-nav-bar, [class*="feed"] [class*="tab"]) :is(.mat-tab-label, .mat-tab-link, .eds-c-tabs__tab, .cvr-c-feed-tab, .cvr-c-feed__tab, button, a):hover,
+.connectea-dark :is(.cvr-c-feed, .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs, .mat-tab-header, .mat-tab-nav-bar, .cvr-c-feed .cvr-c-feed__tabs) :is(.mat-tab-label, .mat-tab-link, .eds-c-tabs__tab, .cvr-c-feed-tab, .cvr-c-feed__tab, button, a):hover,
 .connectea-dark :is(.mat-tab-label-active, .mat-tab-link.mat-tab-label-active, .mat-tab-label.mat-tab-label-active, .eds-c-tabs__tab--active, .eds-c-tabs__tab[aria-selected="true"], .cvr-c-feed__tab--active, .mat-tab-label[aria-selected="true"], .mat-tab-link[aria-selected="true"]) :is(span, a, button, li, .mat-tab-label-content),
 .connectea-dark :is(.mat-tab-label-active, .mat-tab-link.mat-tab-label-active, .mat-tab-label.mat-tab-label-active, .eds-c-tabs__tab--active, .eds-c-tabs__tab[aria-selected="true"], .cvr-c-feed__tab--active, .mat-tab-label[aria-selected="true"], .mat-tab-link[aria-selected="true"]) {
   color: var(--cx-text-primary, #f8fafc) !important;
@@ -50,7 +50,7 @@
 
 /* Light mode over a wallpaper: tabs, headers and toolbars have no panel of their own (the wallpaper is brightened
    for dark text instead, theme-wallpaper-dim.js); their labels keep the dark ink */
-:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(.cvr-c-feed, .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs, .mat-tab-header, .mat-tab-nav-bar, [class*="feed"] [class*="tab"]) :is(.mat-tab-label, .mat-tab-link, .eds-c-tabs__tab, .cvr-c-feed-tab, .cvr-c-feed__tab, .mat-tab-label-content) {
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(.cvr-c-feed, .cvr-c-feed-header, .cvr-c-feed-header__tabs, .cvr-c-feed__tabs, .eds-c-tabs, .mat-tab-header, .mat-tab-nav-bar, .cvr-c-feed .cvr-c-feed__tabs) :is(.mat-tab-label, .mat-tab-link, .eds-c-tabs__tab, .cvr-c-feed-tab, .cvr-c-feed__tab, .mat-tab-label-content) {
   color: #334155 !important;
 }
 :is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(.mat-tab-label-active, .mat-tab-link.mat-tab-label-active, .mat-tab-label.mat-tab-label-active, .eds-c-tabs__tab--active, .eds-c-tabs__tab[aria-selected="true"], .cvr-c-feed__tab--active, .mat-tab-label[aria-selected="true"], .mat-tab-link[aria-selected="true"]) :is(span, a, button, li, .mat-tab-label-content) {
@@ -110,9 +110,7 @@
   .mat-tab-header,
   .cvr-c-reports,
   .cvr-c-report-years,
-  .cvr-c-year-selector,
-  [class*="year-selector"],
-  [class*="report-year"]
+  .cvr-c-year-selector
 ) :is(div, span, p, h1, h2, h3, h4, strong, a, label, .mat-toolbar-row):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button) {
   background-color: transparent !important;
   color: var(--cx-text-primary, #f8fafc) !important;

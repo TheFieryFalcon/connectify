@@ -26,12 +26,12 @@
 }
 
 .connectea-dark :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, [class*="accent"], [class*="primary"]) *) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, .eds-c-button--primary, .v-button--primary, .cvr-c-primary-navigation, .cvr-c-primary-menu, .c-primary-menu, .bg-primary, .text-primary) *) {
   color: var(--cx-text-primary, #f1f5f9) !important;
   fill: currentColor !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, .eds-c-button--primary, .v-button--primary, [class*="primary"], [class*="accent"], cnt-floating-form-field-button) :is(.mat-icon, mat-icon, cnt-icon) {
+:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, .eds-c-button--primary, .v-button--primary, .cvr-c-primary-navigation, .cvr-c-primary-menu, .c-primary-menu, .bg-primary, .text-primary, cnt-floating-form-field-button) :is(.mat-icon, mat-icon, cnt-icon) {
   color: var(--cx-accent-text, inherit) !important;
   fill: currentColor !important;
 }

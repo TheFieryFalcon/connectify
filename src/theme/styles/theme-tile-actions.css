@@ -3,11 +3,11 @@
  */
 
 /* Neutralize native Connect theme multiplier card and tile borders, headers, and text (.eds-t-*) */
-.connectea-dark :is([class*="eds-t-"], .eds-t-red, .eds-u-theme-multiplier) :is(.eds-c-tile, .eds-c-card, .cvr-c-card) {
+.connectea-dark :is(.eds-t-blue-dark, .eds-t-blue-light, .eds-t-green, .eds-t-grey-dark, .eds-t-grey-light, .eds-t-orange, .eds-t-purple, .eds-t-red, .eds-t-teal, .eds-t-white, .eds-u-theme-multiplier) :is(.eds-c-tile, .eds-c-card, .cvr-c-card) {
   border-color: var(--cx-border-hover, #3d5066) !important;
 }
 
-.connectea-dark :is([class*="eds-t-"], .eds-t-red, .eds-u-theme-multiplier) :is(
+.connectea-dark :is(.eds-t-blue-dark, .eds-t-blue-light, .eds-t-green, .eds-t-grey-dark, .eds-t-grey-light, .eds-t-orange, .eds-t-purple, .eds-t-red, .eds-t-teal, .eds-t-white, .eds-u-theme-multiplier) :is(
   h1,
   h2,
   h3,
@@ -20,7 +20,7 @@
 
 /* Links take the contrast-checked link token (5:1 on the surface), not the raw accent: <body> carries
    eds-t-grey-dark, so this reaches every link on the page */
-.connectea-dark :is([class*="eds-t-"], .eds-t-purple, .eds-u-theme-multiplier) :is(a, .eds-c-link):not(.eds-o-button--positive):not([class*="button--positive"]) {
+.connectea-dark :is(.eds-t-blue-dark, .eds-t-blue-light, .eds-t-green, .eds-t-grey-dark, .eds-t-grey-light, .eds-t-orange, .eds-t-purple, .eds-t-red, .eds-t-teal, .eds-t-white, .eds-u-theme-multiplier) :is(a, .eds-c-link):not(.eds-o-button--positive):not([class*="button--positive"]) {
   color: var(--cx-accent-link, #60a5fa) !important;
 }
 

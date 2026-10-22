@@ -9,7 +9,7 @@
   .cvr-c-primary-navigation__links div,
   .cvr-c-primary-navigation__title,
   .cvr-c-primary-navigation__bar
-):not(#connectea-theme-toggle):not(#connectea-theme-toggle *):not(.eds-c-icon-button):not(.eds-c-icon-button *):not([class*="icon"]):not([class*="icon"] *) {
+):not(#connectea-theme-toggle):not(#connectea-theme-toggle *):not(.eds-c-icon-button):not(.eds-c-icon-button *):not([class*="icon"]):not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
   -webkit-font-smoothing: antialiased !important;
 }
@@ -35,6 +35,7 @@
   text-decoration: none !important;
 }
 
+/* Nav links; the active tab is left to the Active Tab Indicator (theme-reports-menus.css), which this rule's ids would outrank */
 .connectea-dark :is(
   .cvr-c-primary-navigation a,
   .cvr-c-primary-navigation a:link,
@@ -45,7 +46,7 @@
   .cvr-c-primary-navigation .cvr-js-greedy__item a,
   .cvr-c-primary-navigation .cvr-js-greedy__item a span,
   .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div > a, .cvr-js-greedy__trigger > div > a, .v-link a)
-):not(#connectea-theme-toggle):not(#connectea-theme-toggle *):not(.eds-c-icon-button):not(.eds-c-icon-button *):not([class*="icon"]):not([class*="icon"] *):not(.v-button-wrap):not(.v-button-caption) {
+):not(#connectea-theme-toggle):not(#connectea-theme-toggle *):not(.eds-c-icon-button):not(.eds-c-icon-button *):not([class*="icon"]):not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.eds-s-is-active *) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
   font-size: 14px !important;
   font-weight: 700 !important;
@@ -164,8 +165,7 @@
   .cvr-c-classes__sort,
   .cvr-c-sort-by,
   .eds-c-sort-by,
-  [class*="classes"] .cvr-c-classes__sort,
-  [class*="classes"] [class*="sort-by"],
+  .cvr-c-classes .cvr-c-classes__sort,
   .cvr-c-classes-header,
   .cvr-c-classes__header,
   .cvr-c-classes-list__header

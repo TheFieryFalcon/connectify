@@ -75,8 +75,7 @@ html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme
   .eds-c-list__item,
   .eds-c-tile-list__item,
   .cvr-c-resource-item,
-  [class*="guide"] li,
-  [class*="help"] li
+  :is(.help-block, .portlet-msg-help) li
 ):hover {
   background-color: var(--cx-surface-hover, #263344) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
@@ -87,8 +86,8 @@ html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme
   .eds-c-nav-list__item,
   .cvr-c-resource,
   .eds-c-resource,
-  [class*="guide"],
-  [class*="help"]
+  .help-block,
+  .portlet-msg-help
 ) :is(a, span, p, div, label, strong) {
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }

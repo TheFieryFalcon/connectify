@@ -141,7 +141,7 @@ html.connectea-dark,
   --cx-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25); --cx-shadow-md: 0 8px 32px rgba(0, 0, 0, 0.35); --cx-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
 }
 
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(.connectea-dark, [class*="connectea-dark"]) :is(
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :is(
   .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
   .connectea-panel, #connectify-sidebar, #connectea-theme-menu, .v-panel,
   .modal-content, .ui-dialog, .cvr-c-service-bar, .cvr-c-service-bar__container
@@ -151,7 +151,7 @@ html.connectea-dark,
   box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 16px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -10px rgba(0, 0, 0, 0.45) !important;
 }
 
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(.connectea-dark, [class*="connectea-dark"]) :is(
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :is(
   .v-window-modalitycurtain, .modal-backdrop, .yui3-widget-mask, .ui-widget-overlay,
   .cdk-overlay-backdrop, .cdk-overlay-dark-backdrop, .mat-drawer-backdrop,
   .eds-c-modal-overlay, .eds-c-overlay, .cvr-c-overlay, .cx-overlay

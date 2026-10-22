@@ -33,7 +33,7 @@ html.connectea-dark :is(#cx-specificity-anchor, .cvr-c-primary-navigation__user-
 
 html.connectea-dark .cvr-c-primary-navigation__user-display :is(
   #cx-specificity-anchor, div, span, label, p, a, strong, .v-label
-):not([class*="avatar"]):not([class*="avatar"] *) {
+):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *) {
   background-color: transparent !important;
   color: var(--cx-text-primary, #f8fafc) !important;
 }

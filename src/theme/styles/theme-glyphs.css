@@ -1,5 +1,8 @@
 /**
  * Connectify Theme: Connect webfont glyphs and role switcher
+ *
+ * Ancestors are named by class, never [class*="..."]: a substring test on an ancestor makes every class change
+ * on any element restyle its whole subtree (Connect rewrites classes many times per click)
  */
 
 .connectea-dark :is(
@@ -13,9 +16,9 @@
   .cvr-c-branding,
   .cvr-c-header,
   .cvr-c-user-menu,
-  [class*="switch"],
-  [class*="role"],
-  [class*="user"],
+  .cvr-c-switch,
+  .eds-c-switch,
+  .useractivityui,
   .eds-c-nav-list
 ) :is(svg, path, circle) {
   color: var(--cx-nav-text, #cbd5e1) !important;
@@ -39,9 +42,9 @@
   .cvr-c-branding,
   .cvr-c-header,
   .cvr-c-user-menu,
-  [class*="switch"],
-  [class*="role"],
-  [class*="user"],
+  .cvr-c-switch,
+  .eds-c-switch,
+  .useractivityui,
   .eds-c-nav-list,
   .mat-list,
   .mat-nav-list,
@@ -96,15 +99,15 @@
   .cvr-c-branding,
   .cvr-c-header,
   .cvr-c-user-menu,
-  [class*="switch"],
-  [class*="role"],
-  [class*="user"],
+  .cvr-c-switch,
+  .eds-c-switch,
+  .useractivityui,
   .eds-c-nav-list,
   .mat-list,
   .mat-nav-list,
   .v-icon
-) :is(.mat-list-item:hover, a:hover, button:hover, div:hover, [class*="item"]:hover) :is(svg, path, circle),
-.connectea-dark :is([class*="switch"], [class*="role"]):hover :is(svg, path, circle) {
+) :is(.mat-list-item:hover, a:hover, button:hover, div:hover, :is(.eds-o-list__item, .eds-o-media__item, .eds-c-selection-list__item, .selection-list-item, .c-scope-gallery-item, .cvr-c-service-menu__item, .cvr-c-primary-menu__item, .cvr-js-greedy__item):hover) :is(svg, path, circle),
+.connectea-dark :is(.cvr-c-switch, .eds-c-switch):hover :is(svg, path, circle) {
   color: var(--cx-nav-text-hover, #ffffff) !important;
   fill: var(--cx-nav-text-hover, #ffffff) !important;
   stroke: none !important;
@@ -121,15 +124,15 @@
   .cvr-c-branding,
   .cvr-c-header,
   .cvr-c-user-menu,
-  [class*="switch"],
-  [class*="role"],
-  [class*="user"],
+  .cvr-c-switch,
+  .eds-c-switch,
+  .useractivityui,
   .eds-c-nav-list,
   .mat-list,
   .mat-nav-list,
   .v-icon
-) :is(.mat-list-item:hover, a:hover, button:hover, div:hover, [class*="item"]:hover) :is(.mat-icon, .v-icon, .eds-c-icon),
-.connectea-dark :is([class*="switch"], [class*="role"]):hover :is(.mat-icon, .v-icon, .eds-c-icon),
+) :is(.mat-list-item:hover, a:hover, button:hover, div:hover, :is(.eds-o-list__item, .eds-o-media__item, .eds-c-selection-list__item, .selection-list-item, .c-scope-gallery-item, .cvr-c-service-menu__item, .cvr-c-primary-menu__item, .cvr-js-greedy__item):hover) :is(.mat-icon, .v-icon, .eds-c-icon),
+.connectea-dark :is(.cvr-c-switch, .eds-c-switch):hover :is(.mat-icon, .v-icon, .eds-c-icon),
 .connectea-dark :is(
   [class^="cvr-c-icon--"]:hover:before,
   [class*=" cvr-c-icon--"]:hover:before,

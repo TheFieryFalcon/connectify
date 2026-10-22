@@ -153,7 +153,7 @@ html.connectea-dark {
   .cvr-c-primary-navigation .eds-c-icon-button,
   .cvr-c-primary-navigation .cvr-c-icon-button,
   .cvr-c-primary-navigation .cvr-c-primary-navigation__user-controls--icon,
-  .cvr-c-primary-navigation [class*="user-controls"] .eds-o-button,
+  .cvr-c-primary-navigation :is(.cvr-c-primary-navigation__user-controls, .cvr-c-primary-navigation__user-controls--icon, .cvr-c-primary-navigation__user-controls--sign-out) .eds-o-button,
   .cvr-c-primary-navigation [class*="notification"]
 ) {
   background: transparent !important;

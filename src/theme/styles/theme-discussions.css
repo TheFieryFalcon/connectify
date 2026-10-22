@@ -6,7 +6,7 @@
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
   mat-tab-header, .mat-tab-header,
   mat-tab-nav-bar, .mat-tab-nav-bar,
-  .mat-tab-labels, [class*="feed__tab"], [class*="feed-header__tab"]
+  .mat-tab-labels
 ) :is(.mat-tab-label, .mat-tab-link, .mat-tab-label-content, a, button, span, div.mat-tab-label, div.mat-tab-label-content),
 :is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
   mat-tab-header, .mat-tab-header,
