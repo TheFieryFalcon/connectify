@@ -9601,6 +9601,18 @@ runTest('Test 215: A preset picked in the customizer keeps every colour it sets 
   assert.ok(core.includes('tokenSet.fromPreset(state, preset, themeTokens(preset))') && core.includes('tokenSet.track(state, '), 'the preset select goes through fromPreset; opening tracks the theme\'s own colours');
 });
 
+runTest('Test 216: Dark-ink glass themes brighten the page behind a dialog instead of dimming it', () => {
+  const css = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles', file), 'utf8');
+  const lightTone = css('theme-light-tone.css');
+  const rule = lightTone.slice(lightTone.indexOf('/* Dialog backdrops'));
+  assert.ok(rule.includes('html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])'), 'scoped to light-tone glass themes');
+  for (const sel of ['.cdk-overlay-dark-backdrop', '.cdk-overlay-backdrop', '.v-window-modalitycurtain', '.modal-backdrop']) assert.ok(rule.includes(sel), `${sel} is brightened`);
+  assert.ok(/background-color: rgba\(255, 255, 255, 0\.45\) !important/.test(rule), 'a white overlay brightens the backdrop');
+  assert.ok(css('theme-tokens.css').includes('background-color: rgba(11, 17, 32, 0.45) !important'), 'light-ink glass themes keep the navy dim');
+  const order = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8')).content_scripts.flatMap(g => g.css || []);
+  assert.ok(order.findIndex(f => f.endsWith('theme-light-tone.css')) > order.findIndex(f => f.endsWith('theme-tokens.css')), 'the light-tone backdrop loads after the glass dim');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

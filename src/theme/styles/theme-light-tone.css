@@ -124,3 +124,13 @@ html.connectea-dark[data-connectea-tone="light"] :is(
 ) :is(em, span, i, b, strong) {
   color: inherit !important;
 }
+
+/* Dialog backdrops: dark-ink glass themes brighten the page behind a dialog (detail views such as View Notice)
+   instead of the navy dim the dark glass themes use (theme-tokens.css), so the dark text keeps its contrast */
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
+  .v-window-modalitycurtain, .modal-backdrop, .yui3-widget-mask, .ui-widget-overlay,
+  .cdk-overlay-backdrop, .cdk-overlay-dark-backdrop, .mat-drawer-backdrop,
+  .eds-c-modal-overlay, .eds-c-overlay, .cvr-c-overlay, .cx-overlay
+) {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+}
