@@ -6780,6 +6780,7 @@ runTest('Test 146: The sidebar works on every page: off Assessment Outlines only
 
     // 4. Any other page: only Settings is enabled, under a notice linking to the outlines
     location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-connect';
+    for (const panel of sidebar.querySelector('.cx-workspace').children) panel.hidden = true;
     window.ConnectifySidebar.syncState();
     assert.strictEqual(window.ConnectifySidebar.isLimited(), true);
     assert.ok(sidebar.classList.contains('cx-page-limited'), 'the sidebar is marked limited');
@@ -6793,6 +6794,20 @@ runTest('Test 146: The sidebar works on every page: off Assessment Outlines only
       assert.strictEqual(btn.disabled, !settings, `#${btn.id} is ${settings ? 'enabled' : 'disabled'} off the outlines page`);
       assert.strictEqual(btn.getAttribute('aria-disabled'), settings ? null : 'true');
     });
+
+    // Settings opens without the notice above it; Back to Menu brings the notice back
+    let settingsPanel = document.getElementById('connectify-categories');
+    if (!settingsPanel) {
+      settingsPanel = Object.assign(document.createElement('section'), { id: 'connectify-categories' });
+      sidebar.querySelector('.cx-workspace').append(settingsPanel);
+    }
+    settingsPanel.hidden = false;
+    window.ConnectifySidebar.syncState();
+    assert.strictEqual(notice.hidden, true, 'the notice is not shown inside Settings');
+    sidebar.querySelector('.cx-back-menu').onclick();
+    window.ConnectifySidebar.syncState();
+    assert.strictEqual(settingsPanel.hidden, true);
+    assert.strictEqual(notice.hidden, false, 'the notice returns with the launcher menu');
 
     // Back on the outlines page every tool comes back
     location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';

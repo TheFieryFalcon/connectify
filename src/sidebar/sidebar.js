@@ -47,6 +47,7 @@
       for (const child of workspace.children) child.hidden = true;
       sidebar.classList.remove('cx-tool-active');
       introText.hidden = isLimited();
+      pageNotice.hidden = !isLimited();
       toolMenu.querySelectorAll('button').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
       if (handle) {
         handle.dataset.toolActive = 'false';
@@ -144,7 +145,6 @@
 
         const limited = isLimited();
         sidebar.classList.toggle('cx-page-limited', limited);
-        if (pageNotice && pageNotice.hidden !== !limited) pageNotice.hidden = !limited;
         for (const btn of toolMenu.querySelectorAll('button')) {
           const off = !allowsTool(btn.id);
           if (btn.disabled !== off) btn.disabled = off;
@@ -159,6 +159,9 @@
         const hasActiveTool = Array.from(workspace.children).some(p => !p.hidden);
         sidebar.classList.toggle('cx-tool-active', hasActiveTool);
         introText.hidden = hasActiveTool || limited;
+        // The notice belongs to the launcher menu, never above an open tool (Settings)
+        const noticeHidden = !limited || hasActiveTool;
+        if (pageNotice && pageNotice.hidden !== noticeHidden) pageNotice.hidden = noticeHidden;
 
         if (handle) {
           handle.dataset.toolActive = hasActiveTool ? 'true' : 'false';
