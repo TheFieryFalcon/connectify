@@ -1,0 +1,178 @@
+/* Expanded statistics cards (cohort-expanded.js, Settings "Statistics Panels"). The card keeps the statistics
+   panel's surface in every theme (.connectea-panel rules); everything inside it is clear, rows divided by
+   hairlines (one surface per block). The --cx-display-scale zoom still applies; the grid never reflows. */
+.connectea-panel.connectea-panel--expanded {
+  padding: 10px 14px !important;
+  line-height: 1.4 !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+}
+/* The overall card has no row wrapper, so it takes the display scale itself */
+.connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: var(--cx-display-scale, 1); }
+.connectea-row-wrapper > .connectea-panel.connectea-panel--expanded,
+.connectea-row-wrapper > .connectea-panel.connectea-forecast.connectea-panel--expanded {
+  max-width: none !important;
+  padding: 10px 14px !important;
+}
+
+.connectea-panel--expanded :is(.connectea-xp-head, .connectea-xp-foot) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+}
+.connectea-panel--expanded .connectea-xp-grid {
+  display: grid !important;
+  gap: 2px 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+/* Columns line up across rows; a longer value ("Top of assessment") widens its own column instead of overlapping */
+.connectea-panel--expanded :is(.connectea-xp-grid--head, .connectea-xp-grid--hero) { grid-template-columns: repeat(3, minmax(150px, max-content)) !important; }
+.connectea-panel--expanded .connectea-xp-grid--head { align-items: start !important; }
+.connectea-panel--expanded .connectea-xp-grid--quantiles {
+  grid-template-columns: repeat(5, minmax(104px, max-content)) !important;
+  margin-top: 10px !important;
+  padding-top: 8px !important;
+  border-top: 1px solid #d3dfed !important;
+}
+.connectea-panel--expanded :is(.connectea-xp-cell, .connectea-xp-label, .connectea-xp-value) {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-width: 0 !important;
+  background: transparent !important;
+}
+
+/* Labels 400 in the secondary ink, values 700 (bolding parity in light and dark) */
+.connectea-panel--expanded .connectea-xp-label {
+  display: block !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  color: #4e6076 !important;
+}
+.connectea-panel--expanded .connectea-xp-value {
+  display: block !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  color: #203c5e !important;
+}
+.connectea-panel--expanded :is(.connectea-xp-grid--head, .connectea-xp-grid--hero) .connectea-xp-value { font-size: 20px !important; }
+.connectea-panel--expanded .connectea-xp-grid--quantiles .connectea-xp-value { font-size: 14px !important; }
+/* Predictor Low / Mid / High cells: Mid heaviest, Low and High semibold (colours: cohort-forecast.css, cohort-upcoming.css) */
+.connectea-panel--expanded .connectea-xp-value:is(.connectea-forecast-value--low, .connectea-forecast-value--high) { font-weight: 600 !important; }
+
+.connectea-panel--expanded .connectea-xp-foot,
+.connectea-panel--expanded .connectea-xp-prediction {
+  margin-top: 10px !important;
+  padding-top: 8px !important;
+  border-top: 1px solid #d3dfed !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+}
+.connectea-panel--expanded .connectea-xp-body + .connectea-xp-foot { margin-top: 6px !important; }
+.connectea-panel--expanded .connectea-xp-summary:empty { display: none !important; }
+.connectea-panel--expanded .connectea-xp-prediction[hidden] { display: none !important; }
+.connectea-panel--expanded .connectea-xp-needs { white-space: normal !important; }
+.connectea-panel--expanded .connectea-xp-title {
+  margin-bottom: 2px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+/* Overall card: the cohort size input and its notice sit under the Rank value */
+.connectea-panel--expanded .connectea-xp-rank-value { display: block !important; }
+.connectea-panel--expanded .connectea-xp-value .connectea-subject-controls {
+  width: auto !important;
+  margin-top: 4px !important;
+  padding-top: 0 !important;
+  border-top: none !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+}
+.connectea-panel--expanded .connectea-xp-value .connectea-controls { margin: 0 !important; }
+.connectea-panel--expanded .connectea-xp-value .connectea-notice {
+  max-width: 150px !important;
+  white-space: normal !important;
+  font-weight: 400 !important;
+}
+
+html.connectea-dark .connectea-panel--expanded .connectea-xp-label { color: var(--cx-text-secondary, #d6e8f8) !important; }
+html.connectea-dark .connectea-panel--expanded .connectea-xp-value { color: var(--cx-text-primary, #f1f5f9) !important; }
+html.connectea-dark .connectea-panel--expanded :is(.connectea-xp-grid--quantiles, .connectea-xp-foot, .connectea-xp-prediction) {
+  border-top-color: var(--cx-border, #3b6088) !important;
+}
+
+/* Liquid Glass: the card is the whole strip, so it has no edge of its own; labels take the primary ink
+   (secondary drops below 5:1 over dark wallpapers in grey Liquid Glass) and dividers are the glass hairline */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, .connectea-row-wrapper) > .connectea-panel.connectea-panel--expanded {
+  border-color: transparent !important;
+  border-radius: 0 !important;
+}
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-row-wrapper:has(> .connectea-panel--expanded)::before { inset: 0; }
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel--expanded .connectea-xp-label {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel--expanded :is(.connectea-xp-grid--quantiles, .connectea-xp-foot, .connectea-xp-prediction) {
+  border-top-color: var(--cx-gl-hairline, rgba(255, 255, 255, 0.14)) !important;
+}
+
+/* Score colour: the theme accent, more vivid the further the result sits above the predicted range.
+   data-cx-score-step 0-10 is set by cohort-expanded.js (no inline styles); 5 when there is no range */
+.connectea-panel--expanded .connectea-xp-score { --cx-score-t: 0.5; }
+.connectea-xp-score[data-cx-score-step="0"] { --cx-score-t: 0; }
+.connectea-xp-score[data-cx-score-step="1"] { --cx-score-t: 0.1; }
+.connectea-xp-score[data-cx-score-step="2"] { --cx-score-t: 0.2; }
+.connectea-xp-score[data-cx-score-step="3"] { --cx-score-t: 0.3; }
+.connectea-xp-score[data-cx-score-step="4"] { --cx-score-t: 0.4; }
+.connectea-xp-score[data-cx-score-step="5"] { --cx-score-t: 0.5; }
+.connectea-xp-score[data-cx-score-step="6"] { --cx-score-t: 0.6; }
+.connectea-xp-score[data-cx-score-step="7"] { --cx-score-t: 0.7; }
+.connectea-xp-score[data-cx-score-step="8"] { --cx-score-t: 0.8; }
+.connectea-xp-score[data-cx-score-step="9"] { --cx-score-t: 0.9; }
+.connectea-xp-score:is([data-cx-score-step="10"], [data-cx-score-step="breakout"]) { --cx-score-t: 1; }
+
+/* Base inks (>= 5:1 at every step). The glass task-row rule inks the strip with the primary text, so the
+   unused id outranks it. Browsers without relative colours keep the base ink */
+:is(#cx-specificity-anchor, .connectea-panel--expanded) .connectea-xp-score[data-cx-score-step] {
+  --cx-score-base: var(--cx-accent-link, #1d4ed8);
+  color: var(--cx-score-base) !important;
+}
+html.connectea-dark :is(#cx-specificity-anchor, .connectea-panel--expanded) .connectea-xp-score[data-cx-score-step] {
+  --cx-score-base: color-mix(in srgb, var(--cx-accent-hover, #93c5fd) 60%, var(--cx-text-primary, #ffffff));
+  color: var(--cx-score-base) !important;
+}
+html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-panel--expanded) .connectea-xp-score[data-cx-score-step] {
+  --cx-score-base: var(--cx-text-primary, #1d1c1c);
+  color: var(--cx-text-primary, #1d1c1c) !important;
+}
+
+/* The breakout Score glows (static pastel purple): the only text shadow in Connectify. It marks a breakout
+   without disclosing the threshold, which stays secret */
+.connectea-panel--expanded .connectea-xp-score[data-cx-score-step="breakout"] {
+  text-shadow: 0 0 6px rgba(196, 181, 253, 0.9), 0 0 14px rgba(167, 139, 250, 0.6) !important;
+}
+
+@supports (color: oklch(from red l c h)) {
+  /* Light: better results go darker and more saturated, so contrast only rises */
+  :is(#cx-specificity-anchor, .connectea-panel--expanded) .connectea-xp-score[data-cx-score-step] {
+    color: oklch(from var(--cx-score-base) calc(l * (1.04 - 0.16 * var(--cx-score-t))) calc(c * (0.45 + 0.7 * var(--cx-score-t))) h) !important;
+  }
+  :is(#cx-specificity-anchor, .connectea-panel--expanded) .connectea-xp-score[data-cx-score-step="breakout"] {
+    color: oklch(from var(--cx-score-base) calc(l * 0.8) calc(c * 1.3) h) !important;
+  }
+  /* Dark: better results go lighter and more saturated */
+  html.connectea-dark :is(#cx-specificity-anchor, .connectea-panel--expanded) .connectea-xp-score[data-cx-score-step] {
+    color: oklch(from var(--cx-score-base) calc(l * (0.92 + 0.08 * var(--cx-score-t))) calc(c * (0.4 + 0.6 * var(--cx-score-t))) h) !important;
+  }
+  html.connectea-dark :is(#cx-specificity-anchor, .connectea-panel--expanded) .connectea-xp-score[data-cx-score-step="breakout"] {
+    color: oklch(from var(--cx-score-base) calc(l * 1.06) calc(c * 1.6) h) !important;
+  }
+  /* Light tone: the Predictor's OKLCH 0.34 re-inking, going darker and more saturated */
+  html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-panel--expanded) .connectea-xp-score[data-cx-score-step] {
+    color: oklch(from var(--cx-accent, #38bdf8) calc(0.34 * (1 - 0.12 * var(--cx-score-t))) calc(c * (0.45 + 0.55 * var(--cx-score-t))) h) !important;
+  }
+  html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-panel--expanded) .connectea-xp-score[data-cx-score-step="breakout"] {
+    color: oklch(from var(--cx-accent, #38bdf8) 0.27 calc(c * 1.3) h) !important;
+  }
+}

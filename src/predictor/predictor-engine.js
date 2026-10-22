@@ -88,7 +88,9 @@
 
     // 1. Resolve subject performance:
     let subjectAvg = historical?.subjects?.[cleanSubj];
+    let subjectSource = 'subject-history';
     if (subjectAvg === undefined && baselines?.subjects) {
+      subjectSource = 'subject-baseline';
       if (baselines.subjects[cleanSubj] !== undefined) {
         subjectAvg = Number(baselines.subjects[cleanSubj]);
       } else if (baselines.subjects[subjectName] !== undefined) {
@@ -109,11 +111,15 @@
     // 2. Resolve assessment type performance:
     const completedTypeCount = historical?.typeCounts?.[taskType] || 0;
     let typeAvg = historical?.types?.[taskType];
+    // What the prediction rests on, for the expanded prediction card (cohort-expanded.js)
+    let basis = { source: 'type-history', count: completedTypeCount };
 
     if (completedTypeCount === 0 && baselines?.types?.[taskType] !== undefined) {
       typeAvg = Number(baselines.types[taskType]);
+      basis = { source: 'type-baseline', count: 0 };
     } else if (typeAvg === undefined || !Number.isFinite(typeAvg) || completedTypeCount === 0) {
       typeAvg = subjectAvg;
+      basis = { source: subjectSource, count: 0 };
     }
 
     if (typeAvg === undefined || !Number.isFinite(typeAvg)) {
@@ -171,7 +177,8 @@
       breakoutScore,
       taskType,
       type: taskType,
-      subjectName: cleanSubj
+      subjectName: cleanSubj,
+      basis
     };
   }
 

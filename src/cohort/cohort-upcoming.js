@@ -4,7 +4,8 @@
  * A class without a final A-E letter shows its projected final mark under the overall statistics: one
  * line in the task forecast's style, Low / Mid / High from the Predictor's subject projection (completed
  * results plus predictions for the uncompleted tasks), or what the projection still needs. Hidden once the
- * class shows a letter. Exposes window.ConnectifyCohortUpcoming.
+ * class shows a letter. Expanded overall cards show it in their own section below a divider instead.
+ * Exposes window.ConnectifyCohortUpcoming.
  */
 (() => {
   'use strict';
@@ -52,9 +53,24 @@
       box.style.setProperty('display', 'none', 'important');
     }
 
+    /** Shows the class's prediction and returns it (null without a projection or once it has a letter). */
     function show(ui, overallRow, subjects) {
-      if (!ui?.box) return;
-      if (hasLetter(overallRow)) return hide(ui);
+      if (!ui?.box) return null;
+      // Expanded overall cards hold the prediction in their own section (cohort-expanded.js)
+      const section = ui.xp?.prediction;
+      if (section) {
+        if (hasLetter(overallRow)) {
+          section.hidden = true;
+          return null;
+        }
+        const projected = projection(overallRow, subjects);
+        window.ConnectifyCohortExpanded.fillPrediction(section, projected, NEEDS);
+        return projected;
+      }
+      if (hasLetter(overallRow)) {
+        hide(ui);
+        return null;
+      }
       if (!ui.upcoming?.isConnected) {
         ui.upcoming = createElement('section', 'connectea-panel connectea-upcoming');
         ui.upcoming.setAttribute('aria-label', 'Connectify predicted class result');
@@ -72,6 +88,7 @@
       }
       ui.upcoming.hidden = false;
       ui.upcoming.style.setProperty('display', 'block', 'important');
+      return p;
     }
 
     window.ConnectifyCohortUpcoming = { show, hide, signature, hasLetter, projection, NEEDS };

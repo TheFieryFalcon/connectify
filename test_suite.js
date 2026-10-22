@@ -94,6 +94,8 @@ const MODULE_BUNDLES = {
   'cohort-view.js': [
     'cohort-outcome.js',
     'cohort-row-readers.js',
+    'cohort-panel-view.js',
+    'cohort-expanded.js',
     'cohort-panel.js',
     'cohort-outcome-eval.js',
     'cohort-forecast.js',
@@ -105,6 +107,7 @@ const MODULE_BUNDLES = {
     'category-baselines.js',
     'settings-markup.js',
     'settings-semester-filter.js',
+    'settings-panel-view.js',
     'settings-preferences.js',
     'category-settings.js'
   ],
@@ -2372,8 +2375,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v12_20261019_pred'"), 'predictor-math.js must use v12_20261019_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v12_20261019_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v12_20261019_pred');
+  assert.ok(predMathCode.includes("'v13_20261022_pred'"), 'predictor-math.js must use v13_20261022_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v13_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v13_20261022_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2466,9 +2469,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v12_20261019_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v13_20261022_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v12_20261019_pred'), 'predictor-math.js must bump version to v12_20261019_pred');
+  assert.ok(predMathJs.includes('v13_20261022_pred'), 'predictor-math.js must bump version to v13_20261022_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -9849,6 +9852,282 @@ runTest('Test 220: On Assessment Outlines the shortcut, not My Connect, is the h
   } finally {
     document.querySelectorAll = origQSA; location.href = origHref;
   }
+});
+
+// Expanded statistics cards (specs/expanded-stats-panels.md): loads the cohort view with a panel view mode
+function loadCohortViewIn(mode) {
+  localStorage.clear();
+  if (mode) localStorage.setItem('connectify:panel_view', mode);
+  for (const g of ['ConnectifyTaskTypes', 'ConnectifyCohortView', 'ConnectifyCohortForecast', 'ConnectifyCohortUpcoming', 'ConnectifyCohortExpanded', 'ConnectifyPanelView']) delete window[g];
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8'));
+  eval(origReadFileSync.call(fs, path.join(SRC_DIR, 'cohort/cohort-math.js'), 'utf8'));
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8'));
+  return { view: window.ConnectifyCohortView, xp: window.ConnectifyCohortExpanded };
+}
+
+// A Literature card with an overall row (outside .cvr-c-tasks) and task rows; marks [text] and an optional boxplot
+function expandedFixture() {
+  const card = new MockElement('div', 'eds-c-tile');
+  const title = new MockElement('div', 'eds-c-tile__title');
+  title.textContent = '12 Literature ATAR - Semester 2';
+  card.appendChild(title);
+  const makeRow = (inTasks, labels, markTexts, stats) => {
+    const row = new MockElement('div', 'cvr-c-task');
+    row.closest = sel => sel.includes('eds-c-tile') ? card : (sel === '.cvr-c-tasks' && inTasks ? card : null);
+    const details = new MockElement('div', 'cvr-c-task__details');
+    for (const text of labels) {
+      const label = new MockElement('span', 'v-label');
+      label.textContent = text;
+      details.appendChild(label);
+    }
+    row.appendChild(details);
+    const marks = new MockElement('div', 'cvr-c-task__marks');
+    for (const text of [].concat(markTexts)) {
+      const cell = new MockElement('div', 'cvr-c-task__mark');
+      cell.textContent = text;
+      marks.appendChild(cell);
+    }
+    row.appendChild(marks);
+    if (stats) {
+      const chart = new MockElement('div', 'cvr-c-task__chart');
+      chart.dataset.connectifyStats = JSON.stringify(stats);
+      row.appendChild(chart);
+    }
+    card.appendChild(row);
+    return row;
+  };
+  return { card, makeRow };
+}
+
+const descendants = el => (el.children || []).flatMap(c => [c, ...descendants(c)]);
+
+runTest('Test 221: The Statistics Panels setting stores compact, subjects or all, read once per page load', () => {
+  localStorage.clear();
+  delete window.ConnectifyPanelView;
+  const load = () => eval(origReadFileSync.call(fs, path.join(SRC_DIR, 'cohort/cohort-panel-view.js'), 'utf8'));
+  load();
+  let view = window.ConnectifyPanelView;
+  assert.strictEqual(view.mode(), 'compact', 'compact view is the default');
+  assert.ok(!view.expandsOverall() && !view.expandsTasks());
+  localStorage.setItem('connectify:panel_view', 'banana');
+  assert.strictEqual(view.read(), 'compact', 'unknown values read as compact');
+  localStorage.setItem('connectify:panel_view', 'subjects');
+  load();
+  view = window.ConnectifyPanelView;
+  assert.ok(view.expandsOverall() && !view.expandsTasks(), 'subjects: overall rows only');
+  localStorage.setItem('connectify:panel_view', 'all');
+  load();
+  view = window.ConnectifyPanelView;
+  assert.ok(view.expandsOverall() && view.expandsTasks(), 'all: every row');
+
+  // Settings dropdown: writes storage, the page keeps the mode it loaded with until reload
+  eval(origReadFileSync.call(fs, path.join(SRC_DIR, 'predictor/settings-markup.js'), 'utf8'));
+  eval(origReadFileSync.call(fs, path.join(SRC_DIR, 'predictor/settings-panel-view.js'), 'utf8'));
+  const html = window.ConnectifySettingsMarkup.panelHtml();
+  for (const [value, label] of [['compact', 'Compact view'], ['subjects', 'Expanded view on subject panels only'], ['all', 'Expanded view on all panels']]) {
+    assert.ok(html.includes(`<option value="${value}">${label}</option>`), `the dropdown offers ${label}`);
+  }
+  assert.ok(/Statistics Panels<\/label>/.test(html) && html.includes('Takes effect after reload.'), 'labelled, with the reload note');
+  const panel = new MockElement('div');
+  panel.innerHTML = html;
+  const select = panel.querySelector('#cx-panel-view-select');
+  window.ConnectifySettingsPanelView.bind(panel);
+  assert.strictEqual(select.value, 'all', 'the dropdown shows the stored mode');
+  select.value = 'compact';
+  select.dispatchEvent(new MockEvent('change'));
+  assert.strictEqual(localStorage.getItem('connectify:panel_view'), null, 'compact (the default) removes the setting');
+  select.value = 'subjects';
+  select.dispatchEvent(new MockEvent('change'));
+  assert.strictEqual(localStorage.getItem('connectify:panel_view'), 'subjects');
+  assert.strictEqual(view.mode(), 'all', 'the open page keeps its mode until reload');
+
+  const prefs = origReadFileSync.call(fs, path.join(SRC_DIR, 'predictor/settings-preferences.js'), 'utf8');
+  assert.ok(prefs.includes('window.ConnectifySettingsPanelView?.bind(panel)'), 'General Preferences binds the dropdown');
+  const versions = origReadFileSync.call(fs, path.join(SRC_DIR, 'assessment/cache-versions.js'), 'utf8');
+  assert.ok(/directKeys = \[[^\]]*'connectify:panel_view'/.test(versions), 'a settings reset clears it like the other preferences');
+  assert.ok(!/panel_view/.test(prefs.slice(prefs.indexOf('function bindClearCache'), prefs.indexOf('function bind(panel)'))), 'Clear Cache keeps it');
+
+  const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const js = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-view.js')).js;
+  const at = f => js.indexOf(`src/${f}`);
+  assert.ok(at('cohort/cohort-row-readers.js') < at('cohort/cohort-panel-view.js') && at('cohort/cohort-panel-view.js') < at('cohort/cohort-expanded.js') &&
+    at('cohort/cohort-expanded.js') < at('cohort/cohort-panel.js'), 'the view setting and cards load before cohort-panel.js');
+  assert.ok(at('predictor/settings-semester-filter.js') < at('predictor/settings-panel-view.js') && at('predictor/settings-panel-view.js') < at('predictor/settings-preferences.js'));
+  assert.ok(manifest.content_scripts.some(g => (g.css || []).includes('src/cohort/cohort-expanded.css')), 'cohort-expanded.css is registered');
+  localStorage.clear();
+});
+
+runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot values and SD, z-score and standing', () => {
+  const { view, xp } = loadCohortViewIn('all');
+  window.ConnectifyPredictorMath.saveBaselines({ types: { Exam: 70 }, subjects: { '12 Literature ATAR': 70 } });
+  const { makeRow } = expandedFixture();
+  const stats = [32.5, 58, 68.85, 79.9, 96.7];
+  const row = makeRow(true, ['Examination', 'Term 1, Week 4', 'Extended response 1'], '21 Out of 30', stats);
+  view.render(row, false, 'lit-key', 219, null, []);
+  const ui = view.panels.get(row);
+  assert.ok(ui.box.classList.contains('connectea-panel') && ui.box.classList.contains('connectea-panel--expanded'), 'the card is still a statistics panel');
+  assert.deepStrictEqual(ui.wrapper.children, [ui.box], 'the card holds the meter and Type dropdown itself');
+  const parts = descendants(ui.box);
+  const labels = parts.filter(e => e.classList.contains('connectea-xp-label')).map(e => e.textContent);
+  assert.deepStrictEqual(labels, ['Score', 'Rank', 'Average', 'Minimum', 'Lower Quartile', 'Median', 'Upper Quartile', 'Maximum']);
+  assert.ok(parts.every(e => e.tagName !== 'SPAN' || !e.classList.contains('v-label')) && !parts.some(e => e.classList.contains('v-label')), 'no .v-label inside the card (task labels stay Connect\'s)');
+  assert.ok(parts.filter(e => e.classList.contains('connectea-xp-cell')).every(e => e.className === 'connectea-xp-cell'), 'no quantile cell is highlighted');
+  assert.strictEqual(ui.xp.score.textContent, '70%');
+  assert.deepStrictEqual(ui.xp.quantiles.map(e => e.textContent), ['32.5%', '58%', '68.85%', '79.9%', '96.7%']);
+  assert.ok(/%$/.test(ui.xp.average.textContent), 'the cohort mean is shown');
+  assert.ok(/^(Top of assessment|\d+ \/ ~219)$/.test(ui.xp.rankValue.textContent), `an estimated cohort size reads ~: ${ui.xp.rankValue.textContent}`);
+  assert.ok(/^SD [\d.]+ · Z-Score -?[\d.]+( · .+)?$/.test(ui.xp.summary.textContent), `footer: ${ui.xp.summary.textContent}`);
+  assert.ok(ui.outcomeBar.parentElement.classList.contains('connectea-xp-head'), 'the outcome meter sits in the header');
+  assert.strictEqual(ui.typeContainer.parentElement, ui.xp.foot, 'the Type dropdown sits in the footer');
+  assert.ok(/^(10|\d)$/.test(ui.xp.score.getAttribute('data-cx-score-step')), 'the Score has a colour step');
+  assert.ok(ui.outcomeBar.dataset.connecteaTooltip.endsWith(xp.SCORE_NOTE), 'the meter tooltip explains the Score colour');
+
+  // A breakout glows; the threshold is never named
+  row.querySelector('.cvr-c-task__mark').textContent = '30 Out of 30';
+  view.render(row, false, 'lit-key', 219, null, []);
+  assert.strictEqual(ui.xp.score.getAttribute('data-cx-score-step'), 'breakout');
+  assert.ok(!/purple|glow|1\.1|breakout/i.test(xp.SCORE_NOTE), 'the tooltip note never discloses the breakout');
+
+  // No boxplot: the skeleton stays with dashes and the compact view's wording
+  const bare = makeRow(true, ['Test', 'Term 1, Week 5', 'Short answer'], '20 Out of 25');
+  view.render(bare, false, 'lit-key', undefined, null, []);
+  const b = view.panels.get(bare).xp;
+  assert.ok([b.rankValue, b.average, ...b.quantiles].every(e => e.textContent === '—'), 'unavailable values are dashes');
+  assert.strictEqual(b.summary.textContent, 'Cohort statistics unavailable');
+  assert.strictEqual(b.score.textContent, '80%', 'the Score is still shown');
+  loadCohortViewIn(null);
+});
+
+runTest('Test 223: Expanded overall cards hold the cohort input under Rank and the class prediction; subjects mode keeps tasks compact', () => {
+  const { view } = loadCohortViewIn('subjects');
+  window.ConnectifyPredictorMath.saveBaselines({ types: { Exam: 70 }, subjects: { '12 Literature ATAR': 70 } });
+  const { makeRow } = expandedFixture();
+  const overall = makeRow(false, ['Semester 2 Cumulative Percent'], '81.2%', [32.5, 58, 68.85, 79.9, 96.7]);
+  view.render(overall, true, 'lit-key', 219, null, []);
+  const ui = view.panels.get(overall);
+  assert.ok(ui.box.classList.contains('connectea-panel--expanded'));
+  assert.strictEqual(ui.input.parentElement.parentElement.parentElement, ui.xp.rankValue.parentElement, 'the cohort size input sits under the Rank value');
+  assert.ok(!ui.upcoming, 'no separate class prediction line');
+  assert.ok(!ui.xp.prediction.hidden && /Predicted class result/.test(ui.xp.prediction.innerHTML), 'the class prediction is a section of the card');
+  assert.ok(!ui.outcomeBar, 'overall rows have no meter');
+  assert.ok(ui.xp.score.getAttribute('data-cx-score-step') !== 'breakout', 'overall rows never glow');
+
+  const finished = makeRow(false, ['Semester 1 Cumulative Percent'], ['81.2%', 'A'], [32.5, 58, 68.85, 79.9, 96.7]);
+  view.render(finished, true, 'lit-key-2', 219, null, []);
+  const done = view.panels.get(finished).xp;
+  assert.strictEqual(done.prediction.hidden, true, 'a class with a final letter has no prediction section');
+  assert.strictEqual(done.score.getAttribute('data-cx-score-step'), '5', 'without a projection the Score sits mid-scale');
+
+  const task = makeRow(true, ['Examination', 'Term 1, Week 4', 'Extended response 1'], '21 Out of 30', [32.5, 58, 68.85, 79.9, 96.7]);
+  view.render(task, false, 'lit-key', 219, null, []);
+  const t = view.panels.get(task);
+  assert.ok(!t.xp && !t.box.classList.contains('connectea-panel--expanded') && t.wrapper.children.includes(t.typeContainer), 'subjects mode keeps task rows compact');
+  loadCohortViewIn(null);
+});
+
+runTest('Test 224: Expanded unmarked rows show Low / Mid / High with what the prediction is based on', () => {
+  const { view, xp } = loadCohortViewIn('all');
+  const { makeRow } = expandedFixture();
+  const row = makeRow(true, ['Examination', 'Term 4, Week 3', 'Extended response 1'], '');
+  window.ConnectifyPredictorMath.saveBaselines({ types: {}, subjects: {} });
+  view.render(row, false, 'lit-key', 50, null, []);
+  let ui = view.panels.get(row);
+  assert.ok(ui.forecast.classList.contains('connectea-panel--expanded'), 'the prediction card is expanded');
+  assert.strictEqual(ui.xpForecast.body.textContent, window.ConnectifyCohortForecast.NEEDS, 'without data it says what the prediction needs');
+  assert.strictEqual(ui.typeContainer.parentElement, ui.xpForecast.foot, 'the Type dropdown follows the visible card');
+
+  window.ConnectifyPredictorMath.saveBaselines({ types: { Exam: 70 }, subjects: { '12 Literature ATAR': 70 } });
+  window.dispatchEvent(new MockEvent('connectify-baselines-updated'));
+  view.render(row, false, 'lit-key', 50, null, []);
+  ui = view.panels.get(row);
+  const html = ui.xpForecast.body.innerHTML;
+  for (const level of ['low', 'mid', 'high']) {
+    assert.ok(new RegExp(`<dd class="connectea-xp-value connectea-forecast-value connectea-forecast-value--${level}">\\d+%</dd>`).test(html), `${level} in the Predictor colour class`);
+  }
+  assert.ok(!/breakout|purple|110/i.test(html), 'the breakout threshold stays secret');
+  assert.ok(/^From your previous-year .+ average$|^From your/.test(ui.xpForecast.summary.textContent), `basis: ${ui.xpForecast.summary.textContent}`);
+
+  row.querySelector('.cvr-c-task__mark').textContent = '72 Out of 100';
+  view.render(row, false, 'lit-key', 50, null, []);
+  assert.strictEqual(ui.typeContainer.parentElement, ui.xp.foot, 'once marked the Type dropdown returns to the statistics card');
+
+  // Basis wording, and the engine records it for every path
+  assert.strictEqual(xp.basisText({ type: 'Exam', basis: { source: 'type-history', count: 3 } }), 'From your 3 earlier Exam results');
+  assert.strictEqual(xp.basisText({ type: 'Exam', basis: { source: 'type-history', count: 1 } }), 'From your earlier Exam result');
+  assert.strictEqual(xp.basisText({ type: 'Exam', basis: { source: 'type-baseline', count: 0 } }), 'From your previous-year Exam average');
+  assert.strictEqual(xp.basisText({ type: 'Exam', basis: { source: 'subject-history', count: 0 } }), 'From your results in this subject');
+  assert.strictEqual(xp.basisText({ type: 'Exam', basis: { source: 'subject-baseline', count: 0 } }), 'From your previous-year subject result');
+  assert.strictEqual(xp.basisText({ type: 'Exam' }), 'Predicted from your Exam results', 'predictions cached before basis existed');
+  const pm = window.ConnectifyPredictorMath;
+  const task = { name: 'Final Exam', caption: '' };
+  const type = window.ConnectifyTaskTypes.getEffectiveType('Art', task);
+  const hist = (subjects, types, typeCounts) => ({ subjects, types, typeCounts, overallAverage: 75, spread: 6 });
+  const none = { types: {}, subjects: {} };
+  assert.deepStrictEqual(pm.predictTask('Art', task, hist({ Art: 75 }, { [type]: 80 }, { [type]: 3 }), none).basis, { source: 'type-history', count: 3 });
+  assert.deepStrictEqual(pm.predictTask('Art', task, hist({ Art: 75 }, {}, {}), { types: { [type]: 70 }, subjects: {} }).basis, { source: 'type-baseline', count: 0 });
+  assert.deepStrictEqual(pm.predictTask('Art', task, hist({ Art: 75 }, {}, {}), none).basis, { source: 'subject-history', count: 0 });
+  assert.deepStrictEqual(pm.predictTask('Art', task, hist({}, {}, {}), { types: {}, subjects: { Art: 70 } }).basis, { source: 'subject-baseline', count: 0 });
+  const outcome = pm.evaluateOutcome(80, { low: 60, mid: 70, high: 78, breakoutScore: 85.8 });
+  assert.deepStrictEqual([outcome.low, outcome.high, outcome.segments], [60, 78, 4], 'the outcome carries the prediction range');
+  loadCohortViewIn(null);
+});
+
+runTest('Test 225: The Score colour steps from Low to High, stays >= 5:1 and only the breakout glows', () => {
+  const { xp } = loadCohortViewIn('all');
+  assert.strictEqual(xp.scoreStep(50, 60, 80), '0', 'below Low clamps to the dullest step');
+  assert.strictEqual(xp.scoreStep(70, 60, 80), '5');
+  assert.strictEqual(xp.scoreStep(77, 60, 80), '9', '11 steps between Low and High');
+  assert.strictEqual(xp.scoreStep(95, 60, 80), '10', 'above High clamps to the brightest step');
+  assert.strictEqual(xp.scoreStep(95, 60, 80, true), 'breakout');
+  assert.strictEqual(xp.scoreStep(70, undefined, undefined), '5', 'no range sits mid-scale');
+  assert.strictEqual(xp.scoreStep(NaN, 60, 80), null, 'no mark, no step');
+
+  const css = origReadFileSync.call(fs, path.join(SRC_DIR, 'cohort/cohort-expanded.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  for (let i = 0; i <= 9; i++) assert.ok(css.includes(`.connectea-xp-score[data-cx-score-step="${i}"] { --cx-score-t: ${i / 10}; }`), `step ${i}`);
+  const shadows = [...css.matchAll(/([^{}]+)\{[^{}]*text-shadow[^{}]*\}/g)].map(m => m[1].trim());
+  assert.deepStrictEqual(shadows, ['.connectea-panel--expanded .connectea-xp-score[data-cx-score-step="breakout"]'], 'the breakout Score is the only text shadow');
+  assert.ok(/rgba\(196, 181, 253/.test(css), 'the glow is pastel purple');
+  assert.ok(!/@keyframes|animation/.test(css), 'the glow is static');
+  assert.ok(/@supports \(color: oklch\(from red l c h\)\)/.test(css), 'relative colours are guarded, so older browsers keep the base ink');
+
+  // Every dark preset: the dullest step and the breakout reach 5:1 on the panel; light inverts (darker is better)
+  const win = {};
+  for (const f of ['theme-oklch.js', 'theme-palettes.js']) new Function('window', origReadFileSync.call(fs, path.join(SRC_DIR, 'theme', f), 'utf8'))(win);
+  const O = win.ConnectifyThemeOklch;
+  const factors = scope => {
+    const m = css.match(new RegExp(`${scope}:is\\(#cx-specificity-anchor, \\.connectea-panel--expanded\\) \\.connectea-xp-score\\[data-cx-score-step\\] \\{\\s*color: oklch\\(from var\\(--cx-score-base\\) calc\\(l \\* \\(([\\d.]+) ([+-]) ([\\d.]+) \\* var\\(--cx-score-t\\)\\)\\) calc\\(c \\* \\(([\\d.]+) \\+ ([\\d.]+) \\* var\\(--cx-score-t\\)\\)\\) h\\)`));
+    assert.ok(m, `relative step rule for ${scope || 'light'}`);
+    const sign = m[2] === '+' ? 1 : -1;
+    return t => [Number(m[1]) + sign * Number(m[3]) * t, Number(m[4]) + Number(m[5]) * t];
+  };
+  const step = (base, [lf, cf]) => { const o = O.toOklch(base); return O.fromOklch(Math.min(100, o.L * lf), o.C * cf, o.h); };
+  const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const hex = a => '#' + a.map(x => Math.round(x).toString(16).padStart(2, '0')).join('');
+  const over = (top, bottom) => {
+    const m = /rgba\(([^)]+)\)/.exec(top);
+    if (!m) return top;
+    const v = m[1].split(',').map(Number);
+    return hex(v.slice(0, 3).map((x, i) => x * v[3] + rgb(bottom)[i] * (1 - v[3])));
+  };
+  const dark = factors('html\\.connectea-dark ');
+  const breakDark = css.match(/html\.connectea-dark :is\(#cx-specificity-anchor, \.connectea-panel--expanded\) \.connectea-xp-score\[data-cx-score-step="breakout"\] \{\s*color: oklch\(from var\(--cx-score-base\) calc\(l \* ([\d.]+)\) calc\(c \* ([\d.]+)\) h\)/);
+  for (const [id, p] of Object.entries(win.ConnectifyThemePalettes.BUILTIN_PALETTES)) {
+    if (p.derived || !p.accentHover) continue;
+    const bg = over(p.surfaceElevated || p.surface, p.canvas);
+    const base = hex(rgb(p.accentHover).map((x, i) => x * 0.6 + rgb(p.textPrimary)[i] * 0.4));
+    for (const [name, ink] of [['step 0', step(base, dark(0))], ['step 10', step(base, dark(1))], ['breakout', step(base, [Number(breakDark[1]), Number(breakDark[2])])]]) {
+      assert.ok(O.contrast(ink, bg) >= 5, `${id} ${name}: ${ink} on ${bg} is ${O.contrast(ink, bg).toFixed(2)}:1`);
+    }
+    assert.ok(O.toOklch(step(base, dark(1))).L > O.toOklch(step(base, dark(0))).L, `${id}: better results are brighter`);
+  }
+  const light = factors('');
+  for (const bg of ['#f3f7fc', '#ffffff']) {
+    assert.ok(O.contrast(step('#1d4ed8', light(0)), bg) >= 5, `Light step 0 reaches 5:1 on ${bg}`);
+    assert.ok(O.contrast(step('#1d4ed8', light(1)), bg) > O.contrast(step('#1d4ed8', light(0)), bg), 'Light inverts: better results are darker');
+  }
+  assert.ok(css.includes('calc(0.34 * (1 - 0.12 * var(--cx-score-t)))') && css.includes('0.27 calc(c * 1.3)'), 'light tone only darkens from the Predictor\'s 0.34 ink');
+  loadCohortViewIn(null);
 });
 
 Promise.all(pendingTestPromises).then(() => {

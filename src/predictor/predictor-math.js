@@ -42,7 +42,7 @@
   const getOrComputeTaskPrediction = viaCache('getOrComputeTaskPrediction');
   const clearSubjectPredictionCache = viaCache('clearSubjectPredictionCache');
   const updatePredictionCache = viaCache('updatePredictionCache');
-  const PREDICTOR_ALGO_VERSION = cacheModule.PREDICTOR_ALGO_VERSION || 'v12_20261019_pred';
+  const PREDICTOR_ALGO_VERSION = cacheModule.PREDICTOR_ALGO_VERSION || 'v13_20261022_pred';
 
   const projectSubjectGrades = viaProjection('projectSubjectGrades');
   const projectATAR = viaProjection('projectATAR');
@@ -58,7 +58,7 @@
    * - Critical Shortfall: Score <= Low - 10 (additive) -> 0 segments (Empty glowing red bar)
    * Note: The purple breakout threshold is secret and never revealed in advance or in the tooltip legend.
    */
-  function evaluateOutcome(score, prediction) {
+  function outcomeTier(score, prediction) {
     if (!Number.isFinite(score) || !prediction || prediction.unpredicted) return null;
 
     const low = prediction.low;
@@ -146,6 +146,12 @@
       label: `Below Low! Scored ${round(score, 1)}% (under Low estimate ${low}%)`,
       details: `Actual Score: ${round(score, 1)}%\nOutcome: Below Low (Red - 1 segment)\n\n${legend}`
     };
+  }
+
+  /** The meter's outcome plus the prediction's Low and High (expanded cards colour the Score by them). */
+  function evaluateOutcome(score, prediction) {
+    const outcome = outcomeTier(score, prediction);
+    return outcome && { ...outcome, low: prediction.low, high: prediction.high };
   }
 
   // --- EXPORTS ---

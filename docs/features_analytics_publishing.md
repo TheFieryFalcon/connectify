@@ -32,6 +32,7 @@ This document details user-facing features 11 through 20, covering Target ATAR a
 - **DOM Insertion**: Standalone panel (`#connectify-categories`).
 - **UI Appearance**: Three distinct sections: General Preferences (`connectify:auto_expand`, `connectify:general_cohort_size`, `connectify:atar_percentage`), Semester 1 Scaling Calibration grid table (`connectea:preferences`), and Assessment Categories editor (`+ Add Category`, custom colors, keyword editor).
 - **Functionality**: Synchronizes custom categories across storage; triggers `rescanAllAutoAssessments()` upon saving.
+- **Statistics Panels** (`connectify:panel_view`): Compact view (default), Expanded view on subject panels only, or Expanded view on all panels; takes effect after reload.
 - **Show this semester's classes only** (`connectify:semester_filter`, off by default; always the detected semester: Semester 2 once a class shows a final Semester 1 grade): hides the other semester's outlines, refreshes the cache from this semester's cards only (the other semester's cached results stay frozen and are still used, e.g. final Semester 1 marks) and lists only this semester's classes in every sidebar tool. Filtering the outlines to a class keeps its outline for this semester visible; a class with none shows a message saying its other-semester outline is hidden, with "← Back to All".
 
 ### 15. DOM Sweeper & Health Monitor

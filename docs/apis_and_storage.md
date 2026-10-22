@@ -17,7 +17,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyCohortSizeBaselines` | `cohort-size-baselines.js` | Typical cohort size per subject and year level |
 | `window.ConnectifyCohortRows` | `cohort-row-readers.js` | Task row mark and boxplot readers, DOM helpers |
 | `window.ConnectifyCohortOutcomeEval` | `cohort-outcome-eval.js` | Outcome meter evaluation and prediction pre-caching for a row |
-| `window.ConnectifyCohortView` / `ConnectifyCohortForecast` / `ConnectifyCohortUpcoming` | `cohort-view.js` / `cohort-forecast.js` / `cohort-upcoming.js` | Injects stats panels and type selectors into assessment rows; Low / Mid / High prediction panel on unmarked rows; class Low / Mid / High prediction on the overall row of a class without a letter |
+| `window.ConnectifyCohortView` / `ConnectifyCohortForecast` / `ConnectifyCohortUpcoming` | `cohort-view.js` / `cohort-forecast.js` / `cohort-upcoming.js` | Injects stats panels and type selectors into assessment rows; Low / Mid / High prediction panel on unmarked rows; class Low / Mid / High prediction on the overall row of a class without a letter; `ConnectifyPanelView` (`cohort-panel-view.js`: `mode()`, `expandsOverall()`, `expandsTasks()`, read once per load) and `ConnectifyCohortExpanded` (`cohort-expanded.js`: expanded cards, `scoreStep`, `basisText`) |
 | `window.ConnectifyCohort` | `cohort-stats.js` | Controller orchestrating passes, mutation observer, styles |
 | `window.ConnectifyTaskTypes` | `task-types.js` | Category keyword detection, overrides, class category sharing |
 | `window.ConnectifyScalingData` | `scaling-data.js` | 2025 TISC scaling curves |
@@ -93,7 +93,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify:baseline_backup:<account>` | `localStorage` | `year-rollover.js` | Baselines as they were before a new-year rollover replaced them |
 | `connectify:year_archive:<account>` | `localStorage` | `year-rollover.js` | Last two years' cached results (subjects, grade cache, registry, averages): Connect no longer shows them |
 | `connectify:class_semesters:<student>` | `localStorage` | `class-semesters.js` | Each class's outlines per semester: title, overall mark, final letter, task ids (results cache) |
-| `connectify:semester_filter` | `localStorage` | `semester-filter.js` | `{ enabled }`; off by default; the semester is always the detected one (settings) |
+| `connectify:semester_filter` / `connectify:panel_view` | `localStorage` | `semester-filter.js` / `cohort-panel-view.js` | `{ enabled }`; off by default; the semester is always the detected one (settings). Statistics Panels: `subjects` or `all` (missing = `compact`); applies on next load |
 | `connectify:prediction:<account>:<subject>:<taskId>` | `localStorage` | `predictor-math.js` / `cohort-view.js` | Cached task prediction object (`{ low, mid, high, breakoutScore, type }`) |
 | `connectify:prediction_version` | `localStorage` | `predictor-math.js` | Calculation version incrementer tracking when chronological prediction cache must be re-populated |
 | `connectify:cache_version:<subsystem>` | `localStorage` | `assessment-data.js` | Independent invalidation keys (`predictor`, `results`, `settings`, `cohort`) |

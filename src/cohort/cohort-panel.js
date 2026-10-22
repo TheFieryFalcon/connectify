@@ -2,7 +2,8 @@
  * Connectify Cohort Panel
  *
  * Builds a task row's statistics panel: the distribution and result lines, the "Type:" dropdown and
- * outcome meter for assessments, and the cohort size input on the overall subject row.
+ * outcome meter for assessments, and the cohort size input on the overall subject row. With the expanded
+ * view the panel is a card instead (cohort-expanded.js), holding the meter, Type dropdown and cohort input.
  * Row readers and DOM helpers: cohort-row-readers.js. Exposes window.ConnectifyCohortPanel.
  */
 (() => {
@@ -23,6 +24,10 @@
     const panels = window.ConnectifyCohortPanels || (window.ConnectifyCohortPanels = new WeakMap());
 
     function createPanel(row, isOverall, key, estimatedSize, onCohortChange) {
+      // Expanded cards (Settings "Statistics Panels", read once per page load: cohort-panel-view.js)
+      const view = window.ConnectifyPanelView;
+      const expandedMod = window.ConnectifyCohortExpanded;
+      const expanded = Boolean(view && expandedMod && (isOverall ? view.expandsOverall() : view.expandsTasks()));
       const box = createElement('section', 'connectea-panel');
       box.setAttribute(
         'aria-label',
@@ -35,7 +40,7 @@
 
       const resultRow = createElement('div', 'connectea-result-row');
       resultRow.append(result);
-      box.append(distribution, resultRow);
+      if (!expanded) box.append(distribution, resultRow);
 
       const isMarked = Number.isFinite(readMark(row));
       if (!isOverall && !isMarked) {
@@ -66,7 +71,9 @@
         outcomeBar.hidden = true;
         outcomeBar.style.setProperty('display', 'none', 'important');
 
-        wrapper.append(box, typeContainer, outcomeBar);
+        // An expanded card holds the meter and Type dropdown itself
+        if (expanded) wrapper.append(box);
+        else wrapper.append(box, typeContainer, outcomeBar);
 
         const meta = types().getTaskMeta(row);
         types().updateTypeSelect(typeSelect, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
@@ -99,6 +106,7 @@
 
       let input;
       let notice;
+      let controls;
       const stateRef = {};
 
       if (isOverall && key) {
@@ -116,9 +124,9 @@
         notice = createElement('span', 'connectea-notice', noticeText(estimatedSize, saved));
         notice.setAttribute('aria-live', 'polite');
 
-        const controls = createElement('div', 'connectea-subject-controls');
+        controls = createElement('div', 'connectea-subject-controls');
         controls.append(label, notice);
-        box.append(controls);
+        if (!expanded) box.append(controls);
 
         input.addEventListener('input', () => {
           const size = math().validCohortSize(input.value);
@@ -141,6 +149,10 @@
         }
       }
 
+      const xp = expanded
+        ? expandedMod.buildStats(box, { overall: isOverall, meter: outcomeBar, type: typeContainer, controls })
+        : null;
+
       const target = row.querySelector('.cvr-c-task__details') || row;
       target.querySelectorAll('.connectea-panel, .connectea-row-wrapper').forEach(el => {
         if (el !== wrapper && el !== box) el.remove();
@@ -161,7 +173,8 @@
         estimatedSize,
         typeContainer,
         typeSelect,
-        outcomeBar
+        outcomeBar,
+        xp
       };
 
       if (isOverall && key) {

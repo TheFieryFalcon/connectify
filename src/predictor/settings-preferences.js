@@ -123,6 +123,7 @@
     themeSelect?.addEventListener('change', () => window.ConnectifyTheme?.setTheme(themeSelect.value));
     const refreshWallpaper = bindWallpaper(panel);
     const refreshSemesterFilter = window.ConnectifySettingsSemesterFilter?.bind(panel) || (() => {});
+    const refreshPanelView = window.ConnectifySettingsPanelView?.bind(panel) || (() => {});
     bindClearCache(panel);
 
     const refresh = () => {
@@ -133,6 +134,7 @@
         if (themeSelect) renderThemeOptions(themeSelect);
         refreshWallpaper();
         refreshSemesterFilter();
+        refreshPanelView();
       } catch (e) {
         console.warn('Connectify settings preferences error:', e);
       }

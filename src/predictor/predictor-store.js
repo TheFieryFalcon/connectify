@@ -12,7 +12,7 @@
   const cleanSubject = (...args) => window.ConnectifyPredictorEngine.cleanSubject(...args);
   const getAccountKey = () => window.ConnectifyUtils.accountKey();
 
-  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v12_20261019_pred';
+  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v13_20261022_pred';
   const PREDICTOR_CACHE_VERSION_KEY = window.ConnectifyCache?.KEYS?.PREDICTOR || 'connectify:cache_version:predictor';
   const LEGACY_PREDICTION_VERSION_KEY = 'connectify:prediction_version';
 

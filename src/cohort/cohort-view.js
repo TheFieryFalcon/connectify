@@ -4,7 +4,8 @@
  * Renders a task row's statistics panel: distribution summary, score, z-score, standing and rank, the
  * cohort size notice on the overall row, and the outcome meter (evaluated in cohort-outcome-eval.js).
  * Unmarked rows show their Low / Mid / High prediction instead (cohort-forecast.js); a class without a
- * final letter lists its uncompleted tasks on the overall row (cohort-upcoming.js).
+ * final letter lists its uncompleted tasks on the overall row (cohort-upcoming.js). Expanded cards are filled
+ * by cohort-expanded.js.
  * Each row memoises its inputs so unchanged rows are skipped while scrolling.
  * Provides `window.ConnectifyCohortView`.
  */
@@ -20,6 +21,7 @@
     const renderOutcomeBar = (bar, outcome) => window.ConnectifyCohortOutcome?.renderOutcomeBar?.(bar, outcome);
     const forecast = () => window.ConnectifyCohortForecast;
     const upcoming = () => window.ConnectifyCohortUpcoming;
+    const expanded = () => window.ConnectifyCohortExpanded;
 
     const panels = window.ConnectifyCohortPanels || (window.ConnectifyCohortPanels = new WeakMap());
 
@@ -75,14 +77,19 @@
       if (ui.notice) setText(ui.notice, noticeText(estimatedSize, userSize));
     }
 
+    /** Renders the meter and returns the outcome (null when the meter stays hidden). */
     function renderOutcome(ui, row, mark, meta, precollectedSubjects) {
       try {
-        const outcome = outcomeEval.evaluateRow(row, mark, meta, precollectedSubjects);
+        let outcome = outcomeEval.evaluateRow(row, mark, meta, precollectedSubjects);
+        // Expanded cards colour the Score by the same range; the meter's tooltip says how
+        if (outcome && ui.xp) outcome = { ...outcome, details: expanded().withScoreNote(outcome.details) };
         if (outcome) renderOutcomeBar(ui.outcomeBar, outcome);
         else hideOutcome(ui.outcomeBar);
+        return outcome;
       } catch (e) {
         console.error('cohort-view error in outcomeBar:', e);
         hideOutcome(ui.outcomeBar);
+        return null;
       }
     }
 
@@ -148,9 +155,10 @@
 
       let taskType = null;
       let meta = null;
+      let projected = null;
       if (isOverall) {
         syncCohortInput(ui, userSize, estimatedSize);
-        if (window.ConnectifyPredictorMath) upcoming()?.show(ui, row, precollectedSubjects);
+        if (window.ConnectifyPredictorMath) projected = upcoming()?.show(ui, row, precollectedSubjects) || null;
       } else {
         meta = types().getTaskMeta(row);
         taskType = types().getEffectiveType(meta.subjectName, meta.taskName, meta.labelsKey);
@@ -173,12 +181,21 @@
 
       forecast()?.hide(ui);
       showPanel(ui, isOverall, true);
+      let outcome = null;
       if (!isOverall && ui.outcomeBar) {
-        if (window.ConnectifyPredictorMath) renderOutcome(ui, row, mark, meta, precollectedSubjects);
+        if (window.ConnectifyPredictorMath) outcome = renderOutcome(ui, row, mark, meta, precollectedSubjects);
         else hide(ui.outcomeBar);
       }
 
       const data = math().summary(stats, mark, cohortSize);
+      if (ui.xp) {
+        // Score colour: the task's predicted range (meter), or the class projection on the overall row
+        const range = isOverall ? projected : outcome;
+        const step = expanded().scoreStep(mark, range?.low, range?.high, !isOverall && Boolean(outcome?.broken));
+        expanded().fillStats(ui, { mark, stats, data, isOverall, userSize, estimatedSize, cohortSize, step });
+        remember();
+        return;
+      }
       if (!data) {
         setText(ui.distribution, 'Cohort statistics unavailable');
         setText(ui.result, Number.isFinite(mark) ? 'Rank and z-score unavailable' : 'Not marked · Rank and z-score unavailable');

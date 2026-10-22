@@ -8,6 +8,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ### Additions
 - **Predictions on upcoming assessments**: each unmarked task shows a one-line Low • Mid • High panel beside its Type dropdown, in the Predictor's colours. If there isn't enough data yet, it says what the prediction still needs. The panel disappears once the task is marked.
+- **Expanded statistics panels** (Settings → Statistics Panels, off by default): show the statistics on subject rows, or on every row, as larger cards with your Score, Rank and the cohort Average up top, the five boxplot values below, and SD, z-score and standing underneath. Your Score's colour grows more vivid the further you beat your predicted range. Subject cards include the class prediction and cohort size; upcoming tasks show Low, Mid and High with what the prediction is based on. Takes effect after reloading the page.
 - **Show this semester's classes only** (Settings, off by default): hides the other semester's outlines and lists only this semester's classes in every sidebar tool. Connectify switches to Semester 2 once a class shows a final Semester 1 grade, and your Semester 1 results are kept and still used.
 - **Year in Progress data point modes**: a "Show:" dropdown switches each subject's graph between single tasks, a running weighted average and a weighted rolling average of the last three tasks. The cohort mean line is averaged the same way.
 - A "Connectify updated" notice after each update, with a "What's new" button that opens this changelog.

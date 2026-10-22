@@ -46,6 +46,17 @@
             </div>
             <p class="cx-settings-desc">Interface theme and visual palette.</p>
           </div>
+          <div>
+            <label for="cx-panel-view-select" class="cx-settings-label">Statistics Panels</label>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <select id="cx-panel-view-select" class="cx-settings-select" style="box-sizing:border-box;padding:3px 8px;border-radius:4px;font-size:12px;cursor:pointer;">
+                <option value="compact">Compact view</option>
+                <option value="subjects">Expanded view on subject panels only</option>
+                <option value="all">Expanded view on all panels</option>
+              </select>
+            </div>
+            <p class="cx-settings-desc">Shows statistics as larger cards. Takes effect after reload.</p>
+          </div>
           <div id="cx-bg-settings-container" style="flex:1 1 100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
             <label class="cx-settings-label" style="margin:0;">Custom Wallpaper:</label>
             <input type="file" id="cx-bg-upload-input" accept="image/*" style="display:none;">

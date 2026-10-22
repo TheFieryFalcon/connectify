@@ -1,6 +1,6 @@
 # Spec: Expanded Statistics & Prediction Panels
 
-Status: approved for implementation (interview 2026-10-22). Default **off**.
+Status: implemented (2026-10-22). Default **off**.
 
 ## 1. Summary
 A Settings option that renders the assessment outlines' statistics and prediction panels as multi-row cards (labelled headline values, a quantile row and a footer) instead of today's one-line summaries. Reference: a card with *Score / Rank / Average* headline values, a *Minimum / Lower Quartile / Median / Upper Quartile / Maximum* row and an *SD · Z-Score · standing* footer.
@@ -13,7 +13,7 @@ A Settings option that renders the assessment outlines' statistics and predictio
   | `subjects` | Expanded view on subject panels only | expanded, prediction merged in | compact |
   | `all` | Expanded view on all panels | expanded, prediction merged in | expanded |
 - Description line (`.cx-settings-desc`): "Shows statistics as larger cards. Takes effect after reload."
-- **Storage**: `connectify:panel_view` in `localStorage` (`'compact' | 'subjects' | 'all'`); missing or unknown values read as `compact`. It is a preference, so it is never cleared by any subsystem cache clear (Settings cache clearing must keep it, like `connectify:auto_expand`).
+- **Storage**: `connectify:panel_view` in `localStorage` (`'compact' | 'subjects' | 'all'`); missing or unknown values read as `compact` (choosing Compact removes the key). It is a preference like `connectify:auto_expand`: the Clear Cache button keeps it, and only a settings reset (`clearSettingsCache`) removes it.
 - **Apply on next page load only**: the mode is read once when the outlines scripts load. Changing it writes storage and shows the hint; no live re-render, no `connectify-settings-updated` dispatch, no memo field.
 
 ## 3. Card layouts
@@ -53,7 +53,7 @@ All cards keep the `.connectea-panel` element (dom-sweeper, Test 185 and existin
 ### 3.3 Unmarked task row — forecast (`all` only)
 ```
 │ Low 71%            Mid 78%            High 84%   │
-│ From your 3 earlier Exams          Type: [Auto (Exam) ▾] │
+│ From your 3 earlier Exam results   Type: [Auto (Exam) ▾] │
 ```
 - Three hero cells in Predictor colours (rounded integers as today); breakout threshold never shown; no meter.
 - Footer: basis text (§5) left, Type dropdown right.
@@ -77,15 +77,15 @@ Only the **Score** value is tinted; everything else uses theme ink.
 - **Floor**: step 0 must still be >= 5:1 on the panel in every preset (verified by the theme audit).
 - **Breakout** (task rows only; `outcome.broken`): `data-cx-score-step="breakout"` — substantially brighter than step 10 (dark: extra lightness and full chroma; light: darkest, full chroma) plus a **static pastel purple glow** (`text-shadow` in `#c4b5fd` / `#a78bfa`, no animation). Overall rows never glow.
 - Browsers without relative colour syntax fall back to the base ink (glow kept).
-- **Explanation**: the outcome meter's singleton tooltip (`#connectea-outcome-tooltip`) gains one line in expanded modes: "The Score colour brightens the further your result sits above your predicted range." It never mentions the glow, purple or any threshold. No `title` attributes.
+- **Explanation**: the outcome meter's singleton tooltip (`#connectea-outcome-tooltip`) gains one line in expanded modes: "The Score colour grows more vivid the further your result sits above your predicted range." ("vivid", not "brightens": light themes go darker). It never mentions the glow, purple or any threshold. No `title` attributes.
 
 ## 5. Prediction basis (engine change)
 - `predictTask` adds `basis: { source, count }` to predicted results:
-  - `type-history` — `completedTypeCount > 0` (`count` = completed tasks of the type) → "From your 3 earlier Exams" ("From your earlier Exam" when 1).
+  - `type-history` — `completedTypeCount > 0` (`count` = completed tasks of the type) → "From your 3 earlier Exam results" ("From your earlier Exam result" when 1; no pluralising of custom type names).
   - `type-baseline` — previous-year type baseline used → "From your previous-year Exam average".
   - `subject-history` — type average fell back to this year's subject average → "From your results in this subject".
   - `subject-baseline` — fell back to the previous-year subject baseline → "From your previous-year subject result".
-- Type names come from `prediction.type`, HTML-escaped (`ConnectifyUtils.escapeHtml`).
+- Type names come from `prediction.type`, written with `textContent` (never parsed as HTML).
 - Bump `PREDICTOR` in `cache-versions.js` (data model change) so cached predictions gain `basis`. A prediction without `basis` shows "Predicted from your <Type> results".
 
 ## 6. Theming, geometry, scaling
@@ -118,7 +118,7 @@ Performance: skeletons are built once; repaints only touch text nodes and one da
 
 ## 9. Tests (`test_suite.js`)
 - Mode parsing: missing/unknown → `compact`; each mode's `expandsOverall` / `expandsTasks`.
-- Settings dropdown writes `connectify:panel_view`; cache clearing keeps it.
+- Settings dropdown writes `connectify:panel_view`; Clear Cache keeps it, a settings reset clears it.
 - Skeletons: marked card has Score/Rank/Average, five quantile labels (Minimum, Lower Quartile, Median, Upper Quartile, Maximum), footer with Type select; meter inside header; no `.v-label` inside cards; no highlighted cell.
 - Overall card: cohort input under Rank; merged prediction present without a letter, absent with one; no `.connectea-upcoming` in expanded modes.
 - Forecast card: three cells with Predictor classes, basis text per `basis.source`, NEEDS text when unpredicted.
