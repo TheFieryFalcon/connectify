@@ -114,9 +114,9 @@
 
     const percent = v => (Number.isFinite(v) ? `${math().formatPercentage(v)}%` : DASH);
 
-    function rankText(data, isOverall, userSize, estimatedSize, cohortSize) {
+    /** "1 / ~232": first and last place read as ranks like any other. */
+    function rankText(data, userSize, estimatedSize, cohortSize) {
       if (data.rank === undefined) return DASH;
-      if (data.rank === 1) return `Top of ${isOverall ? 'subject' : 'assessment'}`;
       const estimated = userSize === undefined && estimatedSize !== undefined;
       return `${data.rank} / ${estimated ? '~' : ''}${cohortSize}`;
     }
@@ -136,7 +136,7 @@
         xp.quantiles.forEach((el, i) => setText(el, percent(stats[i + xp.first])));
         markReached(xp.quantiles, mark, stats, xp.first);
         setText(xp.average, percent(data.mean));
-        setText(xp.rankValue, rankText(data, isOverall, userSize, estimatedSize, cohortSize));
+        setText(xp.rankValue, rankText(data, userSize, estimatedSize, cohortSize));
         if (xp.first) parts.push(`Minimum ${percent(stats[0])}`);
         parts.push(`SD ${math().formatPercentage(data.sd)}`, `Z-Score ${Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A'}`);
         const standing = math().standing(data.p);
@@ -215,6 +215,7 @@
       fillForecast,
       fillPrediction,
       basisText,
+      rankText,
       withScoreNote
     };
   } catch (err) {

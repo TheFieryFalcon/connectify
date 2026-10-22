@@ -2984,7 +2984,7 @@ runTest('Test 109: Text bolding parity across light and dark modes for Test head
   assert.ok(cohortViewJs.includes('<strong>Z-Score ${zStr}</strong>'), 'cohort-view.js must format Z-Score in strong tag');
   assert.ok(cohortViewJs.includes('<strong>Score ${math().formatPercentage(mark)}%</strong>'), 'cohort-view.js must bold entire score display');
   assert.ok(cohortViewJs.includes('<strong>${standingText}</strong>'), 'cohort-view.js must wrap Top standing in strong tag');
-  assert.ok(cohortViewJs.includes('<strong>${rankStr}</strong>'), 'cohort-view.js must wrap Rank in strong tag');
+  assert.ok(cohortViewJs.includes('<strong>${data.rank} / ${totalDisplay}</strong>'), 'cohort-view.js must wrap Rank in strong tag');
 
   // 2. Verify cohort-stats.js styles panel strong tags with font-weight 700
   assert.ok(cohortStatsJs.includes('.connectea-distribution strong,\n    .connectea-result strong,\n    .connectea-panel strong {\n      font-weight: 700 !important;'), 'cohort-stats.js must style strong tags with font-weight 700');
@@ -9993,7 +9993,11 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   assert.strictEqual(ui.xp.score.textContent, '70%');
   assert.deepStrictEqual(ui.xp.quantiles.map(e => e.textContent), ['32.5%', '58%', '68.85%', '79.9%', '96.7%']);
   assert.ok(/%$/.test(ui.xp.average.textContent), 'the cohort mean is shown');
-  assert.ok(/^(Top of assessment|\d+ \/ ~219)$/.test(ui.xp.rankValue.textContent), `an estimated cohort size reads ~: ${ui.xp.rankValue.textContent}`);
+  assert.ok(/^\d+ \/ ~219$/.test(ui.xp.rankValue.textContent), `an estimated cohort size reads ~: ${ui.xp.rankValue.textContent}`);
+  // First and last place read as ranks too, never "Top of assessment"
+  assert.strictEqual(window.ConnectifyCohortExpanded.rankText({ rank: 1 }, undefined, 232, 232), '1 / ~232');
+  assert.strictEqual(window.ConnectifyCohortExpanded.rankText({ rank: 1 }, 150, 232, 150), '1 / 150');
+  assert.strictEqual(window.ConnectifyCohortExpanded.rankText({ rank: 232 }, undefined, 232, 232), '232 / ~232');
   assert.ok(/^SD [\d.]+ · Z-Score -?[\d.]+( · .+)?$/.test(ui.xp.summary.textContent), `footer: ${ui.xp.summary.textContent}`);
   assert.ok(ui.outcomeBar.parentElement.classList.contains('connectea-xp-head'), 'the outcome meter sits in the header');
   assert.strictEqual(ui.xp.quantiles[0].parentElement.parentElement.parentElement, ui.outcomeBar.parentElement, 'the five quantiles share the header row (wide, short card)');

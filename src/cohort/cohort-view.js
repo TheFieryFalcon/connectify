@@ -109,8 +109,7 @@
       }
       const isEstimated = userSize === undefined && estimatedSize !== undefined;
       const totalDisplay = isEstimated ? `~${cohortSize}` : `${cohortSize}`;
-      const rankStr = data.rank === 1 ? `Top of ${isOverall ? 'subject' : 'assessment'}` : `${data.rank} / ${totalDisplay}`;
-      parts.push(`<strong>${rankStr}</strong>`);
+      parts.push(`<strong>${data.rank} / ${totalDisplay}</strong>`);
       return parts;
     }
 
