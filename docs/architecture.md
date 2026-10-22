@@ -106,6 +106,8 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 83. `src/system/new-grade.js` (grade change detector & jump-to-card dispatcher)
 84. `src/system/dom-sweeper.js` (health check & component restoration)
 
+**Background** (`src/system/update-reload.js`, GitHub and Firefox builds only; the Chrome Web Store zip drops it with `host_permissions`): browsers never load a new version into open tabs (Firefox leaves the old drawer with dead buttons), so after an install or update every open Connect tab is reloaded (`tabs.query` needs the Connect host permission in Chrome).
+
 **Other Connect pages** load a sidebar-only group (`exclude_matches` the outlines page): scheduler, utils, the assessment cache and data modules, categories, the predictor model, Settings (calibration, baselines, preferences) and the sidebar, in the order above. `ConnectifyUtils.isOutlinesPage()` keeps `collect()`, semester detection and the semester filter off other pages' tiles there, so tools read only the cache.
 
 ### SPA Navigation & DOM Sweeping

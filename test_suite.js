@@ -10508,6 +10508,41 @@ runTest('Test 232: Scaled scores follow TISC Average Marks Scaling: course scale
   assert.ok(!/DEFAULT_BOXPLOT|getBasePercentile/.test(source), 'no generic raw-mark distribution decides the percentile');
 });
 
+runTest('Test 233: After an install or update, open Connect tabs are reloaded (GitHub and Firefox builds; stripped from the Chrome Web Store zip)', async () => {
+  const manifestJson = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  assert.deepStrictEqual(manifestJson.background, { scripts: ['src/system/update-reload.js'], service_worker: 'src/system/update-reload.js' },
+    'Firefox runs it as a background script, Chrome as the service worker');
+  assert.deepStrictEqual(manifestJson.host_permissions, ['https://connect.det.wa.edu.au/*'], 'Chrome only finds Connect tabs with the host permission');
+
+  let listener = null;
+  const reloaded = [];
+  const queries = [];
+  const fakeExt = {
+    runtime: { onInstalled: { addListener: fn => { listener = fn; } } },
+    tabs: {
+      query: async q => { queries.push(q); return [{ id: 4 }, { id: 9 }]; },
+      reload: async tabId => { reloaded.push(tabId); }
+    }
+  };
+  const code = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/update-reload.js'), 'utf8');
+  new Function('globalThis', code)({ chrome: fakeExt });
+  assert.ok(listener, 'the onInstalled listener is registered at start-up');
+
+  for (const reason of ['browser_update', 'chrome_update', 'shared_module_update']) await listener({ reason });
+  assert.deepStrictEqual(reloaded, [], 'a browser update never reloads tabs');
+  await listener({ reason: 'update' });
+  assert.deepStrictEqual(queries, [{ url: 'https://connect.det.wa.edu.au/*' }], 'only Connect tabs are looked up');
+  assert.deepStrictEqual(reloaded, [4, 9], 'every open Connect tab is reloaded after an update');
+  await listener({ reason: 'install' });
+  assert.deepStrictEqual(reloaded, [4, 9, 4, 9], 'and after a fresh install');
+
+  for (const wf of ['publish.yml', 'publish-cws.yml']) {
+    const yml = fs.readFileSync(path.join(BASE_DIR, '.github/workflows', wf), 'utf8');
+    assert.ok(yml.includes('del(.background) | del(.host_permissions)'), `${wf} strips the background script and host permission from the Chrome Web Store zip`);
+    assert.ok(/rm \/tmp\/(chrome|cws)-build\/src\/system\/update-reload\.js/.test(yml), `${wf} leaves update-reload.js out of the Chrome Web Store zip`);
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

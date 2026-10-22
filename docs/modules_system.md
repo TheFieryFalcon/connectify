@@ -21,6 +21,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
   - Action button dispatcher supporting custom callbacks with `{ id, element, close }`.
   - `dismiss(id)` and `clearAll()`: Smoothly animates out and cleans up DOM elements.
 - **Export**: `window.ConnectifyNotifications`.
+- **`update-reload.js`** (background: Firefox `background.scripts`, Chrome `service_worker`; GitHub and Firefox builds only, both publish workflows strip it, `background` and `host_permissions` from the Chrome Web Store zip): on `runtime.onInstalled` (`install` / `update`, never browser updates) reloads every open `https://connect.det.wa.edu.au/*` tab, because tabs open during an update keep the old version's DOM with dead listeners until refreshed.
 - **`update-notice.js`** (`ConnectifyUpdateNotice`): 3s after load, compares the manifest version with `connectify:seen_version`; a newer version shows one persistent "Connectify updated to X" toast (Dismiss / "What's new" → GitHub `CHANGELOG.md`, newest release first). Fresh installs only record the version; downgrades never notify.
 
 #### [`new-grade.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/new-grade.js) & `grade-snapshot.js`

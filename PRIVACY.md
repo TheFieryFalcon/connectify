@@ -27,6 +27,9 @@ Connectify requests only the minimum permissions necessary to deliver its featur
 - **`unlimitedStorage` Permission (Firefox and GitHub builds only; not requested by the Chrome Web Store version):**
   - **Purpose:** Lifts the browser's local storage quota so animated GIF wallpapers up to 40 MB can be kept. Nothing else is stored, and everything stays on your computer.
 
+- **Background script and `connect.det.wa.edu.au` host permission (Firefox and GitHub builds only; not in the Chrome Web Store version):**
+  - **Purpose:** After Connectify is installed or updated, it reloads any open Connect tabs so they run the new version. It reads nothing from those tabs and sends nothing anywhere.
+
 - **Host Permissions & Content Scripts (`connect.det.wa.edu.au`, `login.det.wa.edu.au`):**
   - **Purpose:** Content scripts run only on Western Australia Department of Education student portal pages to read assessment marks from the DOM, render statistical graphs (boxplots, radar charts, running averages), and apply optional CSS theme enhancements.
 

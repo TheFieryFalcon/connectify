@@ -12,6 +12,15 @@
       "storage",
       "unlimitedStorage"
    ],
+   "host_permissions": [
+      "https://connect.det.wa.edu.au/*"
+   ],
+   "background": {
+      "scripts": [
+         "src/system/update-reload.js"
+      ],
+      "service_worker": "src/system/update-reload.js"
+   },
    "browser_specific_settings": {
       "gecko": {
          "id": "connectify@local",

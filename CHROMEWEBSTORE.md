@@ -61,7 +61,7 @@ English
 
 Google Web Store reviewers require an explicit, plain-English justification for every requested permission. Copy and paste these exact justifications into the Developer Dashboard:
 
-The Chrome Web Store zip does not request `unlimitedStorage` (both publish workflows strip it from `manifest.json`), so GIF wallpapers are capped at 4 MB in that build. Do not list it in the dashboard.
+The Chrome Web Store zip does not request `unlimitedStorage` (both publish workflows strip it from `manifest.json`), so GIF wallpapers are capped at 4 MB in that build. Do not list it in the dashboard. The store zip also has no background script and no `host_permissions` (the GitHub/Firefox builds use them to reload open Connect tabs after an update); its Connect access comes from `content_scripts` alone.
 
 | Permission / Host | Type | Justification for Reviewer |
 | :--- | :--- | :--- |

@@ -62,10 +62,12 @@ jobs:
             ./ /tmp/cws-build/
 
           # Clean Chrome Web Store manifest (strip key, update_url, browser_specific_settings, unlimitedStorage;
-          # without it GIF wallpapers are capped at 4 MB, theme-wallpaper-fit.js)
-          jq 'del(.browser_specific_settings) | del(.update_url) | del(.key) | .permissions -= ["unlimitedStorage"]' \
+          # without it GIF wallpapers are capped at 4 MB, theme-wallpaper-fit.js). The background script that reloads
+          # open Connect tabs after an update, and the host permission it needs, are left out of the store build.
+          jq 'del(.browser_specific_settings) | del(.update_url) | del(.key) | .permissions -= ["unlimitedStorage"] | del(.background) | del(.host_permissions)' \
             /tmp/cws-build/manifest.json > /tmp/cws-build/manifest.cws.json
           mv /tmp/cws-build/manifest.cws.json /tmp/cws-build/manifest.json
+          rm /tmp/cws-build/src/system/update-reload.js
 
           cd /tmp/cws-build
           zip -r "$GITHUB_WORKSPACE/connectify-${VERSION}.zip" .

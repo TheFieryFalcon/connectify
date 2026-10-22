@@ -91,8 +91,10 @@ jobs:
           
           # Prepare clean ZIP for Chrome Web Store submission (no update_url, no key, no browser_specific_settings).
           # The store build drops unlimitedStorage; GIF wallpapers are then capped at 4 MB (theme-wallpaper-fit.js).
-          jq 'del(.key) | .permissions -= ["unlimitedStorage"]' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.cws.json
+          # It also drops the background script that reloads open Connect tabs after an update, and the host permission it needs.
+          jq 'del(.key) | .permissions -= ["unlimitedStorage"] | del(.background) | del(.host_permissions)' /tmp/chrome-build/manifest.json > /tmp/chrome-build/manifest.cws.json
           mv /tmp/chrome-build/manifest.cws.json /tmp/chrome-build/manifest.json
+          rm /tmp/chrome-build/src/system/update-reload.js
 
           cd /tmp/chrome-build
           zip -r "$GITHUB_WORKSPACE/connectify-${VERSION}.zip" .
