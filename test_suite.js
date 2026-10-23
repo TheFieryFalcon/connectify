@@ -400,11 +400,12 @@ class MockElement {
   }
   appendChild(kid) { this.append(kid); return kid; }
   insertAdjacentElement(position, el) {
-    if (position === 'afterend' && this.parentElement) {
+    if ((position === 'afterend' || position === 'beforebegin') && this.parentElement) {
       const idx = this.parentElement.children.indexOf(this);
       if (idx !== -1) {
-        this.parentElement.children.splice(idx + 1, 0, el);
-        this.parentElement.childNodes.splice(idx + 1, 0, el);
+        const at = position === 'afterend' ? idx + 1 : idx;
+        this.parentElement.children.splice(at, 0, el);
+        this.parentElement.childNodes.splice(at, 0, el);
         el.parentElement = this.parentElement;
         el.parentNode = this.parentElement;
         el.isConnected = true;
@@ -10774,6 +10775,207 @@ runTest('Test 236: The Predictor subject tabs hide the native scrollbar for a pl
   assert.ok(view.includes('ConnectifyPredictorTabScroll?.attach(subTabsBar)'), 'the grade view attaches it to the tabs');
 });
 
+
+const loadExportModules = () => {
+  for (const f of ['school-terms.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js']) {
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress', f), 'utf8'));
+  }
+  return { terms: window.ConnectifySchoolTerms, tasks: window.ConnectifyExportTasks, ics: window.ConnectifyExportIcs, csv: window.ConnectifyExportCsv };
+};
+const isoDay = d => d.toISOString().slice(0, 10);
+
+runTest('Test 238: Export term calendar: Term 1 rule, Early Easter, spill-over and the Wednesday Week 1', () => {
+  const { terms } = loadExportModules();
+  const table = {
+    2026: ['Mon 2 Feb', '04-06', true, 'Mon 20 Apr', 'Mon 20 Jul', 'Mon 12 Oct'],
+    2027: ['Mon 1 Feb', '03-29', false, 'Mon 26 Apr', 'Mon 19 Jul', 'Mon 11 Oct'],
+    2028: ['Wed 2 Feb', '04-17', false, 'Mon 24 Apr', 'Mon 17 Jul', 'Mon 9 Oct'],
+    2029: ['Wed 31 Jan', '04-02', true, 'Mon 16 Apr', 'Mon 16 Jul', 'Mon 8 Oct'],
+    2030: ['Mon 4 Feb', '04-22', false, 'Mon 29 Apr', 'Mon 22 Jul', 'Mon 14 Oct'],
+    2031: ['Mon 3 Feb', '04-14', false, 'Mon 28 Apr', 'Mon 21 Jul', 'Mon 13 Oct'],
+    2032: ['Mon 2 Feb', '03-29', false, 'Mon 26 Apr', 'Mon 19 Jul', 'Mon 11 Oct']
+  };
+  for (const [year, [t1, easter, early, t2, t3, t4]] of Object.entries(table)) {
+    assert.strictEqual(terms.formatDay(terms.term1Start(+year)), t1, `${year} Term 1`);
+    assert.strictEqual(isoDay(terms.easterMonday(+year)), `${year}-${easter}`, `${year} Easter Monday`);
+    assert.strictEqual(terms.autoEarlyEaster(+year), early, `${year} Early Easter`);
+    assert.deepStrictEqual(terms.terms(+year, early).slice(1).map(t => terms.formatDay(t.start)), [t2, t3, t4], `${year} Terms 2-4`);
+  }
+  // Early Easter moves Term 2 a week, never Terms 3 and 4
+  assert.strictEqual(terms.formatDay(terms.terms(2027, true)[1].start), 'Mon 19 Apr');
+  assert.strictEqual(terms.formatDay(terms.terms(2027, true)[2].start), 'Mon 19 Jul');
+  assert.deepStrictEqual(terms.terms(2026, true).map(t => t.weeks), [9, 11, 10, 10]);
+  // Wednesday start: Week 1 is Wed-Fri, so Mon/Tue clamp to the start; Week 2 starts the next Monday
+  assert.strictEqual(terms.formatDay(terms.dateFor(2028, 1, 1, 1, false)), 'Wed 2 Feb');
+  assert.strictEqual(terms.formatDay(terms.dateFor(2028, 1, 1, 5, false)), 'Fri 4 Feb');
+  assert.strictEqual(terms.formatDay(terms.dateFor(2028, 1, 2, 1, false)), 'Mon 7 Feb');
+  // A week past its term spills into the next term; past Term 4 there is no date
+  assert.strictEqual(terms.formatDay(terms.dateFor(2026, 1, 10, 1, true)), 'Mon 20 Apr', 'Term 1 Week 10 under Early Easter is Term 2 Week 1');
+  assert.strictEqual(terms.formatDay(terms.dateFor(2026, 1, 10, 1, false)), 'Mon 6 Apr');
+  assert.strictEqual(terms.formatDay(terms.dateFor(2027, 2, 11, 3, false)), 'Wed 21 Jul', 'Term 2 Week 11 without Early Easter is Term 3 Week 1');
+  assert.strictEqual(terms.dateFor(2026, 4, 11, 1, false), null);
+});
+
+runTest('Test 239: Export tasks: week precedence, weekdays, left-out tasks, ticks and next-due order', () => {
+  const { tasks } = loadExportModules();
+  const savedTypes = window.ConnectifyTaskTypes;
+  window.ConnectifyTaskTypes = { getEffectiveType: (subject, task) => task.typeOverride || (/exam/i.test(task.name) ? 'Exam' : 'Test') };
+  localStorage.setItem('connectea:time_override:Physics ATAR:p2', '17');
+  try {
+    assert.deepStrictEqual(tasks.captionWeek('Term 2 Week 6/7'), { term: 2, week: 6 }, 'a range uses its first week');
+    assert.deepStrictEqual(tasks.captionWeek('Week 5, Term 3'), { term: 3, week: 5 });
+    assert.strictEqual(tasks.captionWeek('Week 4'), null, 'a bare week has no term');
+    assert.strictEqual(isoDay(tasks.captionDate('Fri 14th March', 2026)), '2026-03-14');
+    assert.strictEqual(isoDay(tasks.captionDate('Due March 3', 2026)), '2026-03-03');
+    assert.strictEqual(tasks.captionDate('31 Feb', 2026), null);
+    const subjects = [
+      { name: 'Physics ATAR', tasks: [
+        { id: 'p1', name: 'Test 1', caption: 'Term 1 Week 4', pending: false, score: 80, sequence: 0 },
+        { id: 'p2', name: 'Lab', caption: 'Term 3 Week 2', pending: true, weight: 10, sequence: 1, semester: 1 },
+        { id: 'p3', name: 'Report', caption: '', pending: true, sequence: 2 },
+        { id: 'p4', name: 'Late', caption: 'Term 4 Week 11', pending: true, sequence: 3 }
+      ] },
+      { name: 'Chemistry ATAR - Semester 2', tasks: [
+        { id: 'c1', name: 'Exam', caption: 'Term 2 Week 9', pending: true, weight: 30, sequence: 0, semester: 1 },
+        { id: 'c2', name: 'Quiz', caption: 'Fri 13 Mar', pending: true, sequence: 1, semester: 1 },
+        { id: 'c3', name: 'Test 2', caption: 'Term 2 Week 6/7', pending: true, sequence: 2, semester: 1, typeOverride: 'Exam' }
+      ] }
+    ];
+    const { groups, leftOut } = tasks.build(subjects, {
+      year: 2026, early: true, subjectDays: { 'Chemistry ATAR': 3 }, taskDays: { 'Chemistry ATAR::c3': 5 }, unticked: new Set(['Chemistry ATAR::c1'])
+    });
+    assert.deepStrictEqual(groups.map(g => g.subject), ['Chemistry ATAR', 'Physics ATAR'], 'subjects by next due, Semester suffix removed');
+    const chem = groups[0].tasks;
+    assert.deepStrictEqual(chem.map(t => t.name), ['Quiz', 'Test 2', 'Exam'], 'tasks by date');
+    assert.strictEqual(isoDay(chem[0].date), '2026-03-13', 'a caption date is used as is');
+    assert.ok(chem[0].fixed, 'a dated caption has no weekday');
+    assert.strictEqual(isoDay(chem[1].date), '2026-05-29', 'the task day (Fri) beats the subject day, Week 6 of Term 2');
+    assert.strictEqual(isoDay(chem[2].date), '2026-06-17', 'the subject day (Wed) in Term 2 Week 9');
+    assert.strictEqual(chem[1].type, 'Exam', 'Type overrides count');
+    assert.strictEqual(chem[2].ticked, false, 'unticked tasks stay unticked');
+    const lab = groups[1].tasks[0];
+    assert.strictEqual(lab.name, 'Lab');
+    assert.strictEqual(isoDay(lab.date), '2026-06-01', 'a Progress override (week 17 = Term 2 Week 7) beats the caption');
+    assert.ok(groups[1].tasks.every(t => t.name !== 'Test 1'), 'marked tasks are not exported');
+    assert.deepStrictEqual(leftOut.map(t => [t.name, t.reason]), [['Report', 'noWeek'], ['Late', 'afterTerm4']]);
+    assert.deepStrictEqual(tasks.ticked(groups).map(t => t.name), ['Quiz', 'Test 2', 'Lab']);
+  } finally {
+    window.ConnectifyTaskTypes = savedTypes;
+    localStorage.removeItem('connectea:time_override:Physics ATAR:p2');
+  }
+});
+
+const exportItem = (key, name, subject, date, extra = {}) => ({
+  key, name, subject, date: new Date(date + 'T00:00:00Z'), caption: 'Term 2 Week 9', weight: null, type: 'Test', semester: 1, ticked: true, ...extra
+});
+
+runTest('Test 240: Export .ics: all-day events, stable UIDs, escaping, folding and the merged semester exam', () => {
+  const { tasks, ics } = loadExportModules();
+  const items = [
+    exportItem('a', 'Exam', 'Chemistry ATAR', '2026-06-08', { type: 'Exam', weight: 30 }),
+    exportItem('b', 'Exam', 'Physics ATAR', '2026-06-19', { type: 'Exam' }),
+    exportItem('c', 'Essay; part 1, draft', 'English ATAR', '2026-05-25', { weight: 12.5 }),
+    exportItem('d', 'Exam', 'Literature ATAR', '2026-11-02', { type: 'Exam', semester: 2 })
+  ];
+  assert.deepStrictEqual(tasks.examGroups(items).map(g => [g.semester, g.exams.length]), [[1, 2]], 'only a semester with two or more exams merges');
+  const now = new Date('2026-10-23T01:02:03Z');
+  const text = ics.build(items, { account: '12345', year: 2026, merge: true, now });
+  assert.ok(!/[^\r]\n/.test(text) && text.endsWith('\r\n'), 'CRLF line endings');
+  assert.ok(text.includes('X-WR-CALNAME:Connectify Assessments') && text.includes('PRODID:-//Connectify//Assessments//EN'));
+  assert.ok(text.includes('SUMMARY:Essay\\; part 1\\, draft (English ATAR)'), 'text is escaped');
+  assert.ok(text.includes('DESCRIPTION:Type: Test\\nWeight: 12.5%\\nTerm 2 Week 9'));
+  assert.ok(text.includes('DTSTART;VALUE=DATE:20260525\r\nDTEND;VALUE=DATE:20260526'), 'all-day with an exclusive end');
+  assert.ok(text.includes('SUMMARY:Semester 1 Exam') && text.includes('DTSTART;VALUE=DATE:20260608\r\nDTEND;VALUE=DATE:20260620'), 'the merged span runs first to last exam');
+  assert.ok(!text.includes('SUMMARY:Exam (Chemistry ATAR)'), 'merged exams have no event of their own');
+  assert.ok(text.includes('SUMMARY:Exam (Literature ATAR)'), 'a lone semester exam stays');
+  assert.ok(text.includes('TRANSP:TRANSPARENT') && text.includes('DTSTAMP:20261023T010203Z'));
+  const unmerged = ics.build(items, { account: '12345', year: 2026, merge: false, now });
+  assert.ok(unmerged.includes('SUMMARY:Exam (Chemistry ATAR)') && !unmerged.includes('Semester 1 Exam'));
+  assert.ok(!/Weight/.test(unmerged.split('SUMMARY:Exam (Physics ATAR)')[1].split('END:VEVENT')[0]), 'no Weight line when unknown');
+  const uids = t => t.match(/UID:[^\r]+/g);
+  assert.deepStrictEqual(uids(ics.build(items, { account: '12345', year: 2026, merge: true })), uids(text), 'UIDs are stable across exports');
+  assert.notDeepStrictEqual(uids(ics.build(items, { account: '999', year: 2026, merge: true })), uids(text), 'UIDs differ per account');
+  const folded = ics.fold('DESCRIPTION:' + 'é'.repeat(80));
+  assert.ok(folded.split('\r\n').every(line => Buffer.byteLength(line, 'utf8') <= 75), 'lines fold at 75 octets');
+  assert.ok(folded.split('\r\n').slice(1).every(line => line.startsWith(' ')), 'continuations start with a space');
+  assert.strictEqual(folded.split('\r\n').map((l, i) => (i ? l.slice(1) : l)).join(''), 'DESCRIPTION:' + 'é'.repeat(80), 'folding never splits a character');
+});
+
+runTest('Test 241: Export CSV for Notion: BOM, columns, quoting, dates and weights', () => {
+  const { csv } = loadExportModules();
+  const text = csv.build([
+    exportItem('a', 'Exam', 'Chemistry ATAR', '2026-06-08', { type: 'Exam', weight: 30 }),
+    exportItem('b', 'Essay "final", v2', 'English ATAR', '2026-05-25', { caption: 'Term 2 Week 6/7' })
+  ]);
+  assert.ok(text.startsWith('﻿'), 'UTF-8 BOM');
+  const lines = text.slice(1).split('\r\n');
+  assert.strictEqual(lines[0], 'Name,Date,Subject,Type,Weight (%),Term / Week');
+  assert.strictEqual(lines[1], 'Exam (Chemistry ATAR),"June 8, 2026",Chemistry ATAR,Exam,30,Term 2 Week 9');
+  assert.strictEqual(lines[2], '"Essay ""final"", v2 (English ATAR)","May 25, 2026",English ATAR,Test,,Term 2 Week 6/7');
+  assert.strictEqual(lines[3], '', 'ends with CRLF');
+});
+
+runTest('Test 242: Export view mounts in the Progress header, swaps out the graph and stores its choices', () => {
+  loadExportModules();
+  const saved = { progress: window.ConnectifyProgress, data: window.ConnectifyData, view: window.ConnectifyExportView, chart: window.ConnectifyProgressChart };
+  const panel = new MockElement('section');
+  panel.id = 'connectify-progress';
+  const head = new MockElement('header');
+  const scan = new MockElement('button', 'cx-refresh-btn');
+  scan.textContent = 'Refresh Assessments';
+  head.append(new MockElement('strong'), scan);
+  const chips = new MockElement('div', 'cx-subjects');
+  const chart = new MockElement('div');
+  panel.append(head, chips, chart);
+  window.ConnectifyProgress = { panelRefs: { panel } };
+  window.ConnectifyProgressChart = saved.chart || { createElement: (tag, text, cls) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== null && text !== undefined) el.textContent = text; return el; } };
+  window.ConnectifyData = { collectClasses: () => [{ name: 'Physics ATAR', tasks: [{ id: 'p1', name: 'Lab', caption: 'Term 3 Week 2', pending: true, sequence: 0 }] }] };
+  delete window.ConnectifyExportView;
+  try {
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.js'), 'utf8'));
+    const view = window.ConnectifyExportView;
+    assert.ok(view, 'the view mounts');
+    assert.strictEqual(head.children.indexOf(view.toggleBtn), head.children.indexOf(scan) - 1, 'Export sits just before Refresh Assessments');
+    assert.strictEqual(view.toggleBtn.textContent, 'Export');
+    view.toggleBtn.dispatchEvent(new MockEvent('click'));
+    assert.ok(!view.view.hidden && chips.hidden && chart.hidden, 'the export view replaces the chips and chart');
+    assert.strictEqual(view.toggleBtn.textContent, '← Back to Graph');
+    const find = (root, pred) => { const out = []; (function walk(n) { for (const c of n.children || []) { if (pred(c)) out.push(c); walk(c); } })(root); return out; };
+    const text = find(view.view, () => true).map(n => n.textContent).join('|');
+    const year = new Date().getFullYear();
+    const T = window.ConnectifySchoolTerms;
+    const starts = T.terms(year, T.autoEarlyEaster(year)).map(t => T.formatDay(t.start)).join(' · ');
+    assert.ok(text.includes(`Terms start ${starts}`), 'the term line lists the four starts');
+    assert.ok(text.includes('Google Calendar (.ics)') && text.includes('Notion (CSV)'));
+    assert.ok(text.includes('To update an earlier export, import into a new calendar.'));
+    const tick = find(view.view, n => n.type === 'checkbox' && n.dataset.cxFocus === 'tick:Physics ATAR::p1')[0];
+    tick.checked = false;
+    tick.dispatchEvent(new MockEvent('change'));
+    const stored = JSON.parse(localStorage.getItem(view.storageKey()));
+    assert.deepStrictEqual(stored.unticked, ['Physics ATAR::p1'], 'unticks are stored by task key');
+    assert.ok(find(view.view, n => n.id === 'cx-export-ics')[0].disabled, 'nothing ticked disables the downloads');
+    // Opening Progress (or any tool) fires connectify-open, which returns the panel to the graph
+    assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.js'), 'utf8').includes("window.addEventListener('connectify-open', showGraph)"));
+    view.showGraph();
+    assert.ok(view.view.hidden && !chips.hidden && !chart.hidden, 'reopening Progress starts on the graph');
+    // A settings reset removes the choices; Clear Cache keeps them
+    const cacheSrc = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/cache-versions.js'), 'utf8');
+    assert.ok(cacheSrc.includes("k.startsWith('connectify:calendar_export:')"));
+    localStorage.removeItem(view.storageKey());
+  } finally {
+    Object.assign(window, { ConnectifyProgress: saved.progress, ConnectifyData: saved.data, ConnectifyExportView: saved.view, ConnectifyProgressChart: saved.chart });
+  }
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(g => (g.js || []).includes('src/progress/progress-graph.js'));
+  const order = ['progress-graph.js', 'school-terms.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js', 'export-view.js'].map(f => group.js.indexOf(`src/progress/${f}`));
+  assert.ok(order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), 'export scripts load after progress-graph.js in order');
+  assert.ok(group.matches.every(m => m.includes('assessment-outlines')), 'outlines page only');
+  assert.ok((group.css || []).includes('src/progress/export-view.css') || manifest.content_scripts.some(g => (g.css || []).includes('src/progress/export-view.css')));
+  assert.deepStrictEqual(manifest.permissions, ['storage', 'unlimitedStorage'], 'no new permissions');
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.css'), 'utf8');
+  assert.ok(cssHasToken(css, '.connectea-dark #cx-export-view button.cx-export-download { background: #2563eb;'), 'dark download buttons take the primary button token');
+  assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
+});
 
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');

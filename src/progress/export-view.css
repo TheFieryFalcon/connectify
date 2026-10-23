@@ -1,0 +1,55 @@
+/* Connectify Assessment Export view (export-view.js) inside the Progress panel. One surface: the
+   panel; rows and headings are clear with hairline dividers. Dark themes route colours through tokens. */
+#cx-export-toggle { margin-left: auto; }
+/* The chips and chart are display: flex / block, which would override their hidden attribute */
+#connectify-progress > [hidden] { display: none !important; }
+#cx-export-view { display: flex; flex-direction: column; gap: 12px; }
+#cx-export-view .cx-export-terms { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-weight: 400; }
+#cx-export-view .cx-export-check { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; cursor: pointer; }
+#cx-export-view .cx-export-check input { margin: 0; cursor: pointer; }
+#cx-export-view .cx-export-list { display: flex; flex-direction: column; }
+#cx-export-view .cx-export-subject { padding: 10px 0; border-top: 1px solid #bacbd8; }
+#cx-export-view .cx-export-subject:last-child { border-bottom: 1px solid #bacbd8; }
+#cx-export-view .cx-export-subject-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+#cx-export-view .cx-export-subject-head strong { font-weight: 700; margin-right: auto; }
+#cx-export-view .cx-export-day { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; }
+#cx-export-view .cx-export-task {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) 118px 92px;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 3px 0 3px 4px;
+}
+#cx-export-view .cx-export-week { color: #4a5d70; font-weight: 400; }
+#cx-export-view .cx-export-date { font-weight: 700; white-space: nowrap; }
+#cx-export-view .cx-export-tag { grid-column: 1 / -1; padding-left: 22px; color: #4a5d70; font-size: 12px; font-weight: 400; }
+#cx-export-view .cx-export-left,
+#cx-export-view .cx-export-hint,
+#cx-export-view .cx-export-empty { margin: 0; color: #4a5d70; font-weight: 400; }
+#cx-export-view .cx-export-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#cx-export-view button.cx-export-download { background: #2563eb; color: #ffffff; border-color: #2563eb; font-weight: 600; padding: 6px 14px; }
+#cx-export-view button.cx-export-download:hover { background: #1d4ed8; border-color: #1d4ed8; }
+#cx-export-view button.cx-export-download:disabled { opacity: 0.55; cursor: default; }
+
+.connectea-dark #cx-export-view .cx-export-subject { border-top-color: var(--cx-nav-border, #3b4d5e); }
+.connectea-dark #cx-export-view .cx-export-subject:last-child { border-bottom-color: var(--cx-nav-border, #3b4d5e); }
+.connectea-dark #cx-export-view .cx-export-subject-head strong,
+.connectea-dark #cx-export-view .cx-export-date { color: var(--cx-text-primary, #ffffff); }
+.connectea-dark #cx-export-view .cx-export-week,
+.connectea-dark #cx-export-view .cx-export-tag,
+.connectea-dark #cx-export-view .cx-export-left,
+.connectea-dark #cx-export-view .cx-export-hint,
+.connectea-dark #cx-export-view .cx-export-empty { color: var(--cx-text-secondary, #dce2e8); }
+.connectea-dark #cx-export-view button.cx-export-download {
+  background: var(--cx-button-primary-bg, #2563eb);
+  color: var(--cx-button-primary-text, #ffffff);
+  border-color: var(--cx-button-primary-bg, #2563eb);
+}
+.connectea-dark #cx-export-view button.cx-export-download:hover {
+  background: var(--cx-button-primary-hover, #1d4ed8);
+  border-color: var(--cx-button-primary-hover, #1d4ed8);
+}
+@media (max-width: 760px) {
+  #cx-export-view .cx-export-task { grid-template-columns: minmax(0, 1fr) 118px; }
+  #cx-export-view .cx-export-week { grid-column: 1; padding-left: 22px; }
+}

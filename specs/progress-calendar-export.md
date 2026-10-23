@@ -1,6 +1,6 @@
 # Spec: Export Assessments to Google Calendar & Notion
 
-Status: specified (2026-10-23), not implemented.
+Status: implemented (2026-10-23).
 
 ## 1. Summary
 An **Export** view in the Progress panel that turns the student's upcoming (unmarked) assessments into two downloadable files:
