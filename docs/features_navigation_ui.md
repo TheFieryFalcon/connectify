@@ -86,6 +86,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`cohort-estimator.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-estimator.js)
 - **DOM Insertion**: Overall subject summary row (top row of each `.eds-c-tile` card).
 - **UI Appearance**: Full-width statistics card with cohort size override input (`Cohort Size: [ ~170 ]`). When Connect renders a class's Cumulative Percent heading with no row under it (Economics), Connectify restores the row in Connect's own markup with the average worked out from the task marks (noted as such, no boxplot), carrying the same panel.
+- **Possible Final Mark**: a class without a final letter shows the lowest and highest final mark it can still reach (every unmarked weighted task at 0% or 100%): Lowest / Highest Possible cells at the end of the expanded card's row, or at the end of the compact panel's result line.
 - **Functionality**: Student override for course cohort baseline; persists to `localStorage` (`connectea:cohort:v3:<student>:<year>:<subject>`); immediately recalculates rank and standing across assessments.
 
 ---

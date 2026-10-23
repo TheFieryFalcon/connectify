@@ -131,6 +131,8 @@
       const userSize = estimator().loadCohortSize(key);
       const cohortSize = userSize ?? estimatedSize;
       const pendingSig = isOverall ? (upcoming()?.signature(row) ?? '') : '';
+      const gradeRange = isOverall ? window.ConnectifyCohortGradeRange?.forRow(row, mark) ?? null : null;
+      const rangeSig = gradeRange ? `${gradeRange.low},${gradeRange.high}` : '';
 
       // Fast path: nothing that affects this row has changed. A task type change bumps typesVersion,
       // so the memoised taskType never needs recomputing here
@@ -145,6 +147,7 @@
         memo.isOverall === isOverall &&
         memo.baselinesSig === baselinesSig &&
         memo.pendingSig === pendingSig &&
+        memo.rangeSig === rangeSig &&
         !memo.retry &&
         ui.wrapper?.isConnected
       ) {
@@ -171,7 +174,7 @@
       }
       // retry: an unmarked row without a prediction yet is re-evaluated once results are collected
       const remember = (retry = false) => {
-        ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, pendingSig, taskType, typesVersion, retry };
+        ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, pendingSig, rangeSig, taskType, typesVersion, retry };
       };
 
       // Unmarked assessments show their Low / Mid / High prediction instead of statistics
@@ -197,13 +200,16 @@
         // Score colour: the task's predicted range (meter), or the class projection on the overall row
         const range = isOverall ? projected : outcome;
         const step = expanded().scoreStep(mark, range?.low, range?.high, !isOverall && Boolean(outcome?.broken));
-        expanded().fillStats(ui, { mark, stats, data, isOverall, userSize, estimatedSize, cohortSize, step });
+        expanded().fillStats(ui, { mark, stats, data, isOverall, userSize, estimatedSize, cohortSize, step, gradeRange });
         remember();
         return;
       }
+      // Compact overall panels end their result line with the final mark still possible
+      const possible = window.ConnectifyCohortGradeRange?.compactText(gradeRange) || '';
       if (!data) {
         setText(ui.distribution, 'Cohort statistics unavailable');
-        setText(ui.result, Number.isFinite(mark) ? 'Rank and z-score unavailable' : 'Not marked · Rank and z-score unavailable');
+        const missing = Number.isFinite(mark) ? 'Rank and z-score unavailable' : 'Not marked · Rank and z-score unavailable';
+        setText(ui.result, possible ? `${missing}  •  ${possible}` : missing);
         remember();
         return;
       }
@@ -215,7 +221,7 @@
         `<strong>Max ${math().formatPercentage(stats[4])}%</strong>  •  <strong>Mean ${math().formatPercentage(data.mean)}%</strong>  •  ` +
         `SD ${math().formatPercentage(data.sd)}`
       );
-      setHTML(ui.result, resultParts(data, mark, isOverall, userSize, estimatedSize, cohortSize).join('  •  '));
+      setHTML(ui.result, resultParts(data, mark, isOverall, userSize, estimatedSize, cohortSize).concat(possible || []).join('  •  '));
       remember();
     }
 

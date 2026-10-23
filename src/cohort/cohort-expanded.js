@@ -6,7 +6,8 @@
  * task rows), then a footer with SD, z-score and standing (Type dropdown, or the cohort size input on overall
  * rows). The quantile the result has reached is faintly tinted. Overall rows show the four quartile values
  * (Minimum joins SD in the footer; below Q1 the tint stays on Q1) and put the class prediction's Low / Mid /
- * High under Score / Rank / Average, the quartiles then two by two beside them; unmarked rows are one line
+ * High under Score / Rank / Average, the quartiles then two by two beside them; Lowest / Highest Possible
+ * (the final mark still reachable) close the row; unmarked rows are one line
  * of Low / Mid / High beside what the prediction is based on. Skeletons are built once per panel; fills only
  * touch text and the Score colour step.
  * Exposes window.ConnectifyCohortExpanded.
@@ -19,6 +20,7 @@
     const DASH = '—';
     const HEAD = ['Score', 'Rank', 'Average'];
     const QUANTILES = ['Minimum', 'Lower Quartile', 'Median', 'Upper Quartile', 'Maximum'];
+    const POSSIBLE = ['Lowest Possible', 'Highest Possible'];
     const SCORE_NOTE = 'The Score colour grows more vivid the further your result sits above your predicted range.';
 
     /** A <dl> of labelled cells; returns the list and each cell's <dd>. */
@@ -55,6 +57,12 @@
       const first = overall ? 1 : 0;
       const quantiles = grid(QUANTILES.slice(first), 'connectea-xp-grid--quantiles');
       head.append(top.dl, quantiles.dl);
+      // Overall cards: the final mark still possible (cohort-grade-range.js), after the quartiles
+      const possible = overall ? grid(POSSIBLE, 'connectea-xp-grid--possible') : null;
+      if (possible) {
+        possible.dl.hidden = true;
+        head.append(possible.dl);
+      }
       if (meter) head.append(meter);
       const { foot, summary } = footer();
       if (type) foot.append(type);
@@ -67,7 +75,7 @@
         box.append(prediction);
       }
       box.append(foot);
-      return { score, rankValue, average, quantiles: quantiles.values, first, foot, summary, prediction };
+      return { score, rankValue, average, quantiles: quantiles.values, first, foot, summary, prediction, possible };
     }
 
     /** The prediction card on an unmarked row: Low / Mid / High beside the basis and the Type dropdown. */
@@ -123,8 +131,12 @@
     }
 
     /** Fills a statistics card; unavailable values read as a dash, with the compact view's wording below. */
-    function fillStats(ui, { mark, stats, data, isOverall, userSize, estimatedSize, cohortSize, step }) {
+    function fillStats(ui, { mark, stats, data, isOverall, userSize, estimatedSize, cohortSize, step, gradeRange: range }) {
       const xp = ui.xp;
+      if (xp.possible) {
+        xp.possible.dl.hidden = !range;
+        if (range) [range.low, range.high].forEach((v, i) => setText(xp.possible.values[i], window.ConnectifyCohortGradeRange.percent(v)));
+      }
       if (!isOverall) placeType(ui, xp.foot);
       setText(xp.score, percent(mark));
       setStep(xp.score, Number.isFinite(mark) ? step : null);
@@ -207,6 +219,7 @@
 
     window.ConnectifyCohortExpanded = {
       QUANTILES,
+      POSSIBLE,
       SCORE_NOTE,
       buildStats,
       buildForecast,

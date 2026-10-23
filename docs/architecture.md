@@ -42,6 +42,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 24. `src/cohort/cohort-forecast.js` (Low / Mid / High prediction panel on unmarked rows)
 24b. `src/cohort/cohort-upcoming.js` (class prediction panel on the overall row of a class without a letter)
 24c. `src/cohort/cohort-subject-average.js` (restores Connect's missing overall row in Connect's own container)
+24d. `src/cohort/cohort-grade-range.js` (lowest and highest final mark still possible on a class's overall row)
 25. `src/cohort/cohort-view.js` (row rendering with memoised inputs)
 26. `src/cohort/cohort-styles.js` (cohort styles & DOM utilities)
 27. `src/cohort/cohort-stats.js` (two-pass cohort controller and pass scheduler)

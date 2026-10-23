@@ -70,7 +70,8 @@
             "src/cohort/cohort-forecast.css",
             "src/cohort/cohort-upcoming.css",
             "src/cohort/cohort-expanded.css",
-            "src/cohort/cohort-subject-average.css"
+            "src/cohort/cohort-subject-average.css",
+            "src/cohort/cohort-grade-range.css"
          ],
          "js": [
             "src/system/scheduler.js",
@@ -102,6 +103,7 @@
             "src/cohort/cohort-forecast.js",
             "src/cohort/cohort-upcoming.js",
             "src/cohort/cohort-subject-average.js",
+            "src/cohort/cohort-grade-range.js",
             "src/cohort/cohort-view.js",
             "src/cohort/cohort-styles.js",
             "src/cohort/cohort-stats.js",

@@ -102,6 +102,7 @@ const MODULE_BUNDLES = {
     'cohort-forecast.js',
     'cohort-upcoming.js',
     'cohort-subject-average.js',
+    'cohort-grade-range.js',
     'cohort-view.js'
   ],
   'category-settings.js': [
@@ -3522,7 +3523,7 @@ runTest('Test 115: Prediction cache updates on task category change, category se
   assert.ok(catCode.includes('updatePredictionCache'), 'category-settings.js must call updatePredictionCache');
   assert.ok(assessCode.includes('updatePredictionCache'), 'assessment-data.js must call updatePredictionCache upon stale expansion');
   // A task type change bumps typesVersion, which the memo compares; the row's taskType is recorded in the memo
-  assert.ok(cohortViewCode.includes('memo.typesVersion === typesVersion') && cohortViewCode.includes('ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, pendingSig, taskType, typesVersion, retry };'), 'cohort-view.js must memoise taskType and invalidate on type changes');
+  assert.ok(cohortViewCode.includes('memo.typesVersion === typesVersion') && cohortViewCode.includes('ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, pendingSig, rangeSig, taskType, typesVersion, retry };'), 'cohort-view.js must memoise taskType and invalidate on type changes');
 
   // 2. Functional evaluation of predictor-math.js updatePredictionCache & clearSubjectPredictionCache
   eval(predMathCode);
@@ -10690,6 +10691,58 @@ runTest('Test 235: Estimate Grade works out the average from any number of typed
   assert.strictEqual(window.ConnectifyAtarMarkup.semesterLabel(0, { atar: '95.00' }, 'grade-estimate', false), 'Semester 1', 'Estimate Grade semester buttons carry no ATAR');
   assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.estimator.modes, ['estimate', 'grade-estimate'], 'the Estimator holds Estimate ATAR and Estimate Grade');
   assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.goals.modes, ['target', 'grade'], 'Goal Setting holds Target ATAR and Target Grade');
+});
+
+runTest('Test 237: Subject panels show the lowest and highest final mark still possible, in both the expanded and compact views', () => {
+  eval(origReadFileSync.call(fs, path.join(SRC_DIR, 'atar/grade-estimate.js'), 'utf8'));
+  const origData = window.ConnectifyData;
+  const tasks = [
+    { score: 80, weight: 20, semester: 1 }, { score: 60, weight: 20, semester: 1 },
+    { score: null, pending: true, weight: 60, semester: 2 }, { score: null, pending: true, weight: 0, semester: 2 }
+  ];
+  try {
+    let { view, xp } = loadCohortViewIn('subjects');
+    const range = window.ConnectifyCohortGradeRange;
+    assert.deepStrictEqual(range.range(tasks, 70), { low: 28, high: 88 }, 'the unmarked weighted task at 0% and 100%, Connect\'s 70% for the marked 40');
+    assert.strictEqual(range.range(tasks.slice(0, 2), 70), null, 'no range once every task is marked');
+    assert.strictEqual(range.range(tasks.slice(2), 70), null, 'no range without a marked task in the cache');
+    assert.deepStrictEqual(xp.POSSIBLE, ['Lowest Possible', 'Highest Possible']);
+
+    window.ConnectifyData = { getSubjectTasks: () => tasks };
+    const { makeRow } = expandedFixture();
+    const overall = makeRow(false, ['Semester 2 Cumulative Percent'], '70%', [32.5, 58, 68.85, 79.9, 96.7]);
+    view.render(overall, true, 'lit-key', 219, null, []);
+    const ui = view.panels.get(overall);
+    assert.strictEqual(ui.xp.possible.dl.hidden, false, 'the expanded subject card shows the range');
+    assert.deepStrictEqual(ui.xp.possible.values.map(e => e.textContent), ['28%', '88%']);
+    assert.strictEqual(ui.xp.possible.dl.parentElement.className, 'connectea-xp-head', 'it closes the card\'s row, beside the quartiles');
+    assert.ok(!/possible/i.test(ui.xp.summary.textContent), 'not in the footer');
+    const letter = makeRow(false, ['Semester 1 Cumulative Percent'], ['70%', 'B'], [32.5, 58, 68.85, 79.9, 96.7]);
+    view.render(letter, true, 'lit-key-2', 219, null, []);
+    assert.strictEqual(view.panels.get(letter).xp.possible.dl.hidden, true, 'a class with a final letter has no range');
+    ({ view } = loadCohortViewIn('all'));
+    const task = expandedFixture().makeRow(true, ['Examination', 'Term 1, Week 4', 'Extended response 1'], '21 Out of 30', [32.5, 58, 68.85, 79.9, 96.7]);
+    view.render(task, false, 'lit-key', 219, null, []);
+    assert.ok(!view.panels.get(task).xp.possible, 'task cards have no range');
+
+    ({ view } = loadCohortViewIn(null));
+    const compact = expandedFixture().makeRow(false, ['Semester 2 Cumulative Percent'], '70%', [32.5, 58, 68.85, 79.9, 96.7]);
+    view.render(compact, true, 'lit-key', 219, null, []);
+    assert.ok(view.panels.get(compact).result.innerHTML.endsWith('  •  Lowest possible 28%  •  Highest possible 88%'), `the compact result line ends with the range: ${view.panels.get(compact).result.innerHTML}`);
+    const bare = expandedFixture().makeRow(false, ['Semester 2 Cumulative Percent'], '70%');
+    view.render(bare, true, 'lit-key', 219, null, []);
+    assert.strictEqual(view.panels.get(bare).result.textContent, 'Rank and z-score unavailable  •  Lowest possible 28%  •  Highest possible 88%', 'also without cohort statistics');
+  } finally {
+    window.ConnectifyData = origData;
+    loadCohortViewIn(null);
+  }
+
+  const css = origReadFileSync.call(fs, path.join(SRC_DIR, 'cohort/cohort-grade-range.css'), 'utf8');
+  assert.ok(/\.connectea-xp-grid--possible\[hidden\] \{ display: none !important; \}/.test(css), 'a hidden range takes no column');
+  const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-view.js'));
+  assert.ok(group.js.indexOf('src/cohort/cohort-subject-average.js') < group.js.indexOf('src/cohort/cohort-grade-range.js') && group.js.indexOf('src/cohort/cohort-grade-range.js') < group.js.indexOf('src/cohort/cohort-view.js'));
+  assert.ok(manifest.content_scripts.some(g => (g.css || []).includes('src/cohort/cohort-grade-range.css')), 'its stylesheet is registered');
 });
 
 runTest('Test 236: The Predictor subject tabs hide the native scrollbar for a plain one that never changes on hover', () => {
