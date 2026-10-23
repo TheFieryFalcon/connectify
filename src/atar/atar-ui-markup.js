@@ -2,7 +2,7 @@
  * Connectify ATAR calculator: panel markup
  *
  * Builds the calculator panel (#connectea-atar): the Goals and Estimates launchers the sidebar
- * mounts, the mode tabs (Target ATAR / Target Grade, Estimate ATAR / Estimate Grade), the semester
+ * mounts, the mode tabs (Grade / ATAR in each), the semester
  * buttons, course list, summary, reset and Expand All Outlines buttons, and the
  * methodology notes; plus the semester labels and closing rules. Behaviour lives in atar-ui.js.
  * Exposes window.ConnectifyAtarMarkup.
@@ -19,14 +19,15 @@
 
   // Each launcher opens one group of modes; the tabs under the heading switch between its modes
   const GROUPS = {
-    goals: { title: 'Goal Setter', launcher: 'connectify-goals-toggle', modes: ['target', 'grade'] },
-    estimator: { title: 'Estimator', launcher: 'connectify-estimator-toggle', modes: ['estimate', 'grade-estimate'] }
+    goals: { title: 'Goal Setter', launcher: 'connectify-goals-toggle', modes: ['grade', 'target'] },
+    estimator: { title: 'Estimator', launcher: 'connectify-estimator-toggle', modes: ['grade-estimate', 'estimate'] }
   };
+  // Tabs name only what they work out (the launcher heading says how), Grade before ATAR
   const MODES = {
-    target: { tab: 'Target ATAR', title: 'Target ATAR Planner' },
-    grade: { tab: 'Target Grade', title: 'Target Grade Planner' },
-    estimate: { tab: 'Estimate ATAR', title: 'Estimated ATAR' },
-    'grade-estimate': { tab: 'Estimate Grade', title: 'Estimated Grade' }
+    grade: { tab: 'Grade', title: 'Target Grade Planner' },
+    target: { tab: 'ATAR', title: 'Target ATAR Planner' },
+    'grade-estimate': { tab: 'Grade', title: 'Estimated Grade' },
+    estimate: { tab: 'ATAR', title: 'Estimated ATAR' }
   };
   const groupOf = mode => Object.keys(GROUPS).find(g => GROUPS[g].modes.includes(mode));
   // Target Grade and Estimate Grade pick one class, so their semester buttons carry no ATAR

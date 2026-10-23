@@ -22,7 +22,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Settings says when the current theme is showing its own wallpaper instead of yours.
 
 ### Changes
-- **Goal Setting** replaces the Target ATAR and Target Grade buttons: one sidebar button with both as tabs. **Estimator** replaces ATAR Estimate and holds Estimate ATAR and the new Estimate Grade. Each reopens on the tab you last used.
+- **Goal Setter** replaces the Target ATAR and Target Grade buttons: one sidebar button with both as tabs. **Estimator** replaces ATAR Estimate and holds the ATAR estimate and the new grade estimate. Their tabs, like the Predictor's, are simply Grade and ATAR, with Grade first. Each opens on Grade, then reopens on the tab you last used.
 - Every sidebar tool (Predictor, Weakness Analyzer, Year in Progress, ATAR Estimate, Target ATAR, Target Grade and Calibration) now reads your saved results instead of the outline tiles.
 - The sidebar is on every Connect page. Away from Assessment Outlines only Settings works; the other tools are greyed out under a notice with a link to the outlines.
 - A Connect filter on Assessment Outlines no longer greys out the sidebar tools, since they read your saved results.

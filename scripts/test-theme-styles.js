@@ -857,10 +857,10 @@ async function discoverSidebarViews(page, options = {}) {
 
       // Canonical tool configuration list
       const toolConfigs = [
-        { id: 'connectify-goals-toggle', defaultName: 'Goal Setter', type: 'atar', modes: [['target', 'Target ATAR'], ['grade', 'Target Grade']] },
+        { id: 'connectify-goals-toggle', defaultName: 'Goal Setter', type: 'atar', modes: [['grade', 'Target Grade'], ['target', 'Target ATAR']] },
         { id: 'connectify-predictor-toggle', defaultName: 'Predictor', type: 'predictor' },
         { id: 'connectify-progress-toggle', defaultName: 'Year Progression', type: 'progress' },
-        { id: 'connectify-estimator-toggle', defaultName: 'Estimator', type: 'atar', modes: [['estimate', 'Estimate ATAR'], ['grade-estimate', 'Estimate Grade']] },
+        { id: 'connectify-estimator-toggle', defaultName: 'Estimator', type: 'atar', modes: [['grade-estimate', 'Estimate Grade'], ['estimate', 'Estimate ATAR']] },
         { id: 'connectify-weakness-toggle', defaultName: 'Weakness Analyzer', type: 'weakness' },
         { id: 'connectify-categories-toggle', defaultName: 'Settings', type: 'settings' }
       ];

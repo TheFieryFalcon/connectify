@@ -38,10 +38,10 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **DOM Insertion**: Anchored to Connect's native sidebar (`#connectify-sidebar-handle`) and fixed to viewport (`#connectify-sidebar`).
 - **UI Appearance**: Compact 30px width handle with directional arrow icon (`❮` / `❯`) without text or excess whitespace. Anchors directly to Connect's left menu when closed; centers vertically on drawer edge when open.
 - **Canonical Tools**:
-  - **Goal Setter** (`#connectify-goals-toggle`): Target ATAR and Target Grade tabs.
+  - **Goal Setter** (`#connectify-goals-toggle`): Grade and ATAR tabs (Target Grade, Target ATAR).
   - **Predictor** (`#connectify-predictor-toggle`)
   - **Year Progression** (`#connectify-progress-toggle`)
-  - **Estimator** (`#connectify-estimator-toggle`): Estimate ATAR and Estimate Grade tabs.
+  - **Estimator** (`#connectify-estimator-toggle`): Grade and ATAR tabs (Estimate Grade, Estimate ATAR).
   - **Weakness Analyzer** (`#connectify-weakness-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
   - **Settings & Calibration** (`#connectify-categories-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
 - **Functionality**:

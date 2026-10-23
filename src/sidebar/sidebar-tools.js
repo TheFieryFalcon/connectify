@@ -16,7 +16,7 @@
   const SECONDARY_TOOLS = new Set(['connectify-weakness-toggle', 'connectify-categories-toggle']);
   const LAUNCHER_SELECTOR = '#connectify-goals-toggle, #connectify-estimator-toggle, #connectify-predictor-toggle, ' +
     '#connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle';
-  // Both open the calculator panel: Goal Setter (Target ATAR, Target Grade), Estimator (Estimate ATAR, Estimate Grade)
+  // Both open the calculator panel: Goal Setter (Target Grade, Target ATAR), Estimator (Estimate Grade, Estimate ATAR)
   const CALCULATOR_GROUPS = { 'connectify-goals-toggle': 'goals', 'connectify-estimator-toggle': 'estimator' };
 
   const TOOL_MAP = {

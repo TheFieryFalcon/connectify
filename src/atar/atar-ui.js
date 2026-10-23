@@ -42,7 +42,7 @@
     } = markupMod.build();
     const launchers = { goals: goalsTab, estimator: estimatorTab };
     // The mode each launcher reopens on
-    const lastMode = { goals: 'target', estimator: 'estimate' };
+    const lastMode = { goals: 'grade', estimator: 'grade-estimate' };
 
     window.ConnectifyAtar.calculatorButtons = [goalsTab, estimatorTab];
     window.ConnectifyAtar.toolButtons = window.ConnectifyAtar.calculatorButtons;
@@ -157,7 +157,7 @@
     goalsTab.addEventListener('click', () => openCalculator('goals'));
     estimatorTab.addEventListener('click', () => openCalculator('estimator'));
     for (const [tabMode, btn] of Object.entries(modeButtons)) btn.addEventListener('click', () => selectTab(tabMode));
-    selectTab('estimate');
+    selectTab('grade-estimate');
     setPressed(null);
 
     function updateResults() {

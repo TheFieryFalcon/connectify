@@ -4800,7 +4800,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   });
 
   // -------------------------------------------------------------------------
-  // TOOL 1: Goals (opens on Target ATAR)
+  // TOOL 1: Goals (opens on its Grade tab)
   // -------------------------------------------------------------------------
   const goalsBtn = document.getElementById('connectify-goals-toggle');
   goalsBtn.click();
@@ -4812,18 +4812,38 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
 
   const atarPanel = document.getElementById('connectea-atar');
   assert.strictEqual(atarPanel.hidden, false, 'Goals panel (#connectea-atar) must be visible');
-  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target ATAR Planner', 'Goals must open on the Target ATAR Planner');
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target Grade Planner', 'Goals must open on the Target Grade Planner');
 
-  // Verify Goals heading and its mode tabs
-  const targetHeading = atarPanel.querySelector('.cta-heading strong');
-  assert.strictEqual(targetHeading.textContent, 'Goal Setter', 'Goal Setter heading must render');
+  // Verify Goals heading and its mode tabs: no verb, Grade before ATAR
+  const gradeHeading = atarPanel.querySelector('.cta-heading strong');
+  assert.strictEqual(gradeHeading.textContent, 'Goal Setter', 'Goal Setter heading must render');
   const modeTab = mode => Array.from(atarPanel.querySelectorAll('.cta-mode-tab')).find(b => b.dataset.mode === mode);
+  const visibleTabs = () => Array.from(atarPanel.querySelectorAll('.cta-mode-tab')).filter(b => !b.hidden).map(b => b.textContent);
   assert.ok(atarPanel.querySelector('.cta-mode-tabs')?.classList.contains('cx-pred-main-tabs'), 'Mode tabs must use the Predictor tab bar');
-  assert.ok(!modeTab('target').hidden && !modeTab('grade').hidden, 'Goals must show the Target ATAR and Target Grade tabs');
+  assert.deepStrictEqual(visibleTabs(), ['Grade', 'ATAR'], 'Goals must show its Grade tab, then its ATAR tab');
   assert.ok(modeTab('estimate').hidden && modeTab('grade-estimate').hidden, 'Goals must hide Estimates tabs');
-  assert.ok(modeTab('target').classList.contains('active'), 'Target ATAR tab must be selected');
-  assert.strictEqual(modeTab('target').textContent, 'Target ATAR', 'Target ATAR tab label');
-  assert.strictEqual(modeTab('grade').textContent, 'Target Grade', 'Target Grade tab label');
+  assert.ok(modeTab('grade').classList.contains('active') && !modeTab('target').classList.contains('active'), 'Grade tab must be selected');
+
+  // Verify Target Grade internal elements
+  const subjectSelect = atarPanel.querySelector('select.cta-subject-select');
+  assert.ok(subjectSelect, 'Subject dropdown selector (select.cta-subject-select) must render');
+  const gradeScoreInput = atarPanel.querySelector('input.cta-score');
+  assert.ok(gradeScoreInput, 'Grade score input (input.cta-score) must render');
+  const gradeOutput = atarPanel.querySelector('.cta-target-output');
+  assert.ok(gradeOutput, 'Grade breakdown output container (.cta-target-output) must render');
+
+  // -------------------------------------------------------------------------
+  // TOOL 1b: Goals' ATAR tab
+  // -------------------------------------------------------------------------
+  modeTab('target').click();
+
+  assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
+  assert.strictEqual(goalsBtn.getAttribute('aria-pressed'), 'true', 'Goals stays pressed on its ATAR tab');
+  assert.ok(modeTab('target').classList.contains('active') && !modeTab('grade').classList.contains('active'), 'ATAR tab must be selected');
+  assert.strictEqual(atarPanel.hidden, false, '#connectea-atar remains visible for Target ATAR');
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target ATAR Planner', 'Panel label must indicate Target ATAR Planner');
+  const targetHeading = atarPanel.querySelector('.cta-heading strong');
+  assert.strictEqual(targetHeading.textContent, 'Goal Setter', 'Goal Setter heading stays on its ATAR tab');
   const targetSemesterBtns = atarPanel.querySelectorAll('.cta-semesters button');
   assert.strictEqual(targetSemesterBtns.length, 2, 'Semester 1 and 2 selector buttons must render');
   const plannerContainer = atarPanel.querySelector('.cta-planner');
@@ -4840,27 +4860,6 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.ok(targetOutput, 'Target requirement output container (.cta-target-output) must render');
   const targetExpandOutlines = atarPanel.querySelector('.cta-expand-outlines');
   assert.ok(targetExpandOutlines, 'Expand All Outlines button (.cta-expand-outlines) must render');
-
-  // -------------------------------------------------------------------------
-  // TOOL 1b: Goals' Target Grade tab
-  // -------------------------------------------------------------------------
-  modeTab('grade').click();
-
-  assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
-  assert.strictEqual(goalsBtn.getAttribute('aria-pressed'), 'true', 'Goals stays pressed on its Target Grade tab');
-  assert.ok(modeTab('grade').classList.contains('active') && !modeTab('target').classList.contains('active'), 'Target Grade tab must be selected');
-  assert.strictEqual(atarPanel.hidden, false, '#connectea-atar remains visible for Target Grade');
-  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target Grade Planner', 'Panel label must indicate Target Grade Planner');
-
-  // Verify Target Grade internal elements
-  const gradeHeading = atarPanel.querySelector('.cta-heading strong');
-  assert.strictEqual(gradeHeading.textContent, 'Goal Setter', 'Goal Setter heading stays on its Target Grade tab');
-  const subjectSelect = atarPanel.querySelector('select.cta-subject-select');
-  assert.ok(subjectSelect, 'Subject dropdown selector (select.cta-subject-select) must render');
-  const gradeScoreInput = atarPanel.querySelector('input.cta-score');
-  assert.ok(gradeScoreInput, 'Grade score input (input.cta-score) must render');
-  const gradeOutput = atarPanel.querySelector('.cta-target-output');
-  assert.ok(gradeOutput, 'Grade breakdown output container (.cta-target-output) must render');
 
   // -------------------------------------------------------------------------
   // TOOL 3: Predictor
@@ -4884,9 +4883,10 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   const predTabs = predPanel.querySelector('.cx-pred-main-tabs');
   assert.ok(predTabs, 'Predictor tabs container (.cx-pred-main-tabs) must render');
   const gradePredTab = predPanel.querySelector('#cx-pred-btn-grade');
-  assert.ok(gradePredTab && gradePredTab.textContent.includes('Predict Grade'), 'Predict Grade tab button must render');
+  assert.ok(gradePredTab && gradePredTab.textContent === 'Grade', 'Predictor Grade tab button must render');
   const atarPredTab = predPanel.querySelector('#cx-pred-btn-atar');
-  assert.ok(atarPredTab && atarPredTab.textContent.includes('Predict ATAR'), 'Predict ATAR tab button must render');
+  assert.ok(atarPredTab && atarPredTab.textContent === 'ATAR', 'Predictor ATAR tab button must render');
+  assert.deepStrictEqual(Array.from(predTabs.querySelectorAll('.cx-pred-main-tab')).map(b => b.textContent), ['Grade', 'ATAR'], 'Predictor Grade tab must come before its ATAR tab');
   const predContent = predPanel.querySelector('#cx-pred-content');
   assert.ok(predContent, 'Predictor content container (#cx-pred-content) must render');
 
@@ -4913,7 +4913,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.ok(chartContainer, 'Progress chart container must render');
 
   // -------------------------------------------------------------------------
-  // TOOL 5: Estimates (opens on Estimate ATAR)
+  // TOOL 5: Estimates (opens on its Grade tab)
   // -------------------------------------------------------------------------
   const estBtn = document.getElementById('connectify-estimator-toggle');
   estBtn.click();
@@ -4923,40 +4923,40 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.strictEqual(goalsBtn.getAttribute('aria-pressed'), 'false', 'Goals button must not be pressed');
   assert.strictEqual(progPanel.hidden, true, 'Progress panel must be hidden');
   assert.strictEqual(atarPanel.hidden, false, 'ATAR panel (#connectea-atar) must be visible');
-  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated ATAR', 'Panel label must indicate Estimated ATAR');
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated Grade', 'Estimates must open on Estimated Grade');
 
-  // Verify Estimates heading, its tabs and the Estimate ATAR elements
+  // Verify Estimates heading, its tabs and the Estimate Grade elements
   const estHeading = atarPanel.querySelector('.cta-heading strong');
   assert.strictEqual(estHeading.textContent, 'Estimator', 'Estimator heading must render');
-  assert.ok(!modeTab('estimate').hidden && !modeTab('grade-estimate').hidden, 'Estimates must show the Estimate ATAR and Estimate Grade tabs');
+  assert.deepStrictEqual(visibleTabs(), ['Grade', 'ATAR'], 'Estimates must show its Grade tab, then its ATAR tab');
   assert.ok(modeTab('target').hidden && modeTab('grade').hidden, 'Estimates must hide the Goals tabs');
-  assert.strictEqual(modeTab('estimate').textContent, 'Estimate ATAR', 'Estimate ATAR tab label');
-  assert.strictEqual(modeTab('grade-estimate').textContent, 'Estimate Grade', 'Estimate Grade tab label');
+  assert.ok(modeTab('grade-estimate').classList.contains('active'), 'Estimates Grade tab must be selected');
+  const estimateView = atarPanel.querySelector('.cta-grade-estimate');
+  assert.ok(estimateView && !estimateView.hidden, 'Estimate Grade view (.cta-grade-estimate) must be unhidden');
+  assert.ok(estimateView.querySelector('select.cta-subject-select'), 'Estimate Grade must render a subject dropdown');
   const courseList = atarPanel.querySelector('.cta-courses');
+  const methodDetails = atarPanel.querySelector('details.cta-method');
+  assert.ok(courseList.hidden && methodDetails.hidden, 'Estimate ATAR course list and methodology must hide on Estimate Grade');
+
+  // TOOL 5b: Estimates' ATAR tab
+  modeTab('estimate').click();
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated ATAR', 'Panel label must indicate Estimated ATAR');
+  assert.strictEqual(estBtn.getAttribute('aria-pressed'), 'true', 'Estimates stays pressed on its ATAR tab');
   assert.ok(courseList && !courseList.hidden, 'Courses list container (.cta-courses) must be unhidden');
   const breakdownSummary = atarPanel.querySelector('.cta-breakdown');
   assert.ok(breakdownSummary && !breakdownSummary.hidden, 'Breakdown summary (.cta-breakdown) must be unhidden');
   const resetBtn = Array.from(atarPanel.querySelectorAll('button.cta-reset')).find(b => !b.classList.contains('cta-expand-outlines'));
   assert.ok(resetBtn && !resetBtn.hidden && resetBtn.textContent.includes('Reset to School Marks'), 'Reset button must be unhidden');
-  const methodDetails = atarPanel.querySelector('details.cta-method');
   assert.ok(methodDetails && !methodDetails.hidden, 'Methodology details (details.cta-method) must be unhidden');
   const methodSummary = methodDetails.querySelector('summary');
   assert.strictEqual(methodSummary.textContent, 'Calculation Methodology & Sources', 'Methodology summary text must match');
-
-  // TOOL 5b: Estimates' Estimate Grade tab
-  modeTab('grade-estimate').click();
-  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated Grade', 'Panel label must indicate Estimated Grade');
-  assert.strictEqual(estBtn.getAttribute('aria-pressed'), 'true', 'Estimates stays pressed on its Estimate Grade tab');
-  const estimateView = atarPanel.querySelector('.cta-grade-estimate');
-  assert.ok(estimateView && !estimateView.hidden, 'Estimate Grade view (.cta-grade-estimate) must be unhidden');
-  assert.ok(estimateView.querySelector('select.cta-subject-select'), 'Estimate Grade must render a subject dropdown');
-  assert.ok(courseList.hidden && methodDetails.hidden, 'Estimate ATAR course list and methodology must hide on Estimate Grade');
+  assert.ok(estimateView.hidden, 'Estimate Grade view must hide on Estimate ATAR');
 
   // Each launcher reopens on the tab it was left on
   goalsBtn.click();
-  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target Grade Planner', 'Goals must reopen on Target Grade');
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target ATAR Planner', 'Goals must reopen on Target ATAR');
   estBtn.click();
-  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated Grade', 'Estimates must reopen on Estimate Grade');
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated ATAR', 'Estimates must reopen on Estimate ATAR');
 
   // -------------------------------------------------------------------------
   // TOOL 6: Weaknesses
@@ -10697,8 +10697,9 @@ runTest('Test 235: Estimate Grade works out the average from any number of typed
   const markup = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui-markup.js'), 'utf8');
   eval(markup);
   assert.strictEqual(window.ConnectifyAtarMarkup.semesterLabel(0, { atar: '95.00' }, 'grade-estimate', false), 'Semester 1', 'Estimate Grade semester buttons carry no ATAR');
-  assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.estimator.modes, ['estimate', 'grade-estimate'], 'Estimates holds Estimate ATAR and Estimate Grade');
-  assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.goals.modes, ['target', 'grade'], 'Goals holds Target ATAR and Target Grade');
+  assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.estimator.modes, ['grade-estimate', 'estimate'], 'Estimates holds Estimate Grade, then Estimate ATAR');
+  assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.goals.modes, ['grade', 'target'], 'Goals holds Target Grade, then Target ATAR');
+  assert.deepStrictEqual(Object.values(window.ConnectifyAtarMarkup.MODES).map(m => m.tab), ['Grade', 'ATAR', 'Grade', 'ATAR'], 'mode tabs name no verb, Grade before ATAR');
 });
 
 runTest('Test 237: Subject panels show the lowest and highest final mark still possible, in both the expanded and compact views', () => {
