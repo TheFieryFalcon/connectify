@@ -1188,7 +1188,7 @@ async function activateSidebarView(page, currentView, delay = 1250) {
  */
 /**
  * Data completeness for the drawer tools: every subject with a marked task on the page (a row with a cohort
- * panel) must appear in the Predictor's subject tabs, the Weaknesses's checkboxes and the Progress
+ * panel) must appear in the Predictions subject tabs, the Weaknesses checkboxes and the Progress
  * chips. Catches a partially filled subject cache (tools listing only the subjects scraped first). Theme
  * independent, so it runs once per tool. Returns TOOL_SUBJECTS_MISSING issues.
  */
