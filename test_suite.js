@@ -11142,11 +11142,14 @@ runTest('Test 246: Weeks past a term\'s end read as the next term\'s everywhere;
     assert.strictEqual(window.ConnectifyProgressMath.formatTimestamp(10), 'Term 1, Week 10');
     // One checkbox module for both views: it applies the choice, refreshes predictions and tells every view
     eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress-early-easter.js'), 'utf8'));
-    let events = 0, refreshed = 0;
+    let events = 0, refreshed = 0, termEvents = 0;
     const origDispatch = window.dispatchEvent;
-    window.dispatchEvent = e => { if (e.type === 'connectify-settings-updated') events++; return true; };
-    const savedMath = window.ConnectifyPredictorMath;
+    window.dispatchEvent = e => { if (e.type === 'connectify-settings-updated') events++; if (e.type === 'connectify-terms-updated') termEvents++; return true; };
+    const savedMath = window.ConnectifyPredictorMath, savedData = window.ConnectifyData;
     window.ConnectifyPredictorMath = { updatePredictionCache: () => { refreshed++; } };
+    // Terms 3 and 4 never move, so their order holds and nothing is recomputed
+    let tasks = [{ id: 'a', order: 25 }, { id: 'b', order: 40 }];
+    window.ConnectifyData = { collect: () => [{ name: 'Chemistry', tasks: tasks.map(t => ({ ...t, order: terms.normalizeOrder(t.order, year) })) }] };
     try {
       const show = document.createElement('label');
       const row = window.ConnectifyEarlyEaster.controls(show, () => {});
@@ -11156,10 +11159,19 @@ runTest('Test 246: Weeks past a term\'s end read as the next term\'s everywhere;
       input.checked = true;
       input.dispatchEvent(new MockEvent('change'));
       assert.strictEqual(terms.earlyEaster(year), true);
-      assert.ok(events === 1 && refreshed === 1, 'one settings event and one prediction refresh');
+      assert.ok(events === 0 && refreshed === 0 && termEvents === 1, 'the order holds: no prediction refresh, no full redraw, one terms event');
+      // Term 1 Week 10 becomes Term 2 Week 1 and now ties with a Term 2 Week 1 task: a real reorder
+      tasks = [{ id: 'a', order: 10 }, { id: 'b', order: 13 }];
+      input.checked = false;
+      input.dispatchEvent(new MockEvent('change'));
+      input.checked = true;
+      refreshed = 0;
+      input.dispatchEvent(new MockEvent('change'));
+      assert.strictEqual(refreshed, 1, 'a changed order refreshes predictions once');
     } finally {
       window.dispatchEvent = origDispatch;
       window.ConnectifyPredictorMath = savedMath;
+      window.ConnectifyData = savedData;
     }
   } finally {
     if (saved === null) localStorage.removeItem('connectify:school_terms');

@@ -196,6 +196,7 @@
 
   window.addEventListener('connectify-task-type-changed', scheduleUpdate);
   window.addEventListener('connectify-settings-updated', scheduleUpdate);
+  window.addEventListener('connectify-terms-updated', scheduleUpdate);
   window.addEventListener('connectify-results-updated', scheduleUpdate);
   window.addEventListener('storage', e => {
     if (e.key === 'connectea:task_type_overrides' || e.key?.startsWith('connectea:class_categories:')) {

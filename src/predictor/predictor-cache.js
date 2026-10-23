@@ -37,7 +37,13 @@
 
     const rawSubjects = subjectsList || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
     if (!rawSubjects || rawSubjects.length === 0) return;
+    const memo = window.ConnectifyPredictorDates.withStampMemo || (fn => fn());
+    memo(() => populateInOrder(rawSubjects));
+    setPredictionCacheCurrent();
+    needsRecompute = false;
+  }
 
+  function populateInOrder(rawSubjects) {
     const allTasks = [];
     for (const subj of rawSubjects) {
       for (const t of subj.tasks || []) {
@@ -60,9 +66,6 @@
         cacheTaskPrediction(item.subjectName, item.task, pred);
       }
     }
-
-    setPredictionCacheCurrent();
-    needsRecompute = false;
   }
 
   /**

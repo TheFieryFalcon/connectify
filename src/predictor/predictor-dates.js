@@ -135,8 +135,29 @@
   }
 
   // --- CHRONOLOGICAL HISTORICAL PREDICTION ENGINE ---
+  // While a batch runs (withStampMemo), each task's stamp is worked out once: a full recompute asks for
+  // every task's stamp once per other task, and each lookup without an override scans localStorage
+  let stampMemo = null;
+
+  function withStampMemo(fn) {
+    if (stampMemo) return fn();
+    stampMemo = new WeakMap();
+    try { return fn(); } finally { stampMemo = null; }
+  }
+
   function getTaskChronologicalStamp(task, subjectName) {
     if (!task) return 0;
+    const memo = stampMemo && typeof task === 'object' ? stampMemo.get(task) : null;
+    if (memo && memo.has(subjectName)) return memo.get(subjectName);
+    const stamp = computeStamp(task, subjectName);
+    if (stampMemo && typeof task === 'object') {
+      if (!memo) stampMemo.set(task, new Map([[subjectName, stamp]]));
+      else memo.set(subjectName, stamp);
+    }
+    return stamp;
+  }
+
+  function computeStamp(task, subjectName) {
     const semester = Number(task.semester) || 1;
 
     let order = null;
@@ -180,7 +201,8 @@
       formatCustomWeek,
       formatOverrideWeek,
       hasParsableDate,
-      getTaskChronologicalStamp
+      getTaskChronologicalStamp,
+      withStampMemo
     };
   } catch (err) {
     console.error('Connectify error in predictor-dates.js:', err);

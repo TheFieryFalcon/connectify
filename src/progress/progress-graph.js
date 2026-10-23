@@ -238,7 +238,7 @@
 
     // Only an open panel refreshes on the shared heartbeat; data events refresh it immediately
     window.ConnectifyScheduler.every(1500, () => refresh(), { when: () => !panel.hidden });
-    for (const evt of ['connectify-results-updated', 'connectify-task-type-changed', 'connectify-settings-updated']) {
+    for (const evt of ['connectify-results-updated', 'connectify-task-type-changed', 'connectify-settings-updated', 'connectify-terms-updated']) {
       window.addEventListener(evt, () => refresh());
     }
 

@@ -182,7 +182,7 @@
     });
     // Opening Progress again (or another tool) starts on the graph
     window.addEventListener('connectify-open', showGraph);
-    for (const evt of ['connectify-results-updated', 'connectify-task-type-changed', 'connectify-settings-updated']) {
+    for (const evt of ['connectify-results-updated', 'connectify-task-type-changed', 'connectify-settings-updated', 'connectify-terms-updated']) {
       window.addEventListener(evt, () => render());
     }
 
