@@ -88,7 +88,7 @@
       const details = [];
       if (item.type) details.push(`Type: ${item.type}`);
       if (item.weight !== null && item.weight !== undefined) details.push(`Weight: ${weightText(item.weight)}`);
-      if (item.caption) details.push(item.caption);
+      if (item.when) details.push(item.when);
       event(lines, {
         uid: hash(prefix + item.key), start: item.date, end: item.date,
         summary: title(item), description: details.join('\n'), now

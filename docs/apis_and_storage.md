@@ -35,7 +35,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyAtarMarkup` | `atar-ui-markup.js` | Calculator panel markup, `GROUPS` / `MODES` (Goals, Estimates) and semester rules |
 | `window.ConnectifyAtar` | `atar-ui.js` | Calculator shell and mode coordinator (`openCalculator('goals' \| 'estimator' \| mode)`) |
 | `window.ConnectifyOutlineControls` | `outline-controls.js` | Floating Expand/Collapse All and Back to top button |
-| `window.ConnectifyProgressMath` | `progress-math.js` | Historical ATAR trajectory and monthly aggregation |
+| `window.ConnectifyProgressMath` | `progress-math.js` | Historical ATAR trajectory and monthly aggregation; `termWeek(order)` / `formatTimestamp`: the graph's date system, shared with the export |
 | `window.ConnectifyProgressChart` / `ConnectifyProgressModes` | `progress-chart.js` / `progress-modes.js` | SVG polyline line chart and plotted data table renderer; single task / weighted / rolling average data points |
 | `window.ConnectifyProgressWeekEditor` | `progress-week-editor.js` | Week override cells in the progress table |
 | `window.ConnectifyProgressPanel` | `progress-panel.js` | Progress launcher and panel markup |

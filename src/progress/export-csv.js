@@ -25,7 +25,7 @@
     for (const item of items) {
       if (!item.date) continue;
       const weight = item.weight !== null && item.weight !== undefined ? Math.round(item.weight * 100) / 100 : '';
-      rows.push([`${item.name} (${item.subject})`, dateText(item.date), item.subject, item.type, weight, item.caption]);
+      rows.push([`${item.name} (${item.subject})`, dateText(item.date), item.subject, item.type, weight, item.when]);
     }
     return '﻿' + rows.map(row => row.map(cell).join(',')).join('\r\n') + '\r\n';
   }

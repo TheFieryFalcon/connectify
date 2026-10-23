@@ -158,21 +158,16 @@
             p.unticked = Array.from(keys);
           }));
           track(tick.input, `tick:${task.key}`);
-          row.append(tick.wrap, createElement('span', task.caption, 'cx-export-week'));
-          if (task.fixed) {
-            row.append(createElement('span', null, 'cx-export-day-slot'));
-          } else {
-            const taskDay = track(daySelect(task.day, 'Subject day'), `taskday:${task.key}`);
-            taskDay.setAttribute('aria-label', `Day for ${task.name}`);
-            taskDay.addEventListener('change', () => update(p => {
-              const days = { ...(p.taskDays || {}) };
-              if (taskDay.value) days[task.key] = Number(taskDay.value);
-              else delete days[task.key];
-              p.taskDays = days;
-            }));
-            row.append(taskDay);
-          }
-          row.append(createElement('span', terms.formatDay(task.date), 'cx-export-date'));
+          const taskDay = track(daySelect(task.day, 'Subject day'), `taskday:${task.key}`);
+          taskDay.setAttribute('aria-label', `Day for ${task.name}`);
+          taskDay.addEventListener('change', () => update(p => {
+            const days = { ...(p.taskDays || {}) };
+            if (taskDay.value) days[task.key] = Number(taskDay.value);
+            else delete days[task.key];
+            p.taskDays = days;
+          }));
+          row.append(tick.wrap, createElement('span', task.when, 'cx-export-week'), taskDay,
+            createElement('span', terms.formatDay(task.date), 'cx-export-date'));
           if (mergedIn.has(task.key)) row.append(createElement('span', `In Semester ${mergedIn.get(task.key)} Exam`, 'cx-export-tag'));
           block.append(row);
         }

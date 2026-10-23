@@ -9,11 +9,16 @@
 
   if (window.ConnectifyProgressMath) return;
 
+  /** A task's chronological order (12 slots per term) as its term and school week, or null. */
+  function termWeek(order) {
+    if (!Number.isFinite(order) || order < 1) return null;
+    return { term: Math.floor((order - 1) / 12) + 1, week: Math.floor((order - 1) % 12) + 1 };
+  }
+
   function formatTimestamp(order, fallbackCaption) {
-    if (!Number.isFinite(order)) return fallbackCaption || 'Unknown';
-    const term = Math.floor((order - 1) / 12) + 1;
-    const week = Math.floor((order - 1) % 12) + 1;
-    return `Term ${term}, Week ${week}`;
+    const when = termWeek(order);
+    if (!when) return fallbackCaption || 'Unknown';
+    return `Term ${when.term}, Week ${when.week}`;
   }
 
   const getMonthName = (week) => {
@@ -175,6 +180,7 @@
   }
 
   window.ConnectifyProgressMath = {
+    termWeek,
     formatTimestamp,
     getMonthName,
     history,

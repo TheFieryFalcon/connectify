@@ -23,7 +23,7 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 │ [x] Merge exams into one event per semester (.ics)                              │
 │                                                                                 │
 │ Chemistry ATAR          Day: [Mon ▾]                      [Select All / None]   │
-│   [x] Test 3            Term 2 Week 6/7      [Subject day ▾]   Mon 25 May       │
+│   [x] Test 3            Term 2, Week 6       [Subject day ▾]   Mon 25 May       │
 │   [x] Exam              Term 2 Week 9        [Subject day ▾]   Mon 15 Jun  In Semester 1 Exam │
 │ English ATAR            Day: [Thu ▾]                                            │
 │   [ ] Essay 2           Term 3 Week 2        [Fri ▾]           Fri 31 Jul       │
@@ -45,7 +45,7 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 ### 2.3 Task list
 - **Rows**: every unmarked task (`pending`) of every class from `ConnectifyData.collectClasses(true)` (so "Show this semester's classes only" applies, as in every sidebar tool), grouped under its subject.
 - **Subject heading**: cleaned subject name (same cleaning as the Progress chips / Predictor tabs: `- Semester N` suffix removed), a **Day** select (`Mon`–`Fri`, default `Mon`, `.cx-settings-select`) and Select All / None.
-- **Task row**: tick checkbox, task name, the raw week text (caption), a per-task day select (`Subject day` (default, follows the heading) or `Mon`–`Fri`), and the export date preview (`Mon 25 May`), updated live on every change. A task whose caption is a real date shows that date and no day select.
+- **Task row**: tick checkbox, task name, its week as the Progress graph shows it (`Term 2, Week 6`), a per-task day select (`Subject day` (default, follows the heading) or `Mon`–`Fri`), and the export date preview (`Mon 25 May`), updated live on every change.
 - **Exam tag**: while merging is on, each ticked Exam row shows `In Semester N Exam` (secondary ink). Rows stay individually tickable; unticking removes the exam from the merged span.
 - **Ticks**: every task is ticked by default; unticked tasks stay unticked across visits (by task key); tasks first seen later arrive ticked.
 - **Order**: subjects by their next due task (earliest export date among their upcoming tasks, ticked or not, so ticking never reorders); subjects with no dated task last, A–Z. Within a subject, tasks by export date, undated ones last.
@@ -86,11 +86,10 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 
 ## 4. Task date resolution (`export-tasks.js`)
 ### 4.1 Which week
-In priority order:
-1. **Progress week override** (`ConnectifyUtils.readTimeOverride([subject, title], [id, name])`), read at export time so overrides typed after the last scrape count; decoded with `customWeekOrder` (12-slot order: `term = floor((o - 1) / 12) + 1`, `week = o - 12 (term - 1)`).
-2. **Caption term and week**: `Term T Week W` / `Week W, Term T`; a range (`Week 6/7`, `6-7`, `6 & 7`) uses its **first** week.
-3. **Caption real date** (`Fri 14 Mar`, `14th March`): that date in the current year; the weekday selects do not apply.
-4. Otherwise **no week** (§2.3). A bare `Week 4` with no term counts as no week.
+The export uses the Progress graph's own date system and never reads captions, overrides or the DOM itself:
+- Each task's **`order`** from `ConnectifyData.collectClasses(true)` (`resolveTaskOrder`: the Progress week override, else the parsed caption's week, a range's first; a date caption becomes a week counted from 26 Jan, as the graph plots it).
+- Decoded by **`ConnectifyProgressMath.termWeek(order)`** (12 slots per term: `term = floor((o - 1) / 12) + 1`, `week = floor((o - 1) % 12) + 1`), the same function behind the graph's `formatTimestamp` label, which the list, `.ics` and CSV show (`Term 2, Week 6`).
+- No `order` → **no week** (§2.3); the student sets one in the Progress table, which the graph and the export then share.
 
 ### 4.2 Which day
 - The task's own day if set, else its subject's day (default Monday): that weekday of school week `W` of term `T`.
@@ -98,7 +97,7 @@ In priority order:
 - **Clamp**: a day before Term 1's start (Mon/Tue of a Wednesday-start Week 1) moves to the start day.
 
 ### 4.3 Task fields
-`{ key: '<subject>::<task.id>', subject (cleaned), name, caption, weight, type, semester, date | null, reason }`; `type` = `ConnectifyTaskTypes.getEffectiveType(subject, task, task.labelsKey)` (overrides count); `semester` = the task's own `semester` (`taskSemester`: Semester 1 is before Term 2 Week 7).
+`{ key: '<subject>::<task.id>', subject (cleaned), name, when, term, week, weight, type, semester, date | null, reason }`; `type` = `ConnectifyTaskTypes.getEffectiveType(subject, task, task.labelsKey)` (overrides count); `semester` = the task's own `semester` (`taskSemester`: Semester 1 is before Term 2 Week 7).
 
 ## 5. Exam merge (.ics only)
 - Checkbox `Merge exams into one event per semester (.ics)`, **default on**, stored.
@@ -109,11 +108,11 @@ In priority order:
 ## 6. .ics format (`export-ics.js`)
 - RFC 5545, CRLF line endings, lines folded at 75 octets, UTF-8. Text escaped (`\\`, `\;`, `\,`, newline → `\n`).
 - Calendar: `VERSION:2.0`, `PRODID:-//Connectify//Assessments//EN`, `CALSCALE:GREGORIAN`, `METHOD:PUBLISH`, `X-WR-CALNAME:Connectify Assessments`.
-- Event: `UID:<hash(account|year|key)>@connectify` (stable across exports; merged exams `<hash(account|year|sN-exam)>@connectify`), `DTSTAMP` (UTC now), `DTSTART;VALUE=DATE:<yyyymmdd>`, `DTEND;VALUE=DATE:<day after>` (exclusive end; the last exam's day after for a merged span), `SUMMARY:<task> (<subject>)`, `DESCRIPTION:Type: <type>\nWeight: <w>%\n<caption>` (Weight line omitted when unknown), `TRANSP:TRANSPARENT` (never shows the student as busy). No alarms.
+- Event: `UID:<hash(account|year|key)>@connectify` (stable across exports; merged exams `<hash(account|year|sN-exam)>@connectify`), `DTSTAMP` (UTC now), `DTSTART;VALUE=DATE:<yyyymmdd>`, `DTEND;VALUE=DATE:<day after>` (exclusive end; the last exam's day after for a merged span), `SUMMARY:<task> (<subject>)`, `DESCRIPTION:Type: <type>\nWeight: <w>%\n<when>` (Weight line omitted when unknown), `TRANSP:TRANSPARENT` (never shows the student as busy). No alarms.
 
 ## 7. CSV format (`export-csv.js`)
 - RFC 4180 (comma, `"` quoting and doubling, CRLF), UTF-8 with BOM.
-- Columns: `Name` (`<task> (<subject>)`, Notion's title), `Date` (`May 25, 2026`, a form Notion's importer reads as a date; verify on import), `Subject`, `Type`, `Weight (%)` (number, blank when unknown), `Term / Week` (the caption).
+- Columns: `Name` (`<task> (<subject>)`, Notion's title), `Date` (`May 25, 2026`, a form Notion's importer reads as a date; verify on import), `Subject`, `Type`, `Weight (%)` (number, blank when unknown), `Term / Week` (`when`, as the Progress graph shows it).
 - Ticked, dated tasks only, in list order.
 
 ## 8. Storage
@@ -144,8 +143,8 @@ In priority order:
 1. Term starts, auto Early Easter and Term 2–4 starts match the §3.2 table for 2026–2032.
 2. Wednesday start: Week 1 Mon/Tue clamp to Wed; Week 2 Monday = start + 5 days.
 3. Early Easter toggled: Term 2 moves one week, Terms 3/4 do not; `Term 1 Week 10` spills to Term 2 Week 1; `Term 4 Week 11` is left out.
-4. Week precedence: override > caption > real date; `Week 6/7` uses Week 6; bare `Week 4` is no week.
-5. Subject day, task day override, and real-date captions ignoring both.
+4. Weeks come only from `order` via `ProgressMath.termWeek` (captions ignored); no `order` is no week; `formatTimestamp` unchanged.
+5. Subject day and task day override.
 6. Order: subjects by next due, tasks by date, undated last; ticking does not reorder.
 7. Ticks: unticks persist by key, new tasks ticked, stored shape as §8.
 8. Exam merge: >= 2 exams per semester across subjects → one span with exclusive DTEND; one exam stays alone; Type overrides decide; unticked exams excluded; CSV unaffected.
