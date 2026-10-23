@@ -72,7 +72,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectea:theme:liquid_glass` | `localStorage` | `theme.js` | Boolean flag enabling Liquid Glass diffusion mode |
 | `connectea:theme:restore_dark` / `restore_theme` / `custom_colors` | `localStorage` | `theme.js` / `theme-registry.js` | Dark-mode flag and saved theme ID restored after navigating away from the login page; custom theme JSON palette (`canvas`, `surface`, `accent`) |
 | `connectea:cohort:v3:<student>:<year>:<subject>` | `localStorage` | `cohort-estimator.js` | Custom user-override cohort size |
-| `connectea:observed_spreads:<key>` | `sessionStorage` | `cohort-estimator.js` | Cached empirical IQR ratios |
+| `connectea:observed_spreads:<key>` | `sessionStorage` | `cohort-estimator.js` | Legacy (no longer read; removed by `clearCohortCache`): spreads now come from `connectify:stats_cache:` |
 | `connectea:task_type_overrides` | `localStorage` | `task-types.js` | Map of assessment manual category overrides |
 | `connectea:class_categories:<subjectKey>` | `localStorage` | `task-types.js` | Custom categories shared across Sem 1 & 2 for a class |
 | `cx-categories` / `connectea:categories` | `localStorage` & `browser.storage.local` | `category-settings.js` | Custom category definitions, keywords, colors |

@@ -15,7 +15,7 @@
     PREDICTOR: 'v21_20261024_pred',
     RESULTS: 'v10_20261019_results',
     SETTINGS: 'v4_20261001_settings',
-    COHORT: 'v6_20261018_cohort'
+    COHORT: 'v7_20261024_cohort'
   };
 
   const CACHE_KEYS = {
@@ -89,7 +89,12 @@
         removeStorageKeys(k => (!keepOverrides && k.startsWith('connectea:cohort:v3:')) || k.startsWith('connectify:stats_cache:'));
         if (window.ConnectifyCohortEstimator?.memory) {
           window.ConnectifyCohortEstimator.memory.clear();
+          window.ConnectifyCohortEstimator.spreadPools?.clear();
         }
+        // Spreads once kept per tab (keyed by panel text, so one row counted several times)
+        try {
+          for (const k of Object.keys(sessionStorage)) if (k.startsWith('connectea:observed_spreads:')) sessionStorage.removeItem(k);
+        } catch {}
         localStorage.setItem(CACHE_KEYS.COHORT, CACHE_VERSIONS.COHORT);
         window.dispatchEvent(new CustomEvent('connectify-cohort-invalidated'));
       } catch (e) {

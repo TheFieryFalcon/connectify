@@ -18,7 +18,7 @@
     function noticeText(estimatedSize, size, status = 'Saved.') {
       const warning = estimatedSize < 50 ? SMALL_COHORT : '';
       if (size === undefined) return warning ? warning.trim() : 'Enter custom size to override.';
-      return `Original Estimate ~${estimatedSize}${warning} • ${status}`;
+      return estimatedSize === undefined ? status : `Original Estimate ~${estimatedSize}${warning} • ${status}`;
     }
 
     const panels = window.ConnectifyCohortPanels || (window.ConnectifyCohortPanels = new WeakMap());
@@ -115,7 +115,7 @@
         input.type = 'number';
         input.min = '1';
         input.step = '1';
-        input.placeholder = estimatedSize !== undefined ? `~${estimatedSize}` : 'e.g. 120';
+        input.placeholder = estimatedSize !== undefined ? `~${estimatedSize}` : '';
         input.setAttribute('aria-label', 'Students in this subject');
         const saved = estimator().loadCohortSize(key);
         input.value = saved !== undefined ? String(saved) : '';

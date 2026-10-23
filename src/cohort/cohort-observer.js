@@ -11,7 +11,7 @@
 
   const cohort = window.ConnectifyCohort;
   if (!cohort || cohort.observer) return;
-  const { schedule, runPass, persistentEstimates } = cohort;
+  const { schedule, runPass } = cohort;
 
   const CARD_SELECTOR = '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile';
   const OWN_UI = '.connectea-panel, .connectea-type-container, .connectea-row-wrapper';
@@ -77,10 +77,7 @@
     });
   }
   for (const evt of ['connectify-settings-updated', 'connectify-cohort-invalidated']) {
-    window.addEventListener(evt, () => {
-      persistentEstimates.clear();
-      schedule(true);
-    });
+    window.addEventListener(evt, () => schedule(true));
   }
 
   // Heartbeat while the user is active: a cohort pass, and a request for the main-world bridge to

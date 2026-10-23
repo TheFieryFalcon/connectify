@@ -20,7 +20,6 @@
   const estimator = () => window.ConnectifyCohortEstimator || {
     subjectKey: () => null,
     estimateCohortSize: () => 50,
-    observedSpreadsBySubject: new Map(),
     memory: new Map()
   };
 
@@ -30,7 +29,8 @@
 
   const styles = window.ConnectifyCohortStyles || '';
 
-  const persistentEstimates = new Map();
+  let waitTimer = null;
+  const estimated = new Set();
 
   function pass(precollectedAllSubjects = null) {
     if (!document.getElementById('connectea-style')) {
@@ -46,8 +46,11 @@
 
     const est = estimator();
 
-    // Pass 1: Group and find best estimates per subject key (retaining empirical refinements)
+    // Pass 1: every card's boxplots join its subject's spread pool first, so both semesters' cards get
+    // one estimate from the same spreads in this pass (a later card's chart never shifts it next pass);
+    // a subject still waiting for a chart it has never seen has no estimate yet (estimator chartsPending)
     const subjectEstimates = {};
+    const pending = new Set();
     for (const card of cards) {
       // A class Connect shows no overall row for gets Connectify's own subject average row first
       try { window.ConnectifyCohortSubjectAverage?.sync(card); } catch {}
@@ -56,29 +59,21 @@
       );
       if (!rows.length) continue;
       card._cxTaskRows = rows;
-
-      const key = est.subjectKey(card);
-      card._cxCohortKey = key;
-      if (!key) continue;
-
-      const estimatedSize = est.estimateCohortSize(card);
-      const titleEl = card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading');
-      const isSemester2 = titleEl && titleEl.textContent.match(/Semester\s+2/i);
-
-      const hasObservedSpreads = est.observedSpreadsBySubject?.get(key)?.size > 0;
-      const existingEstimate = persistentEstimates.get(key);
-
-      if (!(key in subjectEstimates)) {
-        subjectEstimates[key] = estimatedSize;
-      } else if (hasObservedSpreads && isSemester2) {
-        subjectEstimates[key] = estimatedSize;
-      } else if (!hasObservedSpreads && existingEstimate) {
-        subjectEstimates[key] = existingEstimate;
+      card._cxCohortKey = est.subjectKey(card);
+      if (card._cxCohortKey) est.observeSpreads?.(card);
+      // Only before a subject's first estimate: a shown one is never taken back
+      if (card._cxCohortKey && !estimated.has(card._cxCohortKey) && est.chartsPending?.(card)) pending.add(card._cxCohortKey);
+    }
+    for (const card of cards) {
+      const key = card._cxCohortKey;
+      if (card._cxTaskRows?.length && key && !(key in subjectEstimates)) {
+        subjectEstimates[key] = pending.has(key) ? undefined : est.estimateCohortSize(card);
+        if (subjectEstimates[key] !== undefined) estimated.add(key);
       }
-
-      if (hasObservedSpreads || !persistentEstimates.has(key)) {
-        persistentEstimates.set(key, subjectEstimates[key]);
-      }
+    }
+    // A chart that never stamps stops holding the estimate once the wait is over
+    if (pending.size && !waitTimer) {
+      waitTimer = setTimeout(() => schedule(true), Math.max(0, (est.CHART_WAIT_MS || 0) - performance.now()) + 50);
     }
 
     // Pass 2: Render using unified best estimates
@@ -89,9 +84,7 @@
       if (!rows.length) continue;
 
       const key = card._cxCohortKey;
-      const estimatedSize = key
-        ? (subjectEstimates[key] || persistentEstimates.get(key) || est.estimateCohortSize(card))
-        : est.estimateCohortSize(card);
+      const estimatedSize = key && key in subjectEstimates ? subjectEstimates[key] : est.estimateCohortSize(card);
 
       for (const row of rows) {
         const isOverall = !row.closest('.cvr-c-tasks');
@@ -154,7 +147,6 @@
     pass,
     schedule,
     runPass,
-    persistentEstimates,
     clearCohortCache: () => window.ConnectifyCache?.clearCohortCache?.(),
     COHORT_ALGO_VERSION: window.ConnectifyCache?.VERSIONS?.COHORT || 'v4_20261001_cohort'
   };

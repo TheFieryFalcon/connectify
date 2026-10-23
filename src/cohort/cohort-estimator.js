@@ -2,7 +2,7 @@
  * Connectify Cohort Size Estimator
  *
  * Estimates cohort size from a sample count on the chart when Connect provides one, otherwise from the
- * typical size for the subject and year level (cohort-size-baselines.js) refined by observed boxplot spreads.
+ * typical size for the subject and year level (cohort-size-baselines.js) refined by the subject's boxplot spreads.
  * Provides `window.ConnectifyCohortEstimator`.
  */
 (() => {
@@ -11,7 +11,11 @@
   if (window.ConnectifyCohortEstimator) return;
 
   const memory = new Map();
-  const observedSpreadsBySubject = new Map();
+  // Right after load a subject waits this long for boxplots it has never seen (cold cache), so it shows
+  // one estimate from all of them instead of the typical size, then each chart as it is stamped
+  const CHART_WAIT_MS = 10000;
+  // Boxplot range / IQR per task, per subject (both semesters): subject -> Map(task -> ratio)
+  const spreadPools = new Map();
 
   const { normalize } = window.ConnectifyUtils;
 
@@ -32,38 +36,75 @@
     return `connectea:cohort:v3:${student}:${new Date().getFullYear()}:${subject}`;
   }
 
-  function loadObservedSpreads(key) {
-    if (!key) return new Map();
-    if (observedSpreadsBySubject.has(key)) return observedSpreadsBySubject.get(key);
+  const lower = text => normalize(text).toLowerCase();
 
-    const map = new Map();
-    try {
-      const raw = sessionStorage.getItem(`connectea:observed_spreads:${key}`);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        for (const [k, v] of Object.entries(parsed)) {
-          if (Number.isFinite(v) && v > 0) map.set(k, v);
-        }
-      }
-    } catch {}
-    observedSpreadsBySubject.set(key, map);
-    return map;
+  function spreadRatio(stats) {
+    if (!math().validStats(stats)) return undefined;
+    const [min, q1, , q3, max] = stats;
+    return max - min > 0 && q3 - q1 > 0 ? (max - min) / (q3 - q1) : undefined;
   }
 
-  function saveObservedSpread(key, taskId, ratio) {
-    if (!key || !taskId || !Number.isFinite(ratio) || ratio <= 0) return;
-    const map = loadObservedSpreads(key);
-    // Every pass re-observes each row; only a new or changed spread is written
-    if (map.get(taskId) === ratio) return;
-    map.set(taskId, ratio);
-    try {
-      const obj = Object.fromEntries(map);
-      sessionStorage.setItem(`connectea:observed_spreads:${key}`, JSON.stringify(obj));
-    } catch {}
+  /**
+   * A subject's spreads, seeded from every boxplot in the stats cache (connectify:stats_cache:, keyed by
+   * subject and task name like the rows), so a refreshed page starts from the spreads it last showed
+   * instead of growing them chart by chart as the bridge stamps them.
+   */
+  function spreadPool(subjectName) {
+    const subject = lower(subjectName);
+    if (!subject) return new Map();
+    if (spreadPools.has(subject)) return spreadPools.get(subject);
+    const pool = new Map();
+    const prefix = `connectify:stats_cache:${window.ConnectifyUtils.accountKey()}:${subject}:`;
+    for (const key of window.ConnectifyUtils.storageKeys(k => k.startsWith(prefix))) {
+      try {
+        const ratio = spreadRatio(JSON.parse(localStorage.getItem(key))?.stats);
+        if (ratio) pool.set(key.slice(prefix.length), ratio);
+      } catch {}
+    }
+    spreadPools.set(subject, pool);
+    return pool;
   }
 
   // The shared row reader (cohort-row-readers.js) loads later in the pipeline but before any estimate runs
   const readRowStats = row => window.ConnectifyCohortRows?.readStats?.(row) ?? null;
+  const taskMeta = row => window.ConnectifyTaskTypes?.getTaskMeta?.(row) ?? null;
+
+  const cardRows = card => Array.from(card.querySelectorAll('.cvr-c-task')).filter(
+    row => row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card
+  );
+
+  function cardSubject(card, rows) {
+    const meta = rows.length ? taskMeta(rows[0]) : null;
+    if (meta?.subjectName) return meta.subjectName;
+    const title = normalize(card.querySelector('.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading')?.textContent);
+    return window.ConnectifyTaskTypes?.cleanSubject?.(title) ?? title.replace(/\s*[-–—]\s*Semester\s+[12].*$/i, '').trim();
+  }
+
+  /**
+   * Adds the card's readable boxplots to its subject's pool under each row's task name (the stats
+   * cache's own key: the summary row is `Overall S1` / `Overall S2`), never text Connectify injects.
+   */
+  function observeSpreads(card) {
+    const rows = cardRows(card);
+    const pool = spreadPool(cardSubject(card, rows));
+    for (const row of rows) {
+      const ratio = spreadRatio(readRowStats(row));
+      const task = lower(taskMeta(row)?.taskName || '');
+      if (ratio && task) pool.set(task, ratio);
+    }
+    return pool;
+  }
+
+  /**
+   * True while, shortly after load, a marked row of the card has no boxplot yet, live or cached (Connect
+   * draws one for every marked row; Connectify's restored average row has none).
+   */
+  function chartsPending(card) {
+    if (performance.now() >= CHART_WAIT_MS) return false;
+    const readMark = window.ConnectifyCohortRows?.readMark;
+    return cardRows(card).some(row => !row.classList.contains('connectea-subject-average-row') &&
+      Number.isFinite(readMark?.(row)) && !readRowStats(row));
+  }
 
   /**
    * Estimates cohort size dynamically from course characteristics and available boxplot data.
@@ -78,9 +119,7 @@
       .replace(/\s+/g, ' ')
       .trim();
 
-    const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
-      row => row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile') === card
-    );
+    const rows = cardRows(card);
 
     // 1. Check if any Highcharts series or data point explicitly carries sample count
     for (const row of rows) {
@@ -128,34 +167,12 @@
     } catch {}
     const baseline = window.ConnectifyCohortSizeBaselines.baselineSize(cleanTitle, { isYear12, isATAR, totalStudents, atarPct });
 
-    // 3. Empirical refinement from Highcharts boxplot statistics if present
-    if (key) {
-      for (const row of rows) {
-        const stats = readRowStats(row);
-        if (!math().validStats(stats)) continue;
-        const [min, q1, , q3, max] = stats;
-        const range = max - min;
-        const iqr = q3 - q1;
-        if (range > 0 && iqr > 0) {
-          const labels = Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
-            .map(e => normalize(e.textContent))
-            .filter(Boolean);
-          const taskId = labels.join('::') || row.querySelector('.cvr-c-task__details')?.textContent?.trim().slice(0, 50) || 'task';
-          saveObservedSpread(key, taskId, range / iqr);
-        }
-      }
-    }
-
-    const observedSpreads = key ? loadObservedSpreads(key) : null;
-    const boxplotSpreads = observedSpreads && observedSpreads.size > 0
-      ? Array.from(observedSpreads.values())
-      : [];
-
-    if (boxplotSpreads.length > 0) {
-      const avgRatio = boxplotSpreads.reduce((sum, r) => sum + r, 0) / boxplotSpreads.length;
+    // 3. Refinement by the subject's boxplot spreads: every one cached, plus the card's live charts
+    const spreads = key ? Array.from(observeSpreads(card).values()) : [];
+    if (spreads.length > 0) {
+      const avgRatio = spreads.reduce((sum, r) => sum + r, 0) / spreads.length;
       const scalingFactor = Math.max(0.75, Math.min(1.25, avgRatio / 3.2));
-      const refined = Math.round(baseline * scalingFactor);
-      return Math.max(5, refined);
+      return Math.max(5, Math.round(baseline * scalingFactor));
     }
 
     return baseline;
@@ -203,12 +220,14 @@
 
   window.ConnectifyCohortEstimator = {
     subjectKey,
-    loadObservedSpreads,
-    saveObservedSpread,
+    spreadPool,
+    observeSpreads,
     estimateCohortSize,
+    chartsPending,
+    CHART_WAIT_MS,
     loadCohortSize,
     saveCohortSize,
-    observedSpreadsBySubject,
+    spreadPools,
     memory
   };
 })();

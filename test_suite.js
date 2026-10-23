@@ -11334,6 +11334,121 @@ runTest('Test 251: On touchscreens every Connectify control takes a 44px tap wit
 });
 
 
+runTest('Test 252: After a refresh the estimated cohort size never steps: spreads come from the stats cache under task names, never panel text', () => {
+  const saved = { est: window.ConnectifyCohortEstimator, rows: window.ConnectifyCohortRows, view: window.ConnectifyCohortView, avg: window.ConnectifyCohortSubjectAverage, cohort: window.ConnectifyCohort, flag: window.__connectTea141 };
+  const statsJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-stats.js'), 'utf8');
+  if (!window.ConnectifyTaskTypes?.getTaskMeta) eval(fs.readFileSync(path.resolve(BASE_DIR, 'task-types.js'), 'utf8'));
+  const subject = 'Chemistry ATAR Year 11';
+  const prefix = `connectify:stats_cache:${window.ConnectifyUtils.accountKey()}:${subject.toLowerCase()}:`;
+  const S1 = [30.2, 62.3, 70.8, 79.05, 95], S2 = [30.5, 60.4, 69.1, 76.6, 96];
+  // The last visit cached both summary boxplots (the row reader writes every stamped chart there)
+  localStorage.setItem(prefix + 'overall s1', JSON.stringify({ stats: S1 }));
+  localStorage.setItem(prefix + 'overall s2', JSON.stringify({ stats: S2 }));
+  const el = (cls, text, ...children) => {
+    const node = document.createElement('div');
+    node.className = cls;
+    if (text) node.textContent = text;
+    children.forEach(c => node.appendChild(c));
+    return node;
+  };
+  const cards = [1, 2].map(n => {
+    const card = el('eds-c-tile', '', el('eds-c-tile__title', `${subject} - Semester ${n}`),
+      el('cvr-c-task', '', el('cvr-c-task__details', '', el('connectea-panel', 'Cohort statistics unavailable'))));
+    card.dataset.sem = String(n);
+    document.body.appendChild(card);
+    return card;
+  });
+  const semOf = row => row.closest('.eds-c-tile').dataset.sem;
+  let stamped = false;
+  window.ConnectifyCohortRows = { readStats: row => (stamped ? (semOf(row) === '1' ? S1 : S2) : null) };
+  const sizes = [];
+  window.ConnectifyCohortView = { render: (row, isOverall, key, size) => sizes.push(size) };
+  window.ConnectifyCohortSubjectAverage = undefined;
+  const origQSA = document.querySelectorAll;
+  document.querySelectorAll = sel => document.body.querySelectorAll(sel);
+  try {
+    delete window.ConnectifyCohortEstimator;
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'cohort-estimator.js'), 'utf8'));
+    delete window.__connectTea141;
+    delete window.ConnectifyCohort;
+    eval(statsJs);
+    const est = window.ConnectifyCohortEstimator;
+    const baseline = window.ConnectifyCohortSizeBaselines.baselineSize('chemistry atar year 11', { isYear12: false, isATAR: true });
+    // First pass after the refresh: no chart stamped yet, the cached spreads already refine it
+    window.ConnectifyCohort.pass();
+    const first = sizes[0];
+    assert.notStrictEqual(first, baseline, 'the first estimate already uses the cached boxplot spreads');
+    assert.deepStrictEqual(sizes, [first, first], 'both semesters show one estimate');
+    // The bridge stamps the same charts and the panels redraw with new text: nothing moves
+    stamped = true;
+    for (const text of ['Min 30.2%  •  Q1 62.3%', 'Min 30.2%  •  Q1 62.3%  •  Rank 40 / ~261']) {
+      cards.forEach(c => { c.querySelector('.connectea-panel').textContent = text; });
+      window.ConnectifyCohort.pass();
+    }
+    assert.ok(sizes.every(s => s === first), `the estimate never steps (${sizes.join(' -> ')})`);
+    assert.deepStrictEqual([...est.spreadPool(subject).keys()].sort(), ['overall s1', 'overall s2'], 'one spread per task, keyed like the stats cache, never by injected panel text');
+    // A boxplot seen only on the Semester 2 card reaches both cards in the same pass
+    sizes.length = 0;
+    cards[1].appendChild(el('cvr-c-tasks', '', el('cvr-c-task', '', el('cvr-c-task__details', '', el('v-label', 'Exam')))));
+    window.ConnectifyCohortRows.readStats = row => (row.closest('.cvr-c-tasks') ? [10, 50, 60, 70, 100] : semOf(row) === '1' ? S1 : S2);
+    window.ConnectifyCohort.pass();
+    assert.ok(sizes.length === 3 && sizes.every(s => s === sizes[0]) && sizes[0] !== first, `a new boxplot moves both semesters at once (${sizes.join(', ')})`);
+    assert.ok(!fs.readFileSync(path.resolve(BASE_DIR, 'cohort-estimator.js'), 'utf8').includes('sessionStorage'), 'spreads are no longer kept per tab');
+
+    // Cold cache (first visit, or the cohort version bump cleared it): the subject waits for the charts of
+    // its marked rows (both semesters), so the first number shown is the settled one, never the typical size
+    const coldCards = [1, 2].map(n => el('eds-c-tile', '', el('eds-c-tile__title', `Physics ATAR Year 11 - Semester ${n}`),
+      el('cvr-c-task', '', el('cvr-c-task__details'), el('cvr-c-task__marks', '72%'))));
+    coldCards.forEach(c => { c.dataset.sem = c.textContent.includes('Semester 1') ? '1' : '2'; document.body.appendChild(c); cards.push(c); });
+    const origNow = performance.now, origTimeout = global.setTimeout;
+    const timers = [];
+    let now = 500;
+    performance.now = () => now;
+    global.setTimeout = (fn, ms) => { timers.push(ms); return timers.length; };
+    const stampedCold = new Set();
+    window.ConnectifyCohortRows = {
+      readMark: row => (coldCards.includes(row.closest('.eds-c-tile')) ? 72 : undefined),
+      readStats: row => (stampedCold.has(row.closest('.eds-c-tile')) ? (semOf(row) === '1' ? [24.4, 51, 63.8, 75.3, 98] : [20, 49, 61, 74, 99]) : null)
+    };
+    try {
+      const coldBaseline = window.ConnectifyCohortSizeBaselines.baselineSize('physics atar year 11', { isYear12: false, isATAR: true });
+      const shown = [];
+      window.ConnectifyCohortView.render = (row, isOverall, key, size) => { if (coldCards.includes(row.closest('.eds-c-tile'))) shown.push(size); };
+      const coldPass = () => { shown.length = 0; window.ConnectifyCohort.pass(); return [...shown]; };
+      assert.deepStrictEqual(coldPass(), [undefined, undefined], 'no estimate while the subject\'s charts are unstamped');
+      assert.ok(timers.length === 1 && timers[0] > 9000, 'one re-pass is queued for when the wait ends');
+      stampedCold.add(coldCards[0]);
+      assert.deepStrictEqual(coldPass(), [undefined, undefined], 'one semester\'s chart is not enough: the other is still coming');
+      stampedCold.add(coldCards[1]);
+      const settled = coldPass();
+      assert.ok(Number.isFinite(settled[0]) && settled[0] === settled[1] && settled[0] !== coldBaseline, `the first number shown is the settled estimate (${settled}), not the typical ${coldBaseline}`);
+      // Expanding the card reveals unstamped task rows: a shown estimate is never taken back
+      coldCards[0].appendChild(el('cvr-c-tasks', '', el('cvr-c-task', '', el('cvr-c-task__details', '', el('v-label', 'Test 1')))));
+      const readMark = window.ConnectifyCohortRows.readMark;
+      window.ConnectifyCohortRows.readMark = () => 72;
+      assert.ok(coldPass().every(v => v === settled[0]), 'an estimate once shown never goes blank');
+      window.ConnectifyCohortRows.readMark = readMark;
+      // A chart that never stamps holds nothing back once the wait is over
+      now = window.ConnectifyCohortEstimator.CHART_WAIT_MS + 1;
+      assert.strictEqual(window.ConnectifyCohortEstimator.chartsPending(coldCards[1]), false, 'the wait ends after CHART_WAIT_MS');
+      assert.ok(!fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8').includes('Cohort size needed'), 'a pending size shows no rank rather than a message');
+    } finally {
+      performance.now = origNow;
+      global.setTimeout = origTimeout;
+    }
+  } finally {
+    document.querySelectorAll = origQSA;
+    cards.forEach(c => c.remove());
+    for (const k of ['overall s1', 'overall s2', 'exam']) localStorage.removeItem(prefix + k);
+    window.ConnectifyCohortEstimator = saved.est;
+    window.ConnectifyCohortRows = saved.rows;
+    window.ConnectifyCohortView = saved.view;
+    window.ConnectifyCohortSubjectAverage = saved.avg;
+    window.ConnectifyCohort = saved.cohort;
+    window.__connectTea141 = saved.flag;
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

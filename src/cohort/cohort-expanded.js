@@ -154,7 +154,6 @@
         parts.push(`SD ${math().formatPercentage(data.sd)}`, `Z-Score ${Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A'}`);
         const standing = math().standing(data.p);
         if (standing) parts.push(standing);
-        if (data.rank === undefined) parts.push('Cohort size needed');
       }
       setText(xp.summary, parts.join(' · '));
     }

@@ -50,8 +50,8 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Export**: `window.ConnectifyCohortMath`.
 
 #### [`cohort-estimator.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-estimator.js) & `cohort-size-baselines.js`
-- **Role**: Cohort size per subject: a sample count on the chart if present, else the typical size for the subject and year level (`cohort-size-baselines.js` table, scaled from General Cohort Size 500 and ATAR 60%), refined by observed IQR ratios ($\text{range} / \text{IQR}$, written only when changed).
-- **Key Functions**: `subjectKey(card)` (student, year, subject), `estimateCohortSize(card)`, `loadCohortSize(key)` / `saveCohortSize(key, size)` (per-class overrides).
+- **Role**: Cohort size per subject: a sample count on the chart if present, else the typical size for the subject and year level (`cohort-size-baselines.js` table, scaled from General Cohort Size 500 and ATAR 60%), refined by the subject's boxplot spreads: baseline $\times \text{clamp}(\overline{\text{range}/\text{IQR}} / 3.2,\ 0.75,\ 1.25)$. The spread pool (`spreadPool(subject)`, both semesters) is seeded from every cached boxplot (`connectify:stats_cache:`) and keyed by task name like that cache (`Overall S1`, never Connectify's panel text), so a refreshed page shows its settled estimate at once. With no cached boxplot for a marked row, the subject waits up to `CHART_WAIT_MS` (10s after load) for its charts (`chartsPending(card)`): no estimate, no rank, an empty placeholder; never the plain typical size first.
+- **Key Functions**: `subjectKey(card)` (student, year, subject), `observeSpreads(card)`, `estimateCohortSize(card)`, `loadCohortSize(key)` / `saveCohortSize(key, size)` (per-class overrides).
 - **Export**: `window.ConnectifyCohortEstimator`, `window.ConnectifyCohortSizeBaselines`.
 
 #### [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/src/cohort/cohort-view.js) & Submodules
@@ -73,7 +73,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Role**: Controller: styles, pass scheduling and page lifecycle.
 - **Submodules**: `cohort-styles.js` (component CSS `#connectea-style`); `cohort-observer.js` (MutationObserver, events, 8s heartbeat, `--cx-display-scale`).
 - **Key Functions**:
-  - `pass()`: unifies cohort estimates across Semester 1 and 2 cards, then renders every row. Caches `card._cxTaskRows` and `card._cxCohortKey`.
+  - `pass()`: adds every card's spreads first, then one estimate per subject for both semester cards (none while `chartsPending`, never taken back once shown; one re-pass when the wait ends), then renders every row. Caches `card._cxTaskRows` and `card._cxCohortKey`.
   - `schedule(immediate)`: 250ms trailing debounce into `requestAnimationFrame`; `runPass()` drains queued re-passes.
   - Observer: task rows added, mark text edits inside rows, and stats stamped on charts (`data-connectify-stats`, `data-highcharts-chart`); Connectify's own nodes and accordion animations are ignored. A Type change or baseline save with a prediction refresh queued leaves the pass to `connectify-predictions-updated` (one pass, never one with stale predictions).
 - **Export**: `window.ConnectifyCohort`.

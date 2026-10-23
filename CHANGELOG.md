@@ -31,6 +31,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Changing a Basic colour in the Theme Customizer updates every colour built from it.
 
 ### Fixes
+- The estimated cohort size no longer changes several times after the page loads: it shows one number straight away.
 - ATAR Estimate no longer lets you edit semesters that already have final grades.
 - Prediction ranges are no longer lopsided: Low and High now sit evenly around Mid.
 - Predictions no longer double-penalise a subject that's weak in one task type.

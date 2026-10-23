@@ -74,7 +74,7 @@
       if (!input || document.activeElement === input || input.getAttribute('aria-invalid') === 'true') return;
       const valStr = userSize === undefined ? '' : String(userSize);
       if (input.value !== valStr) input.value = valStr;
-      const placeholder = estimatedSize !== undefined ? `~${estimatedSize}` : 'e.g. 120';
+      const placeholder = estimatedSize !== undefined ? `~${estimatedSize}` : '';
       if (input.placeholder !== placeholder) input.placeholder = placeholder;
       if (ui.notice) setText(ui.notice, noticeText(estimatedSize, userSize));
     }
@@ -103,10 +103,8 @@
       parts.push(`<strong>Z-Score ${zStr}</strong>`);
       const standingText = math().standing(data.p);
       if (standingText) parts.push(`<strong>${standingText}</strong>`);
-      if (data.rank === undefined) {
-        parts.push('Cohort size needed');
-        return parts;
-      }
+      // No rank while the estimate waits for the subject's boxplots (cohort-stats.js)
+      if (data.rank === undefined) return parts;
       const isEstimated = userSize === undefined && estimatedSize !== undefined;
       const totalDisplay = isEstimated ? `~${cohortSize}` : `${cohortSize}`;
       // Compact panels name first and last place; expanded cards always show the rank (cohort-expanded.js)
