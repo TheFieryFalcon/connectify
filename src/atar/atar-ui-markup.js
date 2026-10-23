@@ -128,9 +128,9 @@
 
   /** A semester button's label for the current mode. */
   function semesterLabel(i, res, mode, isClosed) {
-    if (mode === 'grade') return isClosed ? `Semester ${i + 1} Target Grade (Closed)` : `Semester ${i + 1} Target Grade`;
+    if (mode === 'grade') return isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;
     if (isGradeMode(mode)) return isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;
-    if (mode === 'target') return isClosed ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`;
+    if (mode === 'target') return isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;
     const atar = res.error ? '—' : (res.finalAtar || res.atar || '—');
     return isClosed ? `Semester ${i + 1} ATAR (Closed)\n${atar}` : `Semester ${i + 1} ATAR\n${atar}`;
   }
