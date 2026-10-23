@@ -9,7 +9,8 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 10050;
-  width: 30px;
+  --cx-handle-width: 30px;
+  width: var(--cx-handle-width);
   height: 66px;
   border-radius: 0 10px 10px 0;
   background: #185c8c;
@@ -36,12 +37,12 @@
 
 #connectify-sidebar:not([hidden])~#connectify-sidebar-handle,
 #connectify-sidebar:not([hidden])+#connectify-sidebar-handle {
-  left: min(310px,calc(100vw - 30px));
+  left: min(310px,calc(100vw - var(--cx-handle-width, 30px)));
 }
 
 #connectify-sidebar.cx-tool-active:not([hidden])~#connectify-sidebar-handle,
 #connectify-sidebar.cx-tool-active:not([hidden])+#connectify-sidebar-handle {
-  left: min(900px,calc(100vw - 30px));
+  left: min(900px,calc(100vw - var(--cx-handle-width, 30px)));
 }
 
 #connectify-sidebar [hidden] {
@@ -145,14 +146,14 @@
 }
 
 #connectify-sidebar-handle[aria-expanded=true] {
-  left: min(310px,calc(100vw - 30px));
+  left: min(310px,calc(100vw - var(--cx-handle-width, 30px)));
 }
 
 #connectify-sidebar.cx-tool-active:not([hidden])~#connectify-sidebar-handle,
 #connectify-sidebar.cx-tool-active:not([hidden])+#connectify-sidebar-handle,
 #connectify-sidebar-handle[aria-expanded=true][data-tool-active="true"],
 #connectify-sidebar-handle[data-tool-active="true"] {
-  left: min(900px,calc(100vw - 30px)) !important;
+  left: min(900px,calc(100vw - var(--cx-handle-width, 30px))) !important;
 }
 
 #connectify-sidebar-handle:hover {

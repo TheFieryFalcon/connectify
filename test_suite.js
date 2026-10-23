@@ -11304,6 +11304,36 @@ runTest('Test 250: Year Progression data points are solid dots, with no white ri
 });
 
 
+runTest('Test 251: On touchscreens every Connectify control takes a 44px tap without overlapping anything; the handle is 44px wide', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/touch-targets.css'), 'utf8');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(c => (c.css || []).includes('src/system/touch-targets.css'));
+  assert.ok(group && group.matches.includes('https://connect.det.wa.edu.au/*'), 'loaded on every Connect page, like the handle and theme button');
+  const body = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const media = body.indexOf('@media (any-pointer: coarse)');
+  assert.ok(media >= 0 && body.slice(0, media).trim() === '', 'every rule is for touchscreens only (mouse-only screens are unchanged)');
+  const rule = sel => (body.match(new RegExp(sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*\\{([^}]*)\\}')) || [])[1] || '';
+  const controls = (body.match(/([^{}]*:is\(button, select[^{]*)\{([^}]*)\}/) || []);
+  for (const host of ['#connectify-sidebar', '#connectea-theme-menu', '#cx-customizer-modal', '#connectify-notifications-container', '#cx-expand-btn', '.connectea-row-wrapper']) {
+    assert.ok((controls[1] || '').includes(host), `${host} controls are covered`);
+  }
+  assert.ok((controls[1] || '').includes(':not(#cx-customizer-preview *)'), 'the customizer preview mock-up keeps Connect\'s sizes');
+  assert.ok(/min-height:\s*44px/.test(controls[2]) && /min-width:\s*44px/.test(controls[2]), 'controls are at least 44 x 44px');
+  // No invisible area reaches past what can be seen onto Connect's side menu, tiles or nav links
+  assert.ok(!body.includes('#connectify-sidebar-handle::before'), 'the handle has no invisible tap area (it sits over Connect\'s side menu and tiles)');
+  assert.ok(/--cx-handle-width:\s*44px/.test(rule('html #connectify-sidebar-handle')), 'the handle is 44px wide on touchscreens');
+  const handleCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-handle-menu.css'), 'utf8');
+  const handlePos = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/sidebar-handle-position.js'), 'utf8');
+  assert.ok(/--cx-handle-width:\s*30px;\s*width:\s*var\(--cx-handle-width\)/.test(handleCss), 'the handle is 30px wide with a mouse');
+  assert.ok(!/100vw - 30px/.test(handleCss + handlePos) && handlePos.includes('calc(100vw - var(--cx-handle-width, 30px))'), 'the docked handle stays on screen at either width');
+  assert.ok(/inset:\s*-10px 0;/.test(rule('#connectea-theme-toggle::before')), 'the theme button takes taps the height of Connect\'s bar and never sideways');
+  assert.ok(/position:\s*relative/.test(rule('#connectea-theme-toggle .connectea-theme-arrow')) && /inset:\s*-14px -12px -14px -6px/.test(rule('#connectea-theme-toggle .connectea-theme-arrow::before')), 'its chevron takes taps from the gap after the label to the button\'s right edge');
+  assert.ok(/inset:\s*-14px -6px -14px -12px/.test(rule('#connectea-theme-toggle[aria-expanded="true"] .connectea-theme-arrow::before')), 'mirrored while the chevron is turned, so the area stays put on screen');
+  const theme = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme.js'), 'utf8');
+  assert.ok(theme.includes("closest?.('.connectea-theme-arrow')"), 'a tap on the chevron\'s area still opens the menu (the pseudo-element targets the chevron)');
+});
+
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

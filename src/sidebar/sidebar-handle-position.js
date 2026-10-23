@@ -97,8 +97,8 @@
         const isToolActive = sb.classList.contains('cx-tool-active');
         handle.dataset.toolActive = isToolActive ? 'true' : 'false';
         handle.style.left = isToolActive
-          ? 'min(900px, calc(100vw - 30px))'
-          : 'min(310px, calc(100vw - 30px))';
+          ? 'min(900px, calc(100vw - var(--cx-handle-width, 30px)))'
+          : 'min(310px, calc(100vw - var(--cx-handle-width, 30px)))';
         return;
       }
 

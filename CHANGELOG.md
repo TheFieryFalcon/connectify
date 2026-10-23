@@ -17,6 +17,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Lowest and Highest Possible**: see the range of final marks a class can still end on.
 - **Accurate ATAR scaling**: scaled scores now follow TISC's official Average Marks Scaling for each course, instead of squashing marks towards the middle.
 - **School marks in ATAR Estimate**: enter your school mark for each subject and see the scaled score it gives.
+- **Touchscreen-friendly buttons**: on an iPad or touch laptop every Connectify button, tab and dropdown is big enough to tap, the sidebar handle is wider, and the theme button and its menu arrow take taps across the whole top bar.
 - **Auto-refresh after updates**: open Connect tabs reload themselves, so the new version works straight away (not in the Chrome Web Store version).
 
 ### Changes
