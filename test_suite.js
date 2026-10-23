@@ -115,6 +115,7 @@ const MODULE_BUNDLES = {
   ],
   'predictor-ui.js': [
     'predictor-task-cards.js',
+    'predictor-tab-scroll.js',
     'predictor-grade-view.js',
     'predictor-atar-view.js',
     'predictor-ui.js'
@@ -142,7 +143,7 @@ const SPLIT_PARTS = {
   'theme-customizer.css': ['theme-customizer.css', 'theme-color-picker.css', 'theme-customizer-preview.css'],
   'sidebar-drawer.css': ['sidebar-drawer.css', 'sidebar-handle-menu.css', 'sidebar-tool-menu.css', 'sidebar-weakness-types.css', 'sidebar-outcome-filter.css'],
   'sidebar-notifications.css': ['sidebar-notifications.css', 'sidebar-notifications-dark.css'],
-  'sidebar-predictor.css': ['sidebar-predictor.css', 'sidebar-predictor-results.css'],
+  'sidebar-predictor.css': ['sidebar-predictor.css', 'sidebar-predictor-results.css', 'sidebar-predictor-scroll.css'],
   'sidebar-settings.css': ['sidebar-settings.css', 'sidebar-progress-scaling.css'],
   'assessment-cache.js': ['cache-versions.js', 'assessment-cache.js'],
   'task-types.js': ['category-store.js', 'task-types.js', 'task-type-select.js'],
@@ -10690,6 +10691,33 @@ runTest('Test 235: Estimate Grade works out the average from any number of typed
   assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.estimator.modes, ['estimate', 'grade-estimate'], 'the Estimator holds Estimate ATAR and Estimate Grade');
   assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.goals.modes, ['target', 'grade'], 'Goal Setting holds Target ATAR and Target Grade');
 });
+
+runTest('Test 236: The Predictor subject tabs hide the native scrollbar for a plain one that never changes on hover', () => {
+  const css = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-predictor.css'), 'utf8');
+  assert.ok(/\.cx-pred-subtabs \{[^}]*scrollbar-width: none/.test(css) && /\.cx-pred-subtabs::-webkit-scrollbar \{[^}]*display: none/.test(css), 'the native scrollbar (it widens on hover on macOS) is hidden');
+  assert.ok(!/cx-pred-subtabs-(scroll|thumb)[^{,]*:(hover|active)/.test(css), 'the plain scrollbar has no hover or active state');
+  assert.ok(/\.cx-pred-subtabs-thumb \{[^}]*background: var\(--cx-scrollbar-thumb, #[0-9a-f]{6}\)/.test(css), 'the thumb takes the theme scrollbar token');
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'predictor-tab-scroll.js'), 'utf8'));
+  const host = new MockElement('div');
+  const bar = new MockElement('div', 'cx-pred-subtabs');
+  host.append(bar);
+  Object.assign(bar, { scrollWidth: 1000, clientWidth: 400, scrollLeft: 0 });
+  const refs = window.ConnectifyPredictorTabScroll.attach(bar);
+  assert.strictEqual(host.children[1], refs.track, 'the scrollbar sits right under the tabs');
+  Object.defineProperty(refs.track, 'clientWidth', { value: 400 });
+  refs.update();
+  assert.ok(!refs.track.classList.contains('cx-pred-subtabs-scroll--idle'), 'overflowing tabs show it');
+  assert.strictEqual(refs.thumb.style.width, '160px', 'the thumb is the visible share of the tabs');
+  bar.scrollLeft = 600;
+  bar.dispatchEvent(new MockEvent('scroll'));
+  assert.strictEqual(refs.thumb.style.transform, 'translateX(240px)', 'the thumb follows the scroll to the end');
+  bar.scrollWidth = 400;
+  refs.update();
+  assert.ok(refs.track.classList.contains('cx-pred-subtabs-scroll--idle'), 'it hides while every tab fits');
+  const view = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-grade-view.js'), 'utf8');
+  assert.ok(view.includes('ConnectifyPredictorTabScroll?.attach(subTabsBar)'), 'the grade view attaches it to the tabs');
+});
+
 
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');

@@ -1,0 +1,27 @@
+/* Predictor subject tabs: the native scrollbar (which widens on hover on macOS) gives way to a plain
+   one (predictor-tab-scroll.js) that never changes on hover. With the tabs' 4px padding it keeps their old 22px gap. */
+.cx-pred-subtabs {
+  scrollbar-width: none;
+}
+.cx-pred-subtabs::-webkit-scrollbar {
+  display: none;
+}
+.cx-pred-subtabs-scroll {
+  position: relative;
+  height: 8px;
+  margin-bottom: 10px;
+  cursor: default;
+  user-select: none;
+  touch-action: none;
+}
+.cx-pred-subtabs-scroll--idle {
+  visibility: hidden;
+}
+.cx-pred-subtabs-thumb {
+  position: absolute;
+  top: 1px;
+  left: 0;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--cx-scrollbar-thumb, #cbd5e1);
+}

@@ -89,6 +89,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 65. `src/predictor/predictor-math.js` (predictor coordinator & Grade/ATAR projections)
 66. `src/predictor/year-rollover.js` (new school year: last year's averages become baselines, last year archived)
 67. `src/predictor/predictor-task-cards.js` (upcoming assessment cards with escaped names)
+67b. `src/predictor/predictor-tab-scroll.js` (plain scrollbar under the subject tabs, no hover change)
 68. `src/predictor/predictor-grade-view.js` (subject grade predictor sub-tab renderer)
 69. `src/predictor/predictor-atar-view.js` (predictor panel shell and ATAR view)
 70. `src/predictor/predictor-ui.js` (predictor drawer controller)

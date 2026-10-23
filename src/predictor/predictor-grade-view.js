@@ -65,6 +65,7 @@
       });
 
       container.append(subTabsBar);
+      window.ConnectifyPredictorTabScroll?.attach(subTabsBar);
 
       // Restore horizontal scroll position across tab switches
       if (lastSavedSubTabsScroll > 0) {
