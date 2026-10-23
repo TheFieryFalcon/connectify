@@ -7,6 +7,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ## 3.2.4 (2026-10-20)
 
 ### Additions
+- **Estimate Grade** (in the new Estimator): pick a class and type the marks you think you'll get on any of its unmarked tasks (`85`, `85%` or `17/20`) to see what your average would be. One mark is enough: tasks you leave blank are left out, just as Connect leaves out unmarked tasks. Fill in every one to see your final mark. Your typed marks are kept until you press Clear Marks.
 - **Predictions on upcoming assessments**: each unmarked task shows a one-line Low • Mid • High panel beside its Type dropdown, in the Predictor's colours. If there isn't enough data yet, it says what the prediction still needs. The panel disappears once the task is marked.
 - **Expanded statistics panels** (Settings → Statistics Panels, off by default): show the statistics on subject rows, or on every row, as larger cards with your Score, Rank and the cohort Average up top, the five boxplot values below, and SD, z-score and standing underneath. Your Score's colour grows more vivid the further you beat your predicted range. Subject cards include the class prediction and cohort size; upcoming tasks show Low, Mid and High with what the prediction is based on. Takes effect after reloading the page.
 - **Show this semester's classes only** (Settings, off by default): hides the other semester's outlines and lists only this semester's classes in every sidebar tool. Connectify switches to Semester 2 once a class shows a final Semester 1 grade, and your Semester 1 results are kept and still used.
@@ -20,6 +21,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Settings says when the current theme is showing its own wallpaper instead of yours.
 
 ### Changes
+- **Goal Setting** replaces the Target ATAR and Target Grade buttons: one sidebar button with both as tabs. **Estimator** replaces ATAR Estimate and holds Estimate ATAR and the new Estimate Grade. Each reopens on the tab you last used.
 - Every sidebar tool (Predictor, Weakness Analyzer, Year in Progress, ATAR Estimate, Target ATAR, Target Grade and Calibration) now reads your saved results instead of the outline tiles.
 - The sidebar is on every Connect page. Away from Assessment Outlines only Settings works; the other tools are greyed out under a notice with a link to the outlines.
 - A Connect filter on Assessment Outlines no longer greys out the sidebar tools, since they read your saved results.

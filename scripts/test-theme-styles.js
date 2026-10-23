@@ -857,11 +857,10 @@ async function discoverSidebarViews(page, options = {}) {
 
       // Canonical tool configuration list
       const toolConfigs = [
-        { id: 'connectify-target-toggle', defaultName: 'Target ATAR', type: 'atar' },
-        { id: 'connectify-grade-toggle', defaultName: 'Target Grade', type: 'atar' },
+        { id: 'connectify-goals-toggle', defaultName: 'Goal Setting', type: 'atar', modes: [['target', 'Target ATAR'], ['grade', 'Target Grade']] },
         { id: 'connectify-predictor-toggle', defaultName: 'Predictor', type: 'predictor' },
         { id: 'connectify-progress-toggle', defaultName: 'Year in Progress', type: 'progress' },
-        { id: 'connectify-estimate-toggle', defaultName: 'ATAR Estimate', type: 'atar' },
+        { id: 'connectify-estimator-toggle', defaultName: 'Estimator', type: 'atar', modes: [['estimate', 'Estimate ATAR'], ['grade-estimate', 'Estimate Grade']] },
         { id: 'connectify-weakness-toggle', defaultName: 'Weakness Analyzer', type: 'weakness' },
         { id: 'connectify-categories-toggle', defaultName: 'Settings', type: 'settings' }
       ];
@@ -896,32 +895,43 @@ async function discoverSidebarViews(page, options = {}) {
         }
 
         if (cfg.type === 'atar') {
-          // Check for semester buttons
-          const semButtons = Array.from(sidebar.querySelectorAll('.cta-semesters:not(.cta-tabs) .cta-semester, .cta-semesters button'));
-          if (semButtons.length > 0) {
-            semButtons.forEach((sBtn, sIdx) => {
-              const semText = (sBtn.innerText || sBtn.textContent || `Semester ${sIdx + 1}`).trim();
+          // Each mode tab of the launcher (Goal Setting: Target ATAR / Target Grade; Estimator: Estimate ATAR / Estimate Grade), per semester
+          for (const [mode, modeName] of cfg.modes) {
+            const tabSelector = `.cta-mode-tab[data-mode="${mode}"]`;
+            const modeTab = sidebar.querySelector(tabSelector);
+            if (modeTab && typeof modeTab.click === 'function') {
+              try { modeTab.click(); } catch {}
+            }
+            const semButtons = Array.from(sidebar.querySelectorAll('.cta-semesters:not(.cta-tabs) .cta-semester, .cta-semesters button'));
+            if (semButtons.length > 0) {
+              semButtons.forEach((sBtn, sIdx) => {
+                const semText = (sBtn.innerText || sBtn.textContent || `Semester ${sIdx + 1}`).trim();
+                views.push({
+                  id: `cx-sidebar-${cfg.id}-${mode}-sem${sIdx}`,
+                  title: `Sidebar: ${toolName} [${modeName} - ${semText}]`,
+                  auditScope: 'sidebar',
+                  toolId: cfg.id,
+                  toolName,
+                  tabSelector,
+                  tabName: modeName,
+                  subTabSelector: `.cta-semesters .cta-semester:nth-child(${sIdx + 1}), .cta-semesters button:nth-child(${sIdx + 1})`,
+                  subTabIndex: sIdx,
+                  subTabName: semText,
+                  isInitial: false
+                });
+              });
+            } else {
               views.push({
-                id: `cx-sidebar-${cfg.id}-sem${sIdx}`,
-                title: `Sidebar: ${toolName} [${semText}]`,
+                id: `cx-sidebar-${cfg.id}-${mode}`,
+                title: `Sidebar: ${toolName} [${modeName}]`,
                 auditScope: 'sidebar',
                 toolId: cfg.id,
                 toolName,
-                subTabSelector: `.cta-semesters .cta-semester:nth-child(${sIdx + 1}), .cta-semesters button:nth-child(${sIdx + 1})`,
-                subTabIndex: sIdx,
-                subTabName: semText,
+                tabSelector,
+                tabName: modeName,
                 isInitial: false
               });
-            });
-          } else {
-            views.push({
-              id: `cx-sidebar-${cfg.id}`,
-              title: `Sidebar: ${toolName}`,
-              auditScope: 'sidebar',
-              toolId: cfg.id,
-              toolName,
-              isInitial: false
-            });
+            }
           }
         } else if (cfg.type === 'predictor') {
           const gradeBtn = sidebar.querySelector('#cx-pred-btn-grade');

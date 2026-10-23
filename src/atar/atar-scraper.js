@@ -41,7 +41,8 @@
       .replace(/\bYear\s*\d+\b/gi, '')
   );
 
-  // Cached task -> the { name, weight, pending, score, earned } shape taskProgress() expects
+  // Cached task -> the { name, weight, pending, score, earned } shape taskProgress() expects; each course
+  // also keeps these as `tasks`, so Estimate Grade works when the weights do not reconcile
   function toAssessment(t) {
     const isPending = Boolean(t.pending || t.score === null || t.score === undefined);
     const scorePct = isPending ? undefined : Number(t.score);
@@ -112,6 +113,7 @@
           name,
           mark: markValue,
           finalLetter: Boolean(entry.finalLetter),
+          tasks,
           progress: taskProgress(tasks, markValue, semNumber)
         });
       }
@@ -160,6 +162,7 @@
             name: cleanName,
             mark: markVal,
             finalLetter: false,
+            tasks,
             progress: taskProgress(tasks, markVal, semNumber)
           });
         }

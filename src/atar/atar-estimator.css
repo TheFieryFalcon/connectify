@@ -1,0 +1,27 @@
+/**
+ * Connectify calculator: the Goal Setting / Estimator mode tabs and the Estimate Grade table.
+ * The tab bar reuses the Predictor's .cx-pred-main-tabs look (sidebar-predictor.css).
+ */
+
+#connectea-atar .cta-mode-tabs {
+  margin-bottom: 12px;
+}
+
+/* #connectea-atar button resets font to inherit: restore the Predictor tabs' type */
+#connectea-atar .cta-mode-tab {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#connectea-atar .cta-mode-tab.active {
+  font-weight: 700;
+}
+
+#connectea-atar .cta-estimate-input {
+  width: 128px;
+  text-align: left;
+}
+
+#connectea-atar .cta-grade-estimate .cta-grade-table td {
+  vertical-align: middle;
+}

@@ -1,19 +1,20 @@
 # Connectify Analytics, Predictor & Testing Features Reference
 
-This document details user-facing features 11 through 20, covering Target ATAR and Grade planners, ATAR progression graphs, Weakness Radar, Settings & Calibration, DOM sweeping, Grade notifications, store publishing, Grade/ATAR Predictor, canonical sidebar sequence, and the master test suite.
+This document details user-facing features 11 through 20, covering Goal Setting and the Estimator, ATAR progression graphs, Weakness Radar, Settings & Calibration, DOM sweeping, Grade notifications, store publishing, Grade/ATAR Predictor, canonical sidebar sequence, and the master test suite.
 
 ---
 
 ## 7. Front-Facing Features Directory (Part 2: Features 11–20)
 
-### 11. Target ATAR & Grade Planner Modal
-- **Source Modules**: [`target-atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/target-atar-ui.js), [`target-grade-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/target-grade-ui.js), [`atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/atar-ui.js)
-- **DOM Insertion**: Full-screen modal overlay (`#connectea-atar`) opened via sidebar or floating button.
-- **UI Appearance**: Clean tabbed interface with Course Marks Table, Target ATAR Planner, and Target Grade Planner.
+### 11. Goal Setting & Estimator
+- **Source Modules**: [`target-atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-atar-ui.js), [`target-grade-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-grade-ui.js), [`grade-estimate-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/grade-estimate-ui.js), [`atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-ui.js)
+- **DOM Insertion**: One calculator panel (`#connectea-atar`) in the sidebar workspace, opened by two launchers: **Goal Setting** (Target ATAR, Target Grade) and **Estimator** (Estimate ATAR, Estimate Grade).
+- **UI Appearance**: Launcher name as heading, then the Predictor-style mode tabs (`.cta-mode-tabs`), the semester buttons and the active mode's view; each launcher reopens on its last tab.
 - **Functionality**:
-  - **ATAR Calculator**: Aggregates scaled scores across enrolled ATAR courses using TISC Average Marks Scaling (each course's 2025 scaled mean + SD x z, z from the standardised mean 60 / SD 14); selects top 4 subjects for Tertiary Entrance Aggregate (TEA); applies 10% bonus for Methods, Specialist, and Languages (up to 2 bonus courses); calculates projected ATAR. Each course takes a school mark (Connect's by default) and shows its scaled score; a semester with final grades is Closed.
+  - **Estimate ATAR**: Aggregates scaled scores across enrolled ATAR courses using TISC Average Marks Scaling (each course's 2025 scaled mean + SD x z, z from the standardised mean 60 / SD 14); selects top 4 subjects for Tertiary Entrance Aggregate (TEA); applies 10% bonus for Methods, Specialist, and Languages (up to 2 bonus courses); calculates projected ATAR. Each course takes a school mark (Connect's by default) and shows its scaled score; a semester with final grades is Closed.
   - **Target ATAR Planner**: Input target ATAR; toggles top 4 course inclusion; difficulty-weighted optimization adjusts required marks based on historical strengths across subjects and categories (`Adjust marks by subject & task type performance`).
   - **Target Grade Planner**: Select course, enter target percentage, dynamic prior performance adjustment option (`Dynamically adjust required grade based on prior performance`), clean semester tabs eliminating ATAR text.
+  - **Estimate Grade**: Select a class; each weighted unmarked task gets a mark input (`85`, `85%`, `17/20`, `17 Out of 20`). The average updates as you type: Connect's average for the marked tasks as one block plus each typed mark at its weight (`ConnectifyGradeEstimate.estimate`); blank tasks are left out, so one typed mark is enough, and typing every one gives the final mark. Unweighted tasks get no input; unreadable marks are flagged (`aria-invalid`) and ignored. Typed marks persist per class (`gradeEstimates`) until Clear Marks.
 
 ### 12. ATAR Progression & Historical Graphs
 - **Source Modules**: [`progress-chart.js`](file:///Users/uwong/Downloads/2.1.14_0/progress-chart.js), [`progress-graph.js`](file:///Users/uwong/Downloads/2.1.14_0/progress-graph.js)
@@ -62,7 +63,7 @@ This document details user-facing features 11 through 20, covering Target ATAR a
   - **Dynamic Breakout Performance Meter**: 18px wide, 56px tall; 4 baseline segments: Red ($< \text{Low}$), Orange ($\text{Low} \le S < \text{Mid}$), Yellow ($\text{Mid} \le S < \text{High}$), Green ($S \ge \text{High}$). Suppressed on incomplete tasks and on first tasks lacking precedent/baseline. Secret double-height Purple breakout segment (height 20px) appears when $S > 1.10 \times \text{High}$. Critical shortfall ($S \le \text{Low} - 10\%$ additive) renders 0 segments with pulsing red alarm glow (`.connectea-outcome-critical`).
 
 ### 19. Sidebar Integration & Theme Navigation Stabilization
-- **Canonical Sequence**: Target ATAR, Target Grade, Predictor, Year in Progress, ATAR Estimate, Weakness Analyzer, Settings.
+- **Canonical Sequence**: Goal Setting, Predictor, Year in Progress, Estimator, Weakness Analyzer, Settings.
 - **Button Styling**: Settings (`#connectify-categories-toggle`) and Weakness Analyzer (`#connectify-weakness-toggle`) feature white buttons (`#ffffff`) in light mode with centered text.
 - **Category Colors**: Category labels bind to `--cx-cat-color` via `.cx-cat-name-label` for vibrant visibility in dark mode.
 - **Theme Button Mount**: `#connectea-theme-toggle` auto-discovers `.cvr-c-primary-navigation` and centers at `top: 50%; transform: translateY(-50%)`.

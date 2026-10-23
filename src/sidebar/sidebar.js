@@ -110,7 +110,7 @@
       if (e.detail !== 'home') openSidebar();
       const activeTool = e.detail;
       const btnMap = {
-        calculator: ['connectify-target-toggle', 'connectify-grade-toggle', 'connectify-estimate-toggle'],
+        calculator: ['connectify-goals-toggle', 'connectify-estimator-toggle'],
         predictor: ['connectify-predictor-toggle'],
         progress: ['connectify-progress-toggle'],
         weakness: ['connectify-weakness-toggle'],

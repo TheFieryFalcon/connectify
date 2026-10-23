@@ -1,9 +1,10 @@
 /**
  * Connectify ATAR UI & Calculator Interface
  *
- * Coordinates the ATAR estimate view, Target ATAR planner and Target Grade planner in one panel.
- * Markup: atar-ui-markup.js; scraping: ConnectifyAtarScraper; calculations: ConnectifyAtarCalc;
- * planner forms: ConnectifyTargetPlannerUI. Provides `window.ConnectifyAtar`.
+ * Coordinates the calculator panel's four modes in two launcher groups: Goal Setting (Target ATAR,
+ * Target Grade) and Estimator (Estimate ATAR, Estimate Grade). Markup and groups: atar-ui-markup.js;
+ * scraping: ConnectifyAtarScraper; calculations: ConnectifyAtarCalc; planner forms:
+ * ConnectifyTargetPlannerUI; Estimate Grade: ConnectifyGradeEstimateUI. Provides `window.ConnectifyAtar`.
  */
 (() => {
   'use strict';
@@ -26,36 +27,34 @@
     const calc = window.ConnectifyAtarCalc;
     const plannerUI = () => window.ConnectifyTargetPlannerUI;
 
-    if (math.calculate) {
-      window.ConnectifyAtar.calculate = math.calculate;
-    }
+    if (math.calculate) window.ConnectifyAtar.calculate = math.calculate;
 
     let courses = [[], []];
     let gradeCourses = [[], []];
     let activeSemester = 1;
     let lastStateSignature = '';
-    let isPlanningMode = false;
-    let isGradingMode = false;
+    let mode = 'estimate';
 
     const markupMod = window.ConnectifyAtarMarkup;
     const {
-      calculatorPanel, panelTitle, estimateTab, targetTab, gradeTab,
+      calculatorPanel, panelTitle, goalsTab, estimatorTab, modeButtons,
       semesterCardsContainer, courseListContainer, detailSummary, resetBtn, expandAllBtn, calculationDetails
     } = markupMod.build();
-    const toolTabs = [estimateTab, targetTab, gradeTab];
+    const launchers = { goals: goalsTab, estimator: estimatorTab };
+    // The mode each launcher reopens on
+    const lastMode = { goals: 'target', estimator: 'estimate' };
 
-    window.ConnectifyAtar.calculatorButtons = [estimateTab, targetTab, gradeTab];
-    window.ConnectifyAtar.toolButtons = toolTabs;
+    window.ConnectifyAtar.calculatorButtons = [goalsTab, estimatorTab];
+    window.ConnectifyAtar.toolButtons = window.ConnectifyAtar.calculatorButtons;
     window.ConnectifyAtar.calculatorPanel = calculatorPanel;
     if (window.ConnectifyInitSidebar) window.ConnectifyInitSidebar();
 
-    // The tabs are the sidebar launchers, so their pressed state is the sidebar's too
-    function setPressed(mode) {
-      estimateTab.setAttribute('aria-pressed', String(mode === 'estimate'));
-      targetTab.setAttribute('aria-pressed', String(mode === 'target'));
-      gradeTab.setAttribute('aria-pressed', String(mode === 'grade'));
+    // The launchers are the sidebar's, so their pressed state is the sidebar's too (null: closed)
+    function setPressed(activeMode) {
+      const group = activeMode && markupMod.groupOf(activeMode);
+      for (const [name, btn] of Object.entries(launchers)) btn.setAttribute('aria-pressed', String(name === group));
     }
-    const currentMode = () => (isPlanningMode ? 'target' : isGradingMode ? 'grade' : 'estimate');
+    const isGradeMode = () => markupMod.isGradeMode(mode);
 
     const hasSemesterTwoStarted = () => markupMod.hasSemesterTwoStarted(gradeCourses);
     const isTargetClosed = semesterIdx => markupMod.isTargetClosed(gradeCourses, semesterIdx);
@@ -74,9 +73,7 @@
     });
 
     expandAllBtn.addEventListener('click', () => {
-      if (window.ConnectifyData?.expandAll) {
-        window.ConnectifyData.expandAll(true);
-      }
+      window.ConnectifyData?.expandAll?.(true);
       plannerContext.scanAndRefresh();
     });
 
@@ -89,6 +86,12 @@
       isTargetClosed,
       renderTargetOutput: () => plannerRefs && plannerUI()?.renderTargetOutput(plannerRefs, plannerContext),
       renderGradeOutput: () => gradeRefs && plannerUI()?.renderGradeOutput(gradeRefs, plannerContext),
+      renderEstimateOutput: () => estimateRefs && window.ConnectifyGradeEstimateUI.render(estimateRefs, plannerContext),
+      renderModeOutput: () => {
+        if (mode === 'target') plannerContext.renderTargetOutput();
+        else if (mode === 'grade') plannerContext.renderGradeOutput();
+        else if (mode === 'grade-estimate') plannerContext.renderEstimateOutput();
+      },
       scanAndRefresh: () => {
         setTimeout(() => {
           if (window.ConnectifyData?.collect) {
@@ -96,14 +99,14 @@
           }
           lastStateSignature = '';
           refreshData();
-          if (isGradingMode) plannerContext.renderGradeOutput();
-          else plannerContext.renderTargetOutput();
+          plannerContext.renderModeOutput();
         }, 300);
       }
     };
 
     let plannerRefs = null;
     let gradeRefs = null;
+    const estimateRefs = window.ConnectifyGradeEstimateUI?.createView(plannerContext) || null;
 
     if (plannerUI()) {
       plannerRefs = plannerUI().createPlannerView(plannerContext);
@@ -112,51 +115,53 @@
 
     if (plannerRefs) calculatorPanel.append(plannerRefs.container);
     if (gradeRefs) calculatorPanel.append(gradeRefs.container);
+    if (estimateRefs) calculatorPanel.append(estimateRefs.container);
 
     document.body.append(calculatorPanel);
 
-    function selectTab(mode) {
-      isPlanningMode = mode === 'target';
-      isGradingMode = mode === 'grade';
+    function selectTab(nextMode) {
+      mode = markupMod.MODES[nextMode] ? nextMode : 'estimate';
+      const group = markupMod.groupOf(mode);
+      lastMode[group] = mode;
 
-      panelTitle.textContent = isPlanningMode ? 'Target ATAR Planner' : isGradingMode ? 'Target Grade Planner' : 'Estimated ATAR';
+      panelTitle.textContent = markupMod.GROUPS[group].title;
+      calculatorPanel.setAttribute('aria-label', markupMod.MODES[mode].title);
+      markupMod.paintModeTabs(modeButtons, mode);
 
-      calculatorPanel.setAttribute('aria-label', panelTitle.textContent);
-
-      if (isGradingMode && (hasSemesterTwoStarted() || isTargetClosed(0))) {
+      if (isGradeMode() && (hasSemesterTwoStarted() || isTargetClosed(0))) {
         activeSemester = 1;
       }
 
-      setPressed(currentMode());
+      setPressed(mode);
 
       courseListContainer.hidden = detailSummary.hidden = resetBtn.hidden = expandAllBtn.hidden = calculationDetails.hidden =
-        isPlanningMode || isGradingMode;
+        mode !== 'estimate';
 
-      if (plannerRefs) plannerRefs.container.hidden = !isPlanningMode;
-      if (gradeRefs) gradeRefs.container.hidden = !isGradingMode;
+      if (plannerRefs) plannerRefs.container.hidden = mode !== 'target';
+      if (gradeRefs) gradeRefs.container.hidden = mode !== 'grade';
+      if (estimateRefs) estimateRefs.container.hidden = mode !== 'grade-estimate';
 
       renderCourseRows();
-      if (isPlanningMode && plannerRefs) plannerContext.renderTargetOutput();
-      if (isGradingMode && gradeRefs) plannerContext.renderGradeOutput();
     }
 
-    function openCalculator(mode) {
+    /** Opens the panel on a group (its last mode) or on one mode. */
+    function openCalculator(groupOrMode) {
       calculatorPanel.hidden = false;
       lastStateSignature = '';
       refreshData();
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'calculator' }));
-      selectTab(mode);
+      selectTab(lastMode[groupOrMode] || groupOrMode);
       panelTitle.focus();
     }
 
-    estimateTab.addEventListener('click', () => openCalculator('estimate'));
-    targetTab.addEventListener('click', () => openCalculator('target'));
-    gradeTab.addEventListener('click', () => openCalculator('grade'));
+    goalsTab.addEventListener('click', () => openCalculator('goals'));
+    estimatorTab.addEventListener('click', () => openCalculator('estimator'));
+    for (const [tabMode, btn] of Object.entries(modeButtons)) btn.addEventListener('click', () => selectTab(tabMode));
     selectTab('estimate');
     setPressed(null);
 
     function updateResults() {
-      if (isGradingMode && (hasSemesterTwoStarted() || isTargetClosed(0))) {
+      if (isGradeMode() && (hasSemesterTwoStarted() || isTargetClosed(0))) {
         activeSemester = 1;
       }
       if (isTargetClosed(activeSemester) && !isTargetClosed(1 - activeSemester)) {
@@ -175,12 +180,11 @@
         const res = results[i] || {};
         const isClosed = isTargetClosed(i);
 
-        markupMod.paintSemesterButton(semesterButtons[i], i, res, currentMode(), isClosed, i === activeSemester);
+        markupMod.paintSemesterButton(semesterButtons[i], i, res, mode, isClosed, i === activeSemester);
         if (i === activeSemester) detailSummary.textContent = res.detailText || res.error || 'Calculating ATAR...';
       }
 
-      if (isPlanningMode && plannerRefs) plannerContext.renderTargetOutput();
-      if (isGradingMode && gradeRefs) plannerContext.renderGradeOutput();
+      plannerContext.renderModeOutput();
     }
 
     function renderCourseRows() {
@@ -223,7 +227,7 @@
     function closeCalculator() {
       calculatorPanel.hidden = true;
       setPressed(null);
-      (isGradingMode ? gradeTab : isPlanningMode ? targetTab : estimateTab).focus();
+      launchers[markupMod.groupOf(mode)].focus();
     }
 
     calculatorPanel.addEventListener('keydown', e => {

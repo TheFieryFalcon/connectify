@@ -25,10 +25,11 @@ This document covers the user interface and analytics modules, including target 
 #### [`atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-ui.js)
 - **Role**: Coordinates the main calculator modal (`#connectea-atar`), tab switching, semester toggling, and data synchronization.
 - **Key Functions**:
-  - `atar-ui-markup.js`: panel markup (tool tabs mounted as sidebar launchers, semester buttons, methodology), semester labels and closing rules.
-  - `selectTab(mode)`: Switches between `'estimate'`, `'target'`, and `'grade'`.
+  - `atar-ui-markup.js`: panel markup (the Goal Setting and Estimator launchers the sidebar mounts, mode tabs, semester buttons, methodology), `GROUPS` (`goals`: `target`, `grade`; `estimator`: `estimate`, `grade-estimate`), `MODES`, `paintModeTabs`, semester labels and closing rules.
+  - `selectTab(mode)`: Switches between `'target'`, `'grade'`, `'estimate'` and `'grade-estimate'`: heading = launcher name, `aria-label` = mode title, only the group's tabs shown.
+  - `grade-estimate.js` (`ConnectifyGradeEstimate`): `parseMark(text)` (percent, `a/b`, `a Out of b`), `estimate(tasks, entered, mark)` -> `{ current, estimate, entered, pending, complete }`: Connect's mark as one block at the marked weight plus typed marks at theirs; blanks and (when any task is weighted) unweighted tasks are left out. `grade-estimate-ui.js` (`ConnectifyGradeEstimateUI`): class select, task table rebuilt only when the class or tasks change (typing keeps focus), marks saved per class in the calculator preferences. Styles: `atar-estimator.css`.
   - `updateResults()`: Updates Semester 1 & 2 buttons with clean styling (ATAR text eliminated in grade mode). A semester whose A–E grades are final is Closed (`.cta-semester-closed`, disabled) in every mode, Estimate included; unselected and closed buttons keep a whole 1px border (text aligned with the indicator's 4px bar by padding).
-  - `openCalculator(mode)` / `closeCalculator()`: Handles modal visibility, accessibility focus, and Escape key dismissal.
+  - `openCalculator(groupOrMode)` / `closeCalculator()`: a group opens on its last mode; Handles modal visibility, accessibility focus, and Escape key dismissal.
 - **Export**: `window.ConnectifyAtar`.
 
 ---
@@ -114,7 +115,7 @@ This document covers the user interface and analytics modules, including target 
   - `sidebar-filter.js` (`isOutlinesFilterRestricted` for the year rollover, `clickConnectAllButton`), `sidebar-page-notice.js` (`.cx-page-notice` with an Open Assessment Outlines link; `ANYWHERE_TOOLS`: Settings), `sidebar-tools.js`, `sidebar-shell.js`: launcher/panel mounting (DOM only touched when out of place; launchers pressed only while their panel is open) and the drawer shell.
 - **Key Functions**:
   - Drawer slide synchronization and 900px workspace expansion (`.cx-tool-active`) with `← Back to Menu` navigation.
-  - Canonical launcher buttons: Target ATAR, Target Grade, Predictor, Year in Progress, ATAR Estimate, Weakness Analyzer, Settings.
+  - Canonical launcher buttons: Goal Setting, Predictor, Year in Progress, Estimator, Weakness Analyzer, Settings (`CALCULATOR_GROUPS` maps the two calculator launchers to `openCalculator('goals' | 'estimator')`).
   - Centralized delegated click handling and single active tool policy.
 - **Export**: `window.ConnectifyInitSidebar`.
 

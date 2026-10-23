@@ -121,7 +121,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Role**: ATAR courses for the sidebar tools, from the centralized cache only.
 - **Key Functions**:
   - `isAtarEligible()`: Year 11/12 or ATAR in registry class titles, else the page text.
-  - `readCourses(atarOnly)`: `collect(true)`, then `[Semester1Courses, Semester2Courses]` from the class registry (mark, final letter, each outline's own tasks from the subjects cache) plus grade-cache classes; passed through `filterCourses`.
+  - `readCourses(atarOnly)`: `collect(true)`, then `[Semester1Courses, Semester2Courses]` from the class registry (mark, final letter, each outline's own tasks from the subjects cache as `tasks` and through `taskProgress` as `progress`) plus grade-cache classes; passed through `filterCourses`.
   - `scanOutlineDetails()`: Safe no-op complying with Rule 7; users are prompted via explicit "Expand Subject Outlines" buttons.
 - **Export**: `window.ConnectifyAtarScraper`.
 

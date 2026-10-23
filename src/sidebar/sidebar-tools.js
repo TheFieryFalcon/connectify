@@ -9,15 +9,15 @@
   'use strict';
 
   const CANONICAL_BUTTONS = [
-    { id: 'connectify-target-toggle', label: 'Target ATAR' }, { id: 'connectify-grade-toggle', label: 'Target Grade' },
-    { id: 'connectify-predictor-toggle', label: 'Predictor' }, { id: 'connectify-progress-toggle', label: 'Year in Progress' },
-    { id: 'connectify-estimate-toggle', label: 'ATAR Estimate' }, { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' },
-    { id: 'connectify-categories-toggle', label: 'Settings' }
+    { id: 'connectify-goals-toggle', label: 'Goal Setting' }, { id: 'connectify-predictor-toggle', label: 'Predictor' },
+    { id: 'connectify-progress-toggle', label: 'Year in Progress' }, { id: 'connectify-estimator-toggle', label: 'Estimator' },
+    { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' }, { id: 'connectify-categories-toggle', label: 'Settings' }
   ];
   const SECONDARY_TOOLS = new Set(['connectify-weakness-toggle', 'connectify-categories-toggle']);
-  const LAUNCHER_SELECTOR = '#connectify-target-toggle, #connectify-grade-toggle, #connectify-estimate-toggle, #connectify-predictor-toggle, ' +
+  const LAUNCHER_SELECTOR = '#connectify-goals-toggle, #connectify-estimator-toggle, #connectify-predictor-toggle, ' +
     '#connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle';
-  const CALCULATOR_MODES = { 'connectify-target-toggle': 'target', 'connectify-grade-toggle': 'grade', 'connectify-estimate-toggle': 'estimate' };
+  // Both open the calculator panel: Goal Setting (Target ATAR, Target Grade), Estimator (Estimate ATAR, Estimate Grade)
+  const CALCULATOR_GROUPS = { 'connectify-goals-toggle': 'goals', 'connectify-estimator-toggle': 'estimator' };
 
   const TOOL_MAP = {
     'connectify-predictor-toggle': {
@@ -109,14 +109,14 @@
   };
 
   /**
-   * Launchers are pressed only while their tool is open. The calculator's three launchers keep the
-   * mode-specific state atar-ui gives them while the calculator is open, and are all released when it closes.
+   * Launchers are pressed only while their tool is open. The calculator's two launchers keep the
+   * group-specific state atar-ui gives them while the calculator is open, and are both released when it closes.
    */
   function syncPressedState(toolMenu) {
     const calculatorPanel = document.getElementById('connectea-atar');
     const calculatorOpen = Boolean(calculatorPanel && !calculatorPanel.hidden);
     for (const btn of toolMenu.children) {
-      if (CALCULATOR_MODES[btn.id]) {
+      if (CALCULATOR_GROUPS[btn.id]) {
         if (!calculatorOpen) setPressed(btn, false);
       } else if (TOOL_MAP[btn.id]) {
         const panel = document.getElementById(TOOL_MAP[btn.id].panelId);
@@ -128,11 +128,11 @@
   /** Opens (or, if already open, closes) the tool behind a launcher button. */
   function launchTool(toggle) {
     const id = toggle.id;
-    if (CALCULATOR_MODES[id]) {
-      for (const tid of Object.keys(CALCULATOR_MODES)) {
+    if (CALCULATOR_GROUPS[id]) {
+      for (const tid of Object.keys(CALCULATOR_GROUPS)) {
         document.getElementById(tid)?.setAttribute('aria-pressed', tid === id ? 'true' : 'false');
       }
-      if (window.ConnectifyAtar?.openCalculator) window.ConnectifyAtar.openCalculator(CALCULATOR_MODES[id]);
+      if (window.ConnectifyAtar?.openCalculator) window.ConnectifyAtar.openCalculator(CALCULATOR_GROUPS[id]);
       else openEvent('calculator');
       return;
     }

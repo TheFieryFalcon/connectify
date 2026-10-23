@@ -150,9 +150,9 @@ const SPLIT_PARTS = {
   'target-solver.js': ['target-difficulty.js', 'target-solver.js'],
   'target-atar-ui.js': ['target-ui-helpers.js', 'target-atar-breakdown.js', 'target-atar-ui.js'],
   'target-grade-ui.js': ['target-ui-helpers.js', 'target-grade-ui.js'],
-  'atar-ui.js': ['target-ui-helpers.js', 'atar-ui-markup.js', 'atar-ui.js'],
+  'atar-ui.js': ['target-ui-helpers.js', 'grade-estimate.js', 'grade-estimate-ui.js', 'atar-ui-markup.js', 'atar-ui.js'],
   'atar-features.js': ['outline-controls.js', 'atar-features.js'],
-  'atar.css': ['atar.css', 'atar-compact.css', 'atar-planner.css'],
+  'atar.css': ['atar.css', 'atar-compact.css', 'atar-planner.css', 'atar-estimator.css'],
   'progress-chart.js': ['progress-chart.js', 'progress-week-editor.js'],
   'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
   'progress-graph.js': ['progress-modes.js', 'progress-panel.js', 'progress-graph.js'],
@@ -1232,20 +1232,19 @@ runTest('Sidebar mounts launcher buttons in canonical order', () => {
   const buttonIds = window.ConnectifySidebarTools.CANONICAL_BUTTONS.map(b => b.id);
 
   const expectedOrder = [
-    'connectify-target-toggle',
-    'connectify-grade-toggle',
+    'connectify-goals-toggle',
     'connectify-predictor-toggle',
     'connectify-progress-toggle',
-    'connectify-estimate-toggle',
+    'connectify-estimator-toggle',
     'connectify-weakness-toggle',
     'connectify-categories-toggle'
   ];
 
-  assert.deepStrictEqual(buttonIds, expectedOrder, 'Sidebar button order must place Weakness Analyzer below ATAR Estimate');
+  assert.deepStrictEqual(buttonIds, expectedOrder, 'Sidebar button order must place Weakness Analyzer below Estimator');
 });
 
-runTest('Target ATAR, Target Grade, and ATAR Estimate buttons and panel in sidebar', () => {
-  assert.ok(atarUiJs.includes('window.ConnectifyAtar.calculatorButtons = [estimateTab, targetTab, gradeTab]'), 'atar-ui.js must export calculatorButtons');
+runTest('Goal Setting and Estimator launchers and panel in sidebar', () => {
+  assert.ok(atarUiJs.includes('window.ConnectifyAtar.calculatorButtons = [goalsTab, estimatorTab]'), 'atar-ui.js must export calculatorButtons');
   assert.ok(atarUiJs.includes('window.ConnectifyAtar.calculatorPanel = calculatorPanel'), 'atar-ui.js must export calculatorPanel');
   assert.ok(sidebarJs.includes('window.ConnectifyAtar?.calculatorButtons'), 'sidebar.js must check calculatorButtons');
   assert.ok(sidebarJs.includes('window.ConnectifyAtar?.calculatorPanel'), 'sidebar.js must mount calculatorPanel into workspace');
@@ -1932,7 +1931,8 @@ runTest('sidebar.js implements centralized delegation and automatic component in
   const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
   assert.ok(sidebarJs.includes('ensureWeaknessPanel') || sidebarJs.includes('createWeaknessPanel'), 'sidebar.js must ensure weakness panel instantiation');
   assert.ok(sidebarJs.includes('ensureSettingsPanel') || sidebarJs.includes('createSettingsPanel'), 'sidebar.js must ensure settings panel instantiation');
-  assert.ok(sidebarJs.includes('#connectify-target-toggle'), 'sidebar.js must delegate Target ATAR toggle');
+  assert.ok(sidebarJs.includes('#connectify-goals-toggle'), 'sidebar.js must delegate Goal Setting toggle');
+  assert.ok(sidebarJs.includes('#connectify-estimator-toggle'), 'sidebar.js must delegate Estimator toggle');
   assert.ok(sidebarJs.includes('#connectify-progress-toggle'), 'sidebar.js must delegate Progress Graph toggle');
   assert.ok(sidebarJs.includes('#connectify-weakness-toggle'), 'sidebar.js must delegate Weakness Analyzer toggle');
   assert.ok(sidebarJs.includes('#connectify-categories-toggle'), 'sidebar.js must delegate Settings toggle');
@@ -4691,11 +4691,10 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
     'connectify-weakness',
     'connectify-categories',
     'connectify-predictor',
-    'connectify-target-toggle',
-    'connectify-grade-toggle',
+    'connectify-goals-toggle',
     'connectify-predictor-toggle',
     'connectify-progress-toggle',
-    'connectify-estimate-toggle',
+    'connectify-estimator-toggle',
     'connectify-weakness-toggle',
     'connectify-categories-toggle'
   ].forEach(id => {
@@ -4763,16 +4762,15 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.strictEqual(toolMenu.getAttribute('aria-label'), 'Tools', 'Tool menu must have aria-label="Tools"');
 
   const expectedButtons = [
-    { id: 'connectify-target-toggle', label: 'Target ATAR', class: 'cx-calculator-tool' },
-    { id: 'connectify-grade-toggle', label: 'Target Grade', class: 'cx-calculator-tool' },
+    { id: 'connectify-goals-toggle', label: 'Goal Setting', class: 'cx-calculator-tool' },
     { id: 'connectify-predictor-toggle', label: 'Predictor', class: 'cx-calculator-tool' },
     { id: 'connectify-progress-toggle', label: 'Year in Progress', class: 'cx-calculator-tool' },
-    { id: 'connectify-estimate-toggle', label: 'ATAR Estimate', class: 'cx-calculator-tool' },
+    { id: 'connectify-estimator-toggle', label: 'Estimator', class: 'cx-calculator-tool' },
     { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer', class: 'cx-secondary-tool' },
     { id: 'connectify-categories-toggle', label: 'Settings', class: 'cx-secondary-tool' }
   ];
 
-  assert.strictEqual(toolMenu.children.length, 7, 'Tool menu must contain exactly 7 buttons');
+  assert.strictEqual(toolMenu.children.length, 6, 'Tool menu must contain exactly 6 buttons');
   expectedButtons.forEach((exp, idx) => {
     const btn = toolMenu.children[idx];
     assert.strictEqual(btn.id, exp.id, `Button at index ${idx} must have id ${exp.id}`);
@@ -4799,23 +4797,30 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   });
 
   // -------------------------------------------------------------------------
-  // TOOL 1: Target ATAR
+  // TOOL 1: Goal Setting (opens on Target ATAR)
   // -------------------------------------------------------------------------
-  const targetBtn = document.getElementById('connectify-target-toggle');
-  targetBtn.click();
+  const goalsBtn = document.getElementById('connectify-goals-toggle');
+  goalsBtn.click();
 
   assert.strictEqual(sidebar.hidden, false, 'Sidebar must open on tool click');
   assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar must enter cx-tool-active mode');
   assert.strictEqual(introText.hidden, true, 'Intro text must be hidden when tool is active');
-  assert.strictEqual(targetBtn.getAttribute('aria-pressed'), 'true', 'Target ATAR button must be pressed');
+  assert.strictEqual(goalsBtn.getAttribute('aria-pressed'), 'true', 'Goal Setting button must be pressed');
 
   const atarPanel = document.getElementById('connectea-atar');
-  assert.strictEqual(atarPanel.hidden, false, 'Target ATAR panel (#connectea-atar) must be visible');
-  assert.ok(atarPanel.getAttribute('aria-label').includes('Target ATAR'), 'Panel label must indicate Target ATAR Planner');
+  assert.strictEqual(atarPanel.hidden, false, 'Goal Setting panel (#connectea-atar) must be visible');
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target ATAR Planner', 'Goal Setting must open on the Target ATAR Planner');
 
-  // Verify Target ATAR internal elements
+  // Verify Goal Setting heading and its mode tabs
   const targetHeading = atarPanel.querySelector('.cta-heading strong');
-  assert.ok(targetHeading && targetHeading.textContent.includes('Target ATAR'), 'Target ATAR heading must render');
+  assert.strictEqual(targetHeading.textContent, 'Goal Setting', 'Goal Setting heading must render');
+  const modeTab = mode => Array.from(atarPanel.querySelectorAll('.cta-mode-tab')).find(b => b.dataset.mode === mode);
+  assert.ok(atarPanel.querySelector('.cta-mode-tabs')?.classList.contains('cx-pred-main-tabs'), 'Mode tabs must use the Predictor tab bar');
+  assert.ok(!modeTab('target').hidden && !modeTab('grade').hidden, 'Goal Setting must show the Target ATAR and Target Grade tabs');
+  assert.ok(modeTab('estimate').hidden && modeTab('grade-estimate').hidden, 'Goal Setting must hide the Estimator tabs');
+  assert.ok(modeTab('target').classList.contains('active'), 'Target ATAR tab must be selected');
+  assert.strictEqual(modeTab('target').textContent, 'Target ATAR', 'Target ATAR tab label');
+  assert.strictEqual(modeTab('grade').textContent, 'Target Grade', 'Target Grade tab label');
   const targetSemesterBtns = atarPanel.querySelectorAll('.cta-semesters button');
   assert.strictEqual(targetSemesterBtns.length, 2, 'Semester 1 and 2 selector buttons must render');
   const plannerContainer = atarPanel.querySelector('.cta-planner');
@@ -4834,20 +4839,19 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.ok(targetExpandOutlines, 'Expand All Outlines button (.cta-expand-outlines) must render');
 
   // -------------------------------------------------------------------------
-  // TOOL 2: Target Grade
+  // TOOL 1b: Goal Setting's Target Grade tab
   // -------------------------------------------------------------------------
-  const gradeBtn = document.getElementById('connectify-grade-toggle');
-  gradeBtn.click();
+  modeTab('grade').click();
 
   assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
-  assert.strictEqual(gradeBtn.getAttribute('aria-pressed'), 'true', 'Target Grade button must be pressed');
-  assert.strictEqual(targetBtn.getAttribute('aria-pressed'), 'false', 'Target ATAR button must no longer be pressed');
+  assert.strictEqual(goalsBtn.getAttribute('aria-pressed'), 'true', 'Goal Setting stays pressed on its Target Grade tab');
+  assert.ok(modeTab('grade').classList.contains('active') && !modeTab('target').classList.contains('active'), 'Target Grade tab must be selected');
   assert.strictEqual(atarPanel.hidden, false, '#connectea-atar remains visible for Target Grade');
   assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target Grade Planner', 'Panel label must indicate Target Grade Planner');
 
   // Verify Target Grade internal elements
   const gradeHeading = atarPanel.querySelector('.cta-heading strong');
-  assert.strictEqual(gradeHeading.textContent, 'Target Grade Planner', 'Target Grade heading must render');
+  assert.strictEqual(gradeHeading.textContent, 'Goal Setting', 'Goal Setting heading stays on its Target Grade tab');
   const subjectSelect = atarPanel.querySelector('select.cta-subject-select');
   assert.ok(subjectSelect, 'Subject dropdown selector (select.cta-subject-select) must render');
   const gradeScoreInput = atarPanel.querySelector('input.cta-score');
@@ -4906,20 +4910,25 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.ok(chartContainer, 'Progress chart container must render');
 
   // -------------------------------------------------------------------------
-  // TOOL 5: ATAR Estimate
+  // TOOL 5: Estimator (opens on Estimate ATAR)
   // -------------------------------------------------------------------------
-  const estBtn = document.getElementById('connectify-estimate-toggle');
+  const estBtn = document.getElementById('connectify-estimator-toggle');
   estBtn.click();
 
   assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
-  assert.strictEqual(estBtn.getAttribute('aria-pressed'), 'true', 'ATAR Estimate button must be pressed');
+  assert.strictEqual(estBtn.getAttribute('aria-pressed'), 'true', 'Estimator button must be pressed');
+  assert.strictEqual(goalsBtn.getAttribute('aria-pressed'), 'false', 'Goal Setting button must not be pressed');
   assert.strictEqual(progPanel.hidden, true, 'Progress panel must be hidden');
   assert.strictEqual(atarPanel.hidden, false, 'ATAR panel (#connectea-atar) must be visible');
   assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated ATAR', 'Panel label must indicate Estimated ATAR');
 
-  // Verify ATAR Estimate internal elements
+  // Verify Estimator heading, its tabs and the Estimate ATAR elements
   const estHeading = atarPanel.querySelector('.cta-heading strong');
-  assert.strictEqual(estHeading.textContent, 'Estimated ATAR', 'Estimated ATAR heading must render');
+  assert.strictEqual(estHeading.textContent, 'Estimator', 'Estimator heading must render');
+  assert.ok(!modeTab('estimate').hidden && !modeTab('grade-estimate').hidden, 'Estimator must show the Estimate ATAR and Estimate Grade tabs');
+  assert.ok(modeTab('target').hidden && modeTab('grade').hidden, 'Estimator must hide the Goal Setting tabs');
+  assert.strictEqual(modeTab('estimate').textContent, 'Estimate ATAR', 'Estimate ATAR tab label');
+  assert.strictEqual(modeTab('grade-estimate').textContent, 'Estimate Grade', 'Estimate Grade tab label');
   const courseList = atarPanel.querySelector('.cta-courses');
   assert.ok(courseList && !courseList.hidden, 'Courses list container (.cta-courses) must be unhidden');
   const breakdownSummary = atarPanel.querySelector('.cta-breakdown');
@@ -4930,6 +4939,21 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.ok(methodDetails && !methodDetails.hidden, 'Methodology details (details.cta-method) must be unhidden');
   const methodSummary = methodDetails.querySelector('summary');
   assert.strictEqual(methodSummary.textContent, 'Calculation Methodology & Sources', 'Methodology summary text must match');
+
+  // TOOL 5b: Estimator's Estimate Grade tab
+  modeTab('grade-estimate').click();
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated Grade', 'Panel label must indicate Estimated Grade');
+  assert.strictEqual(estBtn.getAttribute('aria-pressed'), 'true', 'Estimator stays pressed on its Estimate Grade tab');
+  const estimateView = atarPanel.querySelector('.cta-grade-estimate');
+  assert.ok(estimateView && !estimateView.hidden, 'Estimate Grade view (.cta-grade-estimate) must be unhidden');
+  assert.ok(estimateView.querySelector('select.cta-subject-select'), 'Estimate Grade must render a subject dropdown');
+  assert.ok(courseList.hidden && methodDetails.hidden, 'Estimate ATAR course list and methodology must hide on Estimate Grade');
+
+  // Each launcher reopens on the tab it was left on
+  goalsBtn.click();
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target Grade Planner', 'Goal Setting must reopen on Target Grade');
+  estBtn.click();
+  assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated Grade', 'Estimator must reopen on Estimate Grade');
 
   // -------------------------------------------------------------------------
   // TOOL 6: Weakness Analyzer
@@ -6370,11 +6394,10 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
     assert.ok(vClicked >= 1, 'div.v-button View Notice must receive click event');
 
     const toolBtnList = [
-      { id: 'connectify-target-toggle', textContent: 'Target ATAR', click: () => {} },
-      { id: 'connectify-grade-toggle', textContent: 'Target Grade', click: () => {} },
+      { id: 'connectify-goals-toggle', textContent: 'Goal Setting', click: () => {} },
       { id: 'connectify-predictor-toggle', textContent: 'Predictor', click: () => {} },
       { id: 'connectify-progress-toggle', textContent: 'Year in Progress', click: () => {} },
-      { id: 'connectify-estimate-toggle', textContent: 'ATAR Estimate', click: () => {} },
+      { id: 'connectify-estimator-toggle', textContent: 'Estimator', click: () => {} },
       { id: 'connectify-weakness-toggle', textContent: 'Weakness Analyzer', click: () => {} },
       { id: 'connectify-categories-toggle', textContent: 'Settings', click: () => {} }
     ];
@@ -6451,6 +6474,8 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
     assert.ok(discoveredSidebarViews.some(v => v.id === 'cx-sidebar-menu'), 'Must discover Sidebar Main Menu');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Target ATAR') && v.title.includes('Semester 1')), 'Must discover Target ATAR Semester 1');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Target ATAR') && v.title.includes('Semester 2')), 'Must discover Target ATAR Semester 2');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Goal Setting') && v.title.includes('Target Grade') && v.tabSelector), 'Must discover Goal Setting\'s Target Grade tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Estimator') && v.title.includes('Estimate Grade') && v.tabSelector), 'Must discover Estimator\'s Estimate Grade tab');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Grade Predictor') && v.title.includes('English')), 'Must discover Grade Predictor English sub-tab');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Grade Predictor') && v.title.includes('Math Methods')), 'Must discover Grade Predictor Math Methods sub-tab');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('ATAR Predictor')), 'Must discover ATAR Predictor tab');
@@ -6768,7 +6793,7 @@ runTest('Test 146: The sidebar works on every page: off Assessment Outlines only
     const notice = sidebar.querySelector('.cx-page-notice');
     assert.ok(notice, 'the page notice exists');
     const toolBtns = Array.from(sidebar.querySelectorAll('.cx-tool-menu button'));
-    assert.strictEqual(toolBtns.length, 7, 'all seven launchers are mounted');
+    assert.strictEqual(toolBtns.length, 6, 'all six launchers are mounted');
 
     assert.strictEqual(window.ConnectifySidebar.isLimited(), false, 'the outlines page is never limited, filtered or not');
     assert.strictEqual(sidebar.classList.contains('cx-page-limited'), false);
@@ -10588,6 +10613,73 @@ runTest('Test 233: After an install or update, open Connect tabs are reloaded (G
     assert.ok(yml.includes('del(.background) | del(.host_permissions)'), `${wf} strips the background script and host permission from the Chrome Web Store zip`);
     assert.ok(/rm \/tmp\/(chrome|cws)-build\/src\/system\/update-reload\.js/.test(yml), `${wf} leaves update-reload.js out of the Chrome Web Store zip`);
   }
+});
+
+runTest('Test 235: Estimate Grade works out the average from any number of typed marks on unmarked tasks, one is enough', () => {
+  delete window.ConnectifyGradeEstimate;
+  delete window.ConnectifyGradeEstimateUI;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-ui-helpers.js'), 'utf8'));
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/grade-estimate.js'), 'utf8'));
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/grade-estimate-ui.js'), 'utf8'));
+  const { parseMark, estimate } = window.ConnectifyGradeEstimate;
+
+  assert.strictEqual(parseMark('85'), 85);
+  assert.strictEqual(parseMark('85%'), 85);
+  assert.strictEqual(parseMark('17/20'), 85, 'a fraction is a percentage');
+  assert.strictEqual(parseMark('17 out of 20'), 85, 'Connect\'s "X Out of Y" form too');
+  for (const bad of ['', '  ', 'abc', '120', '5/0', '21/20', '-4']) assert.strictEqual(parseMark(bad), undefined, `"${bad}" is no mark`);
+
+  const tasks = [
+    { name: 'Test 1', weight: 20, pending: false, score: 80 },
+    { name: 'Exam', weight: 30, pending: true },
+    { name: 'Essay', weight: 50, pending: true },
+    { name: 'Practice quiz', weight: 0, pending: true }
+  ];
+  const one = estimate(tasks, [undefined, 90], 80);
+  assert.strictEqual(one.current, 80);
+  assert.ok(Math.abs(one.estimate - 86) < 1e-9, 'one typed mark of three unmarked tasks: (80 x 20 + 90 x 30) / 50 = 86');
+  assert.deepStrictEqual([one.entered, one.pending, one.complete], [1, 2, false], 'an unweighted task never counts as an unmarked task');
+  const all = estimate(tasks, [undefined, 90, 70, 100], 80);
+  assert.ok(Math.abs(all.estimate - 78) < 1e-9, 'every weighted task typed gives the final mark; the unweighted one changes nothing');
+  assert.strictEqual(all.complete, true);
+  assert.ok(Math.abs(estimate(tasks, [undefined, 90], 81).estimate - 86.4) < 1e-9, 'the marked part is Connect\'s own average');
+  assert.strictEqual(estimate(tasks, [], 80).estimate, 80, 'nothing typed: the average stays as it is');
+  const fresh = estimate([{ name: 'A', weight: 40, pending: true }, { name: 'B', weight: 60, pending: true }], [undefined, 72]);
+  assert.strictEqual(fresh.current, undefined, 'no marked tasks: no current average');
+  assert.strictEqual(fresh.estimate, 72, 'one typed mark on a class with no marks is the average');
+  assert.strictEqual(estimate([{ name: 'A', pending: false, score: 60 }, { name: 'B', pending: true }], [undefined, 80]).estimate, 70, 'with no weights every task counts once');
+
+  // The view: typing into one unmarked task updates the summary without rebuilding the table
+  const prefs = {};
+  const ctx = {
+    calc: { getPreferences: () => prefs, persistPreferences: () => {} },
+    getActiveSemester: () => 1,
+    getGradeCourses: () => [[], [{ id: 'chemistry', name: 'Chemistry', mark: 80, tasks }]],
+    scanAndRefresh: () => {}
+  };
+  const refs = window.ConnectifyGradeEstimateUI.createView(ctx);
+  // The mock's textContent is per node, so read the summary's nodes
+  const summary = () => Array.from(refs.output.children).map(el => el.textContent).join(' ');
+  window.ConnectifyGradeEstimateUI.render(refs, ctx);
+  const inputs = refs.inputs.filter(Boolean);
+  assert.strictEqual(inputs.length, 2, 'an input for each weighted unmarked task only');
+  assert.ok(summary().includes('Current average: 80%'), 'nothing typed shows the current average');
+  inputs[0].value = '18/20';
+  inputs[0].dispatchEvent(new Event('input'));
+  assert.ok(summary().includes('Estimated average: 86% (+6 from 80%)'), `one mark gives an estimate (${summary()})`);
+  assert.deepStrictEqual(prefs.gradeEstimates, { chemistry: { Exam: '18/20' } }, 'typed marks are kept per class');
+  window.ConnectifyGradeEstimateUI.render(refs, ctx);
+  assert.strictEqual(refs.inputs.filter(Boolean)[0], inputs[0], 'a re-render with the same tasks keeps the inputs (and focus)');
+  inputs[1].value = 'lots';
+  inputs[1].dispatchEvent(new Event('input'));
+  assert.strictEqual(inputs[1].getAttribute('aria-invalid'), 'true', 'an unreadable mark is flagged and left out');
+  assert.ok(summary().includes('Estimated average: 86%'));
+
+  const markup = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui-markup.js'), 'utf8');
+  eval(markup);
+  assert.strictEqual(window.ConnectifyAtarMarkup.semesterLabel(0, { atar: '95.00' }, 'grade-estimate', false), 'Semester 1', 'Estimate Grade semester buttons carry no ATAR');
+  assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.estimator.modes, ['estimate', 'grade-estimate'], 'the Estimator holds Estimate ATAR and Estimate Grade');
+  assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.goals.modes, ['target', 'grade'], 'Goal Setting holds Target ATAR and Target Grade');
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -1,8 +1,9 @@
 /**
  * Connectify ATAR calculator: panel markup
  *
- * Builds the calculator panel (#connectea-atar): the three tool tabs that the sidebar mounts as
- * launchers, the semester buttons, course list, summary, reset and Expand All Outlines buttons, and the
+ * Builds the calculator panel (#connectea-atar): the Goal Setting and Estimator launchers the sidebar
+ * mounts, the mode tabs (Target ATAR / Target Grade, Estimate ATAR / Estimate Grade), the semester
+ * buttons, course list, summary, reset and Expand All Outlines buttons, and the
  * methodology notes; plus the semester labels and closing rules. Behaviour lives in atar-ui.js.
  * Exposes window.ConnectifyAtarMarkup.
  */
@@ -16,12 +17,52 @@
     'Semester 2 uses the cumulative percentage shown by Connect. This does not check WACE eligibility, English competency or unacceptable course combinations. Exclude an incompatible course before calculating. No marks are sent to another website.'
   ];
 
-  function toolTab(label, id) {
-    const button = createEl('button', 'cx-calculator-tool', label);
+  // Each launcher opens one group of modes; the tabs under the heading switch between its modes
+  const GROUPS = {
+    goals: { title: 'Goal Setting', launcher: 'connectify-goals-toggle', modes: ['target', 'grade'] },
+    estimator: { title: 'Estimator', launcher: 'connectify-estimator-toggle', modes: ['estimate', 'grade-estimate'] }
+  };
+  const MODES = {
+    target: { tab: 'Target ATAR', title: 'Target ATAR Planner' },
+    grade: { tab: 'Target Grade', title: 'Target Grade Planner' },
+    estimate: { tab: 'Estimate ATAR', title: 'Estimated ATAR' },
+    'grade-estimate': { tab: 'Estimate Grade', title: 'Estimated Grade' }
+  };
+  const groupOf = mode => Object.keys(GROUPS).find(g => GROUPS[g].modes.includes(mode));
+  // Target Grade and Estimate Grade pick one class, so their semester buttons carry no ATAR
+  const isGradeMode = mode => mode === 'grade' || mode === 'grade-estimate';
+
+  function toolTab(group) {
+    const button = createEl('button', 'cx-calculator-tool', GROUPS[group].title);
     button.type = 'button';
-    button.id = id;
+    button.id = GROUPS[group].launcher;
     button.setAttribute('aria-controls', 'connectea-atar');
     return button;
+  }
+
+  // The mode tabs share the Predictor's tab bar (.cx-pred-main-tabs), so both tools look alike in every theme
+  function modeTabBar() {
+    const bar = createEl('div', 'cx-pred-main-tabs cta-mode-tabs');
+    bar.setAttribute('role', 'tablist');
+    const buttons = {};
+    for (const mode of Object.keys(MODES)) {
+      const btn = createEl('button', 'cx-pred-main-tab cta-mode-tab', MODES[mode].tab);
+      btn.type = 'button';
+      btn.dataset.mode = mode;
+      btn.setAttribute('role', 'tab');
+      buttons[mode] = btn;
+      bar.append(btn);
+    }
+    return { bar, buttons };
+  }
+
+  /** Shows the active group's tabs and selects the active mode's. */
+  function paintModeTabs(buttons, mode) {
+    for (const [tabMode, btn] of Object.entries(buttons)) {
+      btn.hidden = groupOf(tabMode) !== groupOf(mode);
+      btn.classList.toggle('active', tabMode === mode);
+      btn.setAttribute('aria-selected', String(tabMode === mode));
+    }
   }
 
   /** The panel and its static parts; semester buttons are added by the caller. */
@@ -32,9 +73,10 @@
     calculatorPanel.setAttribute('aria-label', '2025 ATAR estimates');
 
     const headingContainer = createEl('div', 'cta-heading');
-    const panelTitle = createEl('strong', '', 'Estimated ATAR');
+    const panelTitle = createEl('strong', '', GROUPS.estimator.title);
     panelTitle.tabIndex = -1;
     headingContainer.append(panelTitle);
+    const modeTabs = modeTabBar();
 
     const resetBtn = createEl('button', 'cta-reset', 'Reset to School Marks');
     resetBtn.type = 'button';
@@ -51,13 +93,13 @@
     const semesterCardsContainer = createEl('div', 'cta-semesters');
     const courseListContainer = createEl('div', 'cta-courses');
 
-    calculatorPanel.append(headingContainer, semesterCardsContainer, courseListContainer, detailSummary, resetBtn, expandAllBtn, calculationDetails);
+    calculatorPanel.append(headingContainer, modeTabs.bar, semesterCardsContainer, courseListContainer, detailSummary, resetBtn, expandAllBtn, calculationDetails);
     return {
       calculatorPanel,
       panelTitle,
-      estimateTab: toolTab('ATAR Estimate', 'connectify-estimate-toggle'),
-      targetTab: toolTab('Target ATAR', 'connectify-target-toggle'),
-      gradeTab: toolTab('Target Grade', 'connectify-grade-toggle'),
+      goalsTab: toolTab('goals'),
+      estimatorTab: toolTab('estimator'),
+      modeButtons: modeTabs.buttons,
       semesterCardsContainer,
       courseListContainer,
       detailSummary,
@@ -75,7 +117,7 @@
     (gradeCourses?.[1] || []).some(r => r?.finalLetter);
 
   /**
-   * A semester closes in every mode (Estimate, Target ATAR, Target Grade) once its A–E grades are final
+   * A semester closes in every mode (both estimates, Target ATAR, Target Grade) once its A–E grades are final
    * (Semester 1 task marks on a Semester 2 panel never close it); Semester 2 stays closed until it has classes.
    */
   function isTargetClosed(gradeCourses, semesterIdx) {
@@ -85,7 +127,7 @@
 
   /** A semester button's label for the current mode. */
   function semesterLabel(i, res, mode, isClosed) {
-    if (mode === 'grade') return isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;
+    if (isGradeMode(mode)) return isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;
     if (mode === 'target') return isClosed ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`;
     const atar = res.error ? '—' : (res.finalAtar || res.atar || '—');
     return isClosed ? `Semester ${i + 1} ATAR (Closed)\n${atar}` : `Semester ${i + 1} ATAR\n${atar}`;
@@ -111,5 +153,5 @@
     });
   }
 
-  window.ConnectifyAtarMarkup = { build, semesterLabel, paintSemesterButton, semesterButtons, hasSemesterTwoStarted, isTargetClosed };
+  window.ConnectifyAtarMarkup = { GROUPS, MODES, groupOf, isGradeMode, paintModeTabs, build, semesterLabel, paintSemesterButton, semesterButtons, hasSemesterTwoStarted, isTargetClosed };
 })();
