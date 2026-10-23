@@ -110,23 +110,14 @@
     });
     const result = model().estimate(tasks, entered, refs.course.mark);
     const current = Number.isFinite(result.current) ? `${round(result.current)}%` : 'no marked tasks yet';
-    let headline;
-    let note;
-    if (!result.pending) {
-      headline = `Every task is marked. Average: ${current}.`;
-      note = 'There are no unmarked tasks left to estimate.';
-    } else if (!result.entered) {
-      headline = `Current average: ${current}.`;
-      note = 'Type a mark for one or more unmarked tasks below to see what your average would be. Blank tasks are left out, as Connect leaves out unmarked tasks.';
-    } else {
+    // One line only: the table already shows which tasks are marked, typed or blank
+    let headline = `Current average: ${current}.`;
+    if (result.entered) {
       const change = Number.isFinite(result.current) ? result.estimate - result.current : undefined;
       const delta = change === undefined ? '' : ` (${change >= 0 ? '+' : '−'}${round(Math.abs(change))} from ${current})`;
       headline = `${result.complete ? 'Estimated final mark' : 'Estimated average'}: ${round(result.estimate)}%${delta}.`;
-      note = result.complete
-        ? 'Every unmarked task has a mark, so this is the class mark you would finish on.'
-        : `From ${result.entered} of ${result.pending} unmarked tasks; blank tasks are left out until they are marked.`;
     }
-    refs.output.replaceChildren(createEl('strong', 'cta-estimate-result', headline), createEl('p', 'cta-note', note));
+    refs.output.replaceChildren(createEl('strong', 'cta-estimate-result', headline));
   }
 
   function render(refs, ctx) {

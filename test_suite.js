@@ -10667,6 +10667,7 @@ runTest('Test 235: Estimate Grade works out the average from any number of typed
   inputs[0].value = '18/20';
   inputs[0].dispatchEvent(new Event('input'));
   assert.ok(summary().includes('Estimated average: 86% (+6 from 80%)'), `one mark gives an estimate (${summary()})`);
+  assert.strictEqual(refs.output.children.length, 1, 'the estimate is one line, with no self-evident note under it');
   assert.deepStrictEqual(prefs.gradeEstimates, { chemistry: { Exam: '18/20' } }, 'typed marks are kept per class');
   window.ConnectifyGradeEstimateUI.render(refs, ctx);
   assert.strictEqual(refs.inputs.filter(Boolean)[0], inputs[0], 'a re-render with the same tasks keeps the inputs (and focus)');
