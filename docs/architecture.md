@@ -66,7 +66,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 42. `src/progress/progress-math.js` (chronological ATAR trajectory)
 43. `src/progress/progress-chart.js` (SVG polyline line chart renderer)
 44. `src/progress/progress-week-editor.js` (school week override cells in the Progress Graph table)
-44b. `src/progress/progress-modes.js` (Progress data point modes: single tasks, weighted or rolling average)
+44b. `src/progress/progress-modes.js` (Progress data point modes: single tasks, weighted or rolling average) / `progress-early-easter.js` (the Early Easter checkbox shared by the graph and the export)
 45. `src/progress/progress-panel.js` (Progress launcher and panel markup)
 46. `src/progress/progress-graph.js` (progress graph modal controller)
 46b. `src/progress/export-tasks.js` (upcoming tasks placed on days for the export)

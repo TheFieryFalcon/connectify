@@ -157,7 +157,7 @@ const SPLIT_PARTS = {
   'atar.css': ['atar.css', 'atar-compact.css', 'atar-planner.css', 'atar-estimator.css'],
   'progress-chart.js': ['progress-chart.js', 'progress-week-editor.js'],
   'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
-  'progress-graph.js': ['progress-modes.js', 'progress-panel.js', 'progress-graph.js'],
+  'progress-graph.js': ['school-terms.js', 'progress-modes.js', 'progress-early-easter.js', 'progress-panel.js', 'progress-graph.js'],
   'new-grade.js': ['grade-snapshot.js', 'new-grade.js'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-registry.js', 'theme-custom-themes.js'],
   'theme-customizer.js': ['theme-color-utils.js', 'theme-import.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
@@ -2387,8 +2387,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v19_20261023_pred'"), 'predictor-math.js must use v19_20261023_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v19_20261023_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v19_20261023_pred');
+  assert.ok(predMathCode.includes("'v20_20261023_pred'"), 'predictor-math.js must use v20_20261023_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v20_20261023_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v20_20261023_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2481,9 +2481,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v19_20261023_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v20_20261023_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v19_20261023_pred'), 'predictor-math.js must bump version to v19_20261023_pred');
+  assert.ok(predMathJs.includes('v20_20261023_pred'), 'predictor-math.js must bump version to v20_20261023_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -4133,8 +4133,8 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   const graphJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8');
 
   // Verify code signatures
-  assert.ok(graphJs.includes('if (!force && panel.contains(document.activeElement) && (document.activeElement.tagName === \'INPUT\' || document.activeElement.tagName === \'TEXTAREA\')) return;'),
-    'progress-graph.js refresh() must guard against destroying DOM when input is active');
+  assert.ok(graphJs.includes("if (!force && panel.contains(document.activeElement) && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName) && document.activeElement.type !== 'checkbox') return;"),
+    'progress-graph.js refresh() must guard against destroying DOM while typing (a focused checkbox, e.g. Early Easter, never blocks it)');
   assert.ok(chartJs.includes('if (document.activeElement !== input)'),
     'progress-chart.js must not schedule debounced refresh while input is actively focused');
   assert.ok(chartJs.includes("e.key === 'Enter'") && chartJs.includes("e.key === 'Escape'"),
@@ -11098,6 +11098,69 @@ runTest('Test 243: Date captions take their real term and week from the term cal
     const i = group.js.indexOf('src/assessment/school-terms.js');
     assert.ok(i > group.js.indexOf('src/system/utils.js') && i < group.js.indexOf('src/assessment/assessment-parse-helpers.js'), 'the calendar loads before the parser in every group');
   }
+});
+
+runTest('Test 246: Weeks past a term\'s end read as the next term\'s everywhere; the graph and export share one Early Easter checkbox', () => {
+  const { terms } = loadExportModules();
+  // 2026 with Early Easter: Term 1 has nine weeks, so Term 1 Week 10 is Term 2 Week 1 (20 Apr)
+  assert.strictEqual(terms.normalizeOrder(10, 2026, true), 13);
+  assert.strictEqual(terms.normalizeOrder(10, 2026, false), 10, 'a 10-week Term 1 keeps its Week 10');
+  assert.strictEqual(terms.normalizeOrder(11, 2026, false), 13, 'past the term: the next term');
+  assert.strictEqual(terms.normalizeOrder(23, 2026, true), 23, 'Term 2 has eleven weeks under Early Easter');
+  assert.strictEqual(terms.normalizeOrder(23, 2026, false), 25);
+  assert.strictEqual(terms.normalizeOrder(47, 2026, false), 47, 'past Term 4 stays as it is');
+  assert.strictEqual(terms.normalizeOrder(null), null);
+  for (const early of [true, false]) {
+    for (const order of [5, 10, 11, 15, 23, 34]) {
+      const n = terms.normalizeOrder(order, 2026, early);
+      const { term, week } = window.ConnectifyProgressMath.termWeek(n);
+      const raw = window.ConnectifyProgressMath.termWeek(order);
+      assert.strictEqual(isoDay(terms.dateFor(2026, term, week, 1, early)), isoDay(terms.dateFor(2026, raw.term, raw.week, 1, early)), `order ${order} keeps its export date`);
+    }
+  }
+  // The graph's week label, the export and the Predictor read the same calendar (this year's choice)
+  const year = new Date().getFullYear();
+  const saved = localStorage.getItem('connectify:school_terms');
+  try {
+    terms.setEarlyEaster(year, true);
+    const t1 = terms.terms(year, true)[0].weeks;
+    assert.strictEqual(window.ConnectifyProgressMath.formatTimestamp(t1 + 1), 'Term 2, Week 1', 'the label follows the calendar');
+    terms.setEarlyEaster(year, false);
+    assert.strictEqual(window.ConnectifyProgressMath.formatTimestamp(10), 'Term 1, Week 10');
+    // One checkbox module for both views: it applies the choice, refreshes predictions and tells every view
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress-early-easter.js'), 'utf8'));
+    let events = 0, refreshed = 0;
+    const origDispatch = window.dispatchEvent;
+    window.dispatchEvent = e => { if (e.type === 'connectify-settings-updated') events++; return true; };
+    const savedMath = window.ConnectifyPredictorMath;
+    window.ConnectifyPredictorMath = { updatePredictionCache: () => { refreshed++; } };
+    try {
+      const show = document.createElement('label');
+      const row = window.ConnectifyEarlyEaster.controls(show, () => {});
+      assert.strictEqual(row.className, 'cx-progress-controls');
+      const input = row.children[1].children[0];
+      assert.strictEqual(input.checked, false, 'the box shows this year\'s choice');
+      input.checked = true;
+      input.dispatchEvent(new MockEvent('change'));
+      assert.strictEqual(terms.earlyEaster(year), true);
+      assert.ok(events === 1 && refreshed === 1, 'one settings event and one prediction refresh');
+    } finally {
+      window.dispatchEvent = origDispatch;
+      window.ConnectifyPredictorMath = savedMath;
+    }
+  } finally {
+    if (saved === null) localStorage.removeItem('connectify:school_terms');
+    else localStorage.setItem('connectify:school_terms', saved);
+  }
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  const resolve = read('assessment/assessment-scrape.js').slice(read('assessment/assessment-scrape.js').indexOf('function resolveTaskOrder'));
+  assert.ok(resolve.includes('return termWeekOrder(order);') && resolve.includes('return termWeekOrder(task.order);'), 'overrides and week captions are placed by the calendar');
+  assert.ok(!resolve.includes('termWeekOrder(fromDate)'), 'date captions already are (holiday weeks stay in the term before)');
+  assert.ok(read('progress/progress-graph.js').includes('window.ConnectifyEarlyEaster.controls(modes.select('), 'the graph shows the checkbox beside Show:');
+  assert.ok(read('progress/progress-graph.js').includes('JSON.stringify([data, window.ConnectifySchoolTerms?.earlyEaster('), 'a choice made in the export redraws the graph');
+  assert.ok(read('progress/export-view.js').includes("window.ConnectifyEarlyEaster.checkbox('cx-export-check'"), 'the export uses the same checkbox');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8')).content_scripts.find(g => g.js.includes('src/progress/progress-graph.js')).js;
+  assert.ok(manifest.indexOf('src/progress/progress-early-easter.js') > manifest.indexOf('src/assessment/school-terms.js') && manifest.indexOf('src/progress/progress-early-easter.js') < manifest.indexOf('src/progress/progress-graph.js'));
 });
 
 Promise.all(pendingTestPromises).then(() => {

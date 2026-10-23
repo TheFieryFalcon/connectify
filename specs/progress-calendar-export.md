@@ -98,7 +98,7 @@ The export uses the Progress graph's own date system and never reads captions, o
 
 ### 4.2 Which day
 - The task's own day if set, else its subject's day (default Monday): that weekday of school week `W` of term `T`.
-- **Spill-over**: a week past its term's length moves into the next term (`Term 1 Week 10` under Early Easter → Term 2 Week 1; `Term 2 Week 11` without it → Term 3 Week 1). Past Term 4 → left out (`After Term 4`).
+- **Spill-over**: a week past its term's length moves into the next term (`Term 1 Week 10` under Early Easter → Term 2 Week 1; `Term 2 Week 11` without it → Term 3 Week 1). Past Term 4 → left out (`After Term 4`). Task orders already arrive spilled (`ConnectifySchoolTerms.normalizeOrder` in `resolveTaskOrder` and `formatTimestamp`), so the export's `Term / Week`, the Progress table and the Predictor name the same week. The Progress graph shows the same Early Easter checkbox beside `Show:` (`progress-early-easter.js`).
 - **Clamp**: a day before Term 1's start (Mon/Tue of a Wednesday-start Week 1) moves to the start day.
 
 ### 4.3 Task fields

@@ -33,9 +33,9 @@
 
     function refresh(force = false) {
       if (panel.hidden) return;
-      if (!force && panel.contains(document.activeElement) && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+      if (!force && panel.contains(document.activeElement) && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName) && document.activeElement.type !== 'checkbox') return;
       const data = dataAPI ? (dataAPI.collectClasses || dataAPI.collect)(true) : [];
-      const sig = JSON.stringify(data);
+      const sig = JSON.stringify([data, window.ConnectifySchoolTerms?.earlyEaster(new Date().getFullYear())]);
       if (sig === lastDataSignature) return;
       lastDataSignature = sig;
       render(data);
@@ -129,7 +129,7 @@
         // Single tasks, running weighted average or rolling average of the last three (progress-modes.js)
         mode = modes.read();
         points = modes.apply(current.tasks, mode);
-        chartContainer.append(modes.select(mode, () => render(data)));
+        chartContainer.append(window.ConnectifyEarlyEaster.controls(modes.select(mode, () => render(data)), () => refresh(true)));
       }
 
       const chartRenderer = chartAPI?.renderChart || window.ConnectifyProgressChart?.renderChart;

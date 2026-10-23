@@ -122,12 +122,29 @@
     return i * 12 + Math.min(12, Math.max(1, week));
   }
 
+  /**
+   * A 12-slot order (Term 1 Week 10 -> 10) with a week past its term's length moved into the next term,
+   * as dateFor places it: under Early Easter Term 1 has nine weeks, so Term 1 Week 10 is Term 2 Week 1.
+   * Past Term 4 it is left as it is.
+   */
+  function normalizeOrder(order, year = new Date().getFullYear(), early = earlyEaster(year)) {
+    if (!Number.isFinite(order) || order < 1) return order;
+    const list = terms(year, early);
+    let t = Math.floor((order - 1) / 12) + 1;
+    let w = order - (t - 1) * 12;
+    while (t <= 4 && w >= list[t - 1].weeks + 1) {
+      w -= list[t - 1].weeks;
+      t++;
+    }
+    return t > 4 ? order : (t - 1) * 12 + w;
+  }
+
   /** "25 May" */
   const formatDate = date => `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`;
   /** "Mon 25 May" */
   const formatDay = date => `${WEEKDAYS[date.getUTCDay()]} ${formatDate(date)}`;
 
   window.ConnectifySchoolTerms = {
-    term1Start, easterMonday, autoEarlyEaster, earlyEaster, setEarlyEaster, terms, dateFor, orderOf, formatDate, formatDay, addDays, utc
+    term1Start, easterMonday, autoEarlyEaster, earlyEaster, setEarlyEaster, terms, dateFor, orderOf, normalizeOrder, formatDate, formatDay, addDays, utc
   };
 })();

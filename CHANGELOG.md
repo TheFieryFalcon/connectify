@@ -52,6 +52,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Saved predictions and results are rebuilt once after updating.
 
 ### Fixes
+- Year Progression: the graph has the Early Easter checkbox too, shared with Export. A task in a week past the end of a term (Term 1 Week 10 in an Early Easter year) now reads as the next term's week (Term 2 Week 1) in the graph, Export and Predictor alike, matching the date Export gives it.
 - Weakness Analyzer: the radar's labels sit right at the end of their spokes with the score on the same line (in Firefox the score sat lower), and long subject names are no longer cut off. Its checkboxes and "Group by:" now line up with their row.
 - The unselected semester button no longer looks cut off on its left edge.
 - Saving assessment categories in Settings stored all of them as one category called "undefined", so every Type dropdown offered only "undefined". Categories now save under their own names, and a set damaged by this is repaired the next time a page loads (the five standard categories come back; a custom category saved over can't be recovered, so add it again).

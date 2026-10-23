@@ -15,8 +15,9 @@
     return { term: Math.floor((order - 1) / 12) + 1, week: Math.floor((order - 1) % 12) + 1 };
   }
 
+  // Weeks past a term's end read as the next term's, as the term calendar places them
   function formatTimestamp(order, fallbackCaption) {
-    const when = termWeek(order);
+    const when = termWeek(window.ConnectifySchoolTerms?.normalizeOrder(order) ?? order);
     if (!when) return fallbackCaption || 'Unknown';
     return `Term ${when.term}, Week ${when.week}`;
   }

@@ -106,13 +106,8 @@
         starts.append(cell);
       }
       termLine.append(starts);
-      // The term calendar is shared: date captions move with it in the graph and predictions too
-      const easter = rows.checkbox('Early Easter', early, on => {
-        terms.setEarlyEaster(year, on);
-        window.ConnectifyPredictorMath?.updatePredictionCache?.();
-        window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
-        render(true);
-      });
+      // The term calendar is shared with the graph's own checkbox, its weeks and predictions
+      const easter = window.ConnectifyEarlyEaster.checkbox('cx-export-check', () => render(true));
       track(easter.input, 'easter');
       termLine.append(easter.wrap);
       const nodes = [termLine];

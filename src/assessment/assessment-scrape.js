@@ -142,18 +142,21 @@
     return sameName.length <= 1 || sameName[0] === task;
   }
 
+  // A week past its term's end belongs to the next term (Early Easter: Term 1 Week 10 is Term 2 Week 1)
+  const termWeekOrder = order => window.ConnectifySchoolTerms?.normalizeOrder(order) ?? order;
+
   function resolveTaskOrder(subjectName, task) {
     if (!task) return null;
     const override = readTimeOverride([subjectName], [task.id]) ??
       (task.name && isFirstOfName(subjectName, task) ? readTimeOverride([subjectName], [task.name]) : null);
     const order = customWeekOrder(override);
-    if (order !== null) return order;
+    if (order !== null) return termWeekOrder(order);
     // A date caption is read again each time, so the term calendar (Early Easter) and caches from
     // before dates were placed in their real term and week both give today's order
     const fromDate = window.ConnectifyParseHelpers.dateOrder(task.caption);
     if (fromDate !== null) return fromDate;
-    if (Number.isFinite(task.order)) return task.order;
-    return task.caption ? orderHint(task.caption) : (task.order ?? null);
+    if (Number.isFinite(task.order)) return termWeekOrder(task.order);
+    return task.caption ? termWeekOrder(orderHint(task.caption)) : (task.order ?? null);
   }
 
   function formatCollectedSubjects(includePending) {
