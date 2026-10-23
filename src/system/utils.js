@@ -102,12 +102,20 @@
 
   /**
    * Converts a Progress Graph week override to the internal order (12-week terms, as formatTimestamp reads it).
-   * Overrides are typed as school weeks 1-40 with 10-week terms (17 = Term 2 Week 7) or as "t2w7".
+   * The editor saves "w17": school week 17 of the year through the term calendar, as the Export numbers
+   * term starts (Early Easter: Term 2 starts at Week 10). Bare numbers were saved before that and keep
+   * their 10-week terms (17 = Term 2 Week 7); "t2w7" names a term and week.
    */
   function customWeekOrder(value) {
     const str = String(value ?? '').trim();
     const tw = str.match(/t(?:erm)?\s*(\d+)\s*[,;]?\s*w(?:eek)?\s*(\d+)/i);
     if (tw) return (Number(tw[1]) - 1) * 12 + Number(tw[2]);
+    const school = str.match(/^w(\d+)$/i);
+    if (school) {
+      const n = Number(school[1]);
+      if (n <= 0) return null;
+      return window.ConnectifySchoolTerms?.weekOrder(n) ?? Math.floor((n - 1) / 10) * 12 + ((n - 1) % 10) + 1;
+    }
     const num = Number(str);
     if (!str || !Number.isFinite(num) || num <= 0) return null;
     return Math.floor((num - 1) / 10) * 12 + ((num - 1) % 10) + 1;

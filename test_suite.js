@@ -155,7 +155,7 @@ const SPLIT_PARTS = {
   'atar-ui.js': ['target-ui-helpers.js', 'grade-estimate.js', 'grade-estimate-ui.js', 'atar-ui-markup.js', 'atar-ui.js'],
   'atar-features.js': ['outline-controls.js', 'atar-features.js'],
   'atar.css': ['atar.css', 'atar-compact.css', 'atar-planner.css', 'atar-estimator.css'],
-  'progress-chart.js': ['progress-chart.js', 'progress-week-editor.js'],
+  'progress-chart.js': ['school-terms.js', 'progress-chart.js', 'progress-week-editor.js'],
   'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
   'progress-graph.js': ['school-terms.js', 'progress-modes.js', 'progress-early-easter.js', 'progress-panel.js', 'progress-graph.js'],
   'new-grade.js': ['grade-snapshot.js', 'new-grade.js'],
@@ -4080,7 +4080,9 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   const row1 = rows[1];
   const r1EditBtn = row1.querySelector('.cx-time-edit-btn');
   assert.ok(r1EditBtn, 'Task 1 must have edit button for week 17');
-  assert.ok(r1EditBtn.title.includes('Custom week 17'), 'Task 1 must inherit week 17 as first occurrence');
+  // An older bare 17 is Term 2 Week 7 (order 19), shown as this year's school week (16 under Early Easter)
+  const shown17 = window.ConnectifySchoolTerms.schoolWeek(19);
+  assert.ok(r1EditBtn.title.includes(`Custom week ${shown17} `), 'Task 1 must inherit week 17 as first occurrence');
 
   // Row 2 (Task 2): Second occurrence does NOT inherit generic key!
   // It has order: null, so it renders the input field with warning
@@ -4097,7 +4099,7 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   r2Input.dispatchEvent(new MockEvent('input'));
 
   // Task 2 must be saved under its specific key
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Chemistry ATAR:id_sem2_er1'), '27', 'Task 2 must save to its specific key');
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Chemistry ATAR:id_sem2_er1'), 'w27', 'Task 2 must save to its specific key, as a school week of the year');
   // Task 1's generic key must NOT be overwritten by Task 2
   assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Chemistry ATAR:Extended response 1'), '17', 'Task 1 generic key must remain 17');
 
@@ -4125,7 +4127,7 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   const resolvedT1 = window.ConnectifyPredictorMath.resolveCustomDate('Chemistry ATAR', task1);
   const resolvedT2 = window.ConnectifyPredictorMath.resolveCustomDate('Chemistry ATAR', task2);
   assert.strictEqual(resolvedT1, '17', 'Task 1 must resolve to 17');
-  assert.strictEqual(resolvedT2, '27', 'Task 2 must resolve to 27');
+  assert.strictEqual(resolvedT2, 'w27', 'Task 2 must resolve to w27');
 });
 
 runTest('Test 125: Progress graph date editor protects active typing from premature refresh and commits on Enter or blur', () => {
@@ -4169,7 +4171,7 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   input.dispatchEvent(new MockEvent('input'));
 
   // Synchronous storage check: partial input saved
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_unscheduled'), '1', 'Must save to storage on input');
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_unscheduled'), 'w1', 'Must save to storage on input, as a school week of the year');
   // BUT onRefresh must NOT have fired because input is focused
   assert.strictEqual(refreshCount, 0, 'Must NOT trigger onRefresh while actively focused on input');
 
@@ -4192,7 +4194,7 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   // 4. Simulate typing '7' -> '17'
   input.value = '17';
   input.dispatchEvent(new MockEvent('input'));
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_unscheduled'), '17', 'Must update storage to 17');
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_unscheduled'), 'w17', 'Must update storage to 17');
   assert.strictEqual(refreshCount, 0, 'Still must NOT trigger onRefresh while typing');
 
   // 5. User presses Enter to commit
@@ -4203,7 +4205,7 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   const taskWithDate = { id: 'task_dated', name: 'Midyear Exam', score: 85, mean: 70, order: 19, sequence: 2, pending: false };
   const container2 = document.createElement('div');
   let refreshCount2 = 0;
-  mockLocalStorage.setItem('connectea:time_override:Physics ATAR:task_dated', '19');
+  mockLocalStorage.setItem('connectea:time_override:Physics ATAR:task_dated', 'w19');
 
   window.ConnectifyProgressChart.renderChart(container2, {
     points: [taskWithDate],
@@ -4225,11 +4227,11 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   // User changes value to 25 but presses Escape
   editInput.value = '25';
   editInput.dispatchEvent(new MockEvent('input'));
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), '25', 'Storage updated on input');
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), 'w25', 'Storage updated on input');
 
   editInput.dispatchEvent(new MockEvent('keydown', { key: 'Escape' }));
   assert.strictEqual(editInput.value, '19', 'Escape must restore initial value 19 in input');
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), '19', 'Escape must restore initial value 19 in storage');
+  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), 'w19', 'Escape must restore initial value 19 in storage');
   assert.strictEqual(refreshCount2, 1, 'Escape must commit restored value and trigger onRefresh');
 
   // 7. Test clear button '✕'
@@ -11161,6 +11163,41 @@ runTest('Test 246: Weeks past a term\'s end read as the next term\'s everywhere;
   assert.ok(read('progress/export-view.js').includes("window.ConnectifyEarlyEaster.checkbox('cx-export-check'"), 'the export uses the same checkbox');
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8')).content_scripts.find(g => g.js.includes('src/progress/progress-graph.js')).js;
   assert.ok(manifest.indexOf('src/progress/progress-early-easter.js') > manifest.indexOf('src/assessment/school-terms.js') && manifest.indexOf('src/progress/progress-early-easter.js') < manifest.indexOf('src/progress/progress-graph.js'));
+});
+
+runTest('Test 247: The week editor numbers school weeks through the term calendar, as the Export does; older bare numbers keep their meaning', () => {
+  const { terms } = loadExportModules();
+  // 2026 with Early Easter: Term 1 is Weeks 1-9, Term 2 Weeks 10-20, Term 3 21-30, Term 4 31-40
+  assert.deepStrictEqual([1, 9, 10, 20, 21, 30, 31, 40].map(n => terms.weekOrder(n, 2026, true)), [1, 9, 13, 23, 25, 34, 37, 46]);
+  assert.deepStrictEqual([10, 11, 20].map(n => terms.weekOrder(n, 2026, false)), [10, 13, 22], 'without it, the 10-week terms as before');
+  assert.strictEqual(terms.weekOrder(42, 2026, true), 48, 'past Term 4 runs on in Term 4');
+  assert.strictEqual(terms.weekOrder(0, 2026, true), null);
+  for (const early of [true, false]) {
+    for (let n = 1; n <= 40; n++) assert.strictEqual(terms.schoolWeek(terms.weekOrder(n, 2026, early), 2026, early), n, `school week ${n} round-trips`);
+  }
+  assert.strictEqual(terms.schoolWeek(10, 2026, true), 10, 'Term 1 Week 10 under Early Easter is Term 2 Week 1, school week 10');
+  assert.strictEqual(terms.schoolWeek(48, 2026, true), 42, 'Term 4 runs on past Week 40, as weekOrder reads it');
+  const year = new Date().getFullYear();
+  const saved = localStorage.getItem('connectify:school_terms');
+  const { customWeekOrder } = window.ConnectifyUtils;
+  try {
+    terms.setEarlyEaster(year, true);
+    const t2 = terms.terms(year, true)[1].yearWeek;
+    assert.strictEqual(customWeekOrder(`w${t2}`), 13, 'the week the Export names as Term 2\'s start is Term 2 Week 1');
+    assert.strictEqual(customWeekOrder('w17'), 12 + 17 - t2 + 1, 'w17 is counted through the calendar');
+    assert.strictEqual(customWeekOrder('17'), 19, 'an older bare 17 stays Term 2 Week 7');
+    assert.strictEqual(customWeekOrder('t2w7'), 19);
+    terms.setEarlyEaster(year, false);
+    assert.strictEqual(customWeekOrder('w17'), 19, 'without Early Easter both readings agree');
+    assert.strictEqual(customWeekOrder('w0'), null);
+  } finally {
+    if (saved === null) localStorage.removeItem('connectify:school_terms');
+    else localStorage.setItem('connectify:school_terms', saved);
+  }
+  const editor = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress-week-editor.js'), 'utf8');
+  assert.ok(editor.includes('localStorage.setItem(targetKey, `w${val}`)'), 'typed weeks are saved as school weeks of the year');
+  assert.ok(editor.includes('input.title = `School week of the year: ${weekRanges()}`') && editor.includes('weekOrder(17)'), 'the hints come from this year\'s calendar');
+  assert.ok(!editor.includes('1-10 for Term 1'), 'no fixed 10-week ranges');
 });
 
 Promise.all(pendingTestPromises).then(() => {

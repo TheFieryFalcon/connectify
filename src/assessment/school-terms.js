@@ -139,12 +139,33 @@
     return t > 4 ? order : (t - 1) * 12 + w;
   }
 
+  /**
+   * The 12-slot order of school week `n` of the year, counted through the terms as the Export's term
+   * list numbers them (under Early Easter Term 1 is Weeks 1-9 and Term 2 starts at Week 10). Weeks past
+   * Term 4's last run on in Term 4. Null for anything but a positive number.
+   */
+  function weekOrder(n, year = new Date().getFullYear(), early = earlyEaster(year)) {
+    if (!Number.isFinite(n) || n < 1) return null;
+    const list = terms(year, early);
+    let i = 3;
+    while (i > 0 && n < list[i].yearWeek) i--;
+    return i * 12 + (n - list[i].yearWeek + 1);
+  }
+
+  /** The school week of the year for a 12-slot order (the inverse of weekOrder: Term 4 runs on past Week 40). */
+  function schoolWeek(order, year = new Date().getFullYear(), early = earlyEaster(year)) {
+    const n = normalizeOrder(order, year, early);
+    if (!Number.isFinite(n) || n < 1) return null;
+    const t = Math.min(4, Math.floor((n - 1) / 12) + 1);
+    return terms(year, early)[t - 1].yearWeek + Math.round(n - (t - 1) * 12) - 1;
+  }
+
   /** "25 May" */
   const formatDate = date => `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`;
   /** "Mon 25 May" */
   const formatDay = date => `${WEEKDAYS[date.getUTCDay()]} ${formatDate(date)}`;
 
   window.ConnectifySchoolTerms = {
-    term1Start, easterMonday, autoEarlyEaster, earlyEaster, setEarlyEaster, terms, dateFor, orderOf, normalizeOrder, formatDate, formatDay, addDays, utc
+    term1Start, easterMonday, autoEarlyEaster, earlyEaster, setEarlyEaster, terms, dateFor, orderOf, normalizeOrder, weekOrder, schoolWeek, formatDate, formatDay, addDays, utc
   };
 })();

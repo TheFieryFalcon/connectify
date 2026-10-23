@@ -52,6 +52,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Saved predictions and results are rebuilt once after updating.
 
 ### Fixes
+- Year Progression's week editor counts school weeks the way Export's term list does: in an Early Easter year Term 1 is Weeks 1–9 and Term 2 starts at Week 10. Its hints show this year's ranges. Weeks you set before keep the date they had.
 - Year Progression: the graph has the Early Easter checkbox too, shared with Export. A task in a week past the end of a term (Term 1 Week 10 in an Early Easter year) now reads as the next term's week (Term 2 Week 1) in the graph, Export and Predictor alike, matching the date Export gives it.
 - Weakness Analyzer: the radar's labels sit right at the end of their spokes with the score on the same line (in Firefox the score sat lower), and long subject names are no longer cut off. Its checkboxes and "Group by:" now line up with their row.
 - The unselected semester button no longer looks cut off on its left edge.
