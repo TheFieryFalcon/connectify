@@ -10180,6 +10180,10 @@ runTest('Test 224: Expanded unmarked rows show Low / Mid / High with what the pr
   assert.strictEqual(said('subject', 0, 'history', 2), 'From your 2 previous Literature results', 'a type with neither results nor a baseline is left out');
   assert.strictEqual(xp.basisText({ type: 'Test', subjectName: 'Year 11 Mathematics Methods General', basis: { typeSource: 'baseline', typeCount: 0, subjectSource: 'baseline', subjectCount: 0 } }),
     'From your previous-year Test and Mathematics Methods averages', 'year level and course type are dropped from the subject');
+  assert.strictEqual(xp.basisText({ type: 'Exam', subjectName: 'Literature ATAR Year 11 - Semester 1', basis: { typeSource: 'history', typeCount: 3, subjectSource: 'history', subjectCount: 5 } }),
+    'From your 3 previous Exam results and your 5 previous Literature results', "Connect's class titles lose course type, year level and semester");
+  assert.strictEqual(xp.basisText({ type: 'Test', subjectName: 'Mathematics Methods ATAR Year 12', basis: { typeSource: 'baseline', typeCount: 0, subjectSource: 'baseline', subjectCount: 0 } }),
+    'From your previous-year Test and Mathematics Methods averages', 'the engine\'s cleaned name (semester already dropped) loses course type and year level');
   assert.strictEqual(xp.basisText({ type: 'Exam' }), 'Predicted from your Exam results', 'predictions cached before basis existed');
   const pm = window.ConnectifyPredictorMath;
   const task = { name: 'Final Exam', caption: '' };

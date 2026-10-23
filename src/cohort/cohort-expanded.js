@@ -169,10 +169,14 @@
       return `<dl class="connectea-xp-grid connectea-xp-grid--hero">${cell('low', 'Low')}${cell('mid', 'Mid')}${cell('high', 'High')}</dl>`;
     }
 
-    /** "Literature" from "12 Literature ATAR": no year level or course type. */
+    /** "Literature" from Connect's "Literature ATAR Year 11 - Semester 1" (or "12 Literature ATAR"): no
+     *  semester, year level or course type. */
     const shortSubject = name => String(name || '')
-      .replace(/^\s*(?:Year\s*)?\d{1,2}\s+/i, '')
+      .replace(/\s*[-–—]\s*Sem(?:ester)?\s*[12].*$/i, '')
+      .replace(/\bYear\s*\d{1,2}\b/gi, '')
+      .replace(/^\s*\d{1,2}\s+/, '')
       .replace(/\s+(?:ATAR|General|Foundation|Preliminary)\s*$/i, '')
+      .replace(/\s+/g, ' ')
       .trim() || 'subject';
 
     /** "a, b and c" */
