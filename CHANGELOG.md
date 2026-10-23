@@ -15,6 +15,8 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Score colour**: on expanded panels, your score grows brighter the further you beat your prediction.
 - **Prediction sources**: expanded panels show what each prediction is based on.
 - **Lowest and Highest Possible**: see the range of final marks a class can still end on.
+- **Accurate ATAR scaling**: scaled scores now follow TISC's official Average Marks Scaling for each course, instead of squashing marks towards the middle.
+- **School marks in ATAR Estimate**: enter your school mark for each subject and see the scaled score it gives.
 - **Auto-refresh after updates**: open Connect tabs reload themselves, so the new version works straight away (not in the Chrome Web Store version).
 
 ### Changes
@@ -24,12 +26,10 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - The Predictor's tabs are now Predict Grade and Predict ATAR.
 - Tools open on Grade, then reopen on the tab you last used.
 - **Sidebar everywhere**: the sidebar is on every Connect page, with Settings available outside Assessment Outlines.
-- **ATAR Estimate**: enter your school mark and see its scaled score.
 - **Smarter predictions**: based on your own results in each subject, with recent tasks counting more.
 - Changing a Basic colour in the Theme Customizer updates every colour built from it.
 
 ### Fixes
-- ATAR scaled scores no longer squash marks towards the middle.
 - ATAR Estimate no longer lets you edit semesters that already have final grades.
 - Prediction ranges are no longer lopsided: Low and High now sit evenly around Mid.
 - Predictions no longer double-penalise a subject that's weak in one task type.
