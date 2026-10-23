@@ -139,7 +139,7 @@
         window.ConnectifyCohort.schedule();
       }
 
-      // Year in Progress and the Weakness Analyzer refresh themselves on the event below when open
+      // Progress and the Weaknesses refresh themselves on the event below when open
       if (window.ConnectifyCompoundProgress?.update) {
         window.ConnectifyCompoundProgress.update();
       }

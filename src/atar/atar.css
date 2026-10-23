@@ -129,6 +129,18 @@
   color: #253b53;
 }
 
+/* Typed marks, no spin arrows (the arrow keys still step the value) */
+#connectea-atar .cta-score {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+#connectea-atar .cta-score::-webkit-inner-spin-button,
+#connectea-atar .cta-score::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .cta-score[aria-invalid=true] {
   border-color: #ba3838;
 }

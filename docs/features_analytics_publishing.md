@@ -1,14 +1,14 @@
 # Connectify Analytics, Predictor & Testing Features Reference
 
-This document details user-facing features 11 through 20, covering Goal Setting and the Estimator, ATAR progression graphs, Weakness Radar, Settings & Calibration, DOM sweeping, Grade notifications, store publishing, Grade/ATAR Predictor, canonical sidebar sequence, and the master test suite.
+This document details user-facing features 11 through 20, covering Goals and Estimates, ATAR progression graphs, Weakness Radar, Settings & Calibration, DOM sweeping, Grade notifications, store publishing, Grade/ATAR Predictor, canonical sidebar sequence, and the master test suite.
 
 ---
 
 ## 7. Front-Facing Features Directory (Part 2: Features 11–20)
 
-### 11. Goal Setting & Estimator
+### 11. Goals & Estimates
 - **Source Modules**: [`target-atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-atar-ui.js), [`target-grade-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-grade-ui.js), [`grade-estimate-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/grade-estimate-ui.js), [`atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-ui.js)
-- **DOM Insertion**: One calculator panel (`#connectea-atar`) in the sidebar workspace, opened by two launchers: **Goal Setting** (Target ATAR, Target Grade) and **Estimator** (Estimate ATAR, Estimate Grade).
+- **DOM Insertion**: One calculator panel (`#connectea-atar`) in the sidebar workspace, opened by two launchers: **Goals** (Target ATAR, Target Grade) and **Estimates** (Estimate ATAR, Estimate Grade).
 - **UI Appearance**: Launcher name as heading, then the Predictor-style mode tabs (`.cta-mode-tabs`), the semester buttons and the active mode's view; each launcher reopens on its last tab.
 - **Functionality**:
   - **Estimate ATAR**: Aggregates scaled scores across enrolled ATAR courses using TISC Average Marks Scaling (each course's 2025 scaled mean + SD x z, z from the standardised mean 60 / SD 14); selects top 4 subjects for Tertiary Entrance Aggregate (TEA); applies 10% bonus for Methods, Specialist, and Languages (up to 2 bonus courses); calculates projected ATAR. Each course takes a school mark (Connect's by default) and shows its scaled score; a semester with final grades is Closed.
@@ -22,7 +22,7 @@ This document details user-facing features 11 through 20, covering Goal Setting 
 - **UI Appearance**: Responsive SVG line chart plotting student marks (blue polyline) vs cohort mean (red polyline) over school weeks with detailed task data table listing completed and pending tasks (grayed out with $\ge 5:1$ contrast).
 - **Functionality**: "Show:" dropdown plots single tasks, a running weighted average or a weighted rolling average of the last three tasks (cohort mean alike); cohort means survive the semester filter (derived from cached boxplots); interactive hover tooltips; chronological week override inputs in table for all tasks (with `.cx-date-warning` on unparsable dates); running course average tracking.
 
-### 13. Weakness Analyzer Radar Chart
+### 13. Weaknesses Radar Chart
 - **Source Module**: [`weakness-radar.js`](file:///Users/uwong/Downloads/2.1.14_0/weakness-radar.js)
 - **DOM Insertion**: Standalone panel (`#connectify-weakness`).
 - **UI Appearance**: Native SVG polygonal radar chart with 5 concentric percentage rings (20% to 100%), radial spoke axes, green performance polygon (`#2ecc71`), and perimeter labels.
@@ -54,7 +54,7 @@ This document details user-facing features 11 through 20, covering Goal Setting 
 
 ### 18. Grade Predictor, ATAR Predictor & Dynamic Breakout Performance Meter
 - **Source Modules**: [`predictor-math.js`](file:///Users/uwong/Downloads/2.1.14_0/predictor-math.js), [`predictor-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/predictor-ui.js), [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`category-settings.js`](file:///Users/uwong/Downloads/2.1.14_0/category-settings.js)
-- **DOM Insertion**: Launcher button `Predictor` (`#connectify-predictor-toggle`), workspace panel (`#connectify-predictor`), vertical outcome meter (`.connectea-outcome-bar`), and "Previous Year Baselines" card in Settings.
+- **DOM Insertion**: Launcher button `Predictions` (`#connectify-predictor-toggle`), workspace panel (`#connectify-predictor`), vertical outcome meter (`.connectea-outcome-bar`), and "Previous Year Baselines" card in Settings.
 - **Functionality**:
   - **Cold-Start Baselines**: Previous-year category and subject averages kickstart predictions; dynamically injects baseline inputs for custom categories.
   - **Logarithmic Ceiling**: Tapers gains above 80% proportionally to headroom $\frac{100 - \text{Score}}{20}$.
@@ -63,8 +63,8 @@ This document details user-facing features 11 through 20, covering Goal Setting 
   - **Dynamic Breakout Performance Meter**: 18px wide, 56px tall; 4 baseline segments: Red ($< \text{Low}$), Orange ($\text{Low} \le S < \text{Mid}$), Yellow ($\text{Mid} \le S < \text{High}$), Green ($S \ge \text{High}$). Suppressed on incomplete tasks and on first tasks lacking precedent/baseline. Secret double-height Purple breakout segment (height 20px) appears when $S > 1.10 \times \text{High}$. Critical shortfall ($S \le \text{Low} - 10\%$ additive) renders 0 segments with pulsing red alarm glow (`.connectea-outcome-critical`).
 
 ### 19. Sidebar Integration & Theme Navigation Stabilization
-- **Canonical Sequence**: Goal Setting, Predictor, Year in Progress, Estimator, Weakness Analyzer, Settings.
-- **Button Styling**: Settings (`#connectify-categories-toggle`) and Weakness Analyzer (`#connectify-weakness-toggle`) feature white buttons (`#ffffff`) in light mode with centered text.
+- **Canonical Sequence**: Goals, Predictions, Progress, Estimates, Weaknesses, Settings.
+- **Button Styling**: Settings (`#connectify-categories-toggle`) and Weaknesses (`#connectify-weakness-toggle`) feature white buttons (`#ffffff`) in light mode with centered text.
 - **Category Colors**: Category labels bind to `--cx-cat-color` via `.cx-cat-name-label` for vibrant visibility in dark mode.
 - **Theme Button Mount**: `#connectea-theme-toggle` auto-discovers `.cvr-c-primary-navigation` and centers at `top: 50%; transform: translateY(-50%)`.
 
@@ -80,7 +80,7 @@ This document details user-facing features 11 through 20, covering Goal Setting 
   - Section 6: Regression Verification (centering, first-assessment outcome rules, card scraping, predictor interactivity).
   - Theme audit (`scripts/test-theme-styles.js`): applies themes through `connectify-request-theme` (the registry is isolated-world), clears focus before each capture, composites contrast over the theme's own `--cx-canvas-bg`, and counts unblurred one-axis inset shadows (accent bars) as separators.
   - Glass surface structure (Test 180): `NESTED_SURFACE_FILL` (a fill > 12% inside another surface), `NESTED_BACKDROP_BLUR`, `GLASS_WITHOUT_BLUR` (translucent outer surface) and `ROUNDED_FULL_WIDTH_BAR`, both glass presets; controls, chips, avatars, active states, overlays and Connectify UI exempt.
-  - Contrast coverage and tool data (Test 185): SVG `<text>`/`<tspan>` (chart labels) are measured by fill against the CSS background behind the `<svg>` plus SVG shapes painted under them; Connectify UI on page views (cohort panels, type selects, outcome meters, theme menu) skips parity but is contrast-checked; `TOOL_SUBJECTS_MISSING` (once per drawer tool) flags Predictor tabs, Weakness checkboxes or Year in Progress chips missing a subject with marked tasks, listed under "Tool Data Completeness" in the report.
+  - Contrast coverage and tool data (Test 185): SVG `<text>`/`<tspan>` (chart labels) are measured by fill against the CSS background behind the `<svg>` plus SVG shapes painted under them; Connectify UI on page views (cohort panels, type selects, outcome meters, theme menu) skips parity but is contrast-checked; `TOOL_SUBJECTS_MISSING` (once per drawer tool) flags Predictor tabs, Weakness checkboxes or Progress chips missing a subject with marked tasks, listed under "Tool Data Completeness" in the report.
   - Keyed ancestors (Test 219): no `src/` stylesheet tests a class substring (`[class*=...]`) on an ancestor or inside `:not(... *)`, so Connect's class changes restyle only what they can affect.
   - Spacing parity (Test 160): class/id containers with 0px padding/margin in `connect_css/` (the Default theme) must not get non-zero spacing from any theme or custom theme stylesheet.
 

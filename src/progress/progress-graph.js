@@ -1,7 +1,7 @@
 /**
  * Connectify Progress Graph & ATAR Progression
  *
- * The Year in Progress panel: subject chips, ATAR Progression, refresh while open, and the one-time
+ * The Progress panel: subject chips, ATAR Progression, refresh while open, and the one-time
  * sweep of improvement arrows from older versions. Markup: progress-panel.js; maths:
  * ConnectifyProgressMath; chart: ConnectifyProgressChart. Exposes window.ConnectifyProgress.
  */

@@ -32,7 +32,7 @@ html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar :is(
   color: oklch(from #22c55e 0.34 c h) !important;
 }
 
-/* Year in Progress: chart legend keys match their line colours, and the missing-date warning stays red */
+/* Progress: chart legend keys match their line colours, and the missing-date warning stays red */
 html.connectea-dark[data-connectea-tone="light"] .cx-red-key {
   color: var(--cx-text-primary, #1d1c1c) !important;
   color: oklch(from #d64b58 0.34 c h) !important;
@@ -48,7 +48,7 @@ html.connectea-dark[data-connectea-tone="light"] .cx-date-warning {
   color: oklch(from #dc2626 0.34 c h) !important;
 }
 
-/* Weakness Analyzer radar: the dark plot surface would leave dark-ink labels at ~1.3:1, so the plot is clear on the drawer's
+/* Weaknesses radar: the dark plot surface would leave dark-ink labels at ~1.3:1, so the plot is clear on the drawer's
    own surface (one surface per block) with an ink hairline; labels, ring percentages and messages take the ink, and the
    scores and warning go to OKLCH 0.30 (the drawer glass over the grey canvas is darker than a tile, 0.34 lands at 4.9:1) */
 html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart {

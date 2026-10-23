@@ -26,12 +26,12 @@ Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, scho
 - **Live ATAR Predictor**: Automatically scrapes your unscaled school marks, applies historical TISC scaling algorithms, and predicts your final ATAR. It even dynamically detects if you're in Year 11 or Year 12, applying a mathematical penalty to Year 11 unscaled marks for a more realistic projection. Also allows you to input your known Semester 1 scaled marks and shifting the interpolation to align with official data.
 - **Dynamic Cohort & Rank Estimator**: Instantly estimates your exact rank and percentile within your cohort (e.g. `Top 4.2%`) using an advanced polynomial spline applied to Connect's published boxplot data. 
 - **Target Grade Planner**: Input your dream ATAR, and Connectify will reverse-engineer exactly what percentage you need to score on every remaining assessment to achieve it.
-- **Estimator**: See your ATAR from your school marks, or type the marks you expect on upcoming assessments (even just one) to see what your class average would become.
+- **Estimates**: See your ATAR from your school marks, or type the marks you expect on upcoming assessments (even just one) to see what your class average would become.
 - **Estimated Grade**: Connectify realistically forecasts your upcoming assessment scores with calibrated Low, Mid, and High scenarios, based on data about not only that subject and its volatility, but also how well you did on assessments like that in the past. When a new school year starts, last year's averages carry over automatically as your starting baselines.
 - **Four-Segment Outcome Bar**: Visualizes where your score lands relative to your cohort's distribution across 4 distinct quantile segments (Min, 25th, Median, 75th, and Max) directly alongside each assessment.
 
 ### 📊 Beautiful Visualizations
-- **Weakness Analyzer Radar Chart**: A brand new interactive tool that categorizes every assessment you've taken (Exams, Tests, Essays, Take-Home) and plots your performance on a sleek radar chart, instantly revealing your study weaknesses.
+- **Weaknesses Radar Chart**: A brand new interactive tool that categorizes every assessment you've taken (Exams, Tests, Essays, Take-Home) and plots your performance on a sleek radar chart, instantly revealing your study weaknesses.
 - **Compound Progress Bars**: Every subject card now features a vibrant, color-coded progress bar that breaks down your syllabus weighting (e.g. 50% Test, 30% Exam). It dynamically lowers the opacity of assessments you haven't completed yet, doubling as a **Weighting Tracker** so you know exactly how much of the year is left.
 - **WACE Exam Countdown**: A beautifully integrated countdown widget that tracks exactly how many days are left until the WACE exams for Year 12 students.
 - **Adaptive Progress Timelines**: Custom SVG line graphs that track your ATAR trajectory over the year, dynamically scaling the y-axis to match your specific performance range for maximum detail.
@@ -41,7 +41,7 @@ Version 3 is a massive ground-up rebuild. We've stripped out all hardcoded, scho
 - **Liquid Glass**: Frosted, translucent panels that blur whatever sits behind them, in a grey or navy tint. Adjust the blur strength and transparency to taste, or turn any custom theme into a glass theme.
 - **Theme Customizer**: Design your own theme right inside Connect. Pick just 6 colours and the rest are derived for you with readable contrast, or fine-tune all 20 with a live preview. Save, edit, import and export your themes.
 - **Custom Wallpapers**: Choose one of six built-in gradient wallpapers or upload your own to set behind the whole portal.
-- **Retractable Tools Drawer**: Fast access to all your analytics (Goal Setting, Predictor, Year in Progress, Estimator, Weakness Analyzer and Settings) via a smooth sliding drawer anchored to Connect's sidebar.
+- **Retractable Tools Drawer**: Fast access to all your analytics (Goals, Predictions, Progress, Estimates, Weaknesses and Settings) via a smooth sliding drawer anchored to Connect's sidebar.
 - **Assessment Outline Controls**: One-click floating Expand All and Collapse All buttons with live progress feedback, plus a smooth "Back to top" shortcut.
 - **Blazingly Fast**: Completely rewritten to be modular, efficient, and deeply integrated into Connect's native rendering engine, ensuring UI widgets instantly sync without lag, and pausing background work while you're idle or the tab is hidden.
 

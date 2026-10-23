@@ -1,7 +1,7 @@
 /**
  * Connectify Weakness Radar Analyzer
  *
- * The Weakness Analyzer panel: performance per assessment type or per subject over completed tasks,
+ * The Weaknesses panel: performance per assessment type or per subject over completed tasks,
  * drawn as a radar chart (weakness-radar-view.js), with per-subject include checkboxes.
  * Provides `window.ConnectifyWeakness`.
  */
@@ -146,7 +146,7 @@
       return window.ConnectifyWeakness.panelRefs;
     }
     const toggleBtn = document.createElement('button');
-    toggleBtn.textContent = 'Weakness Analyzer';
+    toggleBtn.textContent = 'Weaknesses';
     toggleBtn.type = 'button';
     toggleBtn.id = 'connectify-weakness-toggle';
 

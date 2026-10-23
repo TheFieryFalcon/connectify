@@ -32,13 +32,13 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyTargetGradeUI` | `target-grade-ui.js` | Target Grade planner modal form and breakdown view |
 | `window.ConnectifyTargetUiHelpers` | `target-ui-helpers.js` | Planner element, rounding and preference helpers |
 | `window.ConnectifyTargetPlannerUI` / `ConnectifyGradeEstimate` / `ConnectifyGradeEstimateUI` | `target-planner-ui.js` / `grade-estimate.js` / `grade-estimate-ui.js` | Planner facade delegating to Atar and Grade UI modules; Estimate Grade: `parseMark`, `estimate`; `createView`, `render` |
-| `window.ConnectifyAtarMarkup` | `atar-ui-markup.js` | Calculator panel markup, `GROUPS` / `MODES` (Goal Setting, Estimator) and semester rules |
+| `window.ConnectifyAtarMarkup` | `atar-ui-markup.js` | Calculator panel markup, `GROUPS` / `MODES` (Goals, Estimates) and semester rules |
 | `window.ConnectifyAtar` | `atar-ui.js` | Calculator shell and mode coordinator (`openCalculator('goals' \| 'estimator' \| mode)`) |
 | `window.ConnectifyOutlineControls` | `outline-controls.js` | Floating Expand/Collapse All and Back to top button |
 | `window.ConnectifyProgressMath` | `progress-math.js` | Historical ATAR trajectory and monthly aggregation |
 | `window.ConnectifyProgressChart` / `ConnectifyProgressModes` | `progress-chart.js` / `progress-modes.js` | SVG polyline line chart and plotted data table renderer; single task / weighted / rolling average data points |
 | `window.ConnectifyProgressWeekEditor` | `progress-week-editor.js` | Week override cells in the progress table |
-| `window.ConnectifyProgressPanel` | `progress-panel.js` | Year in Progress launcher and panel markup |
+| `window.ConnectifyProgressPanel` | `progress-panel.js` | Progress launcher and panel markup |
 | `window.ConnectifyProgress` | `progress-graph.js` | Progress graph modal controller |
 | `window.ConnectifyCompoundProgress` | `compound-progress.js` | Weighted category progress bars on subject cards |
 | `window.ConnectifyWeaknessView` | `weakness-radar-view.js` | Radar SVG and panel markup |
@@ -78,7 +78,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `cx-categories` / `connectea:categories` | `localStorage` & `browser.storage.local` | `category-settings.js` | Custom category definitions, keywords, colors |
 | `connectea:atar:2025:<account>:<year>` | `localStorage` | `atar-calculator.js` | `<semester>:<course>`: `{ include, raw }` (typed school mark; older entries hold a scaled `score`), `gradeEstimates` (`{ <course>: { <task>: typed mark } }`, Estimate Grade), top four selections, targets |
 | `connectea:preferences` | `localStorage` | `scaling-calibration.js` | Calibration table (`sem1_calibration:<courseId>`) |
-| `connectify:weakness_disabled_subjects` / `connectify:progress_mode` | `localStorage` | `weakness-radar.js` / `progress-modes.js` | Subjects excluded from Weakness Analyzer; Year in Progress data point mode (`tasks`, `weighted`, `rolling`) |
+| `connectify:weakness_disabled_subjects` / `connectify:progress_mode` | `localStorage` | `weakness-radar.js` / `progress-modes.js` | Subjects excluded from Weaknesses; Progress data point mode (`tasks`, `weighted`, `rolling`) |
 | `connectea:time_override:<subject>:<task|taskId>` | `localStorage` | `progress-chart.js` | Manual school week overrides: weeks 1-40 in 10-week terms (17 = Term 2 Week 7) or `t2w7`, read via `ConnectifyUtils.customWeekOrder` (disambiguated by task ID for duplicate names) |
 | `connectify:auto_expand` | `localStorage` | `category-settings.js` / `atar-features.js` | Boolean setting to auto-expand course outlines on load |
 | `connectify:stale_subjects` | `localStorage` | `assessment-data.js` / `new-grade.js` | Set of subjects whose collapsed grade/stats changed, awaiting targeted re-scrape upon expansion |
@@ -137,7 +137,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
   - `#cx-expand-progress` (Animated bulk outline expansion loading pill)
   - `#connectea-atar` (Calculator modal)
   - `#connectify-progress` (Progress graph modal)
-  - `#connectify-weakness` (Weakness Analyzer panel)
+  - `#connectify-weakness` (Weaknesses panel)
   - `#connectify-categories` (Settings & Calibration panel)
   - `#connectify-wace-countdown` (Year 12 countdown banner)
   - `.cx-compound-progress-container` (Subject header progress bar)

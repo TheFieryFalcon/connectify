@@ -1,7 +1,7 @@
 /**
  * Connectify ATAR calculator: panel markup
  *
- * Builds the calculator panel (#connectea-atar): the Goal Setting and Estimator launchers the sidebar
+ * Builds the calculator panel (#connectea-atar): the Goals and Estimates launchers the sidebar
  * mounts, the mode tabs (Target ATAR / Target Grade, Estimate ATAR / Estimate Grade), the semester
  * buttons, course list, summary, reset and Expand All Outlines buttons, and the
  * methodology notes; plus the semester labels and closing rules. Behaviour lives in atar-ui.js.
@@ -19,8 +19,8 @@
 
   // Each launcher opens one group of modes; the tabs under the heading switch between its modes
   const GROUPS = {
-    goals: { title: 'Goal Setting', launcher: 'connectify-goals-toggle', modes: ['target', 'grade'] },
-    estimator: { title: 'Estimator', launcher: 'connectify-estimator-toggle', modes: ['estimate', 'grade-estimate'] }
+    goals: { title: 'Goals', launcher: 'connectify-goals-toggle', modes: ['target', 'grade'] },
+    estimator: { title: 'Estimates', launcher: 'connectify-estimator-toggle', modes: ['estimate', 'grade-estimate'] }
   };
   const MODES = {
     target: { tab: 'Target ATAR', title: 'Target ATAR Planner' },

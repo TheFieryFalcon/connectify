@@ -19,7 +19,7 @@
     let toggleBtn = document.getElementById('connectify-predictor-toggle');
     if (!toggleBtn) {
       toggleBtn = document.createElement('button');
-      toggleBtn.textContent = 'Predictor';
+      toggleBtn.textContent = 'Predictions';
       toggleBtn.type = 'button';
       toggleBtn.id = 'connectify-predictor-toggle';
       toggleBtn.className = 'cx-calculator-tool';

@@ -38,11 +38,11 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **DOM Insertion**: Anchored to Connect's native sidebar (`#connectify-sidebar-handle`) and fixed to viewport (`#connectify-sidebar`).
 - **UI Appearance**: Compact 30px width handle with directional arrow icon (`❮` / `❯`) without text or excess whitespace. Anchors directly to Connect's left menu when closed; centers vertically on drawer edge when open.
 - **Canonical Tools**:
-  - **Goal Setting** (`#connectify-goals-toggle`): Target ATAR and Target Grade tabs.
-  - **Predictor** (`#connectify-predictor-toggle`)
-  - **Year in Progress** (`#connectify-progress-toggle`)
+  - **Goals** (`#connectify-goals-toggle`): Target ATAR and Target Grade tabs.
+  - **Predictions** (`#connectify-predictor-toggle`)
+  - **Progress** (`#connectify-progress-toggle`)
   - **Estimator** (`#connectify-estimator-toggle`): Estimate ATAR and Estimate Grade tabs.
-  - **Weakness Analyzer** (`#connectify-weakness-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
+  - **Weaknesses** (`#connectify-weakness-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
   - **Settings & Calibration** (`#connectify-categories-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
 - **Functionality**:
   - **Connect Native Sidebar Anchoring**: When closed, the handle discovers Connect's native left navigation sidebar (`.cvr-c-service-menu`, `.cvr-c-side-menu`, etc., requiring `height >= 120` and excluding top primary menus) and anchors directly to it via `position: absolute` in document coordinates, or `position: fixed` if the sidebar is sticky/fixed. This scrolls synchronously with Connect's sidebar at native frame rates without floating fixed or snapping. Switches to `position: fixed` in the active viewport when the drawer opens, and falls back to dynamic viewport centering if no Connect sidebar exists.

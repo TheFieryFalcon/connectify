@@ -1,7 +1,7 @@
 /**
  * Connectify Progress Graph: panel markup
  *
- * Builds the Year in Progress launcher (#connectify-progress-toggle) and panel (#connectify-progress):
+ * Builds the Progress launcher (#connectify-progress-toggle) and panel (#connectify-progress):
  * header with title and Refresh Assessments button, subject chips and chart area. A panel or launcher
  * left by an earlier injection is adopted rather than duplicated. Exposes window.ConnectifyProgressPanel.
  */
@@ -11,7 +11,7 @@
   const createElement = (...args) => window.ConnectifyProgressChart.createElement(...args);
 
   function build() {
-    const toggleBtn = document.getElementById('connectify-progress-toggle') || createElement('button', 'Year in Progress');
+    const toggleBtn = document.getElementById('connectify-progress-toggle') || createElement('button', 'Progress');
     toggleBtn.id = 'connectify-progress-toggle';
     toggleBtn.type = 'button';
     toggleBtn.setAttribute('aria-expanded', 'false');
@@ -24,7 +24,7 @@
         head = createElement('header');
         panel.prepend(head);
       }
-      title = head.querySelector('strong') || createElement('strong', 'Year in Progress');
+      title = head.querySelector('strong') || createElement('strong', 'Progress');
       title.tabIndex = -1;
       if (!head.contains(title)) head.prepend(title);
 
@@ -44,7 +44,7 @@
       panel.setAttribute('aria-label', 'Assessment progress');
 
       head = createElement('header');
-      title = createElement('strong', 'Year in Progress');
+      title = createElement('strong', 'Progress');
       title.tabIndex = -1;
 
       scanBtn = createElement('button', 'Refresh Assessments');

@@ -25,7 +25,7 @@ This document covers the user interface and analytics modules, including target 
 #### [`atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-ui.js)
 - **Role**: Coordinates the main calculator modal (`#connectea-atar`), tab switching, semester toggling, and data synchronization.
 - **Key Functions**:
-  - `atar-ui-markup.js`: panel markup (the Goal Setting and Estimator launchers the sidebar mounts, mode tabs, semester buttons, methodology), `GROUPS` (`goals`: `target`, `grade`; `estimator`: `estimate`, `grade-estimate`), `MODES`, `paintModeTabs`, semester labels and closing rules.
+  - `atar-ui-markup.js`: panel markup (the Goals and Estimates launchers the sidebar mounts, mode tabs, semester buttons, methodology), `GROUPS` (`goals`: `target`, `grade`; `estimator`: `estimate`, `grade-estimate`), `MODES`, `paintModeTabs`, semester labels and closing rules.
   - `selectTab(mode)`: Switches between `'target'`, `'grade'`, `'estimate'` and `'grade-estimate'`: heading = launcher name, `aria-label` = mode title, only the group's tabs shown.
   - `grade-estimate.js` (`ConnectifyGradeEstimate`): `parseMark(text)` (percent, `a/b`, `a Out of b`), `estimate(tasks, entered, mark)` -> `{ current, estimate, entered, pending, complete }`: Connect's mark as one block at the marked weight plus typed marks at theirs; blanks and (when any task is weighted) unweighted tasks are left out. `grade-estimate-ui.js` (`ConnectifyGradeEstimateUI`): class select, task table rebuilt only when the class or tasks change (typing keeps focus), marks saved per class in the calculator preferences. Styles: `atar-estimator.css`.
   - `updateResults()`: Updates Semester 1 & 2 buttons with clean styling (ATAR text eliminated in grade mode). A semester whose A–E grades are final is Closed (`.cta-semester-closed`, disabled) in every mode, Estimate included; unselected and closed buttons keep a whole 1px border (text aligned with the indicator's 4px bar by padding).
@@ -73,7 +73,7 @@ This document covers the user interface and analytics modules, including target 
 ### Advanced Analytics & Sidebar Tools
 
 #### [`weakness-radar.js`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/weakness-radar.js)
-- **Role**: Implements the Weakness Analyzer native SVG spider/radar chart.
+- **Role**: Implements the Weaknesses native SVG spider/radar chart.
 - **Key Functions**:
   - Plots multi-axis polygonal radar chart of student performance grouped by assessment type or subject (SVG, escaped labels and panel markup in `weakness-radar-view.js`) from the cache only (`collectClasses`; types from each task's stored `labelsKey`, never its row); skips rendering while hidden and redraws while open on `connectify-task-type-changed` / `connectify-results-updated`. The dark plot surface and message colours live in `sidebar-weakness-types.css` (`.cx-radar-message`, `.cx-radar-warning`), so light-tone themes can clear it.
   - Interactive subject filtering checkboxes (`#cx-weakness-checkboxes`) and Expand All Outlines button (`#cx-weakness-expand-all`).
@@ -115,7 +115,7 @@ This document covers the user interface and analytics modules, including target 
   - `sidebar-filter.js` (`isOutlinesFilterRestricted` for the year rollover, `clickConnectAllButton`), `sidebar-page-notice.js` (`.cx-page-notice` with an Open Assessment Outlines link; `ANYWHERE_TOOLS`: Settings), `sidebar-tools.js`, `sidebar-shell.js`: launcher/panel mounting (DOM only touched when out of place; launchers pressed only while their panel is open) and the drawer shell.
 - **Key Functions**:
   - Drawer slide synchronization and 900px workspace expansion (`.cx-tool-active`) with `← Back to Menu` navigation.
-  - Canonical launcher buttons: Goal Setting, Predictor, Year in Progress, Estimator, Weakness Analyzer, Settings (`CALCULATOR_GROUPS` maps the two calculator launchers to `openCalculator('goals' | 'estimator')`).
+  - Canonical launcher buttons: Goals, Predictions, Progress, Estimates, Weaknesses, Settings (`CALCULATOR_GROUPS` maps the two calculator launchers to `openCalculator('goals' | 'estimator')`).
   - Centralized delegated click handling and single active tool policy.
 - **Export**: `window.ConnectifyInitSidebar`.
 

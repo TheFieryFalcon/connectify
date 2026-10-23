@@ -1,8 +1,8 @@
 /**
  * Connectify ATAR UI & Calculator Interface
  *
- * Coordinates the calculator panel's four modes in two launcher groups: Goal Setting (Target ATAR,
- * Target Grade) and Estimator (Estimate ATAR, Estimate Grade). Markup and groups: atar-ui-markup.js;
+ * Coordinates the calculator panel's four modes in two launcher groups: Goals (Target ATAR,
+ * Target Grade) and Estimates (Estimate ATAR, Estimate Grade). Markup and groups: atar-ui-markup.js;
  * scraping: ConnectifyAtarScraper; calculations: ConnectifyAtarCalc; planner forms:
  * ConnectifyTargetPlannerUI; Estimate Grade: ConnectifyGradeEstimateUI. Provides `window.ConnectifyAtar`.
  */

@@ -1,7 +1,7 @@
 /**
  * Connectify ATAR Features & Tools Coordinator
  *
- * Creates the Predictor, Weakness Analyzer and Settings panels for the sidebar to mount, runs the
+ * Creates the Predictor, Weaknesses and Settings panels for the sidebar to mount, runs the
  * startup auto-expand (only when the setting is on), and keeps the outline controls
  * (outline-controls.js), countdown and compound progress bars in sync across Connect re-renders.
  */

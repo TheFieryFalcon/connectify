@@ -1,5 +1,5 @@
 /**
- * Connectify Weakness Analyzer: radar chart and panel markup
+ * Connectify Weaknesses: radar chart and panel markup
  *
  * Builds the SVG radar (spider) chart for labelled percentages, the status messages shown instead of
  * it, and the analyzer panel markup. Labels are subject and category names, so they are escaped.
@@ -99,7 +99,7 @@
     }
 
     return `
-      <svg viewBox="0 0 ${width} ${height}" style="width:100%;height:100%;display:block;user-select:none;" role="img" aria-label="Weakness Analyzer Radar Chart">
+      <svg viewBox="0 0 ${width} ${height}" style="width:100%;height:100%;display:block;user-select:none;" role="img" aria-label="Weaknesses radar chart">
         ${gridPolygons}
         ${spokes}
         ${dataPolygon}
@@ -110,7 +110,7 @@
   }
 
   const PANEL_HTML = `
-      <header><strong>Weakness Analyzer</strong></header>
+      <header><strong>Weaknesses</strong></header>
       <div style="margin-bottom:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
          <label for="cx-radar-mode" class="cx-radar-mode-label" style="font-weight:600; font-size:12px; color:inherit;">Group by:</label>
          <select id="cx-radar-mode">

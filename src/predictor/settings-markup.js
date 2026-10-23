@@ -79,7 +79,7 @@
 
       <section class="cx-settings-section" style="margin-bottom:28px;border-top:1px solid #d8e3ee;padding-top:20px;">
         <header style="margin-bottom:8px;"><strong>Previous Year Baselines</strong></header>
-        <p class="cx-settings-desc" style="font-size:12px;margin:0 0 14px 0;">Enter your previous year's assessment type averages and subject final marks to jumpstart the Grade and ATAR Predictors early in the year.</p>
+        <p class="cx-settings-desc" style="font-size:12px;margin:0 0 14px 0;">Enter your previous year's assessment type averages and subject final marks to jumpstart Predictions early in the year.</p>
         <div id="cx-baselines-container"></div>
       </section>
 

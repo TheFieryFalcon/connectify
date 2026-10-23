@@ -1,7 +1,7 @@
 /**
  * Connectify Progress Graph: data point modes
  *
- * The Year in Progress "Show:" dropdown. Single tasks plots each mark as it is; Weighted average plots
+ * The Progress "Show:" dropdown. Single tasks plots each mark as it is; Weighted average plots
  * the running weighted average of every completed task so far; Rolling average plots the weighted
  * average of the last three completed tasks. The cohort mean is averaged the same way. The choice is
  * kept in connectify:progress_mode. Exposes window.ConnectifyProgressModes.
