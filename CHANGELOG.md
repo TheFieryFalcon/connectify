@@ -4,7 +4,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
-## 3.2.5 (upcoming)
+## 3.2.5 (2026-10-24)
 
 ### Additions
 - **Calendar export**: send your upcoming assessments to Google Calendar or Notion, placed on the right days using this year's WA term dates.
