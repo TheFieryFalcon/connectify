@@ -8348,7 +8348,7 @@ runTest('Test 183: Expand All adds every expanded subject to a cache that alread
     cards = [];
     assert.deepStrictEqual(names(), ['12 Chemistry ATAR', '12 Philosophy and Ethics ATAR', '12 Physics ATAR'], 'the persisted cache keeps every subject');
     const src = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/cache-versions.js'), 'utf8');
-    assert.ok(src.includes("RESULTS: 'v10_20261019_results'"), 'caches from before per-task semesters are invalidated');
+    assert.ok(src.includes("RESULTS: 'v11_20261024_results'"), 'caches from before the term-calendar semester cutoff are invalidated');
   } finally {
     document.querySelectorAll = origQSA;
     mockLocalStorage.clear();
@@ -8607,11 +8607,23 @@ runTest('Test 190: A wholly new class registry rolls last year\'s cached average
   }
 });
 
-runTest('Test 191: Semester 1 is every task before Term 2 Week 7, and the planners start Semester 2 only on a final Semester 1 grade', () => {
+runTest('Test 191: Semester 2 starts at canonical school week 17 (Term 2 Week 7, Week 8 under Early Easter), and the planners start Semester 2 only on a final Semester 1 grade', () => {
   const helpersSrc = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/assessment-parse-helpers.js'), 'utf8');
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/school-terms.js'), 'utf8'));
   eval(helpersSrc);
-  const { taskSemester, SEMESTER_TWO_ORDER } = window.ConnectifyParseHelpers;
-  assert.strictEqual(SEMESTER_TWO_ORDER, 19, 'chronological week 19 (12 weeks per term) = school week 17 = Term 2 Week 7');
+  const { taskSemester, SEMESTER_TWO_WEEK, semesterTwoOrder } = window.ConnectifyParseHelpers;
+  const terms = window.ConnectifySchoolTerms;
+  const year = new Date().getFullYear();
+  const savedTerms = localStorage.getItem('connectify:school_terms');
+  assert.strictEqual(SEMESTER_TWO_WEEK, 17, 'canonical school week 17');
+  terms.setEarlyEaster(year, true);
+  assert.strictEqual(semesterTwoOrder(), 20, 'under Early Easter school week 17 is Term 2 Week 8 (order 20)');
+  assert.strictEqual(taskSemester(2, 'Term 2, Week 7'), 1, 'Early Easter: Term 2 Week 7 is still Semester 1');
+  assert.strictEqual(taskSemester(2, 'Term 2, Week 8'), 2, 'Early Easter: Term 2 Week 8 starts Semester 2');
+  assert.strictEqual(taskSemester(2, 'Term 3, Week 2', terms.weekOrder(17)), 2, 'a week override of school week 17 starts Semester 2');
+  assert.strictEqual(taskSemester(2, 'Term 3, Week 2', terms.weekOrder(16)), 1);
+  terms.setEarlyEaster(year, false);
+  assert.strictEqual(semesterTwoOrder(), 19, 'chronological week 19 (12 weeks per term) = school week 17 = Term 2 Week 7');
   assert.strictEqual(window.ConnectifyUtils.customWeekOrder('17'), 19, 'school week 17 is chronological week 19');
   assert.strictEqual(taskSemester(2, 'Term 1, Week 5'), 1, 'a Semester 1 task listed on a Semester 2 panel stays Semester 1');
   assert.strictEqual(taskSemester(2, 'Term 2, Week 6'), 1, 'Term 2 Week 6 is the last Semester 1 week');
@@ -8622,6 +8634,7 @@ runTest('Test 191: Semester 1 is every task before Term 2 Week 7, and the planne
   assert.strictEqual(taskSemester(2, 'Week 4'), 2, 'a week with no term is ambiguous, so the card decides');
   assert.strictEqual(taskSemester(1, 'Term 3, Week 2'), 1, 'a task is never later than its own card');
   assert.strictEqual(taskSemester(2, 'Term 3, Week 2', 5), 1, 'a week override wins over the caption');
+  if (savedTerms === null) localStorage.removeItem('connectify:school_terms'); else localStorage.setItem('connectify:school_terms', savedTerms);
 
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-ui-helpers.js'), 'utf8'));
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui-markup.js'), 'utf8'));
@@ -11482,12 +11495,21 @@ runTest('Test 253: Every Year Progression chart has a dashed line between its Se
   svg = draw([task('Essay', 5, 1), task('Undated', null, 2)]);
   assert.ok(svg.querySelector('[class="cx-semester-divider"]'), 'undated tasks fall back to their outline');
 
-  // Calendar ATAR chart: the line is at the start of Term 2 Week 7 on the time axis
+  // Calendar ATAR chart: the line is at the start of school week 17 on the time axis
+  const terms = window.ConnectifySchoolTerms;
+  const savedTerms = localStorage.getItem('connectify:school_terms');
+  terms.setEarlyEaster(new Date().getFullYear(), false);
   const months = [{ name: 'Feb', order: 5, score: 80, display: '80' }, { name: 'Jul', order: 26, score: 82, display: '82' }, { name: 'Oct', order: 40, score: 84, display: '84' }];
   svg = draw(months, { isHistory: true });
   const at = (19 - 0.5 - 5) * 595 / 35 + 52;
   assert.ok(Math.abs(Number(svg.querySelector('[class="cx-semester-divider"]').getAttribute('x1')) - at) < 1e-9, 'months are split at Semester 2\'s first week');
   assert.strictEqual(draw(months.slice(1), { isHistory: true }).querySelector('[class="cx-semester-divider"]'), null, 'no divider on a Semester 2 only time axis');
+  terms.setEarlyEaster(new Date().getFullYear(), true);
+  svg = draw(months, { isHistory: true });
+  assert.ok(Math.abs(Number(svg.querySelector('[class="cx-semester-divider"]').getAttribute('x1')) - ((20 - 0.5 - 5) * 595 / 35 + 52)) < 1e-9, 'under Early Easter the months split at Term 2 Week 8');
+  svg = draw([task('Exam', 19, 2), task('Test', 20, 2)]);
+  assert.strictEqual(Number(svg.querySelector('[class="cx-semester-divider"]').getAttribute('x1')), 52 + 595 / 2, 'under Early Easter a Term 2 Week 7 task is Semester 1');
+  if (savedTerms === null) localStorage.removeItem('connectify:school_terms'); else localStorage.setItem('connectify:school_terms', savedTerms);
 
   // Assessment rounds: each round's semester comes from its tasks; a round spanning both sits between
   assert.strictEqual(divider.commonSemester([{ order: 5, semester: 1 }, { order: 22, semester: 2 }]), null, 'a round spanning both semesters has none');

@@ -118,8 +118,11 @@
     return null;
   }
 
-  // Semester 1 is every task before Term 2 Week 7: chronological week 19 (12 per term), school week 17
-  const SEMESTER_TWO_ORDER = 19;
+  // Semester 2 starts at canonical school week 17 through the term calendar: Term 2 Week 7 (order 19,
+  // 12 per term), or Term 2 Week 8 (order 20) under Early Easter, whose Term 1 has nine weeks
+  const SEMESTER_TWO_WEEK = 17;
+  const semesterTwoOrder = (year = new Date().getFullYear()) =>
+    window.ConnectifySchoolTerms?.weekOrder(SEMESTER_TWO_WEEK, year) ?? 19;
   const TERM_AND_WEEK = /term\s*\d[\s\S]*?weeks?\s*\d|weeks?\s*\d+[\s\S]*?term\s*\d/i;
 
   /**
@@ -132,7 +135,7 @@
     const text = String(caption || '');
     const order = Number.isFinite(overrideOrder) ? overrideOrder : (TERM_AND_WEEK.test(text) ? orderHint(text) : null);
     let semester = null;
-    if (Number.isFinite(order)) semester = order < SEMESTER_TWO_ORDER ? 1 : 2;
+    if (Number.isFinite(order)) semester = order < semesterTwoOrder() ? 1 : 2;
     else {
       const term = Number(text.match(/\bterm\s*([1-4])\b/i)?.[1]);
       if (term === 1) semester = 1;
@@ -190,6 +193,6 @@
   }
 
   window.ConnectifyParseHelpers = {
-    orderHint, dateOrder, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_ORDER, readTaskMark, taskLabels, cardTaskIds
+    orderHint, dateOrder, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_WEEK, semesterTwoOrder, readTaskMark, taskLabels, cardTaskIds
   };
 })();

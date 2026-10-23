@@ -2,9 +2,9 @@
  * Connectify Progress Graph: semester divider
  *
  * A dashed vertical line splitting every Year Progression chart into Semester 1 (left) and
- * Semester 2 (right), labelled on either side. Semester 1 is every task before Term 2 Week 7
- * (order < SEMESTER_TWO_ORDER, as ConnectifyParseHelpers.taskSemester decides). Calendar ATAR
- * charts place it at that week on their time axis; task and assessment-round charts place it
+ * Semester 2 (right), labelled on either side. Semester 2 starts at canonical school week 17
+ * (Term 2 Week 7, or Week 8 under Early Easter: ConnectifyParseHelpers.semesterTwoOrder, as
+ * taskSemester decides). Calendar ATAR charts place it at that week on their time axis; task and assessment-round charts place it
  * between the last Semester 1 point and the first Semester 2 point. Exposes
  * window.ConnectifyProgressSemesterDivider.
  */
@@ -15,7 +15,7 @@
 
   const LABEL_GAP = 6;
   const LABEL_WIDTH = 58;
-  const twoOrder = () => window.ConnectifyParseHelpers?.SEMESTER_TWO_ORDER || 19;
+  const twoOrder = () => window.ConnectifyParseHelpers?.semesterTwoOrder?.() ?? 19;
 
   /** A task's semester: its week when known (never later than its outline's semester), else the outline's. */
   function taskSemester(task) {
