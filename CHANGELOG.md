@@ -7,61 +7,57 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ## 3.2.5 (upcoming)
 
 ### Additions
-- **Export to Google Calendar or Notion** (Year Progression → Export): tick the upcoming assessments you want, pick the weekday each subject's tasks fall on (or one task's own day), and download a Google Calendar file (.ics) or a Notion database (CSV). Everything is made on your computer, with no sign-in.
-- Export works out this year's WA term dates, since Connect only gives a school week. Tick Early Easter if your school's April holidays start a week early.
-- Export can merge each semester's exams into one Semester exam event, in either file.
-- Year Progression's graph has the Early Easter checkbox too, shared with Export.
-- **Estimate Grade** (in the new Estimator): pick a class and type the marks you think you'll get on any of its unmarked tasks (`85`, `85%` or `17/20`) to see what your average would be. One mark is enough: tasks you leave blank are left out, just as Connect leaves out unmarked tasks. Fill in every one to see your final mark. Your typed marks are kept until you press Clear Marks.
-- **Expanded statistics panels** (Settings → Statistics Panels, off by default): show the statistics on subject rows, or on every row, as larger cards with your Score, Rank and the cohort Average up top, the five boxplot values below, and SD, z-score and standing underneath. Subject cards include the class prediction and cohort size. Takes effect after reloading the page.
-- On expanded cards, your Score's colour grows more vivid the further you beat your predicted range.
-- On expanded cards, upcoming tasks show Low, Mid and High with what the prediction is based on (e.g. "From your 3 previous Exam results and your 5 previous Literature results").
-- **Lowest and Highest Possible**: a class without a final grade shows the lowest and highest final mark you can still get (every unmarked task at 0% or 100%) at the end of its subject panel.
-- After an update, open Connect tabs reload by themselves, so the sidebar tools work straight away instead of doing nothing until you refresh (not in the Chrome Web Store version).
+- **Calendar export**: send your upcoming assessments to Google Calendar or Notion, placed on the right days using this year's WA term dates.
+- **Merged exams**: each semester's exams can be exported as one exam-period event.
+- **Early Easter**: a checkbox for schools whose April holidays start a week early.
+- **Estimate Grade**: type the marks you expect on upcoming tasks to see where your average would land.
+- **Expanded statistics panels**: an optional larger layout showing your score, rank and the full boxplot at a glance.
+- **Score colour**: on expanded panels, your score grows brighter the further you beat your prediction.
+- **Prediction sources**: expanded panels show what each prediction is based on.
+- **Lowest and Highest Possible**: see the range of final marks a class can still end on.
+- **Auto-refresh after updates**: open Connect tabs reload themselves, so the new version works straight away (not in the Chrome Web Store version).
 
 ### Changes
-- **Goal Setter** replaces the Target ATAR and Target Grade buttons: one sidebar button with Target Grade and Target ATAR as tabs.
-- **Estimator** replaces ATAR Estimate, with Estimate Grade and Estimate ATAR as tabs.
-- Year in Progress is now called Year Progression.
+- **Goal Setter**: Target Grade and Target ATAR now share one sidebar button.
+- **Estimator**: Estimate Grade and Estimate ATAR now share one sidebar button.
+- Year in Progress is now Year Progression.
 - The Predictor's tabs are now Predict Grade and Predict ATAR.
-- Tool tabs list Grade before ATAR.
-- Goal Setter and Estimator open on Grade, then reopen on the tab you last used.
-- Target Grade's semester buttons read Semester 1 Target Grade / Semester 2 Target Grade.
-- The sidebar is on every Connect page. Away from Assessment Outlines only Settings works; the other tools are greyed out under a notice with a link to the outlines.
-- A Connect filter on Assessment Outlines no longer greys out the sidebar tools, since they read your saved results.
-- ATAR Estimate: each subject's box now takes your school mark (Connect's mark until you change it), with the scaled score it gives under the subject name.
-- ATAR Estimate shows a finished semester as Closed and greyed out, like Target ATAR and Target Grade.
-- Task predictions now come from your own results in that subject (recent ones count more), adjusted for how you usually do on that type of task.
-- Low and High predictions sit the same distance either side of Mid, further apart when there are only a few results to go on.
-- Assessments whose outline gives a date instead of a week now land in that date's real term and week, in the Year Progression graph and predictions.
-- A task in a week past the end of a term (Term 1 Week 10 in an Early Easter year) reads as the next term's week (Term 2 Week 1) in the graph, Export and Predictor alike.
-- Year Progression's week editor counts school weeks the way Export's term list does: in an Early Easter year Term 1 is Weeks 1–9 and Term 2 starts at Week 10. Its hints show this year's ranges. Weeks you set before keep the date they had.
-- Picking a preset in the Theme Customizer keeps all of its colours (e.g. Quantum Dark's green secondary text) instead of deriving them from its six Basic colours.
-- Changing a Basic colour in the Theme Customizer re-derives every Full colour based on it, including preset colours and ones you set yourself.
-- The Assessment Outlines tab in Connect's top bar is highlighted on its own page, instead of My Connect.
-- Clicking around Connect with a dark theme is faster: the outline filter menu opens in about a sixth of the time.
-- Year Progression's data points are plain dots, without the white ring that stood out on wallpapers.
+- Tools open on Grade, then reopen on the tab you last used.
+- **Sidebar everywhere**: the sidebar is on every Connect page, with Settings available outside Assessment Outlines.
+- Connect's outline filters no longer grey out the sidebar tools.
+- **ATAR Estimate**: enter your school mark and see its scaled score.
+- ATAR Estimate locks semesters that have final grades.
+- **Smarter predictions**: based on your own results in each subject, with recent tasks counting more.
+- Prediction ranges are balanced evenly around Mid.
+- Assessments listed with a date are placed in the right term and week.
+- Weeks past the end of a term roll into the next term.
+- Year Progression's week editor follows the real term calendar.
+- Theme Customizer presets keep all of their own colours.
+- Changing a Basic colour updates every colour built from it.
+- The Assessment Outlines tab is highlighted while you're on it.
+- **Faster dark themes**: menus and clicks respond far more quickly.
+- Year Progression's data points are plain dots.
 
 ### Fixes
-- ATAR scaled scores squashed marks towards the middle (Physics 87.3 scaled to 82, Literature 58.6 to 64). They now follow TISC's Average Marks Scaling for each course.
-- A subject weak in one type of task that held every task of that type (e.g. Literature's Take-Home tasks) had its predictions pulled down twice: Mid 47% on a subject averaging about 56%.
-- Predictions for upcoming Term 4 tasks ignored your Semester 2 results.
-- A Semester 2 task with the same name as a Semester 1 one (each semester's exam "Close reading") is now its own task, with its own prediction instead of the Semester 1 exam's.
-- Cohort sizes, baselines and saved results were kept apart depending on whether Assessment Outlines was opened from Connectify's shortcut or Connect's menu. They're now kept in one place, and ones saved from the shortcut are carried over.
-- Saving assessment categories in Settings stored all of them as one category called "undefined", so every Type dropdown offered only "undefined". Categories now save under their own names, and a set damaged by this is repaired the next time a page loads (the five standard categories come back; a custom category saved over can't be recovered, so add it again).
-- Connect sometimes shows a class's "Semester 2 Cumulative Percent" heading with nothing under it (seen in Economics, with or without Connectify), so there was no subject average. Connectify now restores the row in Connect's own style with your average worked out from your marked tasks and their weightings, plus the usual statistics panel and class prediction. It goes away as soon as Connect shows its own row.
-- With "Show this semester's classes only" on, filtering Assessment Outlines to a class showed a blank page: the filtered view made Connectify think it was the other semester and hid the class. A class with no outline this semester now shows a message saying why, with a Back to All button.
-- "Back to All" did nothing, in the sidebar's filter notice too. It now presses Connect's top-level All filter, never a semester's own All.
-- Auto-login failed with saved passwords in Chrome, Dia and other Chromium browsers: it pressed Log in before the browser had handed over the password.
-- Weakness Analyzer grouped some tasks under a different type from the one their Type dropdown showed.
-- Weakness Analyzer didn't redraw while open when you changed a task's type or new results came in.
-- Weakness Analyzer's scores sat lower than their labels in Firefox.
-- Weakness Analyzer cut off long subject names.
-- Weakness Analyzer's checkboxes and "Group by:" didn't line up with their row.
-- The Predictor's subject tabs had a scrollbar that widened on hover on macOS and ignored the theme in Firefox.
-- The unselected semester button looked cut off on its left edge.
-- The Color Theme and Statistics Panels dropdowns in Settings were grey boxes with a heavy dark border in the Default theme, and unstyled in dark themes. They now match the number inputs beside them.
-- In dark themes, Connect's top navigation links were only themed on Assessment Outlines.
-- In grey Liquid Glass, opening a dialog such as View Notice darkened the page behind it, making its dark text hard to read. The page is now brightened instead.
+- ATAR scaled scores no longer squash marks towards the middle.
+- Predictions no longer double-penalise a subject that's weak in one task type.
+- Term 4 predictions now use your Semester 2 results.
+- Same-named tasks in Semester 1 and 2 get their own predictions.
+- Saved data no longer splits depending on how you open Assessment Outlines.
+- Saved categories no longer turn into "undefined", and affected sets are repaired automatically.
+- Classes missing Connect's Cumulative Percent row get one worked out from your marks.
+- Filtering outlines to one class with the semester filter on no longer shows a blank page.
+- "Back to All" works again.
+- Auto-login works with saved passwords in Chrome and other Chromium browsers.
+- Weakness Analyzer groups tasks under the same type as their dropdown.
+- Weakness Analyzer updates while it's open.
+- Weakness Analyzer's chart labels line up, and long subject names are no longer cut off.
+- Weakness Analyzer's checkboxes line up with their rows.
+- The Predictor's subject tab scrollbar no longer grows on hover.
+- The unselected semester button is no longer cut off.
+- Settings dropdowns match the rest of the panel.
+- Top navigation links are themed on every page.
+- Dialogs in grey Liquid Glass stay readable.
 
 ## 3.2.4 (2026-10-20)
 
