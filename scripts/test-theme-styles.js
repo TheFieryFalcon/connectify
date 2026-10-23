@@ -938,7 +938,7 @@ async function discoverSidebarViews(page, options = {}) {
           const atarBtn = sidebar.querySelector('#cx-pred-btn-atar');
 
           if (gradeBtn || atarBtn) {
-            // A. Grade Predictor Tab
+            // A. Predict Grade Tab
             if (gradeBtn && typeof gradeBtn.click === 'function') {
               try { gradeBtn.click(); } catch {}
             }
@@ -948,12 +948,12 @@ async function discoverSidebarViews(page, options = {}) {
                 const chipText = (chip.innerText || chip.textContent || `Subject ${cIdx + 1}`).trim();
                 views.push({
                   id: `cx-sidebar-pred-grade-chip${cIdx}`,
-                  title: `Sidebar: Predictor [Grade Predictor - ${chipText}]`,
+                  title: `Sidebar: Predictions [Predict Grade - ${chipText}]`,
                   auditScope: 'sidebar',
                   toolId: cfg.id,
                   toolName,
                   tabSelector: '#cx-pred-btn-grade',
-                  tabName: 'Grade Predictor',
+                  tabName: 'Predict Grade',
                   subTabSelector: `.cx-pred-subtabs .cx-pred-subtab[data-idx="${cIdx}"], .cx-pred-subtabs .cx-pred-subtab:nth-child(${cIdx + 1})`,
                   subTabIndex: cIdx,
                   subTabName: chipText,
@@ -963,26 +963,26 @@ async function discoverSidebarViews(page, options = {}) {
             } else {
               views.push({
                 id: 'cx-sidebar-pred-grade',
-                title: 'Sidebar: Predictor [Grade Predictor]',
+                title: 'Sidebar: Predictions [Predict Grade]',
                 auditScope: 'sidebar',
                 toolId: cfg.id,
                 toolName,
                 tabSelector: '#cx-pred-btn-grade',
-                tabName: 'Grade Predictor',
+                tabName: 'Predict Grade',
                 isInitial: false
               });
             }
 
-            // B. ATAR Predictor Tab
+            // B. Predict ATAR Tab
             if (atarBtn) {
               views.push({
                 id: 'cx-sidebar-pred-atar',
-                title: 'Sidebar: Predictor [ATAR Predictor]',
+                title: 'Sidebar: Predictions [Predict ATAR]',
                 auditScope: 'sidebar',
                 toolId: cfg.id,
                 toolName,
                 tabSelector: '#cx-pred-btn-atar',
-                tabName: 'ATAR Predictor',
+                tabName: 'Predict ATAR',
                 isInitial: false
               });
             }

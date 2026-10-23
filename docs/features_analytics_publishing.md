@@ -1,6 +1,6 @@
 # Connectify Analytics, Predictor & Testing Features Reference
 
-This document details user-facing features 11 through 20, covering Goals and Estimates, ATAR progression graphs, Weakness Radar, Settings & Calibration, DOM sweeping, Grade notifications, store publishing, Grade/ATAR Predictor, canonical sidebar sequence, and the master test suite.
+This document details user-facing features 11 through 20, covering Goals and Estimates, ATAR progression graphs, Weakness Radar, Settings & Calibration, DOM sweeping, Grade notifications, store publishing, Predictions (Predict Grade / Predict ATAR), canonical sidebar sequence, and the master test suite.
 
 ---
 
@@ -52,14 +52,14 @@ This document details user-facing features 11 through 20, covering Goals and Est
 - **Source Modules**: [`.github/workflows/publish.yml`](file:///Users/uwong/Downloads/2.1.14_0/.github/workflows/publish.yml), [`.github/scripts/publish-amo.js`](file:///Users/uwong/Downloads/2.1.14_0/.github/scripts/publish-amo.js), [`CHROMEWEBSTORE.md`](file:///Users/uwong/Downloads/2.1.14_0/CHROMEWEBSTORE.md), [`PRIVACY.md`](file:///Users/uwong/Downloads/2.1.14_0/PRIVACY.md)
 - **Functionality**: Automated AMO v5 REST API upload via HS256 JWT authentication; Chrome Web Store clean packaging without prohibited keys or dev artifacts, uploaded through CWS API v2 (`mnao305/chrome-extension-upload@v7`, needs secrets `CWS_CLIENT_ID`/`CWS_CLIENT_SECRET`/`CWS_REFRESH_TOKEN` and `CWS_PUBLISHER_ID`; the CWS step condition reads the job-level `env`); standardized multi-dimension icons (16, 48, 128); minimal `storage` permission footprint (`unlimitedStorage`, which lets GitHub/Firefox builds keep GIF wallpapers up to 40 MB, is stripped from the CWS zip by both workflows, as are the update-reload background script and its Connect `host_permissions`, which refresh open Connect tabs after an update in GitHub/Firefox builds).
 
-### 18. Grade Predictor, ATAR Predictor & Dynamic Breakout Performance Meter
+### 18. Predictions (Predict Grade, Predict ATAR) & Dynamic Breakout Performance Meter
 - **Source Modules**: [`predictor-math.js`](file:///Users/uwong/Downloads/2.1.14_0/predictor-math.js), [`predictor-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/predictor-ui.js), [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`category-settings.js`](file:///Users/uwong/Downloads/2.1.14_0/category-settings.js)
 - **DOM Insertion**: Launcher button `Predictions` (`#connectify-predictor-toggle`), workspace panel (`#connectify-predictor`), vertical outcome meter (`.connectea-outcome-bar`), and "Previous Year Baselines" card in Settings.
 - **Functionality**:
   - **Cold-Start Baselines**: Previous-year category and subject averages kickstart predictions; dynamically injects baseline inputs for custom categories.
   - **Logarithmic Ceiling**: Tapers gains above 80% proportionally to headroom $\frac{100 - \text{Score}}{20}$.
-  - **Grade Predictor**: one scrollable sub-tab per subject (no cap, so a dropped course plus its replacement still shows every class) with Low, Mid, High task estimates. Secret purple breakout threshold is strictly hidden. Unparsable dates excluded unless custom override exists in Progress Graph.
-  - **ATAR Predictor**: Aggregates projected subject marks into Low, Mid, High ATAR and TEA without Year 11 scaling deductions.
+  - **Predict Grade**: one scrollable sub-tab per subject (no cap, so a dropped course plus its replacement still shows every class) with Low, Mid, High task estimates. Secret purple breakout threshold is strictly hidden. Unparsable dates excluded unless custom override exists in Progress Graph.
+  - **Predict ATAR**: Aggregates projected subject marks into Low, Mid, High ATAR and TEA without Year 11 scaling deductions.
   - **Dynamic Breakout Performance Meter**: 18px wide, 56px tall; 4 baseline segments: Red ($< \text{Low}$), Orange ($\text{Low} \le S < \text{Mid}$), Yellow ($\text{Mid} \le S < \text{High}$), Green ($S \ge \text{High}$). Suppressed on incomplete tasks and on first tasks lacking precedent/baseline. Secret double-height Purple breakout segment (height 20px) appears when $S > 1.10 \times \text{High}$. Critical shortfall ($S \le \text{Low} - 10\%$ additive) renders 0 segments with pulsing red alarm glow (`.connectea-outcome-critical`).
 
 ### 19. Sidebar Integration & Theme Navigation Stabilization

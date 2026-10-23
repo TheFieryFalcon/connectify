@@ -46,7 +46,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyCalibration` | `scaling-calibration.js` | Semester 1 scaled scores calibration table |
 | `window.ConnectifyCategorySettings` | `category-settings.js` | Category keyword settings and custom category management |
 | `window.ConnectifyPredictorMath` | `predictor-math.js` | Logarithmic ceiling modeling, task prediction, outcome evaluation, ATAR projections |
-| `window.ConnectifyPredictorUI` | `predictor-ui.js` | Predictor sidebar tool panel coordinator (Grade & ATAR Predictors) |
+| `window.ConnectifyPredictorUI` | `predictor-ui.js` | Predictor sidebar tool panel coordinator (Predict Grade and Predict ATAR tabs) |
 | `window.ConnectifyCountdown` | `wace-countdown.js` | Year 12 WACE exam countdown timer |
 | `window.ConnectifyNotifications` / `ConnectifyUpdateNotice` | `notifications.js` / `update-notice.js` | Stacked toast engine; one "Connectify updated" toast per newer version, "What's new" opens CHANGELOG.md |
 | `window.ConnectifyGradeSnapshot` | `grade-snapshot.js` | Subject marks and boxplots vs the grade cache, change threshold |

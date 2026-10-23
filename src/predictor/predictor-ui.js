@@ -1,5 +1,5 @@
 /**
- * Connectify Grade & ATAR Predictor panel
+ * Connectify Predictions panel (Predict Grade, Predict ATAR)
  *
  * The Predictor tool (#connectify-predictor, launcher #connectify-predictor-toggle) with Grade and
  * ATAR tabs. Grade views come from predictor-grade-view.js, the shell and ATAR view from
@@ -33,7 +33,7 @@
       panel.id = 'connectify-predictor';
       panel.hidden = true;
       panel.className = 'cx-workspace-panel';
-      panel.setAttribute('aria-label', 'Grade and ATAR Predictor');
+      panel.setAttribute('aria-label', 'Predictions');
     }
 
     function renderPanel() {

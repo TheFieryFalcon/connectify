@@ -2406,7 +2406,7 @@ runTest('predictor-ui.js and atar-ui.js render user-prompted Expand All buttons'
   const predUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-ui.js'), 'utf8');
   const atarUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
 
-  assert.ok(predUiJs.includes('cx-pred-expand-outlines-btn'), 'predictor-ui.js must include cx-pred-expand-outlines-btn in ATAR Predictor');
+  assert.ok(predUiJs.includes('cx-pred-expand-outlines-btn'), 'predictor-ui.js must include cx-pred-expand-outlines-btn in Predict ATAR');
   assert.ok(predUiJs.includes("closest('#cx-pred-expand-outlines, .cx-pred-expand-outlines-btn')"), 'predictor-ui.js click delegation must handle cx-pred-expand-outlines-btn');
   assert.ok(atarUiJs.includes('cta-expand-outlines') || atarUiJs.includes('Expand All Outlines'), 'atar-ui.js must include Expand All Outlines button');
   assert.ok(atarUiJs.includes('expandAllBtn.hidden'), 'atar-ui.js must manage expandAllBtn visibility in selectTab');
@@ -4883,9 +4883,9 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   const predTabs = predPanel.querySelector('.cx-pred-main-tabs');
   assert.ok(predTabs, 'Predictor tabs container (.cx-pred-main-tabs) must render');
   const gradePredTab = predPanel.querySelector('#cx-pred-btn-grade');
-  assert.ok(gradePredTab && gradePredTab.textContent.includes('Grade Predictor'), 'Grade Predictor tab button must render');
+  assert.ok(gradePredTab && gradePredTab.textContent.includes('Predict Grade'), 'Predict Grade tab button must render');
   const atarPredTab = predPanel.querySelector('#cx-pred-btn-atar');
-  assert.ok(atarPredTab && atarPredTab.textContent.includes('ATAR Predictor'), 'ATAR Predictor tab button must render');
+  assert.ok(atarPredTab && atarPredTab.textContent.includes('Predict ATAR'), 'Predict ATAR tab button must render');
   const predContent = predPanel.querySelector('#cx-pred-content');
   assert.ok(predContent, 'Predictor content container (#cx-pred-content) must render');
 
@@ -6478,9 +6478,9 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Target ATAR') && v.title.includes('Semester 2')), 'Must discover Target ATAR Semester 2');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Goals') && v.title.includes('Target Grade') && v.tabSelector), 'Must discover Goals\' Target Grade tab');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Estimates') && v.title.includes('Estimate Grade') && v.tabSelector), 'Must discover Estimates\' Estimate Grade tab');
-    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Grade Predictor') && v.title.includes('English')), 'Must discover Grade Predictor English sub-tab');
-    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Grade Predictor') && v.title.includes('Math Methods')), 'Must discover Grade Predictor Math Methods sub-tab');
-    assert.ok(discoveredSidebarViews.some(v => v.title.includes('ATAR Predictor')), 'Must discover ATAR Predictor tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Predict Grade') && v.title.includes('English')), 'Must discover Predict Grade English sub-tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Predict Grade') && v.title.includes('Math Methods')), 'Must discover Predict Grade Math Methods sub-tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Predict ATAR')), 'Must discover Predict ATAR tab');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Progress') && v.title.includes('Physics')), 'Must discover Progress Physics sub-tab');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Weaknesses') && v.title.includes('By Type')), 'Must discover Weaknesses By Type mode');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Weaknesses') && v.title.includes('By Subject')), 'Must discover Weaknesses By Subject mode');
@@ -8070,7 +8070,7 @@ runTest('Test 173: The Theme Customizer dialog is always solid, even when glass 
   assert.ok(!/background: var\(--cx-surface-bg\)/.test(dialog) && /backdrop-filter: none;/.test(dialog), 'the dialog must not be a bare (translucent) surface fill or frosted');
 });
 
-runTest('Test 174: Grade Predictor shows a tab for every subject (a dropped plus a replacement course makes seven)', () => {
+runTest('Test 174: Predict Grade shows a tab for every subject (a dropped plus a replacement course makes seven)', () => {
   const sidebar = new MockElement('div');
   sidebar.id = 'connectify-sidebar';
   sidebar.appendChild(new MockElement('div', 'cx-workspace'));
