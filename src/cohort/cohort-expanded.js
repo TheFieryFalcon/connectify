@@ -100,14 +100,15 @@
 
     /**
      * Tints the highest quantile cell the mark has reached; cells start at stats[first]. Without statistics
-     * nothing is tinted; below the first cell, task cards (first 0: below the minimum) tint nothing and
-     * overall cards (first 1) keep the tint on Q1.
+     * nothing is tinted. Below Q1 the tint stays on Q1, except a task card's Minimum when the mark is at
+     * (or below) the minimum; overall cards (first 1) have no Minimum cell.
      */
     function markReached(cells, mark, stats, first = 0) {
       let reached = -1;
-      if (Number.isFinite(mark) && stats) {
+      if (Number.isFinite(mark) && stats && stats.some(Number.isFinite)) {
         stats.forEach((v, i) => { if (Number.isFinite(v) && mark >= v) reached = i; });
-        reached = first ? Math.max(reached, first) - first : reached;
+        if (reached < 1) reached = !first && mark <= stats[0] + 0.01 ? 0 : 1;
+        reached -= first;
       }
       cells.forEach((el, i) => el.parentElement.classList.toggle('connectea-xp-cell--reached', i === reached));
     }

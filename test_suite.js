@@ -10044,6 +10044,14 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   assert.ok(parts.every(e => e.tagName !== 'SPAN' || !e.classList.contains('v-label')) && !parts.some(e => e.classList.contains('v-label')), 'no .v-label inside the card (task labels stay Connect\'s)');
   const reached = () => ui.xp.quantiles.map(e => e.parentElement.classList.contains('connectea-xp-cell--reached'));
   assert.deepStrictEqual(reached(), [false, false, true, false, false], '70% has reached the Median (68.85%): only that cell is tinted');
+  for (const [mark, want, why] of [['13 Out of 30', [false, true, false, false, false], '43.33% (above the minimum, below Q1) tints Lower Quartile'],
+    ['9.75 Out of 30', [true, false, false, false, false], '32.5% (at the minimum) tints Minimum']]) {
+    row.querySelector('.cvr-c-task__mark').textContent = mark;
+    view.render(row, false, 'lit-key', 219, null, []);
+    assert.deepStrictEqual(reached(), want, why);
+  }
+  row.querySelector('.cvr-c-task__mark').textContent = '21 Out of 30';
+  view.render(row, false, 'lit-key', 219, null, []);
   const css = fs.readFileSync(path.join(SRC_DIR, 'cohort/cohort-expanded.css'), 'utf8');
   const tint = css.match(/\.connectea-xp-cell--reached::before \{[^}]*background: color-mix\(in srgb, var\(--cx-accent, #[0-9a-f]{6}\) (\d+)%, transparent\)/);
   assert.ok(tint && Number(tint[1]) <= 6, 'the tint is the theme accent at a very low opacity, behind the cell');
