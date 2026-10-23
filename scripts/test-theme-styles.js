@@ -857,11 +857,11 @@ async function discoverSidebarViews(page, options = {}) {
 
       // Canonical tool configuration list
       const toolConfigs = [
-        { id: 'connectify-goals-toggle', defaultName: 'Goals', type: 'atar', modes: [['target', 'Target ATAR'], ['grade', 'Target Grade']] },
-        { id: 'connectify-predictor-toggle', defaultName: 'Predictions', type: 'predictor' },
-        { id: 'connectify-progress-toggle', defaultName: 'Progress', type: 'progress' },
-        { id: 'connectify-estimator-toggle', defaultName: 'Estimates', type: 'atar', modes: [['estimate', 'Estimate ATAR'], ['grade-estimate', 'Estimate Grade']] },
-        { id: 'connectify-weakness-toggle', defaultName: 'Weaknesses', type: 'weakness' },
+        { id: 'connectify-goals-toggle', defaultName: 'Goal Setter', type: 'atar', modes: [['target', 'Target ATAR'], ['grade', 'Target Grade']] },
+        { id: 'connectify-predictor-toggle', defaultName: 'Predictor', type: 'predictor' },
+        { id: 'connectify-progress-toggle', defaultName: 'Year Progression', type: 'progress' },
+        { id: 'connectify-estimator-toggle', defaultName: 'Estimator', type: 'atar', modes: [['estimate', 'Estimate ATAR'], ['grade-estimate', 'Estimate Grade']] },
+        { id: 'connectify-weakness-toggle', defaultName: 'Weakness Analyzer', type: 'weakness' },
         { id: 'connectify-categories-toggle', defaultName: 'Settings', type: 'settings' }
       ];
 
@@ -948,7 +948,7 @@ async function discoverSidebarViews(page, options = {}) {
                 const chipText = (chip.innerText || chip.textContent || `Subject ${cIdx + 1}`).trim();
                 views.push({
                   id: `cx-sidebar-pred-grade-chip${cIdx}`,
-                  title: `Sidebar: Predictions [Predict Grade - ${chipText}]`,
+                  title: `Sidebar: ${toolName} [Predict Grade - ${chipText}]`,
                   auditScope: 'sidebar',
                   toolId: cfg.id,
                   toolName,
@@ -963,7 +963,7 @@ async function discoverSidebarViews(page, options = {}) {
             } else {
               views.push({
                 id: 'cx-sidebar-pred-grade',
-                title: 'Sidebar: Predictions [Predict Grade]',
+                title: `Sidebar: ${toolName} [Predict Grade]`,
                 auditScope: 'sidebar',
                 toolId: cfg.id,
                 toolName,
@@ -977,7 +977,7 @@ async function discoverSidebarViews(page, options = {}) {
             if (atarBtn) {
               views.push({
                 id: 'cx-sidebar-pred-atar',
-                title: 'Sidebar: Predictions [Predict ATAR]',
+                title: `Sidebar: ${toolName} [Predict ATAR]`,
                 auditScope: 'sidebar',
                 toolId: cfg.id,
                 toolName,
@@ -1003,7 +1003,7 @@ async function discoverSidebarViews(page, options = {}) {
               const subText = (subBtn.innerText || subBtn.textContent || `Subject ${subIdx + 1}`).trim();
               views.push({
                 id: `cx-sidebar-prog-sub${subIdx}`,
-                title: `Sidebar: Progress [${subText}]`,
+                title: `Sidebar: ${toolName} [${subText}]`,
                 auditScope: 'sidebar',
                 toolId: cfg.id,
                 toolName,
@@ -1031,7 +1031,7 @@ async function discoverSidebarViews(page, options = {}) {
               const optText = (opt.text || opt.value).trim();
               views.push({
                 id: `cx-sidebar-weakness-${opt.value}`,
-                title: `Sidebar: Weaknesses [${optText}]`,
+                title: `Sidebar: ${toolName} [${optText}]`,
                 auditScope: 'sidebar',
                 toolId: cfg.id,
                 toolName,
@@ -1188,16 +1188,16 @@ async function activateSidebarView(page, currentView, delay = 1250) {
  */
 /**
  * Data completeness for the drawer tools: every subject with a marked task on the page (a row with a cohort
- * panel) must appear in the Predictions subject tabs, the Weaknesses checkboxes and the Progress
+ * panel) must appear in the Predictor subject tabs, the Weakness Analyzer checkboxes and the Year Progression
  * chips. Catches a partially filled subject cache (tools listing only the subjects scraped first). Theme
  * independent, so it runs once per tool. Returns TOOL_SUBJECTS_MISSING issues.
  */
 async function auditToolSubjects(page, toolId) {
   return page.evaluate((id) => {
     const lists = {
-      'connectify-predictor-toggle': { panel: '#connectify-predictor', items: '.cx-pred-subtabs button', name: 'Predictions' },
-      'connectify-weakness-toggle': { panel: '#connectify-weakness', items: '#cx-weakness-checkboxes label', name: 'Weaknesses' },
-      'connectify-progress-toggle': { panel: '#connectify-progress', items: 'button', name: 'Progress' }
+      'connectify-predictor-toggle': { panel: '#connectify-predictor', items: '.cx-pred-subtabs button', name: 'Predictor' },
+      'connectify-weakness-toggle': { panel: '#connectify-weakness', items: '#cx-weakness-checkboxes label', name: 'Weakness Analyzer' },
+      'connectify-progress-toggle': { panel: '#connectify-progress', items: 'button', name: 'Year Progression' }
     };
     const cfg = lists[id];
     const panel = cfg && document.querySelector(cfg.panel);

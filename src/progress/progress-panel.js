@@ -11,7 +11,7 @@
   const createElement = (...args) => window.ConnectifyProgressChart.createElement(...args);
 
   function build() {
-    const toggleBtn = document.getElementById('connectify-progress-toggle') || createElement('button', 'Progress');
+    const toggleBtn = document.getElementById('connectify-progress-toggle') || createElement('button', 'Year Progression');
     toggleBtn.id = 'connectify-progress-toggle';
     toggleBtn.type = 'button';
     toggleBtn.setAttribute('aria-expanded', 'false');
@@ -24,7 +24,7 @@
         head = createElement('header');
         panel.prepend(head);
       }
-      title = head.querySelector('strong') || createElement('strong', 'Progress');
+      title = head.querySelector('strong') || createElement('strong', 'Year Progression');
       title.tabIndex = -1;
       if (!head.contains(title)) head.prepend(title);
 
@@ -44,7 +44,7 @@
       panel.setAttribute('aria-label', 'Assessment progress');
 
       head = createElement('header');
-      title = createElement('strong', 'Progress');
+      title = createElement('strong', 'Year Progression');
       title.tabIndex = -1;
 
       scanBtn = createElement('button', 'Refresh Assessments');

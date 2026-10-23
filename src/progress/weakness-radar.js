@@ -146,7 +146,7 @@
       return window.ConnectifyWeakness.panelRefs;
     }
     const toggleBtn = document.createElement('button');
-    toggleBtn.textContent = 'Weaknesses';
+    toggleBtn.textContent = 'Weakness Analyzer';
     toggleBtn.type = 'button';
     toggleBtn.id = 'connectify-weakness-toggle';
 

@@ -12,7 +12,7 @@
 
   const loadingHtml = () => `
           <header class="cx-pred-header">
-            <strong class="cx-pred-title">Predictions</strong>
+            <strong class="cx-pred-title">Predictor</strong>
           </header>
           <div class="cx-pred-hint" style="padding:24px; text-align:center;">Predictor mathematical engine loading...</div>
         `;
@@ -20,7 +20,7 @@
   const panelHtml = activeMainTab => `
         <header class="cx-pred-header">
           <div class="cx-pred-header-row">
-            <strong class="cx-pred-title">Predictions</strong>
+            <strong class="cx-pred-title">Predictor</strong>
             <span class="cx-pred-subtitle">Momentum & Assessment Modeling</span>
           </div>
           <div class="cx-pred-main-tabs">

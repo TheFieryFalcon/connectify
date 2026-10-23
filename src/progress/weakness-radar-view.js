@@ -110,7 +110,7 @@
   }
 
   const PANEL_HTML = `
-      <header><strong>Weaknesses</strong></header>
+      <header><strong>Weakness Analyzer</strong></header>
       <div style="margin-bottom:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
          <label for="cx-radar-mode" class="cx-radar-mode-label" style="font-weight:600; font-size:12px; color:inherit;">Group by:</label>
          <select id="cx-radar-mode">

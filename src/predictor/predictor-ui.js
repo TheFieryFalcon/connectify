@@ -19,7 +19,7 @@
     let toggleBtn = document.getElementById('connectify-predictor-toggle');
     if (!toggleBtn) {
       toggleBtn = document.createElement('button');
-      toggleBtn.textContent = 'Predictions';
+      toggleBtn.textContent = 'Predictor';
       toggleBtn.type = 'button';
       toggleBtn.id = 'connectify-predictor-toggle';
       toggleBtn.className = 'cx-calculator-tool';
@@ -33,7 +33,7 @@
       panel.id = 'connectify-predictor';
       panel.hidden = true;
       panel.className = 'cx-workspace-panel';
-      panel.setAttribute('aria-label', 'Predictions');
+      panel.setAttribute('aria-label', 'Predictor');
     }
 
     function renderPanel() {

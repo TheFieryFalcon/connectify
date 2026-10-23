@@ -3884,8 +3884,8 @@ runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, g
 
   // 6. Verify sidebar and progress-graph.js use 'Progress'
   const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
-  assert.ok(sidebarJs.includes("{ id: 'connectify-progress-toggle', label: 'Progress' }"), 'sidebar.js canonicalButtons must name button Progress');
-  assert.ok(progressGraphJs.includes("createElement('button', 'Progress')"), 'progress-graph.js must create Progress toggle button');
+  assert.ok(sidebarJs.includes("{ id: 'connectify-progress-toggle', label: 'Year Progression' }"), 'sidebar.js canonicalButtons must name button Year Progression');
+  assert.ok(progressGraphJs.includes("createElement('button', 'Year Progression')"), 'progress-graph.js must create Year Progression toggle button');
 
   // 6. Functional test: renderChart with completed and uncompleted tasks
   delete window.ConnectifyProgressMath;
@@ -3958,7 +3958,7 @@ runTest('Test 122: Back to top button styling parity, expandAll multi-card dedup
 
   // 3. progress-graph.js lifecycle and adoption
   assert.ok(progressJs.includes('if (window.__connectifyProgressInitialized && window.ConnectifyProgress) return;'), 'progress-graph.js must only return early if already initialized AND window.ConnectifyProgress exists');
-  assert.ok(progressJs.includes("document.getElementById('connectify-progress-toggle') || createElement('button', 'Progress')"), 'progress-graph.js must adopt existing toggle button');
+  assert.ok(progressJs.includes("document.getElementById('connectify-progress-toggle') || createElement('button', 'Year Progression')"), 'progress-graph.js must adopt existing toggle button');
   assert.ok(progressJs.includes('ensureProgressPanel'), 'progress-graph.js must export ensureProgressPanel');
 
   // 4. sidebar.js delegated click listener on document
@@ -4765,11 +4765,11 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.strictEqual(toolMenu.getAttribute('aria-label'), 'Tools', 'Tool menu must have aria-label="Tools"');
 
   const expectedButtons = [
-    { id: 'connectify-goals-toggle', label: 'Goals', class: 'cx-calculator-tool' },
-    { id: 'connectify-predictor-toggle', label: 'Predictions', class: 'cx-calculator-tool' },
-    { id: 'connectify-progress-toggle', label: 'Progress', class: 'cx-calculator-tool' },
-    { id: 'connectify-estimator-toggle', label: 'Estimates', class: 'cx-calculator-tool' },
-    { id: 'connectify-weakness-toggle', label: 'Weaknesses', class: 'cx-secondary-tool' },
+    { id: 'connectify-goals-toggle', label: 'Goal Setter', class: 'cx-calculator-tool' },
+    { id: 'connectify-predictor-toggle', label: 'Predictor', class: 'cx-calculator-tool' },
+    { id: 'connectify-progress-toggle', label: 'Year Progression', class: 'cx-calculator-tool' },
+    { id: 'connectify-estimator-toggle', label: 'Estimator', class: 'cx-calculator-tool' },
+    { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer', class: 'cx-secondary-tool' },
     { id: 'connectify-categories-toggle', label: 'Settings', class: 'cx-secondary-tool' }
   ];
 
@@ -4816,7 +4816,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
 
   // Verify Goals heading and its mode tabs
   const targetHeading = atarPanel.querySelector('.cta-heading strong');
-  assert.strictEqual(targetHeading.textContent, 'Goals', 'Goals heading must render');
+  assert.strictEqual(targetHeading.textContent, 'Goal Setter', 'Goal Setter heading must render');
   const modeTab = mode => Array.from(atarPanel.querySelectorAll('.cta-mode-tab')).find(b => b.dataset.mode === mode);
   assert.ok(atarPanel.querySelector('.cta-mode-tabs')?.classList.contains('cx-pred-main-tabs'), 'Mode tabs must use the Predictor tab bar');
   assert.ok(!modeTab('target').hidden && !modeTab('grade').hidden, 'Goals must show the Target ATAR and Target Grade tabs');
@@ -4854,7 +4854,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
 
   // Verify Target Grade internal elements
   const gradeHeading = atarPanel.querySelector('.cta-heading strong');
-  assert.strictEqual(gradeHeading.textContent, 'Goals', 'Goals heading stays on its Target Grade tab');
+  assert.strictEqual(gradeHeading.textContent, 'Goal Setter', 'Goal Setter heading stays on its Target Grade tab');
   const subjectSelect = atarPanel.querySelector('select.cta-subject-select');
   assert.ok(subjectSelect, 'Subject dropdown selector (select.cta-subject-select) must render');
   const gradeScoreInput = atarPanel.querySelector('input.cta-score');
@@ -4878,7 +4878,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   const predHeader = predPanel.querySelector('.cx-pred-header');
   assert.ok(predHeader, 'Predictor header (.cx-pred-header) must render');
   const predTitle = predPanel.querySelector('.cx-pred-title');
-  assert.strictEqual(predTitle.textContent, 'Predictions', 'Predictions title must render');
+  assert.strictEqual(predTitle.textContent, 'Predictor', 'Predictor title must render');
   const predSubtitle = predPanel.querySelector('.cx-pred-subtitle');
   assert.strictEqual(predSubtitle.textContent, 'Momentum & Assessment Modeling', 'Predictor subtitle must render');
   const predTabs = predPanel.querySelector('.cx-pred-main-tabs');
@@ -4904,7 +4904,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
 
   // Verify Progress internal elements
   const progTitle = progPanel.querySelector('header strong');
-  assert.strictEqual(progTitle.textContent, 'Progress', 'Progress title must render');
+  assert.strictEqual(progTitle.textContent, 'Year Progression', 'Year Progression title must render');
   const subjectsContainer = progPanel.querySelector('.cx-subjects');
   assert.ok(subjectsContainer, 'Subjects chip selector container (.cx-subjects) must render');
   const refreshAssessmentsBtn = progPanel.querySelector('button');
@@ -4927,7 +4927,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
 
   // Verify Estimates heading, its tabs and the Estimate ATAR elements
   const estHeading = atarPanel.querySelector('.cta-heading strong');
-  assert.strictEqual(estHeading.textContent, 'Estimates', 'Estimates heading must render');
+  assert.strictEqual(estHeading.textContent, 'Estimator', 'Estimator heading must render');
   assert.ok(!modeTab('estimate').hidden && !modeTab('grade-estimate').hidden, 'Estimates must show the Estimate ATAR and Estimate Grade tabs');
   assert.ok(modeTab('target').hidden && modeTab('grade').hidden, 'Estimates must hide the Goals tabs');
   assert.strictEqual(modeTab('estimate').textContent, 'Estimate ATAR', 'Estimate ATAR tab label');
@@ -4972,7 +4972,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
 
   // Verify Weaknesses internal elements
   const weakTitle = weakPanel.querySelector('header strong');
-  assert.strictEqual(weakTitle.textContent, 'Weaknesses', 'Weaknesses title must render');
+  assert.strictEqual(weakTitle.textContent, 'Weakness Analyzer', 'Weakness Analyzer title must render');
   const radarModeSelect = weakPanel.querySelector('#cx-radar-mode');
   assert.ok(radarModeSelect, 'Group by dropdown selector (#cx-radar-mode) must render');
   const weakExpandAllBtn = weakPanel.querySelector('#cx-weakness-expand-all');
@@ -6397,11 +6397,11 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
     assert.ok(vClicked >= 1, 'div.v-button View Notice must receive click event');
 
     const toolBtnList = [
-      { id: 'connectify-goals-toggle', textContent: 'Goals', click: () => {} },
-      { id: 'connectify-predictor-toggle', textContent: 'Predictions', click: () => {} },
-      { id: 'connectify-progress-toggle', textContent: 'Progress', click: () => {} },
-      { id: 'connectify-estimator-toggle', textContent: 'Estimates', click: () => {} },
-      { id: 'connectify-weakness-toggle', textContent: 'Weaknesses', click: () => {} },
+      { id: 'connectify-goals-toggle', textContent: 'Goal Setter', click: () => {} },
+      { id: 'connectify-predictor-toggle', textContent: 'Predictor', click: () => {} },
+      { id: 'connectify-progress-toggle', textContent: 'Year Progression', click: () => {} },
+      { id: 'connectify-estimator-toggle', textContent: 'Estimator', click: () => {} },
+      { id: 'connectify-weakness-toggle', textContent: 'Weakness Analyzer', click: () => {} },
       { id: 'connectify-categories-toggle', textContent: 'Settings', click: () => {} }
     ];
 
@@ -6477,14 +6477,14 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
     assert.ok(discoveredSidebarViews.some(v => v.id === 'cx-sidebar-menu'), 'Must discover Sidebar Main Menu');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Target ATAR') && v.title.includes('Semester 1')), 'Must discover Target ATAR Semester 1');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Target ATAR') && v.title.includes('Semester 2')), 'Must discover Target ATAR Semester 2');
-    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Goals') && v.title.includes('Target Grade') && v.tabSelector), 'Must discover Goals\' Target Grade tab');
-    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Estimates') && v.title.includes('Estimate Grade') && v.tabSelector), 'Must discover Estimates\' Estimate Grade tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Goal Setter') && v.title.includes('Target Grade') && v.tabSelector), 'Must discover Goals Target Grade tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Estimator') && v.title.includes('Estimate Grade') && v.tabSelector), 'Must discover Estimates Estimate Grade tab');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Predict Grade') && v.title.includes('English')), 'Must discover Predict Grade English sub-tab');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Predict Grade') && v.title.includes('Math Methods')), 'Must discover Predict Grade Math Methods sub-tab');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Predict ATAR')), 'Must discover Predict ATAR tab');
-    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Progress') && v.title.includes('Physics')), 'Must discover Progress Physics sub-tab');
-    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Weaknesses') && v.title.includes('By Type')), 'Must discover Weaknesses By Type mode');
-    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Weaknesses') && v.title.includes('By Subject')), 'Must discover Weaknesses By Subject mode');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Year Progression') && v.title.includes('Physics')), 'Must discover Progress Physics sub-tab');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Weakness Analyzer') && v.title.includes('By Type')), 'Must discover Weaknesses By Type mode');
+    assert.ok(discoveredSidebarViews.some(v => v.title.includes('Weakness Analyzer') && v.title.includes('By Subject')), 'Must discover Weaknesses By Subject mode');
     assert.ok(discoveredSidebarViews.some(v => v.title.includes('Settings')), 'Must discover Settings view');
 
     // Verify activateSidebarView opens drawer and unhides sidebar

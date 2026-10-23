@@ -9,14 +9,14 @@
   'use strict';
 
   const CANONICAL_BUTTONS = [
-    { id: 'connectify-goals-toggle', label: 'Goals' }, { id: 'connectify-predictor-toggle', label: 'Predictions' },
-    { id: 'connectify-progress-toggle', label: 'Progress' }, { id: 'connectify-estimator-toggle', label: 'Estimates' },
-    { id: 'connectify-weakness-toggle', label: 'Weaknesses' }, { id: 'connectify-categories-toggle', label: 'Settings' }
+    { id: 'connectify-goals-toggle', label: 'Goal Setter' }, { id: 'connectify-predictor-toggle', label: 'Predictor' },
+    { id: 'connectify-progress-toggle', label: 'Year Progression' }, { id: 'connectify-estimator-toggle', label: 'Estimator' },
+    { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' }, { id: 'connectify-categories-toggle', label: 'Settings' }
   ];
   const SECONDARY_TOOLS = new Set(['connectify-weakness-toggle', 'connectify-categories-toggle']);
   const LAUNCHER_SELECTOR = '#connectify-goals-toggle, #connectify-estimator-toggle, #connectify-predictor-toggle, ' +
     '#connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle';
-  // Both open the calculator panel: Goals (Target ATAR, Target Grade), Estimates (Estimate ATAR, Estimate Grade)
+  // Both open the calculator panel: Goal Setter (Target ATAR, Target Grade), Estimator (Estimate ATAR, Estimate Grade)
   const CALCULATOR_GROUPS = { 'connectify-goals-toggle': 'goals', 'connectify-estimator-toggle': 'estimator' };
 
   const TOOL_MAP = {

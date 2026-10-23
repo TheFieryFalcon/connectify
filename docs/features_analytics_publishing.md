@@ -8,7 +8,7 @@ This document details user-facing features 11 through 20, covering Goals and Est
 
 ### 11. Goals & Estimates
 - **Source Modules**: [`target-atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-atar-ui.js), [`target-grade-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-grade-ui.js), [`grade-estimate-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/grade-estimate-ui.js), [`atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-ui.js)
-- **DOM Insertion**: One calculator panel (`#connectea-atar`) in the sidebar workspace, opened by two launchers: **Goals** (Target ATAR, Target Grade) and **Estimates** (Estimate ATAR, Estimate Grade).
+- **DOM Insertion**: One calculator panel (`#connectea-atar`) in the sidebar workspace, opened by two launchers: **Goal Setter** (Target ATAR, Target Grade) and **Estimator** (Estimate ATAR, Estimate Grade).
 - **UI Appearance**: Launcher name as heading, then the Predictor-style mode tabs (`.cta-mode-tabs`), the semester buttons and the active mode's view; each launcher reopens on its last tab.
 - **Functionality**:
   - **Estimate ATAR**: Aggregates scaled scores across enrolled ATAR courses using TISC Average Marks Scaling (each course's 2025 scaled mean + SD x z, z from the standardised mean 60 / SD 14); selects top 4 subjects for Tertiary Entrance Aggregate (TEA); applies 10% bonus for Methods, Specialist, and Languages (up to 2 bonus courses); calculates projected ATAR. Each course takes a school mark (Connect's by default) and shows its scaled score; a semester with final grades is Closed.
@@ -55,7 +55,7 @@ This document details user-facing features 11 through 20, covering Goals and Est
 
 ### 18. Predictions (Predict Grade, Predict ATAR) & Dynamic Breakout Performance Meter
 - **Source Modules**: [`predictor-math.js`](file:///Users/uwong/Downloads/2.1.14_0/predictor-math.js), [`predictor-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/predictor-ui.js), [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`category-settings.js`](file:///Users/uwong/Downloads/2.1.14_0/category-settings.js)
-- **DOM Insertion**: Launcher button `Predictions` (`#connectify-predictor-toggle`), workspace panel (`#connectify-predictor`), vertical outcome meter (`.connectea-outcome-bar`), and "Previous Year Baselines" card in Settings.
+- **DOM Insertion**: Launcher button `Predictor` (`#connectify-predictor-toggle`), workspace panel (`#connectify-predictor`), vertical outcome meter (`.connectea-outcome-bar`), and "Previous Year Baselines" card in Settings.
 - **Functionality**:
   - **Cold-Start Baselines**: Previous-year category and subject averages kickstart predictions; dynamically injects baseline inputs for custom categories.
   - **Logarithmic Ceiling**: Tapers gains above 80% proportionally to headroom $\frac{100 - \text{Score}}{20}$.
@@ -64,8 +64,8 @@ This document details user-facing features 11 through 20, covering Goals and Est
   - **Dynamic Breakout Performance Meter**: 18px wide, 56px tall; 4 baseline segments: Red ($< \text{Low}$), Orange ($\text{Low} \le S < \text{Mid}$), Yellow ($\text{Mid} \le S < \text{High}$), Green ($S \ge \text{High}$). Suppressed on incomplete tasks and on first tasks lacking precedent/baseline. Secret double-height Purple breakout segment (height 20px) appears when $S > 1.10 \times \text{High}$. Critical shortfall ($S \le \text{Low} - 10\%$ additive) renders 0 segments with pulsing red alarm glow (`.connectea-outcome-critical`).
 
 ### 19. Sidebar Integration & Theme Navigation Stabilization
-- **Canonical Sequence**: Goals, Predictions, Progress, Estimates, Weaknesses, Settings.
-- **Button Styling**: Settings (`#connectify-categories-toggle`) and Weaknesses (`#connectify-weakness-toggle`) feature white buttons (`#ffffff`) in light mode with centered text.
+- **Canonical Sequence**: Goal Setter, Predictor, Year Progression, Estimator, Weakness Analyzer, Settings.
+- **Button Styling**: Settings (`#connectify-categories-toggle`) and Weakness Analyzer (`#connectify-weakness-toggle`) feature white buttons (`#ffffff`) in light mode with centered text.
 - **Category Colors**: Category labels bind to `--cx-cat-color` via `.cx-cat-name-label` for vibrant visibility in dark mode.
 - **Theme Button Mount**: `#connectea-theme-toggle` auto-discovers `.cvr-c-primary-navigation` and centers at `top: 50%; transform: translateY(-50%)`.
 

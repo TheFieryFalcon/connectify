@@ -19,8 +19,8 @@
 
   // Each launcher opens one group of modes; the tabs under the heading switch between its modes
   const GROUPS = {
-    goals: { title: 'Goals', launcher: 'connectify-goals-toggle', modes: ['target', 'grade'] },
-    estimator: { title: 'Estimates', launcher: 'connectify-estimator-toggle', modes: ['estimate', 'grade-estimate'] }
+    goals: { title: 'Goal Setter', launcher: 'connectify-goals-toggle', modes: ['target', 'grade'] },
+    estimator: { title: 'Estimator', launcher: 'connectify-estimator-toggle', modes: ['estimate', 'grade-estimate'] }
   };
   const MODES = {
     target: { tab: 'Target ATAR', title: 'Target ATAR Planner' },

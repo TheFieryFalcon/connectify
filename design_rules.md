@@ -47,14 +47,14 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Drawer Slide Synchronization**: `#connectify-sidebar` and `#connectify-sidebar-handle` animate in lockstep with matching `0.2s cubic-bezier(0.16, 1, 0.3, 1)` transitions using `transform: translateX(-100%)` to `0`, preventing clipping.
 - **Left-Edge Push & Hover Dismissal**: Moving mouse to `clientX <= 12` expands the drawer. Moving mouse outside collapses it after 120ms debounce when no tool is active. When a tool is active, hover collapse is suppressed and clicking outside collapses it. Returning from an active tool panel retains the launcher menu (`justReturnedToMenu`) without hover collapse. Clicking the handle always wins over hover: after a click-close nothing reopens the drawer until the pointer leaves the handle and the edge zone, and a click within 400ms of a hover-open keeps it open.
 - **Canonical Launcher Button Sequence**:
-  1. `connectify-goals-toggle` (Goals: Target ATAR / Target Grade tabs)
-  2. `connectify-predictor-toggle` (Predictions)
-  3. `connectify-progress-toggle` (Progress)
-  4. `connectify-estimator-toggle` (Estimates: Estimate ATAR / Estimate Grade tabs)
-  5. `connectify-weakness-toggle` (Weaknesses)
+  1. `connectify-goals-toggle` (Goal Setter: Target ATAR / Target Grade tabs)
+  2. `connectify-predictor-toggle` (Predictor)
+  3. `connectify-progress-toggle` (Year Progression)
+  4. `connectify-estimator-toggle` (Estimator: Estimate ATAR / Estimate Grade tabs)
+  5. `connectify-weakness-toggle` (Weakness Analyzer)
   6. `connectify-categories-toggle` (Settings)
-- **Calculator Mode Tabs**: Goals and Estimates share the calculator panel (`#connectea-atar`); its heading names the launcher and the mode tabs under it (`.cta-mode-tabs`) reuse the Predictor's tab bar (`.cx-pred-main-tabs` / `.cx-pred-main-tab`), so both tools look alike in every theme. Each launcher reopens on the tab it was left on.
-- **Secondary Tool Buttons**: Settings and Weaknesses feature clean white buttons (`#ffffff`) in light mode with centered text (`text-align: center !important; justify-content: center !important;`).
+- **Calculator Mode Tabs**: Goal Setter and Estimator share the calculator panel (`#connectea-atar`); its heading names the launcher and the mode tabs under it (`.cta-mode-tabs`) reuse the Predictor's tab bar (`.cx-pred-main-tabs` / `.cx-pred-main-tab`), so both tools look alike in every theme. Each launcher reopens on the tab it was left on.
+- **Secondary Tool Buttons**: Settings and Weakness Analyzer feature clean white buttons (`#ffffff`) in light mode with centered text (`text-align: center !important; justify-content: center !important;`).
 - **Workspace Navigation**: Dedicated `← Back to Menu` navigation header (`.cx-back-menu`) positioned at the top right of the header; single active tool policy enforced via `connectify-open` event; outside click and Escape key dismissal.
 
 ## 4. Outcome Meter & Tooltip Architecture
