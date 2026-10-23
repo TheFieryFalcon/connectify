@@ -37,12 +37,13 @@
   const cachePrediction = viaCache('cachePrediction');
   const cacheTaskPrediction = viaCache('cacheTaskPrediction');
   const getCachedPrediction = viaCache('getCachedPrediction');
+  const predictionId = viaCache('predictionId');
   const getHistoricalDataPriorTo = viaCache('getHistoricalDataPriorTo');
   const populateChronologicalPredictions = viaCache('populateChronologicalPredictions');
   const getOrComputeTaskPrediction = viaCache('getOrComputeTaskPrediction');
   const clearSubjectPredictionCache = viaCache('clearSubjectPredictionCache');
   const updatePredictionCache = viaCache('updatePredictionCache');
-  const PREDICTOR_ALGO_VERSION = cacheModule.PREDICTOR_ALGO_VERSION || 'v20_20261023_pred';
+  const PREDICTOR_ALGO_VERSION = cacheModule.PREDICTOR_ALGO_VERSION || 'v21_20261024_pred';
 
   const projectSubjectGrades = viaProjection('projectSubjectGrades');
   const projectATAR = viaProjection('projectATAR');
@@ -166,6 +167,7 @@
     cachePrediction,
     cacheTaskPrediction,
     getCachedPrediction,
+    predictionId,
     evaluateOutcome,
     projectSubjectGrades,
     projectATAR,

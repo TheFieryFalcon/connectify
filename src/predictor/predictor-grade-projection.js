@@ -65,11 +65,13 @@
             continue;
           }
 
+          // A task is its id (same-named tasks such as each semester's exam are two); the name only without one
           const normName = cleanSubject(t.name).toLowerCase();
+          const sameTask = other => (other.id && t.id ? other.id === t.id : cleanSubject(other.name).toLowerCase() === normName);
 
           // Deduplication: skip if already seen in upcoming or already completed in this subject
-          if (seenUpcomingTaskNames.has(normName)) continue;
-          if (completedTasks.some(ct => cleanSubject(ct.name).toLowerCase() === normName)) continue;
+          if (seenUpcomingTaskNames.has(t.id || normName)) continue;
+          if (completedTasks.some(sameTask)) continue;
 
           // Check if custom date is set in Progress Graph:
           const customTime = resolveCustomDate(subj.name, t);
@@ -105,7 +107,7 @@
             t.dateDisplay = window.ConnectifyProgressMath.formatTimestamp(t.order, t.caption);
           }
 
-          seenUpcomingTaskNames.add(normName);
+          seenUpcomingTaskNames.add(t.id || normName);
           upcomingTasks.push(t);
         }
       }

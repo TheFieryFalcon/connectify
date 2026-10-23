@@ -2299,7 +2299,7 @@ runTest('theme.css and theme.js normalize class page red outlines and headers wi
 runTest('assessment-data.js strictly ignores summary rows outside .cvr-c-tasks and never synthesizes phantom tasks', () => {
   const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
   assert.ok(!dataJs.includes('cvr-c-task--summary'), 'assessment-data.js must not have fallback query capturing summary rows');
-  assert.ok(dataJs.includes("if (!row.closest('.cvr-c-tasks')) continue;"), 'assessment-data.js must guard against tasks outside cvr-c-tasks');
+  assert.ok(dataJs.includes("card.querySelectorAll('.cvr-c-tasks .cvr-c-task')") && dataJs.includes('if (!entry) continue;'), 'assessment-data.js must only parse rows inside cvr-c-tasks that have a task id');
   assert.ok(dataJs.includes('if (labels.length === 0) continue;'), 'assessment-data.js must not invent tasks when labels are empty');
 
   const card = new MockElement('div', 'eds-c-tile');
@@ -2387,8 +2387,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v20_20261023_pred'"), 'predictor-math.js must use v20_20261023_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v20_20261023_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v20_20261023_pred');
+  assert.ok(predMathCode.includes("'v21_20261024_pred'"), 'predictor-math.js must use v21_20261024_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v21_20261024_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v21_20261024_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2481,9 +2481,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v20_20261023_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v21_20261024_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v20_20261023_pred'), 'predictor-math.js must bump version to v20_20261023_pred');
+  assert.ok(predMathJs.includes('v21_20261024_pred'), 'predictor-math.js must bump version to v21_20261024_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -2976,7 +2976,7 @@ runTest('Test 108: Accordion expansion multi-click fix, scroll freeze during bul
   assert.ok(assessJs.includes('if (!window.ConnectifyPredictorMath.isPredictionCacheCurrent?.())'), 'assessment-data.js must not pre-cache predictions when valid cache is present');
   assert.ok(assessJs.includes('if (!window.ConnectifyPredictorMath?.isPredictionCacheCurrent?.()) {'), 'expandAll must only pre-cache predictions when the cache is not current');
   assert.ok(predMathJs.includes('if (!force && isPredictionCacheCurrent()) {\n      return;\n    }'), 'predictor-math.js must exit early when valid cache is present and force is false');
-  assert.ok(cohortViewJs.includes('const cached = key && predMath.getCachedPrediction?.(meta.subjectName, key);') && cohortViewJs.includes('if (cached) return cached;'), 'cohort-view.js must check cache before predicting');
+  assert.ok(cohortViewJs.includes('const cached = predMath.getCachedPrediction?.(meta.subjectName, predictionKey(task));') && cohortViewJs.includes('if (cached) return cached;'), 'cohort-view.js must check the task\'s own cached prediction before predicting');
 });
 
 runTest('Test 109: Text bolding parity across light and dark modes for Test headers, marks 20 and 5, Med, Max, Mean, z, Top, and Rank', () => {
@@ -11199,6 +11199,87 @@ runTest('Test 247: The week editor numbers school weeks through the term calenda
   assert.ok(editor.includes('input.title = `School week of the year: ${weekRanges()}`') && editor.includes('weekOrder(17)'), 'the hints come from this year\'s calendar');
   assert.ok(!editor.includes('1-10 for Term 1'), 'no fixed 10-week ranges');
 });
+
+runTest('Test 248: Same-named tasks in one class (each semester\'s exam) are two tasks, each with its own prediction', () => {
+  const helpers = window.ConnectifyParseHelpers;
+  const makeCard = (titleText, rows) => {
+    const card = new MockElement('div', 'eds-c-tile');
+    const title = new MockElement('div', 'eds-c-tile__title');
+    title.textContent = titleText;
+    card.appendChild(title);
+    const list = new MockElement('div', 'cvr-c-tasks');
+    card.appendChild(list);
+    const made = rows.map(([labels, mark, weight]) => {
+      const row = new MockElement('div', 'cvr-c-task');
+      const details = new MockElement('div', 'cvr-c-task__details');
+      for (const text of labels) {
+        const label = new MockElement('span', 'v-label');
+        label.textContent = text;
+        details.appendChild(label);
+      }
+      row.appendChild(details);
+      const marks = new MockElement('div', 'cvr-c-task__marks');
+      for (const text of [mark, weight]) {
+        const cell = new MockElement('div', 'cvr-c-task__mark');
+        cell.textContent = text;
+        marks.appendChild(cell);
+      }
+      row.appendChild(marks);
+      list.appendChild(row);
+      return row;
+    });
+    return { card, rows: made };
+  };
+  const essay = [['Response', 'Term 1, Week 6', 'Essay'], '30 Out of 50', '10%'];
+  const sem1Exam = [['Examination', 'Close reading'], '27 Out of 60', '15%'];
+  const sem2Exam = [['Examination', 'Close reading'], '- Out of 60', '15%'];
+  const sem1 = makeCard('11 Literature ATAR - Semester 1', [essay, sem1Exam]);
+  // A Semester 2 outline lists the Semester 1 tasks before its own
+  const sem2 = makeCard('11 Literature ATAR - Semester 2', [essay, sem1Exam, sem2Exam]);
+
+  const ids = helpers.cardTaskIds(sem2.card);
+  const [, firstId, secondId] = sem2.rows.map(r => ids.get(r).id);
+  assert.ok(firstId.endsWith(':0') && secondId.endsWith(':1') && firstId !== secondId, 'the two "Close reading" rows get their own ids');
+  assert.strictEqual(helpers.cardTaskIds(sem1.card).get(sem1.rows[1]).id, firstId, 'the Semester 1 exam has one id on both outlines');
+
+  window.ConnectifyData.clearCache();
+  window.ConnectifyData.scrapeSubjectTasks(sem1.card);
+  window.ConnectifyData.scrapeSubjectTasks(sem2.card);
+  const tasks = window.ConnectifyData.getSubjectTasks('11 Literature ATAR');
+  const exams = tasks.filter(t => t.name === 'Close reading');
+  assert.strictEqual(exams.length, 2, 'the Semester 2 exam is never dropped as a copy of the Semester 1 one');
+  assert.deepStrictEqual(exams.map(t => [t.id, t.pending]), [[firstId, false], [secondId, true]]);
+
+  const subject = { name: '11 Literature ATAR', tasks };
+  const predMath = window.ConnectifyPredictorMath;
+  // An undated exam sorts before the essay, so the marked one stands on the subject baseline
+  predMath.saveBaselines({ subjects: { [subject.name]: 60 }, types: {} });
+  predMath.updatePredictionCache();
+  predMath.populateChronologicalPredictions([subject], true);
+  const marked = predMath.getCachedPrediction(subject.name, firstId);
+  const upcoming = predMath.getCachedPrediction(subject.name, secondId);
+  assert.ok(marked && upcoming, 'both exams are predicted');
+  assert.strictEqual(marked.basis.subjectCount, 0, 'the marked exam is predicted from the results before it');
+  assert.strictEqual(upcoming.basis.subjectCount, 2, 'the upcoming exam is predicted from every result');
+  assert.strictEqual(predMath.getCachedPrediction(subject.name, 'Close reading'), null, 'no prediction is shared by name');
+  assert.strictEqual(predMath.getCachedPrediction(subject.name, 'Examination::Close reading'), null, 'no prediction is shared by labels');
+
+  // The class projection keeps a dated Semester 2 exam named like a marked Semester 1 one
+  const dated = { name: '11 English ATAR', tasks: [
+    { id: 'exam:0', name: 'Close reading', caption: 'Term 2, Week 8', order: 20, weight: 15, score: 70, pending: false, sequence: 0 },
+    { id: 'exam:1', name: 'Close reading', caption: 'Term 4, Week 5', order: 41, weight: 15, score: null, pending: true, sequence: 1 }
+  ] };
+  const projection = predMath.projectSubjectGrades([dated]).find(p => p.cleanName === dated.name);
+  assert.ok(projection.upcomingPredictions.some(p => p.task.id === 'exam:1'), 'the class projection includes the Semester 2 exam');
+
+  // The row finds its own prediction, never the Semester 1 exam's
+  const store = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/predictor-store.js'), 'utf8');
+  assert.ok(store.includes('cachePrediction(subjectName, predictionId(task), prediction);'), 'one cache key per task');
+  const evalJs = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'cohort/cohort-outcome-eval.js'), 'utf8');
+  assert.ok(evalJs.includes('cardTaskIds?.(card).get(row)') && !evalJs.includes('`${meta.labelsKey}:0`'), 'rows read the parser\'s id');
+  assert.ok(!evalJs.includes('getCachedPrediction(meta.subjectName, meta.taskName)'), 'rows never look predictions up by name');
+});
+
 
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');

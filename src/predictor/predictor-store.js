@@ -12,7 +12,7 @@
   const cleanSubject = (...args) => window.ConnectifyPredictorEngine.cleanSubject(...args);
   const getAccountKey = () => window.ConnectifyUtils.accountKey();
 
-  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v20_20261023_pred';
+  const PREDICTOR_ALGO_VERSION = window.ConnectifyCache?.VERSIONS?.PREDICTOR || 'v21_20261024_pred';
   const PREDICTOR_CACHE_VERSION_KEY = window.ConnectifyCache?.KEYS?.PREDICTOR || 'connectify:cache_version:predictor';
   const LEGACY_PREDICTION_VERSION_KEY = 'connectify:prediction_version';
 
@@ -61,12 +61,13 @@
     } catch {}
   }
 
+  // One prediction per task, under its own id: same-named tasks (each semester's exam) never share one.
+  // Its labels or name only stand in when a task has no id.
+  const predictionId = task => task?.id || task?.labelsKey || task?.name;
+
   function cacheTaskPrediction(subjectName, task, prediction) {
     if (!task || !prediction || prediction.unpredicted) return;
-    const identifiers = [task.id, task.labelsKey, task.name].filter(Boolean);
-    for (const id of identifiers) {
-      cachePrediction(subjectName, id, prediction);
-    }
+    cachePrediction(subjectName, predictionId(task), prediction);
   }
 
   function getCachedPrediction(subjectName, taskIdOrName) {
@@ -120,6 +121,7 @@
     isPredictionCacheCurrent,
     setPredictionCacheCurrent,
     getTaskPredictionKey,
+    predictionId,
     predictionMemoryCache,
     cachePrediction,
     cacheTaskPrediction,

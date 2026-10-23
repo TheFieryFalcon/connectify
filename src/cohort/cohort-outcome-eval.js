@@ -25,6 +25,12 @@
     return card._cxDetailRows;
   }
 
+  /** The row's task id, exactly as the parser cached it ({ id, occurrence }), or an empty entry. */
+  function rowTaskId(row) {
+    const card = row.closest(CARD_SELECTOR);
+    return (card && window.ConnectifyParseHelpers?.cardTaskIds?.(card).get(row)) || {};
+  }
+
   function rowWeight(row) {
     const text = row.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark')[1]?.textContent?.trim() || '';
     const match = text.match(/(\d+(?:\.\d+)?)\s*%/i) || text.match(/(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)/i);
@@ -36,10 +42,10 @@
     const card = row.closest(CARD_SELECTOR);
     const cardTitle = normalize(card?.querySelector(TITLE_SELECTOR)?.textContent);
     const semMatch = cardTitle.match(/Semester\s*([12])/i);
-    const id = meta.labelsKey ? `${meta.labelsKey}:0` : undefined;
+    const { id, occurrence } = rowTaskId(row);
     const caption = meta.labels?.[1] || '';
-    // A week typed in the Progress Graph wins over the week in the caption
-    const overrideOrder = customWeekOrder(readTimeOverride([meta.subjectName, cardTitle], [id, meta.taskName]));
+    // A week typed in the Progress Graph wins over the week in the caption (by name only for the first occurrence)
+    const overrideOrder = customWeekOrder(readTimeOverride([meta.subjectName, cardTitle], [id, occurrence ? null : meta.taskName]));
     // A Semester 1 task listed on a Semester 2 panel is still a Semester 1 task
     const cardSemester = semMatch ? Number(semMatch[1]) : 1;
     const taskSemester = window.ConnectifyParseHelpers?.taskSemester;
@@ -85,6 +91,9 @@
     return false;
   }
 
+  // One prediction per task: same-named tasks (each semester's exam) have their own ids
+  const predictionKey = task => window.ConnectifyPredictorMath?.predictionId?.(task) ?? task.id;
+
   /** The outcome for a marked row, or null when the meter stays hidden. */
   function evaluateRow(row, mark, meta, precollectedSubjects) {
     const predMath = window.ConnectifyPredictorMath;
@@ -99,11 +108,7 @@
     const isFirstOfSubject = !hasPriorSubjectData && !hasSubjectBaseline;
     if (isFirstOfSubject) return null;
 
-    let prediction = predMath.getCachedPrediction
-      ? (predMath.getCachedPrediction(meta.subjectName, task.id) ||
-         predMath.getCachedPrediction(meta.subjectName, meta.labelsKey) ||
-         predMath.getCachedPrediction(meta.subjectName, meta.taskName))
-      : null;
+    let prediction = predMath.getCachedPrediction ? predMath.getCachedPrediction(meta.subjectName, predictionKey(task)) : null;
     if (!prediction || prediction.unpredicted) {
       const allSubjects = precollectedSubjects || (window.ConnectifyData?.hasCachedSubjects?.() ? window.ConnectifyData.collect(true) : []);
       prediction = predMath.getOrComputeTaskPrediction
@@ -119,17 +124,14 @@
     const predMath = window.ConnectifyPredictorMath;
     if (!predMath) return null;
     try {
-      const id = meta.labelsKey ? `${meta.labelsKey}:0` : undefined;
-      for (const key of [id, meta.labelsKey, meta.taskName]) {
-        const cached = key && predMath.getCachedPrediction?.(meta.subjectName, key);
-        if (cached) return cached;
-      }
-      const task = { id, name: meta.taskName, caption: meta.labels?.[1] || '', labelsKey: meta.labelsKey, row };
+      const task = { id: rowTaskId(row).id, name: meta.taskName, caption: meta.labels?.[1] || '', labelsKey: meta.labelsKey, row };
+      const cached = predMath.getCachedPrediction?.(meta.subjectName, predictionKey(task));
+      if (cached) return cached;
       if (predMath.getOrComputeTaskPrediction) {
         return predMath.getOrComputeTaskPrediction(meta.subjectName, task, precollectedSubjects) || null;
       }
       const pred = predMath.predictTask(meta.subjectName, task);
-      if (!pred.unpredicted) predMath.cachePrediction(meta.subjectName, meta.labelsKey || meta.taskName, pred);
+      if (!pred.unpredicted) predMath.cachePrediction(meta.subjectName, predictionKey(task), pred);
       return pred;
     } catch {
       return null;

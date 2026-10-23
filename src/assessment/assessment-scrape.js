@@ -81,14 +81,18 @@
       subjectsCache.set(subjectName, new Map());
     }
     const tasks = subjectsCache.get(subjectName);
+    const sameName = t => normalize(t.name).toLowerCase();
+    const namesOnCard = new Map();
+    for (const t of parsedTasks) namesOnCard.set(sameName(t), (namesOnCard.get(sameName(t)) || 0) + 1);
 
     for (const record of parsedTasks) {
       const taskName = record.name;
       const isCompleted = !record.pending;
 
-      // Deduplicate tasks repeated across Semester 1 and Semester 2 outlines:
-      const existingSameName = Array.from(tasks.values()).find(
-        t => normalize(t.name).toLowerCase() === normalize(taskName).toLowerCase()
+      // Deduplicate tasks repeated across Semester 1 and Semester 2 outlines. A name listed twice on one
+      // card is two tasks (the Semester 1 and Semester 2 exams' "Close reading"), told apart by their ids.
+      const existingSameName = namesOnCard.get(sameName(record)) > 1 ? null : Array.from(tasks.values()).find(
+        t => sameName(t) === sameName(record)
       );
       if (existingSameName) {
         // If already completed in Sem 1 and current is pending, ignore the unfinished Sem 2 clone

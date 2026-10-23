@@ -11,7 +11,8 @@
   const store = window.ConnectifyPredictorStore;
   const {
     PREDICTOR_ALGO_VERSION, PREDICTOR_CACHE_VERSION_KEY, LEGACY_PREDICTION_VERSION_KEY, predictionMemoryCache,
-    isPredictionCacheCurrent, setPredictionCacheCurrent, cacheTaskPrediction, getCachedPrediction, clearSubjectPredictionCache
+    isPredictionCacheCurrent, setPredictionCacheCurrent, cacheTaskPrediction, getCachedPrediction, clearSubjectPredictionCache,
+    predictionId
   } = store;
   const predictTask = (...args) => window.ConnectifyPredictorEngine.predictTask(...args);
   const getBaselines = (...args) => window.ConnectifyPredictorBaselines.getBaselines(...args);
@@ -73,21 +74,16 @@
     if (!task) return null;
 
     // 1. Fast cache check FIRST before doing any calculation or DOM scraping
-    const identifiers = [task.id, task.labelsKey, task.name].filter(Boolean);
-    for (const id of identifiers) {
-      const cached = getCachedPrediction(subjectName, id);
-      if (cached) return cached;
-    }
+    const cached = getCachedPrediction(subjectName, predictionId(task));
+    if (cached) return cached;
 
     // Use allSubjects if provided; avoid inline collect(true) to prevent quadratic DOM scrapes
     const rawSubjects = allSubjects || [];
 
     if (!isPredictionCacheCurrent()) {
       populateChronologicalPredictions(rawSubjects, true);
-      for (const id of identifiers) {
-        const cached = getCachedPrediction(subjectName, id);
-        if (cached) return cached;
-      }
+      const populated = getCachedPrediction(subjectName, predictionId(task));
+      if (populated) return populated;
     }
 
     const isCompleted = isCompletedTask(task);

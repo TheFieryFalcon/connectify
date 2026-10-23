@@ -1,8 +1,8 @@
 /**
  * Connectify Assessment: parsing helpers
  *
- * Turns Connect date/week captions into a chronological order number, and estimates a task's cohort
- * mean from its boxplot (bridged stats first, Highcharts as a fallback).
+ * Turns Connect date/week captions into a chronological order number, estimates a task's cohort
+ * mean from its boxplot (bridged stats first, Highcharts as a fallback), and reads each task row's mark and id.
  * Exposes window.ConnectifyParseHelpers.
  */
 (() => {
@@ -141,5 +141,55 @@
     return semester ? Math.min(semester, card) : card;
   }
 
-  window.ConnectifyParseHelpers = { orderHint, dateOrder, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_ORDER };
+  /** A task row's mark cell: { score, maxScore, isCompleted, isPending } (maxScore 100 when none is shown). */
+  function readTaskMark(row) {
+    const normalize = window.ConnectifyUtils.normalize;
+    const text = normalize(row.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
+    const fraction = text.match(/^(\d+(?:\.\d+)?)\s*(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)$/i);
+    const percent = text.match(/^(-?\d+(?:\.\d+)?)\s*%$/i) || text.match(/(-?\d+(?:\.\d+)?)\s*%/i);
+    const isPending = /^[-–—]\s*(?:Out\s+of|\/)\s*\d/i.test(text) || /^[-–—\s]+$/i.test(text) || /pending|not\s*marked/i.test(text);
+    let score = null;
+    let maxScore = null;
+    if (fraction && +fraction[2] > 0) {
+      if (+fraction[1] <= +fraction[2]) {
+        score = (+fraction[1] / +fraction[2]) * 100;
+        maxScore = +fraction[2];
+      }
+    } else if (percent) {
+      score = Number(percent[1]);
+      maxScore = 100;
+    }
+    const isCompleted = score !== null;
+    if (!maxScore) maxScore = Number(text.match(/(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)/i)?.[1]) || 100;
+    return { score, maxScore, isCompleted, isPending };
+  }
+
+  const taskLabels = row => Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
+    .map(e => window.ConnectifyUtils.normalize(e.textContent))
+    .filter(Boolean);
+
+  /**
+   * Every task row's id in a card: its labels and out-of mark, then how many earlier rows share both.
+   * A Semester 2 outline lists the Semester 1 exam before its own, so two "Close reading" rows get :0 and :1.
+   * The parser and the row readers both use this, so a row always finds its own cached task and prediction.
+   */
+  function cardTaskIds(card) {
+    const ids = new Map();
+    const occurrences = new Map();
+    for (const row of card.querySelectorAll('.cvr-c-tasks .cvr-c-task')) {
+      const labels = taskLabels(row);
+      if (labels.length === 0) continue;
+      const mark = readTaskMark(row);
+      if (!mark.isCompleted && !mark.isPending) continue;
+      const identity = JSON.stringify([labels, mark.maxScore]);
+      const occurrence = occurrences.get(identity) || 0;
+      occurrences.set(identity, occurrence + 1);
+      ids.set(row, { id: `${identity}:${occurrence}`, occurrence, labels, mark });
+    }
+    return ids;
+  }
+
+  window.ConnectifyParseHelpers = {
+    orderHint, dateOrder, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_ORDER, readTaskMark, taskLabels, cardTaskIds
+  };
 })();
