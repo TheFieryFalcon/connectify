@@ -199,4 +199,6 @@
 
 #connectify-sidebar .cta-course {
   padding: 12px 0;
+  --cta-check-width: 15px;
+  --cta-check-gap: 16px;
 }

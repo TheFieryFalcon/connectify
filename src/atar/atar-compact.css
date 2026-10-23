@@ -166,9 +166,10 @@
   grid-row: 1/3;
 }
 
+/* The scaled score sits under the course name: checkbox width, its margin and the label gap */
 #connectea-atar .cta-course>small {
   grid-column: 1;
-  margin-left: 22px;
+  margin-left: calc(var(--cta-check-width, 13px) + var(--cta-check-gap, 9px));
   font-size: 10px;
 }
 
@@ -180,7 +181,7 @@
 #connectea-atar .cta-score {
   border-radius: 6px;
   padding: 6px 8px;
-  text-align: right;
+  text-align: left;
 }
 
 #connectea-atar .cta-breakdown {

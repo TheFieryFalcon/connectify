@@ -132,7 +132,7 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Key Functions**:
   - `getCourseState(row, semesterIdx, coursesList)`: Returns course inclusion state, `raw` (the typed school mark, else Connect's) and `score` (that mark scaled, calibration shift included; a scaled `score` saved before school marks were typed still wins until the row is edited).
   - `calculateResults(courses)`: Calculates ATAR for Semester 1 and Semester 2 with -15 TEA adjustment for Year 11 unscaled courses.
-  - `renderCourseList(container, courses, activeSemester, onChange)`: Renders each course with an include checkbox, a school mark input (placeholder: Connect's mark; saved as `raw`; no spin arrows, like every `.cta-score`) and the scaled score under it (`Scaled 86`, updated as the student types).
+  - `renderCourseList(container, courses, activeSemester, onChange)`: Renders each course with an include checkbox, a school mark input (placeholder: Connect's mark; saved as `raw`; no spin arrows, like every `.cta-score`) and the scaled score under the course name (`Scaled 86`, updated as the student types); the mark is left-aligned like every calculator input.
 - **Export**: `window.ConnectifyAtarCalc`.
 
 ---

@@ -22,7 +22,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Settings says when the current theme is showing its own wallpaper instead of yours.
 
 ### Changes
-- **Goal Setter** replaces the Target ATAR and Target Grade buttons: one sidebar button with both as tabs. **Estimator** replaces ATAR Estimate and holds the ATAR estimate and the new grade estimate. Their tabs, like the Predictor's, are simply Grade and ATAR, with Grade first. Each opens on Grade, then reopens on the tab you last used.
+- **Goal Setter** replaces the Target ATAR and Target Grade buttons: one sidebar button with both as tabs. **Estimator** replaces ATAR Estimate and holds the ATAR estimate and the new grade estimate. Their tabs, like the Predictor's, list Grade first (Target Grade, Target ATAR; Estimate Grade, Estimate ATAR), and Target Grade's semester buttons read Semester 1 Target Grade / Semester 2 Target Grade. Each opens on Grade, then reopens on the tab you last used.
 - Every sidebar tool (Predictor, Weakness Analyzer, Year in Progress, ATAR Estimate, Target ATAR, Target Grade and Calibration) now reads your saved results instead of the outline tiles.
 - The sidebar is on every Connect page. Away from Assessment Outlines only Settings works; the other tools are greyed out under a notice with a link to the outlines.
 - A Connect filter on Assessment Outlines no longer greys out the sidebar tools, since they read your saved results.
@@ -52,6 +52,8 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Saved predictions and results are rebuilt once after updating.
 
 ### Fixes
+- Year Progression's data points are plain dots, without the white ring that stood out on wallpapers.
+- ATAR Estimate: the school mark reads from the left like the other calculator boxes, and the scaled score sits under the subject name.
 - A Semester 2 task with the same name as a Semester 1 one (each semester's exam "Close reading") is now its own task: it gets its own prediction instead of the Semester 1 exam's, and counts toward the class's Lowest and Highest Possible marks, Estimate Grade and the class prediction.
 - Year Progression's week editor counts school weeks the way Export's term list does: in an Early Easter year Term 1 is Weeks 1–9 and Term 2 starts at Week 10. Its hints show this year's ranges. Weeks you set before keep the date they had.
 - Year Progression: the graph has the Early Easter checkbox too, shared with Export. A task in a week past the end of a term (Term 1 Week 10 in an Early Easter year) now reads as the next term's week (Term 2 Week 1) in the graph, Export and Predictor alike, matching the date Export gives it.

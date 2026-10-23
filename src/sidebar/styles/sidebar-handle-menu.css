@@ -53,16 +53,15 @@
   stroke-width: 3;
 }
 
+/* Data points are solid dots in the line's colour: a white ring stood out on wallpapers and glass */
 .cx-cohort-point {
   fill: #d64b58;
-  stroke: #fff;
-  stroke-width: 1.5;
+  stroke: none;
 }
 
 .cx-line-point {
   fill: #368bd0;
-  stroke: #fff;
-  stroke-width: 1.5;
+  stroke: none;
 }
 
 .cx-legend {

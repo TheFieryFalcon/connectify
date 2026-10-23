@@ -2,7 +2,7 @@
  * Connectify ATAR calculator: panel markup
  *
  * Builds the calculator panel (#connectea-atar): the Goals and Estimates launchers the sidebar
- * mounts, the mode tabs (Grade / ATAR in each), the semester
+ * mounts, the mode tabs (Target Grade / Target ATAR, Estimate Grade / Estimate ATAR), the semester
  * buttons, course list, summary, reset and Expand All Outlines buttons, and the
  * methodology notes; plus the semester labels and closing rules. Behaviour lives in atar-ui.js.
  * Exposes window.ConnectifyAtarMarkup.
@@ -22,12 +22,12 @@
     goals: { title: 'Goal Setter', launcher: 'connectify-goals-toggle', modes: ['grade', 'target'] },
     estimator: { title: 'Estimator', launcher: 'connectify-estimator-toggle', modes: ['grade-estimate', 'estimate'] }
   };
-  // Tabs name only what they work out (the launcher heading says how), Grade before ATAR
+  // Grade before ATAR in each group
   const MODES = {
-    grade: { tab: 'Grade', title: 'Target Grade Planner' },
-    target: { tab: 'ATAR', title: 'Target ATAR Planner' },
-    'grade-estimate': { tab: 'Grade', title: 'Estimated Grade' },
-    estimate: { tab: 'ATAR', title: 'Estimated ATAR' }
+    grade: { tab: 'Target Grade', title: 'Target Grade Planner' },
+    target: { tab: 'Target ATAR', title: 'Target ATAR Planner' },
+    'grade-estimate': { tab: 'Estimate Grade', title: 'Estimated Grade' },
+    estimate: { tab: 'Estimate ATAR', title: 'Estimated ATAR' }
   };
   const groupOf = mode => Object.keys(GROUPS).find(g => GROUPS[g].modes.includes(mode));
   // Target Grade and Estimate Grade pick one class, so their semester buttons carry no ATAR
@@ -128,6 +128,7 @@
 
   /** A semester button's label for the current mode. */
   function semesterLabel(i, res, mode, isClosed) {
+    if (mode === 'grade') return isClosed ? `Semester ${i + 1} Target Grade (Closed)` : `Semester ${i + 1} Target Grade`;
     if (isGradeMode(mode)) return isClosed ? `Semester ${i + 1} (Closed)` : `Semester ${i + 1}`;
     if (mode === 'target') return isClosed ? `Semester ${i + 1} Target ATAR (Closed)` : `Semester ${i + 1} Target ATAR`;
     const atar = res.error ? '—' : (res.finalAtar || res.atar || '—');

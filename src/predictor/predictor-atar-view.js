@@ -24,8 +24,8 @@
             <span class="cx-pred-subtitle">Momentum & Assessment Modeling</span>
           </div>
           <div class="cx-pred-main-tabs">
-            <button type="button" id="cx-pred-btn-grade" class="cx-pred-main-tab ${activeMainTab === 'grade' ? 'active' : ''}">Grade</button>
-            <button type="button" id="cx-pred-btn-atar" class="cx-pred-main-tab ${activeMainTab === 'atar' ? 'active' : ''}">ATAR</button>
+            <button type="button" id="cx-pred-btn-grade" class="cx-pred-main-tab ${activeMainTab === 'grade' ? 'active' : ''}">Predict Grade</button>
+            <button type="button" id="cx-pred-btn-atar" class="cx-pred-main-tab ${activeMainTab === 'atar' ? 'active' : ''}">Predict ATAR</button>
           </div>
         </header>
         <div id="cx-pred-content"></div>

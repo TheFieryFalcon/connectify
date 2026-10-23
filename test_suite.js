@@ -2272,15 +2272,14 @@ runTest('target-solver.js and target-grade-ui.js support dynamic prior performan
   assert.ok(gradeUiCode.includes('gradeDifficultyWeighted'), 'target-grade-ui.js must persist gradeDifficultyWeighted preference');
 });
 
-runTest('atar-ui.js eliminates ATAR text from grade panel buttons and applies canonical tab styling', () => {
+runTest('atar-ui.js names Target Grade on its semester buttons without ATAR and applies canonical tab styling', () => {
   const uiCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-ui-helpers.js'), 'utf8'));
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui-markup.js'), 'utf8'));
   const { semesterLabel } = window.ConnectifyAtarMarkup;
-  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'grade', false), 'Semester 1', 'Grade mode must show a plain Semester label without ATAR');
-  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'grade', true), 'Semester 1 (Closed)', 'Grade mode must append (Closed) when closed');
+  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'grade', false), 'Semester 1 Target Grade', 'Target Grade semester buttons name the mode, without ATAR');
+  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'grade', true), 'Semester 1 Target Grade (Closed)', 'Target Grade must append (Closed) when closed');
   assert.strictEqual(semesterLabel(1, { atar: '95.00' }, 'estimate', false), 'Semester 2 ATAR\n95.00', 'Estimate mode must show the semester ATAR');
-  assert.ok(!uiCode.includes("Semester ${i + 1} Target Grade"), 'atar-ui.js must not append extra redundant text to semester buttons');
   assert.ok(uiCode.includes('cta-semester-closed'), 'atar-ui.js must style closed semester tabs with cta-semester-closed');
   assert.ok(uiCode.includes('cta-semester-indicator'), 'atar-ui.js must style active semester tabs with cta-semester-indicator');
 });
@@ -4816,13 +4815,13 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.strictEqual(atarPanel.hidden, false, 'Goals panel (#connectea-atar) must be visible');
   assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target Grade Planner', 'Goals must open on the Target Grade Planner');
 
-  // Verify Goals heading and its mode tabs: no verb, Grade before ATAR
+  // Verify Goals heading and its mode tabs: Target Grade before Target ATAR
   const gradeHeading = atarPanel.querySelector('.cta-heading strong');
   assert.strictEqual(gradeHeading.textContent, 'Goal Setter', 'Goal Setter heading must render');
   const modeTab = mode => Array.from(atarPanel.querySelectorAll('.cta-mode-tab')).find(b => b.dataset.mode === mode);
   const visibleTabs = () => Array.from(atarPanel.querySelectorAll('.cta-mode-tab')).filter(b => !b.hidden).map(b => b.textContent);
   assert.ok(atarPanel.querySelector('.cta-mode-tabs')?.classList.contains('cx-pred-main-tabs'), 'Mode tabs must use the Predictor tab bar');
-  assert.deepStrictEqual(visibleTabs(), ['Grade', 'ATAR'], 'Goals must show its Grade tab, then its ATAR tab');
+  assert.deepStrictEqual(visibleTabs(), ['Target Grade', 'Target ATAR'], 'Goals must show Target Grade, then Target ATAR');
   assert.ok(modeTab('estimate').hidden && modeTab('grade-estimate').hidden, 'Goals must hide Estimates tabs');
   assert.ok(modeTab('grade').classList.contains('active') && !modeTab('target').classList.contains('active'), 'Grade tab must be selected');
 
@@ -4885,10 +4884,10 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   const predTabs = predPanel.querySelector('.cx-pred-main-tabs');
   assert.ok(predTabs, 'Predictor tabs container (.cx-pred-main-tabs) must render');
   const gradePredTab = predPanel.querySelector('#cx-pred-btn-grade');
-  assert.ok(gradePredTab && gradePredTab.textContent === 'Grade', 'Predictor Grade tab button must render');
+  assert.ok(gradePredTab && gradePredTab.textContent === 'Predict Grade', 'Predict Grade tab button must render');
   const atarPredTab = predPanel.querySelector('#cx-pred-btn-atar');
-  assert.ok(atarPredTab && atarPredTab.textContent === 'ATAR', 'Predictor ATAR tab button must render');
-  assert.deepStrictEqual(Array.from(predTabs.querySelectorAll('.cx-pred-main-tab')).map(b => b.textContent), ['Grade', 'ATAR'], 'Predictor Grade tab must come before its ATAR tab');
+  assert.ok(atarPredTab && atarPredTab.textContent === 'Predict ATAR', 'Predict ATAR tab button must render');
+  assert.deepStrictEqual(Array.from(predTabs.querySelectorAll('.cx-pred-main-tab')).map(b => b.textContent), ['Predict Grade', 'Predict ATAR'], 'Predict Grade must come before Predict ATAR');
   const predContent = predPanel.querySelector('#cx-pred-content');
   assert.ok(predContent, 'Predictor content container (#cx-pred-content) must render');
 
@@ -4930,7 +4929,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   // Verify Estimates heading, its tabs and the Estimate Grade elements
   const estHeading = atarPanel.querySelector('.cta-heading strong');
   assert.strictEqual(estHeading.textContent, 'Estimator', 'Estimator heading must render');
-  assert.deepStrictEqual(visibleTabs(), ['Grade', 'ATAR'], 'Estimates must show its Grade tab, then its ATAR tab');
+  assert.deepStrictEqual(visibleTabs(), ['Estimate Grade', 'Estimate ATAR'], 'Estimates must show Estimate Grade, then Estimate ATAR');
   assert.ok(modeTab('target').hidden && modeTab('grade').hidden, 'Estimates must hide the Goals tabs');
   assert.ok(modeTab('grade-estimate').classList.contains('active'), 'Estimates Grade tab must be selected');
   const estimateView = atarPanel.querySelector('.cta-grade-estimate');
@@ -9276,11 +9275,11 @@ runTest('Test 200: Progress keeps cohort means under the semester filter and plo
   assert.ok(css.includes('.connectea-dark #connectify-progress .cx-progress-mode select{background:var(--cx-nav-bg'), 'the dropdown is token-routed in dark themes');
 });
 
-runTest('Test 201: Target ATAR and Target Grade inputs are left-aligned; course score inputs stay right-aligned', () => {
+runTest('Test 201: Target ATAR, Target Grade and Estimate ATAR course inputs are left-aligned', () => {
   const planner = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/atar-planner.css'), 'utf8');
   assert.ok(/#connectea-atar \.cta-target-label>\.cta-score\s*\{\s*text-align:\s*left;/.test(planner), 'planner target inputs are left-aligned');
   const compact = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/atar-compact.css'), 'utf8');
-  assert.ok(/#connectea-atar \.cta-score\s*\{[^}]*text-align:\s*right;/.test(compact), 'course list score inputs keep right alignment');
+  assert.ok(/#connectea-atar \.cta-score\s*\{[^}]*text-align:\s*left;/.test(compact), 'Estimate ATAR school mark inputs are left-aligned too');
 });
 
 runTest('Test 202: Progress: no subject heading (the pressed chip names it); ATAR Progression heading 700, chips 600, legend 400', () => {
@@ -10701,7 +10700,7 @@ runTest('Test 235: Estimate Grade works out the average from any number of typed
   assert.strictEqual(window.ConnectifyAtarMarkup.semesterLabel(0, { atar: '95.00' }, 'grade-estimate', false), 'Semester 1', 'Estimate Grade semester buttons carry no ATAR');
   assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.estimator.modes, ['grade-estimate', 'estimate'], 'Estimates holds Estimate Grade, then Estimate ATAR');
   assert.deepStrictEqual(window.ConnectifyAtarMarkup.GROUPS.goals.modes, ['grade', 'target'], 'Goals holds Target Grade, then Target ATAR');
-  assert.deepStrictEqual(Object.values(window.ConnectifyAtarMarkup.MODES).map(m => m.tab), ['Grade', 'ATAR', 'Grade', 'ATAR'], 'mode tabs name no verb, Grade before ATAR');
+  assert.deepStrictEqual(Object.values(window.ConnectifyAtarMarkup.MODES).map(m => m.tab), ['Target Grade', 'Target ATAR', 'Estimate Grade', 'Estimate ATAR'], 'mode tabs carry their verb, Grade before ATAR');
 });
 
 runTest('Test 237: Subject panels show the lowest and highest final mark still possible, in both the expanded and compact views', () => {
@@ -11278,6 +11277,30 @@ runTest('Test 248: Same-named tasks in one class (each semester\'s exam) are two
   const evalJs = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'cohort/cohort-outcome-eval.js'), 'utf8');
   assert.ok(evalJs.includes('cardTaskIds?.(card).get(row)') && !evalJs.includes('`${meta.labelsKey}:0`'), 'rows read the parser\'s id');
   assert.ok(!evalJs.includes('getCachedPrediction(meta.subjectName, meta.taskName)'), 'rows never look predictions up by name');
+});
+
+
+runTest('Test 249: Estimate ATAR marks are left-aligned like every calculator input, the scaled score under the course name', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/atar-compact.css'), 'utf8');
+  const drawer = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-drawer.css'), 'utf8');
+  const rule = (src, sel) => (src.match(new RegExp(sel.replace(/[.*+?^${}()|[\]\\>]/g, '\\$&') + '\\s*\\{([^}]*)\\}')) || [])[1] || '';
+  assert.ok(/text-align:\s*left/.test(rule(css, '#connectea-atar .cta-score')), 'school mark inputs are left-aligned');
+  assert.ok(rule(css, '#connectea-atar .cta-course>small').includes('calc(var(--cta-check-width, 13px) + var(--cta-check-gap, 9px))'), 'the scaled score is indented by the checkbox and its gap');
+  // Drawer checkbox: 15px wide, 4px right margin, 12px label gap
+  const course = rule(drawer, '#connectify-sidebar .cta-course');
+  assert.ok(course.includes('--cta-check-width: 15px') && course.includes('--cta-check-gap: 16px'), 'the drawer indent matches its checkbox (15px) plus margin and gap (4px + 12px)');
+  assert.ok(/margin:\s*0 4px 0 0/.test(rule(drawer, '#connectify-sidebar .cta-include input')) && /gap:\s*12px/.test(rule(drawer, '#connectify-sidebar .cta-include')), 'drawer checkbox margin and gap the indent is built from');
+});
+
+
+runTest('Test 250: Year Progression data points are solid dots, with no white ring', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-handle-menu.css'), 'utf8');
+  for (const [cls, colour] of [['cx-line-point', '#368bd0'], ['cx-cohort-point', '#d64b58']]) {
+    const body = (css.match(new RegExp(`\\.${cls}\\s*\\{([^}]*)\\}`)) || [])[1] || '';
+    assert.ok(body.includes(`fill: ${colour}`) && /stroke:\s*none/.test(body), `${cls} is a solid ${colour} dot`);
+  }
+  const progress = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress.css'), 'utf8');
+  assert.ok(!/stroke:\s*#fff/.test(css + progress), 'no white stroke on chart points');
 });
 
 
