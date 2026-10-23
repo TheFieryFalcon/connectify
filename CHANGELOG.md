@@ -4,13 +4,69 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
+## 3.2.5 (upcoming)
+
+### Additions
+- **Export to Google Calendar or Notion** (Year Progression → Export): tick the upcoming assessments you want, pick the weekday each subject's tasks fall on (or one task's own day), and download a Google Calendar file (.ics) or a Notion database (CSV). Everything is made on your computer, with no sign-in.
+- Export works out this year's WA term dates, since Connect only gives a school week. Tick Early Easter if your school's April holidays start a week early.
+- Export can merge each semester's exams into one Semester exam event, in either file.
+- Year Progression's graph has the Early Easter checkbox too, shared with Export.
+- **Estimate Grade** (in the new Estimator): pick a class and type the marks you think you'll get on any of its unmarked tasks (`85`, `85%` or `17/20`) to see what your average would be. One mark is enough: tasks you leave blank are left out, just as Connect leaves out unmarked tasks. Fill in every one to see your final mark. Your typed marks are kept until you press Clear Marks.
+- **Expanded statistics panels** (Settings → Statistics Panels, off by default): show the statistics on subject rows, or on every row, as larger cards with your Score, Rank and the cohort Average up top, the five boxplot values below, and SD, z-score and standing underneath. Subject cards include the class prediction and cohort size. Takes effect after reloading the page.
+- On expanded cards, your Score's colour grows more vivid the further you beat your predicted range.
+- On expanded cards, upcoming tasks show Low, Mid and High with what the prediction is based on (e.g. "From your 3 previous Exam results and your 5 previous Literature results").
+- **Lowest and Highest Possible**: a class without a final grade shows the lowest and highest final mark you can still get (every unmarked task at 0% or 100%) at the end of its subject panel.
+- After an update, open Connect tabs reload by themselves, so the sidebar tools work straight away instead of doing nothing until you refresh (not in the Chrome Web Store version).
+
+### Changes
+- **Goal Setter** replaces the Target ATAR and Target Grade buttons: one sidebar button with Target Grade and Target ATAR as tabs.
+- **Estimator** replaces ATAR Estimate, with Estimate Grade and Estimate ATAR as tabs.
+- Year in Progress is now called Year Progression.
+- The Predictor's tabs are now Predict Grade and Predict ATAR.
+- Tool tabs list Grade before ATAR.
+- Goal Setter and Estimator open on Grade, then reopen on the tab you last used.
+- Target Grade's semester buttons read Semester 1 Target Grade / Semester 2 Target Grade.
+- The sidebar is on every Connect page. Away from Assessment Outlines only Settings works; the other tools are greyed out under a notice with a link to the outlines.
+- A Connect filter on Assessment Outlines no longer greys out the sidebar tools, since they read your saved results.
+- ATAR Estimate: each subject's box now takes your school mark (Connect's mark until you change it), with the scaled score it gives under the subject name.
+- ATAR Estimate shows a finished semester as Closed and greyed out, like Target ATAR and Target Grade.
+- Task predictions now come from your own results in that subject (recent ones count more), adjusted for how you usually do on that type of task.
+- Low and High predictions sit the same distance either side of Mid, further apart when there are only a few results to go on.
+- Assessments whose outline gives a date instead of a week now land in that date's real term and week, in the Year Progression graph and predictions.
+- A task in a week past the end of a term (Term 1 Week 10 in an Early Easter year) reads as the next term's week (Term 2 Week 1) in the graph, Export and Predictor alike.
+- Year Progression's week editor counts school weeks the way Export's term list does: in an Early Easter year Term 1 is Weeks 1–9 and Term 2 starts at Week 10. Its hints show this year's ranges. Weeks you set before keep the date they had.
+- Picking a preset in the Theme Customizer keeps all of its colours (e.g. Quantum Dark's green secondary text) instead of deriving them from its six Basic colours.
+- Changing a Basic colour in the Theme Customizer re-derives every Full colour based on it, including preset colours and ones you set yourself.
+- The Assessment Outlines tab in Connect's top bar is highlighted on its own page, instead of My Connect.
+- Clicking around Connect with a dark theme is faster: the outline filter menu opens in about a sixth of the time.
+- Year Progression's data points are plain dots, without the white ring that stood out on wallpapers.
+
+### Fixes
+- ATAR scaled scores squashed marks towards the middle (Physics 87.3 scaled to 82, Literature 58.6 to 64). They now follow TISC's Average Marks Scaling for each course.
+- A subject weak in one type of task that held every task of that type (e.g. Literature's Take-Home tasks) had its predictions pulled down twice: Mid 47% on a subject averaging about 56%.
+- Predictions for upcoming Term 4 tasks ignored your Semester 2 results.
+- A Semester 2 task with the same name as a Semester 1 one (each semester's exam "Close reading") is now its own task, with its own prediction instead of the Semester 1 exam's.
+- Cohort sizes, baselines and saved results were kept apart depending on whether Assessment Outlines was opened from Connectify's shortcut or Connect's menu. They're now kept in one place, and ones saved from the shortcut are carried over.
+- Saving assessment categories in Settings stored all of them as one category called "undefined", so every Type dropdown offered only "undefined". Categories now save under their own names, and a set damaged by this is repaired the next time a page loads (the five standard categories come back; a custom category saved over can't be recovered, so add it again).
+- Connect sometimes shows a class's "Semester 2 Cumulative Percent" heading with nothing under it (seen in Economics, with or without Connectify), so there was no subject average. Connectify now restores the row in Connect's own style with your average worked out from your marked tasks and their weightings, plus the usual statistics panel and class prediction. It goes away as soon as Connect shows its own row.
+- With "Show this semester's classes only" on, filtering Assessment Outlines to a class showed a blank page: the filtered view made Connectify think it was the other semester and hid the class. A class with no outline this semester now shows a message saying why, with a Back to All button.
+- "Back to All" did nothing, in the sidebar's filter notice too. It now presses Connect's top-level All filter, never a semester's own All.
+- Auto-login failed with saved passwords in Chrome, Dia and other Chromium browsers: it pressed Log in before the browser had handed over the password.
+- Weakness Analyzer grouped some tasks under a different type from the one their Type dropdown showed.
+- Weakness Analyzer didn't redraw while open when you changed a task's type or new results came in.
+- Weakness Analyzer's scores sat lower than their labels in Firefox.
+- Weakness Analyzer cut off long subject names.
+- Weakness Analyzer's checkboxes and "Group by:" didn't line up with their row.
+- The Predictor's subject tabs had a scrollbar that widened on hover on macOS and ignored the theme in Firefox.
+- The unselected semester button looked cut off on its left edge.
+- The Color Theme and Statistics Panels dropdowns in Settings were grey boxes with a heavy dark border in the Default theme, and unstyled in dark themes. They now match the number inputs beside them.
+- In dark themes, Connect's top navigation links were only themed on Assessment Outlines.
+- In grey Liquid Glass, opening a dialog such as View Notice darkened the page behind it, making its dark text hard to read. The page is now brightened instead.
+
 ## 3.2.4 (2026-10-20)
 
 ### Additions
-- **Export to Google Calendar or Notion** (Progress → Export): tick the upcoming assessments you want, pick the weekday each subject's tasks fall on (or one task's own day), and download a Google Calendar file (.ics) or a Notion database (CSV). Connect only gives a school week, so Connectify works out this year's WA term dates; tick Early Easter if your school's April holidays start a week early. Assessments whose outline gives a date instead of a week now land in that date's real term and week, in the Progress graph and predictions too. Exams can be merged into one Semester exam event in either file. Everything is made on your computer, with no sign-in.
-- **Estimate Grade** (in the new Estimator): pick a class and type the marks you think you'll get on any of its unmarked tasks (`85`, `85%` or `17/20`) to see what your average would be. One mark is enough: tasks you leave blank are left out, just as Connect leaves out unmarked tasks. Fill in every one to see your final mark. Your typed marks are kept until you press Clear Marks.
 - **Predictions on upcoming assessments**: each unmarked task shows a one-line Low • Mid • High panel beside its Type dropdown, in the Predictor's colours. If there isn't enough data yet, it says what the prediction still needs. The panel disappears once the task is marked.
-- **Expanded statistics panels** (Settings → Statistics Panels, off by default): show the statistics on subject rows, or on every row, as larger cards with your Score, Rank and the cohort Average up top, the five boxplot values below, and SD, z-score and standing underneath. Your Score's colour grows more vivid the further you beat your predicted range. Subject cards include the class prediction and cohort size; upcoming tasks show Low, Mid and High with what the prediction is based on. Takes effect after reloading the page.
 - **Show this semester's classes only** (Settings, off by default): hides the other semester's outlines and lists only this semester's classes in every sidebar tool. Connectify switches to Semester 2 once a class shows a final Semester 1 grade, and your Semester 1 results are kept and still used.
 - **Year in Progress data point modes**: a "Show:" dropdown switches each subject's graph between single tasks, a running weighted average and a weighted rolling average of the last three tasks. The cohort mean line is averaged the same way.
 - A "Connectify updated" notice after each update, with a "What's new" button that opens this changelog.
@@ -22,12 +78,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Settings says when the current theme is showing its own wallpaper instead of yours.
 
 ### Changes
-- **Goal Setter** replaces the Target ATAR and Target Grade buttons: one sidebar button with both as tabs. **Estimator** replaces ATAR Estimate and holds the ATAR estimate and the new grade estimate. Their tabs, like the Predictor's, list Grade first (Target Grade, Target ATAR; Estimate Grade, Estimate ATAR), and Target Grade's semester buttons read Semester 1 Target Grade / Semester 2 Target Grade. Each opens on Grade, then reopens on the tab you last used.
 - Every sidebar tool (Predictor, Weakness Analyzer, Year in Progress, ATAR Estimate, Target ATAR, Target Grade and Calibration) now reads your saved results instead of the outline tiles.
-- The sidebar is on every Connect page. Away from Assessment Outlines only Settings works; the other tools are greyed out under a notice with a link to the outlines.
-- A Connect filter on Assessment Outlines no longer greys out the sidebar tools, since they read your saved results.
-- ATAR Estimate: each subject's box now takes your school mark (Connect's mark until you change it), and the scaled score it gives is shown underneath.
-- ATAR Estimate shows a finished semester as Closed and greyed out, like Target ATAR and Target Grade.
 - New school year: last year's saved results are archived before they're cleared, because Connect no longer shows them.
 - The new-year switch now starts as soon as every class is new.
 - Uploaded wallpapers are cropped and scaled to your screen before they're saved, from both Settings and the Theme Customizer, so they take far less storage.
@@ -36,9 +87,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Bars, banners, headings, empty states, paginators and the Select All row no longer get panels or glass pills of their own. They sit straight on the page.
 - Liquid Glass notices and discussions sit straight on your wallpaper instead of on a frosted reading panel.
 - Notice and dialog text uses the theme's main text colour (cream in Quantum Dark) instead of its secondary colour.
-- Full-mode colours you set in the Theme Customizer are kept when you switch back to Basic mode.
-- Picking a preset in the Theme Customizer keeps all of its colours (e.g. Quantum Dark's green secondary text) instead of deriving them from its six Basic colours.
-- Changing a Basic colour re-derives every Full colour based on it, including preset colours and ones you set yourself.
+- Full-mode colours you set in the Theme Customizer win over the Basic colours and are kept when you switch back to Basic mode.
 - Text colours you set in a custom theme are used exactly as set.
 - Classes "View All" buttons use the theme's button colours.
 - The coloured line under card headers uses the theme's border colour.
@@ -52,15 +101,6 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Saved predictions and results are rebuilt once after updating.
 
 ### Fixes
-- Year Progression's data points are plain dots, without the white ring that stood out on wallpapers.
-- ATAR Estimate: the school mark reads from the left like the other calculator boxes, and the scaled score sits under the subject name.
-- A Semester 2 task with the same name as a Semester 1 one (each semester's exam "Close reading") is now its own task: it gets its own prediction instead of the Semester 1 exam's, and counts toward the class's Lowest and Highest Possible marks, Estimate Grade and the class prediction.
-- Year Progression's week editor counts school weeks the way Export's term list does: in an Early Easter year Term 1 is Weeks 1–9 and Term 2 starts at Week 10. Its hints show this year's ranges. Weeks you set before keep the date they had.
-- Year Progression: the graph has the Early Easter checkbox too, shared with Export. A task in a week past the end of a term (Term 1 Week 10 in an Early Easter year) now reads as the next term's week (Term 2 Week 1) in the graph, Export and Predictor alike, matching the date Export gives it.
-- Weakness Analyzer: the radar's labels sit right at the end of their spokes with the score on the same line (in Firefox the score sat lower), and long subject names are no longer cut off. Its checkboxes and "Group by:" now line up with their row.
-- The unselected semester button no longer looks cut off on its left edge.
-- Saving assessment categories in Settings stored all of them as one category called "undefined", so every Type dropdown offered only "undefined". Categories now save under their own names, and a set damaged by this is repaired the next time a page loads (the five standard categories come back; a custom category saved over can't be recovered, so add it again).
-- Connect sometimes shows a class's "Semester 2 Cumulative Percent" heading with nothing under it (seen in Economics, with or without Connectify), so there was no subject average. Connectify now restores the row in Connect's own style with your average worked out from your marked tasks and their weightings, noted as worked out by Connectify, plus the usual statistics panel and class prediction. It shows even while the class is collapsed, and goes away as soon as Connect shows its own row.
 - Year in Progress lost its cohort mean line with "Show this semester's classes only" on, when a class was read before its charts had loaded. Means now come from the saved cohort statistics.
 - The outcome meter appeared on every subject's first marked assessment.
 - Semester 1 tasks listed on Semester 2 panels were treated as Semester 2 tasks.
@@ -82,10 +122,6 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - In Light mode, the Theme Customizer's labels took Connect's grey label colour.
 - The Maintenance Notice lost its red header in dark themes.
 - Liquid Glass drew an extra strip under the Maintenance Notice.
-- Auto-login failed with saved passwords in Chrome, Dia and other Chromium browsers: it pressed Log in before the browser had handed over the password.
-- With "Show this semester's classes only" on, filtering Assessment Outlines to a class showed a blank page: the filtered view made Connectify think it was the other semester and hid the class. A class with no outline this semester now shows a message saying why, with a Back to All button.
-- The Color Theme and Statistics Panels dropdowns in Settings were grey boxes with a heavy dark border in the Default theme (and unstyled in dark themes). They now match the number inputs beside them.
-- "Back to All" did nothing, in the sidebar's filter notice too. It now presses Connect's top-level All filter the way a mouse does, never a semester's own All.
 
 ## 3.2.3 (2026-10-18)
 
