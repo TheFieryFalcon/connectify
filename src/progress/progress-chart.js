@@ -95,12 +95,20 @@
     const firstOrder = points[0].order;
     const lastOrder = points.length ? points[points.length - 1].order : 0;
 
+    const xForOrder = order => 52 + ((order - firstOrder) * 595) / (lastOrder - firstOrder);
     const xFor = index =>
       points.length === 1
         ? 350
         : isHistory && lastOrder > firstOrder
-        ? 52 + ((points[index].order - firstOrder) * 595) / (lastOrder - firstOrder)
+        ? xForOrder(points[index].order)
         : 52 + (index * 595) / (points.length - 1);
+
+    // Dashed Semester 1 | Semester 2 line (progress-semester-divider.js), under the series
+    window.ConnectifyProgressSemesterDivider?.render(svg, {
+      points, xFor, createSvgElement,
+      xForOrder: isHistory && !byAssessment && lastOrder > firstOrder ? xForOrder : null,
+      semesterOf: isHistory ? p => p.semester ?? null : undefined
+    });
 
     /**
      * Plots a polyline series and interactive point markers.

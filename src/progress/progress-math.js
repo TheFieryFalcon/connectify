@@ -62,7 +62,7 @@
     const ordered = eligible.map(s => ({
       ...s,
       tasks: byAssessment
-        ? [...s.tasks].sort((a, b) => a.sequence - b.sequence).map((t, i) => ({ ...t, order: i + 1 }))
+        ? [...s.tasks].sort((a, b) => a.sequence - b.sequence).map((t, i) => ({ ...t, order: i + 1, source: t }))
         : s.tasks
     }));
 
@@ -72,6 +72,9 @@
     const calcFn = window.ConnectifyAtar?.calculate || window.ConnectifyMath?.calculate;
 
     for (const step of steps) {
+      // The semester divider splits rounds by their tasks' own weeks (a round spanning both has none)
+      const atStep = ordered.flatMap(s => s.tasks.filter(t => t.order === step).map(t => t.source || t));
+      const semester = window.ConnectifyProgressSemesterDivider?.commonSemester(atStep) ?? null;
       const rows = ordered.map(s => {
         const completedTasks = s.tasks.filter(t => t.order <= step);
         const totalWeight = completedTasks.reduce((acc, t) => acc + t.weight, 0);
@@ -104,7 +107,8 @@
             caption: '',
             score: calculation.atar === '<30' ? null : Number(calculation.atar),
             display: calculation.atar,
-            order: step
+            order: step,
+            semester
           });
         }
       }

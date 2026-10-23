@@ -155,7 +155,7 @@ const SPLIT_PARTS = {
   'atar-ui.js': ['target-ui-helpers.js', 'grade-estimate.js', 'grade-estimate-ui.js', 'atar-ui-markup.js', 'atar-ui.js'],
   'atar-features.js': ['outline-controls.js', 'atar-features.js'],
   'atar.css': ['atar.css', 'atar-compact.css', 'atar-planner.css', 'atar-estimator.css'],
-  'progress-chart.js': ['school-terms.js', 'progress-chart.js', 'progress-week-editor.js'],
+  'progress-chart.js': ['school-terms.js', 'progress-semester-divider.js', 'progress-chart.js', 'progress-week-editor.js'],
   'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
   'progress-graph.js': ['school-terms.js', 'progress-modes.js', 'progress-early-easter.js', 'progress-panel.js', 'progress-graph.js'],
   'new-grade.js': ['grade-snapshot.js', 'new-grade.js'],
@@ -11447,6 +11447,62 @@ runTest('Test 252: After a refresh the estimated cohort size never steps: spread
     window.ConnectifyCohort = saved.cohort;
     window.__connectTea141 = saved.flag;
   }
+});
+
+runTest('Test 253: Every Year Progression chart has a dashed line between its Semester 1 and Semester 2 tasks or months', () => {
+  delete window.ConnectifyProgressMath;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'progress-math.js'), 'utf8'));
+  delete window.ConnectifyProgressSemesterDivider;
+  delete window.ConnectifyProgressChart;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'progress-chart.js'), 'utf8'));
+  const divider = window.ConnectifyProgressSemesterDivider;
+  const draw = (points, extra = {}) => {
+    const container = document.createElement('div');
+    window.ConnectifyProgressChart.renderChart(container, { points, isHistory: false, byAssessment: false, subjectName: 'English ATAR', ...extra });
+    return container.querySelector('svg');
+  };
+  const task = (name, order, semester, score = 70) => ({ name, order, semester, score, mean: 60, pending: false });
+
+  // Subject chart: the line sits halfway between the last Semester 1 task and the first Semester 2 task
+  let svg = draw([task('Essay', 5, 1), task('Exam', 12, 1), task('Test', 22, 2), task('Final', 30, 2, null)]);
+  let lines = svg.querySelectorAll('line[class="cx-semester-divider"]');
+  assert.strictEqual(lines.length, 1, 'one divider on a chart spanning both semesters');
+  assert.strictEqual(Number(lines[0].getAttribute('x1')), 52 + (595 / 3) * 1.5, 'between tasks 2 and 3');
+  assert.strictEqual(lines[0].getAttribute('x1'), lines[0].getAttribute('x2'), 'the line is vertical');
+  assert.deepStrictEqual(Array.from(svg.querySelectorAll('[class="cx-semester-label"]')).map(t => t.textContent), ['Semester 1', 'Semester 2'], 'both sides are labelled');
+  const kids = Array.from(svg.children);
+  assert.ok(kids.indexOf(lines[0].parentNode) < kids.findIndex(el => el.tagName.toLowerCase() === 'polyline'), 'the divider is drawn under the series');
+
+  // One semester only: no line
+  assert.strictEqual(draw([task('Essay', 5, 1), task('Exam', 12, 1)]).querySelector('[class="cx-semester-divider"]'), null, 'no divider within one semester');
+  // A task's week decides (never later than its outline), else its outline's semester
+  assert.strictEqual(divider.taskSemester({ order: 18, semester: 2 }), 1, 'Term 2 Week 6 is Semester 1 on a Semester 2 outline');
+  assert.strictEqual(divider.taskSemester({ order: 25, semester: 1 }), 1, 'never later than its own outline');
+  assert.strictEqual(divider.taskSemester({ order: null, semester: 2 }), 2, 'no week: the outline decides');
+  svg = draw([task('Essay', 5, 1), task('Undated', null, 2)]);
+  assert.ok(svg.querySelector('[class="cx-semester-divider"]'), 'undated tasks fall back to their outline');
+
+  // Calendar ATAR chart: the line is at the start of Term 2 Week 7 on the time axis
+  const months = [{ name: 'Feb', order: 5, score: 80, display: '80' }, { name: 'Jul', order: 26, score: 82, display: '82' }, { name: 'Oct', order: 40, score: 84, display: '84' }];
+  svg = draw(months, { isHistory: true });
+  const at = (19 - 0.5 - 5) * 595 / 35 + 52;
+  assert.ok(Math.abs(Number(svg.querySelector('[class="cx-semester-divider"]').getAttribute('x1')) - at) < 1e-9, 'months are split at Semester 2\'s first week');
+  assert.strictEqual(draw(months.slice(1), { isHistory: true }).querySelector('[class="cx-semester-divider"]'), null, 'no divider on a Semester 2 only time axis');
+
+  // Assessment rounds: each round's semester comes from its tasks; a round spanning both sits between
+  assert.strictEqual(divider.commonSemester([{ order: 5, semester: 1 }, { order: 22, semester: 2 }]), null, 'a round spanning both semesters has none');
+  assert.strictEqual(divider.commonSemester([{ order: 3, semester: 1 }, { order: null, semester: 1 }]), 1);
+  const rounds = [1, null, 2, 2].map((semester, i) => ({ name: `Assessment round ${i + 1}`, order: i + 1, semester, score: 80, display: '80' }));
+  svg = draw(rounds, { isHistory: true, byAssessment: true });
+  assert.strictEqual(Number(svg.querySelector('[class="cx-semester-divider"]').getAttribute('x1')), 52 + (595 / 3), 'between round 1 and round 3, through the mixed round');
+  const mathJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-math.js'), 'utf8');
+  assert.ok(mathJs.includes('order: i + 1, source: t') && mathJs.includes('commonSemester(atStep)'), 'rounds read their tasks\' real weeks, not the round number');
+
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress.css'), 'utf8');
+  assert.ok(/#connectify-progress \.cx-semester-divider\{[^}]*stroke-dasharray:6 4[^}]*pointer-events:none/.test(css), 'the divider is dashed and never takes the pointer');
+  assert.ok(css.includes('.connectea-dark #connectify-progress .cx-semester-divider{stroke:var(--cx-text-muted'), 'token-routed in dark themes');
+  const manifest = origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('progress-semester-divider.js') > -1 && manifest.indexOf('progress-semester-divider.js') < manifest.indexOf('progress-chart.js'), 'registered before the chart');
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -6,3 +6,5 @@
 #connectify-progress h3{font-weight:700}#connectify-progress .cx-subjects button{font-weight:600}#connectify-progress .cx-legend{font-weight:400}
 /* "Show:" and Early Easter (progress-early-easter.js) share one row; Connect's .eds.cvr label margin and size are reset so both sit on its centre line */
 #connectify-progress .cx-progress-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;margin:0 0 10px}#connectify-progress .cx-progress-controls label{margin:0;font-size:inherit;line-height:inherit}#connectify-progress .cx-progress-easter{display:inline-flex;align-items:center;gap:6px;font-weight:400;cursor:pointer}#connectify-progress .cx-progress-easter input{flex:none;width:16px;height:16px;margin:0;cursor:pointer}
+/* Dashed Semester 1 | Semester 2 divider (progress-semester-divider.js); labels keep the chart text colour */
+#connectify-progress .cx-semester-divider{stroke:#64748b;stroke-width:1.5;stroke-dasharray:6 4;pointer-events:none}#connectify-progress svg text.cx-semester-label{font-weight:600;pointer-events:none}.connectea-dark #connectify-progress .cx-semester-divider{stroke:var(--cx-text-muted, #9bb0c4)}

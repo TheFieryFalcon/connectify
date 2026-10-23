@@ -126,6 +126,7 @@
             "src/atar/atar-ui-markup.js",
             "src/atar/atar-ui.js",
             "src/progress/progress-math.js",
+            "src/progress/progress-semester-divider.js",
             "src/progress/progress-chart.js",
             "src/progress/progress-week-editor.js",
             "src/progress/progress-modes.js",
