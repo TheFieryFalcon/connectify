@@ -4,9 +4,16 @@
 /* The chips and chart are display: flex / block, which would override their hidden attribute */
 #connectify-progress > [hidden] { display: none !important; }
 #cx-export-view { display: flex; flex-direction: column; gap: 12px; }
-#cx-export-view .cx-export-terms { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-weight: 400; }
+/* Connect's .eds.cvr label adds a 5px bottom margin and its own font size, lifting labels off their row */
+#cx-export-view label { margin: 0; font-size: inherit; line-height: inherit; }
+#cx-export-view .cx-export-terms { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; font-weight: 400; }
+#cx-export-view .cx-export-term-list { display: flex; flex-wrap: wrap; row-gap: 8px; }
+#cx-export-view .cx-export-term { display: flex; flex-direction: column; padding: 0 16px; border-left: 1px solid #bacbd8; }
+#cx-export-view .cx-export-term:first-child { padding-left: 0; border-left: 0; }
+#cx-export-view .cx-export-term strong { font-weight: 700; }
+#cx-export-view .cx-export-term span { color: #4a5d70; }
 #cx-export-view .cx-export-check { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; cursor: pointer; }
-#cx-export-view .cx-export-check input { margin: 0; cursor: pointer; }
+#cx-export-view .cx-export-check input { flex: none; width: 16px; height: 16px; margin: 0; cursor: pointer; }
 #cx-export-view .cx-export-list { display: flex; flex-direction: column; }
 #cx-export-view .cx-export-subject { padding: 10px 0; border-top: 1px solid #bacbd8; }
 #cx-export-view .cx-export-subject:last-child { border-bottom: 1px solid #bacbd8; }
@@ -22,7 +29,11 @@
 }
 #cx-export-view .cx-export-week { color: #4a5d70; font-weight: 400; }
 #cx-export-view .cx-export-date { font-weight: 700; white-space: nowrap; }
-#cx-export-view .cx-export-tag { grid-column: 1 / -1; padding-left: 22px; color: #4a5d70; font-size: 12px; font-weight: 400; }
+#cx-export-view :is(.cx-export-name, .cx-export-tag) { padding-left: 22px; }
+/* A task merged into the semester exam has no tick or day: its name is muted and the date keeps its column */
+#cx-export-view .cx-export-task--merged .cx-export-name { color: #4a5d70; font-weight: 400; }
+#cx-export-view .cx-export-task--merged .cx-export-date { grid-column: 4; }
+#cx-export-view .cx-export-tag { grid-column: 1 / -1; color: #4a5d70; font-size: 12px; font-weight: 400; }
 #cx-export-view .cx-export-left,
 #cx-export-view .cx-export-hint,
 #cx-export-view .cx-export-empty { margin: 0; color: #4a5d70; font-weight: 400; }
@@ -33,9 +44,13 @@
 
 .connectea-dark #cx-export-view .cx-export-subject { border-top-color: var(--cx-nav-border, #3b4d5e); }
 .connectea-dark #cx-export-view .cx-export-subject:last-child { border-bottom-color: var(--cx-nav-border, #3b4d5e); }
+.connectea-dark #cx-export-view .cx-export-term { border-left-color: var(--cx-nav-border, #3b4d5e); }
 .connectea-dark #cx-export-view .cx-export-subject-head strong,
+.connectea-dark #cx-export-view .cx-export-term strong,
 .connectea-dark #cx-export-view .cx-export-date { color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #cx-export-view .cx-export-week,
+.connectea-dark #cx-export-view .cx-export-term span,
+.connectea-dark #cx-export-view .cx-export-task--merged .cx-export-name,
 .connectea-dark #cx-export-view .cx-export-tag,
 .connectea-dark #cx-export-view .cx-export-left,
 .connectea-dark #cx-export-view .cx-export-hint,
@@ -52,4 +67,5 @@
 @media (max-width: 760px) {
   #cx-export-view .cx-export-task { grid-template-columns: minmax(0, 1fr) 118px; }
   #cx-export-view .cx-export-week { grid-column: 1; padding-left: 22px; }
+  #cx-export-view .cx-export-task--merged .cx-export-date { grid-column: 2; grid-row: 1; }
 }

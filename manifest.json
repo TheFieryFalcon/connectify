@@ -134,6 +134,7 @@
             "src/progress/export-tasks.js",
             "src/progress/export-ics.js",
             "src/progress/export-csv.js",
+            "src/progress/export-rows.js",
             "src/progress/export-view.js",
             "src/progress/wace-countdown.js",
             "src/progress/compound-progress.js",

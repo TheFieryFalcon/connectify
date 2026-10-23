@@ -17,7 +17,8 @@
   /** SVG markup: 20-100% grid rings, spokes, the score polygon, vertex markers and outer labels. */
   function radarSvg(labels, data) {
     const N = labels.length;
-    const width = 500;
+    // Wide enough for a 24-character label (plus its score) beside a side spoke
+    const width = 760;
     const height = 350;
     const cx = width / 2;
     const cy = height / 2 + 5;
@@ -74,15 +75,20 @@
       `;
     });
 
-    // 5. Category labels positioned outside the outer ring
+    // 5. Category labels just past each spoke's end: the label's nearest corner or edge sits GAP from it.
+    // Baselines are set with y (never dominant-baseline, which Firefox does not pass to the score's tspan).
+    const GAP = 12;
+    const FONT = 11;
     let labelElements = '';
     for (let i = 0; i < N; i++) {
       const a = angle(i);
-      const labelR = R + 24;
-      const lx = cx + labelR * Math.cos(a);
-      const ly = cy + labelR * Math.sin(a);
-
       const cosA = Math.cos(a);
+      const sinA = Math.sin(a);
+      const lx = cx + (R + GAP) * cosA;
+      let ly = cy + (R + GAP) * sinA;
+      if (sinA > 0.5) ly += FONT * 0.8; // below the ring: hang from the point
+      else if (sinA >= -0.5) ly += FONT * 0.35; // beside it: centred on the point
+
       let anchor = 'middle';
       if (cosA > 0.3) anchor = 'start';
       else if (cosA < -0.3) anchor = 'end';
@@ -91,15 +97,12 @@
       const val = data[i];
       const displayName = escapeHtml(name.length > 24 ? name.substring(0, 22) + '…' : name);
 
-      labelElements += `
-        <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="central" fill="#e1eaf3" font-size="11" font-weight="600" font-family="system-ui">
-          ${displayName} <tspan fill="#2ecc71" font-weight="700">(${val}%)</tspan>
-        </text>
-      `;
+      // No whitespace around the label: it would shift the anchored text
+      labelElements += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" fill="#e1eaf3" font-size="${FONT}" font-weight="600" font-family="system-ui">${displayName} <tspan fill="#2ecc71" font-weight="700">(${val}%)</tspan></text>`;
     }
 
     return `
-      <svg viewBox="0 0 ${width} ${height}" style="width:100%;height:100%;display:block;user-select:none;" role="img" aria-label="Weaknesses radar chart">
+      <svg viewBox="0 0 ${width} ${height}" style="width:100%;height:100%;display:block;overflow:visible;user-select:none;" role="img" aria-label="Weaknesses radar chart">
         ${gridPolygons}
         ${spokes}
         ${dataPolygon}

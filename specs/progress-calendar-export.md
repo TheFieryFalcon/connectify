@@ -18,13 +18,15 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 
 ```
 ┌ Progress ───────────────────────────── [← Back to Graph] [Refresh Assessments] ┐
-│ Terms start Mon 2 Feb · Mon 20 Apr · Mon 20 Jul · Mon 12 Oct   [x] Early Easter │
+│ Term 1      │ Term 2           │ Term 3           │ Term 4      [x] Early Easter │
+│ 2 Feb (Week 1) │ 20 Apr (Week 10) │ 20 Jul (Week 21) │ 12 Oct (Week 31)         │
 │ [Expand Subject Outlines]          (only when a class has no cached tasks)      │
-│ [x] Merge exams into one event per semester (.ics)                              │
+│ [x] Merge exams into one event per semester                                     │
 │                                                                                 │
 │ Chemistry ATAR          Day: [Mon ▾]                      [Select All / None]   │
-│   [x] Test 3            Term 2, Week 6       [Subject day ▾]   Mon 25 May       │
-│   [x] Exam              Term 2 Week 9        [Subject day ▾]   Mon 15 Jun  In Semester 1 Exam │
+│   [x] Test 3            Term 2, Week 6       [Default (Mon) ▾] Mon 25 May       │
+│       Exam              Term 2, Week 9                         Mon 15 Jun       │
+│       In Semester 1 Exam                                                        │
 │ English ATAR            Day: [Thu ▾]                                            │
 │   [ ] Essay 2           Term 3 Week 2        [Fri ▾]           Fri 31 Jul       │
 │                                                                                 │
@@ -36,7 +38,7 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 ```
 
 ### 2.1 Term line
-- `Terms start <T1> · <T2> · <T3> · <T4>` for the current calendar year (`Mon 2 Feb` format, the actual start weekday, so a Wednesday start reads `Wed 2 Feb`), then an **Early Easter** checkbox. Toggling it updates the Term 2 date, every preview date and both files at once, and (being the shared term calendar) date captions in the Progress graph and predictions too (`connectify-settings-updated`, `updatePredictionCache`).
+- One cell per term for the current calendar year, split by hairlines: `Term N` (700) over `<start> (Week <n>)` (`2 Feb (Week 1)`, `20 Apr (Week 10)` under Early Easter: the term's first school week of the year, 1–40), then an **Early Easter** checkbox. Toggling it updates the Term 2 date, every preview date and both files at once, and (being the shared term calendar) date captions in the Progress graph and predictions too (`connectify-settings-updated`, `updatePredictionCache`).
 - The checkbox starts at the automatic value (§3.2); the student's choice is stored per year and overrides it. No other term editing.
 
 ### 2.2 Expand Subject Outlines
@@ -45,8 +47,8 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 ### 2.3 Task list
 - **Rows**: every unmarked task (`pending`) of every class from `ConnectifyData.collectClasses(true)` (so "Show this semester's classes only" applies, as in every sidebar tool), grouped under its subject.
 - **Subject heading**: cleaned subject name (same cleaning as the Progress chips / Predictor tabs: `- Semester N` suffix removed), a **Day** select (`Mon`–`Fri`, default `Mon`, `.cx-settings-select`) and Select All / None.
-- **Task row**: tick checkbox, task name, its week as the Progress graph shows it (`Term 2, Week 6`), a per-task day select (`Subject day` (default, follows the heading) or `Mon`–`Fri`), and the export date preview (`Mon 25 May`), updated live on every change.
-- **Exam tag**: while merging is on, each ticked Exam row shows `In Semester N Exam` (secondary ink). Rows stay individually tickable; unticking removes the exam from the merged span.
+- **Task row**: tick checkbox, task name, its week as the Progress graph shows it (`Term 2, Week 6`), a per-task day select (`Default (<subject day>)`, e.g. `Default (Mon)`, follows the heading; or `Mon`–`Fri`), and the export date preview (`Mon 25 May`), updated live on every change.
+- **Merged exams**: while merging is on, each exam in a merged semester exam is disabled (`.cx-export-task--merged`, `aria-disabled`): no tick or day select, name in secondary ink, its week and date in their columns, tagged `In Semester N Exam`. Select None (or turning merging off) unticks / frees them.
 - **Ticks**: every task is ticked by default; unticked tasks stay unticked across visits (by task key); tasks first seen later arrive ticked.
 - **Order**: subjects by their next due task (earliest export date among their upcoming tasks, ticked or not, so ticking never reorders); subjects with no dated task last, A–Z. Within a subject, tasks by export date, undated ones last.
 - **No week**: tasks with no readable week are not rows; one line under the list names each (`No week: <task> (<subject>), …. Set one in the Progress table.`), the only note besides the import hint (UI copy rule: only what the screen cannot show). Tasks that would land after Term 4 are listed the same way (`After Term 4: …`).
@@ -102,11 +104,11 @@ The export uses the Progress graph's own date system and never reads captions, o
 ### 4.3 Task fields
 `{ key: '<subject>::<task.id>', subject (cleaned), name, when, term, week, weight, type, semester, date | null, reason }`; `type` = `ConnectifyTaskTypes.getEffectiveType(subject, task, task.labelsKey)` (overrides count); `semester` = the task's own `semester` (`taskSemester`: Semester 1 is before Term 2 Week 7).
 
-## 5. Exam merge (.ics only)
-- Checkbox `Merge exams into one event per semester (.ics)`, **default on**, stored.
+## 5. Exam merge (both files)
+- Checkbox `Merge exams into one event per semester`, **default on**, stored.
 - Tasks whose effective type is **Exam** (a Test set to Exam merges, an Exam set to Test does not), ticked and dated, grouped by semester **across all subjects**.
 - A semester with **2 or more** such exams gets one all-day event `Semester N Exam` from the first exam date through the last (inclusive); its description lists each exam (`Mon 8 Jun: Exam (Chemistry ATAR)`), and the individual exam events are omitted. A semester with one exam keeps it as a normal event.
-- The CSV always keeps one row per exam.
+- The CSV gets one row `Semester N Exam` instead of the exams: Date `June 8, 2026 → June 19, 2026` (Notion's date range), Subject the exams' subjects (`Chemistry ATAR, Physics ATAR`), Type `Exam`, no weight, Term / Week first – last (`Term 2, Week 7 – Term 2, Week 9`).
 
 ## 6. .ics format (`export-ics.js`)
 - RFC 5545, CRLF line endings, lines folded at 75 octets, UTF-8. Text escaped (`\\`, `\;`, `\,`, newline → `\n`).

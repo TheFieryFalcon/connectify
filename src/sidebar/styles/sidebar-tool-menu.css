@@ -164,8 +164,14 @@
   }
 }
 
+/* Connect's .eds.cvr label adds a 5px bottom margin, lifting labels off their row */
+#connectify-sidebar #connectify-weakness .cx-radar-mode-label {
+  margin: 0;
+}
+
 #connectify-sidebar .cx-weakness-checkbox-label, .cx-weakness-checkbox-label {
   display: flex !important;
+  margin: 0 !important;
   align-items: center !important;
   gap: 8px !important;
   font-size: 12px !important;

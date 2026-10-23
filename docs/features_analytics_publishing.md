@@ -21,7 +21,7 @@ This document details user-facing features 11 through 20, covering Goals and Est
 - **DOM Insertion**: Full-screen modal overlay (`#connectify-progress`).
 - **UI Appearance**: Responsive SVG line chart plotting student marks (blue polyline) vs cohort mean (red polyline) over school weeks with detailed task data table listing completed and pending tasks (grayed out with $\ge 5:1$ contrast).
 - **Functionality**: "Show:" dropdown plots single tasks, a running weighted average or a weighted rolling average of the last three tasks (cohort mean alike); cohort means survive the semester filter (derived from cached boxplots); interactive hover tooltips; chronological week override inputs in table for all tasks (with `.cx-date-warning` on unparsable dates); running course average tracking.
-- **Export**: the header's `Export` lists upcoming assessments by subject (soonest due first) with a weekday per subject or task and the generated WA term dates (Early Easter checkbox); `Google Calendar (.ics)` and `Notion (CSV)` download them, made locally (no sign-in, no new permissions). Spec: `specs/progress-calendar-export.md`.
+- **Export**: the header's `Export` lists upcoming assessments by subject (soonest due first) with a weekday per subject or task and the generated WA term dates (Early Easter checkbox), optionally merging each semester's exams into one event in both files; `Google Calendar (.ics)` and `Notion (CSV)` download them, made locally (no sign-in, no new permissions). Spec: `specs/progress-calendar-export.md`.
 
 ### 13. Weaknesses Radar Chart
 - **Source Module**: [`weakness-radar.js`](file:///Users/uwong/Downloads/2.1.14_0/weakness-radar.js)

@@ -52,16 +52,16 @@
     return monday >= week10 && monday <= addDays(week10, 4);
   }
 
-  /** The four terms: first school day, Monday of Week 1 and number of weeks. */
+  /** The four terms: first school day, Monday of Week 1, number of weeks and first school week of the year (1-40). */
   function terms(year, early) {
     const start = term1Start(year);
     const week1 = mondayOf(start);
     const monday = weeks => addDays(week1, weeks * 7);
     return [
-      { term: 1, start, monday: week1, weeks: early ? 9 : 10 },
-      { term: 2, start: monday(early ? 11 : 12), monday: monday(early ? 11 : 12), weeks: early ? 11 : 10 },
-      { term: 3, start: monday(24), monday: monday(24), weeks: 10 },
-      { term: 4, start: monday(36), monday: monday(36), weeks: 10 }
+      { term: 1, start, monday: week1, weeks: early ? 9 : 10, yearWeek: 1 },
+      { term: 2, start: monday(early ? 11 : 12), monday: monday(early ? 11 : 12), weeks: early ? 11 : 10, yearWeek: early ? 10 : 11 },
+      { term: 3, start: monday(24), monday: monday(24), weeks: 10, yearWeek: 21 },
+      { term: 4, start: monday(36), monday: monday(36), weeks: 10, yearWeek: 31 }
     ];
   }
 
@@ -122,10 +122,12 @@
     return i * 12 + Math.min(12, Math.max(1, week));
   }
 
+  /** "25 May" */
+  const formatDate = date => `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`;
   /** "Mon 25 May" */
-  const formatDay = date => `${WEEKDAYS[date.getUTCDay()]} ${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`;
+  const formatDay = date => `${WEEKDAYS[date.getUTCDay()]} ${formatDate(date)}`;
 
   window.ConnectifySchoolTerms = {
-    term1Start, easterMonday, autoEarlyEaster, earlyEaster, setEarlyEaster, terms, dateFor, orderOf, formatDay, addDays, utc
+    term1Start, easterMonday, autoEarlyEaster, earlyEaster, setEarlyEaster, terms, dateFor, orderOf, formatDate, formatDay, addDays, utc
   };
 })();

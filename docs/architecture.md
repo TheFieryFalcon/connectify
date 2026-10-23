@@ -70,7 +70,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 45. `src/progress/progress-panel.js` (Progress launcher and panel markup)
 46. `src/progress/progress-graph.js` (progress graph modal controller)
 46b. `src/progress/export-tasks.js` (upcoming tasks placed on days for the export)
-46c. `src/progress/export-ics.js` / `export-csv.js` (Google Calendar .ics and Notion CSV builders)
+46c. `src/progress/export-ics.js` / `export-csv.js` (Google Calendar .ics and Notion CSV builders) / `export-rows.js` (one subject's export rows)
 46d. `src/progress/export-view.js` (Progress Export view: task ticks, weekdays, downloads)
 47. `src/progress/wace-countdown.js` (Year 12 exam countdown)
 48. `src/progress/compound-progress.js` (weighted completion progress bars)

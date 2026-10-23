@@ -10782,7 +10782,7 @@ runTest('Test 236: The Predictor subject tabs hide the native scrollbar for a pl
 
 
 const loadExportModules = () => {
-  for (const f of ['assessment/school-terms.js', 'progress/progress-math.js', 'progress/export-tasks.js', 'progress/export-ics.js', 'progress/export-csv.js']) {
+  for (const f of ['assessment/school-terms.js', 'progress/progress-math.js', 'progress/export-tasks.js', 'progress/export-ics.js', 'progress/export-csv.js', 'progress/export-rows.js']) {
     eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8'));
   }
   return { terms: window.ConnectifySchoolTerms, tasks: window.ConnectifyExportTasks, ics: window.ConnectifyExportIcs, csv: window.ConnectifyExportCsv };
@@ -10810,6 +10810,10 @@ runTest('Test 238: Export term calendar: Term 1 rule, Early Easter, spill-over a
   assert.strictEqual(terms.formatDay(terms.terms(2027, true)[1].start), 'Mon 19 Apr');
   assert.strictEqual(terms.formatDay(terms.terms(2027, true)[2].start), 'Mon 19 Jul');
   assert.deepStrictEqual(terms.terms(2026, true).map(t => t.weeks), [9, 11, 10, 10]);
+  // Each term's first school week of the year (1-40): Term 2 starts in Week 10 under Early Easter
+  assert.deepStrictEqual(terms.terms(2026, true).map(t => t.yearWeek), [1, 10, 21, 31]);
+  assert.deepStrictEqual(terms.terms(2027, false).map(t => t.yearWeek), [1, 11, 21, 31]);
+  assert.strictEqual(terms.formatDate(terms.term1Start(2026)), '2 Feb');
   // Wednesday start: Week 1 is Wed-Fri, so Mon/Tue clamp to the start; Week 2 starts the next Monday
   assert.strictEqual(terms.formatDay(terms.dateFor(2028, 1, 1, 1, false)), 'Wed 2 Feb');
   assert.strictEqual(terms.formatDay(terms.dateFor(2028, 1, 1, 5, false)), 'Fri 4 Feb');
@@ -10904,7 +10908,7 @@ runTest('Test 240: Export .ics: all-day events, stable UIDs, escaping, folding a
   assert.strictEqual(folded.split('\r\n').map((l, i) => (i ? l.slice(1) : l)).join(''), 'DESCRIPTION:' + 'é'.repeat(80), 'folding never splits a character');
 });
 
-runTest('Test 241: Export CSV for Notion: BOM, columns, quoting, dates and weights', () => {
+runTest('Test 241: Export CSV for Notion: BOM, columns, quoting, dates, weights and the merged semester exam', () => {
   const { csv } = loadExportModules();
   const text = csv.build([
     exportItem('a', 'Exam', 'Chemistry ATAR', '2026-06-08', { type: 'Exam', weight: 30 }),
@@ -10916,6 +10920,17 @@ runTest('Test 241: Export CSV for Notion: BOM, columns, quoting, dates and weigh
   assert.strictEqual(lines[1], 'Exam (Chemistry ATAR),"June 8, 2026",Chemistry ATAR,Exam,30,"Term 2, Week 9"');
   assert.strictEqual(lines[2], '"Essay ""final"", v2 (English ATAR)","May 25, 2026",English ATAR,Test,,"Term 2, Week 6"');
   assert.strictEqual(lines[3], '', 'ends with CRLF');
+  const exams = [
+    exportItem('a', 'Exam', 'Chemistry ATAR', '2026-06-08', { type: 'Exam', weight: 30, when: 'Term 2, Week 7' }),
+    exportItem('b', 'Exam', 'Physics ATAR', '2026-06-19', { type: 'Exam' }),
+    exportItem('c', 'Essay', 'English ATAR', '2026-05-25')
+  ];
+  const merged = csv.build(exams, { merge: true }).slice(1).split('\r\n');
+  assert.deepStrictEqual(merged.slice(1, 3), [
+    'Essay (English ATAR),"May 25, 2026",English ATAR,Test,,"Term 2, Week 9"',
+    'Semester 1 Exam,"June 8, 2026 → June 19, 2026","Chemistry ATAR, Physics ATAR",Exam,,"Term 2, Week 7 – Term 2, Week 9"'
+  ], 'merged exams become one row spanning first to last exam (Notion date range)');
+  assert.strictEqual(csv.build(exams, { merge: false }).split('\r\n').length, 5, 'unmerged: a row per task');
 });
 
 runTest('Test 242: Export view mounts in the Progress header, swaps out the graph and stores its choices', () => {
@@ -10947,8 +10962,10 @@ runTest('Test 242: Export view mounts in the Progress header, swaps out the grap
     const text = find(view.view, () => true).map(n => n.textContent).join('|');
     const year = new Date().getFullYear();
     const T = window.ConnectifySchoolTerms;
-    const starts = T.terms(year, T.autoEarlyEaster(year)).map(t => T.formatDay(t.start)).join(' · ');
-    assert.ok(text.includes(`Terms start ${starts}`), 'the term line lists the four starts');
+    const cells = find(view.view, n => n.className === 'cx-export-term').map(n => n.children.map(c => c.textContent).join(' '));
+    assert.deepStrictEqual(cells, T.terms(year, T.autoEarlyEaster(year)).map(t => `Term ${t.term} ${T.formatDate(t.start)} (Week ${t.yearWeek})`), 'each term has its own cell: its start and its first school week');
+    assert.ok(text.includes('Merge exams into one event per semester') && !text.includes('per semester (.ics)'), 'the merge option covers both files');
+    assert.strictEqual(find(view.view, n => n.dataset?.cxFocus === 'taskday:Physics ATAR::p1')[0].children[0].textContent, 'Default (Mon)', 'the task day defaults to the subject day, named');
     assert.ok(text.includes('Google Calendar (.ics)') && text.includes('Notion (CSV)'));
     assert.ok(text.includes('To update an earlier export, import into a new calendar.'));
     const tick = find(view.view, n => n.type === 'checkbox' && n.dataset.cxFocus === 'tick:Physics ATAR::p1')[0];
@@ -10970,7 +10987,7 @@ runTest('Test 242: Export view mounts in the Progress header, swaps out the grap
   }
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(g => (g.js || []).includes('src/progress/progress-graph.js'));
-  const order = ['progress-graph.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js', 'export-view.js'].map(f => group.js.indexOf(`src/progress/${f}`));
+  const order = ['progress-graph.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js', 'export-rows.js', 'export-view.js'].map(f => group.js.indexOf(`src/progress/${f}`));
   assert.ok(order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), 'export scripts load after progress-graph.js in order');
   assert.ok(group.matches.every(m => m.includes('assessment-outlines')), 'outlines page only');
   assert.ok((group.css || []).includes('src/progress/export-view.css') || manifest.content_scripts.some(g => (g.css || []).includes('src/progress/export-view.css')));
@@ -10978,6 +10995,56 @@ runTest('Test 242: Export view mounts in the Progress header, swaps out the grap
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.css'), 'utf8');
   assert.ok(cssHasToken(css, '.connectea-dark #cx-export-view button.cx-export-download { background: #2563eb;'), 'dark download buttons take the primary button token');
   assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
+});
+
+runTest('Test 244: Exams merged into a semester exam show no tick or day; export and Weakness labels sit on their row', () => {
+  loadExportModules();
+  const saved = { types: window.ConnectifyTaskTypes, chart: window.ConnectifyProgressChart };
+  window.ConnectifyTaskTypes = { getEffectiveType: (subject, task) => (/exam/i.test(task.name) ? 'Exam' : 'Test') };
+  window.ConnectifyProgressChart = saved.chart || { createElement: (tag, text, cls) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== null && text !== undefined) el.textContent = text; return el; } };
+  try {
+    const { groups } = window.ConnectifyExportTasks.build([
+      { name: 'Chemistry ATAR', tasks: [{ id: 'c1', name: 'Lab', order: 31, pending: true, sequence: 0, semester: 2 }, { id: 'c2', name: 'Exam', order: 41, pending: true, sequence: 1, semester: 2 }] },
+      { name: 'Physics ATAR', tasks: [{ id: 'p1', name: 'Semester 2 exam', order: 42, pending: true, sequence: 0, semester: 2 }] }
+    ], { year: 2026, early: true, subjectDays: { 'Chemistry ATAR': 3 } });
+    const mergedIn = new Map(window.ConnectifyExportTasks.examGroups(window.ConnectifyExportTasks.ticked(groups)).flatMap(g => g.exams.map(e => [e.key, g.semester])));
+    const chem = groups.find(g => g.subject === 'Chemistry ATAR');
+    const block = window.ConnectifyExportRows.subjectBlock(chem, { mergedIn, update: () => {}, track: el => el });
+    const rows = block.children.filter(n => n.className.includes('cx-export-task'));
+    const walk = n => [n, ...(n.children || []).flatMap(walk)];
+    const [lab, exam] = rows.map(walk);
+    assert.ok(lab.some(n => n.type === 'checkbox') && lab.some(n => n.tagName === 'SELECT'), 'a task outside the merge keeps its tick and day');
+    assert.strictEqual(lab.find(n => n.tagName === 'SELECT').children[0].textContent, 'Default (Wed)', 'the default names the subject day');
+    assert.ok(rows[1].classList.contains('cx-export-task--merged') && rows[1].getAttribute('aria-disabled') === 'true', 'a merged exam row is disabled');
+    assert.ok(!exam.some(n => n.type === 'checkbox' || n.tagName === 'SELECT'), 'a merged exam renders no tick or day');
+    assert.ok(exam.some(n => n.textContent === 'In Semester 2 Exam'), 'and names the exam it is part of');
+  } finally {
+    Object.assign(window, { ConnectifyTaskTypes: saved.types, ConnectifyProgressChart: saved.chart });
+  }
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.css'), 'utf8');
+  assert.ok(css.includes('#cx-export-view label { margin: 0; font-size: inherit; line-height: inherit; }'), "Connect's .eds.cvr label margin and size never lift export labels off their row");
+  assert.ok(/\.cx-export-task--merged \.cx-export-date \{ grid-column: 4; \}/.test(css), 'a merged row keeps its date in the date column');
+  const weakness = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-tool-menu.css'), 'utf8');
+  assert.ok(/#connectify-weakness \.cx-radar-mode-label \{\s*margin: 0;/.test(weakness) && /\.cx-weakness-checkbox-label \{\s*display: flex !important;\s*margin: 0 !important;/.test(weakness), 'Weakness labels drop the Connect label margin');
+});
+
+runTest('Test 245: Radar labels sit just past their spoke ends, scores on the same baseline, never clipped', () => {
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/weakness-radar-view.js'), 'utf8'));
+  const svg = window.ConnectifyWeaknessView.radarSvg(['Exam', 'Test', 'Application', 'Essay', 'Take-Home'], [72, 85, 64, 90, 78]);
+  const labels = [...svg.matchAll(/<text x="([\d.]+)" y="([\d.]+)" text-anchor="(\w+)"[^>]*font-size="11"[^>]*>([^<]*)<tspan/g)];
+  assert.strictEqual(labels.length, 5, 'one label per spoke');
+  assert.ok(!svg.includes('dominant-baseline'), 'baselines come from y: Firefox does not pass dominant-baseline to the score tspan');
+  assert.ok(labels.every(m => m[4] === m[4].trim() + ' '), 'no whitespace around a label shifts its anchor');
+  assert.ok(svg.includes('overflow:visible'), 'long labels are never clipped at the viewBox');
+  const [w] = svg.match(/viewBox="0 0 (\d+) /).slice(1).map(Number);
+  const cx = w / 2, cy = 180, R = 115;
+  labels.forEach((m, i) => {
+    const a = -Math.PI / 2 + (2 * Math.PI * i) / 5;
+    const dx = +m[1] - (cx + R * Math.cos(a));
+    assert.ok(Math.abs(dx - 12 * Math.cos(a)) < 0.2, `label ${i} anchors 12px past its spoke end`);
+  });
+  assert.deepStrictEqual(labels.map(m => m[3]), ['middle', 'start', 'start', 'end', 'end']);
+  assert.ok(+labels[0][2] < cy - R && +labels[2][2] > cy + R * Math.sin(-Math.PI / 2 + 4 * Math.PI / 5), 'top labels sit above their point, lower ones hang below it');
 });
 
 runTest('Test 243: Date captions take their real term and week from the term calendar, in the graph and the export', () => {
