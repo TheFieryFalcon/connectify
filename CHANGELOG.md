@@ -24,25 +24,22 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - The Predictor's tabs are now Predict Grade and Predict ATAR.
 - Tools open on Grade, then reopen on the tab you last used.
 - **Sidebar everywhere**: the sidebar is on every Connect page, with Settings available outside Assessment Outlines.
-- Connect's outline filters no longer grey out the sidebar tools.
 - **ATAR Estimate**: enter your school mark and see its scaled score.
-- ATAR Estimate locks semesters that have final grades.
 - **Smarter predictions**: based on your own results in each subject, with recent tasks counting more.
-- Prediction ranges are balanced evenly around Mid.
-- Assessments listed with a date are placed in the right term and week.
-- Weeks past the end of a term roll into the next term.
-- Year Progression's week editor follows the real term calendar.
-- Theme Customizer presets keep all of their own colours.
-- Changing a Basic colour updates every colour built from it.
-- The Assessment Outlines tab is highlighted while you're on it.
-- **Faster dark themes**: menus and clicks respond far more quickly.
-- Year Progression's data points are plain dots.
+- Changing a Basic colour in the Theme Customizer updates every colour built from it.
 
 ### Fixes
 - ATAR scaled scores no longer squash marks towards the middle.
+- ATAR Estimate no longer lets you edit semesters that already have final grades.
+- Prediction ranges are no longer lopsided: Low and High now sit evenly around Mid.
 - Predictions no longer double-penalise a subject that's weak in one task type.
 - Term 4 predictions now use your Semester 2 results.
 - Same-named tasks in Semester 1 and 2 get their own predictions.
+- Assessments listed with a date are placed in the right term and week.
+- Weeks past the end of a term now roll into the next term.
+- Year Progression's week editor now follows the real WA term calendar.
+- Year Progression's data points no longer have a white ring that stood out on wallpapers.
+- Connect's outline filters no longer grey out the sidebar tools.
 - Saved data no longer splits depending on how you open Assessment Outlines.
 - Saved categories no longer turn into "undefined", and affected sets are repaired automatically.
 - Classes missing Connect's Cumulative Percent row get one worked out from your marks.
@@ -55,7 +52,10 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Weakness Analyzer's checkboxes line up with their rows.
 - The Predictor's subject tab scrollbar no longer grows on hover.
 - The unselected semester button is no longer cut off.
+- Theme Customizer presets no longer lose some of their colours (e.g. Quantum Dark's green text).
 - Settings dropdowns match the rest of the panel.
+- The Assessment Outlines tab is highlighted while you're on it, instead of My Connect.
+- Dark themes no longer lag when you click menus.
 - Top navigation links are themed on every page.
 - Dialogs in grey Liquid Glass stay readable.
 
