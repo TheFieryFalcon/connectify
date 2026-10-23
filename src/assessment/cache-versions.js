@@ -13,7 +13,7 @@
 
   const CACHE_VERSIONS = {
     PREDICTOR: 'v21_20261024_pred',
-    RESULTS: 'v11_20261024_results',
+    RESULTS: 'v12_20261024_results',
     SETTINGS: 'v4_20261001_settings',
     COHORT: 'v7_20261024_cohort'
   };

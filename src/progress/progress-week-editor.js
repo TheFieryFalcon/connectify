@@ -5,7 +5,7 @@
  * week input when no date could be read. Overrides are school weeks of the year, numbered through the term
  * calendar as the Export's term starts are (under Early Easter Term 2 starts at Week 10), saved as "w17"
  * under connectea:time_override:<subject>:<task id or name>; repeated task names each get their own id key.
- * Older bare numbers (10-week terms) are shown as this calendar's week and kept until changed.
+ * Older bare numbers, saved before Early Easter was known, are the same school week ("17" is "w17").
  * Exposes window.ConnectifyProgressWeekEditor.
  */
 (() => {
@@ -14,7 +14,7 @@
   const createElement = (...args) => window.ConnectifyProgressChart.createElement(...args);
   const thisYear = () => new Date().getFullYear();
 
-  // A saved override as the school week the editor shows ("w10", or an older "11" -> 10 under Early Easter)
+  // A saved override as the school week the editor shows ("w10", or an older bare "10")
   function shownWeek(saved) {
     const order = window.ConnectifyUtils.customWeekOrder(saved);
     const week = order === null ? null : window.ConnectifySchoolTerms.schoolWeek(order);
@@ -144,7 +144,7 @@
         } else if (e.key === 'Escape') {
           e.preventDefault();
           input.value = initialVal;
-          // The override as it was saved (an older bare number keeps its own meaning)
+          // The override as it was saved
           if (savedTime) localStorage.setItem(isDuplicateName && specificKey ? specificKey : (specificKey || genericKey), savedTime);
           else removeOverride();
           if (document.activeElement === input && typeof input.blur === 'function') {

@@ -3141,20 +3141,20 @@ runTest('Test 159: Cohort observer re-runs when the main-world bridge stamps box
 
 runTest('Test 160: Progress Graph week overrides mean the same week to the scraper and the predictor', () => {
   const { customWeekOrder } = window.ConnectifyUtils;
-  // Overrides are typed as school weeks 1-40 with 10-week terms (17 = Term 2 Week 7); order uses 12-week terms
-  assert.strictEqual(customWeekOrder('17'), 19, 'Week 17 must be Term 2 Week 7');
+  // Overrides are school weeks of the year; an older bare number is the same week as "w17"
+  assert.strictEqual(customWeekOrder('17'), customWeekOrder('w17'), 'an older bare 17 is school week 17');
   assert.strictEqual(customWeekOrder('t2w7'), 19, 't2w7 must be Term 2 Week 7');
   assert.strictEqual(customWeekOrder('Term 3, Week 4'), 28, 'Term 3, Week 4 must be order 28');
   assert.strictEqual(customWeekOrder(''), null, 'An empty override is not a week');
   assert.strictEqual(customWeekOrder('soon'), null, 'Unreadable text is not a week');
 
   const dates = window.ConnectifyPredictorDates;
-  assert.strictEqual(dates.formatOverrideWeek('17').display, 'Term 2, Week 7', 'The predictor must show week 17 as Term 2, Week 7');
+  assert.strictEqual(dates.formatOverrideWeek('17').order, customWeekOrder('w17'), 'the predictor reads week 17 as the scraper does');
   mockLocalStorage.clear();
   mockLocalStorage.setItem('connectea:time_override:Physics ATAR:Overridden Task', '17');
   const overridden = dates.getTaskChronologicalStamp({ name: 'Overridden Task', semester: 1, sequence: 0 }, 'Physics ATAR');
-  const captioned = dates.getTaskChronologicalStamp({ name: 'Captioned Task', semester: 1, sequence: 0, order: 19 }, 'Physics ATAR');
-  assert.strictEqual(overridden, captioned, 'An override of 17 must sort exactly where the scraper places it (order 19)');
+  const captioned = dates.getTaskChronologicalStamp({ name: 'Captioned Task', semester: 1, sequence: 0, order: customWeekOrder('w17') }, 'Physics ATAR');
+  assert.strictEqual(overridden, captioned, 'An override of 17 must sort exactly where the scraper places school week 17');
   mockLocalStorage.clear();
 });
 
@@ -4079,9 +4079,8 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   const row1 = rows[1];
   const r1EditBtn = row1.querySelector('.cx-time-edit-btn');
   assert.ok(r1EditBtn, 'Task 1 must have edit button for week 17');
-  // An older bare 17 is Term 2 Week 7 (order 19), shown as this year's school week (16 under Early Easter)
-  const shown17 = window.ConnectifySchoolTerms.schoolWeek(19);
-  assert.ok(r1EditBtn.title.includes(`Custom week ${shown17} `), 'Task 1 must inherit week 17 as first occurrence');
+  // An older bare 17 is converted to school week 17, Early Easter or not
+  assert.ok(r1EditBtn.title.includes('Custom week 17 '), 'Task 1 must inherit week 17 as first occurrence');
 
   // Row 2 (Task 2): Second occurrence does NOT inherit generic key!
   // It has order: null, so it renders the input field with warning
@@ -8348,7 +8347,7 @@ runTest('Test 183: Expand All adds every expanded subject to a cache that alread
     cards = [];
     assert.deepStrictEqual(names(), ['12 Chemistry ATAR', '12 Philosophy and Ethics ATAR', '12 Physics ATAR'], 'the persisted cache keeps every subject');
     const src = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/cache-versions.js'), 'utf8');
-    assert.ok(src.includes("RESULTS: 'v11_20261024_results'"), 'caches from before the term-calendar semester cutoff are invalidated');
+    assert.ok(src.includes("RESULTS: 'v12_20261024_results'"), 'caches from before older week overrides were read as school weeks are invalidated');
   } finally {
     document.querySelectorAll = origQSA;
     mockLocalStorage.clear();
@@ -11177,7 +11176,7 @@ runTest('Test 246: Weeks past a term\'s end read as the next term\'s everywhere;
   assert.ok(manifest.indexOf('src/progress/progress-early-easter.js') > manifest.indexOf('src/assessment/school-terms.js') && manifest.indexOf('src/progress/progress-early-easter.js') < manifest.indexOf('src/progress/progress-graph.js'));
 });
 
-runTest('Test 247: The week editor numbers school weeks through the term calendar, as the Export does; older bare numbers keep their meaning', () => {
+runTest('Test 247: The week editor numbers school weeks through the term calendar, as the Export does; older bare numbers are the same school week', () => {
   const { terms } = loadExportModules();
   // 2026 with Early Easter: Term 1 is Weeks 1-9, Term 2 Weeks 10-20, Term 3 21-30, Term 4 31-40
   assert.deepStrictEqual([1, 9, 10, 20, 21, 30, 31, 40].map(n => terms.weekOrder(n, 2026, true)), [1, 9, 13, 23, 25, 34, 37, 46]);
@@ -11197,7 +11196,8 @@ runTest('Test 247: The week editor numbers school weeks through the term calenda
     const t2 = terms.terms(year, true)[1].yearWeek;
     assert.strictEqual(customWeekOrder(`w${t2}`), 13, 'the week the Export names as Term 2\'s start is Term 2 Week 1');
     assert.strictEqual(customWeekOrder('w17'), 12 + 17 - t2 + 1, 'w17 is counted through the calendar');
-    assert.strictEqual(customWeekOrder('17'), 19, 'an older bare 17 stays Term 2 Week 7');
+    assert.strictEqual(customWeekOrder('17'), customWeekOrder('w17'), 'an older bare 17, saved without Early Easter, is converted to w17');
+    assert.strictEqual(customWeekOrder(String(t2)), 13, 'an older bare Term 2 start is Term 2 Week 1');
     assert.strictEqual(customWeekOrder('t2w7'), 19);
     terms.setEarlyEaster(year, false);
     assert.strictEqual(customWeekOrder('w17'), 19, 'without Early Easter both readings agree');

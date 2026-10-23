@@ -104,7 +104,7 @@
     return null;
   }
 
-  /** A Progress Graph override (school weeks 1-40 in 10-week terms, or "t2w7") as { term, week, order, display }. */
+  /** A Progress Graph override (school week of the year, "w17" or an older bare "17", or "t2w7") as { term, week, order, display }. */
   function formatOverrideWeek(val) {
     const order = window.ConnectifyUtils.customWeekOrder(val);
     if (order === null) return null;
