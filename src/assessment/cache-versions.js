@@ -12,7 +12,7 @@
   const { removeStorageKeys, isBaselineKey } = window.ConnectifyUtils;
 
   const CACHE_VERSIONS = {
-    PREDICTOR: 'v18_20261022_pred',
+    PREDICTOR: 'v19_20261023_pred',
     RESULTS: 'v10_20261019_results',
     SETTINGS: 'v4_20261001_settings',
     COHORT: 'v6_20261018_cohort'
@@ -67,7 +67,8 @@
           'connectify:atar_percentage',
           'connectify:auto_expand',
           'connectify:semester_filter',
-          'connectify:panel_view'
+          'connectify:panel_view',
+          'connectify:school_terms'
         ];
         for (const k of directKeys) localStorage.removeItem(k);
         // Baselines live under singular and legacy plural prefixes (see ConnectifyUtils.BASELINE_PREFIXES)

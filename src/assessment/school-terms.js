@@ -1,10 +1,11 @@
 /**
  * Connectify School Terms
  *
- * Generated WA school-term calendar for the assessment export. Term 1 starts on the Monday falling
- * 1–4 Feb, else the Wednesday falling 31 Jan–3 Feb (Week 1 is then Wed–Fri). Terms are 10 weeks with
- * 2-week breaks; Early Easter makes Term 1 nine weeks and Term 2 eleven (Terms 3 and 4 unchanged), and
- * is on by default when Easter Monday falls in Term 1 Week 10. Dates are UTC midnight.
+ * Generated WA school-term calendar, shared by the caption parser (a date caption's term and week) and
+ * the assessment export. Term 1 starts on the Monday falling 1–4 Feb, else the Wednesday falling
+ * 31 Jan–3 Feb (Week 1 is then Wed–Fri). Terms are 10 weeks with 2-week breaks; Early Easter makes
+ * Term 1 nine weeks and Term 2 eleven (Terms 3 and 4 unchanged), and is on by default when Easter
+ * Monday falls in Term 1 Week 10 (the student's choice is kept per year). Dates are UTC midnight.
  * Exposes window.ConnectifySchoolTerms.
  */
 (() => {
@@ -83,8 +84,48 @@
     return date < list[t - 1].start ? list[t - 1].start : date;
   }
 
+  // The student's Early Easter choice per year; the export stored it with its own choices at first
+  const STORAGE_KEY = 'connectify:school_terms';
+  const readJson = key => {
+    try {
+      const value = JSON.parse(localStorage.getItem(key) || '{}');
+      return value && typeof value === 'object' ? value : {};
+    } catch { return {}; }
+  };
+
+  /** Early Easter for `year`: the student's choice, else the automatic value. */
+  function earlyEaster(year) {
+    const saved = readJson(STORAGE_KEY).earlyEaster?.[year];
+    if (typeof saved === 'boolean') return saved;
+    const account = window.ConnectifyUtils?.accountKey?.();
+    const legacy = account ? readJson(`connectify:calendar_export:${account}`).earlyEaster?.[year] : undefined;
+    return typeof legacy === 'boolean' ? legacy : autoEarlyEaster(year);
+  }
+
+  function setEarlyEaster(year, on) {
+    const prefs = readJson(STORAGE_KEY);
+    prefs.earlyEaster = { ...(prefs.earlyEaster || {}), [year]: Boolean(on) };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs)); } catch {}
+  }
+
+  /**
+   * A date's chronological order in the Progress graph's 12 slots per term: (term - 1) * 12 + week.
+   * Holidays count on from the term before (Term 1 Week 11), never past slot 12; dates before Term 1
+   * are Week 1.
+   */
+  function orderOf(date, early = earlyEaster(date.getUTCFullYear())) {
+    const list = terms(date.getUTCFullYear(), early);
+    if (date < list[0].start) return 1;
+    let i = 0;
+    while (i < 3 && date >= list[i + 1].monday) i++;
+    const week = Math.floor((date - list[i].monday) / (7 * DAY)) + 1;
+    return i * 12 + Math.min(12, Math.max(1, week));
+  }
+
   /** "Mon 25 May" */
   const formatDay = date => `${WEEKDAYS[date.getUTCDay()]} ${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`;
 
-  window.ConnectifySchoolTerms = { term1Start, easterMonday, autoEarlyEaster, terms, dateFor, formatDay, addDays, utc };
+  window.ConnectifySchoolTerms = {
+    term1Start, easterMonday, autoEarlyEaster, earlyEaster, setEarlyEaster, terms, dateFor, orderOf, formatDay, addDays, utc
+  };
 })();

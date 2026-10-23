@@ -36,7 +36,7 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 ```
 
 ### 2.1 Term line
-- `Terms start <T1> · <T2> · <T3> · <T4>` for the current calendar year (`Mon 2 Feb` format, the actual start weekday, so a Wednesday start reads `Wed 2 Feb`), then an **Early Easter** checkbox. Toggling it updates the Term 2 date, every preview date and both files at once.
+- `Terms start <T1> · <T2> · <T3> · <T4>` for the current calendar year (`Mon 2 Feb` format, the actual start weekday, so a Wednesday start reads `Wed 2 Feb`), then an **Early Easter** checkbox. Toggling it updates the Term 2 date, every preview date and both files at once, and (being the shared term calendar) date captions in the Progress graph and predictions too (`connectify-settings-updated`, `updatePredictionCache`).
 - The checkbox starts at the automatic value (§3.2); the student's choice is stored per year and overrides it. No other term editing.
 
 ### 2.2 Expand Subject Outlines
@@ -57,7 +57,7 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 - One hint line under them: `To update an earlier export, import into a new calendar.` (Google's import skips events whose UID already exists, so moved tasks would not update in place.)
 - Files: `connectify_assessments_<year>.ics` / `connectify_assessments_<year>.csv`, downloaded with a Blob and `<a download>` (the pattern in `theme-customizer-controls.js`), revoking the object URL afterwards.
 
-## 3. School-term calendar (`school-terms.js`)
+## 3. School-term calendar (`src/assessment/school-terms.js`)
 ### 3.1 Term 1 start
 - The **Monday falling 1–4 Feb**; in years with none, the **Wednesday falling 31 Jan–3 Feb**.
 - **Week 1** is the week containing the start day; a Wednesday start makes Week 1 Wed–Fri. "Week n" anchors on the Monday of week 1 (`w1Mon`, the Monday before a Wednesday start).
@@ -82,12 +82,15 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 - **Year**: the current calendar year. Public holidays and pupil-free days are not modelled.
 
 ### 3.3 API
-`ConnectifySchoolTerms`: `term1Start(year)`, `easterMonday(year)`, `autoEarlyEaster(year)`, `terms(year, early)` → `[{ start, weeks }] x4`, `dateFor(year, term, week, weekday, early)` → `Date | null` (§4.2).
+`ConnectifySchoolTerms`: `term1Start(year)`, `easterMonday(year)`, `autoEarlyEaster(year)`, `earlyEaster(year)` / `setEarlyEaster(year, on)` (`connectify:school_terms`; the export's earlier per-account `earlyEaster` is still read), `terms(year, early)` → `[{ start, weeks }] x4`, `dateFor(year, term, week, weekday, early)` → `Date | null` (§4.2), `orderOf(date, early)` → a date's 12-slot order (holidays count on from the term before, capped at Week 12; before Term 1 is Week 1).
+
+### 3.4 Date captions
+Loaded before the caption parser in both content-script groups: `orderHint` reads a term/week caption as before, else a calendar-date caption (`Fri 13 Mar`, `14th March`, this year) through `dateOrder` → `orderOf`, so the graph, predictions and export all place it in its real term and week (`Fri 13 Mar 2026` = Term 1 Week 6). `resolveTaskOrder` re-reads date captions after the week override, so cached orders from before (weeks counted from 26 Jan) and Early Easter changes apply without a re-scrape. Predictor cache version bumped; results caches are kept.
 
 ## 4. Task date resolution (`export-tasks.js`)
 ### 4.1 Which week
 The export uses the Progress graph's own date system and never reads captions, overrides or the DOM itself:
-- Each task's **`order`** from `ConnectifyData.collectClasses(true)` (`resolveTaskOrder`: the Progress week override, else the parsed caption's week, a range's first; a date caption becomes a week counted from 26 Jan, as the graph plots it).
+- Each task's **`order`** from `ConnectifyData.collectClasses(true)` (`resolveTaskOrder`: the Progress week override, else the parsed caption's week, a range's first; a date caption becomes its real term and week, §3.4).
 - Decoded by **`ConnectifyProgressMath.termWeek(order)`** (12 slots per term: `term = floor((o - 1) / 12) + 1`, `week = floor((o - 1) % 12) + 1`), the same function behind the graph's `formatTimestamp` label, which the list, `.ics` and CSV show (`Term 2, Week 6`).
 - No `order` → **no week** (§2.3); the student sets one in the Progress table, which the graph and the export then share.
 
@@ -118,15 +121,14 @@ The export uses the Progress graph's own date system and never reads captions, o
 ## 8. Storage
 `connectify:calendar_export:<account>` (`localStorage`, account from `ConnectifyUtils.accountKey()`):
 ```
-{ unticked: [key], subjectDays: { <subject>: 1-5 }, taskDays: { <key>: 1-5 },
-  earlyEaster: { <year>: true | false }, mergeExams: true }
+{ unticked: [key], subjectDays: { <subject>: 1-5 }, taskDays: { <key>: 1-5 }, mergeExams: true }
 ```
-- A preference: Clear Cache keeps it; `clearSettingsCache` removes it. No algorithm version changes (no existing maths changes). Docs: add the key to `docs/apis_and_storage.md`.
+- A preference: Clear Cache keeps it; `clearSettingsCache` removes it. The Early Easter choice lives in `connectify:school_terms` (§3.3), cleared the same way. Docs: add the key to `docs/apis_and_storage.md`.
 
 ## 9. Modules (new files, each <= 250 lines)
 | File | Export | Role |
 |---|---|---|
-| `src/progress/school-terms.js` | `ConnectifySchoolTerms` | §3 term calendar, Easter, `dateFor` |
+| `src/assessment/school-terms.js` | `ConnectifySchoolTerms` | §3 term calendar, Easter, `dateFor`, `orderOf` (loaded before the parser) |
 | `src/progress/export-tasks.js` | `ConnectifyExportTasks` | §4 upcoming tasks, weeks, dates, order, exam groups |
 | `src/progress/export-ics.js` | `ConnectifyExportIcs` | §5–6 `build(items, opts)` |
 | `src/progress/export-csv.js` | `ConnectifyExportCsv` | §7 `build(items)` |

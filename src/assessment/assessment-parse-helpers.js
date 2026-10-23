@@ -8,14 +8,8 @@
 (() => {
   'use strict';
 
-  /**
-   * Parse a chronological order index from a date/week caption.
-   * Maps Term/Week into a numeric sequence (e.g. Term 2 Week 3 -> 13.0).
-   *
-   * @param {string} text - Raw date or week caption from Connect
-   * @returns {number|null} Sequence number for sorting, or null if unreadable
-   */
-  function orderHint(text) {
+  /** Order from a term/week caption ("Term 2 Week 3" -> 15, 12 slots per term), or null. */
+  function weekOrder(text) {
     // Matches "Term 3, Week 5" or "Term 3 Week 5"
     let match = text.match(/term\s*(\d).*?week[s]?\s*(\d+)/i);
     if (match) {
@@ -33,23 +27,36 @@
     if (match) {
       return +match[1];
     }
+    return null;
+  }
 
-    // Fallback: parse month/day date string
+  /**
+   * Order from a caption that is a calendar date ("Fri 13 Mar", "14th March"), this year: its real term
+   * and week from the generated term calendar (ConnectifySchoolTerms, Early Easter included).
+   * Null for term/week captions and unreadable text.
+   */
+  function dateOrder(text) {
+    if (!text || weekOrder(text) !== null) return null;
     const cleaned = text
       .replace(/(\d)(st|nd|rd|th)\b/gi, '$1')
       .replace(/^(mon|tue|wed|thu|fri|sat|sun)\w*\s+/i, '');
-
-    if (/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(cleaned)) {
-      const year = new Date().getFullYear();
-      const parsedDate = Date.parse(`${cleaned} ${year}`);
-      if (Number.isFinite(parsedDate)) {
-        // Convert to school week starting from late January
-        return (parsedDate - Date.UTC(year, 0, 26)) / 604800000 + 1;
-      }
-    }
-
-    return null;
+    if (!/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(cleaned)) return null;
+    const year = new Date().getFullYear();
+    const parsed = new Date(Date.parse(`${cleaned} ${year}`));
+    if (!Number.isFinite(parsed.getTime())) return null;
+    const date = new Date(Date.UTC(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()));
+    const terms = window.ConnectifySchoolTerms;
+    // Without the calendar, weeks count from late January as before
+    return terms ? terms.orderOf(date) : (date - Date.UTC(year, 0, 26)) / 604800000 + 1;
   }
+
+  /**
+   * Chronological order from a date or week caption: 12 slots per term (Term 2 Week 3 -> 15).
+   *
+   * @param {string} text - Raw date or week caption from Connect
+   * @returns {number|null} Sequence number for sorting, or null if unreadable
+   */
+  const orderHint = text => weekOrder(text) ?? dateOrder(text);
 
   // Mean estimated from a 5-number summary: (min + 2*Q1 + 2*median + 2*Q3 + max) / 8
   const weightedMean = stats => (stats[0] + 2 * stats[1] + 2 * stats[2] + 2 * stats[3] + stats[4]) / 8;
@@ -134,5 +141,5 @@
     return semester ? Math.min(semester, card) : card;
   }
 
-  window.ConnectifyParseHelpers = { orderHint, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_ORDER };
+  window.ConnectifyParseHelpers = { orderHint, dateOrder, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_ORDER };
 })();

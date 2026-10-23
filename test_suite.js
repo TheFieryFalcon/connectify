@@ -2387,8 +2387,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v18_20261022_pred'"), 'predictor-math.js must use v18_20261022_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v18_20261022_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v18_20261022_pred');
+  assert.ok(predMathCode.includes("'v19_20261023_pred'"), 'predictor-math.js must use v19_20261023_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v19_20261023_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v19_20261023_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2481,9 +2481,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v18_20261022_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v19_20261023_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v18_20261022_pred'), 'predictor-math.js must bump version to v18_20261022_pred');
+  assert.ok(predMathJs.includes('v19_20261023_pred'), 'predictor-math.js must bump version to v19_20261023_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -10777,8 +10777,8 @@ runTest('Test 236: The Predictor subject tabs hide the native scrollbar for a pl
 
 
 const loadExportModules = () => {
-  for (const f of ['progress-math.js', 'school-terms.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js']) {
-    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress', f), 'utf8'));
+  for (const f of ['assessment/school-terms.js', 'progress/progress-math.js', 'progress/export-tasks.js', 'progress/export-ics.js', 'progress/export-csv.js']) {
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8'));
   }
   return { terms: window.ConnectifySchoolTerms, tasks: window.ConnectifyExportTasks, ics: window.ConnectifyExportIcs, csv: window.ConnectifyExportCsv };
 };
@@ -10965,7 +10965,7 @@ runTest('Test 242: Export view mounts in the Progress header, swaps out the grap
   }
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(g => (g.js || []).includes('src/progress/progress-graph.js'));
-  const order = ['progress-graph.js', 'school-terms.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js', 'export-view.js'].map(f => group.js.indexOf(`src/progress/${f}`));
+  const order = ['progress-graph.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js', 'export-view.js'].map(f => group.js.indexOf(`src/progress/${f}`));
   assert.ok(order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), 'export scripts load after progress-graph.js in order');
   assert.ok(group.matches.every(m => m.includes('assessment-outlines')), 'outlines page only');
   assert.ok((group.css || []).includes('src/progress/export-view.css') || manifest.content_scripts.some(g => (g.css || []).includes('src/progress/export-view.css')));
@@ -10973,6 +10973,59 @@ runTest('Test 242: Export view mounts in the Progress header, swaps out the grap
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.css'), 'utf8');
   assert.ok(cssHasToken(css, '.connectea-dark #cx-export-view button.cx-export-download { background: #2563eb;'), 'dark download buttons take the primary button token');
   assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
+});
+
+runTest('Test 243: Date captions take their real term and week from the term calendar, in the graph and the export', () => {
+  const { terms } = loadExportModules();
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/assessment-parse-helpers.js'), 'utf8'));
+  const helpers = window.ConnectifyParseHelpers;
+  const at = (y, m, d) => new Date(Date.UTC(y, m - 1, d));
+  // 2026: Term 1 Mon 2 Feb; Early Easter moves Term 2 to Mon 20 Apr (else Mon 27 Apr)
+  assert.strictEqual(terms.orderOf(at(2026, 3, 13), true), 6, 'Fri 13 Mar is Term 1 Week 6');
+  assert.strictEqual(terms.orderOf(at(2026, 4, 2), true), 9, 'the last week of a 9-week Term 1');
+  assert.strictEqual(terms.orderOf(at(2026, 4, 8), true), 10, 'holidays count on from the term before');
+  assert.strictEqual(terms.orderOf(at(2026, 4, 20), true), 13, 'Early Easter: 20 Apr is Term 2 Week 1');
+  assert.strictEqual(terms.orderOf(at(2026, 4, 20), false), 12, 'without it, 20 Apr is still the holidays');
+  assert.strictEqual(terms.orderOf(at(2026, 4, 27), false), 13);
+  assert.strictEqual(terms.orderOf(at(2026, 1, 10), true), 1, 'before Term 1 is Week 1');
+  assert.strictEqual(terms.orderOf(at(2026, 12, 30), true), 48, 'after Term 4 never passes slot 12');
+  assert.strictEqual(terms.orderOf(at(2028, 1, 31), false), 1, 'the Monday before a Wednesday start');
+  assert.strictEqual(terms.orderOf(at(2028, 2, 7), false), 2);
+  for (const early of [true, false]) {
+    for (const [t, w] of [[1, 1], [1, 9], [2, 1], [2, 10], [3, 5], [4, 10]]) {
+      assert.strictEqual(terms.orderOf(terms.dateFor(2026, t, w, 3, early), early), (t - 1) * 12 + w, `Term ${t} Week ${w} round-trips`);
+    }
+  }
+  // Captions: week captions are unchanged; a date caption is this year's date through the calendar
+  const year = new Date().getFullYear();
+  assert.strictEqual(helpers.orderHint('Term 2 Week 3'), 15);
+  assert.strictEqual(helpers.orderHint('Week 5, Term 3'), 29);
+  assert.strictEqual(helpers.dateOrder('Term 2 Week 3 (14 May)'), null, 'a term and week wins over a date');
+  assert.strictEqual(helpers.orderHint('Fri 13th March'), terms.orderOf(at(year, 3, 13)));
+  assert.strictEqual(helpers.orderHint('August 14'), terms.orderOf(at(year, 8, 14)));
+  assert.ok(Number.isInteger(helpers.orderHint('Fri 13 Mar')), 'a whole week, not a fraction counted from 26 Jan');
+  assert.strictEqual(helpers.orderHint('Practical'), null);
+  // The Early Easter choice is shared: stored per year, legacy export choice read, else automatic
+  const account = window.ConnectifyUtils.accountKey();
+  localStorage.removeItem('connectify:school_terms');
+  assert.strictEqual(terms.earlyEaster(2027), terms.autoEarlyEaster(2027));
+  localStorage.setItem(`connectify:calendar_export:${account}`, JSON.stringify({ earlyEaster: { 2027: true } }));
+  assert.strictEqual(terms.earlyEaster(2027), true, 'the export\'s earlier choice is kept');
+  terms.setEarlyEaster(2027, false);
+  assert.deepStrictEqual(JSON.parse(localStorage.getItem('connectify:school_terms')), { earlyEaster: { 2027: false } });
+  assert.strictEqual(terms.earlyEaster(2027), false, 'the shared choice wins');
+  localStorage.removeItem('connectify:school_terms');
+  localStorage.removeItem(`connectify:calendar_export:${account}`);
+  // Read paths: a cached task re-reads its date caption, so older fractional orders are corrected
+  const scrape = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/assessment-scrape.js'), 'utf8');
+  const resolve = scrape.slice(scrape.indexOf('function resolveTaskOrder'));
+  assert.ok(resolve.indexOf('dateOrder(task.caption)') > 0 && resolve.indexOf('dateOrder(task.caption)') < resolve.indexOf('Number.isFinite(task.order)'), 'the date caption is read before the cached order');
+  assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/cache-versions.js'), 'utf8').includes("'connectify:school_terms'"), 'a settings reset clears the choice');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  for (const group of manifest.content_scripts.filter(g => (g.js || []).includes('src/assessment/assessment-parse-helpers.js'))) {
+    const i = group.js.indexOf('src/assessment/school-terms.js');
+    assert.ok(i > group.js.indexOf('src/system/utils.js') && i < group.js.indexOf('src/assessment/assessment-parse-helpers.js'), 'the calendar loads before the parser in every group');
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

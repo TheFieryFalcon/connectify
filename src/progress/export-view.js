@@ -91,9 +91,9 @@
       const subjects = window.ConnectifyData ? window.ConnectifyData.collectClasses(true) : [];
       const prefs = load();
       const year = new Date().getFullYear();
-      const early = typeof prefs.earlyEaster?.[year] === 'boolean' ? prefs.earlyEaster[year] : terms.autoEarlyEaster(year);
+      const early = terms.earlyEaster(year);
       const merge = prefs.mergeExams !== false;
-      const signature = JSON.stringify([subjects, prefs, year]);
+      const signature = JSON.stringify([subjects, prefs, year, early]);
       if (!force && signature === lastSignature) return;
       lastSignature = signature;
 
@@ -118,7 +118,13 @@
 
       const termLine = createElement('div', null, 'cx-export-terms');
       termLine.append(createElement('span', `Terms start ${terms.terms(year, early).map(t => terms.formatDay(t.start)).join(' · ')}`));
-      const easter = checkbox('Early Easter', early, on => update(p => { p.earlyEaster = { ...(p.earlyEaster || {}), [year]: on }; }));
+      // The term calendar is shared: date captions move with it in the graph and predictions too
+      const easter = checkbox('Early Easter', early, on => {
+        terms.setEarlyEaster(year, on);
+        window.ConnectifyPredictorMath?.updatePredictionCache?.();
+        window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
+        render(true);
+      });
       track(easter.input, 'easter');
       termLine.append(easter.wrap);
       const nodes = [termLine];
