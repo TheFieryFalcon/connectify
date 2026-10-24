@@ -192,25 +192,30 @@ jobs:
             TAG_NAME="${{ github.ref_name }}"
           fi
 
-          PRERELEASE_FLAG=""
+          # Builds pushed without a version bump are for testing: their titles and notes tell users not to install them
+          DEV_WARNING="**Development build: do not install.** Get Connectify from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/connectify/) or the [Chrome Web Store](https://chromewebstore.google.com/detail/connectify/cmdpfgdabplmlflhechpifkonkjaiohm)."
+          RELEASE_ARGS=(--title "Connectify ${TAG_NAME}" --generate-notes)
 
           if [[ "${{ github.ref_type }}" != "tag" ]]; then
             if release_exists "$TAG_NAME"; then
               TIMECODE=$(git show -s --format=%ct ${{ github.sha }})
               TAG_NAME="${TAG_NAME}-${TIMECODE}"
               VERSION="${VERSION}-${TIMECODE}"
-              PRERELEASE_FLAG="--prerelease"
+              RELEASE_ARGS=(--title "Connectify ${TAG_NAME} (Development Build: Do Not Install)" --notes "$DEV_WARNING" --generate-notes --prerelease)
               mv "connectify-${{ steps.meta.outputs.version }}.xpi" "connectify-${VERSION}.xpi"
               mv "connectify-${{ steps.meta.outputs.version }}.crx" "connectify-${VERSION}.crx"
               mv "connectify-${{ steps.meta.outputs.version }}.zip" "connectify-${VERSION}.zip"
             fi
           fi
 
-          publish_release "$TAG_NAME" --title "Connectify ${TAG_NAME}" --generate-notes $PRERELEASE_FLAG
+          publish_release "$TAG_NAME" "${RELEASE_ARGS[@]}"
 
-          LATEST_NOTES="Automated build from commit ${{ github.sha }} (version ${VERSION})"
-          publish_release "latest" --title "Connectify Latest Build" --notes "$LATEST_NOTES" --prerelease
-          gh_retry gh release edit "latest" --notes "$LATEST_NOTES" || echo "::warning::Could not update latest notes: ${GH_ERROR}"
+          LATEST_TITLE="Connectify Development Build (Do Not Install)"
+          LATEST_NOTES="${DEV_WARNING}
+
+          Automated build from commit ${{ github.sha }} (version ${VERSION})"
+          publish_release "latest" --title "$LATEST_TITLE" --notes "$LATEST_NOTES" --prerelease
+          gh_retry gh release edit "latest" --title "$LATEST_TITLE" --notes "$LATEST_NOTES" || echo "::warning::Could not update latest title and notes: ${GH_ERROR}"
 
           # "latest" keeps only this build: each build's files have their own names, so leaving the old
           # ones filled it to GitHub's 1000-asset limit. Pruned after the upload, so it is never empty.
