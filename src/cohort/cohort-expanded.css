@@ -31,7 +31,7 @@
   grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(4, minmax(60px, max-content)) !important;
 }
 .connectea-panel.connectea-xp-stats.connectea-xp-overall:has(> .connectea-xp-prediction:not([hidden])) {
-  grid-template-columns: repeat(3, minmax(150px, max-content)) repeat(2, minmax(130px, max-content)) !important;
+  grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(2, minmax(60px, max-content)) !important;
 }
 .connectea-xp-stats :is(.connectea-xp-head, .connectea-xp-prediction) {
   grid-column: 1 / -1 !important;
