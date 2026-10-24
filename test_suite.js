@@ -2272,13 +2272,15 @@ runTest('target-solver.js and target-grade-ui.js support dynamic prior performan
   assert.ok(gradeUiCode.includes('gradeDifficultyWeighted'), 'target-grade-ui.js must persist gradeDifficultyWeighted preference');
 });
 
-runTest('atar-ui.js names Target Grade on its semester buttons without ATAR and applies canonical tab styling', () => {
+runTest('atar-ui.js labels Target Grade and Target ATAR semester buttons plainly (Semester N) and applies canonical tab styling', () => {
   const uiCode = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-ui-helpers.js'), 'utf8'));
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui-markup.js'), 'utf8'));
   const { semesterLabel } = window.ConnectifyAtarMarkup;
-  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'grade', false), 'Semester 1 Target Grade', 'Target Grade semester buttons name the mode, without ATAR');
-  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'grade', true), 'Semester 1 Target Grade (Closed)', 'Target Grade must append (Closed) when closed');
+  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'grade', false), 'Semester 1', 'Target Grade semester buttons read Semester N, without ATAR');
+  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'grade', true), 'Semester 1 (Closed)', 'Target Grade must append (Closed) when closed');
+  assert.strictEqual(semesterLabel(1, { atar: '95.00' }, 'target', false), 'Semester 2', 'Target ATAR semester buttons read Semester N');
+  assert.strictEqual(semesterLabel(0, { atar: '95.00' }, 'target', true), 'Semester 1 (Closed)', 'Target ATAR must append (Closed) when closed');
   assert.strictEqual(semesterLabel(1, { atar: '95.00' }, 'estimate', false), 'Semester 2 ATAR\n95.00', 'Estimate mode must show the semester ATAR');
   assert.ok(uiCode.includes('cta-semester-closed'), 'atar-ui.js must style closed semester tabs with cta-semester-closed');
   assert.ok(uiCode.includes('cta-semester-indicator'), 'atar-ui.js must style active semester tabs with cta-semester-indicator');
