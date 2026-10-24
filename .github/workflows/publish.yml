@@ -208,7 +208,13 @@ jobs:
 
           publish_release "$TAG_NAME" --title "Connectify ${TAG_NAME}" --generate-notes $PRERELEASE_FLAG
 
-          publish_release "latest" --title "Connectify Latest Build" \
+          # "latest" holds only the newest build: each build's files have their own names, so uploading
+          # beside the old ones filled it to GitHub's 1000-asset limit. Recreating it (one call, however
+          # many assets) also moves its tag to this commit.
+          if release_exists "latest"; then
+            gh_retry gh release delete "latest" --yes --cleanup-tag || { echo "::error::Could not delete release latest: ${GH_ERROR}"; exit 1; }
+          fi
+          publish_release "latest" --title "Connectify Latest Build" --target "${{ github.sha }}" \
             --notes "Automated build from commit ${{ github.sha }} (version ${VERSION})" --prerelease
 
           cat <<EOF > updates.xml
