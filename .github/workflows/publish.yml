@@ -208,14 +208,17 @@ jobs:
 
           publish_release "$TAG_NAME" --title "Connectify ${TAG_NAME}" --generate-notes $PRERELEASE_FLAG
 
-          # "latest" holds only the newest build: each build's files have their own names, so uploading
-          # beside the old ones filled it to GitHub's 1000-asset limit. Recreating it (one call, however
-          # many assets) also moves its tag to this commit.
-          if release_exists "latest"; then
-            gh_retry gh release delete "latest" --yes --cleanup-tag || { echo "::error::Could not delete release latest: ${GH_ERROR}"; exit 1; }
-          fi
-          publish_release "latest" --title "Connectify Latest Build" --target "${{ github.sha }}" \
-            --notes "Automated build from commit ${{ github.sha }} (version ${VERSION})" --prerelease
+          LATEST_NOTES="Automated build from commit ${{ github.sha }} (version ${VERSION})"
+          publish_release "latest" --title "Connectify Latest Build" --notes "$LATEST_NOTES" --prerelease
+          gh_retry gh release edit "latest" --notes "$LATEST_NOTES" || echo "::warning::Could not update latest notes: ${GH_ERROR}"
+
+          # "latest" keeps only this build: each build's files have their own names, so leaving the old
+          # ones filled it to GitHub's 1000-asset limit. Pruned after the upload, so it is never empty.
+          LATEST_ASSETS=$(gh release view "latest" --json assets --jq '.assets[].name') || { echo "::error::Could not list latest assets"; exit 1; }
+          while IFS= read -r asset; do
+            [[ -z "$asset" || "$asset" == connectify-"${VERSION}".* ]] && continue
+            gh_retry gh release delete-asset "latest" "$asset" --yes || echo "::warning::Could not delete ${asset}: ${GH_ERROR}"
+          done <<<"$LATEST_ASSETS"
 
           cat <<EOF > updates.xml
           <?xml version='1.0' encoding='UTF-8'?>
