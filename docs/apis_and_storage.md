@@ -11,7 +11,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyScheduler` | `scheduler.js` | Shared page observer (`onMutations`) and heartbeat (`every`) |
 | `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `accountKey` (URL `coisp`, else the remembered account, else `current`), `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey`, `customWeekOrder`/`readTimeOverride`, `OUTLINES_URL`/`isOutlinesPage()` (load first) |
 | `window.ConnectifyData` | `assessment-data.js` | Scrapes assessment cards, caches tasks, expands accordions; `collectClasses()` for sidebar tools |
-| `window.ConnectifyCache` | `cache-versions.js` | Subsystem cache versioning (predictor, results, settings, cohort) and clearing |
+| `window.ConnectifyCache` | `cache-versions.js` | Subsystem cache versioning (predictor, results, settings, cohort, goals) and clearing |
 | `window.ConnectifyCohortMath` | `cohort-math.js` | PCHIP cubic Hermite interpolation, variance, z-score |
 | `window.ConnectifyCohortEstimator` | `cohort-estimator.js` | Baseline and empirical cohort size estimation |
 | `window.ConnectifyCohortSizeBaselines` | `cohort-size-baselines.js` | Typical cohort size per subject and year level |
@@ -95,7 +95,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify:semester_filter` / `connectify:panel_view` | `localStorage` | `semester-filter.js` / `cohort-panel-view.js` | `{ enabled }`; off by default; the semester is always the detected one (settings). Statistics Panels: `subjects` or `all` (missing = `compact`); applies on next load |
 | `connectify:prediction:<account>:<subject>:<taskId>` | `localStorage` | `predictor-math.js` / `cohort-view.js` | Cached task prediction object (`{ low, mid, high, breakoutScore, type, basis, subjectName }`), one per task under its parser id (`predictionId`: labels or name only without one), so same-named tasks never share one |
 | `connectify:prediction_version` | `localStorage` | `predictor-math.js` | Calculation version incrementer tracking when chronological prediction cache must be re-populated |
-| `connectify:cache_version:<subsystem>` | `localStorage` | `assessment-data.js` | Independent invalidation keys (`predictor`, `results`, `settings`, `cohort`) |
+| `connectify:cache_version:<subsystem>` | `localStorage` | `assessment-data.js` | Independent invalidation keys (`predictor`, `results`, `settings`, `cohort`, `goals`: goal verdicts only; goals: `modules_goals.md`) |
 | `connectify:stats_cache:<student>:<subject>:<task>` | `localStorage` | `assessment-data.js` | Cached 5-number boxplot quantiles and sample size; summary rows use task `Overall S1` / `Overall S2` (keys never include Connectify's own panel text) |
 | `cx-autologin-enabled` | `browser.storage.local` | `auto-login.js` | Boolean flag for auto-login on sign-in page |
 | `cx-session-expired` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user session expires while idle |

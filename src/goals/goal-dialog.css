@@ -80,7 +80,8 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-gla
   background: var(--cx-button-hover, #31415a);
 }
 
-:is(.cx-goal-overlay, #connectea-atar) :is(.cx-goal-confirm, .cx-goal-set) {
+/* Primary goal buttons: the anchor outranks the sidebar's id-weighted dark button rule (#cx-specificity-anchor) */
+:is(.cx-goal-overlay, #connectea-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set) {
   padding: 6px 14px;
   border: 1px solid transparent;
   border-radius: 5px;
@@ -91,11 +92,11 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-gla
   cursor: pointer;
 }
 
-:is(.cx-goal-overlay, #connectea-atar) :is(.cx-goal-confirm, .cx-goal-set):hover:not(:disabled) {
+:is(.cx-goal-overlay, #connectea-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set):hover:not(:disabled) {
   background: var(--cx-button-primary-hover, #1d4ed8);
 }
 
-:is(.cx-goal-overlay, #connectea-atar) :is(.cx-goal-confirm, .cx-goal-set, .cx-goals-open):disabled {
+:is(.cx-goal-overlay, #connectea-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set, .cx-goals-open):disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }

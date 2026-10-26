@@ -1,57 +1,59 @@
 # Connectify Goals Reference
 
-Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outline goal bars, lifecycle and celebration. Spec: `specs/goals.md`.
+Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outline goal bars, lifecycle and celebration. Spec: `specs/goals.md`. All goal scripts are in the outlines group (manifest order: goal-difficulty, goal-store, goal-plan, goal-replay, goal-modal, goal-sliders, goal-dialog, goal-list-ui, goal-editor, goal-celebrate, goal-events, goal-bars).
 
 ---
 
 ## 1. Model
 
-### Goals and ranges (`src/goals/goal-plan.js`, `ConnectifyGoalPlan`)
-- **Kinds**: a grade goal (subject percent; end `Semester 1`, `Semester 2` or a custom school week 1–40) or an ATAR goal (ATAR 30–99.95; end `Semester 1` / `Semester 2`; four linked child grade goals, the top four ticked when saved).
-- **Range**: a semester end is the semester's outline tasks (`taskSemester`, Semester 2 cumulative). A custom week is every task whose Year Progression week (`customWeekOrder` override, else caption) is <= the week's end; undated tasks are out of range for custom weeks.
-- **Week snapshot**: `weekSnapshot()` reads each task's week once per page load. A week override save (`connectify-week-override-saved`) or `connectify-terms-updated` sets `isHeld()`: goals stop recomputing (tiers, bars, verdicts, lock-in, toast lines) until reload.
-- **Sliders**: 5 notches (-2..+2, Much less / Less / Normal / More / Much more), +-5 points per notch on a task's baseline (`offsets`), then `gradePlan` / `targetPlan` bisect the shared effort. Checkbox off: one flat baseline for every task, so all-Normal equals the uniform required average. Toggling the checkbox resets the sliders. ATAR: subject notch + that subject's task notches add up.
-- **ATAR re-solve**: target, top four and sliders fixed; child targets re-solved after every new mark.
-- **Replay**: `replay(goal)` walks the judged tasks in week order, planning each with only the results before it: `R` (required), the tier and cumulative points just after it. Memoised per goal revision and marks signature.
+### Plans (`goal-plan.js`, `ConnectifyGoalPlan`)
+- **Kinds**: a grade goal (subject percent; end `Semester 1`, `Semester 2` or a custom school week 1–40) or an ATAR goal (ATAR 30–99.95; end Semester 1 / 2; four linked child grade goals: the plan's top four when saved, fixed until edited; `included` keeps the ticked subjects the solver uses).
+- **Subject key**: the planners' course id (`ConnectifyGoalStore.subjectKey`: semester, `ATAR` and `Year N` removed, lower case), so both semester outlines are one subject.
+- **Range** (`rangeTasks`): a semester end is that semester's outline tasks (Semester 2 cumulative); a custom week is every task whose Year Progression week (week override, else caption, as `atar-scraper.js` resolves `order`) is <= the end week; undated tasks are left out and named.
+- **Week snapshot** (`weekOf`): each task's school week and semester as first read this page load. `connectify-week-override-saved` (the Progress week editor) or `connectify-terms-updated` (Early Easter) sets `isHeld()`: goals stop recomputing until reload.
+- **Sliders**: 5 notches (-2..+2, `NOTCHES`), +-5 points each on a task's baseline (`offsets`), then the solver bisects one shared effort. `gradePlan` / `targetPlan` take `offsets` (`{ taskKey }`; ATAR `{ course, course::taskKey }`); no offsets reproduces the old plans. Checkbox off: every task starts at the uniform score. `taskRequirements` are keyed by task id (name without one).
+- **ATAR rows** (`atarRows`, shared with the Target ATAR planner): scaled school marks, progress, calibration offsets and the held TEA bonus. `atarOffsets` adds subject notches and each child's task notches.
 
-### Difficulty (`src/goals/goal-difficulty.js`, `ConnectifyGoalDifficulty`)
-- **Chance**: target vs the projection (grade: `projectSubjectGrades` limited to the range; ATAR: `projectATAR`): normal on Mid, sigma = half-range on the target's side / 0.8416, `chance = 1 - Phi((target - Mid)/sigma)`. Sliders never change it.
-- **Tiers**: Guaranteed (met at 0% on everything left), Trivial >= 90%, Easy >= 70%, Medium >= 40%, Hard >= 15%, Hell < 15%, Impossible (needs > 100%).
-- **Per-task tier** (planner, dialog): the task's own `predictTask` range against its R, same sigma rule.
-- **Colours**: Guaranteed `#15803d`, Trivial `#22c55e`, Easy `#84cc16`, Medium `#eab308`, Hard `#f97316`, Hell `#ef4444`, Impossible `#991b1b` (Achieved / Missed use the first / last). Semantic, literal.
+### Evaluation (`goal-replay.js`, `ConnectifyGoalReplay`)
+- `evaluate(goal, ctx)` -> `{ tier, chance, range, plan, progress, verdicts, children (ATAR), finished, finalValue, undated }`; `ctx.noReplay` skips the per-task replay (planner tiers).
+- **Replay**: judged tasks (marked, weighted, not in `priorMarked`) in date order; each is planned with only the results before it (`required` R), then added (tier and points as of it). Verdict keys `<subject>::<task id>`.
+- **ATAR**: child targets re-solved from the plan's projected rows (`childTargets`, raw percent); the ATAR range comes from each included course's projected Low / Mid / High through `ConnectifyMath.calculate`.
 
-### Store (`src/goals/goal-store.js`, `ConnectifyGoalStore`)
-- `connectify:goals:<account>`: `{ version: 1, goals: [...] }` (id, revision, kind, subject, parent, target, end, difficultyWeighted, sliders, subjectSliders, topFour, priorMarked, status, createdAt, finishedAt, finalValue, lastTier, celebrated, celebratePending). Unknown versions read as none; unknown fields are kept.
-- `connectify:goal_verdicts:<account>`: frozen verdicts of finished goals per task (`required, mark, perfTier, progress, goalTier`). Clear Cache and a `goals` cache-version bump clear it; goals stay. A settings reset removes both.
-- **Conflicts**: one active goal per subject key (both semester outlines are one subject), one active ATAR goal; an ATAR goal over a grade goal offers Replace (deletes it).
-- **Lifecycle**: Guaranteed -> Achieved and Impossible -> Missed at once (early lock-in); otherwise finished once every task in range is marked or the semester's final letter shows. Finished goals free their subject and keep their verdicts. A new school year finishes active goals and archives every goal and verdict into `connectify:year_archive:<account>` (`goals`).
+### Difficulty (`goal-difficulty.js`, `ConnectifyGoalDifficulty`)
+- **Chance**: target vs a Low / Mid / High projection (`projectTasks`: marked tasks as they are, the rest from `getOrComputeTaskPrediction`, the Predictor's minimum spread): normal on Mid, sigma = half-range on the target's side / 0.8416. Sliders never change it.
+- **Tiers**: Guaranteed (met at 0% on everything left), Trivial >= 90%, Easy >= 70%, Medium >= 40%, Hard >= 15%, Hell < 15%, Impossible (needs > 100%). `taskTier`: a remaining task's own prediction vs its R.
+- **Performance bands** (`perfTier`): red < R-5, orange < R, yellow < R+5, green; purple (secret) above 1.10 x R on green.
+- **Colours**: Guaranteed `#15803d`, Trivial `#22c55e`, Easy `#84cc16`, Medium `#eab308`, Hard `#f97316`, Hell `#ef4444`, Impossible `#991b1b`; Achieved / Missed take the first / last.
+
+### Store (`goal-store.js`, `ConnectifyGoalStore`)
+- `connectify:goals:<account>`: `{ version: 1, goals }` (id, revision, kind, subject, name, parent, target, end, difficultyWeighted, sliders, subjectSliders, included, topFour, priorMarked, status, createdAt, finishedAt, finalValue, finalProgress, lastTier, announcePending, celebratePending, celebrated, glowPending). Unknown versions read as none; unknown fields are kept.
+- `connectify:goal_verdicts:<account>`: frozen verdicts of finished goals. Clear Cache and the `goals` cache version (`clearGoalsCache`) clear only these; a settings reset removes goals too.
+- **Conflicts** (`conflicts`): one active goal per subject, one active ATAR goal; the goal being edited never counts. `save` keeps the id and counts a revision; an ATAR save rewrites its children (`childSliders`).
+- `finish`, `remove`, `takeAll` (new-year archive). Events: `connectify-goals-changed` on every write.
 
 ## 2. Interface
 
-### Planner and dialogs
-- `goal-sliders.js` (`ConnectifyGoalSliders`): the Target Grade task rows (required mark, tier, slider) and Target ATAR subject sliders; ATAR-held subjects show `Set by your ATAR <n> goal` with editable task sliders.
-- `goal-modal.js` (`ConnectifyGoalModal`): shared modal shell (solid surface, page dimmed, focus moved in and returned, Escape / Cancel / outside click close, clicks never reach the drawer's outside-click).
-- `goal-dialog.js` (`ConnectifyGoalDialog`, `#cx-goal-dialog`): **Set as Goal** preview (heading with tier, read-only task/subject rows, horizontal progress), End picker (week input with term hint), Confirm / Save Changes, disabled reasons (`Already secured.`, `Highest possible: X%.`, `<subject> already has a goal.`, `Set by your ATAR <n> goal.`, `You already have an ATAR goal.`), Replace prompt.
-- `goal-list-ui.js` (`ConnectifyGoalListUI`, `#cx-goals-dialog`): goal cards (target and end, tier label, horizontal progress, Edit / Delete with inline confirm), ATAR children, Past goals `<details>`; read-only off the outlines page.
-- `goal-editor.js` (`ConnectifyGoalEditor`): Set as Goal / Update Goal under each planner, the `Goals (n)` header button (`#cx-goals-open`), edit mode (`Editing <subject> goal`, Cancel Editing restores the planner).
+### Planners and dialogs
+- `goal-sliders.js` (`ConnectifyGoalSliders`): Target Grade's task table (Effort / Needs / Difficulty), Target ATAR's subject slider, needed mark and tier; drafts per subject; `reset` on the checkbox; keyboard focus kept across re-renders.
+- `goal-editor.js` (`ConnectifyGoalEditor`): the goal tier beside each planner headline, Set as Goal / Update Goal and Cancel Editing, `Goals (n)` in the panel heading (`paintGoalsButton`, from `paintModeTabs`), `edit(goal)` (loads its planner tab; semester by its button), `heldTarget` (an ATAR-held subject plans for its child target, read-only, `Set by your ATAR <n> goal`).
+- `goal-modal.js` (`ConnectifyGoalModal`): the shared dialog (solid surface, dimmed page, focus in and back, Escape / ✕ / outside click, clicks never reach the drawer's outside-click), `tierLabel`, `progressBar`.
+- `goal-dialog.js` (`#cx-goal-dialog`): preview, End (week input with term hint), Confirm / Save Changes; blocked with `Already secured.`, `Highest possible: X%.`, `<subject> already has a goal.` (+ Edit), `Set by your ATAR <n> goal.`, `You already have an ATAR goal.`; an ATAR goal over subject goals asks to Replace them. New goals record `priorMarked`.
+- `goal-list-ui.js` (`#cx-goals-dialog`): cards (title, tier, progress, ATAR children's targets, Edit ✎ / Delete ✕ with inline confirm) and Past goals (Achieved / Missed, final mark, date).
 
-### Outline bars (`src/goals/goal-bars.js`, `ConnectifyGoalBars`)
-- `.cx-goal-bars` right of the outcome meter (compact and expanded panels), each bar 18 x 56.
-- **Performance** (`.cx-goal-perf`, completed tasks judged by a goal): pastel Red < R-5, Orange < R, Yellow < R+5, Green >= R+5; secret purple breakout (20px) above 1.10 x R on Green.
-- **Progress** (`.cx-goal-progress`, completed tasks and the overall row): smooth fill = earned / required weighted points, tier colour as of that task (overall row: now).
-- Singleton `#cx-goal-tooltip` (numbers only, no `title`, purple never named); `goalSig` joins the row memo.
-- **Which goal judges a task**: tasks not in a goal's `priorMarked` are replayed live; earlier tasks show the most recent finished goal's frozen verdict, else nothing.
+### Outline bars (`goal-bars.js`, `ConnectifyGoalBars`)
+- `.cx-goal-bars` after the outcome meter (task rows) or in the panel's top right (overall row of the goal's semester card). Performance (`.cx-goal-perf`, segments lit up to the band, purple 20px) and progress (`.cx-goal-progress`, smooth fill, `data-tier`). The outcome meter's singleton tooltip shows numbers only; `signature` joins the row memo (`goalSig`).
+- Live verdicts for the goal's own tasks; earlier tasks show the latest finished goal's frozen verdict.
 
 ### Events and celebration
-- `goal-events.js` (`ConnectifyGoalEvents`): evaluates active goals after each results update (unless held), locks in / finishes them, keeps `lastTier`; `toastLine(subject)` for the Class Updated toast: `Goal: Medium` / `Goal is now Hard (was Medium)` / `Goal complete!` / `Goal missed!` (`ATAR goal: ...` for children).
-- `goal-celebrate.js` (`ConnectifyGoalCelebrate`): once per goal, ~4s confetti on `#cx-goal-confetti` (no library) and a ~600ms shake of Connect's app layout (never html/body); `prefers-reduced-motion`: no shake, static fading confetti. A goal that finishes without a toast (first visit on a fresh cache) celebrates the next time the Goals dialog opens; its card glows (`.cx-goal-card--celebrate`).
+- `goal-events.js` (`ConnectifyGoalEvents`): `stateOf` (cached per revision; kept while held), `refresh` after results / predictions / goals / types change (400ms; settles finished goals: Guaranteed -> Achieved, Impossible -> Missed, all marked or final letter -> by the measured mark), then `connectify-goals-evaluated` and a cohort pass. `toastLine` for `new-grade.js` (`Goal: Medium`, `Goal is now Hard (was Medium)`, `Goal complete!` + celebration, `Goal missed!`; `ATAR goal ...`). `celebratePending` (Goals dialog), `endYear` (`year-rollover.js` archive).
+- `goal-celebrate.js` (`ConnectifyGoalCelebrate.play`): ~4s confetti on `#cx-goal-confetti` from the toast corner, ~600ms shake of `.cvr-c-app-layout` / `#main-content`; reduced motion: still fading confetti, no shake. Once per goal; the finished goal glows in the Goals dialog.
 
 ### Other tools
-- `progress-goal-line.js` (`ConnectifyProgressGoalLine`): dashed `Goal 85%` line on the subject's Year Progression chart (ATAR goal on ATAR Progression) up to the end week.
-- `grade-estimate-goal.js` (`ConnectifyGradeEstimateGoal`): `Goal 85%: met` / `Goal 85%: 3.2 short` under Estimate Grade; `Goal 95.00: met` / `1.35 short` under Estimate ATAR.
+- `progress-goal-line.js` (`ConnectifyProgressGoalLine`): dashed `Goal 85%` line on the subject's Year Progression chart (ATAR goal on ATAR Progression), ending after the last task in a custom week.
+- `grade-estimate-goal.js` (`ConnectifyGradeEstimateGoal`): `Goal 85%: met` / `3.2 short` under Estimate Grade (range tasks only for custom weeks); `Goal 95.00: 1.35 short` under Estimate ATAR (that semester's goal).
 
 ## 3. Styles
-`goal-bars.css`, `goal-dialog.css`, `goal-list.css`, `goal-celebrate.css`: token-routed in dark themes, tier labels re-inked at OKLCH 0.34 in light tone, >= 5:1.
+`goal-dialog.css` (dialogs, tier labels: tier 40% into the theme ink on a 14% tint, >= 5:1 in every preset), `goal-planner.css` (planner controls, sliders), `goal-list.css`, `goal-bars.css` (bars, goal line), `goal-celebrate.css`: theme tokens only.
 
 ---
 

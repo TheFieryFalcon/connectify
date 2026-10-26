@@ -1,6 +1,6 @@
 # Spec: Goals
 
-Status: spec (2026-10-26). Not implemented.
+Status: implemented (2026-10-26). Module reference: `docs/modules_goals.md`.
 
 ## 1. Summary
 The Goal Setter's **Target Grade** and **Target ATAR** planners get a **Set as Goal** button that opens a modal dialog (preview, end point, Confirm) to save the plan as a **goal**. A **Goals** button opens a second modal listing saved goals. A saved goal:
@@ -139,7 +139,7 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
 - **Order**: the ATAR goal first, then grade goals by end, soonest first.
 - **Past goals**: a collapsed `<details>` listing each finished goal's target, **Achieved** / **Missed**, the final mark or ATAR, and the date it finished. Read-only; Delete only.
 - A just-completed goal's card glows (`.cx-goal-card--celebrate`, ~2s) the next time the Goals dialog opens after its celebration (§8.2).
-- Also opens off the outlines page, read-only: no Edit, and progress and tiers from the cache.
+- Opened from the Goal Setter, which works on the Assessment Outlines page only.
 
 ### 4.4 Editing
 - **Edit ✎** closes the Goals dialog and loads the goal into its planner tab: subject or top four, target, semester, checkbox and sliders.
@@ -175,7 +175,7 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
 - **Completed task rows** judged by a goal (§7) get a performance bar and a progress bar.
 - **The overall row** of a subject with a goal (active, or the latest past goal) gets a progress bar only.
 - Unmarked rows get none.
-- **Tooltips**: one singleton floating tooltip, `#cx-goal-tooltip` (as `#connectea-outcome-tooltip`: viewport-fixed, `pointer-events: none` on segments, never a `title` attribute), giving numbers only:
+- **Tooltips**: the outcome meter's singleton floating tooltip (`#connectea-outcome-tooltip`: viewport-fixed, `pointer-events: none` on segments, never a `title` attribute), giving numbers only:
   - performance: `Needed 78.0% • Got 82.5%`;
   - progress: `Goal 80%: 41.2 of 80 weighted points • Hard` (ATAR children: `ATAR goal 95.00 • Chemistry needs 84.0%: 41.2 of 67.2 weighted points • Hard`).
   - Purple is never mentioned.
@@ -273,13 +273,14 @@ Goal = {
 - **Backward compatibility**: a missing or unknown `version` reads as no goals. Unknown fields are kept on save.
 
 ## 11. Files (new features in new files, each ≤ 250 lines)
-Registered in `manifest.json` after the planner scripts (outlines group). The store, difficulty and Goals dialog modules also go in the sidebar-only group, so the Goals dialog opens read-only off the outlines page.
+Registered in `manifest.json` after the planner scripts (outlines group only: the Goal Setter, and so the Goals dialog, works only on the Assessment Outlines page).
 
 | File | Global | Role |
 |---|---|---|
 | `src/goals/goal-store.js` | `ConnectifyGoalStore` | load/save, conflicts, finish, archive, verdict cache |
 | `src/goals/goal-difficulty.js` | `ConnectifyGoalDifficulty` | chance, tiers, colours, per-task tier |
-| `src/goals/goal-plan.js` | `ConnectifyGoalPlan` | offsets → `gradePlan` / `targetPlan`, ATAR re-solve, replay (§7.2), progress points, `weekSnapshot()` (task weeks frozen at load, §2.1) |
+| `src/goals/goal-plan.js` | `ConnectifyGoalPlan` | ranges, week snapshot and hold (§2.1), slider offsets, grade and ATAR plans, ATAR rows |
+| `src/goals/goal-replay.js` | `ConnectifyGoalReplay` | evaluation now and the replay (§7.2), ATAR child targets |
 | `src/goals/goal-sliders.js` | `ConnectifyGoalSliders` | slider markup, notch names, reset on checkbox |
 | `src/goals/goal-modal.js` | `ConnectifyGoalModal` | shared modal shell: focus trap, Escape / outside click, dim, drawer-safe clicks |
 | `src/goals/goal-dialog.js` | `ConnectifyGoalDialog` | Set as Goal dialog: preview, End picker, Confirm / Save Changes, conflict prompt |
@@ -290,7 +291,7 @@ Registered in `manifest.json` after the planner scripts (outlines group). The st
 | `src/goals/goal-celebrate.js` | `ConnectifyGoalCelebrate` | confetti, shake, reduced motion |
 | `src/progress/progress-goal-line.js` | `ConnectifyProgressGoalLine` | Year Progression goal line |
 | `src/atar/grade-estimate-goal.js` | `ConnectifyGradeEstimateGoal` | Estimator goal lines |
-| `src/goals/goal-bars.css`, `goal-dialog.css`, `goal-list.css`, `goal-celebrate.css` | | token-routed in dark themes, light-tone rules |
+| `src/goals/goal-bars.css`, `goal-dialog.css`, `goal-planner.css`, `goal-list.css`, `goal-celebrate.css` | | theme tokens only |
 
 Changes to existing files stay small: `target-solver.js` gains the `offsets` option; the planners call the editor and sliders; `cohort-view.js` calls `goal-bars`; `new-grade.js` asks `goal-events` for the toast line; `year-rollover.js` archives goals; `cache-versions.js` clears verdicts on Clear Cache.
 
