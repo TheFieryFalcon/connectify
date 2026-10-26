@@ -94,7 +94,7 @@
         if (plan.impossible) {
           reqText = 'max 100%';
         } else if (difficultyWeighted) {
-          const meta = plan.taskRequirements?.[`${course.name}::${task.name}`];
+          const meta = plan.taskRequirements?.[`${course.name}::${task.id || task.name}`];
           const reqVal = meta ? meta.required : plan.required;
           const baseVal = meta ? meta.baseline : null;
           reqText = `required ${round(reqVal)}%${baseVal !== null ? ` (baseline: ${round(baseVal)}%)` : ''}`;

@@ -1795,11 +1795,12 @@ runTest('ConnectifyCache manages independent subsystem versions and isolated cle
   assert.ok(window.ConnectifyCache.VERSIONS.RESULTS, 'RESULTS version must exist');
   assert.ok(window.ConnectifyCache.VERSIONS.SETTINGS, 'SETTINGS version must exist');
   assert.ok(window.ConnectifyCache.VERSIONS.COHORT, 'COHORT version must exist');
+  assert.ok(window.ConnectifyCache.VERSIONS.GOALS, 'GOALS version must exist');
 
   // Verify versions are distinct
   const versions = Object.values(window.ConnectifyCache.VERSIONS);
   const uniqueVersions = new Set(versions);
-  assert.strictEqual(uniqueVersions.size, 4, 'All 4 subsystem versions must be distinct');
+  assert.strictEqual(uniqueVersions.size, 5, 'All 5 subsystem versions must be distinct');
 
   // Verify isolated clearing: clearing predictor cache does NOT clear settings or cohort
   localStorage.setItem('connectify:prediction:current:chem:t1', JSON.stringify({ mid: 75 }));
@@ -1815,6 +1816,16 @@ runTest('ConnectifyCache manages independent subsystem versions and isolated cle
   window.ConnectifyCache.invalidateSubsystem('cohort');
   assert.strictEqual(localStorage.getItem('connectea:cohort:v3:test'), null, 'Cohort cache must be cleared');
   assert.ok(localStorage.getItem('connectea:categories'), 'Settings cache must remain intact');
+
+  // Goals: a version bump or Clear Cache drops finished goals' verdicts, never the goals
+  localStorage.setItem('connectify:goals:12345', '{"version":1,"goals":[]}');
+  localStorage.setItem('connectify:goal_verdicts:12345', '{}');
+  window.ConnectifyCache.invalidateSubsystem('goals');
+  assert.strictEqual(localStorage.getItem('connectify:goal_verdicts:12345'), null, 'goal verdicts must be cleared');
+  assert.ok(localStorage.getItem('connectify:goals:12345'), 'goals must stay');
+  assert.ok(localStorage.getItem('connectea:categories'), 'Settings cache must remain intact');
+  window.ConnectifyCache.clearSettingsCache();
+  assert.strictEqual(localStorage.getItem('connectify:goals:12345'), null, 'a settings reset removes goals');
 });
 
 runTest('cohort-view.js memoizes task row and outcome bar rendering to eliminate scroll lag', () => {
@@ -11776,6 +11787,170 @@ runTest('Test 256: Uploads are rescaled, then resized and placed by the student 
   const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('"src/theme/theme-wallpaper-crop.js"') > manifest.indexOf('"src/theme/theme-wallpaper-fit.js"')
     && manifest.includes('"src/theme/styles/theme-wallpaper-crop.css"'), 'registered after theme-wallpaper-fit.js, with its stylesheet');
+});
+
+// Goals: loads the goal modules (and the solver they plan with) into a sandbox window with the given stubs
+function loadGoalModules(stubs = {}) {
+  const listeners = {};
+  const win = {
+    ConnectifyUtils: global.ConnectifyUtils,
+    addEventListener: (type, fn) => { (listeners[type] = listeners[type] || []).push(fn); },
+    removeEventListener: () => {},
+    dispatchEvent: e => { (listeners[e.type] || []).forEach(fn => fn(e)); return true; },
+    ...stubs
+  };
+  const run = file => new Function('window', origReadFileSync.call(fs, resolveFilePath(file), 'utf8'))(win);
+  ['scaling-data.js', 'atar-math.js', 'target-difficulty.js', 'target-solver.js'].forEach(run);
+  ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js'].forEach(f => run(path.resolve(SRC_DIR, 'goals', f)));
+  return win;
+}
+
+runTest('Test 259: Goal effort sliders move required marks without changing today\'s plans; tiers and performance bands', () => {
+  const win = loadGoalModules();
+  const S = win.ConnectifyTargetSolver;
+  const tasks = [
+    { id: 'a', name: 'Test 1', weight: 20, pending: false, score: 80, earned: 16 },
+    { id: 'b', name: 'Test 2', weight: 30, pending: true, earned: 0 },
+    { id: 'c', name: 'Exam', weight: 50, pending: true, earned: 0 }
+  ];
+  const progress = S.taskProgress(tasks, 80, 2);
+  const uniform = S.gradePlan(progress, 75);
+  assert.deepStrictEqual(S.gradePlan(progress, 75, { offsets: {} }), uniform, 'no offsets: today\'s uniform plan');
+  assert.deepStrictEqual(S.gradePlan(progress, 75, { offsets: { b: 0, c: 0 } }), uniform, 'all Normal: today\'s uniform plan');
+  const weighted = S.gradePlan(progress, 75, { difficultyWeighted: true, subjectName: 'Chem' });
+  assert.deepStrictEqual(S.gradePlan(progress, 75, { difficultyWeighted: true, subjectName: 'Chem', offsets: { b: 0 } }), weighted, 'checkbox on, all Normal: today\'s difficulty plan');
+  assert.ok(weighted.taskRequirements.b && weighted.taskRequirements.c, 'requirements are keyed by task id');
+
+  const more = S.gradePlan(progress, 75, { offsets: { b: 5 } });
+  const reqB = more.taskRequirements.b.required;
+  const reqC = more.taskRequirements.c.required;
+  assert.ok(reqB > uniform.required + 2 && reqC < uniform.required, `More effort on Test 2 asks more of it (${reqB}) and less of the exam (${reqC}) than ${uniform.required}`);
+  assert.ok(16 + reqB * 0.3 + reqC * 0.5 >= 75 - 0.05, 'and the target is still reached');
+  assert.ok(Math.abs(reqB - reqC - 5) < 0.6, 'one notch is about 5 points between the two');
+
+  const D = win.ConnectifyGoalDifficulty;
+  const range = { low: 70, mid: 75, high: 80 };
+  assert.ok(Math.abs(D.chance(75, range) - 0.5) < 1e-6, 'the target at Mid is a coin flip');
+  assert.ok(Math.abs(D.chance(80, range) - 0.2) < 0.002, 'High is about the 80th percentile');
+  assert.strictEqual(D.tierFor({ chance: 0.95 }), 'trivial');
+  assert.strictEqual(D.tierFor({ chance: 0.7 }), 'easy');
+  assert.strictEqual(D.tierFor({ chance: 0.4 }), 'medium');
+  assert.strictEqual(D.tierFor({ chance: 0.15 }), 'hard');
+  assert.strictEqual(D.tierFor({ chance: 0.01 }), 'hell');
+  assert.strictEqual(D.tierFor({ guaranteed: true, chance: 0.01 }), 'guaranteed');
+  assert.strictEqual(D.tierFor({ impossible: true, chance: 0.99 }), 'impossible');
+  assert.ok(D.chance(90, { low: 60, mid: 85, high: 87 }) < D.chance(90, { low: 83, mid: 85, high: 95 }), 'the half-range on the target\'s side sets the spread');
+  assert.deepStrictEqual([70, 76, 80, 85, 90].map(m => D.perfTier(m, 80)), ['red', 'orange', 'yellow', 'green', 'purple'], '+-5 bands, purple above 1.10 x R on green');
+  assert.strictEqual(D.perfTier(100, 92), 'green', 'purple cannot happen once R is over 90.9');
+  assert.strictEqual(D.color('achieved'), D.color('guaranteed'));
+  assert.strictEqual(D.color('missed'), D.color('impossible'));
+});
+
+runTest('Test 260: Goals are saved per account, one per subject, and finished goals keep frozen verdicts', () => {
+  const win = loadGoalModules();
+  const G = win.ConnectifyGoalStore;
+  localStorage.clear();
+  const chem = G.save({ kind: 'grade', subject: 'chemistry', target: 80, end: { type: 'semester', semester: 2 } });
+  assert.ok(localStorage.getItem('connectify:goals:12345'), 'stored under the account');
+  assert.strictEqual(G.activeFor('Chemistry ATAR Year 12 - Semester 1').id, chem.id, 'both semester outlines are one subject');
+  const again = G.conflicts({ kind: 'grade', subject: 'chemistry' });
+  assert.strictEqual(again.subjects[0].goal.id, chem.id, 'a second goal for the subject conflicts');
+  assert.strictEqual(G.conflicts({ ...chem }).subjects.length, 0, 'the goal being edited never conflicts with itself');
+  const edited = G.save({ ...chem, target: 85 });
+  assert.deepStrictEqual([edited.id, edited.revision, G.all().length], [chem.id, 2, 1], 'an edit keeps the id and counts a revision');
+
+  const atar = { kind: 'atar', target: 95, end: { type: 'semester', semester: 2 }, topFour: ['chemistry', 'physics', 'english', 'methods'] };
+  assert.strictEqual(G.conflicts(atar).subjects[0].subject, 'chemistry', 'an ATAR goal over a grade goal conflicts (Replace is offered)');
+  G.remove(chem.id);
+  const savedAtar = G.save(atar);
+  assert.strictEqual(G.childrenOf(savedAtar.id).length, 4, 'an ATAR goal holds four linked subject goals');
+  assert.strictEqual(G.activeFor('Physics').id, savedAtar.id, 'a child subject resolves to its ATAR goal');
+  assert.ok(G.conflicts({ kind: 'atar', topFour: [] }).atar, 'only one ATAR goal at a time');
+
+  G.finish(savedAtar.id, 'achieved', { finalValue: 95.4, verdicts: { 'chemistry::t1': { required: 80, mark: 85, perfTier: 'green' } } });
+  assert.strictEqual(G.active().length, 0, 'a finished goal frees its subjects (children too)');
+  assert.strictEqual(G.past().length, 1, 'and is listed under Past goals');
+  assert.strictEqual(G.verdicts()[savedAtar.id]['chemistry::t1'].perfTier, 'green', 'its verdicts are frozen');
+  G.clearVerdicts();
+  assert.deepStrictEqual(G.verdicts(), {}, 'Clear Cache drops the verdicts');
+  assert.strictEqual(G.all().length, 5, 'and keeps the goals');
+  localStorage.setItem('connectify:goals:12345', JSON.stringify({ version: 9, goals: [{ id: 'x' }] }));
+  assert.deepStrictEqual(G.all(), [], 'an unknown version reads as no goals');
+  localStorage.clear();
+});
+
+runTest('Test 261: Goal ranges use Year Progression weeks fixed at load; replays judge each task against what it needed', () => {
+  const pred = { low: 65, mid: 72, high: 79 };
+  const chemTasks = [
+    { id: 't1', name: 'Test 1', weight: 20, pending: false, score: 80, earned: 16, order: 5, semester: 1 },
+    { id: 't2', name: 'Test 2', weight: 20, pending: false, score: 70, earned: 14, order: 10, semester: 1 },
+    { id: 't3', name: 'Exam', weight: 60, pending: true, earned: 0, order: 27, semester: 2 },
+    { id: 't4', name: 'Project', weight: 10, pending: true, earned: 0, order: null, semester: 2 }
+  ];
+  const courses = [[{ id: 'chemistry', name: 'Chemistry', subject: 'Chemistry ATAR', tasks: chemTasks.slice(0, 2) }],
+    [{ id: 'chemistry', name: 'Chemistry', subject: 'Chemistry ATAR', tasks: chemTasks }]];
+  const win = loadGoalModules({
+    ConnectifySchoolTerms: { schoolWeek: o => o, weekOrder: n => n },
+    ConnectifyPredictorCache: { getOrComputeTaskPrediction: () => pred }
+  });
+  const P = win.ConnectifyGoalPlan;
+  const goal = { kind: 'grade', subject: 'chemistry', target: 75, end: { type: 'week', week: 30 }, priorMarked: ['chemistry::t1'] };
+  const range = P.rangeTasks(goal, P.entryFor(courses, 'chemistry'));
+  assert.deepStrictEqual(range.tasks.map(t => t.id).sort(), ['t1', 't2', 't3'], 'tasks up to the end week are in range');
+  assert.deepStrictEqual(range.undated, ['Project'], 'a task with no week is left out and named');
+
+  chemTasks[2].order = 35;
+  assert.strictEqual(P.rangeTasks(goal, P.entryFor(courses, 'chemistry')).tasks.length, 3, 'a week changed after load is not used until reload');
+  assert.strictEqual(P.isHeld(), false);
+  win.dispatchEvent({ type: 'connectify-week-override-saved' });
+  assert.strictEqual(P.isHeld(), true, 'a saved week override holds goals until reload');
+
+  const R = win.ConnectifyGoalReplay.evaluate(goal, { courses, allSubjects: [] });
+  assert.ok(!R.verdicts['chemistry::t1'], 'a task marked before the goal was set is not judged by it');
+  const v = R.verdicts['chemistry::t2'];
+  assert.strictEqual(v.required, 73.8, 'Test 2 needed what the goal required with only Test 1 marked');
+  assert.strictEqual(v.perfTier, 'orange', '70 is within 5 below what it needed');
+  assert.deepStrictEqual([v.progress.earned, v.progress.required], [30, 75], 'progress as of Test 2: 30 of 75 weighted points');
+  assert.ok(R.tier && R.tier !== 'guaranteed' && R.tier !== 'impossible', `the goal has a tier now (${R.tier})`);
+  assert.strictEqual(R.finished, null, 'it is still running');
+
+  const sure = win.ConnectifyGoalReplay.evaluate({ ...goal, target: 25 }, { courses, allSubjects: [] });
+  assert.deepStrictEqual([sure.tier, sure.finished], ['guaranteed', 'achieved'], 'a target already met locks in Achieved');
+  const never = win.ConnectifyGoalReplay.evaluate({ ...goal, target: 95 }, { courses, allSubjects: [] });
+  assert.deepStrictEqual([never.tier, never.finished], ['impossible', 'missed'], 'a target out of reach locks in Missed');
+
+  const S = win.ConnectifyTargetSolver;
+  assert.strictEqual(S.gradePlan(S.taskProgress(chemTasks.slice(0, 3), undefined, 1), 75, { offsets: { t3: 10 } }).taskRequirements.t3.required,
+    S.gradePlan(S.taskProgress(chemTasks.slice(0, 3), undefined, 1), 75).required, 'one task left takes the whole requirement whatever its slider');
+});
+
+runTest('Test 262: An ATAR goal re-solves its four subjects\' targets; subject sliders shift effort between them', () => {
+  const mk = (id, name, marks) => ({
+    id, name, subject: `${name} ATAR`, mark: 75,
+    tasks: marks.map((m, i) => ({ id: `${id}${i}`, name: `Task ${i + 1}`, weight: 25, pending: m === null, score: m ?? undefined, earned: m === null ? 0 : m / 4, order: 5 + i * 8, semester: i < 2 ? 1 : 2 }))
+  });
+  const sem2 = [mk('chemistry', 'Chemistry', [80, 70, null, null]), mk('physics', 'Physics', [75, 72, null, null]),
+    mk('english', 'English', [68, 74, null, null]), mk('mathematics methods', 'Mathematics Methods', [82, 85, null, null])];
+  const win = loadGoalModules({
+    ConnectifySchoolTerms: { schoolWeek: o => o, weekOrder: n => n },
+    ConnectifyPredictorCache: { getOrComputeTaskPrediction: () => ({ low: 68, mid: 75, high: 82 }) },
+    ConnectifyAtarCalc: { getCourseState: r => ({ ...r, score: r.mark, raw: r.mark }), calculateResults: () => [{ bonus: 0 }, { bonus: 0 }] }
+  });
+  const S = win.ConnectifyTargetSolver;
+  for (const c of sem2) c.progress = S.taskProgress(c.tasks, undefined, 2);
+  const ctx = { atarCourses: [[], sem2], courses: [[], sem2], allSubjects: [] };
+  const goal = { id: 'g1', kind: 'atar', target: 85, end: { type: 'semester', semester: 2 }, included: sem2.map(c => c.id), topFour: sem2.map(c => c.id), priorMarked: [] };
+  const R = win.ConnectifyGoalReplay.evaluate(goal, ctx);
+  assert.ok(!R.error, R.error);
+  assert.deepStrictEqual(Object.keys(R.children).sort(), sem2.map(c => c.id).sort(), 'every top-four subject gets a target');
+  assert.ok(Object.values(R.children).every(c => Number.isFinite(c.target) && c.tier), 'with its own tier');
+  assert.ok(R.tier, `the ATAR goal has a tier (${R.tier})`);
+  assert.strictEqual(Object.keys(R.verdicts).length, 8, 'every completed task of the four subjects is judged');
+  assert.ok(Object.values(R.verdicts).every(v => Number.isFinite(v.required) && v.perfTier), 'each against what it needed');
+
+  const pushed = win.ConnectifyGoalReplay.evaluate({ ...goal, subjectSliders: { chemistry: 2 } }, ctx);
+  assert.ok(pushed.children.chemistry.target > R.children.chemistry.target + 3, 'Much more effort on Chemistry raises its target');
+  assert.ok(pushed.children.physics.target < R.children.physics.target, 'and lowers the others');
 });
 
 Promise.all(pendingTestPromises).then(() => {

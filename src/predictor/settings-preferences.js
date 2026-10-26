@@ -95,6 +95,7 @@
         window.ConnectifyCache?.clearResultsCache?.();
         window.ConnectifyCache?.clearCohortCache?.();
         window.ConnectifyCache?.clearPredictorCache?.();
+        window.ConnectifyCache?.clearGoalsCache?.();
         window.ConnectifyData?.clearCache?.();
         try { localStorage.removeItem('connectify:stale_subjects'); } catch {}
         const feedback = panel.querySelector('#cx-clear-cache-feedback');

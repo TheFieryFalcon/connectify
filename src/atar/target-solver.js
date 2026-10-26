@@ -52,6 +52,15 @@
     };
   }
 
+  // Tasks are keyed by id (same-named tasks such as each semester's exam are two), the name only without one
+  const taskKey = task => task?.id || task?.name;
+  const clamp100 = v => Math.max(0, Math.min(100, v));
+
+  /**
+   * Score needed on the remaining tasks. Without `difficultyWeighted` or `offsets` every task needs the same
+   * score; otherwise each task starts from a baseline (past performance, or the uniform score for all), moved
+   * by its effort offset in points (`offsets[taskKey]`), and one shared effort is solved for.
+   */
   function gradePlan(progress, target, options = {}) {
     if (progress.error) return { error: progress.error };
     if (scoreVal(target) === undefined) return { error: 'Enter an overall target percentage from 0 to 100.' };
@@ -60,8 +69,9 @@
     if (progress.remaining <= 1e-9) return { finished: true, maximum, final: progress.earned };
 
     const difficultyWeighted = Boolean(options.difficultyWeighted);
-    if (!difficultyWeighted) {
-      const exactRequired = Math.max(0, ((target - progress.earned) / progress.remaining) * 100);
+    const offsetOf = task => Number(options.offsets?.[taskKey(task)]) || 0;
+    const exactRequired = Math.max(0, ((target - progress.earned) / progress.remaining) * 100);
+    if (!difficultyWeighted && !(progress.tasks || []).some(offsetOf)) {
       return { required: Math.min(100, Math.ceil((exactRequired - 1e-9) * 10) / 10), maximum };
     }
 
@@ -71,25 +81,26 @@
     const totals = D.typeTotals(subjectName, progress.allTasks);
     const taskMetaList = (progress.tasks || []).map(task => {
       const category = D.taskType(subjectName, task);
-      return { task, category, weight: task.weight, baseline: D.clampBaseline(D.typeAverage(totals, category) ?? courseAvg) };
+      const base = difficultyWeighted ? D.clampBaseline(D.typeAverage(totals, category) ?? courseAvg) : Math.min(100, exactRequired);
+      return { task, category, weight: task.weight, baseline: clamp100(base + offsetOf(task)) };
     });
     const calcTaskScore = (meta, t) => D.scoreAt(meta.baseline, t);
     const totalWeight = progress.total || 100;
     const projectScoreAtT = t =>
       ((progress.rawEarned || 0) + taskMetaList.reduce((sum, m) => sum + (calcTaskScore(m, t) / 100) * m.weight, 0)) / totalWeight * 100;
 
-    if (projectScoreAtT(1.0) < target - 1e-9) return { impossible: true, maximum, difficultyWeighted: true };
+    if (projectScoreAtT(1.0) < target - 1e-9) return { impossible: true, maximum, difficultyWeighted };
     const finalT = D.bisect(t => projectScoreAtT(t) >= target, -1.0, 1.0);
 
     const taskRequirements = {};
     let totalReqSum = 0;
     for (const m of taskMetaList) {
       const score = Math.min(100, Math.max(0, D.round1(calcTaskScore(m, finalT))));
-      taskRequirements[m.task.name] = { required: score, baseline: D.round1(m.baseline), category: m.category };
+      taskRequirements[taskKey(m.task)] = { required: score, baseline: D.round1(m.baseline), category: m.category };
       totalReqSum += score;
     }
     const avgRequired = taskMetaList.length > 0 ? D.round1(totalReqSum / taskMetaList.length) : D.round1(finalT);
-    return { required: avgRequired, parameter: finalT, difficultyWeighted: true, maximum, taskRequirements };
+    return { required: avgRequired, parameter: finalT, difficultyWeighted, effort: true, maximum, taskRequirements };
   }
 
   // The TEA bonus is held at its current value while solving, so the solver moves raw marks only
@@ -103,9 +114,10 @@
 
   /**
    * Pending tasks of the included courses with their baselines: the course's own average on that type,
-   * else halfway between the course average and that type's average across all courses, else the course average.
+   * else halfway between the course average and that type's average across all courses, else the course average
+   * (`flat`: one baseline for every task).
    */
-  function difficultyTasks(eligibleRows) {
+  function difficultyTasks(eligibleRows, flat) {
     const overall = {};
     for (const r of eligibleRows) D.typeTotals(r.name, r.progress?.allTasks, overall);
     const list = [];
@@ -117,7 +129,7 @@
         const category = D.taskType(r.name, task);
         const overallAvg = D.typeAverage(overall, category);
         const baseline = D.typeAverage(course, category) ?? (overallAvg !== undefined ? (courseAvg + overallAvg) / 2 : courseAvg);
-        list.push({ course: r.name, taskName: task.name, task, weight: task.weight, category, baseline: D.clampBaseline(baseline) });
+        list.push({ course: r.name, taskName: taskKey(task), task, weight: task.weight, category, baseline: flat ?? D.clampBaseline(baseline) });
       }
     }
     return list;
@@ -134,7 +146,18 @@
 
     const currentBonus = heldBonus(eligibleRows, options);
     const difficultyWeighted = Boolean(options.difficultyWeighted);
-    const taskMetaList = difficultyWeighted ? difficultyTasks(eligibleRows) : [];
+    // Effort offsets in points: a subject's (`offsets[course]`) plus its task's (`offsets[course::taskKey]`)
+    const offsetOf = (course, task) => (Number(options.offsets?.[course]) || 0) + (Number(options.offsets?.[`${course}::${taskKey(task)}`]) || 0);
+    const hasOffsets = eligibleRows.some(r => r.include !== false && (r.progress?.tasks || []).some(t => offsetOf(r.name, t)));
+    let taskMetaList = difficultyWeighted ? difficultyTasks(eligibleRows) : [];
+    if (!difficultyWeighted && hasOffsets) {
+      // Without performance baselines every task starts at the uniform score the target needs
+      const uniform = targetPlan(rows, target, { ...options, offsets: null });
+      if (uniform.error || uniform.impossible) return uniform;
+      taskMetaList = difficultyTasks(eligibleRows, uniform.parameter);
+    }
+    for (const meta of taskMetaList) meta.baseline = clamp100(meta.baseline + offsetOf(meta.course, meta.task));
+    const effort = difficultyWeighted || taskMetaList.length > 0;
     const metaByTask = new Map();
     for (const meta of taskMetaList) {
       const key = `${meta.course}::${meta.taskName}`;
@@ -147,9 +170,9 @@
     const projectCourseScore = (r, pOrT) => {
       if (r.include === false || !r.progress?.remaining || (r.progress?.tasks || []).length === 0) return currentScore(r);
       let rawScore;
-      if (difficultyWeighted) {
+      if (effort) {
         const earnedRemaining = r.progress.tasks.reduce((sum, task) => {
-          const meta = metaByTask.get(`${r.name}::${task.name}`);
+          const meta = metaByTask.get(`${r.name}::${taskKey(task)}`);
           const score = meta ? calcTaskScore(meta, pOrT) : Math.max(0, Math.min(100, 75 + pOrT * 25));
           return sum + (score / 100) * task.weight;
         }, 0);
@@ -164,8 +187,8 @@
     const calculateAtVal = pOrT => (calculate ? calculate(projectedRows(pOrT), { fixedBonus: currentBonus }) : { error: 'Calculation unavailable' });
     const reachesTarget = res => !res.error && res.atar !== '<30' && Number(res.atar) >= target;
 
-    const maxVal = difficultyWeighted ? 1.0 : 100.0;
-    const minVal = difficultyWeighted ? -1.0 : 0.0;
+    const maxVal = effort ? 1.0 : 100.0;
+    const minVal = effort ? -1.0 : 0.0;
     const maximumResult = calculateAtVal(maxVal);
     if (maximumResult.error) return { error: maximumResult.error };
     if (!reachesTarget(maximumResult)) {
@@ -175,7 +198,7 @@
     let finalT = D.bisect(v => reachesTarget(calculateAtVal(v)), minVal, maxVal);
     const taskRequirements = {};
     let totalReqSum = 0;
-    if (difficultyWeighted) {
+    if (effort) {
       for (const meta of taskMetaList) {
         const score = Math.min(100, Math.max(0, D.round1(calcTaskScore(meta, finalT))));
         taskRequirements[`${meta.course}::${meta.taskName}`] = { required: score, baseline: D.round1(meta.baseline), category: meta.category };
@@ -192,9 +215,10 @@
     const avgRequired = taskMetaList.length > 0 ? D.round1(totalReqSum / taskMetaList.length) : D.round1(finalT);
 
     return {
-      required: difficultyWeighted ? avgRequired : finalT,
+      required: effort ? avgRequired : finalT,
       parameter: finalT,
       difficultyWeighted,
+      effort,
       maximum: maximumResult,
       result: finalResult,
       rows: finalProjected,

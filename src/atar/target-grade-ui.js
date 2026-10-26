@@ -188,8 +188,8 @@
     if (!plan.impossible && !plan.finished) {
       for (const task of progress.tasks || []) {
         let reqText = '';
-        if (isDifficulty && plan.taskRequirements?.[task.name]) {
-          const meta = plan.taskRequirements[task.name];
+        if (isDifficulty && plan.taskRequirements?.[task.id || task.name]) {
+          const meta = plan.taskRequirements[task.id || task.name];
           reqText = `requires ${round(meta.required)}% (baseline: ${round(meta.baseline)}%)`;
         } else {
           reqText = `requires ${round(plan.required)}%`;

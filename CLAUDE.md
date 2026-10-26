@@ -10,6 +10,7 @@ The full rule set is always loaded into context via these imports:
 @docs/modules_core.md
 @docs/modules_system.md
 @docs/modules_ui_analytics.md
+@docs/modules_goals.md
 @docs/features_navigation_ui.md
 @docs/features_analytics_publishing.md
 

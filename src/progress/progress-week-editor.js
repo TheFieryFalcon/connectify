@@ -106,6 +106,8 @@
         } else {
           removeOverride();
         }
+        // Goals keep the weeks they read at page load until a reload
+        window.dispatchEvent(new CustomEvent('connectify-week-override-saved'));
       };
 
       let committed = false;

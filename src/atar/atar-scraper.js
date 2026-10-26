@@ -42,13 +42,19 @@
   );
 
   // Cached task -> the { name, weight, pending, score, earned } shape taskProgress() expects; each course
-  // also keeps these as `tasks`, so Estimate Grade works when the weights do not reconcile
-  function toAssessment(t) {
+  // also keeps these as `tasks`, so Estimate Grade works when the weights do not reconcile. Goals also need
+  // the task's id, school week (`order`, week override applied), semester and the cached task (`source`)
+  function toAssessment(t, subject) {
     const isPending = Boolean(t.pending || t.score === null || t.score === undefined);
     const scorePct = isPending ? undefined : Number(t.score);
     const weightVal = Number(t.weight) || 0;
     const earnedWeight = (!isPending && Number.isFinite(scorePct)) ? (scorePct / 100) * weightVal : 0;
-    return { name: t.name, weight: weightVal, pending: isPending, score: scorePct, earned: earnedWeight };
+    const resolve = window.ConnectifyAssessmentScrape?.resolveTaskOrder;
+    const order = resolve ? resolve(subject, t) : t.order;
+    return {
+      id: t.id, name: t.name, weight: weightVal, pending: isPending, score: scorePct, earned: earnedWeight,
+      order: Number.isFinite(order) ? order : null, semester: t.semester, source: t
+    };
   }
 
   const usableTask = t => t && t.name && (t.weight > 0 || !/^Assessment\s+\d+$/i.test(t.name));
@@ -98,7 +104,7 @@
         if (!name || seen[index].has(id)) continue;
         seen[index].add(id);
 
-        const tasks = cachedTasks(subject, entry).filter(usableTask).map(toAssessment);
+        const tasks = cachedTasks(subject, entry).filter(usableTask).map(t => toAssessment(t, subject));
         let markValue = entry.mark !== null && entry.mark !== undefined ? scoreValue(entry.mark) : undefined;
         if (markValue === undefined && tasks.length > 0) {
           const completedTasks = tasks.filter(t => !t.pending && Number.isFinite(t.score) && t.weight > 0);
@@ -111,6 +117,7 @@
         result[index].push({
           id,
           name,
+          subject,
           mark: markValue,
           finalLetter: Boolean(entry.finalLetter),
           tasks,
@@ -155,11 +162,12 @@
           const markVal = Number.isFinite(entry.mark) ? entry.mark : undefined;
           const byName = window.ConnectifyData?.getSubjectTasks?.(subjName) || [];
           const cached = byName.length ? byName : (window.ConnectifyData?.getSubjectTasks?.(cleanName) || []);
-          const tasks = cached.filter(usableTask).map(toAssessment);
+          const tasks = cached.filter(usableTask).map(t => toAssessment(t, subjName));
 
           result[semIdx].push({
             id,
             name: cleanName,
+            subject: subjName,
             mark: markVal,
             finalLetter: false,
             tasks,

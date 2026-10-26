@@ -1,7 +1,7 @@
 /**
  * Connectify: subsystem cache versions and clearing
  *
- * Each subsystem (predictor, results, settings, cohort) has its own version string and storage key
+ * Each subsystem (predictor, results, settings, cohort, goals) has its own version string and storage key
  * (connectify:cache_version:<subsystem>). Bumping a version clears only that subsystem's caches on the
  * next load. Loaded before assessment-cache.js, which adds the in-memory caches to this object.
  * Exposes window.ConnectifyCache.
@@ -15,14 +15,16 @@
     PREDICTOR: 'v21_20261024_pred',
     RESULTS: 'v12_20261024_results',
     SETTINGS: 'v4_20261001_settings',
-    COHORT: 'v7_20261024_cohort'
+    COHORT: 'v7_20261024_cohort',
+    GOALS: 'v1_20261026_goals'
   };
 
   const CACHE_KEYS = {
     PREDICTOR: 'connectify:cache_version:predictor',
     RESULTS: 'connectify:cache_version:results',
     SETTINGS: 'connectify:cache_version:settings',
-    COHORT: 'connectify:cache_version:cohort'
+    COHORT: 'connectify:cache_version:cohort',
+    GOALS: 'connectify:cache_version:goals'
   };
 
   const ConnectifyCache = {
@@ -74,7 +76,8 @@
         ];
         for (const k of directKeys) localStorage.removeItem(k);
         // Baselines live under singular and legacy plural prefixes (see ConnectifyUtils.BASELINE_PREFIXES)
-        removeStorageKeys(k => isBaselineKey(k) || k.startsWith('connectea:class_categories:') || k.startsWith('connectify:calendar_export:'));
+        removeStorageKeys(k => isBaselineKey(k) || k.startsWith('connectea:class_categories:') || k.startsWith('connectify:calendar_export:') ||
+          k.startsWith('connectify:goals:') || k.startsWith('connectify:goal_verdicts:'));
         localStorage.setItem(CACHE_KEYS.SETTINGS, CACHE_VERSIONS.SETTINGS);
         // Predictor modules memoise baselines; this event drops their in-memory copy
         window.dispatchEvent(new CustomEvent('connectify-baselines-updated'));
@@ -104,11 +107,23 @@
       }
     },
 
+    // Finished goals' frozen verdicts only: the goals themselves are the student's own settings
+    clearGoalsCache() {
+      try {
+        removeStorageKeys(k => k.startsWith('connectify:goal_verdicts:'));
+        localStorage.setItem(CACHE_KEYS.GOALS, CACHE_VERSIONS.GOALS);
+        window.dispatchEvent(new CustomEvent('connectify-goals-changed'));
+      } catch (e) {
+        console.warn('ConnectifyCache: failed to clear goal verdicts', e);
+      }
+    },
+
     clearAllCaches() {
       this.clearPredictorCache();
       this.clearResultsCache();
       this.clearSettingsCache();
       this.clearCohortCache();
+      this.clearGoalsCache();
     },
 
     invalidateSubsystem(name) {
@@ -121,6 +136,8 @@
         this.clearSettingsCache();
       } else if (norm === 'cohort') {
         this.clearCohortCache();
+      } else if (norm === 'goals') {
+        this.clearGoalsCache();
       } else if (norm === 'all') {
         this.clearAllCaches();
       }
@@ -143,6 +160,7 @@
         if (localStorage.getItem(CACHE_KEYS.COHORT) !== CACHE_VERSIONS.COHORT) {
           this.clearCohortCache({ keepOverrides: true });
         }
+        if (localStorage.getItem(CACHE_KEYS.GOALS) !== CACHE_VERSIONS.GOALS) this.clearGoalsCache();
       } catch {}
     }
   };
