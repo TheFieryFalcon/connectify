@@ -3,9 +3,10 @@
  *
  * Keeps every active goal's evaluation (re-worked after results, predictions, task types or goals change,
  * unless goals are held after a week change), ends goals that lock in (Guaranteed -> Achieved, Impossible ->
- * Missed) or finish (every task in range marked, or the final letter shows), freezing their verdicts, and gives
- * the Class Updated toast its goal line. A completed goal celebrates with that toast, or, when none comes, the
- * next time the Goals dialog opens. Exposes window.ConnectifyGoalEvents.
+ * Missed) or finish (every task in range marked, or the final letter shows), freezing their verdicts. When a
+ * newly marked task is read (an outline expanded, Expand All, auto-expand) or a goal ends, a Goal Updated toast
+ * of its own names the tier; a completed goal celebrates with it, or, when no toast could show, the next time
+ * the Goals dialog opens. Exposes window.ConnectifyGoalEvents.
  */
 (() => {
   'use strict';
@@ -53,12 +54,25 @@
     return true;
   }
 
-  /** Re-evaluates every active goal and settles the finished ones. */
+  /** Marked tasks in range the goal has not told the student about yet (`seenMarked`, else those marked when set). */
+  const unseen = (goal, state) => {
+    const seen = new Set(goal.seenMarked || goal.priorMarked || []);
+    return (state?.markedKeys || []).filter(key => !seen.has(key));
+  };
+
+  /** Re-evaluates every active goal, settles the finished ones and announces the ones with new results. */
   function refresh() {
     timer = null;
     if (P().isHeld()) return;
     states.clear();
-    for (const goal of store().active().filter(g => !g.parent)) settle(goal, stateOf(goal));
+    for (const goal of store().active().filter(g => !g.parent)) {
+      const state = stateOf(goal);
+      const fresh = unseen(goal, state);
+      const ended = settle(goal, state);
+      if (!fresh.length && !ended) continue;
+      store().patch(goal.id, { seenMarked: state?.markedKeys || [] });
+      announce(store().byId(goal.id), fresh);
+    }
     version++;
     window.dispatchEvent(new CustomEvent('connectify-goals-evaluated'));
     window.ConnectifyCohort?.schedule?.();
@@ -87,19 +101,10 @@
   }
 
   /**
-   * The Class Updated toast's goal line for a subject, or null: `Goal: Medium`, `Goal is now Hard (was Medium)`,
-   * `Goal complete!` (with the celebration) or `Goal missed!` (`ATAR goal ...` for a subject an ATAR goal holds).
+   * The goal's toast line: `Goal: Medium`, `Goal is now Hard (was Medium)`, `Goal complete!` (with the
+   * celebration) or `Goal missed!` (`ATAR goal ...` for an ATAR goal). Remembers the tier it named.
    */
-  function toastLine(subjectName) {
-    const key = store().subjectKey(subjectName);
-    let goal = store().activeFor(subjectName);
-    if (goal && !P().isHeld()) {
-      states.delete(goal.id);
-      ctxMemo = null;
-      if (settle(goal, stateOf(goal))) goal = store().byId(goal.id);
-    }
-    goal = goal || store().all().find(g => !g.parent && g.announcePending && store().subjectsOf(g).includes(key));
-    if (!goal) return null;
+  function lineFor(goal) {
     const prefix = goal.kind === 'atar' ? 'ATAR goal' : 'Goal';
     if (goal.status !== 'active') {
       store().patch(goal.id, { announcePending: false });
@@ -112,6 +117,25 @@
     const before = goal.lastTier;
     store().patch(goal.id, { lastTier: tier });
     return before && before !== tier ? `${prefix} is now ${D().name(tier)} (was ${D().name(before)})` : `${prefix}: ${D().name(tier)}`;
+  }
+
+  /** The outline card of the subject a new result belongs to (the later semester's), for Jump to Subject. */
+  function cardFor(subject) {
+    const cards = Array.from(document.querySelectorAll('.eds-c-tile')).filter(card =>
+      store().subjectKey(card.querySelector('.eds-c-tile__title, .cvr-c-tile__title')?.textContent || '') === subject);
+    return cards[cards.length - 1] || null;
+  }
+
+  /** The Goal Updated toast (one per goal at a time): the goal, and its line under it. */
+  function announce(goal, fresh = []) {
+    const line = lineFor(goal);
+    if (!line) return;
+    const card = cardFor((fresh[fresh.length - 1] || '').split('::')[0] || goal.subject);
+    const actions = [{ text: 'Dismiss', type: 'secondary', onClick: ({ close }) => close() }];
+    if (card && window.ConnectifyNewGrade?.jumpToSubject) actions.push({ text: 'Jump to Subject', type: 'accent', onClick: () => window.ConnectifyNewGrade.jumpToSubject(card) });
+    window.ConnectifyNotifications?.show?.({
+      id: `connectify-goal-${goal.id}`, type: 'grade', title: 'Goal Updated', message: P().title(goal), details: [line], duration: 12000, actions
+    });
   }
 
   /** New school year: every active goal is judged on what is marked and ended; all goals go to the archive. */
@@ -127,6 +151,6 @@
     return store().takeAll();
   }
 
-  window.ConnectifyGoalEvents = { stateOf, refresh, invalidate, toastLine, celebratePending, celebrate, endYear, version: () => version };
+  window.ConnectifyGoalEvents = { stateOf, refresh, invalidate, lineFor, announce, celebratePending, celebrate, endYear, version: () => version };
   if (window.ConnectifyUtils?.isOutlinesPage()) invalidate();
 })();

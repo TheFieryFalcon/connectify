@@ -94,7 +94,6 @@
       type: 'grade',
       title: 'Class Updated',
       message: `${entry.subjectName} scores have been updated.`,
-      details: [window.ConnectifyGoalEvents?.toastLine?.(entry.subjectName)].filter(Boolean),
       duration: 12000,
       actions: [
         { text: 'Dismiss', type: 'secondary', onClick: ({ close }) => close() },

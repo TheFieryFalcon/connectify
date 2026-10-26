@@ -221,14 +221,14 @@ For each judged task in date order (school week, as the Predictor orders tasks),
 
 ## 8. Notifications and celebration
 
-### 8.1 Folded into "Class Updated"
-The existing grade toast (`new-grade.js`) for a subject with an active goal (or an ATAR child) gets one extra line:
-- unchanged: `Goal: Medium` (ATAR children: `ATAR goal: Medium`);
+### 8.1 Goal Updated toast
+A toast of its own (`Goal Updated`, the goal's title as its message, one line under it, Dismiss and Jump to Subject), shown when a newly marked task in the goal's range is read (an outline expanded, Expand All, auto-expand) or the goal ends. The Class Updated toast carries no goal line: when Connect's running mark changes on a collapsed outline, the new task's mark is not read yet, so the tier would be stale. The line:
+- unchanged: `Goal: Medium` (ATAR goals: `ATAR goal: Medium`);
 - tier changed: `Goal is now Hard (was Medium)`;
 - finished, achieved: `Goal complete!` plus the celebration;
 - finished, missed: `Goal missed!`.
 
-There is no separate goal toast. The goal's `lastTier` is stored, so the "was" tier survives reloads.
+Each goal stores the marked tasks it has announced (`seenMarked`, starting from `priorMarked`), so every result brings one toast, and its `lastTier`, so the "was" tier survives reloads.
 
 ### 8.2 Celebration (`goal-celebrate.js`, `goal-celebrate.css`)
 - Plays **once per goal** (`celebrated: true` saved), never again on reload.
@@ -287,13 +287,13 @@ Registered in `manifest.json` after the planner scripts (outlines group only: th
 | `src/goals/goal-list-ui.js` | `ConnectifyGoalListUI` | Goals dialog: cards, Past goals, Edit / Delete |
 | `src/goals/goal-editor.js` | `ConnectifyGoalEditor` | Set as Goal / Update Goal / Goals buttons, edit mode and Cancel Editing in both tabs |
 | `src/goals/goal-bars.js` | `ConnectifyGoalBars` | row bars, tooltip, memo signature |
-| `src/goals/goal-events.js` | `ConnectifyGoalEvents` | lock-in / finish detection, toast line |
+| `src/goals/goal-events.js` | `ConnectifyGoalEvents` | lock-in / finish detection, Goal Updated toast |
 | `src/goals/goal-celebrate.js` | `ConnectifyGoalCelebrate` | confetti, shake, reduced motion |
 | `src/progress/progress-goal-line.js` | `ConnectifyProgressGoalLine` | Year Progression goal line |
 | `src/atar/grade-estimate-goal.js` | `ConnectifyGradeEstimateGoal` | Estimator goal lines |
 | `src/goals/goal-bars.css`, `goal-dialog.css`, `goal-planner.css`, `goal-list.css`, `goal-celebrate.css` | | theme tokens only |
 
-Changes to existing files stay small: `target-solver.js` gains the `offsets` option; the planners call the editor and sliders; `cohort-view.js` calls `goal-bars`; `new-grade.js` asks `goal-events` for the toast line; `year-rollover.js` archives goals; `cache-versions.js` clears verdicts on Clear Cache.
+Changes to existing files stay small: `target-solver.js` gains the `offsets` option; the planners call the editor and sliders; `cohort-view.js` calls `goal-bars`; `year-rollover.js` archives goals; `cache-versions.js` clears verdicts on Clear Cache.
 
 ## 12. Tests (`test_suite.js`)
 - **Tiers**: chance from Low / Mid / High with lopsided ranges; the 90 / 70 / 40 / 15 bands; Guaranteed (met at 0%) and Impossible (> 100%) edges.

@@ -26,7 +26,7 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 - **Colours**: Guaranteed `#15803d`, Trivial `#22c55e`, Easy `#84cc16`, Medium `#eab308`, Hard `#f97316`, Hell `#ef4444`, Impossible `#991b1b`; Achieved / Missed take the first / last.
 
 ### Store (`goal-store.js`, `ConnectifyGoalStore`)
-- `connectify:goals:<account>`: `{ version: 1, goals }` (id, revision, kind, subject, name, parent, target, end, difficultyWeighted, sliders, subjectSliders, included, topFour, priorMarked, status, createdAt, finishedAt, finalValue, finalProgress, lastTier, announcePending, celebratePending, celebrated, glowPending). Unknown versions read as none; unknown fields are kept.
+- `connectify:goals:<account>`: `{ version: 1, goals }` (id, revision, kind, subject, name, parent, target, end, difficultyWeighted, sliders, subjectSliders, included, topFour, priorMarked, status, createdAt, finishedAt, finalValue, finalProgress, lastTier, seenMarked, announcePending, celebratePending, celebrated, glowPending). Unknown versions read as none; unknown fields are kept.
 - `connectify:goal_verdicts:<account>`: frozen verdicts of finished goals. Clear Cache and the `goals` cache version (`clearGoalsCache`) clear only these; a settings reset removes goals too.
 - **Conflicts** (`conflicts`): one active goal per subject, one active ATAR goal; the goal being edited never counts. `save` keeps the id and counts a revision; an ATAR save rewrites its children (`childSliders`).
 - `finish`, `remove`, `takeAll` (new-year archive). Events: `connectify-goals-changed` on every write.
@@ -45,7 +45,7 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 - Live verdicts for the goal's own tasks; earlier tasks show the latest finished goal's frozen verdict.
 
 ### Events and celebration
-- `goal-events.js` (`ConnectifyGoalEvents`): `stateOf` (cached per revision; kept while held), `refresh` after results / predictions / goals / types change (400ms; settles finished goals: Guaranteed -> Achieved, Impossible -> Missed, all marked or final letter -> by the measured mark), then `connectify-goals-evaluated` and a cohort pass. `toastLine` for `new-grade.js` (`Goal: Medium`, `Goal is now Hard (was Medium)`, `Goal complete!` + celebration, `Goal missed!`; `ATAR goal ...`). `celebratePending` (Goals dialog), `endYear` (`year-rollover.js` archive).
+- `goal-events.js` (`ConnectifyGoalEvents`): `stateOf` (cached per revision; kept while held), `refresh` after results / predictions / goals / types change (400ms; settles finished goals: Guaranteed -> Achieved, Impossible -> Missed, all marked or final letter -> by the measured mark), then `connectify-goals-evaluated` and a cohort pass. A newly read marked task in range (not in the goal's `seenMarked`, else `priorMarked`) or a goal ending brings a `Goal Updated` toast of its own (`announce`, id `connectify-goal-<id>`, Jump to Subject; never folded into Class Updated, whose collapsed-card marks come before the task is read): `lineFor` gives `Goal: Medium`, `Goal is now Hard (was Medium)` (`lastTier`), `Goal complete!` + celebration or `Goal missed!` (`ATAR goal ...`). `celebratePending` (Goals dialog), `endYear` (`year-rollover.js` archive).
 - `goal-celebrate.js` (`ConnectifyGoalCelebrate.play`): ~4s confetti on `#cx-goal-confetti` from the toast corner, ~600ms shake of `.cvr-c-app-layout` / `#main-content`; reduced motion: still fading confetti, no shake. Once per goal; the finished goal glows in the Goals dialog.
 
 ### Other tools

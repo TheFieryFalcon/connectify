@@ -70,7 +70,8 @@
     else if ((weighted.length && weighted.every(P().isMarked)) || letter) finished = measured >= target - 1e-9 ? 'achieved' : 'missed';
     return {
       kind: 'grade', ...now, progress, verdicts, undated, tasks, subject, finished, finalValue: measured,
-      rangeKeys: new Set(tasks.map(t => keyOf(goal.subject, t)))
+      rangeKeys: new Set(tasks.map(t => keyOf(goal.subject, t))),
+      markedKeys: weighted.filter(P().isMarked).map(t => keyOf(goal.subject, t))
     };
   }
 
@@ -168,7 +169,8 @@
     else if (complete && Number.isFinite(measured)) finished = measured >= target - 1e-9 ? 'achieved' : 'missed';
     return {
       kind: 'atar', plan: now, range, chance: p, tier, children: kids, progress, verdicts, finished, finalValue: measured,
-      rangeKeys: new Set(childRows.flatMap(r => r.goalTasks.map(t => keyOf(r.id, t))))
+      rangeKeys: new Set(childRows.flatMap(r => r.goalTasks.map(t => keyOf(r.id, t)))),
+      markedKeys: childRows.flatMap(r => r.goalTasks.filter(t => t.weight > 0 && P().isMarked(t)).map(t => keyOf(r.id, t)))
     };
   }
 
