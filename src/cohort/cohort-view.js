@@ -131,6 +131,7 @@
       const pendingSig = isOverall ? (upcoming()?.signature(row) ?? '') : '';
       const gradeRange = isOverall ? window.ConnectifyCohortGradeRange?.forRow(row, mark) ?? null : null;
       const rangeSig = gradeRange ? `${gradeRange.low},${gradeRange.high}` : '';
+      const goalSig = window.ConnectifyGoalBars?.signature(row, isOverall) ?? '';
 
       // Fast path: nothing that affects this row has changed. A task type change bumps typesVersion,
       // so the memoised taskType never needs recomputing here
@@ -146,6 +147,7 @@
         memo.baselinesSig === baselinesSig &&
         memo.pendingSig === pendingSig &&
         memo.rangeSig === rangeSig &&
+        memo.goalSig === goalSig &&
         !memo.retry &&
         ui.wrapper?.isConnected
       ) {
@@ -172,7 +174,8 @@
       }
       // retry: an unmarked row without a prediction yet is re-evaluated once results are collected
       const remember = (retry = false) => {
-        ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, pendingSig, rangeSig, taskType, typesVersion, retry };
+        window.ConnectifyGoalBars?.render(ui, row, isOverall);
+        ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, pendingSig, rangeSig, goalSig, taskType, typesVersion, retry };
       };
 
       // Unmarked assessments show their Low / Mid / High prediction instead of statistics

@@ -136,6 +136,7 @@
       subjects: cache?.serializeSubjects?.(cache.subjectsCache) || {},
       grades: readJson(`connectify:grade_cache:${accountKey()}`) || {},
       classSemesters: window.ConnectifyClassSemesters?.get?.() || {},
+      goals: window.ConnectifyGoalEvents?.endYear?.() || null,
       archivedAt: Date.now()
     };
     const previous = Array.isArray(readJson(archiveKey())) ? readJson(archiveKey()) : [];

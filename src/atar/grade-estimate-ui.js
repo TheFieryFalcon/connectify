@@ -117,7 +117,8 @@
       const delta = change === undefined ? '' : ` (${change >= 0 ? '+' : '−'}${round(Math.abs(change))} from ${current})`;
       headline = `${result.complete ? 'Estimated final mark' : 'Estimated average'}: ${round(result.estimate)}%${delta}.`;
     }
-    refs.output.replaceChildren(createEl('strong', 'cta-estimate-result', headline));
+    const goalLine = window.ConnectifyGradeEstimateGoal?.gradeLine(refs.course, tasks, entered, result);
+    refs.output.replaceChildren(...[createEl('strong', 'cta-estimate-result', headline), goalLine].filter(Boolean));
   }
 
   function render(refs, ctx) {

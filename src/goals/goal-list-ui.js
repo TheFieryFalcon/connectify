@@ -75,6 +75,10 @@
 
   function pastRow(goal, rerender) {
     const row = M().el('div', 'cx-goal-past');
+    if (goal.glowPending) {
+      row.classList.add('cx-goal-card--celebrate');
+      store().patch(goal.id, { glowPending: false });
+    }
     const verdict = goal.status === 'achieved' ? 'achieved' : 'missed';
     const final = finalText(goal);
     row.append(
@@ -109,8 +113,8 @@
           }
           if (!active.length && !past.length) close();
         };
-        render();
         window.ConnectifyGoalEvents?.celebratePending?.();
+        render();
       }
     });
   }

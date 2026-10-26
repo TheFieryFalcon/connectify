@@ -110,6 +110,9 @@
       semesterOf: isHistory ? p => p.semester ?? null : undefined
     });
 
+    // Dashed goal line (progress-goal-line.js), under the series too
+    window.ConnectifyProgressGoalLine?.render(svg, { points, xFor, yFor, minY, maxY, subjectName, isHistory, createSvgElement });
+
     /**
      * Plots a polyline series and interactive point markers.
      */

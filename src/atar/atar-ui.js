@@ -182,6 +182,7 @@
 
         markupMod.paintSemesterButton(semesterButtons[i], i, res, mode, isClosed, i === activeSemester);
         if (i === activeSemester) detailSummary.textContent = res.detailText || res.error || 'Calculating ATAR...';
+        if (i === activeSemester) window.ConnectifyGradeEstimateGoal?.atarLine(detailSummary, res, i);
       }
 
       plannerContext.renderModeOutput();

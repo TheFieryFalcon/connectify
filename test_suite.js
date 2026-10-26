@@ -3531,7 +3531,7 @@ runTest('Test 115: Prediction cache updates on task category change, category se
   assert.ok(catCode.includes('updatePredictionCache'), 'category-settings.js must call updatePredictionCache');
   assert.ok(assessCode.includes('updatePredictionCache'), 'assessment-data.js must call updatePredictionCache upon stale expansion');
   // A task type change bumps typesVersion, which the memo compares; the row's taskType is recorded in the memo
-  assert.ok(cohortViewCode.includes('memo.typesVersion === typesVersion') && cohortViewCode.includes('ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, pendingSig, rangeSig, taskType, typesVersion, retry };'), 'cohort-view.js must memoise taskType and invalidate on type changes');
+  assert.ok(cohortViewCode.includes('memo.typesVersion === typesVersion') && cohortViewCode.includes('ui._memo = { mark, statsKey, cohortSize, key, isOverall, baselinesSig, pendingSig, rangeSig, goalSig, taskType, typesVersion, retry };'), 'cohort-view.js must memoise taskType and invalidate on type changes');
 
   // 2. Functional evaluation of predictor-math.js updatePredictionCache & clearSubjectPredictionCache
   eval(predMathCode);
@@ -11805,8 +11805,10 @@ function loadGoalModules(stubs = {}) {
   };
   const run = file => new Function('window', origReadFileSync.call(fs, resolveFilePath(file), 'utf8'))(win);
   ['scaling-data.js', 'atar-math.js', 'target-difficulty.js', 'target-solver.js'].forEach(run);
-  ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js', 'goal-modal.js', 'goal-sliders.js', 'goal-dialog.js', 'goal-list-ui.js', 'goal-editor.js']
-    .forEach(f => run(path.resolve(SRC_DIR, 'goals', f)));
+  ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js', 'goal-modal.js', 'goal-sliders.js', 'goal-dialog.js', 'goal-list-ui.js', 'goal-editor.js',
+    'goal-celebrate.js', 'goal-events.js', 'goal-bars.js'].forEach(f => run(path.resolve(SRC_DIR, 'goals', f)));
+  run(path.resolve(SRC_DIR, 'progress/progress-goal-line.js'));
+  run(path.resolve(SRC_DIR, 'atar/grade-estimate-goal.js'));
   return win;
 }
 
@@ -12032,6 +12034,150 @@ runTest('Test 263: Set as Goal previews the goal with its end and confirms it; t
   list.querySelector('.cx-goal-card__confirm .cx-goal-link').click();
   assert.strictEqual(win.ConnectifyGoalStore.all().length, 0, 'Delete asks first, then removes the goal');
   assert.ok(!document.getElementById('cx-goals-dialog'), 'an empty list closes');
+  localStorage.clear();
+});
+
+// A Chemistry class for goal tests: Test 1 (78) and Test 2 marked, Investigation and the exam pending
+function goalFixture(extra = {}) {
+  const tasks = [
+    { id: 't1', name: 'Test 1', weight: 20, pending: false, score: 78, earned: 15.6, order: 6, semester: 1 },
+    { id: 't2', name: 'Test 2', weight: 15, pending: false, score: 72, earned: 10.8, order: 12, semester: 1 },
+    { id: 't3', name: 'Investigation', weight: 15, pending: true, earned: 0, order: 26, semester: 2 },
+    { id: 't4', name: 'Exam', weight: 50, pending: true, earned: 0, order: 33, semester: 2 }
+  ];
+  const chem = { id: 'chemistry', name: 'Chemistry', subject: 'Chemistry ATAR', tasks };
+  const played = [];
+  const win = loadGoalModules({
+    ConnectifySchoolTerms: { schoolWeek: o => o, weekOrder: n => n },
+    ConnectifyPredictorCache: { getOrComputeTaskPrediction: () => ({ low: 68, mid: 75, high: 82 }) },
+    ConnectifyAtarScraper: { readCourses: () => [[], [chem]] },
+    ConnectifyData: { collect: () => [] },
+    ConnectifyGoalCelebrate: { play: () => played.push(1) },
+    ...extra
+  });
+  return { win, chem, tasks, played };
+}
+
+runTest('Test 264: Goals lock in, finish and feed the Class Updated toast; a completed goal celebrates once; a new year archives them', () => {
+  localStorage.clear();
+  const { win, played } = goalFixture();
+  const G = win.ConnectifyGoalStore;
+  const E = win.ConnectifyGoalEvents;
+  const goal = G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 76, end: { type: 'semester', semester: 2 }, priorMarked: [] });
+  const first = E.toastLine('Chemistry ATAR - Semester 2');
+  assert.ok(/^Goal: (Trivial|Easy|Medium|Hard|Hell)$/.test(first), `the toast names the goal's tier (${first})`);
+  G.save({ ...G.byId(goal.id), target: 86 });
+  assert.ok(/^Goal is now \w+ \(was \w+\)$/.test(E.toastLine('Chemistry ATAR')), 'a changed tier says what it was');
+  assert.strictEqual(E.toastLine('Physics ATAR'), null, 'no line for a subject without a goal');
+
+  G.save({ ...G.byId(goal.id), target: 20 });
+  assert.strictEqual(E.toastLine('Chemistry ATAR'), 'Goal complete!', 'a target already met locks in Achieved');
+  assert.deepStrictEqual([G.byId(goal.id).status, played.length], ['achieved', 1], 'and celebrates');
+  assert.ok(G.verdicts()[goal.id]['chemistry::t1'], 'its verdicts are frozen');
+  assert.strictEqual(E.toastLine('Chemistry ATAR'), null, 'only once');
+  E.celebratePending();
+  assert.strictEqual(played.length, 1, 'never twice');
+
+  const missed = G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 99.5, end: { type: 'semester', semester: 2 }, priorMarked: [] });
+  assert.strictEqual(E.toastLine('Chemistry ATAR'), 'Goal missed!', 'a target out of reach locks in Missed');
+  assert.strictEqual(played.length, 1, 'with no celebration');
+
+  const quiet = G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 10, end: { type: 'semester', semester: 2 }, priorMarked: [] });
+  E.refresh();
+  assert.deepStrictEqual([G.byId(quiet.id).status, G.byId(quiet.id).celebratePending], ['achieved', true], 'a goal that finishes with no toast waits to celebrate');
+  E.celebratePending();
+  assert.deepStrictEqual([played.length, G.byId(quiet.id).glowPending], [2, true], 'it celebrates when the Goals dialog opens, and its row glows');
+
+  G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 80, end: { type: 'semester', semester: 2 }, priorMarked: [] });
+  win.dispatchEvent({ type: 'connectify-week-override-saved' });
+  const archived = E.endYear();
+  assert.strictEqual(archived.goals.length, 4, 'a new year archives every goal');
+  assert.ok(archived.goals.every(g => g.status !== 'active'), 'active goals are judged on what is marked');
+  assert.deepStrictEqual(G.all(), [], 'and the list starts empty');
+  const rollover = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/year-rollover.js'), 'utf8');
+  assert.ok(rollover.includes('goals: window.ConnectifyGoalEvents?.endYear?.() || null'), 'the year archive keeps them');
+  const newGrade = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/new-grade.js'), 'utf8');
+  assert.ok(newGrade.includes('details: [window.ConnectifyGoalEvents?.toastLine?.(entry.subjectName)].filter(Boolean)'), 'the Class Updated toast carries the goal line');
+  localStorage.clear();
+});
+
+runTest('Test 265: Goal bars sit beside the outcome meter: pastel performance bands with a secret purple breakout, progress in the tier colour', () => {
+  localStorage.clear();
+  const card = makeOutlineCard('Chemistry ATAR - Semester 2', { overall: '75.4%', tasks: [['Test 1', '39 Out of 50'], ['Test 2', '36 Out of 50']] });
+  const rows = card.querySelectorAll('.cvr-c-tasks .cvr-c-task');
+  const ids = new Map([[rows[0], { id: 't1' }], [rows[1], { id: 't2' }]]);
+  const { win } = goalFixture({
+    ConnectifyTaskTypes: { getTaskMeta: () => ({ subjectName: 'Chemistry ATAR' }) },
+    ConnectifyParseHelpers: { cardTaskIds: () => ids }
+  });
+  const G = win.ConnectifyGoalStore;
+  G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 72, end: { type: 'semester', semester: 2 }, priorMarked: [] });
+  const B = win.ConnectifyGoalBars;
+  const row = rows[1];
+  const wrapper = new MockElement('div', 'connectea-row-wrapper');
+  const outcomeBar = new MockElement('div', 'connectea-outcome-bar');
+  wrapper.append(new MockElement('div', 'connectea-panel'), outcomeBar);
+  const ui = { outcomeBar, box: wrapper.children[0] };
+  B.render(ui, row, false);
+  const bars = wrapper.querySelector('.cx-goal-bars');
+  assert.ok(bars && wrapper.children[2] === bars, 'the bars follow the outcome meter');
+  const data = B.rowData(row, false);
+  const lit = bars.querySelectorAll('.cx-goal-perf .cx-goal-seg').filter(seg => seg.className !== 'cx-goal-seg');
+  const expected = data.perf.band === 'purple' ? 5 : ['red', 'orange', 'yellow', 'green'].indexOf(data.perf.band) + 1;
+  assert.strictEqual(lit.length, expected, `segments are lit up to the band (${data.perf.band})`);
+  const progress = bars.querySelector('.cx-goal-progress');
+  assert.ok(progress.dataset.tier && progress.querySelectorAll('.cx-goal-seg').length === 0, 'the progress bar has no segments, only its tier');
+  assert.ok(/^\d+(\.\d+)?%$/.test(progress.children[0].style['--cx-goal-fill']), 'and a fill');
+  assert.ok(!bars.hasAttribute('title') && !/purple|breakout|1\.1/i.test(bars.dataset.goalTooltip), 'no native title, and the breakout is never named');
+  assert.ok(/^Needed \d+\.\d% • Got 72\.0%\n/.test(bars.dataset.goalTooltip), `numbers only (${bars.dataset.goalTooltip})`);
+
+  win.ConnectifyGoalStore.remove(G.active()[0].id);
+  B.render(ui, row, false);
+  assert.ok(!wrapper.querySelector('.cx-goal-bars'), 'deleting the goal removes its bars');
+
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-bars.css'), 'utf8');
+  assert.ok(cssHas(css, 'width: 18px;') && cssHas(css, 'height: 56px;'), 'each bar is 18 x 56');
+  assert.ok(cssHas(css, '.cx-goal-seg--purple { height: 20px; background: #cdb5f7; }'), 'the breakout segment is double height');
+  assert.ok(css.match(/pointer-events: none !important/g).length >= 2, 'segments and fill never take the pointer');
+  for (const [band, color] of Object.entries({ red: '#f4a3a3', orange: '#f8c99b', yellow: '#f5e19a', green: '#a7e3b5' })) {
+    assert.ok(cssHas(css, `.cx-goal-seg--${band} { background: ${color}; }`), `${band} is pastel`);
+  }
+  const view = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'cohort/cohort-view.js'), 'utf8');
+  assert.ok(view.includes('memo.goalSig === goalSig') && view.includes('window.ConnectifyGoalBars?.render(ui, row, isOverall);'), 'rows memoise and draw their goal bars');
+  localStorage.clear();
+});
+
+runTest('Test 266: Year Progression draws the goal line; the Estimator says whether the goal is met; celebrations respect reduced motion', () => {
+  localStorage.clear();
+  const { win } = goalFixture();
+  const G = win.ConnectifyGoalStore;
+  G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 78, end: { type: 'semester', semester: 2 }, priorMarked: [] });
+  const L = win.ConnectifyProgressGoalLine;
+  assert.deepStrictEqual(L.goalFor('Chemistry', false), { value: 78, endOrder: null, label: 'Goal 78%' }, 'the subject chart gets its goal');
+  const svg = new MockElement('svg');
+  const made = (tag, attrs, text) => { const el = new MockElement(tag, attrs.class || ''); Object.assign(el, { attrs }); el.textContent = text || ''; return el; };
+  L.render(svg, { points: [{ order: 6 }, { order: 12 }], xFor: i => 52 + i * 100, yFor: v => 260 - v * 2.2, minY: 0, maxY: 100, subjectName: 'Chemistry', isHistory: false, createSvgElement: made });
+  const line = svg.querySelector('.cx-goal-line');
+  assert.ok(line && line.attrs.y1 === 260 - 78 * 2.2, 'a dashed line at the goal');
+  assert.strictEqual(svg.querySelector('.cx-goal-line-label').textContent, 'Goal 78%');
+  assert.strictEqual(L.goalFor('Physics', false), null, 'none without a goal');
+
+  const E = win.ConnectifyGradeEstimateGoal;
+  const course = { id: 'chemistry', name: 'Chemistry', subject: 'Chemistry ATAR' };
+  assert.strictEqual(E.gradeLine(course, [], [], { entered: 1, estimate: 80.2 }).textContent, 'Goal 78%: met');
+  assert.strictEqual(E.gradeLine(course, [], [], { entered: 0, current: 74.8 }).textContent, 'Goal 78%: 3.2 short');
+  G.save({ kind: 'atar', target: 95, end: { type: 'semester', semester: 2 }, topFour: [], priorMarked: [] });
+  const box = new MockElement('p');
+  E.atarLine(box, { finalAtar: '93.65' }, 1);
+  assert.strictEqual(box.querySelector('.cx-goal-estimate').textContent, 'Goal 95.00: 1.35 short', 'Estimate ATAR compares with the ATAR goal');
+  E.atarLine(box, { finalAtar: '96.10' }, 0);
+  assert.strictEqual(box.querySelector('.cx-goal-estimate'), null, 'only for that goal\'s semester');
+
+  const celebrate = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-celebrate.js'), 'utf8');
+  const celebrateCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-celebrate.css'), 'utf8');
+  assert.ok(celebrate.includes("matchMedia?.('(prefers-reduced-motion: reduce)')") && celebrate.includes('if (still) {'), 'reduced motion draws still confetti and skips the shake');
+  assert.ok(cssHas(celebrateCss, '#cx-goal-confetti { position: fixed; inset: 0;') && cssHas(celebrateCss, 'pointer-events: none !important;'), 'the confetti never takes the pointer');
+  assert.ok(celebrate.includes("document.querySelector('.cvr-c-app-layout') || document.getElementById('main-content')"), 'the shake moves Connect\'s layout, never html or body');
   localStorage.clear();
 });
 

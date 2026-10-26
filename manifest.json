@@ -75,7 +75,9 @@
             "src/cohort/cohort-grade-range.css",
             "src/goals/goal-dialog.css",
             "src/goals/goal-planner.css",
-            "src/goals/goal-list.css"
+            "src/goals/goal-list.css",
+            "src/goals/goal-bars.css",
+            "src/goals/goal-celebrate.css"
          ],
          "js": [
             "src/system/scheduler.js",
@@ -135,10 +137,15 @@
             "src/goals/goal-dialog.js",
             "src/goals/goal-list-ui.js",
             "src/goals/goal-editor.js",
+            "src/goals/goal-celebrate.js",
+            "src/goals/goal-events.js",
+            "src/goals/goal-bars.js",
+            "src/atar/grade-estimate-goal.js",
             "src/atar/atar-ui-markup.js",
             "src/atar/atar-ui.js",
             "src/progress/progress-math.js",
             "src/progress/progress-semester-divider.js",
+            "src/progress/progress-goal-line.js",
             "src/progress/progress-chart.js",
             "src/progress/progress-week-editor.js",
             "src/progress/progress-modes.js",

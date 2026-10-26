@@ -61,7 +61,8 @@
     }
 
     const weighted = tasks.filter(t => t.weight > 0);
-    const measured = progress.total > 0 ? (progress.earned / progress.total) * 100 : null;
+    const markedWeight = weighted.filter(P().isMarked).reduce((sum, t) => sum + t.weight, 0);
+    const measured = markedWeight > 0 ? (progress.earned / markedWeight) * 100 : null;
     const letter = goal.end?.type !== 'week' && entry[semNum]?.finalLetter;
     let finished = null;
     if (now.tier === 'guaranteed') finished = 'achieved';

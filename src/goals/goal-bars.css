@@ -1,0 +1,105 @@
+/**
+ * Connectify Goals: bars on assessment rows (goal-bars.js)
+ *
+ * Two 18 x 56 bars right of the outcome meter, in its track style, so rows never grow. Goal-performance:
+ * four pastel segments lit from the bottom (red, orange, yellow, green) and a secret purple breakout segment
+ * (20px, the bar grows upwards like the meter's). Goal-progress: one smooth fill from the bottom in the goal
+ * tier's colour (not pastel). Segments never take the pointer (one tooltip for the pair).
+ */
+
+.cx-goal-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 4px;
+  flex: 0 0 auto;
+  margin-left: 6px;
+  vertical-align: middle;
+  cursor: help;
+}
+
+:is(.cx-goal-perf, .cx-goal-progress) {
+  position: relative;
+  box-sizing: border-box;
+  width: 18px;
+  height: 56px;
+  padding: 3px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--cx-text-primary, #0f172a) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cx-text-primary, #0f172a) 14%, transparent);
+}
+
+.cx-goal-perf {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 3px;
+}
+
+.cx-goal-perf.cx-goal-perf--broken {
+  height: 70px;
+  margin-top: -14px;
+}
+
+.cx-goal-seg {
+  width: 100%;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 2.5px;
+  background: color-mix(in srgb, var(--cx-text-primary, #0f172a) 18%, transparent);
+  pointer-events: none !important;
+}
+
+.cx-goal-seg--red { background: #f4a3a3; }
+.cx-goal-seg--orange { background: #f8c99b; }
+.cx-goal-seg--yellow { background: #f5e19a; }
+.cx-goal-seg--green { background: #a7e3b5; }
+.cx-goal-seg--purple { height: 20px; background: #cdb5f7; }
+
+.cx-goal-progress {
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.cx-goal-progress__fill {
+  width: 100%;
+  height: var(--cx-goal-fill, 0%);
+  border-radius: 2.5px;
+  background: var(--cx-goal-tier, var(--cx-accent, #3b82f6));
+  pointer-events: none !important;
+}
+
+.cx-goal-progress[data-tier="guaranteed"], .cx-goal-progress[data-tier="achieved"] { --cx-goal-tier: #15803d; }
+.cx-goal-progress[data-tier="trivial"] { --cx-goal-tier: #22c55e; }
+.cx-goal-progress[data-tier="easy"] { --cx-goal-tier: #84cc16; }
+.cx-goal-progress[data-tier="medium"] { --cx-goal-tier: #eab308; }
+.cx-goal-progress[data-tier="hard"] { --cx-goal-tier: #f97316; }
+.cx-goal-progress[data-tier="hell"] { --cx-goal-tier: #ef4444; }
+.cx-goal-progress[data-tier="impossible"], .cx-goal-progress[data-tier="missed"] { --cx-goal-tier: #991b1b; }
+
+/* Overall rows: the progress bar sits in the panel's top right corner, in room the panel keeps for it
+   (the panel's own padding rules are !important at every display scale) */
+.connectea-panel.cx-has-goal-bars {
+  position: relative !important;
+  padding-right: 40px !important;
+  min-height: 64px;
+}
+
+.connectea-panel.cx-has-goal-bars > .cx-goal-bars {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  margin: 0;
+}
+
+/* Year Progression goal line (progress-goal-line.js) */
+.cx-goal-line {
+  stroke: var(--cx-text-secondary, #334155);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+.cx-goal-line-label {
+  fill: var(--cx-text-secondary, #334155);
+  font-size: 11px;
+  font-weight: 600;
+}
