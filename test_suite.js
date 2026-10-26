@@ -7433,7 +7433,9 @@ runTest('Test 154: Shared utilities, settings reset clears every baseline key, a
   const outlines = manifest.content_scripts.find(cs => (cs.js || []).includes('src/assessment/assessment-cache.js'));
   // The shared scheduler comes first (it depends on nothing), then utils.js before every other outlines script
   assert.deepStrictEqual(outlines.js.slice(0, 2), ['src/system/scheduler.js', 'src/system/utils.js'], 'scheduler.js then utils.js must load before every other outlines content script');
-  for (const cs of manifest.content_scripts.filter(c => c.world !== 'MAIN' && (c.js || []).some(f => !f.includes('auto-login')))) {
+  // The document_start boot group (pointer-kind.js, theme-boot.js) runs before the scheduler exists and never uses it
+  const usesScheduler = c => (c.js || []).some(f => origReadFileSync.call(fs, path.resolve(__dirname, f), 'utf8').includes('ConnectifyScheduler'));
+  for (const cs of manifest.content_scripts.filter(c => c.world !== 'MAIN' && (c.js || []).some(f => !f.includes('auto-login')) && (c.run_at !== 'document_start' || usesScheduler(c)))) {
     assert.strictEqual(cs.js[0], 'src/system/scheduler.js', 'Every isolated content-script group that uses the scheduler must load it first');
   }
 
@@ -9013,7 +9015,7 @@ runTest('Test 197: Uploaded wallpapers are centre-cropped to the screen and scal
   }
   const createImageBitmap = async (source, ...args) => {
     if (!args.length) return new FakeBitmap(source.w, source.h);
-    const opts = args[4];
+    const opts = args.length === 1 ? args[0] : args[4]; // a whole-image rescale, or a crop and resize
     return new FakeBitmap(opts.resizeWidth, opts.resizeHeight);
   };
   class OffscreenCanvas {
@@ -9079,7 +9081,8 @@ runTest('Test 197: Uploaded wallpapers are centre-cropped to the screen and scal
   const prefs = fs.readFileSync(path.join(BASE_DIR, 'src/predictor/settings-preferences.js'), 'utf8');
   const controls = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-customizer-controls.js'), 'utf8');
   for (const [name, code] of [['Settings', prefs], ['Theme Customizer', controls]]) {
-    assert.ok(code.includes('window.ConnectifyWallpaperFit.fromFile(file).then('), `${name} wallpaper upload must go through ConnectifyWallpaperFit`);
+    assert.ok(code.includes('window.ConnectifyWallpaperFit.fromFile(file, { adjust: window.ConnectifyWallpaperCrop?.prompt }).then('), `${name} wallpaper upload must go through ConnectifyWallpaperFit and the crop prompt`);
+    assert.ok(code.includes('window.ConnectifyWallpaperFit.isCancelled(err)'), `${name} shows no error when the student cancels the crop prompt`);
     assert.ok(!code.includes('readAsDataURL'), `${name} must not store the raw image file`);
     assert.ok(code.includes('window.ConnectifyWallpaperFit.errorText(err)'), `${name} shows why an upload was refused`);
   }
@@ -11348,7 +11351,7 @@ runTest('Test 251: On touchscreens every Connectify control takes a 44px tap wit
   assert.ok(/min-height:\s*44px/.test(controls[2]) && /min-width:\s*44px/.test(controls[2]), 'controls are at least 44 x 44px');
   // No invisible area reaches past what can be seen onto Connect's side menu, tiles or nav links
   assert.ok(!body.includes('#connectify-sidebar-handle::before'), 'the handle has no invisible tap area (it sits over Connect\'s side menu and tiles)');
-  assert.ok(/--cx-handle-width:\s*44px/.test(rule('html #connectify-sidebar-handle')), 'the handle is 44px wide on touchscreens');
+  assert.ok(/--cx-handle-width:\s*44px/.test(rule('html:not([data-cx-mouse]) #connectify-sidebar-handle')), 'the handle is 44px wide on touchscreens');
   const handleCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-handle-menu.css'), 'utf8');
   const handlePos = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/sidebar-handle-position.js'), 'utf8');
   assert.ok(/--cx-handle-width:\s*30px;\s*width:\s*var\(--cx-handle-width\)/.test(handleCss), 'the handle is 30px wide with a mouse');
@@ -11539,6 +11542,169 @@ runTest('Test 253: Every Year Progression chart has a dashed line between its Se
   assert.ok(css.includes('.connectea-dark #connectify-progress .cx-semester-divider{stroke:var(--cx-text-muted'), 'token-routed in dark themes');
   const manifest = origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('progress-semester-divider.js') > -1 && manifest.indexOf('progress-semester-divider.js') < manifest.indexOf('progress-chart.js'), 'registered before the chart');
+});
+
+runTest('Test 254: Touch targets only grow on a touchscreen until a mouse is used; a touch brings them back', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/touch-targets.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const inner = css.slice(css.indexOf('{') + 1, css.lastIndexOf('}'));
+  const selectors = inner.split('}').map(r => r.split('{')[0].trim()).filter(Boolean);
+  assert.ok(selectors.length >= 8 && selectors.every(sel => sel.startsWith('html:not([data-cx-mouse]) ')), 'every touch rule is off once a mouse is used');
+  assert.ok(selectors[0].includes('#cx-wallpaper-crop'), 'the wallpaper crop prompt\'s controls grow on touchscreens too');
+
+  const src = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/pointer-kind.js'), 'utf8');
+  const store = {};
+  const ls = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: k => { delete store[k]; } };
+  const attrs = new Set();
+  const root = { hasAttribute: a => attrs.has(a), setAttribute: a => attrs.add(a), toggleAttribute: (a, on) => (on ? attrs.add(a) : attrs.delete(a)) };
+  const listeners = {};
+  const win = { addEventListener: (t, fn, o) => { listeners[t] = fn; assert.ok(o.capture && o.passive, `${t} is a passive capture listener`); } };
+  const run = () => new Function('window', 'document', 'localStorage', src)(win, { documentElement: root }, ls);
+  run();
+  assert.ok(!attrs.has('data-cx-mouse'), 'a touchscreen starts with large targets');
+  listeners.pointermove({ pointerType: 'touch' });
+  assert.ok(!attrs.has('data-cx-mouse'), 'touch input keeps them');
+  listeners.pointermove({ pointerType: 'mouse' });
+  assert.ok(attrs.has('data-cx-mouse') && store['connectify:pointer_mouse'] === 'true', 'the first mouse input turns them off and is remembered');
+  // The next page starts with the mouse sizes at once
+  attrs.clear(); delete win.ConnectifyPointerKind;
+  run();
+  assert.ok(attrs.has('data-cx-mouse'), 'a remembered mouse applies before the page paints');
+  listeners.pointerdown({ pointerType: 'touch' });
+  assert.ok(!attrs.has('data-cx-mouse') && !('connectify:pointer_mouse' in store), 'a touch turns the large targets back on');
+  listeners.pointerdown({ pointerType: 'pen' });
+  assert.ok(!attrs.has('data-cx-mouse'), 'a pen changes nothing');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const boot = manifest.content_scripts.find(c => (c.js || []).includes('src/system/pointer-kind.js'));
+  assert.ok(boot && boot.run_at === 'document_start' && boot.matches.includes('https://connect.det.wa.edu.au/*'), 'pointer-kind.js runs at document_start on every Connect page');
+});
+
+runTest('Test 255: A reload paints the last theme at document_start, and Chrome paints wallpapers over 2 MB through a blob: URL', () => {
+  const src = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-boot.js'), 'utf8');
+  const make = ({ store = {}, pathname = '/group/home', chromium = true } = {}) => {
+    const ls = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } };
+    const classes = new Set(), attrs = {}, props = {}, children = [];
+    const root = {
+      classList: { toggle: (c, on) => (on ? classes.add(c) : classes.delete(c)), contains: c => classes.has(c) },
+      setAttribute: (a, v) => { attrs[a] = v; }, removeAttribute: a => { delete attrs[a]; }, hasAttribute: a => a in attrs, getAttribute: a => attrs[a],
+      style: Object.assign([], { setProperty: (p, v) => { props[p] = v; if (!root.style.includes(p)) root.style.push(p); }, getPropertyValue: p => props[p] || '' }),
+      appendChild: el => children.push(el)
+    };
+    const doc = { documentElement: root, createElement: () => ({}), getElementById: id => children.find(c => c.id === id) && { remove: () => children.splice(children.findIndex(c => c.id === id), 1) } };
+    const blobs = [];
+    const URLs = { createObjectURL: b => { blobs.push(b); return `blob:${blobs.length}`; }, revokeObjectURL: () => {} };
+    const chrome = { runtime: { getURL: () => (chromium ? 'chrome-extension://abc/' : 'moz-extension://abc/') } };
+    const win = {};
+    const timers = [];
+    new Function('window', 'document', 'localStorage', 'location', 'chrome', 'URL', 'Blob', 'atob', 'setTimeout', 'getComputedStyle', 'MutationObserver', src)(
+      win, doc, ls, { pathname, search: '' }, chrome, URLs, function (parts, o) { this.parts = parts; this.type = o.type; },
+      b64 => Buffer.from(b64, 'base64').toString('binary'), fn => timers.push(fn), () => ({ backgroundColor: 'rgb(11, 19, 43)' }), class {});
+    return { win, store, classes, attrs, props, children, blobs, timers, root };
+  };
+  const snap = { id: 'quantum', dark: true, attrs: { 'data-connectea-theme': 'quantum', 'data-connectea-has-custom-bg': 'true', onclick: 'x' },
+    props: { '--cx-wallpaper-dim': '0.3', color: 'red' }, canvas: 'rgb(40, 40, 40)', bg: { settings: true } };
+  const saved = { 'connectify:theme_boot': JSON.stringify(snap), 'connectea:theme:id': 'quantum', 'connectea:custom_background': 'data:image/png;base64,AAAA' };
+  let b = make({ store: { ...saved } });
+  assert.ok(b.classes.has('connectea-dark') && b.attrs['data-connectea-theme'] === 'quantum', 'the theme classes are on <html> before Connect renders');
+  assert.ok(!('onclick' in b.attrs) && !('color' in b.props), 'only theme attributes and --cx-* tokens are restored');
+  assert.strictEqual(b.props['--cx-wallpaper-dim'], '0.3', 'the wallpaper dim is restored with the theme');
+  assert.strictEqual(b.props['--cx-custom-bg-image'], 'url("data:image/png;base64,AAAA")', 'the Settings wallpaper is read straight from storage');
+  assert.strictEqual(b.children[0].id, 'cx-theme-boot', 'a boot canvas covers the page until the theme stylesheets are in');
+  assert.ok(b.children[0].textContent.includes('html { background-color: rgb(40, 40, 40) !important; } body { background-color: transparent !important; }'),
+    'the canvas is painted on <html> and body stays clear for the wallpaper');
+  b.win.ConnectifyThemeBoot.done();
+  assert.strictEqual(b.children.length, 0, 'theme.js removes the boot canvas once the theme is applied');
+
+  b = make({ store: { ...saved, 'connectea:theme:id': 'dark' } });
+  assert.ok(!b.classes.has('connectea-dark') && !b.children.length, 'a snapshot of another theme is never applied');
+  b = make({ store: { ...saved }, pathname: '/login' });
+  assert.ok(!b.classes.has('connectea-dark'), 'login pages stay unthemed');
+  b = make({ store: { ...saved, 'connectify:theme_boot': JSON.stringify({ ...snap, bg: { theme: true } }),
+    'connectea:custom_themes_list': JSON.stringify([{ id: 'quantum', wallpaper: 'data:image/png;base64,BBBB' }]) } });
+  assert.strictEqual(b.props['--cx-custom-bg-image'], 'url("data:image/png;base64,BBBB")', 'a custom theme\'s own wallpaper is read from the theme list');
+  b = make({ store: { ...saved, 'connectify:theme_boot': JSON.stringify({ ...snap, canvas: 'red; } body { x', bg: null }) } });
+  assert.ok(!b.children.length && !('data-connectea-has-custom-bg' in b.attrs), 'an unexpected canvas value is never written into CSS');
+
+  // Chrome drops CSS url()s over 2 MB; Firefox keeps the data URL
+  const big = 'data:image/gif;base64,' + Buffer.alloc(1.6 * 1024 * 1024).toString('base64');
+  b = make();
+  const B = b.win.ConnectifyThemeBoot;
+  assert.strictEqual(B.cssUrl('data:image/png;base64,AAAA'), 'data:image/png;base64,AAAA', 'small wallpapers keep their data URL');
+  assert.strictEqual(B.cssUrl(big), 'blob:1', 'a data URL over 2 MB becomes a blob: URL in Chrome');
+  assert.strictEqual(B.cssUrl(big), 'blob:1', 'decoded once per wallpaper');
+  assert.strictEqual(b.blobs[0].type, 'image/gif');
+  assert.strictEqual(make({ chromium: false }).win.ConnectifyThemeBoot.cssUrl(big), big, 'Firefox paints the data URL itself');
+  assert.deepStrictEqual(B.sourceOf('data:x', false), { url: 'data:x' }, 'small wallpapers (SVG presets) are kept in the snapshot');
+  assert.deepStrictEqual(B.sourceOf(big, true), { theme: true });
+  assert.deepStrictEqual(B.sourceOf(big, false), { settings: true }, 'large ones by where they are stored');
+
+  // save(): one write per task, of what is on <html>
+  b = make();
+  b.root.classList.toggle('connectea-dark', true);
+  b.root.setAttribute('data-connectea-theme', 'forest');
+  b.root.style.setProperty('--cx-canvas-bg', '#0a1914');
+  b.root.style.setProperty('--cx-custom-bg-image', 'url("x")');
+  b.store['connectea:theme:id'] = 'forest';
+  b.win.ConnectifyThemeBoot.save(); b.win.ConnectifyThemeBoot.save();
+  assert.strictEqual(b.timers.length, 1, 'saves within a task are coalesced');
+  b.timers[0]();
+  const written = JSON.parse(b.store['connectify:theme_boot']);
+  assert.deepStrictEqual([written.id, written.dark, written.attrs['data-connectea-theme'], written.props['--cx-canvas-bg'], written.canvas],
+    ['forest', true, 'forest', '#0a1914', 'rgb(11, 19, 43)'], 'the snapshot holds the theme, its tokens and canvas');
+  assert.ok(!('--cx-custom-bg-image' in written.props), 'the (possibly huge) wallpaper itself is never copied into the snapshot');
+
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  assert.ok(read('theme/theme-registry.js').includes('window.ConnectifyThemeBoot?.save();'), 'every theme switch is saved');
+  assert.ok(read('theme/theme-custom-tokens.js').includes('window.ConnectifyThemeBoot?.cssUrl(bgUrl) ?? bgUrl') && read('theme/theme-custom-tokens.js').includes('window.ConnectifyThemeBoot?.save();'),
+    'wallpapers go on screen through cssUrl and are saved');
+  assert.ok(read('theme/theme-wallpaper-dim.js').includes('window.ConnectifyThemeBoot?.save();'), 'wallpaper overlays are saved');
+  assert.ok(read('theme/theme-customizer.js').includes('window.ConnectifyThemeBoot?.cssUrl(state.wallpaper)'), 'the customizer preview paints large wallpapers in Chrome too');
+  assert.ok(read('theme/theme.js').includes('window.ConnectifyThemeBoot?.done();'), 'theme.js drops the boot canvas');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(c => (c.js || []).includes('src/theme/theme-boot.js'));
+  assert.ok(group.run_at === 'document_start' && !group.css, 'theme-boot.js runs at document_start, with no stylesheets of its own');
+});
+
+runTest('Test 256: Uploads are rescaled, then resized and placed by the student in the crop prompt, then cropped', async () => {
+  const src = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-wallpaper-fit.js'), 'utf8');
+  const made = [];
+  class FakeBitmap { constructor(w, h) { this.width = w; this.height = h; made.push(this); } close() { this.closed = true; } }
+  const createImageBitmap = async (source, ...args) => {
+    if (!args.length) return new FakeBitmap(source.w, source.h);
+    const o = args.length === 1 ? args[0] : args[4];
+    return Object.assign(new FakeBitmap(o.resizeWidth, o.resizeHeight), { crop: args.length > 1 ? args.slice(0, 4) : null });
+  };
+  class OffscreenCanvas { constructor(w, h) { this.width = w; this.height = h; } getContext() { return { drawImage() {} }; } async convertToBlob() { return { type: 'image/jpeg', w: this.width, h: this.height }; } }
+  class FileReader { readAsDataURL(b) { this.result = b.w ? `data:image/jpeg;fit=${b.w}x${b.h}` : `data:${b.type};original`; this.onload(); } }
+  const win = { devicePixelRatio: 2, screen: { width: 1440, height: 900 }, innerWidth: 1440, innerHeight: 800 };
+  new Function('window', 'createImageBitmap', 'OffscreenCanvas', 'FileReader', 'chrome', src)(win, createImageBitmap, OffscreenCanvas, FileReader, { runtime: { getManifest: () => ({ permissions: [] }) } });
+  const F = win.ConnectifyWallpaperFit;
+  assert.deepStrictEqual(F.prescaleSize(12000, 8000, 2880, 1800), { width: 8640, height: 5760, scale: 0.72 }, 'rescaled to what the largest size (300%) can show sharply');
+  assert.strictEqual(F.prescaleSize(3000, 2000, 2880, 1800).scale, 1, 'never upscaled');
+  const z = F.cropRect(4000, 2500, 2880, 1800, 2, 0, 0.5);
+  assert.deepStrictEqual([z.sx, z.sw, z.sh, z.width, z.height], [0, 2000, 1250, 2000, 1250], 'zoomed crops are kept inside the image and never upscaled');
+  assert.deepStrictEqual(F.cropRect(4000, 2500, 2880, 1800, 0.5), F.fitRect(4000, 2500, 2880, 1800), 'the smallest size is the whole-image cover fit');
+
+  let seen = null;
+  const out = await F.fromFile({ w: 12000, h: 8000, size: 40e6, type: 'image/jpeg' }, {
+    adjust: async a => { seen = a; return F.cropRect(a.width, a.height, a.target.width, a.target.height, 2, 1, 0); }
+  });
+  assert.deepStrictEqual([seen.width, seen.height, seen.source.width], [8640, 5760, 8640], 'the prompt gets the rescaled image');
+  assert.deepStrictEqual(seen.target, { width: 2880, height: 1800 }, 'and the screen it is cropped for');
+  const crop = made.find(b => b.crop);
+  assert.deepStrictEqual(crop.crop, [4320, 0, 4320, 2700], 'the student\'s crop (top right at 200%) is the one cut out');
+  assert.strictEqual(out, 'data:image/jpeg;fit=2880x1800', 'then scaled to the screen');
+  assert.ok(made.every(b => b.closed), 'every bitmap is released');
+  const cancel = await F.fromFile({ w: 3000, h: 2000, size: 2e6, type: 'image/png' }, { adjust: async () => null }).catch(e => e);
+  assert.ok(F.isCancelled(cancel), 'closing the prompt cancels the upload');
+  assert.strictEqual(await F.fromFile({ size: 1e6, type: 'image/gif' }, { adjust: async () => { throw new Error('asked'); } }), 'data:image/gif;original', 'GIFs skip the prompt (cropping would stop them animating)');
+
+  const crop2 = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-wallpaper-crop.js'), 'utf8');
+  assert.ok(crop2.includes("window.ConnectifyWallpaperCrop = { prompt }") && crop2.includes('fit.cropRect(width, height, target.width, target.height, view.zoom, view.cx, view.cy)'), 'the prompt crops through cropRect');
+  assert.ok(crop2.includes('e.stopPropagation();\n        if (e.target === overlay && downOnBackdrop) close(null);'), 'clicks inside the prompt never reach the sidebar\'s outside-click handler');
+  assert.ok(crop2.includes("setPointerCapture") && /touch-action:\s*none/.test(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-wallpaper-crop.css'), 'utf8')), 'dragging never scrolls the page');
+  const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('"src/theme/theme-wallpaper-crop.js"') > manifest.indexOf('"src/theme/theme-wallpaper-fit.js"')
+    && manifest.includes('"src/theme/styles/theme-wallpaper-crop.css"'), 'registered after theme-wallpaper-fit.js, with its stylesheet');
 });
 
 Promise.all(pendingTestPromises).then(() => {

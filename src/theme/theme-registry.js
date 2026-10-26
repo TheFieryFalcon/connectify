@@ -193,6 +193,7 @@
         window.dispatchEvent(new CustomEvent('connectea:themechange', { detail: { themeId: theme.id, theme } }));
       } catch {}
     }
+    window.ConnectifyThemeBoot?.save(); // the next page load paints this theme before Connect renders
     return true;
   }
 

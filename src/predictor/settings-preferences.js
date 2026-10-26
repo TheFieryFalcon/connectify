@@ -66,14 +66,14 @@
         const file = input.files?.[0];
         if (!file) return;
         input.value = ''; // picking the same file again must fire change
-        // Cropped and scaled to the screen first (theme-wallpaper-fit.js), so huge photos never lag the page
+        // Rescaled, resized and placed by the student, then cropped to the screen (theme-wallpaper-fit.js), so huge photos never lag the page
         if (status) status.textContent = 'Preparing wallpaper...';
-        window.ConnectifyWallpaperFit.fromFile(file).then(dataUrl => {
+        window.ConnectifyWallpaperFit.fromFile(file, { adjust: window.ConnectifyWallpaperCrop?.prompt }).then(dataUrl => {
           window.ConnectifyTheme?.setCustomBackground(dataUrl);
           refresh();
         }).catch(err => {
           refresh();
-          if (status) status.textContent = window.ConnectifyWallpaperFit.errorText(err);
+          if (status && !window.ConnectifyWallpaperFit.isCancelled(err)) status.textContent = window.ConnectifyWallpaperFit.errorText(err);
         });
       };
     }

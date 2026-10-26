@@ -110,6 +110,7 @@
       if (value == null) style.removeProperty(prop);
       else style.setProperty(prop, String(value));
     }
+    window.ConnectifyThemeBoot?.save();
   }
 
   /** Applies cached overlays for this wallpaper and ink, measuring what is missing. */

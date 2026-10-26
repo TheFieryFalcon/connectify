@@ -62,7 +62,7 @@
       '--cx-glass-blur': `${state.glassBlur}px`, '--cx-glass-opacity': `${state.glassOpacity}`
     };
     for (const [k, v] of Object.entries(vars)) preview.style.setProperty(k, v);
-    preview.style.backgroundImage = state.wallpaper ? `url("${state.wallpaper}")` : 'none';
+    preview.style.backgroundImage = state.wallpaper ? `url("${window.ConnectifyThemeBoot?.cssUrl(state.wallpaper) ?? state.wallpaper}")` : 'none';
     const card = preview.querySelector('.cx-mock-card');
     if (card) {
       card.style.borderRadius = '16px';

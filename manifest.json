@@ -220,6 +220,7 @@
             "src/theme/styles/theme-customizer.css",
             "src/theme/styles/theme-color-picker.css",
             "src/theme/styles/theme-customizer-preview.css",
+            "src/theme/styles/theme-wallpaper-crop.css",
             "src/theme/styles/theme-empty-states.css",
             "src/theme/styles/theme-control-bars.css",
             "src/theme/styles/theme-glass-panels.css",
@@ -248,6 +249,7 @@
             "src/theme/theme-token-derive.js",
             "src/theme/theme-glass-tokens.js",
             "src/theme/theme-wallpaper-fit.js",
+            "src/theme/theme-wallpaper-crop.js",
             "src/theme/theme-wallpaper-migrate.js",
             "src/theme/theme-customizer-tokens.js",
             "src/theme/theme-ctme.js",
@@ -263,6 +265,16 @@
             "src/theme/theme-request.js"
          ],
          "run_at": "document_idle"
+      },
+      {
+         "matches": [
+            "https://connect.det.wa.edu.au/*"
+         ],
+         "js": [
+            "src/system/pointer-kind.js",
+            "src/theme/theme-boot.js"
+         ],
+         "run_at": "document_start"
       },
       {
          "matches": [

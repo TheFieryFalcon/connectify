@@ -114,13 +114,22 @@
     const root = document.documentElement;
     if (bgUrl && !isAuthDisabled()) {
       root.setAttribute('data-connectea-has-custom-bg', 'true');
-      root.style.setProperty('--cx-custom-bg-image', `url("${bgUrl}")`);
+      // Chrome drops CSS url()s over 2 MB: large data URLs are painted through a blob: URL (theme-boot.js)
+      root.style.setProperty('--cx-custom-bg-image', `url("${window.ConnectifyThemeBoot?.cssUrl(bgUrl) ?? bgUrl}")`);
     } else {
       root.removeAttribute('data-connectea-has-custom-bg');
       root.style.removeProperty('--cx-custom-bg-image');
     }
     // Dim the wallpaper just enough for white text (theme-wallpaper-dim.js loads after this script and measures on its own)
     window.ConnectifyWallpaperDim?.update(bgUrl && !isAuthDisabled() ? bgUrl : null);
+    window.ConnectifyThemeBoot?.save();
+  }
+
+  /** Where the wallpaper on screen comes from, for the next page load's boot snapshot (theme-boot.js). */
+  function backgroundSource() {
+    const url = getActiveBackground();
+    if (!url || isAuthDisabled()) return null;
+    return window.ConnectifyThemeBoot?.sourceOf(url, Boolean(themeBackground)) || null;
   }
 
   function clearCustomBackground() {
@@ -182,6 +191,7 @@
     setCustomBackground,
     clearCustomBackground,
     applyCustomBackground,
+    backgroundSource,
     restoreBackgroundFromExtensionStorage,
     setGlassDiffusion
   };

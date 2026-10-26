@@ -61,6 +61,9 @@
 
   updateDomThemeAttributes(isDarkMode, activeTheme, isAuthDisabled());
   if (isDarkMode) registry.setTheme(activeTheme);
+  // The theme stylesheets are in and the theme is applied: theme-boot.js's canvas is no longer needed
+  window.ConnectifyThemeBoot?.done();
+  window.ConnectifyThemeBoot?.save();
 
   const updateToggleButtonLabel = dark => toggle.setLabel(dark, () => menu.toggle(toggleButton));
 
