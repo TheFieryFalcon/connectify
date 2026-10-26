@@ -23,11 +23,11 @@
   };
 
   /** Judged tasks: marked, weighted and not already marked when the goal was set; plus a date-order index. */
-  function judgedOf(goal, list, subjectOf) {
+  function judgedOf(goal, list, subjectOf, ctx) {
     const prior = new Set(goal.priorMarked || []);
     const sorted = list.slice().sort(P().byWeek);
     const index = new Map(sorted.map((t, i) => [t, i]));
-    const judged = sorted.filter(t => t.weight > 0 && P().isMarked(t) && !prior.has(keyOf(subjectOf(t), t)));
+    const judged = ctx.noReplay ? [] : sorted.filter(t => t.weight > 0 && P().isMarked(t) && !prior.has(keyOf(subjectOf(t), t)));
     return { judged, index };
   }
 
@@ -47,7 +47,7 @@
 
     const now = tierAt(() => true);
     const progress = P().points(tasks, target);
-    const { judged, index } = judgedOf(goal, tasks, () => goal.subject);
+    const { judged, index } = judgedOf(goal, tasks, () => goal.subject, ctx);
     const verdicts = {};
     for (const k of judged) {
       const pos = index.get(k);
@@ -143,7 +143,7 @@
     const kids = childState(now, all);
 
     const list = rows.filter(r => r.include).flatMap(r => r.goalTasks);
-    const { judged, index } = judgedOf(goal, list.filter(t => childRows.includes(t.course)), t => t.course.id);
+    const { judged, index } = judgedOf(goal, list.filter(t => childRows.includes(t.course)), t => t.course.id, ctx);
     const order = new Map(list.slice().sort(P().byWeek).map((t, i) => [t, i]));
     const verdicts = {};
     for (const k of judged) {
@@ -173,8 +173,15 @@
 
   const atarPlan = (goal, rows, bonus, children) => P().atarPlan(goal, rows, bonus, children);
 
-  /** `ctx`: { courses, atarCourses, allSubjects, children }. */
-  const evaluate = (goal, ctx) => (goal.kind === 'atar' ? evaluateAtar(goal, ctx) : evaluateGrade(goal, ctx));
+  /**
+   * `ctx`: { courses, atarCourses, allSubjects, children, noReplay } (ConnectifyGoalPlan.context(); children default
+   * to the stored ones; noReplay skips the per-task replay when only the goal's tier is wanted).
+   */
+  function evaluate(goal, ctx = P().context()) {
+    if (goal.kind !== 'atar') return evaluateGrade(goal, ctx);
+    const children = ctx.children || window.ConnectifyGoalStore?.childrenOf(goal.id) || [];
+    return evaluateAtar(goal, { ...ctx, children });
+  }
 
   window.ConnectifyGoalReplay = { evaluate, keyOf, atarValue, childTargets };
 })();

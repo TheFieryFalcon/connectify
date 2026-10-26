@@ -72,7 +72,10 @@
             "src/cohort/cohort-upcoming.css",
             "src/cohort/cohort-expanded.css",
             "src/cohort/cohort-subject-average.css",
-            "src/cohort/cohort-grade-range.css"
+            "src/cohort/cohort-grade-range.css",
+            "src/goals/goal-dialog.css",
+            "src/goals/goal-planner.css",
+            "src/goals/goal-list.css"
          ],
          "js": [
             "src/system/scheduler.js",
@@ -127,6 +130,11 @@
             "src/goals/goal-store.js",
             "src/goals/goal-plan.js",
             "src/goals/goal-replay.js",
+            "src/goals/goal-modal.js",
+            "src/goals/goal-sliders.js",
+            "src/goals/goal-dialog.js",
+            "src/goals/goal-list-ui.js",
+            "src/goals/goal-editor.js",
             "src/atar/atar-ui-markup.js",
             "src/atar/atar-ui.js",
             "src/progress/progress-math.js",

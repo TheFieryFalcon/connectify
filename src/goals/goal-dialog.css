@@ -1,0 +1,210 @@
+/**
+ * Connectify Goals: dialogs and planner controls
+ *
+ * The Set as Goal and Goals dialogs (one solid surface over the opaque canvas in every theme, like the crop
+ * prompt), tier labels, the horizontal progress bar and the effort sliders. Every colour is a theme token (the
+ * light tokens live on :root), so the same rules serve Light, every dark theme and custom themes. Tier labels
+ * mix the tier colour 40% into the theme ink on a 14% tint of it: >= 5:1 in every preset.
+ */
+
+.cx-goal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  background-color: rgba(0, 0, 0, 0.6);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+html[data-connectea-tone="light"] .cx-goal-overlay,
+html:not(.connectea-dark) .cx-goal-overlay {
+  background-color: rgba(15, 23, 42, 0.45);
+}
+
+.cx-goal-overlay .cx-goal-modal {
+  width: min(640px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px 18px;
+  background-color: var(--cx-canvas-bg, #12171f);
+  background-image: linear-gradient(var(--cx-surface-bg, #1e2632), var(--cx-surface-bg, #1e2632));
+  border: 1px solid var(--cx-border, #455a73);
+  border-radius: 6px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  color: var(--cx-text-primary, #f8fafc);
+  font-size: 13px;
+}
+
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-glass-clear"], [data-connectea-glass="true"]) .cx-goal-overlay .cx-goal-modal {
+  border-radius: 20px;
+}
+
+.cx-goal-overlay .cx-goal-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cx-goal-overlay .cx-goal-modal__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cx-text-primary, #f8fafc);
+}
+
+.cx-goal-overlay .cx-goal-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cx-goal-overlay :is(.cx-goal-modal__close, .cx-goal-cancel, .cx-goal-link, .cx-goal-card__edit, .cx-goal-card__delete) {
+  padding: 4px 10px;
+  border: 1px solid var(--cx-button-border, #455a73);
+  border-radius: 5px;
+  background: var(--cx-button-bg, #263242);
+  color: var(--cx-button-text, #f8fafc);
+  font: inherit;
+  cursor: pointer;
+}
+
+.cx-goal-overlay :is(.cx-goal-modal__close, .cx-goal-cancel, .cx-goal-link, .cx-goal-card__edit, .cx-goal-card__delete):hover {
+  background: var(--cx-button-hover, #31415a);
+}
+
+:is(.cx-goal-overlay, #connectea-atar) :is(.cx-goal-confirm, .cx-goal-set) {
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: var(--cx-button-primary-bg, #2563eb);
+  color: var(--cx-button-primary-text, #ffffff);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+:is(.cx-goal-overlay, #connectea-atar) :is(.cx-goal-confirm, .cx-goal-set):hover:not(:disabled) {
+  background: var(--cx-button-primary-hover, #1d4ed8);
+}
+
+:is(.cx-goal-overlay, #connectea-atar) :is(.cx-goal-confirm, .cx-goal-set, .cx-goals-open):disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cx-goal-overlay .cx-goal-preview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.cx-goal-overlay .cx-goal-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--cx-text-secondary, #e2e8f0);
+}
+
+.cx-goal-overlay .cx-goal-end-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--cx-text-secondary, #e2e8f0);
+}
+
+.cx-goal-overlay .cx-goal-week {
+  width: 70px;
+}
+
+.cx-goal-overlay .cx-goal-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cx-goal-overlay :is(.cx-goal-reason, .cx-goal-points, .cta-note) {
+  margin: 0;
+  color: var(--cx-text-secondary, #e2e8f0);
+}
+
+.cx-goal-overlay .cx-goal-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Preview: clear rows split by hairlines on the dialog's one surface */
+.cx-goal-overlay .cx-goal-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.cx-goal-overlay .cx-goal-preview-table :is(th, td) {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--cx-border-subtle, #2e3c4e);
+  background: transparent;
+  color: var(--cx-text-primary, #f8fafc);
+  text-align: left;
+  font-weight: 400;
+}
+
+.cx-goal-overlay .cx-goal-preview-table th {
+  font-weight: 700;
+  color: var(--cx-text-secondary, #e2e8f0);
+}
+
+/* Tier label: the tier's colour on a faint tint of it */
+.cx-goal-tier {
+  --cx-goal-tier: currentColor;
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid var(--cx-goal-tier);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cx-goal-tier) 14%, transparent);
+  color: color-mix(in srgb, var(--cx-goal-tier) 40%, var(--cx-text-primary, #f8fafc));
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.cx-goal-tier--none {
+  display: none;
+}
+
+:is(.cx-goal-tier, .cx-goal-hbar)[data-tier="guaranteed"], :is(.cx-goal-tier, .cx-goal-hbar)[data-tier="achieved"] { --cx-goal-tier: #15803d; }
+:is(.cx-goal-tier, .cx-goal-hbar)[data-tier="trivial"] { --cx-goal-tier: #22c55e; }
+:is(.cx-goal-tier, .cx-goal-hbar)[data-tier="easy"] { --cx-goal-tier: #84cc16; }
+:is(.cx-goal-tier, .cx-goal-hbar)[data-tier="medium"] { --cx-goal-tier: #eab308; }
+:is(.cx-goal-tier, .cx-goal-hbar)[data-tier="hard"] { --cx-goal-tier: #f97316; }
+:is(.cx-goal-tier, .cx-goal-hbar)[data-tier="hell"] { --cx-goal-tier: #ef4444; }
+:is(.cx-goal-tier, .cx-goal-hbar)[data-tier="impossible"], :is(.cx-goal-tier, .cx-goal-hbar)[data-tier="missed"] { --cx-goal-tier: #991b1b; }
+
+/* Horizontal goal progress: one smooth fill, no segments */
+.cx-goal-hbar {
+  --cx-goal-tier: var(--cx-accent, #3b82f6);
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--cx-surface-secondary, #18202b);
+  border: 1px solid var(--cx-border-subtle, #2e3c4e);
+}
+
+.cx-goal-hbar__fill {
+  width: var(--cx-goal-fill, 0%);
+  height: 100%;
+  background: var(--cx-goal-tier);
+}

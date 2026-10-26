@@ -10,7 +10,9 @@
 
   const { createEl, round } = window.ConnectifyTargetUiHelpers;
 
-  function renderPlan(targetOutputContainer, plan, rows, difficultyWeighted) {
+  /** `onChange`: re-render after a subject's effort slider moves. */
+  function renderPlan(targetOutputContainer, plan, rows, difficultyWeighted, onChange) {
+    const targets = window.ConnectifyGoalReplay?.childTargets(plan, rows) || {};
     const wholeScore = window.ConnectifyMath?.wholeScore || (v => (Number.isFinite(Number(v)) ? Math.round(Number(v)) : undefined));
     if (plan.impossible) {
       targetOutputContainer.append(
@@ -89,11 +91,13 @@
         )
       );
 
+      if (onChange) window.ConnectifyGoalSliders?.renderSubject(block, { course, target: targets[course.id], onChange });
+
       for (const task of course.progress?.tasks || []) {
         let reqText = '';
         if (plan.impossible) {
           reqText = 'max 100%';
-        } else if (difficultyWeighted) {
+        } else if (plan.effort) {
           const meta = plan.taskRequirements?.[`${course.name}::${task.id || task.name}`];
           const reqVal = meta ? meta.required : plan.required;
           const baseVal = meta ? meta.baseline : null;

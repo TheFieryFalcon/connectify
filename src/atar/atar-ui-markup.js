@@ -64,6 +64,7 @@
       btn.classList.toggle('active', tabMode === mode);
       btn.setAttribute('aria-selected', String(tabMode === mode));
     }
+    window.ConnectifyGoalEditor?.paintGoalsButton(groupOf(mode) === 'goals');
   }
 
   /** The panel and its static parts; semester buttons are added by the caller. */

@@ -4733,6 +4733,10 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-atar-ui.js'), 'utf8'));
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-grade-ui.js'), 'utf8'));
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-planner-ui.js'), 'utf8'));
+  // Goals load after the planners and before the calculator controller, as in manifest.json
+  for (const f of ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js', 'goal-modal.js', 'goal-sliders.js', 'goal-dialog.js', 'goal-list-ui.js', 'goal-editor.js']) {
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals', f), 'utf8'));
+  }
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8'));
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'progress-math.js'), 'utf8'));
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'progress-chart.js'), 'utf8'));
@@ -11801,7 +11805,8 @@ function loadGoalModules(stubs = {}) {
   };
   const run = file => new Function('window', origReadFileSync.call(fs, resolveFilePath(file), 'utf8'))(win);
   ['scaling-data.js', 'atar-math.js', 'target-difficulty.js', 'target-solver.js'].forEach(run);
-  ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js'].forEach(f => run(path.resolve(SRC_DIR, 'goals', f)));
+  ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js', 'goal-modal.js', 'goal-sliders.js', 'goal-dialog.js', 'goal-list-ui.js', 'goal-editor.js']
+    .forEach(f => run(path.resolve(SRC_DIR, 'goals', f)));
   return win;
 }
 
@@ -11951,6 +11956,83 @@ runTest('Test 262: An ATAR goal re-solves its four subjects\' targets; subject s
   const pushed = win.ConnectifyGoalReplay.evaluate({ ...goal, subjectSliders: { chemistry: 2 } }, ctx);
   assert.ok(pushed.children.chemistry.target > R.children.chemistry.target + 3, 'Much more effort on Chemistry raises its target');
   assert.ok(pushed.children.physics.target < R.children.physics.target, 'and lowers the others');
+});
+
+// Text of a mock element and its children, as the browser's textContent would read it
+const mockText = el => (el ? `${el.textContent || ''}${(el.children || []).map(mockText).join('')}` : '');
+
+runTest('Test 263: Set as Goal previews the goal with its end and confirms it; the Goals dialog lists, edits and deletes goals', () => {
+  localStorage.clear();
+  const tasks = [
+    { id: 't1', name: 'Test 1', weight: 30, pending: false, score: 78, earned: 23.4, order: 5, semester: 1 },
+    { id: 't2', name: 'Test 2', weight: 30, pending: true, earned: 0, order: 15, semester: 1 },
+    { id: 't3', name: 'Exam', weight: 40, pending: true, earned: 0, order: 30, semester: 2 }
+  ];
+  const chem = { id: 'chemistry', name: 'Chemistry', subject: 'Chemistry ATAR', tasks };
+  const win = loadGoalModules({
+    ConnectifySchoolTerms: { schoolWeek: o => o, weekOrder: n => n },
+    ConnectifyProgressMath: { termWeek: o => ({ term: Math.floor((o - 1) / 10) + 1, week: ((o - 1) % 10) + 1 }) },
+    ConnectifyPredictorCache: { getOrComputeTaskPrediction: () => ({ low: 70, mid: 77, high: 84 }) },
+    ConnectifyAtarScraper: { readCourses: () => [[], [chem]] },
+    ConnectifyData: { collect: () => [] }
+  });
+  const S = win.ConnectifyGoalSliders;
+  const ctl = S.control('t2', 1, () => {});
+  const input = ctl.querySelector('.cx-goal-slider');
+  assert.deepStrictEqual([input.type, input.min, input.max, input.step, input.getAttribute('aria-valuetext')], ['range', '-2', '2', '1', 'More'], 'five notches, named for screen readers');
+  assert.strictEqual(ctl.querySelector('.cx-goal-notch').textContent, 'More');
+  S.gradeSliders('chemistry').t2 = 2;
+  S.reset('grade');
+  assert.deepStrictEqual(S.gradeSliders('chemistry'), {}, 'the checkbox resets the sliders');
+
+  const draft = { kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 80, end: { type: 'semester', semester: 2 }, sliders: { t2: 1 } };
+  let saved = 0;
+  win.ConnectifyGoalDialog.open({ goal: draft, onSaved: () => saved++ });
+  const dialog = document.getElementById('cx-goal-dialog');
+  assert.ok(dialog, 'the dialog opens over the page');
+  assert.strictEqual(dialog.querySelector('.cx-goal-modal').getAttribute('role'), 'dialog');
+  assert.ok(dialog.querySelector('.cx-goal-preview-head').children[0].textContent.includes('Chemistry · 80% by Semester 2'), 'the preview names the goal');
+  const rows = dialog.querySelectorAll('.cx-goal-preview tr');
+  assert.strictEqual(rows.length, 3, 'one row per remaining task');
+  assert.strictEqual(rows[1].children[1].textContent, 'More', 'with its effort notch');
+  const confirm = dialog.querySelector('.cx-goal-confirm');
+  assert.strictEqual(confirm.disabled, false, 'a goal within reach can be confirmed');
+  const select = dialog.querySelector('.cx-goal-end-select');
+  select.value = 'week';
+  select.dispatchEvent(new MockEvent('change'));
+  const week = dialog.querySelector('.cx-goal-week');
+  week.value = '20';
+  week.dispatchEvent(new MockEvent('input'));
+  assert.strictEqual(dialog.querySelectorAll('.cx-goal-preview tr').length, 2, 'a custom end week drops the tasks after it');
+  assert.strictEqual(dialog.querySelector('.cx-goal-week-hint').textContent, 'Term 2 Week 10', 'the week shows its term');
+  confirm.click();
+  assert.strictEqual(saved, 1, 'Confirm saves');
+  assert.ok(!document.getElementById('cx-goal-dialog'), 'and closes the dialog');
+  const goal = win.ConnectifyGoalStore.active()[0];
+  assert.deepStrictEqual([goal.end, goal.priorMarked], [{ type: 'week', week: 20 }, ['chemistry::t1']], 'with its end and the tasks already marked');
+
+  win.ConnectifyGoalDialog.open({ goal: { ...draft } });
+  const again = document.getElementById('cx-goal-dialog');
+  assert.strictEqual(again.querySelector('.cx-goal-confirm').disabled, true, 'a second goal for the subject cannot be confirmed');
+  assert.ok(mockText(again.querySelector('.cx-goal-reason')).startsWith('Chemistry already has a goal.'), 'and says why');
+  again.querySelector('.cx-goal-cancel').click();
+  win.ConnectifyGoalDialog.open({ goal: { ...draft, id: goal.id, target: 20 } });
+  const sure = document.getElementById('cx-goal-dialog');
+  assert.deepStrictEqual([sure.querySelector('.cx-goal-confirm').disabled, mockText(sure.querySelector('.cx-goal-reason'))], [true, 'Already secured.'], 'a goal already met cannot be saved');
+  sure.querySelector('.cx-goal-modal__close').click();
+  assert.ok(!document.getElementById('cx-goal-dialog'), 'the close button closes it without saving');
+
+  win.ConnectifyGoalListUI.open();
+  const list = document.getElementById('cx-goals-dialog');
+  const cards = list.querySelectorAll('.cx-goal-card');
+  assert.strictEqual(cards.length, 1, 'the Goals dialog lists the active goal');
+  assert.ok(cards[0].querySelector('.cx-goal-card__title').textContent.startsWith('Chemistry · 80% by Term 2 Week 10'));
+  assert.ok(cards[0].querySelector('.cx-goal-hbar') && cards[0].querySelector('.cx-goal-points').textContent === '23.4 of 48 weighted points', 'with its progress');
+  cards[0].querySelector('.cx-goal-card__delete').click();
+  list.querySelector('.cx-goal-card__confirm .cx-goal-link').click();
+  assert.strictEqual(win.ConnectifyGoalStore.all().length, 0, 'Delete asks first, then removes the goal');
+  assert.ok(!document.getElementById('cx-goals-dialog'), 'an empty list closes');
+  localStorage.clear();
 });
 
 Promise.all(pendingTestPromises).then(() => {

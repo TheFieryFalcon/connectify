@@ -44,6 +44,7 @@
 
     difficultyCheckbox.addEventListener('change', () => {
       savePref(calc, 'gradeDifficultyWeighted', difficultyCheckbox.checked);
+      window.ConnectifyGoalSliders?.reset('grade');
       ctx.renderGradeOutput();
     });
 
@@ -116,11 +117,18 @@
     const gradePlanFn = window.ConnectifyTargetSolver?.gradePlan || window.ConnectifyMath?.gradePlan;
     if (!gradePlanFn) return;
 
+    // A subject an ATAR goal holds plans for the target that goal gives it (read-only here)
+    const held = window.ConnectifyGoalEditor?.heldTarget(selected.id) || null;
+    gradeTargetInput.disabled = difficultyCheckbox.disabled = Boolean(held);
+    if (held) gradeTargetInput.value = String(held.target);
+    else if (gradeTargetInput.dataset.goalHeld) gradeTargetInput.value = prefs(ctx.calc).gradeTarget ?? '80';
+    gradeTargetInput.dataset.goalHeld = held ? '1' : '';
     const isDifficulty = Boolean(difficultyCheckbox?.checked);
     const scoreValue = window.ConnectifyMath?.scoreValue || (v => (Number.isFinite(Number(v)) ? Number(v) : undefined));
     const plan = gradePlanFn(progress, scoreValue(gradeTargetInput.value), {
       difficultyWeighted: isDifficulty,
-      subjectName: selected.name
+      subjectName: selected.name,
+      offsets: window.ConnectifyGoalPlan?.offsets({ sliders: window.ConnectifyGoalSliders?.gradeSliders(selected.id) })
     });
 
     if (plan.error) {
@@ -142,6 +150,8 @@
       ? 'Target secured with remaining assessments at 0%.'
       : isDifficulty
       ? `Requires performance-adjusted scores (averaging ${round(plan.required)}%) on remaining assessments to achieve ${gradeTargetInput.value}% overall.`
+      : plan.effort
+      ? `Requires scores averaging ${round(plan.required)}% on remaining assessments to achieve ${gradeTargetInput.value}% overall.`
       : `Requires ${plan.required}% on remaining assessments to achieve ${gradeTargetInput.value}% overall.`;
 
     gradeOutputContainer.append(
@@ -185,20 +195,10 @@
     );
     gradeOutputContainer.append(assessmentDetails);
 
-    if (!plan.impossible && !plan.finished) {
-      for (const task of progress.tasks || []) {
-        let reqText = '';
-        if (isDifficulty && plan.taskRequirements?.[task.id || task.name]) {
-          const meta = plan.taskRequirements[task.id || task.name];
-          reqText = `requires ${round(meta.required)}% (baseline: ${round(meta.baseline)}%)`;
-        } else {
-          reqText = `requires ${round(plan.required)}%`;
-        }
-        assessmentDetails.append(
-          createEl('p', 'cta-note', `${task.name}: ${reqText} (${round(task.weight)}% weight)`)
-        );
-      }
-    }
+    // Each remaining task: its effort slider, the mark it needs and its difficulty; then Set as Goal
+    const rerender = () => renderGradeOutput(viewRefs, ctx);
+    window.ConnectifyGoalSliders?.renderGradeTasks(assessmentDetails, { course: selected, plan, onChange: rerender });
+    window.ConnectifyGoalEditor?.afterGrade(gradeOutputContainer, { refs: viewRefs, ctx, course: selected, plan, held });
   }
 
   window.ConnectifyTargetGradeUI = {

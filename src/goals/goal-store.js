@@ -90,6 +90,7 @@
       status: 'active',
       createdAt: existing?.createdAt || goal.createdAt || new Date().toISOString()
     };
+    delete saved.childSliders;
     let next = goals.filter(g => g.id !== saved.id && g.parent !== saved.id);
     if (saved.kind === 'atar') {
       const previous = goals.filter(g => g.parent === saved.id);
@@ -97,7 +98,7 @@
         const before = previous.find(c => c.subject === subject);
         next.push({
           ...(before || {}), id: before?.id || newId(), kind: 'grade', parent: saved.id, subject, status: 'active',
-          end: saved.end, sliders: before?.sliders || {}, revision: (before?.revision || 0) + 1, createdAt: saved.createdAt,
+          end: saved.end, sliders: goal.childSliders?.[subject] || before?.sliders || {}, revision: (before?.revision || 0) + 1, createdAt: saved.createdAt,
           priorMarked: saved.priorMarked || []
         });
       }

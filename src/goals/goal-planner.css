@@ -1,0 +1,64 @@
+/**
+ * Connectify Goals: planner controls (#connectea-atar)
+ *
+ * Set as Goal / Update Goal, Cancel Editing, the Goals (n) heading button, the saved status, and the effort
+ * sliders in Target Grade's task table, Target ATAR's subject rows and the dialogs. Theme tokens only.
+ */
+
+#connectea-atar .cx-goal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+#connectea-atar :is(.cx-goal-cancel-edit, .cx-goals-open) {
+  padding: 5px 10px;
+  border: 1px solid var(--cx-button-border, #9daebf);
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+#connectea-atar .cta-heading .cx-goals-open {
+  margin-left: auto;
+}
+
+#connectea-atar :is(.cx-goal-status, .cx-goal-editing) {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cx-text-secondary, #334155);
+}
+
+#connectea-atar .cx-goal-subject-effort {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+:is(#connectea-atar, .cx-goal-overlay) .cx-goal-effort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+:is(#connectea-atar, .cx-goal-overlay) .cx-goal-slider {
+  width: 90px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--cx-accent, #3b82f6);
+}
+
+:is(#connectea-atar, .cx-goal-overlay) .cx-goal-notch {
+  min-width: 64px;
+  color: var(--cx-text-secondary, #334155);
+}

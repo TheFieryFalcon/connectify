@@ -39,6 +39,7 @@
 
     difficultyCheckbox.addEventListener('change', () => {
       savePref(calc, 'targetDifficultyWeighted', difficultyCheckbox.checked);
+      window.ConnectifyGoalSliders?.reset('atar', (ctx.getCourses()[ctx.getActiveSemester()] || []).map(c => c.id));
       ctx.renderTargetOutput();
     });
 
@@ -142,24 +143,8 @@
       topFourContainer.append(grid);
     }
 
-    const wholeScore = window.ConnectifyMath?.wholeScore || (v => (Number.isFinite(Number(v)) ? Math.round(Number(v)) : undefined));
     const scoreValue = window.ConnectifyMath?.scoreValue || (v => (Number.isFinite(Number(v)) ? Number(v) : undefined));
-
-    const rows = eligibleCourses.map(r => {
-      const key = r.id || r.name;
-      const isIncluded = !excludedSubjects.has(key);
-      const current = calc?.getCourseState ? calc.getCourseState(r, activeSemester, courses) : r;
-      return {
-        ...r,
-        include: isIncluded,
-        score: current.score,
-        progress:
-          current.score === undefined
-            ? { error: 'Enter a valid school mark in the ATAR Estimate tab.' }
-            : r.progress,
-        offset: current.score === undefined || current.raw === undefined ? 0 : current.score - wholeScore(current.raw)
-      };
-    });
+    const { rows, currentBonus } = window.ConnectifyGoalPlan.atarRows(courses, activeSemester, r => !excludedSubjects.has(r.id || r.name));
 
     if (eligibleCourses.length === 0) {
       topFourContainer.replaceChildren();
@@ -196,20 +181,15 @@
     targetOutputContainer.replaceChildren();
 
     let plan = null;
+    // Effort: each subject's slider plus the task sliders of the subjects it holds (set in Target Grade)
+    const sliders = window.ConnectifyGoalSliders;
+    const draft = { subjectSliders: sliders?.atarSliders() || {} };
+    const children = rows.map(r => ({ subject: r.id, sliders: sliders?.gradeSliders(r.id) || {} }));
     try {
-      let currentBonus = undefined;
-      try {
-        const currentCalcResult = calc?.calculateResults ? calc.calculateResults(courses)[activeSemester] : null;
-        if (currentCalcResult && Number.isFinite(currentCalcResult.bonus)) {
-          currentBonus = currentCalcResult.bonus;
-        }
-      } catch (e) {
-        console.warn('Error reading current bonus:', e);
-      }
-
       plan = targetPlanFn(rows, scoreValue(targetInput.value), {
         difficultyWeighted: difficultyCheckbox.checked,
-        currentBonus: currentBonus
+        currentBonus,
+        offsets: window.ConnectifyGoalPlan.atarOffsets(draft, rows, children)
       });
     } catch (err) {
       console.warn('Target ATAR plan calculation error:', err);
@@ -236,7 +216,9 @@
       return;
     }
 
-    window.ConnectifyTargetAtarBreakdown.renderPlan(targetOutputContainer, plan, rows, difficultyCheckbox.checked);
+    const rerender = () => renderTargetOutput(viewRefs, ctx);
+    window.ConnectifyTargetAtarBreakdown.renderPlan(targetOutputContainer, plan, rows, difficultyCheckbox.checked, rerender);
+    window.ConnectifyGoalEditor?.afterTarget(targetOutputContainer, { refs: viewRefs, ctx, plan, rows, semester: activeSemester });
   }
 
   window.ConnectifyTargetAtarUI = {
