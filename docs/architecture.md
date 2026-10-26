@@ -111,7 +111,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 79. `src/sidebar/sidebar.js` (slide-out tool drawer & launcher)
 80. `src/system/notifications.js` (vertical stacked toast engine)
 81. `src/system/update-notice.js` ("Connectify updated" toast linking to the changelog)
-82. `src/system/grade-snapshot.js` (subject marks and boxplots compared with the grade cache)
+82. `src/system/grade-snapshot.js` (subject running marks compared with the grade cache)
 83. `src/system/new-grade.js` (grade change detector & jump-to-card dispatcher)
 84. `src/system/dom-sweeper.js` (health check & component restoration)
 

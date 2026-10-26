@@ -43,11 +43,13 @@
       }
     },
 
-    clearResultsCache() {
+    // keepGrades: a version bump keeps the marks the student last saw (connectify:grade_cache:), or the next
+    // visit would seed them quietly and miss a result released since
+    clearResultsCache({ keepGrades = false } = {}) {
       try {
         ConnectifyCache.subjectsCache?.clear();
         window.ConnectifyClassSemesters?.clear?.();
-        removeStorageKeys(k => k.startsWith('connectify:grade_cache:') || k.startsWith('connectify:subjects_cache') || k.startsWith('connectify:class_semesters:'));
+        removeStorageKeys(k => (!keepGrades && k.startsWith('connectify:grade_cache:')) || k.startsWith('connectify:subjects_cache') || k.startsWith('connectify:class_semesters:'));
         localStorage.setItem(CACHE_KEYS.RESULTS, CACHE_VERSIONS.RESULTS);
         window.dispatchEvent(new CustomEvent('connectify-results-updated'));
       } catch (e) {
@@ -130,7 +132,7 @@
           this.clearPredictorCache();
         }
         if (localStorage.getItem(CACHE_KEYS.RESULTS) !== CACHE_VERSIONS.RESULTS) {
-          this.clearResultsCache();
+          this.clearResultsCache({ keepGrades: true });
         }
         const storedSettingsVer = localStorage.getItem(CACHE_KEYS.SETTINGS);
         if (storedSettingsVer === null) {

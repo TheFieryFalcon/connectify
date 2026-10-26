@@ -1,7 +1,7 @@
 /**
  * Connectify New Grade Notification Engine
  *
- * Once per page, compares each subject's running mark and boxplot with the cache (grade-snapshot.js).
+ * Once per page, compares each subject's running mark with the cache (grade-snapshot.js).
  * A changed subject is marked stale (re-scraped when next expanded) and announced with a stacked
  * "Class Updated" toast whose "Jump to Subject" action expands that card, scrolls to it and pulses
  * an outline. Nothing is expanded without the student clicking. Exposes window.ConnectifyNewGrade.
@@ -14,7 +14,7 @@
   const { normalize } = window.ConnectifyUtils;
 
   const snapshot = window.ConnectifyGradeSnapshot;
-  const { STATS_CHANGE_THRESHOLD, hasSubjectChanged, getCacheKey, loadCachedGrades, saveCachedGrades, readSubjectStats, extractSubjectName } = snapshot;
+  const { hasSubjectChanged, getCacheKey, loadCachedGrades, saveCachedGrades, extractSubjectName } = snapshot;
 
   /**
    * Expands an individual subject tile card if collapsed.
@@ -29,7 +29,7 @@
   }
 
   /**
-   * For a subject whose average or box plot has changed:
+   * For a subject whose average has changed:
    * Marks that subject stale so that when it is expanded,
    * its portion of the cache is refreshed and unstored from stale tracking.
    */
@@ -102,9 +102,7 @@
     const isFirstRun = !prevCache || Object.keys(prevCache).length === 0;
 
     // First-time users with an empty cache must NOT receive a barrage of notifications.
-    // A notice needs the student's own running mark to move by >= 0.05, or a boxplot quantile to move by
-    // more than STATS_CHANGE_THRESHOLD points: another class uploading results nudges the cohort boxplot
-    // slightly, and that alone must not announce an update
+    // A notice needs the student's own running mark to move (hasSubjectChanged)
     if (!isFirstRun && prevCache) {
       for (const entry of currentEntries) {
         if (hasSubjectChanged(prevCache[entry.subjectName], entry)) {
@@ -144,15 +142,14 @@
       }
     }
 
-    // Update the averages and stats cache 1 second after the page has loaded / evaluated
+    // Update the averages cache 1 second after the page has loaded / evaluated
     setTimeout(() => {
       const updatedCache = loadCachedGrades() || {};
       for (const entry of currentEntries) {
-        const previous = updatedCache[entry.subjectName];
+        // An earlier semester's mark never replaces a later one (its card's summary row was not shown this time)
+        if (updatedCache[entry.subjectName]?.semester > entry.semester) continue;
         updatedCache[entry.subjectName] = {
           mark: entry.mark,
-          // A chart that was not readable this time never erases the boxplot seen before
-          stats: entry.stats || previous?.stats,
           semester: entry.semester,
           updatedAt: Date.now()
         };
@@ -171,26 +168,25 @@
       if (hasCheckedThisPage) return;
       if (document.querySelectorAll('.eds-c-tile').length > 0) {
         hasCheckedThisPage = true;
-        whenChartsStamped(checkGrades);
+        whenMarksShown(checkGrades);
       }
     }, delay);
   }
 
-  // Summary charts are stamped by the main-world bridge some time after the tiles appear; comparing earlier
-  // reads no boxplot, and the next visit would then report it as new. Waits up to CHART_WAIT_MS, then compares
-  // what is there (marks always are).
-  const CHART_WAIT_MS = 10000;
-  function summaryChartsPending() {
-    return Array.from(document.querySelectorAll('.eds-c-tile .cvr-c-task:not(.cvr-c-tasks *)')).some(row => {
-      // A chart host not drawn yet is pending too; subjects without results have no chart host at all
-      return row.querySelector('.cvr-c-task__chart') && !snapshot.readSubjectStats(row);
+  // Tiles can render before their summary rows: comparing then would miss a Semester 2 mark and use the
+  // Semester 1 one. Waits up to MARK_WAIT_MS for every outline's running mark (a class without results has none)
+  const MARK_WAIT_MS = 5000;
+  function summaryMarksPending() {
+    return Array.from(document.querySelectorAll('.eds-c-tile')).some(card => {
+      if (!card.querySelector('.eds-c-tile__title')) return false;
+      const row = Array.from(card.querySelectorAll('.cvr-c-task')).find(r => !r.closest('.cvr-c-tasks'));
+      return !Number.isFinite(snapshot.readSubjectMark(row));
     });
   }
 
-  function whenChartsStamped(run, startedAt = Date.now()) {
-    if (!summaryChartsPending() || Date.now() - startedAt >= CHART_WAIT_MS) { run(); return; }
-    window.ConnectifyUtils.syncCharts();
-    setTimeout(() => whenChartsStamped(run, startedAt), 250);
+  function whenMarksShown(run, startedAt = Date.now()) {
+    if (!summaryMarksPending() || Date.now() - startedAt >= MARK_WAIT_MS) { run(); return; }
+    setTimeout(() => whenMarksShown(run, startedAt), 250);
   }
 
   // Trigger on page load after DOM tiles are present
@@ -221,14 +217,12 @@
   window.ConnectifyNewGrade = {
     checkGrades,
     hasSubjectChanged,
-    STATS_CHANGE_THRESHOLD,
-    readSubjectStats,
     getCachedGrades: loadCachedGrades,
-    setCachedGrade: (subjectName, mark, stats) => {
+    setCachedGrade: (subjectName, mark, semester) => {
       const c = loadCachedGrades() || {};
       c[subjectName] = {
         mark: Number(mark),
-        stats: Array.isArray(stats) ? stats : undefined,
+        semester,
         updatedAt: Date.now()
       };
       saveCachedGrades(c);

@@ -47,7 +47,7 @@ Isolated world content scripts run in the exact dependency order listed in `mani
 
 ## 4. System & Styling Summary (`docs/modules_system.md`, `docs/apis_and_storage.md`)
 - `notifications.js`: Universal vertical stacked toast manager (`#connectify-notifications-container`).
-- `new-grade.js` & `grade-snapshot.js`: Running average grade delta detection ($\ge 0.05\%$; boxplot stats must move by more than 1 point), stale marking and "Jump to Subject" glow.
+- `new-grade.js` & `grade-snapshot.js`: Running average grade delta detection (own mark $\ge 0.05\%$, same semester; boxplot moves never notify), stale marking and "Jump to Subject" glow.
 - `dom-sweeper.js`: SPA DOM monitor and health restorer; panel mutation filter suppresses collapse loops.
 - Theme (`src/theme/`): `theme-auth.js`, `theme-custom-tokens.js`, `theme-palettes.js`, `theme-registry.js`, `theme-custom-themes.js`, customizer modules and `theme.js` engine (see `docs/modules_system.md`): 7 preset palettes, in-DOM customizer, wallpaper upload/caching, Liquid Glass, unstyled surface adaptation (`data-connectea-surface`).
 - Modular styles: `src/sidebar/sidebar-*.css`, `src/atar/atar.css` (+ `atar-compact.css`, `atar-planner.css`), `src/progress/progress.css`, and the theme cascade in `src/theme/styles/` (one concern per file, ending with `theme.css`).

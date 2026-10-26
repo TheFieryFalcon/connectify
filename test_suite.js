@@ -3059,8 +3059,7 @@ runTest('Test 110: Silent difference check, out-of-date cache prompt with one-ti
 
   // 5. Encapsulate summary box plot in new-grade.js & targeted invalidation
   const newGradeJs = fs.readFileSync(path.resolve(BASE_DIR, 'new-grade.js'), 'utf8');
-  assert.ok(newGradeJs.includes('function readSubjectStats(row)'), 'new-grade.js must define readSubjectStats');
-  assert.ok(newGradeJs.includes('readSubjectStats(summaryRow)'), 'new-grade.js checkGrades must extract stats from summaryRow');
+  assert.ok(!newGradeJs.includes('readSubjectStats'), 'grade checks never read the summary boxplot (classmates getting results moves it)');
   assert.ok(newGradeJs.includes('window.ConnectifyData?.markSubjectStale'), 'new-grade.js processChangedSubject must mark subject stale');
   assert.ok(assessJs.includes('markSubjectStale') && assessJs.includes('unmarkSubjectStale') && assessJs.includes('isSubjectStale'), 'assessment-data.js must export markSubjectStale, unmarkSubjectStale, isSubjectStale');
 
@@ -3084,25 +3083,21 @@ runTest('Test 110: Silent difference check, out-of-date cache prompt with one-ti
   assert.ok(atarUiCode.includes('const isClosed = isTargetClosed(i);'), 'atar-ui.js must close a finished semester in every mode, Target Grade included');
 });
 
-runTest('Test 158: Grade notifications ignore small boxplot shifts from other classes uploading results', () => {
+runTest('Test 158: Grade notifications follow the student\'s own mark only, never the cohort boxplot', () => {
   delete window.ConnectifyNewGrade;
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'new-grade.js'), 'utf8'));
-  const { hasSubjectChanged, STATS_CHANGE_THRESHOLD } = window.ConnectifyNewGrade;
-  assert.strictEqual(STATS_CHANGE_THRESHOLD, 1, 'A boxplot quantile must move by more than 1 point to count');
-  const prev = { mark: 72.4, stats: [40, 55, 65, 75, 92] };
+  const { hasSubjectChanged } = window.ConnectifyNewGrade;
+  const prev = { mark: 87.7, semester: 2 };
 
-  assert.strictEqual(hasSubjectChanged(prev, { mark: 72.4, stats: [40.6, 55.4, 65.9, 75.2, 92] }), false,
-    'Quantiles moving by under 1 point (another class uploading results) must not notify');
-  assert.strictEqual(hasSubjectChanged(prev, { mark: 72.4, stats: [40, 55, 66, 75, 92] }), false,
-    'A quantile moving by exactly 1 point must not notify');
-  assert.strictEqual(hasSubjectChanged(prev, { mark: 72.4, stats: [40, 55, 66.5, 75, 92] }), true,
-    'A quantile moving by more than 1 point must notify');
-  assert.strictEqual(hasSubjectChanged(prev, { mark: 72.5, stats: prev.stats }), true,
-    "The student's own running mark moving by 0.05 or more must still notify");
-  assert.strictEqual(hasSubjectChanged({ mark: 72.4 }, { mark: 72.4, stats: prev.stats }), false,
-    'A boxplot appearing (often a chart that rendered late on the last visit) must not notify on its own');
-  assert.strictEqual(hasSubjectChanged(undefined, { mark: 80, stats: prev.stats }), false,
-    'A subject missing from the cache is seeded quietly');
+  assert.strictEqual(hasSubjectChanged({ ...prev, stats: [40, 55, 65, 75, 92] }, { mark: 87.7, semester: 2, stats: [44, 60, 70, 80, 95] }), false,
+    'Classmates getting results back (boxplot moves, own result still unmarked) must not notify');
+  assert.strictEqual(hasSubjectChanged(prev, { mark: 87.74, semester: 2 }), false, 'A mark moving by under 0.05 must not notify');
+  assert.strictEqual(hasSubjectChanged({ mark: 93.6, semester: 2 }, { mark: 93.9, semester: 2 }), true,
+    "The student's own running mark moving by 0.05 or more must notify (a new result)");
+  assert.strictEqual(hasSubjectChanged({ mark: 87.7, semester: 2 }, { mark: 86.9, semester: 1 }), false,
+    'A Semester 1 mark (Semester 2 row not shown yet) never compares with a cached Semester 2 mark');
+  assert.strictEqual(hasSubjectChanged({ mark: 86.9 }, { mark: 87.7, semester: 2 }), true, 'Entries cached without a semester still compare');
+  assert.strictEqual(hasSubjectChanged(undefined, { mark: 80, semester: 1 }), false, 'A subject missing from the cache is seeded quietly');
 });
 
 runTest('Test 159: Cohort observer re-runs when the main-world bridge stamps boxplot stats', () => {
@@ -8182,10 +8177,9 @@ runTest('Test 177: Summary-row stats keys are per semester and never built from 
   assert.ok(readers.includes('function readStats(row, { live = false } = {})') && readers.includes('if (!live && meta?.subjectName'),
     'readStats must skip the stats cache when asked for live data');
   const snapshot = fs.readFileSync(path.join(BASE_DIR, 'src/system/grade-snapshot.js'), 'utf8');
-  assert.ok(snapshot.includes('readStats?.(row, { live: true })'), 'grade checks must read live chart stats only');
+  assert.ok(!snapshot.includes('readStats'), 'grade checks never read summary boxplots');
   const newGrade = fs.readFileSync(path.join(BASE_DIR, 'src/system/new-grade.js'), 'utf8');
-  assert.ok(newGrade.includes('whenChartsStamped(checkGrades)') && /CHART_WAIT_MS = 10000/.test(newGrade), 'the grade check must wait for summary charts (bounded)');
-  assert.ok(newGrade.includes('stats: entry.stats || previous?.stats'), 'an unreadable chart must never erase cached stats');
+  assert.ok(newGrade.includes('whenMarksShown(checkGrades)') && /MARK_WAIT_MS = 5000/.test(newGrade), 'the grade check must wait for summary marks (bounded)');
 });
 
 runTest('Test 178: A cohort version bump clears derived stats but keeps the student cohort size overrides', () => {
@@ -11662,6 +11656,20 @@ runTest('Test 255: A reload paints the last theme at document_start, and Chrome 
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(c => (c.js || []).includes('src/theme/theme-boot.js'));
   assert.ok(group.run_at === 'document_start' && !group.css, 'theme-boot.js runs at document_start, with no stylesheets of its own');
+});
+
+runTest('Test 257: A results version bump keeps the grade cache, so a result released meanwhile is still announced', () => {
+  window.__connectifyDataInitialized = false;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8'));
+  const key = 'connectify:grade_cache:me';
+  localStorage.setItem(key, JSON.stringify({ 'Mathematics Methods': { mark: 93.6, semester: 2 } }));
+  localStorage.setItem('connectify:subjects_cache:me', '{}');
+  localStorage.setItem('connectify:cache_version:results', 'old');
+  window.ConnectifyCache.checkAndInvalidateAll();
+  assert.ok(localStorage.getItem(key), 'the marks last seen survive a results version bump');
+  assert.strictEqual(localStorage.getItem('connectify:subjects_cache:me'), null, 'derived results are still cleared');
+  window.ConnectifyCache.clearResultsCache();
+  assert.strictEqual(localStorage.getItem(key), null, 'Clear Cache and the new-year rollover still clear the grade cache');
 });
 
 runTest('Test 256: Uploads are rescaled, then resized and placed by the student in the crop prompt, then cropped', async () => {

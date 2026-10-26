@@ -49,7 +49,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyPredictorUI` | `predictor-ui.js` | Predictor sidebar tool panel coordinator (Predict Grade and Predict ATAR tabs) |
 | `window.ConnectifyCountdown` | `wace-countdown.js` | Year 12 WACE exam countdown timer |
 | `window.ConnectifyNotifications` / `ConnectifyUpdateNotice` | `notifications.js` / `update-notice.js` | Stacked toast engine; one "Connectify updated" toast per newer version, "What's new" opens CHANGELOG.md |
-| `window.ConnectifyGradeSnapshot` | `grade-snapshot.js` | Subject marks and boxplots vs the grade cache, change threshold |
+| `window.ConnectifyGradeSnapshot` | `grade-snapshot.js` | Subject running marks vs the grade cache (own mark only, same semester) |
 | `window.ConnectifyNewGrade` | `new-grade.js` | Grade change notifications and jump-to-card navigation |
 | `window.ConnectifyDomSweeper` | `dom-sweeper.js` | DOM health monitor and component restoration |
 | `window.ConnectifyThemeAuth` | `theme-auth.js` | Login/logout detection and post-login theme restore |
@@ -85,7 +85,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify:subjects_cache:<student>` | `localStorage` | `assessment-data.js` | Persisted scraped subjects and tasks for instant collection without DOM rescrape |
 | `connectify:general_cohort_size` | `localStorage` | `category-settings.js` / `cohort-estimator.js` | Estimated year level cohort size (default: 500) |
 | `connectify:atar_percentage` | `localStorage` | `category-settings.js` / `cohort-estimator.js` | Estimated ATAR pathway participation percentage (default: 60) |
-| `connectify:grade_cache:<student>` | `localStorage` | `new-grade.js` | Cached running subject average marks for grade update notifications |
+| `connectify:grade_cache:<student>` | `localStorage` | `new-grade.js` | Last seen running mark and semester per subject for grade update notifications (kept across results version bumps) |
 | `connectify:baseline:types:<account>` | `localStorage` | `category-settings.js` / `predictor-math.js` | Previous-year assessment category percentage averages |
 | `connectify:baseline:subjects:<account>` | `localStorage` | `category-settings.js` / `predictor-math.js` | Previous-year enrolled subject final grade averages |
 | `connectify:year_snapshot:<account>` | `localStorage` | `year-rollover.js` | Class names seen this year and this year's type/subject averages, applied as baselines when a new year starts |

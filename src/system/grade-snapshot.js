@@ -1,28 +1,25 @@
 /**
  * Connectify grade change detection: subject snapshot
  *
- * Reads each subject's running mark and summary boxplot (Semester 2 card first once it has results),
- * keeps them in connectify:grade_cache:<student>, and decides whether a subject changed enough to
- * announce. Notifications: new-grade.js. Exposes window.ConnectifyGradeSnapshot.
+ * Reads each subject's running mark (Semester 2 card first once it has results), keeps it in
+ * connectify:grade_cache:<student>, and decides whether a subject changed enough to announce.
+ * Notifications: new-grade.js. Exposes window.ConnectifyGradeSnapshot.
  */
 (() => {
   'use strict';
 
   const { normalize } = window.ConnectifyUtils;
 
-  // Percentage points a boxplot quantile must move by (more than) for a subject to count as updated
-  const STATS_CHANGE_THRESHOLD = 1;
-
-  /** Whether a subject's cached entry and its current entry differ enough to announce an update. */
+  /**
+   * Whether the student's own running mark moved (>= 0.05) since the cached visit. The cohort boxplot never
+   * counts: classmates getting results back moves it while the student's own result is still unmarked.
+   * Only a mark from the same semester's card compares: a Semester 2 row not rendered yet would otherwise
+   * make the Semester 1 mark look like a change.
+   */
   function hasSubjectChanged(prev, entry) {
-    if (!prev) return false;
-    if (Number.isFinite(prev.mark) && Number.isFinite(entry.mark) && Math.abs(Math.round((entry.mark - prev.mark) * 100) / 100) >= 0.05) {
-      return true;
-    }
-    // Only a boxplot seen on both visits can move: one appearing is usually a chart that rendered late last time
-    const hasStats = Array.isArray(entry.stats) && entry.stats.length === 5;
-    if (!hasStats || !Array.isArray(prev.stats) || prev.stats.length !== 5) return false;
-    return entry.stats.some((val, idx) => Math.abs(val - prev.stats[idx]) > STATS_CHANGE_THRESHOLD);
+    if (!prev || !Number.isFinite(prev.mark) || !Number.isFinite(entry.mark)) return false;
+    if (prev.semester && entry.semester && prev.semester !== entry.semester) return false;
+    return Math.abs(Math.round((entry.mark - prev.mark) * 100) / 100) >= 0.05;
   }
 
   const getStudentId = () => window.ConnectifyUtils.accountKey();
@@ -49,15 +46,9 @@
     }
   }
 
-  // The cohort row readers (dataset bridge, Highcharts, then stats cache) serve the summary row too
+  // The cohort row mark reader serves the summary row too
   function readSubjectMark(row) {
     return row ? window.ConnectifyCohortRows?.readMark?.(row) : undefined;
-  }
-
-  // Live chart data only: the stats cache could hold another card's boxplot before this chart is stamped
-  function readSubjectStats(row) {
-    const stats = row ? window.ConnectifyCohortRows?.readStats?.(row, { live: true }) : null;
-    return Array.isArray(stats) && stats.length === 5 && stats.every(Number.isFinite) ? stats : undefined;
   }
 
   const parseCardSemester = rawTitle => window.ConnectifyUtils.cardSemester(rawTitle);
@@ -73,7 +64,7 @@
     ) || rawTitle;
   }
 
-  /** One entry per subject with a running mark or boxplot: { card, rawTitle, subjectName, semester, mark, stats }. */
+  /** One entry per subject with a running mark: { card, rawTitle, subjectName, semester, mark }. */
   function currentEntries() {
     const cards = Array.from(document.querySelectorAll('.eds-c-tile')).filter(
       c => c.querySelector('.eds-c-tile__title')
@@ -94,51 +85,20 @@
         row => !row.closest('.cvr-c-tasks')
       );
       const mark = readSubjectMark(summaryRow);
-      const stats = readSubjectStats(summaryRow);
-      const hasScore = Number.isFinite(mark);
-      const hasStats = Array.isArray(stats) && stats.length === 5;
+      if (!Number.isFinite(mark)) continue;
 
-      const candidate = {
-        card,
-        rawTitle,
-        subjectName,
-        semester,
-        mark: hasScore ? Math.round(mark * 100) / 100 : undefined,
-        stats: hasStats ? stats.map(v => Math.round(v * 100) / 100) : undefined
-      };
-
-      if (!subjectMap.has(subjectName)) {
-        subjectMap.set(subjectName, candidate);
-      } else {
-        const existing = subjectMap.get(subjectName);
-        const candidateHasScore = Number.isFinite(candidate.mark);
-        const existingHasScore = Number.isFinite(existing.mark);
-        const candidateHasStats = Array.isArray(candidate.stats) && candidate.stats.length === 5;
-        const existingHasStats = Array.isArray(existing.stats) && existing.stats.length === 5;
-
-        // Preference rules:
-        // 1. If candidate is Semester 2 with a valid score or stats, it always takes precedence.
-        // 2. If existing is Semester 1 (even with score/stats) and candidate is Semester 2 with score/stats, replace.
-        // 3. If candidate has score/stats but existing has none, candidate wins regardless of semester.
-        // 4. Do not let Semester 1 overwrite an existing Semester 2 with score/stats.
-        if (candidate.semester === 2 && (candidateHasScore || candidateHasStats)) {
-          subjectMap.set(subjectName, candidate);
-        } else if (!existingHasScore && !existingHasStats && (candidateHasScore || candidateHasStats)) {
-          subjectMap.set(subjectName, candidate);
-        } else if (candidate.semester > existing.semester && (candidateHasScore || candidateHasStats)) {
-          subjectMap.set(subjectName, candidate);
-        }
+      // The later semester's card wins: Semester 2 panels carry the year's running mark
+      const existing = subjectMap.get(subjectName);
+      if (!existing || semester > existing.semester) {
+        subjectMap.set(subjectName, { card, rawTitle, subjectName, semester, mark: Math.round(mark * 100) / 100 });
       }
     }
 
-    // Only subjects with a valid running mark or valid boxplot stats
-    return Array.from(subjectMap.values()).filter(
-      e => Number.isFinite(e.mark) || (Array.isArray(e.stats) && e.stats.length === 5)
-    );
+    return Array.from(subjectMap.values());
   }
 
   window.ConnectifyGradeSnapshot = {
-    STATS_CHANGE_THRESHOLD, hasSubjectChanged, getCacheKey, loadCachedGrades, saveCachedGrades,
-    readSubjectMark, readSubjectStats, parseCardSemester, extractSubjectName, currentEntries
+    hasSubjectChanged, getCacheKey, loadCachedGrades, saveCachedGrades,
+    readSubjectMark, parseCardSemester, extractSubjectName, currentEntries
   };
 })();
