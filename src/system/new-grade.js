@@ -87,10 +87,24 @@
     }, 2200);
   }
 
+  /** Stacked "Class Updated" toast for a subject ({ subjectName, card }); one per subject at a time. */
+  function announce(entry) {
+    window.ConnectifyNotifications?.show?.({
+      id: `connectify-grade-${entry.subjectName.replace(/\s+/g, '-').toLowerCase()}`,
+      type: 'grade',
+      title: 'Class Updated',
+      message: `${entry.subjectName} scores have been updated.`,
+      duration: 12000,
+      actions: [
+        { text: 'Dismiss', type: 'secondary', onClick: ({ close }) => close() },
+        { text: 'Jump to Subject', type: 'accent', onClick: () => jumpToSubject(entry.card) }
+      ]
+    });
+  }
+
   /**
-   * Scans all subject cards in the DOM, compares running averages against cache,
-   * emits notifications for any changes, auto-expands the changed cards,
-   * and updates the grade cache.
+   * Compares each subject's running mark with the cache, announces and marks stale the ones that moved,
+   * saves the marks, then starts the newly-marked-task check (grade-tasks.js).
    */
   function checkGrades() {
     if (!document.body) return;
@@ -103,42 +117,13 @@
 
     // First-time users with an empty cache must NOT receive a barrage of notifications.
     // A notice needs the student's own running mark to move (hasSubjectChanged)
-    if (!isFirstRun && prevCache) {
+    const announced = new Set();
+    if (!isFirstRun) {
       for (const entry of currentEntries) {
-        if (hasSubjectChanged(prevCache[entry.subjectName], entry)) {
-          // 1. Process targeted invalidation: store as stale subject
-          processChangedSubject(entry);
-
-          // 2. Dispatch stacked notification
-          let notifTitle = 'Class Updated';
-          let notifMsg = `${entry.subjectName} scores have been updated.`;
-
-          if (window.ConnectifyNotifications?.show) {
-            window.ConnectifyNotifications.show({
-              id: `connectify-grade-${entry.subjectName.replace(/\s+/g, '-').toLowerCase()}`,
-              type: 'grade',
-              title: notifTitle,
-              message: notifMsg,
-              duration: 12000,
-              actions: [
-                {
-                  text: 'Dismiss',
-                  type: 'secondary',
-                  onClick: ({ close }) => {
-                    close();
-                  }
-                },
-                {
-                  text: 'Jump to Subject',
-                  type: 'accent',
-                  onClick: () => {
-                    jumpToSubject(entry.card);
-                  }
-                }
-              ]
-            });
-          }
-        }
+        if (!hasSubjectChanged(prevCache[entry.subjectName], entry)) continue;
+        processChangedSubject(entry);
+        announce(entry);
+        announced.add(entry.subjectName);
       }
     }
 
@@ -146,15 +131,21 @@
     setTimeout(() => {
       const updatedCache = loadCachedGrades() || {};
       for (const entry of currentEntries) {
+        const previous = updatedCache[entry.subjectName];
         // An earlier semester's mark never replaces a later one (its card's summary row was not shown this time)
-        if (updatedCache[entry.subjectName]?.semester > entry.semester) continue;
+        if (previous?.semester > entry.semester) continue;
+        // Saved task ids stay, except for an announced subject: they are saved afresh when its rows are next
+        // shown, so opening it never announces the same result twice
+        const tasks = announced.has(entry.subjectName) ? undefined : previous?.tasks;
         updatedCache[entry.subjectName] = {
           mark: entry.mark,
           semester: entry.semester,
+          ...(tasks ? { tasks } : {}),
           updatedAt: Date.now()
         };
       }
       saveCachedGrades(updatedCache);
+      window.ConnectifyGradeTasks?.start?.();
     }, 1000);
   }
 
@@ -216,6 +207,7 @@
 
   window.ConnectifyNewGrade = {
     checkGrades,
+    announce,
     hasSubjectChanged,
     getCachedGrades: loadCachedGrades,
     setCachedGrade: (subjectName, mark, semester) => {

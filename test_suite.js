@@ -158,7 +158,7 @@ const SPLIT_PARTS = {
   'progress-chart.js': ['school-terms.js', 'progress-semester-divider.js', 'progress-chart.js', 'progress-week-editor.js'],
   'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
   'progress-graph.js': ['school-terms.js', 'progress-modes.js', 'progress-early-easter.js', 'progress-panel.js', 'progress-graph.js'],
-  'new-grade.js': ['grade-snapshot.js', 'new-grade.js'],
+  'new-grade.js': ['grade-snapshot.js', 'grade-tasks.js', 'new-grade.js'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-registry.js', 'theme-custom-themes.js'],
   'theme-customizer.js': ['theme-color-utils.js', 'theme-import.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
   // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
@@ -3717,8 +3717,20 @@ runTest('Test 118: Subject cache invalidation notification wording and single cl
   const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
   // 1. Verify notification title and message formatting
-  assert.ok(newGradeJs.includes("let notifTitle = 'Class Updated';"), "new-grade.js notification title must be 'Class Updated'");
-  assert.ok(newGradeJs.includes("let notifMsg = `${entry.subjectName} scores have been updated.`;"), "new-grade.js notification message must be '[Subject name] scores have been updated.'");
+  assert.ok(newGradeJs.includes('function announce(entry)'), 'new-grade.js must announce through one toast builder');
+  const shown = [];
+  const savedNotifications = window.ConnectifyNotifications;
+  window.ConnectifyNotifications = { show: opts => shown.push(opts) };
+  try {
+    delete window.ConnectifyNewGrade;
+    eval(newGradeJs);
+    window.ConnectifyNewGrade.announce({ subjectName: 'Mathematics Methods', card: null });
+  } finally {
+    window.ConnectifyNotifications = savedNotifications;
+  }
+  assert.strictEqual(shown[0].title, 'Class Updated', "the notification title must be 'Class Updated'");
+  assert.strictEqual(shown[0].message, 'Mathematics Methods scores have been updated.', "the message must be '[Subject name] scores have been updated.'");
+  assert.deepStrictEqual(shown[0].actions.map(a => a.text), ['Dismiss', 'Jump to Subject']);
 
   // 2. Verify expandAll does not double-dispatch clicks via dispatchEvent
   assert.ok(!assessJs.includes('btn.dispatchEvent'), 'expandAll must not call btn.dispatchEvent after btn.click()');
@@ -11670,6 +11682,57 @@ runTest('Test 257: A results version bump keeps the grade cache, so a result rel
   assert.strictEqual(localStorage.getItem('connectify:subjects_cache:me'), null, 'derived results are still cleared');
   window.ConnectifyCache.clearResultsCache();
   assert.strictEqual(localStorage.getItem(key), null, 'Clear Cache and the new-year rollover still clear the grade cache');
+});
+
+runTest('Test 258: A newly marked task is announced even when the running mark stays put; renames and unseen cards stay quiet', () => {
+  const origQSA = document.querySelectorAll;
+  let cards = [];
+  document.querySelectorAll = sel => (sel === '.eds-c-tile' ? cards : origQSA.call(document, sel));
+  try {
+    mockLocalStorage.clear();
+    window.ConnectifyGradeSnapshot = undefined;
+    window.ConnectifyGradeTasks = undefined;
+    for (const f of ['grade-snapshot.js', 'grade-tasks.js']) eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system', f), 'utf8'));
+    const tasks = window.ConnectifyGradeTasks;
+    const snapshot = window.ConnectifyGradeSnapshot;
+    const physics = rows => makeOutlineCard('Physics ATAR Year 11 - Semester 2', { overall: '87.7%', tasks: rows });
+    snapshot.saveCachedGrades({ Physics: { mark: 87.7, semester: 2 } });
+
+    cards = [physics([['Test 4', '41 Out of 44'], ['Test 5', '- Out of 60']])];
+    assert.deepStrictEqual(tasks.check(), [], 'a card never seen before is saved quietly');
+    const saved = snapshot.loadCachedGrades().Physics;
+    assert.strictEqual(saved.tasks['2'].length, 1, 'only marked tasks are saved, under the card\'s semester');
+    assert.strictEqual(saved.mark, 87.7, 'the saved mark is untouched');
+
+    cards = [physics([['Test 4', '41 Out of 44'], ['Test 5', '52 Out of 60']])];
+    const changed = tasks.check();
+    assert.deepStrictEqual(changed.map(c => c.subjectName), ['Physics'], 'a newly marked task is a new result, whatever the running mark did');
+    assert.strictEqual(changed[0].card, cards[0], 'Jump to Subject goes to the card that showed it');
+    assert.deepStrictEqual(tasks.check(), [], 'the same result is announced once');
+
+    cards = [physics([['Test 4 (resubmitted)', '41 Out of 44'], ['Test 5', '52 Out of 60']])];
+    assert.deepStrictEqual(tasks.check(), [], 'a renamed task swaps one id for another and is not a new result');
+    cards = [physics([['Test 4 (resubmitted)', '41 Out of 44'], ['Test 5', '- Out of 60']])];
+    assert.deepStrictEqual(tasks.check(), [], 'a mark taken back is not a new result');
+
+    cards = [makeOutlineCard('Chemistry ATAR Year 11 - Semester 2', { overall: '83.5%', tasks: [['Test 3', '30 Out of 40']] })];
+    tasks.check();
+    assert.strictEqual(snapshot.loadCachedGrades().Chemistry, undefined, 'a subject the mark check has not saved yet is left to it');
+    cards = [makeOutlineCard('Physics ATAR Year 11 - Semester 2', { overall: '87.7%' })];
+    assert.deepStrictEqual(tasks.check(), [], 'a collapsed card (no task rows) is never compared');
+    assert.strictEqual(snapshot.loadCachedGrades().Physics.tasks['2'].length, 1, 'and keeps its saved ids');
+  } finally {
+    document.querySelectorAll = origQSA;
+    mockLocalStorage.clear();
+  }
+
+  const newGrade = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/new-grade.js'), 'utf8');
+  assert.ok(newGrade.includes('announced.has(entry.subjectName) ? undefined : previous?.tasks'),
+    'saving the marks keeps the saved task ids, except for a subject just announced (no second notice on opening it)');
+  assert.ok(newGrade.includes('window.ConnectifyGradeTasks?.start?.()'), 'the task check starts once the marks are saved');
+  const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('src/system/grade-snapshot.js') < manifest.indexOf('src/system/grade-tasks.js') &&
+    manifest.indexOf('src/system/grade-tasks.js') < manifest.indexOf('src/system/new-grade.js'), 'grade-tasks.js loads between the snapshot and the notifier');
 });
 
 runTest('Test 256: Uploads are rescaled, then resized and placed by the student in the crop prompt, then cropped', async () => {
