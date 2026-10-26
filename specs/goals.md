@@ -3,11 +3,11 @@
 Status: spec (2026-10-26). Not implemented.
 
 ## 1. Summary
-The Goal Setter's **Target Grade** and **Target ATAR** planners can save their plan as a **goal**. A saved goal:
+The Goal Setter's **Target Grade** and **Target ATAR** planners get a **Set as Goal** button that opens a modal dialog (preview, end point, Confirm) to save the plan as a **goal**. A **Goals** button opens a second modal listing saved goals. A saved goal:
 - has a **difficulty tier** worked out from the chance of reaching it: **Trivial, Easy, Medium, Hard, Hell**, plus **Guaranteed** and **Impossible**, which end the goal as soon as they happen (early lock-in);
 - carries **effort sliders** (5 notches) on each remaining task (Target Grade) or each top-four subject (Target ATAR) that shift the required marks between them without touching outline weights;
 - adds two vertical bars to assessment rows on the outlines page: a **goal-performance bar** on completed tasks (four pastel segments plus a secret purple breakout) and a **goal-progress bar** (smooth, unsegmented fill coloured by the goal's tier) on completed tasks and the subject's overall row;
-- is **saved**, **editable** and shown in a Goals list at the top of the Goal Setter, with finished goals kept under Past goals;
+- is **saved**, **editable** and listed in the Goals modal, with finished goals kept under Past goals;
 - for Target ATAR, creates **linked subject goals** for the top four, re-solved after every new mark.
 
 Rule: **one active goal per subject**. A Target ATAR goal holds its four subjects.
@@ -22,8 +22,15 @@ Rule: **one active goal per subject**. A Target ATAR goal holds its four subject
 
 ### 2.1 What a goal measures
 - **Semester ends**: the subject's semester mark, the way Connect works it out (Semester 2 is cumulative and includes Semester 1 tasks). The tasks in range are the outline's tasks for that semester (`taskSemester`, school week 17 split, the same as everywhere else).
-- **Custom week** (grade goals only): the running weight-weighted mean of every task due up to the end of that school week (`ConnectifySchoolTerms.weekOrder`, Early Easter respected; Semester 2 weeks include Semester 1 tasks). Tasks after it are out of range: no slider, no bars. Tasks with no readable week are out of range for custom-week goals; one line under the planner names them (`No week: <task>. Set one in the Progress table.`), the only note besides errors.
-- The week picker shows the term form beside the number (`Week 24 · Term 3 Week 4`), from this year's terms.
+- **Custom week** (grade goals only): the running weight-weighted mean of every task due up to the end of that school week (`ConnectifySchoolTerms.weekOrder`, Early Easter respected; Semester 2 weeks include Semester 1 tasks).
+  - **A task's week is its Year Progression week**: the week set in the Progress table (`connectea:time_override:`, read through `ConnectifyUtils.customWeekOrder`), else its caption. This is the same `order` the graph and the export use.
+  - Tasks after the end week are out of range: no slider, no bars.
+  - Tasks with no readable week are also out of range. One line in the Set as Goal dialog names them (`No week: <task>. Set one in the Progress table.`); it is the only note besides errors.
+- **Week snapshot**: goal ranges use the weeks as they were when the page loaded (`ConnectifyGoalPlan.weekSnapshot()`, taken once per load, beside `ConnectifyPanelView`'s read-once pattern). Changing a week in the Year Progression table, or toggling Early Easter, does **not** recompute goals, bars, tiers or verdicts until the page is reloaded.
+  - The graph, the export and predictions still update at once, as today.
+  - The goal subsystem ignores `connectify-terms-updated` and week-override saves. After either one, goals are **held** (`ConnectifyGoalPlan.isHeld()`): no tier, bar, verdict, lock-in or toast-line recompute for the rest of the page's life, even when the predictions refresh. Rows and dialogs keep showing the last values until reload.
+  - The Set as Goal dialog also uses the snapshot, so a preview always matches what the saved goal will show.
+- The week picker shows the term form beside the number (`Week 24 · Term 3 Week 4`), from this year's terms (snapshot).
 
 ### 2.2 Lifecycle
 - **Active**: tier recomputed on every cohort pass and on `connectify-results-updated` / `connectify-predictions-updated`.
@@ -59,43 +66,86 @@ Achieved bars and cards use the Guaranteed colour; Missed bars and cards use the
 
 ## 4. Goal Setter UI
 
-### 4.1 Goals list (top of the Goal Setter panel, above the mode tabs)
-```
-┌ Goal Setter ─────────────────────────────────────────── ← Back to Menu ┐
-│ Goals                                                                    │
-│ ┌ Chemistry ATAR · 85% by Semester 2 ──────────── [Hard] ✎ ✕ ┐          │
-│ │ ███████████░░░░░░░░░  41.2 of 80 weighted points          │          │
-│ └───────────────────────────────────────────────────────────┘          │
-│ ┌ ATAR 95.00 by Semester 2 ─────────────────────── [Medium] ✎ ✕ ┐       │
-│ │ ████████░░░░░░░░░░░░                                          │       │
-│ │   Methods ATAR 88.4% · English ATAR 81.0% · Chemistry … · Physics … │ │
-│ └───────────────────────────────────────────────────────────────┘       │
-│ ▸ Past goals (2)                                                         │
-│ [Target Grade] [Target ATAR]                                             │
-│ …planner…                                                                │
-└──────────────────────────────────────────────────────────────────────────┘
-```
-- Only in the Goal Setter (never the Estimator). Hidden when there are no goals at all.
-- **Card**: subject (cleaned name) or `ATAR`, target and end (`85% by Semester 2`, `80% by Term 3 Week 4`, `ATAR 95.00 by Semester 1`), a tier label in the tier colour (text), a horizontal version of the progress bar (same fill and colour), `<earned> of <required> weighted points` (grade goals), **Edit ✎** and **Delete ✕** (the custom-theme menu's actions; Delete asks first, inline, never `window.confirm`). ATAR cards list their four children with each one's current target.
-- **Past goals**: a collapsed `<details>` with each finished goal's target, **Achieved** / **Missed**, the final mark or ATAR, the date it finished, and Delete. Read-only.
-- Card order: ATAR goal first, then grade goals by end (soonest first).
-- A just-completed goal's card glows (`.cx-goal-card--celebrate`, ~2s) the next time the Goal Setter opens after its celebration (§8.2).
+The planners stay planners. Goals are made in a **Set as Goal** dialog and managed in a **Goals** dialog. Both are modal dialogs over the page.
 
-### 4.2 Target Grade tab
-- Adds an **End** select beside the target: `Semester 1` / `Semester 2` / `Custom week…` (week number input 1–40 with the term hint). Defaults to the semester button that is selected.
-- The breakdown lists every remaining task in range with: required mark, **per-task tier label**, and an **effort slider** (§5).
-- Headline: required average plus the goal's tier label. No chance percentage and no explanatory notes (UI copy rule).
-- **Save Goal** (primary button tokens). In edit mode: **Save Changes** / **Cancel**, with the heading `Editing <subject> goal`.
-- Save is disabled, with one line saying why, when:
-  - the plan is **Guaranteed** (`Already secured.`) or **Impossible** (`Highest possible: 78.4%.`);
-  - the subject already has an active goal (`<subject> already has a goal.` plus an Edit link);
-  - the subject is held by the ATAR goal (§5.3).
-- **Edit ✎** on a card opens this tab with the goal loaded (subject, target, end, checkbox, sliders).
+**Shared dialog behaviour** (`theme-wallpaper-crop.js` / customizer pattern):
+- solid themed surface, never translucent in glass themes, 20px corners only in Liquid Glass;
+- the page is dimmed behind (brightened in light tone);
+- focus moves into the dialog and returns to the opening button;
+- Escape, Cancel / ✕, or a click outside closes it without saving;
+- clicks inside never reach the sidebar's outside-click handler, so the drawer stays open;
+- labels use the theme ink.
 
-### 4.3 Target ATAR tab
-- Adds an effort slider to each top-four subject row and a goal tier label to the plan banner. Each subject also gets its own tier label (its required mark vs its projection, §3.1).
-- **Save Goal** / **Save Changes** / **Cancel**, as in §4.2. Only one active ATAR goal at a time.
-- **Conflict**: when a ticked top-four subject already has a grade goal, Save opens an inline prompt instead of saving: `Chemistry ATAR already has a goal (85% by Semester 2). Replace it with this ATAR goal's?` **Replace** / **Cancel**. Replace deletes that grade goal (it does not go to Past goals), then saves.
+### 4.1 Planner tabs (Target Grade, Target ATAR)
+- **Target Grade**: the breakdown lists every remaining task with its required mark, a **per-task tier label** and an **effort slider** (§5).
+- **Target ATAR**: each top-four subject row gets an effort slider and its own tier label (its required mark vs its projection, §3.1).
+- Both banners show the goal tier label. No chance percentage and no explanatory notes (UI copy rule).
+- The tabs have no End picker. They plan for the selected semester button, as today.
+- **Set as Goal** (primary button tokens) sits under the result, in the Goal Setter only (never the Estimator), on the outlines page only. It is disabled while the planner shows an error.
+- **Goals** (secondary button, `#cx-goals-open`, with the active count, e.g. `Goals (3)`) sits in the Goal Setter header beside the mode tabs. It is disabled when there are no goals at all.
+
+### 4.2 Set as Goal dialog (`#cx-goal-dialog`)
+```
+┌ Set as Goal ─────────────────────────────────────────── ✕ ┐
+│ Chemistry ATAR · 85%                              [Hard]    │
+│ End: [Semester 2 ▾]   (Custom week… → Week [24] Term 3 Week 4) │
+│                                                             │
+│ Task                    Effort      Needs     Tier          │
+│ Test 4                  More        88.0%     Hard          │
+│ Investigation 2         Normal      81.5%     Medium        │
+│ Semester 2 Exam         Less        79.0%     Medium        │
+│                                                             │
+│ ███████████░░░░░░░░░  41.2 of 80 weighted points            │
+│ No week: Practical Report. Set one in the Progress table.   │
+│                                         [Cancel] [Confirm]  │
+└─────────────────────────────────────────────────────────────┘
+```
+- **Preview**: what the goal will be, from the planner's current subject (or top four), target, checkbox and sliders:
+  - the heading: subject or `ATAR`, target and the goal's tier label;
+  - read-only rows for the tasks (or subjects) in range, with their effort notch name, required mark and tier;
+  - the horizontal progress bar with its points.
+  - ATAR previews list the four subjects with their solved targets.
+- **End**:
+  - grade goals: `Semester 1` / `Semester 2` / `Custom week…`, which shows a week input (1–40) with the term hint. It defaults to the planner's selected semester.
+  - ATAR goals: `Semester 1` / `Semester 2` only.
+  - Changing the end recomputes the preview at once: tasks outside the range drop out, and their sliders are kept but ignored.
+- **Confirm** saves the goal and closes the dialog. The Goal Setter shows a one-line `Goal set.` status for 3s, beside Set as Goal.
+- Confirm is disabled, with one line saying why, when:
+  - the preview is **Guaranteed** (`Already secured.`) or **Impossible** (`Highest possible: 78.4%.`);
+  - the subject already has an active goal (`<subject> already has a goal.` plus an **Edit** link that opens it, §4.4);
+  - the subject is held by the ATAR goal (`Set by your ATAR 95.00 goal.`, §5.3);
+  - another ATAR goal is active (`You already have an ATAR goal.`).
+- **ATAR conflict**: when a top-four subject already has a grade goal, Confirm turns into an in-dialog prompt: `Chemistry ATAR already has a goal (85% by Semester 2). Replace it?` **Replace** / **Back**. Replace deletes that grade goal (it does not go to Past goals), then saves.
+
+### 4.3 Goals dialog (`#cx-goals-dialog`)
+```
+┌ Goals ───────────────────────────────────────────────── ✕ ┐
+│ ┌ Chemistry ATAR · 85% by Semester 2 ──────── [Hard] ✎ ✕ ┐ │
+│ │ ███████████░░░░░░░░░  41.2 of 80 weighted points       │ │
+│ └────────────────────────────────────────────────────────┘ │
+│ ┌ ATAR 95.00 by Semester 2 ─────────────────── [Medium] ✎ ✕ ┐│
+│ │ ████████░░░░░░░░░░░░                                     ││
+│ │ Methods ATAR 88.4% · English ATAR 81.0% · Chemistry … · … ││
+│ └──────────────────────────────────────────────────────────┘│
+│ ▸ Past goals (2)                                             │
+└──────────────────────────────────────────────────────────────┘
+```
+- **Card**:
+  - the subject (cleaned name) or `ATAR`, with its target and end (`85% by Semester 2`, `80% by Term 3 Week 4`, `ATAR 95.00 by Semester 1`);
+  - a tier label in the tier colour (text);
+  - a horizontal version of the progress bar (same fill and colour), with `<earned> of <required> weighted points` for grade goals;
+  - **Edit ✎** and **Delete ✕**, the custom-theme menu's actions. Delete asks first, inline, never with `window.confirm`.
+  - ATAR cards also list their four children with each one's current target.
+- **Order**: the ATAR goal first, then grade goals by end, soonest first.
+- **Past goals**: a collapsed `<details>` listing each finished goal's target, **Achieved** / **Missed**, the final mark or ATAR, and the date it finished. Read-only; Delete only.
+- A just-completed goal's card glows (`.cx-goal-card--celebrate`, ~2s) the next time the Goals dialog opens after its celebration (§8.2).
+- Also opens off the outlines page, read-only: no Edit, and progress and tiers from the cache.
+
+### 4.4 Editing
+- **Edit ✎** closes the Goals dialog and loads the goal into its planner tab: subject or top four, target, semester, checkbox and sliders.
+- The tab heading reads `Editing <subject> goal` (or `Editing ATAR goal`), with a **Cancel Editing** link that restores the planner to how it was before.
+- In edit mode, **Set as Goal** reads **Update Goal**. It opens the same dialog with the goal's end preselected, and **Confirm** reads **Save Changes**. The goal keeps its id (revision + 1), so it stays the same goal (§7.1).
+- The conflict rules ignore the goal being edited.
 
 ## 5. Effort sliders
 
@@ -114,7 +164,9 @@ Achieved bars and cards use the Guaranteed colour; Missed bars and cards use the
 - **ATAR re-solve**: the target, the top four and all sliders stay fixed, while the four child targets are re-solved after every new mark so the ATAR stays reachable.
 
 ### 5.3 Linked subjects (ATAR children)
-- Picking an ATAR-held subject in the Target Grade tab shows its current target read-only (`Set by your ATAR 95.00 goal`), its tasks' required marks, tiers and **task sliders**, which are editable and saved with **Save Changes** into the ATAR goal. The target, end and checkbox are disabled there; they belong to the ATAR goal.
+- Picking an ATAR-held subject in the Target Grade tab shows its current target read-only (`Set by your ATAR 95.00 goal`), its tasks' required marks, tiers and **task sliders**. The sliders are editable.
+- The target and checkbox are disabled there; they belong to the ATAR goal.
+- **Update Goal** opens the Set as Goal dialog for the ATAR goal. Its preview shows this subject's tasks, and its end is locked. **Save Changes** stores the task sliders into the ATAR goal.
 
 ## 6. Bars on the outlines page
 
@@ -182,7 +234,7 @@ There is no separate goal toast. The goal's `lastTier` is stored, so the "was" t
 - Plays **once per goal** (`celebrated: true` saved), never again on reload.
 - About **4 s** of confetti bursting from the toast across the viewport, on a fixed full-screen canvas `#cx-goal-confetti` (`pointer-events: none`, top z-index, removed afterwards; no library, `requestAnimationFrame`, stopped when the tab is hidden).
 - A stronger screen shake, about 600 ms. The shake applies `translate` to Connect's app layout (`#main-content`'s layout root), never `<html>`/`<body>`, so fixed elements and the drawer keep their positions.
-- The goal card glows the next time the Goal Setter opens (§4.1).
+- The goal card glows the next time the Goals dialog opens (§4.3).
 - **`prefers-reduced-motion: reduce`**: no shake. The confetti becomes a static burst that fades in and out without moving. The toast text is unchanged.
 - **ATAR goals**: one celebration (or one `Goal missed!`) for the ATAR goal; the children never celebrate.
 
@@ -221,22 +273,24 @@ Goal = {
 - **Backward compatibility**: a missing or unknown `version` reads as no goals. Unknown fields are kept on save.
 
 ## 11. Files (new features in new files, each ≤ 250 lines)
-Registered in `manifest.json` after the planner scripts (outlines group). The store and difficulty modules also go in the sidebar-only group, so the Goals list renders, read-only, off the outlines page.
+Registered in `manifest.json` after the planner scripts (outlines group). The store, difficulty and Goals dialog modules also go in the sidebar-only group, so the Goals dialog opens read-only off the outlines page.
 
 | File | Global | Role |
 |---|---|---|
 | `src/goals/goal-store.js` | `ConnectifyGoalStore` | load/save, conflicts, finish, archive, verdict cache |
 | `src/goals/goal-difficulty.js` | `ConnectifyGoalDifficulty` | chance, tiers, colours, per-task tier |
-| `src/goals/goal-plan.js` | `ConnectifyGoalPlan` | offsets → `gradePlan` / `targetPlan`, ATAR re-solve, replay (§7.2), progress points |
+| `src/goals/goal-plan.js` | `ConnectifyGoalPlan` | offsets → `gradePlan` / `targetPlan`, ATAR re-solve, replay (§7.2), progress points, `weekSnapshot()` (task weeks frozen at load, §2.1) |
 | `src/goals/goal-sliders.js` | `ConnectifyGoalSliders` | slider markup, notch names, reset on checkbox |
-| `src/goals/goal-list-ui.js` | `ConnectifyGoalListUI` | Goals list, Past goals, Edit / Delete |
-| `src/goals/goal-editor.js` | `ConnectifyGoalEditor` | Save Goal / edit mode / conflict prompt in both tabs |
+| `src/goals/goal-modal.js` | `ConnectifyGoalModal` | shared modal shell: focus trap, Escape / outside click, dim, drawer-safe clicks |
+| `src/goals/goal-dialog.js` | `ConnectifyGoalDialog` | Set as Goal dialog: preview, End picker, Confirm / Save Changes, conflict prompt |
+| `src/goals/goal-list-ui.js` | `ConnectifyGoalListUI` | Goals dialog: cards, Past goals, Edit / Delete |
+| `src/goals/goal-editor.js` | `ConnectifyGoalEditor` | Set as Goal / Update Goal / Goals buttons, edit mode and Cancel Editing in both tabs |
 | `src/goals/goal-bars.js` | `ConnectifyGoalBars` | row bars, tooltip, memo signature |
 | `src/goals/goal-events.js` | `ConnectifyGoalEvents` | lock-in / finish detection, toast line |
 | `src/goals/goal-celebrate.js` | `ConnectifyGoalCelebrate` | confetti, shake, reduced motion |
 | `src/progress/progress-goal-line.js` | `ConnectifyProgressGoalLine` | Year Progression goal line |
 | `src/atar/grade-estimate-goal.js` | `ConnectifyGradeEstimateGoal` | Estimator goal lines |
-| `src/goals/goal-bars.css`, `goal-list.css`, `goal-celebrate.css` | | token-routed in dark themes, light-tone rules |
+| `src/goals/goal-bars.css`, `goal-dialog.css`, `goal-list.css`, `goal-celebrate.css` | | token-routed in dark themes, light-tone rules |
 
 Changes to existing files stay small: `target-solver.js` gains the `offsets` option; the planners call the editor and sliders; `cohort-view.js` calls `goal-bars`; `new-grade.js` asks `goal-events` for the toast line; `year-rollover.js` archives goals; `cache-versions.js` clears verdicts on Clear Cache.
 
@@ -258,7 +312,18 @@ Changes to existing files stay small: `target-solver.js` gains the `offsets` opt
   - Clear Cache drops verdicts and keeps goals.
 - **Performance bar**: the ±5 bands; purple only above 1.10 × R and on Green; the tooltip never mentions purple.
 - **Progress bar**: fill = earned / required, capped; task rows use the tier as of that task; no segments; tier colours.
-- **Custom week**: tasks in range by school week (Early Easter on and off); undated tasks are excluded and named.
+- **Custom week**:
+  - Tasks are in range by their Year Progression week: an override beats the caption.
+  - Early Easter on and off.
+  - Undated tasks are excluded and named.
+  - Changing a week override or Early Easter after load leaves goal ranges, tiers and bars unchanged until reload; after a reload they follow the new weeks.
+- **Dialogs**:
+  - Set as Goal opens from the planner with its subject, target and sliders.
+  - End changes recompute the preview.
+  - Confirm is disabled for Guaranteed / Impossible / conflicts.
+  - Escape, Cancel and outside click save nothing; the drawer stays open.
+  - The Goals dialog lists cards and Past goals.
+  - Edit loads the planner in edit mode, Update Goal saves the same id with revision + 1, and Cancel Editing restores the planner.
 - **UI**:
   - Bars are 18 × 56 beside the outcome meter and rows keep their height.
   - No `title` attributes.
@@ -276,7 +341,9 @@ Changes to existing files stay small: `target-solver.js` gains the `offsets` opt
 - `design_rules.md`: Section 4: goal bars (geometry, pastel performance tiers, secret purple, tier-coloured progress).
 
 ## 14. Defaults chosen without asking (revisit if wrong)
-- The planner shows tier names only, with no chance percentage (UI copy rule).
+- The planner and dialogs show tier names only, with no chance percentage (UI copy rule).
+- Effort sliders live in the planner tabs; the Set as Goal dialog shows their notches read-only.
+- Edit ✎ reopens the goal in its planner tab (edit mode). The sliders need the planner, so the dialog alone cannot edit them.
 - ATAR children's progress bars use the child's own tier; the ATAR goal's tier is on its card.
 - Replacing a grade goal via the ATAR prompt deletes it rather than archiving it.
 - Custom-week goals exclude tasks with no readable week.
