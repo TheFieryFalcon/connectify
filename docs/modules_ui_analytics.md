@@ -41,7 +41,7 @@ This document covers the user interface and analytics modules, including target 
 - **Key Functions**:
   - `history(subjects)`: Reconstructs cumulative historical ATAR projection at each sequential assessment milestone.
   - `aggregateMonthlyPoints(points)`: Groups sequential steps into monthly averages for smooth calendar-based trajectory plotting.
-  - `computeYBounds(points, isHistory)`: Dynamically calculates Y-axis min/max bounds and grid tick intervals.
+  - `computeYBounds(points, isHistory)`: Y-axis bounds, grid step and scale. Subject charts run 50–100% (grid every 10), or from the lowest plotted mark or cohort mean below 50% rounded down to the nearest 10; ATAR charts start just under the second-lowest estimate.
 - **Export**: `window.ConnectifyProgressMath`.
 
 #### [`progress-chart.js`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/progress-chart.js)

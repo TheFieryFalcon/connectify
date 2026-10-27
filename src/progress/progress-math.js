@@ -162,12 +162,16 @@
 
   /**
    * Determines dynamic Y-axis bounds, range, step size, and scaling function.
+   * Subject charts start at 50%, or below a plotted value under 50% at that value rounded down to the nearest 10.
    */
   function computeYBounds(points, isHistory) {
     let minY = 0;
     const maxY = 100;
 
-    if (isHistory) {
+    if (!isHistory) {
+      const lowest = Math.min(...points.flatMap(p => [p.score, p.mean]).filter(Number.isFinite));
+      minY = lowest < 50 ? Math.max(0, Math.floor(lowest / 10) * 10) : 50;
+    } else {
       const validScores = points.map(p => p.score).filter(Number.isFinite);
       if (validScores.length) {
         const sorted = [...validScores].sort((a, b) => a - b);
@@ -178,7 +182,7 @@
     }
 
     const range = maxY - minY;
-    const gridStep = !isHistory || range === 100 ? 25 : range > 30 && range % 10 === 0 ? 10 : (range <= 10 ? 1 : 5);
+    const gridStep = !isHistory ? 10 : range === 100 ? 25 : range > 30 && range % 10 === 0 ? 10 : (range <= 10 ? 1 : 5);
     const yFor = val => 260 - ((val - minY) / range) * 220;
 
     return { minY, maxY, range, gridStep, yFor };

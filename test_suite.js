@@ -12535,6 +12535,30 @@ runTest('Test 272: Task types, class categories, week overrides, calibration and
   }
 });
 
+runTest('Test 273: Year Progression subject charts start at 50%, or at the lowest value below 50% rounded down to the nearest 10', () => {
+  const saved = window.ConnectifyProgressMath;
+  try {
+    window.ConnectifyProgressMath = undefined;
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress-math.js'), 'utf8'));
+    const math = window.ConnectifyProgressMath;
+    const bounds = (scores, means = []) => math.computeYBounds(scores.map((score, i) => ({ score, mean: means[i] ?? null })), false);
+    assert.strictEqual(bounds([72, 50, 91]).minY, 50, 'no value below 50%: the scale starts at 50%');
+    assert.strictEqual(bounds([72, 47.5, 91]).minY, 40, 'a task at 47.5%: the scale starts at 40%');
+    assert.strictEqual(bounds([72, 30, 91]).minY, 30, 'a task at exactly 30%: the scale starts at 30%');
+    assert.strictEqual(bounds([72, 4, 91]).minY, 0, 'a task under 10%: the scale starts at 0%');
+    assert.strictEqual(bounds([72, null, 91]).minY, 50, 'unmarked tasks never lower the scale');
+    assert.strictEqual(bounds([72, 81], [44, 60]).minY, 40, 'a cohort mean below 50% stays on the chart');
+    assert.strictEqual(bounds([null]).minY, 50, 'no marked task: the scale starts at 50%');
+    const b = bounds([62, 80]);
+    assert.strictEqual(b.maxY, 100);
+    assert.strictEqual(b.gridStep, 10, 'grid lines every 10%');
+    assert.strictEqual(b.yFor(50), 260, '50% sits on the axis');
+    assert.strictEqual(b.yFor(100), 40, '100% sits at the top');
+  } finally {
+    window.ConnectifyProgressMath = saved;
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
