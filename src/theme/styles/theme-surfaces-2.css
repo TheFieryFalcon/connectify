@@ -1,0 +1,44 @@
+/**
+ * Connectify Theme: learning content, alerts, session warnings and badges (part 2, continued from theme-surfaces.css)
+ */
+
+.connectea-dark .badge-warning, .connectea-dark .label-warning, .connectea-dark .label-inverse-warning {
+  background-color: #854d0e !important;
+  color: #fef9c3 !important;
+  border-color: #eab308 !important;
+}
+
+.connectea-dark .badge-danger, .connectea-dark .label-danger, .connectea-dark .label-inverse-danger {
+  background-color: #991b1b !important;
+  color: #fee2e2 !important;
+  border-color: #ef4444 !important;
+}
+
+.connectea-dark .badge-info, .connectea-dark .label-info, .connectea-dark .label-inverse-info {
+  background-color: #1e40af !important;
+  color: #dbeafe !important;
+  border-color: #3b82f6 !important;
+}
+
+.connectea-dark .cvr-c-status-label, .connectea-dark .cvr-c-entitystatus {
+  background-color: var(--cx-surface-secondary, #24303f) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
+  border-radius: 4px !important;
+}
+
+.connectea-dark .cvr-c-status-label--draft {
+  background-color: #334155 !important;
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+
+.connectea-dark .cvr-c-status-label--featured {
+  background-color: #854d0e !important;
+  color: #fef08a !important;
+}
+
+.connectea-dark .cvr-c-status-label--removed {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-muted, #94a3b8) !important;
+  border-color: var(--cx-border, #36485e) !important;
+}

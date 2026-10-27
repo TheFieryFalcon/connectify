@@ -7,7 +7,8 @@
  */
 
 /* Category names and task-type badges (Settings, Predictor) */
-html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar :is(.cx-cat-name-label, .cx-pred-task-type-badge) {
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-cat-name-label,
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-pred-task-type-badge {
   color: var(--cx-text-primary, #1d1c1c) !important;
   color: oklch(from var(--cx-cat-color, #3498db) 0.34 c h) !important;
 }
@@ -19,15 +20,17 @@ html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-pred-sc
 }
 
 /* High scenario card and pill: a light green tint with dark green ink instead of the dark-surface card */
-html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar :is(.cx-pred-scenario-card--high, .cx-pred-pill--high) {
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-pred-scenario-card--high,
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-pred-pill--high {
   background: color-mix(in srgb, #22c55e 16%, transparent) !important;
   border-color: color-mix(in srgb, #15803d 45%, transparent) !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar :is(
-  .cx-pred-scenario-label--high, .cx-pred-scenario-value--high, .cx-pred-scenario-sub--high,
-  .cx-pred-pill--high, .cx-pred-pill--high strong
-) {
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-pred-scenario-label--high:not(cx-n),
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-pred-scenario-value--high:not(cx-n),
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-pred-scenario-sub--high:not(cx-n),
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-pred-pill--high:not(cx-n),
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar :is(.cx-pred-pill--high strong) {
   color: var(--cx-text-primary, #1d1c1c) !important;
   color: oklch(from #22c55e 0.34 c h) !important;
 }
@@ -56,13 +59,15 @@ html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart {
   border-color: color-mix(in srgb, var(--cx-text-primary, #1d1c1c) 22%, transparent) !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart :is(text, .cx-radar-message) {
+html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart :where(text):not(.cx-n),
+html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart .cx-radar-message {
   fill: var(--cx-text-primary, #1d1c1c) !important;
   color: var(--cx-text-primary, #1d1c1c) !important;
   opacity: 1 !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart :is(line, polygon[fill="none"]) {
+html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart line:not(.cx-n),
+html.connectea-dark[data-connectea-tone="light"] #connectify-radar-chart polygon[fill="none"] {
   stroke: color-mix(in srgb, var(--cx-text-primary, #1d1c1c) 45%, transparent) !important;
 }
 
@@ -101,36 +106,68 @@ html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar-handle {
 
 /* Connect status labels (Overdue, locked, reported, blue-light #0092c9) are dark pills in the dark themes; on a light tone
    they become light tints with dark ink, and their children (em, span) follow the pill's ink */
-html.connectea-dark[data-connectea-tone="light"] :is(
-  .cvr-c-class__status-label--locked, span.standard-label.connect-red, div.standard-label.connect-red, span.connect-red,
-  .cvr-c-submission__status-label--overdue, .cvr-c-entitystatus--reported, .cvr-c-status-label--reported
-) {
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-class__status-label--locked:not(.cx-n):not(cx-n),
+html.connectea-dark[data-connectea-tone="light"] span.standard-label.connect-red,
+html.connectea-dark[data-connectea-tone="light"] div.standard-label.connect-red,
+html.connectea-dark[data-connectea-tone="light"] span.connect-red:not(.cx-n),
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-submission__status-label--overdue:not(.cx-n):not(cx-n),
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-entitystatus--reported:not(.cx-n):not(cx-n),
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-status-label--reported:not(.cx-n):not(cx-n) {
   background-color: color-mix(in srgb, #ef4444 14%, transparent) !important;
   border-color: color-mix(in srgb, #b91c1c 45%, transparent) !important;
   color: var(--cx-text-primary, #1d1c1c) !important;
   color: oklch(from #dc2626 0.34 c h) !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"] :is(.standard-label.connect-blue-light, .connect-blue-light) {
+html.connectea-dark[data-connectea-tone="light"] .standard-label.connect-blue-light,
+html.connectea-dark[data-connectea-tone="light"] .connect-blue-light:not(.cx-n) {
   background-color: color-mix(in srgb, #0092c9 14%, transparent) !important;
   border-color: color-mix(in srgb, #00739e 45%, transparent) !important;
   color: var(--cx-text-primary, #1d1c1c) !important;
   color: oklch(from #0092c9 0.34 c h) !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"] :is(
-  .cvr-c-class__status-label--locked, .connect-red, .cvr-c-submission__status-label--overdue, .cvr-c-entitystatus--reported,
-  .cvr-c-status-label--reported, .connect-blue-light
-) :is(em, span, i, b, strong) {
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-class__status-label--locked em,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-class__status-label--locked span,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-class__status-label--locked i,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-class__status-label--locked b,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-class__status-label--locked strong,
+html.connectea-dark[data-connectea-tone="light"] .connect-red em, html.connectea-dark[data-connectea-tone="light"] .connect-red span,
+html.connectea-dark[data-connectea-tone="light"] .connect-red i, html.connectea-dark[data-connectea-tone="light"] .connect-red b,
+html.connectea-dark[data-connectea-tone="light"] .connect-red strong,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-submission__status-label--overdue em,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-submission__status-label--overdue span,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-submission__status-label--overdue i,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-submission__status-label--overdue b,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-submission__status-label--overdue strong,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-entitystatus--reported em,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-entitystatus--reported span,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-entitystatus--reported i,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-entitystatus--reported b,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-entitystatus--reported strong,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-status-label--reported em,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-status-label--reported span,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-status-label--reported i,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-status-label--reported b,
+html.connectea-dark[data-connectea-tone="light"] .cvr-c-status-label--reported strong,
+html.connectea-dark[data-connectea-tone="light"] .connect-blue-light em, html.connectea-dark[data-connectea-tone="light"] .connect-blue-light span,
+html.connectea-dark[data-connectea-tone="light"] .connect-blue-light i, html.connectea-dark[data-connectea-tone="light"] .connect-blue-light b,
+html.connectea-dark[data-connectea-tone="light"] .connect-blue-light strong {
   color: inherit !important;
 }
 
 /* Dialog backdrops: dark-ink glass themes brighten the page behind a dialog (detail views such as View Notice)
    instead of the navy dim the dark glass themes use (theme-tokens.css), so the dark text keeps its contrast */
-html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .v-window-modalitycurtain, .modal-backdrop, .yui3-widget-mask, .ui-widget-overlay,
-  .cdk-overlay-backdrop, .cdk-overlay-dark-backdrop, .mat-drawer-backdrop,
-  .eds-c-modal-overlay, .eds-c-overlay, .cvr-c-overlay, .cx-overlay
-) {
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-window-modalitycurtain,
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .modal-backdrop,
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .yui3-widget-mask,
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .ui-widget-overlay,
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cdk-overlay-backdrop,
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cdk-overlay-dark-backdrop,
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-drawer-backdrop,
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-modal-overlay,
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-overlay,
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-overlay,
+html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-overlay {
   background-color: rgba(255, 255, 255, 0.45) !important;
 }

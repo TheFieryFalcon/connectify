@@ -1,0 +1,184 @@
+/**
+ * Connectify Theme: tile bodies, nav lists, resource rows and high-contrast links (part 3, continued from theme-tile-bodies-2.css)
+ */
+
+.connectea-dark:not(cx-n) .cvr-c-resource a, .connectea-dark:not(cx-n) .cvr-c-resource span, .connectea-dark:not(cx-n) .cvr-c-resource p,
+.connectea-dark:not(cx-n) .cvr-c-resource div, .connectea-dark:not(cx-n) .cvr-c-resource label, .connectea-dark:not(cx-n) .cvr-c-resource strong,
+.connectea-dark:not(cx-n) .eds-c-resource a, .connectea-dark:not(cx-n) .eds-c-resource span, .connectea-dark:not(cx-n) .eds-c-resource p,
+.connectea-dark:not(cx-n) .eds-c-resource div, .connectea-dark:not(cx-n) .eds-c-resource label, .connectea-dark:not(cx-n) .eds-c-resource strong,
+.connectea-dark:not(cx-n) .help-block a, .connectea-dark:not(cx-n) .help-block span, .connectea-dark:not(cx-n) .help-block p,
+.connectea-dark:not(cx-n) .help-block div, .connectea-dark:not(cx-n) .help-block label, .connectea-dark:not(cx-n) .help-block strong,
+.connectea-dark:not(cx-n) .portlet-msg-help a, .connectea-dark:not(cx-n) .portlet-msg-help span, .connectea-dark:not(cx-n) .portlet-msg-help p,
+.connectea-dark:not(cx-n) .portlet-msg-help div, .connectea-dark:not(cx-n) .portlet-msg-help label,
+.connectea-dark:not(cx-n) .portlet-msg-help strong {
+  color: var(--cx-text-secondary, #e2e8f0) !important;
+}
+
+.connectea-dark:not(cx-n) .eds-c-nav-list .eds-c-icon, .connectea-dark:not(cx-n) .eds-c-nav-list :where(svg):not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-nav-list :where(path):not(.cx-n), .connectea-dark:not(cx-n) .eds-c-nav-list :where(circle):not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-nav-list__item .eds-c-icon, .connectea-dark:not(cx-n) .eds-c-nav-list__item :where(svg):not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-nav-list__item :where(path):not(.cx-n), .connectea-dark:not(cx-n) .eds-c-nav-list__item :where(circle):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-resource .eds-c-icon, .connectea-dark:not(cx-n) .cvr-c-resource :where(svg):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-resource :where(path):not(.cx-n), .connectea-dark:not(cx-n) .cvr-c-resource :where(circle):not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-resource .eds-c-icon, .connectea-dark:not(cx-n) .eds-c-resource :where(svg):not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-resource :where(path):not(.cx-n), .connectea-dark:not(cx-n) .eds-c-resource :where(circle):not(.cx-n) {
+  color: var(--cx-text-muted, #94a3b8) !important;
+  fill: currentColor !important;
+  stroke: none !important;
+}
+
+/* Explicit high-contrast tile and card links (Classes, Notices, Feeds, Help) */
+.connectea-dark:not(cx-n) .eds-c-tile a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *),
+.connectea-dark:not(cx-n) .cvr-c-tile a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *),
+.connectea-dark:not(cx-n) .c-tile a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *),
+.connectea-dark:not(cx-n) .eds-c-card a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *),
+.connectea-dark:not(cx-n) .cvr-c-card a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *),
+.connectea-dark:not(cx-n) .cvr-c-dashboard-card a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *) {
+  color: var(--cx-tile-link-color, var(--cx-text-primary, #f8fafc)) !important;
+}
+
+.connectea-dark:not(cx-n) .eds-c-tile a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *):hover,
+.connectea-dark:not(cx-n) .cvr-c-tile a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *):hover,
+.connectea-dark:not(cx-n) .c-tile a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *):hover,
+.connectea-dark:not(cx-n) .eds-c-card a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *):hover,
+.connectea-dark:not(cx-n) .cvr-c-card a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *):hover,
+.connectea-dark:not(cx-n) .cvr-c-dashboard-card a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *):hover {
+  color: var(--cx-accent-hover, #93c5fd) !important;
+  text-decoration: underline !important;
+}
+
+/* High contrast for class names, notice titles, and tile headings */
+.connectea-dark:not(cx-n) .eds-c-tile .eds-c-tile__title, .connectea-dark:not(cx-n) .eds-c-tile .cvr-c-tile__title,
+.connectea-dark:not(cx-n) .eds-c-tile .cvr-c-class__name, .connectea-dark:not(cx-n) .eds-c-tile .cvr-c-classes-list__title,
+.connectea-dark:not(cx-n) .eds-c-tile [class*="class-name"], .connectea-dark:not(cx-n) .eds-c-tile [class*="class-title"],
+.connectea-dark:not(cx-n) .eds-c-tile [class*="class__name"], .connectea-dark:not(cx-n) .eds-c-tile [class*="notice__title"],
+.connectea-dark:not(cx-n) .eds-c-tile [class*="feed-item__title"], .connectea-dark:not(cx-n) .eds-c-tile :where(h1):not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-tile :where(h2):not(.cx-n), .connectea-dark:not(cx-n) .eds-c-tile :where(h3):not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-tile :where(h4):not(.cx-n), .connectea-dark:not(cx-n) .cvr-c-tile .eds-c-tile__title,
+.connectea-dark:not(cx-n) .cvr-c-tile .cvr-c-tile__title, .connectea-dark:not(cx-n) .cvr-c-tile .cvr-c-class__name,
+.connectea-dark:not(cx-n) .cvr-c-tile .cvr-c-classes-list__title, .connectea-dark:not(cx-n) .cvr-c-tile [class*="class-name"],
+.connectea-dark:not(cx-n) .cvr-c-tile [class*="class-title"], .connectea-dark:not(cx-n) .cvr-c-tile [class*="class__name"],
+.connectea-dark:not(cx-n) .cvr-c-tile [class*="notice__title"], .connectea-dark:not(cx-n) .cvr-c-tile [class*="feed-item__title"],
+.connectea-dark:not(cx-n) .cvr-c-tile :where(h1):not(.cx-n), .connectea-dark:not(cx-n) .cvr-c-tile :where(h2):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-tile :where(h3):not(.cx-n), .connectea-dark:not(cx-n) .cvr-c-tile :where(h4):not(.cx-n),
+.connectea-dark:not(cx-n) .c-tile .eds-c-tile__title, .connectea-dark:not(cx-n) .c-tile .cvr-c-tile__title,
+.connectea-dark:not(cx-n) .c-tile .cvr-c-class__name, .connectea-dark:not(cx-n) .c-tile .cvr-c-classes-list__title,
+.connectea-dark:not(cx-n) .c-tile [class*="class-name"], .connectea-dark:not(cx-n) .c-tile [class*="class-title"],
+.connectea-dark:not(cx-n) .c-tile [class*="class__name"], .connectea-dark:not(cx-n) .c-tile [class*="notice__title"],
+.connectea-dark:not(cx-n) .c-tile [class*="feed-item__title"], .connectea-dark:not(cx-n) .c-tile :where(h1):not(.cx-n),
+.connectea-dark:not(cx-n) .c-tile :where(h2):not(.cx-n), .connectea-dark:not(cx-n) .c-tile :where(h3):not(.cx-n),
+.connectea-dark:not(cx-n) .c-tile :where(h4):not(.cx-n), .connectea-dark:not(cx-n) .eds-c-card .eds-c-tile__title,
+.connectea-dark:not(cx-n) .eds-c-card .cvr-c-tile__title, .connectea-dark:not(cx-n) .eds-c-card .cvr-c-class__name,
+.connectea-dark:not(cx-n) .eds-c-card .cvr-c-classes-list__title, .connectea-dark:not(cx-n) .eds-c-card [class*="class-name"],
+.connectea-dark:not(cx-n) .eds-c-card [class*="class-title"], .connectea-dark:not(cx-n) .eds-c-card [class*="class__name"],
+.connectea-dark:not(cx-n) .eds-c-card [class*="notice__title"], .connectea-dark:not(cx-n) .eds-c-card [class*="feed-item__title"],
+.connectea-dark:not(cx-n) .eds-c-card :where(h1):not(.cx-n), .connectea-dark:not(cx-n) .eds-c-card :where(h2):not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-card :where(h3):not(.cx-n), .connectea-dark:not(cx-n) .eds-c-card :where(h4):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-card .eds-c-tile__title, .connectea-dark:not(cx-n) .cvr-c-card .cvr-c-tile__title,
+.connectea-dark:not(cx-n) .cvr-c-card .cvr-c-class__name, .connectea-dark:not(cx-n) .cvr-c-card .cvr-c-classes-list__title,
+.connectea-dark:not(cx-n) .cvr-c-card [class*="class-name"], .connectea-dark:not(cx-n) .cvr-c-card [class*="class-title"],
+.connectea-dark:not(cx-n) .cvr-c-card [class*="class__name"], .connectea-dark:not(cx-n) .cvr-c-card [class*="notice__title"],
+.connectea-dark:not(cx-n) .cvr-c-card [class*="feed-item__title"], .connectea-dark:not(cx-n) .cvr-c-card :where(h1):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-card :where(h2):not(.cx-n), .connectea-dark:not(cx-n) .cvr-c-card :where(h3):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-card :where(h4):not(.cx-n), .connectea-dark:not(cx-n) .cvr-c-dashboard-card .eds-c-tile__title,
+.connectea-dark:not(cx-n) .cvr-c-dashboard-card .cvr-c-tile__title, .connectea-dark:not(cx-n) .cvr-c-dashboard-card .cvr-c-class__name,
+.connectea-dark:not(cx-n) .cvr-c-dashboard-card .cvr-c-classes-list__title, .connectea-dark:not(cx-n) .cvr-c-dashboard-card [class*="class-name"],
+.connectea-dark:not(cx-n) .cvr-c-dashboard-card [class*="class-title"], .connectea-dark:not(cx-n) .cvr-c-dashboard-card [class*="class__name"],
+.connectea-dark:not(cx-n) .cvr-c-dashboard-card [class*="notice__title"], .connectea-dark:not(cx-n) .cvr-c-dashboard-card [class*="feed-item__title"],
+.connectea-dark:not(cx-n) .cvr-c-dashboard-card :where(h1):not(.cx-n), .connectea-dark:not(cx-n) .cvr-c-dashboard-card :where(h2):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-dashboard-card :where(h3):not(.cx-n), .connectea-dark:not(cx-n) .cvr-c-dashboard-card :where(h4):not(.cx-n) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+  font-weight: 700 !important;
+}
+
+.connectea-dark:not(cx-n) .eds-c-caption:not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark:not(cx-n) .v-label.eds-c-caption:not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) .v-caption:not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark:not(cx-n) :is(.eds-c-tile .eds-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-tile .cvr-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-tile .cvr-c-class__code):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-tile .cvr-c-class__teacher):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-tile .cvr-c-class__details):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-tile [class*="teacher"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-tile [class*="code"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-tile [class*="subtitle"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-tile [class*="meta"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-tile [class*="date"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-tile :where(small):not(.cx-n)):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile .eds-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile .cvr-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile .cvr-c-class__code):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile .cvr-c-class__teacher):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile .cvr-c-class__details):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile [class*="teacher"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile [class*="code"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile [class*="subtitle"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile [class*="meta"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile [class*="date"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-tile :where(small):not(.cx-n)):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile .eds-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile .cvr-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile .cvr-c-class__code):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile .cvr-c-class__teacher):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile .cvr-c-class__details):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile [class*="teacher"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile [class*="code"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile [class*="subtitle"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile [class*="meta"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile [class*="date"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.c-tile :where(small):not(.cx-n)):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card .eds-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card .cvr-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card .cvr-c-class__code):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card .cvr-c-class__teacher):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card .cvr-c-class__details):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card [class*="teacher"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card [class*="code"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card [class*="subtitle"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card [class*="meta"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card [class*="date"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.eds-c-card :where(small):not(.cx-n)):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card .eds-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card .cvr-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card .cvr-c-class__code):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card .cvr-c-class__teacher):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card .cvr-c-class__details):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card [class*="teacher"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card [class*="code"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card [class*="subtitle"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card [class*="meta"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card [class*="date"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-card :where(small):not(.cx-n)):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card .eds-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card .cvr-c-tile__caption):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card .cvr-c-class__code):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card .cvr-c-class__teacher):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card .cvr-c-class__details):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card [class*="teacher"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card [class*="code"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card [class*="subtitle"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card [class*="meta"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card [class*="date"]):not(#connectify-sidebar *),
+.connectea-dark:not(cx-n) :is(.cvr-c-dashboard-card :where(small):not(.cx-n)):not(#connectify-sidebar *) {
+  color: var(--cx-text-muted, #94a3b8) !important;
+}
+
+.connectea-dark .eds-c-tile__footer {
+  border-top: 1px solid var(--cx-border, #2e3c4e) !important;
+}
+
+#ng-zone__classes-metrics-summary {
+  display: block !important;
+  background-color: var(--cx-card-bg, #ffffff) !important;
+  border: 1px solid var(--cx-border, #e2e8f0) !important;
+  box-shadow: var(--cx-card-shadow, 0 1px 3px rgba(0, 0, 0, 0.08)) !important;
+  padding: 16px !important;
+  margin-bottom: 24px !important;
+  box-sizing: border-box !important;
+}
+
+.connectea-dark #ng-zone__classes-metrics-summary {
+  background-color: var(--cx-surface-bg, #1a222d) !important;
+  border-color: var(--cx-border, #314256) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}

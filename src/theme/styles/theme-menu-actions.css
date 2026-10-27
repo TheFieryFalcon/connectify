@@ -9,7 +9,7 @@
   flex-shrink: 0;
 }
 
-#connectea-theme-menu :is(.connectea-theme-edit-btn, .connectea-theme-delete-btn) {
+#connectea-theme-menu .connectea-theme-edit-btn, #connectea-theme-menu .connectea-theme-delete-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;

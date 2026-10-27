@@ -1,0 +1,72 @@
+/**
+ * Connectify Theme: circular, primary, secondary, expand/collapse and back-to-top buttons (part 2, continued from theme-action-buttons.css)
+ */
+
+/* Floating Expand / Collapse Buttons (#cx-expand-btn) */
+.connectea-dark #cx-expand-btn button {
+  background-color: var(--cx-surface-secondary, #24303f) !important;
+  color: var(--cx-text-primary, #e2e8f0) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
+}
+
+.connectea-dark #cx-expand-btn button:hover {
+  background-color: var(--cx-surface-hover, #2e3c4e) !important;
+  border-color: var(--cx-border-hover, #607996) !important;
+}
+
+/* Bulk Expansion Animated Loading Progress Pill in Dark Mode */
+.connectea-dark:not(cx-n) #cx-expand-progress, .connectea-dark:not(cx-n) :where(.cx-expand-progress-pill):not(#cx-n) {
+  background: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: var(--cx-border-subtle, #2e3c4e) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38) !important;
+}
+
+.connectea-dark:not(cx-n) .cx-expand-spinner {
+  border-color: var(--cx-accent, #3b82f6) !important;
+  border-top-color: transparent !important;
+}
+
+.connectea-dark:not(cx-n) .cx-expand-label {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark:not(cx-n) .cx-expand-track {
+  background: var(--cx-canvas-bg, #12171f) !important;
+  border-color: var(--cx-border, #2e3c4e) !important;
+}
+
+.connectea-dark:not(cx-n) .cx-expand-bar {
+  background: linear-gradient(90deg, var(--cx-accent, #3b82f6), var(--cx-accent-hover, #60a5fa)) !important;
+}
+
+/* Back to Top Button in Dark Mode (.cx-back-to-top-btn) */
+.connectea-dark .cx-back-to-top-btn {
+  background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  border: 1px solid var(--cx-border, #455a73) !important;
+  border-radius: 6px !important;
+  padding: 6px 14px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+}
+
+.connectea-dark .cx-back-to-top-btn:hover {
+  background-color: var(--cx-surface-hover, #2c3b4e) !important;
+  border-color: var(--cx-border-hover, #5d7899) !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* The service bar's "+" (cnt-navigation-reveal-menu): Connect paints the circle in the class colour; it takes the
+   theme's primary button colours instead, keeping its native 32px circle. Connect's class-colour rule
+   (.eds.cvr.ngm .connect-purple .bg-primary) is !important, so an id weight (:not(#cx-n), which every element passes) outranks it */
+.connectea-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm {
+  background-color: var(--cx-button-primary-bg, #2563eb) !important;
+  color: var(--cx-button-primary-text, #ffffff) !important;
+}
+
+.connectea-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm cnt-icon,
+.connectea-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm mat-icon {
+  color: var(--cx-button-primary-text, #ffffff) !important;
+}

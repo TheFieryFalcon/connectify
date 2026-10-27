@@ -2,6 +2,9 @@
  * Connectify Theme: icon-only buttons keep Connect's native padding and glyph metrics;
  * only their colours follow the theme (padding/size on them offsets the webfont glyph).
  */
-.connectea-dark :is(.v-button, .eds-c-button, .cvr-c-button, .btn)[class*="icon"]:not(#connectify-sidebar *):not(.cvr-c-header *) {
+.connectea-dark .v-button[class*="icon"]:not(#connectify-sidebar *):not(.cvr-c-header *),
+.connectea-dark .eds-c-button[class*="icon"]:not(#connectify-sidebar *):not(.cvr-c-header *),
+.connectea-dark .cvr-c-button[class*="icon"]:not(#connectify-sidebar *):not(.cvr-c-header *),
+.connectea-dark .btn[class*="icon"]:not(#connectify-sidebar *):not(.cvr-c-header *) {
   color: var(--cx-button-text, var(--cx-text-primary, #f1f5f9)) !important;
 }

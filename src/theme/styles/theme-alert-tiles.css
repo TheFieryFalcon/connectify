@@ -3,35 +3,35 @@
  * red identity in every dark theme. Native: `__header--negative` is tinted #f4e8e8, the important header has a
  * #9d000b divider and the `.eds-t-red` icons are #9d000b. Generic tile rules (theme-tiles.css) clear every
  * coloured header and theme-glyphs.css inks every icon (incl. -webkit-text-fill-color), so these outrank them with
- * #cx-specificity-anchor. Status colours stay literal (semantic).
+ * an id weight (:not(#cx-n), which every element passes). Status colours stay literal (semantic).
  */
 
 /* Solid dark themes and Liquid Tinted Glass: translucent red tint, a red divider and light red icons (>= 5:1) */
-html.connectea-dark[data-connectea-theme] :is(#cx-specificity-anchor, .eds-c-tile__header--negative) {
+html.connectea-dark[data-connectea-theme] :where(.eds-c-tile__header--negative):not(#cx-n) {
   background-color: color-mix(in srgb, #dc2626 16%, transparent) !important;
 }
 
-html.connectea-dark[data-connectea-theme] :is(#cx-specificity-anchor, .eds-c-tile--important > .eds-c-tile__header) {
+html.connectea-dark[data-connectea-theme] :where(.eds-c-tile--important > .eds-c-tile__header):not(#cx-n) {
   border-bottom-color: #dc2626 !important;
 }
 
-html.connectea-dark[data-connectea-theme] .eds-c-tile--important :is(#cx-specificity-anchor, .cvr-c-icon.eds-t-red),
-html.connectea-dark[data-connectea-theme] .eds-c-tile--important :is(#cx-specificity-anchor, .cvr-c-icon.eds-t-red)::before {
+html.connectea-dark[data-connectea-theme] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n),
+html.connectea-dark[data-connectea-theme] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n)::before {
   color: #f87171 !important;
   -webkit-text-fill-color: #f87171 !important;
 }
 
 /* Light tone (grey Liquid Glass, light custom themes): Connect's own red on the light glass */
-html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .eds-c-tile__header--negative) {
+html.connectea-dark[data-connectea-tone="light"] :where(.eds-c-tile__header--negative):not(#cx-n) {
   background-color: color-mix(in srgb, #9d000b 10%, transparent) !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .eds-c-tile--important > .eds-c-tile__header) {
+html.connectea-dark[data-connectea-tone="light"] :where(.eds-c-tile--important > .eds-c-tile__header):not(#cx-n) {
   border-bottom-color: #9d000b !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"] .eds-c-tile--important :is(#cx-specificity-anchor, .cvr-c-icon.eds-t-red),
-html.connectea-dark[data-connectea-tone="light"] .eds-c-tile--important :is(#cx-specificity-anchor, .cvr-c-icon.eds-t-red)::before {
+html.connectea-dark[data-connectea-tone="light"] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n),
+html.connectea-dark[data-connectea-tone="light"] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n)::before {
   color: #9d000b !important;
   -webkit-text-fill-color: #9d000b !important;
 }

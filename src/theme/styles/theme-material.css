@@ -5,7 +5,7 @@
 /* --------------------------------------------------------------------------
    14. Cards, Popups, Modals & Material Panels
    -------------------------------------------------------------------------- */
-.connectea-dark :is(.mat-card, .v-window, .v-window-contents, .mat-dialog-container) {
+.connectea-dark .mat-card, .connectea-dark .v-window, .connectea-dark .v-window-contents, .connectea-dark .mat-dialog-container {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
@@ -16,37 +16,62 @@
   box-shadow: none !important;
 }
 
-.connectea-dark :is(th, td) {
+.connectea-dark th, .connectea-dark td {
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark #main-content :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell),
-.connectea-dark :is(.mat-header-cell, .mat-footer-cell, .mat-mdc-header-cell, .mat-mdc-footer-cell) {
+.connectea-dark #main-content .mat-header-cell, .connectea-dark #main-content .mat-footer-cell, .connectea-dark #main-content .mat-mdc-header-cell,
+.connectea-dark #main-content .mat-mdc-footer-cell, .connectea-dark .mat-header-cell, .connectea-dark .mat-footer-cell,
+.connectea-dark .mat-mdc-header-cell, .connectea-dark .mat-mdc-footer-cell {
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-.connectea-dark :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]),
-.connectea-dark:not(cx-n) .eds.cvr.ngm :is(.mat-icon, [data-mat-icon-type], cnt-icon, .mat-icon-no-color, .mat-ligature-font, mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, .eds-c-button--primary, .v-button--primary, .cvr-c-primary-navigation, .cvr-c-primary-menu, .c-primary-menu, .bg-primary, .text-primary) *) {
+.connectea-dark .mat-icon:not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]),
+.connectea-dark [data-mat-icon-type]:not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]),
+.connectea-dark :where(cnt-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(.cx-n),
+.connectea-dark .mat-icon-no-color:not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]),
+.connectea-dark .mat-ligature-font:not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]),
+.connectea-dark :where(mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(.cx-n),
+.connectea-dark:not(cx-n) .eds.cvr.ngm .mat-icon:not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, .eds-c-button--primary, .v-button--primary, .cvr-c-primary-navigation, .cvr-c-primary-menu, .c-primary-menu, .bg-primary, .text-primary) *),
+.connectea-dark:not(cx-n) .eds.cvr.ngm [data-mat-icon-type]:not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, .eds-c-button--primary, .v-button--primary, .cvr-c-primary-navigation, .cvr-c-primary-menu, .c-primary-menu, .bg-primary, .text-primary) *),
+.connectea-dark:not(cx-n) .eds.cvr.ngm :where(cnt-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, .eds-c-button--primary, .v-button--primary, .cvr-c-primary-navigation, .cvr-c-primary-menu, .c-primary-menu, .bg-primary, .text-primary) *):not(.cx-n),
+.connectea-dark:not(cx-n) .eds.cvr.ngm .mat-icon-no-color:not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, .eds-c-button--primary, .v-button--primary, .cvr-c-primary-navigation, .cvr-c-primary-menu, .c-primary-menu, .bg-primary, .text-primary) *),
+.connectea-dark:not(cx-n) .eds.cvr.ngm .mat-ligature-font:not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, .eds-c-button--primary, .v-button--primary, .cvr-c-primary-navigation, .cvr-c-primary-menu, .c-primary-menu, .bg-primary, .text-primary) *),
+.connectea-dark:not(cx-n) .eds.cvr.ngm :where(mat-icon):not([data-original-color]):not(.mat-primary):not(.mat-accent):not(.mat-warn):not([class*="primary"]):not([class*="accent"]):not(:is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, cnt-floating-form-field-button, .eds-c-button--primary, .v-button--primary, .cvr-c-primary-navigation, .cvr-c-primary-menu, .c-primary-menu, .bg-primary, .text-primary) *):not(.cx-n) {
   color: var(--cx-text-primary, #f1f5f9) !important;
   fill: currentColor !important;
 }
 
-.connectea-dark:not(cx-n) :is(.mat-primary, .mat-accent, .mat-warn, .mat-raised-button, .mat-flat-button, .eds-c-button--primary, .v-button--primary, .cvr-c-primary-navigation, .cvr-c-primary-menu, .c-primary-menu, .bg-primary, .text-primary, cnt-floating-form-field-button) :is(.mat-icon, mat-icon, cnt-icon) {
+.connectea-dark:not(cx-n) .mat-primary .mat-icon, .connectea-dark:not(cx-n) .mat-primary :where(mat-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-primary :where(cnt-icon):not(.cx-n), .connectea-dark:not(cx-n) .mat-accent .mat-icon,
+.connectea-dark:not(cx-n) .mat-accent :where(mat-icon):not(.cx-n), .connectea-dark:not(cx-n) .mat-accent :where(cnt-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-warn .mat-icon, .connectea-dark:not(cx-n) .mat-warn :where(mat-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-warn :where(cnt-icon):not(.cx-n), .connectea-dark:not(cx-n) .mat-raised-button .mat-icon,
+.connectea-dark:not(cx-n) .mat-raised-button :where(mat-icon):not(.cx-n), .connectea-dark:not(cx-n) .mat-raised-button :where(cnt-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-flat-button .mat-icon, .connectea-dark:not(cx-n) .mat-flat-button :where(mat-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-flat-button :where(cnt-icon):not(.cx-n), .connectea-dark:not(cx-n) .eds-c-button--primary .mat-icon,
+.connectea-dark:not(cx-n) .eds-c-button--primary :where(mat-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-button--primary :where(cnt-icon):not(.cx-n), .connectea-dark:not(cx-n) .v-button--primary .mat-icon,
+.connectea-dark:not(cx-n) .v-button--primary :where(mat-icon):not(.cx-n), .connectea-dark:not(cx-n) .v-button--primary :where(cnt-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-primary-navigation .mat-icon, .connectea-dark:not(cx-n) .cvr-c-primary-navigation :where(mat-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-primary-navigation :where(cnt-icon):not(.cx-n), .connectea-dark:not(cx-n) .cvr-c-primary-menu .mat-icon,
+.connectea-dark:not(cx-n) .cvr-c-primary-menu :where(mat-icon):not(.cx-n), .connectea-dark:not(cx-n) .cvr-c-primary-menu :where(cnt-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .c-primary-menu .mat-icon, .connectea-dark:not(cx-n) .c-primary-menu :where(mat-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .c-primary-menu :where(cnt-icon):not(.cx-n), .connectea-dark:not(cx-n) .bg-primary .mat-icon,
+.connectea-dark:not(cx-n) .bg-primary :where(mat-icon):not(.cx-n), .connectea-dark:not(cx-n) .bg-primary :where(cnt-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .text-primary .mat-icon, .connectea-dark:not(cx-n) .text-primary :where(mat-icon):not(.cx-n),
+.connectea-dark:not(cx-n) .text-primary :where(cnt-icon):not(.cx-n),
+.connectea-dark:not(cx-n) :where(cnt-floating-form-field-button):not(.cx-n) .mat-icon,
+.connectea-dark:not(cx-n) :where(cnt-floating-form-field-button):not(.cx-n) :where(mat-icon):not(.cx-n),
+.connectea-dark:not(cx-n) :where(cnt-floating-form-field-button):not(.cx-n) :where(cnt-icon):not(.cx-n) {
   color: var(--cx-accent-text, inherit) !important;
   fill: currentColor !important;
 }
 
 /* Angular Material Accordions, Expansion Panels & Tree Nodes (Site-Wide & Classes Page) */
-.connectea-dark :is(
-  .mat-accordion,
-  .mat-expansion-panel,
-  .mat-expansion-panel-header,
-  .mat-expansion-panel-body,
-  .mat-expansion-panel-content,
-  .mat-tree,
-  .mat-tree-node,
-  .mat-nested-tree-node
-) {
+.connectea-dark .mat-accordion, .connectea-dark .mat-expansion-panel, .connectea-dark .mat-expansion-panel-header,
+.connectea-dark .mat-expansion-panel-body, .connectea-dark .mat-expansion-panel-content, .connectea-dark .mat-tree, .connectea-dark .mat-tree-node,
+.connectea-dark .mat-nested-tree-node {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-color: var(--cx-border, #3d5066) !important;
@@ -57,16 +82,12 @@
   border-radius: 0 !important;
 }
 
-.connectea-dark :is(.mat-expansion-panel-header, .mat-tree-node):hover {
+.connectea-dark .mat-expansion-panel-header:hover, .connectea-dark .mat-tree-node:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
 }
 
-.connectea-dark :is(
-  .mat-expansion-panel-header-title,
-  .mat-expansion-panel-header-description,
-  .mat-panel-title,
-  .mat-panel-description
-) {
+.connectea-dark .mat-expansion-panel-header-title, .connectea-dark .mat-expansion-panel-header-description, .connectea-dark .mat-panel-title,
+.connectea-dark .mat-panel-description {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
@@ -76,95 +97,147 @@
 }
 
 /* Material Lists & Category Menus (Classes, Side Drawers, etc.) */
-.connectea-dark :is(
-  .c-category-menu,
-  .cvr-c-category-menu,
-  .cvr-c-category-menu__wrapper,
-  .cvr-c-category-menu__list,
-  .mat-list,
-  .mat-action-list,
-  .mat-nav-list,
-  .mat-selection-list
-) {
+.connectea-dark .c-category-menu, .connectea-dark .cvr-c-category-menu, .connectea-dark .cvr-c-category-menu__wrapper,
+.connectea-dark .cvr-c-category-menu__list, .connectea-dark .mat-list, .connectea-dark .mat-action-list, .connectea-dark .mat-nav-list,
+.connectea-dark .mat-selection-list {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark :is(
-  .c-category-menu,
-  .cvr-c-category-menu,
-  .mat-list,
-  .mat-action-list,
-  .mat-nav-list,
-  .mat-selection-list
-) :is(.mat-list-item, .mat-mdc-list-item) {
+.connectea-dark .c-category-menu .mat-list-item, .connectea-dark .c-category-menu .mat-mdc-list-item,
+.connectea-dark .cvr-c-category-menu .mat-list-item, .connectea-dark .cvr-c-category-menu .mat-mdc-list-item,
+.connectea-dark .mat-list .mat-list-item, .connectea-dark .mat-list .mat-mdc-list-item, .connectea-dark .mat-action-list .mat-list-item,
+.connectea-dark .mat-action-list .mat-mdc-list-item, .connectea-dark .mat-nav-list .mat-list-item, .connectea-dark .mat-nav-list .mat-mdc-list-item,
+.connectea-dark .mat-selection-list .mat-list-item, .connectea-dark .mat-selection-list .mat-mdc-list-item {
   background-color: transparent !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-bottom-color: var(--cx-border-subtle, #2a3749) !important;
 }
 
-.connectea-dark :is(
-  .c-category-menu,
-  .cvr-c-category-menu,
-  .mat-list,
-  .mat-action-list,
-  .mat-nav-list,
-  .mat-selection-list
-) :is(.mat-list-item, .mat-mdc-list-item):hover {
+.connectea-dark .c-category-menu .mat-list-item:hover, .connectea-dark .c-category-menu .mat-mdc-list-item:hover,
+.connectea-dark .cvr-c-category-menu .mat-list-item:hover, .connectea-dark .cvr-c-category-menu .mat-mdc-list-item:hover,
+.connectea-dark .mat-list .mat-list-item:hover, .connectea-dark .mat-list .mat-mdc-list-item:hover,
+.connectea-dark .mat-action-list .mat-list-item:hover, .connectea-dark .mat-action-list .mat-mdc-list-item:hover,
+.connectea-dark .mat-nav-list .mat-list-item:hover, .connectea-dark .mat-nav-list .mat-mdc-list-item:hover,
+.connectea-dark .mat-selection-list .mat-list-item:hover, .connectea-dark .mat-selection-list .mat-mdc-list-item:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
 }
 
-.connectea-dark :is(
-  .c-category-menu,
-  .cvr-c-category-menu,
-  .cvr-c-classes-menu,
-  .cvr-c-side-menu,
-  .eds-c-nav-list,
-  .mat-list,
-  .mat-action-list,
-  .mat-nav-list,
-  .mat-selection-list,
-  .cvr-c-navigation,
-  .cvr-c-drawer
-) :is(
-  .mat-list-item,
-  .mat-mdc-list-item,
-  .mat-list-item-content,
-  .mat-list-text,
-  .mat-line,
-  .eds-c-nav-list__item,
-  .v-tree-node,
-  a,
-  span,
-  div,
-  p,
-  label
-) {
+.connectea-dark .c-category-menu .mat-list-item, .connectea-dark .c-category-menu .mat-mdc-list-item,
+.connectea-dark .c-category-menu .mat-list-item-content, .connectea-dark .c-category-menu .mat-list-text, .connectea-dark .c-category-menu .mat-line,
+.connectea-dark .c-category-menu .eds-c-nav-list__item, .connectea-dark .c-category-menu .v-tree-node,
+.connectea-dark .c-category-menu :where(a):not(.cx-n), .connectea-dark .c-category-menu :where(span):not(.cx-n),
+.connectea-dark .c-category-menu :where(div):not(.cx-n), .connectea-dark .c-category-menu :where(p):not(.cx-n),
+.connectea-dark .c-category-menu :where(label):not(.cx-n), .connectea-dark .cvr-c-category-menu .mat-list-item,
+.connectea-dark .cvr-c-category-menu .mat-mdc-list-item, .connectea-dark .cvr-c-category-menu .mat-list-item-content,
+.connectea-dark .cvr-c-category-menu .mat-list-text, .connectea-dark .cvr-c-category-menu .mat-line,
+.connectea-dark .cvr-c-category-menu .eds-c-nav-list__item, .connectea-dark .cvr-c-category-menu .v-tree-node,
+.connectea-dark .cvr-c-category-menu :where(a):not(.cx-n), .connectea-dark .cvr-c-category-menu :where(span):not(.cx-n),
+.connectea-dark .cvr-c-category-menu :where(div):not(.cx-n), .connectea-dark .cvr-c-category-menu :where(p):not(.cx-n),
+.connectea-dark .cvr-c-category-menu :where(label):not(.cx-n), .connectea-dark .cvr-c-classes-menu .mat-list-item,
+.connectea-dark .cvr-c-classes-menu .mat-mdc-list-item, .connectea-dark .cvr-c-classes-menu .mat-list-item-content,
+.connectea-dark .cvr-c-classes-menu .mat-list-text, .connectea-dark .cvr-c-classes-menu .mat-line,
+.connectea-dark .cvr-c-classes-menu .eds-c-nav-list__item, .connectea-dark .cvr-c-classes-menu .v-tree-node,
+.connectea-dark .cvr-c-classes-menu :where(a):not(.cx-n), .connectea-dark .cvr-c-classes-menu :where(span):not(.cx-n),
+.connectea-dark .cvr-c-classes-menu :where(div):not(.cx-n), .connectea-dark .cvr-c-classes-menu :where(p):not(.cx-n),
+.connectea-dark .cvr-c-classes-menu :where(label):not(.cx-n), .connectea-dark .cvr-c-side-menu .mat-list-item,
+.connectea-dark .cvr-c-side-menu .mat-mdc-list-item, .connectea-dark .cvr-c-side-menu .mat-list-item-content,
+.connectea-dark .cvr-c-side-menu .mat-list-text, .connectea-dark .cvr-c-side-menu .mat-line, .connectea-dark .cvr-c-side-menu .eds-c-nav-list__item,
+.connectea-dark .cvr-c-side-menu .v-tree-node, .connectea-dark .cvr-c-side-menu :where(a):not(.cx-n),
+.connectea-dark .cvr-c-side-menu :where(span):not(.cx-n), .connectea-dark .cvr-c-side-menu :where(div):not(.cx-n),
+.connectea-dark .cvr-c-side-menu :where(p):not(.cx-n), .connectea-dark .cvr-c-side-menu :where(label):not(.cx-n),
+.connectea-dark .eds-c-nav-list .mat-list-item, .connectea-dark .eds-c-nav-list .mat-mdc-list-item,
+.connectea-dark .eds-c-nav-list .mat-list-item-content, .connectea-dark .eds-c-nav-list .mat-list-text, .connectea-dark .eds-c-nav-list .mat-line,
+.connectea-dark .eds-c-nav-list .eds-c-nav-list__item, .connectea-dark .eds-c-nav-list .v-tree-node,
+.connectea-dark .eds-c-nav-list :where(a):not(.cx-n), .connectea-dark .eds-c-nav-list :where(span):not(.cx-n),
+.connectea-dark .eds-c-nav-list :where(div):not(.cx-n), .connectea-dark .eds-c-nav-list :where(p):not(.cx-n),
+.connectea-dark .eds-c-nav-list :where(label):not(.cx-n), .connectea-dark .mat-list .mat-list-item, .connectea-dark .mat-list .mat-mdc-list-item,
+.connectea-dark .mat-list .mat-list-item-content, .connectea-dark .mat-list .mat-list-text, .connectea-dark .mat-list .mat-line,
+.connectea-dark .mat-list .eds-c-nav-list__item, .connectea-dark .mat-list .v-tree-node, .connectea-dark .mat-list :where(a):not(.cx-n),
+.connectea-dark .mat-list :where(span):not(.cx-n), .connectea-dark .mat-list :where(div):not(.cx-n), .connectea-dark .mat-list :where(p):not(.cx-n),
+.connectea-dark .mat-list :where(label):not(.cx-n), .connectea-dark .mat-action-list .mat-list-item,
+.connectea-dark .mat-action-list .mat-mdc-list-item, .connectea-dark .mat-action-list .mat-list-item-content,
+.connectea-dark .mat-action-list .mat-list-text, .connectea-dark .mat-action-list .mat-line, .connectea-dark .mat-action-list .eds-c-nav-list__item,
+.connectea-dark .mat-action-list .v-tree-node, .connectea-dark .mat-action-list :where(a):not(.cx-n),
+.connectea-dark .mat-action-list :where(span):not(.cx-n), .connectea-dark .mat-action-list :where(div):not(.cx-n),
+.connectea-dark .mat-action-list :where(p):not(.cx-n), .connectea-dark .mat-action-list :where(label):not(.cx-n),
+.connectea-dark .mat-nav-list .mat-list-item, .connectea-dark .mat-nav-list .mat-mdc-list-item, .connectea-dark .mat-nav-list .mat-list-item-content,
+.connectea-dark .mat-nav-list .mat-list-text, .connectea-dark .mat-nav-list .mat-line, .connectea-dark .mat-nav-list .eds-c-nav-list__item,
+.connectea-dark .mat-nav-list .v-tree-node, .connectea-dark .mat-nav-list :where(a):not(.cx-n), .connectea-dark .mat-nav-list :where(span):not(.cx-n),
+.connectea-dark .mat-nav-list :where(div):not(.cx-n), .connectea-dark .mat-nav-list :where(p):not(.cx-n),
+.connectea-dark .mat-nav-list :where(label):not(.cx-n), .connectea-dark .mat-selection-list .mat-list-item,
+.connectea-dark .mat-selection-list .mat-mdc-list-item, .connectea-dark .mat-selection-list .mat-list-item-content,
+.connectea-dark .mat-selection-list .mat-list-text, .connectea-dark .mat-selection-list .mat-line,
+.connectea-dark .mat-selection-list .eds-c-nav-list__item, .connectea-dark .mat-selection-list .v-tree-node,
+.connectea-dark .mat-selection-list :where(a):not(.cx-n), .connectea-dark .mat-selection-list :where(span):not(.cx-n),
+.connectea-dark .mat-selection-list :where(div):not(.cx-n), .connectea-dark .mat-selection-list :where(p):not(.cx-n),
+.connectea-dark .mat-selection-list :where(label):not(.cx-n), .connectea-dark .cvr-c-navigation .mat-list-item,
+.connectea-dark .cvr-c-navigation .mat-mdc-list-item, .connectea-dark .cvr-c-navigation .mat-list-item-content,
+.connectea-dark .cvr-c-navigation .mat-list-text, .connectea-dark .cvr-c-navigation .mat-line,
+.connectea-dark .cvr-c-navigation .eds-c-nav-list__item, .connectea-dark .cvr-c-navigation .v-tree-node,
+.connectea-dark .cvr-c-navigation :where(a):not(.cx-n), .connectea-dark .cvr-c-navigation :where(span):not(.cx-n),
+.connectea-dark .cvr-c-navigation :where(div):not(.cx-n), .connectea-dark .cvr-c-navigation :where(p):not(.cx-n),
+.connectea-dark .cvr-c-navigation :where(label):not(.cx-n), .connectea-dark .cvr-c-drawer .mat-list-item,
+.connectea-dark .cvr-c-drawer .mat-mdc-list-item, .connectea-dark .cvr-c-drawer .mat-list-item-content, .connectea-dark .cvr-c-drawer .mat-list-text,
+.connectea-dark .cvr-c-drawer .mat-line, .connectea-dark .cvr-c-drawer .eds-c-nav-list__item, .connectea-dark .cvr-c-drawer .v-tree-node,
+.connectea-dark .cvr-c-drawer :where(a):not(.cx-n), .connectea-dark .cvr-c-drawer :where(span):not(.cx-n),
+.connectea-dark .cvr-c-drawer :where(div):not(.cx-n), .connectea-dark .cvr-c-drawer :where(p):not(.cx-n),
+.connectea-dark .cvr-c-drawer :where(label):not(.cx-n) {
   color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
-.connectea-dark :is(
-  .c-category-menu,
-  .cvr-c-category-menu,
-  .cvr-c-classes-menu,
-  .cvr-c-side-menu,
-  .eds-c-nav-list,
-  .mat-list,
-  .mat-action-list,
-  .mat-nav-list,
-  .mat-selection-list
-) :is(
-  .mat-list-item,
-  .mat-mdc-list-item,
-  .eds-c-nav-list__item,
-  a
-):hover :is(span, div, p, label, .mat-line, .mat-list-text) {
+.connectea-dark .c-category-menu .mat-list-item:hover :where(span):not(.cx-n),
+.connectea-dark .c-category-menu .mat-list-item:hover :where(div):not(.cx-n),
+.connectea-dark .c-category-menu .mat-list-item:hover :where(p):not(.cx-n),
+.connectea-dark .c-category-menu .mat-list-item:hover :where(label):not(.cx-n), .connectea-dark .c-category-menu .mat-list-item:hover .mat-line,
+.connectea-dark .c-category-menu .mat-list-item:hover .mat-list-text,
+.connectea-dark .c-category-menu .mat-mdc-list-item:hover :where(span):not(.cx-n),
+.connectea-dark .c-category-menu .mat-mdc-list-item:hover :where(div):not(.cx-n),
+.connectea-dark .c-category-menu .mat-mdc-list-item:hover :where(p):not(.cx-n),
+.connectea-dark .c-category-menu .mat-mdc-list-item:hover :where(label):not(.cx-n),
+.connectea-dark .c-category-menu .mat-mdc-list-item:hover .mat-line, .connectea-dark .c-category-menu .mat-mdc-list-item:hover .mat-list-text,
+.connectea-dark .c-category-menu .eds-c-nav-list__item:hover :where(span):not(.cx-n),
+.connectea-dark .c-category-menu .eds-c-nav-list__item:hover :where(div):not(.cx-n),
+.connectea-dark .c-category-menu .eds-c-nav-list__item:hover :where(p):not(.cx-n),
+.connectea-dark .c-category-menu .eds-c-nav-list__item:hover :where(label):not(.cx-n),
+.connectea-dark .c-category-menu .eds-c-nav-list__item:hover .mat-line, .connectea-dark .c-category-menu .eds-c-nav-list__item:hover .mat-list-text,
+.connectea-dark .c-category-menu :where(a):hover:not(.cx-n) :where(span):not(.cx-n),
+.connectea-dark .c-category-menu :where(a):hover:not(.cx-n) :where(div):not(.cx-n),
+.connectea-dark .c-category-menu :where(a):hover:not(.cx-n) :where(p):not(.cx-n),
+.connectea-dark .c-category-menu :where(a):hover:not(.cx-n) :where(label):not(.cx-n),
+.connectea-dark .c-category-menu :where(a):hover:not(.cx-n) .mat-line, .connectea-dark .c-category-menu :where(a):hover:not(.cx-n) .mat-list-text,
+.connectea-dark .cvr-c-category-menu .mat-list-item:hover :where(span):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .mat-list-item:hover :where(div):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .mat-list-item:hover :where(p):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .mat-list-item:hover :where(label):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .mat-list-item:hover .mat-line, .connectea-dark .cvr-c-category-menu .mat-list-item:hover .mat-list-text,
+.connectea-dark .cvr-c-category-menu .mat-mdc-list-item:hover :where(span):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .mat-mdc-list-item:hover :where(div):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .mat-mdc-list-item:hover :where(p):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .mat-mdc-list-item:hover :where(label):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .mat-mdc-list-item:hover .mat-line, .connectea-dark .cvr-c-category-menu .mat-mdc-list-item:hover .mat-list-text,
+.connectea-dark .cvr-c-category-menu .eds-c-nav-list__item:hover :where(span):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .eds-c-nav-list__item:hover :where(div):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .eds-c-nav-list__item:hover :where(p):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .eds-c-nav-list__item:hover :where(label):not(.cx-n),
+.connectea-dark .cvr-c-category-menu .eds-c-nav-list__item:hover .mat-line,
+.connectea-dark .cvr-c-category-menu .eds-c-nav-list__item:hover .mat-list-text,
+.connectea-dark .cvr-c-category-menu :where(a):hover:not(.cx-n) :where(span):not(.cx-n),
+.connectea-dark .cvr-c-category-menu :where(a):hover:not(.cx-n) :where(div):not(.cx-n),
+.connectea-dark .cvr-c-category-menu :where(a):hover:not(.cx-n) :where(p):not(.cx-n),
+.connectea-dark .cvr-c-category-menu :where(a):hover:not(.cx-n) :where(label):not(.cx-n),
+.connectea-dark .cvr-c-category-menu :where(a):hover:not(.cx-n) .mat-line,
+.connectea-dark .cvr-c-category-menu :where(a):hover:not(.cx-n) .mat-list-text,
+.connectea-dark .cvr-c-classes-menu .mat-list-item:hover :where(span):not(.cx-n),
+.connectea-dark .cvr-c-classes-menu .mat-list-item:hover :where(div):not(.cx-n),
+.connectea-dark .cvr-c-classes-menu .mat-list-item:hover :where(p):not(.cx-n),
+.connectea-dark .cvr-c-classes-menu .mat-list-item:hover :where(label):not(.cx-n), .connectea-dark .cvr-c-classes-menu .mat-list-item:hover .mat-line,
+.connectea-dark .cvr-c-classes-menu .mat-list-item:hover .mat-list-text,
+.connectea-dark .cvr-c-classes-menu .mat-mdc-list-item:hover :where(span):not(.cx-n),
+.connectea-dark .cvr-c-classes-menu .mat-mdc-list-item:hover :where(div):not(.cx-n),
+.connectea-dark .cvr-c-classes-menu .mat-mdc-list-item:hover :where(p):not(.cx-n),
+.connectea-dark .cvr-c-classes-menu .mat-mdc-list-item:hover :where(label):not(.cx-n),
+.connectea-dark .cvr-c-classes-menu .mat-mdc-list-item:hover .mat-line, .connectea-dark .cvr-c-classes-menu .mat-mdc-list-item:hover .mat-list-text {
   color: var(--cx-nav-text-hover, #ffffff) !important;
-}
-
-/* Category menu drawers (Attendance terms): Connect paints expanded panels #363636 !important on
-   .toggle-drawer.toggle--grey-dark; the panel's header and content follow the menu surface instead */
-html.eds.cvr.ngm.connectea-dark .toggle-drawer.toggle--grey-dark .c-expansion-panel :is(.mat-expansion-panel-header, .mat-expansion-panel-content) {
-  background-color: var(--cx-surface-bg, #1e2632) !important;
 }

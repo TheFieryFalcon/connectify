@@ -2,157 +2,242 @@
  * Connectify Theme: tile bodies, nav lists, resource rows and high-contrast links
  */
 
-.connectea-dark :is(
-  .eds-c-tile,
-  .cvr-c-tile,
-  .c-tile,
-  .eds-c-card,
-  .cvr-c-card
-) :is(
-  .eds-c-tile__action,
-  .cvr-c-tile__action,
-  .c-tile__action,
-  .eds-c-tile__actions,
-  .cvr-c-tile__actions,
-  .eds-c-tile__header .v-link,
-  .cvr-c-tile__header .v-link
-):hover :is(a, span, div, p) {
+.connectea-dark .eds-c-tile .eds-c-tile__action:hover:not(.cx-n) a, .connectea-dark .eds-c-tile .eds-c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .eds-c-tile .eds-c-tile__action:hover:not(.cx-n) div, .connectea-dark .eds-c-tile .eds-c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .eds-c-tile .cvr-c-tile__action:hover:not(.cx-n) a, .connectea-dark .eds-c-tile .cvr-c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .eds-c-tile .cvr-c-tile__action:hover:not(.cx-n) div, .connectea-dark .eds-c-tile .cvr-c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .eds-c-tile .c-tile__action:hover:not(.cx-n) a, .connectea-dark .eds-c-tile .c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .eds-c-tile .c-tile__action:hover:not(.cx-n) div, .connectea-dark .eds-c-tile .c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .eds-c-tile .eds-c-tile__actions:hover:not(.cx-n) a, .connectea-dark .eds-c-tile .eds-c-tile__actions:hover:not(.cx-n) span,
+.connectea-dark .eds-c-tile .eds-c-tile__actions:hover:not(.cx-n) div, .connectea-dark .eds-c-tile .eds-c-tile__actions:hover:not(.cx-n) p,
+.connectea-dark .eds-c-tile .cvr-c-tile__actions:hover:not(.cx-n) a, .connectea-dark .eds-c-tile .cvr-c-tile__actions:hover:not(.cx-n) span,
+.connectea-dark .eds-c-tile .cvr-c-tile__actions:hover:not(.cx-n) div, .connectea-dark .eds-c-tile .cvr-c-tile__actions:hover:not(.cx-n) p,
+.connectea-dark .eds-c-tile :is(.eds-c-tile__header .v-link):hover a, .connectea-dark .eds-c-tile :is(.eds-c-tile__header .v-link):hover span,
+.connectea-dark .eds-c-tile :is(.eds-c-tile__header .v-link):hover div, .connectea-dark .eds-c-tile :is(.eds-c-tile__header .v-link):hover p,
+.connectea-dark .eds-c-tile :is(.cvr-c-tile__header .v-link):hover a, .connectea-dark .eds-c-tile :is(.cvr-c-tile__header .v-link):hover span,
+.connectea-dark .eds-c-tile :is(.cvr-c-tile__header .v-link):hover div, .connectea-dark .eds-c-tile :is(.cvr-c-tile__header .v-link):hover p,
+.connectea-dark .cvr-c-tile .eds-c-tile__action:hover:not(.cx-n) a, .connectea-dark .cvr-c-tile .eds-c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .cvr-c-tile .eds-c-tile__action:hover:not(.cx-n) div, .connectea-dark .cvr-c-tile .eds-c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .cvr-c-tile .cvr-c-tile__action:hover:not(.cx-n) a, .connectea-dark .cvr-c-tile .cvr-c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .cvr-c-tile .cvr-c-tile__action:hover:not(.cx-n) div, .connectea-dark .cvr-c-tile .cvr-c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .cvr-c-tile .c-tile__action:hover:not(.cx-n) a, .connectea-dark .cvr-c-tile .c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .cvr-c-tile .c-tile__action:hover:not(.cx-n) div, .connectea-dark .cvr-c-tile .c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .cvr-c-tile .eds-c-tile__actions:hover:not(.cx-n) a, .connectea-dark .cvr-c-tile .eds-c-tile__actions:hover:not(.cx-n) span,
+.connectea-dark .cvr-c-tile .eds-c-tile__actions:hover:not(.cx-n) div, .connectea-dark .cvr-c-tile .eds-c-tile__actions:hover:not(.cx-n) p,
+.connectea-dark .cvr-c-tile .cvr-c-tile__actions:hover:not(.cx-n) a, .connectea-dark .cvr-c-tile .cvr-c-tile__actions:hover:not(.cx-n) span,
+.connectea-dark .cvr-c-tile .cvr-c-tile__actions:hover:not(.cx-n) div, .connectea-dark .cvr-c-tile .cvr-c-tile__actions:hover:not(.cx-n) p,
+.connectea-dark .cvr-c-tile :is(.eds-c-tile__header .v-link):hover a, .connectea-dark .cvr-c-tile :is(.eds-c-tile__header .v-link):hover span,
+.connectea-dark .cvr-c-tile :is(.eds-c-tile__header .v-link):hover div, .connectea-dark .cvr-c-tile :is(.eds-c-tile__header .v-link):hover p,
+.connectea-dark .cvr-c-tile :is(.cvr-c-tile__header .v-link):hover a, .connectea-dark .cvr-c-tile :is(.cvr-c-tile__header .v-link):hover span,
+.connectea-dark .cvr-c-tile :is(.cvr-c-tile__header .v-link):hover div, .connectea-dark .cvr-c-tile :is(.cvr-c-tile__header .v-link):hover p,
+.connectea-dark .c-tile .eds-c-tile__action:hover:not(.cx-n) a, .connectea-dark .c-tile .eds-c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .c-tile .eds-c-tile__action:hover:not(.cx-n) div, .connectea-dark .c-tile .eds-c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .c-tile .cvr-c-tile__action:hover:not(.cx-n) a, .connectea-dark .c-tile .cvr-c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .c-tile .cvr-c-tile__action:hover:not(.cx-n) div, .connectea-dark .c-tile .cvr-c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .c-tile .c-tile__action:hover:not(.cx-n) a, .connectea-dark .c-tile .c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .c-tile .c-tile__action:hover:not(.cx-n) div, .connectea-dark .c-tile .c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .c-tile .eds-c-tile__actions:hover:not(.cx-n) a, .connectea-dark .c-tile .eds-c-tile__actions:hover:not(.cx-n) span,
+.connectea-dark .c-tile .eds-c-tile__actions:hover:not(.cx-n) div, .connectea-dark .c-tile .eds-c-tile__actions:hover:not(.cx-n) p,
+.connectea-dark .c-tile .cvr-c-tile__actions:hover:not(.cx-n) a, .connectea-dark .c-tile .cvr-c-tile__actions:hover:not(.cx-n) span,
+.connectea-dark .c-tile .cvr-c-tile__actions:hover:not(.cx-n) div, .connectea-dark .c-tile .cvr-c-tile__actions:hover:not(.cx-n) p,
+.connectea-dark .c-tile :is(.eds-c-tile__header .v-link):hover a, .connectea-dark .c-tile :is(.eds-c-tile__header .v-link):hover span,
+.connectea-dark .c-tile :is(.eds-c-tile__header .v-link):hover div, .connectea-dark .c-tile :is(.eds-c-tile__header .v-link):hover p,
+.connectea-dark .c-tile :is(.cvr-c-tile__header .v-link):hover a, .connectea-dark .c-tile :is(.cvr-c-tile__header .v-link):hover span,
+.connectea-dark .c-tile :is(.cvr-c-tile__header .v-link):hover div, .connectea-dark .c-tile :is(.cvr-c-tile__header .v-link):hover p,
+.connectea-dark .eds-c-card .eds-c-tile__action:hover:not(.cx-n) a, .connectea-dark .eds-c-card .eds-c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .eds-c-card .eds-c-tile__action:hover:not(.cx-n) div, .connectea-dark .eds-c-card .eds-c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .eds-c-card .cvr-c-tile__action:hover:not(.cx-n) a, .connectea-dark .eds-c-card .cvr-c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .eds-c-card .cvr-c-tile__action:hover:not(.cx-n) div, .connectea-dark .eds-c-card .cvr-c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .eds-c-card .c-tile__action:hover:not(.cx-n) a, .connectea-dark .eds-c-card .c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .eds-c-card .c-tile__action:hover:not(.cx-n) div, .connectea-dark .eds-c-card .c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .eds-c-card .eds-c-tile__actions:hover:not(.cx-n) a, .connectea-dark .eds-c-card .eds-c-tile__actions:hover:not(.cx-n) span,
+.connectea-dark .eds-c-card .eds-c-tile__actions:hover:not(.cx-n) div, .connectea-dark .eds-c-card .eds-c-tile__actions:hover:not(.cx-n) p,
+.connectea-dark .eds-c-card .cvr-c-tile__actions:hover:not(.cx-n) a, .connectea-dark .eds-c-card .cvr-c-tile__actions:hover:not(.cx-n) span,
+.connectea-dark .eds-c-card .cvr-c-tile__actions:hover:not(.cx-n) div, .connectea-dark .eds-c-card .cvr-c-tile__actions:hover:not(.cx-n) p,
+.connectea-dark .eds-c-card :is(.eds-c-tile__header .v-link):hover a, .connectea-dark .eds-c-card :is(.eds-c-tile__header .v-link):hover span,
+.connectea-dark .eds-c-card :is(.eds-c-tile__header .v-link):hover div, .connectea-dark .eds-c-card :is(.eds-c-tile__header .v-link):hover p,
+.connectea-dark .eds-c-card :is(.cvr-c-tile__header .v-link):hover a, .connectea-dark .eds-c-card :is(.cvr-c-tile__header .v-link):hover span,
+.connectea-dark .eds-c-card :is(.cvr-c-tile__header .v-link):hover div, .connectea-dark .eds-c-card :is(.cvr-c-tile__header .v-link):hover p,
+.connectea-dark .cvr-c-card .eds-c-tile__action:hover:not(.cx-n) a, .connectea-dark .cvr-c-card .eds-c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .cvr-c-card .eds-c-tile__action:hover:not(.cx-n) div, .connectea-dark .cvr-c-card .eds-c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .cvr-c-card .cvr-c-tile__action:hover:not(.cx-n) a, .connectea-dark .cvr-c-card .cvr-c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .cvr-c-card .cvr-c-tile__action:hover:not(.cx-n) div, .connectea-dark .cvr-c-card .cvr-c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .cvr-c-card .c-tile__action:hover:not(.cx-n) a, .connectea-dark .cvr-c-card .c-tile__action:hover:not(.cx-n) span,
+.connectea-dark .cvr-c-card .c-tile__action:hover:not(.cx-n) div, .connectea-dark .cvr-c-card .c-tile__action:hover:not(.cx-n) p,
+.connectea-dark .cvr-c-card .eds-c-tile__actions:hover:not(.cx-n) a, .connectea-dark .cvr-c-card .eds-c-tile__actions:hover:not(.cx-n) span,
+.connectea-dark .cvr-c-card .eds-c-tile__actions:hover:not(.cx-n) div, .connectea-dark .cvr-c-card .eds-c-tile__actions:hover:not(.cx-n) p,
+.connectea-dark .cvr-c-card .cvr-c-tile__actions:hover:not(.cx-n) a, .connectea-dark .cvr-c-card .cvr-c-tile__actions:hover:not(.cx-n) span,
+.connectea-dark .cvr-c-card .cvr-c-tile__actions:hover:not(.cx-n) div, .connectea-dark .cvr-c-card .cvr-c-tile__actions:hover:not(.cx-n) p,
+.connectea-dark .cvr-c-card :is(.eds-c-tile__header .v-link):hover a, .connectea-dark .cvr-c-card :is(.eds-c-tile__header .v-link):hover span,
+.connectea-dark .cvr-c-card :is(.eds-c-tile__header .v-link):hover div, .connectea-dark .cvr-c-card :is(.eds-c-tile__header .v-link):hover p,
+.connectea-dark .cvr-c-card :is(.cvr-c-tile__header .v-link):hover a, .connectea-dark .cvr-c-card :is(.cvr-c-tile__header .v-link):hover span,
+.connectea-dark .cvr-c-card :is(.cvr-c-tile__header .v-link):hover div, .connectea-dark .cvr-c-card :is(.cvr-c-tile__header .v-link):hover p {
   color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
-.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-heading, .eds-c-tile__title, .cvr-c-tile__title, h2, h3, h4) {
+.connectea-dark .eds-c-tile .eds-c-heading, .connectea-dark .eds-c-tile .eds-c-tile__title, .connectea-dark .eds-c-tile .cvr-c-tile__title,
+.connectea-dark .eds-c-tile :where(h2):not(.cx-n), .connectea-dark .eds-c-tile :where(h3):not(.cx-n),
+.connectea-dark .eds-c-tile :where(h4):not(.cx-n), .connectea-dark .cvr-c-tile .eds-c-heading, .connectea-dark .cvr-c-tile .eds-c-tile__title,
+.connectea-dark .cvr-c-tile .cvr-c-tile__title, .connectea-dark .cvr-c-tile :where(h2):not(.cx-n), .connectea-dark .cvr-c-tile :where(h3):not(.cx-n),
+.connectea-dark .cvr-c-tile :where(h4):not(.cx-n), .connectea-dark .c-tile .eds-c-heading, .connectea-dark .c-tile .eds-c-tile__title,
+.connectea-dark .c-tile .cvr-c-tile__title, .connectea-dark .c-tile :where(h2):not(.cx-n), .connectea-dark .c-tile :where(h3):not(.cx-n),
+.connectea-dark .c-tile :where(h4):not(.cx-n) {
   color: var(--cx-text-primary, #f8fafc) !important;
   font-weight: 700 !important;
 }
 
-.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-caption, .eds-c-tile__caption, .cvr-c-tile__caption, small) {
+.connectea-dark .eds-c-tile .eds-c-caption, .connectea-dark .eds-c-tile .eds-c-tile__caption, .connectea-dark .eds-c-tile .cvr-c-tile__caption,
+.connectea-dark .eds-c-tile :where(small):not(.cx-n), .connectea-dark .cvr-c-tile .eds-c-caption, .connectea-dark .cvr-c-tile .eds-c-tile__caption,
+.connectea-dark .cvr-c-tile .cvr-c-tile__caption, .connectea-dark .cvr-c-tile :where(small):not(.cx-n), .connectea-dark .c-tile .eds-c-caption,
+.connectea-dark .c-tile .eds-c-tile__caption, .connectea-dark .c-tile .cvr-c-tile__caption, .connectea-dark .c-tile :where(small):not(.cx-n) {
   color: var(--cx-text-muted, #94a3b8) !important;
 }
 
-.connectea-dark :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-accordion__panel) {
+.connectea-dark .eds-c-tile :is(.eds-c-accordion__panel), .connectea-dark .cvr-c-tile :is(.eds-c-accordion__panel),
+.connectea-dark .c-tile :is(.eds-c-accordion__panel) {
   background-color: transparent !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
-html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) :is(.eds-c-tile, .cvr-c-tile, .c-tile) :is(.eds-c-tile__body, .cvr-c-tile__body) {
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .cvr-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .cvr-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .cvr-c-tile__body {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
 /* Generic Tile Bodies, Inner Containers, Nav Lists & Resource Rows (Connect Help, Resources) */
-html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) :is(
-  .eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .mat-card, .cvr-c-dashboard-card,
-  .portlet, .portlet-boundary, .portlet-content, .portlet-body, .journal-content-article
-) :is(
-  .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-card__body, .cvr-c-card__body,
-  .portlet-content, .portlet-body, .journal-content-article, .eds-c-nav-list, .eds-c-nav-list__item, .eds-c-nav-list__link,
-  .eds-c-list, .eds-c-list__item, .eds-c-tile-list, .eds-c-tile-list__item, .cvr-c-resource, .cvr-c-resource-item,
-  .cvr-c-resource-card, .eds-c-resource, .cvr-c-notice, .cvr-c-notice-card, .cvr-c-feed-item, [class*="guide"], [class*="help"], [class*="resource"], ul, ol
-) {
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .cvr-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-tile__content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .cvr-c-tile__content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-card__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .cvr-c-card__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .portlet-content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .portlet-body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .journal-content-article,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-nav-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-nav-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-nav-list__link,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-tile-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-tile-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .cvr-c-resource,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .cvr-c-resource-item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .cvr-c-resource-card,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .eds-c-resource,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .cvr-c-notice,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .cvr-c-notice-card,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile .cvr-c-feed-item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile [class*="guide"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile [class*="help"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile [class*="resource"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile :where(ul):not(.cx-n),
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-tile :where(ol):not(.cx-n),
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .cvr-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-tile__content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .cvr-c-tile__content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-card__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .cvr-c-card__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .portlet-content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .portlet-body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .journal-content-article,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-nav-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-nav-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-nav-list__link,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-tile-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-tile-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .cvr-c-resource,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .cvr-c-resource-item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .cvr-c-resource-card,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .eds-c-resource,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .cvr-c-notice,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .cvr-c-notice-card,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile .cvr-c-feed-item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile [class*="guide"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile [class*="help"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile [class*="resource"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile :where(ul):not(.cx-n),
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-tile :where(ol):not(.cx-n),
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .cvr-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-tile__content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .cvr-c-tile__content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-card__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .cvr-c-card__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .portlet-content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .portlet-body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .journal-content-article,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-nav-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-nav-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-nav-list__link,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-tile-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-tile-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .cvr-c-resource,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .cvr-c-resource-item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .cvr-c-resource-card,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .eds-c-resource,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .cvr-c-notice,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .cvr-c-notice-card,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile .cvr-c-feed-item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile [class*="guide"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile [class*="help"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile [class*="resource"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile :where(ul):not(.cx-n),
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .c-tile :where(ol):not(.cx-n),
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .cvr-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-tile__content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .cvr-c-tile__content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-card__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .cvr-c-card__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .portlet-content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .portlet-body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .journal-content-article,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-nav-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-nav-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-nav-list__link,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-tile-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-tile-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .cvr-c-resource,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .cvr-c-resource-item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .cvr-c-resource-card,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .eds-c-resource,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .cvr-c-notice,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .cvr-c-notice-card,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card .cvr-c-feed-item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card [class*="guide"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card [class*="help"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card [class*="resource"],
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card :where(ul):not(.cx-n),
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .eds-c-card :where(ol):not(.cx-n),
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .eds-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .cvr-c-tile__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .eds-c-tile__content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .cvr-c-tile__content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .eds-c-card__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .cvr-c-card__body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .portlet-content,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .portlet-body,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .journal-content-article,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .eds-c-nav-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .eds-c-nav-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .eds-c-nav-list__link,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .eds-c-list,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .eds-c-list__item,
+html.connectea-dark:not([data-connectea-glass="true"]):not([data-connectea-theme="liquid-glass"]) .cvr-c-card .eds-c-tile-list {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   border-color: var(--cx-border-subtle, #2e3c4e) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
-}
-
-.connectea-dark:not(cx-n) :is(
-  .eds-c-nav-list,
-  .eds-c-nav-list__item,
-  .eds-c-nav-list__link,
-  .cvr-c-resource,
-  .cvr-c-resource-item,
-  .eds-c-resource,
-  [class*="guide"],
-  [class*="help"]
-) {
-  background-color: var(--cx-surface-bg, #1e2632) !important;
-  border-color: var(--cx-border-subtle, #2e3c4e) !important;
-  color: var(--cx-text-secondary, #e2e8f0) !important;
-}
-
-.connectea-dark:not(cx-n) :is(
-  .eds-c-nav-list__item,
-  .eds-c-nav-list__link,
-  .eds-c-list__item,
-  .eds-c-tile-list__item,
-  .cvr-c-resource-item,
-  :is(.help-block, .portlet-msg-help) li
-):hover {
-  background-color: var(--cx-surface-hover, #263344) !important;
-  color: var(--cx-nav-text-hover, #ffffff) !important;
-}
-
-.connectea-dark:not(cx-n) :is(
-  .eds-c-nav-list,
-  .eds-c-nav-list__item,
-  .cvr-c-resource,
-  .eds-c-resource,
-  .help-block,
-  .portlet-msg-help
-) :is(a, span, p, div, label, strong) {
-  color: var(--cx-text-secondary, #e2e8f0) !important;
-}
-
-.connectea-dark:not(cx-n) :is(
-  .eds-c-nav-list,
-  .eds-c-nav-list__item,
-  .cvr-c-resource,
-  .eds-c-resource
-) :is(.eds-c-icon, svg, path, circle) {
-  color: var(--cx-text-muted, #94a3b8) !important;
-  fill: currentColor !important;
-  stroke: none !important;
-}
-
-/* Explicit high-contrast tile and card links (Classes, Notices, Feeds, Help) */
-.connectea-dark:not(cx-n) :is(
-  .eds-c-tile,
-  .cvr-c-tile,
-  .c-tile,
-  .eds-c-card,
-  .cvr-c-card,
-  .cvr-c-dashboard-card
-) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *) {
-  color: var(--cx-tile-link-color, var(--cx-text-primary, #f8fafc)) !important;
-}
-
-.connectea-dark:not(cx-n) :is(
-  .eds-c-tile,
-  .cvr-c-tile,
-  .c-tile,
-  .eds-c-card,
-  .cvr-c-card,
-  .cvr-c-dashboard-card
-) a:not(.eds-c-tile__action):not(.cvr-c-tile__action):not(.v-button):not(.eds-c-button):not(.cvr-c-primary-navigation *):not(.cvr-c-header *):not(.cvr-c-service-menu *):hover {
-  color: var(--cx-accent-hover, #93c5fd) !important;
-  text-decoration: underline !important;
-}
-
-/* High contrast for class names, notice titles, and tile headings */
-.connectea-dark:not(cx-n) :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(.eds-c-tile__title, .cvr-c-tile__title, .cvr-c-class__name, .cvr-c-classes-list__title, [class*="class-name"], [class*="class-title"], [class*="class__name"], [class*="notice__title"], [class*="feed-item__title"], h1, h2, h3, h4) {
-  color: var(--cx-text-primary, #f8fafc) !important;
-  font-weight: 700 !important;
-}
-
-.connectea-dark:not(cx-n) :is(.eds-c-caption, .v-label.eds-c-caption, .v-caption, :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) :is(.eds-c-tile__caption, .cvr-c-tile__caption, .cvr-c-class__code, .cvr-c-class__teacher, .cvr-c-class__details, [class*="teacher"], [class*="code"], [class*="subtitle"], [class*="meta"], [class*="date"], small)):not(#connectify-sidebar *) {
-  color: var(--cx-text-muted, #94a3b8) !important;
-}
-
-.connectea-dark .eds-c-tile__footer {
-  border-top: 1px solid var(--cx-border, #2e3c4e) !important;
-}
-
-#ng-zone__classes-metrics-summary {
-  display: block !important;
-  background-color: var(--cx-card-bg, #ffffff) !important;
-  border: 1px solid var(--cx-border, #e2e8f0) !important;
-  box-shadow: var(--cx-card-shadow, 0 1px 3px rgba(0, 0, 0, 0.08)) !important;
-  padding: 16px !important;
-  margin-bottom: 24px !important;
-  box-sizing: border-box !important;
-}
-
-.connectea-dark #ng-zone__classes-metrics-summary {
-  background-color: var(--cx-surface-bg, #1a222d) !important;
-  border-color: var(--cx-border, #314256) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }

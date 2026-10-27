@@ -20,71 +20,220 @@
    Solid:        html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) */
 
 /* Liquid Glass: translucent accordions and tile bodies */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, [data-subject-card], .v-panel, .mat-card, .cvr-c-dashboard-card, .portlet
-) :is(
-  .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content,
-  .eds-c-accordion, .eds-c-accordion__panel, .eds-c-accordion__section, .eds-c-accordion__section-body,
-  .v-panel-content, .cvr-c-tasks, .cvr-c-task-group, .cvr-c-task, .cvr-c-task__details,
-  .cvr-c-event, .cvr-c-event-list, .eds-c-tile-list, .eds-c-list
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .eds-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .cvr-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .eds-c-accordion,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .eds-c-accordion__panel,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .eds-c-accordion__section,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .eds-c-accordion__section-body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .v-panel-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .cvr-c-tasks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .cvr-c-task-group,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .cvr-c-task,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .cvr-c-task__details,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .cvr-c-event,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .cvr-c-event-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .eds-c-tile-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile .eds-c-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .eds-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .cvr-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .eds-c-accordion,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .eds-c-accordion__panel,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .eds-c-accordion__section,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .eds-c-accordion__section-body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .v-panel-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .cvr-c-tasks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .cvr-c-task-group,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .cvr-c-task,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .cvr-c-task__details,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .cvr-c-event,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .cvr-c-event-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .eds-c-tile-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile .eds-c-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .eds-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .cvr-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .eds-c-accordion,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .eds-c-accordion__panel,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .eds-c-accordion__section,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .eds-c-accordion__section-body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .v-panel-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .cvr-c-tasks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .cvr-c-task-group,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .cvr-c-task,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .cvr-c-task__details,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .cvr-c-event,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .cvr-c-event-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .eds-c-tile-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile .eds-c-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .eds-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .cvr-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .eds-c-accordion,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .eds-c-accordion__panel,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .eds-c-accordion__section,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .eds-c-accordion__section-body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .v-panel-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .cvr-c-tasks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .cvr-c-task-group,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .cvr-c-task,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .cvr-c-task__details,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .cvr-c-event,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .cvr-c-event-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .eds-c-tile-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card .eds-c-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .eds-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .cvr-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .eds-c-accordion,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .eds-c-accordion__panel,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .eds-c-accordion__section,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .eds-c-accordion__section-body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .v-panel-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .cvr-c-tasks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .cvr-c-task-group,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .cvr-c-task,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .cvr-c-task__details,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .cvr-c-event,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .cvr-c-event-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .eds-c-tile-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card .eds-c-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .eds-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .cvr-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .eds-c-accordion,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .eds-c-accordion__panel,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .eds-c-accordion__section,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .eds-c-accordion__section-body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .v-panel-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .cvr-c-tasks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .cvr-c-task-group,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .cvr-c-task,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .cvr-c-task__details,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .cvr-c-event,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .cvr-c-event-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .eds-c-tile-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) [data-subject-card] .eds-c-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .eds-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .cvr-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .eds-c-accordion,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .eds-c-accordion__panel,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .eds-c-accordion__section,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .eds-c-accordion__section-body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .v-panel-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .cvr-c-tasks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .cvr-c-task-group,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .cvr-c-task,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .cvr-c-task__details,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .cvr-c-event,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .cvr-c-event-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .eds-c-tile-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-panel .eds-c-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .eds-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .cvr-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .eds-c-accordion,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .eds-c-accordion__panel,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .eds-c-accordion__section,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .eds-c-accordion__section-body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .v-panel-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .cvr-c-tasks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .cvr-c-task-group,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .cvr-c-task,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .cvr-c-task__details,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .cvr-c-event,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .cvr-c-event-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .eds-c-tile-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card .eds-c-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .eds-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .cvr-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .eds-c-accordion,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .eds-c-accordion__panel,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .eds-c-accordion__section,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .eds-c-accordion__section-body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .v-panel-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .cvr-c-tasks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .cvr-c-task-group,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .cvr-c-task,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .cvr-c-task__details,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .cvr-c-event,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .cvr-c-event-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .eds-c-tile-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-dashboard-card .eds-c-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .eds-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .cvr-c-tile__content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .eds-c-accordion,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .eds-c-accordion__panel,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .eds-c-accordion__section,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .eds-c-accordion__section-body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .v-panel-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .cvr-c-tasks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .cvr-c-task-group,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .cvr-c-task,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .cvr-c-task__details,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .cvr-c-event,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .cvr-c-event-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .eds-c-tile-list,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .portlet .eds-c-list {
   background: transparent !important;
   background-color: transparent !important;
 }
 
 /* Solid themes: panels stay opaque, even with a custom wallpaper */
-html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) :is(
-  .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
-  .v-panel, .mat-card, .cvr-c-dashboard-card, .connectea-panel, [data-subject-card]
-) {
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) .eds-c-card,
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) .cvr-c-card,
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) .eds-c-tile,
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) .cvr-c-tile,
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) .c-tile,
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) .v-panel,
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) .mat-card,
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) .cvr-c-dashboard-card,
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) .connectea-panel,
+html.connectea-dark:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]) [data-subject-card] {
   background-color: var(--cx-surface-bg, #1e2632) !important;
 }
 
 /* Liquid Glass: 16px curvature on panels, cards and tiles. Solid themes keep Connect's native geometry.
    Explicit classes only: substring matches caught popups, tooltips, buttons and expansion headers.
    .mat-expansion-panel is left out because its header button inherits the panel's border-radius. */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-reports-tile, [data-subject-card],
-  .v-panel, .mat-card, .cvr-c-expansion-panel, .cvr-c-expandable-panel,
-  .cvr-c-resources-panel, .cvr-c-tree-panel, .cvr-c-folder-panel, .cvr-c-timeline-summary-data-panel,
-  .cvr-c-feedback-content-panel, .eds-c-page-feedback-panel, .connectea-panel, .cvr-c-dashboard-card,
-  .portlet, .file-card, .image-card, .user-card, #ng-zone__classes-metrics-summary
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.eds-c-card):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-card):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.eds-c-tile):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-tile):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.c-tile):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.eds-c-reports-tile):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where([data-subject-card]):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.v-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.mat-card):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-expansion-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-expandable-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-resources-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-tree-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-folder-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-timeline-summary-data-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-feedback-content-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.eds-c-page-feedback-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.connectea-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-dashboard-card):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.portlet):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.file-card):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.image-card):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.user-card):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #ng-zone__classes-metrics-summary {
   border-radius: 16px !important;
-}
-
-/* Clip only tiles and cards to their corners; popups and menus must never be clipped. clip, not hidden: hidden
-   starts a formatting context, so a last child's bottom margin (the Maintenance Notice list's 15px) stopped
-   collapsing out of the tile and showed as an extra strip under its divider */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, .connectea-panel) {
-  overflow: clip !important;
-}
-
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.eds-c-tile__body, .cvr-c-tile__body, .eds-c-card__body, .cvr-c-card__body) {
-  border-bottom-left-radius: 16px !important;
-  border-bottom-right-radius: 16px !important;
-}
-
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.modal-content, .ui-dialog, mat-dialog-container) {
-  border-radius: 20px !important;
-}
-
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-compound-progress-bar {
-  border-radius: 10px !important;
-  overflow: hidden !important;
-}
-
-/* Every dark theme: layout containers and wrappers that hold tiles (Assessment Outlines) are clear, so the canvas or
-   wallpaper shows in Connect's native 15px padding around tiles as in Default. Tiles stay opaque (glass in Liquid
-   Glass); detail views without tiles keep their surface. [data-connectea-theme] outranks the canvas rule. */
-html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) :is(
-  #main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable
-):has(.eds-c-tile, .cvr-c-tile),
-html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) :is(
-  .v-panel, .v-panel-content, .cvr-u-padding--md
-):has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile) {
-  background: transparent !important;
-  background-color: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
 }

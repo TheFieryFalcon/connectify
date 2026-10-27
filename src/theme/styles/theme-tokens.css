@@ -141,21 +141,35 @@ html.connectea-dark,
   --cx-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25); --cx-shadow-md: 0 8px 32px rgba(0, 0, 0, 0.35); --cx-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
 }
 
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :is(
-  .eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile,
-  .connectea-panel, #connectify-sidebar, #connectea-theme-menu, .v-panel,
-  .modal-content, .ui-dialog, .cvr-c-service-bar, .cvr-c-service-bar__container
-) {
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.eds-c-card):not(#cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.cvr-c-card):not(#cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.eds-c-tile):not(#cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.cvr-c-tile):not(#cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.c-tile):not(#cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.connectea-panel):not(#cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark #connectify-sidebar,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark #connectea-theme-menu,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.v-panel):not(#cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.modal-content):not(#cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.ui-dialog):not(#cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.cvr-c-service-bar):not(#cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.cvr-c-service-bar__container):not(#cx-n) {
   backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
   box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 16px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -10px rgba(0, 0, 0, 0.45) !important;
 }
 
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :is(
-  .v-window-modalitycurtain, .modal-backdrop, .yui3-widget-mask, .ui-widget-overlay,
-  .cdk-overlay-backdrop, .cdk-overlay-dark-backdrop, .mat-drawer-backdrop,
-  .eds-c-modal-overlay, .eds-c-overlay, .cvr-c-overlay, .cx-overlay
-) {
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .v-window-modalitycurtain,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .modal-backdrop,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .yui3-widget-mask,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .ui-widget-overlay,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cdk-overlay-backdrop,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cdk-overlay-dark-backdrop,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .mat-drawer-backdrop,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .eds-c-modal-overlay,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .eds-c-overlay,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cvr-c-overlay,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cx-overlay {
   backdrop-filter: blur(var(--cx-glass-blur, 14px)) saturate(150%) !important;
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 14px)) saturate(150%) !important;
   background-color: rgba(11, 17, 32, 0.45) !important;
@@ -163,6 +177,11 @@ html.connectea-dark,
 }
 
 /* The wallpaper itself is a fixed, blurred and dimmed layer under the page (theme-wallpaper-layer.css) */
-[data-connectea-has-custom-bg="true"] :is(.cvr-c-app-layout, .cvr-c-app-layout__body, #main-content, .v-app, .v-ui, .v-scrollable):has(.eds-c-tile, .cvr-c-tile) {
+[data-connectea-has-custom-bg="true"] :where(.cvr-c-app-layout):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+[data-connectea-has-custom-bg="true"] :where(.cvr-c-app-layout__body):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+[data-connectea-has-custom-bg="true"] #main-content:has(.eds-c-tile, .cvr-c-tile),
+[data-connectea-has-custom-bg="true"] :where(.v-app):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+[data-connectea-has-custom-bg="true"] :where(.v-ui):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+[data-connectea-has-custom-bg="true"] :where(.v-scrollable):has(.eds-c-tile, .cvr-c-tile):not(#cx-n) {
   background-color: transparent !important;
 }

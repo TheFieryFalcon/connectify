@@ -1,0 +1,21 @@
+/**
+ * Connectify Theme: glass accordions, reading view, surface adaptation, typography and tile/panel base colours (part 2, continued from theme-surface-base.css)
+ */
+
+/* Material Accordions & Expansion Panels */
+:is(html, body).connectea-dark:not([data-connectea-login]) .mat-card, :is(html, body).connectea-dark:not([data-connectea-login]) .mat-accordion,
+:is(html, body).connectea-dark:not([data-connectea-login]) .mat-expansion-panel,
+:is(html, body).connectea-dark:not([data-connectea-login]) .mat-expansion-panel-header,
+:is(html, body).connectea-dark:not([data-connectea-login]) .mat-expansion-panel-body,
+:is(html, body).connectea-dark:not([data-connectea-login]) .mat-expansion-panel-content,
+:is(html, body).connectea-dark:not([data-connectea-login]) .mat-tree, :is(html, body).connectea-dark:not([data-connectea-login]) .mat-tree-node,
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-accordion__panel {
+  background-color: var(--cx-surface-bg) !important;
+  border-color: var(--cx-border) !important;
+  color: var(--cx-text-secondary) !important;
+}
+
+:is(html, body).connectea-dark:not([data-connectea-login]) .mat-expansion-panel-header:hover,
+:is(html, body).connectea-dark:not([data-connectea-login]) .mat-tree-node:hover {
+  background-color: var(--cx-surface-hover) !important;
+}

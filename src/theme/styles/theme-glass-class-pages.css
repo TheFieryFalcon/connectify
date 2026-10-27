@@ -4,35 +4,37 @@
  */
 
 /* Content: the Vaadin canvas lets the wallpaper through, with sections or without. Connect's canvas rule lists
-   #main-content, so this :is() carries an unused id (#cx-specificity-anchor) to outrank it without changing what matches. */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :is(#cx-specificity-anchor, .v-app.librarylearningcontentui, .v-app.librarylearningcontentui > .v-ui.v-scrollable) {
+   #main-content, so it carries an id weight (:not(#cx-n), which every element passes) to outrank it. */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :where(.v-app.librarylearningcontentui):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :where(.v-app.librarylearningcontentui > .v-ui.v-scrollable):not(#cx-n) {
   background: transparent !important;
   background-color: transparent !important;
 }
 
 /* Learners: the table sits straight in .cvr-c-pagination__body, and Students are inside an accordion.
    clip keeps the table's margins collapsing as natively (hidden made the block 17px taller) */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .cvr-c-pagination__body:has(> table.mat-table),
-  mat-accordion
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-pagination__body:has(> table.mat-table)),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-accordion:not(.cx-n):not(.cx-n) {
   border-radius: 16px !important;
   overflow: clip !important;
 }
 
 /* Table sections: Connect sets background: inherit on thead, tbody and rows, which stacks the translucent table
    fill once per layer and darkens the header band; they stay clear so the table's one glass layer shows */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-table :is(thead, tbody, tfoot, tr.mat-header-row, tr.mat-row, tr.mat-footer-row) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-table thead:not(.cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-table tbody:not(.cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-table tfoot:not(.cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-table tr.mat-header-row,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-table tr.mat-row,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-table tr.mat-footer-row {
   background-color: transparent !important;
 }
 
 /* Summary: stat tiles and the calendar are clear inside their glass card */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .c-scope-statistic,
-  .c-scope-statistic-control,
-  table.mat-calendar-table,
-  .mat-calendar-table-header
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-scope-statistic:not(cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-scope-statistic-control:not(cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) table.mat-calendar-table,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-calendar-table-header:not(cx-n) {
   background: transparent !important;
   background-color: transparent !important;
   border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;

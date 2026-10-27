@@ -2,55 +2,37 @@
  * Connectify Theme: dialogs, drawers, material overlays and the paginator
  */
 
-.connectea-dark :is(
-  .v-window-header,
-  .v-window-outerheader,
-  .ui-dialog-titlebar,
-  .modal-header,
-  .cvr-c-popup .v-window-header,
-  .ui-dialog-title,
-  .modal-title
-) {
+.connectea-dark .v-window-header:not(.cx-n), .connectea-dark .v-window-outerheader:not(.cx-n), .connectea-dark .ui-dialog-titlebar:not(.cx-n),
+.connectea-dark .modal-header:not(.cx-n), .connectea-dark :is(.cvr-c-popup .v-window-header), .connectea-dark .ui-dialog-title:not(.cx-n),
+.connectea-dark .modal-title:not(.cx-n) {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-bottom: 1px solid var(--cx-border, #36485e) !important;
   font-weight: 650 !important;
 }
 
-.connectea-dark :is(
-  .v-window-footer,
-  .ui-dialog-buttonpane,
-  .modal-footer,
-  .cvr-c-popup .cvr-c-popup-button-set,
-  .ui-dialog-buttonset
-) {
+.connectea-dark .v-window-footer:not(.cx-n), .connectea-dark .ui-dialog-buttonpane:not(.cx-n), .connectea-dark .modal-footer:not(.cx-n),
+.connectea-dark :is(.cvr-c-popup .cvr-c-popup-button-set), .connectea-dark .ui-dialog-buttonset:not(.cx-n) {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   border-top: 1px solid var(--cx-border, #36485e) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
-.connectea-dark :is(
-  .v-window-closebox,
-  .v-window-maximizebox,
-  .v-window-restorebox,
-  .ui-dialog-titlebar-close,
-  .modal-header .close,
-  .close
-):not(#connectify-sidebar *) {
+.connectea-dark .v-window-closebox:not(#connectify-sidebar *):not(.cx-n), .connectea-dark .v-window-maximizebox:not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark .v-window-restorebox:not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark .ui-dialog-titlebar-close:not(#connectify-sidebar *):not(.cx-n), .connectea-dark :is(.modal-header .close):not(#connectify-sidebar *),
+.connectea-dark .close:not(#connectify-sidebar *):not(.cx-n) {
   background-color: transparent !important;
   color: var(--cx-nav-text, #cbd5e1) !important;
   border-color: transparent !important;
   opacity: 0.85 !important;
 }
 
-.connectea-dark :is(
-  .v-window-closebox,
-  .v-window-maximizebox,
-  .v-window-restorebox,
-  .ui-dialog-titlebar-close,
-  .modal-header .close,
-  .close
-):not(#connectify-sidebar *):hover {
+.connectea-dark .v-window-closebox:not(#connectify-sidebar *):hover:not(.cx-n),
+.connectea-dark .v-window-maximizebox:not(#connectify-sidebar *):hover:not(.cx-n),
+.connectea-dark .v-window-restorebox:not(#connectify-sidebar *):hover:not(.cx-n),
+.connectea-dark .ui-dialog-titlebar-close:not(#connectify-sidebar *):hover:not(.cx-n),
+.connectea-dark :is(.modal-header .close):not(#connectify-sidebar *):hover, .connectea-dark .close:not(#connectify-sidebar *):hover:not(.cx-n) {
   color: var(--cx-button-text-hover, #ffffff) !important;
   opacity: 1 !important;
   background-color: var(--cx-badge-bg, #24303f) !important;
@@ -80,28 +62,22 @@
 /* --------------------------------------------------------------------------
    24. Dialogs, Drawers & Material Overlays
    -------------------------------------------------------------------------- */
-.connectea-dark :is(
-  mat-drawer-container,
-  mat-drawer-content,
-  mat-drawer,
-  .example-container,
-  cnt-library-avatar-picker,
-  cnt-library-avatar-picker-dialog,
-  cnt-change-password-dialog
-) {
+.connectea-dark :where(mat-drawer-container):not(.cx-n), .connectea-dark :where(mat-drawer-content):not(.cx-n),
+.connectea-dark :where(mat-drawer):not(.cx-n), .connectea-dark .example-container, .connectea-dark :where(cnt-library-avatar-picker):not(.cx-n),
+.connectea-dark :where(cnt-library-avatar-picker-dialog):not(.cx-n), .connectea-dark :where(cnt-change-password-dialog):not(.cx-n) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-.connectea-dark :is(mat-hint, .mat-hint, [id^="mat-hint"]) {
+.connectea-dark :where(mat-hint):not(.cx-n), .connectea-dark .mat-hint, .connectea-dark [id^="mat-hint"] {
   color: var(--cx-text-muted, #94a3b8) !important;
 }
 
-.connectea-dark :is(mat-label, .mat-form-field-label) {
+.connectea-dark :where(mat-label):not(.cx-n), .connectea-dark .mat-form-field-label {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark :is(.mat-input-element, input.mat-input-element) {
+.connectea-dark .mat-input-element:not(cx-n), .connectea-dark input.mat-input-element {
   color: var(--cx-text-primary, #f8fafc) !important;
   caret-color: var(--cx-accent, #3b82f6) !important;
 }
@@ -124,52 +100,51 @@ cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fl
   min-height: 56px !important;
 }
 
-.connectea-dark :is(
-  mat-paginator,
-  .mat-paginator,
-  cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)),
-  .cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)),
-  cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid,
-  .cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid,
-  .mat-paginator-container,
-  .mat-paginator-outer-container,
-  .connect-paginator-container
-) {
+.connectea-dark :where(mat-paginator):not(.cx-n):not(.cx-n):not(.cx-n), .connectea-dark .mat-paginator:not(.cx-n):not(.cx-n),
+.connectea-dark :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body))):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark :is(.cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body))):not(.cx-n),
+.connectea-dark :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark :is(.cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid),
+.connectea-dark .mat-paginator-container:not(.cx-n):not(.cx-n), .connectea-dark .mat-paginator-outer-container:not(.cx-n):not(.cx-n),
+.connectea-dark .connect-paginator-container:not(.cx-n):not(.cx-n) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-:is(cnt-paginator, .cnt-paginator) :is(.mat-paginator, mat-paginator, .connect-paginator-container, .mat-paginator-container, .mat-paginator-outer-container) {
+:where(cnt-paginator):not(.cx-n) .mat-paginator, :where(cnt-paginator):not(.cx-n) :where(mat-paginator):not(.cx-n),
+:where(cnt-paginator):not(.cx-n) .connect-paginator-container, :where(cnt-paginator):not(.cx-n) .mat-paginator-container,
+:where(cnt-paginator):not(.cx-n) .mat-paginator-outer-container, .cnt-paginator .mat-paginator, .cnt-paginator :where(mat-paginator):not(.cx-n),
+.cnt-paginator .connect-paginator-container, .cnt-paginator .mat-paginator-container, .cnt-paginator .mat-paginator-outer-container {
   background: transparent !important;
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-:is(html, body).connectea-dark :is(
-  .mat-paginator-page-size,
-  .mat-paginator-page-size-label,
-  .mat-paginator-range-label,
-  .mat-paginator-range-actions,
-  .connect-paginator-label,
-  span.connect-paginator-label,
-  .mat-select-value,
-  .mat-select-value-text,
-  .mat-select-min-line
-) {
+:is(html, body).connectea-dark .mat-paginator-page-size:not(cx-n), :is(html, body).connectea-dark .mat-paginator-page-size-label:not(cx-n),
+:is(html, body).connectea-dark .mat-paginator-range-label:not(cx-n), :is(html, body).connectea-dark .mat-paginator-range-actions:not(cx-n),
+:is(html, body).connectea-dark .connect-paginator-label:not(cx-n), :is(html, body).connectea-dark span.connect-paginator-label,
+:is(html, body).connectea-dark .mat-select-value:not(cx-n), :is(html, body).connectea-dark .mat-select-value-text:not(cx-n),
+:is(html, body).connectea-dark .mat-select-min-line:not(cx-n) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-:is(html, body).connectea-dark :is(mat-paginator, .mat-paginator, cnt-paginator, .cnt-paginator, .connect-paginator-container) :is(
-  .mat-form-field-underline,
-  .mat-form-field-ripple
-) {
+:is(html, body).connectea-dark :where(mat-paginator):not(.cx-n) .mat-form-field-underline,
+:is(html, body).connectea-dark :where(mat-paginator):not(.cx-n) .mat-form-field-ripple,
+:is(html, body).connectea-dark .mat-paginator .mat-form-field-underline, :is(html, body).connectea-dark .mat-paginator .mat-form-field-ripple,
+:is(html, body).connectea-dark :where(cnt-paginator):not(.cx-n) .mat-form-field-underline,
+:is(html, body).connectea-dark :where(cnt-paginator):not(.cx-n) .mat-form-field-ripple,
+:is(html, body).connectea-dark .cnt-paginator .mat-form-field-underline, :is(html, body).connectea-dark .cnt-paginator .mat-form-field-ripple,
+:is(html, body).connectea-dark .connect-paginator-container .mat-form-field-underline,
+:is(html, body).connectea-dark .connect-paginator-container .mat-form-field-ripple {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border-color: var(--cx-border, #36485e) !important;
   background-color: var(--cx-border, #36485e) !important;
 }
 
-:is(html, body).connectea-dark :is(mat-paginator, .mat-paginator, cnt-paginator, .cnt-paginator, .connect-paginator-container) .mat-select-arrow {
+:is(html, body).connectea-dark :where(mat-paginator):not(.cx-n) .mat-select-arrow, :is(html, body).connectea-dark .mat-paginator .mat-select-arrow,
+:is(html, body).connectea-dark :where(cnt-paginator):not(.cx-n) .mat-select-arrow, :is(html, body).connectea-dark .cnt-paginator .mat-select-arrow,
+:is(html, body).connectea-dark .connect-paginator-container .mat-select-arrow {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border-top-color: var(--cx-text-secondary, #cbd5e1) !important;
   border-right-color: transparent !important;
@@ -178,34 +153,88 @@ cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fl
   background-color: transparent !important;
 }
 
-:is(html, body).connectea-dark :is(.mat-paginator-decrement, .mat-paginator-increment, .mat-paginator-first, .mat-paginator-last) {
+:is(html, body).connectea-dark .mat-paginator-decrement, :is(html, body).connectea-dark .mat-paginator-increment,
+:is(html, body).connectea-dark .mat-paginator-first, :is(html, body).connectea-dark .mat-paginator-last {
   border-color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-:is(html, body).connectea-dark :is(mat-paginator, .mat-paginator, cnt-paginator, .cnt-paginator) :is(.mat-icon, mat-icon, .mat-paginator-icon) {
+:is(html, body).connectea-dark :where(mat-paginator):not(.cx-n) .mat-icon,
+:is(html, body).connectea-dark :where(mat-paginator):not(.cx-n) :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark :where(mat-paginator):not(.cx-n) .mat-paginator-icon, :is(html, body).connectea-dark .mat-paginator .mat-icon,
+:is(html, body).connectea-dark .mat-paginator :where(mat-icon):not(.cx-n), :is(html, body).connectea-dark .mat-paginator .mat-paginator-icon,
+:is(html, body).connectea-dark :where(cnt-paginator):not(.cx-n) .mat-icon,
+:is(html, body).connectea-dark :where(cnt-paginator):not(.cx-n) :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark :where(cnt-paginator):not(.cx-n) .mat-paginator-icon, :is(html, body).connectea-dark .cnt-paginator .mat-icon,
+:is(html, body).connectea-dark .cnt-paginator :where(mat-icon):not(.cx-n), :is(html, body).connectea-dark .cnt-paginator .mat-paginator-icon {
   color: var(--cx-text-primary, #f1f5f9) !important;
   fill: currentColor !important;
 }
 
-:is(html, body).connectea-dark :is(
-  button[disabled],
-  .mat-button-disabled,
-  .mat-disabled,
-  [aria-disabled="true"]
-) :is(.mat-icon, mat-icon, cnt-icon, .mat-paginator-icon, .mat-ligature-font, .material-icons, svg, .mat-paginator-decrement, .mat-paginator-increment, .mat-paginator-first, .mat-paginator-last) {
+:is(html, body).connectea-dark button[disabled] .mat-icon, :is(html, body).connectea-dark button[disabled] :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark button[disabled] :where(cnt-icon):not(.cx-n), :is(html, body).connectea-dark button[disabled] .mat-paginator-icon,
+:is(html, body).connectea-dark button[disabled] .mat-ligature-font, :is(html, body).connectea-dark button[disabled] .material-icons,
+:is(html, body).connectea-dark button[disabled] :where(svg):not(.cx-n), :is(html, body).connectea-dark button[disabled] .mat-paginator-decrement,
+:is(html, body).connectea-dark button[disabled] .mat-paginator-increment, :is(html, body).connectea-dark button[disabled] .mat-paginator-first,
+:is(html, body).connectea-dark button[disabled] .mat-paginator-last, :is(html, body).connectea-dark .mat-button-disabled:not(cx-n) .mat-icon,
+:is(html, body).connectea-dark .mat-button-disabled:not(cx-n) :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark .mat-button-disabled:not(cx-n) :where(cnt-icon):not(.cx-n),
+:is(html, body).connectea-dark .mat-button-disabled:not(cx-n) .mat-paginator-icon,
+:is(html, body).connectea-dark .mat-button-disabled:not(cx-n) .mat-ligature-font,
+:is(html, body).connectea-dark .mat-button-disabled:not(cx-n) .material-icons,
+:is(html, body).connectea-dark .mat-button-disabled:not(cx-n) :where(svg):not(.cx-n),
+:is(html, body).connectea-dark .mat-button-disabled:not(cx-n) .mat-paginator-decrement,
+:is(html, body).connectea-dark .mat-button-disabled:not(cx-n) .mat-paginator-increment,
+:is(html, body).connectea-dark .mat-button-disabled:not(cx-n) .mat-paginator-first,
+:is(html, body).connectea-dark .mat-button-disabled:not(cx-n) .mat-paginator-last, :is(html, body).connectea-dark .mat-disabled:not(cx-n) .mat-icon,
+:is(html, body).connectea-dark .mat-disabled:not(cx-n) :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark .mat-disabled:not(cx-n) :where(cnt-icon):not(.cx-n),
+:is(html, body).connectea-dark .mat-disabled:not(cx-n) .mat-paginator-icon, :is(html, body).connectea-dark .mat-disabled:not(cx-n) .mat-ligature-font,
+:is(html, body).connectea-dark .mat-disabled:not(cx-n) .material-icons, :is(html, body).connectea-dark .mat-disabled:not(cx-n) :where(svg):not(.cx-n),
+:is(html, body).connectea-dark .mat-disabled:not(cx-n) .mat-paginator-decrement,
+:is(html, body).connectea-dark .mat-disabled:not(cx-n) .mat-paginator-increment,
+:is(html, body).connectea-dark .mat-disabled:not(cx-n) .mat-paginator-first,
+:is(html, body).connectea-dark .mat-disabled:not(cx-n) .mat-paginator-last, :is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) .mat-icon,
+:is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) :where(cnt-icon):not(.cx-n),
+:is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) .mat-paginator-icon,
+:is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) .mat-ligature-font,
+:is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) .material-icons,
+:is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) :where(svg):not(.cx-n),
+:is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) .mat-paginator-decrement,
+:is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) .mat-paginator-increment,
+:is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) .mat-paginator-first,
+:is(html, body).connectea-dark [aria-disabled="true"]:not(cx-n) .mat-paginator-last {
   color: var(--cx-text-muted, #94a3b8) !important;
   border-color: var(--cx-border-subtle, #2e3c4e) !important;
   fill: currentColor !important;
   opacity: 0.65 !important;
 }
 
-:is(html, body).connectea-dark :is(
-  .toggle-trigger.toggle--grey-dark,
-  .toggle--grey-dark,
-  .c-toolbar-button.toggle--grey-dark,
-  .mat-button-base.toggle--grey-dark
-) :is(.mat-icon, mat-icon, cnt-icon, svg, .material-icons),
-:is(html, body).connectea-dark.eds.cvr.ngm .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-dark :is(.mat-icon, mat-icon, cnt-icon, svg, .material-icons) {
+:is(html, body).connectea-dark .toggle-trigger.toggle--grey-dark .mat-icon,
+:is(html, body).connectea-dark .toggle-trigger.toggle--grey-dark :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark .toggle-trigger.toggle--grey-dark :where(cnt-icon):not(.cx-n),
+:is(html, body).connectea-dark .toggle-trigger.toggle--grey-dark :where(svg):not(.cx-n),
+:is(html, body).connectea-dark .toggle-trigger.toggle--grey-dark .material-icons,
+:is(html, body).connectea-dark .toggle--grey-dark:not(.cx-n) .mat-icon,
+:is(html, body).connectea-dark .toggle--grey-dark:not(.cx-n) :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark .toggle--grey-dark:not(.cx-n) :where(cnt-icon):not(.cx-n),
+:is(html, body).connectea-dark .toggle--grey-dark:not(.cx-n) :where(svg):not(.cx-n),
+:is(html, body).connectea-dark .toggle--grey-dark:not(.cx-n) .material-icons,
+:is(html, body).connectea-dark .c-toolbar-button.toggle--grey-dark .mat-icon,
+:is(html, body).connectea-dark .c-toolbar-button.toggle--grey-dark :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark .c-toolbar-button.toggle--grey-dark :where(cnt-icon):not(.cx-n),
+:is(html, body).connectea-dark .c-toolbar-button.toggle--grey-dark :where(svg):not(.cx-n),
+:is(html, body).connectea-dark .c-toolbar-button.toggle--grey-dark .material-icons,
+:is(html, body).connectea-dark .mat-button-base.toggle--grey-dark .mat-icon,
+:is(html, body).connectea-dark .mat-button-base.toggle--grey-dark :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark .mat-button-base.toggle--grey-dark :where(cnt-icon):not(.cx-n),
+:is(html, body).connectea-dark .mat-button-base.toggle--grey-dark :where(svg):not(.cx-n),
+:is(html, body).connectea-dark .mat-button-base.toggle--grey-dark .material-icons,
+:is(html, body).connectea-dark.eds.cvr.ngm .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-dark .mat-icon,
+:is(html, body).connectea-dark.eds.cvr.ngm .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-dark :where(mat-icon):not(.cx-n),
+:is(html, body).connectea-dark.eds.cvr.ngm .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-dark :where(cnt-icon):not(.cx-n),
+:is(html, body).connectea-dark.eds.cvr.ngm .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-dark :where(svg):not(.cx-n),
+:is(html, body).connectea-dark.eds.cvr.ngm .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-dark .material-icons {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   fill: currentColor !important;
 }

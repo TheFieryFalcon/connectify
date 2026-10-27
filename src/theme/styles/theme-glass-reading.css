@@ -5,26 +5,25 @@
  * (theme-surface-base.css). Liquid Glass only.
  */
 
-/* The page around the view is clear; the unused id outranks the reading canvas rule (it lists #main-content) */
-html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :is(
-  #cx-specificity-anchor, .cvr-c-app-layout, .cvr-c-app-layout__body, #main-content
-):not(mat-dialog-container *):not(.mat-dialog-container *) {
+/* The page around the view is clear; an id weight (:not(#cx-n)) outranks the reading canvas rule (it lists #main-content) */
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :where(.cvr-c-app-layout):not(mat-dialog-container *):not(.mat-dialog-container *):not(#cx-n),
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :where(.cvr-c-app-layout__body):not(mat-dialog-container *):not(.mat-dialog-container *):not(#cx-n),
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] #main-content:not(mat-dialog-container *):not(.mat-dialog-container *) {
   background-color: transparent !important;
 }
 
 /* Connect's frame around the view (the .cnt-ng-zone wrapper from the side menu to the right edge) paints no fill
    or blur of its own */
-html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :is(
-  #cx-specificity-anchor, .cnt-ng-zone > div:has(cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view)
-):not(mat-dialog-container *):not(.mat-dialog-container *) {
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :where(.cnt-ng-zone > div:has(cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view)):not(mat-dialog-container *):not(.mat-dialog-container *):not(#cx-n) {
   background-color: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
 /* The views themselves (and a discussion's message body) stay clear */
-html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :is(
-  #cx-specificity-anchor, cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view, cnt-message-detail-view
-) {
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :where(cnt-notice-view):not(#cx-n),
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :where(cnt-discussion-view):not(#cx-n),
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :where(cnt-discussion-item-view):not(#cx-n),
+html.connectea-dark[data-connectea-theme]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-connectea-reading-view="true"] :where(cnt-message-detail-view):not(#cx-n) {
   background-color: transparent !important;
 }

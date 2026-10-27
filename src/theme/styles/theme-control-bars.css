@@ -7,22 +7,36 @@
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(mat-paginator, .connect-paginator-container, .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) :is(
-  .mat-paginator-page-size-label, .mat-paginator-range-label, .connect-paginator-label, .mat-select-value, .mat-checkbox-label
-) {
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-paginator-page-size-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-paginator-range-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .connect-paginator-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-select-value,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-checkbox-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-paginator-page-size-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-paginator-range-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .connect-paginator-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-select-value,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-checkbox-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) .mat-paginator-page-size-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) .mat-paginator-range-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) .connect-paginator-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) .mat-select-value,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) .mat-checkbox-label {
   color: #334155 !important;
 }
 
 /* Paginators and the Select All row sit on the page: the paging bar, its "Page N of M" box, the bar's wrapper and
    the Select All row paint no fill, edge or shadow in every dark theme and in Light with a wallpaper (a wrapper
-   holding a table or an empty state keeps its own). The unused id outranks the paging bar fills in
+   holding a table or an empty state keeps its own). An id weight (:not(#cx-n)) outranks the paging bar fills in
    theme-dialogs-paginator.css, whose :not(:has()) weigh more */
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :is(
-  #cx-specificity-anchor, mat-paginator, .mat-paginator, .mat-paginator-container, .mat-paginator-outer-container, .connect-paginator-container,
-  cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content)),
-  cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content)) .container-fluid,
-  .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)
-) {
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(mat-paginator):not(#cx-n),
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.mat-paginator):not(#cx-n),
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.mat-paginator-container):not(#cx-n),
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.mat-paginator-outer-container):not(#cx-n),
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.connect-paginator-container):not(#cx-n),
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))):not(#cx-n),
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content)) .container-fluid):not(#cx-n),
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)):not(#cx-n) {
   background-color: transparent !important;
   border-top-color: transparent !important;
   box-shadow: none !important;

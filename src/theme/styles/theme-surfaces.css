@@ -5,34 +5,21 @@
 /* --------------------------------------------------------------------------
    27. Learning Content, Resource Panels & Tree Structures
    -------------------------------------------------------------------------- */
-.connectea-dark :is(
-  .cvr-c-learning-area,
-  .cvr-c-learning-area .cvr-c-expansion-panel__body,
-  .cvr-c-learning-content-select-container,
-  .cvr-c-learning-content-select-item
-) {
+.connectea-dark .cvr-c-learning-area:not(.cx-n), .connectea-dark :is(.cvr-c-learning-area .cvr-c-expansion-panel__body),
+.connectea-dark .cvr-c-learning-content-select-container:not(.cx-n), .connectea-dark .cvr-c-learning-content-select-item:not(.cx-n) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-primary, #e2e8f0) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-resources-panel,
-  .cvr-c-featured-resources,
-  .cvr-c-featured-resources__content
-) {
+.connectea-dark .cvr-c-resources-panel, .connectea-dark .cvr-c-featured-resources, .connectea-dark .cvr-c-featured-resources__content {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-tree-panel,
-  .cvr-c-tree-row,
-  .cvr-c-tree-list,
-  .v-tree,
-  .v-treetable
-) {
+.connectea-dark .cvr-c-tree-panel, .connectea-dark .cvr-c-tree-row, .connectea-dark .cvr-c-tree-list, .connectea-dark .v-tree,
+.connectea-dark .v-treetable {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-primary, #e2e8f0) !important;
   border-color: var(--cx-border, #36485e) !important;
@@ -42,7 +29,7 @@
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark :is(.v-tree-node-caption, .cvr-c-tree-row):hover {
+.connectea-dark .v-tree-node-caption:hover, .connectea-dark .cvr-c-tree-row:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
 }
@@ -63,12 +50,13 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
 }
 
-.connectea-dark :is(.v-Notification-caption, .v-Notification:not(.v-Notification-system) .v-Notification-caption) {
+.connectea-dark .v-Notification-caption:not(.cx-n):not(.cx-n),
+.connectea-dark :is(.v-Notification:not(.v-Notification-system) .v-Notification-caption) {
   color: var(--cx-text-primary, #f8fafc) !important;
   font-weight: 700 !important;
 }
 
-.connectea-dark :is(.v-Notification-description, .v-Notification-details):not(.v-Notification-system *) {
+.connectea-dark .v-Notification-description:not(.v-Notification-system *), .connectea-dark .v-Notification-details:not(.v-Notification-system *) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
@@ -80,64 +68,123 @@
   border-left: 4px solid #ef4444 !important;
 }
 
-:is(.v-Notification-system, .v-Notification-system *) {
+.v-Notification-system, :is(.v-Notification-system *) {
   all: revert !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-notifications,
-  .cvr-c-notifications__heading,
-  .cvr-c-notifications__item
-) {
+.connectea-dark .cvr-c-notifications, .connectea-dark .cvr-c-notifications__heading, .connectea-dark .cvr-c-notifications__item {
   background-color: var(--cx-surface-elevated, #1e2632) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark :is(.alert, .alert-primary, .alert-secondary, .alert-light, .alert-dark):not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
+.connectea-dark .alert:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert),
+.connectea-dark .alert-primary:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert),
+.connectea-dark .alert-secondary:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert),
+.connectea-dark .alert-light:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert),
+.connectea-dark .alert-dark:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   color: var(--cx-text-primary, #e2e8f0) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
   border-radius: 6px !important;
 }
 
-.connectea-dark :is(.alert-warning, .portlet-msg-alert):not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
+.connectea-dark .alert-warning:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert),
+.connectea-dark .portlet-msg-alert:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
   background-color: #2a2415 !important;
   border-color: #785a15 !important;
   color: #fde68a !important;
 }
 
-.connectea-dark :is(.alert-danger, .portlet-msg-error):not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
+.connectea-dark .alert-danger:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert),
+.connectea-dark .portlet-msg-error:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
   background-color: #2b171a !important;
   border-color: #7f2329 !important;
   color: #fca5a5 !important;
 }
 
-.connectea-dark :is(.alert-success, .portlet-msg-success):not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
+.connectea-dark .alert-success:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert),
+.connectea-dark .portlet-msg-success:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
   background-color: #14281c !important;
   border-color: #226738 !important;
   color: #86efac !important;
 }
 
-.connectea-dark :is(.alert-info, .portlet-msg-info, .portlet-msg-help):not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
+.connectea-dark .alert-info:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert),
+.connectea-dark .portlet-msg-info:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert),
+.connectea-dark .portlet-msg-help:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert) {
   background-color: #15263a !important;
   border-color: #2b5480 !important;
   color: #93c5fd !important;
 }
 
 /* Connect Session & Timeout Alerts: Preserved in native styling without dark theme overrides */
-:is(html, body).connectea-dark :is(.popup-alert-notice, .popup-alert-warning, .session-timeout, .portal-session-warning, .alert-session, .liferay-session-warning, [class*="session-timeout"], [class*="session-warning"], [class*="timeout-alert"], [id*="sessionTimeout"], [id*="session-timeout"], [id*="sessionWarning"], .cvr-c-timeout-alert, .cvr-c-session-alert) {
+:is(html, body).connectea-dark .popup-alert-notice, :is(html, body).connectea-dark .popup-alert-warning,
+:is(html, body).connectea-dark .session-timeout, :is(html, body).connectea-dark .portal-session-warning,
+:is(html, body).connectea-dark .alert-session, :is(html, body).connectea-dark .liferay-session-warning,
+:is(html, body).connectea-dark [class*="session-timeout"], :is(html, body).connectea-dark [class*="session-warning"],
+:is(html, body).connectea-dark [class*="timeout-alert"], :is(html, body).connectea-dark [id*="sessionTimeout"],
+:is(html, body).connectea-dark [id*="session-timeout"], :is(html, body).connectea-dark [id*="sessionWarning"],
+:is(html, body).connectea-dark .cvr-c-timeout-alert, :is(html, body).connectea-dark .cvr-c-session-alert {
   background-color: #fff3cd !important;
   color: #856404 !important;
   border: 1px solid #ffeeba !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
 }
 
-:is(html, body).connectea-dark :is(.popup-alert-notice, .popup-alert-warning, .session-timeout, .portal-session-warning, .alert-session, .liferay-session-warning, [id*="sessionTimeout"], [id*="session-timeout"], [id*="sessionWarning"], .cvr-c-timeout-alert, .cvr-c-session-alert) :is(span, p, div, label, strong, h1, h2, h3, h4) {
+:is(html, body).connectea-dark .popup-alert-notice span, :is(html, body).connectea-dark .popup-alert-notice p,
+:is(html, body).connectea-dark .popup-alert-notice div, :is(html, body).connectea-dark .popup-alert-notice label,
+:is(html, body).connectea-dark .popup-alert-notice strong, :is(html, body).connectea-dark .popup-alert-notice h1,
+:is(html, body).connectea-dark .popup-alert-notice h2, :is(html, body).connectea-dark .popup-alert-notice h3,
+:is(html, body).connectea-dark .popup-alert-notice h4, :is(html, body).connectea-dark .popup-alert-warning span,
+:is(html, body).connectea-dark .popup-alert-warning p, :is(html, body).connectea-dark .popup-alert-warning div,
+:is(html, body).connectea-dark .popup-alert-warning label, :is(html, body).connectea-dark .popup-alert-warning strong,
+:is(html, body).connectea-dark .popup-alert-warning h1, :is(html, body).connectea-dark .popup-alert-warning h2,
+:is(html, body).connectea-dark .popup-alert-warning h3, :is(html, body).connectea-dark .popup-alert-warning h4,
+:is(html, body).connectea-dark .session-timeout span, :is(html, body).connectea-dark .session-timeout p,
+:is(html, body).connectea-dark .session-timeout div, :is(html, body).connectea-dark .session-timeout label,
+:is(html, body).connectea-dark .session-timeout strong, :is(html, body).connectea-dark .session-timeout h1,
+:is(html, body).connectea-dark .session-timeout h2, :is(html, body).connectea-dark .session-timeout h3,
+:is(html, body).connectea-dark .session-timeout h4, :is(html, body).connectea-dark .portal-session-warning span,
+:is(html, body).connectea-dark .portal-session-warning p, :is(html, body).connectea-dark .portal-session-warning div,
+:is(html, body).connectea-dark .portal-session-warning label, :is(html, body).connectea-dark .portal-session-warning strong,
+:is(html, body).connectea-dark .portal-session-warning h1, :is(html, body).connectea-dark .portal-session-warning h2,
+:is(html, body).connectea-dark .portal-session-warning h3, :is(html, body).connectea-dark .portal-session-warning h4,
+:is(html, body).connectea-dark .alert-session span, :is(html, body).connectea-dark .alert-session p,
+:is(html, body).connectea-dark .alert-session div, :is(html, body).connectea-dark .alert-session label,
+:is(html, body).connectea-dark .alert-session strong, :is(html, body).connectea-dark .alert-session h1,
+:is(html, body).connectea-dark .alert-session h2, :is(html, body).connectea-dark .alert-session h3, :is(html, body).connectea-dark .alert-session h4,
+:is(html, body).connectea-dark .liferay-session-warning span, :is(html, body).connectea-dark .liferay-session-warning p,
+:is(html, body).connectea-dark .liferay-session-warning div, :is(html, body).connectea-dark .liferay-session-warning label,
+:is(html, body).connectea-dark .liferay-session-warning strong, :is(html, body).connectea-dark .liferay-session-warning h1,
+:is(html, body).connectea-dark .liferay-session-warning h2, :is(html, body).connectea-dark .liferay-session-warning h3,
+:is(html, body).connectea-dark .liferay-session-warning h4, :is(html, body).connectea-dark [id*="sessionTimeout"] span,
+:is(html, body).connectea-dark [id*="sessionTimeout"] p, :is(html, body).connectea-dark [id*="sessionTimeout"] div,
+:is(html, body).connectea-dark [id*="sessionTimeout"] label, :is(html, body).connectea-dark [id*="sessionTimeout"] strong,
+:is(html, body).connectea-dark [id*="sessionTimeout"] h1, :is(html, body).connectea-dark [id*="sessionTimeout"] h2,
+:is(html, body).connectea-dark [id*="sessionTimeout"] h3, :is(html, body).connectea-dark [id*="sessionTimeout"] h4,
+:is(html, body).connectea-dark [id*="session-timeout"] span, :is(html, body).connectea-dark [id*="session-timeout"] p,
+:is(html, body).connectea-dark [id*="session-timeout"] div, :is(html, body).connectea-dark [id*="session-timeout"] label,
+:is(html, body).connectea-dark [id*="session-timeout"] strong, :is(html, body).connectea-dark [id*="session-timeout"] h1,
+:is(html, body).connectea-dark [id*="session-timeout"] h2, :is(html, body).connectea-dark [id*="session-timeout"] h3,
+:is(html, body).connectea-dark [id*="session-timeout"] h4, :is(html, body).connectea-dark [id*="sessionWarning"] span,
+:is(html, body).connectea-dark [id*="sessionWarning"] p, :is(html, body).connectea-dark [id*="sessionWarning"] div,
+:is(html, body).connectea-dark [id*="sessionWarning"] label, :is(html, body).connectea-dark [id*="sessionWarning"] strong,
+:is(html, body).connectea-dark [id*="sessionWarning"] h1, :is(html, body).connectea-dark [id*="sessionWarning"] h2,
+:is(html, body).connectea-dark [id*="sessionWarning"] h3, :is(html, body).connectea-dark [id*="sessionWarning"] h4,
+:is(html, body).connectea-dark .cvr-c-timeout-alert span, :is(html, body).connectea-dark .cvr-c-timeout-alert p,
+:is(html, body).connectea-dark .cvr-c-timeout-alert div, :is(html, body).connectea-dark .cvr-c-timeout-alert label,
+:is(html, body).connectea-dark .cvr-c-timeout-alert strong, :is(html, body).connectea-dark .cvr-c-timeout-alert h1,
+:is(html, body).connectea-dark .cvr-c-timeout-alert h2, :is(html, body).connectea-dark .cvr-c-timeout-alert h3,
+:is(html, body).connectea-dark .cvr-c-timeout-alert h4, :is(html, body).connectea-dark .cvr-c-session-alert span,
+:is(html, body).connectea-dark .cvr-c-session-alert p, :is(html, body).connectea-dark .cvr-c-session-alert div,
+:is(html, body).connectea-dark .cvr-c-session-alert label, :is(html, body).connectea-dark .cvr-c-session-alert strong,
+:is(html, body).connectea-dark .cvr-c-session-alert h1, :is(html, body).connectea-dark .cvr-c-session-alert h2,
+:is(html, body).connectea-dark .cvr-c-session-alert h3, :is(html, body).connectea-dark .cvr-c-session-alert h4 {
   color: #856404 !important;
 }
 
-.connectea-dark :is(.popover, .popover-body, .ui-tooltip) {
+.connectea-dark .popover, .connectea-dark .popover-body, .connectea-dark .ui-tooltip {
   background-color: var(--cx-surface-elevated, #18202b) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border: 1px solid var(--cx-border, #4a617a) !important;
@@ -167,67 +214,27 @@
 /* --------------------------------------------------------------------------
    29. Badges, Status Labels, Tags, Switches & Wizard Steps
    -------------------------------------------------------------------------- */
-.connectea-dark :is(.badge, .badge-item, .label, .label-item):not(#connectify-sidebar *) {
+.connectea-dark .badge:not(#connectify-sidebar *), .connectea-dark .badge-item:not(#connectify-sidebar *),
+.connectea-dark .label:not(#connectify-sidebar *), .connectea-dark .label-item:not(#connectify-sidebar *) {
   background-color: var(--cx-surface-secondary, #24303f) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border: 1px solid var(--cx-border, #4a617a) !important;
 }
 
-.connectea-dark :is(.badge-light, .label-light, .badge-secondary, .label-secondary) {
+.connectea-dark .badge-light, .connectea-dark .label-light, .connectea-dark .badge-secondary, .connectea-dark .label-secondary {
   background-color: var(--cx-surface-secondary, #24303f) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border-color: var(--cx-border, #4a617a) !important;
 }
 
-.connectea-dark :is(.badge-primary, .label-primary, .label-inverse-primary) {
+.connectea-dark .badge-primary, .connectea-dark .label-primary, .connectea-dark .label-inverse-primary {
   background-color: var(--cx-accent, #2563eb) !important;
   color: var(--cx-accent-text, #ffffff) !important;
   border-color: var(--cx-accent-hover, #3b82f6) !important;
 }
 
-.connectea-dark :is(.badge-success, .label-success, .label-inverse-success) {
+.connectea-dark .badge-success, .connectea-dark .label-success, .connectea-dark .label-inverse-success {
   background-color: #166534 !important;
   color: #dcfce7 !important;
   border-color: #22c55e !important;
-}
-
-.connectea-dark :is(.badge-warning, .label-warning, .label-inverse-warning) {
-  background-color: #854d0e !important;
-  color: #fef9c3 !important;
-  border-color: #eab308 !important;
-}
-
-.connectea-dark :is(.badge-danger, .label-danger, .label-inverse-danger) {
-  background-color: #991b1b !important;
-  color: #fee2e2 !important;
-  border-color: #ef4444 !important;
-}
-
-.connectea-dark :is(.badge-info, .label-info, .label-inverse-info) {
-  background-color: #1e40af !important;
-  color: #dbeafe !important;
-  border-color: #3b82f6 !important;
-}
-
-.connectea-dark :is(.cvr-c-status-label, .cvr-c-entitystatus) {
-  background-color: var(--cx-surface-secondary, #24303f) !important;
-  color: var(--cx-text-primary, #f1f5f9) !important;
-  border: 1px solid var(--cx-border, #4a617a) !important;
-  border-radius: 4px !important;
-}
-
-.connectea-dark .cvr-c-status-label--draft {
-  background-color: #334155 !important;
-  color: var(--cx-text-secondary, #e2e8f0) !important;
-}
-
-.connectea-dark .cvr-c-status-label--featured {
-  background-color: #854d0e !important;
-  color: #fef08a !important;
-}
-
-.connectea-dark .cvr-c-status-label--removed {
-  background-color: var(--cx-surface-bg, #1e2632) !important;
-  color: var(--cx-text-muted, #94a3b8) !important;
-  border-color: var(--cx-border, #36485e) !important;
 }

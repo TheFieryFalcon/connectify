@@ -30,7 +30,8 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
 }
 
-.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) {
+.connectea-dark .connectea-panel, .connectea-dark .connectea-distribution, .connectea-dark .connectea-result,
+.connectea-dark .connectea-panel-distribution, .connectea-dark .connectea-panel-standing {
   font-weight: 400 !important;
 }
 
@@ -38,8 +39,9 @@
   color: var(--cx-text-secondary, #cfe2f5) !important;
 }
 
-:is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong,
-.connectea-dark :is(.connectea-panel, .connectea-distribution, .connectea-result, .connectea-panel-distribution, .connectea-panel-standing) strong {
+.connectea-panel strong, .connectea-distribution strong, .connectea-result strong, .connectea-panel-distribution strong,
+.connectea-panel-standing strong, .connectea-dark .connectea-panel strong, .connectea-dark .connectea-distribution strong,
+.connectea-dark .connectea-result strong, .connectea-dark .connectea-panel-distribution strong, .connectea-dark .connectea-panel-standing strong {
   font-family: inherit !important;
   font-weight: 700 !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
@@ -76,7 +78,7 @@
 /* --------------------------------------------------------------------------
    9. Summary Total Mark & Grade Box (.cvr-c-task__marks)
    -------------------------------------------------------------------------- */
-.connectea-dark :is(.cvr-c-task__marks, .cvr-c-task__mark) {
+.connectea-dark .cvr-c-task__marks, .connectea-dark .cvr-c-task__mark {
   background-color: var(--cx-surface-secondary, #161e29) !important;
   border-color: var(--cx-border, #3d5066) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
@@ -90,7 +92,7 @@
   border-radius: 0 !important;
 }
 
-.connectea-dark :is(.cvr-c-task__marks.eds-s-is-last, .cvr-c-task__marks:last-child) {
+.connectea-dark .cvr-c-task__marks.eds-s-is-last, .connectea-dark .cvr-c-task__marks:last-child {
   border-bottom: none !important;
 }
 
@@ -102,7 +104,7 @@
   border-radius: 0 !important;
 }
 
-.connectea-dark :is(.cvr-c-task__mark.eds-s-is-last, .cvr-c-task__mark:last-child) {
+.connectea-dark .cvr-c-task__mark.eds-s-is-last, .connectea-dark .cvr-c-task__mark:last-child {
   border-right: none !important;
 }
 
@@ -112,9 +114,14 @@
   border: 1px solid var(--cx-border, #3d5066) !important;
 }
 
-/* Card header links (Classes "View All"): the theme's button colours, not Connect's class green. The anchor
-   outranks the positive (View) button rule in theme-feed.css, which also matches buttons in a mat-card */
-.connectea-dark:not(cx-n) :is(mat-card-header, .mat-card-header) :is(#cx-specificity-anchor, .mat-card-button, button[class*="card-button"], .mat-button) {
+/* Card header links (Classes "View All"): the theme's button colours, not Connect's class green. An id weight
+   (:not(#cx-n)) outranks the positive (View) button rule in theme-feed.css, which also matches buttons in a mat-card */
+.connectea-dark:not(cx-n) :where(mat-card-header):not(.cx-n) :where(.mat-card-button):not(#cx-n),
+.connectea-dark:not(cx-n) :where(mat-card-header):not(.cx-n) :where(button[class*="card-button"]):not(#cx-n),
+.connectea-dark:not(cx-n) :where(mat-card-header):not(.cx-n) :where(.mat-button):not(#cx-n),
+.connectea-dark:not(cx-n) .mat-card-header :where(.mat-card-button):not(#cx-n),
+.connectea-dark:not(cx-n) .mat-card-header :where(button[class*="card-button"]):not(#cx-n),
+.connectea-dark:not(cx-n) .mat-card-header :where(.mat-button):not(#cx-n) {
   height: 56px !important;
   line-height: 56px !important;
   border-radius: 0 !important;
@@ -126,51 +133,57 @@
   color: var(--cx-button-text, #f1f5f9) !important;
 }
 
-.connectea-dark:not(cx-n) :is(mat-card-header, .mat-card-header) :is(#cx-specificity-anchor, .mat-card-button, button[class*="card-button"], .mat-button):hover {
+.connectea-dark:not(cx-n) :where(mat-card-header):not(.cx-n) :where(.mat-card-button):hover:not(#cx-n),
+.connectea-dark:not(cx-n) :where(mat-card-header):not(.cx-n) :where(button[class*="card-button"]):hover:not(#cx-n),
+.connectea-dark:not(cx-n) :where(mat-card-header):not(.cx-n) :where(.mat-button):hover:not(#cx-n),
+.connectea-dark:not(cx-n) .mat-card-header :where(.mat-card-button):hover:not(#cx-n),
+.connectea-dark:not(cx-n) .mat-card-header :where(button[class*="card-button"]):hover:not(#cx-n),
+.connectea-dark:not(cx-n) .mat-card-header :where(.mat-button):hover:not(#cx-n) {
   background-color: var(--cx-button-hover, #2c3b4e) !important;
   color: var(--cx-button-text, #f1f5f9) !important;
 }
 
-:is(.connectea-dark, body, html) .cvr-c-tasks :is(
-  .cvr-c-task__mark-score,
-  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
-  .cvr-c-task__mark > :is(.v-label, span, div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)
-) {
+:is(.connectea-dark, body, html) .cvr-c-tasks .cvr-c-task__mark-score:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html) .cvr-c-tasks :is(.cvr-c-task__marks .cvr-c-task__mark .v-label:first-child):not(.cx-n),
+:is(.connectea-dark, body, html) .cvr-c-tasks :is(.cvr-c-task__marks .cvr-c-task__mark :where(span):first-child:not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html) .cvr-c-tasks :is(.cvr-c-task__marks .cvr-c-task__mark :where(div):first-child:not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html) .cvr-c-tasks :is(.cvr-c-task__mark > .v-label:first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)),
+:is(.connectea-dark, body, html) .cvr-c-tasks :is(.cvr-c-task__mark > :where(span):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of):not(.cx-n)),
+:is(.connectea-dark, body, html) .cvr-c-tasks :is(.cvr-c-task__mark > :where(div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of):not(.cx-n)) {
   font-weight: 700 !important;
 }
 
-:is(.connectea-dark, body, html) :is(
-  .cvr-c-task__score,
-  .cvr-c-task__grade,
-  .cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark, .cvr-c-task__mark *, .cvr-c-task__score, .cvr-c-task__grade, .cvr-c-task__marks, .cvr-c-task__marks *)
-) {
+:is(.connectea-dark, body, html) .cvr-c-task__score:not(.cx-n):not(.cx-n), :is(.connectea-dark, body, html) .cvr-c-task__grade:not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__mark),
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark *)),
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__score),
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__grade),
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__marks),
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__marks *)) {
   font-weight: 400 !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-task__score,
-  .cvr-c-task__grade,
-  .cvr-c-task__mark-score,
-  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child,
-  .cvr-c-task__mark > :is(.v-label, span, div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)
-) {
+.connectea-dark .cvr-c-task__score:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-task__grade:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-task__mark-score:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark :is(.cvr-c-task__marks .cvr-c-task__mark .v-label:first-child):not(.cx-n),
+.connectea-dark :is(.cvr-c-task__marks .cvr-c-task__mark :where(span):first-child:not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task__marks .cvr-c-task__mark :where(div):first-child:not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task__mark > .v-label:first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)),
+.connectea-dark :is(.cvr-c-task__mark > :where(span):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of):not(.cx-n)),
+.connectea-dark :is(.cvr-c-task__mark > :where(div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of):not(.cx-n)) {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-:is(.connectea-dark, body, html) :is(
-  .cvr-c-task__outof,
-  .cvr-c-task__mark-out-of,
-  .cvr-c-task__mark-label,
-  .cvr-c-task__marks .cvr-c-task__mark .v-label:nth-child(2)
-) {
+:is(.connectea-dark, body, html) .cvr-c-task__outof:not(.cx-n):not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html) .cvr-c-task__mark-out-of:not(.cx-n):not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html) .cvr-c-task__mark-label:not(.cx-n):not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html) :is(.cvr-c-task__marks .cvr-c-task__mark .v-label:nth-child(2)) {
   font-weight: 400 !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-task__outof,
-  .cvr-c-task__mark-out-of,
-  .cvr-c-task__mark-label,
-  .cvr-c-task__marks .cvr-c-task__mark .v-label:nth-child(2)
-) {
+.connectea-dark .cvr-c-task__outof:not(.cx-n):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task__mark-out-of:not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-task__mark-label:not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark :is(.cvr-c-task__marks .cvr-c-task__mark .v-label:nth-child(2)) {
   color: var(--cx-text-muted, #94a3b8) !important;
 }

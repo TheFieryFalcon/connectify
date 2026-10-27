@@ -1,0 +1,242 @@
+/**
+ * Connectify Theme: reports year selector, light-mode wallpaper containers, glass headers and menus (part 2, continued from theme-reports-menus.css)
+ */
+
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .eds-c-tabs__tab--active:not(.cx-n) :where(li):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .eds-c-tabs__tab--active:not(.cx-n) .mat-tab-label-content,
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .eds-c-tabs__tab[aria-selected="true"] :where(span):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .eds-c-tabs__tab[aria-selected="true"] :where(a):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .eds-c-tabs__tab[aria-selected="true"] :where(button):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .eds-c-tabs__tab[aria-selected="true"] :where(li):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .eds-c-tabs__tab[aria-selected="true"] .mat-tab-label-content,
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed__tab--active:not(.cx-n) :where(span):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed__tab--active:not(.cx-n) :where(a):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed__tab--active:not(.cx-n) :where(button):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed__tab--active:not(.cx-n) :where(li):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed__tab--active:not(.cx-n) .mat-tab-label-content,
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-label[aria-selected="true"] :where(span):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-label[aria-selected="true"] :where(a):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-label[aria-selected="true"] :where(button):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-label[aria-selected="true"] :where(li):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-label[aria-selected="true"] .mat-tab-label-content,
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-link[aria-selected="true"] :where(span):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-link[aria-selected="true"] :where(a):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-link[aria-selected="true"] :where(button):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-link[aria-selected="true"] :where(li):not(.cx-n),
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-link[aria-selected="true"] .mat-tab-label-content {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+/* Liquid Glass Mode: Frosted Translucent Headers Across Light and Dark Modes */
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) :where(mat-toolbar):not(.cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .mat-toolbar,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) :where(mat-tab-header):not(.cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .mat-tab-header,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .mat-tab-nav-bar,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .cvr-c-feed-header,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .cvr-c-feed-header__tabs,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .cvr-c-feed__tabs,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .eds-c-tabs,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .cvr-c-sub-header,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .cvr-c-subheader,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .eds-c-sub-header,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .cvr-c-service-bar,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html:not(.connectea-dark), body:not(.connectea-dark)) .cvr-c-service-bar__container {
+  background-color: rgba(255, 255, 255, var(--cx-glass-opacity, 0.75)) !important;
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+}
+
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(mat-toolbar):not(.cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .mat-toolbar,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(mat-tab-header):not(.cx-n),
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .mat-tab-header,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .mat-tab-nav-bar,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cvr-c-feed-header,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cvr-c-feed-header__tabs,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cvr-c-feed__tabs,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .eds-c-tabs,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cvr-c-sub-header,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cvr-c-subheader,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .eds-c-sub-header,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cvr-c-service-bar,
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cvr-c-service-bar__container {
+  background-color: color-mix(in srgb, color-mix(in srgb, var(--cx-canvas-bg, #0b1120) 92%, var(--cx-text-primary, #ffffff)) calc(var(--cx-glass-opacity, 0.75) * 100%), transparent) !important;
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+}
+
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n), .connectea-dark:not(cx-n) .mat-toolbar,
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n), .connectea-dark:not(cx-n) .mat-tab-header, .connectea-dark:not(cx-n) .cvr-c-reports,
+.connectea-dark:not(cx-n) :is(.cvr-c-reports *), .connectea-dark:not(cx-n) .cvr-c-report-years, .connectea-dark:not(cx-n) :is(.cvr-c-report-years *),
+.connectea-dark:not(cx-n) .cvr-c-report-year, .connectea-dark:not(cx-n) .cvr-c-year-selector, .connectea-dark:not(cx-n) :is(.cvr-c-year-selector *),
+.connectea-dark:not(cx-n) .cvr-c-reporting-period, .connectea-dark:not(cx-n) .cvr-c-report-header, .connectea-dark:not(cx-n) .cvr-c-sub-header,
+.connectea-dark:not(cx-n) .cvr-c-subheader, .connectea-dark:not(cx-n) [class*="year-selector"], .connectea-dark:not(cx-n) [class*="report-year"] {
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border-color: var(--cx-border, #36485e) !important;
+}
+
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) :where(div):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) :where(span):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) :where(p):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) :where(h1):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) :where(h2):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) :where(h3):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) :where(h4):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) :where(strong):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) :where(a):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) :where(label):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n) .mat-toolbar-row:not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button),
+.connectea-dark:not(cx-n) .mat-toolbar :where(div):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-toolbar :where(span):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-toolbar :where(p):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-toolbar :where(h1):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-toolbar :where(h2):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-toolbar :where(h3):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-toolbar :where(h4):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-toolbar :where(strong):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-toolbar :where(a):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-toolbar :where(label):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-toolbar .mat-toolbar-row:not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) :where(div):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) :where(span):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) :where(p):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) :where(h1):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) :where(h2):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) :where(h3):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) :where(h4):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) :where(strong):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) :where(a):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) :where(label):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) .mat-toolbar-row:not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button),
+.connectea-dark:not(cx-n) .mat-tab-header :where(div):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header :where(span):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header :where(p):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header :where(h1):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header :where(h2):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header :where(h3):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header :where(h4):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header :where(strong):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header :where(a):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header :where(label):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header .mat-toolbar-row:not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button),
+.connectea-dark:not(cx-n) .cvr-c-reports :where(div):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-reports :where(span):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-reports :where(p):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-reports :where(h1):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-reports :where(h2):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-reports :where(h3):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-reports :where(h4):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-reports :where(strong):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-reports :where(a):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-reports :where(label):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-reports .mat-toolbar-row:not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button),
+.connectea-dark:not(cx-n) .cvr-c-report-years :where(div):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-report-years :where(span):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-report-years :where(p):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-report-years :where(h1):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-report-years :where(h2):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-report-years :where(h3):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-report-years :where(h4):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-report-years :where(strong):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-report-years :where(a):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-report-years :where(label):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-report-years .mat-toolbar-row:not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button),
+.connectea-dark:not(cx-n) .cvr-c-year-selector :where(div):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-year-selector :where(span):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-year-selector :where(p):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-year-selector :where(h1):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-year-selector :where(h2):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-year-selector :where(h3):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-year-selector :where(h4):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-year-selector :where(strong):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-year-selector :where(a):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-year-selector :where(label):not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-year-selector .mat-toolbar-row:not([class*="button"]):not([class*="btn"]):not([role="button"]):not(.cvr-c-icon-button) {
+  background-color: transparent !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark :where(mat-toolbar):not(.cx-n) :where(button):not(.cx-n), .connectea-dark :where(mat-toolbar):not(.cx-n) .v-button,
+.connectea-dark :where(mat-toolbar):not(.cx-n) :where(a):not(.cx-n), .connectea-dark :where(mat-toolbar):not(.cx-n) .mat-button,
+.connectea-dark .mat-toolbar :where(button):not(.cx-n), .connectea-dark .mat-toolbar .v-button, .connectea-dark .mat-toolbar :where(a):not(.cx-n),
+.connectea-dark .mat-toolbar .mat-button, .connectea-dark .cvr-c-reports :where(button):not(.cx-n), .connectea-dark .cvr-c-reports .v-button,
+.connectea-dark .cvr-c-reports :where(a):not(.cx-n), .connectea-dark .cvr-c-reports .mat-button,
+.connectea-dark .cvr-c-report-years :where(button):not(.cx-n), .connectea-dark .cvr-c-report-years .v-button,
+.connectea-dark .cvr-c-report-years :where(a):not(.cx-n), .connectea-dark .cvr-c-report-years .mat-button,
+.connectea-dark .cvr-c-year-selector :where(button):not(.cx-n), .connectea-dark .cvr-c-year-selector .v-button,
+.connectea-dark .cvr-c-year-selector :where(a):not(.cx-n), .connectea-dark .cvr-c-year-selector .mat-button {
+  background-color: var(--cx-button-bg, #24303f) !important;
+  color: var(--cx-button-text, #f8fafc) !important;
+  border: 1px solid var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark :where(mat-toolbar):not(.cx-n) :where(button):hover:not(.cx-n), .connectea-dark :where(mat-toolbar):not(.cx-n) .v-button:hover,
+.connectea-dark :where(mat-toolbar):not(.cx-n) :where(a):hover:not(.cx-n), .connectea-dark :where(mat-toolbar):not(.cx-n) .mat-button:hover,
+.connectea-dark .mat-toolbar :where(button):hover:not(.cx-n), .connectea-dark .mat-toolbar .v-button:hover,
+.connectea-dark .mat-toolbar :where(a):hover:not(.cx-n), .connectea-dark .mat-toolbar .mat-button:hover,
+.connectea-dark .cvr-c-reports :where(button):hover:not(.cx-n), .connectea-dark .cvr-c-reports .v-button:hover,
+.connectea-dark .cvr-c-reports :where(a):hover:not(.cx-n), .connectea-dark .cvr-c-reports .mat-button:hover,
+.connectea-dark .cvr-c-report-years :where(button):hover:not(.cx-n), .connectea-dark .cvr-c-report-years .v-button:hover,
+.connectea-dark .cvr-c-report-years :where(a):hover:not(.cx-n), .connectea-dark .cvr-c-report-years .mat-button:hover,
+.connectea-dark .cvr-c-year-selector :where(button):hover:not(.cx-n), .connectea-dark .cvr-c-year-selector .v-button:hover,
+.connectea-dark .cvr-c-year-selector :where(a):hover:not(.cx-n), .connectea-dark .cvr-c-year-selector .mat-button:hover {
+  background-color: var(--cx-surface-hover, #313f50) !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
+  border-color: var(--cx-border-strong, #5c7899) !important;
+}
+
+/* --------------------------------------------------------------------------
+   19. General Menus, Interactive Elements & Links (3.1.14 Parity)
+   -------------------------------------------------------------------------- */
+.connectea-dark .cvr-c-primary-navigation, .connectea-dark .cvr-c-primary-menu, .connectea-dark .cvr-c-service-menu,
+.connectea-dark .cvr-c-category-menu {
+  background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
+}
+
+.connectea-dark .cvr-c-service-menu__wrapper, .connectea-dark .cvr-c-service-menu__list, .connectea-dark .cvr-c-primary-menu__body,
+.connectea-dark .cvr-c-primary-menu__list, .connectea-dark .cvr-c-category-menu__wrapper {
+  background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
+}
+
+/* Menu rows show their menu's own surface (the category drawer uses the elevated surface, not the nav colour), so
+   no row draws a box behind its label; hover and active states below still highlight */
+.connectea-dark .cvr-c-service-menu__item:not(.cx-n), .connectea-dark .cvr-c-primary-menu__item:not(.cx-n),
+.connectea-dark :is(.cvr-c-category-menu .eds-u-interactive) {
+  background-color: transparent !important;
+  color: var(--cx-nav-text, #cbd5e1) !important;
+  transition: background-color 0.15s ease;
+}
+
+.connectea-dark .cvr-c-service-menu__item:hover:not(.cx-n), .connectea-dark .cvr-c-primary-menu__item:hover:not(.cx-n),
+.connectea-dark :is(.cvr-c-category-menu .eds-u-interactive):hover {
+  background-color: var(--cx-surface-hover, #24303f) !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
+}
+
+.connectea-dark :is(
+  .cvr-c-service-menu__item,
+  .cvr-c-primary-menu__item,
+  .cvr-c-category-menu .eds-u-interactive
+).eds-s-is-active {
+  background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
+  color: var(--cx-nav-text-hover, #edf4fc) !important;
+  box-shadow: inset 3px 0 var(--cx-accent, #3b82f6) !important;
+}
+
+/* Horizontal Top Navigation Active Tab Indicator */
+.connectea-dark .cvr-c-primary-navigation__links .v-link.eds-s-is-active:not(cx-n),
+.connectea-dark .cvr-c-primary-navigation__links :is(.eds-s-is-active a):not(.cx-n),
+.connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a) {
+  background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
+  color: var(--cx-nav-text-hover, #ffffff) !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  margin: 0 !important;
+}

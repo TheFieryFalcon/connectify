@@ -3,73 +3,115 @@
  */
 
 /* Classes Page List Items, Status, Sort Dropdown & Action Controls */
-.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, [class*="classes-list"], [class*="class-item"], [class*="class-row"]) {
+.connectea-dark .cvr-c-classes, .connectea-dark .cvr-c-classes-list, .connectea-dark .cvr-c-class-list, .connectea-dark [class*="classes-list"],
+.connectea-dark [class*="class-item"], .connectea-dark [class*="class-row"] {
   border-bottom: 1px solid var(--cx-border, #36485e) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, .eds-c-selection-list__item) :is(h1, h2, h3, h4, [class*="title"], strong) {
+.connectea-dark .cvr-c-classes :where(h1):not(.cx-n), .connectea-dark .cvr-c-classes :where(h2):not(.cx-n),
+.connectea-dark .cvr-c-classes :where(h3):not(.cx-n), .connectea-dark .cvr-c-classes :where(h4):not(.cx-n),
+.connectea-dark .cvr-c-classes [class*="title"], .connectea-dark .cvr-c-classes :where(strong):not(.cx-n),
+.connectea-dark .cvr-c-classes-list :where(h1):not(.cx-n), .connectea-dark .cvr-c-classes-list :where(h2):not(.cx-n),
+.connectea-dark .cvr-c-classes-list :where(h3):not(.cx-n), .connectea-dark .cvr-c-classes-list :where(h4):not(.cx-n),
+.connectea-dark .cvr-c-classes-list [class*="title"], .connectea-dark .cvr-c-classes-list :where(strong):not(.cx-n),
+.connectea-dark .cvr-c-class-list :where(h1):not(.cx-n), .connectea-dark .cvr-c-class-list :where(h2):not(.cx-n),
+.connectea-dark .cvr-c-class-list :where(h3):not(.cx-n), .connectea-dark .cvr-c-class-list :where(h4):not(.cx-n),
+.connectea-dark .cvr-c-class-list [class*="title"], .connectea-dark .cvr-c-class-list :where(strong):not(.cx-n),
+.connectea-dark .eds-c-selection-list :where(h1):not(.cx-n), .connectea-dark .eds-c-selection-list :where(h2):not(.cx-n),
+.connectea-dark .eds-c-selection-list :where(h3):not(.cx-n), .connectea-dark .eds-c-selection-list :where(h4):not(.cx-n),
+.connectea-dark .eds-c-selection-list [class*="title"], .connectea-dark .eds-c-selection-list :where(strong):not(.cx-n),
+.connectea-dark .eds-c-selection-list__item :where(h1):not(.cx-n), .connectea-dark .eds-c-selection-list__item :where(h2):not(.cx-n),
+.connectea-dark .eds-c-selection-list__item :where(h3):not(.cx-n), .connectea-dark .eds-c-selection-list__item :where(h4):not(.cx-n),
+.connectea-dark .eds-c-selection-list__item [class*="title"], .connectea-dark .eds-c-selection-list__item :where(strong):not(.cx-n) {
   color: var(--cx-text-primary, #f8fafc) !important;
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
   font-weight: 650 !important;
 }
 
-.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, .eds-c-selection-list__item) :is(span, p, small, [class*="subtitle"], [class*="code"], [class*="status"], [class*="badge"]) {
+.connectea-dark .cvr-c-classes :where(span):not(.cx-n), .connectea-dark .cvr-c-classes :where(p):not(.cx-n),
+.connectea-dark .cvr-c-classes :where(small):not(.cx-n), .connectea-dark .cvr-c-classes [class*="subtitle"],
+.connectea-dark .cvr-c-classes [class*="code"], .connectea-dark .cvr-c-classes [class*="status"], .connectea-dark .cvr-c-classes [class*="badge"],
+.connectea-dark .cvr-c-classes-list :where(span):not(.cx-n), .connectea-dark .cvr-c-classes-list :where(p):not(.cx-n),
+.connectea-dark .cvr-c-classes-list :where(small):not(.cx-n), .connectea-dark .cvr-c-classes-list [class*="subtitle"],
+.connectea-dark .cvr-c-classes-list [class*="code"], .connectea-dark .cvr-c-classes-list [class*="status"],
+.connectea-dark .cvr-c-classes-list [class*="badge"], .connectea-dark .cvr-c-class-list :where(span):not(.cx-n),
+.connectea-dark .cvr-c-class-list :where(p):not(.cx-n), .connectea-dark .cvr-c-class-list :where(small):not(.cx-n),
+.connectea-dark .cvr-c-class-list [class*="subtitle"], .connectea-dark .cvr-c-class-list [class*="code"],
+.connectea-dark .cvr-c-class-list [class*="status"], .connectea-dark .cvr-c-class-list [class*="badge"],
+.connectea-dark .eds-c-selection-list :where(span):not(.cx-n), .connectea-dark .eds-c-selection-list :where(p):not(.cx-n),
+.connectea-dark .eds-c-selection-list :where(small):not(.cx-n), .connectea-dark .eds-c-selection-list [class*="subtitle"],
+.connectea-dark .eds-c-selection-list [class*="code"], .connectea-dark .eds-c-selection-list [class*="status"],
+.connectea-dark .eds-c-selection-list [class*="badge"], .connectea-dark .eds-c-selection-list__item :where(span):not(.cx-n),
+.connectea-dark .eds-c-selection-list__item :where(p):not(.cx-n), .connectea-dark .eds-c-selection-list__item :where(small):not(.cx-n),
+.connectea-dark .eds-c-selection-list__item [class*="subtitle"], .connectea-dark .eds-c-selection-list__item [class*="code"],
+.connectea-dark .eds-c-selection-list__item [class*="status"], .connectea-dark .eds-c-selection-list__item [class*="badge"] {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 
-.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list, .eds-c-selection-list__item) :is(button:not(.mat-icon-button), a, [class*="action"], [class*="btn"]) {
+.connectea-dark .cvr-c-classes button:not(.mat-icon-button), .connectea-dark .cvr-c-classes a:not(.cx-n),
+.connectea-dark .cvr-c-classes [class*="action"]:not(cx-n), .connectea-dark .cvr-c-classes [class*="btn"]:not(cx-n),
+.connectea-dark .cvr-c-classes-list button:not(.mat-icon-button), .connectea-dark .cvr-c-classes-list a:not(.cx-n),
+.connectea-dark .cvr-c-classes-list [class*="action"]:not(cx-n), .connectea-dark .cvr-c-classes-list [class*="btn"]:not(cx-n),
+.connectea-dark .cvr-c-class-list button:not(.mat-icon-button), .connectea-dark .cvr-c-class-list a:not(.cx-n),
+.connectea-dark .cvr-c-class-list [class*="action"]:not(cx-n), .connectea-dark .cvr-c-class-list [class*="btn"]:not(cx-n),
+.connectea-dark .eds-c-selection-list button:not(.mat-icon-button), .connectea-dark .eds-c-selection-list a:not(.cx-n),
+.connectea-dark .eds-c-selection-list [class*="action"]:not(cx-n), .connectea-dark .eds-c-selection-list [class*="btn"]:not(cx-n),
+.connectea-dark .eds-c-selection-list__item button:not(.mat-icon-button), .connectea-dark .eds-c-selection-list__item a:not(.cx-n),
+.connectea-dark .eds-c-selection-list__item [class*="action"]:not(cx-n), .connectea-dark .eds-c-selection-list__item [class*="btn"]:not(cx-n) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 
-.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list) svg {
+.connectea-dark .cvr-c-classes svg, .connectea-dark .cvr-c-classes-list svg, .connectea-dark .cvr-c-class-list svg,
+.connectea-dark .eds-c-selection-list svg {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   fill: currentColor !important;
   stroke: none !important;
 }
 
-.connectea-dark :is(.cvr-c-classes, .cvr-c-classes-list, .cvr-c-class-list, .eds-c-selection-list) :is(button, a, .mat-icon-button):hover svg {
+.connectea-dark .cvr-c-classes :where(button):hover:not(.cx-n) svg, .connectea-dark .cvr-c-classes :where(a):hover:not(.cx-n) svg,
+.connectea-dark .cvr-c-classes .mat-icon-button:hover svg, .connectea-dark .cvr-c-classes-list :where(button):hover:not(.cx-n) svg,
+.connectea-dark .cvr-c-classes-list :where(a):hover:not(.cx-n) svg, .connectea-dark .cvr-c-classes-list .mat-icon-button:hover svg,
+.connectea-dark .cvr-c-class-list :where(button):hover:not(.cx-n) svg, .connectea-dark .cvr-c-class-list :where(a):hover:not(.cx-n) svg,
+.connectea-dark .cvr-c-class-list .mat-icon-button:hover svg, .connectea-dark .eds-c-selection-list :where(button):hover:not(.cx-n) svg,
+.connectea-dark .eds-c-selection-list :where(a):hover:not(.cx-n) svg, .connectea-dark .eds-c-selection-list .mat-icon-button:hover svg {
   color: var(--cx-button-text-hover, #ffffff) !important;
   fill: var(--cx-button-text-hover, #ffffff) !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-classes__sort,
-  .cvr-c-sort-by,
-  .eds-c-sort-by,
-  .mat-form-field,
-  .mat-form-field-wrapper
-) :is(label, .mat-form-field-label, span) {
+.connectea-dark .cvr-c-classes__sort :where(label):not(.cx-n), .connectea-dark .cvr-c-classes__sort .mat-form-field-label,
+.connectea-dark .cvr-c-classes__sort :where(span):not(.cx-n), .connectea-dark .cvr-c-sort-by :where(label):not(.cx-n),
+.connectea-dark .cvr-c-sort-by .mat-form-field-label, .connectea-dark .cvr-c-sort-by :where(span):not(.cx-n),
+.connectea-dark .eds-c-sort-by :where(label):not(.cx-n), .connectea-dark .eds-c-sort-by .mat-form-field-label,
+.connectea-dark .eds-c-sort-by :where(span):not(.cx-n), .connectea-dark .mat-form-field :where(label):not(.cx-n),
+.connectea-dark .mat-form-field .mat-form-field-label, .connectea-dark .mat-form-field :where(span):not(.cx-n),
+.connectea-dark .mat-form-field-wrapper :where(label):not(.cx-n), .connectea-dark .mat-form-field-wrapper .mat-form-field-label,
+.connectea-dark .mat-form-field-wrapper :where(span):not(.cx-n) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 
-.connectea-dark :is(
-  .mat-select,
-  .mat-select-value,
-  .mat-select-value-text,
-  .mat-select-arrow,
-  .mat-select-trigger
-) {
+.connectea-dark .mat-select, .connectea-dark .mat-select-value, .connectea-dark .mat-select-value-text, .connectea-dark .mat-select-arrow,
+.connectea-dark .mat-select-trigger {
   color: var(--cx-text-primary, #f8fafc) !important;
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 
-.connectea-dark :is(.mat-select-panel, .mat-menu-panel, .mat-autocomplete-panel) {
+.connectea-dark .mat-select-panel, .connectea-dark .mat-menu-panel, .connectea-dark .mat-autocomplete-panel {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
 }
 
-.connectea-dark :is(.mat-option, .mat-select-panel .mat-option) {
+.connectea-dark .mat-option:not(.cx-n), .connectea-dark :is(.mat-select-panel .mat-option) {
   background-color: transparent !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
 
-.connectea-dark :is(.mat-option:hover, .mat-option.mat-active, .mat-option.mat-selected) {
+.connectea-dark .mat-option:hover, .connectea-dark .mat-option.mat-active, .connectea-dark .mat-option.mat-selected {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: var(--cx-text-primary, #ffffff) !important;
 }
@@ -77,27 +119,33 @@
 /* --------------------------------------------------------------------------
    15. Homepage Promos, Notices & Alerts (My Connect, etc.)
    -------------------------------------------------------------------------- */
-html.connectea-dark #main-content .cvr-c-promo.eds-t-white,
-.connectea-dark :is(.cvr-c-promo, .cvr-c-promo__body, .cvr-c-promo__content, .cvr-c-notice, .cvr-c-maintenance-notice, .eds-c-notice, .eds-c-alert, .eds-t-white) {
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white, .connectea-dark .cvr-c-promo, .connectea-dark .cvr-c-promo__body,
+.connectea-dark .cvr-c-promo__content, .connectea-dark .cvr-c-notice, .connectea-dark .cvr-c-maintenance-notice, .connectea-dark .eds-c-notice,
+.connectea-dark .eds-c-alert, .connectea-dark .eds-t-white {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
   border-radius: 8px !important;
 }
 
-html.connectea-dark #main-content .cvr-c-promo.eds-t-white .cvr-c-promo__body,
-.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) :is(.cvr-c-promo__body, .cvr-c-promo__content, .eds-c-notice__content) {
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .cvr-c-promo__body, .connectea-dark .cvr-c-promo .cvr-c-promo__body,
+.connectea-dark .cvr-c-promo .cvr-c-promo__content, .connectea-dark .cvr-c-promo .eds-c-notice__content,
+.connectea-dark .cvr-c-notice .cvr-c-promo__body, .connectea-dark .cvr-c-notice .cvr-c-promo__content,
+.connectea-dark .cvr-c-notice .eds-c-notice__content {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-html.connectea-dark #main-content .cvr-c-promo.eds-t-white :is(.cvr-c-promo__title, p),
-.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) :is(p, span, div, .cvr-c-promo__title) {
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white .cvr-c-promo__title,
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white :where(p):not(.cx-n), .connectea-dark .cvr-c-promo :where(p):not(.cx-n),
+.connectea-dark .cvr-c-promo :where(span):not(.cx-n), .connectea-dark .cvr-c-promo :where(div):not(.cx-n),
+.connectea-dark .cvr-c-promo .cvr-c-promo__title, .connectea-dark .cvr-c-notice :where(p):not(.cx-n),
+.connectea-dark .cvr-c-notice :where(span):not(.cx-n), .connectea-dark .cvr-c-notice :where(div):not(.cx-n),
+.connectea-dark .cvr-c-notice .cvr-c-promo__title {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-html.connectea-dark #main-content .cvr-c-promo.eds-t-white strong,
-.connectea-dark :is(.cvr-c-promo, .cvr-c-notice) strong {
+html.connectea-dark #main-content .cvr-c-promo.eds-t-white strong, .connectea-dark .cvr-c-promo strong, .connectea-dark .cvr-c-notice strong {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
@@ -116,57 +164,60 @@ html.connectea-dark #main-content .cvr-c-promo.eds-t-white .eds-c-standard-butto
 /* --------------------------------------------------------------------------
    16. Preferences Page, Settings Cards & Form Layouts
    -------------------------------------------------------------------------- */
-.connectea-dark :is(
-  .cvr-c-preferences,
-  .cvr-c-preferences-section,
-  .cvr-c-preference-group,
-  .cvr-c-preferences__section,
-  .cvr-c-preferences__group,
-  .cvr-c-form-section,
-  .cvr-c-form-group,
-  .v-panel,
-  .v-panel-caption,
-  .eds-c-card,
-  .eds-c-card__body,
-  .eds-c-card__header,
-  .cvr-c-dashboard-card,
-  .v-formlayout,
-  .v-formlayout-row
-) {
+.connectea-dark .cvr-c-preferences, .connectea-dark .cvr-c-preferences-section, .connectea-dark .cvr-c-preference-group,
+.connectea-dark .cvr-c-preferences__section, .connectea-dark .cvr-c-preferences__group, .connectea-dark .cvr-c-form-section,
+.connectea-dark .cvr-c-form-group, .connectea-dark .v-panel, .connectea-dark .v-panel-caption, .connectea-dark .eds-c-card,
+.connectea-dark .eds-c-card__body, .connectea-dark .eds-c-card__header, .connectea-dark .cvr-c-dashboard-card, .connectea-dark .v-formlayout,
+.connectea-dark .v-formlayout-row {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   border-color: var(--cx-border, #3d5066) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-preferences,
-  .cvr-c-preferences-section,
-  .cvr-c-preference-group,
-  .eds-c-card,
-  .v-panel
-) :is(h1, h2, h3, h4, .eds-c-heading, .v-panel-caption, .cvr-c-preference-group__title, .cvr-c-preferences-section__title, .eds-c-card__title) {
+.connectea-dark .cvr-c-preferences :where(h1):not(.cx-n), .connectea-dark .cvr-c-preferences :where(h2):not(.cx-n),
+.connectea-dark .cvr-c-preferences :where(h3):not(.cx-n), .connectea-dark .cvr-c-preferences :where(h4):not(.cx-n),
+.connectea-dark .cvr-c-preferences .eds-c-heading, .connectea-dark .cvr-c-preferences .v-panel-caption,
+.connectea-dark .cvr-c-preferences .cvr-c-preference-group__title, .connectea-dark .cvr-c-preferences .cvr-c-preferences-section__title,
+.connectea-dark .cvr-c-preferences .eds-c-card__title, .connectea-dark .cvr-c-preferences-section :where(h1):not(.cx-n),
+.connectea-dark .cvr-c-preferences-section :where(h2):not(.cx-n), .connectea-dark .cvr-c-preferences-section :where(h3):not(.cx-n),
+.connectea-dark .cvr-c-preferences-section :where(h4):not(.cx-n), .connectea-dark .cvr-c-preferences-section .eds-c-heading,
+.connectea-dark .cvr-c-preferences-section .v-panel-caption, .connectea-dark .cvr-c-preferences-section .cvr-c-preference-group__title,
+.connectea-dark .cvr-c-preferences-section .cvr-c-preferences-section__title, .connectea-dark .cvr-c-preferences-section .eds-c-card__title,
+.connectea-dark .cvr-c-preference-group :where(h1):not(.cx-n), .connectea-dark .cvr-c-preference-group :where(h2):not(.cx-n),
+.connectea-dark .cvr-c-preference-group :where(h3):not(.cx-n), .connectea-dark .cvr-c-preference-group :where(h4):not(.cx-n),
+.connectea-dark .cvr-c-preference-group .eds-c-heading, .connectea-dark .cvr-c-preference-group .v-panel-caption,
+.connectea-dark .cvr-c-preference-group .cvr-c-preference-group__title, .connectea-dark .cvr-c-preference-group .cvr-c-preferences-section__title,
+.connectea-dark .cvr-c-preference-group .eds-c-card__title, .connectea-dark .eds-c-card :where(h1):not(.cx-n),
+.connectea-dark .eds-c-card :where(h2):not(.cx-n), .connectea-dark .eds-c-card :where(h3):not(.cx-n),
+.connectea-dark .eds-c-card :where(h4):not(.cx-n), .connectea-dark .eds-c-card .eds-c-heading, .connectea-dark .eds-c-card .v-panel-caption,
+.connectea-dark .eds-c-card .cvr-c-preference-group__title, .connectea-dark .eds-c-card .cvr-c-preferences-section__title,
+.connectea-dark .eds-c-card .eds-c-card__title, .connectea-dark .v-panel :where(h1):not(.cx-n), .connectea-dark .v-panel :where(h2):not(.cx-n),
+.connectea-dark .v-panel :where(h3):not(.cx-n), .connectea-dark .v-panel :where(h4):not(.cx-n), .connectea-dark .v-panel .eds-c-heading,
+.connectea-dark .v-panel .v-panel-caption, .connectea-dark .v-panel .cvr-c-preference-group__title,
+.connectea-dark .v-panel .cvr-c-preferences-section__title, .connectea-dark .v-panel .eds-c-card__title {
   color: var(--cx-text-primary, #f8fafc) !important;
   border-bottom-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-preferences,
-  .cvr-c-preferences-section,
-  .cvr-c-preference-group,
-  .eds-c-card,
-  .v-panel
-) :is(p, span, label, .v-label, .cvr-c-form__label, .eds-c-caption) {
+.connectea-dark .cvr-c-preferences :where(p):not(.cx-n), .connectea-dark .cvr-c-preferences :where(span):not(.cx-n),
+.connectea-dark .cvr-c-preferences :where(label):not(.cx-n), .connectea-dark .cvr-c-preferences .v-label,
+.connectea-dark .cvr-c-preferences .cvr-c-form__label, .connectea-dark .cvr-c-preferences .eds-c-caption,
+.connectea-dark .cvr-c-preferences-section :where(p):not(.cx-n), .connectea-dark .cvr-c-preferences-section :where(span):not(.cx-n),
+.connectea-dark .cvr-c-preferences-section :where(label):not(.cx-n), .connectea-dark .cvr-c-preferences-section .v-label,
+.connectea-dark .cvr-c-preferences-section .cvr-c-form__label, .connectea-dark .cvr-c-preferences-section .eds-c-caption,
+.connectea-dark .cvr-c-preference-group :where(p):not(.cx-n), .connectea-dark .cvr-c-preference-group :where(span):not(.cx-n),
+.connectea-dark .cvr-c-preference-group :where(label):not(.cx-n), .connectea-dark .cvr-c-preference-group .v-label,
+.connectea-dark .cvr-c-preference-group .cvr-c-form__label, .connectea-dark .cvr-c-preference-group .eds-c-caption,
+.connectea-dark .eds-c-card :where(p):not(.cx-n), .connectea-dark .eds-c-card :where(span):not(.cx-n),
+.connectea-dark .eds-c-card :where(label):not(.cx-n), .connectea-dark .eds-c-card .v-label, .connectea-dark .eds-c-card .cvr-c-form__label,
+.connectea-dark .eds-c-card .eds-c-caption, .connectea-dark .v-panel :where(p):not(.cx-n), .connectea-dark .v-panel :where(span):not(.cx-n),
+.connectea-dark .v-panel :where(label):not(.cx-n), .connectea-dark .v-panel .v-label, .connectea-dark .v-panel .cvr-c-form__label,
+.connectea-dark .v-panel .eds-c-caption {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark :is(
-  .v-filterselect,
-  .v-filterselect-input,
-  .v-select-select,
-  .v-textfield,
-  .eds-c-select,
-  .eds-c-form-control
-) {
+.connectea-dark .v-filterselect, .connectea-dark .v-filterselect-input, .connectea-dark .v-select-select, .connectea-dark .v-textfield,
+.connectea-dark .eds-c-select, .connectea-dark .eds-c-form-control {
   background-color: var(--cx-input-bg, #141a22) !important;
   border: 1px solid var(--cx-input-border, #42556d) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;

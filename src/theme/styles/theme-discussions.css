@@ -3,74 +3,138 @@
  */
 
 /* Angular Material High-Specificity Tabs & Ink Bar (.eds.cvr.ngm) */
-.connectea-dark:not(cx-n).eds.cvr.ngm :is(
-  mat-tab-header, .mat-tab-header,
-  mat-tab-nav-bar, .mat-tab-nav-bar,
-  .mat-tab-labels
-) :is(.mat-tab-label, .mat-tab-link, .mat-tab-label-content, a, button, span, div.mat-tab-label, div.mat-tab-label-content),
-.connectea-dark:not(cx-n) :is(
-  mat-tab-header, .mat-tab-header,
-  mat-tab-nav-bar, .mat-tab-nav-bar,
-  .mat-tab-labels
-) :is(.mat-tab-label, .mat-tab-link, .mat-tab-label-content) {
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) .mat-tab-label:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) .mat-tab-link:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) .mat-tab-label-content:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) a:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) button:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) span:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) div.mat-tab-label,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) div.mat-tab-label-content,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header .mat-tab-label:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header .mat-tab-link:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header .mat-tab-label-content:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header a:not(.cx-n), .connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header button:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header span:not(.cx-n), .connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header div.mat-tab-label,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header div.mat-tab-label-content,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-label:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-link:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-label-content:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) a:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) button:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) span:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) div.mat-tab-label,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) div.mat-tab-label-content,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar .mat-tab-label:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar .mat-tab-link:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar .mat-tab-label-content:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar a:not(.cx-n), .connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar button:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar span:not(.cx-n), .connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar div.mat-tab-label,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar div.mat-tab-label-content,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-labels .mat-tab-label:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-labels .mat-tab-link:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-labels .mat-tab-label-content:not(cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-labels a:not(.cx-n), .connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-labels button:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-labels span:not(.cx-n), .connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-labels div.mat-tab-label,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-labels div.mat-tab-label-content,
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) .mat-tab-label, .connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) .mat-tab-link,
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) .mat-tab-label-content, .connectea-dark:not(cx-n) .mat-tab-header .mat-tab-label,
+.connectea-dark:not(cx-n) .mat-tab-header .mat-tab-link, .connectea-dark:not(cx-n) .mat-tab-header .mat-tab-label-content,
+.connectea-dark:not(cx-n) :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-label,
+.connectea-dark:not(cx-n) :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-link,
+.connectea-dark:not(cx-n) :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-label-content, .connectea-dark:not(cx-n) .mat-tab-nav-bar .mat-tab-label,
+.connectea-dark:not(cx-n) .mat-tab-nav-bar .mat-tab-link, .connectea-dark:not(cx-n) .mat-tab-nav-bar .mat-tab-label-content,
+.connectea-dark:not(cx-n) .mat-tab-labels .mat-tab-label, .connectea-dark:not(cx-n) .mat-tab-labels .mat-tab-link,
+.connectea-dark:not(cx-n) .mat-tab-labels .mat-tab-label-content {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   letter-spacing: normal !important;
   text-decoration: none !important;
 }
 
-.connectea-dark:not(cx-n).eds.cvr.ngm :is(
-  mat-tab-header, .mat-tab-header,
-  mat-tab-nav-bar, .mat-tab-nav-bar
-) :is(.mat-tab-label, .mat-tab-link):hover,
-.connectea-dark:not(cx-n) :is(
-  mat-tab-header, .mat-tab-header,
-  mat-tab-nav-bar, .mat-tab-nav-bar
-) :is(.mat-tab-label, .mat-tab-link):hover {
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) .mat-tab-label:hover,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) .mat-tab-link:hover,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header .mat-tab-label:hover, .connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header .mat-tab-link:hover,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-label:hover,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-link:hover,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar .mat-tab-label:hover,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar .mat-tab-link:hover,
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) .mat-tab-label:hover,
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) .mat-tab-link:hover, .connectea-dark:not(cx-n) .mat-tab-header .mat-tab-label:hover,
+.connectea-dark:not(cx-n) .mat-tab-header .mat-tab-link:hover, .connectea-dark:not(cx-n) :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-label:hover,
+.connectea-dark:not(cx-n) :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-link:hover, .connectea-dark:not(cx-n) .mat-tab-nav-bar .mat-tab-label:hover,
+.connectea-dark:not(cx-n) .mat-tab-nav-bar .mat-tab-link:hover {
   color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
-.connectea-dark:not(cx-n).eds.cvr.ngm :is(
-  mat-tab-header, .mat-tab-header,
-  mat-tab-nav-bar, .mat-tab-nav-bar,
-  mat-tab-group, .mat-tab-group
-) :is(
-  .mat-tab-label-active,
-  .mat-tab-link.mat-tab-label-active,
-  .mat-tab-label.mat-tab-label-active,
-  [aria-selected="true"],
-  .active
-),
-.connectea-dark:not(cx-n) :is(
-  mat-tab-header, .mat-tab-header,
-  mat-tab-nav-bar, .mat-tab-nav-bar,
-  mat-tab-group, .mat-tab-group
-) :is(
-  .mat-tab-label-active,
-  .mat-tab-link.mat-tab-label-active,
-  .mat-tab-label.mat-tab-label-active,
-  [aria-selected="true"],
-  .active
-) {
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) [aria-selected="true"]:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-header):not(.cx-n) .active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header [aria-selected="true"]:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-header .active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) [aria-selected="true"]:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-nav-bar):not(.cx-n) .active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar [aria-selected="true"]:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar .active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-group):not(.cx-n) .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-group):not(.cx-n) .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-group):not(.cx-n) .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-group):not(.cx-n) [aria-selected="true"]:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm :where(mat-tab-group):not(.cx-n) .active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-group .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-group .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-group .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-group [aria-selected="true"]:not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-group .active:not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) [aria-selected="true"]:not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n) .active:not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-header .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n) .mat-tab-header .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n) .mat-tab-header [aria-selected="true"]:not(.cx-n), .connectea-dark:not(cx-n) .mat-tab-header .active:not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n) :where(mat-tab-nav-bar):not(.cx-n) .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n) :where(mat-tab-nav-bar):not(.cx-n) [aria-selected="true"]:not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-nav-bar):not(.cx-n) .active:not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-nav-bar .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-nav-bar .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n) .mat-tab-nav-bar .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n) .mat-tab-nav-bar [aria-selected="true"]:not(.cx-n), .connectea-dark:not(cx-n) .mat-tab-nav-bar .active:not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-group):not(.cx-n) .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-group):not(.cx-n) .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n) :where(mat-tab-group):not(.cx-n) .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n) :where(mat-tab-group):not(.cx-n) [aria-selected="true"]:not(.cx-n),
+.connectea-dark:not(cx-n) :where(mat-tab-group):not(.cx-n) .active:not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-group .mat-tab-label-active:not(.cx-n),
+.connectea-dark:not(cx-n) .mat-tab-group .mat-tab-link.mat-tab-label-active,
+.connectea-dark:not(cx-n) .mat-tab-group .mat-tab-label.mat-tab-label-active,
+.connectea-dark:not(cx-n) .mat-tab-group [aria-selected="true"]:not(.cx-n), .connectea-dark:not(cx-n) .mat-tab-group .active:not(.cx-n) {
   color: var(--cx-text-primary, #ffffff) !important;
 }
 
-.connectea-dark:not(cx-n).eds.cvr.ngm :is(
-  .mat-ink-bar,
-  .mat-tab-nav-bar .mat-ink-bar,
-  .mat-tab-group .mat-ink-bar
-),
-.connectea-dark:not(cx-n) :is(.mat-ink-bar, [class*="ink-bar"]) {
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-ink-bar:not(.cx-n), .connectea-dark:not(cx-n).eds.cvr.ngm :is(.mat-tab-nav-bar .mat-ink-bar),
+.connectea-dark:not(cx-n).eds.cvr.ngm :is(.mat-tab-group .mat-ink-bar), .connectea-dark:not(cx-n) .mat-ink-bar,
+.connectea-dark:not(cx-n) [class*="ink-bar"] {
   background-color: var(--cx-accent, #3b82f6) !important;
   height: 2px !important;
 }
 
-.connectea-dark :is(
-  .nav-tabs,
-  .nav-pills,
-  .management-bar,
-  .subnav-tbar
-) {
+.connectea-dark .nav-tabs, .connectea-dark .nav-pills, .connectea-dark .management-bar, .connectea-dark .subnav-tbar {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
@@ -92,69 +156,55 @@
   border-top: 2px solid var(--cx-accent, #3b82f6) !important;
 }
 
-.connectea-dark :is(.breadcrumb, .cvr-c-location-bar, .cvr-c-location) {
+.connectea-dark .breadcrumb, .connectea-dark .cvr-c-location-bar, .connectea-dark .cvr-c-location {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   border-color: var(--cx-border, #36485e) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark :is(.breadcrumb a, .breadcrumb-link, .cvr-c-location-bar__title) {
+.connectea-dark :is(.breadcrumb a), .connectea-dark .breadcrumb-link:not(cx-n), .connectea-dark .cvr-c-location-bar__title:not(cx-n) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark :is(.breadcrumb a:hover, .breadcrumb-link:hover) {
+.connectea-dark :is(.breadcrumb a:hover), .connectea-dark .breadcrumb-link:hover:not(cx-n) {
   color: var(--cx-accent-hover, #60a5fa) !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-pagination,
-  .cvr-c-pagination-button-set,
-  .eds-c-pagination-button-set,
-  .pagination
-) {
+.connectea-dark .cvr-c-pagination, .connectea-dark .cvr-c-pagination-button-set, .connectea-dark .eds-c-pagination-button-set,
+.connectea-dark .pagination {
   background-color: transparent !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark :is(
-  .page-link,
-  .pagination-items-per-page > a,
-  .pagination-items-per-page > button
-) {
+.connectea-dark .page-link:not(cx-n), .connectea-dark :is(.pagination-items-per-page > a), .connectea-dark :is(.pagination-items-per-page > button) {
   background-color: var(--cx-button-bg, #202c3b) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border: 1px solid var(--cx-border, #455a73) !important;
   border-radius: 4px !important;
 }
 
-.connectea-dark :is(
-  .page-link,
-  .pagination-items-per-page > a,
-  .pagination-items-per-page > button
-):hover {
+.connectea-dark .page-link:hover:not(cx-n), .connectea-dark :is(.pagination-items-per-page > a):hover,
+.connectea-dark :is(.pagination-items-per-page > button):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
   border-color: var(--cx-border-strong, #5b7594) !important;
 }
 
-.connectea-dark :is(.eds-c-pagination-button, .cvr-c-pagination-button-set button) {
+.connectea-dark .eds-c-pagination-button:not(cx-n), .connectea-dark :is(.cvr-c-pagination-button-set button) {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark :is(.eds-c-pagination-button, .cvr-c-pagination-button-set button):hover {
+.connectea-dark .eds-c-pagination-button:hover:not(cx-n), .connectea-dark :is(.cvr-c-pagination-button-set button):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
   border: none !important;
 }
 
-.connectea-dark :is(
-  .page-item.active .page-link,
-  .pagination-items-per-page > a.active,
-  .pagination-items-per-page > button.active
-) {
+.connectea-dark :is(.page-item.active .page-link), .connectea-dark :where(.pagination-items-per-page > a.active):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark :where(.pagination-items-per-page > button.active):not(.cx-n):not(.cx-n):not(.cx-n) {
   background-color: var(--cx-accent, #2563eb) !important;
   color: var(--cx-accent-text, #ffffff) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
@@ -163,11 +213,7 @@
 /* --------------------------------------------------------------------------
    26. Discussions, Comments, Stories & Speech Bubbles
    -------------------------------------------------------------------------- */
-.connectea-dark :is(
-  .cvr-c-speech-box,
-  .cvr-c-reply,
-  .cvr-c-replies
-) {
+.connectea-dark .cvr-c-speech-box, .connectea-dark .cvr-c-reply, .connectea-dark .cvr-c-replies {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
   border-radius: 8px !important;
@@ -179,7 +225,7 @@
   border: 1px solid var(--cx-border, #3d5066) !important;
 }
 
-.connectea-dark :is(.cvr-c-story, .cvr-c-story-list, blockquote, .blockquote) {
+.connectea-dark .cvr-c-story, .connectea-dark .cvr-c-story-list, .connectea-dark :where(blockquote):not(.cx-n), .connectea-dark .blockquote {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border-color: var(--cx-border, #36485e) !important;

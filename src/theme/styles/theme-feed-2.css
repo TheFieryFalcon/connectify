@@ -1,0 +1,242 @@
+/**
+ * Connectify Theme: surface adaptation, feed filters, notice cards and feed tabs (part 2, continued from theme-feed.css)
+ */
+
+.connectea-dark :is(.eds-c-card :where(a)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice .v-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent)):hover,
+.connectea-dark :is(.cvr-c-notice .eds-c-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent)):hover,
+.connectea-dark :is(.cvr-c-notice :where(button)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice :where(button)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice :where(button).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice :where(button)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice :where(button)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice :where(a)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice :where(a)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice :where(a).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice :where(a)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice :where(a)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice-card .v-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent)):hover,
+.connectea-dark :is(.cvr-c-notice-card .eds-c-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent)):hover,
+.connectea-dark :is(.cvr-c-notice-card :where(button)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice-card :where(button)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice-card :where(button).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice-card :where(button)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice-card :where(button)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice-card :where(a)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice-card :where(a)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice-card :where(a).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice-card :where(a)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :is(.cvr-c-notice-card :where(a)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
+.connectea-dark :where(mat-dialog-container button.mat-primary):hover:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n),
+.connectea-dark :is(.mat-dialog-actions button.mat-primary):hover:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n) {
+  background-color: var(--cx-positive-hover, #9ec204) !important;
+  color: var(--cx-positive-text, #ffffff) !important;
+  border: none !important;
+}
+
+.connectea-dark .eds-o-button--positive:not(.cx-n) :where(span):not(.cx-n), .connectea-dark .eds-o-button--positive:not(.cx-n) :where(div):not(.cx-n),
+.connectea-dark .eds-o-button--positive:not(.cx-n) :where(a):not(.cx-n), .connectea-dark .eds-o-button--positive:not(.cx-n) .v-button-caption,
+.connectea-dark .eds-c-button--positive:not(.cx-n) :where(span):not(.cx-n), .connectea-dark .eds-c-button--positive:not(.cx-n) :where(div):not(.cx-n),
+.connectea-dark .eds-c-button--positive:not(.cx-n) :where(a):not(.cx-n), .connectea-dark .eds-c-button--positive:not(.cx-n) .v-button-caption,
+.connectea-dark .v-button.eds-o-button--positive :where(span):not(.cx-n), .connectea-dark .v-button.eds-o-button--positive :where(div):not(.cx-n),
+.connectea-dark .v-button.eds-o-button--positive :where(a):not(.cx-n), .connectea-dark .v-button.eds-o-button--positive .v-button-caption,
+.connectea-dark .eds-c-action-button.eds-o-button--positive :where(span):not(.cx-n),
+.connectea-dark .eds-c-action-button.eds-o-button--positive :where(div):not(.cx-n),
+.connectea-dark .eds-c-action-button.eds-o-button--positive :where(a):not(.cx-n),
+.connectea-dark .eds-c-action-button.eds-o-button--positive .v-button-caption,
+.connectea-dark .v-button-eds-o-button--positive:not(.cx-n) :where(span):not(.cx-n),
+.connectea-dark .v-button-eds-o-button--positive:not(.cx-n) :where(div):not(.cx-n),
+.connectea-dark .v-button-eds-o-button--positive:not(.cx-n) :where(a):not(.cx-n),
+.connectea-dark .v-button-eds-o-button--positive:not(.cx-n) .v-button-caption {
+  color: var(--cx-positive-text, #ffffff) !important;
+  text-decoration: none !important;
+}
+
+.connectea-dark cnt-avatar, .connectea-dark ngx-avatar {
+  font-family: "Open Sans", "Helvetica Neue", sans-serif !important;
+}
+
+.connectea-dark:not(cx-n).eds.cvr.ngm .avatar-content, .connectea-dark:not(cx-n).eds.cvr.ngm [class*="avatar-content"],
+:is(html, body).connectea-dark .avatar-content, :is(html, body).connectea-dark [class*="avatar-content"] {
+  font-family: Helvetica, Arial, sans-serif !important;
+  color: var(--cx-avatar-text, #ffffff) !important;
+  background-color: var(--cx-avatar-bg, #24303f) !important;
+}
+
+/* Feed Follow Pill Buttons */
+.connectea-dark :where(mat-chip):not(mat-chip-list):not(.mat-chip-list):not(.cx-n), .connectea-dark .mat-chip:not(mat-chip-list):not(.mat-chip-list),
+.connectea-dark .mat-standard-chip:not(mat-chip-list):not(.mat-chip-list), .connectea-dark .eds-c-tag:not(mat-chip-list):not(.mat-chip-list),
+.connectea-dark .cvr-c-tag:not(mat-chip-list):not(.mat-chip-list), .connectea-dark .badge:not(mat-chip-list):not(.mat-chip-list),
+.connectea-dark .badge-pill:not(mat-chip-list):not(.mat-chip-list), .connectea-dark .label-pill:not(mat-chip-list):not(.mat-chip-list),
+.connectea-dark .cvr-c-feed-item__follow:not(mat-chip-list):not(.mat-chip-list) {
+  background-color: var(--cx-surface-elevated, #24303f) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border: 1px solid var(--cx-border, #4a617a) !important;
+  border-radius: 9999px !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.connectea-dark :where(mat-chip):not(mat-chip-list):not(.mat-chip-list):hover:not(.cx-n),
+.connectea-dark .mat-chip:not(mat-chip-list):not(.mat-chip-list):hover,
+.connectea-dark .mat-standard-chip:not(mat-chip-list):not(.mat-chip-list):hover,
+.connectea-dark .eds-c-tag:not(mat-chip-list):not(.mat-chip-list):hover, .connectea-dark .cvr-c-tag:not(mat-chip-list):not(.mat-chip-list):hover,
+.connectea-dark .badge:not(mat-chip-list):not(.mat-chip-list):hover, .connectea-dark .badge-pill:not(mat-chip-list):not(.mat-chip-list):hover,
+.connectea-dark .label-pill:not(mat-chip-list):not(.mat-chip-list):hover,
+.connectea-dark .cvr-c-feed-item__follow:not(mat-chip-list):not(.mat-chip-list):hover {
+  background-color: var(--cx-surface-hover, #313f50) !important;
+  border-color: var(--cx-border-strong, #6b88a5) !important;
+  color: var(--cx-button-text-hover, #ffffff) !important;
+}
+
+.connectea-dark :where(mat-chip-list):not(.cx-n), .connectea-dark .mat-chip-list {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Feed Cards & Author/Timestamp/Comment Metadata */
+.connectea-dark .cvr-c-feed-card:not(cx-n), .connectea-dark .cvr-c-feed-item:not(cx-n), .connectea-dark [class*="feed-card"]:not(cx-n),
+.connectea-dark [class*="feed-item"]:not(cx-n), .connectea-dark cnt-stream-notice-card:not(.cx-n),
+.connectea-dark :where(cnt-stream-notice-card mat-card):not(.cx-n):not(cx-n), .connectea-dark mat-card.mat-card {
+  background-color: var(--cx-card-bg, var(--cx-surface-bg, #1e2632)) !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+.connectea-dark cnt-stream-notice-card .mat-card-header, .connectea-dark mat-card .mat-card-header {
+  border-bottom: none !important;
+}
+
+.connectea-dark .cvr-c-feed-card :where(h1):not(.cx-n), .connectea-dark .cvr-c-feed-card :where(h2):not(.cx-n),
+.connectea-dark .cvr-c-feed-card :where(h3):not(.cx-n), .connectea-dark .cvr-c-feed-card :where(h4):not(.cx-n),
+.connectea-dark .cvr-c-feed-card :where(strong):not(.cx-n), .connectea-dark .cvr-c-feed-card [class*="title"],
+.connectea-dark .cvr-c-feed-item :where(h1):not(.cx-n), .connectea-dark .cvr-c-feed-item :where(h2):not(.cx-n),
+.connectea-dark .cvr-c-feed-item :where(h3):not(.cx-n), .connectea-dark .cvr-c-feed-item :where(h4):not(.cx-n),
+.connectea-dark .cvr-c-feed-item :where(strong):not(.cx-n), .connectea-dark .cvr-c-feed-item [class*="title"] {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark .cvr-c-feed-card .cvr-c-feed-item__meta, .connectea-dark .cvr-c-feed-card .cvr-c-feed-item__author,
+.connectea-dark .cvr-c-feed-card .cvr-c-feed-item__date, .connectea-dark .cvr-c-feed-card [class*="author"],
+.connectea-dark .cvr-c-feed-card [class*="date"], .connectea-dark .cvr-c-feed-card [class*="timestamp"],
+.connectea-dark .cvr-c-feed-card [class*="meta"], .connectea-dark .cvr-c-feed-card .mat-caption, .connectea-dark .cvr-c-feed-card .text-muted,
+.connectea-dark .cvr-c-feed-card :where(small):not(.cx-n), .connectea-dark .cvr-c-feed-card :where(em):not(.cx-n),
+.connectea-dark .cvr-c-feed-card :where(p):not(.cx-n), .connectea-dark .cvr-c-feed-item .cvr-c-feed-item__meta,
+.connectea-dark .cvr-c-feed-item .cvr-c-feed-item__author, .connectea-dark .cvr-c-feed-item .cvr-c-feed-item__date,
+.connectea-dark .cvr-c-feed-item [class*="author"], .connectea-dark .cvr-c-feed-item [class*="date"],
+.connectea-dark .cvr-c-feed-item [class*="timestamp"], .connectea-dark .cvr-c-feed-item [class*="meta"],
+.connectea-dark .cvr-c-feed-item .mat-caption, .connectea-dark .cvr-c-feed-item .text-muted,
+.connectea-dark .cvr-c-feed-item :where(small):not(.cx-n), .connectea-dark .cvr-c-feed-item :where(em):not(.cx-n),
+.connectea-dark .cvr-c-feed-item :where(p):not(.cx-n), .connectea-dark :where(cnt-stream-notice-card):not(.cx-n) .cvr-c-feed-item__meta,
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) .cvr-c-feed-item__author,
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) .cvr-c-feed-item__date,
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) [class*="author"],
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) [class*="date"],
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) [class*="timestamp"],
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) [class*="meta"], .connectea-dark :where(cnt-stream-notice-card):not(.cx-n) .mat-caption,
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) .text-muted,
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) :where(small):not(.cx-n),
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) :where(em):not(.cx-n),
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) :where(p):not(.cx-n),
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) .cvr-c-feed-item__meta,
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) .cvr-c-feed-item__author,
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) .cvr-c-feed-item__date,
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) [class*="author"],
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) [class*="date"],
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) [class*="timestamp"],
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) [class*="meta"], .connectea-dark :where(cnt-stream-card-author):not(.cx-n) .mat-caption,
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) .text-muted,
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) :where(small):not(.cx-n),
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) :where(em):not(.cx-n),
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) :where(p):not(.cx-n), .connectea-dark :where(mat-card):not(.cx-n) .cvr-c-feed-item__meta,
+.connectea-dark :where(mat-card):not(.cx-n) .cvr-c-feed-item__author, .connectea-dark :where(mat-card):not(.cx-n) .cvr-c-feed-item__date,
+.connectea-dark :where(mat-card):not(.cx-n) [class*="author"], .connectea-dark :where(mat-card):not(.cx-n) [class*="date"],
+.connectea-dark :where(mat-card):not(.cx-n) [class*="timestamp"], .connectea-dark :where(mat-card):not(.cx-n) [class*="meta"],
+.connectea-dark :where(mat-card):not(.cx-n) .mat-caption, .connectea-dark :where(mat-card):not(.cx-n) .text-muted,
+.connectea-dark :where(mat-card):not(.cx-n) :where(small):not(.cx-n), .connectea-dark :where(mat-card):not(.cx-n) :where(em):not(.cx-n),
+.connectea-dark :where(mat-card):not(.cx-n) :where(p):not(.cx-n), .connectea-dark .mat-card .cvr-c-feed-item__meta,
+.connectea-dark .mat-card .cvr-c-feed-item__author, .connectea-dark .mat-card .cvr-c-feed-item__date, .connectea-dark .mat-card [class*="author"],
+.connectea-dark .mat-card [class*="date"], .connectea-dark .mat-card [class*="timestamp"], .connectea-dark .mat-card [class*="meta"],
+.connectea-dark .mat-card .mat-caption, .connectea-dark .mat-card .text-muted, .connectea-dark .mat-card :where(small):not(.cx-n),
+.connectea-dark .mat-card :where(em):not(.cx-n), .connectea-dark .mat-card :where(p):not(.cx-n), .connectea-dark .text-muted:not(.cx-n),
+.connectea-dark .mat-caption.text-muted, .connectea-dark .mat-caption:not(.cx-n) {
+  color: var(--cx-text-muted, #cbd5e1) !important;
+}
+
+.connectea-dark .tutorial-author :where(a):not(.cx-n), .connectea-dark .tutorial-author .author-name,
+.connectea-dark .tutorial-author [class*="name"], .connectea-dark .author-details :where(a):not(.cx-n), .connectea-dark .author-details .author-name,
+.connectea-dark .author-details [class*="name"], .connectea-dark .cvr-c-feed-item__author :where(a):not(.cx-n),
+.connectea-dark .cvr-c-feed-item__author .author-name, .connectea-dark .cvr-c-feed-item__author [class*="name"],
+.connectea-dark .cvr-c-feed-card__author :where(a):not(.cx-n), .connectea-dark .cvr-c-feed-card__author .author-name,
+.connectea-dark .cvr-c-feed-card__author [class*="name"], .connectea-dark .stream-notice-author :where(a):not(.cx-n),
+.connectea-dark .stream-notice-author .author-name, .connectea-dark .stream-notice-author [class*="name"],
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) :where(a):not(.cx-n),
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) .author-name, .connectea-dark :where(cnt-stream-card-author):not(.cx-n) [class*="name"] {
+  color: var(--cx-text-primary, #f8fafc) !important;
+  font-weight: 600 !important;
+}
+
+.connectea-dark .tutorial-author :where(span):not(.cx-n), .connectea-dark .tutorial-author .role, .connectea-dark .tutorial-author .time,
+.connectea-dark .tutorial-author .date, .connectea-dark .tutorial-author .eds-c-caption, .connectea-dark .tutorial-author [class*="date"],
+.connectea-dark .tutorial-author [class*="meta"], .connectea-dark .author-details :where(span):not(.cx-n), .connectea-dark .author-details .role,
+.connectea-dark .author-details .time, .connectea-dark .author-details .date, .connectea-dark .author-details .eds-c-caption,
+.connectea-dark .author-details [class*="date"], .connectea-dark .author-details [class*="meta"],
+.connectea-dark .cvr-c-feed-item__author :where(span):not(.cx-n), .connectea-dark .cvr-c-feed-item__author .role,
+.connectea-dark .cvr-c-feed-item__author .time, .connectea-dark .cvr-c-feed-item__author .date,
+.connectea-dark .cvr-c-feed-item__author .eds-c-caption, .connectea-dark .cvr-c-feed-item__author [class*="date"],
+.connectea-dark .cvr-c-feed-item__author [class*="meta"], .connectea-dark .cvr-c-feed-card__author :where(span):not(.cx-n),
+.connectea-dark .cvr-c-feed-card__author .role, .connectea-dark .cvr-c-feed-card__author .time, .connectea-dark .cvr-c-feed-card__author .date,
+.connectea-dark .cvr-c-feed-card__author .eds-c-caption, .connectea-dark .cvr-c-feed-card__author [class*="date"],
+.connectea-dark .cvr-c-feed-card__author [class*="meta"], .connectea-dark .stream-notice-author :where(span):not(.cx-n),
+.connectea-dark .stream-notice-author .role, .connectea-dark .stream-notice-author .time, .connectea-dark .stream-notice-author .date,
+.connectea-dark .stream-notice-author .eds-c-caption, .connectea-dark .stream-notice-author [class*="date"],
+.connectea-dark .stream-notice-author [class*="meta"], .connectea-dark :where(cnt-stream-card-author):not(.cx-n) :where(span):not(.cx-n),
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) .role, .connectea-dark :where(cnt-stream-card-author):not(.cx-n) .time,
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) .date, .connectea-dark :where(cnt-stream-card-author):not(.cx-n) .eds-c-caption,
+.connectea-dark :where(cnt-stream-card-author):not(.cx-n) [class*="date"], .connectea-dark :where(cnt-stream-card-author):not(.cx-n) [class*="meta"] {
+  color: var(--cx-text-muted, #94a3b8) !important;
+  font-weight: 400 !important;
+}
+
+.connectea-dark .cvr-c-feed-card svg:not([fill="none"]):not([stroke]), .connectea-dark .cvr-c-feed-item svg:not([fill="none"]):not([stroke]) {
+  color: var(--cx-text-muted, #cbd5e1) !important;
+  fill: currentColor !important;
+}
+
+.connectea-dark .cvr-c-feed-card svg[fill="none"], .connectea-dark .cvr-c-feed-item svg[fill="none"] {
+  fill: none !important;
+  stroke: currentColor !important;
+}
+
+/* Feed Header Navigation Tabs (All, Classes, Read Later) */
+.connectea-dark .cvr-c-feed:not(.cx-n), .connectea-dark .cvr-c-feed-header:not(.cx-n), .connectea-dark .cvr-c-feed-header__tabs:not(.cx-n),
+.connectea-dark .cvr-c-feed__tabs:not(.cx-n), .connectea-dark .eds-c-tabs:not(.cx-n), .connectea-dark .mat-tab-group:not(.cx-n),
+.connectea-dark .mat-tab-nav-bar:not(.cx-n), .connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.connectea-dark mat-tab-header.mat-tab-header {
+  border-bottom: 1px solid var(--cx-border, #3d5066) !important;
+}
+
+.connectea-dark .cvr-c-feed .mat-ink-bar, .connectea-dark .cvr-c-feed-header .mat-ink-bar,
+.connectea-dark :where(cnt-stream-notice-card):not(.cx-n) .mat-ink-bar {
+  background-color: var(--cx-positive-bg, #8cae04) !important;
+}
+
+.connectea-dark .mat-dialog-container, .connectea-dark :where(mat-dialog-container):not(.cx-n) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+  border: none !important;
+  box-shadow: 0 11px 15px -7px rgba(0,0,0,0.5), 0 24px 38px 3px rgba(0,0,0,0.35), 0 9px 46px 8px rgba(0,0,0,0.3) !important;
+}
+
+/* Popups paint one elevated surface; a 1px ring (not a border, so native size is kept) marks the edge */
+.connectea-dark .v-popupview-popup, .connectea-dark .v-popupview-popup-cvr-js-popup-view-panel {
+  background-color: var(--cx-surface-elevated, #263242) !important;
+  box-shadow: 0 0 0 1px var(--cx-border-strong, #5a7391), 0 11px 15px -7px rgba(0, 0, 0, 0.5) !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}

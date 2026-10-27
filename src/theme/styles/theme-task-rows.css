@@ -19,7 +19,8 @@
   border-bottom: none !important;
 }
 
-.connectea-dark .eds-c-accordion__section-heading :is(.v-label, .eds-c-accordion__section-label, span, div) {
+.connectea-dark .eds-c-accordion__section-heading .v-label, .connectea-dark .eds-c-accordion__section-heading .eds-c-accordion__section-label,
+.connectea-dark .eds-c-accordion__section-heading :where(span):not(.cx-n), .connectea-dark .eds-c-accordion__section-heading :where(div):not(.cx-n) {
   background-color: transparent !important;
   border: none !important;
   color: inherit !important;
@@ -30,7 +31,10 @@
   color: var(--cx-button-text, #f1f5f9) !important;
 }
 
-.connectea-dark .eds-c-accordion__section-heading:hover :is(.v-label, .eds-c-accordion__section-label, span, div) {
+.connectea-dark .eds-c-accordion__section-heading:hover .v-label,
+.connectea-dark .eds-c-accordion__section-heading:hover .eds-c-accordion__section-label,
+.connectea-dark .eds-c-accordion__section-heading:hover :where(span):not(.cx-n),
+.connectea-dark .eds-c-accordion__section-heading:hover :where(div):not(.cx-n) {
   background-color: transparent !important;
   color: var(--cx-button-text, #f1f5f9) !important;
 }
@@ -44,23 +48,16 @@
 /* --------------------------------------------------------------------------
    11. Assessment Task Rows (.cvr-c-task)
    -------------------------------------------------------------------------- */
-.connectea-dark:not(cx-n) :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
-.connectea-dark:not(cx-n).eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
-.connectea-dark:not(cx-n) .eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group) {
+.connectea-dark:not(cx-n) .cvr-c-task, .connectea-dark:not(cx-n) .cvr-c-tasks, .connectea-dark:not(cx-n) .cvr-c-task-group,
+.connectea-dark:not(cx-n).eds.cvr .cvr-c-task, .connectea-dark:not(cx-n).eds.cvr .cvr-c-tasks, .connectea-dark:not(cx-n).eds.cvr .cvr-c-task-group,
+.connectea-dark:not(cx-n) .eds.cvr .cvr-c-task, .connectea-dark:not(cx-n) .eds.cvr .cvr-c-tasks, .connectea-dark:not(cx-n) .eds.cvr .cvr-c-task-group {
   background-color: transparent !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
-.connectea-dark:not(cx-n) :is(
-  .eds-c-accordion__panel,
-  .cvr-c-accordion__panel,
-  .eds-c-accordion__section-body
-),
-.connectea-dark:not(cx-n) .eds.cvr :is(
-  .eds-c-accordion__panel,
-  .cvr-c-accordion__panel,
-  .eds-c-accordion__section-body
-) {
+.connectea-dark:not(cx-n) .eds-c-accordion__panel, .connectea-dark:not(cx-n) .cvr-c-accordion__panel,
+.connectea-dark:not(cx-n) .eds-c-accordion__section-body, .connectea-dark:not(cx-n) .eds.cvr .eds-c-accordion__panel,
+.connectea-dark:not(cx-n) .eds.cvr .cvr-c-accordion__panel, .connectea-dark:not(cx-n) .eds.cvr .eds-c-accordion__section-body {
   border-bottom: 1px solid var(--cx-border, #3d5066) !important;
 }
 
@@ -75,7 +72,7 @@
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
-.connectea-dark .cvr-c-task :is(.v-label, .cvr-c-task__title) {
+.connectea-dark .cvr-c-task .v-label, .connectea-dark .cvr-c-task .cvr-c-task__title {
   color: var(--cx-text-primary, #f8fafc) !important;
   font-weight: 400 !important;
 }
@@ -89,45 +86,87 @@
   border-top: none !important;
 }
 
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(
-  .cvr-c-task-group__title,
-  .cvr-c-task__group-name,
-  .cvr-c-task-group h2,
-  .cvr-c-task-group h3,
-  .cvr-c-task-group h4,
-  .cvr-c-task-group :is(.v-label, span, strong):first-child,
-  :is(.cvr-c-task-group, .cvr-c-task-group__header, .cvr-c-task-group__headers, .cvr-c-task-group__heading) :is(h2, h3, h4, [class*="title"]),
-  .cvr-c-task__group-title,
-  .cvr-c-task__title,
-  .cvr-c-task__details .v-label:first-child,
-  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
-),
-.connectea-dark:not(cx-n) .cvr-c-task :is(
-  .cvr-c-task__title,
-  .cvr-c-task__details .v-label:first-child,
-  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
-) {
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__title:not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__group-name:not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :where(.cvr-c-task-group h2):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :where(.cvr-c-task-group h3):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :where(.cvr-c-task-group h4):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group .v-label:first-child),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group :where(span):first-child:not(.cx-n)),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group :where(strong):first-child:not(.cx-n)),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group :where(h2):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group :where(h3):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group :where(h4):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group [class*="title"]):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__header :where(h2):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__header :where(h3):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__header :where(h4):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__header [class*="title"]):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__headers :where(h2):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__headers :where(h3):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__headers :where(h4):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__headers [class*="title"]):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__heading :where(h2):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__heading :where(h3):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__heading :where(h4):not(.cx-n)):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task-group__heading [class*="title"]):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__group-title:not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__title:not(.cx-n):not(.cx-n),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__details .v-label:first-child),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__details > .v-label:first-child),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__details > :where(span):first-child:not(.cx-n)),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__details > :where(div):first-child:not(.cx-n)),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__details > :where(h2):first-child:not(.cx-n)),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__details > :where(h3):first-child:not(.cx-n)),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__details > :where(h4):first-child:not(.cx-n)),
+:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__details > :where(strong):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task .cvr-c-task__title:not(.cx-n):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details .v-label:first-child),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > .v-label:first-child),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(span):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(div):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h2):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h3):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h4):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(strong):first-child:not(.cx-n)) {
   font-weight: 700 !important;
 }
 
-.connectea-dark :is(
-  .cvr-c-task-group__title,
-  .cvr-c-task__group-name,
-  .cvr-c-task-group h2,
-  .cvr-c-task-group h3,
-  .cvr-c-task-group h4,
-  .cvr-c-task-group :is(.v-label, span, strong):first-child,
-  :is(.cvr-c-task-group, .cvr-c-task-group__header, .cvr-c-task-group__headers, .cvr-c-task-group__heading) :is(h2, h3, h4, [class*="title"]),
-  .cvr-c-task__group-title,
-  .cvr-c-task__title,
-  .cvr-c-task__details .v-label:first-child,
-  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
-),
-.connectea-dark:not(cx-n) .cvr-c-task :is(
-  .cvr-c-task__title,
-  .cvr-c-task__details .v-label:first-child,
-  .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
-) {
+.connectea-dark .cvr-c-task-group__title:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task__group-name:not(.cx-n):not(.cx-n),
+.connectea-dark :where(.cvr-c-task-group h2):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark :where(.cvr-c-task-group h3):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark :where(.cvr-c-task-group h4):not(.cx-n):not(.cx-n):not(.cx-n), .connectea-dark :is(.cvr-c-task-group .v-label:first-child),
+.connectea-dark :is(.cvr-c-task-group :where(span):first-child:not(.cx-n)),
+.connectea-dark :is(.cvr-c-task-group :where(strong):first-child:not(.cx-n)), .connectea-dark :is(.cvr-c-task-group :where(h2):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group :where(h3):not(.cx-n)):not(.cx-n), .connectea-dark :is(.cvr-c-task-group :where(h4):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group [class*="title"]):not(.cx-n), .connectea-dark :is(.cvr-c-task-group__header :where(h2):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__header :where(h3):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__header :where(h4):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__header [class*="title"]):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__headers :where(h2):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__headers :where(h3):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__headers :where(h4):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__headers [class*="title"]):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__heading :where(h2):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__heading :where(h3):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__heading :where(h4):not(.cx-n)):not(.cx-n),
+.connectea-dark :is(.cvr-c-task-group__heading [class*="title"]):not(.cx-n), .connectea-dark .cvr-c-task__group-title:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-task__title:not(.cx-n):not(.cx-n), .connectea-dark :is(.cvr-c-task__details .v-label:first-child),
+.connectea-dark :is(.cvr-c-task__details > .v-label:first-child), .connectea-dark :is(.cvr-c-task__details > :where(span):first-child:not(.cx-n)),
+.connectea-dark :is(.cvr-c-task__details > :where(div):first-child:not(.cx-n)),
+.connectea-dark :is(.cvr-c-task__details > :where(h2):first-child:not(.cx-n)),
+.connectea-dark :is(.cvr-c-task__details > :where(h3):first-child:not(.cx-n)),
+.connectea-dark :is(.cvr-c-task__details > :where(h4):first-child:not(.cx-n)),
+.connectea-dark :is(.cvr-c-task__details > :where(strong):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task .cvr-c-task__title:not(.cx-n):not(.cx-n),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details .v-label:first-child),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > .v-label:first-child),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(span):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(div):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h2):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h3):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h4):first-child:not(.cx-n)),
+.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(strong):first-child:not(.cx-n)) {
   color: var(--cx-button-text, #f1f5f9) !important;
 }
 

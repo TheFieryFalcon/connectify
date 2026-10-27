@@ -1,0 +1,15 @@
+/**
+ * Connectify Theme: reports year selector, light-mode wallpaper containers, glass headers and menus (part 3, continued from theme-reports-menus-2.css)
+ */
+
+.connectea-dark .cvr-c-primary-navigation__links .eds-s-is-active a::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;
+  box-shadow: none !important;
+}
+
+.connectea-dark .eds-c-tile a {
+  color: var(--cx-accent, #60a5fa) !important;
+}

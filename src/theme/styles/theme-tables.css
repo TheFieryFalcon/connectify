@@ -5,44 +5,30 @@
 /* --------------------------------------------------------------------------
    20. Universal Border Restoration & Structural Integrity
    -------------------------------------------------------------------------- */
-.connectea-dark :is(
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.mat-input-element):not(.cdk-visually-hidden):not(.mat-checkbox-input),
-  select,
-  textarea
-) {
+.connectea-dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.mat-input-element):not(.cdk-visually-hidden):not(.mat-checkbox-input),
+.connectea-dark select:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark textarea:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n) {
   border-style: solid !important;
   border-width: 1px !important;
 }
 
-.connectea-dark :is(.cdk-visually-hidden, .mat-checkbox-input) {
+.connectea-dark .cdk-visually-hidden, .connectea-dark .mat-checkbox-input {
   border: 0 !important;
   border-width: 0 !important;
 }
 /* --------------------------------------------------------------------------
    21. Tables, Grids & Submission Marksbooks
    -------------------------------------------------------------------------- */
-.connectea-dark :is(
-  table,
-  .table,
-  .table-striped,
-  .table-hover,
-  .table-bordered,
-  .table-list,
-  .table-responsive,
-  .cvr-c-table,
-  .cvr-c-table--marksbook,
-  .cvr-c-table--submission-students,
-  .cvr-c-table--list,
-  .cvr-c-submission-students-table,
-  .mat-table,
-  mat-table,
-  .cdk-table,
-  cdk-table,
-  .v-table,
-  .v-table-table,
-  .v-grid,
-  .v-treetable
-):not(#connectify-sidebar *) {
+.connectea-dark :where(table):not(#connectify-sidebar *):not(.cx-n), .connectea-dark .table:not(#connectify-sidebar *),
+.connectea-dark .table-striped:not(#connectify-sidebar *), .connectea-dark .table-hover:not(#connectify-sidebar *),
+.connectea-dark .table-bordered:not(#connectify-sidebar *), .connectea-dark .table-list:not(#connectify-sidebar *),
+.connectea-dark .table-responsive:not(#connectify-sidebar *), .connectea-dark .cvr-c-table:not(#connectify-sidebar *),
+.connectea-dark .cvr-c-table--marksbook:not(#connectify-sidebar *), .connectea-dark .cvr-c-table--submission-students:not(#connectify-sidebar *),
+.connectea-dark .cvr-c-table--list:not(#connectify-sidebar *), .connectea-dark .cvr-c-submission-students-table:not(#connectify-sidebar *),
+.connectea-dark .mat-table:not(#connectify-sidebar *), .connectea-dark :where(mat-table):not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark .cdk-table:not(#connectify-sidebar *), .connectea-dark :where(cdk-table):not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark .v-table:not(#connectify-sidebar *), .connectea-dark .v-table-table:not(#connectify-sidebar *),
+.connectea-dark .v-grid:not(#connectify-sidebar *), .connectea-dark .v-treetable:not(#connectify-sidebar *) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
   border-color: var(--cx-border, #36485e) !important;
@@ -50,108 +36,97 @@
 
 /* The header colour sits on the header cells, not on thead or the header row: a filled band a shade off the
    table body with nothing separating it reads as a smudge (adjacent-colour audit) */
-.connectea-dark :is(
-  thead th,
-  thead td,
-  .mat-header-cell,
-  mat-header-cell,
-  .v-table-header,
-  .v-table-header-cell,
-  .v-grid-header,
-  .v-grid-column-header-content,
-  .cvr-c-submission-students-table table th,
-  .cvr-c-submission-students-table__header-element,
-  .cvr-c-submission-students-table__preheader-element,
-  .table thead th,
-  .table-list thead th,
-  .cvr-c-tree-panel > thead
-):not(#connectify-sidebar *) {
+.connectea-dark :is(thead th):not(#connectify-sidebar *):not(.cx-n), .connectea-dark :is(thead td):not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark .mat-header-cell:not(#connectify-sidebar *):not(cx-n):not(cx-n),
+.connectea-dark mat-header-cell:not(#connectify-sidebar *):not(.cx-n):not(cx-n),
+.connectea-dark .v-table-header:not(#connectify-sidebar *):not(cx-n):not(cx-n),
+.connectea-dark .v-table-header-cell:not(#connectify-sidebar *):not(cx-n):not(cx-n),
+.connectea-dark .v-grid-header:not(#connectify-sidebar *):not(cx-n):not(cx-n),
+.connectea-dark .v-grid-column-header-content:not(#connectify-sidebar *):not(cx-n):not(cx-n),
+.connectea-dark :is(.cvr-c-submission-students-table table th):not(#connectify-sidebar *),
+.connectea-dark .cvr-c-submission-students-table__header-element:not(#connectify-sidebar *):not(cx-n):not(cx-n),
+.connectea-dark .cvr-c-submission-students-table__preheader-element:not(#connectify-sidebar *):not(cx-n):not(cx-n),
+.connectea-dark :is(.table thead th):not(#connectify-sidebar *), .connectea-dark :is(.table-list thead th):not(#connectify-sidebar *),
+.connectea-dark :is(.cvr-c-tree-panel > thead):not(#connectify-sidebar *):not(cx-n) {
   background-color: var(--cx-table-header-bg, var(--cx-surface-secondary, #18202b)) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark :is(
-  tbody th,
-  tbody td,
-  tfoot th,
-  tfoot td,
-  .mat-row,
-  mat-row,
-  .mat-cell,
-  mat-cell,
-  .v-table-cell-content,
-  .v-table-row,
-  .v-grid-row,
-  .v-grid-cell,
-  .table td,
-  .table th,
-  .table-list td,
-  .table-list th,
-  .cvr-c-submission-students-table table td,
-  .cvr-c-submission-students-table__element
-):not(#connectify-sidebar *) {
+.connectea-dark :is(tbody th):not(#connectify-sidebar *):not(.cx-n), .connectea-dark :is(tbody td):not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark :is(tfoot th):not(#connectify-sidebar *):not(.cx-n), .connectea-dark :is(tfoot td):not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark .mat-row:not(#connectify-sidebar *):not(cx-n):not(cx-n), .connectea-dark mat-row:not(#connectify-sidebar *):not(.cx-n):not(cx-n),
+.connectea-dark .mat-cell:not(#connectify-sidebar *):not(cx-n):not(cx-n), .connectea-dark mat-cell:not(#connectify-sidebar *):not(.cx-n):not(cx-n),
+.connectea-dark .v-table-cell-content:not(#connectify-sidebar *):not(cx-n):not(cx-n),
+.connectea-dark .v-table-row:not(#connectify-sidebar *):not(cx-n):not(cx-n),
+.connectea-dark .v-grid-row:not(#connectify-sidebar *):not(cx-n):not(cx-n),
+.connectea-dark .v-grid-cell:not(#connectify-sidebar *):not(cx-n):not(cx-n), .connectea-dark :is(.table td):not(#connectify-sidebar *):not(cx-n),
+.connectea-dark :is(.table th):not(#connectify-sidebar *):not(cx-n), .connectea-dark :is(.table-list td):not(#connectify-sidebar *):not(cx-n),
+.connectea-dark :is(.table-list th):not(#connectify-sidebar *):not(cx-n),
+.connectea-dark :is(.cvr-c-submission-students-table table td):not(#connectify-sidebar *),
+.connectea-dark .cvr-c-submission-students-table__element:not(#connectify-sidebar *):not(cx-n):not(cx-n) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
   border-color: var(--cx-border-subtle, #2e3c4e) !important;
 }
 
-.connectea-dark :is(
-  table:not(.table-bordered):not(.mat-table):not(.cdk-table),
-  .table:not(.table-bordered):not(.mat-table):not(.cdk-table),
-  .table-list,
-  .cvr-c-table,
-  .cvr-c-table--list,
-  .cvr-c-tree-panel,
-  .cvr-c-submission-students-table,
-  .v-table,
-  .v-table-table
-) {
+.connectea-dark :where(table:not(.table-bordered):not(.mat-table):not(.cdk-table)):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark .table:not(.table-bordered):not(.mat-table):not(.cdk-table), .connectea-dark .table-list:not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-table:not(.cx-n):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-table--list:not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-tree-panel:not(.cx-n):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-submission-students-table:not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark .v-table:not(.cx-n):not(.cx-n):not(.cx-n), .connectea-dark .v-table-table:not(.cx-n):not(.cx-n):not(.cx-n) {
   border-left: none !important;
   border-right: none !important;
 }
 
-.connectea-dark :is(
-  table:not(.table-bordered):not(.mat-table):not(.cdk-table),
-  .table:not(.table-bordered):not(.mat-table):not(.cdk-table),
-  .table-list,
-  .cvr-c-table,
-  .cvr-c-table--list,
-  .cvr-c-tree-panel,
-  .cvr-c-submission-students-table,
-  .v-table,
-  .v-table-table
-) :is(th, td):not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]) {
+.connectea-dark :where(table:not(.table-bordered):not(.mat-table):not(.cdk-table)):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n) th:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark :where(table:not(.table-bordered):not(.mat-table):not(.cdk-table)):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n) td:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .table:not(.table-bordered):not(.mat-table):not(.cdk-table) th:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .table:not(.table-bordered):not(.mat-table):not(.cdk-table) td:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .table-list:not(.cx-n):not(.cx-n):not(.cx-n) th:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .table-list:not(.cx-n):not(.cx-n):not(.cx-n) td:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .cvr-c-table:not(.cx-n):not(.cx-n):not(.cx-n) th:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .cvr-c-table:not(.cx-n):not(.cx-n):not(.cx-n) td:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .cvr-c-table--list:not(.cx-n):not(.cx-n):not(.cx-n) th:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .cvr-c-table--list:not(.cx-n):not(.cx-n):not(.cx-n) td:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .cvr-c-tree-panel:not(.cx-n):not(.cx-n):not(.cx-n) th:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .cvr-c-tree-panel:not(.cx-n):not(.cx-n):not(.cx-n) td:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .cvr-c-submission-students-table:not(.cx-n):not(.cx-n):not(.cx-n) th:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .cvr-c-submission-students-table:not(.cx-n):not(.cx-n):not(.cx-n) td:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .v-table:not(.cx-n):not(.cx-n):not(.cx-n) th:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .v-table:not(.cx-n):not(.cx-n):not(.cx-n) td:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .v-table-table:not(.cx-n):not(.cx-n):not(.cx-n) th:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]),
+.connectea-dark .v-table-table:not(.cx-n):not(.cx-n):not(.cx-n) td:not(.mat-header-cell):not(.mat-cell):not(mat-header-cell):not(mat-cell):not([class*="mat-column"]) {
   border-left: none !important;
   border-right: none !important;
 }
 
-.connectea-dark :is(
-  .table-striped tbody tr:nth-of-type(odd),
-  .table-list.table-striped tbody tr:nth-of-type(odd),
-  .v-table-row-odd,
-  .v-grid-row-stripe
-):not(#connectify-sidebar *) :is(td, th) {
+.connectea-dark :is(.table-striped tbody tr:nth-of-type(odd)):not(#connectify-sidebar *):not(.cx-n) td,
+.connectea-dark :is(.table-striped tbody tr:nth-of-type(odd)):not(#connectify-sidebar *):not(.cx-n) th,
+.connectea-dark :is(.table-list.table-striped tbody tr:nth-of-type(odd)):not(#connectify-sidebar *) td,
+.connectea-dark :is(.table-list.table-striped tbody tr:nth-of-type(odd)):not(#connectify-sidebar *) th,
+.connectea-dark .v-table-row-odd:not(#connectify-sidebar *):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n) td,
+.connectea-dark .v-table-row-odd:not(#connectify-sidebar *):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n) th,
+.connectea-dark .v-grid-row-stripe:not(#connectify-sidebar *):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n) td,
+.connectea-dark .v-grid-row-stripe:not(#connectify-sidebar *):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n) th {
   background-color: var(--cx-table-row-alt, var(--cx-surface-secondary, #161e29)) !important;
 }
 
-.connectea-dark :is(
-  .table-hover tbody tr:hover,
-  .table-list.table-hover tbody tr:hover,
-  .v-table-row:hover,
-  .v-grid-row:hover
-):not(#connectify-sidebar *) :is(td, th) {
+.connectea-dark :is(.table-hover tbody tr:hover):not(#connectify-sidebar *):not(.cx-n) td,
+.connectea-dark :is(.table-hover tbody tr:hover):not(#connectify-sidebar *):not(.cx-n) th,
+.connectea-dark :is(.table-list.table-hover tbody tr:hover):not(#connectify-sidebar *) td,
+.connectea-dark :is(.table-list.table-hover tbody tr:hover):not(#connectify-sidebar *) th,
+.connectea-dark .v-table-row:hover:not(#connectify-sidebar *):not(.cx-n):not(cx-n):not(cx-n) td,
+.connectea-dark .v-table-row:hover:not(#connectify-sidebar *):not(.cx-n):not(cx-n):not(cx-n) th,
+.connectea-dark .v-grid-row:hover:not(#connectify-sidebar *):not(.cx-n):not(cx-n):not(cx-n) td,
+.connectea-dark .v-grid-row:hover:not(#connectify-sidebar *):not(.cx-n):not(cx-n):not(cx-n) th {
   background-color: var(--cx-table-row-hover, var(--cx-surface-hover, #24303f)) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
-.connectea-dark :is(
-  tfoot,
-  .v-table-footer,
-  .v-table-footer-cell,
-  .v-grid-footer,
-  .table tfoot
-):not(#connectify-sidebar *) {
+.connectea-dark tfoot:not(#connectify-sidebar *):not(.cx-n), .connectea-dark .v-table-footer:not(#connectify-sidebar *):not(cx-n),
+.connectea-dark .v-table-footer-cell:not(#connectify-sidebar *):not(cx-n), .connectea-dark .v-grid-footer:not(#connectify-sidebar *):not(cx-n),
+.connectea-dark :is(.table tfoot):not(#connectify-sidebar *) {
   background-color: var(--cx-table-header-bg, var(--cx-surface-secondary, #18202b)) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-color: var(--cx-border, #36485e) !important;
@@ -166,27 +141,16 @@
 /* --------------------------------------------------------------------------
    22. Comprehensive Modals, Dialogs, Popups & Dark Modality Curtains
    -------------------------------------------------------------------------- */
-.connectea-dark :is(
-  .v-window-modalitycurtain,
-  .modal-backdrop,
-  .yui3-widget-mask,
-  .ui-widget-overlay
-) {
+.connectea-dark .v-window-modalitycurtain, .connectea-dark .modal-backdrop, .connectea-dark .yui3-widget-mask, .connectea-dark .ui-widget-overlay {
   background-color: rgba(0, 0, 0, 0.75) !important;
   opacity: 1 !important;
 }
 
-.connectea-dark :is(
-  .v-window,
-  .v-window-contents,
-  .ui-dialog,
-  .modal-content,
-  .modal-dialog,
-  .portal-popup,
-  .liferay-modal .modal-dialog,
-  .cvr-c-popup,
-  .v-reconnect-dialog
-):not(#connectify-sidebar *) {
+.connectea-dark .v-window:not(#connectify-sidebar *):not(.cx-n), .connectea-dark .v-window-contents:not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark .ui-dialog:not(#connectify-sidebar *):not(.cx-n), .connectea-dark .modal-content:not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark .modal-dialog:not(#connectify-sidebar *):not(.cx-n), .connectea-dark .portal-popup:not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark :is(.liferay-modal .modal-dialog):not(#connectify-sidebar *), .connectea-dark .cvr-c-popup:not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark .v-reconnect-dialog:not(#connectify-sidebar *):not(.cx-n) {
   background-color: var(--cx-surface-elevated, #1e2632) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;

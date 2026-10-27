@@ -3,36 +3,46 @@
  */
 
 /* Nav Lists, Resource Links, and Connect Help */
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .eds-c-nav-list, .eds-c-nav-list__item, .eds-c-nav-list__link,
-  .cvr-c-resource, .cvr-c-resource-item, .eds-c-resource, [class*="guide"], [class*="help"]
-) {
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-nav-list,
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-nav-list__item,
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-nav-list__link,
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-resource,
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-resource-item,
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-resource,
+:is(html, body).connectea-dark:not([data-connectea-login]) [class*="guide"],
+:is(html, body).connectea-dark:not([data-connectea-login]) [class*="help"] {
   background-color: var(--cx-surface-bg) !important;
   border-color: var(--cx-border-subtle) !important;
   color: var(--cx-text-secondary) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .eds-c-nav-list__item, .eds-c-nav-list__link, .cvr-c-resource-item
-):hover {
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-nav-list__item:hover,
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-nav-list__link:hover,
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-resource-item:hover {
   background-color: var(--cx-surface-hover) !important;
   color: var(--cx-text-primary) !important;
 }
 
 /* Tables, Grids & Submission Marksbooks */
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  table, .table, .table-striped, .table-hover, .table-bordered,
-  .cvr-c-table, .cvr-c-table--marksbook, .cvr-c-submission-students-table,
-  .v-table, .v-grid, .v-treetable
-):not(#connectify-sidebar *) {
+:is(html, body).connectea-dark:not([data-connectea-login]) :where(table):not(#connectify-sidebar *):not(.cx-n),
+:is(html, body).connectea-dark:not([data-connectea-login]) .table:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .table-striped:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .table-hover:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .table-bordered:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-table:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-table--marksbook:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-submission-students-table:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-table:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-grid:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-treetable:not(#connectify-sidebar *) {
   background-color: var(--cx-surface-bg) !important;
   color: var(--cx-text-secondary) !important;
   border-color: var(--cx-table-border) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  thead th, thead td, .v-table-header, .v-grid-header
-) {
+:is(html, body).connectea-dark:not([data-connectea-login]) :where(thead th):not(.cx-n),
+:is(html, body).connectea-dark:not([data-connectea-login]) :where(thead td):not(.cx-n),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-table-header, :is(html, body).connectea-dark:not([data-connectea-login]) .v-grid-header {
   background-color: var(--cx-table-header-bg) !important;
   color: var(--cx-text-primary) !important;
   border-color: var(--cx-table-border) !important;
@@ -43,71 +53,81 @@
 }
 
 /* Dropdowns, Menubars, Context Menus & Popups */
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .v-filterselect-suggestpopup, .v-menubar-popup, .v-contextmenu, .v-context-menu-container,
-  .v-popupview-popup, .dropdown-menu, .clay-dropdown-menu, .ui-menu, .ui-autocomplete,
-  .v-datefield-popup, .v-datefield-calendarpanel, .v-window, .v-window-contents, .mat-dialog-container
-):not(#connectify-sidebar *) {
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-filterselect-suggestpopup:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-menubar-popup:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-contextmenu:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-context-menu-container:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-popupview-popup:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .dropdown-menu:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .clay-dropdown-menu:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .ui-menu:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .ui-autocomplete:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-datefield-popup:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-datefield-calendarpanel:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-window:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-window-contents:not(#connectify-sidebar *),
+:is(html, body).connectea-dark:not([data-connectea-login]) .mat-dialog-container:not(#connectify-sidebar *) {
   background-color: var(--cx-surface-elevated) !important;
   color: var(--cx-text-secondary) !important;
   border-color: var(--cx-border-strong) !important;
 }
 
 /* Primary Navigation Bar (Matches Connect light mode Open Sans typography) */
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .cvr-c-primary-navigation__links, .cvr-c-primary-navigation__title, .cvr-c-primary-navigation .v-button-caption
-):not(.eds-c-icon-button *):not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *) {
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-primary-navigation__links:not(.eds-c-icon-button *):not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.cx-n),
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-primary-navigation__title:not(.eds-c-icon-button *):not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.cx-n),
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.cvr-c-primary-navigation .v-button-caption):not(.eds-c-icon-button *):not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .cvr-c-primary-navigation, .cvr-c-service-menu, .cvr-c-primary-menu
-) {
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-primary-navigation,
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-service-menu,
+:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-primary-menu {
   background-color: var(--cx-nav-bg) !important;
   border-bottom-color: var(--cx-nav-border) !important;
 }
 
 /* Buttons and Action Elements (top-bar icon buttons such as the Connect home logo stay on the nav surface) */
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .v-button, .eds-c-button, .eds-c-standard-button
-):not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(#connectify-sidebar *):not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-button:not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(#connectify-sidebar *):not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button),
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-button:not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(#connectify-sidebar *):not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button),
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-standard-button:not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(#connectify-sidebar *):not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
   background-color: var(--cx-button-bg) !important;
   color: var(--cx-button-text) !important;
   border-color: var(--cx-button-border) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .v-button:hover, .eds-c-button:hover, .eds-c-standard-button:hover
-):not(.cx-clear-cache-btn):not(#connectify-sidebar *):not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
+:is(html, body).connectea-dark:not([data-connectea-login]) .v-button:hover:not(.cx-clear-cache-btn):not(#connectify-sidebar *):not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button),
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-button:hover:not(.cx-clear-cache-btn):not(#connectify-sidebar *):not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button),
+:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-standard-button:hover:not(.cx-clear-cache-btn):not(#connectify-sidebar *):not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button) {
   background-color: var(--cx-surface-hover) !important;
   border-color: var(--cx-border-strong) !important;
 }
 
 /* Form Inputs, Textareas & Selects */
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not(.mat-input-element),
-  textarea, select, .connectea-type-select
-) {
+:is(html, body).connectea-dark:not([data-connectea-login]) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not(.mat-input-element),
+:is(html, body).connectea-dark:not([data-connectea-login]) textarea:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(html, body).connectea-dark:not([data-connectea-login]) select:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(html, body).connectea-dark:not([data-connectea-login]) .connectea-type-select:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n) {
   background-color: var(--cx-input-bg) !important;
   color: var(--cx-text-primary) !important;
   border-color: var(--cx-input-border) !important;
 }
 
 /* Links & Accents */
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(
-  .eds-c-tile a, .cvr-c-tile a, .connectea-panel a, .portlet-body a
-):not(.eds-c-tile__action):not(.cvr-c-tile__action) {
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.eds-c-tile a):not(.eds-c-tile__action):not(.cvr-c-tile__action),
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.cvr-c-tile a):not(.eds-c-tile__action):not(.cvr-c-tile__action),
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.connectea-panel a):not(.eds-c-tile__action):not(.cvr-c-tile__action),
+:is(html, body).connectea-dark:not([data-connectea-login]) :is(.portlet-body a):not(.eds-c-tile__action):not(.cvr-c-tile__action) {
   color: var(--cx-tile-link-color, var(--cx-text-primary, #f8fafc)) !important;
 }
 
 /* Login & Logout Page Guard: Disable all themes completely */
-:is([data-connectea-login], [data-connectea-logout], [data-connectea-login] *, [data-connectea-logout] *) {
+[data-connectea-login], [data-connectea-logout], :is([data-connectea-login] *), :is([data-connectea-logout] *) {
   --cx-canvas-bg: initial !important; --cx-surface-bg: initial !important; --cx-surface-secondary: initial !important;
   --cx-surface-elevated: initial !important; --cx-border: initial !important; --cx-border-subtle: initial !important;
   --cx-text-primary: initial !important; --cx-text-secondary: initial !important; --cx-accent: initial !important;
 }
 
-[data-connectea-login] :is(#connectea-theme-toggle, #connectea-theme-menu),
-[data-connectea-logout] :is(#connectea-theme-toggle, #connectea-theme-menu) {
+[data-connectea-login] #connectea-theme-toggle, [data-connectea-login] #connectea-theme-menu, [data-connectea-logout] #connectea-theme-toggle,
+[data-connectea-logout] #connectea-theme-menu {
   display: none !important;
 }
 

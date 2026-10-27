@@ -6,62 +6,86 @@
  */
 
 /* Header: the Vaadin header app paints the canvas under the bars, so their blur had nothing to show. The canvas
-   rule lists #main-content, so the unused id (#cx-specificity-anchor) is needed to outrank it */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, .v-app.headerui, .v-app.headerui > .v-ui) {
+   rule lists #main-content, so an id weight (:not(#cx-n), which every element passes) is needed to outrank it */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.v-app.headerui):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.v-app.headerui > .v-ui):not(#cx-n) {
   background-color: transparent !important;
 }
 
 /* The top navigation bar and the location ("Latest Notice") bar are glass bars */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .cvr-c-thori-pnl.cvr-c-primary-navigation, .cvr-c-thori-pnl.cvr-c-location-bar
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-thori-pnl.cvr-c-primary-navigation,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-thori-pnl.cvr-c-location-bar {
   backdrop-filter: var(--cx-gl-blur) !important;
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;
 }
 
 /* Service bar: the fixed container is only a positioner; the bar and the side menu (which overflows the
    container) are the two surfaces, so each blurs the page itself. The glass blur rule (theme-tokens.css) lists
-   #connectify-sidebar, so the container needs the unused id to drop its blur */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, .cvr-c-service-bar__container) {
+   #connectify-sidebar, so the container needs an id weight (:not(#cx-n)) to drop its blur */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-service-bar__container):not(#cx-n) {
   background-color: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .cvr-c-service-bar__container > .cvr-c-service-bar, .cvr-c-service-menu, .cvr-c-category-menu, .v-popupview-popup
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-service-bar__container > .cvr-c-service-bar),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-menu:not(.cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-category-menu:not(.cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-popupview-popup:not(.cx-n) {
   backdrop-filter: var(--cx-gl-blur) !important;
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;
 }
 
 /* Accordions (Learners, Notifications): the outermost accordion is the surface and blurs; its panels, their
    content and bodies, nested accordions, tables and paginators inside stay clear */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(mat-accordion, .mat-accordion):not(:is(mat-accordion, .mat-accordion, .mat-card, .eds-c-tile) *) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(mat-accordion):not(:is(mat-accordion, .mat-accordion, .mat-card, .eds-c-tile) *):not(.cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-accordion:not(:is(mat-accordion, .mat-accordion, .mat-card, .eds-c-tile) *) {
   backdrop-filter: var(--cx-gl-blur) !important;
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(mat-accordion, .mat-accordion, mat-toolbar.c-category-bar) :is(
-  #cx-specificity-anchor, mat-expansion-panel, .mat-expansion-panel, .mat-expansion-panel-content, .mat-expansion-panel-body,
-  mat-accordion, .mat-accordion, table, .connect-paginator-container, mat-paginator
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-accordion:not(.cx-n) :where(mat-expansion-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-accordion:not(.cx-n) :where(.mat-expansion-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-accordion:not(.cx-n) :where(.mat-expansion-panel-content):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-accordion:not(.cx-n) :where(.mat-expansion-panel-body):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-accordion:not(.cx-n) :where(mat-accordion):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-accordion:not(.cx-n) :where(.mat-accordion):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-accordion:not(.cx-n) :where(table):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-accordion:not(.cx-n) :where(.connect-paginator-container):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-accordion:not(.cx-n) :where(mat-paginator):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-accordion:not(cx-n) :where(mat-expansion-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-accordion:not(cx-n) :where(.mat-expansion-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-accordion:not(cx-n) :where(.mat-expansion-panel-content):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-accordion:not(cx-n) :where(.mat-expansion-panel-body):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-accordion:not(cx-n) :where(mat-accordion):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-accordion:not(cx-n) :where(.mat-accordion):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-accordion:not(cx-n) :where(table):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-accordion:not(cx-n) :where(.connect-paginator-container):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-accordion:not(cx-n) :where(mat-paginator):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar :where(mat-expansion-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar :where(.mat-expansion-panel):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar :where(.mat-expansion-panel-content):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar :where(.mat-expansion-panel-body):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar :where(mat-accordion):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar :where(.mat-accordion):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar :where(table):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar :where(.connect-paginator-container):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar :where(mat-paginator):not(#cx-n) {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
 /* Outermost tables, paginator bars and the Classes summary on the wallpaper blur like every glass surface */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  table.mat-table:not(:is(.mat-card, .eds-c-tile, .cvr-c-tile, .v-panel, mat-accordion, .mat-accordion) *),
-  #ng-zone__classes-metrics-summary
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(table.mat-table:not(:is(.mat-card, .eds-c-tile, .cvr-c-tile, .v-panel, mat-accordion, .mat-accordion) *)):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #ng-zone__classes-metrics-summary {
   backdrop-filter: var(--cx-gl-blur) !important;
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;
 }
 
 /* Vaadin popup panels are one surface: their bars and labels do not blur again (clearing: theme-surface-nesting.css) */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-popupview-popup :is(#cx-specificity-anchor, .v-csslayout, .v-label) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-popupview-popup :where(.v-csslayout):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-popupview-popup :where(.v-label):not(#cx-n) {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }

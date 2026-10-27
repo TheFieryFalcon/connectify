@@ -35,8 +35,8 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 }
 
 /* The cohort panel inside the strip is clear, divided from the controls by a hairline. The glass blur rule in
-   theme-tokens.css lists #connectify-sidebar, so the unused id (#cx-specificity-anchor) is needed to outrank it */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, .connectea-row-wrapper) > .connectea-panel {
+   theme-tokens.css lists #connectify-sidebar, so an id weight (:not(#cx-n), which every element passes) is needed to outrank it */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.connectea-row-wrapper):not(#cx-n) > .connectea-panel {
   background: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -46,9 +46,11 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 }
 
 /* Lines inside any cohort panel never add a second fill */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel :is(
-  .connectea-distribution, .connectea-result, .connectea-result-row, .connectea-panel-distribution, .connectea-panel-standing
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel .connectea-distribution,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel .connectea-result,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel .connectea-result-row,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel .connectea-panel-distribution,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel .connectea-panel-standing {
   background: transparent !important;
   border-color: transparent !important;
   box-shadow: none !important;
@@ -56,10 +58,12 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 
 /* Text on these glass surfaces uses the primary ink (secondary ink drops below 5:1 over a black wallpaper in
    grey Liquid Glass); the 700/400 weights keep the hierarchy */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(
-  .connectea-row-wrapper :is(.connectea-panel, .connectea-panel *, .connectea-type-label, .connectea-type-title),
-  .cvr-c-task__mark, .cvr-c-task__mark *
-) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.connectea-row-wrapper .connectea-panel),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.connectea-row-wrapper :is(.connectea-panel *)),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.connectea-row-wrapper .connectea-type-label),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.connectea-row-wrapper .connectea-type-title),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__mark:not(.cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-task__mark *):not(.cx-n) {
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
@@ -72,7 +76,8 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-task__marks, .cvr-c-task__mark) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__marks,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__mark {
   background: transparent !important;
   border-color: var(--cx-gl-hairline) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
@@ -84,7 +89,8 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 }
 
 /* The subject's overall statistics panel (summary row, outside a strip) is the same tint inside the tile */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(#cx-specificity-anchor, .eds-c-tile, .cvr-c-tile) .connectea-panel:not(.connectea-row-wrapper > .connectea-panel) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.eds-c-tile):not(#cx-n) .connectea-panel:not(.connectea-row-wrapper > .connectea-panel),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.cvr-c-tile):not(#cx-n) .connectea-panel:not(.connectea-row-wrapper > .connectea-panel) {
   background-color: var(--cx-gl-tint) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;

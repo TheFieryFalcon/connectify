@@ -85,6 +85,7 @@ This document details user-facing features 11 through 20, covering Goals and Est
   - Contrast coverage and tool data (Test 185): SVG `<text>`/`<tspan>` (chart labels) are measured by fill against the CSS background behind the `<svg>` plus SVG shapes painted under them; Connectify UI on page views (cohort panels, type selects, outcome meters, theme menu) skips parity but is contrast-checked; `TOOL_SUBJECTS_MISSING` (once per drawer tool) flags Predictor tabs, Weakness checkboxes or Progress chips missing a subject with marked tasks, listed under "Tool Data Completeness" in the report.
   - Keyed ancestors (Test 219): no `src/` stylesheet tests a class substring (`[class*=...]`) on an ancestor or inside `:not(... *)`, so Connect's class changes restyle only what they can affect.
   - Spacing parity (Test 160): class/id containers with 0px padding/margin in `connect_css/` (the Default theme) must not get non-zero spacing from any theme or custom theme stylesheet.
+  - Keyed theme rules (Test 270): every theme stylesheet is already expanded by `scripts/expand-is.js` (running it changes nothing), and the expansion keeps matches and specificity.
 
 ---
 

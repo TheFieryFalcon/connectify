@@ -1,0 +1,52 @@
+/**
+ * Connectify Theme Entry Point (part 2, continued from theme.css)
+ */
+
+/* Clip only tiles and cards to their corners; popups and menus must never be clipped. clip, not hidden: hidden
+   starts a formatting context, so a last child's bottom margin (the Maintenance Notice list's 15px) stopped
+   collapsing out of the tile and showed as an extra strip under its divider */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel {
+  overflow: clip !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card__body,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card__body {
+  border-bottom-left-radius: 16px !important;
+  border-bottom-right-radius: 16px !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .modal-content,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .ui-dialog,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(mat-dialog-container):not(.cx-n) {
+  border-radius: 20px !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-compound-progress-bar {
+  border-radius: 10px !important;
+  overflow: hidden !important;
+}
+
+/* Every dark theme: layout containers and wrappers that hold tiles (Assessment Outlines) are clear, so the canvas or
+   wallpaper shows in Connect's native 15px padding around tiles as in Default. Tiles stay opaque (glass in Liquid
+   Glass); detail views without tiles keep their surface. [data-connectea-theme] outranks the canvas rule. */
+html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) #main-content:has(.eds-c-tile, .cvr-c-tile),
+html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) :where(.cvr-c-app-layout):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) :where(.cvr-c-app-layout__body):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) :where(.v-app):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) :where(.v-ui):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) :where(.v-scrollable):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) .v-panel:has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile),
+html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) .v-panel-content:has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile),
+html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) .cvr-u-padding--md:has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile) {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}

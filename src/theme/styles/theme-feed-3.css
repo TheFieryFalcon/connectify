@@ -1,0 +1,76 @@
+/**
+ * Connectify Theme: surface adaptation, feed filters, notice cards and feed tabs (part 3, continued from theme-feed-2.css)
+ */
+
+.connectea-dark .v-popupview-popup .popupContent, .connectea-dark .v-popupview-popup .v-csslayout,
+.connectea-dark .v-popupview-popup-cvr-js-popup-view-panel .popupContent, .connectea-dark .v-popupview-popup-cvr-js-popup-view-panel .v-csslayout {
+  background-color: transparent !important;
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark .v-popupview-popup :where(div):not(.cx-n), .connectea-dark .v-popupview-popup :where(span):not(.cx-n),
+.connectea-dark .v-popupview-popup :where(label):not(.cx-n), .connectea-dark .v-popupview-popup :where(p):not(.cx-n),
+.connectea-dark .v-popupview-popup .v-label, .connectea-dark .v-popupview-popup-cvr-js-popup-view-panel :where(div):not(.cx-n),
+.connectea-dark .v-popupview-popup-cvr-js-popup-view-panel :where(span):not(.cx-n),
+.connectea-dark .v-popupview-popup-cvr-js-popup-view-panel :where(label):not(.cx-n),
+.connectea-dark .v-popupview-popup-cvr-js-popup-view-panel :where(p):not(.cx-n), .connectea-dark .v-popupview-popup-cvr-js-popup-view-panel .v-label {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark .cvr-c-feed-card p, .connectea-dark .cvr-c-feed-card span, .connectea-dark .cvr-c-feed-card div, .connectea-dark .cvr-c-feed-card u,
+.connectea-dark .cvr-c-feed-card em, .connectea-dark .cvr-c-feed-card li, .connectea-dark .cvr-c-feed-item p, .connectea-dark .cvr-c-feed-item span,
+.connectea-dark .cvr-c-feed-item div, .connectea-dark .cvr-c-feed-item u, .connectea-dark .cvr-c-feed-item em, .connectea-dark .cvr-c-feed-item li {
+  color: var(--cx-text-secondary, #cbd5e1) !important;
+}
+
+/* Detail views read in the primary ink (cream in Quantum Dark), never the secondary accent */
+.connectea-dark cnt-notice-view p, .connectea-dark cnt-notice-view span, .connectea-dark cnt-notice-view div, .connectea-dark cnt-notice-view u,
+.connectea-dark cnt-notice-view em, .connectea-dark cnt-notice-view li, .connectea-dark mat-dialog-container p,
+.connectea-dark mat-dialog-container span, .connectea-dark mat-dialog-container div, .connectea-dark mat-dialog-container u,
+.connectea-dark mat-dialog-container em, .connectea-dark mat-dialog-container li {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark :where(cnt-notice-view):not(.cx-n) h1:not(.cx-n):not(.cx-n),
+.connectea-dark :where(cnt-notice-view):not(.cx-n) h2:not(.cx-n):not(.cx-n),
+.connectea-dark :where(cnt-notice-view):not(.cx-n) h3:not(.cx-n):not(.cx-n),
+.connectea-dark :where(cnt-notice-view):not(.cx-n) h4:not(.cx-n):not(.cx-n),
+.connectea-dark :where(cnt-notice-view):not(.cx-n) h5:not(.cx-n):not(.cx-n),
+.connectea-dark :where(cnt-notice-view):not(.cx-n) h6:not(.cx-n):not(.cx-n),
+.connectea-dark :where(cnt-notice-view):not(.cx-n) strong:not(.cx-n):not(.cx-n),
+.connectea-dark :where(cnt-notice-view):not(.cx-n) b:not(.cx-n):not(.cx-n),
+.connectea-dark :where(cnt-notice-view):not(.cx-n) a:not(.btn):not(.mat-button-base),
+.connectea-dark :where(mat-dialog-container):not(.cx-n) h1:not(.cx-n):not(.cx-n),
+.connectea-dark :where(mat-dialog-container):not(.cx-n) h2:not(.cx-n):not(.cx-n),
+.connectea-dark :where(mat-dialog-container):not(.cx-n) h3:not(.cx-n):not(.cx-n),
+.connectea-dark :where(mat-dialog-container):not(.cx-n) h4:not(.cx-n):not(.cx-n),
+.connectea-dark :where(mat-dialog-container):not(.cx-n) h5:not(.cx-n):not(.cx-n),
+.connectea-dark :where(mat-dialog-container):not(.cx-n) h6:not(.cx-n):not(.cx-n),
+.connectea-dark :where(mat-dialog-container):not(.cx-n) strong:not(.cx-n):not(.cx-n),
+.connectea-dark :where(mat-dialog-container):not(.cx-n) b:not(.cx-n):not(.cx-n),
+.connectea-dark :where(mat-dialog-container):not(.cx-n) a:not(.btn):not(.mat-button-base), .connectea-dark .cvr-c-feed-card h1:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-feed-card h2:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-feed-card h3:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-feed-card h4:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-feed-card h5:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-feed-card h6:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-feed-card strong:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-feed-card b:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-feed-card a:not(.btn):not(.mat-button-base),
+.connectea-dark .cvr-c-feed-item h1:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-feed-item h2:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-feed-item h3:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-feed-item h4:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-feed-item h5:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-feed-item h6:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-feed-item strong:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-feed-item b:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-feed-item a:not(.btn):not(.mat-button-base) {
+  color: var(--cx-text-primary, #f8fafc) !important;
+}
+
+.connectea-dark cnt-notice-view a.link--reversed, .connectea-dark mat-dialog-container a.link--reversed {
+  color: var(--cx-accent-link, #60a5fa) !important;
+}
+
+.connectea-dark cnt-notice-view u, .connectea-dark mat-dialog-container u {
+  color: inherit !important;
+  text-decoration: underline !important;
+}
+
+.connectea-dark :where(mat-icon)[icon*="lock"]:not(.cx-n), .connectea-dark :where(mat-icon)[class*="lock"]:not(.cx-n),
+.connectea-dark .mat-icon:is([icon*="lock"], [class*="lock"]), .connectea-dark .text-danger {
+  color: var(--cx-danger, #f87171) !important;
+}
