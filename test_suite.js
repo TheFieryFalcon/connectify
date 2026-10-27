@@ -11846,7 +11846,12 @@ runTest('Test 259: Goal effort sliders move required marks without changing toda
   assert.strictEqual(D.tierFor({ chance: 0.01 }), 'hell');
   assert.strictEqual(D.tierFor({ guaranteed: true, chance: 0.01 }), 'guaranteed');
   assert.strictEqual(D.tierFor({ impossible: true, chance: 0.99 }), 'impossible');
-  assert.ok(D.chance(90, { low: 60, mid: 85, high: 87 }) < D.chance(90, { low: 83, mid: 85, high: 95 }), 'the half-range on the target\'s side sets the spread');
+  // Near 100 High's logarithmic headroom squeezes the upside: the wider half sets the spread on the logit scale
+  const nearTop = { low: 92, mid: 94, high: 94.6 };
+  assert.ok(D.chance(94.5, nearTop) >= 0.4, `half a point over a 94 Mid is Medium (${D.chance(94.5, nearTop)})`);
+  assert.strictEqual(D.tierFor({ chance: D.chance(95, nearTop) }), 'hard', 'one point over it is Hard, never Hell');
+  assert.ok(D.chance(99.9, { low: 90, mid: 94, high: 95 }) < 0.01, 'the logit scale still bounds it towards 100');
+  assert.ok(Math.abs(D.chance(45, { low: 45, mid: 50, high: 55 }) - 0.8) < 0.002, 'Low is about the 20th percentile');
   assert.deepStrictEqual([70, 76, 80, 85, 90].map(m => D.perfTier(m, 80)), ['red', 'orange', 'yellow', 'green', 'purple'], '+-5 bands, purple above 1.10 x R on green');
   assert.strictEqual(D.perfTier(100, 92), 'green', 'purple cannot happen once R is over 90.9');
   assert.strictEqual(D.color('achieved'), D.color('guaranteed'));

@@ -16,7 +16,7 @@
     RESULTS: 'v12_20261024_results',
     SETTINGS: 'v4_20261001_settings',
     COHORT: 'v7_20261024_cohort',
-    GOALS: 'v1_20261026_goals'
+    GOALS: 'v2_20261027_goals'
   };
 
   const CACHE_KEYS = {

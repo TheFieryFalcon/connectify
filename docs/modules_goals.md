@@ -20,7 +20,7 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 - **ATAR**: child targets re-solved from the plan's projected rows (`childTargets`, raw percent); the ATAR range comes from each included course's projected Low / Mid / High through `ConnectifyMath.calculate`.
 
 ### Difficulty (`goal-difficulty.js`, `ConnectifyGoalDifficulty`)
-- **Chance**: target vs a Low / Mid / High projection (`projectTasks`: marked tasks as they are, the rest from `getOrComputeTaskPrediction`, the Predictor's minimum spread): normal on Mid, sigma = half-range on the target's side / 0.8416. Sliders never change it.
+- **Chance**: target vs a Low / Mid / High projection (`projectTasks`: marked tasks as they are, the rest from `getOrComputeTaskPrediction`, the Predictor's minimum spread): normal on Mid on the logit scale (marks bounded by 0 and 100), sigma = the wider logit half-range / 0.8416 (High's logarithmic headroom squeezes the upside near 100, which made a point over Mid Hell). Sliders never change it.
 - **Tiers**: Guaranteed (met at 0% on everything left), Trivial >= 90%, Easy >= 70%, Medium >= 40%, Hard >= 15%, Hell < 15%, Impossible (needs > 100%). `taskTier`: a remaining task's own prediction vs its R.
 - **Performance bands** (`perfTier`): red < R-5, orange < R, yellow < R+5, green; purple (secret) above 1.10 x R on green.
 - **Colours**: Guaranteed `#15803d`, Trivial `#22c55e`, Easy `#84cc16`, Medium `#eab308`, Hard `#f97316`, Hell `#ef4444`, Impossible `#991b1b`; Achieved / Missed take the first / last.

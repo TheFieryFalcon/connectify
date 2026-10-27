@@ -2,7 +2,7 @@
  * Connectify Goals: difficulty
  *
  * The chance of reaching a target from a Low / Mid / High projection (about the 20th / 50th / 80th
- * percentiles: a normal on Mid, sigma from the half-range on the target's side), the seven tiers and their
+ * percentiles: a normal on Mid in logit space, sigma from the wider half-range), the seven tiers and their
  * colours, a task's own tier against its prediction, the goal-performance bands, and a projection of a set of
  * tasks (marked ones as they are, the rest from their predictions). Exposes window.ConnectifyGoalDifficulty.
  */
@@ -36,14 +36,24 @@
     return x >= 0 ? (1 + erf) / 2 : (1 - erf) / 2;
   }
 
-  /** Chance (0–1) that the outcome reaches `target`, or null without a projection. */
+  // Marks live between 0 and 100: on the logit scale a spread narrows towards either end by itself
+  const logit = v => {
+    const p = Math.min(99.95, Math.max(0.05, v)) / 100;
+    return Math.log(p / (1 - p));
+  };
+
+  /**
+   * Chance (0–1) that the outcome reaches `target`, or null without a projection. The spread is the wider
+   * half-range on the logit scale: High's logarithmic headroom squeezes the upside near 100 (a 94 average had
+   * 95 at the 92nd percentile), while the logit scale still bounds it there.
+   */
   function chance(target, range) {
     const { low, mid, high } = range || {};
     if (!Number.isFinite(target) || !Number.isFinite(mid)) return null;
-    const half = target >= mid ? high - mid : mid - low;
-    const sigma = Number.isFinite(half) ? half / Z80 : 0;
+    const halves = [Number.isFinite(low) ? logit(mid) - logit(low) : 0, Number.isFinite(high) ? logit(high) - logit(mid) : 0];
+    const sigma = Math.max(...halves) / Z80;
     if (!(sigma > 0)) return target <= mid ? 1 : 0;
-    return 1 - phi((target - mid) / sigma);
+    return 1 - phi((logit(target) - logit(mid)) / sigma);
   }
 
   /** The tier id: Guaranteed / Impossible from the plan, otherwise from the chance (null without one). */

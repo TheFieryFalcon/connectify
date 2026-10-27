@@ -47,7 +47,7 @@ Rule: **one active goal per subject**. A Target ATAR goal holds its four subject
 Taken from Connectify's existing projections, so a goal never disagrees with the Predictor:
 - **Grade goal**: target vs the subject's projected final mark (`projectSubjectGrades`: Low / Mid / High ≈ 20th / 50th / 80th percentile). For a custom week, the same projection limited to the tasks in range.
 - **ATAR goal**: target vs Predict ATAR's Low / Mid / High (`projectATAR`).
-- Model: a normal distribution centred on Mid. σ is the half-range on the target's side divided by 0.8416 (`(High − Mid)/0.8416` when target ≥ Mid, else `(Mid − Low)/0.8416`), so lopsided ATAR ranges stay honest. `chance = 1 − Φ((target − Mid)/σ)`. When the half-range is 0, chance is 1 or 0.
+- Model: a normal distribution centred on Mid on the logit scale (`L(x) = ln(x / (100 − x))`, x clamped to 0.05–99.95), so marks stay bounded by 0 and 100. σ is the wider of `L(Mid) − L(Low)` and `L(High) − L(Mid)` divided by 0.8416: High's logarithmic headroom squeezes the upside near 100 (a 94 Mid with Low 92 had High 94.6, so needing 95 read as 8%, Hell), while the logit scale narrows the spread towards 100 by itself. `chance = 1 − Φ((L(target) − L(Mid))/σ)`. When the half-range is 0, chance is 1 or 0.
 - **Effort sliders do not change the chance.** They change where the marks are needed, not how likely the total is.
 - **Per-task tier** (planner only): the chance of scoring at least the task's required mark R against that task's own prediction (`predictTask` Low / Mid / High, same σ rule). Tasks without a prediction get no tier.
 
