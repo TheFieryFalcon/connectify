@@ -11979,10 +11979,17 @@ runTest('Test 263: Set as Goal previews the goal with its end and confirms it; t
     ConnectifyData: { collect: () => [] }
   });
   const S = win.ConnectifyGoalSliders;
-  const ctl = S.control('t2', 1, () => {});
+  const moved = [];
+  const ctl = S.control('t2', 1, notch => moved.push(notch));
   const input = ctl.querySelector('.cx-goal-slider');
   assert.deepStrictEqual([input.type, input.min, input.max, input.step, input.getAttribute('aria-valuetext')], ['range', '-2', '2', '1', 'More'], 'five notches, named for screen readers');
   assert.strictEqual(ctl.querySelector('.cx-goal-notch').textContent, 'More');
+  input.value = '-2';
+  input.dispatchEvent(new MockEvent('input'));
+  assert.strictEqual(ctl.querySelector('.cx-goal-notch').textContent, 'Much less', 'the notch name follows a drag');
+  assert.deepStrictEqual(moved, [], 'a drag never re-renders the planner (that replaced the slider and lost the drag)');
+  input.dispatchEvent(new MockEvent('change'));
+  assert.deepStrictEqual(moved, [-2], 'releasing it does');
   S.gradeSliders('chemistry').t2 = 2;
   S.reset('grade');
   assert.deepStrictEqual(S.gradeSliders('chemistry'), {}, 'the checkbox resets the sliders');

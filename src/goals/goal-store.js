@@ -59,10 +59,10 @@
   /** The subject keys a goal holds: its subject, or an ATAR goal's four subjects. */
   const subjectsOf = goal => (goal.kind === 'atar' ? (goal.topFour || []) : [goal.subject]).filter(Boolean);
 
-  /** The active goal holding a subject (an ATAR child resolves to its ATAR goal), or null. */
-  function activeFor(subject) {
+  /** The active goal holding a subject (an ATAR child resolves to its ATAR goal), or null. `goals`: an `all()` already read. */
+  function activeFor(subject, goals = all()) {
     const key = subjectKey(subject);
-    return active().find(g => !g.parent && subjectsOf(g).includes(key)) || null;
+    return goals.find(g => g.status === 'active' && !g.parent && subjectsOf(g).includes(key)) || null;
   }
 
   /**

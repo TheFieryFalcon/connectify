@@ -19,17 +19,33 @@
   const round1 = v => (Number.isFinite(v) ? (Math.round(v * 10) / 10).toFixed(1) : '—');
   const BANDS = ['red', 'orange', 'yellow', 'green'];
 
+  // A cohort pass asks for every row: goals, verdicts and each card's task ids are read once per pass (the
+  // stored JSON and a whole-card scan per row made every pass stutter), dropped after the task or a goal change
+  let memo = null;
+  function pass() {
+    if (!memo) {
+      memo = { goals: store().all(), verdicts: null, ids: new Map() };
+      setTimeout(() => { memo = null; }, 0);
+    }
+    return memo;
+  }
+  window.addEventListener('connectify-goals-changed', () => { memo = null; });
+
   function taskId(row) {
     const card = row.closest?.('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
-    return (card && window.ConnectifyParseHelpers?.cardTaskIds?.(card).get(row)?.id) || null;
+    if (!card) return null;
+    const { ids } = pass();
+    if (!ids.has(card)) ids.set(card, window.ConnectifyParseHelpers?.cardTaskIds?.(card) || new Map());
+    return ids.get(card).get(row)?.id || null;
   }
 
   const subjectOfRow = row => window.ConnectifyTaskTypes?.getTaskMeta?.(row)?.subjectName || '';
 
   /** The latest finished goal's frozen verdict for a task, with that goal. */
   function frozenVerdict(key) {
-    const verdicts = store().verdicts();
-    const past = store().all().filter(g => g.status !== 'active' && verdicts[g.id]?.[key])
+    const snap = pass();
+    const verdicts = (snap.verdicts = snap.verdicts || store().verdicts());
+    const past = snap.goals.filter(g => g.status !== 'active' && verdicts[g.id]?.[key])
       .sort((a, b) => String(b.finishedAt).localeCompare(String(a.finishedAt)));
     return past[0] ? { goal: past[0], verdict: verdicts[past[0].id][key] } : null;
   }
@@ -39,7 +55,7 @@
     if (!store() || !events()) return null;
     const subjectName = subjectOfRow(row);
     const subject = store().subjectKey(subjectName);
-    const goal = store().activeFor(subjectName);
+    const goal = store().activeFor(subjectName, pass().goals);
     const state = goal ? events().stateOf(goal) : null;
     const child = goal?.kind === 'atar' ? state?.children?.[subject] : null;
     if (isOverall) {
@@ -106,17 +122,17 @@
     return lines.join('\n');
   }
 
-  /** Memo key of what the row's bars show (joins the row's cohort memo). */
+  /** Memo key of what the row's bars show (joins the row's cohort memo): a row redraws only when they change. */
   function signature(row, isOverall) {
-    if (!store()?.all().length) return '';
+    if (!store() || !pass().goals.length) return '';
     const data = rowData(row, isOverall);
-    return `${events()?.version() ?? 0}|${data ? tooltip(data) : ''}|${data?.perf?.band || ''}|${data?.progress?.tier || ''}`;
+    return `${data ? tooltip(data) : ''}|${data?.perf?.band || ''}|${data?.progress?.tier || ''}`;
   }
 
   /** Draws (or removes) the row's goal bars, right of its outcome meter or at the end of an overall panel. */
   function render(ui, row, isOverall) {
     if (!ui) return;
-    const data = store()?.all().length ? rowData(row, isOverall) : null;
+    const data = store() && pass().goals.length ? rowData(row, isOverall) : null;
     const host = isOverall ? ui.box : ui.outcomeBar?.parentElement;
     let wrap = ui.goalBars;
     if (!data || (!data.perf && !data.progress) || !host) {

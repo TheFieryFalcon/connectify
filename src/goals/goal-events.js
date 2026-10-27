@@ -60,10 +60,26 @@
     return (state?.markedKeys || []).filter(key => !seen.has(key));
   };
 
+  // What an evaluation reads: goals, and each course's tasks and final letter. Connect re-reads a card on every
+  // accordion open, so most results events change nothing; those skip the replay (a bisection per judged task)
+  // and the cohort pass after it. Predictions, task types and settings always re-evaluate (`stale`).
+  let lastInputs = null;
+  let stale = true;
+  function inputsOf(ctx) {
+    const goals = store().all().map(g => [g.id, g.revision, g.status]);
+    const courses = [...ctx.courses, ...ctx.atarCourses].flat().map(c => [c.id, c.finalLetter || '', c.mark,
+      (c.tasks || []).map(t => [t.id || t.name, t.score, t.weight, t.order, t.pending ? 1 : 0])]);
+    return JSON.stringify([goals, courses]);
+  }
+
   /** Re-evaluates every active goal, settles the finished ones and announces the ones with new results. */
   function refresh() {
     timer = null;
     if (P().isHeld()) return;
+    const inputs = inputsOf(context());
+    if (!stale && inputs === lastInputs) return;
+    stale = false;
+    lastInputs = inputs;
     states.clear();
     for (const goal of store().active().filter(g => !g.parent)) {
       const state = stateOf(goal);
@@ -78,8 +94,9 @@
     window.ConnectifyCohort?.schedule?.();
   }
 
-  function invalidate() {
+  function invalidate(event) {
     if (P().isHeld()) return;
+    if (event && !['connectify-results-updated', 'connectify-goals-changed'].includes(event.type)) stale = true;
     clearTimeout(timer);
     timer = setTimeout(refresh, 400);
   }

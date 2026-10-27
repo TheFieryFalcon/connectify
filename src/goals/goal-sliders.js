@@ -45,12 +45,16 @@
     input.setAttribute('aria-valuetext', P().notchName(value));
     input.setAttribute('aria-label', 'Effort');
     input.dataset.goalKey = key;
+    // While dragging only the notch name follows; the planner re-renders on release (`change`, also each
+    // key press), since replacing the slider mid-drag drops the drag and selects text instead
     input.addEventListener('input', () => {
       const notch = Number(input.value);
       name.textContent = P().notchName(notch);
       input.setAttribute('aria-valuetext', P().notchName(notch));
+    });
+    input.addEventListener('change', () => {
       focusKey = document.activeElement === input ? key : null;
-      onChange(notch);
+      onChange(Number(input.value));
     });
     label.append(input, name);
     return label;
