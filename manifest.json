@@ -320,7 +320,9 @@
             "https://connect.det.wa.edu.au/*"
          ],
          "exclude_matches": [
-            "https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*"
+            "https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines*",
+            "https://connect.det.wa.edu.au/login*",
+            "https://connect.det.wa.edu.au/*portal/login*"
          ],
          "css": [
             "src/sidebar/styles/sidebar-drawer.css",

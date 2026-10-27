@@ -12198,6 +12198,44 @@ runTest('Test 266: Year Progression draws the goal line; the Estimator says whet
   localStorage.clear();
 });
 
+runTest('Test 267: The sidebar never appears on the login screen', async () => {
+  await Promise.all(pendingTestPromises);
+  const manifest = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'manifest.json'), 'utf8'));
+  const sidebarGroups = manifest.content_scripts.filter(g => (g.js || []).includes('src/sidebar/sidebar.js'));
+  const everywhere = sidebarGroups.find(g => g.matches.includes('https://connect.det.wa.edu.au/*'));
+  for (const url of ['https://connect.det.wa.edu.au/login*', 'https://connect.det.wa.edu.au/*portal/login*']) {
+    assert.ok(everywhere.exclude_matches.includes(url), `the sidebar-only group excludes ${url}`);
+  }
+  assert.ok(sidebarGroups.every(g => g.matches.every(m => !m.startsWith('https://login.det.wa.edu.au'))), 'no sidebar on the DET sign-in host');
+
+  // A login page the manifest misses (or a logged-out page) still gets no handle or drawer
+  const authJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-auth.js'), 'utf8');
+  const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
+  const origHref = location.href;
+  const origAuth = window.ConnectifyThemeAuth;
+  const reset = () => {
+    delete window.__connectifySidebarInitialized;
+    document.querySelectorAll('#connectify-sidebar, #connectify-sidebar-handle').forEach(el => el.remove());
+  };
+  try {
+    eval(authJs);
+    reset();
+    location.href = 'https://connect.det.wa.edu.au/login?dest=home';
+    eval(sidebarJs);
+    // Booleans only: a failing assertion holding a mock element hangs while the runner prints it
+    assert.strictEqual(Boolean(document.getElementById('connectify-sidebar')), false, 'no drawer on the login page');
+    assert.strictEqual(Boolean(document.getElementById('connectify-sidebar-handle')), false, 'no handle on the login page');
+    assert.strictEqual(Boolean(window.__connectifySidebarInitialized), false, 'the sidebar is not initialised');
+
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-connect';
+    eval(sidebarJs);
+    assert.strictEqual(Boolean(document.getElementById('connectify-sidebar') && document.getElementById('connectify-sidebar-handle')), true, 'other Connect pages keep the sidebar');
+  } finally {
+    location.href = origHref;
+    window.ConnectifyThemeAuth = origAuth;
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

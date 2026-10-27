@@ -35,7 +35,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 
 ### 4. Floating Tools Drawer & Sidebar
 - **Source Modules**: `src/sidebar/` (`sidebar.js` and its shell, tools, page notice, handle and hover modules) and `src/sidebar/styles/`
-- **Every Page**: the drawer is on every Connect page. Away from Assessment Outlines every launcher but Settings is greyed out under an "Assessment Outlines Only" notice with an `Open Assessment Outlines →` link; on the outlines page every tool works, filtered or not (tools read the cache).
+- **Every Page**: the drawer is on every Connect page except the login and logged-out screens. Away from Assessment Outlines every launcher but Settings is greyed out under an "Assessment Outlines Only" notice with an `Open Assessment Outlines →` link; on the outlines page every tool works, filtered or not (tools read the cache).
 - **DOM Insertion**: Anchored to Connect's native sidebar (`#connectify-sidebar-handle`) and fixed to viewport (`#connectify-sidebar`).
 - **Touch Screens**: until a mouse or trackpad is used (a touch turns it back on), every Connectify control takes a 44px tap (it grows in the layout, so nothing overlaps); the handle is 44px wide; the theme button and its chevron take taps over the whole height of Connect's bar.
 - **UI Appearance**: Compact 30px width handle (44px on touchscreens) with directional arrow icon (`❮` / `❯`) without text or excess whitespace. Anchors directly to Connect's left menu when closed; centers vertically on drawer edge when open.

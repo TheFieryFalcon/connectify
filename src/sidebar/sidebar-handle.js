@@ -9,6 +9,9 @@
   'use strict';
 
   try {
+    // Never on login or logout pages (manifest excludes login URLs; logged-out pages are known by content)
+    if (window.ConnectifyThemeAuth?.isAuthDisabled()) return;
+
     const createElement = (tag, text) => {
       const el = document.createElement(tag);
       if (text) el.textContent = text;

@@ -10,7 +10,7 @@
   'use strict';
 
   try {
-    if (window.__connectifySidebarInitialized) return;
+    if (window.__connectifySidebarInitialized || window.ConnectifyThemeAuth?.isAuthDisabled()) return;
     window.__connectifySidebarInitialized = true;
 
     const tools = window.ConnectifySidebarTools;
