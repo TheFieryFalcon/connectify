@@ -44,19 +44,19 @@
 /* --------------------------------------------------------------------------
    11. Assessment Task Rows (.cvr-c-task)
    -------------------------------------------------------------------------- */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group) {
+.connectea-dark:not(cx-n) :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
+.connectea-dark:not(cx-n).eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group),
+.connectea-dark:not(cx-n) .eds.cvr :is(.cvr-c-task, .cvr-c-tasks, .cvr-c-task-group) {
   background-color: transparent !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .eds-c-accordion__panel,
   .cvr-c-accordion__panel,
   .eds-c-accordion__section-body
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+.connectea-dark:not(cx-n) .eds.cvr :is(
   .eds-c-accordion__panel,
   .cvr-c-accordion__panel,
   .eds-c-accordion__section-body
@@ -64,8 +64,8 @@
   border-bottom: 1px solid var(--cx-border, #3d5066) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds-c-accordion__panel:before,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr .eds-c-accordion__panel:before {
+.connectea-dark:not(cx-n) .eds-c-accordion__panel:before,
+.connectea-dark:not(cx-n) .eds.cvr .eds-c-accordion__panel:before {
   display: none !important;
   content: none !important;
 }
@@ -102,7 +102,7 @@
   .cvr-c-task__details .v-label:first-child,
   .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is(
+.connectea-dark:not(cx-n) .cvr-c-task :is(
   .cvr-c-task__title,
   .cvr-c-task__details .v-label:first-child,
   .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
@@ -123,7 +123,7 @@
   .cvr-c-task__details .v-label:first-child,
   .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is(
+.connectea-dark:not(cx-n) .cvr-c-task :is(
   .cvr-c-task__title,
   .cvr-c-task__details .v-label:first-child,
   .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child

@@ -3,7 +3,7 @@
  */
 
 /* Circular Action Buttons (e.g. trash/delete, circular controls) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)) {
+.connectea-dark:not(cx-n) :is(.btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)) {
   background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
   background-image: none !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
@@ -11,7 +11,7 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .eds-c-icon-button,
   .cvr-c-icon-button,
   .cvr-c-pri-nav-icon-button,
@@ -25,7 +25,7 @@
   box-shadow: none !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .mat-stroked-button,
   button.mat-focus-indicator.border,
   .mat-icon-button.border,
@@ -34,11 +34,11 @@
   border: 1px solid var(--cx-button-border, var(--cx-border, #455a73)) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.border-left, [class*="border-left"], .eds-u-separator--left, [class*="separator--left"]) {
+.connectea-dark:not(cx-n) :is(.border-left, [class*="border-left"], .eds-u-separator--left, [class*="separator--left"]) {
   border-left: 1px solid var(--cx-border, #455a73) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .c-toolbar-button,
   .toggle--white-rounded,
   .toggle--grey-light,
@@ -52,7 +52,7 @@
 }
 
 /* Icon buttons inside table cells (row ⋯ menus) are clear like Connect's: a fill a shade off the row read as a smudge */
-:is(html.connectea-dark, body.connectea-dark) :is(td, .mat-cell) button.mat-icon-button {
+.connectea-dark:not(cx-n) :is(td, .mat-cell) button.mat-icon-button {
   background-color: transparent !important;
 }
 
@@ -62,18 +62,18 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
   fill: currentColor !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)):hover {
+.connectea-dark:not(cx-n) :is(.btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), [class*="delete"]:is(button, a, .btn), [class*="trash"]:is(button, a, .btn)):hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   border-color: var(--cx-border-hover, #6482a6) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), .delete-button:is(button, a, .btn)) :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], mat-icon, cnt-icon, [class^="cvr-c-icon--"]):not([data-original-color]) {
+.connectea-dark:not(cx-n) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), .delete-button:is(button, a, .btn)) :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], mat-icon, cnt-icon, [class^="cvr-c-icon--"]):not([data-original-color]) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   fill: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), .delete-button:is(button, a, .btn)):hover :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
+.connectea-dark:not(cx-n) :is(.eds-c-icon-button, .cvr-c-icon-button, .mat-icon-button, .btn-monospaced, .rounded-circle:is(button, a, .btn), button:has([class*="trash"], [class*="delete"], [class*="bin"]), .delete-button:is(button, a, .btn)):hover :is(svg, i, span, .lexicon-icon, .v-icon, [class*="icon"], [class^="cvr-c-icon--"]):not([data-original-color]) {
   color: var(--cx-button-text-hover, #ffffff) !important;
   fill: var(--cx-button-text-hover, #ffffff) !important;
 }
@@ -140,28 +140,28 @@ html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-acce
 }
 
 /* Bulk Expansion Animated Loading Progress Pill in Dark Mode */
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(#cx-expand-progress, .cx-expand-progress-pill) {
+.connectea-dark:not(cx-n) :is(#cx-expand-progress, .cx-expand-progress-pill) {
   background: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-color: var(--cx-border-subtle, #2e3c4e) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38) !important;
 }
 
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-spinner {
+.connectea-dark:not(cx-n) .cx-expand-spinner {
   border-color: var(--cx-accent, #3b82f6) !important;
   border-top-color: transparent !important;
 }
 
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-label {
+.connectea-dark:not(cx-n) .cx-expand-label {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-track {
+.connectea-dark:not(cx-n) .cx-expand-track {
   background: var(--cx-canvas-bg, #12171f) !important;
   border-color: var(--cx-border, #2e3c4e) !important;
 }
 
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-bar {
+.connectea-dark:not(cx-n) .cx-expand-bar {
   background: linear-gradient(90deg, var(--cx-accent, #3b82f6), var(--cx-accent-hover, #60a5fa)) !important;
 }
 

@@ -29,7 +29,7 @@
 }
 
 /* Unified Card & Tile Header: clean border, no colored accent stripes */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .eds-c-tile,
   .cvr-c-tile,
   .c-tile,
@@ -44,14 +44,14 @@
   .eds-c-card__header,
   .cvr-c-card__header
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
+.connectea-dark:not(cx-n).eds.cvr :is(
   .eds-c-tile__header,
   .cvr-c-tile__header,
   .c-tile__header,
   .eds-c-card__header,
   .cvr-c-card__header
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+.connectea-dark:not(cx-n) .eds.cvr :is(
   .eds-c-tile__header,
   .cvr-c-tile__header,
   .c-tile__header,
@@ -68,7 +68,7 @@
 }
 
 /* Suppress all native colored header divider lines (e.g. olive on Classes, red on Next Event) while preserving clearfix */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .eds-c-tile__header,
   .eds-t-grey-dark .eds-c-tile__header,
   .eds-t-blue-dark .eds-c-tile__header,
@@ -85,7 +85,7 @@
   .c-tile__header,
   .cvr-c-card__header
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
+.connectea-dark:not(cx-n).eds.cvr :is(
   .eds-c-tile__header,
   .eds-t-grey-dark .eds-c-tile__header,
   .eds-t-blue-dark .eds-c-tile__header,
@@ -102,7 +102,7 @@
   .c-tile__header,
   .cvr-c-card__header
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+.connectea-dark:not(cx-n) .eds.cvr :is(
   .eds-c-tile__header,
   .eds-t-grey-dark .eds-c-tile__header,
   .eds-t-blue-dark .eds-c-tile__header,

@@ -33,6 +33,14 @@
         .filter(r => r !== overallRow).map(r => readMark(r)).join('|');
     }
 
+    // A cohort pass hands every overall row the same freshly collected list: every subject is projected
+    // once per pass, not once per overall row
+    const projected = new WeakMap();
+    function projectAll(predMath, list) {
+      if (!projected.has(list)) projected.set(list, predMath.projectSubjectGrades(list));
+      return projected.get(list);
+    }
+
     /** The class's projection from the Predictor, or null when it has no marks or baseline. */
     function projection(overallRow, subjects) {
       const predMath = window.ConnectifyPredictorMath;
@@ -41,7 +49,7 @@
       if (!predMath?.projectSubjectGrades || !title) return null;
       const list = subjects?.length ? subjects : (window.ConnectifyData?.hasCachedSubjects?.() ? window.ConnectifyData.collect(true) : []);
       const clean = predMath.cleanSubject ? predMath.cleanSubject(title) : title;
-      const found = predMath.projectSubjectGrades(list).find(s => s.cleanName === clean);
+      const found = projectAll(predMath, list).find(s => s.cleanName === clean);
       const p = found?.projected;
       return found?.hasSubjectAverage && p && [p.low, p.mid, p.high].every(Number.isFinite) ? p : null;
     }

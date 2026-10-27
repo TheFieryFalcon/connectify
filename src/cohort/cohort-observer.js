@@ -82,7 +82,7 @@
 
   // Heartbeat while the user is active: a cohort pass, and a request for the main-world bridge to
   // re-read charts whose data arrived without a DOM change
-  scheduler.every(8000, () => schedule());
+  scheduler.every(8000, () => schedule(), { mute: true });
   scheduler.every(2500, () => window.ConnectifyDataSyncCharts?.(), { mute: true });
   window.addEventListener('pageshow', e => {
     if (e.persisted) schedule();

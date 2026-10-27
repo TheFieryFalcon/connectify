@@ -2200,7 +2200,7 @@ runTest('theme.css covers circular trash buttons, View All buttons, Clay/Materia
   assert.ok(cssHas(css, '.eds-c-action-button') || cssHas(css, '.eds-c-tile__header .v-button'), 'theme.css must style View All tile header action button');
   assert.ok(cssHas(css, '.custom-checkbox') && cssHas(css, '.custom-control-label::before'), 'theme.css must style Clay custom checkboxes');
   assert.ok(cssHas(css, '.mat-checkbox-frame'), 'theme.css must style Angular Material checkbox frames');
-  assert.ok(cssHas(css, ':is(html.connectea-dark, body.connectea-dark, .connectea-dark)') && cssHas(css, '.eds.cvr'), 'theme.css must provide maximum specificity covering .eds.cvr');
+  assert.ok(cssHas(css, '.connectea-dark:not(cx-n)') && cssHas(css, '.eds.cvr'), 'theme.css must provide maximum specificity covering .eds.cvr');
   assert.ok(cssHasToken(css, 'border-top: 1px solid #2e3c4e !important;') && cssHasToken(css, 'border-bottom: 1px solid #2e3c4e !important;'), 'theme.css must set dark borders on task rows to eliminate light #888 lines');
 });
 
@@ -3437,9 +3437,9 @@ runTest('Test 113: Typography bolding parity between dark and light modes for ta
 
   // 1. Task titles and first details labels bolding in light and dark modes (font-weight: 700 !important)
   assert.ok(cssHas(sideCss, '.cvr-c-task__details .v-label:first-child'), 'sidebar.css must bold first details label');
-  assert.ok(cssHas(sideCss, ':is(.connectea-dark, html.connectea-dark, body.connectea-dark)'), 'sidebar.css must enforce dark mode bolding parity');
+  assert.ok(cssHas(sideCss, '.connectea-dark:not(cx-n)'), 'sidebar.css must enforce dark mode bolding parity');
   assert.ok(cssHas(themeCss, '.cvr-c-task__details .v-label:first-child'), 'theme.css must bold first details label in dark mode');
-  assert.ok(cssHas(themeCss, ':is(html.connectea-dark, body.connectea-dark, .connectea-dark) .cvr-c-task :is('), 'theme.css must override task details unbolding for task headers');
+  assert.ok(cssHas(themeCss, '.connectea-dark:not(cx-n) .cvr-c-task :is('), 'theme.css must override task details unbolding for task headers');
 
   // 2. Summary mark and non-task score unbolding parity (font-weight: 400 !important)
   assert.ok(cssHas(sideCss, '.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'sidebar.css must unbold subject summary mark');
@@ -3773,7 +3773,7 @@ runTest('Test 119: Immediate summary panel recovery, scoped surface adaptation, 
   assert.ok(themeJs.includes('scheduleAdaptSurfaces(600)'), 'theme.js must schedule startup surface adaptation without blocking render');
 
   // 5. Verify relaxed polling cadence in atar-features.js
-  assert.ok(atarFeatJs.includes('scheduler.every(5000, syncFeatures);'), 'atar-features.js must use 5000ms cadence for periodic syncFeatures (shared heartbeat skips idle users)');
+  assert.ok(atarFeatJs.includes('scheduler.every(5000, syncFeatures, { mute: true });'), 'atar-features.js must use 5000ms cadence for periodic syncFeatures (shared heartbeat skips idle users and Expand All)');
 
   // 6. Functional test: immediate summary panel restoration
   const card = document.createElement('div');
@@ -9508,7 +9508,7 @@ runTest('Test 208: Text tokens a custom theme sets are used as given; only text 
 
 runTest('Test 209: Card header buttons (View All) use the button tokens and the class-coloured divider uses the strong border', () => {
   const cards = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-cards.css'), 'utf8');
-  const sel = ':is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(mat-card-header, .mat-card-header) :is(#cx-specificity-anchor, .mat-card-button, button[class*="card-button"], .mat-button)';
+  const sel = '.connectea-dark:not(cx-n) :is(mat-card-header, .mat-card-header) :is(#cx-specificity-anchor, .mat-card-button, button[class*="card-button"], .mat-button)';
   const rule = cards.slice(cards.indexOf(sel + ' {'), cards.indexOf('}', cards.indexOf(sel + ' {')));
   assert.ok(rule && /background-color: var\(--cx-button-bg, #202c3b\) !important;/.test(rule) && /color: var\(--cx-button-text, #f1f5f9\) !important;/.test(rule), 'View All takes the button background and text');
   assert.ok(cards.includes(sel + ':hover {\n  background-color: var(--cx-button-hover, #2c3b4e) !important;'), 'and the button hover');
@@ -12263,6 +12263,92 @@ runTest('Test 267: The sidebar never appears on the login screen', async () => {
     location.href = origHref;
     window.ConnectifyThemeAuth = origAuth;
   }
+});
+
+runTest('Test 268: Target Grade and Target ATAR plan from Connect\'s mark when the school adjusts it away from the task marks', () => {
+  // Biology ATAR Year 11 Semester 2: weights total 100 and Connect shows 71.8%, but the marked tasks average 66.3%.
+  // The planners used to refuse with "Task weights do not reconcile"; Connect's mark is the class result
+  const S = loadGoalModules().ConnectifyTargetSolver;
+  const t = (id, weight, score) => ({ id, name: id, weight, pending: score === undefined, score, earned: score === undefined ? 0 : (score / 100) * weight });
+  const tasks = [t('Test 1', 6, 82), t('ER 1', 5, 60), t('Inquiry 1', 15, 77.5), t('Exam 1', 18, 64), t('Inquiry 2', 15, 51.67),
+    t('Test 2', 7, 66), t('ER 2', 5, 73.33), t('Test 3', 7), t('Exam 2', 22)];
+  const progress = S.taskProgress(tasks, 71.8, 2);
+  assert.strictEqual(progress.error, undefined, 'no reconcile error');
+  assert.ok(Math.abs(progress.earned - 71.8 * 0.71) < 1e-9 && Math.abs(progress.remaining - 29) < 1e-9, 'Connect\'s mark stands for the 71% already marked');
+  assert.strictEqual(S.gradePlan(progress, 75).required, 82.9, 'Target 75 needs 82.9 on the remaining 29%');
+  assert.ok(S.gradePlan(progress, 75, { difficultyWeighted: true, subjectName: 'Biology' }).taskRequirements['Exam 2'], 'difficulty weighting still plans each task');
+  const semesterOne = S.taskProgress(tasks.slice(0, 4), 70.6, 1);
+  assert.ok(!semesterOne.error && semesterOne.total === 44, 'a Semester 1 outline totals its own weights (44%)');
+  const noMark = S.taskProgress(tasks, undefined, 2);
+  assert.ok(Math.abs(noMark.rawEarned - tasks.reduce((s, x) => s + x.earned, 0)) < 1e-9, 'without Connect\'s mark (goal replays) the task marks are summed');
+  assert.ok(S.taskProgress(tasks.slice(0, 8), 71.8, 2).error.includes('not 100%'), 'a Semester 2 outline missing weight is still refused');
+});
+
+runTest('Test 269: Expand All stays light: week overrides are indexed once, class projections run once per pass, heartbeats pause, theme rules are filterable', () => {
+  // 1. Week override lookups no longer scan every storage key per task
+  const store = { 'connectify:stats_cache:x:a': '1', 'connectify:stats_cache:x:b': '1' };
+  let keyCalls = 0;
+  const ls = {
+    getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: k => { delete store[k]; },
+    key: i => { keyCalls++; return Object.keys(store)[i] ?? null; }, get length() { return Object.keys(store).length; }
+  };
+  const listeners = {};
+  const sandbox = { console, localStorage: ls, window: { localStorage: ls, addEventListener: (type, fn) => { (listeners[type] = listeners[type] || []).push(fn); } } };
+  sandbox.window.ConnectifyUtils = { storageKeys: pred => { const out = []; for (let i = 0; i < ls.length; i++) { const k = ls.key(i); if (k && pred(k)) out.push(k); } return out; } };
+  vm.createContext(sandbox);
+  vm.runInContext(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/predictor-dates.js'), 'utf8'), sandbox);
+  const dates = sandbox.window.ConnectifyPredictorDates;
+  for (let i = 0; i < 50; i++) assert.strictEqual(dates.resolveCustomDate('Biology', { name: `Task ${i}`, id: `id${i}` }), null);
+  assert.ok(keyCalls <= 2, `storage keys were read once for 50 tasks (${keyCalls} reads)`);
+  store['connectea:time_override:biology:test #3'] = 'w30';
+  assert.strictEqual(dates.resolveCustomDate('Biology', 'Test #3'), 'w30', 'a new override is found case-insensitively');
+  store['connectea:time_override:biology:test #3'] = 'w31';
+  assert.strictEqual(dates.resolveCustomDate('Biology', 'Test #3'), 'w31', 'its value is read fresh');
+  delete store['connectea:time_override:biology:test #3'];
+  store['connectea:time_override:biology:test #4'] = 'w32';
+  listeners['connectify-week-override-saved'].forEach(fn => fn());
+  assert.strictEqual(dates.resolveCustomDate('Biology', 'Test #4'), 'w32', 'a saved override (same key count) drops the index');
+
+  // 2. Every overall row of a pass shares one projection of every subject
+  let projections = 0;
+  const win = {
+    ConnectifyUtils: { normalize: s => String(s || '').trim() },
+    ConnectifyCohortRows: { createElement: () => ({}), setHTML: () => {}, setText: () => {}, readMark: () => NaN },
+    ConnectifyCohortExpanded: { fillPrediction: () => {} },
+    ConnectifyPredictorMath: { cleanSubject: s => s.replace(/ - Semester \d/, ''), projectSubjectGrades: list => (projections++, list.map(s => ({ cleanName: s.name, hasSubjectAverage: true, projected: { low: 60, mid: 65, high: 70 } }))) }
+  };
+  new Function('window', origReadFileSync.call(fs, path.resolve(SRC_DIR, 'cohort/cohort-upcoming.js'), 'utf8'))(win);
+  const row = title => ({ querySelectorAll: () => [], closest: () => ({ querySelector: () => ({ textContent: title }) }) });
+  const ui = () => ({ box: {}, xp: { prediction: {} } });
+  const pass = [{ name: 'Biology ATAR Year 11', tasks: [] }, { name: 'Physics ATAR Year 11', tasks: [] }];
+  assert.strictEqual(win.ConnectifyCohortUpcoming.show(ui(), row('Biology ATAR Year 11 - Semester 2'), pass).mid, 65);
+  win.ConnectifyCohortUpcoming.show(ui(), row('Physics ATAR Year 11 - Semester 2'), pass);
+  win.ConnectifyCohortUpcoming.show(ui(), row('Biology ATAR Year 11 - Semester 1'), pass);
+  assert.strictEqual(projections, 1, 'three overall rows, one projection');
+  win.ConnectifyCohortUpcoming.show(ui(), row('Biology ATAR Year 11 - Semester 2'), pass.slice());
+  assert.strictEqual(projections, 2, 'the next pass (a fresh list) projects again');
+
+  // 3. Heartbeat work that lays out the page waits while Expand All or an accordion runs
+  const src = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
+  assert.ok(src('sidebar/sidebar.js').includes('every(1500, syncState, { mute: true })'), 'sidebar sync (handle position) is muted');
+  assert.ok(src('atar/atar-features.js').includes('every(2000, initSidebarTools, { mute: true })'), 'sidebar tools sync is muted');
+  assert.ok(src('cohort/cohort-observer.js').includes('every(8000, () => schedule(), { mute: true })'), 'the 8s cohort pass is muted');
+
+  // 4. Theme hooks give Chrome's ancestor filter a class, and no positional pseudo-class sits on a generic subject:
+  // a multi-argument :is() ancestor is checked against every ancestor of every element, and span/div:nth-child
+  // flagged nearly every parent, so each insertion restyled the following siblings' whole subtrees
+  const offenders = [];
+  (function walk(dir) {
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) { walk(full); continue; }
+      if (!ent.name.endsWith('.css')) continue;
+      const css = origReadFileSync.call(fs, full, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+      if (/:is\(\s*(?:(?:html|body)?\.connectea-dark\s*,\s*)+(?:html|body)?\.connectea-dark\s*\)/.test(css)) offenders.push(`${path.relative(SRC_DIR, full)}: :is() of .connectea-dark hooks`);
+      if (/:is\([^()]*\b(?:span|div)\b[^()]*\):nth-(?:child|of-type)/.test(css)) offenders.push(`${path.relative(SRC_DIR, full)}: span/div :nth-child`);
+    }
+  })(SRC_DIR);
+  assert.deepStrictEqual(offenders, [], 'theme hooks are written .connectea-dark:not(cx-n) (same match, same 0,1,1 specificity)');
 });
 
 Promise.all(pendingTestPromises).then(() => {

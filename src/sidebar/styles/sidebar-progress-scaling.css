@@ -57,24 +57,24 @@
 }
 
 /* Dark Mode Progress Pill */
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(#cx-expand-progress, .cx-expand-progress-pill) {
+.connectea-dark:not(cx-n) :is(#cx-expand-progress, .cx-expand-progress-pill) {
   background: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-color: var(--cx-border, #2e3c4e) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38) !important;
 }
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-spinner {
+.connectea-dark:not(cx-n) .cx-expand-spinner {
   border-color: var(--cx-accent, #3b82f6) !important;
   border-top-color: transparent !important;
 }
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-label {
+.connectea-dark:not(cx-n) .cx-expand-label {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-track {
+.connectea-dark:not(cx-n) .cx-expand-track {
   background: var(--cx-canvas-bg, #12171f) !important;
   border-color: var(--cx-border, #2e3c4e) !important;
 }
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-expand-bar {
+.connectea-dark:not(cx-n) .cx-expand-bar {
   background: linear-gradient(90deg, var(--cx-accent, #3b82f6), var(--cx-accent-hover, #60a5fa)) !important;
 }
 
@@ -85,7 +85,7 @@
 :is(.cvr-c-task-group__title, .cvr-c-task__group-name, .cx-cat-name-label, .cvr-c-task__title, .cvr-c-task__details .v-label:first-child, .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child) {
   font-weight: 700 !important;
 }
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .cvr-c-task-group__title,
   .cvr-c-task__group-name,
   .cx-cat-name-label,
@@ -93,7 +93,7 @@
   .cvr-c-task__details .v-label:first-child,
   .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
 ),
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cvr-c-task :is(
+.connectea-dark:not(cx-n) .cvr-c-task :is(
   .cvr-c-task__title,
   .cvr-c-task__details .v-label:first-child,
   .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
@@ -122,12 +122,12 @@
   background: #c0392b !important;
   border-color: #a93226 !important;
 }
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-clear-cache-btn {
+.connectea-dark:not(cx-n) .cx-clear-cache-btn {
   background: #c0392b !important;
   color: var(--cx-text-primary, #ffffff) !important;
   border: 1px solid #962d22 !important;
 }
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-clear-cache-btn:hover {
+.connectea-dark:not(cx-n) .cx-clear-cache-btn:hover {
   background: #962d22 !important;
   border-color: #78241c !important;
 }

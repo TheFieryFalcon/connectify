@@ -3,15 +3,15 @@
  */
 
 /* Translucent Assessment Outline Accordions & Subject Cards */
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, [data-subject-card], .mat-card) {
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark:not(cx-n) :is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, [data-subject-card], .mat-card) {
   background-color: var(--cx-glass-card-bg, rgba(18, 26, 40, var(--cx-glass-opacity, 0.65))) !important;
   backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
 }
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds-c-accordion, .eds-c-accordion__panel, .v-panel-content, .cvr-c-tasks, .cvr-c-task-group, .cvr-c-task, .cvr-c-task__details, .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-accordion__section, .eds-c-accordion__section-body) {
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark:not(cx-n) :is(.eds-c-accordion, .eds-c-accordion__panel, .v-panel-content, .cvr-c-tasks, .cvr-c-task-group, .cvr-c-task, .cvr-c-task__details, .eds-c-tile__body, .cvr-c-tile__body, .eds-c-tile__content, .cvr-c-tile__content, .eds-c-accordion__section, .eds-c-accordion__section-body) {
   background: transparent !important; background-color: transparent !important;
 }
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) .connectea-panel {
+:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark:not(cx-n) .connectea-panel {
   background-color: var(--cx-glass-panel-bg, rgba(22, 34, 52, var(--cx-glass-opacity, 0.65))) !important;
 }
 
@@ -29,7 +29,7 @@ html[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass
 
 /* Universal Surface Adaptation */
 :is(html, body).connectea-dark:not([data-connectea-login]),
-[data-connectea-theme]:not([data-connectea-login]):is(html.connectea-dark, body.connectea-dark, .connectea-dark) body,
+[data-connectea-theme]:not([data-connectea-login]).connectea-dark:not(cx-n) body,
 [data-connectea-theme]:not([data-connectea-login]).connectea-dark,
 :is(html, body).connectea-dark:not([data-connectea-login]) :is(body, #main-content, .cvr-c-app-layout, .cvr-c-app-layout__body, .v-app, .v-ui, .v-scrollable) {
   background-color: var(--cx-canvas-bg) !important;
@@ -48,14 +48,14 @@ html[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass
 }
 
 /* Explicit Webfont Glyph Protection: Always enforce Connect & Material icon fonts */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   [class^="cvr-c-icon--"], [class*=" cvr-c-icon--"], .cvr-c-icon, .cvr-c-icon--switch,
   [class^="eds-c-icon"], [class*=" eds-c-icon"], .eds-c-icon,
   .v-datefield-button, .v-datefield-calendarpanel button,
   .cvr-c-reply, .cvr-c-expansion-panel__trigger, .cvr-c-resources-panel .column-heading,
   [class*="cvr-c-icon"], [class*="eds-c-icon"]
 ):is(::before, ::after),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   i.cvr-c-icon, i.eds-c-icon, span.cvr-c-icon, span.eds-c-icon,
   [class^="cvr-c-icon--"]:not(button):not(div):not(a):not(section):not(header):not(img),
   [class*=" cvr-c-icon--"]:not(button):not(div):not(a):not(section):not(header):not(img),
@@ -65,13 +65,13 @@ html[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass
   font-weight: normal !important; speak: none !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons, [class*="material-icons"], .mat-icon, [class*="mat-icon"], mat-icon):not(button):not([class*="button"]):not(.btn):not(.material-icons-outlined):not([class*="material-icons-outlined"]):not(:has(svg)):not(svg):not(path),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons, [class*="material-icons"], .mat-icon, [class*="mat-icon"], mat-icon):not(button):not([class*="button"]):not(.btn):not(.material-icons-outlined):not([class*="material-icons-outlined"]):not(:has(svg)):not(svg):not(path):is(::before, ::after) {
+.connectea-dark:not(cx-n) :is(.material-icons, [class*="material-icons"], .mat-icon, [class*="mat-icon"], mat-icon):not(button):not([class*="button"]):not(.btn):not(.material-icons-outlined):not([class*="material-icons-outlined"]):not(:has(svg)):not(svg):not(path),
+.connectea-dark:not(cx-n) :is(.material-icons, [class*="material-icons"], .mat-icon, [class*="mat-icon"], mat-icon):not(button):not([class*="button"]):not(.btn):not(.material-icons-outlined):not([class*="material-icons-outlined"]):not(:has(svg)):not(svg):not(path):is(::before, ::after) {
   font-family: 'Material Icons' !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons-outlined, [class*="material-icons-outlined"]):not(button):not([class*="button"]):not(.btn):not(:has(svg)):not(svg):not(path),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.material-icons-outlined, [class*="material-icons-outlined"]):not(button):not([class*="button"]):not(.btn):not(:has(svg)):not(svg):not(path):is(::before, ::after) {
+.connectea-dark:not(cx-n) :is(.material-icons-outlined, [class*="material-icons-outlined"]):not(button):not([class*="button"]):not(.btn):not(:has(svg)):not(svg):not(path),
+.connectea-dark:not(cx-n) :is(.material-icons-outlined, [class*="material-icons-outlined"]):not(button):not([class*="button"]):not(.btn):not(:has(svg)):not(svg):not(path):is(::before, ::after) {
   font-family: 'Material Icons Outlined' !important;
   font-style: normal !important; font-weight: normal !important; line-height: 1 !important;
   letter-spacing: normal !important; text-transform: none !important; white-space: nowrap !important;
@@ -79,8 +79,8 @@ html[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass
   -webkit-font-feature-settings: 'liga' !important; font-feature-settings: 'liga' !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(span.v-icon, i.v-icon, span.fontawesome-alloy, i.fontawesome-alloy):not(img):not(button):not(div):not(a),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-icon, [class*="v-icon"], .fontawesome-alloy, [class*="fontawesome"]):not(img):not(button):not(div):not(a):is(::before, ::after) {
+.connectea-dark:not(cx-n) :is(span.v-icon, i.v-icon, span.fontawesome-alloy, i.fontawesome-alloy):not(img):not(button):not(div):not(a),
+.connectea-dark:not(cx-n) :is(.v-icon, [class*="v-icon"], .fontawesome-alloy, [class*="fontawesome"]):not(img):not(button):not(div):not(a):is(::before, ::after) {
   font-family: "connect-webfont", FontAwesome, Vaadin-Icons !important;
 }
 

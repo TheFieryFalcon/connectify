@@ -33,7 +33,7 @@
 }
 
 /* Reports Page Year Selector Bar, Angular Toolbars & Sub-Headers */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   mat-toolbar, .mat-toolbar, .mat-toolbar-row, .mat-toolbar-single-row,
   mat-tab-header, .mat-tab-header, .mat-tab-nav-bar, .cvr-c-reports, .cvr-c-report,
   .cvr-c-report-years, .cvr-c-report-year, .cvr-c-year-selector, .cvr-c-reporting-period,
@@ -79,7 +79,7 @@
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   mat-toolbar,
   .mat-toolbar,
   mat-tab-header,
@@ -103,7 +103,7 @@
   border-color: var(--cx-border, #36485e) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   mat-toolbar,
   .mat-toolbar,
   mat-tab-header,

@@ -5,20 +5,20 @@
 /* --------------------------------------------------------------------------
    17. Dynamic Surface & Text Contrast Adaptation
    -------------------------------------------------------------------------- */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-surface],
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(div, section, article, header, nav, table, tr, td, th, ul, li)[data-connectea-surface] {
+.connectea-dark:not(cx-n) [data-connectea-surface],
+.connectea-dark:not(cx-n) :is(div, section, article, header, nav, table, tr, td, th, ul, li)[data-connectea-surface] {
   background-color: var(--cx-card-bg, var(--cx-surface-bg, #1e2632)) !important;
   border-color: var(--cx-border, #3d5066) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.portlet, .portlet-boundary, .portlet-content, .portlet-body, #main-content)[data-connectea-surface] {
+.connectea-dark:not(cx-n) :is(.portlet, .portlet-boundary, .portlet-content, .portlet-body, #main-content)[data-connectea-surface] {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) [data-connectea-ink],
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(div, span, p, a, label, strong, h1, h2, h3, h4, h5, h6, li, button, i)[data-connectea-ink] {
+.connectea-dark:not(cx-n) [data-connectea-ink],
+.connectea-dark:not(cx-n) :is(div, span, p, a, label, strong, h1, h2, h3, h4, h5, h6, li, button, i)[data-connectea-ink] {
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
@@ -69,7 +69,7 @@
   font-family: "Open Sans", "Helvetica Neue", sans-serif !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(.avatar-content, [class*="avatar-content"]),
+.connectea-dark:not(cx-n).eds.cvr.ngm :is(.avatar-content, [class*="avatar-content"]),
 :is(html, body).connectea-dark :is(.avatar-content, [class*="avatar-content"]) {
   font-family: Helvetica, Arial, sans-serif !important;
   color: var(--cx-avatar-text, #ffffff) !important;

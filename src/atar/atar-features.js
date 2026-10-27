@@ -158,8 +158,8 @@
       if (!document.getElementById('cx-expand-btn') && window.ConnectifyData) syncFeatures();
     }, { filter: r => r.type === 'childList', mute: true });
 
-    scheduler.every(2000, initSidebarTools);
-    scheduler.every(5000, syncFeatures);
+    scheduler.every(2000, initSidebarTools, { mute: true });
+    scheduler.every(5000, syncFeatures, { mute: true });
 
     window.ConnectifySync = syncFeatures;
     window.ConnectifyIsAutoExpandEnabled = isAutoExpandEnabled;

@@ -25,7 +25,7 @@
 }
 
 /* High-Contrast Dark Checkboxes (Native, Clay, Material, Vaadin) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):not(#connectify-sidebar *):not([class*="connectea-"]) {
+.connectea-dark:not(cx-n) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):not(#connectify-sidebar *):not([class*="connectea-"]) {
   appearance: none !important;
   -webkit-appearance: none !important;
   width: 17px !important;
@@ -41,12 +41,12 @@
   transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):hover {
+.connectea-dark:not(cx-n) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):hover {
   border-color: var(--cx-accent-hover, #60a5fa) !important;
   background-color: var(--cx-surface-hover, #222d3d) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):checked {
+.connectea-dark:not(cx-n) :is(input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input), .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):checked {
   background-color: var(--cx-accent, #2563eb) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3E%3Cpath d='M13.485 3.515a1 1 0 0 1 0 1.414l-7.071 7.071a1 1 0 0 1-1.414 0L1.515 8.515a1 1 0 1 1 1.414-1.414l2.778 2.778 6.364-6.364a1 1 0 0 1 1.414 0z'/%3E%3C/svg%3E") !important;
@@ -55,41 +55,41 @@
   background-position: center !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(input[type="checkbox"], .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):focus {
+.connectea-dark:not(cx-n) :is(input[type="checkbox"], .v-checkbox input[type="checkbox"], .eds-c-checkbox input[type="checkbox"]):focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--cx-accent, #3b82f6) 35%, transparent) !important;
   outline: none !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.custom-control.custom-checkbox, .custom-checkbox, .custom-control) .custom-control-label::before {
+.connectea-dark:not(cx-n) :is(.custom-control.custom-checkbox, .custom-checkbox, .custom-control) .custom-control-label::before {
   background-color: var(--cx-input-bg, #1a2330) !important;
   border: 1.5px solid var(--cx-border, #4b6382) !important;
   border-radius: 4px !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.custom-control.custom-checkbox, .custom-checkbox, .custom-control) .custom-control-input:checked ~ .custom-control-label::before {
+.connectea-dark:not(cx-n) :is(.custom-control.custom-checkbox, .custom-checkbox, .custom-control) .custom-control-input:checked ~ .custom-control-label::before {
   background-color: var(--cx-accent, #2563eb) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.custom-control.custom-checkbox, .custom-checkbox, .custom-control) .custom-control-input:focus ~ .custom-control-label::before {
+.connectea-dark:not(cx-n) :is(.custom-control.custom-checkbox, .custom-checkbox, .custom-control) .custom-control-input:focus ~ .custom-control-label::before {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--cx-accent, #3b82f6) 35%, transparent) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-checkbox-frame {
+.connectea-dark:not(cx-n) .mat-checkbox-frame {
   border-color: var(--cx-border, #4b6382) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-checkbox-checked .mat-checkbox-background {
+.connectea-dark:not(cx-n) .mat-checkbox-checked .mat-checkbox-background {
   background-color: var(--cx-accent, #2563eb) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-checkbox-checkmark-path {
+.connectea-dark:not(cx-n) .mat-checkbox-checkmark-path {
   stroke: var(--cx-accent-text, #ffffff) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.v-checkbox, .mat-checkbox, .eds-c-checkbox, .custom-control) label,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .custom-control-label,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) label:has(input[type="checkbox"]) {
+.connectea-dark:not(cx-n) :is(.v-checkbox, .mat-checkbox, .eds-c-checkbox, .custom-control) label,
+.connectea-dark:not(cx-n) .custom-control-label,
+.connectea-dark:not(cx-n) label:has(input[type="checkbox"]) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   cursor: pointer !important;
 }

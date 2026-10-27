@@ -103,7 +103,7 @@
 }
 
 /* Angular Material Class Pages (.eds.cvr.ngm) Contrast Normalization */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+.connectea-dark:not(cx-n).eds.cvr.ngm :is(
   .connect-purple.theme-multiplier.text-primary,
   .connect-purple.theme-multiplier .text-primary,
   .connect-purple.text-primary,
@@ -112,7 +112,7 @@
   .theme-multiplier .text-primary,
   .text-primary
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr.ngm :is(
+.connectea-dark:not(cx-n) .eds.cvr.ngm :is(
   .connect-purple.theme-multiplier.text-primary,
   .connect-purple.theme-multiplier .text-primary,
   .connect-purple.text-primary,
@@ -124,13 +124,13 @@
   color: var(--cx-button-text, #f1f5f9) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.eds.cvr.ngm, .eds.cvr.ngm *) :is(.mat-divider:not(.mat-divider--primary), .connect-purple.theme-multiplier .mat-divider:not(.mat-divider--primary)) {
+.connectea-dark:not(cx-n) :is(.eds.cvr.ngm, .eds.cvr.ngm *) :is(.mat-divider:not(.mat-divider--primary), .connect-purple.theme-multiplier .mat-divider:not(.mat-divider--primary)) {
   border-top-color: var(--cx-border-hover, #3d5066) !important;
   border-color: var(--cx-border-hover, #3d5066) !important;
 }
 
 /* The class-coloured rule under card headers (Connect's green) takes the theme's strong border */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .mat-divider--primary {
+.connectea-dark:not(cx-n) .mat-divider--primary {
   border-top-color: var(--cx-border-strong, #5a7391) !important;
   border-color: var(--cx-border-strong, #5a7391) !important;
 }
@@ -150,12 +150,12 @@
   background: #c0392b !important;
   border-color: #a93226 !important;
 }
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-clear-cache-btn {
+.connectea-dark:not(cx-n) .cx-clear-cache-btn {
   background: #c0392b !important;
   color: #ffffff !important;
   border: 1px solid #962d22 !important;
 }
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) .cx-clear-cache-btn:hover {
+.connectea-dark:not(cx-n) .cx-clear-cache-btn:hover {
   background: #962d22 !important;
   border-color: #78241c !important;
 }

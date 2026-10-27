@@ -68,7 +68,7 @@
 }
 
 /* Tile Header Action Controls (e.g. "View All" button in Classes tile header) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .eds-c-tile,
   .cvr-c-tile,
   .c-tile,
@@ -103,7 +103,7 @@
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(.eds-c-tile__header .v-button, .cvr-c-tile__header .v-button) {
+.connectea-dark:not(cx-n) .eds.cvr :is(.eds-c-tile__header .v-button, .cvr-c-tile__header .v-button) {
   background-color: transparent !important;
   border: none !important;
   border-left: 1px solid var(--cx-border, #3d5066) !important;
@@ -114,7 +114,7 @@
   outline: none !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .eds-c-tile,
   .cvr-c-tile,
   .c-tile,
@@ -133,7 +133,7 @@
   .eds-c-tile__header a,
   .cvr-c-tile__header a
 ):hover,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+.connectea-dark:not(cx-n) .eds.cvr :is(
   .eds-c-action-button-set .eds-c-action-button,
   .eds-c-action-button
 ):hover {
@@ -142,7 +142,7 @@
   color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .eds-c-tile,
   .cvr-c-tile,
   .c-tile,

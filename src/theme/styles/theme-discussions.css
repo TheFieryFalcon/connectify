@@ -3,12 +3,12 @@
  */
 
 /* Angular Material High-Specificity Tabs & Ink Bar (.eds.cvr.ngm) */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+.connectea-dark:not(cx-n).eds.cvr.ngm :is(
   mat-tab-header, .mat-tab-header,
   mat-tab-nav-bar, .mat-tab-nav-bar,
   .mat-tab-labels
 ) :is(.mat-tab-label, .mat-tab-link, .mat-tab-label-content, a, button, span, div.mat-tab-label, div.mat-tab-label-content),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   mat-tab-header, .mat-tab-header,
   mat-tab-nav-bar, .mat-tab-nav-bar,
   .mat-tab-labels
@@ -19,18 +19,18 @@
   text-decoration: none !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+.connectea-dark:not(cx-n).eds.cvr.ngm :is(
   mat-tab-header, .mat-tab-header,
   mat-tab-nav-bar, .mat-tab-nav-bar
 ) :is(.mat-tab-label, .mat-tab-link):hover,
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   mat-tab-header, .mat-tab-header,
   mat-tab-nav-bar, .mat-tab-nav-bar
 ) :is(.mat-tab-label, .mat-tab-link):hover {
   color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+.connectea-dark:not(cx-n).eds.cvr.ngm :is(
   mat-tab-header, .mat-tab-header,
   mat-tab-nav-bar, .mat-tab-nav-bar,
   mat-tab-group, .mat-tab-group
@@ -41,7 +41,7 @@
   [aria-selected="true"],
   .active
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   mat-tab-header, .mat-tab-header,
   mat-tab-nav-bar, .mat-tab-nav-bar,
   mat-tab-group, .mat-tab-group
@@ -55,12 +55,12 @@
   color: var(--cx-text-primary, #ffffff) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr.ngm :is(
+.connectea-dark:not(cx-n).eds.cvr.ngm :is(
   .mat-ink-bar,
   .mat-tab-nav-bar .mat-ink-bar,
   .mat-tab-group .mat-ink-bar
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(.mat-ink-bar, [class*="ink-bar"]) {
+.connectea-dark:not(cx-n) :is(.mat-ink-bar, [class*="ink-bar"]) {
   background-color: var(--cx-accent, #3b82f6) !important;
   height: 2px !important;
 }

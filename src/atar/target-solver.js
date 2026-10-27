@@ -35,12 +35,12 @@
       return { error: `Visible annual weights total ${Number(totalWeight.toFixed(2))}%, not 100%. Expand the complete semester 2 outline.` };
     }
     const remainingWeight = tasks.filter(t => t.pending).reduce((sum, t) => sum + t.weight, 0);
-    const earnedWeight = tasks.reduce((sum, t) => sum + t.earned, 0);
     const completedWeight = totalWeight - remainingWeight;
-
-    if (completedWeight > 0 && scoreVal(mark) !== undefined && Math.abs((earnedWeight / completedWeight) * 100 - mark) > 1.5) {
-      return { error: 'Task weights do not reconcile with the displayed overall mark.' };
-    }
+    // Connect's mark is the class result (schools may adjust it away from the task marks, e.g. Biology
+    // 71.8% over tasks averaging 66.3%), so it stands for the marked weight as one block, as in Estimate Grade
+    const earnedWeight = completedWeight > 0 && scoreVal(mark) !== undefined
+      ? (Number(mark) / 100) * completedWeight
+      : tasks.reduce((sum, t) => sum + t.earned, 0);
     return {
       earned: (earnedWeight / totalWeight) * 100,
       remaining: (remainingWeight / totalWeight) * 100,

@@ -5,7 +5,7 @@
 /* --------------------------------------------------------------------------
    12. Highcharts Boxplot Chart (.cvr-c-task__chart)
    -------------------------------------------------------------------------- */
-:is(.connectea-dark, html.connectea-dark, body.connectea-dark) :is(.cvr-c-task__chart, .cvr-c-task__chart *, .highcharts-container, .highcharts-container *) {
+.connectea-dark:not(cx-n) :is(.cvr-c-task__chart, .cvr-c-task__chart *, .highcharts-container, .highcharts-container *) {
   background: transparent !important;
   background-color: transparent !important;
 }

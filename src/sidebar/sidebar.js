@@ -202,7 +202,7 @@
 
     window.ConnectifySidebar = { isLimited, syncState, openSidebar, closeSidebar };
     window.ConnectifyInitSidebar = syncState;
-    window.ConnectifyScheduler.every(1500, syncState);
+    window.ConnectifyScheduler.every(1500, syncState, { mute: true });
     syncState();
 
     window.ConnectifyOpenSidebar = openSidebar;

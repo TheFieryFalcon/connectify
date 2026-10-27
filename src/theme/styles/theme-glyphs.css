@@ -31,7 +31,7 @@
   fill: var(--cx-nav-text, #cbd5e1) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   .c-category-menu,
   .cvr-c-category-menu,
   .cvr-c-classes-menu,
@@ -56,7 +56,7 @@
 }
 
 /* Connect Webfont Glyphs, Role/Student Switcher & Action Icons */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(
+.connectea-dark:not(cx-n) :is(
   [class^="cvr-c-icon--"]:before,
   [class*=" cvr-c-icon--"]:before,
   .cvr-c-icon:before,
@@ -69,13 +69,13 @@
   .cvr-c-icon,
   .cvr-c-icon--switch
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(
+.connectea-dark:not(cx-n).eds.cvr :is(
   .cvr-c-icon,
   .cvr-c-icon--switch,
   [class^="cvr-c-icon--"]:before,
   [class*=" cvr-c-icon--"]:before
 ),
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(
+.connectea-dark:not(cx-n) .eds.cvr :is(
   .cvr-c-icon,
   .cvr-c-icon--switch,
   [class^="cvr-c-icon--"]:before,

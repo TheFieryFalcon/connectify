@@ -11,6 +11,24 @@
     const round = (val, decimals = 1) => (window.ConnectifyPredictorEngine?.round || ((v, d = 1) => Number(Math.round(v + 'e' + d) + 'e-' + d)))(val, decimals);
     const cleanSubject = (...args) => (window.ConnectifyPredictorEngine?.cleanSubject || (s => String(s || '').trim()))(...args);
   // --- DATE RESOLUTION & PROGRESS GRAPH SYNC ---
+  // Saved week overrides, lower-cased, for the case-insensitive match. Scanning every storage key per task
+  // made each cohort pass seconds long on slow machines, so the index is rebuilt only when keys change
+  let overrideCache = null;
+  const dropOverrideIndex = () => { overrideCache = null; };
+  window.addEventListener?.('connectify-week-override-saved', dropOverrideIndex);
+  window.addEventListener?.('storage', dropOverrideIndex);
+  function overrideIndex() {
+    const length = localStorage.length;
+    if (overrideCache?.length === length) return overrideCache.entries;
+    const entries = [];
+    for (const k of window.ConnectifyUtils.storageKeys(key => key.startsWith('connectea:time_override:') || key.startsWith('connectify:time_override:'))) {
+      const parts = k.split(':');
+      if (parts.length >= 4) entries.push({ k, s: parts[2].toLowerCase().trim(), t: parts.slice(3).join(':').toLowerCase().trim() });
+    }
+    overrideCache = { length, entries };
+    return entries;
+  }
+
   function resolveCustomDate(subjectName, taskOrName, taskId) {
     if (!taskOrName) return null;
     const taskName = typeof taskOrName === 'string' ? taskOrName : (taskOrName.name || '');
@@ -50,12 +68,7 @@
       const lowerTask = taskName.toLowerCase().trim();
       const lowerSubj = subjectName ? subjectName.toLowerCase().trim() : '';
       const lowerClean = cleanSubj ? cleanSubj.toLowerCase().trim() : '';
-      const overrideKeys = window.ConnectifyUtils.storageKeys(k => k.startsWith('connectea:time_override:') || k.startsWith('connectify:time_override:'));
-      for (const k of overrideKeys) {
-        const parts = k.split(':');
-        if (parts.length < 4) continue;
-        const s = parts[2].toLowerCase().trim();
-        const t = parts.slice(3).join(':').toLowerCase().trim();
+      for (const { k, s, t } of overrideIndex()) {
         if ((!lowerSubj || s === lowerSubj || s === lowerClean) && (t === lowerTask || (actualTaskId && t === String(actualTaskId).toLowerCase().trim()))) {
           const val = localStorage.getItem(k);
           if (val !== null) return val.trim();

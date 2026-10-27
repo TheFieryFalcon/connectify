@@ -114,7 +114,7 @@
 
 /* Card header links (Classes "View All"): the theme's button colours, not Connect's class green. The anchor
    outranks the positive (View) button rule in theme-feed.css, which also matches buttons in a mat-card */
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(mat-card-header, .mat-card-header) :is(#cx-specificity-anchor, .mat-card-button, button[class*="card-button"], .mat-button) {
+.connectea-dark:not(cx-n) :is(mat-card-header, .mat-card-header) :is(#cx-specificity-anchor, .mat-card-button, button[class*="card-button"], .mat-button) {
   height: 56px !important;
   line-height: 56px !important;
   border-radius: 0 !important;
@@ -126,7 +126,7 @@
   color: var(--cx-button-text, #f1f5f9) !important;
 }
 
-:is(html.connectea-dark, body.connectea-dark, .connectea-dark) :is(mat-card-header, .mat-card-header) :is(#cx-specificity-anchor, .mat-card-button, button[class*="card-button"], .mat-button):hover {
+.connectea-dark:not(cx-n) :is(mat-card-header, .mat-card-header) :is(#cx-specificity-anchor, .mat-card-button, button[class*="card-button"], .mat-button):hover {
   background-color: var(--cx-button-hover, #2c3b4e) !important;
   color: var(--cx-button-text, #f1f5f9) !important;
 }
@@ -161,7 +161,7 @@
   .cvr-c-task__outof,
   .cvr-c-task__mark-out-of,
   .cvr-c-task__mark-label,
-  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):nth-child(2)
+  .cvr-c-task__marks .cvr-c-task__mark .v-label:nth-child(2)
 ) {
   font-weight: 400 !important;
 }
@@ -170,7 +170,7 @@
   .cvr-c-task__outof,
   .cvr-c-task__mark-out-of,
   .cvr-c-task__mark-label,
-  .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):nth-child(2)
+  .cvr-c-task__marks .cvr-c-task__mark .v-label:nth-child(2)
 ) {
   color: var(--cx-text-muted, #94a3b8) !important;
 }
