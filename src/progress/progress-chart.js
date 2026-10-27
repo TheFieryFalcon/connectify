@@ -61,8 +61,9 @@
       return;
     }
 
+    let legend = null;
     if (!isHistory) {
-      const legend = createElement('div', null, 'cx-legend');
+      legend = createElement('div', null, 'cx-legend');
       const redKey = createElement('span', modeInfo?.mean ? `Red: ${meanLabel}` : 'Red: Cohort Mean', 'cx-red-key');
       const blueKey = createElement('span', modeInfo?.score ? `Blue: ${scoreLabel}` : 'Blue: Student Score', 'cx-blue-key');
       legend.append(redKey, blueKey);
@@ -110,8 +111,8 @@
       semesterOf: isHistory ? p => p.semester ?? null : undefined
     });
 
-    // Dashed goal line (progress-goal-line.js), under the series too
-    window.ConnectifyProgressGoalLine?.render(svg, { points, xFor, yFor, minY, maxY, subjectName, isHistory, createSvgElement });
+    // Dashed goal targets per task, or the ATAR goal line (progress-goal-line.js), under the series too
+    window.ConnectifyProgressGoalLine?.render(svg, { points, xFor, yFor, minY, maxY, subjectName, isHistory, mode, legend, createSvgElement });
 
     /**
      * Plots a polyline series and interactive point markers.

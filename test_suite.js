@@ -11807,6 +11807,7 @@ function loadGoalModules(stubs = {}) {
   ['scaling-data.js', 'atar-math.js', 'target-difficulty.js', 'target-solver.js'].forEach(run);
   ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js', 'goal-modal.js', 'goal-sliders.js', 'goal-dialog.js', 'goal-list-ui.js', 'goal-editor.js',
     'goal-celebrate.js', 'goal-events.js', 'goal-bars.js'].forEach(f => run(path.resolve(SRC_DIR, 'goals', f)));
+  run(path.resolve(SRC_DIR, 'progress/progress-modes.js'));
   run(path.resolve(SRC_DIR, 'progress/progress-goal-line.js'));
   run(path.resolve(SRC_DIR, 'atar/grade-estimate-goal.js'));
   return win;
@@ -12169,20 +12170,43 @@ runTest('Test 265: Goal bars sit beside the outcome meter: pastel performance ba
   localStorage.clear();
 });
 
-runTest('Test 266: Year Progression draws the goal line; the Estimator says whether the goal is met; celebrations respect reduced motion', () => {
+runTest('Test 266: Year Progression plots the goal\'s target mark for each task; the Estimator says whether the goal is met; celebrations respect reduced motion', () => {
   localStorage.clear();
   const { win } = goalFixture();
   const G = win.ConnectifyGoalStore;
-  G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 78, end: { type: 'semester', semester: 2 }, priorMarked: [] });
+  G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 78, end: { type: 'semester', semester: 2 }, priorMarked: ['chemistry::a'] });
   const L = win.ConnectifyProgressGoalLine;
-  assert.deepStrictEqual(L.goalFor('Chemistry', false), { value: 78, endOrder: null, label: 'Goal 78%' }, 'the subject chart gets its goal');
+  const realEvents = win.ConnectifyGoalEvents;
+  // a: marked before the goal (no target); b: judged (R before it was marked); c, d: remaining (plan); e: out of range
+  win.ConnectifyGoalEvents = { stateOf: () => ({
+    plan: { required: 80, effort: true, taskRequirements: { c: { required: 82.4 } } },
+    verdicts: { 'chemistry::b': { required: 76.5 } },
+    rangeKeys: new Set(['chemistry::a', 'chemistry::b', 'chemistry::c', 'chemistry::d'])
+  }) };
+  const points = [
+    { id: 'a', name: 'A', score: 70, weight: 10 }, { id: 'b', name: 'B', score: 81, weight: 10 },
+    { id: 'c', name: 'C', pending: true, score: null, weight: 20 }, { id: 'd', name: 'D', pending: true, score: null, weight: 20 },
+    { id: 'e', name: 'E', pending: true, score: null, weight: 20 }
+  ];
+  const goal = L.goalFor('Chemistry');
+  assert.strictEqual(goal.label, 'Goal 78%');
+  assert.deepStrictEqual(L.targetsFor(points, goal, 'tasks'), [null, 76.5, 82.4, 80, null], 'each task its own target: R when judged, the plan when remaining');
+  const avg = L.targetsFor(win.ConnectifyProgressModes.apply(points, 'weighted'), goal, 'weighted');
+  assert.strictEqual(avg[0], null, 'no target before the goal');
+  assert.ok(Math.abs(avg[1] - (70 + 76.5) / 2) < 1e-9, 'averaged targets count a task without one at its own mark');
   const svg = new MockElement('svg');
+  const legend = new MockElement('div', 'cx-legend');
   const made = (tag, attrs, text) => { const el = new MockElement(tag, attrs.class || ''); Object.assign(el, { attrs }); el.textContent = text || ''; return el; };
-  L.render(svg, { points: [{ order: 6 }, { order: 12 }], xFor: i => 52 + i * 100, yFor: v => 260 - v * 2.2, minY: 0, maxY: 100, subjectName: 'Chemistry', isHistory: false, createSvgElement: made });
-  const line = svg.querySelector('.cx-goal-line');
-  assert.ok(line && line.attrs.y1 === 260 - 78 * 2.2, 'a dashed line at the goal');
-  assert.strictEqual(svg.querySelector('.cx-goal-line-label').textContent, 'Goal 78%');
-  assert.strictEqual(L.goalFor('Physics', false), null, 'none without a goal');
+  L.render(svg, { points, xFor: i => 52 + i * 100, yFor: v => 260 - v * 2.2, minY: 0, maxY: 100, subjectName: 'Chemistry', isHistory: false, mode: 'tasks', legend, createSvgElement: made });
+  const dots = svg.querySelectorAll('.cx-goal-target-point');
+  assert.strictEqual(dots.length, 3, 'a marker per task with a target');
+  assert.strictEqual(dots[0].attrs.cy, 260 - 76.5 * 2.2);
+  const line = svg.querySelector('polyline.cx-goal-line, .cx-goal-line');
+  assert.ok(line && line.attrs.points.split(' ').length === 3, 'a dashed line through the targets, not a flat bar');
+  assert.ok(!svg.querySelector('line.cx-goal-line'), 'no horizontal goal line on subject charts');
+  assert.strictEqual(legend.querySelector('.cx-goal-key').textContent, 'Dashed: Target mark (Goal 78%)');
+  win.ConnectifyGoalEvents = realEvents;
+  assert.strictEqual(L.goalFor('Physics'), null, 'none without a goal');
 
   const E = win.ConnectifyGradeEstimateGoal;
   const course = { id: 'chemistry', name: 'Chemistry', subject: 'Chemistry ATAR' };

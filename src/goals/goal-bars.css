@@ -91,11 +91,20 @@
   margin: 0;
 }
 
-/* Year Progression goal line (progress-goal-line.js) */
+/* Year Progression goal targets and ATAR goal line (progress-goal-line.js) */
 .cx-goal-line {
   stroke: var(--cx-text-secondary, #334155);
   stroke-width: 1.5;
   stroke-dasharray: 6 4;
+}
+
+.cx-goal-target-point {
+  fill: var(--cx-text-secondary, #334155);
+  stroke: none;
+}
+
+.cx-goal-key {
+  color: var(--cx-text-secondary, #334155);
 }
 
 .cx-goal-line-label {

@@ -239,7 +239,7 @@ Each goal stores the marked tasks it has announced (`seenMarked`, starting from 
 - **ATAR goals**: one celebration (or one `Goal missed!`) for the ATAR goal; the children never celebrate.
 
 ## 9. Goals in other tools
-- **Year Progression**: a dashed horizontal goal line (`.cx-goal-line`, labelled `Goal 85%`) on the subject's chart in every Show mode, running up to the goal's end week (to the right edge for semester ends). ATAR Progression shows the ATAR goal's line. It is drawn under the series, like the semester divider.
+- **Year Progression**: the subject's chart plots the goal's target mark for each task it covers (`.cx-goal-line` through `.cx-goal-target-point` markers, legend `Dashed: Target mark (Goal 85%)`): a completed task's requirement just before it was marked, a remaining task's requirement in the current plan. Tasks marked before the goal was set, or after its end week, have none. Weighted / rolling average modes average the targets like the scores (`Target weighted average`). ATAR Progression shows one dashed line at the ATAR goal. Drawn under the series, like the semester divider.
 - **Estimate Grade**: when the selected class has a goal, one line under the headline: `Goal 85%: met` or `Goal 85%: 3.2 short`, using the typed estimate for the tasks in range.
 - **Estimate ATAR**: when an ATAR goal exists for the shown semester: `Goal 95.00: met` or `Goal 95.00: 1.35 short`.
 
@@ -289,7 +289,7 @@ Registered in `manifest.json` after the planner scripts (outlines group only: th
 | `src/goals/goal-bars.js` | `ConnectifyGoalBars` | row bars, tooltip, memo signature |
 | `src/goals/goal-events.js` | `ConnectifyGoalEvents` | lock-in / finish detection, Goal Updated toast |
 | `src/goals/goal-celebrate.js` | `ConnectifyGoalCelebrate` | confetti, shake, reduced motion |
-| `src/progress/progress-goal-line.js` | `ConnectifyProgressGoalLine` | Year Progression goal line |
+| `src/progress/progress-goal-line.js` | `ConnectifyProgressGoalLine` | Year Progression goal targets per task |
 | `src/atar/grade-estimate-goal.js` | `ConnectifyGradeEstimateGoal` | Estimator goal lines |
 | `src/goals/goal-bars.css`, `goal-dialog.css`, `goal-planner.css`, `goal-list.css`, `goal-celebrate.css` | | theme tokens only |
 

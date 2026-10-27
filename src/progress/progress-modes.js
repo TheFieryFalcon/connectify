@@ -3,7 +3,8 @@
  *
  * The Progress "Show:" dropdown. Single tasks plots each mark as it is; Weighted average plots
  * the running weighted average of every completed task so far; Rolling average plots the weighted
- * average of the last three completed tasks. The cohort mean is averaged the same way. The choice is
+ * average of the last three completed tasks. The cohort mean (and goal targets) are averaged the same way;
+ * averaged points keep the task's own mark as `ownScore`. The choice is
  * kept in connectify:progress_mode. Exposes window.ConnectifyProgressModes.
  */
 (() => {
@@ -14,9 +15,9 @@
   const KEY = 'connectify:progress_mode';
   const ROLLING_WINDOW = 3;
   const MODES = [
-    { id: 'tasks', label: 'Single tasks' },
-    { id: 'weighted', label: 'Weighted average', score: 'Your weighted average', mean: 'Cohort weighted average' },
-    { id: 'rolling', label: 'Rolling average (last 3)', score: 'Your rolling average', mean: 'Cohort rolling average' }
+    { id: 'tasks', label: 'Single tasks', target: 'Target mark' },
+    { id: 'weighted', label: 'Weighted average', score: 'Your weighted average', mean: 'Cohort weighted average', target: 'Target weighted average' },
+    { id: 'rolling', label: 'Rolling average (last 3)', score: 'Your rolling average', mean: 'Cohort rolling average', target: 'Target rolling average' }
   ];
   const find = id => MODES.find(m => m.id === id) || MODES[0];
 
@@ -51,7 +52,7 @@
     const done = { score: [], mean: [] };
     return points.map(point => {
       if (point.pending || !Number.isFinite(point.score)) return { ...point, score: null, mean: null };
-      const out = { ...point };
+      const out = { ...point, ownScore: point.score };
       for (const key of ['score', 'mean']) {
         if (Number.isFinite(point[key])) done[key].push(point);
         const span = id === 'rolling' ? done[key].slice(-ROLLING_WINDOW) : done[key];
@@ -82,5 +83,5 @@
     return label;
   }
 
-  window.ConnectifyProgressModes = { KEY, MODES, find, read, save, apply, select };
+  window.ConnectifyProgressModes = { KEY, MODES, ROLLING_WINDOW, find, read, save, apply, select, weightResolver, weightedAverage };
 })();

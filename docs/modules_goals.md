@@ -49,11 +49,11 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 - `goal-celebrate.js` (`ConnectifyGoalCelebrate.play`): ~4s confetti on `#cx-goal-confetti` from the toast corner, ~600ms shake of `.cvr-c-app-layout` / `#main-content`; reduced motion: still fading confetti, no shake. Once per goal; the finished goal glows in the Goals dialog.
 
 ### Other tools
-- `progress-goal-line.js` (`ConnectifyProgressGoalLine`): dashed `Goal 85%` line on the subject's Year Progression chart (ATAR goal on ATAR Progression), ending after the last task in a custom week.
+- `progress-goal-line.js` (`ConnectifyProgressGoalLine`): the subject's Year Progression chart plots each task's target mark as a dashed line with markers (`.cx-goal-target-point`; legend `Dashed: Target mark (Goal 85%)`): a judged task's verdict R, a remaining in-range task's `requiredOf` in the current plan (an ATAR goal's child: `<course>::<task>`); none for tasks marked before the goal or outside its range. Average modes average the targets like the scores (a task without one counts its own mark, `ownScore`). ATAR Progression keeps one dashed line at the ATAR goal.
 - `grade-estimate-goal.js` (`ConnectifyGradeEstimateGoal`): `Goal 85%: met` / `3.2 short` under Estimate Grade (range tasks only for custom weeks); `Goal 95.00: 1.35 short` under Estimate ATAR (that semester's goal).
 
 ## 3. Styles
-`goal-dialog.css` (dialogs, tier labels: tier 40% into the theme ink on a 14% tint, >= 5:1 in every preset), `goal-planner.css` (planner controls, sliders), `goal-list.css`, `goal-bars.css` (bars, goal line), `goal-celebrate.css`: theme tokens only.
+`goal-dialog.css` (dialogs, tier labels: tier 40% into the theme ink on a 14% tint, >= 5:1 in every preset), `goal-planner.css` (planner controls, sliders), `goal-list.css`, `goal-bars.css` (bars, goal targets and line), `goal-celebrate.css`: theme tokens only.
 
 ---
 
