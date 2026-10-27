@@ -39,7 +39,7 @@
         const account = getAccountKey();
         const storageKey = `connectea:atar:2025:${account}:${new Date().getFullYear()}`;
         preferences = JSON.parse(localStorage.getItem(storageKey) || '{}');
-        const rawPrefs = localStorage.getItem('connectea:preferences');
+        const rawPrefs = localStorage.getItem(window.ConnectifyUtils.userKey('connectea:preferences'));
         if (rawPrefs) {
           preferences = { ...preferences, ...JSON.parse(rawPrefs) };
         }

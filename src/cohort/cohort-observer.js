@@ -64,7 +64,7 @@
     if (e.key?.startsWith('connectea:cohort:v3:')) {
       window.ConnectifyCohortEstimator?.memory?.delete(e.key);
       schedule(true);
-    } else if (e.key === 'connectea:task_type_overrides') {
+    } else if (e.key === window.ConnectifyUtils.userKey('connectea:task_type_overrides')) {
       schedule(true);
     }
   });

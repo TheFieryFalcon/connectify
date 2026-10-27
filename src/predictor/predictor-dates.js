@@ -21,8 +21,9 @@
     const length = localStorage.length;
     if (overrideCache?.length === length) return overrideCache.entries;
     const entries = [];
-    for (const k of window.ConnectifyUtils.storageKeys(key => key.startsWith('connectea:time_override:') || key.startsWith('connectify:time_override:'))) {
-      const parts = k.split(':');
+    const prefixLength = window.ConnectifyUtils.userKey('').length;
+    for (const k of window.ConnectifyUtils.userKeys(key => key.startsWith('connectea:time_override:') || key.startsWith('connectify:time_override:'))) {
+      const parts = k.slice(prefixLength).split(':');
       if (parts.length >= 4) entries.push({ k, s: parts[2].toLowerCase().trim(), t: parts.slice(3).join(':').toLowerCase().trim() });
     }
     overrideCache = { length, entries };
@@ -37,10 +38,10 @@
 
     if (actualTaskId) {
       const idCandidates = [
-        `connectea:time_override:${subjectName}:${actualTaskId}`,
-        `connectea:time_override:${cleanSubj}:${actualTaskId}`,
-        `connectify:time_override:${subjectName}:${actualTaskId}`,
-        `connectify:time_override:${cleanSubj}:${actualTaskId}`
+        window.ConnectifyUtils.userKey(`connectea:time_override:${subjectName}:${actualTaskId}`),
+        window.ConnectifyUtils.userKey(`connectea:time_override:${cleanSubj}:${actualTaskId}`),
+        window.ConnectifyUtils.userKey(`connectify:time_override:${subjectName}:${actualTaskId}`),
+        window.ConnectifyUtils.userKey(`connectify:time_override:${cleanSubj}:${actualTaskId}`)
       ];
       for (const key of idCandidates) {
         try {
@@ -52,10 +53,10 @@
 
     if (taskName) {
       const candidates = [
-        `connectea:time_override:${subjectName}:${taskName}`,
-        `connectea:time_override:${cleanSubj}:${taskName}`,
-        `connectify:time_override:${subjectName}:${taskName}`,
-        `connectify:time_override:${cleanSubj}:${taskName}`
+        window.ConnectifyUtils.userKey(`connectea:time_override:${subjectName}:${taskName}`),
+        window.ConnectifyUtils.userKey(`connectea:time_override:${cleanSubj}:${taskName}`),
+        window.ConnectifyUtils.userKey(`connectify:time_override:${subjectName}:${taskName}`),
+        window.ConnectifyUtils.userKey(`connectify:time_override:${cleanSubj}:${taskName}`)
       ];
       for (const key of candidates) {
         try {

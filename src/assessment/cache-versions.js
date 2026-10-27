@@ -76,7 +76,7 @@
         ];
         for (const k of directKeys) localStorage.removeItem(k);
         // Baselines live under singular and legacy plural prefixes (see ConnectifyUtils.BASELINE_PREFIXES)
-        removeStorageKeys(k => isBaselineKey(k) || k.startsWith('connectea:class_categories:') || k.startsWith('connectify:calendar_export:') ||
+        removeStorageKeys(k => isBaselineKey(k) || k.startsWith('connectea:class_categories:') || k.startsWith('connectify:user:') || k.startsWith('connectify:calendar_export:') ||
           k.startsWith('connectify:goals:') || k.startsWith('connectify:goal_verdicts:'));
         localStorage.setItem(CACHE_KEYS.SETTINGS, CACHE_VERSIONS.SETTINGS);
         // Predictor modules memoise baselines; this event drops their in-memory copy

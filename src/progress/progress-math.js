@@ -86,7 +86,7 @@
             if (!totalWeight) return undefined;
             const rawAvg = completedTasks.reduce((acc, t) => acc + t.score * t.weight, 0) / totalWeight;
 
-            const prefsStr = localStorage.getItem('connectea:preferences');
+            const prefsStr = localStorage.getItem(window.ConnectifyUtils.userKey('connectea:preferences'));
             const savedPrefs = prefsStr ? JSON.parse(prefsStr) : {};
             const courseId = s.name.replace(/\bATAR\b|\bYear\s*\d+\b/gi, '').trim().toLowerCase();
             const calibration = savedPrefs[`sem1_calibration:${courseId}`] || {};

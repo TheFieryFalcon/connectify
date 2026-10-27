@@ -43,7 +43,7 @@
       return cachedClassCategories.get(subjKey);
     }
     try {
-      const stored = localStorage.getItem(`connectea:class_categories:${subjKey}`);
+      const stored = localStorage.getItem(window.ConnectifyUtils.userKey(`connectea:class_categories:${subjKey}`));
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
@@ -68,7 +68,7 @@
       existing.push(cat);
       cachedClassCategories.set(subjKey, existing);
       try {
-        localStorage.setItem(`connectea:class_categories:${subjKey}`, JSON.stringify(existing));
+        localStorage.setItem(window.ConnectifyUtils.userKey(`connectea:class_categories:${subjKey}`), JSON.stringify(existing));
       } catch {}
     }
   }
@@ -76,7 +76,7 @@
   function getTaskTypeOverrides() {
     if (cachedOverrides !== null) return cachedOverrides;
     try {
-      cachedOverrides = JSON.parse(localStorage.getItem('connectea:task_type_overrides') || '{}');
+      cachedOverrides = JSON.parse(localStorage.getItem(window.ConnectifyUtils.userKey('connectea:task_type_overrides')) || '{}');
       return cachedOverrides;
     } catch {
       cachedOverrides = {};
@@ -113,7 +113,7 @@
     }
 
     try {
-      localStorage.setItem('connectea:task_type_overrides', JSON.stringify(overrides));
+      localStorage.setItem(window.ConnectifyUtils.userKey('connectea:task_type_overrides'), JSON.stringify(overrides));
     } catch {}
 
     if (window.ConnectifyPredictorMath?.updatePredictionCache) {

@@ -4,7 +4,7 @@
  * The "When" cell of a task in the Progress Graph table: the task's week with an edit button, or a
  * week input when no date could be read. Overrides are school weeks of the year, numbered through the term
  * calendar as the Export's term starts are (under Early Easter Term 2 starts at Week 10), saved as "w17"
- * under connectea:time_override:<subject>:<task id or name>; repeated task names each get their own id key.
+ * under the student's own connectea:time_override:<subject>:<task id or name> (ConnectifyUtils.userKey); repeated task names each get their own id key.
  * Older bare numbers, saved before Early Easter was known, are the same school week ("17" is "w17").
  * Exposes window.ConnectifyProgressWeekEditor.
  */
@@ -43,8 +43,8 @@
 
     // Build specific key using point.id (or sequence if id missing) for duplicate-named tasks
     const disambiguator = taskId || (isDuplicateName && point.sequence !== undefined ? `seq_${point.sequence}` : null);
-    const specificKey = disambiguator ? `connectea:time_override:${subjectName}:${disambiguator}` : null;
-    const genericKey = `connectea:time_override:${subjectName}:${taskName}`;
+    const specificKey = disambiguator ? window.ConnectifyUtils.userKey(`connectea:time_override:${subjectName}:${disambiguator}`) : null;
+    const genericKey = window.ConnectifyUtils.userKey(`connectea:time_override:${subjectName}:${taskName}`);
 
     // Retrieve saved custom date:
     // Priority 1: Specific key (exact task instance)

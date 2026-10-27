@@ -82,6 +82,7 @@
          "js": [
             "src/system/scheduler.js",
             "src/system/utils.js",
+            "src/system/user-settings-migrate.js",
             "src/assessment/cache-versions.js",
             "src/assessment/assessment-cache.js",
             "src/assessment/school-terms.js",
@@ -352,6 +353,7 @@
          "js": [
             "src/system/scheduler.js",
             "src/system/utils.js",
+            "src/system/user-settings-migrate.js",
             "src/assessment/cache-versions.js",
             "src/assessment/assessment-cache.js",
             "src/assessment/school-terms.js",

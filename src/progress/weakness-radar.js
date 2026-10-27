@@ -12,13 +12,13 @@
 
   let disabledWeaknessSubjects = new Set();
   try {
-    const stored = JSON.parse(localStorage.getItem('connectify:weakness_disabled_subjects') || '[]');
+    const stored = JSON.parse(localStorage.getItem(window.ConnectifyUtils.userKey('connectify:weakness_disabled_subjects')) || '[]');
     if (Array.isArray(stored)) disabledWeaknessSubjects = new Set(stored);
   } catch (e) {}
 
   const saveDisabledSubjects = () => {
     try {
-      localStorage.setItem('connectify:weakness_disabled_subjects', JSON.stringify([...disabledWeaknessSubjects]));
+      localStorage.setItem(window.ConnectifyUtils.userKey('connectify:weakness_disabled_subjects'), JSON.stringify([...disabledWeaknessSubjects]));
     } catch (e) {}
   };
 

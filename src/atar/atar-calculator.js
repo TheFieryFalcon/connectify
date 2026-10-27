@@ -21,7 +21,7 @@
   } catch {}
 
   function reloadPreferences() {
-    const rawPrefs = localStorage.getItem('connectea:preferences');
+    const rawPrefs = localStorage.getItem(window.ConnectifyUtils.userKey('connectea:preferences'));
     if (rawPrefs) {
       try {
         const parsed = JSON.parse(rawPrefs);

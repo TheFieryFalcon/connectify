@@ -104,6 +104,7 @@
    * user, ?coisp=... (class ids excluded), else the last account seen, else 'current'.
    */
   function accountKey() {
+    if (userAccount) return userAccount;
     let coisp = null;
     try { coisp = new URL(location.href).searchParams.get('coisp'); } catch {}
     if (coisp && /^DomainSchool/i.test(coisp)) coisp = null;
@@ -135,6 +136,16 @@
       try { localStorage.removeItem(key); } catch {}
     }
     return keys.length;
+  }
+
+  // A student's own settings (task types, class categories, week overrides, calibration, Weaknesses filter)
+  // are stored under connectify:user:<account>: + the key they had before (user-settings-migrate.js moves them)
+  const userKey = key => `connectify:user:${accountKey()}:${key}`;
+
+  /** The signed-in student's own keys whose old name is accepted by predicate, as full storage keys. */
+  function userKeys(predicate) {
+    const prefix = userKey('');
+    return storageKeys(k => k.startsWith(prefix) && predicate(k.slice(prefix.length)));
   }
 
   // Every prefix baselines have ever been stored under (singular is current, plural is legacy)
@@ -184,7 +195,7 @@
         if (!subject) continue;
         for (const prefix of ['connectea', 'connectify']) {
           try {
-            const value = localStorage.getItem(`${prefix}:time_override:${subject}:${id}`);
+            const value = localStorage.getItem(userKey(`${prefix}:time_override:${subject}:${id}`));
             if (value !== null && value !== '') return value;
           } catch {}
         }
@@ -213,7 +224,7 @@
   window.ConnectifyDataSyncCharts = syncCharts;
 
   window.ConnectifyUtils = {
-    normalize, escapeHtml, accountKey, signedInUserId, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
+    normalize, escapeHtml, accountKey, signedInUserId, userKey, userKeys, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
     customWeekOrder, readTimeOverride, syncCharts, cardSemester, OUTLINES_URL, isOutlinesPage
   };
 })();

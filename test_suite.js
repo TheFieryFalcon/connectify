@@ -1122,7 +1122,7 @@ runTest('Low estimate variance scaling penalizes volatile performers appropriate
 
 runTest('Progress Graph custom date sync & unparsable date suppression', () => {
   mockLocalStorage.clear();
-  mockLocalStorage.setItem('connectea:time_override:Chemistry ATAR:Task Override Test', 't3w5');
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Chemistry ATAR:Task Override Test'), 't3w5');
 
   const mockSubjects = [
     {
@@ -1988,6 +1988,7 @@ runTest('predictor-math.js strictly hides 0% and NaN% weighted tasks from upcomi
     localStorage: mockLocalStorage,
     window: {
       localStorage: mockLocalStorage,
+      ConnectifyUtils: window.ConnectifyUtils,
       ConnectifyCache: {
         VERSIONS: { PREDICTOR: 'v5_20261001_pred' },
         KEYS: { PREDICTOR: 'connectify:cache_version:predictor' }
@@ -2053,6 +2054,7 @@ runTest('predictor-math.js strictly honors custom dates and suppresses unparsabl
     localStorage: mockLocalStorage,
     window: {
       localStorage: mockLocalStorage,
+      ConnectifyUtils: window.ConnectifyUtils,
       ConnectifyCache: {
         VERSIONS: { PREDICTOR: 'v5_20261001_pred' },
         KEYS: { PREDICTOR: 'connectify:cache_version:predictor' }
@@ -2074,16 +2076,16 @@ runTest('predictor-math.js strictly honors custom dates and suppresses unparsabl
   assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), false, 'Task with no date should not be parsable');
 
   // Add custom date override via progress graph key
-  mockLocalStorage.setItem('connectea:time_override:Physics ATAR:Unscheduled Investigation', '17'); // Term 2 Week 7
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:Unscheduled Investigation'), '17'); // Term 2 Week 7
   assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), true, 'Task with custom date 17 must be parsable');
 
   // Test custom date override with connectify: namespace
-  mockLocalStorage.removeItem('connectea:time_override:Physics ATAR:Unscheduled Investigation');
-  mockLocalStorage.setItem('connectify:time_override:Physics ATAR:Unscheduled Investigation', 'Term 3, Week 4');
+  mockLocalStorage.removeItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:Unscheduled Investigation'));
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:Unscheduled Investigation'), 'Term 3, Week 4');
   assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), true, 'Task with connectify: time override must be parsable');
 
   // Explicitly cleared custom date (empty string) must suppress task
-  mockLocalStorage.setItem('connectea:time_override:Physics ATAR:Unscheduled Investigation', '');
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:Unscheduled Investigation'), '');
   assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), false, 'Explicitly cleared custom date must suppress task');
 });
 
@@ -3168,7 +3170,7 @@ runTest('Test 160: Progress Graph week overrides mean the same week to the scrap
   const dates = window.ConnectifyPredictorDates;
   assert.strictEqual(dates.formatOverrideWeek('17').order, customWeekOrder('w17'), 'the predictor reads week 17 as the scraper does');
   mockLocalStorage.clear();
-  mockLocalStorage.setItem('connectea:time_override:Physics ATAR:Overridden Task', '17');
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:Overridden Task'), '17');
   const overridden = dates.getTaskChronologicalStamp({ name: 'Overridden Task', semester: 1, sequence: 0 }, 'Physics ATAR');
   const captioned = dates.getTaskChronologicalStamp({ name: 'Captioned Task', semester: 1, sequence: 0, order: customWeekOrder('w17') }, 'Physics ATAR');
   assert.strictEqual(overridden, captioned, 'An override of 17 must sort exactly where the scraper places school week 17');
@@ -4088,7 +4090,7 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   const mockPoints = [task1, task2];
 
   // Set an old generic override (e.g. 17)
-  mockLocalStorage.setItem('connectea:time_override:Chemistry ATAR:Extended response 1', '17');
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Chemistry ATAR:Extended response 1'), '17');
 
   let refreshed = false;
   window.ConnectifyProgressChart.renderChart(container, {
@@ -4126,9 +4128,9 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   r2Input.dispatchEvent(new MockEvent('input'));
 
   // Task 2 must be saved under its specific key
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Chemistry ATAR:id_sem2_er1'), 'w27', 'Task 2 must save to its specific key, as a school week of the year');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Chemistry ATAR:id_sem2_er1')), 'w27', 'Task 2 must save to its specific key, as a school week of the year');
   // Task 1's generic key must NOT be overwritten by Task 2
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Chemistry ATAR:Extended response 1'), '17', 'Task 1 generic key must remain 17');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Chemistry ATAR:Extended response 1')), '17', 'Task 1 generic key must remain 17');
 
   // Test resolveTaskOrder in assessment-data.js
   delete window.ConnectifyData;
@@ -4198,7 +4200,7 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   input.dispatchEvent(new MockEvent('input'));
 
   // Synchronous storage check: partial input saved
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_unscheduled'), 'w1', 'Must save to storage on input, as a school week of the year');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_unscheduled')), 'w1', 'Must save to storage on input, as a school week of the year');
   // BUT onRefresh must NOT have fired because input is focused
   assert.strictEqual(refreshCount, 0, 'Must NOT trigger onRefresh while actively focused on input');
 
@@ -4221,7 +4223,7 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   // 4. Simulate typing '7' -> '17'
   input.value = '17';
   input.dispatchEvent(new MockEvent('input'));
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_unscheduled'), 'w17', 'Must update storage to 17');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_unscheduled')), 'w17', 'Must update storage to 17');
   assert.strictEqual(refreshCount, 0, 'Still must NOT trigger onRefresh while typing');
 
   // 5. User presses Enter to commit
@@ -4232,7 +4234,7 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   const taskWithDate = { id: 'task_dated', name: 'Midyear Exam', score: 85, mean: 70, order: 19, sequence: 2, pending: false };
   const container2 = document.createElement('div');
   let refreshCount2 = 0;
-  mockLocalStorage.setItem('connectea:time_override:Physics ATAR:task_dated', 'w19');
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated'), 'w19');
 
   window.ConnectifyProgressChart.renderChart(container2, {
     points: [taskWithDate],
@@ -4254,18 +4256,18 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   // User changes value to 25 but presses Escape
   editInput.value = '25';
   editInput.dispatchEvent(new MockEvent('input'));
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), 'w25', 'Storage updated on input');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated')), 'w25', 'Storage updated on input');
 
   editInput.dispatchEvent(new MockEvent('keydown', { key: 'Escape' }));
   assert.strictEqual(editInput.value, '19', 'Escape must restore initial value 19 in input');
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), 'w19', 'Escape must restore initial value 19 in storage');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated')), 'w19', 'Escape must restore initial value 19 in storage');
   assert.strictEqual(refreshCount2, 1, 'Escape must commit restored value and trigger onRefresh');
 
   // 7. Test clear button '✕'
   const clearBtn = container2.querySelector('.cx-time-clear-btn');
   assert.ok(clearBtn, 'Must render clear button when currentVal exists');
   clearBtn.click();
-  assert.strictEqual(mockLocalStorage.getItem('connectea:time_override:Physics ATAR:task_dated'), null, 'Clear button must remove override');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated')), null, 'Clear button must remove override');
   assert.strictEqual(refreshCount2, 2, 'Clear button must trigger onRefresh');
 });
 
@@ -10432,8 +10434,8 @@ runTest('Test 227: Settings saves each category under its own name; a set saved 
     mockLocalStorage.setItem('cx-categories', damaged);
     mockLocalStorage.setItem('connectea:categories', damaged);
     ext['cx-categories'] = JSON.parse(damaged);
-    mockLocalStorage.setItem('connectea:class_categories:economics atar year 11', JSON.stringify(['undefined', 'Fieldwork']));
-    mockLocalStorage.setItem('connectea:task_type_overrides', JSON.stringify({ 'Economics ATAR Year 11::Extended Answer': 'undefined' }));
+    mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:class_categories:economics atar year 11'), JSON.stringify(['undefined', 'Fieldwork']));
+    mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:task_type_overrides'), JSON.stringify({ 'Economics ATAR Year 11::Extended Answer': 'undefined' }));
     // Shadowed, not deleted: an earlier test leaves window inheriting these from a prototype
     window.ConnectifyCategoryStore = window.ConnectifyCategorySettings = window.ConnectifyTaskTypes = window.cxCategories = undefined;
     eval(fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8'));
@@ -12314,18 +12316,20 @@ runTest('Test 269: Expand All stays light: week overrides are indexed once, clas
   };
   const listeners = {};
   const sandbox = { console, localStorage: ls, window: { localStorage: ls, addEventListener: (type, fn) => { (listeners[type] = listeners[type] || []).push(fn); } } };
-  sandbox.window.ConnectifyUtils = { storageKeys: pred => { const out = []; for (let i = 0; i < ls.length; i++) { const k = ls.key(i); if (k && pred(k)) out.push(k); } return out; } };
+  const storageKeys = pred => { const out = []; for (let i = 0; i < ls.length; i++) { const k = ls.key(i); if (k && pred(k)) out.push(k); } return out; };
+  const userKey = key => `connectify:user:acc:${key}`;
+  sandbox.window.ConnectifyUtils = { storageKeys, userKey, userKeys: pred => storageKeys(k => k.startsWith(userKey('')) && pred(k.slice(userKey('').length))) };
   vm.createContext(sandbox);
   vm.runInContext(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/predictor-dates.js'), 'utf8'), sandbox);
   const dates = sandbox.window.ConnectifyPredictorDates;
   for (let i = 0; i < 50; i++) assert.strictEqual(dates.resolveCustomDate('Biology', { name: `Task ${i}`, id: `id${i}` }), null);
   assert.ok(keyCalls <= 2, `storage keys were read once for 50 tasks (${keyCalls} reads)`);
-  store['connectea:time_override:biology:test #3'] = 'w30';
+  store['connectify:user:acc:connectea:time_override:biology:test #3'] = 'w30';
   assert.strictEqual(dates.resolveCustomDate('Biology', 'Test #3'), 'w30', 'a new override is found case-insensitively');
-  store['connectea:time_override:biology:test #3'] = 'w31';
+  store['connectify:user:acc:connectea:time_override:biology:test #3'] = 'w31';
   assert.strictEqual(dates.resolveCustomDate('Biology', 'Test #3'), 'w31', 'its value is read fresh');
-  delete store['connectea:time_override:biology:test #3'];
-  store['connectea:time_override:biology:test #4'] = 'w32';
+  delete store['connectify:user:acc:connectea:time_override:biology:test #3'];
+  store['connectify:user:acc:connectea:time_override:biology:test #4'] = 'w32';
   listeners['connectify-week-override-saved'].forEach(fn => fn());
   assert.strictEqual(dates.resolveCustomDate('Biology', 'Test #4'), 'w32', 'a saved override (same key count) drops the index');
 
@@ -12454,6 +12458,80 @@ runTest('Test 271: Caches follow the signed-in user: another student signing in 
     location.href = savedHref;
     document.scripts = savedScripts;
     window.ConnectifyUtils = savedUtils;
+  }
+});
+
+runTest('Test 272: Task types, class categories, week overrides, calibration and the Weaknesses filter belong to the signed-in user', () => {
+  const savedUtils = window.ConnectifyUtils;
+  const savedMigrate = window.ConnectifyUserSettingsMigrate;
+  const savedStore = localStorage.store;
+  const savedScripts = document.scripts;
+  const savedHref = location.href;
+  const liferay = id => [{ src: '', textContent: `Liferay.ThemeDisplay={getUserId:function(){return"${id}"},isSignedIn:function(){return!0}}` }];
+  const load = (file, global) => { window[global] = undefined; eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8')); return window[global]; };
+  try {
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
+    localStorage.store = {
+      'connectify:account': 'DomainConnectUser:42',
+      'connectea:task_type_overrides': '{"Chemistry::Test 1":"Exam"}',
+      'connectea:class_categories:chemistry': '["Fieldwork"]',
+      'connectea:time_override:Chemistry ATAR:Test 1': 'w12',
+      'connectify:time_override:Physics ATAR:Lab': 't3w2',
+      'connectea:preferences': '{"sem1_calibration:chemistry":{"raw":80,"scaled":75}}',
+      'connectify:weakness_disabled_subjects': '["Physics"]',
+      'connectea:theme:id': 'dark'
+    };
+
+    // A page with no signed-in user leaves the shared values where they are
+    document.scripts = [];
+    load('system/utils.js', 'ConnectifyUtils');
+    assert.strictEqual(load('system/user-settings-migrate.js', 'ConnectifyUserSettingsMigrate').run(), false, 'no user: nothing moves');
+    assert.strictEqual(localStorage.getItem('connectea:task_type_overrides'), '{"Chemistry::Test 1":"Exam"}');
+
+    // The first signed-in page moves every one of them to that student, once
+    document.scripts = liferay('23317222');
+    let utils = load('system/utils.js', 'ConnectifyUtils');
+    load('system/user-settings-migrate.js', 'ConnectifyUserSettingsMigrate');
+    const mine = 'connectify:user:DomainConnectUser:42:';
+    assert.strictEqual(utils.userKey('connectea:preferences'), `${mine}connectea:preferences`);
+    for (const key of ['connectea:task_type_overrides', 'connectea:class_categories:chemistry', 'connectea:time_override:Chemistry ATAR:Test 1',
+      'connectify:time_override:Physics ATAR:Lab', 'connectea:preferences', 'connectify:weakness_disabled_subjects']) {
+      assert.strictEqual(localStorage.getItem(key), null, `${key} is no longer shared`);
+      assert.notStrictEqual(localStorage.getItem(mine + key), null, `${key} moved to the signed-in student`);
+    }
+    assert.strictEqual(localStorage.getItem('connectea:theme:id'), 'dark', 'browser-wide settings stay shared');
+    assert.strictEqual(utils.readTimeOverride(['Chemistry ATAR'], ['Test 1']), 'w12', 'week overrides are read from the student\'s own keys');
+    assert.deepStrictEqual(utils.userKeys(k => k.startsWith('connectea:class_categories:')), [`${mine}connectea:class_categories:chemistry`]);
+    assert.strictEqual(localStorage.getItem('connectify:user_settings_migrated'), '1');
+
+    // Another student sees none of them, and a later shared value (an old tab) is never moved to them
+    document.scripts = liferay('99887766');
+    utils = load('system/utils.js', 'ConnectifyUtils');
+    localStorage.setItem('connectea:task_type_overrides', '{"Old::Tab":"Test"}');
+    load('system/user-settings-migrate.js', 'ConnectifyUserSettingsMigrate');
+    assert.strictEqual(utils.readTimeOverride(['Chemistry ATAR'], ['Test 1']), null, 'another student never reads the first one\'s overrides');
+    assert.deepStrictEqual(utils.userKeys(() => true), [], 'another student starts with no settings of their own');
+    assert.strictEqual(localStorage.getItem('connectify:user:user99887766:connectea:task_type_overrides'), null, 'the migration runs once');
+
+    // Every reader and writer goes through the student's keys
+    const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
+    const files = ['cohort/task-types.js', 'cohort/task-type-select.js', 'cohort/cohort-observer.js', 'progress/compound-progress.js', 'progress/weakness-radar.js',
+      'progress/progress-week-editor.js', 'progress/progress-math.js', 'predictor/predictor-dates.js', 'predictor/predictor-atar-projection.js',
+      'predictor/category-baselines.js', 'atar/scaling-calibration.js', 'atar/atar-calculator.js'];
+    for (const file of files) {
+      const unkeyed = read(file).match(/(?:getItem\(|setItem\(|removeItem\(|e\.key ===|e\.key\?\.startsWith\()\s*[`'](?:connectea:(?:task_type_overrides|class_categories|time_override|preferences)|connectify:(?:time_override|weakness_disabled_subjects))/);
+      assert.ok(!unkeyed, `${file} reads a shared key: ${unkeyed && unkeyed[0]}`);
+    }
+    const manifest = JSON.parse(read('../manifest.json'));
+    for (const group of manifest.content_scripts.filter(g => g.js?.includes('src/system/utils.js') && g.js.includes('src/assessment/cache-versions.js'))) {
+      assert.strictEqual(group.js[group.js.indexOf('src/system/utils.js') + 1], 'src/system/user-settings-migrate.js', 'the migration runs before anything reads the settings');
+    }
+  } finally {
+    localStorage.store = savedStore;
+    document.scripts = savedScripts;
+    location.href = savedHref;
+    window.ConnectifyUtils = savedUtils;
+    window.ConnectifyUserSettingsMigrate = savedMigrate;
   }
 });
 

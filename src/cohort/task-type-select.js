@@ -119,7 +119,7 @@
       } catch {}
       invalidateTypesMemoryCache();
       rescanAllAutoAssessments();
-    } else if (e.key === 'connectea:task_type_overrides' || e.key?.startsWith('connectea:class_categories:')) {
+    } else if (e.key === window.ConnectifyUtils.userKey('connectea:task_type_overrides') || e.key?.startsWith(window.ConnectifyUtils.userKey('connectea:class_categories:'))) {
       invalidateTypesMemoryCache();
     }
   });

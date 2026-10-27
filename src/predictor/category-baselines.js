@@ -48,7 +48,7 @@
       if (stored && typeof stored === 'object') Object.keys(stored).forEach(c => names.add(c));
     } catch {}
     Object.keys(baselines.types || {}).forEach(c => names.add(c));
-    for (const key of window.ConnectifyUtils.storageKeys(k => k.startsWith('connectea:class_categories:'))) {
+    for (const key of window.ConnectifyUtils.userKeys(k => k.startsWith('connectea:class_categories:'))) {
       let arr = null;
       try { arr = JSON.parse(localStorage.getItem(key)); } catch {} // one bad entry must not hide the rest
       if (Array.isArray(arr)) arr.forEach(c => { if (typeof c === 'string' && c.trim()) names.add(c.trim()); });
