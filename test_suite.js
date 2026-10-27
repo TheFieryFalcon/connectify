@@ -2464,7 +2464,7 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   const scraperJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-scraper.js'), 'utf8');
   const atarMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8');
 
-  assert.ok(scraperJs.includes('connectify:grade_cache:current'), 'atar-scraper.js must read connectify:grade_cache:current');
+  assert.ok(!scraperJs.includes('connectify:grade_cache:current'), 'atar-scraper.js reads only the signed-in account\'s grade cache, never the untagged one');
   assert.ok(atarMathJs.includes('mathematics methods') && atarMathJs.includes('philosophy and ethics'), 'atar-math.js isAtarCourse must recognize Methods and Philosophy');
 
   // Test functional cache ingestion
@@ -2476,7 +2476,7 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
     'Philosophy and Ethics': { mark: 77, semester: 2 },
     'Physics': { mark: 87.7, semester: 2 }
   };
-  localStorage.setItem('connectify:grade_cache:current', JSON.stringify(mockCache));
+  localStorage.setItem(`connectify:grade_cache:${window.ConnectifyUtils.accountKey()}`, JSON.stringify(mockCache));
 
   delete window.ConnectifyAtarScraper;
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-math.js'), 'utf8'));
@@ -12349,6 +12349,62 @@ runTest('Test 269: Expand All stays light: week overrides are indexed once, clas
     }
   })(SRC_DIR);
   assert.deepStrictEqual(offenders, [], 'theme hooks are written .connectea-dark:not(cx-n) (same match, same 0,1,1 specificity)');
+});
+
+runTest('Test 271: Caches follow the signed-in user: another student signing in never sees the last one\'s cached classes', () => {
+  const savedUtils = window.ConnectifyUtils;
+  const savedHref = location.href;
+  const savedStore = localStorage.store;
+  const savedScripts = document.scripts;
+  const outlines = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
+  const liferay = id => [{ src: '', textContent: `Liferay.ThemeDisplay={getUserEmailAddress:function(){return"x@student"},getUserId:function(){return"${id}"},getUserName:function(){return"Student"},isImpersonated:function(){return!1},isSignedIn:function(){return!0}}` }];
+  try {
+    localStorage.store = {
+      'connectify:account': 'DomainConnectUser:42',
+      'connectify:subjects_cache:DomainConnectUser:42': '{"12 Chemistry ATAR":[]}',
+      'connectify:subjects_cache:current': '{"12 Chemistry ATAR":[]}',
+      'connectify:stale_subjects': '["12 chemistry atar"]'
+    };
+    const load = (href, scripts) => {
+      location.href = href;
+      document.scripts = scripts;
+      window.ConnectifyUtils = undefined;
+      eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/utils.js'), 'utf8'));
+      return window.ConnectifyUtils;
+    };
+
+    // The student who used Connectify before users were told apart keeps their account and data
+    let utils = load(outlines, liferay('23317222'));
+    assert.strictEqual(utils.signedInUserId(), '23317222', 'the user id is read from Connect\'s Liferay themeDisplay');
+    assert.strictEqual(utils.accountKey(), 'DomainConnectUser:42', 'the first user signed in keeps the account already in use');
+    assert.deepStrictEqual(JSON.parse(localStorage.getItem('connectify:accounts')), { 23317222: 'DomainConnectUser:42' });
+
+    // Signing out and in as someone else (shortcut, no coisp) gives a fresh account, not the remembered one
+    utils = load(outlines, liferay('99887766'));
+    assert.strictEqual(utils.accountKey(), 'user99887766', 'a new user never reads the last user\'s account');
+    assert.strictEqual(localStorage.getItem('connectify:account'), 'user99887766', 'pages without a user follow the last one signed in');
+    utils = load(`${outlines}?coisp=DomainConnectUser:42`, liferay('99887766'));
+    assert.strictEqual(utils.accountKey(), 'user99887766', 'an account, once given, never changes with the URL');
+
+    // Signing back in as the first student brings their own caches back
+    utils = load(outlines, liferay('23317222'));
+    assert.strictEqual(utils.accountKey(), 'DomainConnectUser:42', 'each user returns to their own account');
+
+    // A guest page (not signed in) names no user
+    const guest = [{ src: '', textContent: 'Liferay.ThemeDisplay={getUserId:function(){return"20123"},isSignedIn:function(){return!1}}' }];
+    assert.strictEqual(load(outlines, guest).signedInUserId(), null, 'the guest user is never an account');
+
+    // Caches: no untagged copies are read, and stale subjects are kept per account
+    const cacheJs = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/assessment-cache.js'), 'utf8');
+    assert.ok(!/getItem\('connectify:subjects_cache:current'\)/.test(cacheJs) && !/setItem\('connectify:subjects_cache:current'/.test(cacheJs),
+      'the subjects cache never mirrors to or reads the untagged current copy');
+    assert.ok(cacheJs.includes('`${LEGACY_STALE_KEY}:${getStudentId()}`'), 'stale subjects are keyed by account');
+  } finally {
+    localStorage.store = savedStore;
+    location.href = savedHref;
+    document.scripts = savedScripts;
+    window.ConnectifyUtils = savedUtils;
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

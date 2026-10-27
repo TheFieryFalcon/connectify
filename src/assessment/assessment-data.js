@@ -187,9 +187,8 @@
         statsCache.clear();
         window.ConnectifyClassSemesters?.clear?.();
         try {
-          localStorage.removeItem(cache.getSubjectsCacheKey ? cache.getSubjectsCacheKey() : 'connectify:subjects_cache:current');
-          localStorage.removeItem('connectify:subjects_cache:current');
-          localStorage.removeItem('connectify:stale_subjects');
+          if (cache.getSubjectsCacheKey) localStorage.removeItem(cache.getSubjectsCacheKey());
+          if (cache.staleSubjectsKey) localStorage.removeItem(cache.staleSubjectsKey());
         } catch {}
       },
       cache: window.ConnectifyCache || cache

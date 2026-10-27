@@ -97,7 +97,7 @@
         window.ConnectifyCache?.clearPredictorCache?.();
         window.ConnectifyCache?.clearGoalsCache?.();
         window.ConnectifyData?.clearCache?.();
-        try { localStorage.removeItem('connectify:stale_subjects'); } catch {}
+        window.ConnectifyUtils.removeStorageKeys(k => k.startsWith('connectify:stale_subjects'));
         const feedback = panel.querySelector('#cx-clear-cache-feedback');
         if (feedback) {
           feedback.style.display = 'inline';

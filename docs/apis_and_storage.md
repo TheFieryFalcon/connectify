@@ -9,7 +9,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | Global Object | Module | Primary Purpose |
 |---|---|---|
 | `window.ConnectifyScheduler` | `scheduler.js` | Shared page observer (`onMutations`) and heartbeat (`every`) |
-| `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `accountKey` (URL `coisp`, else the remembered account, else `current`), `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey`, `customWeekOrder`/`readTimeOverride`, `OUTLINES_URL`/`isOutlinesPage()` (load first) |
+| `window.ConnectifyUtils` | `utils.js` | Shared `normalize`, `accountKey` (the signed-in user's own account, `connectify:accounts`; on pages naming no user, URL `coisp`, else the remembered account, else `current`), `signedInUserId()` (Connect's Liferay `getUserId`, null for guests), `storageKeys`/`removeStorageKeys`, `baselineKeys`/`isBaselineKey`, `customWeekOrder`/`readTimeOverride`, `OUTLINES_URL`/`isOutlinesPage()` (load first) |
 | `window.ConnectifyData` | `assessment-data.js` | Scrapes assessment cards, caches tasks, expands accordions; `collectClasses()` for sidebar tools |
 | `window.ConnectifyCache` | `cache-versions.js` | Subsystem cache versioning (predictor, results, settings, cohort, goals) and clearing |
 | `window.ConnectifyCohortMath` | `cohort-math.js` | PCHIP cubic Hermite interpolation, variance, z-score |
@@ -81,7 +81,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `connectify:weakness_disabled_subjects` / `connectify:progress_mode` / `connectify:calendar_export:<account>` | `localStorage` | `weakness-radar.js` / `progress-modes.js` / `export-view.js` | Subjects excluded from Weaknesses; Progress data point mode (`tasks`, `weighted`, `rolling`); export choices `{ unticked, subjectDays, taskDays, mergeExams }` (older ones also hold `earlyEaster`, still read); `connectify:school_terms` (`school-terms.js`): `{ earlyEaster: { <year>: bool } }`, shared by the graph and export (both settings: Clear Cache keeps them) |
 | `connectea:time_override:<subject>:<task|taskId>` | `localStorage` | `progress-chart.js` | Manual school week overrides: `w17` (school week of the year through the term calendar, as the Export numbers term starts; Early Easter: Term 2 starts at Week 10), older bare numbers (saved before Early Easter was known) read as the same school week (`17` = `w17`) or `t2w7`, read via `ConnectifyUtils.customWeekOrder` (disambiguated by task ID for duplicate names) |
 | `connectify:auto_expand` | `localStorage` | `category-settings.js` / `atar-features.js` | Boolean setting to auto-expand course outlines on load |
-| `connectify:stale_subjects` | `localStorage` | `assessment-data.js` / `new-grade.js` | Set of subjects whose collapsed grade/stats changed, awaiting targeted re-scrape upon expansion |
+| `connectify:stale_subjects:<account>` | `localStorage` | `assessment-data.js` / `new-grade.js` | Set of subjects whose collapsed grade/stats changed, awaiting targeted re-scrape upon expansion (the untagged legacy key moves to the first account that reads it) |
 | `connectify:subjects_cache:<student>` | `localStorage` | `assessment-data.js` | Persisted scraped subjects and tasks for instant collection without DOM rescrape |
 | `connectify:general_cohort_size` | `localStorage` | `category-settings.js` / `cohort-estimator.js` | Estimated year level cohort size (default: 500) |
 | `connectify:atar_percentage` | `localStorage` | `category-settings.js` / `cohort-estimator.js` | Estimated ATAR pathway participation percentage (default: 60) |
@@ -101,7 +101,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `cx-session-expired` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user session expires while idle |
 | `cx-manual-logout` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user explicitly clicks logout |
 | `cx-last-autologin` | `browser.storage.local` | `auto-login.js` | Timestamp to prevent rapid login loops (<30s) |
-| `connectify:account` | `localStorage` | `utils.js` | Last student account seen in a `coisp` URL (never a class id): Connectify's shortcut opens the outlines without `coisp`, so every per-student key uses it; the first account seen copies keys saved under `current` it lacks |
+| `connectify:account` / `connectify:accounts` | `localStorage` | `utils.js` | Last account in use (pages that name no user fall back to it); the first account seen copies keys saved under `current` it lacks. `{ <Connect user id>: <account> }`: each signed-in user's account, fixed when first seen (Connect's `coisp`, else for the first user only the account already in use, else `user<id>`), so signing in as someone else never shows the last user's caches and signing back in brings them back |
 | `connectify:seen_version` / `connectify:theme_boot` / `connectify:pointer_mouse` | `localStorage` | `update-notice.js` / `theme-boot.js` / `pointer-kind.js` | Last extension version seen; a newer manifest version shows the update notice once (fresh installs only record it); `{ id, dark, attrs, props, canvas, bg }` snapshot of the applied theme (`bg`: `{ url }` small, `{ settings }`, `{ theme }`), applied at document_start; `'true'` once a mouse was used (touch clears it) |
 
 ---

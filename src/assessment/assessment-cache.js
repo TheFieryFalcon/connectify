@@ -2,7 +2,8 @@
  * Connectify Assessment Cache & Invalidation Manager
  *
  * In-memory and persisted assessment data: subjects/tasks (connectify:subjects_cache:), boxplot
- * stats (connectify:stats_cache:) and subjects marked stale by a grade change. Extends
+ * stats (connectify:stats_cache:) and subjects marked stale by a grade change (connectify:stale_subjects:),
+ * all keyed by the signed-in student's account. Extends
  * window.ConnectifyCache (created by cache-versions.js).
  */
 (() => {
@@ -117,7 +118,6 @@
       const serialized = serializeSubjects(source || subjectsCache);
       const json = JSON.stringify(serialized);
       localStorage.setItem(getSubjectsCacheKey(), json);
-      localStorage.setItem('connectify:subjects_cache:current', json);
     } catch (e) {
       console.warn('Connectify failed to save subjects cache:', e);
     }
@@ -125,7 +125,10 @@
 
   function loadSubjectsCache() {
     try {
-      const raw = localStorage.getItem(getSubjectsCacheKey()) || localStorage.getItem('connectify:subjects_cache:current');
+      // Never the untagged 'current' copy older versions mirrored every save: it held whoever was signed in last
+      const key = getSubjectsCacheKey();
+      if (!key.endsWith(':current')) localStorage.removeItem('connectify:subjects_cache:current');
+      const raw = localStorage.getItem(key);
       if (!raw) return false;
       const parsed = JSON.parse(raw);
       if (!parsed || typeof parsed !== 'object') return false;
@@ -151,11 +154,18 @@
 
   loadSubjectsCache();
 
-  const STALE_SUBJECTS_KEY = 'connectify:stale_subjects';
+  // Per account; the untagged key older versions used moves to the first account that reads it
+  const LEGACY_STALE_KEY = 'connectify:stale_subjects';
+  const staleSubjectsKey = () => `${LEGACY_STALE_KEY}:${getStudentId()}`;
 
   function getStaleSubjects() {
     try {
-      const raw = localStorage.getItem(STALE_SUBJECTS_KEY);
+      const legacy = localStorage.getItem(LEGACY_STALE_KEY);
+      if (legacy !== null) {
+        if (localStorage.getItem(staleSubjectsKey()) === null) localStorage.setItem(staleSubjectsKey(), legacy);
+        localStorage.removeItem(LEGACY_STALE_KEY);
+      }
+      const raw = localStorage.getItem(staleSubjectsKey());
       if (raw) {
         const arr = JSON.parse(raw);
         if (Array.isArray(arr)) return new Set(arr.map(s => normalize(s).toLowerCase()));
@@ -166,7 +176,7 @@
 
   function saveStaleSubjects(staleSet) {
     try {
-      localStorage.setItem(STALE_SUBJECTS_KEY, JSON.stringify(Array.from(staleSet)));
+      localStorage.setItem(staleSubjectsKey(), JSON.stringify(Array.from(staleSet)));
     } catch {}
   }
 
@@ -224,23 +234,11 @@
   }
 
 
-    ConnectifyCache.subjectsCache = subjectsCache;
-    ConnectifyCache.statsCache = statsCache;
-    ConnectifyCache.getStudentId = getStudentId;
-    ConnectifyCache.statsCacheKey = statsCacheKey;
-    ConnectifyCache.getTaskStats = getTaskStats;
-    ConnectifyCache.setTaskStats = setTaskStats;
-    ConnectifyCache.getSubjectTasks = getSubjectTasks;
-    ConnectifyCache.getSubjectsCacheKey = getSubjectsCacheKey;
-    ConnectifyCache.serializeSubjects = serializeSubjects;
-    ConnectifyCache.saveSubjectsCache = saveSubjectsCache;
-    ConnectifyCache.loadSubjectsCache = loadSubjectsCache;
-    ConnectifyCache.getStaleSubjects = getStaleSubjects;
-    ConnectifyCache.saveStaleSubjects = saveStaleSubjects;
-    ConnectifyCache.markSubjectStale = markSubjectStale;
-    ConnectifyCache.unmarkSubjectStale = unmarkSubjectStale;
-    ConnectifyCache.isSubjectStale = isSubjectStale;
-    ConnectifyCache.hasCachedSubjects = hasCachedSubjects;
+    Object.assign(ConnectifyCache, {
+      subjectsCache, statsCache, getStudentId, statsCacheKey, getTaskStats, setTaskStats, getSubjectTasks,
+      getSubjectsCacheKey, staleSubjectsKey, serializeSubjects, saveSubjectsCache, loadSubjectsCache,
+      getStaleSubjects, saveStaleSubjects, markSubjectStale, unmarkSubjectStale, isSubjectStale, hasCachedSubjects
+    });
   } catch (err) {
     console.error('Connectify error in assessment-cache.js:', err);
   }

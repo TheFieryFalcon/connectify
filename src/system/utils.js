@@ -1,7 +1,7 @@
 /**
  * Connectify Shared Utilities
  *
- * Text normalisation, HTML escaping, the current account key, localStorage key scanning, legacy baseline key resolution,
+ * Text normalisation, HTML escaping, the signed-in user's account key, localStorage key scanning, legacy baseline key resolution,
  * Progress Graph week overrides, the outlines page check and the chart resync request to the main-world bridge
  * shared by every content script. Loaded first in the assessment outlines pipeline.
  * Exposes window.ConnectifyUtils.
@@ -46,11 +46,70 @@
     if (!previous) adoptPlaceholderKeys(account);
   }
 
-  /** The student account: ?coisp=... (class ids excluded), else the last account seen, else 'current'. */
+  // Connect (Liferay) names the signed-in user in an inline script (themeDisplay's getUserId), so each user
+  // keeps an account of their own: someone else signing in on this browser never sees the last user's caches
+  const USERS_STORE = 'connectify:accounts';
+  const USER_ID = /getUserId\s*:\s*function\s*\(\s*\)\s*\{\s*return\s*["'](\d+)["']/;
+  const SIGNED_IN = /isSignedIn\s*:\s*function\s*\(\s*\)\s*\{\s*return\s*(?:!0|true)\b/;
+  let signedInUser;
+  let userAccount = null;
+
+  /** The signed-in user's Connect id, or null (guest pages, or before Connect's scripts are parsed). */
+  function signedInUserId() {
+    if (signedInUser !== undefined) return signedInUser;
+    let found = null;
+    let parsed = true;
+    try {
+      parsed = document.readyState !== 'loading';
+      for (const script of document.scripts) {
+        if (script.src) continue;
+        const text = script.textContent || '';
+        if (!text.includes('getUserId')) continue;
+        const match = text.match(USER_ID);
+        if (match) { found = SIGNED_IN.test(text) ? match[1] : null; break; }
+      }
+    } catch {}
+    if (found || parsed) signedInUser = found;
+    return found;
+  }
+
+  function readUsers() {
+    try {
+      const users = JSON.parse(localStorage.getItem(USERS_STORE) || '{}');
+      return users && typeof users === 'object' && !Array.isArray(users) ? users : {};
+    } catch { return {}; }
+  }
+
+  /**
+   * The signed-in user's account, fixed the first time they are seen: Connect's ?coisp=, else the account
+   * in use before users were told apart (only for the first user, since it is theirs), else 'user<id>'.
+   */
+  function accountForUser(user, coisp) {
+    if (userAccount) return userAccount;
+    const users = readUsers();
+    let account = users[user];
+    if (!account) {
+      const legacy = Object.keys(users).length ? null : rememberedAccount();
+      account = coisp || legacy || `user${user}`;
+      users[user] = account;
+      try { localStorage.setItem(USERS_STORE, JSON.stringify(users)); } catch {}
+    }
+    userAccount = account;
+    rememberAccount(account);
+    return account;
+  }
+
+  /**
+   * The student account: the signed-in user's own (see accountForUser); on a page that does not name its
+   * user, ?coisp=... (class ids excluded), else the last account seen, else 'current'.
+   */
   function accountKey() {
     let coisp = null;
     try { coisp = new URL(location.href).searchParams.get('coisp'); } catch {}
-    if (coisp && !/^DomainSchool/i.test(coisp)) {
+    if (coisp && /^DomainSchool/i.test(coisp)) coisp = null;
+    const user = signedInUserId();
+    if (user) return accountForUser(user, coisp);
+    if (coisp) {
       rememberAccount(coisp);
       return coisp;
     }
@@ -154,7 +213,7 @@
   window.ConnectifyDataSyncCharts = syncCharts;
 
   window.ConnectifyUtils = {
-    normalize, escapeHtml, accountKey, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
+    normalize, escapeHtml, accountKey, signedInUserId, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
     customWeekOrder, readTimeOverride, syncCharts, cardSemester, OUTLINES_URL, isOutlinesPage
   };
 })();

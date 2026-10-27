@@ -126,13 +126,9 @@
       }
     }
 
-    // Ingest grade cache (e.g. connectify:grade_cache:current and connectify:grade_cache:<studentId>)
+    // Ingest the signed-in student's grade cache (connectify:grade_cache:<account>), never another account's
     try {
-      const studentId = window.ConnectifyUtils.accountKey();
-      const cacheKeys = [
-        'connectify:grade_cache:current',
-        `connectify:grade_cache:${studentId}`
-      ];
+      const cacheKeys = [`connectify:grade_cache:${window.ConnectifyUtils.accountKey()}`];
       for (const k of cacheKeys) {
         const raw = localStorage.getItem(k);
         if (!raw) continue;
