@@ -175,10 +175,12 @@
    * Every task row's id in a card: its labels and out-of mark, then how many earlier rows share both.
    * A Semester 2 outline lists the Semester 1 exam before its own, so two "Close reading" rows get :0 and :1.
    * The parser and the row readers both use this, so a row always finds its own cached task and prediction.
+   * statsKey keys the boxplot stats cache: the task name, or the id when an earlier row has the same name.
    */
   function cardTaskIds(card) {
     const ids = new Map();
     const occurrences = new Map();
+    const names = new Set();
     for (const row of card.querySelectorAll('.cvr-c-tasks .cvr-c-task')) {
       const labels = taskLabels(row);
       if (labels.length === 0) continue;
@@ -187,7 +189,11 @@
       const identity = JSON.stringify([labels, mark.maxScore]);
       const occurrence = occurrences.get(identity) || 0;
       occurrences.set(identity, occurrence + 1);
-      ids.set(row, { id: `${identity}:${occurrence}`, occurrence, labels, mark });
+      const id = `${identity}:${occurrence}`;
+      const name = labels[labels.length - 1];
+      const nameKey = name.toLowerCase();
+      ids.set(row, { id, occurrence, labels, mark, statsKey: names.has(nameKey) ? id : name });
+      names.add(nameKey);
     }
     return ids;
   }

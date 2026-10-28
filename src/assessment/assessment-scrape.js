@@ -35,7 +35,7 @@
   // The cohort mean from the task's boxplot, else from the stats cache the cohort pass keeps for every row
   function cohortMeanOf(subjectName, task) {
     if (Number.isFinite(task.mean)) return task.mean;
-    const stats = Array.isArray(task.stats) ? task.stats : cache.getTaskStats?.(subjectName, task.name);
+    const stats = Array.isArray(task.stats) ? task.stats : cache.getTaskStats?.(subjectName, task.statsKey || task.name);
     return Array.isArray(stats) && stats.length === 5 && stats.every(Number.isFinite)
       ? window.ConnectifyParseHelpers.weightedMean(stats)
       : task.mean;
@@ -117,7 +117,7 @@
       if (record.stats && record.row) {
         const chartHost = record.row.querySelector('[data-highcharts-chart], .cvr-c-task__chart');
         if (chartHost?.dataset?.connectifyStats) {
-          setTaskStats(subjectName, taskName, record.stats, chartHost.dataset.connectifyN);
+          setTaskStats(subjectName, record.statsKey || taskName, record.stats, chartHost.dataset.connectifyN);
         }
       }
 

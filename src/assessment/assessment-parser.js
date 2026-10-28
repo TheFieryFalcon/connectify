@@ -73,7 +73,7 @@
     for (const row of taskRows) {
       const entry = ids.get(row);
       if (!entry) continue;
-      const { id, occurrence, labels } = entry;
+      const { id, occurrence, labels, statsKey } = entry;
       const { score, isCompleted } = entry.mark;
 
       const weightElement = row.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark')[1];
@@ -114,6 +114,8 @@
         caption,
         // Every label, as the Type dropdown keys overrides and detects types, so cached tasks need no row
         labelsKey: labels.join('::'),
+        // Boxplot stats cache key: a repeated name ("Close reading" in both exams) is keyed by its id
+        statsKey,
         score: isCompleted ? score : null,
         pending: !isCompleted,
         weight,
@@ -135,7 +137,7 @@
         } catch {}
       }
       if (!record.stats) {
-        const cached = getTaskStats(subjectName, taskName);
+        const cached = getTaskStats(subjectName, statsKey);
         if (cached) record.stats = cached;
       }
 

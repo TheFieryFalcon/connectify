@@ -8393,7 +8393,7 @@ runTest('Test 183: Expand All adds every expanded subject to a cache that alread
     cards = [];
     assert.deepStrictEqual(names(), ['12 Chemistry ATAR', '12 Philosophy and Ethics ATAR', '12 Physics ATAR'], 'the persisted cache keeps every subject');
     const src = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/cache-versions.js'), 'utf8');
-    assert.ok(src.includes("RESULTS: 'v12_20261024_results'"), 'caches from before older week overrides were read as school weeks are invalidated');
+    assert.ok(src.includes("RESULTS: 'v13_20261028_results'"), 'caches holding a same-named task\'s boxplot are invalidated');
   } finally {
     document.querySelectorAll = origQSA;
     mockLocalStorage.clear();
@@ -12556,6 +12556,78 @@ runTest('Test 273: Year Progression subject charts start at 50%, or at the lowes
     assert.strictEqual(b.yFor(100), 40, '100% sits at the top');
   } finally {
     window.ConnectifyProgressMath = saved;
+  }
+});
+
+runTest('Test 274: Same-named tasks keep their own cohort mean: a repeated name is keyed by its id in the stats cache', () => {
+  const makeCard = (titleText, rows) => {
+    const card = new MockElement('div', 'eds-c-tile');
+    const title = new MockElement('div', 'eds-c-tile__title');
+    title.textContent = titleText;
+    card.appendChild(title);
+    const list = new MockElement('div', 'cvr-c-tasks');
+    card.appendChild(list);
+    const made = rows.map(([labels, mark, weight, stats]) => {
+      const row = new MockElement('div', 'cvr-c-task');
+      const details = new MockElement('div', 'cvr-c-task__details');
+      for (const text of labels) {
+        const label = new MockElement('span', 'v-label');
+        label.textContent = text;
+        details.appendChild(label);
+      }
+      row.appendChild(details);
+      const marks = new MockElement('div', 'cvr-c-task__marks');
+      for (const text of [mark, weight]) {
+        const cell = new MockElement('div', 'cvr-c-task__mark');
+        cell.textContent = text;
+        marks.appendChild(cell);
+      }
+      row.appendChild(marks);
+      if (stats) {
+        const chart = new MockElement('div', 'cvr-c-task__chart');
+        chart.dataset.connectifyStats = JSON.stringify(stats);
+        row.appendChild(chart);
+      }
+      list.appendChild(row);
+      return row;
+    });
+    return { card, rows: made };
+  };
+  const subjectName = '12 Literature ATAR';
+  const firstStats = [30, 50, 58, 66, 85];
+  const sem1Exam = [['Examination', 'Term 2, Week 7', 'Close reading'], '41 Out of 60', '15%', firstStats];
+  const sem2Exam = [['Examination', 'Term 4, Week 5', 'Close reading'], '- Out of 60', '15%'];
+  try {
+    window.ConnectifyCache.clearCohortCache();
+    window.ConnectifyData.clearCache();
+    const sem1 = makeCard(`${subjectName} - Semester 1`, [sem1Exam]);
+    const sem2 = makeCard(`${subjectName} - Semester 2`, [sem1Exam, sem2Exam]);
+    const ids = window.ConnectifyParseHelpers.cardTaskIds(sem2.card);
+    const secondId = ids.get(sem2.rows[1]).id;
+    assert.strictEqual(ids.get(sem2.rows[0]).statsKey, 'Close reading', 'the first task of a name keeps its name key');
+    assert.strictEqual(ids.get(sem2.rows[1]).statsKey, secondId, 'a repeated name is keyed by its id');
+    assert.strictEqual(window.ConnectifyCohortRows.statsKey(sem2.rows[1]), secondId, 'the row readers use the same key');
+
+    window.ConnectifyData.scrapeSubjectTasks(sem1.card);
+    window.ConnectifyData.scrapeSubjectTasks(sem2.card);
+    const subject = window.ConnectifyAssessmentScrape.formatCollectedSubjects(true).find(s => s.name === subjectName);
+    const [marked, upcoming] = subject.tasks.filter(t => t.name === 'Close reading');
+    assert.ok(Number.isFinite(marked.mean), 'the marked exam keeps its cohort mean');
+    assert.ok(!Number.isFinite(upcoming.mean) && !upcoming.stats, 'the upcoming exam never takes the marked one\'s boxplot');
+
+    // Both marked: each keeps its own boxplot, and the name key stays the first one's
+    const laterStats = [20, 40, 48, 55, 70];
+    const sem2Marked = makeCard(`${subjectName} - Semester 2`, [sem1Exam, [sem2Exam[0], '30 Out of 60', '15%', laterStats]]);
+    const laterId = window.ConnectifyParseHelpers.cardTaskIds(sem2Marked.card).get(sem2Marked.rows[1]).id;
+    window.ConnectifyData.scrapeSubjectTasks(sem2Marked.card, true);
+    assert.deepStrictEqual(window.ConnectifyCache.getTaskStats(subjectName, 'Close reading'), firstStats);
+    assert.deepStrictEqual(window.ConnectifyCache.getTaskStats(subjectName, laterId), laterStats);
+    const means = window.ConnectifyAssessmentScrape.formatCollectedSubjects(true).find(s => s.name === subjectName)
+      .tasks.filter(t => t.name === 'Close reading').map(t => t.mean);
+    assert.ok(means.length === 2 && means[0] !== means[1], 'the two exams show different cohort means');
+  } finally {
+    window.ConnectifyCache.clearCohortCache();
+    window.ConnectifyData.clearCache();
   }
 });
 

@@ -81,15 +81,16 @@
   }
 
   /**
-   * Adds the card's readable boxplots to its subject's pool under each row's task name (the stats
-   * cache's own key: the summary row is `Overall S1` / `Overall S2`), never text Connectify injects.
+   * Adds the card's readable boxplots to its subject's pool under each row's stats cache key (its task
+   * name, `Overall S1` / `Overall S2` on the summary row, its id for a repeated name), never injected text.
    */
   function observeSpreads(card) {
     const rows = cardRows(card);
     const pool = spreadPool(cardSubject(card, rows));
     for (const row of rows) {
       const ratio = spreadRatio(readRowStats(row));
-      const task = lower(taskMeta(row)?.taskName || '');
+      const meta = taskMeta(row);
+      const task = lower((meta && window.ConnectifyCohortRows?.statsKey?.(row, meta)) || meta?.taskName || '');
       if (ratio && task) pool.set(task, ratio);
     }
     return pool;

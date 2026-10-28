@@ -62,6 +62,23 @@
       return undefined;
     }
 
+    // A card's task ids, read once per task: a cohort pass reads every row's stats in one go
+    let idMemo = null;
+    function cardIds(card) {
+      if (!idMemo) {
+        idMemo = new WeakMap();
+        setTimeout(() => { idMemo = null; });
+      }
+      if (!idMemo.has(card)) idMemo.set(card, window.ConnectifyParseHelpers?.cardTaskIds?.(card) ?? new Map());
+      return idMemo.get(card);
+    }
+
+    /** The row's stats cache key: its task name (`Overall S1` on summary rows), its id for a repeated name. */
+    function statsKey(row, meta = types().getTaskMeta(row)) {
+      const card = row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
+      return (card && cardIds(card).get(row)?.statsKey) || meta?.taskName;
+    }
+
     /** Boxplot stats for a row: the dataset bridge, then Highcharts, then (unless live) the stats cache. */
     function readStats(row, { live = false } = {}) {
       const meta = types().getTaskMeta(row);
@@ -121,13 +138,13 @@
 
       if (foundStats) {
         if (meta?.subjectName && meta?.taskName && window.ConnectifyData?.setTaskStats) {
-          window.ConnectifyData.setTaskStats(meta.subjectName, meta.taskName, foundStats, foundN);
+          window.ConnectifyData.setTaskStats(meta.subjectName, statsKey(row, meta), foundStats, foundN);
         }
         return foundStats;
       }
 
       if (!live && meta?.subjectName && meta?.taskName && window.ConnectifyData?.getTaskStats) {
-        const cached = window.ConnectifyData.getTaskStats(meta.subjectName, meta.taskName);
+        const cached = window.ConnectifyData.getTaskStats(meta.subjectName, statsKey(row, meta));
         if (math().validStats(cached)) return cached;
       }
 
@@ -153,7 +170,7 @@
       return el;
     }
 
-    window.ConnectifyCohortRows = { readMark, readStats, createElement, clearChildren, setText, setHTML, normalize, math, types, estimator };
+    window.ConnectifyCohortRows = { readMark, readStats, statsKey, createElement, clearChildren, setText, setHTML, normalize, math, types, estimator };
   } catch (err) {
     console.error('Connectify error in cohort-row-readers.js:', err);
   }
