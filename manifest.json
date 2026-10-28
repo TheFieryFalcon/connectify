@@ -270,7 +270,8 @@
             "src/theme/styles/theme-alert-tiles.css",
             "src/theme/styles/theme.css",
             "src/theme/styles/theme-2.css",
-            "src/system/touch-targets.css"
+            "src/system/touch-targets.css",
+            "src/system/webkit-buttons.css"
          ],
          "js": [
             "src/system/scheduler.js",

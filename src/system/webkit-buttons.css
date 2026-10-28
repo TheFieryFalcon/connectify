@@ -1,0 +1,17 @@
+/**
+ * iPadOS / iOS buttons: WebKit there (Safari, Orion) draws a <button> with a visible background in its
+ * native appearance and gives it a capsule radius (half its height, or 17.5% of it from 45px tall),
+ * over the stylesheet's own border-radius, so every Connectify button turned round in every theme.
+ * Without native appearance they keep Connectify's own geometry, as in desktop browsers, which already
+ * drop it on a styled button. `-webkit-touch-callout` exists only in iOS WebKit, so nothing else changes.
+ * Selects keep their native arrow (WebKit leaves a select's own border-radius alone).
+ */
+
+@supports (-webkit-touch-callout: none) {
+  :is(#connectify-sidebar, #connectea-theme-menu, #cx-customizer-modal, #cx-wallpaper-crop, #connectify-notifications-container, #cx-expand-btn, #cx-back-to-top-container, #cx-semester-notice, #connectea-atar, #connectify-progress, .cx-goal-overlay, .connectea-row-wrapper, .connectea-panel) button,
+  #connectify-sidebar-handle,
+  #connectea-theme-toggle {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}

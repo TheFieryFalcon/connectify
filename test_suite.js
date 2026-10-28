@@ -12631,6 +12631,25 @@ runTest('Test 274: Same-named tasks keep their own cohort mean: a repeated name 
   }
 });
 
+
+runTest('Test 275: On iPadOS / iOS Connectify buttons drop native appearance, so WebKit never forces a capsule radius over their own', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/webkit-buttons.css'), 'utf8');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(c => (c.css || []).includes('src/system/webkit-buttons.css'));
+  assert.ok(group && group.matches.includes('https://connect.det.wa.edu.au/*'), 'loaded on every Connect page, like the handle and theme button');
+  const body = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const supports = body.indexOf('@supports (-webkit-touch-callout: none)');
+  assert.ok(supports >= 0 && body.slice(0, supports).trim() === '', 'every rule is for iOS WebKit only (desktop browsers are unchanged)');
+  const [, selector = '', decls = ''] = body.match(/\{\s*([^{}]*)\{([^}]*)\}/) || [];
+  for (const host of ['#connectify-sidebar', '#connectea-theme-menu', '#cx-customizer-modal', '#connectify-notifications-container', '#cx-expand-btn', '.cx-goal-overlay', '.connectea-row-wrapper', '.connectea-panel']) {
+    assert.ok(selector.includes(host), `${host} buttons are covered`);
+  }
+  assert.ok(selector.includes('#connectify-sidebar-handle') && selector.includes('#connectea-theme-toggle'), 'the handle and the theme button are buttons themselves');
+  assert.ok(!/\bselect\b/.test(selector), 'selects keep their native arrow');
+  assert.ok(/(^|[;\s])appearance:\s*none/.test(decls) && /-webkit-appearance:\s*none/.test(decls), 'native appearance is off');
+  assert.ok(!/radius|padding|margin|!important/.test(decls), 'each button keeps its own geometry and spacing');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
