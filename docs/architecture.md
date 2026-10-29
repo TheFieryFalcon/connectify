@@ -65,7 +65,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 40. `src/atar/atar-ui-markup.js` (calculator panel markup, Goals / Estimates groups and mode tabs, semester labels and closing rules)
 41. `src/atar/atar-ui.js` (calculator controller: Goals and Estimates modes)
 42. `src/progress/progress-math.js` (chronological ATAR trajectory)
-42b. `src/progress/progress-semester-divider.js` (dashed Semester 1 | Semester 2 line on every progress chart) / `progress-goal-line.js` (each task's goal target as a dashed line; ATAR goal line)
+42b. `src/progress/progress-semester-divider.js` (dashed Semester 1 | Semester 2 line on every progress chart) / `progress-goal-line.js` (each task's goal target as a dashed line from the last score; ATAR goal line)
 43. `src/progress/progress-chart.js` (SVG polyline line chart renderer)
 44. `src/progress/progress-week-editor.js` (school week override cells in the Progress Graph table)
 44b. `src/progress/progress-modes.js` (Progress data point modes: single tasks, weighted or rolling average) / `progress-early-easter.js` (the Early Easter checkbox shared by the graph and the export)

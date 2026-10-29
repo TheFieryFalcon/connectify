@@ -86,17 +86,28 @@
     if (!targets.some(Number.isFinite)) return false;
     const name = window.ConnectifyProgressModes?.find(mode).target || 'Target mark';
     // Lines first, then markers, all before the series (drawn after this)
-    const spots = targets.map((value, idx) => (Number.isFinite(value)
-      ? { idx, value, cx: xFor(idx), cy: Math.max(40, Math.min(260, yFor(value))) }
-      : null));
+    const clampY = value => Math.max(40, Math.min(260, yFor(value)));
+    const spots = targets.map((value, idx) => (Number.isFinite(value) ? { idx, value, cx: xFor(idx), cy: clampY(value) } : null));
+    // Remaining tasks' targets run on from the last plotted score (the plan starts where the results end);
+    // marked tasks' requirements are their own line, ending at the last of them
+    const scored = idx => Number.isFinite(points[idx]?.score);
+    const firstAhead = spots.findIndex(spot => spot && !scored(spot.idx));
+    let anchor = -1;
+    for (let idx = firstAhead - 1; idx >= 0; idx--) if (scored(idx)) { anchor = idx; break; }
     let segment = [];
-    for (const spot of [...spots, null]) {
-      if (spot) segment.push(`${spot.cx},${spot.cy}`);
-      else {
-        if (segment.length > 1) svg.append(createSvgElement('polyline', { points: segment.join(' '), fill: 'none', class: 'cx-goal-line' }));
-        segment = [];
+    const flush = () => {
+      if (segment.length > 1) svg.append(createSvgElement('polyline', { points: segment.join(' '), fill: 'none', class: 'cx-goal-line' }));
+      segment = [];
+    };
+    spots.forEach((spot, idx) => {
+      if (idx === firstAhead) {
+        flush();
+        if (anchor > -1) segment.push(`${xFor(anchor)},${clampY(points[anchor].score)}`);
       }
-    }
+      if (spot) segment.push(`${spot.cx},${spot.cy}`);
+      else flush();
+    });
+    flush();
     for (const spot of spots.filter(Boolean)) {
       const dot = createSvgElement('circle', { cx: spot.cx, cy: spot.cy, r: 3, tabindex: 0, class: 'cx-goal-target-point' });
       dot.append(createSvgElement('title', {}, `${points[spot.idx].name}: ${name} ${round1(spot.value)}%`));

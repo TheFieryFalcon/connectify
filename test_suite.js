@@ -12308,9 +12308,27 @@ runTest('Test 266: Year Progression plots the goal\'s target mark for each task;
   const dots = svg.querySelectorAll('.cx-goal-target-point');
   assert.strictEqual(dots.length, 3, 'a marker per task with a target');
   assert.strictEqual(dots[0].attrs.cy, 260 - 76.5 * 2.2);
-  const line = svg.querySelector('polyline.cx-goal-line, .cx-goal-line');
-  assert.ok(line && line.attrs.points.split(' ').length === 3, 'a dashed line through the targets, not a flat bar');
+  const lines = svg.querySelectorAll('.cx-goal-line');
+  assert.strictEqual(lines.length, 1, 'B\'s requirement alone is a marker, not a line of its own');
+  assert.deepStrictEqual(lines[0].attrs.points.split(' '), [`152,${260 - 81 * 2.2}`, `252,${260 - 82.4 * 2.2}`, `352,${260 - 80 * 2.2}`],
+    'the remaining targets run on from the last plotted score (B\'s 81), not from B\'s requirement');
   assert.ok(!svg.querySelector('line.cx-goal-line'), 'no horizontal goal line on subject charts');
+  // Two judged tasks: their requirements are their own line, ending where the results end
+  win.ConnectifyGoalEvents = { stateOf: () => ({
+    plan: { required: 80, effort: true, taskRequirements: { c: { required: 82.4 } } },
+    verdicts: { 'chemistry::a': { required: 72 }, 'chemistry::b': { required: 76.5 } },
+    rangeKeys: new Set(['chemistry::a', 'chemistry::b', 'chemistry::c', 'chemistry::d'])
+  }) };
+  const judged = new MockElement('svg');
+  L.render(judged, { points, xFor: i => 52 + i * 100, yFor: v => 260 - v * 2.2, minY: 0, maxY: 100, subjectName: 'Chemistry', isHistory: false, mode: 'tasks', legend: null, createSvgElement: made });
+  assert.deepStrictEqual(judged.querySelectorAll('.cx-goal-line').map(l => l.attrs.points.split(' ').length), [2, 3],
+    'past requirements (A, B) and the plan from B\'s score (B, C, D)');
+  // Nothing marked yet: the plan starts at its first target
+  const fresh = new MockElement('svg');
+  const pending = points.map(p => ({ ...p, pending: true, score: null }));
+  win.ConnectifyGoalEvents = { stateOf: () => ({ plan: { required: 80, taskRequirements: {} }, verdicts: {}, rangeKeys: new Set(['chemistry::a', 'chemistry::b']) }) };
+  L.render(fresh, { points: pending, xFor: i => 52 + i * 100, yFor: v => 260 - v * 2.2, minY: 0, maxY: 100, subjectName: 'Chemistry', isHistory: false, mode: 'tasks', legend: null, createSvgElement: made });
+  assert.deepStrictEqual(fresh.querySelector('.cx-goal-line').attrs.points.split(' '), [`52,${260 - 80 * 2.2}`, `152,${260 - 80 * 2.2}`]);
   assert.strictEqual(legend.querySelector('.cx-goal-key').textContent, 'Dashed: Target mark (Goal 78%)');
   win.ConnectifyGoalEvents = realEvents;
   assert.strictEqual(L.goalFor('Physics'), null, 'none without a goal');
