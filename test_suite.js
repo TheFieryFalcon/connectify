@@ -6082,6 +6082,11 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   const utilsMod = require(utilsPath);
   assert.strictEqual(typeof utilsMod.launchBrowser, 'function', 'launchBrowser must be exported');
   assert.strictEqual(typeof utilsMod.authenticate, 'function', 'authenticate must be exported');
+  assert.strictEqual(typeof utilsMod.chooseStudentLogin, 'function', 'the login picks Student on Connect\'s sign-in chooser');
+  const utilsSrc = fs.readFileSync(utilsPath, 'utf8');
+  assert.ok(!utilsSrc.includes('bringToFront'), 'the login window never takes focus');
+  assert.ok(utilsSrc.includes('activateApp(front)') && utilsSrc.includes('settleExtension(browser)'), 'a visible window hands focus back; launches wait for the extension\'s install reload');
+  assert.ok(/chooseStudentLogin\(page\);\s*await page\.waitForSelector\('#ssousername/.test(utilsSrc), 'credential login picks Student before the SSO form');
   assert.strictEqual(typeof utilsMod.saveSession, 'function', 'saveSession must be exported');
   assert.strictEqual(typeof utilsMod.loadSession, 'function', 'loadSession must be exported');
   assert.strictEqual(typeof utilsMod.calculateContrastRatio, 'function', 'calculateContrastRatio must be exported');

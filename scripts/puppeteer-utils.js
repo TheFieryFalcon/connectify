@@ -10,6 +10,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const readline = require('readline');
+const { execFileSync } = require('child_process');
 const puppeteer = require('puppeteer');
 
 const DEFAULT_SESSION_FILE = 'connect_session.json';
@@ -32,7 +33,41 @@ function getChromeExecutablePath() {
 }
 
 /**
+ * macOS: the bundle id of the app in front, so a visible Chrome can hand focus back to it.
+ */
+function frontmostApp() {
+  if (process.platform !== 'darwin') return null;
+  try {
+    const asn = execFileSync('lsappinfo', ['front'], { encoding: 'utf8' }).trim();
+    const info = execFileSync('lsappinfo', ['info', '-only', 'bundleid', asn], { encoding: 'utf8' });
+    return info.match(/"CFBundleIdentifier"="([^"]+)"/)?.[1] || null;
+  } catch {
+    return null;
+  }
+}
+
+function activateApp(bundleId) {
+  if (!bundleId) return;
+  try {
+    execFileSync('open', ['-b', bundleId]);
+  } catch {}
+}
+
+/**
+ * The extension's install handler (update-reload.js) reloads every open Connect tab, which aborted the
+ * first navigation of a fresh profile (ERR_ABORTED, read as an expired session): wait until it has run.
+ */
+async function settleExtension(browser) {
+  await browser.waitForTarget(
+    t => t.type() === 'service_worker' && t.url().startsWith('chrome-extension://'),
+    { timeout: 10000 }
+  ).catch(() => {});
+  await new Promise(r => setTimeout(r, 1000));
+}
+
+/**
  * Launches a Puppeteer browser instance configured for Connectify.
+ * A visible window opens behind the app in front (macOS), so a login prompt never pulls the user away.
  */
 async function launchBrowser(options = {}) {
   const {
@@ -76,7 +111,14 @@ async function launchBrowser(options = {}) {
     launchConfig.executablePath = execPath;
   }
 
+  const front = headless ? null : frontmostApp();
   const browser = await puppeteer.launch(launchConfig);
+  if (front) {
+    // The window can take focus a moment after launch resolves
+    activateApp(front);
+    setTimeout(() => activateApp(front), 1000).unref();
+  }
+  if (loadExtension) await settleExtension(browser);
   if (tempUserDataDir) {
     const origClose = browser.close.bind(browser);
     browser.close = async () => {
@@ -164,6 +206,19 @@ async function isAuthenticated(page) {
 }
 
 /**
+ * Connect's sign-in page first asks who is signing in (Staff / Parent / Student); picks Student.
+ */
+async function chooseStudentLogin(page) {
+  const student = await page.waitForSelector('a.login-btn--student, a[href$="/login/student"]', { timeout: 10000 }).catch(() => null);
+  if (!student) return false;
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {}),
+    student.click()
+  ]);
+  return true;
+}
+
+/**
  * Performs login using credentials, saved session, or interactive browser prompt.
  */
 async function authenticate(page, options = {}) {
@@ -202,6 +257,7 @@ async function authenticate(page, options = {}) {
     });
 
     try {
+      await chooseStudentLogin(page);
       await page.waitForSelector('#ssousername, input[name="username"]', { timeout: 15000 });
       const userSel = await page.$('#ssousername') ? '#ssousername' : 'input[name="username"]';
       const passSel = await page.$('#password') ? '#password' : 'input[name="password"]';
@@ -243,7 +299,7 @@ async function authenticate(page, options = {}) {
   if (interactive || !username) {
     console.log('\n' + '='.repeat(64));
     console.log('INTERACTIVE LOGIN REQUIRED');
-    console.log('A Chrome browser window has opened for you.');
+    console.log('A Chrome window has opened behind your other windows (Student sign-in already chosen).');
     console.log('Please log into Connect in the browser window.');
     console.log('Complete any department SSO, 2FA or security prompts.');
     console.log('The script will automatically detect login and proceed.');
@@ -253,8 +309,7 @@ async function authenticate(page, options = {}) {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     }).catch(() => {});
-
-    await page.bringToFront().catch(() => {});
+    await chooseStudentLogin(page);
 
     const startTime = Date.now();
     let lastLogTime = 0;
@@ -485,6 +540,7 @@ module.exports = {
   DEFAULT_SESSION_FILE,
   getChromeExecutablePath,
   launchBrowser,
+  chooseStudentLogin,
   saveSession,
   loadSession,
   isAuthenticated,
