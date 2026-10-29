@@ -1,8 +1,9 @@
 /**
  * Connectify Outlines: floating Expand All / Collapse All and Back to top
  *
- * Keeps the fixed #cx-expand-btn pair (bottom left) and the #cx-back-to-top-container button after the
- * last subject tile in place across Connect re-renders. Exposes window.ConnectifyOutlineControls.
+ * Keeps the fixed #cx-expand-btn pair (bottom left, under the Jump To row from outline-jump.js) and the
+ * #cx-back-to-top-container button after the last subject tile in place across Connect re-renders.
+ * Exposes window.ConnectifyOutlineControls.
  */
 (() => {
   'use strict';
@@ -56,9 +57,15 @@
     }
   }
 
-  /** Adds the floating Expand All / Collapse All buttons once. */
+  /** Adds the floating Expand All / Collapse All buttons once, with the Jump To row above them. */
   function ensureExpandButtons() {
-    if (document.getElementById('cx-expand-btn') || !window.ConnectifyData) return;
+    const existing = document.getElementById('cx-expand-btn');
+    if (existing) {
+      if (!document.getElementById('cx-jump-subject') && window.ConnectifyOutlineJump) existing.prepend(window.ConnectifyOutlineJump.create());
+      window.ConnectifyOutlineJump?.sync();
+      return;
+    }
+    if (!window.ConnectifyData) return;
     const btnContainer = document.createElement('div');
     btnContainer.id = 'cx-expand-btn';
     Object.assign(btnContainer.style, {
@@ -73,8 +80,10 @@
       btn.onclick = () => window.ConnectifyData.expandAll(isExpand);
       return btn;
     };
+    if (window.ConnectifyOutlineJump) btnContainer.append(window.ConnectifyOutlineJump.create());
     btnContainer.append(createBtn('Expand All', true), createBtn('Collapse All', false));
     document.body.appendChild(btnContainer);
+    window.ConnectifyOutlineJump?.sync();
   }
 
   window.ConnectifyOutlineControls = { syncBackToTop, ensureExpandButtons, scrollToTop };

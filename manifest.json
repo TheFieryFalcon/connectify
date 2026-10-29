@@ -78,6 +78,7 @@
             "src/goals/goal-list.css",
             "src/goals/goal-bars.css",
             "src/goals/goal-forecast.css",
+            "src/atar/outline-jump.css",
             "src/goals/goal-celebrate.css"
          ],
          "js": [
@@ -186,6 +187,7 @@
             "src/predictor/predictor-grade-view.js",
             "src/predictor/predictor-atar-view.js",
             "src/predictor/predictor-ui.js",
+            "src/atar/outline-jump.js",
             "src/atar/outline-controls.js",
             "src/atar/atar-features.js",
             "src/sidebar/sidebar-handle-position.js",

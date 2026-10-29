@@ -162,7 +162,7 @@ const SPLIT_PARTS = {
   'target-atar-ui.js': ['target-ui-helpers.js', 'target-atar-breakdown.js', 'target-atar-ui.js'],
   'target-grade-ui.js': ['target-ui-helpers.js', 'target-grade-ui.js'],
   'atar-ui.js': ['target-ui-helpers.js', 'grade-estimate.js', 'grade-estimate-ui.js', 'atar-ui-markup.js', 'atar-ui.js'],
-  'atar-features.js': ['outline-controls.js', 'atar-features.js'],
+  'atar-features.js': ['outline-jump.js', 'outline-controls.js', 'atar-features.js'],
   'atar.css': ['atar.css', 'atar-compact.css', 'atar-planner.css', 'atar-estimator.css'],
   'progress-chart.js': ['school-terms.js', 'progress-semester-divider.js', 'progress-chart.js', 'progress-week-editor.js'],
   'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
@@ -12925,6 +12925,58 @@ runTest('Test 281: Prediction panels on unmarked tasks a goal covers show the go
   assert.ok(dialogCss.includes(':is(.cx-goal-tier, .cx-goal-hbar, .cx-goal-target__value)[data-tier="hard"] { --cx-goal-tier: #f97316; }'), 'tier colours have one source');
   assert.ok(cssHas(css, 'border-color: var(--cx-border, #3b6088) !important;'), 'its hairline follows the card\'s in dark themes');
   localStorage.clear();
+});
+
+runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once, in page order, above Expand All / Collapse All', () => {
+  const prev = { Option: global.Option, filter: window.ConnectifySemesterFilter, newGrade: window.ConnectifyNewGrade, jumpMod: window.ConnectifyOutlineJump };
+  global.Option = function (text, value) { const o = new MockElement('option'); o.textContent = text; o.value = value; return o; };
+  window.ConnectifySemesterFilter = { currentSemester: () => 2 };
+  const jumped = [];
+  window.ConnectifyNewGrade = { jumpToSubject: card => jumped.push(card) };
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/outline-jump.js'), 'utf8'));
+  const J = window.ConnectifyOutlineJump;
+  const page = new MockElement('div');
+  const cards = ['Year 12 Physics ATAR - Semester 1', 'English ATAR - Semester 1', 'Year 12 Physics ATAR - Semester 2', 'Biology - Semester 1', 'Economics - Semester 2']
+    .map(title => makeOutlineCard(title));
+  cards[4].classList.add('cx-semester-hidden');
+  cards.forEach(c => page.appendChild(c));
+  const origQSA = document.querySelectorAll;
+  document.querySelectorAll = sel => (sel.includes('eds-c-tile') ? page.querySelectorAll(sel) : origQSA(sel));
+  try {
+    assert.deepStrictEqual(J.subjects().map(s => s.name), ['Physics', 'English', 'Biology'],
+      'cleaned names (no year level, ATAR or semester), each once, in page order; hidden outlines left out');
+    assert.strictEqual(J.subjects()[0].card, cards[2], 'a subject with both outlines shown jumps to this semester\'s');
+
+    const row = J.create();
+    const select = row.querySelector('#cx-jump-subject-select');
+    const btn = row.querySelector('#cx-jump-subject-btn');
+    assert.ok(select.tagName === 'SELECT' && btn.tagName === 'BUTTON' && row.children[0] === select, 'the dropdown, then the button');
+    assert.strictEqual(btn.textContent, 'Jump To');
+    const origById = document.getElementById;
+    document.getElementById = id => row.querySelector(`#${id}`) || origById(id);
+    J.sync();
+    document.getElementById = origById;
+    assert.deepStrictEqual(select.children.map(o => o.textContent), ['Physics', 'English', 'Biology'], 'the dropdown lists them in page order');
+    select.value = 'English';
+    btn.onclick();
+    assert.deepStrictEqual(jumped, [cards[1]], 'Jump To expands, scrolls to and highlights the chosen subject\'s card');
+
+    const controls = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/outline-controls.js'), 'utf8');
+    assert.ok(controls.includes("if (window.ConnectifyOutlineJump) btnContainer.append(window.ConnectifyOutlineJump.create());\n    btnContainer.append(createBtn('Expand All', true), createBtn('Collapse All', false));"),
+      'the Jump To row sits above Expand All and Collapse All');
+    const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
+    const outlines = manifest.content_scripts.find(g => g.js?.includes('src/atar/outline-controls.js'));
+    assert.ok(outlines.js.indexOf('src/atar/outline-jump.js') === outlines.js.indexOf('src/atar/outline-controls.js') - 1, 'loaded just before the outline controls');
+    assert.ok(outlines.css.includes('src/atar/outline-jump.css'));
+    const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/outline-jump.css'), 'utf8');
+    assert.ok(cssHas(css, '.connectea-dark #cx-jump-subject .cx-jump-subject-select { background-color: var(--cx-input-bg, #141a22) !important;'), 'dark themes use the input tokens');
+  } finally {
+    document.querySelectorAll = origQSA;
+    Object.assign(global, { Option: prev.Option });
+    window.ConnectifySemesterFilter = prev.filter;
+    window.ConnectifyNewGrade = prev.newGrade;
+    window.ConnectifyOutlineJump = prev.jumpMod;
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

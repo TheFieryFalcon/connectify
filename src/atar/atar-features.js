@@ -155,6 +155,7 @@
     scheduler.onMutations(() => {
       if (!hasAutoExpanded) checkStartupAutoExpand();
       syncBackToTop();
+      window.ConnectifyOutlineJump?.sync();
       if (!document.getElementById('cx-expand-btn') && window.ConnectifyData) syncFeatures();
     }, { filter: r => r.type === 'childList', mute: true });
 

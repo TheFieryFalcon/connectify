@@ -100,6 +100,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 68. `src/predictor/predictor-grade-view.js` (subject grade predictor sub-tab renderer)
 69. `src/predictor/predictor-atar-view.js` (predictor panel shell and ATAR view)
 70. `src/predictor/predictor-ui.js` (predictor drawer controller)
+70b. `src/atar/outline-jump.js` (Jump To subject dropdown above Expand/Collapse All)
 71. `src/atar/outline-controls.js` (floating Expand/Collapse All and Back to top)
 72. `src/atar/atar-features.js` (tools coordinator and startup auto-expand)
 73. `src/sidebar/sidebar-handle-position.js` (handle anchoring and viewport centring maths)
