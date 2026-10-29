@@ -4,7 +4,10 @@
  * Connect replaced its Vaadin outlines (October 2026) with Angular cards (cnt-sao-card) and canvas boxplots.
  * Each card Connect shows is drawn again in the old markup (legacy-outlines-markup.js) from Connect's API
  * record (outline-api.js) inside #cx-legacy-outlines, in Connect's order, and Connect's own card is hidden
- * (.cx-legacy-hidden); Connect's filter menu still decides which cards are shown. Show / Hide Details adds
+ * (.cx-legacy-hidden); Connect's filter menu still decides which cards are shown. Connect renders nothing
+ * until it has fetched every boxplot one by one (~13s), so until its cards or filter bar appear every outline
+ * is drawn in the API's order (Connect's own) into Connect's zone, boxplots filling in as they arrive
+ * (ConnectifyOutlineApi.drawable). Show / Hide Details adds
  * and removes the task rows as Vaadin did, so Expand All, Jump To, the cohort panels and every other
  * outline feature work on them unchanged. Clicking a teacher or school forwards to Connect's own link.
  * Cards without a record, or a page where the API failed, keep Connect's new look.
@@ -27,8 +30,12 @@
   const titleOf = card => normalize(card.querySelector('mat-card-title')?.textContent);
   // Angular's "col-12 mb-3" wrapper around each card
   const slotOf = card => card.closest('.col-12') || card;
+  // Connect shows only its progress bar until its cards arrive, with the filter bar above them
+  const connectPending = () => !document.querySelector('cnt-sao-card, cnt-category-bar');
+  const zone = () => document.getElementById('ng-zone__student-assessment-outline') || document.querySelector('cnt-progress-bar')?.parentElement || null;
 
-  function ensureHost(anchor) {
+  /** The host, placed in parent before the given node (or last). */
+  function ensureHost(parent, before) {
     let host = document.getElementById(HOST_ID);
     if (!host) {
       host = document.createElement('div');
@@ -40,7 +47,7 @@
         '<div class="v-csslayout v-layout v-widget eds-s-is-first v-csslayout-eds-s-is-first cvr-u-margin-bottom--xs v-csslayout-cvr-u-margin-bottom--xs cx-legacy-list">' +
         '</div></div></div></div>';
     }
-    if (host.nextElementSibling !== anchor) anchor.parentElement.insertBefore(host, anchor);
+    if (host.parentElement !== parent || host.nextElementSibling !== before) parent.insertBefore(host, before);
     return host;
   }
 
@@ -53,27 +60,45 @@
     return slot;
   }
 
-  /** Draws every card Connect shows that has an API record, in Connect's order, and hides Connect's copy. */
+  /**
+   * Draws every card Connect shows that has an API record, in Connect's order, and hides Connect's copy;
+   * before Connect has rendered, every record in the API's order.
+   */
+  let retry = null;
   function sync() {
-    const api = outlineApi();
-    if (!api?.isLoaded?.() || !markup() || !window.ConnectifyUtils.isOutlinesPage()) return;
-    const byTitle = new Map(api.records().map(r => [r.title, r]));
-    const shown = [];
-    for (const card of angularCards()) {
-      const record = byTitle.get(titleOf(card));
-      const slot = slotOf(card);
-      if (slot.classList.contains(HIDDEN) !== Boolean(record)) slot.classList.toggle(HIDDEN, Boolean(record));
-      if (record) shown.push({ card, record });
+    const records = outlineApi()?.drawable?.() || [];
+    if (!records.length || !markup() || !window.ConnectifyUtils.isOutlinesPage()) return;
+    let shown = [];
+    let parent = null;
+    let before = null;
+    if (connectPending()) {
+      parent = zone();
+      if (!parent) return;
+      shown = records;
+    } else {
+      const byTitle = new Map(records.map(r => [r.title, r]));
+      for (const card of angularCards()) {
+        const record = byTitle.get(titleOf(card));
+        const slot = slotOf(card);
+        if (slot.classList.contains(HIDDEN) !== Boolean(record)) slot.classList.toggle(HIDDEN, Boolean(record));
+        if (!record) continue;
+        if (!before) { before = slot; parent = slot.parentElement; }
+        shown.push(record);
+      }
     }
     if (!shown.length) { document.getElementById(HOST_ID)?.remove(); return; }
-    const list = ensureHost(slotOf(shown[0].card)).querySelector('.cx-legacy-list');
+    const list = ensureHost(parent, before).querySelector('.cx-legacy-list');
     const existing = new Map(Array.from(list.children, el => [el.dataset.cxOutline, el]));
+    // Expand All holds the headings it is about to click: a changed tile waits until it has finished
+    const holding = Boolean(window.ConnectifyIsBulkExpanding);
     let previous = null;
-    for (const { record } of shown) {
+    for (const record of shown) {
       let slot = existing.get(record.title);
       existing.delete(record.title);
-      // A reloaded record (refresh) is drawn afresh; an unchanged one keeps its panels and state
-      if (slot && slot.firstElementChild?._cxOutline !== record) { slot.remove(); slot = null; }
+      // A changed record (a boxplot arriving, a refresh) is drawn afresh; an unchanged one keeps its panels and state
+      if (slot && slot.firstElementChild?._cxOutline !== record) {
+        if (holding) { clearTimeout(retry); retry = setTimeout(sync, 500); } else { slot.remove(); slot = null; }
+      }
       if (!slot) {
         slot = buildSlot(record);
         if (expanded.has(record.title)) { expanded.delete(record.title); queueMicrotask(() => setExpanded(slot.firstElementChild, true)); }
@@ -141,8 +166,9 @@
 
   // Connect adding, removing or filtering its cards (or dropping the host while re-rendering)
   const touchesCards = m => m.type === 'childList' && [...m.addedNodes, ...m.removedNodes].some(n => n.nodeType === 1 &&
-    (n.id === HOST_ID || n.matches?.('cnt-sao-card, .col-12') || n.querySelector?.('cnt-sao-card')));
+    (n.id === HOST_ID || n.matches?.('cnt-sao-card, cnt-category-bar, .col-12') || n.querySelector?.('cnt-sao-card, cnt-category-bar')));
   window.ConnectifyScheduler?.onMutations?.(sync, { filter: touchesCards, mute: false });
+  window.addEventListener('connectify-outlines-preview', sync);
   window.addEventListener('connectify-outlines-loaded', sync);
   sync();
 

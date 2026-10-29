@@ -12984,7 +12984,7 @@ runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once
   }
 });
 
-runTest('Test 283: Outlines come from Connect\'s API: records number tasks as the old rows did and fill every cache without reading the page', async () => {
+runTest('Test 283: Outlines come from Connect\'s API: records number tasks as the old rows did and fill every cache without reading the page; they are drawable before every boxplot arrives', async () => {
   const prev = { fetch: global.fetch, api: window.ConnectifyOutlineApi, parse: window.ConnectifyApiParse, markup: window.ConnectifyLegacyMarkup, cookie: document.cookie };
   const task = (taskId, taskType, taskWhen, taskDescription, mark, maximumMark, weightedMark, weightedMaximumMark) =>
     ({ taskId, taskType, taskWhen, taskDescription, showTaskChart: true, mark, maximumMark, weightedMark, weightedMaximumMark });
@@ -13008,9 +13008,13 @@ runTest('Test 283: Outlines come from Connect\'s API: records number tasks as th
     assessmentOutlines: { status: 'SUCCESS', items: [{ semester1Groups: [group(1, 1, s1Tasks, '83.3%', 'A')], semester2Groups: [group(2, 2, s2Tasks, '84.9%', '')] }] }
   };
   const calls = [];
+  // Group 2's boxplot is held back until the test has looked at the outlines drawn before it
+  let release = null;
+  const held = new Promise(r => { release = r; });
   global.fetch = async (url, init) => {
     calls.push({ url, init });
     const route = url.replace('/connectapi/rest/api/v1/app/student/', '');
+    if (route.startsWith('assessmentOutlines/chart') && JSON.parse(init.body).assessmentGroupId === 2) await held;
     const json = route.startsWith('assessmentOutlines/chart')
       ? { status: 'SUCCESS', items: [charts[JSON.parse(init.body).assessmentGroupId]] }
       : replies[route.split('?')[0]];
@@ -13030,8 +13034,16 @@ runTest('Test 283: Outlines come from Connect\'s API: records number tasks as th
     const api = window.ConnectifyOutlineApi;
     // Other tests' cleanups run while this one awaits: keep this test's modules in place
     const mine = { ConnectifyOutlineApi: api, ConnectifyApiParse: window.ConnectifyApiParse, ConnectifyLegacyMarkup: window.ConnectifyLegacyMarkup };
-    const records = await api.load();
+    const loading = api.load();
+    for (let i = 0; i < 200 && !api.drawable()[0]?.stats; i++) await new Promise(r => setTimeout(r, 0));
+    const early = api.drawable();
+    assert.ok(!api.isLoaded() && early.length === 2 && early[0].stats && early[1].stats === null,
+      'both outlines are drawable before every boxplot arrives, each boxplot filled in as its chart lands; the caches wait');
+    release();
+    const records = await loading;
     Object.assign(window, mine);
+    assert.ok(records[0] === early[0] && records[1] !== early[1] && api.drawable() === records,
+      'a record a later chart leaves unchanged keeps its object, so legacy-outlines.js draws only the tiles that changed');
     // (other async tests swap the mock document between requests, so the cookie is checked on the first)
     assert.ok(calls.length === 4 && calls.every(c => c.init.method === 'POST' && c.init.credentials === 'same-origin' && 'X-XSRF-TOKEN' in c.init.headers) &&
       calls[0].init.headers['X-XSRF-TOKEN'] === 'tok=1',
@@ -13044,6 +13056,9 @@ runTest('Test 283: Outlines come from Connect\'s API: records number tasks as th
     assert.deepStrictEqual(records[1].outlines[0].tasks[0].stats, [14, 56, 68, 79, 100],
       'a Semester 1 task on the Semester 2 outline takes its boxplot from Semester 1\'s chart, float noise rounded away');
     assert.strictEqual(records[1].outlines[0].tasks[2].stats, null, 'an unmarked task has no boxplot');
+    const again = await api.refresh();
+    Object.assign(window, mine);
+    assert.ok(again !== records && again.every((r, i) => r === records[i]), 'a reload with nothing changed draws nothing again');
 
     // The same tasks as the old rows showed them: identical ids, so caches, overrides and predictions carry on
     const P = window.ConnectifyApiParse;
@@ -13120,6 +13135,18 @@ runTest('Test 284: Connect\'s new outline cards are drawn again in the old Vaadi
     'each card Connect shows (its filter decides) with an API record is drawn and Connect\'s copy hidden');
   assert.ok(mount.includes("section.insertAdjacentHTML('beforeend', markup().detailsPanel(record))") && mount.includes('else panel.remove();'),
     'Show / Hide Details adds and removes the task rows, as Vaadin did');
+  // Connect fetches its boxplots one at a time and shows nothing for ~13s: the outlines are drawn from the API at once
+  assert.ok(mount.includes("const connectPending = () => !document.querySelector('cnt-sao-card, cnt-category-bar');") &&
+    mount.includes("document.getElementById('ng-zone__student-assessment-outline')") && mount.includes('shown = records;'),
+    'before Connect has rendered, every outline is drawn in the API\'s order (Connect\'s own) into Connect\'s zone');
+  assert.ok(mount.includes("const records = outlineApi()?.drawable?.() || [];") && mount.includes("window.addEventListener('connectify-outlines-preview', sync);"),
+    'outlines are drawn before every boxplot has arrived and drawn again as each lands');
+  assert.ok(mount.includes('const holding = Boolean(window.ConnectifyIsBulkExpanding);') && mount.includes('retry = setTimeout(sync, 500)'),
+    'a tile Expand All is about to click is not replaced until the run ends');
+  const features = read('atar/atar-features.js');
+  assert.ok(features.includes('if (window.ConnectifyOutlineApi && !window.ConnectifyOutlineApi.isSettled()) return;') &&
+    features.includes("['connectify-outlines-loaded', 'connectify-outlines-failed'].forEach(type => window.addEventListener(type, () => checkStartupAutoExpand()));"),
+    'startup auto-expand opens the outlines once every boxplot has arrived, not tiles that will be drawn again');
 
   eval(read('assessment/legacy-outlines-markup.js'));
   const M = window.ConnectifyLegacyMarkup;

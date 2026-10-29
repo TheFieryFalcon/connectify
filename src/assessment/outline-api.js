@@ -8,6 +8,10 @@
  * CONNECT_XSRF cookie as X-XSRF-TOKEN, as Connect's own do. The response becomes one record per outline
  * card ({ apiOutline: true, title, subject, semester, ... }): the caches read these instead of the page
  * (assessment-api-parse.js) and the old outline markup is drawn from them (legacy-outlines.js).
+ * Connect itself fetches the boxplots one at a time and shows nothing until the last (~13s), so the outlines
+ * are drawable (drawable(), connectify-outlines-preview) as soon as they arrive, each boxplot filled in as its
+ * chart lands; the caches wait for the whole load. A record whose content is unchanged keeps its object, so
+ * only tiles that changed are drawn again.
  * Loads once per outlines page; fires connectify-outlines-loaded / connectify-outlines-failed.
  * Exposes window.ConnectifyOutlineApi.
  */
@@ -104,6 +108,8 @@
   }
 
   let records = null;
+  // Records as far as the boxplots have arrived, for drawing only (the caches read records)
+  let preview = null;
   let version = 0;
   let pending = null;
   let failed = null;
@@ -118,6 +124,17 @@
     // One chart call per group; a Semester 2 outline lists Semester 1 tasks whose boxplots come with Semester 1's
     const chartFor = new Map();
     const taskCharts = new Map();
+    const build = () => {
+      // The last whole load too: a reload's first build, before any chart, must not replace its records
+      const known = [...(records || []), ...(preview || [])];
+      preview = groups.map(g => cardRecord(g, chartFor, taskCharts)).filter(r => r.subject).map(r => {
+        const json = JSON.stringify(r);
+        return known.find(old => old.title === r.title && JSON.stringify(old) === json) || r;
+      });
+      window.dispatchEvent(new CustomEvent('connectify-outlines-preview'));
+      return preview;
+    };
+    build();
     await Promise.all(groups.map(async group => {
       if (!group.assessmentGroupId || !group.chartAssessmentOutlineId) return;
       try {
@@ -129,11 +146,12 @@
           const plot = boxplot(entry);
           if (plot) taskCharts.set(String(taskId), plot);
         }
+        build();
       } catch (err) {
         console.warn('Connectify: a boxplot request failed', err);
       }
     }));
-    return groups.map(g => cardRecord(g, chartFor, taskCharts)).filter(r => r.subject);
+    return build();
   }
 
   /** Loads (or with force, reloads) every outline; resolves to the records, or null when Connect refused. */
@@ -162,6 +180,8 @@
     load,
     refresh: () => load({ force: true }),
     records: () => records || [],
+    /** What legacy-outlines.js draws: the records, else the outlines as far as their boxplots have arrived. */
+    drawable: () => records || preview || [],
     isLoaded: () => Boolean(records),
     // Loaded or given up: the grade check waits for this instead of the page's summary marks
     isSettled: () => Boolean(records || failed),
