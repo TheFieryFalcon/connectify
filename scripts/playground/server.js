@@ -68,9 +68,21 @@ const server = http.createServer((req, res) => {
 });
 
 if (require.main === module) {
-  server.listen(PORT, '127.0.0.1', () => {
-    console.log(`Connectify playground: http://localhost:${PORT}${OUTLINES_PATH}`);
+  const url = `http://localhost:${PORT}${OUTLINES_PATH}`;
+  server.on('error', err => {
+    if (err.code !== 'EADDRINUSE') throw err;
+    // Port taken: either a playground is already running there (open it), or something else is
+    http.get(`http://127.0.0.1:${PORT}/playground/model.js`, res => {
+      res.resume();
+      if (res.statusCode === 200) console.log(`The Connectify playground is already running: ${url}`);
+      else console.error(`Port ${PORT} is in use by another program. Try: npm run playground -- --port ${PORT + 1}`);
+      process.exit(res.statusCode === 200 ? 0 : 1);
+    }).on('error', () => {
+      console.error(`Port ${PORT} is in use. Try: npm run playground -- --port ${PORT + 1}`);
+      process.exit(1);
+    });
   });
+  server.listen(PORT, '127.0.0.1', () => console.log(`Connectify playground: ${url}`));
 }
 
 module.exports = { page, outlineScripts, OUTLINES_PATH };
