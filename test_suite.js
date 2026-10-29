@@ -8393,7 +8393,8 @@ runTest('Test 183: Expand All adds every expanded subject to a cache that alread
     cards = [];
     assert.deepStrictEqual(names(), ['12 Chemistry ATAR', '12 Philosophy and Ethics ATAR', '12 Physics ATAR'], 'the persisted cache keeps every subject');
     const src = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/cache-versions.js'), 'utf8');
-    assert.ok(src.includes("RESULTS: 'v13_20261028_results'"), 'caches holding a same-named task\'s boxplot are invalidated');
+    const resultsVersion = Number(src.match(/RESULTS: 'v(\d+)_/)?.[1]);
+    assert.ok(resultsVersion >= 13, 'caches holding a same-named task\'s boxplot are invalidated');
   } finally {
     document.querySelectorAll = origQSA;
     mockLocalStorage.clear();
@@ -8677,6 +8678,11 @@ runTest('Test 191: Semester 2 starts at canonical school week 17 (Term 2 Week 7,
   assert.strictEqual(taskSemester(2, 'Term 1'), 1, 'a bare Term 1 caption is Semester 1');
   assert.strictEqual(taskSemester(2, 'Term 2'), 2, 'a bare Term 2 caption spans both semesters, so the card decides');
   assert.strictEqual(taskSemester(2, 'Week 4'), 2, 'a week with no term is ambiguous, so the card decides');
+  assert.strictEqual(taskSemester(2, 'Thur 5th March'), 1, 'a date caption on a Semester 2 outline is placed by its own week (Methods)');
+  assert.strictEqual(taskSemester(2, 'Thur 21st May'), 1);
+  assert.strictEqual(taskSemester(2, 'Thur 27th August'), 2);
+  assert.strictEqual(taskSemester(1, 'Thur 27th August'), 1, 'a dated task is never later than its own card');
+  assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/cache-versions.js'), 'utf8').includes("RESULTS: 'v14_20261029_results'"), 'cached tasks placed in the card\'s semester are re-read');
   assert.strictEqual(taskSemester(1, 'Term 3, Week 2'), 1, 'a task is never later than its own card');
   assert.strictEqual(taskSemester(2, 'Term 3, Week 2', 5), 1, 'a week override wins over the caption');
   if (savedTerms === null) localStorage.removeItem('connectify:school_terms'); else localStorage.setItem('connectify:school_terms', savedTerms);

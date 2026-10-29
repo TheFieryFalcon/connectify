@@ -127,13 +127,13 @@
 
   /**
    * The semester a task belongs to. Semester 2 outlines also list the Semester 1 tasks, so the card title
-   * alone is not enough: a week override (order) or a "Term N, Week W" caption decides first (a bare
-   * "Term 1" / "Term 3|4" too; Term 2 spans both), never later than the card's own semester.
+   * alone is not enough: a week override (order), a "Term N, Week W" caption or a date caption ("Thur 5th
+   * March") decides first (a bare "Term 1" / "Term 3|4" too; Term 2 spans both), never later than the card's own semester.
    */
   function taskSemester(cardSemester, caption, overrideOrder = null) {
     const card = Number(cardSemester) === 2 ? 2 : 1;
     const text = String(caption || '');
-    const order = Number.isFinite(overrideOrder) ? overrideOrder : (TERM_AND_WEEK.test(text) ? orderHint(text) : null);
+    const order = Number.isFinite(overrideOrder) ? overrideOrder : (TERM_AND_WEEK.test(text) ? orderHint(text) : dateOrder(text));
     let semester = null;
     if (Number.isFinite(order)) semester = order < semesterTwoOrder() ? 1 : 2;
     else {
