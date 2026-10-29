@@ -329,6 +329,7 @@
             "https://login.det.wa.edu.au/*"
          ],
          "js": [
+            "src/system/auto-login-credentials.js",
             "src/system/auto-login.js"
          ],
          "run_at": "document_end"

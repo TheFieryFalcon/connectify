@@ -7757,11 +7757,50 @@ runTest('Test 162: Auto-login only fires for a saved password or browser autofil
   // Chromium (Chrome, Dia) matches :autofill while it still withholds the password value: submitting then sends an empty password
   assert.ok(!/['"]:(-webkit-)?autofill['"]/.test(js) && js.includes("const isFilled = el => el.value.trim() !== '';"),
     'auto-login must wait for readable credential values, never treat :autofill alone as filled');
-  assert.ok(js.includes('isFilled(userField) && isFilled(passField)'), 'auto-login must require both credential fields to be filled');
+  assert.ok(js.includes('if (!isFilled(userField) || !isFilled(passField)) return;'), 'auto-login must require both credential fields to be filled');
   assert.ok(js.includes("passField.addEventListener('input', attemptLogin)"), 'the browser releasing an autofilled value must retry the login');
   assert.ok(js.includes("field.addEventListener('keydown', markTyped)") && js.includes("field.addEventListener('paste', markTyped)"),
     'typing or pasting in a credential field must mark the form as user-entered');
   assert.ok(js.includes("=== false || userTyped) return;"), 'auto-login must not fire once the user typed');
+});
+
+runTest('Test 278: In Chromium, auto-login signs in with the password saved in the browser, which the page never sees autofilled', async () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const entry = manifest.content_scripts.find(c => (c.js || []).includes('src/system/auto-login.js'));
+  assert.deepStrictEqual(entry.js, ['src/system/auto-login-credentials.js', 'src/system/auto-login.js'], 'the credential reader loads first');
+  const credSrc = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login-credentials.js'), 'utf8');
+  const loginSrc = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login.js'), 'utf8');
+  const run = async ({ flags = {}, cred = { type: 'password', id: 'student', password: 'pw' }, chromium = true, typeFirst = false } = {}) => {
+    const field = id => ({ id, value: '', listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; } });
+    const fields = { ssousername: field('ssousername'), password: field('password') };
+    let clicks = 0;
+    let asked = null;
+    fields.login = { value: 'Log in', style: {}, parentElement: { appendChild() {} }, addEventListener() {}, click: () => { clicks++; } };
+    const terms = { checked: false };
+    const window = chromium ? { PasswordCredential: function () {} } : {};
+    const sandbox = {
+      window,
+      navigator: { credentials: { get: opts => { asked = opts; return new Promise(r => setTimeout(() => r(cred), 5)); } } },
+      chrome: { storage: { local: { get: (keys, cb) => cb(flags), set() {}, remove() {} } } },
+      document: { getElementById: id => fields[id] || null, querySelector: () => terms, createElement: () => ({ style: {}, appendChild() {}, addEventListener() {} }), createTextNode: () => ({}) },
+      setInterval: () => 0, clearInterval() {}, setTimeout, Date, Promise
+    };
+    require('vm').runInNewContext(credSrc, sandbox);
+    require('vm').runInNewContext(loginSrc, sandbox);
+    if (typeFirst) fields.password.listeners.keydown();
+    await new Promise(r => setTimeout(r, 20));
+    return { clicks, asked, user: fields.ssousername.value, pass: fields.password.value, terms: terms.checked };
+  };
+  const signedIn = await run();
+  assert.strictEqual(signedIn.clicks, 1, 'the saved credential logs in');
+  assert.ok(signedIn.user === 'student' && signedIn.pass === 'pw' && signedIn.terms, 'fills both fields and accepts the terms');
+  assert.ok(signedIn.asked.password === true && signedIn.asked.mediation === 'optional', 'Chrome signs in at once when it can, else shows its account chooser');
+  assert.strictEqual((await run({ flags: { 'cx-autologin-enabled': false } })).asked, null, 'Auto-login off: the password manager is never asked');
+  assert.strictEqual((await run({ flags: { 'cx-manual-logout': true } })).asked, null, 'never after a manual logout');
+  assert.strictEqual((await run({ flags: { 'cx-last-autologin': Date.now() - 5000 } })).clicks, 0, 'never within 30s of a login');
+  assert.strictEqual((await run({ typeFirst: true })).clicks, 0, 'typing before the credential arrives leaves the form to the student');
+  assert.strictEqual((await run({ cred: null })).clicks, 0, 'no saved password (or the chooser cancelled): nothing is submitted');
+  assert.strictEqual((await run({ chromium: false })).asked, null, 'Firefox has no PasswordCredential: its autofill path is used');
 });
 
 runTest('Test 277: With Auto-login on, Connect\'s sign-in chooser presses Student, also after the session expired, but never after a logout', async () => {

@@ -104,29 +104,42 @@
       // only a readable value counts, and the release fires 'input', which retries the login
       const isFilled = el => el.value.trim() !== '';
 
+      let submitted = false;
+      const submitLogin = (user, pass) => {
+        const userField = document.getElementById('ssousername');
+        const passField = document.getElementById('password');
+        const termsBox = document.querySelector('input[name="acceptterms"]');
+        const loginBtn = document.getElementById('login');
+        if (submitted || userTyped || !userField || !passField || !loginBtn) return;
+        if (user !== undefined) {
+          userField.value = user;
+          passField.value = pass;
+        }
+        if (!isFilled(userField) || !isFilled(passField)) return;
+        submitted = true;
+        if (termsBox && !termsBox.checked) {
+          termsBox.checked = true;
+        }
+
+        storageSet({ 'cx-last-autologin': Date.now() });
+        loginBtn.value = 'Logging in...';
+        loginBtn.style.opacity = '0.8';
+        loginBtn.click();
+      };
+
       const attemptLogin = () => {
         storageGet(['cx-autologin-enabled'], (res) => {
             if (res['cx-autologin-enabled'] === false || userTyped) return;
-            
-            const userField = document.getElementById('ssousername');
-            const passField = document.getElementById('password');
-            const termsBox = document.querySelector('input[name="acceptterms"]');
-            const loginBtn = document.getElementById('login');
-            
-            if (userField && passField && loginBtn) {
-              if (isFilled(userField) && isFilled(passField)) {
-                if (termsBox && !termsBox.checked) {
-                  termsBox.checked = true;
-                }
-                
-                storageSet({ 'cx-last-autologin': Date.now() });
-                loginBtn.value = 'Logging in...';
-                loginBtn.style.opacity = '0.8';
-                loginBtn.click();
-              }
-            }
+            submitLogin();
         });
       };
+
+      // Chromium never releases an autofilled password untouched: ask its password manager for the saved one
+      if (result['cx-autologin-enabled'] !== false) {
+          window.ConnectifyAutoLoginCredentials?.saved().then(cred => {
+              if (cred) submitLogin(cred.id, cred.password);
+          });
+      }
 
       // 3. Attempt instantly
       attemptLogin();

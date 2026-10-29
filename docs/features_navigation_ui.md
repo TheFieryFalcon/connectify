@@ -31,7 +31,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Source Module**: [`auto-login.js`](file:///Users/uwong/Downloads/2.1.14_0/auto-login.js)
 - **DOM Insertion**: DET Single Sign-On page (`https://login.det.wa.edu.au/*`), adjacent to `#login`.
 - **UI Appearance**: Checkbox toggle labelled `[x] Auto-login` with a red status badge (`(Paused: logged out)`) when safety guards are active.
-- **Functionality**: Presses Student on Connect's Staff / Parent / Student sign-in chooser (`auto-login-student.js`), automatically checks the mandatory terms box, submits saved credentials (also straight after an expired session), pauses upon manual logout, and enforces 30-second rapid-loop protection.
+- **Functionality**: Presses Student on Connect's Staff / Parent / Student sign-in chooser (`auto-login-student.js`), automatically checks the mandatory terms box, submits saved credentials (also straight after an expired session; in Chrome, which hides an autofilled password from the page until it is touched, the browser's saved password via the Credential Management API, `auto-login-credentials.js`), pauses upon manual logout, and enforces 30-second rapid-loop protection.
 
 ### 4. Floating Tools Drawer & Sidebar
 - **Source Modules**: `src/sidebar/` (`sidebar.js` and its shell, tools, page notice, handle and hover modules) and `src/sidebar/styles/`

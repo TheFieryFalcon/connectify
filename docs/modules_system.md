@@ -78,6 +78,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
   - Prevents rapid looping via a 30-second loop guard.
   - `auto-login-student.js` (`https://connect.det.wa.edu.au/login`, Connect's Staff / Parent / Student chooser): with Auto-login on, presses Student, also after an expired session, but not after a manual logout or a login in the last 30s; leaves the flags for `auto-login.js`.
   - Fires only for a saved password / browser autofill once both values are readable (Chromium matches `:autofill` before releasing the password to the page; the release fires `input`, which retries); typing or pasting in a credential field disables it for that page.
+  - `auto-login-credentials.js` (`ConnectifyAutoLoginCredentials.saved()`, loaded first): Chromium keeps an autofilled password from the page and from a submitted form until the page is touched, so there the saved password comes from the Credential Management API (`navigator.credentials.get({ password: true, mediation: 'optional' })`: at once when Chrome's auto sign-in allows it, else after the student picks the account in Chrome's chooser) and is filled and submitted; Firefox (no `PasswordCredential`) uses its readable autofill.
 
 ---
 
