@@ -12751,6 +12751,63 @@ runTest('Test 276: Feed cards keep Connect\'s white class thumbnail and item ico
   assert.ok(!/#cx-/.test(generic.split('/* Angular Material Accordions')[0]), 'the generic icon rule carries no id weight that could tie it');
 });
 
+runTest('Test 279: The playground feeds Connectify classes as the scraper would cache them, with every outlines-page script', () => {
+  const model = require('./scripts/playground/model.js');
+  const sandbox = { window: {} };
+  vm.runInNewContext(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/assessment-parse-helpers.js'), 'utf8'), sandbox);
+  const helpers = sandbox.window.ConnectifyParseHelpers;
+
+  let seed = 0.37;
+  const rand = () => (seed = (seed * 9301 + 49297) % 233280 / 233280);
+  const first = model.generateClass([], rand);
+  const second = model.generateClass([first.name], rand);
+  assert.notStrictEqual(first.name, second.name, 'each new class gets an unused subject');
+  for (const cls of [first, second]) {
+    for (const semester of [1, 2]) assert.strictEqual(cls.tasks.filter(t => t.semester === semester).length, 2, 'two tasks per semester');
+    assert.strictEqual(model.weightTotal(cls), 100, 'annual weights total 100, as Target Grade needs');
+    assert.strictEqual(new Set(cls.tasks.map(t => t.name)).size, 4, 'task names are generated and distinct');
+  }
+
+  first.tasks[0].score = 80;
+  first.tasks[2].score = 60;
+  const { subjects, registry } = model.toConnectify({ classes: [first] }, helpers);
+  const tasks = subjects[first.name];
+  const taskOne = first.tasks[0];
+  assert.strictEqual(tasks[0].id, `${JSON.stringify([[taskOne.type, `Term ${taskOne.term}, Week ${taskOne.week}`, taskOne.name], 100])}:0`,
+    'ids use the parser\'s format (labels and out-of mark, then the occurrence)');
+  assert.deepStrictEqual([tasks[0].pending, tasks[1].pending, tasks[1].score], [false, true, null], 'a blank mark is a pending task');
+  assert.deepStrictEqual(tasks.map(t => t.semester), [1, 1, 2, 2], 'each task\'s semester comes from its week');
+  assert.strictEqual(tasks[1].order, helpers.orderHint('Term 2, Week 5'), 'the order is the caption\'s, as the parser reads it');
+
+  taskOne.name = 'Renamed';
+  assert.strictEqual(model.toConnectify({ classes: [first] }, helpers).subjects[first.name][0].id, tasks[0].id, 'edits keep a task\'s id');
+
+  const reg = registry[first.name];
+  assert.strictEqual(reg[1].title, `${first.name} - Semester 1`);
+  assert.deepStrictEqual(reg[1].tasks.map(t => t[0]), tasks.slice(0, 2).map(t => t.id), 'the Semester 1 outline lists its own tasks');
+  assert.strictEqual(reg[2].tasks.length, 4, 'the Semester 2 outline lists every task of the year, as Connect does');
+  assert.strictEqual(reg[1].mark, 80, 'Semester 1\'s mark is its own marked tasks\' weighted mean');
+  assert.strictEqual(reg[2].mark, 70, 'Semester 2\'s mark is cumulative');
+  first.markOverride[2] = 72.5;
+  first.letters[1] = 'B';
+  const after = model.toConnectify({ classes: [first] }, helpers).registry[first.name];
+  assert.deepStrictEqual([after[2].mark, after[1].finalLetter, after[2].finalLetter], [72.5, true, false], 'overrides and final grades reach the registry');
+
+  const server = require('./scripts/playground/server.js');
+  const html = server.page();
+  const group = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8')).content_scripts
+    .find(cs => !cs.world && cs.matches.some(m => m.includes('assessment-outlines')));
+  const scripts = [...html.matchAll(/<script src="\/(src\/[^"]+)"/g)].map(m => m[1]);
+  assert.deepStrictEqual(scripts, group.js, 'every outlines-page content script loads, in manifest order');
+  assert.ok(html.indexOf('/playground/shim.js') < html.indexOf(`/${group.js[0]}`) && html.indexOf('/playground/app.js') > html.lastIndexOf('/src/'),
+    'the extension API shim loads first and the editor last');
+  const styles = [...html.matchAll(/<link rel="stylesheet" href="\/([^"]+)"/g)].map(m => m[1]);
+  assert.deepStrictEqual(styles, group.css || [], 'only Connectify\'s own component stylesheets');
+  assert.ok(!styles.some(s => s.includes('theme/')), 'never theme stylesheets');
+  assert.ok(server.OUTLINES_PATH === new URL('https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines').pathname,
+    'served at the outlines path, so isOutlinesPage() is true');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

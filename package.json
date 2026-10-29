@@ -13,7 +13,8 @@
     "test:themes:help": "node scripts/test-theme-styles.js --help",
     "crawl": "node scripts/crawl-connect-directories.js",
     "crawl:force": "node scripts/crawl-connect-directories.js --force",
-    "crawl:interactive": "node scripts/crawl-connect-directories.js --interactive"
+    "crawl:interactive": "node scripts/crawl-connect-directories.js --interactive",
+    "playground": "node scripts/playground/server.js"
   },
   "repository": {
     "type": "git",

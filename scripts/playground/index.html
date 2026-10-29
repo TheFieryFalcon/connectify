@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connectify Playground</title>
+<style>
+  :root {
+    --pg-bg: #f5f7fa; --pg-card: #ffffff; --pg-line: #d9e0e8; --pg-text: #1c2430; --pg-muted: #5a6575;
+    --pg-accent: #2563eb; --pg-accent-text: #ffffff; --pg-warn: #9a3412; --pg-warn-bg: #fff3e8; --pg-flash: #fff4b8;
+    --pg-input: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --pg-bg: #12171f; --pg-card: #1b222d; --pg-line: #2e3a4a; --pg-text: #e6ebf2; --pg-muted: #9aa6b5;
+      --pg-accent: #3b82f6; --pg-warn: #fdba74; --pg-warn-bg: #3a2414; --pg-flash: #4a4317; --pg-input: #121821;
+    }
+  }
+  body { margin: 0; background: var(--pg-bg); color: var(--pg-text); font: 14px/1.4 system-ui, -apple-system, Segoe UI, sans-serif; }
+  #pg-app { max-width: 1280px; margin: 0 auto; padding: 16px 16px 48px 56px; }
+  #pg-app .pg-bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 12px 0; background: var(--pg-bg); border-bottom: 1px solid var(--pg-line); margin-bottom: 16px; }
+  #pg-app .pg-bar h1 { font-size: 18px; margin: 0 12px 0 0; }
+  #pg-app .pg-spacer { flex: 1; }
+  #pg-app .pg-status { color: var(--pg-muted); }
+  #pg-app button, #pg-app select, #pg-app input { font: inherit; color: inherit; }
+  #pg-app .pg-btn { border: 1px solid var(--pg-line); background: var(--pg-card); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+  #pg-app .pg-btn:hover { border-color: var(--pg-accent); }
+  #pg-app .pg-btn--primary { background: var(--pg-accent); border-color: var(--pg-accent); color: var(--pg-accent-text); }
+  #pg-app .pg-btn--icon { padding: 2px 7px; }
+  #pg-app .pg-btn--danger:hover { border-color: #dc2626; color: #dc2626; }
+  #pg-app .pg-class { background: var(--pg-card); border: 1px solid var(--pg-line); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+  #pg-app .pg-class-head { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  #pg-app .pg-class-name { font-size: 16px; font-weight: 700; flex: 1; min-width: 0; }
+  #pg-app .pg-warn { background: var(--pg-warn-bg); color: var(--pg-warn); border-radius: 6px; padding: 4px 10px; margin: 4px 0 8px; }
+  #pg-app .pg-sems { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  #pg-app .pg-class { container-type: inline-size; }
+  @container (min-width: 1040px) { #pg-app .pg-sems { grid-template-columns: 1fr 1fr; } }
+  #pg-app .pg-sem { border-top: 1px solid var(--pg-line); padding-top: 8px; min-width: 0; }
+  #pg-app .pg-sem-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 6px; }
+  #pg-app .pg-sem-head h2 { font-size: 14px; margin: 0; }
+  #pg-app .pg-sem-head label { color: var(--pg-muted); display: flex; gap: 4px; align-items: center; }
+  #pg-app .pg-scroll { overflow-x: auto; }
+  #pg-app table { border-collapse: collapse; width: 100%; }
+  #pg-app th { text-align: left; font-weight: 400; color: var(--pg-muted); font-size: 12px; padding: 2px 4px; white-space: nowrap; }
+  #pg-app td { padding: 2px 4px; vertical-align: middle; }
+  #pg-app tr.pg-flash td { background: var(--pg-flash); transition: background 1.5s; }
+  #pg-app input, #pg-app select { background: var(--pg-input); border: 1px solid var(--pg-line); border-radius: 4px; padding: 3px 5px; }
+  #pg-app input:focus, #pg-app select:focus { outline: 2px solid var(--pg-accent); outline-offset: -1px; }
+  #pg-app input[type="number"] { width: 56px; }
+  #pg-app .pg-name { width: 100%; min-width: 160px; }
+  #pg-app .pg-class-name.pg-name { width: auto; }
+  #pg-app .pg-marked input.pg-score { font-weight: 700; }
+  #pg-app .pg-empty { color: var(--pg-muted); padding: 32px 0; text-align: center; }
+  #pg-app .pg-hidden { display: none; }
+  /* The open drawer sits beside the editor on wide screens, so results and tools can be watched together */
+  @media (min-width: 1100px) {
+    #pg-app { transition: margin-left 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+    body:has(#connectify-sidebar:not([hidden])) #pg-app { margin-left: 310px; }
+  }
+  @media (min-width: 1500px) {
+    body:has(#connectify-sidebar.cx-tool-active:not([hidden])) #pg-app { margin-left: 900px; max-width: none; }
+  }
+  /* No outlines to expand here */
+  #cx-expand-btn, #cx-back-to-top-container { display: none !important; }
+  #pg-app .pg-toggle { display: flex; gap: 4px; align-items: center; color: var(--pg-muted); }
+</style>
+<!-- manifest -->
+<!-- connectify-styles -->
+<script>
+  // Connectify's own component stylesheets can be switched off (toolbar), before the page paints
+  try {
+    if (localStorage.getItem('connectify-playground:styles') === 'off') {
+      document.querySelectorAll('link[data-pg-connectify]').forEach(link => { link.disabled = true; });
+    }
+  } catch {}
+</script>
+<script src="/playground/shim.js"></script>
+</head>
+<body>
+<main id="pg-app">
+  <div class="pg-bar">
+    <h1>Connectify Playground</h1>
+    <button class="pg-btn pg-btn--primary" data-action="add-class">+ Add class</button>
+    <button class="pg-btn" data-action="release">Release next result</button>
+    <span class="pg-status" id="pg-status"></span>
+    <span class="pg-spacer"></span>
+    <label class="pg-toggle" title="Connectify's own component stylesheets (never theme or Connect styles)"><input type="checkbox" id="pg-styles"> Connectify styles</label>
+    <button class="pg-btn" data-action="reload">Reload</button>
+    <button class="pg-btn" data-action="export">Export</button>
+    <button class="pg-btn" data-action="import">Import</button>
+    <button class="pg-btn pg-btn--danger" data-action="clear-connectify" title="Goals, predictions, settings and caches; classes stay">Clear Connectify data</button>
+    <button class="pg-btn pg-btn--danger" data-action="reset">Delete everything</button>
+    <input type="file" id="pg-import" accept=".json,application/json" class="pg-hidden">
+  </div>
+  <div id="pg-classes"></div>
+</main>
+<script src="/playground/model.js"></script>
+<!-- connectify-scripts -->
+<script src="/playground/app.js"></script>
+</body>
+</html>
