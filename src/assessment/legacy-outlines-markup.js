@@ -39,6 +39,12 @@
       line(median, median, 16.5, 28.5) + `</g>${dot}</svg></div></div>`;
   }
 
+  /** A task row's chart cell: marked tasks Connect charts only. */
+  const taskChart = task => (task.mark && task.showChart ? chart(task.stats, task.percent) : '');
+  /** The overall row's chart cell: the class boxplot, the dot at the overall mark when the chart gives none. */
+  const summaryChart = record => (record.showChart
+    ? chart(record.stats, Number.isFinite(record.percent) ? record.percent : window.ConnectifyApiParse?.overallMark?.(record)) : '');
+
   const markCell = inner => `<div class="cvr-c-task__mark v-layout v-widget"><div class="cvr-c-task__grade v-layout v-widget">${inner}</div></div>`;
 
   // A Raw Score / Weighted Mark cell: the value over "Out of N"
@@ -56,14 +62,13 @@
     const details = panel(label(type, `eds-c-paragraph v-label-eds-c-paragraph eds-c-paragraph--bold v-label-eds-c-paragraph--bold ${FIRST_LAST}`)) +
       (when ? panel(label(when, `eds-c-caption v-label-eds-c-caption ${FIRST_LAST}`)) : '') +
       panel(label(name, FIRST_LAST));
-    const marked = Boolean(task.mark);
     const weight = task.weightedMax || task.weighted ? fractionCell(task.weighted, task.weightedMax) : '';
     return '<div class="cvr-c-task v-layout v-widget">' +
       `<div class="cvr-c-task__details v-layout v-widget">${details}</div>` +
       `<div class="cvr-c-task-mark__headers v-layout v-widget">${markHeader('Raw Score')}${markHeader('Weighted Mark')}</div>` +
       '<div class="cvr-c-task__achievement v-layout v-widget">' +
       `<div class="cvr-c-task__marks v-layout v-widget">${fractionCell(task.mark, task.max)}${weight}</div>` +
-      (marked && task.showChart ? chart(task.stats, task.percent) : '') +
+      taskChart(task) +
       '</div></div>';
   }
 
@@ -103,11 +108,9 @@
   function summaryRow(record) {
     if (!record.mark) return '<div class="v-csslayout v-layout v-widget"></div>';
     const cells = markCell(label(record.mark)) + markCell(label(record.grade));
-    const marks = window.ConnectifyApiParse?.overallMark?.(record);
-    const plot = record.showChart ? chart(record.stats, Number.isFinite(record.percent) ? record.percent : marks) : '';
     return '<div class="v-csslayout v-layout v-widget"><div class="cvr-c-task v-layout v-widget eds-s-is-first cvr-c-task-eds-s-is-first eds-s-is-last cvr-c-task-eds-s-is-last">' +
       '<div class="cvr-c-task__details v-layout v-widget"></div><div class="cvr-c-task-mark__headers v-layout v-widget"></div>' +
-      `<div class="cvr-c-task__achievement v-layout v-widget"><div class="cvr-c-task__marks v-layout v-widget">${cells}</div>${plot}</div></div></div>`;
+      `<div class="cvr-c-task__achievement v-layout v-widget"><div class="cvr-c-task__marks v-layout v-widget">${cells}</div>${summaryChart(record)}</div></div></div>`;
   }
 
   // "Leon Harris from Willetton Senior High School"; names are links in Connect (legacy-outlines.js forwards clicks)
@@ -132,5 +135,5 @@
       `<div class="eds-c-tile__body v-layout v-widget"><div class="v-csslayout v-layout v-widget eds-s-is-first v-csslayout-eds-s-is-first eds-s-is-last v-csslayout-eds-s-is-last">${body}</div></div></div>`;
   }
 
-  window.ConnectifyLegacyMarkup = { tile, detailsPanel, accordion, taskRow, chart, groupHeading };
+  window.ConnectifyLegacyMarkup = { tile, detailsPanel, accordion, taskRow, chart, taskChart, summaryChart, groupHeading };
 })();

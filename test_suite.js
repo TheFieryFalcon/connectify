@@ -12930,8 +12930,7 @@ runTest('Test 281: Prediction panels on unmarked tasks a goal covers show the go
 });
 
 runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once, in page order, above Expand All / Collapse All', () => {
-  const prev = { Option: global.Option, filter: window.ConnectifySemesterFilter, newGrade: window.ConnectifyNewGrade, jumpMod: window.ConnectifyOutlineJump };
-  global.Option = function (text, value) { const o = new MockElement('option'); o.textContent = text; o.value = value; return o; };
+  const prev = { filter: window.ConnectifySemesterFilter, newGrade: window.ConnectifyNewGrade, jumpMod: window.ConnectifyOutlineJump };
   window.ConnectifySemesterFilter = { currentSemester: () => 2 };
   const jumped = [];
   window.ConnectifyNewGrade = { jumpToSubject: card => jumped.push(card) };
@@ -12950,19 +12949,34 @@ runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once
     assert.strictEqual(J.subjects()[0].card, cards[2], 'a subject with both outlines shown jumps to this semester\'s');
 
     const row = J.create();
-    const select = row.querySelector('#cx-jump-subject-select');
+    const box = row.querySelector('#cx-jump-subject-select');
+    const list = row.querySelector('#cx-jump-subject-list');
     const btn = row.querySelector('#cx-jump-subject-btn');
-    assert.ok(select.tagName === 'SELECT' && btn.tagName === 'BUTTON' && row.children[0] === select, 'the dropdown, then the button');
+    assert.ok(box.tagName === 'BUTTON' && row.children[0] === box && row.children[1] === list && row.children[2] === btn,
+      'the dropdown box, its list, then the button (never a native <select>, whose macOS list falls off the bottom of the screen)');
+    assert.strictEqual(box.getAttribute('aria-haspopup'), 'listbox');
+    assert.strictEqual(list.getAttribute('role'), 'listbox');
+    assert.ok(list.hidden, 'the list starts closed');
     assert.strictEqual(btn.textContent, 'Jump To');
     const origById = document.getElementById;
     document.getElementById = id => row.querySelector(`#${id}`) || origById(id);
-    J.sync();
-    document.getElementById = origById;
-    assert.deepStrictEqual(select.children.map(o => o.textContent), ['Physics', 'English', 'Biology'], 'the dropdown lists them in page order');
-    assert.ok(select.children.every(o => o.value === o.textContent), 'the list shows each full name, never cut short');
-    select.value = 'English';
-    btn.onclick();
-    assert.deepStrictEqual(jumped, [cards[1]], 'Jump To expands, scrolls to and highlights the chosen subject\'s card');
+    try {
+      J.sync();
+      assert.deepStrictEqual(list.children.map(o => o.textContent), ['Physics', 'English', 'Biology'], 'the list shows them in page order');
+      assert.ok(list.children.every(o => o.dataset.value === o.textContent && o.getAttribute('role') === 'option'), 'each option shows the full name, never cut short');
+      assert.strictEqual(box.dataset.value, 'Physics', 'the first subject is chosen');
+      assert.strictEqual(box.textContent, 'Physics');
+      J.open();
+      assert.ok(!list.hidden && box.getAttribute('aria-expanded') === 'true', 'the box opens the list');
+      list.dispatchEvent({ type: 'click', target: list.children[1] });
+      assert.strictEqual(box.dataset.value, 'English', 'picking an option chooses it');
+      assert.ok(list.hidden, 'and closes the list');
+      assert.deepStrictEqual(list.children.map(o => o.getAttribute('aria-selected')), ['false', 'true', 'false']);
+      btn.onclick();
+      assert.deepStrictEqual(jumped, [cards[1]], 'Jump To expands, scrolls to and highlights the chosen subject\'s card');
+    } finally {
+      document.getElementById = origById;
+    }
 
     const controls = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/outline-controls.js'), 'utf8');
     assert.ok(controls.includes("if (window.ConnectifyOutlineJump) btnContainer.append(window.ConnectifyOutlineJump.create());\n    btnContainer.append(createBtn('Expand All', true), createBtn('Collapse All', false));"),
@@ -12975,9 +12989,10 @@ runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once
     assert.ok(cssHas(css, '.connectea-dark #cx-jump-subject .cx-jump-subject-select { background-color: var(--cx-input-bg, #141a22) !important;'), 'dark themes use the input tokens');
     assert.ok(cssHas(css, '#cx-jump-subject .cx-jump-subject-select { box-sizing: border-box; width: 108px; flex: 0 0 auto;'), 'a fixed narrow dropdown keeps the row close to the buttons\' width');
     assert.ok(/#cx-jump-subject \.cx-jump-subject-select \{[^}]*text-overflow: ellipsis;/.test(css), 'only the closed dropdown ends a long name in an ellipsis');
+    assert.ok(/#cx-jump-subject \.cx-jump-subject-list \{[^}]*bottom: calc\(100% \+ 6px\);[^}]*max-height: calc\(100vh - 140px\);/.test(css),
+      'the list opens upwards from the box and is as tall as its subjects (seven or more without scrolling)');
   } finally {
     document.querySelectorAll = origQSA;
-    Object.assign(global, { Option: prev.Option });
     window.ConnectifySemesterFilter = prev.filter;
     window.ConnectifyNewGrade = prev.newGrade;
     window.ConnectifyOutlineJump = prev.jumpMod;
@@ -13143,10 +13158,12 @@ runTest('Test 284: Connect\'s new outline cards are drawn again in the old Vaadi
     'outlines are drawn before every boxplot has arrived and drawn again as each lands');
   assert.ok(mount.includes('const holding = Boolean(window.ConnectifyIsBulkExpanding);') && mount.includes('retry = setTimeout(sync, 500)'),
     'a tile Expand All is about to click is not replaced until the run ends');
+  assert.ok(mount.includes('!swapCharts(slot.firstElementChild, record)') && mount.includes('if (!old || sansCharts(old) !== sansCharts(record)) return false;') &&
+    mount.includes('window.ConnectifyCohort?.schedule?.();'),
+    'a boxplot arriving swaps only the chart cells (open rows and their panels stay), then the panels refresh');
   const features = read('atar/atar-features.js');
-  assert.ok(features.includes('if (window.ConnectifyOutlineApi && !window.ConnectifyOutlineApi.isSettled()) return;') &&
-    features.includes("['connectify-outlines-loaded', 'connectify-outlines-failed'].forEach(type => window.addEventListener(type, () => checkStartupAutoExpand()));"),
-    'startup auto-expand opens the outlines once every boxplot has arrived, not tiles that will be drawn again');
+  assert.ok(features.includes("window.addEventListener('connectify-outlines-preview', () => checkStartupAutoExpand());") && !features.includes('isSettled'),
+    'startup auto-expand opens the outlines as soon as they are drawn, before their boxplots arrive');
 
   eval(read('assessment/legacy-outlines-markup.js'));
   const M = window.ConnectifyLegacyMarkup;

@@ -34,8 +34,6 @@
         hasAutoExpanded = true;
         return;
       }
-      // Outlines drawn before their boxplots arrive are drawn again as each lands: expand the finished ones
-      if (window.ConnectifyOutlineApi && !window.ConnectifyOutlineApi.isSettled()) return;
       const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile');
       if (tiles.length > 0 && window.ConnectifyData?.expandAll) {
         hasAutoExpanded = true;
@@ -161,8 +159,8 @@
       if (!document.getElementById('cx-expand-btn') && window.ConnectifyData) syncFeatures();
     }, { filter: r => r.type === 'childList', mute: true });
 
-    // Startup auto-expand waits for every boxplot (checkStartupAutoExpand)
-    ['connectify-outlines-loaded', 'connectify-outlines-failed'].forEach(type => window.addEventListener(type, () => checkStartupAutoExpand()));
+    // Startup auto-expand opens the outlines as soon as they are drawn, before their boxplots arrive
+    window.addEventListener('connectify-outlines-preview', () => checkStartupAutoExpand());
 
     scheduler.every(2000, initSidebarTools, { mute: true });
     scheduler.every(5000, syncFeatures, { mute: true });

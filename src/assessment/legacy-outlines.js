@@ -7,7 +7,8 @@
  * (.cx-legacy-hidden); Connect's filter menu still decides which cards are shown. Connect renders nothing
  * until it has fetched every boxplot one by one (~13s), so until its cards or filter bar appear every outline
  * is drawn in the API's order (Connect's own) into Connect's zone, boxplots filling in as they arrive
- * (ConnectifyOutlineApi.drawable). Show / Hide Details adds
+ * (ConnectifyOutlineApi.drawable): only the chart cells are swapped, so open outlines and their panels stay.
+ * Show / Hide Details adds
  * and removes the task rows as Vaadin did, so Expand All, Jump To, the cohort panels and every other
  * outline feature work on them unchanged. Clicking a teacher or school forwards to Connect's own link.
  * Cards without a record, or a page where the API failed, keep Connect's new look.
@@ -64,6 +65,36 @@
    * Draws every card Connect shows that has an API record, in Connect's order, and hides Connect's copy;
    * before Connect has rendered, every record in the API's order.
    */
+  // A record that differs only in its boxplots has its chart cells swapped in place
+  const sansCharts = r => JSON.stringify(r, (k, v) => (k === 'stats' || k === 'percent' ? undefined : v));
+  const chartsOf = r => JSON.stringify([r.stats, r.percent]);
+  const tasksOf = r => (r.outlines || []).filter(o => o.tasks?.length).flatMap(o => o.tasks);
+
+  /** Swaps a drawn tile's chart cells for the record's (open task rows too); false when its rows do not line up. */
+  function swapCharts(tile, record) {
+    const old = tile?._cxOutline;
+    if (!old || sansCharts(old) !== sansCharts(record)) return false;
+    const rows = Array.from(tile.querySelectorAll('.eds-c-accordion__panel .cvr-c-tasks > .cvr-c-task'));
+    const tasks = tasksOf(record);
+    if (rows.length && rows.length !== tasks.length) return false;
+    const swap = (row, html) => {
+      const achievement = row?.querySelector(':scope > .cvr-c-task__achievement');
+      if (!achievement) return;
+      achievement.querySelector(':scope > .cvr-c-task__chart')?.remove();
+      if (html) achievement.insertAdjacentHTML('beforeend', html);
+    };
+    if (chartsOf(old) !== chartsOf(record)) {
+      const summary = Array.from(tile.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.eds-c-accordion, .connectea-subject-average-row'));
+      swap(summary, markup().summaryChart(record));
+    }
+    const before = tasksOf(old);
+    rows.forEach((row, i) => { if (chartsOf(before[i]) !== chartsOf(tasks[i])) swap(row, markup().taskChart(tasks[i])); });
+    tile._cxOutline = record;
+    // A chart added to an open row is not a page change the cohort observer counts
+    window.ConnectifyCohort?.schedule?.();
+    return true;
+  }
+
   let retry = null;
   function sync() {
     const records = outlineApi()?.drawable?.() || [];
@@ -96,7 +127,7 @@
       let slot = existing.get(record.title);
       existing.delete(record.title);
       // A changed record (a boxplot arriving, a refresh) is drawn afresh; an unchanged one keeps its panels and state
-      if (slot && slot.firstElementChild?._cxOutline !== record) {
+      if (slot && slot.firstElementChild?._cxOutline !== record && !swapCharts(slot.firstElementChild, record)) {
         if (holding) { clearTimeout(retry); retry = setTimeout(sync, 500); } else { slot.remove(); slot = null; }
       }
       if (!slot) {
