@@ -37,7 +37,7 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 - `goal-sliders.js` (`ConnectifyGoalSliders`): Target Grade's task table (Effort / Needs / Difficulty), Target ATAR's subject slider, needed mark and tier; drafts per subject; `reset` on the checkbox; keyboard focus kept across re-renders. A drag moves only the notch name (`input`); the planner re-renders on `change` (release, each key press), since replacing the slider mid-drag dropped the drag and selected text.
 - `goal-editor.js` (`ConnectifyGoalEditor`): the goal tier beside each planner headline, Set as Goal / Update Goal and Cancel Editing, `Goals (n)` in the panel heading (`paintGoalsButton`, from `paintModeTabs`), `edit(goal)` (loads its planner tab; semester by its button), `heldTarget` (an ATAR-held subject plans for its child target, read-only, `Set by your ATAR <n> goal`).
 - `goal-modal.js` (`ConnectifyGoalModal`): the shared dialog (solid surface, dimmed page, focus in and back, Escape / ✕ / outside click, clicks never reach the drawer's outside-click), `tierLabel`, `progressBar`.
-- `goal-dialog.js` (`#cx-goal-dialog`): preview, End (week input with term hint), Confirm / Save Changes; blocked with `Already secured.`, `Highest possible: X%.`, `<subject> already has a goal.` (+ Edit), `Set by your ATAR <n> goal.`, `You already have an ATAR goal.`; an ATAR goal over subject goals asks to Replace them. New goals record `priorMarked`.
+- `goal-dialog.js` (`#cx-goal-dialog`): preview, End (week input with term hint), Confirm / Save Changes; blocked with `Already secured.`, `Highest possible: X%.`, `Set by your ATAR <n> goal.`, `You already have an ATAR goal.`; an ATAR goal over subject goals asks to Replace them. New goals record `priorMarked`. A grade goal for a subject that already has one asks `<subject> already has a goal. Overwrite?`: Confirm stays enabled and replaces it (removed, not a past goal).
 - `goal-list-ui.js` (`#cx-goals-dialog`): cards (title, tier, progress, ATAR children's targets, Edit ✎ / Delete ✕ with inline confirm) and Past goals (Achieved / Missed, final mark, date).
 
 ### Outline bars (`goal-bars.js`, `ConnectifyGoalBars`)
@@ -54,7 +54,7 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 - `grade-estimate-goal.js` (`ConnectifyGradeEstimateGoal`): `Goal 85%: met` / `3.2 short` under Estimate Grade (range tasks only for custom weeks); `Goal 95.00: 1.35 short` under Estimate ATAR (that semester's goal).
 
 ## 3. Styles
-`goal-dialog.css` (dialogs, tier labels: tier 40% into the theme ink on a 14% tint, >= 5:1 in every preset; secondary buttons (Open Settings, Cancel, ✕) take `--cx-button-text` over Connect's `.eds.cvr button` grey via `#cx-specificity-anchor`), `goal-planner.css` (planner controls, sliders), `goal-list.css`, `goal-bars.css` (bars, goal targets and line), `goal-forecast.css` (goal target on prediction panels), `goal-celebrate.css`: theme tokens only.
+`goal-dialog.css` (dialogs, tier labels: tier 40% into the theme ink on a 14% tint, >= 5:1 in every preset; secondary buttons (Open Settings, Cancel, ✕) take `--cx-button-text` over Connect's `.eds.cvr button` grey via `#cx-specificity-anchor`), `goal-planner.css` (planner controls, sliders; Goals (n) and Cancel Editing take the button tokens), `goal-list.css`, `goal-bars.css` (bars, goal targets and line), `goal-forecast.css` (goal target on prediction panels), `goal-celebrate.css`: theme tokens only.
 
 ---
 

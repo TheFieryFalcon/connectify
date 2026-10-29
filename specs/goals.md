@@ -112,9 +112,9 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
 - **Confirm** saves the goal and closes the dialog. The Goal Setter shows a one-line `Goal set.` status for 3s, beside Set as Goal.
 - Confirm is disabled, with one line saying why, when:
   - the preview is **Guaranteed** (`Already secured.`) or **Impossible** (`Highest possible: 78.4%.`);
-  - the subject already has an active goal (`<subject> already has a goal.` plus an **Edit** link that opens it, §4.4);
   - the subject is held by the ATAR goal (`Set by your ATAR 95.00 goal.`, §5.3);
   - another ATAR goal is active (`You already have an ATAR goal.`).
+- **Subject conflict**: when the subject already has an active grade goal, the line reads `<subject> already has a goal. Overwrite?` (no Edit link) and Confirm stays enabled: it deletes that goal (it does not go to Past goals), then saves.
 - **ATAR conflict**: when a top-four subject already has a grade goal, Confirm turns into an in-dialog prompt: `Chemistry ATAR already has a goal (85% by Semester 2). Replace it?` **Replace** / **Back**. Replace deletes that grade goal (it does not go to Past goals), then saves.
 
 ### 4.3 Goals dialog (`#cx-goals-dialog`)

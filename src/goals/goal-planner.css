@@ -13,14 +13,19 @@
   margin-top: 12px;
 }
 
+/* Secondary planner buttons wear the theme's button tokens, like the goal dialogs' Cancel and Edit */
 #connectea-atar :is(.cx-goal-cancel-edit, .cx-goals-open) {
   padding: 5px 10px;
-  border: 1px solid var(--cx-button-border, #9daebf);
+  border: 1px solid var(--cx-button-border, #455a73);
   border-radius: 5px;
-  background: transparent;
-  color: inherit;
+  background: var(--cx-button-bg, #263242);
+  color: var(--cx-button-text, #f8fafc);
   font: inherit;
   cursor: pointer;
+}
+
+#connectea-atar :is(.cx-goal-cancel-edit, .cx-goals-open):hover:not(:disabled) {
+  background: var(--cx-button-hover, #31415a);
 }
 
 #connectea-atar .cta-heading .cx-goals-open {

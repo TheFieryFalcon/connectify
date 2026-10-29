@@ -12137,9 +12137,18 @@ runTest('Test 263: Set as Goal previews the goal with its end and confirms it; t
 
   win.ConnectifyGoalDialog.open({ goal: { ...draft } });
   const again = document.getElementById('cx-goal-dialog');
-  assert.strictEqual(again.querySelector('.cx-goal-confirm').disabled, true, 'a second goal for the subject cannot be confirmed');
-  assert.ok(mockText(again.querySelector('.cx-goal-reason')).startsWith('Chemistry already has a goal.'), 'and says why');
+  assert.strictEqual(mockText(again.querySelector('.cx-goal-reason')), 'Chemistry already has a goal. Overwrite?', 'a second goal for the subject asks to overwrite the first');
+  assert.ok(!again.querySelector('.cx-goal-reason .cx-goal-link'), 'with no Edit button');
+  assert.strictEqual(again.querySelector('.cx-goal-confirm').disabled, false, 'Confirm answers it');
   again.querySelector('.cx-goal-cancel').click();
+  assert.strictEqual(win.ConnectifyGoalStore.active()[0].id, goal.id, 'Cancel keeps the first goal');
+  win.ConnectifyGoalDialog.open({ goal: { ...draft, target: 82 } });
+  document.getElementById('cx-goal-dialog').querySelector('.cx-goal-confirm').click();
+  const replaced = win.ConnectifyGoalStore.active();
+  assert.deepStrictEqual([replaced.length, replaced[0].target, replaced[0].id !== goal.id], [1, 82, true], 'Confirm replaces the subject\'s goal with the new one');
+  assert.ok(!win.ConnectifyGoalStore.all().some(g => g.id === goal.id), 'the overwritten goal is removed, not kept as a past goal');
+  win.ConnectifyGoalStore.remove(replaced[0].id);
+  win.ConnectifyGoalStore.save(goal);
   win.ConnectifyGoalDialog.open({ goal: { ...draft, id: goal.id, target: 20 } });
   const sure = document.getElementById('cx-goal-dialog');
   assert.deepStrictEqual([sure.querySelector('.cx-goal-confirm').disabled, mockText(sure.querySelector('.cx-goal-reason'))], [true, 'Already secured.'], 'a goal already met cannot be saved');
@@ -13283,6 +13292,18 @@ runTest('Test 289: Goal dialog secondary buttons (Open Settings, Cancel, ✕) ta
   const block = css.slice(at, css.indexOf('}', at));
   assert.ok(block.includes('color: var(--cx-button-text, #f8fafc);') && !block.includes('--cx-text-muted'), 'the button ink, never the muted text colour');
   assert.ok(css.includes(sel + ':hover {'), 'the hover rule carries the same weight');
+});
+
+runTest('Test 290: The Goals (n) and Cancel Editing buttons wear the theme\'s button tokens, not an inherited ink and fallback border', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-planner.css'), 'utf8');
+  const sel = '#connectea-atar :is(.cx-goal-cancel-edit, .cx-goals-open)';
+  const at = css.indexOf(sel + ' {');
+  const block = css.slice(at, css.indexOf('}', at));
+  assert.ok(at >= 0 && block.includes('background: var(--cx-button-bg, #263242);') && block.includes('color: var(--cx-button-text, #f8fafc);') &&
+    block.includes('border: 1px solid var(--cx-button-border, #455a73);'), 'button fill, ink and border tokens');
+  assert.ok(!/color: inherit/.test(block), 'never the heading\'s inherited ink');
+  assert.ok(!block.includes('#9daebf') && !block.includes('transparent'), 'nor the old fallback border on a clear fill');
+  assert.ok(css.includes(sel + ':hover:not(:disabled) {'), 'with the button hover');
 });
 
 Promise.all(pendingTestPromises).then(() => {

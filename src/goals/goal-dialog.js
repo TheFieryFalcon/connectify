@@ -4,8 +4,9 @@
  * A preview of the goal the planner describes (target and tier, the tasks or subjects it covers with their
  * effort, required mark and tier, progress so far), its End (Semester 1 / 2, or a custom school week for grade
  * goals) and Confirm (Save Changes when editing). Confirm is disabled, with the reason, for a goal already
- * secured or out of reach and for one that clashes with another goal; an ATAR goal over subject goals asks to
- * replace them. Exposes window.ConnectifyGoalDialog.
+ * secured or out of reach and for one that clashes with an ATAR goal; a grade goal for a subject that has one
+ * asks to overwrite it (Confirm replaces it), and an ATAR goal over subject goals asks to replace them.
+ * Exposes window.ConnectifyGoalDialog.
  */
 (() => {
   'use strict';
@@ -55,7 +56,7 @@
     return table.children.length > 1 ? table : null;
   }
 
-  /** Why Confirm is disabled (text, and an optional goal to edit instead), or null. */
+  /** Why Confirm is disabled (text), or a question Confirm answers (`overwrite`: the subject goal it replaces), or null. */
   function blocker(goal, state) {
     if (state.error) return { text: state.error === 'No tasks' ? 'No assessments up to that week.' : state.error };
     if (state.plan?.error) return { text: state.plan.error };
@@ -70,7 +71,7 @@
     if (other && goal.kind !== 'atar') {
       return other.kind === 'atar'
         ? { text: `Set by your ATAR ${Number(other.target).toFixed(2)} goal.` }
-        : { text: `${goalName(goal)} already has a goal.`, edit: other };
+        : { text: `${goalName(goal)} already has a goal. Overwrite?`, overwrite: other };
     }
     return null;
   }
@@ -128,13 +129,7 @@
           if (state.undated?.length) preview.append(M().el('p', 'cta-note', `No week: ${state.undated.join(', ')}. Set one in the Progress table.`));
           const block = blocker(draft, state);
           reason.replaceChildren(block ? block.text : '');
-          if (block?.edit) {
-            const link = M().el('button', 'cx-goal-link', 'Edit');
-            link.type = 'button';
-            link.addEventListener('click', () => { close(); window.ConnectifyGoalEditor?.edit(block.edit); });
-            reason.append(' ', link);
-          }
-          confirm.disabled = Boolean(block);
+          confirm.disabled = Boolean(block) && !block.overwrite;
         };
 
         const save = () => {
