@@ -13256,6 +13256,25 @@ runTest('Test 287: Upgrading to 3.3.0 turns "Show this semester\'s classes only"
   }
 });
 
+runTest('Test 288: Connect\'s hover outlines on form fields are off, focus keeps Material\'s outline without a second ring, and dialog fieldsets are clear', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-field-hover.css'), 'utf8');
+  for (const hook of ['.connectea-dark', 'html:not(.connectea-dark)[data-connectea-has-custom-bg="true"]']) {
+    assert.ok(css.includes(`${hook} .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline-thick`), `${hook}: no 2px Material outline on hover, focus untouched`);
+    assert.ok(css.includes(`${hook} .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline:not(.mat-form-field-outline-thick)`), `${hook}: the 1px outline stays on hover`);
+    assert.ok(css.includes(`${hook} .c-floating-form-field:hover:not(:focus-within) .c-floating-form-field-outline-thick`), `${hook}: no black fieldset outline on hover`);
+  }
+  assert.ok(cssHas(css, '{ opacity: 0 !important; }') && cssHas(css, '{ opacity: 1 !important; }'));
+  const nesting = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-surface-nesting.css'), 'utf8');
+  assert.ok(nesting.includes('html.connectea-dark[data-connectea-theme] .mat-dialog-container :where(fieldset.c-floating-form-field):not(#cx-n)'),
+    'Message and Image Gallery fieldsets sit on the dialog\'s one surface, so their padding shows no fill');
+  const controls = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-controls.css'), 'utf8');
+  assert.ok(controls.includes('.connectea-dark input:focus:not(.mat-input-element), .connectea-dark textarea:focus:not(.mat-input-element) {'),
+    'the accent focus ring skips Material inputs, whose outlined field already shows focus');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
+  const sheets = manifest.content_scripts.find(g => g.css?.includes('src/theme/styles/theme-field-hover.css')).css;
+  assert.strictEqual(sheets.indexOf('src/theme/styles/theme-field-hover.css'), sheets.indexOf('src/theme/styles/theme-dialog-surface.css') + 1);
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

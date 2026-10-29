@@ -260,6 +260,7 @@
             "src/theme/styles/theme-tables.css",
             "src/theme/styles/theme-dialogs-paginator.css",
             "src/theme/styles/theme-dialog-surface.css",
+            "src/theme/styles/theme-field-hover.css",
             "src/theme/styles/theme-navigation.css",
             "src/theme/styles/theme-discussions.css",
             "src/theme/styles/theme-surfaces.css",

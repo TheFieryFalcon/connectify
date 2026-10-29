@@ -20,7 +20,8 @@
   opacity: 1 !important;
 }
 
-.connectea-dark input:focus, .connectea-dark textarea:focus {
+/* Material inputs are left out: their outlined field already shows focus (a second ring boxed the Title text) */
+.connectea-dark input:focus:not(.mat-input-element), .connectea-dark textarea:focus:not(.mat-input-element) {
   border-color: var(--cx-accent, #3b82f6) !important;
   outline: 2px solid var(--cx-accent, #3b82f6) !important;
 }

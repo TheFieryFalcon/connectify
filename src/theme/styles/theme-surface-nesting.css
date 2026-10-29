@@ -93,8 +93,9 @@ html.connectea-dark[data-connectea-theme] :is(.cvr-c-category-menu .eds-u-intera
   background-color: transparent !important;
 }
 
-/* Form fieldsets inside a card (Profile) are clear */
+/* Form fieldsets inside a card (Profile) or a dialog (Add Discussion's Message and Image Gallery) are clear */
 html.connectea-dark[data-connectea-theme] .mat-card :where(fieldset.c-floating-form-field):not(#cx-n),
+html.connectea-dark[data-connectea-theme] .mat-dialog-container :where(fieldset.c-floating-form-field):not(#cx-n),
 html.connectea-dark[data-connectea-theme] .eds-c-tile :where(fieldset.c-floating-form-field):not(#cx-n),
 html.connectea-dark[data-connectea-theme] .v-panel :where(fieldset.c-floating-form-field):not(#cx-n) {
   background-color: transparent !important;
