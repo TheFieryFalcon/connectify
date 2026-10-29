@@ -2,7 +2,9 @@
  * Connectify Theme: bars, banners, section headings and empty states that Connect leaves flat (class banner,
  * category bars, Library toolbar, Select All row, Learners headings, empty states) have no panel in Liquid
  * Glass: they sit straight on the page like the paginators, and the wallpaper is dimmed or brightened for the
- * theme's text instead (theme-wallpaper-dim.js). Liquid Glass only; boxes keep their native size.
+ * theme's text instead (theme-wallpaper-dim.js). Liquid Glass only; boxes keep their native size. A category bar
+ * in Connect's fixed container (the Assessment Outlines "All" bar) is a top bar the page scrolls under, so it keeps
+ * the glass top-bar fill and blur (theme-reports-menus-2.css).
  */
 
 /* Shared glass blur for the surfaces theme-glass-nesting.css paints */
@@ -11,7 +13,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 }
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-scope-intro-class:not(.cx-n):not(.cx-n):not(cx-n),
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar:not(.cx-n):not(cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar:not(.js-pos-category-toolbar-container > *):not(cx-n),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-category-toolbar__container > .cvr-c-thori-pnl):not(cx-n):not(cx-n),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(cnt-paginator:has(.c-empty-content)):not(.cx-n):not(cx-n),

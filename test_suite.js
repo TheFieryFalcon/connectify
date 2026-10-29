@@ -13306,6 +13306,16 @@ runTest('Test 290: The Goals (n) and Cancel Editing buttons wear the theme\'s bu
   assert.ok(css.includes(sel + ':hover:not(:disabled) {'), 'with the button hover');
 });
 
+runTest('Test 291: The outlines page\'s fixed "All" category bar keeps the Liquid Glass top-bar fill and blur; category bars on the page stay clear', () => {
+  const surface = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-glass-surface.css'), 'utf8');
+  assert.ok(surface.includes(' mat-toolbar.c-category-bar:not(.js-pos-category-toolbar-container > *):not(cx-n),'),
+    'the clear rule skips the bar in Connect\'s fixed toolbar container (same specificity as before)');
+  const bars = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-reports-menus-2.css'), 'utf8');
+  const glassBar = bars.split('}').find(b => b.includes('.connectea-dark .mat-toolbar,')) || '';
+  assert.ok(/backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\) saturate\(160%\) !important;/.test(glassBar) && /--cx-glass-opacity/.test(glassBar),
+    'which leaves it the translucent, blurred top-bar glass');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
