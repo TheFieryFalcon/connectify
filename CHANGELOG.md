@@ -4,6 +4,54 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
+## 3.3.0 (2026-10-29)
+
+**Hotfix release**: Connect rebuilt its Assessment Outlines page, which broke Connectify's outline features. Please update as soon as possible.
+
+### Urgent Fix:
+- **Assessment Outlines work again**: Connectify now reads your classes and boxplots straight from Connect and shows them in the familiar outline layout, so statistics panels, outcome meters, predictions and every sidebar tool work as before.
+- Your saved categories, predictions, week overrides and other data carry over.
+- Connect's filter menu still chooses which classes show, and "Back to All" works with Connect's new All button.
+- **Faster outlines**: your outlines appear in about 3 seconds, with boxplots filling in shortly after, instead of waiting around 13 seconds for Connect's own page. Auto-expand opens them as soon as they appear.
+- **One-time notice**: "Show this semester's classes only" is turned off once after updating, so Connectify can read every class from the new page. A popup explains this and how to turn it back on in Settings.
+- **Auto-login**: Connect's sign-in page now asks Staff / Parent / Student first, and Auto-login presses Student for you.
+
+### Additions
+- **Goals**: Set as Goal in Target Grade or Target ATAR saves your target, ending at Semester 1, Semester 2 or a school week you choose. Each goal shows how hard it is, from Guaranteed to Impossible.
+- **Goals list**: Goals (n) lists your goals with Edit and Delete, plus past goals you achieved or missed.
+- **Effort sliders**: in Target Grade and Target ATAR, choose which tasks or subjects to push harder on, and the needed marks shift to match.
+- **Goal bars**: marked tasks a goal covers show how you did against what the goal needed, and your progress towards it, beside the outcome meter.
+- **Goal targets**: upcoming tasks show the mark your goal needs on them, and Year Progression plots it as a dashed line.
+- **Goal Updated** notices when a new result changes your goal, with a celebration when you reach it.
+- Estimate Grade and Estimate ATAR say whether your estimate meets your goal.
+- **Jump To**: a subject dropdown above Expand All opens, scrolls to and highlights a class's outline.
+- **New result notices** for results that leave your average unchanged.
+- **Adjust Wallpaper**: resize and position an uploaded wallpaper before it's saved.
+- **Instant themes**: pages load in your theme straight away, without a white flash.
+
+### Changes
+- Year Progression subject graphs start at 50% (lower only when a result is below it), with grid lines every 10%.
+- Touchscreen-sized buttons go back to normal size once you use a mouse or trackpad.
+- The Type dropdown is only as wide as the chosen type.
+- New category names can be up to 16 characters.
+- Expand All is much faster, especially in dark themes and on slower computers.
+
+### Fixes
+- Another student signing in on the same browser no longer sees your saved results or settings.
+- Class Updated notices no longer appear when only your classmates' results changed.
+- A result released around an update is no longer missed.
+- Target Grade and Target ATAR no longer fail with "Task weights do not reconcile" when the school adjusts a class's mark.
+- Same-named tasks in Semester 1 and 2 (e.g. each semester's exam) keep their own cohort mean.
+- Dated tasks shown on Semester 2 outlines stay in Semester 1.
+- Expanded overall statistics cards fit in smaller windows.
+- Large wallpapers no longer turn the page off-white in Chrome.
+- The sidebar no longer appears on the sign-in screen.
+- Auto-login signs straight back in after your session expires, and uses Chrome's saved password.
+- Connectify's buttons are no longer round on iPad.
+- Text pasted into notices no longer shows a white box behind each line in dark themes.
+- Feed cards keep Connect's white class icon in dark themes.
+- Form fields no longer show thick hover outlines or an extra focus box in dark themes.
+
 ## 3.2.5 (2026-10-24)
 
 ### Additions
