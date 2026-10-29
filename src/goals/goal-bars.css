@@ -84,6 +84,18 @@
   min-height: 64px;
 }
 
+/* Expanded task cards: the goal bars take a column of their own after the outcome meter, so the card grows
+   wider instead of wrapping them under Score (the column grid is cohort-expanded.css's) */
+.connectea-panel.connectea-xp-stats:not(.connectea-xp-overall):has(> .connectea-xp-head > .cx-goal-bars) {
+  grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(5, minmax(60px, max-content)) auto auto !important;
+}
+.connectea-xp-stats .connectea-xp-head > .cx-goal-bars {
+  grid-column: 10 !important;
+  grid-row: 1 !important;
+  align-self: center !important;
+  margin: 0 !important;
+}
+
 .connectea-panel.cx-has-goal-bars > .cx-goal-bars {
   position: absolute;
   top: 6px;

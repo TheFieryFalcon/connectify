@@ -13154,6 +13154,17 @@ runTest('Test 285: Pasted text in notices keeps no white highlight on dark theme
   assert.strictEqual(sheets.indexOf('src/theme/styles/theme-rich-text.css'), sheets.indexOf('src/theme/styles/theme-feed-3.css') + 1);
 });
 
+runTest('Test 286: Goal bars sit beside the outcome meter on expanded task cards, and the meter tooltip blurs in Liquid Glass', () => {
+  const bars = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-bars.css'), 'utf8');
+  assert.ok(cssHas(bars, '.connectea-panel.connectea-xp-stats:not(.connectea-xp-overall):has(> .connectea-xp-head > .cx-goal-bars) { grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(5, minmax(60px, max-content)) auto auto !important;'),
+    'a task card with goal bars gains a column after the meter, so it grows wider');
+  assert.ok(cssHas(bars, '.connectea-xp-stats .connectea-xp-head > .cx-goal-bars { grid-column: 10 !important; grid-row: 1 !important;'),
+    'the goal bars take that column in the top row, never wrapping under Score');
+  const tip = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-outcome-filter.css'), 'utf8');
+  assert.ok(cssHas(tip, 'html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectea-outcome-tooltip { backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;'),
+    'the singleton tooltip (meter and goal bars) blurs like the theme\'s other glass, at the Blur Strength set');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

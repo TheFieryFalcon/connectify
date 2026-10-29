@@ -132,6 +132,12 @@
   box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.55), 0 8px 12px -6px rgba(0, 0, 0, 0.45) !important;
 }
 
+/* Liquid Glass: the tooltip's translucent surface blurs what is under it, like the theme's other glass */
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectea-outcome-tooltip {
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+}
+
 /* Off the outlines page every launcher but Settings is disabled (sidebar-page-notice.js) */
 #connectify-sidebar.cx-page-limited .cx-tool-menu > button:disabled {
   opacity: 0.38 !important;
