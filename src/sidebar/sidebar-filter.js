@@ -9,14 +9,16 @@
   'use strict';
 
   // Connect's filter menu is an accordion: a top-level "All" heading, then "Semester 1 Classes" /
-  // "Semester 2 Classes" sections whose tree lists start with their own "All" (that semester only)
+  // "Semester 2 Classes" sections whose lists start with their own "All" (that semester only). Since
+  // October 2026 it is Angular (cnt-category-menu expansion panels); the Vaadin selectors stay for older pages
   const ALL_FILTER_SELECTORS = [
+    'cnt-category-menu .mat-expansion-panel-header .mat-content',
     '.eds-c-accordion--dark .eds-c-accordion__section-label', '.eds-c-accordion--dark .eds-c-accordion__section-heading',
     '.eds-c-accordion__section-label', '.eds-c-accordion__section-heading',
     '.cvr-c-category-toolbar__container .v-label', '.cvr-c-category-toolbar .v-label', '.v-accordion .v-label', '[role="button"]'
   ];
   // A semester section's "All" and Connectify's own UI are never the top-level filter
-  const NOT_TOP_LEVEL = '.eds-c-accordion__panel, .cvr-c-tree-list, .cvr-c-tree-list__item, #connectify-sidebar, #cx-semester-notice';
+  const NOT_TOP_LEVEL = '.eds-c-accordion__panel, .cvr-c-tree-list, .cvr-c-tree-list__item, .mat-expansion-panel-content, #connectify-sidebar, #cx-semester-notice';
 
   /** The innermost element of the top-level "All" filter (a wrapper around it reads "All" too), or null. */
   function findAllFilter() {
@@ -56,13 +58,13 @@
 
   /** The name of the Connect outline filter applied (e.g. a class), or '' when showing All. */
   function activeFilterTitle() {
-    const toolbarTitle = (document.querySelector('.cvr-c-category-toolbar__title .v-label, .cvr-c-category-toolbar__title')?.textContent || '').trim();
+    const toolbarTitle = (document.querySelector('.cvr-c-category-toolbar__title .v-label, .cvr-c-category-toolbar__title, mat-toolbar.c-category-bar .text-truncate')?.textContent || '').trim();
     return toolbarTitle.toLowerCase() === 'all' ? '' : toolbarTitle;
   }
 
   /** True on the outlines page when a filter is applied or fewer than four courses are visible (year-rollover.js). */
   function isOutlinesFilterRestricted() {
-    const outlinesRoot = document.querySelector('.assessmentoutlinesui, [class*="assessmentoutline"], .cvr-c-category-toolbar, .eds-c-accordion--dark');
+    const outlinesRoot = document.querySelector('.assessmentoutlinesui, [class*="assessmentoutline"], .cvr-c-category-toolbar, .eds-c-accordion--dark, cnt-category-bar');
     if (!outlinesRoot) return false;
     const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, [class*="subject-card"]');
     return Boolean(activeFilterTitle()) || tiles.length < 4;

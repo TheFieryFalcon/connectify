@@ -144,10 +144,8 @@
     return semester ? Math.min(semester, card) : card;
   }
 
-  /** A task row's mark cell: { score, maxScore, isCompleted, isPending } (maxScore 100 when none is shown). */
-  function readTaskMark(row) {
-    const normalize = window.ConnectifyUtils.normalize;
-    const text = normalize(row.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent);
+  /** A task's mark text ("17 Out of 20", "85%", "- Out of 30"): { score, maxScore, isCompleted, isPending } (maxScore 100 when none is shown). */
+  function markFromText(text) {
     const fraction = text.match(/^(\d+(?:\.\d+)?)\s*(?:Out\s+of|\/)\s*(\d+(?:\.\d+)?)$/i);
     const percent = text.match(/^(-?\d+(?:\.\d+)?)\s*%$/i) || text.match(/(-?\d+(?:\.\d+)?)\s*%/i);
     const isPending = /^[-–—]\s*(?:Out\s+of|\/)\s*\d/i.test(text) || /^[-–—\s]+$/i.test(text) || /pending|not\s*marked/i.test(text);
@@ -167,38 +165,51 @@
     return { score, maxScore, isCompleted, isPending };
   }
 
+  /** A task row's mark cell, read as markFromText. */
+  const readTaskMark = row => markFromText(window.ConnectifyUtils.normalize(row.querySelector('.cvr-c-task__marks .cvr-c-task__mark')?.textContent));
+
   const taskLabels = row => Array.from(row.querySelectorAll('.cvr-c-task__details .v-label'))
     .map(e => window.ConnectifyUtils.normalize(e.textContent))
     .filter(Boolean);
 
   /**
-   * Every task row's id in a card: its labels and out-of mark, then how many earlier rows share both.
-   * A Semester 2 outline lists the Semester 1 exam before its own, so two "Close reading" rows get :0 and :1.
-   * The parser and the row readers both use this, so a row always finds its own cached task and prediction.
-   * statsKey keys the boxplot stats cache: the task name, or the id when an earlier row has the same name.
+   * Ids for one card's tasks ({ labels, mark } in card order): their labels and out-of mark, then how many
+   * earlier tasks share both. A Semester 2 outline lists the Semester 1 exam before its own, so two "Close
+   * reading" tasks get :0 and :1. statsKey keys the boxplot stats cache: the task name, or the id when an
+   * earlier task has the same name. Tasks without labels or a readable mark get null.
    */
-  function cardTaskIds(card) {
-    const ids = new Map();
+  function assignTaskIds(tasks) {
     const occurrences = new Map();
     const names = new Set();
-    for (const row of card.querySelectorAll('.cvr-c-tasks .cvr-c-task')) {
-      const labels = taskLabels(row);
-      if (labels.length === 0) continue;
-      const mark = readTaskMark(row);
-      if (!mark.isCompleted && !mark.isPending) continue;
+    return tasks.map(({ labels, mark }) => {
+      if (!labels.length || (!mark.isCompleted && !mark.isPending)) return null;
       const identity = JSON.stringify([labels, mark.maxScore]);
       const occurrence = occurrences.get(identity) || 0;
       occurrences.set(identity, occurrence + 1);
       const id = `${identity}:${occurrence}`;
       const name = labels[labels.length - 1];
       const nameKey = name.toLowerCase();
-      ids.set(row, { id, occurrence, labels, mark, statsKey: names.has(nameKey) ? id : name });
+      const entry = { id, occurrence, labels, mark, statsKey: names.has(nameKey) ? id : name };
       names.add(nameKey);
-    }
+      return entry;
+    });
+  }
+
+  /**
+   * Every task row's id in a card (assignTaskIds over its rows). The parser, the API records
+   * (assessment-api-parse.js) and the row readers all number tasks this way, so a row always finds its own
+   * cached task and prediction.
+   */
+  function cardTaskIds(card) {
+    const rows = Array.from(card.querySelectorAll('.cvr-c-tasks .cvr-c-task'));
+    const entries = assignTaskIds(rows.map(row => ({ labels: taskLabels(row), mark: readTaskMark(row) })));
+    const ids = new Map();
+    rows.forEach((row, i) => { if (entries[i]) ids.set(row, entries[i]); });
     return ids;
   }
 
   window.ConnectifyParseHelpers = {
-    orderHint, dateOrder, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_WEEK, semesterTwoOrder, readTaskMark, taskLabels, cardTaskIds
+    orderHint, dateOrder, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_WEEK, semesterTwoOrder,
+    markFromText, readTaskMark, taskLabels, assignTaskIds, cardTaskIds
   };
 })();

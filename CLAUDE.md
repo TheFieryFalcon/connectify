@@ -30,7 +30,7 @@ The full rule set is always loaded into context via these imports:
 ---
 
 ## 2. Architecture & Script Pipeline (`docs/architecture.md`)
-Main world `src/system/data.js` extracts Highcharts boxplot quantiles onto DOM `dataset.connectifyStats`.
+Main world `src/system/data.js` extracts Highcharts boxplot quantiles onto DOM `dataset.connectifyStats`. Since Connect's October 2026 Angular outlines, outline data and boxplots come from Connect's API (`src/assessment/outline-api.js`), and `legacy-outlines.js` redraws the cards in the old Vaadin look.
 Isolated world content scripts run in the exact dependency order listed in `manifest.json` and `docs/architecture.md` (imported above), starting with `src/system/utils.js` (`ConnectifyUtils`: `normalize`, storage key scans, baseline keys). Reuse it instead of re-implementing helpers.
 
 ---

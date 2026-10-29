@@ -157,7 +157,10 @@
     clearTimeout(checkTimer);
     checkTimer = setTimeout(() => {
       if (hasCheckedThisPage) return;
-      if (document.querySelectorAll('.eds-c-tile').length > 0) {
+      // Connect's API holds every outline's mark: wait for it (or for it to fail) rather than the page
+      const api = window.ConnectifyOutlineApi;
+      if (api && window.ConnectifyUtils.isOutlinesPage() && !api.isSettled()) return;
+      if (api?.isLoaded() || document.querySelectorAll('.eds-c-tile').length > 0) {
         hasCheckedThisPage = true;
         whenMarksShown(checkGrades);
       }
@@ -168,6 +171,7 @@
   // Semester 1 one. Waits up to MARK_WAIT_MS for every outline's running mark (a class without results has none)
   const MARK_WAIT_MS = 5000;
   function summaryMarksPending() {
+    if (window.ConnectifyOutlineApi?.isLoaded?.()) return false;
     return Array.from(document.querySelectorAll('.eds-c-tile')).some(card => {
       if (!card.querySelector('.eds-c-tile__title')) return false;
       const row = Array.from(card.querySelectorAll('.cvr-c-task')).find(r => !r.closest('.cvr-c-tasks'));
@@ -189,6 +193,9 @@
   setTimeout(() => scheduleCheck(600), 600);
   setTimeout(() => scheduleCheck(1500), 1500);
   setTimeout(() => scheduleCheck(3000), 3000);
+
+  window.addEventListener('connectify-outlines-loaded', () => scheduleCheck(0));
+  window.addEventListener('connectify-outlines-failed', () => scheduleCheck(0));
 
   // Nodes being added (e.g. tiles arriving) re-arm the check until it has run on this page
   window.ConnectifyScheduler.onMutations(() => {

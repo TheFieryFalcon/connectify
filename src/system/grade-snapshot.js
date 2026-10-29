@@ -1,8 +1,8 @@
 /**
  * Connectify grade change detection: subject snapshot
  *
- * Reads each subject's running mark (Semester 2 card first once it has results), keeps it in
- * connectify:grade_cache:<student>, and decides whether a subject changed enough to announce.
+ * Reads each subject's running mark (Semester 2 card first once it has results; from Connect's API once
+ * loaded, outline-api.js), keeps it in connectify:grade_cache:<student>, and decides whether a subject changed enough to announce.
  * Notifications: new-grade.js. Exposes window.ConnectifyGradeSnapshot.
  */
 (() => {
@@ -64,36 +64,41 @@
     ) || rawTitle;
   }
 
+  // { rawTitle, mark, card } per outline: Connect's API records once loaded (every class, whatever the page
+  // shows; card is the tile drawn for it, looked up when needed), else the page's tiles
+  function outlineMarks() {
+    const api = window.ConnectifyOutlineApi;
+    if (api?.isLoaded?.()) {
+      return api.records().map(record => ({
+        rawTitle: record.title,
+        mark: window.ConnectifyApiParse?.overallMark?.(record),
+        get card() { return window.ConnectifyLegacyOutlines?.tileFor?.(record) || null; }
+      }));
+    }
+    return Array.from(document.querySelectorAll('.eds-c-tile')).filter(c => c.querySelector('.eds-c-tile__title')).map(card => ({
+      card,
+      rawTitle: normalize(card.querySelector('.eds-c-tile__title')?.textContent),
+      mark: readSubjectMark(Array.from(card.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.cvr-c-tasks')))
+    }));
+  }
+
   /** One entry per subject with a running mark: { card, rawTitle, subjectName, semester, mark }. */
   function currentEntries() {
-    const cards = Array.from(document.querySelectorAll('.eds-c-tile')).filter(
-      c => c.querySelector('.eds-c-tile__title')
-    );
-    if (!cards.length) return [];
-
-    // Group cards by normalized subject name, prioritizing Semester 2 when scores exist
+    // Group outlines by normalized subject name, prioritizing Semester 2 when scores exist
     const subjectMap = new Map();
-
-    for (const card of cards) {
-      const rawTitle = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
-      if (!rawTitle) continue;
-
+    for (const outline of outlineMarks()) {
+      const { rawTitle, mark } = outline;
+      if (!rawTitle || !Number.isFinite(mark)) continue;
       const semester = parseCardSemester(rawTitle);
       const subjectName = extractSubjectName(rawTitle);
-
-      const summaryRow = Array.from(card.querySelectorAll('.cvr-c-task')).find(
-        row => !row.closest('.cvr-c-tasks')
-      );
-      const mark = readSubjectMark(summaryRow);
-      if (!Number.isFinite(mark)) continue;
-
       // The later semester's card wins: Semester 2 panels carry the year's running mark
       const existing = subjectMap.get(subjectName);
       if (!existing || semester > existing.semester) {
-        subjectMap.set(subjectName, { card, rawTitle, subjectName, semester, mark: Math.round(mark * 100) / 100 });
+        subjectMap.set(subjectName, {
+          get card() { return outline.card; }, rawTitle, subjectName, semester, mark: Math.round(mark * 100) / 100
+        });
       }
     }
-
     return Array.from(subjectMap.values());
   }
 

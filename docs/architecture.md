@@ -8,7 +8,8 @@ This document details the world isolation model, script execution lifecycle, and
 
 ### World Isolation Model (MAIN vs ISOLATED)
 Connectify executes across both the webpage's `MAIN` execution world and the extension's default `ISOLATED` world:
-- **`MAIN` World** (`src/system/data.js`): Connect renders boxplots using Highcharts attached to `window.Highcharts`. Due to Chrome/Firefox Manifest V3 isolation, `ISOLATED` content scripts cannot access `window.Highcharts` directly. `data.js` runs in `MAIN` at `document_idle`, intercepts Highcharts series and points data, and stamps JSON-encoded boxplot stats onto DOM element attributes (`data-connectify-stats` and `data-connectify-n`).
+- **Connect's API** (since October 2026 the outlines page is Angular with canvas boxplots): `outline-api.js` reads the outlines and every boxplot from `/connectapi/rest/api/v1/app/student/` (`default_student`, `assessmentOutlines`, `assessmentOutlines/chart`; `X-XSRF-TOKEN` from the `CONNECT_XSRF` cookie). Caches fill from these records, never the page; `legacy-outlines.js` draws Connect's cards again in the old Vaadin markup from them.
+- **`MAIN` World** (`src/system/data.js`): Connect rendered boxplots using Highcharts attached to `window.Highcharts`. Due to Chrome/Firefox Manifest V3 isolation, `ISOLATED` content scripts cannot access `window.Highcharts` directly. `data.js` runs in `MAIN` at `document_idle`, intercepts Highcharts series and points data, and stamps JSON-encoded boxplot stats onto DOM element attributes (`data-connectify-stats` and `data-connectify-n`).
 - **`ISOLATED` World** (All other content scripts): Content scripts read `dataset.connectifyStats` and `dataset.connectifyN` synchronously from DOM nodes without triggering CSP errors or context violations. Globals never cross worlds (e.g. `ConnectifyIsAccordionAnimating` is invisible to `data.js`); requests go through DOM events.
 
 ### Execution Lifecycle & Dependency Pipeline
@@ -19,7 +20,9 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 4. `src/assessment/assessment-cache.js` (in-memory subjects and persistent stats cache)
 4b. `src/assessment/school-terms.js` (generated WA term dates, Early Easter choice, a date's term and week)
 5. `src/assessment/assessment-parse-helpers.js` (order hints, cohort mean, weighted mean)
-6. `src/assessment/assessment-parser.js` (task row & score parser)
+6. `src/assessment/assessment-parser.js` (task row & score parser; `taskRecord` shared with API records)
+6a. `src/assessment/outline-api.js` (Connect's outlines and boxplots from its API, one record per card)
+6b. `src/assessment/assessment-api-parse.js` (API records as the parser's tasks, with the old rows' ids)
 7. `src/assessment/class-semesters.js` (class registry by semester, current-semester detection, new-year trigger)
 7b. `src/assessment/semester-filter-notice.js` (message in place of outlines the semester filter hides entirely)
 8. `src/assessment/semester-filter.js` ("Show this semester's classes only": hidden tiles, refreshed cards, filtered tool data)
@@ -28,6 +31,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 11. `src/assessment/assessment-expand.js` (paced Expand All / Collapse All)
 12. `src/assessment/assessment-scrape.js` (per-card task scraping and chronological order)
 13. `src/assessment/assessment-data.js` (scraper coordinator & cache manager)
+13a. `src/assessment/legacy-outlines-markup.js` / `legacy-outlines.js` (Connect's cards drawn again in the old Vaadin markup; styles `legacy-outlines.css`)
 14. `src/cohort/cohort-math.js` (PCHIP interpolation & quantile stats)
 15. `src/cohort/cohort-size-baselines.js` (typical cohort sizes per subject and year level)
 16. `src/cohort/cohort-estimator.js` (cohort size estimate refined by boxplot spreads)

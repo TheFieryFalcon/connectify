@@ -6,7 +6,8 @@
  * persisted at connectify:class_semesters:<student> (written only on change). The subjects cache merges
  * both semesters under one name, so sidebar tools read semester groupings from here instead of the
  * outline tiles. Also detects the current semester (Semester 2 once any class shows a final Semester 1
- * grade). Exposes window.ConnectifyClassSemesters.
+ * grade). Cards are Connect's API records once loaded (outline-api.js), else its tiles.
+ * Exposes window.ConnectifyClassSemesters.
  */
 (() => {
   'use strict';
@@ -51,6 +52,8 @@
   const infoCache = new WeakMap();
   /** { title, subject, semester } for a card; semester is null when the title names none. */
   function cardInfo(card) {
+    // Connect's API records (outline-api.js) name their class and semester
+    if (card?.apiOutline) return { title: card.title, subject: card.subject, semester: card.semester };
     if (infoCache.has(card)) return infoCache.get(card);
     const title = cardTitle(card);
     const match = title.match(/\bSem(?:ester)?\s*([12])\b/i);
@@ -62,6 +65,8 @@
 
   // The overall row sits outside .cvr-c-tasks and is rendered even while the card is collapsed
   function cardSummary(card) {
+    const api = window.ConnectifyApiParse;
+    if (card?.apiOutline && api) return { mark: api.overallMark(card), finalLetter: api.hasFinalLetter(card) };
     const summaryRow = Array.from(card.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.cvr-c-tasks'));
     const cells = Array.from(summaryRow?.querySelectorAll('.cvr-c-task__marks .cvr-c-task__mark') || []);
     const markMatch = normalize(cells[0]?.textContent).match(/(-?\d+(?:\.\d+)?)\s*%/);
@@ -132,6 +137,12 @@
   // registry decides. Classes the registry has never seen (a new year) are a whole page.
   function evidenceFromPage() {
     if (!window.ConnectifyUtils.isOutlinesPage()) return null;
+    // Connect's API lists every class whatever the page's filter shows, so it always decides
+    const api = window.ConnectifyOutlineApi;
+    if (api?.isLoaded?.()) {
+      const records = api.records();
+      return records.length ? (records.some(r => cardSummary(r).finalLetter) ? 2 : 1) : null;
+    }
     const cards = Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester);
     if (!cards.length) return null;
     if (cards.some(card => cardSummary(card).finalLetter)) return 2;

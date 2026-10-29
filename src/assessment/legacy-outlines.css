@@ -1,0 +1,33 @@
+/**
+ * Connectify: the old Assessment Outlines look (legacy-outlines.js)
+ *
+ * Connect's own Angular cards are hidden once drawn again in the old markup; the drawn host keeps its
+ * natural height (Vaadin's app classes size a whole-page app); boxplots sit in Highcharts' 50px box with
+ * its 10px inset. Dark themes recolour the boxplot through the chart rules (theme-charts-editor.css).
+ */
+.cx-legacy-hidden {
+  display: none !important;
+}
+
+#cx-legacy-outlines,
+#cx-legacy-outlines > .v-ui {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+#cx-legacy-outlines .cx-legacy-chart {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+#cx-legacy-outlines .cx-legacy-boxplot {
+  display: block;
+  width: 100%;
+  height: 50px;
+  overflow: visible;
+}

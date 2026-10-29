@@ -1,11 +1,12 @@
 /**
  * Connectify grade change detection: newly marked tasks
  *
- * The running mark can stay put when a new result lands on the student's average, so whenever an
- * outline's task rows are on screen (the student opened it, Expand All, auto-expand) its marked task ids
- * (ConnectifyParseHelpers.cardTaskIds) are compared with the ones saved for that card's semester in
- * connectify:grade_cache:<student> (entry.tasks[semester]). More newly marked ids than vanished ones is a
- * new result (a renamed task swaps one id for another); a card never seen before is saved quietly.
+ * The running mark can stay put when a new result lands on the student's average, so each outline's marked
+ * task ids (ConnectifyParseHelpers ids: every outline from Connect's API once loaded, outline-api.js; else
+ * whenever an outline's task rows are on screen: the student opened it, Expand All, auto-expand) are
+ * compared with the ones saved for that card's semester in connectify:grade_cache:<student>
+ * (entry.tasks[semester]). More newly marked ids than vanished ones is a new result (a renamed task swaps
+ * one id for another); a card never seen before is saved quietly.
  * Runs once new-grade.js has checked the marks (start()). Exposes window.ConnectifyGradeTasks.
  */
 (() => {
@@ -42,20 +43,37 @@
     if (!cache) return [];
     const changed = new Map();
     let dirty = false;
-    for (const card of document.querySelectorAll('.eds-c-tile')) {
-      const rawTitle = normalize(card.querySelector('.eds-c-tile__title')?.textContent);
+    for (const outline of outlines()) {
+      const { rawTitle } = outline;
       if (!rawTitle) continue;
       const entry = cache[snapshot.extractSubjectName(rawTitle)];
-      const ids = entry && markedIds(card);
+      const ids = entry && outline.ids();
       if (!ids) continue;
       const semester = String(snapshot.parseCardSemester(rawTitle));
       const subjectName = snapshot.extractSubjectName(rawTitle);
-      if (hasNewResult(entry.tasks?.[semester], ids) && !changed.has(subjectName)) changed.set(subjectName, card);
+      if (hasNewResult(entry.tasks?.[semester], ids) && !changed.has(subjectName)) changed.set(subjectName, outline);
       entry.tasks = { ...entry.tasks, [semester]: ids };
       dirty = true;
     }
     if (dirty) snapshot.saveCachedGrades(cache);
-    return Array.from(changed, ([subjectName, card]) => ({ subjectName, card }));
+    return Array.from(changed, ([subjectName, outline]) => ({ subjectName, get card() { return outline.card(); } }));
+  }
+
+  // Connect's API records once loaded (every outline's tasks, opened or not), else the tiles with rows on screen
+  function outlines() {
+    const api = window.ConnectifyOutlineApi;
+    if (api?.isLoaded?.()) {
+      return api.records().map(record => ({
+        rawTitle: record.title,
+        ids: () => window.ConnectifyApiParse?.markedIds?.(record) ?? null,
+        card: () => window.ConnectifyLegacyOutlines?.tileFor?.(record) || null
+      }));
+    }
+    return Array.from(document.querySelectorAll('.eds-c-tile')).map(card => ({
+      rawTitle: normalize(card.querySelector('.eds-c-tile__title')?.textContent),
+      ids: () => markedIds(card),
+      card: () => card
+    }));
   }
 
   let started = false;

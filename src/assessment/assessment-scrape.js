@@ -20,6 +20,7 @@
   // (Expand All skips the per-card update) without re-reading cards whose subjects are already complete
   const scrapedRows = new WeakMap();
   function needsScrape(card) {
+    if (card.apiOutline) return false;
     const rows = card.querySelectorAll(TASK_ROWS).length;
     return rows > 0 && scrapedRows.get(card) !== rows;
   }
@@ -46,14 +47,18 @@
    */
   function scrapeSubjectTasks(card, forceRefresh = false, updatedStaleSubjects = null) {
     if (!card) return;
+    // A tile drawn from Connect's API (legacy-outlines.js) is read from its record, never its rows
+    const apiRecord = window.ConnectifyOutlineApi?.recordOf?.(card) || null;
     const parsed = parseCardSubjectTasks(card);
     if (!parsed) return;
     const { title, subjectName, tasks: parsedTasks } = parsed;
-    if (parsedTasks.length > 0) scrapedRows.set(card, card.querySelectorAll(TASK_ROWS).length);
+    if (parsedTasks.length > 0 && !card.apiOutline) scrapedRows.set(card, card.querySelectorAll(TASK_ROWS).length);
     // The class registry keeps which tasks each semester's outline lists (the cache merges both)
     const classes = window.ConnectifyClassSemesters;
-    classes?.recordCards?.([card], true);
-    classes?.recordTasks?.(subjectName, classes.cardInfo(card).semester, parsedTasks);
+    const source = apiRecord || card;
+    classes?.recordCards?.([source], true);
+    classes?.recordTasks?.(subjectName, classes.cardInfo(source).semester, parsedTasks);
+    if (apiRecord?.stats) setTaskStats(subjectName, `Overall S${apiRecord.semester}`, apiRecord.stats);
 
     const isStale = isSubjectStale(subjectName);
     const hasCache = subjectsCache.has(subjectName) && subjectsCache.get(subjectName).size > 0;
@@ -114,7 +119,10 @@
         keepCohortStats(record, existingTask);
       }
 
-      if (record.stats && record.row) {
+      if (record.stats && apiRecord) {
+        // Connect's API boxplots are the task's own, so they are always the cached ones
+        setTaskStats(subjectName, record.statsKey || taskName, record.stats);
+      } else if (record.stats && record.row) {
         const chartHost = record.row.querySelector('[data-highcharts-chart], .cvr-c-task__chart');
         if (chartHost?.dataset?.connectifyStats) {
           setTaskStats(subjectName, record.statsKey || taskName, record.stats, chartHost.dataset.connectifyN);

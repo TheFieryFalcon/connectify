@@ -2323,7 +2323,7 @@ runTest('assessment-data.js strictly ignores summary rows outside .cvr-c-tasks a
   const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
   assert.ok(!dataJs.includes('cvr-c-task--summary'), 'assessment-data.js must not have fallback query capturing summary rows');
   assert.ok(dataJs.includes("card.querySelectorAll('.cvr-c-tasks .cvr-c-task')") && dataJs.includes('if (!entry) continue;'), 'assessment-data.js must only parse rows inside cvr-c-tasks that have a task id');
-  assert.ok(dataJs.includes('if (labels.length === 0) continue;'), 'assessment-data.js must not invent tasks when labels are empty');
+  assert.ok(dataJs.includes('if (!labels.length || (!mark.isCompleted && !mark.isPending)) return null;'), 'assessment-data.js must not invent tasks when labels are empty');
 
   const card = new MockElement('div', 'eds-c-tile');
   const title = new MockElement('div', 'eds-c-tile__title');
@@ -3069,7 +3069,8 @@ runTest('Test 110: Silent difference check, out-of-date cache prompt with one-ti
 
   // 3. collect() stops scrape when valid cache exists, no subjects are stale and every expanded card was read (Test 183)
   // Only stale classes whose cards refresh count, so a hidden semester's stale class cannot force a full read on every collect
-  assert.ok(assessJs.includes('const refreshAll = forceRefresh || hasStale || !hasCachedSubjects();') && assessJs.includes('staleSet.size > 0 && (cards === allCards') && assessJs.includes('cards.filter(needsScrape)'), 'collect must check hasCachedSubjects, stale refreshed classes and unread expanded cards');
+  // A new load of Connect's API records (outline-api.js) refreshes every card too
+  assert.ok(assessJs.includes('const refreshAll = forceRefresh || freshApi || hasStale || !hasCachedSubjects();') && assessJs.includes('staleSet.size > 0 && (cards === allCards') && assessJs.includes('cards.filter(needsScrape)'), 'collect must check hasCachedSubjects, a new API load, stale refreshed classes and unread expanded cards');
   assert.ok(assessJs.includes('function hasCachedSubjects()'), 'assessment-data.js must define hasCachedSubjects');
   assert.ok(assessJs.includes('parseCardSubjectTasks'), 'assessment-data.js must separate card task parsing into parseCardSubjectTasks');
 
@@ -6903,7 +6904,8 @@ runTest('Test 231: Off the outlines page the cache is read as is: no tile is scr
     location.href = origHref;
   }
   const read = f => fs.readFileSync(path.resolve(__dirname, f), 'utf8');
-  assert.ok(/const allCards = window\.ConnectifyUtils\.isOutlinesPage\(\)\s*\?/.test(read('src/assessment/assessment-data.js')), 'collect() reads no cards off the outlines page');
+  assert.ok(/const onOutlines = window\.ConnectifyUtils\.isOutlinesPage\(\);/.test(read('src/assessment/assessment-data.js')) &&
+    read('src/assessment/assessment-data.js').includes('const allCards = !onOutlines ? [] :'), 'collect() reads no cards off the outlines page');
   assert.ok(read('src/assessment/class-semesters.js').includes('if (!window.ConnectifyUtils.isOutlinesPage()) return null;'), 'semester detection ignores other pages\' tiles');
   assert.ok(read('src/assessment/semester-filter.js').includes('isOutlinesPage?.() === false ? null'), 'the semester filter hides nothing off the outlines page');
 
@@ -8761,7 +8763,7 @@ runTest('Test 191: Semester 2 starts at canonical school week 17 (Term 2 Week 7,
   assert.strictEqual(taskSemester(2, 'Thur 21st May'), 1);
   assert.strictEqual(taskSemester(2, 'Thur 27th August'), 2);
   assert.strictEqual(taskSemester(1, 'Thur 27th August'), 1, 'a dated task is never later than its own card');
-  assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/cache-versions.js'), 'utf8').includes("RESULTS: 'v14_20261029_results'"), 'cached tasks placed in the card\'s semester are re-read');
+  assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/cache-versions.js'), 'utf8').includes("RESULTS: 'v15_20261029_results'"), 'cached tasks placed in the card\'s semester are re-read');
   assert.strictEqual(taskSemester(1, 'Term 3, Week 2'), 1, 'a task is never later than its own card');
   assert.strictEqual(taskSemester(2, 'Term 3, Week 2', 5), 1, 'a week override wins over the caption');
   if (savedTerms === null) localStorage.removeItem('connectify:school_terms'); else localStorage.setItem('connectify:school_terms', savedTerms);
@@ -12981,6 +12983,161 @@ runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once
     window.ConnectifyNewGrade = prev.newGrade;
     window.ConnectifyOutlineJump = prev.jumpMod;
   }
+});
+
+runTest('Test 283: Outlines come from Connect\'s API: records number tasks as the old rows did and fill every cache without reading the page', async () => {
+  const prev = { fetch: global.fetch, api: window.ConnectifyOutlineApi, parse: window.ConnectifyApiParse, markup: window.ConnectifyLegacyMarkup, cookie: document.cookie };
+  const task = (taskId, taskType, taskWhen, taskDescription, mark, maximumMark, weightedMark, weightedMaximumMark) =>
+    ({ taskId, taskType, taskWhen, taskDescription, showTaskChart: true, mark, maximumMark, weightedMark, weightedMaximumMark });
+  const s1Tasks = [task(11, 'Test', '8', 'TEST 1', '43.5', '50', '4.3', '5'), task(12, 'Examination', undefined, 'Close reading', '17', '25', '4', '5')];
+  const s2Tasks = [...s1Tasks, task(13, 'Examination', undefined, 'Close reading', undefined, '25', undefined, '5')];
+  const group = (id, semester, tasks, mark, grade) => ({
+    assessmentGroupId: id, chartAssessmentOutlineId: id + 1000, name: 'Chemistry ATAR Year 11', semester,
+    staff: [{ fullName: 'Leon Harris' }], school: { name: 'Willetton Senior High School' },
+    statusLine: semester === 1 ? 'Semester 1 Total Percent and Progress Grade' : 'Semester 2 Cumulative Percent',
+    groupResultsData: { mark, grade, showGroupChart: true },
+    outlines: [{ assessmentOutlineId: id + 1000, description: 'AECHE', taskGroups: [{ tasks, groups: [] }] }]
+  });
+  const plot = (mark, a, b, c, d, e) => ({ mark, minValue: a, quartile1: b, median: c, quartile3: d, maxValue: e });
+  const charts = {
+    1: { groupChartData: plot(83.3, 30.2, 62.3, 70.8, 79.05, 92.7),
+      tasksChartData: { 11: plot(87, 14.000000000000002, 56.00000000000001, 68, 79, 100), 12: plot(68, 0.01, 52, 64, 72, 92) } },
+    2: { groupChartData: plot(84.9, 40, 60, 70, 80, 95), tasksChartData: {} }
+  };
+  const replies = {
+    default_student: { status: 'SUCCESS', items: [{ entityId: 42 }] },
+    assessmentOutlines: { status: 'SUCCESS', items: [{ semester1Groups: [group(1, 1, s1Tasks, '83.3%', 'A')], semester2Groups: [group(2, 2, s2Tasks, '84.9%', '')] }] }
+  };
+  const calls = [];
+  global.fetch = async (url, init) => {
+    calls.push({ url, init });
+    const route = url.replace('/connectapi/rest/api/v1/app/student/', '');
+    const json = route.startsWith('assessmentOutlines/chart')
+      ? { status: 'SUCCESS', items: [charts[JSON.parse(init.body).assessmentGroupId]] }
+      : replies[route.split('?')[0]];
+    return { ok: true, status: 200, json: async () => json };
+  };
+  document.cookie = 'a=1; CONNECT_XSRF=tok%3D1';
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  try {
+    delete window.ConnectifyOutlineApi;
+    delete window.ConnectifyApiParse;
+    delete window.ConnectifyLegacyMarkup;
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8'));
+    eval(read('assessment/assessment-api-parse.js'));
+    eval(read('assessment/legacy-outlines-markup.js'));
+    // On the outlines page the API loads by itself
+    eval(read('assessment/outline-api.js'));
+    const api = window.ConnectifyOutlineApi;
+    // Other tests' cleanups run while this one awaits: keep this test's modules in place
+    const mine = { ConnectifyOutlineApi: api, ConnectifyApiParse: window.ConnectifyApiParse, ConnectifyLegacyMarkup: window.ConnectifyLegacyMarkup };
+    const records = await api.load();
+    Object.assign(window, mine);
+    // (other async tests swap the mock document between requests, so the cookie is checked on the first)
+    assert.ok(calls.length === 4 && calls.every(c => c.init.method === 'POST' && c.init.credentials === 'same-origin' && 'X-XSRF-TOKEN' in c.init.headers) &&
+      calls[0].init.headers['X-XSRF-TOKEN'] === 'tok=1',
+      'every request is a same-origin POST carrying Connect\'s CONNECT_XSRF cookie as X-XSRF-TOKEN');
+    assert.strictEqual(calls[1].url, '/connectapi/rest/api/v1/app/student/assessmentOutlines?studentId=42', 'outlines for the signed-in student');
+    assert.strictEqual(calls[1].init.body, undefined, 'the outlines request has no body, as Connect\'s');
+    assert.deepStrictEqual(JSON.parse(calls[2].init.body), { assessmentGroupId: 1, assessmentOutlineId: 1001 }, 'one chart request per group');
+    assert.deepStrictEqual(records.map(r => r.title), ['Chemistry ATAR Year 11 - Semester 1', 'Chemistry ATAR Year 11 - Semester 2']);
+    assert.deepStrictEqual(records[0].stats, [30.2, 62.3, 70.8, 79.05, 92.7], 'the class boxplot');
+    assert.deepStrictEqual(records[1].outlines[0].tasks[0].stats, [14, 56, 68, 79, 100],
+      'a Semester 1 task on the Semester 2 outline takes its boxplot from Semester 1\'s chart, float noise rounded away');
+    assert.strictEqual(records[1].outlines[0].tasks[2].stats, null, 'an unmarked task has no boxplot');
+
+    // The same tasks as the old rows showed them: identical ids, so caches, overrides and predictions carry on
+    const P = window.ConnectifyApiParse;
+    const card = new MockElement('div', 'eds-c-tile');
+    const list = new MockElement('div', 'cvr-c-tasks');
+    card.appendChild(list);
+    for (const t of records[1].outlines[0].tasks) {
+      const row = new MockElement('div', 'cvr-c-task');
+      const details = new MockElement('div', 'cvr-c-task__details');
+      for (const text of P.labelsOf(t)) { const l = new MockElement('span', 'v-label'); l.textContent = text; details.appendChild(l); }
+      const marks = new MockElement('div', 'cvr-c-task__marks');
+      for (const text of [`${t.mark || '-'}Out of ${t.max}`, `${t.weighted || '-'}Out of ${t.weightedMax}`]) {
+        const cell = new MockElement('div', 'cvr-c-task__mark'); cell.textContent = text; marks.appendChild(cell);
+      }
+      row.appendChild(details); row.appendChild(marks); list.appendChild(row);
+    }
+    assert.deepStrictEqual(P.ids(records[1]).map(e => e.id), Array.from(window.ConnectifyParseHelpers.cardTaskIds(card).values()).map(e => e.id),
+      'API tasks get the ids the old outline rows got');
+    const parsed = P.parse(records[1]);
+    assert.deepStrictEqual(parsed.tasks.map(t => [t.name, t.weight, t.pending]), [['TEST 1', 5, false], ['Close reading', 5, false], ['Close reading', 5, true]]);
+    assert.strictEqual(parsed.tasks[0].score, 87);
+    assert.strictEqual(parsed.tasks[2].statsKey, parsed.tasks[2].id, 'a repeated name is keyed by its id in the stats cache');
+    assert.deepStrictEqual(P.markedIds(records[1]), parsed.tasks.slice(0, 2).map(t => t.id), 'the grade check compares marked ids');
+
+    // The old markup lists exactly those labels, and unmarked rows show "-" with no chart
+    const M = window.ConnectifyLegacyMarkup;
+    const labelsIn = html => Array.from(html.split('cvr-c-task-mark__headers')[0].matchAll(/v-label-undef-w">([^<]*)</g), m => m[1]);
+    records[1].outlines[0].tasks.forEach(t => assert.deepStrictEqual(labelsIn(M.taskRow(t)), P.labelsOf(t)));
+    const unmarked = M.taskRow(records[1].outlines[0].tasks[2]);
+    assert.ok(unmarked.includes('v-label-undef-w">-</div>') && unmarked.includes('Out of 25') && !unmarked.includes('cvr-c-task__chart'));
+    const chart = M.chart([14, 56, 68, 79, 100], 87);
+    assert.ok(chart.includes('data-connectify-stats="[14,56,68,79,100]"') && chart.includes('class="highcharts-series"') &&
+      chart.includes('fill="#FFFFFF" stroke="#A9A9A9"') && chart.includes('cx="87%"') && chart.includes('fill="#000000"'),
+      'boxplots carry their quantiles and Highcharts\' fills, which the theme rules recolour');
+
+    // Every cache fills from the records, nothing read from the page
+    window.ConnectifyData.clearCache();
+    const subjects = window.ConnectifyData.collect(true);
+    const chem = subjects.find(s => s.name === 'Chemistry ATAR Year 11');
+    assert.strictEqual(chem?.tasks.length, 3, 'the subjects cache holds every task, opened or not');
+    assert.deepStrictEqual(window.ConnectifyData.getTaskStats('Chemistry ATAR Year 11', 'TEST 1'), [14, 56, 68, 79, 100], 'task boxplots reach the stats cache');
+    assert.deepStrictEqual(window.ConnectifyData.getTaskStats('Chemistry ATAR Year 11', 'Overall S1'), [30.2, 62.3, 70.8, 79.05, 92.7], 'and the class boxplot');
+    const reg = window.ConnectifyClassSemesters.get()['Chemistry ATAR Year 11'];
+    assert.ok(reg[1].mark === 83.3 && reg[1].finalLetter && reg[2].mark === 84.9 && !reg[2].finalLetter, 'the class registry');
+    assert.strictEqual(window.ConnectifyClassSemesters.detectSemester(), 2, 'a final Semester 1 letter in the API makes it Semester 2');
+    eval(read('system/grade-snapshot.js'));
+    const entries = window.ConnectifyGradeSnapshot.currentEntries();
+    assert.deepStrictEqual(entries.map(e => [e.subjectName, e.semester, e.mark]), [['Chemistry', 2, 84.9]], 'the grade check reads the API\'s running marks');
+  } finally {
+    global.fetch = prev.fetch;
+    document.cookie = prev.cookie;
+    window.ConnectifyOutlineApi = prev.api;
+    window.ConnectifyApiParse = prev.parse;
+    window.ConnectifyLegacyMarkup = prev.markup;
+    window.ConnectifyData.clearCache();
+  }
+});
+
+runTest('Test 284: Connect\'s new outline cards are drawn again in the old Vaadin markup, and Connect\'s filter menu still works', () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
+  const js = manifest.content_scripts.find(g => g.js?.includes('src/assessment/legacy-outlines.js')).js;
+  const at = f => js.indexOf(`src/assessment/${f}`);
+  assert.ok(at('outline-api.js') === at('assessment-parser.js') + 1 && at('assessment-api-parse.js') === at('outline-api.js') + 1, 'the API modules follow the parser');
+  assert.ok(at('legacy-outlines-markup.js') === at('assessment-data.js') + 1 && at('legacy-outlines.js') === at('legacy-outlines-markup.js') + 1 &&
+    at('legacy-outlines.js') > at('assessment-accordion-watch.js'), 'the renderer follows the data module, after the accordion watch (it reads Show Details before a toggle)');
+  const css = read('assessment/legacy-outlines.css');
+  assert.ok(manifest.content_scripts.some(g => g.css?.includes('src/assessment/legacy-outlines.css')));
+  assert.ok(cssHas(css, '.cx-legacy-hidden { display: none !important;'), 'Connect\'s own cards are hidden once drawn');
+
+  const mount = read('assessment/legacy-outlines.js');
+  assert.ok(mount.includes("host.className = 'v-app connect-vr assessmentoutlinesui'"), 'the host carries Vaadin\'s app classes, which Connect\'s theme styles under');
+  assert.ok(mount.includes("document.querySelectorAll('cnt-sao-card')") && mount.includes('slot.classList.toggle(HIDDEN, Boolean(record))'),
+    'each card Connect shows (its filter decides) with an API record is drawn and Connect\'s copy hidden');
+  assert.ok(mount.includes("section.insertAdjacentHTML('beforeend', markup().detailsPanel(record))") && mount.includes('else panel.remove();'),
+    'Show / Hide Details adds and removes the task rows, as Vaadin did');
+
+  eval(read('assessment/legacy-outlines-markup.js'));
+  const M = window.ConnectifyLegacyMarkup;
+  const record = { title: 'Physics ATAR Year 11 - Semester 2', subject: 'Physics ATAR Year 11', semester: 2, staff: ['A Teacher'], school: 'A School',
+    statusLine: 'Semester 2 Cumulative Percent', mark: '', grade: '', showChart: true, stats: null,
+    outlines: [{ code: 'AEPHY', tasks: [{ type: 'Test', when: 'Term 3, week 4', name: 'Test 3', mark: '40', max: '50', weighted: '5.6', weightedMax: '7', showChart: true, stats: null }] }] };
+  const tile = M.tile(record);
+  assert.ok(tile.includes('eds-c-tile__title') && tile.includes('>Physics ATAR Year 11 - Semester 2<') && tile.includes('>Show Details<') && !tile.includes('cvr-c-tasks'),
+    'a collapsed tile has its title and Show Details, no task rows');
+  assert.ok(tile.includes('eds-c-text--bold v-label-eds-c-text--bold v-label-undef-w">Semester 2 Cumulative Percent</div><div class="v-csslayout v-layout v-widget"></div>'),
+    'no overall mark leaves Connect\'s empty summary container (cohort-subject-average.js fills it)');
+  const details = M.detailsPanel(record);
+  assert.ok(details.includes('>Physics ATAR Year 11 (AEPHY)<') && details.includes('</div></div><div class="cvr-c-task v-layout v-widget">'),
+    'rows follow their group\'s heading bar, which Connect lays out as one flex row');
+  const filter = read('sidebar/sidebar-filter.js');
+  assert.ok(filter.includes("'cnt-category-menu .mat-expansion-panel-header .mat-content'") && filter.includes('.mat-expansion-panel-content, #connectify-sidebar'),
+    'Back to All presses the Angular filter menu\'s top-level All, never a semester section\'s');
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -86,6 +86,7 @@ Extremely concise summary of the core visual design language, contrast standards
 
 ## 6. Runtime & DOM Safety
 - **World Isolation**: Respect `MAIN` world data bridge (`data.js` stamps `dataset.connectifyStats`) vs `ISOLATED` world UI scripts.
+- **Assessment Outlines from Connect's API** (`outline-api.js`): since Connect's October 2026 Angular outlines, every cache on the outlines page (subjects, boxplot stats, class registry, grade cache) fills from Connect's own API, never from the page, and each card Connect shows is drawn again in the old Vaadin look (`legacy-outlines.js`: Vaadin's markup and class lists, Highcharts-style SVG boxplots with the same fills so themes recolour them; Connect's filter menu still decides which cards show). API tasks are numbered exactly as the old rows were (`assignTaskIds` over the same labels and mark texts), so saved overrides, predictions and caches carry on.
 - **Zero-Flicker Observers**: Page-wide observation and periodic work go through `ConnectifyScheduler` (`onMutations` with a filter and `mute`, `every` gated on activity, visibility and open panels), never a new body observer or `setInterval`; filter out `style` attribute mutations; track user activity with `ConnectifyIsUserActive()`.
 - **Strict Deduplication**: Purge redundant DOM elements on SPA transitions. Ensure all tool launchers and panels export standard `panelRefs` (`toggleBtn`, `panel`).
 

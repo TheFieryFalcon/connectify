@@ -51,13 +51,23 @@
    * @returns {Array<{name: string, tasks: Array<Object>}>} Array of subject records
    */
   let isCollecting = false;
+  let scrapedApiVersion = 0;
+  const semesterOf = card => (card.apiOutline ? card.semester : parseSemester(card));
   function collect(includePending = false, forceRefresh = false) {
     if (isCollecting) {
       return formatCollectedSubjects(includePending);
     }
-    // Other pages' tiles (home page notices, class promos) are never class cards: there the cache is read as is
-    const allCards = window.ConnectifyUtils.isOutlinesPage()
-      ? Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile')) : [];
+    // Connect's API records once loaded (outline-api.js): the page is never read for them. Before that, or
+    // if Connect refuses, only Connect's own tiles (never ones Connectify drew). Other pages' tiles (home
+    // page notices, class promos) are never class cards: there the cache is read as is
+    const api = window.ConnectifyOutlineApi;
+    const apiCards = api?.isLoaded?.() ? api.records() : null;
+    const onOutlines = window.ConnectifyUtils.isOutlinesPage();
+    const allCards = !onOutlines ? [] : apiCards || Array.from(document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile'))
+      .filter(card => !card.closest('#cx-legacy-outlines'));
+    // A new API load is the whole truth for every class: each card refreshes its cached tasks
+    const freshApi = Boolean(apiCards) && api.version() !== scrapedApiVersion;
+    if (freshApi) scrapedApiVersion = api.version();
     // "Show this semester's classes only": only this semester's cards refresh the cache; the other
     // semester's cached results stay as they are (semester-filter.js)
     const filter = window.ConnectifySemesterFilter;
@@ -75,11 +85,11 @@
       // A stale class whose cards are not refreshed (hidden semester) must not force a full read every time.
       const staleSet = getStaleSubjects();
       const hasStale = staleSet.size > 0 && (cards === allCards || cards.some(c => isSubjectStale(classes?.cardInfo(c).subject || '')));
-      const refreshAll = forceRefresh || hasStale || !hasCachedSubjects();
+      const refreshAll = forceRefresh || freshApi || hasStale || !hasCachedSubjects();
       const targets = (refreshAll ? cards : cards.filter(needsScrape))
-        .sort((a, b) => parseSemester(a) - parseSemester(b));
+        .sort((a, b) => semesterOf(a) - semesterOf(b));
       for (const card of targets) {
-        scrapeSubjectTasks(card, forceRefresh, updatedStaleSubjects);
+        scrapeSubjectTasks(card, forceRefresh || freshApi, updatedStaleSubjects);
       }
     } finally {
       isCollecting = false;
@@ -157,6 +167,9 @@
     const subjects = collect(includePending, forceRefresh);
     return window.ConnectifySemesterFilter ? window.ConnectifySemesterFilter.filterSubjects(subjects) : subjects;
   }
+
+    // Connect's outlines arrived: every tool and panel refreshes from them
+    window.addEventListener('connectify-outlines-loaded', () => notifyResultsUpdated());
 
     // Publish public API
     window.ConnectifyData = {
