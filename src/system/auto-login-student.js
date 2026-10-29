@@ -3,8 +3,8 @@
  *
  * Connect's sign-in page first asks who is signing in (Staff / Parent / Student). With Auto-login on
  * (`cx-autologin-enabled`, the checkbox on the DET sign-in page) it presses Student, also after the session
- * expired, unless the student logged out or a login was attempted in the last 30s. The flags are left for
- * auto-login.js, which shows why it paused and clears them.
+ * expired, unless the student logged out or a login was attempted in the last 30s. The logout flag is left
+ * for auto-login.js, which shows why it paused and clears it.
  */
 (() => {
   'use strict';

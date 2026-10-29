@@ -45,12 +45,11 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 - **Export**: `window.ConnectifyDomSweeper`.
 
 #### [`navigation.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/navigation.js)
-- **Role**: Injects direct "Assessment Outlines" shortcut into Connect navigation bar, tracks user activity, and detects session timeouts.
+- **Role**: Injects direct "Assessment Outlines" shortcut into Connect navigation bar and tracks user activity.
 - **Key Functions**:
   - Injects link into desktop greedy navigation and mobile drawer.
   - `ConnectifyNavigation.markActive()`: on the outlines page moves Connect's `eds-s-is-active` from My Connect to the shortcut (desktop and drawer), restoring it elsewhere; re-run on nav re-renders and class changes.
   - Tracks user activity (`mousemove`, `keydown`, `scroll`) to update `window.__connectifyLastActive` and provide `window.ConnectifyIsUserActive()`.
-  - Monitors session expiry modals and unloads while idle (> 5 min) to set `cx-session-expired`.
   - Intercepts manual logout clicks to set `cx-manual-logout`.
 
 #### Theme scripts (`src/theme/`, manifest order)
@@ -72,10 +71,10 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 - **Engine**: `theme-surface-adapter.js` tags unstyled light surfaces (`data-connectea-surface`/`-ink`); `theme-toggle.js` mounts `#connectea-theme-toggle`; `theme-menu.js` renders `#connectea-theme-menu` (custom themes get Edit ✎, which reopens the customizer on that theme and saves in place by id, and Delete ✕; styles in `theme-menu-actions.css`; Customize Theme... then Import Theme...); `theme-import.js` (`ConnectifyThemeImport`): `sanitize(raw)` (shared with the customizer import), `importFile(file)` saves a theme file as a custom theme (same name updates it; missing Basic tokens from Dark) and applies it, `pick()` opens the picker, `failText(err)` (the import alert names the reason and logs it); files are read with `ConnectifyThemeCtme.unpackFile` (a data URL string via `FileReader`, since Firefox MV3 content scripts may not read page-owned buffers from `arrayBuffer()` or a `Response`); `theme.js` (`ConnectifyTheme`) applies themes on `connectea:themechange`, disables them on login/logout and restores after sign-in; `theme-request.js` applies a theme requested from the page world (`connectify-request-theme`), which the theme audit uses because the registry is isolated-world only.
 
 #### [`auto-login.js`](file:///Users/uwong/Downloads/2.1.14_0/src/system/auto-login.js)
-- **Role**: Auto-submits login credentials on `https://login.det.wa.edu.au/*` while respecting session expiry and manual logout.
+- **Role**: Auto-submits login credentials on `https://login.det.wa.edu.au/*` while respecting manual logout; an expired session signs straight back in.
 - **Key Functions**:
   - Injects "Auto-login" toggle checkbox next to the login button.
-  - Detects session timeout URLs and inactivity messages; pauses auto-login and displays warning notice `(Paused: session expired)`.
+  - Pauses only after a manual logout (`(Paused: logged out)`) or a login in the last 30s; removes the `cx-session-expired` flag older versions left.
   - Prevents rapid looping via a 30-second loop guard.
   - `auto-login-student.js` (`https://connect.det.wa.edu.au/login`, Connect's Staff / Parent / Student chooser): with Auto-login on, presses Student, also after an expired session, but not after a manual logout or a login in the last 30s; leaves the flags for `auto-login.js`.
   - Fires only for a saved password / browser autofill once both values are readable (Chromium matches `:autofill` before releasing the password to the page; the release fires `input`, which retries); typing or pasting in a credential field disables it for that page.

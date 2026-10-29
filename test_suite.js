@@ -7790,7 +7790,12 @@ runTest('Test 277: With Auto-login on, Connect\'s sign-in chooser presses Studen
   assert.strictEqual(await run({ 'cx-session-expired': true }), 1, 'an expired session signs straight back in');
   assert.strictEqual(await run({ 'cx-last-autologin': Date.now() - 5000 }), 0, 'never loops within 30s of a login');
   assert.strictEqual(await run({}, 'https://connect.det.wa.edu.au/login?reason=timeout'), 1, 'a timeout URL never pauses it');
-  assert.ok(!src.includes('storage.local.remove'), 'the pause flags are left for the DET page, which shows why it paused');
+  assert.ok(!src.includes('storage.local.remove'), 'the logout flag is left for the DET page, which shows why it paused');
+  const login = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login.js'), 'utf8');
+  assert.ok(login.includes('const shouldBlockAutoLogin = isManualLogout || isRapidLoop;') && !login.includes('Paused: session expired'),
+    'the DET sign-in page signs straight back in after an expired session');
+  const nav = fs.readFileSync(path.join(BASE_DIR, 'src/system/navigation.js'), 'utf8');
+  assert.ok(!nav.includes("'cx-session-expired': true"), 'nothing marks an expired session any more');
 });
 
 runTest('Test 163: Liquid Glass rounds the notice card host and Library table wrapper, paginators have no pill; icon buttons keep native padding', () => {

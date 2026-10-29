@@ -105,7 +105,7 @@
 
   update();
 
-  // User activity tracking to allow quiet idle periods and detect session timeouts
+  // User activity tracking to allow quiet idle periods
   window.__connectifyLastActive = Date.now();
   window.ConnectifyIsUserActive = () => (Date.now() - (window.__connectifyLastActive || Date.now())) < 90000;
 
@@ -133,31 +133,4 @@
       } catch (err) {}
     }
   }, true);
-
-  // If page unloads or redirects while user was idle (> 5 mins), mark session as expired
-  window.addEventListener('beforeunload', () => {
-    if (Date.now() - (window.__connectifyLastActive || Date.now()) > 300000) {
-      try {
-        const api = getStorageApi();
-        if (api?.storage?.local) {
-          api.storage.local.set({ 'cx-session-expired': true });
-        }
-      } catch (err) {}
-    }
-  });
-
-  // Watch for session warning/expiry modal dialogs in Connect
-  const checkSessionStatus = () => {
-    const text = document.body ? document.body.innerText : '';
-    if (/session\s*(has\s*)?(expired|timed\s*out)|your\s*session\s*will\s*expire/i.test(text)) {
-      try {
-        const api = getStorageApi();
-        if (api?.storage?.local) {
-          api.storage.local.set({ 'cx-session-expired': true });
-        }
-      } catch (err) {}
-    }
-  };
-  // Session expiry is exactly what happens while the student is away, so this runs even when idle
-  scheduler.every(10000, checkSessionStatus, { whenActive: false, whenVisible: false });
 })();
