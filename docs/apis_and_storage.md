@@ -49,7 +49,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyPredictorMath` | `predictor-math.js` | Logarithmic ceiling modeling, task prediction, outcome evaluation, ATAR projections |
 | `window.ConnectifyPredictorUI` | `predictor-ui.js` | Predictor sidebar tool panel coordinator (Predict Grade and Predict ATAR tabs) |
 | `window.ConnectifyCountdown` | `wace-countdown.js` | Year 12 WACE exam countdown timer |
-| `window.ConnectifyNotifications` / `ConnectifyUpdateNotice` | `notifications.js` / `update-notice.js` | Stacked toast engine; one "Connectify updated" toast per newer version, "What's new" opens CHANGELOG.md |
+| `window.ConnectifyNotifications` / `ConnectifyUpdateNotice` / `ConnectifyOverhaulNotice` | `notifications.js` / `update-notice.js` / `overhaul-notice.js` | Stacked toast engine; one "Connectify updated" toast per newer version, "What's new" opens CHANGELOG.md; once, on an upgrade to 3.3.0, the semester filter off and a Connect overhaul popup (`migrate`, `show`) |
 | `window.ConnectifyGradeSnapshot` / `ConnectifyGradeTasks` | `grade-snapshot.js` / `grade-tasks.js` | Subject running marks vs the grade cache (own mark only, same semester); newly marked task ids on shown outlines (`check`, `hasNewResult`, `start`) |
 | `window.ConnectifyNewGrade` | `new-grade.js` | Grade change notifications and jump-to-card navigation |
 | `window.ConnectifyDomSweeper` | `dom-sweeper.js` | DOM health monitor and component restoration |
@@ -102,7 +102,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `cx-manual-logout` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user explicitly clicks logout |
 | `cx-last-autologin` | `browser.storage.local` | `auto-login.js` | Timestamp to prevent rapid login loops (<30s) |
 | `connectify:account` / `connectify:accounts` | `localStorage` | `utils.js` | Last account in use (pages that name no user fall back to it); the first account seen copies keys saved under `current` it lacks. `{ <Connect user id>: <account> }`: each signed-in user's account, fixed when first seen (Connect's `coisp`, else for the first user only the account already in use, else `user<id>`), so signing in as someone else never shows the last user's caches and signing back in brings them back |
-| `connectify:seen_version` / `connectify:theme_boot` / `connectify:pointer_mouse` | `localStorage` | `update-notice.js` / `theme-boot.js` / `pointer-kind.js` | Last extension version seen; a newer manifest version shows the update notice once (fresh installs only record it); `{ id, dark, attrs, props, canvas, bg }` snapshot of the applied theme (`bg`: `{ url }` small, `{ settings }`, `{ theme }`), applied at document_start; `'true'` once a mouse was used (touch clears it) |
+| `connectify:seen_version` / `connectify:overhaul_notice` / `connectify:theme_boot` / `connectify:pointer_mouse` | `localStorage` | `update-notice.js` / `overhaul-notice.js` / `theme-boot.js` / `pointer-kind.js` | Last extension version seen; `'true'` once the 3.3.0 overhaul migration ran (or a fresh install skipped it); a newer manifest version shows the update notice once (fresh installs only record it); `{ id, dark, attrs, props, canvas, bg }` snapshot of the applied theme (`bg`: `{ url }` small, `{ settings }`, `{ theme }`), applied at document_start; `'true'` once a mouse was used (touch clears it) |
 
 ---
 

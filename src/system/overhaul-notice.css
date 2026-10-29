@@ -1,0 +1,11 @@
+/**
+ * Connectify: Connect overhaul notice (overhaul-notice.js) text on the shared goal dialog surface
+ * (goal-dialog.css); the id outweighs Connect's paragraph colours, so the theme ink shows in every theme.
+ */
+#cx-overhaul-notice .cx-overhaul-text {
+  margin: 0;
+  max-width: 60ch;
+  line-height: 1.55;
+  font-size: 14px;
+  color: var(--cx-text-primary, #f8fafc);
+}

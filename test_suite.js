@@ -13165,6 +13165,54 @@ runTest('Test 286: Goal bars sit beside the outcome meter on expanded task cards
     'the singleton tooltip (meter and goal bars) blurs like the theme\'s other glass, at the Blur Strength set');
 });
 
+runTest('Test 287: Upgrading to 3.3.0 turns "Show this semester\'s classes only" off once and explains Connect\'s overhaul in a popup', () => {
+  const keys = ['connectify:overhaul_notice', 'connectify:seen_version', 'connectify:semester_filter'];
+  const saved = keys.map(k => localStorage.getItem(k));
+  const set = (k, v) => (v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v));
+  const prev = window.ConnectifyOverhaulNotice;
+  try {
+    delete window.ConnectifyOverhaulNotice;
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/overhaul-notice.js'), 'utf8'));
+    const O = window.ConnectifyOverhaulNotice;
+    assert.ok(O.isOlder('3.2.5', '3.3.0') && O.isOlder('3.2.10', '3.3.0') && !O.isOlder('3.3.0', '3.3.0') && !O.isOlder('3.3.1', '3.3.0'));
+    const reset = (seen, filter) => { set(O.DONE_KEY, null); set('connectify:seen_version', seen); set('connectify:semester_filter', filter); };
+
+    reset('3.2.5', JSON.stringify({ enabled: true }));
+    assert.deepStrictEqual(O.migrate(), { filterWasOn: true }, 'an upgrade from before 3.3.0 with the option on gets the popup with the Settings note');
+    assert.strictEqual(localStorage.getItem('connectify:semester_filter'), JSON.stringify({ enabled: false }), 'the option is turned off');
+    assert.strictEqual(O.migrate(), null, 'only once');
+    localStorage.setItem('connectify:semester_filter', JSON.stringify({ enabled: true }));
+    assert.strictEqual(O.migrate(), null, 'turning it back on stays on');
+
+    reset('3.2.5', null);
+    assert.deepStrictEqual(O.migrate(), { filterWasOn: false }, 'with the option off, the popup only explains the change');
+    reset(null, JSON.stringify({ enabled: true }));
+    assert.strictEqual(O.migrate(), null, 'a fresh install gets no popup');
+    assert.strictEqual(localStorage.getItem('connectify:semester_filter'), JSON.stringify({ enabled: true }), 'and keeps its setting');
+    assert.strictEqual(localStorage.getItem(O.DONE_KEY), 'true', 'but records that it ran');
+    reset('3.3.0', JSON.stringify({ enabled: true }));
+    assert.strictEqual(O.migrate(), null, 'versions from 3.3.0 on are never migrated');
+    location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-connect';
+    reset('3.2.5', JSON.stringify({ enabled: true }));
+    assert.strictEqual(O.migrate(), null, 'only on the Assessment Outlines page');
+    assert.strictEqual(localStorage.getItem(O.DONE_KEY), null);
+    location.href = OUTLINES_HREF;
+
+    const src = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/overhaul-notice.js'), 'utf8');
+    assert.ok(src.includes("modal.open({\n      id: 'cx-overhaul-notice',") && src.includes("'Open Settings'") && src.includes("'Got it'"), 'the shared solid dialog, Open Settings and Got it');
+    const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
+    const group = manifest.content_scripts.find(g => g.js?.includes('src/system/overhaul-notice.js'));
+    assert.ok(group.js.indexOf('src/system/overhaul-notice.js') < group.js.indexOf('src/assessment/semester-filter.js') &&
+      group.js.indexOf('src/system/overhaul-notice.js') < group.js.indexOf('src/system/update-notice.js'),
+      'runs before the semester filter reads the option and before the update notice records this version');
+    assert.ok(group.css.includes('src/system/overhaul-notice.css'));
+  } finally {
+    keys.forEach((k, i) => set(k, saved[i]));
+    window.ConnectifyOverhaulNotice = prev;
+    location.href = OUTLINES_HREF;
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

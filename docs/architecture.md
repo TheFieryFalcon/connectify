@@ -24,6 +24,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 6a. `src/assessment/outline-api.js` (Connect's outlines and boxplots from its API, one record per card)
 6b. `src/assessment/assessment-api-parse.js` (API records as the parser's tasks, with the old rows' ids)
 7. `src/assessment/class-semesters.js` (class registry by semester, current-semester detection, new-year trigger)
+7a. `src/system/overhaul-notice.js` (once, upgrading to 3.3.0: semester filter off and a popup on Connect's overhaul; before the filter reads it)
 7b. `src/assessment/semester-filter-notice.js` (message in place of outlines the semester filter hides entirely)
 8. `src/assessment/semester-filter.js` ("Show this semester's classes only": hidden tiles, refreshed cards, filtered tool data)
 9. `src/assessment/assessment-expand-progress.js` (Expand All progress pill and scroll freeze)
