@@ -87,8 +87,8 @@ This document covers data ingestion, cohort distribution math, dynamic cohort si
 - **Key Functions**:
   - `categorizeTask(taskName, allLabels)`: keyword then regex match on the name, then the labels; defaults to `'Take-Home'`.
   - `saveTaskTypeOverride(...)` / `getEffectiveType(subjectName, task, labelsKey)`: override wins over detection; saving refreshes the prediction cache. Cached tasks carry `labelsKey` (every label, set by the parser; older caches read it from the task id), so tools type them like the Type dropdown without the DOM.
-  - `getCustomCategoriesForClass` / `addCustomCategoryForClass`: per-class custom categories. Names failing `ConnectifyCategoryStore.isCategoryName` (blank, `undefined`, `null`) are never stored or listed, and such an override reads as Auto.
-  - `task-type-select.js`: `getTaskMeta(row)`, `updateTypeSelect(select, ...)`, `rescanAllAutoAssessments()` (also on `connectify-rescan-auto-types`, fired when extension storage returns different categories).
+  - `getCustomCategoriesForClass` / `addCustomCategoryForClass`: per-class custom categories. Names failing `ConnectifyCategoryStore.isCategoryName` (blank, `undefined`, `null`) are never stored or listed, and such an override reads as Auto. New names (row `+ Custom...`, Settings `+ Add Category`) go through `promptName`: at most `MAX_NAME_LENGTH` (16) characters, asked again when longer (older, longer names are kept).
+  - `task-type-select.js`: `getTaskMeta(row)`, `updateTypeSelect(select, ...)` (the dropdown sizes to the chosen type, `field-sizing: content`, capped at 160px with an ellipsis, so a long name never widens the row on an iPad), `rescanAllAutoAssessments()` (also on `connectify-rescan-auto-types`, fired when extension storage returns different categories).
 - **Export**: `window.ConnectifyTaskTypes`.
 
 ---

@@ -23,6 +23,23 @@
   // had), so "undefined" and "null" are never category names, wherever they were stored
   const isCategoryName = name => typeof name === 'string' && !!name.trim() && !/^(?:undefined|null)$/i.test(name.trim());
 
+  // New category names are capped so the Type dropdown never widens a task row (older, longer names are kept)
+  const MAX_NAME_LENGTH = 16;
+
+  /** Asks for a new category name until it fits MAX_NAME_LENGTH; null when cancelled or left blank. */
+  function promptName(message) {
+    let ask = `${message} (up to ${MAX_NAME_LENGTH} characters)`;
+    let value = '';
+    for (;;) {
+      const raw = prompt(ask, value);
+      const name = typeof raw === 'string' ? raw.trim().replace(/\s+/g, ' ') : '';
+      if (!name) return null;
+      if (name.length <= MAX_NAME_LENGTH) return name;
+      ask = `"${name}" is ${name.length} characters. Category names can be up to ${MAX_NAME_LENGTH}:`;
+      value = name.slice(0, MAX_NAME_LENGTH).trim();
+    }
+  }
+
   /**
    * A usable category set from stored data: entries without a real name or settings are dropped and missing
    * defaults come back (Settings cannot delete a default, so a set without one was damaged). Null if unusable.
@@ -111,5 +128,5 @@
   if (!window.cxCategories) window.cxCategories = copyDefaults();
   resolveCategories();
 
-  window.ConnectifyCategoryStore = { defaultCategories, copyDefaults, isCategoryName, sanitize, resolveCategories, saveCategories, resetCategories };
+  window.ConnectifyCategoryStore = { defaultCategories, copyDefaults, isCategoryName, MAX_NAME_LENGTH, promptName, sanitize, resolveCategories, saveCategories, resetCategories };
 })();

@@ -82,9 +82,8 @@
     const refreshPreferences = window.ConnectifySettingsPreferences.bind(catPanel);
 
     catPanel.querySelector('#cx-cat-add').onclick = () => {
-      const catName = prompt('Enter new assessment category name (e.g. Practical, Investigation):');
-      if (!catName || !catName.trim()) return;
-      const cleanName = catName.trim();
+      const cleanName = store.promptName('Enter new assessment category name (e.g. Practical, Investigation)');
+      if (!cleanName) return;
       if (!window.cxCategories) window.cxCategories = store.copyDefaults();
       if (Object.keys(window.cxCategories).some(k => k.toLowerCase() === cleanName.toLowerCase())) {
         alert(`Category "${cleanName}" already exists!`); return;

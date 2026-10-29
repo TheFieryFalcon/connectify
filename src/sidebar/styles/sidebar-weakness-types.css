@@ -141,6 +141,17 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
   transition: border-color .2s,background-color .2s;
 }
 
+/* Sized to the chosen type, never the longest option (field-sizing; older browsers keep the cap), so a long
+   category name never widens the row on narrower screens such as an iPad */
+.connectea-type-select {
+  field-sizing: content;
+  width: auto;
+  max-width: 160px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .connectea-type-select:hover {
   border-color: #3575b9;
   background: #fff;

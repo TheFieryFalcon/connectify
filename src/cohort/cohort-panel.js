@@ -83,10 +83,10 @@
           const currentMeta = types().getTaskMeta(row);
 
           if (val === '__custom__') {
-            const custom = prompt('Enter custom assessment type:');
-            if (custom && custom.trim()) {
+            const custom = window.ConnectifyCategoryStore.promptName('Enter custom assessment type');
+            if (custom) {
               // Saving adds the class category; the cohort pass that follows re-syncs every row's dropdown
-              types().saveTaskTypeOverride(currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, custom.trim());
+              types().saveTaskTypeOverride(currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, custom);
               types().updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);
             } else {
               types().updateTypeSelect(typeSelect, currentMeta.subjectName, currentMeta.taskName, currentMeta.labelsKey, currentMeta.labels);

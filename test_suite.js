@@ -12808,6 +12808,35 @@ runTest('Test 279: The playground feeds Connectify classes as the scraper would 
     'served at the outlines path, so isOutlinesPage() is true');
 });
 
+runTest('Test 280: Type dropdowns size to the chosen type with a cap, and new category names are at most 16 characters', () => {
+  const read = rel => origReadFileSync.call(fs, path.resolve(BASE_DIR, rel), 'utf8');
+  for (const [file, css] of [['sidebar-weakness-types.css', read('src/sidebar/styles/sidebar-weakness-types.css')], ['cohort-styles.js', read('src/cohort/cohort-styles.js')]]) {
+    const rule = css.slice(css.indexOf('field-sizing: content;') - 300, css.indexOf('field-sizing: content;') + 200);
+    assert.ok(rule.includes('.connectea-type-select'), `${file}: field-sizing sits on the Type dropdown`);
+    assert.ok(/max-width: 160px;/.test(rule) && rule.includes('text-overflow: ellipsis;'), `${file}: a long category name is truncated, never widening the row`);
+  }
+
+  const store = window.ConnectifyCategoryStore;
+  assert.strictEqual(store.MAX_NAME_LENGTH, 16);
+  const asked = [];
+  const answers = ['  Practical   Investigation  ', 'Practical Invest'];
+  const origPrompt = global.prompt;
+  global.prompt = (message, value) => { asked.push([message, value]); return answers.shift(); };
+  try {
+    assert.strictEqual(store.promptName('Enter custom assessment type'), 'Practical Invest', 'a name over 16 characters is asked again');
+    assert.ok(asked[0][0].includes('up to 16 characters'), 'the first prompt names the limit');
+    assert.ok(asked[1][0].includes('23 characters') && asked[1][1] === 'Practical Invest', 'the retry says how long it was and offers it cut to 16');
+    global.prompt = () => null;
+    assert.strictEqual(store.promptName('x'), null, 'cancel returns null');
+    global.prompt = () => '   ';
+    assert.strictEqual(store.promptName('x'), null, 'a blank name returns null');
+  } finally {
+    global.prompt = origPrompt;
+  }
+  assert.ok(read('src/cohort/cohort-panel.js').includes("window.ConnectifyCategoryStore.promptName('Enter custom assessment type')"), 'the row\'s + Custom... asks through promptName');
+  assert.ok(read('src/predictor/category-settings.js').includes("store.promptName('Enter new assessment category name"), 'Settings + Add Category asks through promptName');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

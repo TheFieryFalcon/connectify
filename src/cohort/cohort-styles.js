@@ -80,6 +80,13 @@
       cursor: pointer;
       outline: none;
       transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+      /* Sized to the chosen type, never the longest option (older browsers keep the cap) */
+      field-sizing: content;
+      width: auto;
+      max-width: 160px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
     .connectea-type-select:hover {
       border-color: #3575b9;
