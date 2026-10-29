@@ -13140,6 +13140,20 @@ runTest('Test 284: Connect\'s new outline cards are drawn again in the old Vaadi
     'Back to All presses the Angular filter menu\'s top-level All, never a semester section\'s');
 });
 
+runTest('Test 285: Pasted text in notices keeps no white highlight on dark themes or a wallpaper', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-rich-text.css'), 'utf8');
+  for (const hook of ['.connectea-dark:not(cx-n)', 'html:not(.connectea-dark)[data-connectea-has-custom-bg="true"]']) {
+    for (const value of ['background-color:rgb(255,255,255)', 'background-color: rgb(255, 255, 255)', 'background-color: #ffffff', 'background:white']) {
+      assert.ok(css.includes(`${hook} .rtf-content [style*="${value}" i]`), `${hook} clears ${value} on Connect's rich text`);
+    }
+  }
+  assert.ok(cssHas(css, '{ background-color: transparent !important;'), 'the inline white is cleared');
+  assert.ok(!/yellow|#ff0|marker/i.test(css.replace(/\/\*[\s\S]*?\*\//g, '')), 'highlights in other colours are kept');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
+  const sheets = manifest.content_scripts.find(g => g.css?.includes('src/theme/styles/theme-rich-text.css')).css;
+  assert.strictEqual(sheets.indexOf('src/theme/styles/theme-rich-text.css'), sheets.indexOf('src/theme/styles/theme-feed-3.css') + 1);
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

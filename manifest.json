@@ -250,6 +250,7 @@
             "src/theme/styles/theme-feed.css",
             "src/theme/styles/theme-feed-2.css",
             "src/theme/styles/theme-feed-3.css",
+            "src/theme/styles/theme-rich-text.css",
             "src/theme/styles/theme-reports-menus.css",
             "src/theme/styles/theme-reports-menus-2.css",
             "src/theme/styles/theme-reports-menus-3.css",

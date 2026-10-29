@@ -1,0 +1,43 @@
+/**
+ * Connectify Theme: rich text (notices, discussions)
+ *
+ * Connect's CKEditor content (.rtf-content) keeps the inline styles of text pasted into it, so a notice copied
+ * from a document carries background-color: rgb(255, 255, 255) on every run of text. On Connect's white page
+ * that is invisible; on a dark theme or a wallpaper each line became a white box. A white inline background
+ * (rgb(255, 255, 255), #ffffff or white) is cleared there, so the text sits on the page like the rest;
+ * highlights in other colours are kept.
+ */
+.connectea-dark:not(cx-n) .rtf-content [style*="background-color:rgb(255,255,255)" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background-color:rgb(255, 255, 255)" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background-color:#ffffff" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background-color:white" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background-color: rgb(255,255,255)" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background-color: rgb(255, 255, 255)" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background-color: #ffffff" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background-color: white" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background:rgb(255,255,255)" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background:rgb(255, 255, 255)" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background:#ffffff" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background:white" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background: rgb(255,255,255)" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background: rgb(255, 255, 255)" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background: #ffffff" i],
+.connectea-dark:not(cx-n) .rtf-content [style*="background: white" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background-color:rgb(255,255,255)" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background-color:rgb(255, 255, 255)" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background-color:#ffffff" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background-color:white" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background-color: rgb(255,255,255)" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background-color: rgb(255, 255, 255)" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background-color: #ffffff" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background-color: white" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background:rgb(255,255,255)" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background:rgb(255, 255, 255)" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background:#ffffff" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background:white" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background: rgb(255,255,255)" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background: rgb(255, 255, 255)" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background: #ffffff" i],
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .rtf-content [style*="background: white" i] {
+  background-color: transparent !important;
+}
