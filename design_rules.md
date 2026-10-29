@@ -13,6 +13,7 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Accordions & Section Headers**: `#222b39`, border `#2e3c4e`; transparent over custom wallpapers or Liquid Glass.
 - **Category Colors**: Exam (Red `#e74c3c`), Test (Green `#2ecc71`), Application (Blue `#3498db`), Essay (Purple `#9b59b6`), Take-Home (Yellow `#f1c40f`); defined once in `src/cohort/category-store.js`. Labels bind to `--cx-cat-color` via `.cx-cat-name-label`.
 - **Important Tiles** (`.eds-c-tile--important`, e.g. Maintenance Notice; `theme-alert-tiles.css`): keep Connect's red in every dark theme: `__header--negative` tinted (`#dc2626` 16%, or Connect's `#9d000b` 10% in light tone), red header divider, red `.eds-t-red` icons (`#f87171`, `#9d000b` in light tone, incl. `-webkit-text-fill-color`).
+- **Feed Class Bars** (`.card-scope` on feed cards, Connect's class colour; `theme-feed-3.css`): the class thumbnail and item icon keep Connect's white in every dark theme, never the theme ink (an id-weighted rule beats the generic icon rule).
 - **Assessment Type Label**: Always formatted as `"Type: "` with trailing colon and space.
 - **UI Copy**: no superfluous text that is self-evident from what is on screen (e.g. "From 1 of 2 unmarked tasks; blank tasks are left out until they are marked." under an estimate): show the result; a note only for what the screen cannot show (errors, missing data).
 

@@ -74,3 +74,12 @@
 .connectea-dark .mat-icon:is([icon*="lock"], [class*="lock"]), .connectea-dark .text-danger {
   color: var(--cx-danger, #f87171) !important;
 }
+
+/* Feed cards' class bar (.card-scope, filled with the class colour by Connect): its class thumbnail and item icon
+   stay Connect's white in every dark theme, never the theme ink (dark in light tone). The generic icon rule
+   (theme-material.css) outweighs Connect's own !important white, so an id weight (:not(#cx-n)) outranks it */
+.connectea-dark :where(.card-scope):not(#cx-n) .card-scope-thumbnail .mat-icon,
+.connectea-dark :where(.card-scope):not(#cx-n) .card-scope-icon {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}

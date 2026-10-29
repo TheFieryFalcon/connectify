@@ -7926,8 +7926,9 @@ runTest('Test 167: Dark and glass rules route theme colours through tokens, so c
   const read = f => origReadFileSync.call(fs, path.join(dir, f), 'utf8');
   const darkBlock = read('theme-tokens.css').match(/html\.connectea-dark,\s*\n\[data-connectea-theme="dark"\][^{]*\{([^}]*)\}/)[1];
   const darkValues = new Set([...darkBlock.matchAll(/:\s*(#[0-9a-f]{6})/gi)].map(m => m[1].toLowerCase()));
-  // Semantic status colours (danger/success/warning/info badges, white on the red clear-cache button and on avatars)
-  const allowed = new Set(['theme-feed.css #ffffff', 'theme-search-scaling.css #991b1b', 'theme-search-scaling.css #ffffff',
+  // Semantic status colours (danger/success/warning/info badges, white on the red clear-cache button, on avatars and on
+  // Connect's class-colour bars)
+  const allowed = new Set(['theme-feed.css #ffffff', 'theme-feed-3.css #ffffff', 'theme-search-scaling.css #991b1b', 'theme-search-scaling.css #ffffff',
     'theme-surfaces.css #166534', 'theme-surfaces.css #854d0e', 'theme-surfaces.css #991b1b', 'theme-surfaces.css #1e40af',
     'theme-surfaces.css #3b82f6', 'theme-surfaces-2.css #166534', 'theme-surfaces-2.css #854d0e', 'theme-surfaces-2.css #991b1b',
     'theme-surfaces-2.css #1e40af', 'theme-surfaces-2.css #3b82f6', 'theme-tile-actions.css #1e40af']);
@@ -12659,6 +12660,22 @@ runTest('Test 275: On iPadOS / iOS Connectify buttons drop native appearance, so
   assert.ok(!/\bselect\b/.test(selector), 'selects keep their native arrow');
   assert.ok(/(^|[;\s])appearance:\s*none/.test(decls) && /-webkit-appearance:\s*none/.test(decls), 'native appearance is off');
   assert.ok(!/radius|padding|margin|!important/.test(decls), 'each button keeps its own geometry and spacing');
+});
+
+runTest('Test 276: Feed cards keep Connect\'s white class thumbnail and item icon on the class-colour bar in every dark theme', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-feed-3.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const rule = css.match(/([^{}]*\.card-scope-thumbnail[^{}]*)\{([^}]*)\}/);
+  assert.ok(rule, 'the feed card class bar has its own icon rule');
+  const selectors = rule[1].split(',').map(s => s.trim());
+  for (const target of ['.card-scope-thumbnail .mat-icon', '.card-scope-icon']) {
+    const sel = selectors.find(s => s.endsWith(target));
+    assert.ok(sel && sel.startsWith('.connectea-dark') && sel.includes(':not(#cx-n)'),
+      `${target} is scoped to dark themes with an id weight, so it beats the generic icon rule (no id) in theme-material.css`);
+  }
+  assert.ok(/(^|[;\s])color:\s*#ffffff !important/.test(rule[2]) && /fill:\s*#ffffff !important/.test(rule[2]),
+    'the glyphs are Connect\'s white (fill for the SVG thumbnail), never the theme ink');
+  const generic = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-material.css'), 'utf8');
+  assert.ok(!/#cx-/.test(generic.split('/* Angular Material Accordions')[0]), 'the generic icon rule carries no id weight that could tie it');
 });
 
 Promise.all(pendingTestPromises).then(() => {
