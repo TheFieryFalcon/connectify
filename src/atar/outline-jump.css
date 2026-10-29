@@ -1,8 +1,11 @@
 /**
- * Connectify Outlines: Jump To row (#cx-jump-subject) above the floating Expand All / Collapse All buttons
+ * Connectify Outlines: Jump To row (#cx-jump-subject) above the floating Expand All / Collapse All buttons.
+ * The subject list opens upwards from the box (the row sits at the bottom of the screen) and is as tall as
+ * its subjects, so seven or more show without scrolling.
  */
 
 #cx-jump-subject {
+  position: relative;
   display: flex;
   align-items: stretch;
   gap: 6px;
@@ -12,24 +15,90 @@
   box-sizing: border-box;
   width: 108px;
   flex: 0 0 auto;
+  position: relative;
   background-color: #ffffff;
   color: #203c5e;
   border: 1px solid #b9cbe1;
   border-radius: 4px;
-  padding: 4px 6px;
+  padding: 4px 18px 4px 6px;
   font-size: 11px;
   font-family: inherit;
+  text-align: left;
   /* The closed box ends a long name in an ellipsis; the open list shows full names */
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
 }
 
+/* The list opens upwards, so the caret points up */
+#cx-jump-subject .cx-jump-subject-select::after {
+  content: '';
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  margin-top: -2px;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 5px solid currentColor;
+  opacity: 0.75;
+}
+
 #cx-jump-subject .cx-jump-subject-select:hover { border-color: #3575b9; }
-#cx-jump-subject .cx-jump-subject-select:focus {
+#cx-jump-subject .cx-jump-subject-select:focus-visible,
+#cx-jump-subject .cx-jump-subject-select[aria-expanded="true"] {
   border-color: #3575b9;
   outline: 2px solid #3575b9;
   outline-offset: 1px;
 }
+
+#cx-jump-subject .cx-jump-subject-list {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 6px);
+  box-sizing: border-box;
+  min-width: 108px;
+  max-width: 280px;
+  width: max-content;
+  /* Only a very short window scrolls the list */
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  background-color: #ffffff;
+  border: 1px solid #b9cbe1;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  z-index: 1;
+}
+
+#cx-jump-subject .cx-jump-subject-list[hidden] { display: none; }
+
+#cx-jump-subject .cx-jump-subject-option {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 6px 10px;
+  background: transparent;
+  color: #203c5e;
+  border: 0;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 400;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#cx-jump-subject .cx-jump-subject-option:hover,
+#cx-jump-subject .cx-jump-subject-option:focus-visible {
+  background: #e9f2fb;
+  outline: none;
+}
+
+#cx-jump-subject .cx-jump-subject-option[aria-selected="true"] { font-weight: 700; }
 
 #cx-jump-subject .cx-jump-subject-btn {
   flex: 0 0 auto;
@@ -49,7 +118,30 @@
   border-color: var(--cx-input-border, #496178) !important;
 }
 
-.connectea-dark #cx-jump-subject .cx-jump-subject-select:focus {
+.connectea-dark #cx-jump-subject .cx-jump-subject-select:focus-visible,
+.connectea-dark #cx-jump-subject .cx-jump-subject-select[aria-expanded="true"] {
   border-color: var(--cx-border-focus, #60a5fa) !important;
   outline: 2px solid var(--cx-accent, #60a5fa) !important;
+}
+
+.connectea-dark #cx-jump-subject .cx-jump-subject-list {
+  background-color: var(--cx-surface-elevated, #182230) !important;
+  border-color: var(--cx-border, #3d5066) !important;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.55) !important;
+}
+
+.connectea-dark #cx-jump-subject .cx-jump-subject-option {
+  background: transparent !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+.connectea-dark #cx-jump-subject .cx-jump-subject-option:hover,
+.connectea-dark #cx-jump-subject .cx-jump-subject-option:focus-visible {
+  background: var(--cx-surface-hover, #2b394b) !important;
+}
+
+/* Liquid Glass: the translucent list blurs what is under it, like the theme's other popups */
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #cx-jump-subject .cx-jump-subject-list {
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
 }
