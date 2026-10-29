@@ -77,6 +77,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
   - Injects "Auto-login" toggle checkbox next to the login button.
   - Detects session timeout URLs and inactivity messages; pauses auto-login and displays warning notice `(Paused: session expired)`.
   - Prevents rapid looping via a 30-second loop guard.
+  - `auto-login-student.js` (`https://connect.det.wa.edu.au/login`, Connect's Staff / Parent / Student chooser): with Auto-login on, presses Student unless paused (manual logout, expired session, a login in the last 30s); leaves the flags for `auto-login.js`.
   - Fires only for a saved password / browser autofill once both values are readable (Chromium matches `:autofill` before releasing the password to the page; the release fires `input`, which retries); typing or pasting in a credential field disables it for that page.
 
 ---

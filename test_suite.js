@@ -7764,6 +7764,35 @@ runTest('Test 162: Auto-login only fires for a saved password or browser autofil
   assert.ok(js.includes("=== false || userTyped) return;"), 'auto-login must not fire once the user typed');
 });
 
+runTest('Test 277: With Auto-login on, Connect\'s sign-in chooser presses Student unless auto-login is paused', async () => {
+  const src = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login-student.js'), 'utf8');
+  const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const entry = manifest.content_scripts.find(c => (c.js || []).includes('src/system/auto-login-student.js'));
+  assert.ok(entry && entry.matches.includes('https://connect.det.wa.edu.au/login') && entry.matches.includes('https://connect.det.wa.edu.au/login?*'),
+    'runs on Connect\'s sign-in chooser, with or without a query');
+  const run = async (flags, href = 'https://connect.det.wa.edu.au/login') => {
+    let clicks = 0;
+    // Its own globals, so other tests never see this page's location or storage
+    const sandbox = {
+      window: {},
+      location: { href },
+      chrome: { storage: { local: { get: (keys, cb) => { cb(flags); } } } },
+      document: { body: { innerText: '' }, querySelector: sel => (sel.includes('login-btn--student') ? { click: () => { clicks++; } } : null) }
+    };
+    require('vm').runInNewContext(src, sandbox);
+    await new Promise(r => setTimeout(r, 0));
+    return clicks;
+  };
+  assert.strictEqual(await run({}), 1, 'Auto-login is on by default: Student is pressed');
+  assert.strictEqual(await run({ 'cx-autologin-enabled': true }), 1);
+  assert.strictEqual(await run({ 'cx-autologin-enabled': false }), 0, 'Auto-login off: the student chooses');
+  assert.strictEqual(await run({ 'cx-manual-logout': true }), 0, 'after a manual logout');
+  assert.strictEqual(await run({ 'cx-session-expired': true }), 0, 'after the session expired');
+  assert.strictEqual(await run({ 'cx-last-autologin': Date.now() - 5000 }), 0, 'never loops within 30s of a login');
+  assert.strictEqual(await run({}, 'https://connect.det.wa.edu.au/login?reason=timeout'), 0, 'a timeout URL pauses it');
+  assert.ok(!src.includes('storage.local.remove'), 'the pause flags are left for the DET page, which shows why it paused');
+});
+
 runTest('Test 163: Liquid Glass rounds the notice card host and Library table wrapper, paginators have no pill; icon buttons keep native padding', () => {
   const styles = path.join(BASE_DIR, 'src/theme/styles');
   const css = fs.readFileSync(path.join(styles, 'theme-glass-panels.css'), 'utf8');

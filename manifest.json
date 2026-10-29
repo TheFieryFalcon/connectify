@@ -335,6 +335,16 @@
       },
       {
          "matches": [
+            "https://connect.det.wa.edu.au/login",
+            "https://connect.det.wa.edu.au/login?*"
+         ],
+         "js": [
+            "src/system/auto-login-student.js"
+         ],
+         "run_at": "document_end"
+      },
+      {
+         "matches": [
             "https://connect.det.wa.edu.au/*"
          ],
          "exclude_matches": [
