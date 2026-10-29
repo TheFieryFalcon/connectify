@@ -4,6 +4,7 @@
  * A subject dropdown and a "Jump To" button (#cx-jump-subject) above the floating Expand All / Collapse All
  * buttons. The dropdown lists each shown outline's cleaned subject name once, in page order; Jump To expands
  * that subject's card, scrolls to it and pulses its highlight (ConnectifyNewGrade.jumpToSubject).
+ * The dropdown is 108px wide; names over MAX_LABEL (10) characters end in an ellipsis (full name as value and title).
  * Styles: outline-jump.css. Exposes window.ConnectifyOutlineJump.
  */
 (() => {
@@ -11,6 +12,8 @@
 
   const TILE_SELECTOR = '.eds-c-tile, .cvr-c-tile';
   const TITLE_SELECTOR = '.eds-c-tile__title, .cvr-c-tile__title';
+  // Longer names end in an ellipsis, so the row stays about as wide as the buttons under it
+  const MAX_LABEL = 10;
   const { normalize, cardSemester } = window.ConnectifyUtils;
 
   // Same cleaning as the grade snapshot: no semester suffix, ATAR or year level
@@ -21,6 +24,14 @@
       .replace(/\bATAR\b/gi, '')
       .replace(/\bYear\s*\d+\b/gi, '')
   ) || normalize(title);
+
+  const label = name => (name.length > MAX_LABEL ? `${name.slice(0, MAX_LABEL - 1).trimEnd()}…` : name);
+
+  function option(name) {
+    const opt = new Option(label(name), name);
+    opt.title = name;
+    return opt;
+  }
 
   /**
    * Shown outlines as [{ name, card }], one per subject in page order. A subject with both semesters' outlines
@@ -59,7 +70,7 @@
     if (select._cxSignature === signature) return;
     select._cxSignature = signature;
     const chosen = select.value;
-    select.replaceChildren(...names.map(name => new Option(name, name)));
+    select.replaceChildren(...names.map(option));
     if (names.includes(chosen)) select.value = chosen;
     select.disabled = names.length === 0;
     const btn = document.getElementById('cx-jump-subject-btn');
@@ -87,5 +98,5 @@
     return row;
   }
 
-  window.ConnectifyOutlineJump = { create, sync, subjects, cleanName, jump };
+  window.ConnectifyOutlineJump = { create, sync, subjects, cleanName, label, jump, MAX_LABEL };
 })();

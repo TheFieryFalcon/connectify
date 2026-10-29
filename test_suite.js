@@ -12957,6 +12957,9 @@ runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once
     J.sync();
     document.getElementById = origById;
     assert.deepStrictEqual(select.children.map(o => o.textContent), ['Physics', 'English', 'Biology'], 'the dropdown lists them in page order');
+    assert.strictEqual(J.label('Mathematics Methods'), 'Mathemati…', 'names longer than 10 characters end in an ellipsis');
+    assert.strictEqual(J.label('Chemistry'), 'Chemistry');
+    assert.ok(select.children.every(o => o.value === o.title), 'each option keeps the full name as its value and title');
     select.value = 'English';
     btn.onclick();
     assert.deepStrictEqual(jumped, [cards[1]], 'Jump To expands, scrolls to and highlights the chosen subject\'s card');
@@ -12970,6 +12973,7 @@ runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once
     assert.ok(outlines.css.includes('src/atar/outline-jump.css'));
     const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/outline-jump.css'), 'utf8');
     assert.ok(cssHas(css, '.connectea-dark #cx-jump-subject .cx-jump-subject-select { background-color: var(--cx-input-bg, #141a22) !important;'), 'dark themes use the input tokens');
+    assert.ok(cssHas(css, '#cx-jump-subject .cx-jump-subject-select { box-sizing: border-box; width: 108px; flex: 0 0 auto;'), 'a fixed narrow dropdown keeps the row close to the buttons\' width');
   } finally {
     document.querySelectorAll = origQSA;
     Object.assign(global, { Option: prev.Option });
