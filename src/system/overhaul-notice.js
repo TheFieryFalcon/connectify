@@ -89,12 +89,12 @@
   }
 
   const pending = migrate();
-  // Shown once the outlines are drawn (legacy-outlines.js), or 15s on, so it rarely covers a half-built page
+  // Shown once the outlines are drawn (legacy-outlines.js), or 8s on, so it rarely covers a half-built page
   if (pending) {
     const startedAt = Date.now();
     const drawn = () => document.querySelector('#cx-legacy-outlines .eds-c-tile');
     const waitAndShow = () => {
-      if (!document.body || (!drawn() && Date.now() - startedAt < 15000)) { setTimeout(waitAndShow, 250); return; }
+      if (!document.body || (!drawn() && Date.now() - startedAt < 8000)) { setTimeout(waitAndShow, 250); return; }
       setTimeout(() => show(pending), 400);
     };
     waitAndShow();
