@@ -77,6 +77,7 @@
             "src/goals/goal-planner.css",
             "src/goals/goal-list.css",
             "src/goals/goal-bars.css",
+            "src/goals/goal-forecast.css",
             "src/goals/goal-celebrate.css"
          ],
          "js": [
@@ -141,6 +142,7 @@
             "src/goals/goal-celebrate.js",
             "src/goals/goal-events.js",
             "src/goals/goal-bars.js",
+            "src/goals/goal-forecast.js",
             "src/atar/grade-estimate-goal.js",
             "src/atar/atar-ui-markup.js",
             "src/atar/atar-ui.js",

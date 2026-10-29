@@ -131,7 +131,7 @@
       const pendingSig = isOverall ? (upcoming()?.signature(row) ?? '') : '';
       const gradeRange = isOverall ? window.ConnectifyCohortGradeRange?.forRow(row, mark) ?? null : null;
       const rangeSig = gradeRange ? `${gradeRange.low},${gradeRange.high}` : '';
-      const goalSig = window.ConnectifyGoalBars?.signature(row, isOverall) ?? '';
+      const goalSig = `${window.ConnectifyGoalBars?.signature(row, isOverall) ?? ''}|${window.ConnectifyGoalForecast?.signature(row, isOverall) ?? ''}`;
 
       // Fast path: nothing that affects this row has changed. A task type change bumps typesVersion,
       // so the memoised taskType never needs recomputing here
@@ -183,7 +183,10 @@
         showPanel(ui, isOverall, false);
         if (ui.outcomeBar) hide(ui.outcomeBar);
         const prediction = outcomeEval.precacheUpcoming(row, meta, precollectedSubjects);
-        if (window.ConnectifyPredictorMath) forecast()?.show(ui, prediction);
+        if (window.ConnectifyPredictorMath) {
+          forecast()?.show(ui, prediction);
+          window.ConnectifyGoalForecast?.render(ui, row, prediction);
+        }
         remember(!forecast()?.isPredicted(prediction));
         return;
       }

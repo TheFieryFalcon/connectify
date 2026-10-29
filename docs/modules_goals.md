@@ -1,6 +1,6 @@
 # Connectify Goals Reference
 
-Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outline goal bars, lifecycle and celebration. Spec: `specs/goals.md`. All goal scripts are in the outlines group (manifest order: goal-difficulty, goal-store, goal-plan, goal-replay, goal-modal, goal-sliders, goal-dialog, goal-list-ui, goal-editor, goal-celebrate, goal-events, goal-bars).
+Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outline goal bars, lifecycle and celebration. Spec: `specs/goals.md`. All goal scripts are in the outlines group (manifest order: goal-difficulty, goal-store, goal-plan, goal-replay, goal-modal, goal-sliders, goal-dialog, goal-list-ui, goal-editor, goal-celebrate, goal-events, goal-bars, goal-forecast).
 
 ---
 
@@ -43,6 +43,7 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 ### Outline bars (`goal-bars.js`, `ConnectifyGoalBars`)
 - `.cx-goal-bars` after the outcome meter (task rows) or in the panel's top right (overall row of the goal's semester card). Performance (`.cx-goal-perf`, segments lit up to the band, purple 20px) and progress (`.cx-goal-progress`, smooth fill, `data-tier`). The outcome meter's singleton tooltip shows numbers only; `signature` (what the bars show, no evaluation counter) joins the row memo (`goalSig`), so a re-evaluation redraws only rows whose bars changed. Goals, verdicts and each card's `cardTaskIds` are read once per pass (dropped after the task or on `connectify-goals-changed`).
 - Live verdicts for the goal's own tasks; earlier tasks show the latest finished goal's frozen verdict.
+- `goal-forecast.js` (`ConnectifyGoalForecast`): an unmarked weighted task the active goal covers shows its goal target (`ConnectifyProgressGoalLine.goalFor(...).targetOf`, the chart's target) on its prediction panel: a `Goal target` cell after High on expanded cards, `• Goal target 86%` ending the compact line. No tier label: the value's `data-tier` colours it, desaturated (the tier's hue at OKLCH chroma 0.075, lightness 0.46 on light panels, 0.80 on dark; >= 6:1). `signature` joins the row memo.
 
 ### Events and celebration
 - `goal-events.js` (`ConnectifyGoalEvents`): `stateOf` (cached per revision; kept while held), `refresh` after results / predictions / goals / types change (400ms; results and goals events whose inputs (goal ids, revisions, statuses; each course's tasks, mark and letter) are unchanged skip the replay and cohort pass; settles finished goals: Guaranteed -> Achieved, Impossible -> Missed, all marked or final letter -> by the measured mark), then `connectify-goals-evaluated` and a cohort pass. A newly read marked task in range (not in the goal's `seenMarked`, else `priorMarked`) or a goal ending brings a `Goal Updated` toast of its own (`announce`, id `connectify-goal-<id>`, Jump to Subject; never folded into Class Updated, whose collapsed-card marks come before the task is read): `lineFor` gives `Goal: Medium`, `Goal is now Hard (was Medium)` (`lastTier`), `Goal complete!` + celebration or `Goal missed!` (`ATAR goal ...`). `celebratePending` (Goals dialog), `endYear` (`year-rollover.js` archive).
@@ -53,7 +54,7 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 - `grade-estimate-goal.js` (`ConnectifyGradeEstimateGoal`): `Goal 85%: met` / `3.2 short` under Estimate Grade (range tasks only for custom weeks); `Goal 95.00: 1.35 short` under Estimate ATAR (that semester's goal).
 
 ## 3. Styles
-`goal-dialog.css` (dialogs, tier labels: tier 40% into the theme ink on a 14% tint, >= 5:1 in every preset), `goal-planner.css` (planner controls, sliders), `goal-list.css`, `goal-bars.css` (bars, goal targets and line), `goal-celebrate.css`: theme tokens only.
+`goal-dialog.css` (dialogs, tier labels: tier 40% into the theme ink on a 14% tint, >= 5:1 in every preset), `goal-planner.css` (planner controls, sliders), `goal-list.css`, `goal-bars.css` (bars, goal targets and line), `goal-forecast.css` (goal target on prediction panels), `goal-celebrate.css`: theme tokens only.
 
 ---
 

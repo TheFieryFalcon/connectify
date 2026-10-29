@@ -11913,7 +11913,7 @@ function loadGoalModules(stubs = {}) {
   const run = file => new Function('window', origReadFileSync.call(fs, resolveFilePath(file), 'utf8'))(win);
   ['scaling-data.js', 'atar-math.js', 'target-difficulty.js', 'target-solver.js'].forEach(run);
   ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js', 'goal-modal.js', 'goal-sliders.js', 'goal-dialog.js', 'goal-list-ui.js', 'goal-editor.js',
-    'goal-celebrate.js', 'goal-events.js', 'goal-bars.js'].forEach(f => run(path.resolve(SRC_DIR, 'goals', f)));
+    'goal-celebrate.js', 'goal-events.js', 'goal-bars.js', 'goal-forecast.js'].forEach(f => run(path.resolve(SRC_DIR, 'goals', f)));
   run(path.resolve(SRC_DIR, 'progress/progress-modes.js'));
   run(path.resolve(SRC_DIR, 'progress/progress-goal-line.js'));
   run(path.resolve(SRC_DIR, 'atar/grade-estimate-goal.js'));
@@ -12853,6 +12853,78 @@ runTest('Test 280: Type dropdowns size to the chosen type with a cap, and new ca
   }
   assert.ok(read('src/cohort/cohort-panel.js').includes("window.ConnectifyCategoryStore.promptName('Enter custom assessment type')"), 'the row\'s + Custom... asks through promptName');
   assert.ok(read('src/predictor/category-settings.js').includes("store.promptName('Enter new assessment category name"), 'Settings + Add Category asks through promptName');
+});
+
+runTest('Test 281: Prediction panels on unmarked tasks a goal covers show the goal target, coloured by the task\'s tier', () => {
+  localStorage.clear();
+  const card = makeOutlineCard('Chemistry ATAR - Semester 2', { tasks: [['Test 1', '39 Out of 50'], ['Investigation', '- Out of 50'], ['Exam', '- Out of 50']] });
+  const rows = card.querySelectorAll('.cvr-c-tasks .cvr-c-task');
+  const ids = new Map([[rows[0], { id: 't1' }], [rows[1], { id: 't3' }], [rows[2], { id: 't4' }]]);
+  const weights = { t1: 20, t3: 15, t4: 50 };
+  const { win, chem } = goalFixture({
+    ConnectifyTaskTypes: { getTaskMeta: () => ({ subjectName: 'Chemistry ATAR' }) },
+    ConnectifyParseHelpers: { cardTaskIds: () => ids },
+    ConnectifyCache: { subjectsCache: new Map([['Chemistry ATAR', new Map(Object.entries(weights).map(([id, weight]) => [id, { id, weight }]))]]) }
+  });
+  const F = win.ConnectifyGoalForecast;
+  assert.strictEqual(F.targetFor(rows[1], null), null, 'nothing without a goal');
+  assert.strictEqual(F.signature(rows[1], false), '');
+  const G = win.ConnectifyGoalStore;
+  G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 80, end: { type: 'semester', semester: 2 }, priorMarked: ['chemistry::t1', 'chemistry::t2'] });
+  const prediction = { low: 68, mid: 75, high: 82 };
+  const target = F.targetFor(rows[1], prediction);
+  const plan = win.ConnectifyGoalEvents.stateOf(G.active()[0]).plan;
+  assert.ok(target && Math.abs(target.required - win.ConnectifyGoalPlan.requiredOf(plan, 't3')) < 1e-9, 'the plan\'s requirement for the task, as the Year Progression chart plots it');
+  assert.strictEqual(target.tier, win.ConnectifyGoalDifficulty.taskTier(target.required, prediction), 'the task\'s own tier against its prediction');
+  assert.strictEqual(F.signature(rows[1], false), `target:${Math.round(target.required)}`, 'joins the row memo, so a changed target redraws it');
+  assert.strictEqual(F.signature(rows[1], true), '', 'overall rows have no prediction panel');
+
+  // Compact line: "Goal target 86%" and the tier label at its end
+  const box = new MockElement('section', 'connectea-panel connectea-forecast');
+  F.render({ forecast: box }, rows[1], prediction);
+  F.render({ forecast: box }, rows[1], prediction);
+  const compact = box.querySelectorAll('.cx-goal-target');
+  assert.strictEqual(compact.length, 1, 'drawn once however often the row renders');
+  assert.strictEqual(compact[0].childNodes[0].textContent, '  •  Goal target ');
+  const compactValue = compact[0].querySelector('.cx-goal-target__value');
+  assert.strictEqual(compactValue.textContent, `${Math.round(target.required)}%`);
+  assert.strictEqual(compactValue.dataset.tier, target.tier, 'the value carries the task\'s tier for its colour');
+  assert.strictEqual(box.querySelector('.cx-goal-tier'), null, 'no tier label: the colour says it');
+  assert.ok(box.classList.contains('cx-has-goal-target'));
+
+  // Expanded card: a Goal target cell after Low / Mid / High
+  const xpBox = new MockElement('section', 'connectea-panel connectea-forecast connectea-xp-forecast');
+  const body = new MockElement('div', 'connectea-xp-body');
+  xpBox.append(body);
+  F.render({ forecast: xpBox, xpForecast: { body } }, rows[1], prediction);
+  const cell = body.querySelector('dl.cx-goal-target');
+  assert.ok(cell && cell.classList.contains('connectea-xp-grid'), 'a cell of the card\'s own grid');
+  assert.strictEqual(cell.querySelector('.connectea-xp-label').textContent, 'Goal target');
+  const xpValue = cell.querySelector('.connectea-xp-value');
+  assert.ok(xpValue.classList.contains('cx-goal-target__value') && xpValue.dataset.tier === target.tier && !cell.querySelector('.cx-goal-tier'),
+    'the card\'s value, coloured by the tier, with no tier label');
+
+  // Unweighted tasks need nothing; deleting the goal removes the target
+  weights.t3 = 0;
+  win.ConnectifyCache.subjectsCache.get('Chemistry ATAR').get('t3').weight = 0;
+  assert.strictEqual(F.targetFor(rows[1], prediction), null, 'an unweighted task has no target');
+  G.remove(G.active()[0].id);
+  F.render({ forecast: box }, rows[2], prediction);
+  assert.strictEqual(box.querySelector('.cx-goal-target'), null, 'no goal, no target');
+  assert.ok(!box.classList.contains('cx-has-goal-target'));
+  assert.ok(chem.tasks.length === 4);
+
+  const view = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'cohort/cohort-view.js'), 'utf8');
+  assert.ok(view.includes('window.ConnectifyGoalForecast?.signature(row, isOverall)') && view.includes('window.ConnectifyGoalForecast?.render(ui, row, prediction)'),
+    'unmarked rows memoise and draw the goal target after the prediction');
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-forecast.css'), 'utf8');
+  assert.ok(cssHas(css, 'color: oklch(from var(--cx-goal-tier) 0.46 0.075 h) !important;') && cssHas(css, 'color: oklch(from var(--cx-goal-tier) 0.8 0.075 h) !important;'),
+    'the tier\'s hue, desaturated, at a lightness that keeps >= 5:1 (dark ink on light panels, light ink on dark ones)');
+  assert.ok(cssHas(css, ':is(#cx-specificity-anchor, .connectea-row-wrapper) .cx-goal-target__value[data-tier]'), 'the colour outranks the glass strip\'s ink rule');
+  const dialogCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-dialog.css'), 'utf8');
+  assert.ok(dialogCss.includes(':is(.cx-goal-tier, .cx-goal-hbar, .cx-goal-target__value)[data-tier="hard"] { --cx-goal-tier: #f97316; }'), 'tier colours have one source');
+  assert.ok(cssHas(css, 'border-color: var(--cx-border, #3b6088) !important;'), 'its hairline follows the card\'s in dark themes');
+  localStorage.clear();
 });
 
 Promise.all(pendingTestPromises).then(() => {

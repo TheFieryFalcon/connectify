@@ -21,10 +21,11 @@
     return atar ? { value: Number(atar.target), label: `Goal ${Number(atar.target).toFixed(2)}` } : null;
   }
 
-  /** `{ label, targetOf(point) }` for the subject's goal (or the target an ATAR goal gives it), or null. */
-  function goalFor(subjectName) {
+  /** `{ label, plan, targetOf(point) }` for the subject's goal (or the target an ATAR goal gives it), or null.
+   *  `goals`: the stored goals when the caller already read them. */
+  function goalFor(subjectName, goals) {
     const store = window.ConnectifyGoalStore;
-    const goal = store?.activeFor(subjectName);
+    const goal = store?.activeFor(subjectName, goals);
     const state = goal && window.ConnectifyGoalEvents?.stateOf(goal);
     if (!state || state.error || !state.plan) return null;
     const subject = store.subjectKey(subjectName);
@@ -43,7 +44,7 @@
       return window.ConnectifyGoalPlan.requiredOf(plan, child ? `${child.name}::${id}` : id);
     };
     const label = goal.kind === 'atar' ? `ATAR goal ${Number(goal.target).toFixed(2)}` : `Goal ${round1(Number(goal.target))}%`;
-    return { label, targetOf };
+    return { label, plan, targetOf };
   }
 
   /** Each point's target in the chart's mode (null where there is none). */

@@ -61,7 +61,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 39. `src/atar/target-planner-ui.js` (planner facade)
 39a. `src/atar/grade-estimate.js` (Estimate Grade math: average with typed marks on unmarked tasks)
 39b. `src/atar/grade-estimate-ui.js` (Estimate Grade view)
-39c. `src/goals/` goal-difficulty, goal-store, goal-plan, goal-replay, goal-modal, goal-sliders, goal-dialog, goal-list-ui, goal-editor, goal-celebrate, goal-events, goal-bars, then `src/atar/grade-estimate-goal.js` (Goals: `modules_goals.md`)
+39c. `src/goals/` goal-difficulty, goal-store, goal-plan, goal-replay, goal-modal, goal-sliders, goal-dialog, goal-list-ui, goal-editor, goal-celebrate, goal-events, goal-bars, goal-forecast, then `src/atar/grade-estimate-goal.js` (Goals: `modules_goals.md`)
 40. `src/atar/atar-ui-markup.js` (calculator panel markup, Goals / Estimates groups and mode tabs, semester labels and closing rules)
 41. `src/atar/atar-ui.js` (calculator controller: Goals and Estimates modes)
 42. `src/progress/progress-math.js` (chronological ATAR trajectory)

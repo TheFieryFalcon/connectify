@@ -1,0 +1,48 @@
+/**
+ * Connectify Goals: goal target on prediction panels (goal-forecast.js)
+ *
+ * Expanded cards: a "Goal target" cell after High, behind the card's hairline, in the card's value style.
+ * Compact line: "Goal target 86%" at the end. The value is coloured by the task's tier (--cx-goal-tier from its
+ * data-tier, goal-dialog.css), desaturated: the tier's hue at chroma 0.075 and a fixed OKLCH lightness, 0.46 on
+ * light panels and 0.80 on dark ones, >= 6:1 for every tier on every preset's panel. Browsers without relative
+ * colours keep the value's ink. Hairlines follow cohort-expanded.css in every theme.
+ */
+
+/* Expanded card: Low / Mid / High, then the goal target */
+.connectea-panel.connectea-xp-forecast .connectea-xp-body {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 20px !important;
+}
+.connectea-xp-forecast .cx-goal-target.connectea-xp-grid {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 0 0 20px !important;
+  border-left: 1px solid #d3dfed !important;
+}
+.connectea-xp-forecast .cx-goal-target .cx-goal-target__value {
+  margin: 0 !important;
+  font-size: 20px !important;
+}
+html.connectea-dark .connectea-xp-forecast .cx-goal-target.connectea-xp-grid {
+  border-color: var(--cx-border, #3b6088) !important;
+}
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-xp-forecast .cx-goal-target.connectea-xp-grid {
+  border-color: var(--cx-gl-hairline, rgba(255, 255, 255, 0.14)) !important;
+}
+
+/* Tier colour. The glass task-row rule inks everything in the strip with the primary text, so the unused id
+   outranks it (as for the Low / Mid / High colours, cohort-forecast.css) */
+:is(#cx-specificity-anchor, .connectea-row-wrapper) .cx-goal-target__value[data-tier] {
+  color: #203c5e !important;
+  color: oklch(from var(--cx-goal-tier) 0.46 0.075 h) !important;
+}
+html.connectea-dark :is(#cx-specificity-anchor, .connectea-row-wrapper) .cx-goal-target__value[data-tier] {
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  color: oklch(from var(--cx-goal-tier) 0.8 0.075 h) !important;
+}
+/* Light-tone themes (grey Liquid Glass, light custom themes) have dark ink on light glass */
+html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-row-wrapper) .cx-goal-target__value[data-tier] {
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from var(--cx-goal-tier) 0.46 0.075 h) !important;
+}
