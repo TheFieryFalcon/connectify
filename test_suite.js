@@ -7764,7 +7764,7 @@ runTest('Test 162: Auto-login only fires for a saved password or browser autofil
   assert.ok(js.includes("=== false || userTyped) return;"), 'auto-login must not fire once the user typed');
 });
 
-runTest('Test 277: With Auto-login on, Connect\'s sign-in chooser presses Student unless auto-login is paused', async () => {
+runTest('Test 277: With Auto-login on, Connect\'s sign-in chooser presses Student, also after the session expired, but never after a logout', async () => {
   const src = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login-student.js'), 'utf8');
   const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
   const entry = manifest.content_scripts.find(c => (c.js || []).includes('src/system/auto-login-student.js'));
@@ -7777,7 +7777,7 @@ runTest('Test 277: With Auto-login on, Connect\'s sign-in chooser presses Studen
       window: {},
       location: { href },
       chrome: { storage: { local: { get: (keys, cb) => { cb(flags); } } } },
-      document: { body: { innerText: '' }, querySelector: sel => (sel.includes('login-btn--student') ? { click: () => { clicks++; } } : null) }
+      document: { body: { innerText: 'Your session has expired' }, querySelector: sel => (sel.includes('login-btn--student') ? { click: () => { clicks++; } } : null) }
     };
     require('vm').runInNewContext(src, sandbox);
     await new Promise(r => setTimeout(r, 0));
@@ -7787,9 +7787,9 @@ runTest('Test 277: With Auto-login on, Connect\'s sign-in chooser presses Studen
   assert.strictEqual(await run({ 'cx-autologin-enabled': true }), 1);
   assert.strictEqual(await run({ 'cx-autologin-enabled': false }), 0, 'Auto-login off: the student chooses');
   assert.strictEqual(await run({ 'cx-manual-logout': true }), 0, 'after a manual logout');
-  assert.strictEqual(await run({ 'cx-session-expired': true }), 0, 'after the session expired');
+  assert.strictEqual(await run({ 'cx-session-expired': true }), 1, 'an expired session signs straight back in');
   assert.strictEqual(await run({ 'cx-last-autologin': Date.now() - 5000 }), 0, 'never loops within 30s of a login');
-  assert.strictEqual(await run({}, 'https://connect.det.wa.edu.au/login?reason=timeout'), 0, 'a timeout URL pauses it');
+  assert.strictEqual(await run({}, 'https://connect.det.wa.edu.au/login?reason=timeout'), 1, 'a timeout URL never pauses it');
   assert.ok(!src.includes('storage.local.remove'), 'the pause flags are left for the DET page, which shows why it paused');
 });
 
