@@ -19,6 +19,7 @@
   padding: 4px 6px;
   font-size: 11px;
   font-family: inherit;
+  /* The closed box ends a long name in an ellipsis; the open list shows full names */
   text-overflow: ellipsis;
   cursor: pointer;
 }
