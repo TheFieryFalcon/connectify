@@ -54,7 +54,7 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 - `grade-estimate-goal.js` (`ConnectifyGradeEstimateGoal`): `Goal 85%: met` / `3.2 short` under Estimate Grade (range tasks only for custom weeks); `Goal 95.00: 1.35 short` under Estimate ATAR (that semester's goal).
 
 ## 3. Styles
-`goal-dialog.css` (dialogs, tier labels: tier 40% into the theme ink on a 14% tint, >= 5:1 in every preset), `goal-planner.css` (planner controls, sliders), `goal-list.css`, `goal-bars.css` (bars, goal targets and line), `goal-forecast.css` (goal target on prediction panels), `goal-celebrate.css`: theme tokens only.
+`goal-dialog.css` (dialogs, tier labels: tier 40% into the theme ink on a 14% tint, >= 5:1 in every preset; secondary buttons (Open Settings, Cancel, ✕) take `--cx-button-text` over Connect's `.eds.cvr button` grey via `#cx-specificity-anchor`), `goal-planner.css` (planner controls, sliders), `goal-list.css`, `goal-bars.css` (bars, goal targets and line), `goal-forecast.css` (goal target on prediction panels), `goal-celebrate.css`: theme tokens only.
 
 ---
 

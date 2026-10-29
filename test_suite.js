@@ -13275,6 +13275,16 @@ runTest('Test 288: Connect\'s hover outlines on form fields are off, focus keeps
   assert.strictEqual(sheets.indexOf('src/theme/styles/theme-field-hover.css'), sheets.indexOf('src/theme/styles/theme-dialog-surface.css') + 1);
 });
 
+runTest('Test 289: Goal dialog secondary buttons (Open Settings, Cancel, ✕) take the theme\'s button ink over Connect\'s .eds.cvr button grey', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-dialog.css'), 'utf8');
+  const sel = ':is(.cx-goal-overlay, #cx-specificity-anchor) :is(.cx-goal-modal__close, .cx-goal-cancel, .cx-goal-link, .cx-goal-card__edit, .cx-goal-card__delete)';
+  const at = css.indexOf(sel + ' {');
+  assert.ok(at >= 0, 'the id-weighted anchor outranks Connect\'s .eds.cvr button (0,2,1), which painted Open Settings #4f4f4f');
+  const block = css.slice(at, css.indexOf('}', at));
+  assert.ok(block.includes('color: var(--cx-button-text, #f8fafc);') && !block.includes('--cx-text-muted'), 'the button ink, never the muted text colour');
+  assert.ok(css.includes(sel + ':hover {'), 'the hover rule carries the same weight');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

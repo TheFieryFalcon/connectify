@@ -66,7 +66,8 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-gla
   gap: 10px;
 }
 
-.cx-goal-overlay :is(.cx-goal-modal__close, .cx-goal-cancel, .cx-goal-link, .cx-goal-card__edit, .cx-goal-card__delete) {
+/* Secondary goal buttons: the anchor outranks Connect's `.eds.cvr button` grey (#4f4f4f), which beat the theme ink */
+:is(.cx-goal-overlay, #cx-specificity-anchor) :is(.cx-goal-modal__close, .cx-goal-cancel, .cx-goal-link, .cx-goal-card__edit, .cx-goal-card__delete) {
   padding: 4px 10px;
   border: 1px solid var(--cx-button-border, #455a73);
   border-radius: 5px;
@@ -76,7 +77,7 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-gla
   cursor: pointer;
 }
 
-.cx-goal-overlay :is(.cx-goal-modal__close, .cx-goal-cancel, .cx-goal-link, .cx-goal-card__edit, .cx-goal-card__delete):hover {
+:is(.cx-goal-overlay, #cx-specificity-anchor) :is(.cx-goal-modal__close, .cx-goal-cancel, .cx-goal-link, .cx-goal-card__edit, .cx-goal-card__delete):hover {
   background: var(--cx-button-hover, #31415a);
 }
 
