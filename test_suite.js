@@ -13778,8 +13778,11 @@ runTest('Test 301: Picking one class after another in Connect\'s filter redraws 
   assert.ok(cssHas(css, 'html.connectea-dark[data-connectea-theme] .c-category-menu.toggle-drawer:not(#cx-n) { background-color: var(--cx-surface-elevated, #1a222d) !important;'),
     'in every dark theme the drawer is painted (the toolbar\'s clear-text rule left the page showing through)');
   const material = read('theme/styles/theme-material-2.css');
-  assert.ok(cssHas(material, 'html.eds.cvr.ngm.connectea-dark .toggle-drawer.toggle--grey-dark .c-expansion-panel .mat-expansion-panel-content { background-color: transparent !important;'),
-    'its panels are clear on it (one surface per block)');
+  const header = 'html.eds.cvr.ngm.connectea-dark .toggle-drawer.toggle--grey-dark .c-expansion-panel .mat-expansion-panel-header';
+  assert.ok(cssHas(material, `${header}:not(#cx-n), html.eds.cvr.ngm.connectea-dark .toggle-drawer.toggle--grey-dark .c-expansion-panel .mat-expansion-panel-content:not(#cx-n) { background-color: transparent !important;`),
+    'its panels are clear on it (one surface per block), id-anchored past Connect\'s focused-header #363636 (0,9,0): a clicked header stayed dark under the theme ink');
+  assert.ok(cssHas(material, `${header}:hover:not(#cx-n), ${header}.cdk-keyboard-focused:not(#cx-n) { background-color: var(--cx-surface-hover, #24303f) !important;`),
+    'hover and keyboard focus keep the theme\'s highlight; a mouse click leaves no highlight behind');
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
   const sheets = manifest.content_scripts.find(g => g.css?.includes('src/theme/styles/theme-category-menu.css')).css;
   assert.ok(sheets.indexOf('src/theme/styles/theme-category-menu.css') === sheets.indexOf('src/theme/styles/theme-glass-nesting.css') + 1, 'loaded right after the glass nesting rules');
