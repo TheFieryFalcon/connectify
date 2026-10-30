@@ -22,6 +22,8 @@
     attributeFilter: ['class', 'data-highcharts-chart', 'data-connectify-stats']
   };
   const TICK_MS = 500;
+  // Batches this small are filtered as they are
+  const NESTED_MIN = 50;
 
   const isMuted = () => Boolean(window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding);
   const isUserActive = () => (typeof window.ConnectifyIsUserActive === 'function' ? window.ConnectifyIsUserActive() : true);
@@ -30,9 +32,25 @@
   let pending = [];
   let flushHandle = null;
 
+  /**
+   * Drops records inside a subtree added in the same batch: whoever cares about an addition scans the added
+   * subtree. Connect rendering its cards adds each node into a parent it added just before, thousands of
+   * records that every subscriber's filter walked up the tree for.
+   */
+  function withoutNested(records) {
+    if (records.length < NESTED_MIN) return records;
+    const added = new Set();
+    for (const r of records) if (r.type === 'childList') for (const n of r.addedNodes) if (n.nodeType === 1) added.add(n);
+    if (!added.size) return records;
+    return records.filter(r => {
+      for (let node = r.target; node; node = node.parentNode) if (added.has(node)) return false;
+      return true;
+    });
+  }
+
   function flush() {
     flushHandle = null;
-    const records = pending;
+    const records = withoutNested(pending);
     pending = [];
     const muted = isMuted();
     for (const sub of [...subscribers]) {
@@ -125,5 +143,5 @@
     startTicking();
   });
 
-  window.ConnectifyScheduler = { onMutations, every, isMuted, tick, flush };
+  window.ConnectifyScheduler = { onMutations, every, isMuted, tick, flush, withoutNested };
 })();

@@ -10,7 +10,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 
 #### `scheduler.js` (`ConnectifyScheduler`)
 - **Role**: One page-wide MutationObserver and one heartbeat shared by every isolated script; loaded first in each isolated group (first copy wins); disconnects on `pagehide`, resumes on a back/forward `pageshow`.
-- **Key Functions**: `onMutations(callback, { filter, mute = true })` (records batched per animation frame, per 100ms while hidden); `every(ms, fn, { whenActive = true, whenVisible = true, mute = false, when })`; `isMuted()`. Sidebar sync (handle position reads layout), tools sync, `syncFeatures` and the 8s cohort pass are muted, so Expand All never forces a page layout mid-run.
+- **Key Functions**: `onMutations(callback, { filter, mute = true })` (records batched per animation frame, per 100ms while hidden; `withoutNested` drops records inside a subtree added in the same batch of 50+, since subscribers scan added subtrees: Connect rendering its cards adds thousands); `every(ms, fn, { whenActive = true, whenVisible = true, mute = false, when })`; `isMuted()`. Sidebar sync (handle position reads layout), tools sync, `syncFeatures` and the 8s cohort pass are muted, so Expand All never forces a page layout mid-run.
 
 #### `user-settings-migrate.js` (`ConnectifyUserSettingsMigrate`)
 - **Role**: right after `utils.js` in both isolated groups, once per browser (`connectify:user_settings_migrated`), on the first signed-in page, moves task type overrides, class categories, week overrides, the calibration and the Weaknesses filter to that student's `userKey`s (never overwriting); Clear settings removes every user's.

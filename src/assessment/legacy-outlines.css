@@ -9,6 +9,13 @@
   display: none !important;
 }
 
+/* Off-screen outlines skip style and layout, so a page-wide restyle (Connect adding its Material stylesheets
+   ~13s in, then reading styles) touches only the outlines on screen; auto keeps each one's last height */
+#cx-legacy-outlines .eds-c-tile {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
 #cx-legacy-outlines,
 #cx-legacy-outlines > .v-ui {
   height: auto !important;

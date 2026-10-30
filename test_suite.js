@@ -13623,6 +13623,44 @@ runTest('Test 298: Startup Expand All waits for the other semester\'s outlines t
   assert.ok(mount.includes('if (!inPlace(host, parent, before)) parent.insertBefore(host, before);'), 'the host is placed through inPlace');
 });
 
+runTest('Test 299: Connect rendering its cards never makes Connectify restyle off-screen outlines or filter thousands of nested mutation records', () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  // Off-screen outlines skip style and layout, so Connect's page-wide restyles (its Material stylesheets) touch only what is on screen
+  const css = read('assessment/legacy-outlines.css');
+  assert.ok(cssHas(css, '#cx-legacy-outlines .eds-c-tile { content-visibility: auto; contain-intrinsic-size: auto 600px;'), 'drawn outline tiles skip rendering while off screen and keep their last height');
+  assert.ok(cssHas(css, '.cx-legacy-hidden { display: none !important;'), 'Connect\'s own cards are still hidden only once drawn: hiding them as Angular inserts them made its charts restyle the hidden card on every init (4x the work)');
+
+  // The scheduler drops records inside subtrees added in the same batch
+  let observed = null;
+  const w = { addEventListener() {} };
+  const doc = { body: {}, hidden: false, addEventListener() {} };
+  new Function('window', 'document', 'MutationObserver', 'requestAnimationFrame', 'setInterval', 'clearInterval', read('system/scheduler.js'))(
+    w, doc, function (cb) { observed = cb; this.observe = () => {}; this.disconnect = () => {}; }, () => 1, () => 1, () => {});
+  const S = w.ConnectifyScheduler;
+  const zone = { parentNode: null, nodeType: 1 };
+  const card = { parentNode: zone, nodeType: 1 };
+  const inner = Array.from({ length: 80 }, () => ({ parentNode: card, nodeType: 1 }));
+  const leaf = { parentNode: inner[0], nodeType: 1 };
+  const records = [
+    { type: 'childList', target: zone, addedNodes: [card], removedNodes: [] },
+    ...inner.map(n => ({ type: 'childList', target: card, addedNodes: [n], removedNodes: [] })),
+    { type: 'childList', target: inner[0], addedNodes: [leaf], removedNodes: [] },
+    { type: 'attributes', target: leaf, attributeName: 'class' }
+  ];
+  const kept = S.withoutNested(records);
+  assert.deepStrictEqual(kept, [records[0]], 'only the record adding the card is kept: subscribers scan the subtree it added');
+  const small = records.slice(0, 10);
+  assert.strictEqual(S.withoutNested(small), small, 'small batches are filtered as they are');
+  const other = { parentNode: null, nodeType: 1 };
+  const elsewhere = { type: 'attributes', target: other, attributeName: 'class' };
+  assert.ok(S.withoutNested([...records, elsewhere]).includes(elsewhere), 'records outside the added subtrees are kept');
+  let got = null;
+  S.onMutations(r => { got = r; }, { mute: false });
+  observed(records);
+  S.flush();
+  assert.deepStrictEqual(got, [records[0]], 'subscribers receive the reduced batch');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
