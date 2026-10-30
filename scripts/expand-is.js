@@ -23,6 +23,17 @@
  * An ancestor list made only of <html> / <body> hooks (:is(.connectea-dark, body, html)) is left whole: those are
  * ancestors of everything, so expanding it would only add rules.
  *
+ * A single complex argument is never bucketed (`.connectea-dark :is(.a span)` is tried on every element, not on
+ * spans), so after root hooks that sit only on <html> / <body> it is written one compound at a time:
+ * `.connectea-dark :is(.a span)` -> `.connectea-dark .a :is(span)` (:where() likewise), the same matches (every
+ * element but <html> is inside <html>, and the first compound names a Connect component, never <html> / <body>)
+ * and the same specificity. A compound after any other ancestor keeps its list (`.tile :is(.a span)` also matches
+ * an .a outside the tile).
+ *
+ * Ancestor exclusions in one compound (`:not(.a *):not(#b *)`) become one `:not(:is(.a, #b) *)`, padded to the
+ * same specificity: each `:not(X *)` walks every ancestor up to <html> on its own, so a text rule tried on every
+ * div walked them seven times (the costliest rule of Expand All in Dark, 2026-10); one list walks them once.
+ *
  * Usage: node scripts/expand-is.js [--write] file.css ...   (prints files whose rules change; --write saves them)
  */
 
@@ -201,6 +212,67 @@ function expandSelector(sel) {
   return combos.map(render);
 }
 
+// Root hooks: only <html> and <body> carry .connectea-dark and these attributes
+const ROOT_ATTR = /^\[data-connectea-(theme|glass|tone|reading-view|has-custom-bg|login|logout)(=("[^"]*"|'[^']*'))?\]$/;
+function rootOnly(comp) {
+  let parts; try { parts = simples(comp); } catch { return false; }
+  if (parts.some(p => p === '.connectea-dark' || /^(html|body)$/i.test(p))) return true;
+  return parts.every(p => ROOT_ATTR.test(p) || /^:not\([^()]*\)$/.test(p) || (/^:(is|where)\(/.test(p) && listArgs(p).every(rootOnly)));
+}
+// A compound naming a Connect component (class or id) or an element <html> / <body> never are
+const componentKey = comp => {
+  let parts; try { parts = simples(comp); } catch { return false; }
+  return parts.some(p => /^[.#](cvr-|eds-c-|v-|mat-|cdk-|cnt-|c-|connect-)/.test(p)) ||
+    (isTag(parts[0]) && parts[0] !== '*' && !/^(html|body)$/i.test(parts[0]));
+};
+
+// A single complex :is() / :where() argument right after root hooks, written one compound at a time
+function splitSingle(sel) {
+  const toks = tokens(sel);
+  for (let i = 2; i < toks.length; i += 2) {
+    if (toks[i - 1] !== ' ' || !toks.slice(0, i - 1).every((t, k) => (k % 2 ? t === ' ' : rootOnly(t)))) break;
+    let parts; try { parts = simples(toks[i]); } catch { break; }
+    const idx = parts.findIndex(p => /^:(is|where)\(/.test(p) && listArgs(p).length === 1 && tokens(listArgs(p)[0]).length > 1);
+    if (idx < 0) continue;
+    if (parts.some((p, k) => k !== idx && isTag(p))) break;
+    const inner = tokens(listArgs(parts[idx])[0]);
+    if (!componentKey(inner[0]) || inner.some((t, k) => !(k % 2) && /^:(is|where)\(.*,/.test(t))) break;
+    const kind = parts[idx].startsWith(':where') ? 'where' : 'is';
+    const wrap = c => (kind === 'is' && plainCompound(c) ? c : `:${kind}(${c})`);
+    const last = inner.length - 1;
+    // The subject's own compound takes the list's place (bare at the start of an :is() compound)
+    const subject = t => parts.map((p, j) => (j !== idx ? p : kind === 'is' && j === 0 ? t : `:${kind}(${t})`)).join('');
+    const pieces = inner.map((t, k) => (k % 2 ? t : k < last ? wrap(t) : subject(t)));
+    return splitSingle(render([...toks.slice(0, i), ...pieces, ...toks.slice(i + 1)]));
+  }
+  return sel;
+}
+
+// The plain compounds an ancestor exclusion names (`:not(.a *)`, or an already merged `:not(:is(.a, #b) *)`), else null
+function excluded(simple) {
+  const m = simple.match(/^:not\((.*)\)$/);
+  const toks = m && tokens(m[1]);
+  if (!toks || toks.length !== 3 || toks[1] !== ' ' || toks[2] !== '*') return null;
+  const named = /^:is\(.*\)$/.test(toks[0]) ? listArgs(toks[0]) : [toks[0]];
+  return named.every(plainCompound) ? named : null;
+}
+
+// Every compound's ancestor exclusions as one :not(:is(...) *) where the first stood, padded to the same specificity
+function mergeExclusions(sel) {
+  const toks = tokens(sel);
+  return render(toks.map((t, i) => {
+    if (i % 2) return t;
+    let parts; try { parts = simples(t); } catch { return t; }
+    const idx = parts.map((p, k) => (excluded(p) ? k : -1)).filter(k => k >= 0);
+    if (idx.length < 2) return t;
+    const named = [...new Set(idx.flatMap(k => excluded(parts[k])))];
+    const merged = `:not(:is(${named.join(', ')}) *)`;
+    const before = idx.reduce((sum, k) => add(sum, simpleSpec(parts[k])), [0, 0, 0]);
+    const kept = parts.filter((p, k) => !idx.includes(k) || k === idx[0]).map(p => (p === parts[idx[0]] ? merged : p));
+    return withPad(kept.join(''), sub(before, simpleSpec(merged)));
+  }));
+}
+
 function wrapList(sels) {
   const lines = []; let cur = '';
   for (const s of sels) {
@@ -241,7 +313,7 @@ function transform(css) {
       else if (/\/\*/.test(selText) || /^(from|to|\d+%)/.test(selText)) res += `${pre}{${body}}`;
       else {
         const sels = splitTop(selText, ',').map(s => s.trim().replace(/\s+/g, ' '));
-        const out = sels.flatMap(expandSelector);
+        const out = sels.flatMap(expandSelector).map(splitSingle).map(mergeExclusions);
         res += out.length === sels.length && out.every((s, k) => s === sels[k]) ? `${pre}{${body}}` : `${lead}${wrapList(out)}${trail || ' '}{${body}}`;
       }
       pre = ''; j = close + 1;
@@ -251,7 +323,7 @@ function transform(css) {
   return walk(css);
 }
 
-module.exports = { transform, expandSelector, specificity };
+module.exports = { transform, expandSelector, splitSingle, mergeExclusions, specificity };
 
 if (require.main === module) {
   const args = process.argv.slice(2);

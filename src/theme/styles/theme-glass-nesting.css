@@ -8,7 +8,7 @@
 /* Header: the Vaadin header app paints the canvas under the bars, so their blur had nothing to show. The canvas
    rule lists #main-content, so an id weight (:not(#cx-n), which every element passes) is needed to outrank it */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.v-app.headerui):not(#cx-n),
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.v-app.headerui > .v-ui):not(#cx-n) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(.v-app.headerui) > :where(.v-ui):not(#cx-n) {
   background-color: transparent !important;
 }
 
@@ -29,7 +29,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   box-shadow: none !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-service-bar__container > .cvr-c-service-bar),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-bar__container > .cvr-c-service-bar,
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-menu:not(.cx-n),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-category-menu:not(.cx-n),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-popupview-popup:not(.cx-n) {

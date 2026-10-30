@@ -17,11 +17,11 @@ html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginato
 html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .connect-paginator-label,
 html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-select-value,
 html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-checkbox-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) .mat-paginator-page-size-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) .mat-paginator-range-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) .connect-paginator-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) .mat-select-value,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)) .mat-checkbox-label {
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-paginator-page-size-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-paginator-range-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .connect-paginator-label,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-select-value,
+html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-checkbox-label {
   color: #334155 !important;
 }
 
@@ -35,8 +35,8 @@ html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] :is(.cvr-c-pagina
 :is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.mat-paginator-outer-container):not(#cx-n),
 :is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.connect-paginator-container):not(#cx-n),
 :is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))):not(#cx-n),
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content)) .container-fluid):not(#cx-n),
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)):not(#cx-n) {
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))) :where(.container-fluid):not(#cx-n),
+:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.cvr-c-pagination__body) > :where(div.d-flex:has(> mat-checkbox)):not(#cx-n) {
   background-color: transparent !important;
   border-top-color: transparent !important;
   box-shadow: none !important;

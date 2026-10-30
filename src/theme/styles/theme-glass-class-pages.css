@@ -6,7 +6,7 @@
 /* Content: the Vaadin canvas lets the wallpaper through, with sections or without. Connect's canvas rule lists
    #main-content, so it carries an id weight (:not(#cx-n), which every element passes) to outrank it. */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :where(.v-app.librarylearningcontentui):not(#cx-n),
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :where(.v-app.librarylearningcontentui > .v-ui.v-scrollable):not(#cx-n) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]):not([data-connectea-login]) :where(.v-app.librarylearningcontentui) > :where(.v-ui.v-scrollable):not(#cx-n) {
   background: transparent !important;
   background-color: transparent !important;
 }

@@ -63,7 +63,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.connectea-row-wrapper .connectea-type-label),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.connectea-row-wrapper .connectea-type-title),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__mark:not(.cx-n),
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-task__mark *):not(.cx-n) {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-task__mark *:not(.cx-n) {
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 

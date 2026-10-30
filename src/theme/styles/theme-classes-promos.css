@@ -105,7 +105,7 @@
   border: 1px solid var(--cx-border, #3d5066) !important;
 }
 
-.connectea-dark .mat-option:not(.cx-n), .connectea-dark :is(.mat-select-panel .mat-option) {
+.connectea-dark .mat-option:not(.cx-n), .connectea-dark .mat-select-panel .mat-option {
   background-color: transparent !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;

@@ -127,8 +127,8 @@
   color: var(--cx-text-primary, #ffffff) !important;
 }
 
-.connectea-dark:not(cx-n).eds.cvr.ngm .mat-ink-bar:not(.cx-n), .connectea-dark:not(cx-n).eds.cvr.ngm :is(.mat-tab-nav-bar .mat-ink-bar),
-.connectea-dark:not(cx-n).eds.cvr.ngm :is(.mat-tab-group .mat-ink-bar), .connectea-dark:not(cx-n) .mat-ink-bar,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-ink-bar:not(.cx-n), .connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-nav-bar .mat-ink-bar,
+.connectea-dark:not(cx-n).eds.cvr.ngm .mat-tab-group .mat-ink-bar, .connectea-dark:not(cx-n) .mat-ink-bar,
 .connectea-dark:not(cx-n) [class*="ink-bar"] {
   background-color: var(--cx-accent, #3b82f6) !important;
   height: 2px !important;
@@ -190,14 +190,14 @@
   border-color: var(--cx-border-strong, #5b7594) !important;
 }
 
-.connectea-dark .eds-c-pagination-button:not(cx-n), .connectea-dark :is(.cvr-c-pagination-button-set button) {
+.connectea-dark .eds-c-pagination-button:not(cx-n), .connectea-dark .cvr-c-pagination-button-set button {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark .eds-c-pagination-button:hover:not(cx-n), .connectea-dark :is(.cvr-c-pagination-button-set button):hover {
+.connectea-dark .eds-c-pagination-button:hover:not(cx-n), .connectea-dark .cvr-c-pagination-button-set button:hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
   border: none !important;

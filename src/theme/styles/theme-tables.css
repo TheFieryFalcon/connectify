@@ -36,25 +36,25 @@
 
 /* The header colour sits on the header cells, not on thead or the header row: a filled band a shade off the
    table body with nothing separating it reads as a smudge (adjacent-colour audit) */
-.connectea-dark :is(thead th):not(#connectify-sidebar *):not(.cx-n), .connectea-dark :is(thead td):not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark thead th:not(#connectify-sidebar *):not(.cx-n), .connectea-dark thead td:not(#connectify-sidebar *):not(.cx-n),
 .connectea-dark .mat-header-cell:not(#connectify-sidebar *):not(cx-n):not(cx-n),
 .connectea-dark mat-header-cell:not(#connectify-sidebar *):not(.cx-n):not(cx-n),
 .connectea-dark .v-table-header:not(#connectify-sidebar *):not(cx-n):not(cx-n),
 .connectea-dark .v-table-header-cell:not(#connectify-sidebar *):not(cx-n):not(cx-n),
 .connectea-dark .v-grid-header:not(#connectify-sidebar *):not(cx-n):not(cx-n),
 .connectea-dark .v-grid-column-header-content:not(#connectify-sidebar *):not(cx-n):not(cx-n),
-.connectea-dark :is(.cvr-c-submission-students-table table th):not(#connectify-sidebar *),
+.connectea-dark .cvr-c-submission-students-table table th:not(#connectify-sidebar *),
 .connectea-dark .cvr-c-submission-students-table__header-element:not(#connectify-sidebar *):not(cx-n):not(cx-n),
 .connectea-dark .cvr-c-submission-students-table__preheader-element:not(#connectify-sidebar *):not(cx-n):not(cx-n),
 .connectea-dark :is(.table thead th):not(#connectify-sidebar *), .connectea-dark :is(.table-list thead th):not(#connectify-sidebar *),
-.connectea-dark :is(.cvr-c-tree-panel > thead):not(#connectify-sidebar *):not(cx-n) {
+.connectea-dark .cvr-c-tree-panel > thead:not(#connectify-sidebar *):not(cx-n) {
   background-color: var(--cx-table-header-bg, var(--cx-surface-secondary, #18202b)) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark :is(tbody th):not(#connectify-sidebar *):not(.cx-n), .connectea-dark :is(tbody td):not(#connectify-sidebar *):not(.cx-n),
-.connectea-dark :is(tfoot th):not(#connectify-sidebar *):not(.cx-n), .connectea-dark :is(tfoot td):not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark tbody th:not(#connectify-sidebar *):not(.cx-n), .connectea-dark tbody td:not(#connectify-sidebar *):not(.cx-n),
+.connectea-dark tfoot th:not(#connectify-sidebar *):not(.cx-n), .connectea-dark tfoot td:not(#connectify-sidebar *):not(.cx-n),
 .connectea-dark .mat-row:not(#connectify-sidebar *):not(cx-n):not(cx-n), .connectea-dark mat-row:not(#connectify-sidebar *):not(.cx-n):not(cx-n),
 .connectea-dark .mat-cell:not(#connectify-sidebar *):not(cx-n):not(cx-n), .connectea-dark mat-cell:not(#connectify-sidebar *):not(.cx-n):not(cx-n),
 .connectea-dark .v-table-cell-content:not(#connectify-sidebar *):not(cx-n):not(cx-n),
@@ -63,7 +63,7 @@
 .connectea-dark .v-grid-cell:not(#connectify-sidebar *):not(cx-n):not(cx-n), .connectea-dark :is(.table td):not(#connectify-sidebar *):not(cx-n),
 .connectea-dark :is(.table th):not(#connectify-sidebar *):not(cx-n), .connectea-dark :is(.table-list td):not(#connectify-sidebar *):not(cx-n),
 .connectea-dark :is(.table-list th):not(#connectify-sidebar *):not(cx-n),
-.connectea-dark :is(.cvr-c-submission-students-table table td):not(#connectify-sidebar *),
+.connectea-dark .cvr-c-submission-students-table table td:not(#connectify-sidebar *),
 .connectea-dark .cvr-c-submission-students-table__element:not(#connectify-sidebar *):not(cx-n):not(cx-n) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;

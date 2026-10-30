@@ -5,7 +5,7 @@
 /* --------------------------------------------------------------------------
    12. Highcharts Boxplot Chart (.cvr-c-task__chart)
    -------------------------------------------------------------------------- */
-.connectea-dark:not(cx-n) .cvr-c-task__chart, .connectea-dark:not(cx-n) :is(.cvr-c-task__chart *), .connectea-dark:not(cx-n) .highcharts-container,
+.connectea-dark:not(cx-n) .cvr-c-task__chart, .connectea-dark:not(cx-n) .cvr-c-task__chart *, .connectea-dark:not(cx-n) .highcharts-container,
 .connectea-dark:not(cx-n) :is(.highcharts-container *) {
   background: transparent !important;
   background-color: transparent !important;
@@ -48,7 +48,7 @@
    13. Profile, Selection Lists, Legends & Action Buttons
    -------------------------------------------------------------------------- */
 .connectea-dark :where(fieldset):not(.cx-n):not(.cx-n), .connectea-dark :where(legend):not(.cx-n):not(.cx-n),
-.connectea-dark .c-floating-form-field:not(.cx-n), .connectea-dark :where(.c-floating-form-field legend):not(.cx-n):not(.cx-n),
+.connectea-dark .c-floating-form-field:not(.cx-n), .connectea-dark :where(.c-floating-form-field) :where(legend):not(.cx-n):not(.cx-n),
 .connectea-dark .eds-c-selection-list:not(.cx-n), .connectea-dark .eds-c-selection-list__item:not(.cx-n),
 .connectea-dark .eds-o-list__item:not(.cx-n), .connectea-dark .eds-c-tile.eds-o-feature, .connectea-dark .cvr-c-recent-event-activity:not(.cx-n) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
@@ -58,7 +58,7 @@
 
 .connectea-dark .eds-c-action-button:not(.eds-o-button--positive):not(.cx-n),
 .connectea-dark .v-button-eds-c-action-button:not(.eds-o-button--positive):not(.cx-n),
-.connectea-dark :is(.eds-c-action-button-set .v-button):not(.eds-o-button--positive) {
+.connectea-dark .eds-c-action-button-set .v-button:not(.eds-o-button--positive) {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -66,9 +66,8 @@
 }
 .connectea-dark .eds-c-action-button:is(.eds-s-is-first, .eds-u-separator--right, [class*="separator--right"]):not(.cx-n),
 .connectea-dark .v-button-eds-c-action-button:is(.eds-s-is-first, .eds-u-separator--right, [class*="separator--right"]):not(.cx-n),
-.connectea-dark :is(.eds-c-action-button-set .v-button).eds-s-is-first,
-.connectea-dark :is(.eds-c-action-button-set .v-button).eds-u-separator--right,
-.connectea-dark :is(.eds-c-action-button-set .v-button)[class*="separator--right"] {
+.connectea-dark .eds-c-action-button-set .v-button.eds-s-is-first, .connectea-dark .eds-c-action-button-set .v-button.eds-u-separator--right,
+.connectea-dark .eds-c-action-button-set .v-button[class*="separator--right"] {
   border-right: 1px solid var(--cx-border, #455a73) !important;
 }
 
@@ -80,8 +79,8 @@
 
 .connectea-dark .eds-c-action-button:not(.cx-n) .v-button-wrap, .connectea-dark .eds-c-action-button:not(.cx-n) .v-button-caption,
 .connectea-dark .v-button-eds-c-action-button:not(.cx-n) .v-button-wrap, .connectea-dark .v-button-eds-c-action-button:not(.cx-n) .v-button-caption,
-.connectea-dark :is(.eds-c-action-button-set .v-button) .v-button-wrap, .connectea-dark :is(.eds-c-action-button-set .v-button) .v-button-caption,
-.connectea-dark :is(.eds-c-tile__footer .v-button) .v-button-wrap, .connectea-dark :is(.eds-c-tile__footer .v-button) .v-button-caption {
+.connectea-dark .eds-c-action-button-set .v-button .v-button-wrap, .connectea-dark .eds-c-action-button-set .v-button .v-button-caption,
+.connectea-dark .eds-c-tile__footer .v-button .v-button-wrap, .connectea-dark .eds-c-tile__footer .v-button .v-button-caption {
   color: inherit !important;
 }
 
@@ -115,8 +114,8 @@
 .connectea-dark .mat-form-field-label:not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n):not(cx-n):not(cx-n),
 .connectea-dark .mat-form-field-outline-legend:not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n):not(cx-n):not(cx-n),
 .connectea-dark .ck-form-label:not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n):not(cx-n):not(cx-n),
-.connectea-dark :is(cnt-rich-text-editor label):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n),
-.connectea-dark :is(cnt-rich-text-editor .label):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n):not(cx-n),
+.connectea-dark cnt-rich-text-editor label:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n),
+.connectea-dark cnt-rich-text-editor .label:not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n):not(cx-n),
 .connectea-dark legend:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n):not(cx-n):not(cx-n),
 .connectea-dark :is(label:not(.custom-control-label):not(.v-checkbox label):not(.eds-c-checkbox label):not(.mat-checkbox label)) {
   background-color: transparent !important;

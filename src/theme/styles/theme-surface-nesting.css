@@ -87,9 +87,9 @@ html.connectea-dark[data-connectea-theme] cnt-stream-notice-card {
 
 /* Right-hand category drawer: the menu paints, its wrapper and rows stay clear (the active row keeps its mark) */
 html.connectea-dark[data-connectea-theme] .cvr-c-category-menu__wrapper:not(.cx-n):not(.cx-n):not(.cx-n),
-html.connectea-dark[data-connectea-theme] :is(.cvr-c-category-menu .v-label:not(.eds-s-is-active):not(.v-selected)),
-html.connectea-dark[data-connectea-theme] :is(.cvr-c-category-menu .v-link:not(.eds-s-is-active):not(.v-selected)),
-html.connectea-dark[data-connectea-theme] :is(.cvr-c-category-menu .eds-u-interactive:not(.eds-s-is-active):not(.v-selected)) {
+html.connectea-dark[data-connectea-theme] .cvr-c-category-menu .v-label:not(.eds-s-is-active):not(.v-selected),
+html.connectea-dark[data-connectea-theme] .cvr-c-category-menu .v-link:not(.eds-s-is-active):not(.v-selected),
+html.connectea-dark[data-connectea-theme] .cvr-c-category-menu .eds-u-interactive:not(.eds-s-is-active):not(.v-selected) {
   background-color: transparent !important;
 }
 

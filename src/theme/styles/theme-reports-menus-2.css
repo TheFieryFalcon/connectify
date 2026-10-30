@@ -69,8 +69,8 @@
 
 .connectea-dark:not(cx-n) :where(mat-toolbar):not(.cx-n), .connectea-dark:not(cx-n) .mat-toolbar,
 .connectea-dark:not(cx-n) :where(mat-tab-header):not(.cx-n), .connectea-dark:not(cx-n) .mat-tab-header, .connectea-dark:not(cx-n) .cvr-c-reports,
-.connectea-dark:not(cx-n) :is(.cvr-c-reports *), .connectea-dark:not(cx-n) .cvr-c-report-years, .connectea-dark:not(cx-n) :is(.cvr-c-report-years *),
-.connectea-dark:not(cx-n) .cvr-c-report-year, .connectea-dark:not(cx-n) .cvr-c-year-selector, .connectea-dark:not(cx-n) :is(.cvr-c-year-selector *),
+.connectea-dark:not(cx-n) .cvr-c-reports *, .connectea-dark:not(cx-n) .cvr-c-report-years, .connectea-dark:not(cx-n) .cvr-c-report-years *,
+.connectea-dark:not(cx-n) .cvr-c-report-year, .connectea-dark:not(cx-n) .cvr-c-year-selector, .connectea-dark:not(cx-n) .cvr-c-year-selector *,
 .connectea-dark:not(cx-n) .cvr-c-reporting-period, .connectea-dark:not(cx-n) .cvr-c-report-header, .connectea-dark:not(cx-n) .cvr-c-sub-header,
 .connectea-dark:not(cx-n) .cvr-c-subheader, .connectea-dark:not(cx-n) [class*="year-selector"], .connectea-dark:not(cx-n) [class*="report-year"] {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
@@ -206,14 +206,14 @@
 /* Menu rows show their menu's own surface (the category drawer uses the elevated surface, not the nav colour), so
    no row draws a box behind its label; hover and active states below still highlight */
 .connectea-dark .cvr-c-service-menu__item:not(.cx-n), .connectea-dark .cvr-c-primary-menu__item:not(.cx-n),
-.connectea-dark :is(.cvr-c-category-menu .eds-u-interactive) {
+.connectea-dark .cvr-c-category-menu .eds-u-interactive {
   background-color: transparent !important;
   color: var(--cx-nav-text, #cbd5e1) !important;
   transition: background-color 0.15s ease;
 }
 
 .connectea-dark .cvr-c-service-menu__item:hover:not(.cx-n), .connectea-dark .cvr-c-primary-menu__item:hover:not(.cx-n),
-.connectea-dark :is(.cvr-c-category-menu .eds-u-interactive):hover {
+.connectea-dark .cvr-c-category-menu .eds-u-interactive:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
 }

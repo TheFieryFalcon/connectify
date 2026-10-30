@@ -2,33 +2,33 @@
  * Connectify Theme: surface adaptation, feed filters, notice cards and feed tabs (part 2, continued from theme-feed.css)
  */
 
-.connectea-dark :is(.eds-c-card :where(a)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice .v-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent)):hover,
-.connectea-dark :is(.cvr-c-notice .eds-c-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent)):hover,
-.connectea-dark :is(.cvr-c-notice :where(button)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice :where(button)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice :where(button).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice :where(button)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice :where(button)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice :where(a)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice :where(a)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice :where(a).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice :where(a)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice :where(a)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice-card .v-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent)):hover,
-.connectea-dark :is(.cvr-c-notice-card .eds-c-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent)):hover,
-.connectea-dark :is(.cvr-c-notice-card :where(button)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice-card :where(button)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice-card :where(button).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice-card :where(button)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice-card :where(button)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice-card :where(a)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice-card :where(a)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice-card :where(a).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice-card :where(a)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :is(.cvr-c-notice-card :where(a)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n)):hover,
-.connectea-dark :where(mat-dialog-container button.mat-primary):hover:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n),
-.connectea-dark :is(.mat-dialog-actions button.mat-primary):hover:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n) {
+.connectea-dark .eds-c-card :where(a)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice .v-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):hover,
+.connectea-dark .cvr-c-notice .eds-c-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):hover,
+.connectea-dark .cvr-c-notice :where(button)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice :where(button)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice :where(button).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice :where(button)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice :where(button)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice :where(a)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice :where(a)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice :where(a).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice :where(a)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice :where(a)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice-card .v-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):hover,
+.connectea-dark .cvr-c-notice-card .eds-c-button:is([class*="positive"], [class*="view"], .mat-primary, [mat-raised-button], [mat-flat-button]):not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):hover,
+.connectea-dark .cvr-c-notice-card :where(button)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice-card :where(button)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice-card :where(button).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice-card :where(button)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice-card :where(button)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice-card :where(a)[class*="positive"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice-card :where(a)[class*="view"]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice-card :where(a).mat-primary:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice-card :where(a)[mat-raised-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark .cvr-c-notice-card :where(a)[mat-flat-button]:not(.mat-icon-button):not([class*="icon-button"]):not(cnt-floating-form-field-button *):not(.mat-accent):not(.cx-n):hover,
+.connectea-dark :where(mat-dialog-container) :where(button.mat-primary):hover:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n),
+.connectea-dark .mat-dialog-actions button.mat-primary:hover:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n) {
   background-color: var(--cx-positive-hover, #9ec204) !important;
   color: var(--cx-positive-text, #ffffff) !important;
   border: none !important;
@@ -97,7 +97,7 @@
 /* Feed Cards & Author/Timestamp/Comment Metadata */
 .connectea-dark .cvr-c-feed-card:not(cx-n), .connectea-dark .cvr-c-feed-item:not(cx-n), .connectea-dark [class*="feed-card"]:not(cx-n),
 .connectea-dark [class*="feed-item"]:not(cx-n), .connectea-dark cnt-stream-notice-card:not(.cx-n),
-.connectea-dark :where(cnt-stream-notice-card mat-card):not(.cx-n):not(cx-n), .connectea-dark mat-card.mat-card {
+.connectea-dark :where(cnt-stream-notice-card) :where(mat-card):not(.cx-n):not(cx-n), .connectea-dark mat-card.mat-card {
   background-color: var(--cx-card-bg, var(--cx-surface-bg, #1e2632)) !important;
   border: none !important;
   border-radius: 4px !important;
@@ -212,7 +212,7 @@
 /* Feed Header Navigation Tabs (All, Classes, Read Later) */
 .connectea-dark .cvr-c-feed:not(.cx-n), .connectea-dark .cvr-c-feed-header:not(.cx-n), .connectea-dark .cvr-c-feed-header__tabs:not(.cx-n),
 .connectea-dark .cvr-c-feed__tabs:not(.cx-n), .connectea-dark .eds-c-tabs:not(.cx-n), .connectea-dark .mat-tab-group:not(.cx-n),
-.connectea-dark .mat-tab-nav-bar:not(.cx-n), .connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) {
+.connectea-dark .mat-tab-nav-bar:not(.cx-n), .connectea-dark .cvr-c-feed .cvr-c-feed__tabs {
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;

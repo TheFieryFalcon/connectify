@@ -7,7 +7,7 @@
   justify-content: center !important;
 }
 
-.connectea-dark .c-empty-content:not(cx-n), .connectea-dark :is(.c-empty-content p), .connectea-dark .eds-c-empty-content:not(cx-n) {
+.connectea-dark .c-empty-content:not(cx-n), .connectea-dark .c-empty-content p, .connectea-dark .eds-c-empty-content:not(cx-n) {
   text-align: center !important;
 }
 

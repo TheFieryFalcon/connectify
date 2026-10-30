@@ -6,8 +6,8 @@
    13. Form Controls & General Buttons
    -------------------------------------------------------------------------- */
 /* Text Inputs & Textareas (not range sliders: padding would stop their thumbs short of the track ends) */
-.connectea-dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not(.mat-input-element):not(.connectea-subject-cohort-input):not([class*="connectea-"]):not(#connectify-sidebar *):not(#connectify-sidebar-handle *),
-.connectea-dark textarea:not(#connectify-sidebar *):not(#connectify-sidebar-handle *):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n) {
+.connectea-dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not(.mat-input-element):not(.connectea-subject-cohort-input):not([class*="connectea-"]):not(:is(#connectify-sidebar, #connectify-sidebar-handle) *):not(#cx-n),
+.connectea-dark textarea:not(:is(#connectify-sidebar, #connectify-sidebar-handle) *):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(#cx-n) {
   background-color: var(--cx-input-bg, #141a22) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border: 1px solid var(--cx-border, #42556d) !important;
@@ -28,8 +28,8 @@
 
 /* High-Contrast Dark Checkboxes (Native, Clay, Material, Vaadin) */
 .connectea-dark:not(cx-n) input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input):not(#connectify-sidebar *):not([class*="connectea-"]),
-.connectea-dark:not(cx-n) :is(.v-checkbox input[type="checkbox"]):not(#connectify-sidebar *):not([class*="connectea-"]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.eds-c-checkbox input[type="checkbox"]):not(#connectify-sidebar *):not([class*="connectea-"]):not(.cx-n) {
+.connectea-dark:not(cx-n) .v-checkbox input[type="checkbox"]:not(#connectify-sidebar *):not([class*="connectea-"]):not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-checkbox input[type="checkbox"]:not(#connectify-sidebar *):not([class*="connectea-"]):not(.cx-n) {
   appearance: none !important;
   -webkit-appearance: none !important;
   width: 17px !important;
@@ -46,15 +46,15 @@
 }
 
 .connectea-dark:not(cx-n) input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input):hover,
-.connectea-dark:not(cx-n) :is(.v-checkbox input[type="checkbox"]):hover:not(.cx-n),
-.connectea-dark:not(cx-n) :is(.eds-c-checkbox input[type="checkbox"]):hover:not(.cx-n) {
+.connectea-dark:not(cx-n) .v-checkbox input[type="checkbox"]:hover:not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-checkbox input[type="checkbox"]:hover:not(.cx-n) {
   border-color: var(--cx-accent-hover, #60a5fa) !important;
   background-color: var(--cx-surface-hover, #222d3d) !important;
 }
 
 .connectea-dark:not(cx-n) input[type="checkbox"]:not(.cdk-visually-hidden):not(.mat-checkbox-input):checked,
-.connectea-dark:not(cx-n) :is(.v-checkbox input[type="checkbox"]):checked:not(.cx-n),
-.connectea-dark:not(cx-n) :is(.eds-c-checkbox input[type="checkbox"]):checked:not(.cx-n) {
+.connectea-dark:not(cx-n) .v-checkbox input[type="checkbox"]:checked:not(.cx-n),
+.connectea-dark:not(cx-n) .eds-c-checkbox input[type="checkbox"]:checked:not(.cx-n) {
   background-color: var(--cx-accent, #2563eb) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3E%3Cpath d='M13.485 3.515a1 1 0 0 1 0 1.414l-7.071 7.071a1 1 0 0 1-1.414 0L1.515 8.515a1 1 0 1 1 1.414-1.414l2.778 2.778 6.364-6.364a1 1 0 0 1 1.414 0z'/%3E%3C/svg%3E") !important;
@@ -63,8 +63,8 @@
   background-position: center !important;
 }
 
-.connectea-dark:not(cx-n) input[type="checkbox"]:focus:not(.cx-n), .connectea-dark:not(cx-n) :is(.v-checkbox input[type="checkbox"]):focus,
-.connectea-dark:not(cx-n) :is(.eds-c-checkbox input[type="checkbox"]):focus {
+.connectea-dark:not(cx-n) input[type="checkbox"]:focus:not(.cx-n), .connectea-dark:not(cx-n) .v-checkbox input[type="checkbox"]:focus,
+.connectea-dark:not(cx-n) .eds-c-checkbox input[type="checkbox"]:focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--cx-accent, #3b82f6) 35%, transparent) !important;
   outline: none !important;
 }

@@ -5,7 +5,7 @@
 /* --------------------------------------------------------------------------
    27. Learning Content, Resource Panels & Tree Structures
    -------------------------------------------------------------------------- */
-.connectea-dark .cvr-c-learning-area:not(.cx-n), .connectea-dark :is(.cvr-c-learning-area .cvr-c-expansion-panel__body),
+.connectea-dark .cvr-c-learning-area:not(.cx-n), .connectea-dark .cvr-c-learning-area .cvr-c-expansion-panel__body,
 .connectea-dark .cvr-c-learning-content-select-container:not(.cx-n), .connectea-dark .cvr-c-learning-content-select-item:not(.cx-n) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-primary, #e2e8f0) !important;
@@ -50,8 +50,7 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
 }
 
-.connectea-dark .v-Notification-caption:not(.cx-n):not(.cx-n),
-.connectea-dark :is(.v-Notification:not(.v-Notification-system) .v-Notification-caption) {
+.connectea-dark .v-Notification-caption:not(.cx-n):not(.cx-n), .connectea-dark .v-Notification:not(.v-Notification-system) .v-Notification-caption {
   color: var(--cx-text-primary, #f8fafc) !important;
   font-weight: 700 !important;
 }

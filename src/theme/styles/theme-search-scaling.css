@@ -8,21 +8,21 @@
   border-color: #ef4444 !important;
 }
 
-.connectea-dark :is(.cvr-c-switch label):not(.cx-n), .connectea-dark .eds-c-switch__slider:not(.cx-n):not(cx-n),
+.connectea-dark .cvr-c-switch label:not(.cx-n), .connectea-dark .eds-c-switch__slider:not(.cx-n):not(cx-n),
 .connectea-dark :is(.custom-switch .custom-control-label::before) {
   background-color: var(--cx-input-bg, #202c3b) !important;
   border: 1px solid var(--cx-border, #4a617a) !important;
 }
 
-.connectea-dark :where(.cvr-c-switch input:checked + label):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n),
-.connectea-dark :is(.eds-c-switch input:checked + .eds-c-switch__slider):not(.cx-n),
+.connectea-dark :where(.cvr-c-switch) :where(input:checked) + :where(label):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n),
+.connectea-dark .eds-c-switch input:checked + .eds-c-switch__slider:not(.cx-n),
 .connectea-dark :is(.custom-switch .custom-control-input:checked ~ .custom-control-label::before) {
   background-color: var(--cx-accent, #2563eb) !important;
   border-color: var(--cx-accent-hover, #3b82f6) !important;
 }
 
-.connectea-dark :where(.cvr-c-switch label:before):not(.cx-n):not(.cx-n):not(cx-n), .connectea-dark :is(.eds-c-switch__slider:before):not(.cx-n),
-.connectea-dark :is(.custom-switch .custom-control-label::after) {
+.connectea-dark :where(.cvr-c-switch) :where(label:before):not(.cx-n):not(.cx-n):not(cx-n),
+.connectea-dark :is(.eds-c-switch__slider:before):not(.cx-n), .connectea-dark :is(.custom-switch .custom-control-label::after) {
   background-color: var(--cx-button-text, #f1f5f9) !important;
 }
 
@@ -39,7 +39,7 @@
 /* --------------------------------------------------------------------------
    30. Search, Floating Filters, Rich Media, Editors & KaTeX
    -------------------------------------------------------------------------- */
-.connectea-dark .eds-c-search__field:not(cx-n), .connectea-dark :is(.cvr-c-search input), .connectea-dark .site-search__field:not(cx-n) {
+.connectea-dark .eds-c-search__field:not(cx-n), .connectea-dark .cvr-c-search input, .connectea-dark .site-search__field:not(cx-n) {
   background-color: var(--cx-input-bg, #141a22) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border: 1px solid var(--cx-border, #42556d) !important;
@@ -57,7 +57,7 @@
   border-radius: 6px !important;
 }
 
-.connectea-dark :is(.v-richtextarea .gwt-RichTextArea), .connectea-dark :where(.cvr-c-richtextarea iframe):not(.cx-n):not(.cx-n) {
+.connectea-dark .v-richtextarea .gwt-RichTextArea, .connectea-dark :where(.cvr-c-richtextarea) :where(iframe):not(.cx-n):not(.cx-n) {
   background-color: var(--cx-input-bg, #141a22) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
@@ -108,9 +108,9 @@
 
 /* Angular Material Class Pages (.eds.cvr.ngm) Contrast Normalization */
 .connectea-dark:not(cx-n).eds.cvr.ngm .connect-purple.theme-multiplier.text-primary,
-.connectea-dark:not(cx-n).eds.cvr.ngm :is(.connect-purple.theme-multiplier .text-primary),
+.connectea-dark:not(cx-n).eds.cvr.ngm .connect-purple.theme-multiplier .text-primary,
 .connectea-dark:not(cx-n).eds.cvr.ngm .connect-purple.text-primary:not(.cx-n),
-.connectea-dark:not(cx-n).eds.cvr.ngm :is(.connect-purple .text-primary):not(.cx-n),
+.connectea-dark:not(cx-n).eds.cvr.ngm .connect-purple .text-primary:not(.cx-n),
 .connectea-dark:not(cx-n).eds.cvr.ngm .theme-multiplier.text-primary:not(.cx-n),
 .connectea-dark:not(cx-n).eds.cvr.ngm :is(.theme-multiplier .text-primary):not(.cx-n),
 .connectea-dark:not(cx-n).eds.cvr.ngm .text-primary:not(.cx-n):not(.cx-n),

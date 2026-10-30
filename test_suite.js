@@ -3422,7 +3422,7 @@ runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, 
 
   // 1. Subject grade and summary mark text unbolding (font-weight: 400 !important)
   assert.ok(cssHas(sideCss, '.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'sidebar.css must explicitly set font-weight 400 for summary marks outside cvr-c-tasks');
-  assert.ok(cssHas(themeCss, '.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'theme.css must explicitly set font-weight 400 for summary marks outside cvr-c-tasks');
+  assert.ok(cssHas(themeCss, ':is(.cvr-c-task:not(.cvr-c-tasks *)) .cvr-c-task__mark'), 'theme.css must explicitly set font-weight 400 for summary marks outside cvr-c-tasks');
 
   // 2. First task outcome bar suppression via .cvr-c-tasks .cvr-c-task query
   assert.ok(cohortViewJs.includes("card.querySelectorAll('.cvr-c-tasks .cvr-c-task')"), 'cohort-view.js must index tasks inside .cvr-c-tasks');
@@ -3455,7 +3455,7 @@ runTest('Test 113: Typography bolding parity between dark and light modes for ta
 
   // 2. Summary mark and non-task score unbolding parity (font-weight: 400 !important)
   assert.ok(cssHas(sideCss, '.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'sidebar.css must unbold subject summary mark');
-  assert.ok(cssHas(themeCss, ':is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__mark)'), 'theme.css must unbold subject summary mark');
+  assert.ok(cssHas(themeCss, ':is(.cvr-c-task:not(.cvr-c-tasks *)) .cvr-c-task__mark'), 'theme.css must unbold subject summary mark');
 
   // 3. Stats panel strong elements parity
   assert.ok(cssHas(sideCss, ':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold stats panel strong elements');
@@ -5338,7 +5338,7 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   const manifest = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'manifest.json'), 'utf8'));
 
   // 1. Static checks: CSS controls exclude navbar and header buttons from padding inflation
-  assert.ok(cssHas(themeControlsCss, ':not(.cvr-c-primary-navigation *):not(.cvr-c-primary-navigation):not(.cvr-c-header *):not(.cvr-c-header):not(#connectea-theme-toggle)'),
+  assert.ok(cssHas(themeControlsCss, ':not(:is(#connectify-sidebar, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-primary-navigation__user-controls) *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation):not(.cvr-c-header):not(#connectea-theme-toggle)'),
     'theme-controls.css must exclude primary navigation and header buttons from generic button padding');
   assert.ok(cssHas(themeCoreCss, 'min-height: 48px !important;'), 'theme-core.css must enforce min-height on cvr-c-primary-navigation');
   assert.ok(cssHas(themeCoreCss, 'box-sizing: border-box !important;'), 'theme-core.css must enforce box-sizing on cvr-c-primary-navigation');
@@ -7876,7 +7876,7 @@ runTest('Test 164: Liquid Glass Class page banners, bars, headings and empty sta
   }
   const surface = fs.readFileSync(path.join(styles, 'theme-glass-surface.css'), 'utf8');
   const clearRule = surface.replace(/\/\*[\s\S]*?\*\//g, '').split('}').find(b => b.includes('cnt-scope-intro-class')) || '';
-  for (const sel of [' cnt-scope-intro-class:not(', ' mat-toolbar.c-category-bar:not(', ':is(.cvr-c-category-toolbar__container > .cvr-c-thori-pnl)', ':is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox))', ':is(cnt-paginator:has(.c-empty-content))', ' p.mat-h2:not(', ' .eds-c-empty-content:not(']) {
+  for (const sel of [' cnt-scope-intro-class:not(', ' mat-toolbar.c-category-bar:not(', ' .cvr-c-category-toolbar__container > .cvr-c-thori-pnl:not(', ' .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)', ':is(cnt-paginator:has(.c-empty-content))', ' p.mat-h2:not(', ' .eds-c-empty-content:not(']) {
     assert.ok(clearRule.includes(sel), `${sel} sits on the page in Liquid Glass`);
   }
   assert.ok(/background: transparent !important;/.test(clearRule) && /backdrop-filter: none !important;/.test(clearRule) && /box-shadow: none !important;/.test(clearRule),
@@ -7884,7 +7884,7 @@ runTest('Test 164: Liquid Glass Class page banners, bars, headings and empty sta
   assert.ok(!/::before/.test(surface) && !/--cx-gl-fill/.test(surface) && !/border-radius/.test(surface), 'no glass pills, cards or panels remain');
   const pages = fs.readFileSync(path.join(styles, 'theme-glass-class-pages.css'), 'utf8');
   assert.ok(cssHas(pages, `:is(.cvr-c-pagination__body:has(> table.mat-table)),\n${glass} mat-accordion:not(.cx-n):not(.cx-n) {\n  border-radius: 16px !important;\n  overflow: clip !important;`), 'the Learners table and accordion must be rounded and clipped');
-  assert.ok(cssHas(pages, `${glass}:not([data-connectea-login]) :where(.v-app.librarylearningcontentui):not(#cx-n),\n${glass}:not([data-connectea-login]) :where(.v-app.librarylearningcontentui > .v-ui.v-scrollable):not(#cx-n)`),
+  assert.ok(cssHas(pages, `${glass}:not([data-connectea-login]) :where(.v-app.librarylearningcontentui):not(#cx-n),\n${glass}:not([data-connectea-login]) :where(.v-app.librarylearningcontentui) > :where(.v-ui.v-scrollable):not(#cx-n)`),
     'the Content canvas must be transparent with or without sections, scoped to the Content app');
   const empty = fs.readFileSync(path.join(styles, 'theme-empty-states.css'), 'utf8');
   assert.ok(cssHas(empty, '.connectea-dark cnt-paginator:has(.c-empty-content) {\n  justify-content: center !important;') && cssHas(empty, '.eds-c-empty-content'),
@@ -7894,7 +7894,7 @@ runTest('Test 164: Liquid Glass Class page banners, bars, headings and empty sta
   // Paginators and the Select All row have no panel: bar, Page N of M box, bar wrapper and Select All row are clear (empty-state and table wrappers keep theirs)
   const clear = (bars.split('}').find(b => b.includes(':where(mat-paginator):not(#cx-n)')) || '');
   assert.ok(clear.includes(':is(html.connectea-dark, html[data-connectea-has-custom-bg="true"])') && clear.includes('.connect-paginator-container') &&
-    clear.includes('cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))') && clear.includes('.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)') &&
+    clear.includes('cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))') && clear.includes(':where(.cvr-c-pagination__body) > :where(div.d-flex:has(> mat-checkbox))') &&
     /background-color: transparent !important;/.test(clear) && /box-shadow: none !important;/.test(clear), 'paginators sit on the page with no panel');
   assert.ok(!/(mat-paginator|paginator-container)[^{}]*\{[^}]*rgba\(255, 255, 255, 0\.9\)/.test(bars), 'Light with a wallpaper puts no white panel behind paginators');
   for (const file of ['theme-empty-states.css', 'theme-control-bars.css']) {
@@ -8248,7 +8248,7 @@ runTest('Test 175: Liquid Glass task rows are tinted blocks inside the glass til
   }
   assert.ok(/background: transparent/.test(rule(':where\\(\\.connectea-row-wrapper\\):not\\(#cx-n\\) > \\.connectea-panel')), 'the panel inside the strip must be clear (and outrank the id-weighted glass blur rule)');
   assert.ok(/background: transparent/.test(rule('\\.cvr-c-task__mark')), 'marks must not add a second fill');
-  assert.ok(/\.cvr-c-task__mark \*\)(:not\(\.cx-n\))?\s*\{\s*color: var\(--cx-text-primary/.test(css), 'text on the task-row blocks must use the primary ink');
+  assert.ok(/\.cvr-c-task__mark \*(:not\(\.cx-n\))?\s*\{\s*color: var\(--cx-text-primary/.test(css), 'text on the task-row blocks must use the primary ink');
 });
 
 runTest('Test 176: Boxplot decoration shapes stay invisible in dark and glass themes; only the box keeps a fill', () => {
@@ -8342,11 +8342,11 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   const reading = read('styles/theme-glass-reading.css');
   const manifestJson = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifestJson.indexOf('theme-glass-reading.css') > manifestJson.indexOf('theme-glass-nesting.css') && manifestJson.indexOf('theme-glass-reading.css') < manifestJson.indexOf('"src/theme/styles/theme.css"'), 'theme-glass-reading.css must be registered before theme.css');
-  assert.ok(/\.cnt-ng-zone > div:has\(cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view\)[^{]*\{\s*background-color: transparent !important;\s*backdrop-filter: none !important;/.test(reading) && !/88%|blur\(/.test(reading),
+  assert.ok(/:where\(\.cnt-ng-zone\) > :where\(div:has\(cnt-notice-view, cnt-discussion-view, cnt-discussion-item-view\)\)[^{]*\{\s*background-color: transparent !important;\s*backdrop-filter: none !important;/.test(reading) && !/88%|blur\(/.test(reading),
     'the frame holding a glass reading view has no fill or blur: the text sits on the wallpaper');
   assert.ok(/:where\(cnt-notice-view\):not\(#cx-n\),/.test(reading) && /:where\(cnt-message-detail-view\):not\(#cx-n\) \{\s*background-color: transparent/.test(reading), 'the views inside the reading frame stay clear');
-  assert.ok(/#main-content:not\(mat-dialog-container \*\)[^{]*\{\s*background-color: transparent/.test(reading), 'the page around a glass reading view stays clear');
-  assert.ok(base.includes(':where(cnt-discussion-item-view):not(mat-dialog-container *)') && base.includes(':where(cnt-message-detail-view):not(mat-dialog-container *)'), 'discussion views must get the solid reading canvas');
+  assert.ok(/#main-content:not\(:is\(mat-dialog-container, \.mat-dialog-container\) \*\)[^{]*\{\s*background-color: transparent/.test(reading), 'the page around a glass reading view stays clear');
+  assert.ok(base.includes(':where(cnt-discussion-item-view):not(:is(mat-dialog-container, .mat-dialog-container) *)') && base.includes(':where(cnt-message-detail-view):not(:is(mat-dialog-container, .mat-dialog-container) *)'), 'discussion views must get the solid reading canvas');
   assert.ok(read('theme.js').includes('cnt-discussion-item-view'), 'discussion views must be detected as reading views');
   // Service bar "+": theme colours, outranking Connect's !important class colour
   assert.ok(read('styles/theme-action-buttons.css').includes(':where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm {\n  background-color: var(--cx-button-primary-bg'), 'the + circle must use the primary button colour');
@@ -8357,7 +8357,7 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   assert.ok(manifest.indexOf('theme-glass-nesting.css') > manifest.indexOf('theme-glass-task-rows.css') && manifest.indexOf('theme-glass-nesting.css') < manifest.indexOf('"src/theme/styles/theme.css"'), 'theme-glass-nesting.css must be registered before theme.css');
   const sels = nesting.replace(/\/\*[\s\S]*?\*\//g, '').split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
   assert.ok(sels.every(sel => sel.startsWith(G)), 'every nesting rule must be Liquid Glass only');
-  assert.ok(nesting.includes(':where(.v-app.headerui):not(#cx-n),') && /:where\(\.v-app\.headerui > \.v-ui\):not\(#cx-n\) \{\s*background-color: transparent/.test(nesting), 'the header canvas must be clear (outranking the #main-content canvas rule) so the top bars blur the page');
+  assert.ok(nesting.includes(':where(.v-app.headerui):not(#cx-n),') && /:where\(\.v-app\.headerui\) > :where\(\.v-ui\):not\(#cx-n\) \{\s*background-color: transparent/.test(nesting), 'the header canvas must be clear (outranking the #main-content canvas rule) so the top bars blur the page');
   assert.ok(/\.cvr-c-thori-pnl\.cvr-c-primary-navigation[\s\S]*?backdrop-filter: var\(--cx-gl-blur\)/.test(nesting), 'the top navigation bar must blur');
   assert.ok(/:where\(\.cvr-c-service-bar__container\):not\(#cx-n\) \{[^}]*backdrop-filter: none/.test(nesting), 'the service bar container must not blur (it would trap the bar and menu blur), outranking the id-weighted glass rule');
   assert.ok(['thead', 'tbody', 'tfoot', 'tr:not(:hover)', 'th', 'td'].every(s => surfaceNesting.includes(` table :where(${s}):not(#cx-n)`)), 'table rows and cells must be clear inside the table surface');
@@ -8894,10 +8894,12 @@ runTest('Test 194: The top-right user area keeps the bar and popup surfaces, rea
   assert.ok(find('.cvr-c-primary-navigation__button--sign-out', ':hover').some(b => /var\(--cx-surface-hover/.test(b.body)), 'Sign Out highlights on hover');
   assert.ok(find('.cvr-c-primary-navigation__user-controls').some(b => /background-color: transparent/.test(b.body)), 'the Sign Out row is clear');
   // The generic button rules (border, 4px radius, 6px 14px padding, button fill) skip the user-area buttons
-  const skip = ':not([class*="cvr-c-primary-navigation__button--"]):not(.cvr-c-primary-navigation__user-controls *)';
+  // (the user controls are one of the rule's ancestor exclusions, merged into one :not(:is(...) *) by the expander)
+  const skipsUserArea = sel => cssCompact(sel).includes(cssCompact(':not([class*="cvr-c-primary-navigation__button--"])')) &&
+    /:not\((:is\([^)]*)?\.cvr-c-primary-navigation__user-controls[,)][^)]*\)? \*\)/.test(sel);
   for (const f of ['src/theme/styles/theme-buttons.css', 'src/theme/styles/theme-component-base.css']) {
     for (const b of blocks(read(f)).filter(b => /\.v-button/.test(b.sel) && !/:disabled/.test(b.sel) && /background-color: var\(--cx-(button-bg|surface-hover|surface-active)|border-color: var\(--cx-accent/.test(b.body))) {
-      assert.ok(cssCompact(b.sel).includes(cssCompact(skip)), `${f}: generic button rule must skip Sign Out and the avatar: ${b.sel.slice(0, 60)}`);
+      assert.ok(skipsUserArea(b.sel), `${f}: generic button rule must skip Sign Out and the avatar: ${b.sel.slice(0, 60)}`);
     }
   }
   // Ink reaches 5:1 on the popup surface (and its hover) in every preset; glass layers composite over the canvas
@@ -9446,7 +9448,7 @@ runTest('Test 203: Important tiles (Maintenance Notice) keep their red tint in d
   assert.ok(manifest.indexOf('"src/theme/styles/theme-alert-tiles.css"') > manifest.indexOf('"src/theme/styles/theme-tiles.css"') &&
     manifest.indexOf('"src/theme/styles/theme-alert-tiles.css"') < manifest.indexOf('"src/theme/styles/theme.css"'), 'theme-alert-tiles.css loads after the tile rules it overrides');
   assert.ok(css.includes('html.connectea-dark[data-connectea-theme] :where(.eds-c-tile__header--negative):not(#cx-n) {\n  background-color: color-mix(in srgb, #dc2626 16%, transparent) !important;'), 'negative headers keep a red tint in dark themes');
-  assert.ok(css.includes(':where(.eds-c-tile--important > .eds-c-tile__header):not(#cx-n) {\n  border-bottom-color: #dc2626 !important;'), 'important headers keep a red divider');
+  assert.ok(css.includes(':where(.eds-c-tile--important) > :where(.eds-c-tile__header):not(#cx-n) {\n  border-bottom-color: #dc2626 !important;'), 'important headers keep a red divider');
   assert.ok(/#f87171 !important;\n  -webkit-text-fill-color: #f87171 !important;/.test(css), 'red icons beat the glyph ink (text-fill too)');
   assert.ok(css.includes('html.connectea-dark[data-connectea-tone="light"] :where(.eds-c-tile__header--negative):not(#cx-n) {\n  background-color: color-mix(in srgb, #9d000b 10%, transparent) !important;'), 'light-tone themes use Connect\'s own red');
   assert.ok(!/:is\([^)]*::before/.test(css), 'pseudo-elements stay outside :is() (an invalid :is drops the rule)');
@@ -12552,7 +12554,7 @@ runTest('Test 269: Expand All stays light: week overrides are indexed once, clas
   assert.deepStrictEqual(offenders, [], 'theme hooks are written .connectea-dark:not(cx-n) (same match, same 0,1,1 specificity)');
 });
 
-runTest('Test 270: Theme rules are keyed by a class, id or tag: every :is() / :where() list is expanded exactly (scripts/expand-is.js)', () => {
+runTest('Test 270: Theme rules are keyed by a class, id or tag: every :is() / :where() list is expanded or split exactly, ancestor exclusions merged (scripts/expand-is.js)', () => {
   // A subject keyed only by a multi-argument :is() sits in Chrome's universal bucket and is tried on every element; an
   // ancestor keyed only by one gives the Bloom filter nothing to reject on. Expand All restyled ~4x slower in Dark.
   const x = expandIs;
@@ -12580,6 +12582,33 @@ runTest('Test 270: Theme rules are keyed by a class, id or tag: every :is() / :w
   same(':is(.connectea-dark, body, html) :is(.a, .b)', [':is(.connectea-dark, body, html) .a', ':is(.connectea-dark, body, html) .b']);
   // A compound already keyed by a class keeps its list
   same('.x:is(.a, .b) span', ['.x:is(.a, .b) span']);
+  // Ancestor exclusions walk every ancestor each: one compound's become one :not(:is(...) *), padded to the same
+  // specificity (the typography rule tried on every div walked them seven times, Expand All's costliest rule in Dark)
+  const merged = (sel, out) => {
+    assert.strictEqual(x.mergeExclusions(sel), out, sel);
+    assert.deepStrictEqual(x.specificity(out), x.specificity(sel), `${out} keeps the specificity of ${sel}`);
+    assert.strictEqual(x.mergeExclusions(out), out, 'merging again changes nothing');
+  };
+  merged('.connectea-dark div:not(.a *):not(#b *):not([style*="font-family"] *):not(.c)', '.connectea-dark div:not(:is(.a, #b, [style*="font-family"]) *):not(.c):not(.cx-n):not(.cx-n)');
+  merged('.p:not(.a > *):not(.b *)::before', '.p:not(.a > *):not(.b *)::before');
+  merged('.p:not(:is(.a, .b) *):not(#c *)', '.p:not(:is(.a, .b, #c) *):not(.cx-n)');
+  // A single complex argument is never bucketed by Chrome (tried on every element): after <html> / <body> hooks it is
+  // written one compound at a time, which matches the same elements with the same specificity
+  const split = (sel, out) => {
+    assert.strictEqual(x.splitSingle(sel), out, sel);
+    assert.deepStrictEqual(x.specificity(out), x.specificity(sel), `${out} keeps the specificity of ${sel}`);
+    assert.strictEqual(x.splitSingle(out), out, 'splitting again changes nothing');
+  };
+  split(':is(html, body).connectea-dark:not([data-connectea-login]) :is(.cvr-c-classes span):not(.cx-n)', ':is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-classes span:not(.cx-n)');
+  split('.connectea-dark :where(.cvr-c-a > .cvr-c-b div)', '.connectea-dark :where(.cvr-c-a) > :where(.cvr-c-b) :where(div)');
+  split('html.connectea-dark :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__mark)::before', 'html.connectea-dark :is(.cvr-c-task:not(.cvr-c-tasks *)) .cvr-c-task__mark::before');
+  // After any other ancestor the list stays (.tile :is(.a span) also matches an .a outside the tile), and so does a
+  // first compound that could be <html> / <body> itself
+  split('.connectea-dark .eds-c-tile :is(.cvr-c-a span)', '.connectea-dark .eds-c-tile :is(.cvr-c-a span)');
+  split('.connectea-dark :is(.wf-active span)', '.connectea-dark :is(.wf-active span)');
+  split('.connectea-dark [data-connectea-surface] :is(.cvr-c-a span)', '.connectea-dark [data-connectea-surface] :is(.cvr-c-a span)');
+  const typography = origReadFileSync.call(fs, path.join(dir, 'theme-core.css'), 'utf8').split('\n').find(l => l.startsWith('.connectea-dark :where(div):not('));
+  assert.ok(typography && (typography.match(/ \*\)/g) || []).length === 1, 'the typography rule walks the ancestors once');
 });
 
 runTest('Test 271: Caches follow the signed-in user: another student signing in never sees the last one\'s cached classes', () => {

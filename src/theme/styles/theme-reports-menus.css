@@ -2,10 +2,10 @@
  * Connectify Theme: reports year selector, light-mode wallpaper containers, glass headers and menus
  */
 
-.connectea-dark .font-weight-bold:not(#connectify-sidebar *):not(#connectify-sidebar-handle *):not(#connectea-atar *):not([class*="connectea-"]):not([class*="cta-"]),
-.connectea-dark .fw-bold:not(#connectify-sidebar *):not(#connectify-sidebar-handle *):not(#connectea-atar *):not([class*="connectea-"]):not([class*="cta-"]),
-.connectea-dark :where(b):not(#connectify-sidebar *):not(#connectify-sidebar-handle *):not(#connectea-atar *):not([class*="connectea-"]):not([class*="cta-"]):not(.cx-n),
-.connectea-dark :where(strong):not(#connectify-sidebar *):not(#connectify-sidebar-handle *):not(#connectea-atar *):not([class*="connectea-"]):not([class*="cta-"]):not(.cx-n) {
+.connectea-dark .font-weight-bold:not(:is(#connectify-sidebar, #connectify-sidebar-handle, #connectea-atar) *):not([class*="connectea-"]):not([class*="cta-"]):not(#cx-n):not(#cx-n),
+.connectea-dark .fw-bold:not(:is(#connectify-sidebar, #connectify-sidebar-handle, #connectea-atar) *):not([class*="connectea-"]):not([class*="cta-"]):not(#cx-n):not(#cx-n),
+.connectea-dark :where(b):not(:is(#connectify-sidebar, #connectify-sidebar-handle, #connectea-atar) *):not([class*="connectea-"]):not([class*="cta-"]):not(.cx-n):not(#cx-n):not(#cx-n),
+.connectea-dark :where(strong):not(:is(#connectify-sidebar, #connectify-sidebar-handle, #connectea-atar) *):not([class*="connectea-"]):not([class*="cta-"]):not(.cx-n):not(#cx-n):not(#cx-n) {
   font-weight: 700 !important;
 }
 
@@ -73,15 +73,13 @@
 .connectea-dark .mat-tab-nav-bar:not(.cx-n) .mat-tab-label-content:not(cx-n), .connectea-dark .mat-tab-nav-bar:not(.cx-n) button:not(.cx-n),
 .connectea-dark .mat-tab-nav-bar:not(.cx-n) a:not(.cx-n), .connectea-dark .mat-tab-nav-bar:not(.cx-n) span:not(.cx-n),
 .connectea-dark .mat-tab-nav-bar:not(.cx-n) div.mat-tab-label, .connectea-dark .mat-tab-nav-bar:not(.cx-n) div.mat-tab-label-content,
-.connectea-dark .mat-tab-nav-bar:not(.cx-n) li:not(.cx-n), .connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .mat-tab-label:not(cx-n),
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .mat-tab-link:not(cx-n),
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .eds-c-tabs__tab:not(cx-n),
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .cvr-c-feed-tab:not(cx-n),
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .cvr-c-feed__tab:not(cx-n),
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .mat-tab-label-content:not(cx-n),
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) button:not(.cx-n), .connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) a:not(.cx-n),
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) span:not(.cx-n), .connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) div.mat-tab-label,
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) div.mat-tab-label-content, .connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) li:not(.cx-n) {
+.connectea-dark .mat-tab-nav-bar:not(.cx-n) li:not(.cx-n), .connectea-dark .cvr-c-feed .cvr-c-feed__tabs .mat-tab-label:not(cx-n),
+.connectea-dark .cvr-c-feed .cvr-c-feed__tabs .mat-tab-link:not(cx-n), .connectea-dark .cvr-c-feed .cvr-c-feed__tabs .eds-c-tabs__tab:not(cx-n),
+.connectea-dark .cvr-c-feed .cvr-c-feed__tabs .cvr-c-feed-tab:not(cx-n), .connectea-dark .cvr-c-feed .cvr-c-feed__tabs .cvr-c-feed__tab:not(cx-n),
+.connectea-dark .cvr-c-feed .cvr-c-feed__tabs .mat-tab-label-content:not(cx-n), .connectea-dark .cvr-c-feed .cvr-c-feed__tabs button:not(.cx-n),
+.connectea-dark .cvr-c-feed .cvr-c-feed__tabs a:not(.cx-n), .connectea-dark .cvr-c-feed .cvr-c-feed__tabs span:not(.cx-n),
+.connectea-dark .cvr-c-feed .cvr-c-feed__tabs div.mat-tab-label, .connectea-dark .cvr-c-feed .cvr-c-feed__tabs div.mat-tab-label-content,
+.connectea-dark .cvr-c-feed .cvr-c-feed__tabs li:not(.cx-n) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
@@ -110,15 +108,15 @@
 .connectea-dark .mat-tab-nav-bar:not(.cx-n) .mat-tab-label:hover, .connectea-dark .mat-tab-nav-bar:not(.cx-n) .mat-tab-link:hover,
 .connectea-dark .mat-tab-nav-bar:not(.cx-n) .eds-c-tabs__tab:hover, .connectea-dark .mat-tab-nav-bar:not(.cx-n) .cvr-c-feed-tab:hover,
 .connectea-dark .mat-tab-nav-bar:not(.cx-n) .cvr-c-feed__tab:hover, .connectea-dark .mat-tab-nav-bar:not(.cx-n) :where(button):hover:not(.cx-n),
-.connectea-dark .mat-tab-nav-bar:not(.cx-n) :where(a):hover:not(.cx-n), .connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .mat-tab-label:hover,
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .mat-tab-link:hover, .connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .eds-c-tabs__tab:hover,
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .cvr-c-feed-tab:hover, .connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) .cvr-c-feed__tab:hover,
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) :where(button):hover:not(.cx-n),
-.connectea-dark :is(.cvr-c-feed .cvr-c-feed__tabs) :where(a):hover:not(.cx-n),
-.connectea-dark .mat-tab-label-active:not(.cx-n) :where(span):not(.cx-n), .connectea-dark .mat-tab-label-active:not(.cx-n) :where(a):not(.cx-n),
-.connectea-dark .mat-tab-label-active:not(.cx-n) :where(button):not(.cx-n), .connectea-dark .mat-tab-label-active:not(.cx-n) :where(li):not(.cx-n),
-.connectea-dark .mat-tab-label-active:not(.cx-n) .mat-tab-label-content, .connectea-dark .mat-tab-link.mat-tab-label-active :where(span):not(.cx-n),
-.connectea-dark .mat-tab-link.mat-tab-label-active :where(a):not(.cx-n), .connectea-dark .mat-tab-link.mat-tab-label-active :where(button):not(.cx-n),
+.connectea-dark .mat-tab-nav-bar:not(.cx-n) :where(a):hover:not(.cx-n), .connectea-dark .cvr-c-feed .cvr-c-feed__tabs .mat-tab-label:hover,
+.connectea-dark .cvr-c-feed .cvr-c-feed__tabs .mat-tab-link:hover, .connectea-dark .cvr-c-feed .cvr-c-feed__tabs .eds-c-tabs__tab:hover,
+.connectea-dark .cvr-c-feed .cvr-c-feed__tabs .cvr-c-feed-tab:hover, .connectea-dark .cvr-c-feed .cvr-c-feed__tabs .cvr-c-feed__tab:hover,
+.connectea-dark .cvr-c-feed .cvr-c-feed__tabs :where(button):hover:not(.cx-n),
+.connectea-dark .cvr-c-feed .cvr-c-feed__tabs :where(a):hover:not(.cx-n), .connectea-dark .mat-tab-label-active:not(.cx-n) :where(span):not(.cx-n),
+.connectea-dark .mat-tab-label-active:not(.cx-n) :where(a):not(.cx-n), .connectea-dark .mat-tab-label-active:not(.cx-n) :where(button):not(.cx-n),
+.connectea-dark .mat-tab-label-active:not(.cx-n) :where(li):not(.cx-n), .connectea-dark .mat-tab-label-active:not(.cx-n) .mat-tab-label-content,
+.connectea-dark .mat-tab-link.mat-tab-label-active :where(span):not(.cx-n), .connectea-dark .mat-tab-link.mat-tab-label-active :where(a):not(.cx-n),
+.connectea-dark .mat-tab-link.mat-tab-label-active :where(button):not(.cx-n),
 .connectea-dark .mat-tab-link.mat-tab-label-active :where(li):not(.cx-n), .connectea-dark .mat-tab-link.mat-tab-label-active .mat-tab-label-content,
 .connectea-dark .mat-tab-label.mat-tab-label-active :where(span):not(.cx-n), .connectea-dark .mat-tab-label.mat-tab-label-active :where(a):not(.cx-n),
 .connectea-dark .mat-tab-label.mat-tab-label-active :where(button):not(.cx-n),
@@ -158,8 +156,8 @@
 .connectea-dark:not(cx-n) .cvr-c-report-year:not(cx-n), .connectea-dark:not(cx-n) .cvr-c-year-selector:not(cx-n),
 .connectea-dark:not(cx-n) .cvr-c-reporting-period:not(cx-n), .connectea-dark:not(cx-n) .cvr-c-report-header:not(cx-n),
 .connectea-dark:not(cx-n) .cvr-c-sub-header:not(cx-n), .connectea-dark:not(cx-n) .cvr-c-subheader:not(cx-n),
-.connectea-dark:not(cx-n) .eds-c-sub-header:not(cx-n), .connectea-dark:not(cx-n) :is(.cvr-c-page-header + div),
-.connectea-dark:not(cx-n) :is(.cvr-c-page-header + section), .connectea-dark:not(cx-n) [class*="year-selector"]:not(cx-n),
+.connectea-dark:not(cx-n) .eds-c-sub-header:not(cx-n), .connectea-dark:not(cx-n) .cvr-c-page-header + div,
+.connectea-dark:not(cx-n) .cvr-c-page-header + section, .connectea-dark:not(cx-n) [class*="year-selector"]:not(cx-n),
 .connectea-dark:not(cx-n) [class*="report-year"]:not(cx-n), .connectea-dark:not(cx-n) [class*="reports-year"]:not(cx-n),
 .connectea-dark:not(cx-n) [class*="header-bar"]:not(cx-n), .connectea-dark:not(cx-n) [class*="heading-bar"]:not(cx-n) {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
@@ -212,12 +210,12 @@
 :is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-nav-bar:not(.cx-n) .cvr-c-feed-tab,
 :is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-nav-bar:not(.cx-n) .cvr-c-feed__tab,
 :is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-nav-bar:not(.cx-n) .mat-tab-label-content,
-:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(.cvr-c-feed .cvr-c-feed__tabs) .mat-tab-label,
-:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(.cvr-c-feed .cvr-c-feed__tabs) .mat-tab-link,
-:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(.cvr-c-feed .cvr-c-feed__tabs) .eds-c-tabs__tab,
-:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(.cvr-c-feed .cvr-c-feed__tabs) .cvr-c-feed-tab,
-:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(.cvr-c-feed .cvr-c-feed__tabs) .cvr-c-feed__tab,
-:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] :is(.cvr-c-feed .cvr-c-feed__tabs) .mat-tab-label-content {
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed .cvr-c-feed__tabs .mat-tab-label,
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed .cvr-c-feed__tabs .mat-tab-link,
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed .cvr-c-feed__tabs .eds-c-tabs__tab,
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed .cvr-c-feed__tabs .cvr-c-feed-tab,
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed .cvr-c-feed__tabs .cvr-c-feed__tab,
+:is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .cvr-c-feed .cvr-c-feed__tabs .mat-tab-label-content {
   color: #334155 !important;
 }
 :is(html:not(.connectea-dark), body:not(.connectea-dark))[data-connectea-has-custom-bg="true"] .mat-tab-label-active:not(.cx-n) :where(span):not(.cx-n),

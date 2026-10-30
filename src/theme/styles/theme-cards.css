@@ -154,36 +154,35 @@
 }
 
 :is(.connectea-dark, body, html) .cvr-c-task__score:not(.cx-n):not(.cx-n), :is(.connectea-dark, body, html) .cvr-c-task__grade:not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__mark),
-:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark *)),
-:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__score),
-:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__grade),
-:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__marks),
-:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__marks *)) {
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *)) .cvr-c-task__mark,
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *)) :is(.cvr-c-task__mark *),
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *)) .cvr-c-task__score,
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *)) .cvr-c-task__grade,
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *)) .cvr-c-task__marks,
+:is(.connectea-dark, body, html) :is(.cvr-c-task:not(.cvr-c-tasks *)) :is(.cvr-c-task__marks *) {
   font-weight: 400 !important;
 }
 
 .connectea-dark .cvr-c-task__score:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
 .connectea-dark .cvr-c-task__grade:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
 .connectea-dark .cvr-c-task__mark-score:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark :is(.cvr-c-task__marks .cvr-c-task__mark .v-label:first-child):not(.cx-n),
-.connectea-dark :is(.cvr-c-task__marks .cvr-c-task__mark :where(span):first-child:not(.cx-n)):not(.cx-n),
-.connectea-dark :is(.cvr-c-task__marks .cvr-c-task__mark :where(div):first-child:not(.cx-n)):not(.cx-n),
-.connectea-dark :is(.cvr-c-task__mark > .v-label:first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of)),
-.connectea-dark :is(.cvr-c-task__mark > :where(span):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of):not(.cx-n)),
-.connectea-dark :is(.cvr-c-task__mark > :where(div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of):not(.cx-n)) {
+.connectea-dark .cvr-c-task__marks .cvr-c-task__mark .v-label:first-child:not(.cx-n),
+.connectea-dark .cvr-c-task__marks .cvr-c-task__mark :where(span):first-child:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-task__marks .cvr-c-task__mark :where(div):first-child:not(.cx-n):not(.cx-n),
+.connectea-dark .cvr-c-task__mark > .v-label:first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of),
+.connectea-dark .cvr-c-task__mark > :where(span):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of):not(.cx-n),
+.connectea-dark .cvr-c-task__mark > :where(div):first-child:not(.cvr-c-task__outof):not(.cvr-c-task__mark-out-of):not(.cx-n) {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 :is(.connectea-dark, body, html) .cvr-c-task__outof:not(.cx-n):not(.cx-n):not(.cx-n),
 :is(.connectea-dark, body, html) .cvr-c-task__mark-out-of:not(.cx-n):not(.cx-n):not(.cx-n),
 :is(.connectea-dark, body, html) .cvr-c-task__mark-label:not(.cx-n):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html) :is(.cvr-c-task__marks .cvr-c-task__mark .v-label:nth-child(2)) {
+:is(.connectea-dark, body, html) .cvr-c-task__marks .cvr-c-task__mark .v-label:nth-child(2) {
   font-weight: 400 !important;
 }
 
 .connectea-dark .cvr-c-task__outof:not(.cx-n):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task__mark-out-of:not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-task__mark-label:not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark :is(.cvr-c-task__marks .cvr-c-task__mark .v-label:nth-child(2)) {
+.connectea-dark .cvr-c-task__mark-label:not(.cx-n):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task__marks .cvr-c-task__mark .v-label:nth-child(2) {
   color: var(--cx-text-muted, #94a3b8) !important;
 }

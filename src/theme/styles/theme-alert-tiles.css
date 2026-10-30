@@ -11,7 +11,7 @@ html.connectea-dark[data-connectea-theme] :where(.eds-c-tile__header--negative):
   background-color: color-mix(in srgb, #dc2626 16%, transparent) !important;
 }
 
-html.connectea-dark[data-connectea-theme] :where(.eds-c-tile--important > .eds-c-tile__header):not(#cx-n) {
+html.connectea-dark[data-connectea-theme] :where(.eds-c-tile--important) > :where(.eds-c-tile__header):not(#cx-n) {
   border-bottom-color: #dc2626 !important;
 }
 
@@ -26,7 +26,7 @@ html.connectea-dark[data-connectea-tone="light"] :where(.eds-c-tile__header--neg
   background-color: color-mix(in srgb, #9d000b 10%, transparent) !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"] :where(.eds-c-tile--important > .eds-c-tile__header):not(#cx-n) {
+html.connectea-dark[data-connectea-tone="light"] :where(.eds-c-tile--important) > :where(.eds-c-tile__header):not(#cx-n) {
   border-bottom-color: #9d000b !important;
 }
 

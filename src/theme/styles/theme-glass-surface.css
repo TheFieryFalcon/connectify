@@ -14,8 +14,8 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-scope-intro-class:not(.cx-n):not(.cx-n):not(cx-n),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-toolbar.c-category-bar:not(.js-pos-category-toolbar-container > *):not(cx-n),
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-category-toolbar__container > .cvr-c-thori-pnl):not(cx-n):not(cx-n),
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(.cvr-c-pagination__body > div.d-flex:has(> mat-checkbox)),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-category-toolbar__container > .cvr-c-thori-pnl:not(cx-n):not(cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :is(cnt-paginator:has(.c-empty-content)):not(.cx-n):not(cx-n),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) p.mat-h2:not(.cx-n):not(cx-n),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-empty-content:not(.cx-n):not(cx-n):not(cx-n) {

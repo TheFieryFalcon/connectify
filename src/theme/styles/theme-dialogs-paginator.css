@@ -3,7 +3,7 @@
  */
 
 .connectea-dark .v-window-header:not(.cx-n), .connectea-dark .v-window-outerheader:not(.cx-n), .connectea-dark .ui-dialog-titlebar:not(.cx-n),
-.connectea-dark .modal-header:not(.cx-n), .connectea-dark :is(.cvr-c-popup .v-window-header), .connectea-dark .ui-dialog-title:not(.cx-n),
+.connectea-dark .modal-header:not(.cx-n), .connectea-dark .cvr-c-popup .v-window-header, .connectea-dark .ui-dialog-title:not(.cx-n),
 .connectea-dark .modal-title:not(.cx-n) {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
@@ -12,7 +12,7 @@
 }
 
 .connectea-dark .v-window-footer:not(.cx-n), .connectea-dark .ui-dialog-buttonpane:not(.cx-n), .connectea-dark .modal-footer:not(.cx-n),
-.connectea-dark :is(.cvr-c-popup .cvr-c-popup-button-set), .connectea-dark .ui-dialog-buttonset:not(.cx-n) {
+.connectea-dark .cvr-c-popup .cvr-c-popup-button-set, .connectea-dark .ui-dialog-buttonset:not(.cx-n) {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   border-top: 1px solid var(--cx-border, #36485e) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
@@ -103,8 +103,8 @@ cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fl
 .connectea-dark :where(mat-paginator):not(.cx-n):not(.cx-n):not(.cx-n), .connectea-dark .mat-paginator:not(.cx-n):not(.cx-n),
 .connectea-dark :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body))):not(.cx-n):not(.cx-n):not(.cx-n),
 .connectea-dark :is(.cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body))):not(.cx-n),
-.connectea-dark :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark :is(.cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)) .container-fluid),
+.connectea-dark :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body))) :where(.container-fluid):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectea-dark :is(.cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body))) .container-fluid,
 .connectea-dark .mat-paginator-container:not(.cx-n):not(.cx-n), .connectea-dark .mat-paginator-outer-container:not(.cx-n):not(.cx-n),
 .connectea-dark .connect-paginator-container:not(.cx-n):not(.cx-n) {
   background-color: var(--cx-surface-bg, #1e2632) !important;

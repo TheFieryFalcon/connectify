@@ -94,7 +94,7 @@
 }
 
 .connectea-dark :where(div.standard-label.connect-red):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark :is(.cvr-c-attendance .standard-label.connect-red), .connectea-dark :is(.cvr-c-attendance .eds-t-red.cvr-c-standard-label) {
+.connectea-dark .cvr-c-attendance .standard-label.connect-red, .connectea-dark .cvr-c-attendance .eds-t-red.cvr-c-standard-label {
   background-color: #2b171a !important;
   border: 1px solid #7f2329 !important;
   color: #fca5a5 !important;
