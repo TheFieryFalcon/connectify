@@ -21,7 +21,7 @@
   }
 
   function html(s) {
-    return `<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--cx-text-muted);cursor:pointer;"><input type="checkbox" id="cx-overlay-blur-toggle" ${keeps(s) ? 'checked' : ''}><span>At least ${FLOOR}px blur on the sidebar, menus and dialogs</span></label>`;
+    return `<label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--cx-text-muted);cursor:pointer;"><input type="checkbox" id="cx-overlay-blur-toggle" ${keeps(s) ? 'checked' : ''}><span>Always blur sidebar, menus, and dialogs</span></label>`;
   }
 
   function sync(modal, state) {
