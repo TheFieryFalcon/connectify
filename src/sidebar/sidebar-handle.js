@@ -171,8 +171,10 @@
     let hoverOpenedAt = 0;
     const isHoldingClosed = () => holdClosed;
     const releaseHold = () => { holdClosed = false; };
+    // Only Assessment Outlines opens the drawer on hover; elsewhere (only Settings works) it takes a click
+    const opensOnHover = () => window.ConnectifyUtils?.isOutlinesPage?.() !== false;
     function hoverOpen() {
-      if (holdClosed) return false;
+      if (holdClosed || !opensOnHover()) return false;
       hoverOpenedAt = Date.now();
       openSidebar();
       return true;
@@ -209,6 +211,7 @@
       setJustReturnedToMenu,
       isJustReturnedToMenu,
       hoverOpen,
+      opensOnHover,
       isHoldingClosed,
       releaseHold
     };

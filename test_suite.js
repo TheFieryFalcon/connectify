@@ -13316,6 +13316,49 @@ runTest('Test 291: The outlines page\'s fixed "All" category bar keeps the Liqui
     'which leaves it the translucent, blurred top-bar glass');
 });
 
+
+runTest('Test 292: Hovering opens the drawer only on Assessment Outlines, and never from the top left corner where Connect\'s home logo is', () => {
+  const saved = { api: window.ConnectifySidebarHandle, open: window.ConnectifyOpenSidebar, close: window.ConnectifyCloseSidebar, href: location.href };
+  try {
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-handle-position.js'), 'utf8'));
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-handle.js'), 'utf8'));
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-hover.js'), 'utf8'));
+    const api = window.ConnectifySidebarHandle;
+    const sb = api.getSidebar();
+    window.ConnectifyOpenSidebar = () => { sb.hidden = false; };
+    window.ConnectifyCloseSidebar = () => { sb.hidden = true; };
+    const away = document.createElement('div');
+    location.href = OUTLINES_HREF;
+    sb.hidden = true;
+
+    api.getTopBarBottom = () => 100;
+    api.handleMouseMove({ clientX: 4, clientY: 40, target: away });
+    assert.strictEqual(sb.hidden, true, 'The left edge beside Connect\'s top bar (home logo) must not open the drawer');
+    api.getTopBarBottom = () => 0;
+    api.handleMouseMove({ clientX: 4, clientY: 40, target: away });
+    assert.strictEqual(sb.hidden, true, 'With the top bar scrolled away the top 60px corner still never opens it');
+    api.handleMouseMove({ clientX: 4, clientY: 300, target: away });
+    assert.strictEqual(sb.hidden, false, 'Below the corner the left edge opens the drawer on Assessment Outlines');
+
+    sb.hidden = true;
+    location.href = 'https://connect.det.wa.edu.au/classes';
+    api.handleMouseMove({ clientX: 4, clientY: 300, target: away });
+    assert.strictEqual(sb.hidden, true, 'Off Assessment Outlines the left edge never opens the drawer');
+    api.handleMouseMove({ clientX: 10, clientY: 300, target: api.handle });
+    api.handle.dispatchEvent(new MockEvent('mouseenter'));
+    assert.strictEqual(sb.hidden, true, 'Off Assessment Outlines hovering the handle never opens the drawer');
+    api.handle.onclick();
+    assert.strictEqual(sb.hidden, false, 'Off Assessment Outlines a click on the handle still opens it');
+  } finally {
+    location.href = saved.href;
+    const sb = window.ConnectifySidebarHandle?.getSidebar?.();
+    if (sb) sb.hidden = true;
+    window.ConnectifySidebarHandle = saved.api;
+    window.ConnectifyOpenSidebar = saved.open;
+    window.ConnectifyCloseSidebar = saved.close;
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

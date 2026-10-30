@@ -1,8 +1,10 @@
 /**
  * Connectify Sidebar: edge expand and hover collapse
  *
- * Moving the mouse to the left screen edge opens the drawer. While no tool is open (and the user did
- * not just come back to the menu), moving away collapses it after 120ms; leaving the page does too.
+ * On Assessment Outlines, moving the mouse to the left screen edge opens the drawer, except in the top
+ * left corner beside Connect's top bar (its home logo stays clickable); other pages never open it on
+ * hover (the handle is clicked). While no tool is open (and the user did not just come back to the
+ * menu), moving away collapses it after 120ms; leaving the page does too.
  * Extends window.ConnectifySidebarHandle.
  */
 (() => {
@@ -18,6 +20,10 @@
     const r = typeof el.getBoundingClientRect === 'function' ? el.getBoundingClientRect() : null;
     return Boolean(r && r.width > 0 && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom);
   };
+  // The top left corner holds Connect's home logo: the edge there never opens the drawer
+  const CORNER_MIN_HEIGHT = 60;
+  const inLogoCorner = e => e.clientY <= Math.max(CORNER_MIN_HEIGHT, api.getTopBarBottom?.() || 0);
+  const atOpeningEdge = e => e.clientX <= 12 && !inLogoCorner(e);
 
   if (window._connectifyMouseMoveAttached) {
     document.removeEventListener('mousemove', window._connectifyMouseMoveAttached);
@@ -34,7 +40,8 @@
         if (!overHandle && e.clientX > 12) api.releaseHold();
         return;
       }
-      if (e.clientX <= 12 || overHandle) {
+      if (!api.opensOnHover()) return;
+      if (atOpeningEdge(e) || overHandle) {
         setJustReturnedToMenu(false);
         if (hoverCollapseTimeout) {
           clearTimeout(hoverCollapseTimeout);
