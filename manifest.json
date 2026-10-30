@@ -285,7 +285,8 @@
             "src/theme/styles/theme.css",
             "src/theme/styles/theme-2.css",
             "src/system/touch-targets.css",
-            "src/system/webkit-buttons.css"
+            "src/system/webkit-buttons.css",
+            "src/system/connect-loading.css"
          ],
          "js": [
             "src/system/scheduler.js",

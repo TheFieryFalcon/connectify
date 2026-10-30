@@ -1,0 +1,22 @@
+/**
+ * Connect's loading indicators are off on every Connect page, in every theme. Vaadin shows its
+ * indicator on each server round trip (every button press), animating and transitioning it over the
+ * page; in WebKit (Orion, Safari) each frame repaints the blurred glass and wallpaper layers under it,
+ * so presses lagged. The box keeps its size: Vaadin holds back its first render (up to 5s) while
+ * `.v-loading-indicator` has no height, its check that the theme CSS has loaded. Angular pages'
+ * `cnt-progress-bar` (the outlines' bar while Connect fetches its boxplots) is removed outright.
+ */
+
+.v-loading-indicator,
+.v-loading-indicator-delay,
+.v-loading-indicator-wait {
+  visibility: hidden !important;
+  background: none !important;
+  animation: none !important;
+  transition: none !important;
+  pointer-events: none !important;
+}
+
+cnt-progress-bar {
+  display: none !important;
+}

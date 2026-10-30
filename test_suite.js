@@ -13423,6 +13423,24 @@ runTest('Test 292: Hovering opens the drawer only on Assessment Outlines, and ne
   }
 });
 
+runTest('Test 294: Connect\'s loading indicators are off on every Connect page, and Vaadin\'s keeps its box so its first render never waits', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/connect-loading.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(c => (c.css || []).includes('src/system/connect-loading.css'));
+  assert.ok(group && group.matches.includes('https://connect.det.wa.edu.au/*'), 'loaded on every Connect page');
+  assert.ok(!/@(media|supports)/.test(css), 'in every browser and theme');
+  const vaadin = css.match(/([^{}]*\.v-loading-indicator[^{}]*)\{([^}]*)\}/);
+  assert.ok(vaadin, 'Vaadin\'s indicator has its own rule');
+  for (const sel of ['.v-loading-indicator', '.v-loading-indicator-delay', '.v-loading-indicator-wait']) {
+    assert.ok(vaadin[1].split(',').map(s => s.trim()).includes(sel), `${sel} is covered`);
+  }
+  for (const decl of ['visibility: hidden', 'background: none', 'animation: none', 'transition: none']) {
+    assert.ok(vaadin[2].includes(`${decl} !important`), `${decl} beats Connect's .eds.cvr rules`);
+  }
+  assert.ok(!/display|height|width/.test(vaadin[2]), 'the box keeps its size: Vaadin waits up to 5s for CSS while its height is 0');
+  assert.ok(/cnt-progress-bar\s*\{\s*display:\s*none !important/.test(css), 'Angular\'s page progress bar is removed');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

@@ -521,7 +521,9 @@ async function waitForPageReady(page, postDelayMs = 1250) {
         '.cvr-c-spinner, .v-loading-indicator, .eds-c-spinner, mat-spinner, .loading-mask, [aria-busy="true"]'
       );
       for (const s of spinners) {
-        if (s.offsetParent !== null && window.getComputedStyle(s).display !== 'none' && window.getComputedStyle(s).visibility !== 'hidden') {
+        // Connectify hides Vaadin's indicator (connect-loading.css); Vaadin still toggles its display while busy
+        const hidden = !s.matches('.v-loading-indicator') && window.getComputedStyle(s).visibility === 'hidden';
+        if (s.offsetParent !== null && window.getComputedStyle(s).display !== 'none' && !hidden) {
           return false;
         }
       }
