@@ -7,18 +7,19 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ## 3.3.1 (Unreleased)
 
 ### Additions
-- **Jump to Subject lands on the new result**: Class Updated and Goal Updated notices now scroll to the task that was just marked, and highlight that task as well as the subject. Jump To scrolls to the subject's average.
-- **Blur for menus and dialogs**: in Liquid Glass, the sidebar, menus, popups and dialogs stay blurred enough to read over, even when a custom theme's Blur Strength is set low. You can turn this off with "Always blur sidebar, menus, and dialogs" under the slider.
+- **Always blur sidebar, menus, and dialogs**: a new custom theme option, under Blur Strength. In Liquid Glass, it keeps the sidebar, menus, popups and dialogs blurred enough to read over, even when Blur Strength is set low. It's on by default.
 
 ### Changes
-- **Faster outlines**: the outlines page does much less work while it loads, especially on slower computers, and no longer freezes about 15 seconds after loading.
-- With Auto-expand and "Show this semester's classes only" on, only this semester's outlines are opened at startup.
-- The page is smoother while you scroll and hover, especially in dark themes.
+- Jump to Subject on Class Updated and Goal Updated notices now scrolls to the task that was just marked, and highlights that task as well as the subject. Jump To scrolls to the subject's average.
+- The outlines page loads faster, especially on slower computers.
+- Scrolling and hovering are smoother, especially in dark themes.
 - The page scrollbar is no longer shown. You can still scroll as normal.
-- Connect's loading bars are hidden, which stops the lag they caused in Orion.
-- Hovering at the left edge opens the sidebar only on Assessment Outlines. Elsewhere, click the handle. The top-left corner no longer opens it, so Connect's home logo can be clicked.
+- Hovering at the left edge opens the sidebar only on Assessment Outlines. On other pages, click the handle.
 
 ### Fixes
+- The outlines page no longer freezes about 15 seconds after loading.
+- Connect's loading bars no longer make Orion lag.
+- The top-left corner no longer opens the sidebar, so Connect's home logo can be clicked.
 - Choosing one class after another in Connect's filter now shows the right outline, instead of saying the class has no outline for this semester.
 - Connect's class filter menu shows properly in dark themes, and its headers no longer turn dark after you click them.
 - Expanded statistics cards fit beside the sidebar and on iPad, without running into the marks column, and Liquid Glass no longer cuts off the top of the outcome meter.
