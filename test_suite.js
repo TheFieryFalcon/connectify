@@ -11864,7 +11864,7 @@ runTest('Test 258: A newly marked task is announced even when the running mark s
     manifest.indexOf('src/system/grade-tasks.js') < manifest.indexOf('src/system/new-grade.js'), 'grade-tasks.js loads between the snapshot and the notifier');
 });
 
-runTest('Test 293: Jump to Subject lands on a newly marked task from a grade notice, else on the subject average panel', () => {
+runTest('Test 293: Jump to Subject lands on a newly marked task from a grade notice, else on the subject average panel; the whole card pulses', () => {
   const origQSA = document.querySelectorAll;
   let cards = [];
   document.querySelectorAll = sel => (sel === '.eds-c-tile' ? cards : origQSA.call(document, sel));
@@ -11903,12 +11903,18 @@ runTest('Test 293: Jump to Subject lands on a newly marked task from a grade not
       target.go(card, changed[0].taskIds);
       assert.strictEqual(newRow.scrollCount, 1, 'the jump scrolls to the task row');
       assert.ok(newRow.classList.contains('cx-card-jump-highlight'), 'and pulses it');
+      assert.ok(card.classList.contains('cx-card-jump-highlight'), 'with the whole subject card');
       assert.ok(!overall.scrollCount, 'not to the overall row');
+      newRow.classList.remove('cx-card-jump-highlight');
+      card.classList.remove('cx-card-jump-highlight');
       target.go(card);
     } finally {
       global.requestAnimationFrame = origRaf;
     }
     assert.strictEqual(overall.scrollCount, 1, 'a subject jump scrolls to the overall row');
+    assert.ok(card.classList.contains('cx-card-jump-highlight'), 'and pulses the whole subject card');
+    assert.ok(!overall.classList.contains('cx-card-jump-highlight') && !newRow.classList.contains('cx-card-jump-highlight'),
+      'not just a row inside it');
   } finally {
     document.querySelectorAll = origQSA;
     Object.assign(window, { ConnectifyGradeSnapshot: prev.snapshot, ConnectifyGradeTasks: prev.tasks, ConnectifyJumpTarget: prev.target });

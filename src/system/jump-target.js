@@ -4,8 +4,9 @@
  * A grade notice jumps to a task it announced (any of them: the first row on the card whose parser id,
  * ConnectifyParseHelpers.cardTaskIds, is one of taskIds) and pulses that row; every other jump (the Jump To
  * row, a notice whose tasks are not known) lands on the card's overall row, the subject average panel at the
- * top. A task row only exists once the card is expanded, so it is looked for until it appears (TASK_WAIT_MS),
- * then the overall row stands in. Used by new-grade.js. Exposes window.ConnectifyJumpTarget.
+ * top. The whole card always pulses, and a task row landed on pulses with it. A task row only exists once the
+ * card is expanded, so it is looked for until it appears (TASK_WAIT_MS), then the overall row stands in. Used by
+ * new-grade.js. Exposes window.ConnectifyJumpTarget.
  */
 (() => {
   'use strict';
@@ -45,7 +46,7 @@
   }
 
   /**
-   * Scrolls to the jump's target and pulses it, in the next frame: scrolling straight after the expand click
+   * Scrolls to the jump's target and pulses the card (and a task row landed on), in the next frame: scrolling straight after the expand click
    * laid the freshly expanded card out synchronously, a ~60ms hitch on the click.
    */
   function go(card, taskIds, startedAt = Date.now()) {
@@ -58,7 +59,8 @@
       }
       const target = row || overallRow(card) || card;
       target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      pulse(target);
+      pulse(card);
+      if (row) pulse(row);
     });
   }
 
