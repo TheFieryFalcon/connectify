@@ -37,6 +37,8 @@
       const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile');
       if (tiles.length > 0 && window.ConnectifyData?.expandAll) {
         hasAutoExpanded = true;
+        // The other semester's tiles are hidden first, so Expand All never opens outlines about to vanish
+        window.ConnectifySemesterFilter?.applyToPage?.();
         window.ConnectifyData.expandAll(true);
       }
     }

@@ -35,6 +35,20 @@
   const connectPending = () => !document.querySelector('cnt-sao-card, cnt-category-bar');
   const zone = () => document.getElementById('ng-zone__student-assessment-outline') || document.querySelector('cnt-progress-bar')?.parentElement || null;
 
+  // Only Connect's hidden cards lie between from and to (to included or not reached)
+  function onlyHidden(from, to) {
+    for (let el = from; el !== to; el = el.nextElementSibling) if (!el?.classList.contains(HIDDEN)) return false;
+    return true;
+  }
+
+  // Hidden cards take no space, so a host beside them is already in place: moving it (Connect's cards
+  // rendering after it, ~13s in) would restyle and lay out every drawn tile and its open rows again
+  function inPlace(host, parent, before) {
+    if (host.parentElement !== parent) return false;
+    if (!before) return !host.nextElementSibling;
+    return onlyHidden(before, host) || onlyHidden(host.nextElementSibling, before);
+  }
+
   /** The host, placed in parent before the given node (or last). */
   function ensureHost(parent, before) {
     let host = document.getElementById(HOST_ID);
@@ -48,7 +62,7 @@
         '<div class="v-csslayout v-layout v-widget eds-s-is-first v-csslayout-eds-s-is-first cvr-u-margin-bottom--xs v-csslayout-cvr-u-margin-bottom--xs cx-legacy-list">' +
         '</div></div></div></div>';
     }
-    if (host.parentElement !== parent || host.nextElementSibling !== before) parent.insertBefore(host, before);
+    if (!inPlace(host, parent, before)) parent.insertBefore(host, before);
     return host;
   }
 

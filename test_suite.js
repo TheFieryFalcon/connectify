@@ -13580,6 +13580,49 @@ runTest('Test 297: Page changes adapt only the subtrees they touched, Connectify
   assert.ok(/opacity: 0/.test(frames) && /opacity: 1/.test(frames) && !/box-shadow|border/.test(frames), 'it animates opacity only, which the compositor runs without restyling the page');
 });
 
+runTest('Test 298: Startup Expand All waits for the other semester\'s outlines to be hidden, and Connect\'s cards arriving never move the drawn outlines', () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  // Semester detection reads Connect's first outlines (grades come before any boxplot), at once
+  const listeners = {};
+  let drawable = [];
+  const w = {
+    ConnectifyUtils: { normalize: v => String(v || '').trim(), accountKey: () => 'test298', isOutlinesPage: () => true, removeStorageKeys() {} },
+    ConnectifyOutlineApi: { drawable: () => drawable, isLoaded: () => false },
+    ConnectifyApiParse: { overallMark: () => null, hasFinalLetter: r => Boolean(r.grade) },
+    addEventListener: (type, fn) => { listeners[type] = fn; }
+  };
+  new Function('window', read('assessment/class-semesters.js'))(w);
+  const S = w.ConnectifyClassSemesters;
+  drawable = [{ apiOutline: true, title: 'Physics - Semester 1', subject: 'Physics', semester: 1, grade: '' }];
+  assert.strictEqual(S.detectSemester(), 1, 'no final letter yet: Semester 1');
+  drawable = [{ apiOutline: true, title: 'Physics - Semester 1', subject: 'Physics', semester: 1, grade: 'B' }, { apiOutline: true, title: 'Physics - Semester 2', subject: 'Physics', semester: 2, grade: '' }];
+  assert.strictEqual(S.detectSemester(), 1, 'detection is held for a second');
+  listeners['connectify-outlines-preview']();
+  assert.strictEqual(S.detectSemester(), 2, 'Connect\'s first outlines decide at once, before every boxplot (and the whole load) has arrived');
+
+  const features = read('atar/atar-features.js');
+  const start = features.slice(features.indexOf('function checkStartupAutoExpand()'), features.indexOf('function syncFeatures()'));
+  assert.ok(start.indexOf('window.ConnectifySemesterFilter?.applyToPage?.();') > 0 && start.indexOf('window.ConnectifySemesterFilter?.applyToPage?.();') < start.indexOf('window.ConnectifyData.expandAll(true);'),
+    'startup auto-expand hides the other semester\'s tiles first, so Expand All (which skips hidden tiles) never opens outlines about to vanish');
+
+  // The drawn host stays put when only Connect's hidden cards lie between it and its slot
+  const mount = read('assessment/legacy-outlines.js');
+  const fnSrc = name => { const at = mount.indexOf(`function ${name}(`); return mount.slice(at, mount.indexOf('\n  }\n', at) + 4); };
+  const { inPlace } = new Function('HIDDEN', `${fnSrc('onlyHidden')}\n${fnSrc('inPlace')}\nreturn { inPlace };`)('cx-legacy-hidden');
+  const parent = {};
+  const node = cls => ({ parentElement: parent, nextElementSibling: null, classList: { contains: c => c === cls } });
+  const chain = (...nodes) => { nodes.forEach((n, i) => { n.nextElementSibling = nodes[i + 1] || null; }); return nodes; };
+  const [bar, a, b, host] = chain(node('cnt-category-bar'), node('cx-legacy-hidden'), node('cx-legacy-hidden'), node('host'));
+  assert.ok(inPlace(host, parent, a), 'Connect\'s cards rendering before the host (all hidden) leave it in place: moving it restyled every tile (~1s at 4x CPU)');
+  assert.ok(!inPlace(host, parent, bar), 'a visible element between them moves it');
+  const [host2, c, d] = chain(node('host'), node('cx-legacy-hidden'), node('cx-legacy-hidden'));
+  assert.ok(inPlace(host2, parent, d) && inPlace(host2, parent, c), 'hidden cards after the host count too');
+  const [first, last] = chain(node('x'), node('host'));
+  assert.ok(inPlace(last, parent, null) && !inPlace(first, parent, null), 'before Connect renders, the host is last in Connect\'s zone');
+  assert.ok(!inPlace(host, {}, a), 'another parent moves it');
+  assert.ok(mount.includes('if (!inPlace(host, parent, before)) parent.insertBefore(host, before);'), 'the host is placed through inPlace');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

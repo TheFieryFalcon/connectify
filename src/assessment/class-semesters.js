@@ -137,12 +137,10 @@
   // registry decides. Classes the registry has never seen (a new year) are a whole page.
   function evidenceFromPage() {
     if (!window.ConnectifyUtils.isOutlinesPage()) return null;
-    // Connect's API lists every class whatever the page's filter shows, so it always decides
-    const api = window.ConnectifyOutlineApi;
-    if (api?.isLoaded?.()) {
-      const records = api.records();
-      return records.length ? (records.some(r => cardSummary(r).finalLetter) ? 2 : 1) : null;
-    }
+    // Connect's API lists every class whatever the page's filter shows, so it always decides, from its
+    // first outlines (grades arrive with them, before any boxplot)
+    const records = window.ConnectifyOutlineApi?.drawable?.() || [];
+    if (records.length) return records.some(r => cardSummary(r).finalLetter) ? 2 : 1;
     const cards = Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester);
     if (!cards.length) return null;
     if (cards.some(card => cardSummary(card).finalLetter)) return 2;
@@ -169,6 +167,9 @@
     detectedAt = now;
     return detected;
   }
+
+  // Connect's first outlines decide at once (startup Expand All hides the other semester's tiles first)
+  window.addEventListener('connectify-outlines-preview', () => { detected = null; });
 
   function clear() {
     registry = {};
