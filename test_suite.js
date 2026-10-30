@@ -3740,7 +3740,7 @@ runTest('Test 118: Subject cache invalidation notification wording and single cl
   const assessJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
   // 1. Verify notification title and message formatting
-  assert.ok(newGradeJs.includes('function announce(entry)'), 'new-grade.js must announce through one toast builder');
+  assert.ok(newGradeJs.includes('function announce(entry, taskIds = entry.taskIds)'), 'new-grade.js must announce through one toast builder');
   const shown = [];
   const savedNotifications = window.ConnectifyNotifications;
   window.ConnectifyNotifications = { show: opts => shown.push(opts) };
@@ -11857,6 +11857,66 @@ runTest('Test 258: A newly marked task is announced even when the running mark s
   const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('src/system/grade-snapshot.js') < manifest.indexOf('src/system/grade-tasks.js') &&
     manifest.indexOf('src/system/grade-tasks.js') < manifest.indexOf('src/system/new-grade.js'), 'grade-tasks.js loads between the snapshot and the notifier');
+});
+
+runTest('Test 293: Jump to Subject lands on a newly marked task from a grade notice, else on the subject average panel', () => {
+  const origQSA = document.querySelectorAll;
+  let cards = [];
+  document.querySelectorAll = sel => (sel === '.eds-c-tile' ? cards : origQSA.call(document, sel));
+  const prev = { snapshot: window.ConnectifyGradeSnapshot, tasks: window.ConnectifyGradeTasks, target: window.ConnectifyJumpTarget };
+  try {
+    mockLocalStorage.clear();
+    window.ConnectifyGradeSnapshot = undefined;
+    window.ConnectifyGradeTasks = undefined;
+    window.ConnectifyJumpTarget = undefined;
+    for (const f of ['grade-snapshot.js', 'grade-tasks.js', 'jump-target.js']) eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system', f), 'utf8'));
+    const tasks = window.ConnectifyGradeTasks;
+    const target = window.ConnectifyJumpTarget;
+    const title = 'Physics ATAR Year 11 - Semester 2';
+    const physics = rows => makeOutlineCard(title, { overall: '87.7%', tasks: rows });
+    window.ConnectifyGradeSnapshot.saveCachedGrades({ Physics: { mark: 87.7, semester: 2 } });
+    cards = [physics([['Test 4', '41 Out of 44'], ['Test 5', '- Out of 60']])];
+    tasks.check();
+    const before = window.ConnectifyGradeSnapshot.loadCachedGrades().Physics;
+
+    cards = [physics([['Test 4', '41 Out of 44'], ['Test 5', '52 Out of 60']])];
+    const card = cards[0];
+    const [taskRow, newRow] = card.querySelectorAll('.cvr-c-tasks .cvr-c-task');
+    const overall = card.querySelectorAll('.cvr-c-task').find(row => !row.closest('.cvr-c-tasks'));
+    assert.deepStrictEqual(tasks.newIds(title, before).length, 1, 'the mark check finds the task newly marked since the saved ids');
+    const changed = tasks.check();
+    assert.strictEqual(changed[0].taskIds.length, 1, 'the task check names the newly marked task');
+    assert.strictEqual(target.resolve(card, changed[0].taskIds), newRow, 'a grade notice lands on the newly marked task');
+    assert.notStrictEqual(target.resolve(card, changed[0].taskIds), taskRow);
+    assert.strictEqual(target.resolve(card), overall, 'Jump To (no tasks) lands on the overall row: the subject average panel');
+    assert.strictEqual(target.resolve(card, ['unknown']), overall, 'a task not on the card falls back to the overall row');
+    assert.deepStrictEqual(tasks.newIds(title, {}), [], 'nothing saved for the semester: no task to jump to');
+
+    const origRaf = global.requestAnimationFrame;
+    global.requestAnimationFrame = fn => fn();
+    try {
+      target.go(card, changed[0].taskIds);
+      assert.strictEqual(newRow.scrollCount, 1, 'the jump scrolls to the task row');
+      assert.ok(newRow.classList.contains('cx-card-jump-highlight'), 'and pulses it');
+      assert.ok(!overall.scrollCount, 'not to the overall row');
+      target.go(card);
+    } finally {
+      global.requestAnimationFrame = origRaf;
+    }
+    assert.strictEqual(overall.scrollCount, 1, 'a subject jump scrolls to the overall row');
+  } finally {
+    document.querySelectorAll = origQSA;
+    Object.assign(window, { ConnectifyGradeSnapshot: prev.snapshot, ConnectifyGradeTasks: prev.tasks, ConnectifyJumpTarget: prev.target });
+    mockLocalStorage.clear();
+  }
+
+  const newGrade = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/new-grade.js'), 'utf8');
+  assert.ok(newGrade.includes("announce(entry, window.ConnectifyGradeTasks?.newIds?.(entry.rawTitle, prevCache[entry.subjectName]))"), 'a mark change notice jumps to its new task');
+  assert.ok(newGrade.includes('jumpToSubject(entry.card, taskIds)'));
+  const goalEvents = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-events.js'), 'utf8');
+  assert.ok(goalEvents.includes('jumpToSubject(card, taskIds)'), 'Goal Updated jumps to the newly read result too');
+  const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('src/system/jump-target.js') < manifest.indexOf('src/system/new-grade.js'), 'jump-target.js loads before the notifier');
 });
 
 runTest('Test 256: Uploads are rescaled, then resized and placed by the student in the crop prompt, then cropped', async () => {

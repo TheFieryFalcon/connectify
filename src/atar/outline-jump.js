@@ -3,7 +3,8 @@
  *
  * A subject dropdown and a "Jump To" button (#cx-jump-subject) above the floating Expand All / Collapse All
  * buttons. The dropdown lists each shown outline's cleaned subject name once, in page order; Jump To expands
- * that subject's card, scrolls to it and pulses its highlight (ConnectifyNewGrade.jumpToSubject).
+ * that subject's card, scrolls to its overall row (the subject average panel) and pulses it
+ * (ConnectifyNewGrade.jumpToSubject).
  * The dropdown is Connectify's own listbox, not a native <select>: the row sits at the bottom of the screen,
  * where macOS opens a native list downwards from the chosen name and cuts it off, so the list opens upwards
  * and shows every subject without scrolling. The closed box (108px) ends a long name in an ellipsis; the list

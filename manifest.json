@@ -209,6 +209,7 @@
             "src/system/update-notice.js",
             "src/system/grade-snapshot.js",
             "src/system/grade-tasks.js",
+            "src/system/jump-target.js",
             "src/system/new-grade.js",
             "src/system/dom-sweeper.js"
          ],

@@ -3,8 +3,8 @@
  *
  * Once per page, compares each subject's running mark with the cache (grade-snapshot.js).
  * A changed subject is marked stale (re-scraped when next expanded) and announced with a stacked
- * "Class Updated" toast whose "Jump to Subject" action expands that card, scrolls to it and pulses
- * an outline. Nothing is expanded without the student clicking. Exposes window.ConnectifyNewGrade.
+ * "Class Updated" toast whose "Jump to Subject" action expands that card, scrolls to a newly marked task
+ * (else the overall row) and pulses it. Nothing is expanded without the student clicking. Exposes window.ConnectifyNewGrade.
  */
 (() => {
   'use strict';
@@ -41,7 +41,7 @@
   }
 
   /**
-   * Smoothly scrolls to a subject card, expands it and pulses a highlight straight away; the heavy
+   * Jumping expands the card and scrolls to its target straight away; the heavy
    * refresh (re-scrape, prediction rebuild over every subject, results notify) waits until the accordion
    * animation and smooth scroll have settled, then runs when the browser is idle, so the click never janks.
    */
@@ -67,28 +67,24 @@
     }
   }
 
-  function jumpToSubject(card) {
+  /**
+   * Expands the card, then scrolls to and pulses one of taskIds' rows (a grade notice's new results) or, without
+   * them, its overall row (jump-target.js).
+   */
+  function jumpToSubject(card, taskIds) {
     if (!card) return;
     expandSubjectCard(card);
-    // Scroll and highlight in the next frame: scrolling straight after the expand click (and forcing a reflow to
-    // restart the pulse) laid the freshly expanded card out synchronously, a ~60ms hitch on the click. The pulse
-    // restarts by re-adding its class a frame after removing it
-    card.classList.remove('cx-card-jump-highlight');
-    requestAnimationFrame(() => {
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      requestAnimationFrame(() => card.classList.add('cx-card-jump-highlight'));
-    });
+    window.ConnectifyJumpTarget?.go(card, taskIds);
 
     clearTimeout(card._cxJumpRefresh);
     card._cxJumpRefresh = setTimeout(() => whenIdle(() => refreshJumpedSubject(card)), JUMP_REFRESH_DELAY);
-
-    setTimeout(() => {
-      card.classList.remove('cx-card-jump-highlight');
-    }, 2200);
   }
 
-  /** Stacked "Class Updated" toast for a subject ({ subjectName, card }); one per subject at a time. */
-  function announce(entry) {
+  /**
+   * Stacked "Class Updated" toast for a subject ({ subjectName, card, taskIds }); one per subject at a time.
+   * Jump to Subject goes to one of the newly marked tasks (taskIds), else the subject's overall row.
+   */
+  function announce(entry, taskIds = entry.taskIds) {
     window.ConnectifyNotifications?.show?.({
       id: `connectify-grade-${entry.subjectName.replace(/\s+/g, '-').toLowerCase()}`,
       type: 'grade',
@@ -97,7 +93,7 @@
       duration: 12000,
       actions: [
         { text: 'Dismiss', type: 'secondary', onClick: ({ close }) => close() },
-        { text: 'Jump to Subject', type: 'accent', onClick: () => jumpToSubject(entry.card) }
+        { text: 'Jump to Subject', type: 'accent', onClick: () => jumpToSubject(entry.card, taskIds) }
       ]
     });
   }
@@ -122,7 +118,7 @@
       for (const entry of currentEntries) {
         if (!hasSubjectChanged(prevCache[entry.subjectName], entry)) continue;
         processChangedSubject(entry);
-        announce(entry);
+        announce(entry, window.ConnectifyGradeTasks?.newIds?.(entry.rawTitle, prevCache[entry.subjectName]));
         announced.add(entry.subjectName);
       }
     }

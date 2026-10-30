@@ -147,9 +147,12 @@
   function announce(goal, fresh = []) {
     const line = lineFor(goal);
     if (!line) return;
-    const card = cardFor((fresh[fresh.length - 1] || '').split('::')[0] || goal.subject);
+    const subject = (fresh[fresh.length - 1] || '').split('::')[0] || goal.subject;
+    const card = cardFor(subject);
+    // Jump to Subject lands on one of the newly read results (verdict keys `<subject>::<task id>`)
+    const taskIds = fresh.filter(key => key.startsWith(`${subject}::`)).map(key => key.slice(subject.length + 2));
     const actions = [{ text: 'Dismiss', type: 'secondary', onClick: ({ close }) => close() }];
-    if (card && window.ConnectifyNewGrade?.jumpToSubject) actions.push({ text: 'Jump to Subject', type: 'accent', onClick: () => window.ConnectifyNewGrade.jumpToSubject(card) });
+    if (card && window.ConnectifyNewGrade?.jumpToSubject) actions.push({ text: 'Jump to Subject', type: 'accent', onClick: () => window.ConnectifyNewGrade.jumpToSubject(card, taskIds) });
     window.ConnectifyNotifications?.show?.({
       id: `connectify-goal-${goal.id}`, type: 'grade', title: 'Goal Updated', message: P().title(goal), details: [line], duration: 12000, actions
     });

@@ -37,7 +37,26 @@
     return added > vanished;
   }
 
-  /** Compares every card with task rows on screen, saves their ids and returns the subjects with a new result. */
+  /** The ids marked now that the saved ids did not hold (the tasks a notice jumps to). */
+  function addedIds(prevIds, ids) {
+    const prev = new Set(prevIds || []);
+    return (ids || []).filter(id => !prev.has(id));
+  }
+
+  /**
+   * The newly marked task ids on an outline (rawTitle) against a cached subject entry: the mark check's notice
+   * jumps to one of them. Empty when nothing was saved for its semester or its tasks are not readable.
+   */
+  function newIds(rawTitle, entry) {
+    const prevIds = entry?.tasks?.[String(snapshot.parseCardSemester(rawTitle))];
+    if (!Array.isArray(prevIds)) return [];
+    return addedIds(prevIds, outlines().find(o => o.rawTitle === rawTitle)?.ids());
+  }
+
+  /**
+   * Compares every card with task rows on screen, saves their ids and returns the subjects with a new result
+   * ({ subjectName, taskIds: the newly marked ids, card }).
+   */
   function check() {
     const cache = snapshot.loadCachedGrades();
     if (!cache) return [];
@@ -51,12 +70,13 @@
       if (!ids) continue;
       const semester = String(snapshot.parseCardSemester(rawTitle));
       const subjectName = snapshot.extractSubjectName(rawTitle);
-      if (hasNewResult(entry.tasks?.[semester], ids) && !changed.has(subjectName)) changed.set(subjectName, outline);
+      const prevIds = entry.tasks?.[semester];
+      if (hasNewResult(prevIds, ids) && !changed.has(subjectName)) changed.set(subjectName, { outline, taskIds: addedIds(prevIds, ids) });
       entry.tasks = { ...entry.tasks, [semester]: ids };
       dirty = true;
     }
     if (dirty) snapshot.saveCachedGrades(cache);
-    return Array.from(changed, ([subjectName, outline]) => ({ subjectName, get card() { return outline.card(); } }));
+    return Array.from(changed, ([subjectName, { outline, taskIds }]) => ({ subjectName, taskIds, get card() { return outline.card(); } }));
   }
 
   // Connect's API records once loaded (every outline's tasks, opened or not), else the tiles with rows on screen
@@ -101,5 +121,5 @@
     node.nodeType === 1 && (node.matches?.('.cvr-c-task') || node.querySelector?.('.cvr-c-task')));
   window.ConnectifyScheduler.onMutations(schedule, { filter: addsTaskRows, mute: false });
 
-  window.ConnectifyGradeTasks = { SETTLE_MS, markedIds, hasNewResult, check, start };
+  window.ConnectifyGradeTasks = { SETTLE_MS, markedIds, hasNewResult, addedIds, newIds, check, start };
 })();
