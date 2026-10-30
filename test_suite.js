@@ -7136,8 +7136,10 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   assert.ok(cssHas(themeCss, 'border-bottom-left-radius: 16px !important') &&
             cssHas(themeCss, 'border-bottom-right-radius: 16px !important'),
             'theme.css must round bottom corners with 16px radius');
-  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .connectea-panel {\n  overflow: clip !important;'),
+  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-c-card {\n  overflow: clip !important;'),
             'theme.css must clip liquid glass tiles and cards with overflow: clip (hidden stops margins collapsing)');
+  assert.ok(!cssHas(themeCss, '[data-connectea-glass="true"]) .connectea-panel {\n  overflow: clip'),
+            'statistics panels are never clipped: the breakout meter rises above its row and glows');
   assert.ok(cssHas(themeCss, '.eds-c-tile__body') &&
             cssHas(themeCss, 'background-color: transparent !important'),
             'theme.css must make tile body transparent in Liquid Glass mode');
@@ -13439,6 +13441,26 @@ runTest('Test 294: Connect\'s loading indicators are off on every Connect page, 
   }
   assert.ok(!/display|height|width/.test(vaadin[2]), 'the box keeps its size: Vaadin waits up to 5s for CSS while its height is 0');
   assert.ok(/cnt-progress-bar\s*\{\s*display:\s*none !important/.test(css), 'Angular\'s page progress bar is removed');
+});
+
+runTest('Test 295: Expanded statistics cards zoom to fit their task column, so nothing runs past the card or into the marks column', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'cohort/cohort-expanded-fit.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(c => (c.css || []).includes('src/cohort/cohort-expanded-fit.css'));
+  assert.ok(group && group.css.indexOf('src/cohort/cohort-expanded-fit.css') > group.css.indexOf('src/cohort/cohort-expanded.css'), 'loaded on the outlines page after the expanded card styles');
+  const container = css.match(/([^{}]*)\{([^}]*container:\s*cx-task-row \/ inline-size[^}]*)\}/);
+  assert.ok(container && /\.cvr-c-task__details:has\(> \.connectea-row-wrapper > \.connectea-panel--expanded\)/.test(container[1]) &&
+    /\.cvr-c-task__details:has\(> \.connectea-panel--expanded\)/.test(container[1]), 'only task columns holding an expanded card are containers (compact panels keep the window scale)');
+  assert.ok(/flex:\s*1 1 0% !important/.test(container[2]) && /min-width:\s*0 !important/.test(container[2]), 'the column takes the row\'s free space, never its card\'s width');
+  // Each step's zoom must fit the widest card (about 920px with goal bars at zoom 1) in the narrowest column it covers
+  const steps = [...css.matchAll(/@container cx-task-row \(width < (\d+)px\) \{([^}]*)\{ zoom: ([\d.]+) !important; \}/g)].map(m => ({ below: Number(m[1]), sel: m[2], zoom: Number(m[3]) }));
+  assert.ok(steps.length >= 10, 'zoom steps down to phone widths');
+  for (let i = 0; i < steps.length; i++) {
+    assert.ok(steps[i].sel.includes('.connectea-row-wrapper:has(> .connectea-panel--expanded)') && steps[i].sel.includes('.connectea-panel.connectea-panel--expanded.connectea-xp-overall'), 'task and overall cards both fit');
+    const narrowest = steps[i + 1] ? steps[i + 1].below : 0;
+    if (narrowest) assert.ok(920 * steps[i].zoom <= narrowest, `zoom ${steps[i].zoom} fits a 920px card in a ${narrowest}px column`);
+    if (i) assert.ok(steps[i].zoom < steps[i - 1].zoom && steps[i].below < steps[i - 1].below, 'narrower columns zoom further');
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -2,15 +2,15 @@
  * Connectify Theme Entry Point (part 2, continued from theme.css)
  */
 
-/* Clip only tiles and cards to their corners; popups and menus must never be clipped. clip, not hidden: hidden
-   starts a formatting context, so a last child's bottom margin (the Maintenance Notice list's 15px) stopped
+/* Clip only tiles and cards to their corners; popups and menus must never be clipped, nor Connectify's statistics
+   panels (nothing in them has a fill to clip; the breakout meter rises above its row and glows). clip, not hidden:
+   hidden starts a formatting context, so a last child's bottom margin (the Maintenance Notice list's 15px) stopped
    collapsing out of the tile and showed as an extra strip under its divider */
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-tile,
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-tile,
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-tile,
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-card,
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card,
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel {
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-card {
   overflow: clip !important;
 }
 

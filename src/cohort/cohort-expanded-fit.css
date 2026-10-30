@@ -1,0 +1,69 @@
+/**
+ * Expanded statistics cards fit their task row (cohort-expanded.css). A card is one short row up to ~920px wide
+ * at zoom 1 (goal bars included), but the window-width display scale knew nothing of the column it sits in:
+ * Connect's task column is far narrower than the window on an iPad or beside the drawer, so the card ran past
+ * it into the marks column and, in Liquid Glass, was cut off. The task column is a size container that takes
+ * the row's free space (the marks column keeps its 165px), and a card is zoomed by the column's own width,
+ * fitting a 960px card (Safari's wider text included) in 0.05 steps down to 0.35 (phones). Never a reflow: the
+ * card keeps its one row of values. Compact panels wrap and keep the window scale.
+ */
+
+.cvr-c-task__details:has(> .connectea-row-wrapper > .connectea-panel--expanded),
+.cvr-c-task__details:has(> .connectea-panel--expanded) {
+  container: cx-task-row / inline-size;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+}
+
+@container cx-task-row (width < 960px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.95 !important; }
+}
+@container cx-task-row (width < 912px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.9 !important; }
+}
+@container cx-task-row (width < 864px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.85 !important; }
+}
+@container cx-task-row (width < 816px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.8 !important; }
+}
+@container cx-task-row (width < 768px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.75 !important; }
+}
+@container cx-task-row (width < 720px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.7 !important; }
+}
+@container cx-task-row (width < 672px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.65 !important; }
+}
+@container cx-task-row (width < 624px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.6 !important; }
+}
+@container cx-task-row (width < 576px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.55 !important; }
+}
+@container cx-task-row (width < 528px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.5 !important; }
+}
+@container cx-task-row (width < 480px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.45 !important; }
+}
+@container cx-task-row (width < 432px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.4 !important; }
+}
+@container cx-task-row (width < 384px) {
+  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
+  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.35 !important; }
+}

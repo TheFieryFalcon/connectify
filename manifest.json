@@ -80,6 +80,7 @@
             "src/goals/goal-list.css",
             "src/goals/goal-bars.css",
             "src/goals/goal-forecast.css",
+            "src/cohort/cohort-expanded-fit.css",
             "src/atar/outline-jump.css",
             "src/goals/goal-celebrate.css"
          ],
