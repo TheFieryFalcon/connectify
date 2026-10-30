@@ -17,7 +17,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Hovering at the left edge opens the sidebar only on Assessment Outlines. On other pages, click the handle.
 
 ### Fixes
-- The outlines page no longer freezes about 15 seconds after loading.
+- **The outlines page no longer freezes about 15 seconds after loading.**
 - Connect's loading bars no longer make Orion lag.
 - The top-left corner no longer opens the sidebar, so Connect's home logo can be clicked.
 - Choosing one class after another in Connect's filter now shows the right outline, instead of saying the class has no outline for this semester.
