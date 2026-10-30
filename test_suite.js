@@ -13788,6 +13788,17 @@ runTest('Test 301: Picking one class after another in Connect\'s filter redraws 
   assert.ok(sheets.indexOf('src/theme/styles/theme-category-menu.css') === sheets.indexOf('src/theme/styles/theme-glass-nesting.css') + 1, 'loaded right after the glass nesting rules');
 });
 
+runTest('Test 302: The page scrollbar is invisible on every Connect page, in every theme and browser, while the page still scrolls', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/page-scrollbar.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(c => (c.css || []).includes('src/system/page-scrollbar.css'));
+  assert.ok(group && group.matches.includes('https://connect.det.wa.edu.au/*'), 'loaded on every Connect page');
+  assert.ok(!/@(media|supports)/.test(css), 'in every browser and theme');
+  assert.ok(/html,\s*body\s*\{[^}]*scrollbar-width: none !important/.test(css), 'Firefox and Chromium hide the root scrollbar');
+  assert.ok(/html::-webkit-scrollbar,\s*body::-webkit-scrollbar\s*\{[^}]*display: none !important/.test(css), 'WebKit (Safari, Orion) hides it too');
+  assert.ok(!/overflow/.test(css), 'the page keeps scrolling (overflow untouched)');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

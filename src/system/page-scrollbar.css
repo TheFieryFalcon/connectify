@@ -1,0 +1,19 @@
+/**
+ * The page scrollbar is invisible on every Connect page, in every theme: the page still scrolls
+ * (wheel, trackpad, keys, touch), but macOS "always show" and Windows scrollbars no longer draw a
+ * grey track down the right edge over the canvas or wallpaper. Connect scrolls the root element, so
+ * the rule sits on <html>; <body> is covered too for pages that scroll it instead.
+ * `scrollbar-width` serves Firefox and Chromium; WebKit (Safari, Orion) reads `::-webkit-scrollbar`.
+ */
+
+html,
+body {
+  scrollbar-width: none !important;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
