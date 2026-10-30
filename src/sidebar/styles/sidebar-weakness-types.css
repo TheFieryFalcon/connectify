@@ -232,5 +232,19 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
   border-color: #ef4444 !important;
   background: rgba(239, 68, 68, 0.12) !important;
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.8), inset 0 0 4px rgba(239, 68, 68, 0.3) !important;
-  animation: connectea-glow-critical 1.6s ease-in-out infinite alternate !important;
+}
+
+/* The pulse fades a brighter glow (connectea-glow-critical, opacity only) in and out on a layer of its own, so the
+   compositor runs it: an animated box-shadow restyled and repainted the page every frame for as long as it showed */
+.connectea-outcome-bar.connectea-outcome-critical::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: -1px !important;
+  border: 1px solid #ef4444 !important;
+  border-radius: inherit !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 1), inset 0 0 6px rgba(239, 68, 68, 0.5) !important;
+  pointer-events: none !important;
+  opacity: 0;
+  will-change: opacity;
+  animation: connectea-glow-critical 1.6s ease-in-out infinite alternate;
 }

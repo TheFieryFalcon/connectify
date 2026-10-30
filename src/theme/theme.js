@@ -87,17 +87,8 @@
     else document.documentElement.removeAttribute('data-connectea-reading-view');
   }
 
-  let adaptTimer = null;
-  const pageStartTime = Date.now();
-  function scheduleAdaptSurfaces(delay) {
-    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-    clearTimeout(adaptTimer);
-    const effectiveDelay = delay ?? (Date.now() - pageStartTime < 2500 ? 1200 : 400);
-    adaptTimer = setTimeout(() => {
-      if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
-      if (isDarkMode && !isAuthDisabled()) surfaceAdapter.adaptSurfaces();
-    }, effectiveDelay);
-  }
+  // Without records the whole page is adapted (a theme change); with them only what they added or re-classed
+  const scheduleAdaptSurfaces = (delay, records) => surfaceAdapter.schedule(delay, records);
 
   function applyTheme(isDark, themeId) {
     if (isAuthDisabled()) {
@@ -145,11 +136,15 @@
   };
 
   let syncScheduled = false;
-  const debouncedSync = () => {
+  let syncRecords = [];
+  const debouncedSync = records => {
+    syncRecords.push(...records);
     if (syncScheduled) return;
     syncScheduled = true;
     requestAnimationFrame(() => {
       syncScheduled = false;
+      const changes = syncRecords;
+      syncRecords = [];
       if (isAuthDisabled()) {
         if (isDarkMode || document.documentElement.classList.contains('connectea-dark')) {
           rememberThemeForLogin();
@@ -164,17 +159,21 @@
       toggle.cleanupDuplicateButtons();
       const nav = document.querySelector('.cvr-c-primary-navigation');
       updateTogglePosition(!nav || toggleButton.parentElement !== nav || !toggleButton.isConnected);
-      if (isDarkMode) scheduleAdaptSurfaces();
+      if (isDarkMode) scheduleAdaptSurfaces(undefined, changes);
     });
   };
 
   // Page changes through the shared scheduler (muted during accordion animations): added or removed
-  // nodes and class changes outside the toggle, the sidebar, accordions and task rows
+  // nodes and class changes outside the toggle, the sidebar, accordions, task rows and Connectify's floating UI
+  // (the outcome tooltip shows on every hover)
+  const OWN_UI = '#connectify-sidebar, #connectea-outcome-tooltip, #cx-preview-tooltip, #connectify-notifications-container, #cx-expand-btn, #cx-expand-progress, #cx-jump-subject, #connectea-theme-menu';
+  const isOwnUi = n => n.nodeType !== 1 || Boolean(n.closest(OWN_UI));
   window.ConnectifyScheduler.onMutations(debouncedSync, {
     mute: true,
     filter: r => {
       if (r.type === 'characterData' || (r.type === 'attributes' && r.attributeName !== 'class')) return false;
-      if (r.target === toggleButton || r.target.parentElement?.closest('#connectea-theme-toggle') || r.target.closest?.('#connectify-sidebar')) return false;
+      if (r.target === toggleButton || r.target.parentElement?.closest('#connectea-theme-toggle') || r.target.closest?.(OWN_UI)) return false;
+      if (r.type === 'childList' && [...r.addedNodes, ...r.removedNodes].every(isOwnUi)) return false;
       return !r.target?.closest?.('.eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectea-panel');
     }
   });

@@ -718,7 +718,7 @@ runTest('theme.css styles Classes and Preferences heading bars and cards', () =>
 });
 
 runTest('theme.js implements flicker-free attribute surface adaptation', () => {
-  assert.ok(themeJs.includes('function adaptSurfaces()'), 'theme.js must define adaptSurfaces()');
+  assert.ok(themeJs.includes('function adaptSurfaces(roots)'), 'theme.js must define adaptSurfaces(roots)');
   assert.ok(themeJs.includes('data-connectea-surface'), 'theme.js must tag data-connectea-surface');
   assert.ok(themeJs.includes('data-connectea-ink'), 'theme.js must tag data-connectea-ink');
   assert.ok(!themeJs.includes('savedTextColors'), 'theme.js must NOT mutate inline style properties');
@@ -13501,6 +13501,54 @@ runTest('Test 296: Layers over text (sidebar, menus, popups, dialogs, top bars) 
   const group = manifest.content_scripts.find(c => (c.js || []).includes('src/theme/theme-registry.js'));
   assert.ok(group.js.indexOf('src/theme/theme-overlay-blur.js') > -1 && group.js.indexOf('src/theme/theme-overlay-blur.js') < group.js.indexOf('src/theme/theme-registry.js'), 'loads before the registry');
   assert.ok(group.css.indexOf('src/theme/styles/theme-overlay-blur.css') > group.css.indexOf('src/theme/styles/theme-glass-surface.css'), 'loads after --cx-gl-blur is defined');
+});
+
+runTest('Test 297: Page changes adapt only the subtrees they touched, Connectify\'s own tooltip never triggers a scan, and the critical pulse runs on the compositor', () => {
+  const src = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-surface-adapter.js'), 'utf8');
+  const el = (name, kids = []) => {
+    const node = { name, nodeType: 1, isConnected: true, kids, scanned: 0, closest: () => null, hasAttribute: () => false, setAttribute() {}, children: [],
+      contains: other => other === node || kids.some(k => k.contains(other)) };
+    node.matches = () => false;
+    node.querySelectorAll = () => { node.scanned++; return []; };
+    return node;
+  };
+  const leaf = el('leaf');
+  const row = el('row', [leaf]);
+  const other = el('other');
+  let pageScans = 0;
+  const doc = { documentElement: { classList: { contains: c => c === 'connectea-dark' } }, body: { querySelectorAll: () => { pageScans++; return []; } } };
+  const timers = [];
+  const w = { getComputedStyle: () => ({ backgroundColor: 'rgb(0, 0, 0)', color: 'rgb(0, 0, 0)' }) };
+  new Function('window', 'document', 'setTimeout', 'clearTimeout', src)(w, doc, (fn, ms) => timers.push({ fn, ms }) && timers.length, () => {});
+  const A = w.ConnectifyThemeSurfaceAdapter;
+
+  const text = { nodeType: 3 };
+  assert.deepStrictEqual(A.rootsOf([{ type: 'childList', addedNodes: [row, text], removedNodes: [] }, { type: 'attributes', target: leaf }, { type: 'childList', addedNodes: [], removedNodes: [other] }]), [row],
+    'only added or re-classed elements, outermost first; text nodes and removals need no scan');
+
+  A.schedule(undefined, [{ type: 'childList', addedNodes: [], removedNodes: [other] }]);
+  assert.strictEqual(timers.length, 0, 'a removal schedules nothing');
+  A.schedule(undefined, [{ type: 'childList', addedNodes: [row], removedNodes: [] }]);
+  A.schedule(undefined, [{ type: 'attributes', target: leaf }]);
+  timers.pop().fn();
+  assert.ok(row.scanned > 0 && leaf.scanned === 0 && pageScans === 0, 'a page change scans the subtree it added (once), never the whole page');
+  A.schedule(600);
+  timers.pop().fn();
+  assert.ok(pageScans > 0, 'a theme change scans the whole page');
+
+  const themeJs = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme.js'), 'utf8');
+  assert.ok(/const OWN_UI = '[^']*#connectea-outcome-tooltip/.test(themeJs) && themeJs.includes('r.target.closest?.(OWN_UI)'), 'the outcome tooltip (shown on every hover) is not a page change');
+  assert.ok(themeJs.includes("[...r.addedNodes, ...r.removedNodes].every(isOwnUi)"), 'nor is adding or removing Connectify\'s floating UI');
+  assert.ok(themeJs.includes('scheduleAdaptSurfaces(undefined, changes)'), 'page changes pass their records, so only their subtrees are adapted');
+
+  const weak = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-weakness-types.css'), 'utf8');
+  const bar = weak.match(/\.connectea-outcome-bar\.connectea-outcome-critical \{([^}]*)\}/)[1];
+  assert.ok(!/animation/.test(bar), 'the critical bar itself never animates (its !important box-shadow hid the animated one, which still restyled every frame)');
+  const glow = weak.match(/\.connectea-outcome-bar\.connectea-outcome-critical::after \{([^}]*)\}/)[1];
+  assert.ok(/animation: connectea-glow-critical 1\.6s ease-in-out infinite alternate;/.test(glow) && /pointer-events: none !important;/.test(glow) && /will-change: opacity;/.test(glow), 'the pulse is a pseudo-element of its own');
+  const filter = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-outcome-filter.css'), 'utf8');
+  const frames = filter.match(/@keyframes connectea-glow-critical \{([\s\S]*?)\n\}/)[1];
+  assert.ok(/opacity: 0/.test(frames) && /opacity: 1/.test(frames) && !/box-shadow|border/.test(frames), 'it animates opacity only, which the compositor runs without restyling the page');
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -3,7 +3,9 @@
  *
  * Tags Connect surfaces that keep a hard-coded light background (data-connectea-surface) and the
  * dark text on them (data-connectea-ink) so dark themes can restyle them without inline styles.
- * Exposes window.ConnectifyThemeSurfaceAdapter.
+ * A theme change scans the whole page; a page change scans only the subtrees it added or re-classed
+ * (a whole-page scan, with a computed style per candidate, after every tooltip or row change made every
+ * interaction lag). Exposes window.ConnectifyThemeSurfaceAdapter.
  */
 (() => {
   'use strict';
@@ -51,16 +53,27 @@
     return lum < 135 || (isNeutralColor(rgb) && Math.max(...rgb) < 140) || isConnectRed;
   }
 
-  function adaptSurfaces() {
+  // Every element matching selector in roots (the roots included), or in the whole page without roots
+  function* candidates(roots, selector) {
+    if (!roots) { yield* document.body.querySelectorAll(selector); return; }
+    for (const root of roots) {
+      if (!root.isConnected) continue;
+      if (root.matches(selector)) yield root;
+      yield* root.querySelectorAll(selector);
+    }
+  }
+
+  /** Tags light surfaces and the dark ink on them, in roots (elements) or, without roots, the whole page. */
+  function adaptSurfaces(roots) {
     const isDark = document.documentElement.classList.contains('connectea-dark');
     if (!isDark || window.ConnectifyThemeAuth?.isAuthDisabled()) return;
     try {
-      for (const el of document.body.querySelectorAll(SURFACE_SELECTOR)) {
+      for (const el of candidates(roots, SURFACE_SELECTOR)) {
         if (el.closest(SKIP_ANCESTORS) || el.matches('.portlet, .portlet-boundary, .portlet-layout, #main-content')) continue;
         const bgRgb = parseRgb(window.getComputedStyle(el).backgroundColor);
         if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) el.setAttribute('data-connectea-surface', '');
       }
-      for (const el of document.querySelectorAll(INK_SELECTOR)) {
+      for (const el of candidates(roots, INK_SELECTOR)) {
         if (el.children.length > 2 || el.hasAttribute('data-connectea-surface') || el.closest(SKIP_ANCESTORS)) continue;
         const fgRgb = parseRgb(window.getComputedStyle(el).color, true);
         if (isDarkColor(fgRgb)) el.setAttribute('data-connectea-ink', '');
@@ -68,5 +81,42 @@
     } catch {}
   }
 
-  window.ConnectifyThemeSurfaceAdapter = { adaptSurfaces, parseRgb, isDarkColor, SURFACE_SELECTOR, INK_SELECTOR };
+  // Past this many changed subtrees one page scan is cheaper
+  const MAX_ROOTS = 150;
+
+  const outermost = list => list.filter(el => !list.some(other => other !== el && other.contains(el)));
+
+  /** Elements the mutation records added or re-classed, outermost only (removals need no scan). */
+  function rootsOf(records) {
+    const roots = new Set();
+    for (const r of records) {
+      if (r.type === 'attributes') roots.add(r.target);
+      else for (const n of r.addedNodes) if (n.nodeType === 1) roots.add(n);
+    }
+    return outermost([...roots]);
+  }
+
+  // Subtrees waiting to be adapted; null is the whole page
+  let pending = [];
+  let adaptTimer = null;
+  const pageStartTime = Date.now();
+
+  /** Adapts after delay (1.2s while the page starts, else 400ms): the records' subtrees, or the whole page without records. */
+  function schedule(delay, records) {
+    if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
+    if (!records) pending = null;
+    else if (pending) pending.push(...rootsOf(records));
+    if (pending && pending.length > MAX_ROOTS) pending = null;
+    if (pending && !pending.length) return;
+    clearTimeout(adaptTimer);
+    const effectiveDelay = delay ?? (Date.now() - pageStartTime < 2500 ? 1200 : 400);
+    adaptTimer = setTimeout(() => {
+      if (window.ConnectifyIsAccordionAnimating || window.ConnectifyIsBulkExpanding) return;
+      const roots = pending;
+      pending = [];
+      adaptSurfaces(roots ? outermost([...new Set(roots)]) : undefined);
+    }, effectiveDelay);
+  }
+
+  window.ConnectifyThemeSurfaceAdapter = { adaptSurfaces, schedule, rootsOf, parseRgb, isDarkColor, SURFACE_SELECTOR, INK_SELECTOR };
 })();
