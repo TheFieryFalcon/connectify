@@ -2,10 +2,10 @@
  * Connectify Goals: goal target on prediction panels (goal-forecast.js)
  *
  * Expanded cards: a "Goal target" cell after High, behind the card's hairline, in the card's value style.
- * Compact line: "Goal target 86%" at the end. The value is coloured by the task's tier (--cx-goal-tier from its
- * data-tier, goal-dialog.css), desaturated: the tier's hue at chroma 0.075 and a fixed OKLCH lightness, 0.46 on
- * light panels and 0.80 on dark ones, >= 6:1 for every tier on every preset's panel. Browsers without relative
- * colours keep the value's ink. Hairlines follow cohort-expanded.css in every theme.
+ * Compact line: "Goal target 86%" at the end, the value semibold (600) like Low and High. The value is coloured by
+ * the task's tier (--cx-goal-tier from its data-tier, goal-dialog.css), desaturated: the tier's hue at chroma 0.075
+ * and a fixed OKLCH lightness, 0.46 on light panels and 0.80 on dark ones, >= 6:1 for every tier on every preset's
+ * panel. Browsers without relative colours keep the value's ink. Hairlines follow cohort-expanded.css in every theme.
  */
 
 /* Expanded card: Low / Mid / High, then the goal target */
@@ -30,6 +30,10 @@ html.connectea-dark .connectea-xp-forecast .cx-goal-target.connectea-xp-grid {
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-xp-forecast .cx-goal-target.connectea-xp-grid {
   border-color: var(--cx-gl-hairline, rgba(255, 255, 255, 0.14)) !important;
 }
+
+/* Compact line: the value is semibold like Low and High (Mid alone is 700); the unused id outranks the task group's
+   first-child span rule */
+:is(#cx-specificity-anchor, .connectea-row-wrapper) span.cx-goal-target > .cx-goal-target__value { font-weight: 600 !important; }
 
 /* Tier colour. The glass task-row rule inks everything in the strip with the primary text, so the unused id
    outranks it (as for the Low / Mid / High colours, cohort-forecast.css) */

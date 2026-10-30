@@ -8974,7 +8974,8 @@ runTest('Unmarked task rows show a compact Low / Mid / High prediction panel, hi
   const forecastCss = fs.readFileSync(path.join(SRC_DIR, 'cohort/cohort-forecast.css'), 'utf8');
   const ink = (scope, level) => new RegExp(`${scope}:is\\(#cx-specificity-anchor, \\.connectea-row-wrapper\\) \\.connectea-forecast-value--${level} \\{[^}]*`, 'm');
   const block = (scope, level) => (forecastCss.match(ink(scope, level)) || [''])[0];
-  assert.ok(/\.connectea-row-wrapper :is\(\.connectea-forecast-value--low, \.connectea-forecast-value--high\) \{ font-weight: 600 !important; \}/.test(forecastCss), 'Low and High are semibold (600), below the 700 Mid strong');
+  assert.ok(forecastCss.includes(':is(#cx-specificity-anchor, .connectea-row-wrapper) :is(.connectea-forecast-value--low, .connectea-forecast-value--high) { font-weight: 600 !important; }'),
+    'Low and High are semibold (600), below the 700 Mid strong, outranking the task group\'s first-child span rule (Low is the line\'s first span)');
   assert.ok(block('^', 'low').includes('#475569') && block('^', 'mid').includes('#174c75') && block('^', 'high').includes('#15803d'), 'Light ink matches the Predictor pills');
   assert.ok(block('html\\.connectea-dark ', 'mid').includes('var(--cx-accent-hover') && block('html\\.connectea-dark ', 'high').includes('#4ade80'), 'Dark ink matches the Predictor scenario values');
   assert.ok(block('html\\.connectea-dark\\[data-connectea-tone="light"\\] ', 'high').includes('oklch(from #22c55e 0.34 c h)'), 'Light-tone ink matches the Predictor re-inking');
@@ -12960,6 +12961,7 @@ runTest('Test 281: Prediction panels on unmarked tasks a goal covers show the go
   const compactValue = compact[0].querySelector('.cx-goal-target__value');
   assert.strictEqual(compactValue.textContent, `${Math.round(target.required)}%`);
   assert.strictEqual(compactValue.dataset.tier, target.tier, 'the value carries the task\'s tier for its colour');
+  assert.strictEqual(compactValue.tagName.toLowerCase(), 'span', 'a span, not a strong: the panel\'s strong rules would make it 700 like Mid');
   assert.strictEqual(box.querySelector('.cx-goal-tier'), null, 'no tier label: the colour says it');
   assert.ok(box.classList.contains('cx-has-goal-target'));
 
@@ -12992,6 +12994,8 @@ runTest('Test 281: Prediction panels on unmarked tasks a goal covers show the go
   assert.ok(cssHas(css, 'color: oklch(from var(--cx-goal-tier) 0.46 0.075 h) !important;') && cssHas(css, 'color: oklch(from var(--cx-goal-tier) 0.8 0.075 h) !important;'),
     'the tier\'s hue, desaturated, at a lightness that keeps >= 5:1 (dark ink on light panels, light ink on dark ones)');
   assert.ok(cssHas(css, ':is(#cx-specificity-anchor, .connectea-row-wrapper) .cx-goal-target__value[data-tier]'), 'the colour outranks the glass strip\'s ink rule');
+  assert.ok(cssHas(css, ':is(#cx-specificity-anchor, .connectea-row-wrapper) span.cx-goal-target > .cx-goal-target__value { font-weight: 600 !important; }'),
+    'the compact value is semibold like Low and High, outranking the task group\'s first-child span rule');
   const dialogCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-dialog.css'), 'utf8');
   assert.ok(dialogCss.includes(':is(.cx-goal-tier, .cx-goal-hbar, .cx-goal-target__value)[data-tier="hard"] { --cx-goal-tier: #f97316; }'), 'tier colours have one source');
   assert.ok(cssHas(css, 'border-color: var(--cx-border, #3b6088) !important;'), 'its hairline follows the card\'s in dark themes');

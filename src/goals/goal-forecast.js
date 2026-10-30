@@ -92,10 +92,10 @@
     } else {
       const span = document.createElement('span');
       span.className = 'cx-goal-target';
-      const strong = document.createElement('strong');
-      strong.className = 'cx-goal-target__value';
-      strong.textContent = value;
-      span.append('  •  Goal target ', tinted(strong));
+      const valueEl = document.createElement('span');
+      valueEl.className = 'cx-goal-target__value';
+      valueEl.textContent = value;
+      span.append('  •  Goal target ', tinted(valueEl));
       box.append(span);
     }
   }
