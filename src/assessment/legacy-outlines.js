@@ -209,9 +209,12 @@
     return slot?.firstElementChild || null;
   }
 
-  // Connect adding, removing or filtering its cards (or dropping the host while re-rendering)
-  const touchesCards = m => m.type === 'childList' && [...m.addedNodes, ...m.removedNodes].some(n => n.nodeType === 1 &&
-    (n.id === HOST_ID || n.matches?.('cnt-sao-card, cnt-category-bar, .col-12') || n.querySelector?.('cnt-sao-card, cnt-category-bar')));
+  // Connect adding, removing or filtering its cards (or dropping the host while re-rendering). Picking one class
+  // after another reuses the shown card and only rewrites its title, so a title change counts too
+  const inCardTitle = node => Boolean((node?.nodeType === 1 ? node : node?.parentElement)?.closest?.('cnt-sao-card mat-card-title'));
+  const touchesCards = m => (m.type === 'characterData' && inCardTitle(m.target)) ||
+    (m.type === 'childList' && (inCardTitle(m.target) || [...m.addedNodes, ...m.removedNodes].some(n => n.nodeType === 1 &&
+      (n.id === HOST_ID || n.matches?.('cnt-sao-card, cnt-category-bar, .col-12') || n.querySelector?.('cnt-sao-card, cnt-category-bar')))));
   window.ConnectifyScheduler?.onMutations?.(sync, { filter: touchesCards, mute: false });
   window.addEventListener('connectify-outlines-preview', sync);
   window.addEventListener('connectify-outlines-loaded', sync);

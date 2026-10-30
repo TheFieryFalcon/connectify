@@ -290,6 +290,7 @@
             "src/theme/styles/theme-glass-task-rows.css",
             "src/theme/styles/theme-surface-nesting.css",
             "src/theme/styles/theme-glass-nesting.css",
+            "src/theme/styles/theme-category-menu.css",
             "src/theme/styles/theme-overlay-blur.css",
             "src/theme/styles/theme-glass-reading.css",
             "src/theme/styles/theme-light-tone.css",

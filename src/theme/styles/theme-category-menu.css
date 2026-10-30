@@ -1,0 +1,47 @@
+/**
+ * Connectify Theme: Connect's category menu drawer (#categoryMenu .c-category-menu: the outlines' class filter,
+ * Attendance's terms), which Angular puts inside the toolbar it opens from.
+ * Every dark theme: the drawer is the menu's one surface (the toolbar's clear-text rule left it unpainted, so the
+ * page showed through); its panels and their headers stay clear on it, hover keeps its highlight.
+ * Liquid Glass: a blurring ancestor is the drawer's backdrop root, so its own blur would see only the bar above it,
+ * never the page. The outlines' fixed "All" bar therefore paints its glass on its container's ::before (behind the
+ * bar, never an ancestor of the drawer), and the drawer is a glass surface of its own with the same fill and blur.
+ */
+
+html.connectea-dark[data-connectea-theme] .c-category-menu.toggle-drawer:not(#cx-n) {
+  background-color: var(--cx-surface-elevated, #1a222d) !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container > mat-toolbar.c-category-bar,
+html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container > mat-toolbar.c-category-bar {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container::before,
+html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%);
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container::before,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n) {
+  background-color: color-mix(in srgb, color-mix(in srgb, var(--cx-canvas-bg, #0b1120) 92%, var(--cx-text-primary, #ffffff)) calc(var(--cx-glass-opacity, 0.75) * 100%), transparent) !important;
+}
+
+html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container::before,
+html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n) {
+  background-color: rgba(255, 255, 255, var(--cx-glass-opacity, 0.75)) !important;
+}
+
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n),
+html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n) {
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+}

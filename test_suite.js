@@ -13749,6 +13749,42 @@ runTest('Test 300: Connect builds its hidden outline cards without task rows or 
     'all surface reads come before any write (a write between reads forced a fresh restyle each time)');
 });
 
+runTest('Test 301: Picking one class after another in Connect\'s filter redraws the outline, and the filter drawer is its own glass surface over the page', () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  // Angular reuses the shown card and rewrites only its title: that text change must reach sync()
+  let filter = null;
+  const w = { ConnectifyUtils: { normalize: s => String(s || '').trim(), isOutlinesPage: () => true }, addEventListener() {},
+    ConnectifyScheduler: { onMutations: (fn, opts) => { filter = opts.filter; } } };
+  const doc = { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [], addEventListener() {} };
+  new Function('window', 'document', read('assessment/legacy-outlines.js'))(w, doc);
+  const titleSpan = { nodeType: 1, closest: sel => (sel === 'cnt-sao-card mat-card-title' ? {} : null) };
+  const text = { nodeType: 3, parentElement: titleSpan };
+  const elsewhere = { nodeType: 1, closest: () => null };
+  assert.ok(filter({ type: 'characterData', target: text, addedNodes: [], removedNodes: [] }),
+    'a card title rewritten in place (Semester 1 Chemistry -> Semester 2 Chemistry) redraws the outlines: the old tile stayed, and the semester filter hid it');
+  assert.ok(filter({ type: 'childList', target: titleSpan, addedNodes: [], removedNodes: [] }), 'a title whose text node is replaced counts too');
+  assert.ok(!filter({ type: 'characterData', target: { nodeType: 3, parentElement: elsewhere }, addedNodes: [], removedNodes: [] }), 'other text changes never redraw');
+
+  // The drawer sits inside the "All" bar: a blurring bar is its backdrop root, so the bar's glass moves to its container's ::before
+  const css = read('theme/styles/theme-category-menu.css');
+  const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  assert.ok(cssHas(css, `${glass} .js-pos-category-toolbar-container > mat-toolbar.c-category-bar,`) && /mat-toolbar\.c-category-bar \{[^}]*backdrop-filter: none !important;/.test(css),
+    'the fixed "All" bar no longer blurs itself, so it is no ancestor blur for the drawer');
+  assert.ok(/\.js-pos-category-toolbar-container::before \{[^}]*content: '';[^}]*z-index: -1;[^}]*backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\) saturate\(160%\);/.test(css),
+    'its glass is painted behind it on the container\'s ::before');
+  assert.ok(cssHas(css, `${glass} .c-category-menu.toggle-drawer:not(#cx-n) { backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;`) ||
+    /\.c-category-menu\.toggle-drawer:not\(#cx-n\) \{\s*backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\) saturate\(160%\) !important;/.test(css),
+    'the drawer blurs the page itself');
+  assert.ok(cssHas(css, 'html.connectea-dark[data-connectea-theme] .c-category-menu.toggle-drawer:not(#cx-n) { background-color: var(--cx-surface-elevated, #1a222d) !important;'),
+    'in every dark theme the drawer is painted (the toolbar\'s clear-text rule left the page showing through)');
+  const material = read('theme/styles/theme-material-2.css');
+  assert.ok(cssHas(material, 'html.eds.cvr.ngm.connectea-dark .toggle-drawer.toggle--grey-dark .c-expansion-panel .mat-expansion-panel-content { background-color: transparent !important;'),
+    'its panels are clear on it (one surface per block)');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
+  const sheets = manifest.content_scripts.find(g => g.css?.includes('src/theme/styles/theme-category-menu.css')).css;
+  assert.ok(sheets.indexOf('src/theme/styles/theme-category-menu.css') === sheets.indexOf('src/theme/styles/theme-glass-nesting.css') + 1, 'loaded right after the glass nesting rules');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
