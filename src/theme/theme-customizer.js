@@ -35,8 +35,7 @@
     emoji: '🎨',
     liquidGlass: false,
     wallpaper: null,
-    glassBlur: 12,
-    glassOpacity: 0.65,
+    glassBlur: 12, glassOpacity: 0.65, overlayBlurFloor: true, // the floor: theme-overlay-blur.js
     activeToken: 'canvas',
     pickerH: 215,
     pickerS: 0.5,
@@ -126,6 +125,7 @@
     $('#cx-glass-blur-val').textContent = `${state.glassBlur}px`;
     $('#cx-glass-opacity-slider').value = Math.round(state.glassOpacity * 100);
     $('#cx-glass-opacity-val').textContent = `${Math.round(state.glassOpacity * 100)}%`;
+    window.ConnectifyOverlayBlur?.sync(modalEl, state);
   }
 
   function setMode(mode) {
@@ -177,6 +177,7 @@
       $('#cx-glass-blur-val').textContent = `${state.glassBlur}px`;
       renderMockup();
     };
+    window.ConnectifyOverlayBlur?.bind(modalEl, state);
     $('#cx-glass-opacity-slider').oninput = e => {
       state.glassOpacity = parseInt(e.target.value, 10) / 100;
       $('#cx-glass-opacity-val').textContent = `${Math.round(state.glassOpacity * 100)}%`;
@@ -192,8 +193,7 @@
       name: ($('#cx-name-input')?.value || state.name || 'Custom Theme').trim(),
       icon: ($('#cx-emoji-input')?.value || state.emoji || '🎨').trim(),
       liquidGlass: state.liquidGlass,
-      glassBlur: state.glassBlur,
-      glassOpacity: state.glassOpacity,
+      glassBlur: state.glassBlur, glassOpacity: state.glassOpacity, overlayBlurFloor: state.overlayBlurFloor !== false,
       ...window.ConnectifyThemeImport.wallpaperFields(state.wallpaper), // a preset is saved by id
       swatch: [state.tokens.canvas, state.tokens.surface, state.tokens.accent],
       // Basic tokens plus the Full tokens the user set; the rest is derived when the theme is applied
@@ -215,6 +215,7 @@
       liquidGlass: Boolean(themeToEdit?.liquidGlass),
       glassBlur: typeof themeToEdit?.glassBlur === 'number' ? themeToEdit.glassBlur : 12,
       glassOpacity: typeof themeToEdit?.glassOpacity === 'number' ? themeToEdit.glassOpacity : 0.65,
+      overlayBlurFloor: themeToEdit?.overlayBlurFloor !== false,
       wallpaper: window.ConnectifyWallpaperPresets?.byId(themeToEdit?.wallpaperPreset)?.url || themeToEdit?.wallpaper || null,
       tokens: themeToEdit?.colors ? themeTokens(themeToEdit.colors) : getDefaultTokens()
     });

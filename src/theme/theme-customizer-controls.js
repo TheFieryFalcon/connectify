@@ -108,7 +108,7 @@
   function exportTheme(state) {
     const data = {
       version: 1, name: state.name, icon: state.emoji, liquidGlass: state.liquidGlass,
-      glassBlur: state.glassBlur, glassOpacity: state.glassOpacity,
+      glassBlur: state.glassBlur, glassOpacity: state.glassOpacity, overlayBlurFloor: state.overlayBlurFloor !== false,
       ...window.ConnectifyThemeImport.wallpaperFields(state.wallpaper), // a preset ships as its id, no image
       swatch: [state.tokens.canvas, state.tokens.surface, state.tokens.accent],
       colors: window.ConnectifyCustomizerTokens.savedColors(state)
@@ -129,6 +129,7 @@
     if (t.liquidGlass !== undefined) state.liquidGlass = t.liquidGlass;
     if (t.glassBlur !== undefined) state.glassBlur = t.glassBlur;
     if (t.glassOpacity !== undefined) state.glassOpacity = t.glassOpacity;
+    if (t.overlayBlurFloor !== undefined) state.overlayBlurFloor = t.overlayBlurFloor;
     if (t.colors) state.tokens = { ...state.tokens, ...t.colors };
     if (t.wallpaperPreset) state.wallpaper = window.ConnectifyWallpaperPresets.byId(t.wallpaperPreset).url;
     if (t.wallpaper === undefined || t.wallpaperPreset) return null;

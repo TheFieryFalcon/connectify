@@ -29,6 +29,7 @@
     if (raw.liquidGlass !== undefined) out.liquidGlass = Boolean(raw.liquidGlass);
     if (Number.isFinite(raw.glassBlur)) out.glassBlur = clamp(raw.glassBlur, 0, 40);
     if (Number.isFinite(raw.glassOpacity)) out.glassOpacity = clamp(raw.glassOpacity, 0.1, 1);
+    if (typeof raw.overlayBlurFloor === 'boolean') out.overlayBlurFloor = raw.overlayBlurFloor;
     if (raw.colors && typeof raw.colors === 'object') out.colors = window.ConnectifyThemeColors.pickColors(raw.colors);
     // A preset wallpaper is kept as its id
     const preset = presets()?.byId(raw.wallpaperPreset);
@@ -52,7 +53,7 @@
     const saved = reg.saveCustomTheme({
       name: theme.name || 'Imported Theme', icon: theme.icon || '🎨',
       liquidGlass: Boolean(theme.liquidGlass), glassBlur: theme.glassBlur ?? 12, glassOpacity: theme.glassOpacity ?? 0.65,
-      wallpaper: theme.wallpaper ?? null, wallpaperPreset: theme.wallpaperPreset ?? null,
+      overlayBlurFloor: theme.overlayBlurFloor !== false, wallpaper: theme.wallpaper ?? null, wallpaperPreset: theme.wallpaperPreset ?? null,
       swatch: [colors.canvas, colors.surface, colors.accent], colors
     });
     if (saved) reg.setTheme(saved.id);

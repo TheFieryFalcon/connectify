@@ -1,0 +1,35 @@
+/**
+ * Connectify Theme: layers that cover other text blur at least 12px in Liquid Glass, even when a custom theme's
+ * Blur Strength is lower (unless its checkbox is off): the Connectify drawer, theme menu, outcome tooltip and
+ * Jump To list, Connect's top bars the page scrolls under (navigation, location bar, service bar and menus, the
+ * outlines' fixed "All" bar), popups, dialogs and their backdrops. theme-overlay-blur.js puts the value in
+ * --cx-glass-blur-overlay on <html>; every blur rule on these layers reads --cx-glass-blur or --cx-gl-blur, so
+ * redefining both here reaches them (and anything inside them) without touching the rules themselves.
+ */
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectea-theme-menu,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectea-outcome-tooltip,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #cx-jump-subject-list,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-primary-navigation,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-location-bar,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-bar__container,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-bar,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-menu,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-category-menu,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-popupview-popup,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .modal-content,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .ui-dialog,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-window-modalitycurtain,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .modal-backdrop,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .yui3-widget-mask,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .ui-widget-overlay,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cdk-overlay-backdrop,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-drawer-backdrop,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-modal-overlay,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-overlay,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-overlay,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-overlay {
+  --cx-glass-blur: var(--cx-glass-blur-overlay, 12px);
+  --cx-gl-blur: blur(var(--cx-glass-blur-overlay, 12px)) saturate(160%);
+}

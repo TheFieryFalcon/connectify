@@ -69,6 +69,7 @@
       liquidGlass: Boolean(themeDef.liquidGlass),
       glassBlur: typeof themeDef.glassBlur === 'number' ? themeDef.glassBlur : 12,
       glassOpacity: typeof themeDef.glassOpacity === 'number' ? themeDef.glassOpacity : 0.65,
+      overlayBlurFloor: themeDef.overlayBlurFloor !== false,
       wallpaper: themeDef.wallpaper || null,
       wallpaperPreset: typeof themeDef.wallpaperPreset === 'string' ? themeDef.wallpaperPreset : null,
       swatch: Array.isArray(themeDef.swatch) ? themeDef.swatch : ['#1e2632', '#3b82f6'],
@@ -137,7 +138,11 @@
     const root = document.documentElement;
     if (theme.id === 'liquid-glass' || theme.liquidGlass || customColors?.glassDiffusion) {
       root.setAttribute('data-connectea-glass', 'true');
-      root.style.setProperty('--cx-glass-blur', `${theme.glassBlur ?? customColors?.glassBlur ?? 12}px`);
+      const blur = theme.glassBlur ?? customColors?.glassBlur ?? 12;
+      root.style.setProperty('--cx-glass-blur', `${blur}px`);
+      // Layers over text keep a 12px floor unless the theme turns it off (theme-overlay-blur.js)
+      const keep = (theme.overlayBlurFloor ?? customColors?.overlayBlurFloor) !== false;
+      root.style.setProperty('--cx-glass-blur-overlay', `${window.ConnectifyOverlayBlur?.of(blur, keep) ?? (keep ? Math.max(12, blur) : blur)}px`);
       root.style.setProperty('--cx-glass-opacity', `${theme.glassOpacity ?? customColors?.glassOpacity ?? 0.65}`);
     } else {
       root.removeAttribute('data-connectea-glass');

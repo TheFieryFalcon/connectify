@@ -90,6 +90,7 @@
       liquidGlass: Boolean(themeDef.liquidGlass),
       glassBlur: typeof themeDef.glassBlur === 'number' ? themeDef.glassBlur : (existing?.glassBlur ?? 12),
       glassOpacity: typeof themeDef.glassOpacity === 'number' ? themeDef.glassOpacity : (existing?.glassOpacity ?? 0.65),
+      overlayBlurFloor: typeof themeDef.overlayBlurFloor === 'boolean' ? themeDef.overlayBlurFloor : existing?.overlayBlurFloor !== false,
       wallpaper: themeDef.wallpaper !== undefined ? themeDef.wallpaper : (existing ? existing.wallpaper : null),
       wallpaperPreset: themeDef.wallpaperPreset !== undefined ? themeDef.wallpaperPreset : (existing?.wallpaperPreset ?? null),
       swatch: Array.isArray(themeDef.swatch) ? themeDef.swatch : [

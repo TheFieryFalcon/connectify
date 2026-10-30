@@ -77,6 +77,7 @@
               </label>
               <div id="cx-glass-sliders-wrap" style="display:${s.liquidGlass ? 'flex' : 'none'};flex-direction:column;gap:6px;margin:6px 0;padding:6px 8px;background:var(--cx-surface-secondary);border-radius:6px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--cx-text-muted);"><span>Blur Strength: <strong id="cx-glass-blur-val" style="color:var(--cx-text-primary);">${s.glassBlur}px</strong></span><input type="range" id="cx-glass-blur-slider" min="0" max="40" value="${s.glassBlur}" style="width:110px;cursor:pointer;"></div>
+                ${window.ConnectifyOverlayBlur?.html(s) || ''}
                 <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--cx-text-muted);"><span>Transparency: <strong id="cx-glass-opacity-val" style="color:var(--cx-text-primary);">${opacityPct}%</strong></span><input type="range" id="cx-glass-opacity-slider" min="10" max="100" value="${opacityPct}" style="width:110px;cursor:pointer;"></div>
               </div>
               <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">

@@ -168,10 +168,10 @@ const SPLIT_PARTS = {
   'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
   'progress-graph.js': ['school-terms.js', 'progress-modes.js', 'progress-early-easter.js', 'progress-panel.js', 'progress-graph.js'],
   'new-grade.js': ['grade-snapshot.js', 'grade-tasks.js', 'new-grade.js'],
-  'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-registry.js', 'theme-custom-themes.js'],
-  'theme-customizer.js': ['theme-color-utils.js', 'theme-import.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
+  'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-overlay-blur.js', 'theme-registry.js', 'theme-custom-themes.js'],
+  'theme-customizer.js': ['theme-color-utils.js', 'theme-overlay-blur.js', 'theme-import.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
   // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
-  'theme.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-registry.js', 'theme-custom-themes.js',
+  'theme.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-overlay-blur.js', 'theme-registry.js', 'theme-custom-themes.js',
     'theme-surface-adapter.js', 'theme-toggle.js', 'theme-menu.js', 'theme.js']
 };
 for (const [name, files] of Object.entries(MODULE_BUNDLES)) {
@@ -8070,7 +8070,7 @@ runTest('Test 168: A custom theme with Liquid Glass on becomes a recoloured Liqu
   assert.ok(tokensJs.includes('ConnectifyThemeGlassTokens?.props(c, glass.opacity)'), 'applyCustomTokens must apply glass tokens when glass is on');
   const registryJs = fs.readFileSync(path.join(themeDir, 'theme-registry.js'), 'utf8');
   assert.ok(/theme\.liquidGlass \|\| customColors\?\.glassDiffusion \? \{ opacity:/.test(registryJs), 'the registry must pass the glass opacity for Liquid Glass custom themes');
-  assert.ok(registryJs.includes("themeDef.glassBlur : 12,") && registryJs.includes('glassBlur ?? 12}px'), 'default blur must be 12px');
+  assert.ok(registryJs.includes("themeDef.glassBlur : 12,") && registryJs.includes('glassBlur ?? 12;'), 'default blur must be 12px');
   assert.ok(fs.readFileSync(path.join(themeDir, 'theme-customizer.js'), 'utf8').includes('glassBlur: 12,'), 'the customizer must default blur to 12px');
   const styles = fs.readdirSync(path.join(themeDir, 'styles')).map(f => origReadFileSync.call(fs, path.join(themeDir, 'styles', f), 'utf8')).join('\n');
   assert.ok(!styles.includes('var(--cx-glass-blur, 16px)'), 'stylesheet blur fallbacks must be 12px');
@@ -13461,6 +13461,46 @@ runTest('Test 295: Expanded statistics cards zoom to fit their task column, so n
     if (narrowest) assert.ok(920 * steps[i].zoom <= narrowest, `zoom ${steps[i].zoom} fits a 920px card in a ${narrowest}px column`);
     if (i) assert.ok(steps[i].zoom < steps[i - 1].zoom && steps[i].below < steps[i - 1].below, 'narrower columns zoom further');
   }
+});
+
+runTest('Test 296: Layers over text (sidebar, menus, popups, dialogs, top bars) keep a 12px glass blur under a lower custom Blur Strength unless the theme turns it off', () => {
+  const themeDir = path.resolve(SRC_DIR, 'theme');
+  const w = {};
+  new Function('window', origReadFileSync.call(fs, path.join(themeDir, 'theme-overlay-blur.js'), 'utf8'))(w);
+  const O = w.ConnectifyOverlayBlur;
+  assert.strictEqual(O.of(4), 12, 'a blur under 12px is raised to 12px');
+  assert.strictEqual(O.of(0, true), 12, 'no blur is raised too');
+  assert.strictEqual(O.of(20), 20, 'a stronger blur is kept');
+  assert.strictEqual(O.of(4, false), 4, 'with the checkbox off the theme\'s own blur is used');
+  assert.ok(O.keeps({}) && O.keeps({ overlayBlurFloor: true }) && !O.keeps({ overlayBlurFloor: false }), 'on unless a theme sets it off (older themes keep it)');
+  assert.ok(/id="cx-overlay-blur-toggle" checked/.test(O.html({})) && !/checked/.test(O.html({ overlayBlurFloor: false })), 'the customizer checkbox shows the theme\'s setting');
+
+  // The registry writes the floored value for the page; the theme's own blur stays as set
+  const registryJs = origReadFileSync.call(fs, path.join(themeDir, 'theme-registry.js'), 'utf8');
+  assert.ok(registryJs.includes("'--cx-glass-blur-overlay'") && registryJs.includes('ConnectifyOverlayBlur?.of(blur, keep)'), 'applyGlass sets --cx-glass-blur-overlay');
+  assert.ok(registryJs.includes('overlayBlurFloor: themeDef.overlayBlurFloor !== false'), 'registered themes carry the setting');
+  const savedJs = origReadFileSync.call(fs, path.join(themeDir, 'theme-custom-themes.js'), 'utf8');
+  assert.ok(savedJs.includes('overlayBlurFloor:'), 'saved custom themes keep the setting');
+  const importJs = origReadFileSync.call(fs, path.join(themeDir, 'theme-import.js'), 'utf8');
+  assert.ok(importJs.includes("typeof raw.overlayBlurFloor === 'boolean'"), 'theme files carry it, as a boolean only');
+  const customizerJs = origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer.js'), 'utf8');
+  assert.ok(customizerJs.includes('overlayBlurFloor: state.overlayBlurFloor !== false') && customizerJs.includes('ConnectifyOverlayBlur?.bind(modalEl, state)'), 'the customizer saves and binds the checkbox');
+  assert.ok(origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer-markup.js'), 'utf8').includes('ConnectifyOverlayBlur?.html(s)'), 'the checkbox sits with the glass sliders');
+
+  // The stylesheet hands the floored value to every layer over text, through both blur variables
+  const css = origReadFileSync.call(fs, path.join(themeDir, 'styles/theme-overlay-blur.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const rule = css.match(/([^{}]*)\{([^}]*)\}/);
+  const sels = rule[1].split(/,\s*\n/).map(x => x.trim());
+  for (const sel of ['#connectify-sidebar', '#connectea-theme-menu', '#connectea-outcome-tooltip', '#cx-jump-subject-list', '.cvr-c-primary-navigation',
+    '.cvr-c-service-bar__container', '.cvr-c-service-menu', '.js-pos-category-toolbar-container', '.v-popupview-popup', '.modal-content', '.ui-dialog', '.cdk-overlay-backdrop']) {
+    assert.ok(sels.includes(`html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) ${sel}`), `${sel} keeps the floor, in Liquid Glass only`);
+  }
+  assert.ok(!sels.some(x => /eds-c-tile|cvr-c-card|connectea-panel/.test(x)), 'tiles and panels over the wallpaper keep the theme\'s own blur');
+  assert.ok(/--cx-glass-blur:\s*var\(--cx-glass-blur-overlay, 12px\)/.test(rule[2]) && /--cx-gl-blur:\s*blur\(var\(--cx-glass-blur-overlay, 12px\)\) saturate\(160%\)/.test(rule[2]), 'both blur variables are redefined');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(c => (c.js || []).includes('src/theme/theme-registry.js'));
+  assert.ok(group.js.indexOf('src/theme/theme-overlay-blur.js') > -1 && group.js.indexOf('src/theme/theme-overlay-blur.js') < group.js.indexOf('src/theme/theme-registry.js'), 'loads before the registry');
+  assert.ok(group.css.indexOf('src/theme/styles/theme-overlay-blur.css') > group.css.indexOf('src/theme/styles/theme-glass-surface.css'), 'loads after --cx-gl-blur is defined');
 });
 
 Promise.all(pendingTestPromises).then(() => {
