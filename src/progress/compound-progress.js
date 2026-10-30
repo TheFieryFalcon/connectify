@@ -102,9 +102,16 @@
     const cardSemester = cardSemesterMatch ? +cardSemesterMatch[1] : null;
     const sortedTasks = cardTasks(subject, cardSemester);
 
+    // Filled and emptied in place (drawn outlines carry an empty one): inserting or removing a child of an
+    // expanded tile restyled the whole tile (Connect's CKEditor `+ *` sibling rules)
     const existingContainer = card.querySelector('.cx-compound-progress-container');
+    const clear = () => {
+      if (!existingContainer?.firstChild) return;
+      existingContainer.replaceChildren();
+      delete existingContainer.dataset.signature;
+    };
     if (sortedTasks.length === 0) {
-      if (existingContainer) existingContainer.remove();
+      clear();
       return;
     }
 
@@ -115,10 +122,7 @@
       semester: cardSemester,
       tasks: typed.map(({ task, type }) => ({ name: task.name, weight: task.weight, pending: task.pending, type }))
     });
-    if (existingContainer) {
-      if (existingContainer.dataset.signature === signature) return;
-      existingContainer.remove();
-    }
+    if (existingContainer?.dataset.signature === signature) return;
 
     let totalWeight = 0;
     let overallCompleted = 0;
@@ -131,7 +135,10 @@
       labelBreakdowns[cat] = (labelBreakdowns[cat] || 0) + t.weight;
     });
 
-    if (!Number.isFinite(totalWeight) || totalWeight <= 0) return;
+    if (!Number.isFinite(totalWeight) || totalWeight <= 0) {
+      clear();
+      return;
+    }
 
     const bar = document.createElement('div');
     bar.className = 'cx-compound-bar';
@@ -162,6 +169,11 @@
     label.className = 'cx-compound-label';
     label.textContent = `${tooltipParts.join(' • ')} | ${Math.round((overallCompleted / totalWeight) * 100)}% Done`;
 
+    if (existingContainer) {
+      existingContainer.replaceChildren(bar, label);
+      existingContainer.dataset.signature = signature;
+      return;
+    }
     const container = document.createElement('div');
     container.className = 'cx-compound-progress-container';
     container.dataset.signature = signature;

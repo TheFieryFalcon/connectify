@@ -13661,6 +13661,88 @@ runTest('Test 299: Connect rendering its cards never makes Connectify restyle of
   assert.deepStrictEqual(got, [records[0]], 'subscribers receive the reduced batch');
 });
 
+runTest('Test 300: Connect builds its hidden outline cards without task rows or boxplots, the progress bar fills a slot in place, and the surface adapter reads before it writes', () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(g => g.js?.includes('src/assessment/connect-cards-trim.js'));
+  assert.ok(group && group.world === 'MAIN' && group.run_at === 'document_start' && group.matches.every(m => m.includes('/assessment-outlines')),
+    'the trim runs in the page world before Angular sends its request, on the outlines page only');
+
+  // A fake XMLHttpRequest: native getters on the prototype, listeners called by hand
+  function makeEnv() {
+    const listeners = {};
+    const timers = [];
+    function FakeXhr() { this.readyState = 0; this.responseType = ''; this._text = ''; this._load = []; }
+    FakeXhr.prototype.open = function (method, url) { this.url = url; };
+    Object.defineProperty(FakeXhr.prototype, 'responseText', { configurable: true, get() { return this._text; } });
+    Object.defineProperty(FakeXhr.prototype, 'response', { configurable: true, get() { return this._text; } });
+    FakeXhr.prototype.addEventListener = function (type, fn) { if (type === 'load') this._load.push(fn); };
+    FakeXhr.prototype.removeEventListener = function (type, fn) { this._load = this._load.filter(f => f !== fn); };
+    const w = { addEventListener: (type, fn) => { listeners[type] = fn; } };
+    new Function('window', 'XMLHttpRequest', 'setTimeout', read('assessment/connect-cards-trim.js'))(w, FakeXhr, fn => timers.push(fn));
+    return { w, FakeXhr, listeners, timers };
+  }
+  const body = JSON.stringify({ status: 'SUCCESS', items: [{ semester1Groups: [{ name: 'Physics', groupResultsData: { mark: '80%', showGroupChart: true },
+    outlines: [{ assessmentOutlineId: 1, taskGroups: [{ tasks: [{ taskId: 9, showTaskChart: true }] }] }] }], semester2Groups: [] }] });
+  const request = (env, url) => {
+    const xhr = new env.FakeXhr();
+    xhr.open('POST', url);
+    let seen = null;
+    const onLoad = () => { seen = JSON.parse(xhr.response); };
+    xhr.addEventListener('load', onLoad);
+    xhr._text = body;
+    xhr.readyState = 4;
+    xhr._load.forEach(fn => fn({ type: 'load' }));
+    return { xhr, onLoad, seen: () => seen };
+  };
+  const URL_OUTLINES = '/connectapi/rest/api/v1/app/student/assessmentOutlines?studentId=1';
+
+  let env = makeEnv();
+  let r = request(env, URL_OUTLINES);
+  assert.strictEqual(r.seen(), null, 'Connect\'s load handler waits until Connectify knows whether it has its own outlines');
+  env.timers.shift()();
+  assert.strictEqual(r.seen(), null, 'it keeps waiting (on Connect\'s own timers, so Angular\'s zone sees the result)');
+  env.listeners['connectify-outlines-preview']();
+  env.timers.shift()();
+  const trimmed = r.seen().items[0].semester1Groups[0];
+  assert.ok(trimmed.groupResultsData.showGroupChart === false && trimmed.outlines[0].taskGroups.length === 0 && trimmed.name === 'Physics' && trimmed.groupResultsData.mark === '80%',
+    'once Connectify has its outlines, Connect gets each class without task rows or its boxplot (no chart requests, light cards; titles, marks and the filter menu unchanged)');
+
+  env = makeEnv();
+  r = request(env, URL_OUTLINES);
+  env.listeners['connectify-outlines-failed']();
+  env.timers.shift()();
+  assert.strictEqual(r.seen().items[0].semester1Groups[0].outlines[0].taskGroups.length, 1, 'if Connectify cannot get its outlines, Connect gets them unchanged');
+
+  env = makeEnv();
+  env.listeners['connectify-outlines-preview']();
+  r = request(env, '/connectapi/rest/api/v1/app/student/assessmentOutlines/chart?studentId=1');
+  assert.strictEqual(r.seen().items[0].semester1Groups[0].outlines[0].taskGroups.length, 1, 'other requests are untouched');
+  assert.ok(read('assessment/connect-cards-trim.js').includes('const WAIT_MS = 10000;'), 'Connect never waits more than 10s');
+
+  // The progress bar slot is drawn with the tile and filled in place
+  eval(read('assessment/legacy-outlines-markup.js'));
+  const tile = window.ConnectifyLegacyMarkup.tile({ title: 'Physics - Semester 1', outlines: [], staff: [] });
+  assert.ok(/eds-c-tile__header[^]*?<\/div><\/div><div class="cx-compound-progress-container"><\/div><div class="eds-c-tile__body/.test(tile), 'drawn tiles carry an empty progress bar slot after the header');
+  const progress = read('progress/compound-progress.js');
+  assert.ok(progress.includes('existingContainer.replaceChildren(bar, label);') && !progress.includes('existingContainer.remove()'),
+    'the bar fills and empties its slot in place: inserting a child into an expanded tile restyled the whole tile (Connect\'s `+ *` rules)');
+  assert.ok(cssHas(read('progress/compound-progress.css'), '.cx-compound-progress-container:empty { display: none !important;'), 'an empty slot takes no space');
+
+  // The surface adapter reads every computed style before writing a tag
+  const log = [];
+  const el = name => ({ name, isConnected: true, children: [], closest: () => null, matches: () => false, hasAttribute: () => false,
+    setAttribute: () => log.push('write ' + name), querySelectorAll: () => [] });
+  const nodes = [el('a'), el('b'), el('c')];
+  const doc = { documentElement: { classList: { contains: c => c === 'connectea-dark' } }, body: { querySelectorAll: sel => (sel.startsWith('[data-connectea-surface]') ? nodes : nodes) } };
+  const w2 = { getComputedStyle: n => { log.push('read ' + n.name); return { backgroundColor: 'rgb(250, 250, 250)', color: 'rgb(20, 20, 20)' }; } };
+  new Function('window', 'document', 'setTimeout', 'clearTimeout', read('theme/theme-surface-adapter.js'))(w2, doc, () => 0, () => {});
+  w2.ConnectifyThemeSurfaceAdapter.adaptSurfaces();
+  const firstWrite = log.findIndex(e => e.startsWith('write'));
+  assert.ok(log.slice(0, firstWrite).length === 3 && log.slice(firstWrite, firstWrite + 3).every(e => e.startsWith('write')),
+    'all surface reads come before any write (a write between reads forced a fresh restyle each time)');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

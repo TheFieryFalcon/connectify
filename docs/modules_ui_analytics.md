@@ -65,7 +65,7 @@ This document covers the user interface and analytics modules, including target 
 #### [`compound-progress.js`](file:///Users/uwong/Downloads/2.1.14_0/src/progress/compound-progress.js)
 - **Role**: Injects multi-category weighted completion progress bars into each subject card header.
 - **Key Functions**:
-  - Renders horizontal segmented bar (`.cx-compound-bar`, styles in `compound-progress.css`) across generic tile containers (`.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile`). Partitions Semester 1 vs Semester 2 chronologically and mutes during accordion animations.
+  - Renders horizontal segmented bar (`.cx-compound-bar`, styles in `compound-progress.css`) across generic tile containers (`.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile`). Partitions Semester 1 vs Semester 2 chronologically and mutes during accordion animations. Drawn outline tiles carry an empty `.cx-compound-progress-container` (`:empty` hidden) that is filled and emptied in place, never inserted into or removed from an expanded tile (Connect's `+ *` sibling rules restyled the whole tile).
   - `subjectForCard(title, subjects)`: one subject per card (exact cleaned name, then full name, then closest partial), so similar names never redraw each other's bars.
   - Reactive updates on `connectify-task-type-changed` and `connectify-settings-updated` without page reloads.
 - **Export**: `window.ConnectifyCompoundProgress`.

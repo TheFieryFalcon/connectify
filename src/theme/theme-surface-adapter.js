@@ -67,17 +67,23 @@
   function adaptSurfaces(roots) {
     const isDark = document.documentElement.classList.contains('connectea-dark');
     if (!isDark || window.ConnectifyThemeAuth?.isAuthDisabled()) return;
+    // Every computed style is read before any tag is written: a tag restyles the page, so reading after each
+    // one forced a fresh restyle per element (five back-to-back restyles once Connect's cards rendered)
     try {
+      const surfaces = [];
       for (const el of candidates(roots, SURFACE_SELECTOR)) {
         if (el.closest(SKIP_ANCESTORS) || el.matches('.portlet, .portlet-boundary, .portlet-layout, #main-content')) continue;
         const bgRgb = parseRgb(window.getComputedStyle(el).backgroundColor);
-        if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) el.setAttribute('data-connectea-surface', '');
+        if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) surfaces.push(el);
       }
+      surfaces.forEach(el => el.setAttribute('data-connectea-surface', ''));
+      const inks = [];
       for (const el of candidates(roots, INK_SELECTOR)) {
         if (el.children.length > 2 || el.hasAttribute('data-connectea-surface') || el.closest(SKIP_ANCESTORS)) continue;
         const fgRgb = parseRgb(window.getComputedStyle(el).color, true);
-        if (isDarkColor(fgRgb)) el.setAttribute('data-connectea-ink', '');
+        if (isDarkColor(fgRgb)) inks.push(el);
       }
+      inks.forEach(el => el.setAttribute('data-connectea-ink', ''));
     } catch {}
   }
 

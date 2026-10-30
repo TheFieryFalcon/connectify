@@ -132,6 +132,8 @@
       summaryRow(record) + (hasTasks ? accordion(expanded) : '');
     return '<div class="eds-c-tile v-layout v-widget eds-o-feature eds-c-tile-eds-o-feature eds-s-is-first eds-c-tile-eds-s-is-first eds-s-is-last eds-c-tile-eds-s-is-last">' +
       `<div class="eds-c-tile__header v-layout v-widget">${label(record.title, `eds-c-tile__title v-label-eds-c-tile__title eds-u-float--left v-label-eds-u-float--left ${FIRST_LAST}`)}</div>` +
+      // compound-progress.js fills it in place: inserting it later restyled the whole (expanded) tile
+      '<div class="cx-compound-progress-container"></div>' +
       `<div class="eds-c-tile__body v-layout v-widget"><div class="v-csslayout v-layout v-widget eds-s-is-first v-csslayout-eds-s-is-first eds-s-is-last v-csslayout-eds-s-is-last">${body}</div></div></div>`;
   }
 
