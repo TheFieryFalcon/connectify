@@ -65,7 +65,7 @@
         <div>
           <strong style="font-size:13px; font-weight:650;">${esc(task?.name || 'Assessment')}</strong>
           <div style="font-size:11px; opacity:0.75; margin-top:1px;">
-            ${esc(taskDateLabel(task))} • Weight: ${Number.isFinite(task?.weight) ? task.weight + '%' : '—'}
+            ${esc(taskDateLabel(task))}&emsp;Weight: ${Number.isFinite(task?.weight) ? task.weight + '%' : '—'}
           </div>
         </div>
         <span class="cx-pred-task-type-badge" data-cat="${esc(taskType)}" style="font-size:10.5px; font-weight:700; color:${typeTextColor}; background:${typeColor}; padding:2.5px 8px; border-radius:10px;">

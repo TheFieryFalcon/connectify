@@ -3,7 +3,7 @@
 Status: implemented (2026-10-22). Default **off**.
 
 ## 1. Summary
-A Settings option that renders the assessment outlines' statistics and prediction panels as multi-row cards (labelled headline values, a quantile row and a footer) instead of today's one-line summaries. Reference: a card with *Score / Rank / Average* headline values, a *Minimum / Lower Quartile / Median / Upper Quartile / Maximum* row and an *SD · Z-Score · standing* footer.
+A Settings option that renders the assessment outlines' statistics and prediction panels as multi-row cards (labelled headline values, a quantile row and a footer) instead of today's one-line summaries. Reference: a card with *Score / Rank / Average* headline values, a *Minimum / Lower Quartile / Median / Upper Quartile / Maximum* row and an *SD, Z-Score, standing* footer.
 
 ## 2. Setting
 - **Control**: a `<select class="cx-settings-select" id="cx-panel-view-select">` labelled **Statistics Panels** in General Preferences (Settings), beside Color Theme, with three options:
@@ -26,12 +26,12 @@ All cards keep the `.connectea-panel` element (dom-sweeper, Test 185 and existin
 │ 96.7%        1 / ~219      67.84%                    ▐ ▌ │
 │ Minimum   Lower Quartile   Median   Upper Quartile   Maximum │
 │ 32.5%     58%              68.85%   79.9%            96.7%   │
-│ SD 16.5 · Z-Score 1.75 · Top 5%              Type: [Auto (Exam) ▾] │
+│ SD 16.5, Z-Score 1.75, Top 5%              Type: [Auto (Exam) ▾] │
 └───────────────────────────────────────────────────────────┘
 ```
 - Header: **Score** (`formatPercentage(mark)%`, tinted, §4), **Rank** (`rank / total`, `~` before an estimated total; `Top of assessment` text for rank 1 as today), **Average** (`data.mean`). Outcome meter sits in the header's right column, unchanged in size and behaviour.
 - Quantile row: the five boxplot values. **No highlighted cell.**
-- Footer: `SD x · Z-Score y · <standing()>` (existing `math().standing` wording, e.g. "Top of cohort", "Top 5%"); the `Type:` dropdown right-aligned in the footer, under the meter.
+- Footer: `SD x, Z-Score y, <standing()>` (existing `math().standing` wording, e.g. "Top of cohort", "Top 5%"); the `Type:` dropdown right-aligned in the footer, under the meter.
 - The card replaces the compact panel inside `.connectea-row-wrapper`; the wrapper's Type container and meter move into the card (same elements, same listeners).
 
 ### 3.2 Overall subject row (`subjects` and `all`)
@@ -39,9 +39,9 @@ All cards keep the `.connectea-panel` element (dom-sweeper, Test 185 and existin
 │ Score        Rank               Average   │
 │ 81.2%        12 / ~219          67.84%    │
 │              Cohort Size [~219]           │
-│              Original Estimate ~219 • Saved.│
+│              Original Estimate ~219, Saved.│
 │ Minimum   Lower Quartile   Median   Upper Quartile   Maximum │
-│ SD 16.5 · Z-Score 0.81 · Top 20%          │
+│ SD 16.5, Z-Score 0.81, Top 20%          │
 ├────────────────── hairline ────────────────┤
 │ Predicted class result                    │
 │ Low 78.4%      Mid 81.0%      High 83.9%  │

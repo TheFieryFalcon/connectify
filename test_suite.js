@@ -8284,7 +8284,7 @@ runTest('Test 177: Summary-row stats keys are per semester and never built from 
       panel.className = 'connectea-panel';
       const injected = document.createElement('span');
       injected.className = 'v-label';
-      injected.textContent = 'Min 24.1% • Q1 56%';
+      injected.textContent = 'Min 24.1%\u2003Q1 56%';
       panel.appendChild(injected);
       details.appendChild(panel);
     }
@@ -10229,7 +10229,7 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   assert.strictEqual(compactRank(232, false), '<strong>Bottom of assessment</strong>');
   assert.strictEqual(compactRank(1, true), '<strong>Top of subject</strong>');
   assert.strictEqual(compactRank(40, false), '<strong>40 / ~232</strong>');
-  assert.ok(/^SD [\d.]+ · Z-Score -?[\d.]+( · .+)?$/.test(ui.xp.summary.textContent), `footer: ${ui.xp.summary.textContent}`);
+  assert.ok(/^SD [\d.]+\u2003Z-Score -?[\d.]+(\u2003.+)?$/.test(ui.xp.summary.textContent), `footer: ${ui.xp.summary.textContent}`);
   assert.ok(ui.outcomeBar.parentElement.classList.contains('connectea-xp-head'), 'the outcome meter sits in the header');
   assert.strictEqual(ui.xp.quantiles[0].parentElement.parentElement.parentElement, ui.outcomeBar.parentElement, 'the five quantiles share the header row (wide, short card)');
   assert.strictEqual(ui.typeContainer.parentElement, ui.xp.foot, 'the Type dropdown sits in the footer');
@@ -10267,7 +10267,7 @@ runTest('Test 223: Expanded overall cards show the four quartile values, Minimum
   const cellLabels = descendants(ui.xp.quantiles[0].parentElement.parentElement).filter(e => e.classList.contains('connectea-xp-label')).map(e => e.textContent);
   assert.deepStrictEqual(cellLabels, ['Lower Quartile', 'Median', 'Upper Quartile', 'Maximum'], 'the four quartile values, two by two beside the prediction');
   assert.deepStrictEqual(ui.xp.quantiles.map(e => e.textContent), ['58%', '68.85%', '79.9%', '96.7%']);
-  assert.ok(/^Minimum 32\.5% · SD [\d.]+ · Z-Score -?[\d.]+/.test(ui.xp.summary.textContent), `Minimum and SD sit in the footer: ${ui.xp.summary.textContent}`);
+  assert.ok(/^Minimum 32\.5%\u2003SD [\d.]+\u2003Z-Score -?[\d.]+/.test(ui.xp.summary.textContent), `Minimum and SD sit in the footer: ${ui.xp.summary.textContent}`);
   const tinted = () => ui.xp.quantiles.map(e => e.parentElement.classList.contains('connectea-xp-cell--reached'));
   assert.deepStrictEqual(tinted(), [false, false, true, false], '81.2% has reached the Upper Quartile');
   for (const low of ['40%', '20%']) {
@@ -10895,10 +10895,10 @@ runTest('Test 237: Subject panels show the lowest and highest final mark still p
     ({ view } = loadCohortViewIn(null));
     const compact = expandedFixture().makeRow(false, ['Semester 2 Cumulative Percent'], '70%', [32.5, 58, 68.85, 79.9, 96.7]);
     view.render(compact, true, 'lit-key', 219, null, []);
-    assert.ok(view.panels.get(compact).result.innerHTML.endsWith('  •  Lowest possible 28%  •  Highest possible 88%'), `the compact result line ends with the range: ${view.panels.get(compact).result.innerHTML}`);
+    assert.ok(view.panels.get(compact).result.innerHTML.endsWith('\u2003Lowest possible 28%\u2003Highest possible 88%'), `the compact result line ends with the range: ${view.panels.get(compact).result.innerHTML}`);
     const bare = expandedFixture().makeRow(false, ['Semester 2 Cumulative Percent'], '70%');
     view.render(bare, true, 'lit-key', 219, null, []);
-    assert.strictEqual(view.panels.get(bare).result.textContent, 'Rank and z-score unavailable  •  Lowest possible 28%  •  Highest possible 88%', 'also without cohort statistics');
+    assert.strictEqual(view.panels.get(bare).result.textContent, 'Rank and z-score unavailable\u2003Lowest possible 28%\u2003Highest possible 88%', 'also without cohort statistics');
   } finally {
     window.ConnectifyData = origData;
     loadCohortViewIn(null);
@@ -11580,7 +11580,7 @@ runTest('Test 252: After a refresh the estimated cohort size never steps: spread
     assert.deepStrictEqual(sizes, [first, first], 'both semesters show one estimate');
     // The bridge stamps the same charts and the panels redraw with new text: nothing moves
     stamped = true;
-    for (const text of ['Min 30.2%  •  Q1 62.3%', 'Min 30.2%  •  Q1 62.3%  •  Rank 40 / ~261']) {
+    for (const text of ['Min 30.2%\u2003Q1 62.3%', 'Min 30.2%\u2003Q1 62.3%\u2003Rank 40 / ~261']) {
       cards.forEach(c => { c.querySelector('.connectea-panel').textContent = text; });
       window.ConnectifyCohort.pass();
     }
@@ -12263,7 +12263,7 @@ runTest('Test 263: Set as Goal previews the goal with its end and confirms it; t
   const list = document.getElementById('cx-goals-dialog');
   const cards = list.querySelectorAll('.cx-goal-card');
   assert.strictEqual(cards.length, 1, 'the Goals dialog lists the active goal');
-  assert.ok(cards[0].querySelector('.cx-goal-card__title').textContent.startsWith('Chemistry · 80% by Term 2 Week 10'));
+  assert.ok(cards[0].querySelector('.cx-goal-card__title').textContent.startsWith('Chemistry: 80% by Term 2 Week 10'));
   assert.ok(cards[0].querySelector('.cx-goal-hbar') && cards[0].querySelector('.cx-goal-points').textContent === '23.4 of 48 weighted points', 'with its progress');
   cards[0].querySelector('.cx-goal-card__delete').click();
   list.querySelector('.cx-goal-card__confirm .cx-goal-link').click();
@@ -12307,7 +12307,7 @@ runTest('Test 264: Newly read results bring a Goal Updated toast of its own; goa
   Object.assign(tasks[2], { pending: false, score: 74, earned: 11.1 });
   E.refresh();
   assert.strictEqual(toasts.length, 1, 'a newly read result brings a toast of its own');
-  assert.deepStrictEqual([toasts[0].title, toasts[0].message, toasts[0].id], ['Goal Updated', 'Chemistry · 80% by Semester 2', `connectify-goal-${goal.id}`]);
+  assert.deepStrictEqual([toasts[0].title, toasts[0].message, toasts[0].id], ['Goal Updated', 'Chemistry: 80% by Semester 2', `connectify-goal-${goal.id}`]);
   assert.ok(/^Goal: (Trivial|Easy|Medium|Hard|Hell)$/.test(toasts[0].details[0]), `it names the tier (${toasts[0].details[0]})`);
   E.refresh();
   assert.strictEqual(toasts.length, 1, 'once per result');
@@ -12374,7 +12374,7 @@ runTest('Test 265: Goal bars sit beside the outcome meter: pastel performance ba
   assert.ok(progress.dataset.tier && progress.querySelectorAll('.cx-goal-seg').length === 0, 'the progress bar has no segments, only its tier');
   assert.ok(/^\d+(\.\d+)?%$/.test(progress.children[0].style['--cx-goal-fill']), 'and a fill');
   assert.ok(!bars.hasAttribute('title') && !/purple|breakout|1\.1/i.test(bars.dataset.goalTooltip), 'no native title, and the breakout is never named');
-  assert.ok(/^Needed \d+\.\d% • Got 72\.0%\n/.test(bars.dataset.goalTooltip), `numbers only (${bars.dataset.goalTooltip})`);
+  assert.ok(/^Needed \d+\.\d%, got 72\.0%\n/.test(bars.dataset.goalTooltip), `numbers only (${bars.dataset.goalTooltip})`);
 
   win.ConnectifyGoalStore.remove(G.active()[0].id);
   B.render(ui, row, false);
@@ -13027,7 +13027,7 @@ runTest('Test 281: Prediction panels on unmarked tasks a goal covers show the go
   F.render({ forecast: box }, rows[1], prediction);
   const compact = box.querySelectorAll('.cx-goal-target');
   assert.strictEqual(compact.length, 1, 'drawn once however often the row renders');
-  assert.strictEqual(compact[0].childNodes[0].textContent, '  •  Goal target ');
+  assert.strictEqual(compact[0].childNodes[0].textContent, '\u2003Goal target ');
   const compactValue = compact[0].querySelector('.cx-goal-target__value');
   assert.strictEqual(compactValue.textContent, `${Math.round(target.required)}%`);
   assert.strictEqual(compactValue.dataset.tier, target.tier, 'the value carries the task\'s tier for its colour');
@@ -14090,9 +14090,20 @@ runTest('Test 306: The shared tab bars outrank the drawer\'s button rules, so th
   assert.ok(/^[^}]*border: 0;\s*background: transparent;/.test(darkMain), 'an inactive dark tab is clear, never the drawer\'s filled box');
   assert.ok(css.includes('color: var(--cx-text-primary, #e0eefb);'), 'the active main tab keeps >= 5:1 in Quantum Dark, whose secondary ink is green');
   assert.ok(/oklch\(from var\(--cx-button-primary-bg, #3575b9\) calc\(l \* 0\.82\) c h\);[^}]*color: var\(--cx-button-primary-text, #ffffff\);/.test(css), 'the active subject tab pairs the primary fill with its own ink, darkened to >= 5:1');
-  assert.strictEqual(window.ConnectifyProgressMath.shortTimestamp(18).includes('·'), false, 'task dates have no dot');
   assert.ok(!/\.cx-progress-tab[ .:{,]/.test(read('progress/task-dates.css')) && !read('atar/atar-estimator.css').includes('.cta-mode-tab {'), 'no tool keeps its own copy');
   assert.ok(read('progress/progress-tabs.js').includes("'cx-pred-main-tab cx-progress-tab'") && read('atar/atar-ui-markup.js').includes("'cx-pred-main-tab cta-mode-tab'"), 'every tab bar uses the shared class');
+});
+
+runTest('Test 307: No dot separators anywhere in Connectify\'s UI', () => {
+  const offenders = [];
+  (function walk(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (/\.(js|css|html)$/.test(entry.name) && /[•·]|&bull;|&middot;/.test(origReadFileSync.call(fs, full, 'utf8'))) offenders.push(path.relative(SRC_DIR, full));
+    }
+  })(SRC_DIR);
+  assert.deepStrictEqual(offenders, [], 'stats are split by an em space, sentences by commas, lists by line breaks');
 });
 
 Promise.all(pendingTestPromises).then(() => {

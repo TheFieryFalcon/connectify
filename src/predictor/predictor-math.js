@@ -71,11 +71,11 @@
 
     const legend = [
       'Target Tiers & Color Guide:',
-      `• Green: High Target (≥ ${high}%)`,
-      `• Yellow: Mid Momentum Target (≥ ${mid}%)`,
-      `• Orange: Low Boundary (≥ ${low}%)`,
-      `• Red: Below Low (< ${low}%)`,
-      `• Empty (Glowing Red): Critical Shortfall (≤ ${round(low - 10, 1)}%)`
+      `Green: High Target (≥ ${high}%)`,
+      `Yellow: Mid Momentum Target (≥ ${mid}%)`,
+      `Orange: Low Boundary (≥ ${low}%)`,
+      `Red: Below Low (< ${low}%)`,
+      `Empty (Glowing Red): Critical Shortfall (≤ ${round(low - 10, 1)}%)`
     ].join('\n');
 
     // 1. Breakout (> 1.10 * High multiplicative) - secret purple segment

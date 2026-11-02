@@ -95,7 +95,7 @@
       const valueEl = document.createElement('span');
       valueEl.className = 'cx-goal-target__value';
       valueEl.textContent = value;
-      span.append('  •  Goal target ', tinted(valueEl));
+      span.append('\u2003Goal target ', tinted(valueEl));
       box.append(span);
     }
   }

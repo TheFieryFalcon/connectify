@@ -96,7 +96,7 @@
     }
 
     function resultParts(data, mark, isOverall, userSize, estimatedSize, cohortSize) {
-      if (!Number.isFinite(mark)) return ['Not marked · Stats unavailable'];
+      if (!Number.isFinite(mark)) return ['Not marked, stats unavailable'];
       const parts = [];
       if (!isOverall) parts.push(`<strong>Score ${math().formatPercentage(mark)}%</strong>`);
       const zStr = Number.isFinite(data.z) ? String(Number(data.z.toFixed(2))) : 'N/A';
@@ -212,20 +212,20 @@
       const possible = window.ConnectifyCohortGradeRange?.compactText(gradeRange) || '';
       if (!data) {
         setText(ui.distribution, 'Cohort statistics unavailable');
-        const missing = Number.isFinite(mark) ? 'Rank and z-score unavailable' : 'Not marked · Rank and z-score unavailable';
-        setText(ui.result, possible ? `${missing}  •  ${possible}` : missing);
+        const missing = Number.isFinite(mark) ? 'Rank and z-score unavailable' : 'Not marked, rank and z-score unavailable';
+        setText(ui.result, possible ? `${missing}\u2003${possible}` : missing);
         remember();
         return;
       }
 
       setHTML(
         ui.distribution,
-        `Min&nbsp;${math().formatPercentage(stats[0])}%  •  Q1&nbsp;${math().formatPercentage(stats[1])}%  •  ` +
-        `<strong>Med ${math().formatPercentage(stats[2])}%</strong>  •  Q3&nbsp;${math().formatPercentage(stats[3])}%  •  ` +
-        `<strong>Max ${math().formatPercentage(stats[4])}%</strong>  •  <strong>Mean ${math().formatPercentage(data.mean)}%</strong>  •  ` +
+        `Min&nbsp;${math().formatPercentage(stats[0])}%\u2003Q1&nbsp;${math().formatPercentage(stats[1])}%\u2003` +
+        `<strong>Med ${math().formatPercentage(stats[2])}%</strong>\u2003Q3&nbsp;${math().formatPercentage(stats[3])}%\u2003` +
+        `<strong>Max ${math().formatPercentage(stats[4])}%</strong>\u2003<strong>Mean ${math().formatPercentage(data.mean)}%</strong>\u2003` +
         `SD&nbsp;${math().formatPercentage(data.sd)}`
       );
-      setHTML(ui.result, resultParts(data, mark, isOverall, userSize, estimatedSize, cohortSize).concat(possible || []).join('  •  '));
+      setHTML(ui.result, resultParts(data, mark, isOverall, userSize, estimatedSize, cohortSize).concat(possible || []).join('\u2003'));
       remember();
     }
 

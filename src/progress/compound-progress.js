@@ -155,7 +155,7 @@
         segment.style.opacity = '0.3';
       }
       segment.style.borderRight = '1px solid rgba(0, 0, 0, 0.15)';
-      const semTag = t.semester ? `Sem ${t.semester} · ` : '';
+      const semTag = t.semester ? `Sem ${t.semester}: ` : '';
       segment.title = `${semTag}${t.name} [${cat}]: ${t.weight}% (${isCompleted ? 'Completed' : 'Remaining'})`;
       bar.appendChild(segment);
     });
@@ -167,7 +167,7 @@
 
     const label = document.createElement('div');
     label.className = 'cx-compound-label';
-    label.textContent = `${tooltipParts.join(' • ')} | ${Math.round((overallCompleted / totalWeight) * 100)}% Done`;
+    label.textContent = `${tooltipParts.join('\u2003')} | ${Math.round((overallCompleted / totalWeight) * 100)}% Done`;
 
     if (existingContainer) {
       existingContainer.replaceChildren(bar, label);

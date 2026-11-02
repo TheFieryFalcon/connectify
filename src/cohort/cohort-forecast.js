@@ -44,7 +44,7 @@
         };
         setHTML(
           box,
-          `${value('low', 'Low', prediction.low)}  •  ${value('mid', 'Mid', prediction.mid)}  •  ${value('high', 'High', prediction.high)}`
+          `${value('low', 'Low', prediction.low)}\u2003${value('mid', 'Mid', prediction.mid)}\u2003${value('high', 'High', prediction.high)}`
         );
       } else {
         setText(box, NEEDS);

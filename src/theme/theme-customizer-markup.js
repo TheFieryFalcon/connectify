@@ -110,12 +110,12 @@
                   <div class="cx-mock-progress-fill" data-cx-elem="Progress Fill" data-cx-fill="--cx-accent (accent)"></div>
                   <div class="cx-mock-accent-indicator" data-cx-elem="Accent Indicator" data-cx-fill="--cx-accent-hover (accentHover)"></div>
                 </div>
-                <div class="cx-mock-meta" data-cx-elem="Secondary Text" data-cx-text="${T.secondary}">Leon Harris &bull; Willetton Senior High School</div>
-                <div class="cx-mock-muted" data-cx-elem="Muted Text" data-cx-text="--cx-text-muted (textMuted)">Due 14 Nov &bull; Weighting 15%</div>
+                <div class="cx-mock-meta" data-cx-elem="Secondary Text" data-cx-text="${T.secondary}">Leon Harris, Willetton Senior High School</div>
+                <div class="cx-mock-muted" data-cx-elem="Muted Text" data-cx-text="--cx-text-muted (textMuted)">Due 14 Nov, Weighting 15%</div>
                 <div class="cx-mock-stats-panel" data-cx-elem="Statistics Panel" data-cx-fill="--cx-surface-secondary (surfaceSecondary), --cx-border-subtle (borderSubtle)" data-cx-text="${T.secondary}">
-                  Min 30.2% &bull; Q1 62.3% &bull; <strong data-cx-elem="Highlighted Value" data-cx-text="${T.primary}">Med 70.8%</strong> &bull; Q3 79.1% &bull; <strong data-cx-elem="Highlighted Value" data-cx-text="${T.primary}">Max 92.7%</strong>
+                  Min 30.2% &emsp; Q1 62.3% &emsp; <strong data-cx-elem="Highlighted Value" data-cx-text="${T.primary}">Med 70.8%</strong> &emsp; Q3 79.1% &emsp; <strong data-cx-elem="Highlighted Value" data-cx-text="${T.primary}">Max 92.7%</strong>
                   <div class="cx-mock-divider" data-cx-elem="Divider" data-cx-fill="--cx-border-subtle (borderSubtle)"></div>
-                  <strong data-cx-elem="Highlighted Value" data-cx-text="${T.primary}">Z-Score 0.96</strong> &bull; <strong data-cx-elem="Highlighted Value" data-cx-text="${T.primary}">Top 15%</strong> &bull; <span>35 / ~234</span>
+                  <strong data-cx-elem="Highlighted Value" data-cx-text="${T.primary}">Z-Score 0.96</strong> &emsp; <strong data-cx-elem="Highlighted Value" data-cx-text="${T.primary}">Top 15%</strong> &emsp; <span>35 / ~234</span>
                 </div>
                 <div class="cx-mock-row-hover" data-cx-elem="Hovered Row" data-cx-fill="--cx-surface-hover (surfaceHover)" data-cx-text="${T.primary}">Chemistry Test 3 &mdash; 82%</div>
                 <div class="cx-mock-input" data-cx-elem="Input Field" data-cx-fill="--cx-input-bg (inputBg), --cx-input-border (inputBorder)" data-cx-text="--cx-input-placeholder (from textPrimary)">Search tasks&hellip;</div>

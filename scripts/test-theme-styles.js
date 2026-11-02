@@ -2685,7 +2685,7 @@ async function runThemeAudit(customOptions = {}) {
             const styleIssues = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
 
             console.log(
-              `       • ${t.name.padEnd(16)} [${t.id}]: ` +
+              `       - ${t.name.padEnd(16)} [${t.id}]: ` +
               `Visible: ${auditResult.visibleCount}/${auditResult.baselineVisibleCount} | ` +
               `Parity: ${parityDiffs} | Crit: ${criticalContrast} | Style: ${styleIssues}`
             );

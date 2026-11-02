@@ -155,7 +155,7 @@
         const standing = math().standing(data.p);
         if (standing) parts.push(standing);
       }
-      setText(xp.summary, parts.join(' · '));
+      setText(xp.summary, parts.join('\u2003'));
     }
 
     /** Low / Mid / High cells in the Predictor's colours (cohort-forecast.css, cohort-upcoming.css). */

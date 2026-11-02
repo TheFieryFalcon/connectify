@@ -43,8 +43,8 @@
 
     const percent = v => `${Number(v.toFixed(1))}%`;
 
-    /** Compact panels: "Lowest possible 41.2%  •  Highest possible 93.5%" ('' without a range). */
-    const compactText = r => (r ? `Lowest possible ${percent(r.low)}  •  Highest possible ${percent(r.high)}` : '');
+    /** Compact panels: "Lowest possible 41.2%  Highest possible 93.5%" ('' without a range). */
+    const compactText = r => (r ? `Lowest possible ${percent(r.low)}\u2003Highest possible ${percent(r.high)}` : '');
 
     window.ConnectifyCohortGradeRange = { range, forRow, cardTasks, percent, compactText };
   } catch (err) {

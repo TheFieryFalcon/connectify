@@ -67,7 +67,7 @@
     node.append(head, M().progressBar(state.progress, state.tier));
     if (goal.kind !== 'atar') node.append(M().el('span', 'cx-goal-points', M().pointsText(state.progress)));
     else {
-      const kids = Object.values(state.children || {}).map(c => `${c.name} ${M().round1(c.target)}%`).join(' · ');
+      const kids = Object.values(state.children || {}).map(c => `${c.name} ${M().round1(c.target)}%`).join(', ');
       if (kids) node.append(M().el('span', 'cx-goal-card__children', kids));
     }
     return node;
@@ -84,7 +84,7 @@
     row.append(
       M().el('span', 'cx-goal-past__title', P().title(goal)),
       M().tierLabel(verdict),
-      M().el('span', 'cx-goal-past__final', [final, dateText(goal.finishedAt)].filter(Boolean).join(' · ')),
+      M().el('span', 'cx-goal-past__final', [final, dateText(goal.finishedAt)].filter(Boolean).join(', ')),
       deleteButton(goal, rerender)
     );
     return row;

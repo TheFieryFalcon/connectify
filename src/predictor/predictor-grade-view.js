@@ -123,7 +123,7 @@
           <div>
             <strong style="font-size:15px; font-weight:700;">${esc(activeSubject.cleanName)}</strong>
             <div style="font-size:11px; opacity:0.8; margin-top:2px;">
-              ${activeSubject.completedWeight}% completed (${activeSubject.completedCount} graded) • ${currentScoreLabel}
+              ${activeSubject.completedWeight}% completed (${activeSubject.completedCount} graded)&emsp;${currentScoreLabel}
             </div>
           </div>
         </div>

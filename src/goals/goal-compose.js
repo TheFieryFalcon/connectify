@@ -86,7 +86,7 @@
       week.setAttribute('aria-label', 'End week');
       week.value = String(draft.end.week || 20);
       week.disabled = lockEnd;
-      endRow.append(week, M().el('span', 'cx-goal-week-hint', P().weekLabel(draft.end.week || 20).split(' · ')[1] || ''));
+      endRow.append(week, M().el('span', 'cx-goal-week-hint', P().weekTerm(draft.end.week || 20)));
     }
 
     const state = window.ConnectifyGoalReplay.evaluate(draft, { ...ctx, noReplay: true });

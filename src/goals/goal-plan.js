@@ -177,24 +177,24 @@
     return { ...plan, guaranteed };
   }
 
-  /** "Week 24 · Term 3 Week 4" (the term form from this year's calendar). */
-  function weekLabel(week) {
+  /** "Term 3 Week 4" for a school week of the year (this year's calendar), or '' when it has no term. */
+  function weekTerm(week) {
     const order = window.ConnectifySchoolTerms?.weekOrder(Number(week));
     const tw = window.ConnectifyProgressMath?.termWeek(order);
-    return tw ? `Week ${week} · Term ${tw.term} Week ${tw.week}` : `Week ${week}`;
+    return tw ? `Term ${tw.term} Week ${tw.week}` : '';
   }
 
   /** "85% by Semester 2", "80% by Term 3 Week 4", "ATAR 95.00 by Semester 1". */
   function describe(goal) {
     const end = goal.end?.type === 'week'
-      ? (weekLabel(goal.end.week).split(' · ')[1] || `Week ${goal.end.week}`)
+      ? (weekTerm(goal.end.week) || `Week ${goal.end.week}`)
       : `Semester ${goal.end?.semester === 1 ? 1 : 2}`;
     const target = goal.kind === 'atar' ? `ATAR ${Number(goal.target).toFixed(2)}` : `${Math.round(Number(goal.target) * 10) / 10}%`;
     return `${target} by ${end}`;
   }
 
-  /** "Chemistry · 85% by Semester 2", or "ATAR 95.00 by Semester 1". */
-  const title = goal => (goal.kind === 'atar' ? describe(goal) : `${goal.name || goal.subject} · ${describe(goal)}`);
+  /** "Chemistry: 85% by Semester 2", or "ATAR 95.00 by Semester 1". */
+  const title = goal => (goal.kind === 'atar' ? describe(goal) : `${goal.name || goal.subject}: ${describe(goal)}`);
 
   /** Everything an evaluation reads, gathered once: every course, ATAR courses and the cached subjects. */
   function context() {
@@ -204,7 +204,7 @@
   }
 
   window.ConnectifyGoalPlan = {
-    weekLabel, describe, title, context,
+    weekTerm, describe, title, context,
     NOTCHES, POINTS_PER_NOTCH, notchName, isMarked, isHeld: () => held, hold, weekOf, readCourses, entryFor, semesterOf,
     rangeTasks, byWeek, asOf, points, offsets, gradePlan, requiredOf, atarRows, atarOffsets, atarPlan
   };

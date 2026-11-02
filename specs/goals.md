@@ -30,7 +30,7 @@ Rule: **one active goal per subject**. A Target ATAR goal holds its four subject
   - The graph, the export and predictions still update at once, as today.
   - The goal subsystem ignores `connectify-terms-updated` and week-override saves. After either one, goals are **held** (`ConnectifyGoalPlan.isHeld()`): no tier, bar, verdict, lock-in or toast-line recompute for the rest of the page's life, even when the predictions refresh. Rows and dialogs keep showing the last values until reload.
   - The Set as Goal dialog also uses the snapshot, so a preview always matches what the saved goal will show.
-- The week picker shows the term form beside the number (`Week 24 · Term 3 Week 4`), from this year's terms (snapshot).
+- The week picker shows the term form beside the number (`Week 24 (Term 3 Week 4)`), from this year's terms (snapshot).
 
 ### 2.2 Lifecycle
 - **Active**: tier recomputed on every cohort pass and on `connectify-results-updated` / `connectify-predictions-updated`.
@@ -87,7 +87,7 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
 ### 4.2 Set as Goal dialog (`#cx-goal-dialog`)
 ```
 ┌ Set as Goal ─────────────────────────────────────────── ✕ ┐
-│ Chemistry ATAR · 85%                              [Hard]    │
+│ Chemistry ATAR: 85%                              [Hard]    │
 │ End: [Semester 2 ▾]   (Custom week… → Week [24] Term 3 Week 4) │
 │                                                             │
 │ Task                    Effort      Needs     Tier          │
@@ -120,12 +120,12 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
 ### 4.3 Goals dialog (`#cx-goals-dialog`)
 ```
 ┌ Goals ───────────────────────────────────────────────── ✕ ┐
-│ ┌ Chemistry ATAR · 85% by Semester 2 ──────── [Hard] ✎ ✕ ┐ │
+│ ┌ Chemistry ATAR: 85% by Semester 2 ──────── [Hard] ✎ ✕ ┐ │
 │ │ ███████████░░░░░░░░░  41.2 of 80 weighted points       │ │
 │ └────────────────────────────────────────────────────────┘ │
 │ ┌ ATAR 95.00 by Semester 2 ─────────────────── [Medium] ✎ ✕ ┐│
 │ │ ████████░░░░░░░░░░░░                                     ││
-│ │ Methods ATAR 88.4% · English ATAR 81.0% · Chemistry … · … ││
+│ │ Methods ATAR 88.4%, English ATAR 81.0%, Chemistry …, … ││
 │ └──────────────────────────────────────────────────────────┘│
 │ ▸ Past goals (2)                                             │
 └──────────────────────────────────────────────────────────────┘
@@ -176,8 +176,8 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
 - **The overall row** of a subject with a goal (active, or the latest past goal) gets a progress bar only.
 - Unmarked rows get none.
 - **Tooltips**: the outcome meter's singleton floating tooltip (`#connectea-outcome-tooltip`: viewport-fixed, `pointer-events: none` on segments, never a `title` attribute), giving numbers only:
-  - performance: `Needed 78.0% • Got 82.5%`;
-  - progress: `Goal 80%: 41.2 of 80 weighted points • Hard` (ATAR children: `ATAR goal 95.00 • Chemistry needs 84.0%: 41.2 of 67.2 weighted points • Hard`).
+  - performance: `Needed 78.0%, Got 82.5%`;
+  - progress: `Goal 80%: 41.2 of 80 weighted points, Hard` (ATAR children: `ATAR goal 95.00, Chemistry needs 84.0%: 41.2 of 67.2 weighted points, Hard`).
   - Purple is never mentioned.
 
 ### 6.2 Goal-performance bar (completed tasks)

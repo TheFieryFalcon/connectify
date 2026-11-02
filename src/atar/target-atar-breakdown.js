@@ -83,9 +83,9 @@
         createEl(
           'small',
           '',
-          `Outline weight ${round(course.progress?.total ?? 0)}% · ${round(
+          `Outline weight ${round(course.progress?.total ?? 0)}%, ${round(
             course.progress?.earned ?? 0
-          )} normalized points earned · ${round(course.progress?.remaining ?? 0)}% of semester remaining · projected rounded score ${wholeScore(
+          )} normalized points earned, ${round(course.progress?.remaining ?? 0)}% of semester remaining, projected rounded score ${wholeScore(
             projectedScore
           )}`
         )
@@ -110,7 +110,7 @@
           createEl(
             'small',
             '',
-            `${task.name}: weight ${round(task.weight)}% · ${reqText}`
+            `${task.name}: weight ${round(task.weight)}%, ${reqText}`
           )
         );
       }

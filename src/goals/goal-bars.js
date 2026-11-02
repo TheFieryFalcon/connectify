@@ -113,11 +113,11 @@
 
   function tooltip(data) {
     const lines = [];
-    if (data.perf) lines.push(`Needed ${round1(data.perf.required)}% • Got ${round1(data.perf.mark)}%`);
+    if (data.perf) lines.push(`Needed ${round1(data.perf.required)}%, got ${round1(data.perf.mark)}%`);
     if (data.progress) {
       const p = data.progress;
-      const goal = data.goal?.kind === 'atar' ? `ATAR goal ${Number(data.goal.target).toFixed(2)} • Needs ${round1(p.target)}%` : `Goal ${round1(p.target)}%`;
-      lines.push(`${goal}: ${round1(p.earned)} of ${round1(p.required)} weighted points${p.tier ? ` • ${D().name(p.tier) || p.tier}` : ''}`);
+      const goal = data.goal?.kind === 'atar' ? `ATAR goal ${Number(data.goal.target).toFixed(2)}, needs ${round1(p.target)}%` : `Goal ${round1(p.target)}%`;
+      lines.push(`${goal}: ${round1(p.earned)} of ${round1(p.required)} weighted points${p.tier ? ` (${D().name(p.tier) || p.tier})` : ''}`);
     }
     return lines.join('\n');
   }
