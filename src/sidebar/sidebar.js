@@ -71,12 +71,13 @@
       };
     }
 
-    // Collapse sidebar when clicking outside the sidebar and handle
+    // Collapse sidebar when clicking outside the sidebar and handle. Only the user's own click counts:
+    // Expand All's scripted heading clicks reach the document too, and closed the drawer once per outline
     if (window._connectifyOutsideClickAttached) {
       document.removeEventListener('click', window._connectifyOutsideClickAttached);
     }
     const handleOutsideClick = e => {
-      if (sidebar.hidden) return;
+      if (sidebar.hidden || e.isTrusted === false) return;
       const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
       const isInside = path.includes(sidebar) || path.includes(handle) || sidebar.contains(e.target) || handle.contains(e.target);
       if (!isInside) {

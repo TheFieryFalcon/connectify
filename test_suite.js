@@ -14141,6 +14141,22 @@ runTest('Test 307: No dot separators anywhere in Connectify\'s UI', () => {
   assert.deepStrictEqual(offenders, [], 'stats are split by an em space, sentences by commas, lists by line breaks');
 });
 
+runTest('Test 308: Only the user\'s own click outside closes the drawer, so Expand All\'s scripted clicks never make it pop in and out while the page loads', () => {
+  window.__connectifySidebarInitialized = false;
+  eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8'));
+  const sidebar = document.getElementById('connectify-sidebar');
+  const outside = document.createElement('div');
+  domBody.appendChild(outside);
+  window.ConnectifyOpenSidebar();
+  assert.strictEqual(sidebar.hidden, false, 'the drawer is open');
+
+  outside.dispatchEvent(new MockEvent('click', { target: outside, bubbles: true, isTrusted: false }));
+  assert.strictEqual(sidebar.hidden, false, 'a scripted click (an outline heading during Expand All) leaves it open');
+
+  outside.dispatchEvent(new MockEvent('click', { target: outside, bubbles: true, isTrusted: true }));
+  assert.strictEqual(sidebar.hidden, true, 'the user\'s own click outside still closes it');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

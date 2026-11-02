@@ -18,6 +18,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - You can now see which tab is selected on the Predictor, Goal Setter, Estimator and Year Progression, in every theme.
 - Pressing Escape while changing a task's week now cancels the change without closing the sidebar.
 - Notifications now have the Liquid Glass effect in Liquid Glass themes.
+- The sidebar no longer pops in and out if your cursor is on the left edge while Auto-expand opens your outlines.
 
 ## 3.3.1 (2026-11-01)
 
