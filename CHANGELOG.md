@@ -4,6 +4,11 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
+## Unreleased
+
+### Fixes
+- Notifications now have the Liquid Glass effect in Liquid Glass themes.
+
 ## 3.3.1 (2026-11-01)
 
 ### Additions

@@ -1,7 +1,7 @@
 /**
  * Connectify Theme: layers that cover other text blur at least 12px in Liquid Glass, even when a custom theme's
- * Blur Strength is lower (unless its checkbox is off): the Connectify drawer, theme menu, outcome tooltip and
- * Jump To list, Connect's top bars the page scrolls under (navigation, location bar, service bar and menus, the
+ * Blur Strength is lower (unless its checkbox is off): the Connectify drawer, theme menu, outcome tooltip,
+ * notifications and Jump To list, Connect's top bars the page scrolls under (navigation, location bar, service bar and menus, the
  * outlines' fixed "All" bar), popups, dialogs and their backdrops. theme-overlay-blur.js puts the value in
  * --cx-glass-blur-overlay on <html>; every blur rule on these layers reads --cx-glass-blur or --cx-gl-blur, so
  * redefining both here reaches them (and anything inside them) without touching the rules themselves.
@@ -10,6 +10,7 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #c
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectea-theme-menu,
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectea-outcome-tooltip,
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #cx-jump-subject-list,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-notifications-container,
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-primary-navigation,
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-location-bar,
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-bar__container,

@@ -111,6 +111,20 @@
   color: var(--cx-text-primary, #ffffff) !important;
 }
 
+/* Liquid Glass: a toast is one glass surface over the page, like the drawer; what is inside it stays clear */
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-notification {
+  background: var(--cx-surface-elevated, rgba(38, 51, 72, 0.80)) !important;
+  background-color: var(--cx-surface-elevated, rgba(38, 51, 72, 0.80)) !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
+  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 16px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -10px rgba(0, 0, 0, 0.45) !important;
+}
+
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-notification-details {
+  background: transparent !important;
+}
+
 /* Card Jump / Flash Animation */
 .cx-card-jump-highlight {
   animation: cx-highlight-pulse 2s ease-out;

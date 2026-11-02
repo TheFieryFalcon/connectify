@@ -13799,6 +13799,19 @@ runTest('Test 302: The page scrollbar is invisible on every Connect page, in eve
   assert.ok(!/overflow/.test(css), 'the page keeps scrolling (overflow untouched)');
 });
 
+runTest('Test 303: Notifications are one glass surface in Liquid Glass, blurred at least as much as the other layers over text', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-notifications-dark.css'), 'utf8');
+  const glass = 'html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  const toast = css.slice(css.indexOf(`${glass} .cx-notification {`));
+  const rule = toast.slice(0, toast.indexOf('}'));
+  assert.ok(rule.includes('background-color: var(--cx-surface-elevated, rgba(38, 51, 72, 0.80)) !important'), 'a translucent surface fill in the theme\'s own colour, not the 10% button fill');
+  assert.ok(rule.includes('backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important') && rule.includes('-webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px))'), 'blurs the page in Chromium, Firefox and WebKit');
+  assert.ok(rule.includes('border-radius: 16px !important') && rule.includes('inset 0 1px 1px 0 rgba(255, 255, 255, 0.55)'), 'the glass corners and edge highlight');
+  assert.ok(css.includes(`${glass} .cx-notification-details {\n  background: transparent !important;`), 'the details list stays clear (one surface per block)');
+  const overlay = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-overlay-blur.css'), 'utf8');
+  assert.ok(overlay.includes(`${glass} #connectify-notifications-container,`), 'notifications cover text, so they keep the overlay blur floor');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
