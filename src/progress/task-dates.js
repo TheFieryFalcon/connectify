@@ -4,8 +4,9 @@
  * The Task Dates tab's list: every cached task of every class. Group By (None, Subject, Type, Completed,
  * Predicted Grade: uncompleted tasks only, Grade Achieved: completed tasks only; grades in university bands) with
  * a direction for the groups (not Completed), then Sort By inside each group (Chronological, Alphabetical,
- * Grade Achieved), and Show Uncompleted Only, which Export mode forces on. A task without the value sorted on
- * comes last whatever the direction. The choices are kept in connectify:task_dates_view.
+ * Grade Achieved/Predicted Grade: the predicted grade when grouped by it, else the grade achieved), Show Uncompleted
+ * Only, which Export mode forces on, and the subjects and types hidden from the list. A task without the value sorted on comes
+ * last whatever the direction. The choices are kept in connectify:task_dates_view.
  * Exposes window.ConnectifyTaskDates.
  */
 (() => {
@@ -46,17 +47,21 @@
   const SORTS = [
     { id: 'chronological', label: 'Chronological' },
     { id: 'alphabetical', label: 'Alphabetical' },
-    { id: 'grade', label: 'Grade Achieved', needsCompleted: true }
+    { id: 'grade', label: 'Grade Achieved/Predicted Grade', needsCompleted: true }
   ];
   const pick = (list, id) => list.find(item => item.id === id) || list[0];
 
+  const rank = value => (Number.isFinite(value) ? -value : Infinity);
   const chronological = (a, b) => byNumber(a.at, b.at) || byText(a.subject, b.subject) || a.sequence - b.sequence;
   const COMPARE = {
     chronological,
     alphabetical: (a, b) => byText(a.name, b.name) || chronological(a, b),
-    // Highest first; tasks without a mark last
-    grade: (a, b) => byNumber(a.gradeRank, b.gradeRank) || chronological(a, b)
+    // Highest first; tasks without a mark or prediction last
+    grade: (a, b) => byNumber(a.gradeRank, b.gradeRank) || chronological(a, b),
+    predicted: (a, b) => byNumber(rank(a.predicted), rank(b.predicted)) || chronological(a, b)
   };
+  // Grouped by Predicted Grade, the grades in the list are predictions
+  const showsPredicted = groupBy => groupBy === 'predicted';
 
   function readView() {
     let saved = {};
@@ -65,7 +70,9 @@
       groupBy: saved.groupBy === undefined ? 'subject' : pick(GROUPS, saved.groupBy).id,
       direction: pick(DIRECTIONS, saved.direction).id,
       sortBy: pick(SORTS, saved.sortBy).id,
-      uncompletedOnly: saved.uncompletedOnly === true
+      uncompletedOnly: saved.uncompletedOnly === true,
+      hiddenSubjects: Array.isArray(saved.hiddenSubjects) ? saved.hiddenSubjects : [],
+      hiddenTypes: Array.isArray(saved.hiddenTypes) ? saved.hiddenTypes : []
     };
   }
 
@@ -75,16 +82,18 @@
 
   /**
    * The view as listed. `exporting` forces Show Uncompleted Only; a group or sort that needs completed tasks then
-   * falls back to the default, leaving the saved choice for when the option is off.
+   * falls back to the default, leaving the saved choice for when the option is off. Sorting by grade stays while the
+   * predicted grades are listed.
    */
   function effectiveView(view, exporting) {
     const uncompletedOnly = Boolean(exporting || view.uncompletedOnly);
     if (!uncompletedOnly) return { ...view, uncompletedOnly };
+    const groupBy = pick(GROUPS, view.groupBy).needsCompleted ? 'subject' : view.groupBy;
     return {
       ...view,
       uncompletedOnly,
-      groupBy: pick(GROUPS, view.groupBy).needsCompleted ? 'subject' : view.groupBy,
-      sortBy: pick(SORTS, view.sortBy).needsCompleted ? 'chronological' : view.sortBy
+      groupBy,
+      sortBy: pick(SORTS, view.sortBy).needsCompleted && !showsPredicted(groupBy) ? 'chronological' : view.sortBy
     };
   }
 
@@ -139,12 +148,24 @@
     return out;
   }
 
+  /** Whether the Subjects and Type filters leave a row on the list. */
+  const isShown = (row, view) => !view.hiddenSubjects.includes(row.subject) && !view.hiddenTypes.includes(row.type);
+
+  /** The classes with only the tasks those filters leave, for what Export builds from. */
+  function shownSubjects(subjects, view) {
+    const cleanSubject = window.ConnectifyExportTasks.cleanSubject;
+    return (subjects || []).filter(s => !view.hiddenSubjects.includes(cleanSubject(s.name))).map(s => ({
+      ...s, tasks: (s.tasks || []).filter(t => t && !view.hiddenTypes.includes(typeOf(s.name, t)))
+    }));
+  }
+
   /** An effective view -> `[{ label, rows }]`; one group with a null label when not grouped. */
   function arrange(list, view) {
     const group = pick(GROUPS, view.groupBy);
+    const sortId = pick(SORTS, view.sortBy).id;
     const sorted = list
-      .filter(row => (!view.uncompletedOnly || !row.completed) && (!group.only || group.only(row)))
-      .sort(COMPARE[pick(SORTS, view.sortBy).id]);
+      .filter(row => isShown(row, view) && (!view.uncompletedOnly || !row.completed) && (!group.only || group.only(row)))
+      .sort(COMPARE[sortId === 'grade' && showsPredicted(view.groupBy) ? 'predicted' : sortId]);
     if (!group.of) return sorted.length ? [{ label: null, rows: sorted }] : [];
     const groups = new Map();
     for (const row of sorted) {
@@ -160,5 +181,5 @@
     });
   }
 
-  window.ConnectifyTaskDates = { KEY, GROUPS, DIRECTIONS, SORTS, readView, saveView, effectiveView, isOrdered, rows, arrange, gradeBand };
+  window.ConnectifyTaskDates = { KEY, GROUPS, DIRECTIONS, SORTS, readView, saveView, effectiveView, isOrdered, showsPredicted, rows, isShown, shownSubjects, arrange, gradeBand };
 })();

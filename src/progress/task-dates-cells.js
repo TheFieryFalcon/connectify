@@ -1,7 +1,7 @@
 /**
  * Connectify Task Dates: task data cells
  *
- * What the Normal view shows of a task beside its date: its cleaned subject, its grade and its type, on the outline
+ * What the Normal view shows of a task beside its date: its cleaned subject, its grade or prediction and its type, on the outline
  * rows' own Type dropdown (same options and saved overrides, so a change here reaches the outlines, and one there
  * reaches this list, through connectify-task-type-changed). Exposes window.ConnectifyTaskDatesCells.
  */
@@ -18,8 +18,11 @@
     String(row.subject || '').replace(/\bATAR\b/gi, '').replace(/\bYear\s*\d+\b/gi, '').replace(/^\s*\d{1,2}\s+/, '')
   ) || row.subject;
 
+  const percent = value => `${Math.round(value * 10) / 10}%`;
   /** A completed task's grade ("85.5%"), or a dash. */
-  const gradeText = row => (row.completed ? `${Math.round(row.score * 10) / 10}%` : '—');
+  const gradeText = row => (row.completed ? percent(row.score) : '—');
+  /** A task's predicted grade (the Predictor's Mid), or a dash. */
+  const predictedText = row => (Number.isFinite(row.predicted) ? percent(row.predicted) : '—');
 
   /**
    * The task's Type dropdown; `track` keeps its focus across the list's rebuilds. It holds only its choice until it is
@@ -44,5 +47,5 @@
     return track(select, `type:${row.key}`);
   }
 
-  window.ConnectifyTaskDatesCells = { subjectText, gradeText, typeSelect };
+  window.ConnectifyTaskDatesCells = { subjectText, gradeText, predictedText, typeSelect };
 })();

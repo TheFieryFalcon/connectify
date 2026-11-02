@@ -24,7 +24,7 @@
 #cx-task-dates .cx-dates-control { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; }
 #cx-task-dates .cx-dates-select {
   field-sizing: content;
-  max-width: 200px;
+  max-width: 240px;
   padding: 3px 6px;
   border: 1px solid var(--cx-progress-line, #d5dfe9) !important;
   border-radius: 6px;
@@ -77,7 +77,6 @@
 #cx-task-dates .cx-dates-when .cx-date-warning { font-size: inherit; }
 #cx-task-dates .cx-dates-grade { font-variant-numeric: tabular-nums; }
 #cx-task-dates .cx-dates-table .cx-dates-type { max-width: min(160px, 100%); text-overflow: ellipsis; }
-#cx-task-dates .cx-dates-table .cx-dates-type.connectea-overridden { font-weight: 600; }
 /* Every row's pencil just after its week, on one line whatever the week's width */
 #cx-task-dates .cx-time-cell { display: flex; align-items: center; gap: 6px; }
 #cx-task-dates .cx-time-cell > span { min-width: 6.8em; }

@@ -78,7 +78,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 46. `src/progress/progress-graph.js` (progress graph modal controller)
 46b. `src/progress/export-tasks.js` (upcoming tasks placed on days for the export)
 46c. `src/progress/export-ics.js` / `export-csv.js` (Google Calendar .ics and Notion CSV builders) / `export-rows.js` (one subject's export rows)
-46d. `src/progress/task-dates.js` (Task Dates rows, Group By, Sort By) / `task-dates-cells.js` (each task's cleaned subject, Type dropdown and grade) / `task-dates-view.js` (the Task Dates tab) / `export-view.js` (Export mode of that list: ticks, weekdays, downloads) / `progress-tabs.js` (Progress Graph and Task Dates subtabs)
+46d. `src/progress/task-dates.js` (Task Dates rows, Group By, Sort By) / `task-dates-cells.js` (each task's cleaned subject, Type dropdown, grade and prediction) / `task-dates-filter.js` (Subjects and Type lists of ticks) / `task-dates-view.js` (the Task Dates tab) / `export-view.js` (Export mode of that list: ticks, weekdays, downloads) / `progress-tabs.js` (Progress Graph and Task Dates subtabs)
 47. `src/progress/wace-countdown.js` (Year 12 exam countdown)
 48. `src/progress/compound-progress.js` (weighted completion progress bars)
 49. `src/progress/weakness-radar-view.js` (radar SVG, status messages and panel markup)

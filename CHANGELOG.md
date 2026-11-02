@@ -12,12 +12,15 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Export now happens on the list.** Press Export and the same list gains ticks, days and download buttons.
 - **Set as Goal now happens on the planner.** Choose the end and confirm under your task table, with the effort sliders still working, instead of in a popup.
 - **Task Dates shows each task's subject, type and grade.** Change a task's type right there, and the outlines update with it. Export swaps those columns for Day and Export Date, leaving Assessment and Date where they are. Lines on Year Progression now all match.
+- **Show or hide subjects and types on Task Dates.** The new Subjects and Type dropdowns tick each one on or off, for the list and for Export's downloads.
+- **Group by Predicted Grade now shows the predictions.** The last column shows each task's predicted grade, and Sort By's Grade Achieved/Predicted Grade sorts by them.
 - **Finished goals say so in the notification's title.** It reads Goal Achieved with a green edge or Goal Missed with a gray edge, and goal names no longer start with the year level.
 
 ### Fixes
 - You can now see which tab is selected on the Predictor, Goal Setter, Estimator and Year Progression, in every theme.
 - Pressing Escape while changing a task's week now cancels the change without closing the sidebar.
 - Notifications now have the Liquid Glass effect in Liquid Glass themes.
+- A task type you chose yourself is no longer bold.
 - The sidebar no longer pops in and out if your cursor is on the left edge while Auto-expand opens your outlines.
 
 ## 3.3.1 (2026-11-01)

@@ -104,7 +104,6 @@
       border-color: #24618c;
       background: #e9f2fb;
       color: #174c75;
-      font-weight: 700;
     }
     .connectea-dark .connectea-type-label {
       color: var(--cx-text-muted, #a0b2c6);

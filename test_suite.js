@@ -11094,7 +11094,7 @@ runTest('Test 241: Export CSV for Notion: BOM, columns, quoting, dates, weights 
 // A Year Progression panel with the Task Dates and Export modules mounted on it (Tests 242, 311)
 function withTaskDatesPanel(subjects, body) {
   const { terms } = loadExportModules();
-  const names = ['ConnectifyProgress', 'ConnectifyData', 'ConnectifyExportView', 'ConnectifyProgressChart', 'ConnectifyTaskDates', 'ConnectifyTaskDatesView', 'ConnectifyProgressTabs', 'ConnectifyProgressWeekEditor', 'ConnectifyEarlyEaster'];
+  const names = ['ConnectifyProgress', 'ConnectifyData', 'ConnectifyExportView', 'ConnectifyProgressChart', 'ConnectifyTaskDates', 'ConnectifyTaskDatesFilter', 'ConnectifyTaskDatesCells', 'ConnectifyTaskDatesView', 'ConnectifyProgressTabs', 'ConnectifyProgressWeekEditor', 'ConnectifyEarlyEaster'];
   const saved = Object.fromEntries(names.map(n => [n, window[n]]));
   const evalSrc = f => eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8'));
   const panel = new MockElement('section');
@@ -11110,7 +11110,7 @@ function withTaskDatesPanel(subjects, body) {
   window.ConnectifyData = { collectClasses: () => subjects };
   for (const n of names.slice(2)) delete window[n];
   try {
-    for (const f of ['progress/progress-chart.js', 'progress/progress-week-editor.js', 'progress/progress-early-easter.js', 'progress/task-dates.js', 'progress/task-dates-cells.js', 'progress/task-dates-view.js', 'progress/export-view.js', 'progress/progress-tabs.js']) evalSrc(f);
+    for (const f of ['progress/progress-chart.js', 'progress/progress-week-editor.js', 'progress/progress-early-easter.js', 'progress/task-dates.js', 'progress/task-dates-cells.js', 'progress/task-dates-filter.js', 'progress/task-dates-view.js', 'progress/export-view.js', 'progress/progress-tabs.js']) evalSrc(f);
     const find = (root, pred) => { const out = []; (function walk(n) { for (const c of n.children || []) { if (pred(c)) out.push(c); walk(c); } })(root); return out; };
     body({ terms, panel, head, chips, chart, find, refreshes: () => refreshes });
   } finally {
@@ -11129,7 +11129,7 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     const dates = window.ConnectifyTaskDatesView;
     window.ConnectifyProgressTabs.select('dates');
     const names = () => find(dates.list, n => n.tagName === 'TD').map(n => n.textContent);
-    const box = () => find(dates.toolbar, n => n.type === 'checkbox')[0];
+    const box = () => dates.filterRow.children.find(n => n.className === 'cx-dates-check').children[0];
     assert.ok(dates.toolbar.children.includes(view.toggleBtn) && !head.children.includes(view.toggleBtn), 'Export sits in the Task Dates toolbar, not the panel header');
     assert.ok(names().includes('Quiz'), 'the list starts with every task');
     assert.ok(find(dates.list, n => n.tagName === 'SELECT').every(n => n.className.includes('cx-dates-type')), 'with no export controls, only each task\'s Type');
@@ -13984,7 +13984,7 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
 
       assert.deepStrictEqual(group.children.map(o => o.textContent), ['None', 'Subject', 'Type', 'Completed', 'Predicted Grade', 'Grade Achieved']);
       assert.deepStrictEqual([direction.textContent, direction.title], ['↑', 'Ascending'], 'the direction is one small arrow');
-      assert.deepStrictEqual(sort.children.map(o => o.textContent), ['Chronological', 'Alphabetical', 'Grade Achieved']);
+      assert.deepStrictEqual(sort.children.map(o => o.textContent), ['Chronological', 'Alphabetical', 'Grade Achieved/Predicted Grade']);
       assert.deepStrictEqual(find(dates.toolbar, n => n.className === 'cx-dates-control').map(l => l.children[0].textContent), ['Group By:', 'Sort By:']);
 
       // Default: grouped by Subject, Chronological
@@ -14023,7 +14023,7 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
       assert.strictEqual(tableRows()[1].children[2].textContent, 'Physics');
       assert.strictEqual(tableRows()[2].children[2].textContent, 'Chemistry', 'the semester suffix is not part of the subject');
       assert.strictEqual(direction.hidden, true);
-      assert.deepStrictEqual(JSON.parse(localStorage.getItem(T.KEY)), { groupBy: 'none', direction: 'asc', sortBy: 'chronological', uncompletedOnly: false }, 'the choices are kept');
+      assert.deepStrictEqual(JSON.parse(localStorage.getItem(T.KEY)), { groupBy: 'none', direction: 'asc', sortBy: 'chronological', uncompletedOnly: false, hiddenSubjects: [], hiddenTypes: [] }, 'the choices are kept');
 
       // Type, in both directions
       pick(group, 'type');
@@ -14053,7 +14053,7 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
         ['High Distinction (A)', 'High Distinction (A)', 'Distinction (B)', 'Distinction (B)', 'Credit (C)', 'Credit (C)', 'Pass (C)', 'Fail (D)', 'Fail (D)'], 'the bands\' cutoffs');
 
       // Show Uncompleted Only: what needs completed tasks is off and falls back, the saved choice kept
-      const box = find(dates.toolbar, n => n.type === 'checkbox')[0];
+      const box = dates.filterRow.children.find(n => n.className === 'cx-dates-check').children[0];
       box.checked = true;
       box.dispatchEvent(new MockEvent('change'));
       assert.strictEqual(group.value, 'subject', 'Grade Achieved says nothing about uncompleted tasks');
@@ -14139,6 +14139,138 @@ runTest('Test 307: No dot separators anywhere in Connectify\'s UI', () => {
     }
   })(SRC_DIR);
   assert.deepStrictEqual(offenders, [], 'stats are split by an em space, sentences by commas, lists by line breaks');
+});
+
+runTest('Test 309: Task Dates shows predicted grades when grouped by them, its grade sort follows, and a second row shows or hides subjects and types', () => {
+  const subjects = [
+    { name: 'Physics ATAR', tasks: [
+      { id: 'p1', name: 'Low', order: 30, pending: true, sequence: 0 },
+      { id: 'p2', name: 'High', order: 31, pending: true, sequence: 1 },
+      { id: 'p3', name: 'Marked', order: 5, score: 85, pending: false, sequence: 2 }
+    ] },
+    { name: '12 Chemistry ATAR - Semester 2', tasks: [
+      { id: 'c1', name: 'Lab', order: 6, pending: true, sequence: 0 },
+      { id: 'c2', name: 'Unknown', order: 7, pending: true, sequence: 1 }
+    ] }
+  ];
+  const savedTypes = window.ConnectifyTaskTypes, savedPred = window.ConnectifyPredictorMath;
+  window.ConnectifyTaskTypes = { getEffectiveType: (subject, task) => (task.id === 'p3' ? 'Exam' : task.id === 'c1' ? 'Lab' : 'Test'), labelsKeyOf: () => '', updateTypeSelect: () => {}, bindTypeSelect: () => {} };
+  const predicted = { p1: 81.25, p2: 94, c1: 88 };
+  window.ConnectifyPredictorMath = { getOrComputeTaskPrediction: (subject, task) => (predicted[task.id] ? { mid: predicted[task.id] } : null) };
+  try {
+    withTaskDatesPanel(subjects, ({ find }) => {
+      window.ConnectifyProgressTabs.select('dates');
+      const dates = window.ConnectifyTaskDatesView;
+      const T = window.ConnectifyTaskDates;
+      const tableRows = () => find(dates.list, n => n.tagName === 'TR');
+      const body = () => tableRows().slice(1).filter(tr => tr.className !== 'cx-dates-group');
+      const names = () => body().map(tr => tr.children[0].textContent);
+      const [group, sort] = find(dates.toolbar, n => n.tagName === 'SELECT');
+      const pick = (sel, value) => { sel.value = value; sel.dispatchEvent(new MockEvent('change')); };
+      const uncompleted = dates.filterRow.children.find(n => n.className === 'cx-dates-check').children[0];
+      const setUncompleted = on => { uncompleted.checked = on; uncompleted.dispatchEvent(new MockEvent('change')); };
+
+      // Grouped by Predicted Grade, the grade column is the prediction, Show Uncompleted Only or not
+      pick(group, 'predicted');
+      const head = () => tableRows()[0].children.map(n => n.textContent);
+      assert.strictEqual(head().at(-1), 'Predicted');
+      const predictedOf = name => body().find(tr => tr.children[0].textContent === name).children.at(-1).textContent;
+      assert.deepStrictEqual(['Low', 'High', 'Lab', 'Unknown'].map(predictedOf), ['81.3%', '94%', '88%', '—'], 'each task\'s prediction, or a dash');
+      setUncompleted(true);
+      assert.strictEqual(head().at(-1), 'Predicted', 'Show Uncompleted Only keeps the predictions');
+      assert.strictEqual(sort.children.find(o => o.value === 'grade').disabled, false, 'and its grade sort, which has predictions to sort');
+      pick(sort, 'grade');
+      assert.strictEqual(sort.value, 'grade');
+      assert.deepStrictEqual(names(), ['High', 'Lab', 'Low', 'Unknown'], 'highest prediction first, none last');
+      pick(group, 'none');
+      assert.ok(!head().includes('Grade') && !head().includes('Predicted'), 'other groupings under Show Uncompleted Only list no grades');
+      assert.strictEqual(sort.value, 'chronological', 'and have no grade to sort by');
+      assert.strictEqual(sort.children.find(o => o.value === 'grade').disabled, true);
+      setUncompleted(false);
+
+      // Any other grouping sorts by the grade achieved
+      assert.strictEqual(head().at(-1), 'Grade');
+      assert.strictEqual(sort.value, 'grade', 'the saved sort returns');
+      assert.strictEqual(names()[0], 'Marked', 'by grade achieved, unmarked last, whatever they are predicted');
+      pick(sort, 'chronological');
+      pick(group, 'subject');
+
+      // The second row, right under the toolbar: Subjects, Type and Show Uncompleted Only
+      assert.strictEqual(dates.section.children[dates.section.children.indexOf(dates.toolbar) + 1], dates.filterRow);
+      assert.ok(!find(dates.toolbar, n => n.type === 'checkbox').length, 'the first row keeps Group By, Sort By and Export');
+      const filters = find(dates.filterRow, n => n.className === 'cx-dates-control cx-dates-filter');
+      assert.deepStrictEqual(filters.map(f => f.children[0].textContent), ['Subjects:', 'Type:']);
+      const [subjectWrap, typeWrap] = filters;
+      const parts = wrap => ({ button: wrap.children[1], popup: wrap.children[2], ticks: () => find(wrap.children[2], n => n.className === 'cx-dates-check'), all: find(wrap.children[2], n => n.className === 'cx-export-all')[0] });
+      const subjectsOf = parts(subjectWrap), typesOf = parts(typeWrap);
+      assert.strictEqual(subjectsOf.button.textContent, 'All');
+      assert.strictEqual(subjectsOf.popup.hidden, true, 'its list stays closed until pressed');
+      subjectsOf.button.dispatchEvent(new MockEvent('click'));
+      assert.strictEqual(subjectsOf.popup.hidden, false);
+      assert.strictEqual(subjectsOf.button.getAttribute('aria-expanded'), 'true');
+      assert.deepStrictEqual(subjectsOf.ticks().map(t => t.children[1].textContent), ['Chemistry', 'Physics'], 'cleaned names, alphabetically');
+      assert.deepStrictEqual(typesOf.ticks().map(t => t.children[1].textContent), ['Exam', 'Lab', 'Test'], 'each type once, alphabetically');
+      const chemistry = subjectsOf.ticks()[0].children[0];
+
+      chemistry.checked = false;
+      chemistry.dispatchEvent(new MockEvent('change'));
+      assert.deepStrictEqual(names(), ['Marked', 'Low', 'High'], 'a hidden subject\'s tasks leave the list');
+      assert.strictEqual(subjectsOf.button.textContent, '1 of 2');
+      assert.strictEqual(subjectsOf.popup.hidden, false, 'the list stays open to hide another');
+      assert.strictEqual(subjectsOf.ticks()[0].children[0], chemistry, 'and its tick is not rebuilt under the pointer');
+      assert.deepStrictEqual(T.readView().hiddenSubjects, ['12 Chemistry ATAR'], 'the choice is kept');
+
+      // Types filter alongside it
+      const testTick = typesOf.ticks()[2].children[0];
+      testTick.checked = false;
+      testTick.dispatchEvent(new MockEvent('change'));
+      assert.deepStrictEqual(names(), ['Marked'], 'a hidden type\'s tasks leave too');
+      assert.strictEqual(typesOf.button.textContent, '2 of 3');
+      assert.deepStrictEqual(T.readView().hiddenTypes, ['Test']);
+
+      // Export leaves whatever is hidden out of the downloads
+      const realBuild = window.ConnectifyExportTasks.build;
+      let exported = null;
+      window.ConnectifyExportTasks.build = (list, opts) => { exported = list.flatMap(item => item.tasks.map(t => `${item.name}: ${t.name}`)); return realBuild(list, opts); };
+      window.ConnectifyExportView.setActive(true);
+      window.ConnectifyExportTasks.build = realBuild;
+      assert.deepStrictEqual(exported, ['Physics ATAR: Marked'], 'no hidden task reaches a file');
+      window.ConnectifyExportView.setActive(false);
+
+      // One button: Show All while any is hidden, else Hide All, which says why the list is empty
+      assert.strictEqual(typesOf.all.textContent, 'Show All');
+      typesOf.all.dispatchEvent(new MockEvent('click'));
+      assert.strictEqual(typesOf.button.textContent, 'All');
+      subjectsOf.all.dispatchEvent(new MockEvent('click'));
+      assert.strictEqual(names().length, 5, 'everything comes back');
+      subjectsOf.all.dispatchEvent(new MockEvent('click'));
+      assert.strictEqual(find(dates.list, n => n.className === 'cx-dates-empty')[0].textContent, 'All tasks are hidden.');
+      assert.strictEqual(subjectsOf.button.textContent, 'None');
+      assert.strictEqual(chemistry.checked, false);
+
+      // Escape closes the list only
+      if (subjectsOf.popup.hidden) subjectsOf.button.dispatchEvent(new MockEvent('click'));
+      assert.strictEqual(subjectsOf.popup.hidden, false);
+      let stopped = false;
+      const key = new MockEvent('keydown', { key: 'Escape' });
+      key.stopPropagation = () => { stopped = true; };
+      subjectWrap.dispatchEvent(key);
+      assert.ok(subjectsOf.popup.hidden && stopped, 'Escape stops at the list, so the drawer stays open');
+    });
+  } finally {
+    window.ConnectifyTaskTypes = savedTypes;
+    window.ConnectifyPredictorMath = savedPred;
+    localStorage.removeItem('connectify:task_dates_view');
+  }
+
+  const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
+  for (const file of ['cohort/cohort-styles.js', 'sidebar/styles/sidebar-weakness-types.css', 'progress/task-dates.css', 'theme/styles/theme-task-rows.css']) {
+    const rules = read(file).split('}').filter(block => block.includes('connectea-overridden'));
+    assert.ok(rules.every(block => !block.includes('font-weight')), `${file}: a manually chosen type is not bold`);
+  }
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const outlines = manifest.content_scripts.find(c => (c.js || []).includes('src/progress/task-dates-view.js'));
+  assert.ok(outlines.js.indexOf('src/progress/task-dates-filter.js') < outlines.js.indexOf('src/progress/task-dates-view.js') && outlines.css.includes('src/progress/task-dates-filter.css'), 'registered before the view that uses it');
 });
 
 runTest('Test 308: Only the user\'s own click outside closes the drawer, so Expand All\'s scripted clicks never make it pop in and out while the page loads', () => {
