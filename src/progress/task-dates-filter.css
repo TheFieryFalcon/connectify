@@ -1,50 +1,56 @@
 /* Connectify Task Dates: the toolbar's second row. Subjects and Type look like its dropdowns, and open a list of ticks
    over the table; the list is solid (surface over the opaque canvas), since table text runs under it. */
-#cx-task-dates .cx-dates-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; color: #4a5d70; }
-#cx-task-dates .cx-dates-filter { position: relative; }
 #connectify-progress .cx-dates-filter-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 3px 7px 3px 6px;
+  display: block;
+  flex: 1 1 0;
+  box-sizing: border-box;
+  width: 0;
+  min-width: 0;
+  height: 28px;
+  padding: 0 24px 0 9px;
+  overflow: hidden;
   border: 1px solid var(--cx-progress-line, #d5dfe9);
   border-radius: 6px;
   background: transparent;
   color: #253b53;
   font: inherit;
   font-weight: 500;
+  text-align: left;
   white-space: nowrap;
-}
-#connectify-progress .cx-dates-filter-btn::after {
-  content: '';
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid currentColor;
+  text-overflow: ellipsis;
 }
 #connectify-progress .cx-dates-filter-btn:hover { border-color: #94adc3; }
+/* Under its button, at least as wide */
 #cx-task-dates .cx-dates-filter-list {
   position: absolute;
   top: calc(100% + 4px);
-  left: 0;
+  left: calc(var(--cx-dates-label, 56px) + 6px);
   z-index: 5;
   box-sizing: border-box;
   width: max-content;
-  min-width: 150px;
+  min-width: calc(100% - var(--cx-dates-label, 56px) - 6px);
   max-width: 280px;
   max-height: 320px;
   overflow-y: auto;
-  padding: 8px 10px;
+  padding: 10px;
   border: 1px solid #c7d6e4;
   border-radius: 6px;
   background: #ffffff;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
 }
 #cx-task-dates .cx-dates-filter-list[hidden] { display: none; }
-#cx-task-dates .cx-dates-filter-list .cx-export-all { display: block; margin: 0 0 6px -4px; }
-#cx-task-dates .cx-dates-filter-ticks { display: flex; flex-direction: column; gap: 5px; }
+/* The text lines up with the ticks below it, past the link's own padding */
+#cx-task-dates .cx-dates-filter-list .cx-export-all { display: block; margin: 0 0 0 -4px; }
+#cx-task-dates .cx-dates-filter-ticks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--cx-progress-line, #d5dfe9);
+}
 #cx-task-dates .cx-dates-filter-ticks .cx-dates-check { white-space: nowrap; }
 
-.connectea-dark #cx-task-dates .cx-dates-filters { color: var(--cx-text-secondary, #dce2e8); }
 .connectea-dark #connectify-sidebar #connectify-progress .cx-dates-filter-btn { border: 1px solid var(--cx-progress-line, #3b4d5e); background: transparent; color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #connectify-sidebar #connectify-progress .cx-dates-filter-btn:hover { border-color: var(--cx-border-strong, #556c84); background: transparent; color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #cx-task-dates .cx-dates-filter-list {

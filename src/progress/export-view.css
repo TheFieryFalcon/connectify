@@ -17,6 +17,9 @@
 #cx-task-dates .cx-export-day { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; }
 /* Select All / None reads as a link beside the heading, never a button in every group */
 #connectify-progress #cx-task-dates .cx-export-all { padding: 1px 4px; border: 0; border-radius: 4px; background: transparent; color: #245579; font-size: 12px; font-weight: 400; }
+/* Its text ends on the panel's right edge, past the link's own padding */
+#connectify-progress #cx-task-dates .cx-dates-export-options .cx-export-all,
+#connectify-progress #cx-task-dates .cx-export-group-head .cx-export-all { margin-right: -4px; }
 #connectify-progress #cx-task-dates .cx-export-all:hover:not(:disabled) { text-decoration: underline; }
 #connectify-progress #cx-task-dates .cx-export-all:disabled { opacity: 0.55; cursor: default; }
 #cx-task-dates .cx-export-date { white-space: nowrap; font-variant-numeric: tabular-nums; }

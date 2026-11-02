@@ -21,6 +21,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Pressing Escape while changing a task's week now cancels the change without closing the sidebar.
 - Notifications now have the Liquid Glass effect in Liquid Glass themes.
 - A task type you chose yourself is no longer bold.
+- Spacing is even across the drawer: every tool now lines up with the header, and Task Dates' controls line up in two tidy rows.
 - The sidebar no longer pops in and out if your cursor is on the left edge while Auto-expand opens your outlines.
 
 ## 3.3.1 (2026-11-01)

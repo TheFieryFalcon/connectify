@@ -14289,6 +14289,31 @@ runTest('Test 308: Only the user\'s own click outside closes the drawer, so Expa
   assert.strictEqual(sidebar.hidden, true, 'the user\'s own click outside still closes it');
 });
 
+runTest('Test 310: The drawer has one side margin, and Task Dates\' controls share a height, a grid and a vertical rhythm', () => {
+  const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
+  const blockOf = (css, selector) => { const at = css.indexOf(selector + ' {'); assert.ok(at >= 0, selector); return css.slice(at, css.indexOf('}', at)); };
+  const drawer = read('sidebar/styles/sidebar-drawer.css');
+  const sideOf = rule => Number(/padding: (?:\d+px )?(\d+)px/.exec(rule)[1]);
+  const panels = blockOf(drawer, '#connectify-sidebar :is(#connectea-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel)');
+  assert.strictEqual(sideOf(panels), 20, 'every tool panel');
+  assert.strictEqual(sideOf(blockOf(drawer, '#connectify-sidebar>header')), 20, 'lines up with the drawer\'s header');
+  assert.strictEqual(sideOf(blockOf(drawer, '#connectify-sidebar .cx-tool-menu')), 20, 'and its launcher menu');
+  assert.ok(read('sidebar/styles/sidebar-handle-menu.css').includes('padding: 15px 12px !important;'), 'on narrow screens too');
+
+  const css = read('progress/task-dates.css');
+  const filter = read('progress/task-dates-filter.css');
+  for (const [sheet, selector] of [[css, '#cx-task-dates .cx-dates-toolbar .cx-dates-select'], [css, '#connectify-progress .cx-dates-direction'], [css, '#connectify-progress .cx-refresh-btn'], [filter, '#connectify-progress .cx-dates-filter-btn']]) {
+    assert.ok(/height: 28px/.test(blockOf(sheet, selector)), `${selector} is 28px tall`);
+  }
+  assert.ok(css.includes('#cx-task-dates .cx-dates-controls { grid-template-columns: var(--cx-dates-columns); }') && css.includes('#cx-task-dates .cx-dates-filters { grid-template-columns: var(--cx-dates-columns) 1fr; }'), 'both rows share one set of columns');
+  assert.ok(css.includes('#cx-task-dates .cx-dates-toolbar .cx-dates-control::after,\n#cx-task-dates .cx-dates-filter::after {'), 'with one arrow on every dropdown');
+  assert.ok(/appearance: none/.test(blockOf(css, '#cx-task-dates .cx-dates-toolbar .cx-dates-select')), 'instead of each browser\'s own');
+  assert.ok(css.includes('#cx-task-dates .cx-dates-terms > .cx-dates-check { margin-left: auto; }') && css.includes('#cx-task-dates .cx-dates-filters > .cx-dates-check { grid-column: 6; justify-self: end; }'), 'Early Easter and Show Uncompleted Only end on the right edge, like Export');
+  assert.ok(css.includes('.cx-progress-tabs { margin: 0 0 16px; }') && /\.cx-dates-toolbar,\n#cx-task-dates \.cx-dates-export-options \{ margin-top: 12px; \}/.test(css) && css.includes('.cx-dates-filters { margin-top: 8px; }') && css.includes('.cx-dates-list { margin-top: 20px; }'), 'the gaps run 16, 12, 8, then 20 to the table');
+  assert.ok(css.includes('#cx-task-dates .cx-dates-row td { box-sizing: border-box; height: 35px; }'), 'every row is one height');
+  assert.ok(read('progress/export-view.css').includes('.cx-export-group-head .cx-export-all { margin-right: -4px; }'), 'Select All / None ends on the right edge');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

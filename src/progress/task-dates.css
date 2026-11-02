@@ -3,11 +3,18 @@
    structure, no boxes or vertical dividers. Dark themes route colours through tokens. */
 #connectify-progress { --cx-progress-line: #d5dfe9; }
 .connectea-dark #connectify-progress { --cx-progress-line: var(--cx-nav-border, #3b4d5e); }
-#connectify-progress .cx-progress-tabs { margin: 0 0 12px; }
+#connectify-progress .cx-progress-tabs { margin: 0 0 16px; }
 /* The chips and chart are display: flex / block, which would override their hidden attribute */
 #connectify-progress > [hidden],
 #cx-task-dates .cx-dates-controls > [hidden] { display: none !important; }
-#cx-task-dates { display: flex; flex-direction: column; gap: 10px; }
+#cx-task-dates { display: flex; flex-direction: column; }
+/* One rhythm: 16 from the tabs to the terms (the tabs' margin), 12 to the controls, 8 between their rows, 20 to the table */
+#cx-task-dates .cx-dates-expand,
+#cx-task-dates .cx-dates-toolbar,
+#cx-task-dates .cx-dates-export-options { margin-top: 12px; }
+#cx-task-dates .cx-dates-filters { margin-top: 8px; }
+#cx-task-dates .cx-dates-list { margin-top: 20px; }
+#cx-task-dates .cx-dates-export-footer { margin-top: 16px; }
 /* Connect's .eds.cvr label adds a 5px bottom margin and its own font size, lifting labels off their row */
 #cx-task-dates label { margin: 0; font-size: inherit; line-height: inherit; }
 #cx-task-dates .cx-dates-expand:empty { display: none; }
@@ -17,11 +24,24 @@
 #cx-task-dates .cx-dates-term-list { display: flex; flex-wrap: wrap; gap: 4px 20px; }
 #cx-task-dates .cx-dates-term { display: inline-flex; gap: 5px; }
 #cx-task-dates .cx-dates-term span:first-child { font-weight: 600; }
+/* Early Easter, Export and Show Uncompleted Only all end on the panel's right edge */
+#cx-task-dates .cx-dates-terms > .cx-dates-check { margin-left: auto; }
 
-/* Controls: thin outlines, so they read as controls without weighing on the list */
-#cx-task-dates .cx-dates-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-#cx-task-dates .cx-dates-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; color: #4a5d70; }
-#cx-task-dates .cx-dates-control { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; }
+/* Controls: thin outlines, so they read as controls without weighing on the list. Both rows share one set of columns
+   (field, arrow, field, the rest), every control 28px tall: Subjects sits under Group By and Type under Sort By */
+#cx-task-dates .cx-dates-toolbar { display: flex; align-items: center; gap: 8px 12px; }
+#cx-task-dates .cx-dates-controls,
+#cx-task-dates .cx-dates-filters { --cx-dates-columns: 208px 6px 28px 16px 302px; display: grid; align-items: center; color: #4a5d70; }
+#cx-task-dates .cx-dates-controls { grid-template-columns: var(--cx-dates-columns); }
+#cx-task-dates .cx-dates-filters { grid-template-columns: var(--cx-dates-columns) 1fr; }
+#cx-task-dates .cx-dates-controls > :first-child,
+#cx-task-dates .cx-dates-filters > :first-child { --cx-dates-label: 62px; grid-column: 1; }
+#cx-task-dates .cx-dates-controls > .cx-dates-direction { grid-column: 3; }
+#cx-task-dates .cx-dates-controls > .cx-dates-direction + .cx-dates-control,
+#cx-task-dates .cx-dates-filters > :nth-child(2) { grid-column: 5; }
+#cx-task-dates .cx-dates-filters > .cx-dates-check { grid-column: 6; justify-self: end; }
+#cx-task-dates .cx-dates-control { position: relative; display: flex; align-items: center; gap: 6px; min-width: 0; font-weight: 400; }
+#cx-task-dates .cx-dates-control > span { flex: none; min-width: var(--cx-dates-label, 56px); }
 #cx-task-dates .cx-dates-select {
   field-sizing: content;
   max-width: 240px;
@@ -36,13 +56,46 @@
   font-weight: 500;
   cursor: pointer;
 }
+#cx-task-dates .cx-dates-toolbar .cx-dates-select {
+  flex: 1 1 0;
+  box-sizing: border-box;
+  field-sizing: fixed;
+  width: 0;
+  min-width: 0;
+  max-width: none;
+  height: 28px;
+  padding: 0 24px 0 9px;
+  appearance: none;
+  -webkit-appearance: none;
+  text-overflow: ellipsis;
+}
+/* One arrow on every toolbar dropdown, in every browser and theme */
+#cx-task-dates .cx-dates-toolbar .cx-dates-control::after,
+#cx-task-dates .cx-dates-filter::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 6px;
+  height: 6px;
+  margin-top: -5px;
+  border-right: 1.5px solid #253b53;
+  border-bottom: 1.5px solid #253b53;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
 #cx-task-dates .cx-dates-select:hover { border-color: #94adc3 !important; }
 #cx-task-dates .cx-dates-select:disabled { cursor: default; }
 /* Inside the table a day is a detail */
 #cx-task-dates .cx-dates-table .cx-dates-select { padding: 1px 4px; font-weight: 400; }
 #connectify-progress .cx-dates-direction {
-  margin-left: -10px;
-  padding: 2px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: 1px solid var(--cx-progress-line, #d5dfe9);
   border-radius: 6px;
   background: transparent;
@@ -50,6 +103,7 @@
   font-weight: 500;
 }
 #connectify-progress .cx-dates-direction:hover { border-color: #94adc3; }
+#connectify-progress .cx-refresh-btn { box-sizing: border-box; height: 28px; padding: 0 12px; }
 #cx-task-dates .cx-dates-check { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; cursor: pointer; }
 #cx-task-dates .cx-dates-check input { flex: none; width: 15px; height: 15px; margin: 0; cursor: pointer; }
 
@@ -63,6 +117,8 @@
 #cx-task-dates .cx-dates-col-name { width: 34%; }
 #cx-task-dates .cx-dates-col-when { width: 16%; }
 #cx-task-dates .cx-dates-col-grade { width: 9%; }
+/* Every row one height, with a dropdown in it or not, in every browser */
+#cx-task-dates .cx-dates-row td { box-sizing: border-box; height: 35px; }
 #cx-task-dates .cx-dates-head th { padding-top: 0; color: #4a5d70; font-size: 12px; font-weight: 600; }
 #cx-task-dates .cx-dates-table .cx-dates-group th { padding-top: 16px; color: #253b53; font-weight: 700; }
 #cx-task-dates .cx-dates-row:hover td { background: color-mix(in srgb, currentColor 5%, transparent); }
@@ -88,6 +144,7 @@
 #connectify-progress #cx-task-dates .cx-time-edit-btn--unconfigured:focus-visible { opacity: 1; }
 
 .connectea-dark #cx-task-dates .cx-dates-controls,
+.connectea-dark #cx-task-dates .cx-dates-filters,
 .connectea-dark #cx-task-dates .cx-dates-terms,
 .connectea-dark #cx-task-dates .cx-dates-head th,
 .connectea-dark #cx-task-dates .cx-dates-row--done td,
@@ -95,9 +152,20 @@
 .connectea-dark #cx-task-dates .cx-dates-empty { color: var(--cx-text-secondary, #dce2e8); }
 .connectea-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #cx-task-dates .cx-dates-select { color: var(--cx-text-primary, #ffffff) !important; }
+.connectea-dark #cx-task-dates .cx-dates-toolbar .cx-dates-control::after,
+.connectea-dark #cx-task-dates .cx-dates-filter::after { border-color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #cx-task-dates .cx-dates-select:hover { border-color: var(--cx-border-strong, #556c84) !important; }
 .connectea-dark #cx-task-dates .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid var(--cx-progress-line, #3b4d5e); background: transparent; color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction:hover { border-color: var(--cx-border-strong, #556c84); background: transparent; color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn,
 .connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn:hover { background: none; color: inherit; }
+
+/* A narrow window: the rows wrap instead of holding their columns */
+@media (max-width: 840px) {
+  #cx-task-dates .cx-dates-toolbar { flex-wrap: wrap; }
+  #cx-task-dates .cx-dates-controls,
+  #cx-task-dates .cx-dates-filters { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+  #cx-task-dates .cx-dates-toolbar .cx-dates-select { flex: none; width: 140px; }
+  #cx-task-dates .cx-dates-toolbar .cx-dates-control:last-child .cx-dates-select { width: 240px; }
+}
