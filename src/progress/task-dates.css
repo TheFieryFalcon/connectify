@@ -87,7 +87,7 @@
 #cx-task-dates .cx-dates-select:hover { border-color: #94adc3 !important; }
 #cx-task-dates .cx-dates-select:disabled { cursor: default; }
 /* Inside the table a day is a detail */
-#cx-task-dates .cx-dates-table .cx-dates-select { padding: 1px 4px; font-weight: 400; }
+#cx-task-dates .cx-dates-table .cx-dates-select { padding: 1px 4px; font-weight: 400; vertical-align: middle; }
 #connectify-progress .cx-dates-direction {
   display: flex;
   align-items: center;
