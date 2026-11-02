@@ -7,16 +7,6 @@
   margin-bottom: 12px;
 }
 
-/* #connectea-atar button resets font to inherit: restore the Predictor tabs' type */
-#connectea-atar .cta-mode-tab {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-#connectea-atar .cta-mode-tab.active {
-  font-weight: 700;
-}
-
 #connectea-atar .cta-estimate-input {
   width: 128px;
   text-align: left;

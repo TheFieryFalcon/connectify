@@ -1,18 +1,6 @@
 /* Connectify Year Progression tabs and Task Dates (progress-tabs.js, task-dates-view.js). One surface, the panel: light
    hairlines and bold subject headings carry the structure, no boxes. Dark themes route colours through tokens. */
-/* #connectify-progress button and #connectify-sidebar button restyle every button: restore the Predictor tabs' look */
 #connectify-progress .cx-progress-tabs { margin: 0 0 12px; }
-#connectify-progress .cx-progress-tab { padding: 8px 12px; border: 0; border-radius: 6px; background: transparent; font-size: 12px; font-weight: 600; color: #55667a; }
-#connectify-progress .cx-progress-tab:hover { color: #174c75; }
-#connectify-progress .cx-progress-tab.active { background: #ffffff; color: #215d90; font-weight: 700; }
-/* .connectea-dark #connectify-sidebar :is(button, ...) weighs two ids, so these name the sidebar too */
-.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab { border: 0; background: transparent; color: var(--cx-text-muted, #a0b2c6); }
-.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab:hover { background: transparent; color: var(--cx-text-secondary, #e1eaf3); }
-.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab.active,
-.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab.active:hover {
-  background: color-mix(in srgb, var(--cx-accent, #3b82f6) 20%, var(--cx-surface-hover, #263344));
-  color: var(--cx-text-secondary, #e0eefb);
-}
 /* The chips and chart are display: flex / block, which would override their hidden attribute */
 #connectify-progress > [hidden],
 #cx-task-dates .cx-dates-controls > [hidden] { display: none !important; }

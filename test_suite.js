@@ -13976,7 +13976,7 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
       assert.deepStrictEqual(firstCells(), ['Chemistry ATAR', 'lab', 'Essay', 'Exam', 'Physics ATAR', 'Test 2', 'Test 10', 'Undated']);
       assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date'], 'no marks, no weights, only dates');
       assert.strictEqual(tableRows()[1].className, 'cx-dates-group');
-      assert.ok(find(tableRows()[2].children[1], n => n.textContent === 'Term 1 · Wk 6' && n.title === math.formatTimestamp(6)).length, 'each row names its week, in full on hover');
+      assert.ok(find(tableRows()[2].children[1], n => n.textContent === 'Term 1 Wk 6' && n.title === math.formatTimestamp(6)).length, 'each row names its week, in full on hover');
       assert.strictEqual(find(tableRows()[8], n => n.className === 'cx-date-warning')[0].textContent, 'No week', 'and a missing week says so briefly');
       assert.ok(tableRows()[2].children[1].querySelector('.cx-time-edit-btn'), 'and its week can be edited');
       assert.ok(tableRows()[8].children[1].querySelector('.cx-date-warning'), 'a task with no week asks for one');
@@ -14071,11 +14071,28 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
   // The sidebar's dark button rule weighs two ids (2,1,0): anything lighter leaves every button the same filled box
   const sidebarRule = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-handle-menu.css'), 'utf8');
   assert.ok(sidebarRule.includes('.connectea-dark #connectify-sidebar :is(button,'), 'the rule these outrank');
-  assert.ok(css.includes('.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab { border: 0; background: transparent;'), 'dark inactive tabs stay clear, so the active one shows');
-  assert.ok(css.includes('.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab.active,'), 'and the active tab keeps its fill');
   assert.ok(css.includes('.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid'), 'the direction arrow is an outline in dark themes too');
   const exportCss = read('progress/export-view.css');
   assert.ok(exportCss.includes('.connectea-dark #connectify-sidebar #cx-task-dates .cx-export-all,') && exportCss.includes('.connectea-dark #connectify-sidebar #cx-export-toggle[aria-pressed="true"],'), 'Select All stays a link and Export shows it is pressed');
+});
+
+runTest('Test 306: The shared tab bars outrank the drawer\'s button rules, so the selected tab shows in every tool and theme', () => {
+  const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
+  const css = read('sidebar/styles/sidebar-predictor.css');
+  const has = sel => new RegExp(`(^|\\n|,\\s*)${sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s*\\{|,)`).test(css);
+  for (const [bar, tab] of [['.cx-pred-main-tabs', '.cx-pred-main-tab'], ['.cx-pred-subtabs', '.cx-pred-subtab']]) {
+    assert.ok(has(`#connectify-sidebar ${tab}`) && has(`#connectify-sidebar ${tab}.active`), `${tab} outranks #connectify-sidebar button`);
+    const dark = `.connectea-dark #connectify-sidebar ${bar} :is(#cx-specificity-anchor, ${tab})`;
+    assert.ok(has(dark) && has(`${dark}:hover`) && has(`${dark}.active`), `${tab} outranks the dark drawer button rule and its hover`);
+    assert.ok(!new RegExp(`(^|\\n)(\\.connectea-dark )?${tab.replace('.', '\\.')}[ .:{]`).test(css), `${tab} has no weaker rule left to lose`);
+  }
+  const darkMain = css.slice(css.indexOf('.connectea-dark #connectify-sidebar .cx-pred-main-tabs :is(#cx-specificity-anchor, .cx-pred-main-tab) {'));
+  assert.ok(/^[^}]*border: 0;\s*background: transparent;/.test(darkMain), 'an inactive dark tab is clear, never the drawer\'s filled box');
+  assert.ok(css.includes('color: var(--cx-text-primary, #e0eefb);'), 'the active main tab keeps >= 5:1 in Quantum Dark, whose secondary ink is green');
+  assert.ok(/oklch\(from var\(--cx-button-primary-bg, #3575b9\) calc\(l \* 0\.82\) c h\);[^}]*color: var\(--cx-button-primary-text, #ffffff\);/.test(css), 'the active subject tab pairs the primary fill with its own ink, darkened to >= 5:1');
+  assert.strictEqual(window.ConnectifyProgressMath.shortTimestamp(18).includes('·'), false, 'task dates have no dot');
+  assert.ok(!/\.cx-progress-tab[ .:{,]/.test(read('progress/task-dates.css')) && !read('atar/atar-estimator.css').includes('.cta-mode-tab {'), 'no tool keeps its own copy');
+  assert.ok(read('progress/progress-tabs.js').includes("'cx-pred-main-tab cx-progress-tab'") && read('atar/atar-ui-markup.js').includes("'cx-pred-main-tab cta-mode-tab'"), 'every tab bar uses the shared class');
 });
 
 Promise.all(pendingTestPromises).then(() => {

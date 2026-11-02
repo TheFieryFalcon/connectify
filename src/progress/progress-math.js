@@ -22,10 +22,10 @@
     return `Term ${when.term}, Week ${when.week}`;
   }
 
-  /** The week in fewer characters ("Term 2 · Wk 5"), for lists; a caption or nothing without one. */
+  /** The week in fewer characters ("Term 2 Wk 5"), for lists; a caption or nothing without one. */
   function shortTimestamp(order, fallbackCaption) {
     const when = termWeek(window.ConnectifySchoolTerms?.normalizeOrder(order) ?? order);
-    return when ? `Term ${when.term} · Wk ${when.week}` : fallbackCaption || '';
+    return when ? `Term ${when.term} Wk ${when.week}` : fallbackCaption || '';
   }
 
   const getMonthName = (week) => {

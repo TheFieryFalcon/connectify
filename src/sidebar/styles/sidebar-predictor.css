@@ -25,7 +25,9 @@
   color: var(--cx-text-muted, #94a3b8);
 }
 
-/* Primary Tabs (matching .cta-tabs pill bar design language) */
+/* Primary Tabs, shared by the Predictor, Goal Setter, Estimator and Year Progression. These sit in the drawer, so they
+   outrank #connectify-sidebar button (1,0,1) and, in dark themes, .connectea-dark #connectify-sidebar :is(button, ...)
+   (2,1,0), which otherwise paint every tab the same filled box. */
 .cx-pred-main-tabs {
   display: flex;
   gap: 4px;
@@ -37,7 +39,7 @@
 .connectea-dark .cx-pred-main-tabs {
   background: var(--cx-table-row-alt, #191f27);
 }
-.cx-pred-main-tab {
+#connectify-sidebar .cx-pred-main-tab {
   flex: 1;
   background: transparent;
   border: 0;
@@ -50,24 +52,29 @@
   text-align: center;
   transition: all 0.15s ease;
 }
-.cx-pred-main-tab:hover {
+#connectify-sidebar .cx-pred-main-tab:hover {
   color: #174c75;
 }
-.cx-pred-main-tab.active {
+#connectify-sidebar .cx-pred-main-tab.active,
+#connectify-sidebar .cx-pred-main-tab.active:hover {
   background: #ffffff;
   color: #215d90;
   box-shadow: 0 1px 4px rgba(23, 57, 84, 0.15);
   font-weight: 700;
 }
-.connectea-dark .cx-pred-main-tab {
+.connectea-dark #connectify-sidebar .cx-pred-main-tabs :is(#cx-specificity-anchor, .cx-pred-main-tab) {
+  border: 0;
+  background: transparent;
   color: var(--cx-text-muted, #a0b2c6);
 }
-.connectea-dark .cx-pred-main-tab:hover {
+.connectea-dark #connectify-sidebar .cx-pred-main-tabs :is(#cx-specificity-anchor, .cx-pred-main-tab):hover {
+  background: transparent;
   color: var(--cx-text-secondary, #e1eaf3);
 }
-.connectea-dark .cx-pred-main-tab.active {
+.connectea-dark #connectify-sidebar .cx-pred-main-tabs :is(#cx-specificity-anchor, .cx-pred-main-tab).active,
+.connectea-dark #connectify-sidebar .cx-pred-main-tabs :is(#cx-specificity-anchor, .cx-pred-main-tab).active:hover {
   background: color-mix(in srgb, var(--cx-accent, #3b82f6) 20%, var(--cx-surface-hover, #263344));
-  color: var(--cx-text-secondary, #e0eefb);
+  color: var(--cx-text-primary, #e0eefb);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -78,7 +85,7 @@
   overflow-x: auto;
   padding-bottom: 4px;
 }
-.cx-pred-subtab {
+#connectify-sidebar .cx-pred-subtab {
   background: #edf4fa;
   border: 1px solid #c8d9e8;
   border-radius: 6px;
@@ -91,30 +98,33 @@
   transition: all 0.15s ease;
   flex: 0 0 auto;
 }
-.cx-pred-subtab:hover {
+#connectify-sidebar .cx-pred-subtab:hover {
   background: #d9eafa;
   border-color: #709fc4;
   color: #174c75;
 }
-.cx-pred-subtab.active {
+#connectify-sidebar .cx-pred-subtab.active,
+#connectify-sidebar .cx-pred-subtab.active:hover {
   background: #24618c;
   border-color: #1b4b6d;
   color: #ffffff;
   box-shadow: 0 1px 3px rgba(36, 97, 140, 0.3);
 }
-.connectea-dark .cx-pred-subtab {
+.connectea-dark #connectify-sidebar .cx-pred-subtabs :is(#cx-specificity-anchor, .cx-pred-subtab) {
   background: var(--cx-surface-elevated, #253342);
   border-color: var(--cx-input-border, #3b5066);
   color: var(--cx-text-secondary, #dceaf6);
 }
-.connectea-dark .cx-pred-subtab:hover {
+.connectea-dark #connectify-sidebar .cx-pred-subtabs :is(#cx-specificity-anchor, .cx-pred-subtab):hover {
   background: var(--cx-surface-hover, #33485d);
   color: var(--cx-text-primary, #ffffff);
 }
-.connectea-dark .cx-pred-subtab.active {
-  background: var(--cx-button-primary-bg, #3575b9);
+.connectea-dark #connectify-sidebar .cx-pred-subtabs :is(#cx-specificity-anchor, .cx-pred-subtab).active,
+.connectea-dark #connectify-sidebar .cx-pred-subtabs :is(#cx-specificity-anchor, .cx-pred-subtab).active:hover {
+  /* Darkened: some presets' primary button is under 5:1 with its own ink */
+  background: oklch(from var(--cx-button-primary-bg, #3575b9) calc(l * 0.82) c h);
   border-color: var(--cx-accent-hover, #6ba5d6);
-  color: var(--cx-text-primary, #ffffff);
+  color: var(--cx-button-primary-text, #ffffff);
 }
 
 /* Cards & Containers */

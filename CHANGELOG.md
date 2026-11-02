@@ -13,6 +13,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Set as Goal now happens on the planner.** Choose the end and confirm under your task table, with the effort sliders still working, instead of in a popup.
 
 ### Fixes
+- You can now see which tab is selected on the Predictor, Goal Setter, Estimator and Year Progression, in every theme.
 - Pressing Escape while changing a task's week now cancels the change without closing the sidebar.
 - Notifications now have the Liquid Glass effect in Liquid Glass themes.
 
