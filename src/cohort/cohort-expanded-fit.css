@@ -1,18 +1,34 @@
 /**
- * Expanded statistics cards fit their task row (cohort-expanded.css). A card is one short row up to ~920px wide
- * at zoom 1 (goal bars included), but the window-width display scale knew nothing of the column it sits in:
- * Connect's task column is far narrower than the window on an iPad or beside the drawer, so the card ran past
- * it into the marks column and, in Liquid Glass, was cut off. The task column is a size container that takes
- * the row's free space (the marks column keeps its 165px), and a card is zoomed by the column's own width,
- * fitting a 960px card (Safari's wider text included) in 0.05 steps down to 0.35 (phones). Never a reflow: the
- * card keeps its one row of values. Compact panels wrap and keep the window scale.
+ * Expanded statistics cards fit their task column (cohort-expanded-fit.js writes the scale). The column takes the
+ * row's free space (the marks column keeps its 165px) whatever the card's width. The card keeps its natural size
+ * and one row of values, with no display zoom (WebKit keeps text at a minimum size under zoom), and is scaled from
+ * its top left corner; the height the scale frees comes back through its bottom margin. Compact panels wrap instead.
  */
 
-.cvr-c-task__details:has(> .connectea-row-wrapper > .connectea-panel--expanded),
-.cvr-c-task__details:has(> .connectea-panel--expanded) {
-  container: cx-task-row / inline-size;
+.cvr-c-task__details:has(> .connectea-xp-fit) {
+  contain: inline-size;
   flex: 1 1 0% !important;
   min-width: 0 !important;
+}
+
+/* Reports the column's width to cohort-expanded-fit.js */
+.connectea-xp-fit-probe {
+  display: block;
+  height: 0;
+}
+
+/* The unused id outranks Liquid Glass's fit-content strip and the display zoom's !important rules */
+.cvr-c-task__details > :is(#cx-specificity-anchor, .connectea-xp-fit) {
+  zoom: 1 !important;
+  width: max-content !important;
+  max-width: none !important;
+  transform: scale(var(--cx-fit-scale, 1)) !important;
+  transform-origin: left top !important;
+  margin-bottom: calc(var(--cx-fit-margin, 4px) - var(--cx-fit-slack, 0px)) !important;
+}
+
+.cvr-c-task__details > .connectea-panel.connectea-xp-fit {
+  --cx-fit-margin: 8px;
 }
 
 /* A compact panel gives way to the Type dropdown and meter (cohort-styles.js); a card never reflows */
@@ -20,55 +36,7 @@
   flex: 0 0 auto !important;
 }
 
-@container cx-task-row (width < 960px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.95 !important; }
-}
-@container cx-task-row (width < 912px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.9 !important; }
-}
-@container cx-task-row (width < 864px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.85 !important; }
-}
-@container cx-task-row (width < 816px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.8 !important; }
-}
-@container cx-task-row (width < 768px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.75 !important; }
-}
-@container cx-task-row (width < 720px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.7 !important; }
-}
-@container cx-task-row (width < 672px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.65 !important; }
-}
-@container cx-task-row (width < 624px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.6 !important; }
-}
-@container cx-task-row (width < 576px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.55 !important; }
-}
-@container cx-task-row (width < 528px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.5 !important; }
-}
-@container cx-task-row (width < 480px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.45 !important; }
-}
-@container cx-task-row (width < 432px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.4 !important; }
-}
-@container cx-task-row (width < 384px) {
-  .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
-  .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.35 !important; }
+/* The scale is the whole card's, so the Type dropdown's cap needs no display zoom correction here */
+.connectea-panel--expanded .connectea-type-select {
+  max-width: 160px;
 }

@@ -42,7 +42,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 20. `src/cohort/cohort-outcome.js` (outcome meter DOM & breakout evaluation)
 21. `src/cohort/cohort-row-readers.js` (task row mark and boxplot readers, DOM helpers)
 21a. `src/cohort/cohort-panel-view.js` (Statistics Panels setting, read once per page load)
-21b. `src/cohort/cohort-expanded.js` (expanded statistics and prediction cards, Score colour step)
+21b. `src/cohort/cohort-expanded.js` (expanded statistics and prediction cards, Score colour step) / `cohort-expanded-fit.js` (scales a card to its task column)
 22. `src/cohort/cohort-panel.js` (statistics panel, Type dropdown and cohort size input)
 23. `src/cohort/cohort-outcome-eval.js` (outcome meter evaluation and first-task suppression)
 24. `src/cohort/cohort-forecast.js` (Low / Mid / High prediction panel on unmarked rows)

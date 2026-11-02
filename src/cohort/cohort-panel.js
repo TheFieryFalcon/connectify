@@ -160,6 +160,7 @@
       if (!target.contains(wrapper)) {
         target.append(wrapper);
       }
+      if (expanded) window.ConnectifyCohortExpandedFit?.watch(wrapper, target);
 
       const state = {
         wrapper,

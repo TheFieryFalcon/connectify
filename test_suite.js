@@ -13478,24 +13478,83 @@ runTest('Test 294: Connect\'s loading indicators are off on every Connect page, 
   assert.ok(/cnt-progress-bar\s*\{\s*display:\s*none !important/.test(css), 'Angular\'s page progress bar is removed');
 });
 
-runTest('Test 295: Expanded statistics cards zoom to fit their task column, so nothing runs past the card or into the marks column', () => {
-  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'cohort/cohort-expanded-fit.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+runTest('Test 295: Expanded statistics cards scale to fit their task column with a transform, so nothing runs past the card or into the marks column, even where WebKit keeps zoomed text from shrinking', () => {
+  const read = rel => origReadFileSync.call(fs, path.resolve(BASE_DIR, rel), 'utf8');
+  const css = read('src/cohort/cohort-expanded-fit.css').replace(/\/\*[\s\S]*?\*\//g, '');
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(c => (c.css || []).includes('src/cohort/cohort-expanded-fit.css'));
   assert.ok(group && group.css.indexOf('src/cohort/cohort-expanded-fit.css') > group.css.indexOf('src/cohort/cohort-expanded.css'), 'loaded on the outlines page after the expanded card styles');
-  const container = css.match(/([^{}]*)\{([^}]*container:\s*cx-task-row \/ inline-size[^}]*)\}/);
-  assert.ok(container && /\.cvr-c-task__details:has\(> \.connectea-row-wrapper > \.connectea-panel--expanded\)/.test(container[1]) &&
-    /\.cvr-c-task__details:has\(> \.connectea-panel--expanded\)/.test(container[1]), 'only task columns holding an expanded card are containers (compact panels keep the window scale)');
-  assert.ok(/flex:\s*1 1 0% !important/.test(container[2]) && /min-width:\s*0 !important/.test(container[2]), 'the column takes the row\'s free space, never its card\'s width');
-  // Each step's zoom must fit the widest card (about 920px with goal bars at zoom 1) in the narrowest column it covers
-  const steps = [...css.matchAll(/@container cx-task-row \(width < (\d+)px\) \{([^}]*)\{ zoom: ([\d.]+) !important; \}/g)].map(m => ({ below: Number(m[1]), sel: m[2], zoom: Number(m[3]) }));
-  assert.ok(steps.length >= 10, 'zoom steps down to phone widths');
-  for (let i = 0; i < steps.length; i++) {
-    assert.ok(steps[i].sel.includes('.connectea-row-wrapper:has(> .connectea-panel--expanded)') && steps[i].sel.includes('.connectea-panel.connectea-panel--expanded.connectea-xp-overall'), 'task and overall cards both fit');
-    const narrowest = steps[i + 1] ? steps[i + 1].below : 0;
-    if (narrowest) assert.ok(920 * steps[i].zoom <= narrowest, `zoom ${steps[i].zoom} fits a 920px card in a ${narrowest}px column`);
-    if (i) assert.ok(steps[i].zoom < steps[i - 1].zoom && steps[i].below < steps[i - 1].below, 'narrower columns zoom further');
+  assert.ok(group.js.indexOf('src/cohort/cohort-expanded-fit.js') > -1 && group.js.indexOf('src/cohort/cohort-expanded-fit.js') < group.js.indexOf('src/cohort/cohort-panel.js'), 'the fit script loads before the panels that use it');
+  const columnRule = css.match(/\.cvr-c-task__details:has\(> \.connectea-xp-fit\) \{([^}]*)\}/);
+  assert.ok(columnRule && /flex:\s*1 1 0% !important/.test(columnRule[1]) && /min-width:\s*0 !important/.test(columnRule[1]), 'only columns holding a card change: they take the row\'s free space, never the card\'s width');
+  const card = css.match(/\.cvr-c-task__details > :is\(#cx-specificity-anchor, \.connectea-xp-fit\) \{([^}]*)\}/);
+  assert.ok(card, 'the card rule outranks Liquid Glass and the display zoom');
+  for (const decl of ['zoom: 1 !important', 'width: max-content !important', 'max-width: none !important', 'transform: scale(var(--cx-fit-scale, 1)) !important', 'transform-origin: left top !important']) {
+    assert.ok(card[1].includes(decl), `card: ${decl}`);
   }
+  assert.ok(/margin-bottom: calc\(var\(--cx-fit-margin, 4px\) - var\(--cx-fit-slack, 0px\)\) !important/.test(card[1]), 'the height the scale frees comes back, so the row never grows');
+  assert.ok(!/@container|zoom: 0\./.test(css) && !/connectea-xp-overall \{ zoom/.test(read('src/cohort/cohort-expanded.css')), 'no card is zoomed: WebKit keeps text at a minimum size under zoom');
+  assert.ok(read('src/cohort/cohort-panel.js').includes('if (expanded) window.ConnectifyCohortExpandedFit?.watch(wrapper, target);'), 'every expanded card, task or overall, is watched');
+  assert.ok(read('src/cohort/cohort-observer.js').includes('.connectea-xp-fit-probe'), 'the probe is Connectify\'s own node, so adding it runs no pass');
+
+  // The real script against a fake ResizeObserver and DOM
+  const observers = [];
+  class FakeObserver {
+    constructor(cb) { this.cb = cb; this.watched = new Set(); observers.push(this); }
+    observe(el) { this.watched.add(el); }
+    unobserve(el) { this.watched.delete(el); }
+    fire(entries) { this.cb(entries, this); }
+  }
+  const el = () => {
+    const props = {};
+    const classes = new Set();
+    return { isConnected: true, props, classes, classList: { add: c => classes.add(c) }, style: { setProperty: (k, v) => { props[k] = v; } } };
+  };
+  const makeColumn = () => {
+    const column = el();
+    column.probe = null;
+    column.querySelector = () => column.probe;
+    column.appendChild = node => (column.probe = node);
+    return column;
+  };
+  const w = {};
+  new Function('window', 'ResizeObserver', 'document', read('src/cohort/cohort-expanded-fit.js'))(w, FakeObserver, { createElement: () => el() });
+  const F = w.ConnectifyCohortExpandedFit;
+  const ro = observers[0];
+  assert.strictEqual(F.scaleFor(1200, 920), 1, 'a card is never enlarged');
+  assert.strictEqual(F.scaleFor(596, 920), 0.647, 'rounded down, so it never runs past the column');
+  assert.ok(920 * F.scaleFor(596, 920) <= 596);
+  assert.strictEqual(F.scaleFor(100, 920), F.MIN_SCALE, 'with a floor for phones');
+
+  const report = (target, width, height) => ({ target, contentRect: { width }, borderBoxSize: [{ inlineSize: width, blockSize: height }] });
+  const column = makeColumn();
+  const first = el();
+  F.watch(first, column);
+  const probe = column.probe;
+  assert.ok(first.classes.has('connectea-xp-fit') && probe.className === 'connectea-xp-fit-probe');
+  assert.ok(ro.watched.has(first) && ro.watched.has(probe) && !ro.watched.has(column), 'never the column itself: the margin changes its height, a ResizeObserver loop');
+  ro.fire([report(probe, 500, 0)]);
+  assert.deepStrictEqual(first.props, {}, 'nothing is written before both sizes are known');
+  ro.fire([report(first, 1000, 120)]);
+  assert.strictEqual(first.props['--cx-fit-scale'], '0.5');
+  assert.strictEqual(first.props['--cx-fit-slack'], '60px', 'half the height comes back');
+  ro.fire([report(probe, 1000, 0)]);
+  assert.strictEqual(first.props['--cx-fit-scale'], '1', 'a wider column (rotating the iPad) scales it again');
+  assert.strictEqual(first.props['--cx-fit-slack'], '0px');
+  first.props['--cx-fit-scale'] = 'untouched';
+  ro.fire([report(probe, 0, 0)]);
+  assert.strictEqual(first.props['--cx-fit-scale'], 'untouched', 'a hidden column keeps the last fit');
+
+  // A redraw's new card reuses the column's probe, and the removed card lets go of neither
+  const next = el();
+  F.watch(next, column);
+  assert.strictEqual(column.probe, probe, 'one probe per column');
+  assert.ok(ro.watched.has(next) && ro.watched.has(probe));
+  first.isConnected = false;
+  ro.fire([report(first, 0, 0)]);
+  assert.ok(!ro.watched.has(first) && ro.watched.has(probe), 'the removed card stops being observed; the new card keeps the probe');
+  ro.fire([report(probe, 300, 0), report(next, 600, 100)]);
+  assert.strictEqual(next.props['--cx-fit-scale'], '0.5');
 });
 
 runTest('Test 296: Layers over text (sidebar, menus, popups, dialogs, top bars) keep a 12px glass blur under a lower custom Blur Strength unless the theme turns it off', () => {
@@ -13827,7 +13886,7 @@ runTest('Test 304: A compact statistics panel gives way to the Type dropdown and
   const forecast = read('src/cohort/cohort-forecast.css');
   assert.ok(!/white-space: nowrap/.test(forecast.slice(0, forecast.indexOf('}'))), 'a prediction line wraps rather than overflowing its panel in a very narrow column');
   const fit = read('src/cohort/cohort-expanded-fit.css').replace(/\/\*[\s\S]*?\*\//g, '');
-  assert.ok(/\.connectea-row-wrapper > \.connectea-panel\.connectea-panel--expanded \{\s*flex: 0 0 auto !important;/.test(fit), 'expanded cards keep their one row: they zoom, never reflow');
+  assert.ok(/\.connectea-row-wrapper > \.connectea-panel\.connectea-panel--expanded \{\s*flex: 0 0 auto !important;/.test(fit), 'expanded cards keep their one row: they scale, never reflow');
 });
 
 Promise.all(pendingTestPromises).then(() => {

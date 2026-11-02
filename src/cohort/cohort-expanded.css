@@ -1,15 +1,13 @@
 /* Expanded statistics cards (cohort-expanded.js, Settings "Statistics Panels"). The card keeps the statistics
    panel's surface in every theme (.connectea-panel rules); everything inside it is clear, groups divided by
-   hairlines (one surface per block). Wide and short: one row of values, the footer below. The
-   --cx-display-scale zoom still applies; the grid never reflows. */
+   hairlines (one surface per block). Wide and short: one row of values, the footer below. The grid never
+   reflows: the card is scaled to fit its task column (cohort-expanded-fit.css). */
 .connectea-panel.connectea-panel--expanded {
   padding: 10px 16px !important;
   line-height: 1.4 !important;
   white-space: nowrap !important;
   overflow-wrap: normal !important;
 }
-/* The overall card has no row wrapper, so it takes the display scale itself */
-.connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: var(--cx-display-scale, 1); }
 .connectea-row-wrapper > .connectea-panel.connectea-panel--expanded,
 .connectea-row-wrapper > .connectea-panel.connectea-forecast.connectea-panel--expanded {
   max-width: none !important;
