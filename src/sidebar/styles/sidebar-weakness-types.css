@@ -102,7 +102,7 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
 }
 
 .connectea-row-wrapper>.connectea-panel {
-  flex: 0 0 auto !important;
+  flex: 0 1 auto !important;
   width: auto !important;
   max-width: fit-content !important;
   margin: 0 !important;
@@ -146,7 +146,7 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
 .connectea-type-select {
   field-sizing: content;
   width: auto;
-  max-width: 160px;
+  max-width: calc(160px / var(--cx-display-scale, 1));
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

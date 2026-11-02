@@ -15,6 +15,11 @@
   min-width: 0 !important;
 }
 
+/* A compact panel gives way to the Type dropdown and meter (cohort-styles.js); a card never reflows */
+.connectea-row-wrapper > .connectea-panel.connectea-panel--expanded {
+  flex: 0 0 auto !important;
+}
+
 @container cx-task-row (width < 960px) {
   .cvr-c-task__details > .connectea-row-wrapper:has(> .connectea-panel--expanded),
   .cvr-c-task__details > .connectea-panel.connectea-panel--expanded.connectea-xp-overall { zoom: 0.95 !important; }

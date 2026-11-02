@@ -220,10 +220,10 @@
 
       setHTML(
         ui.distribution,
-        `Min ${math().formatPercentage(stats[0])}%  •  Q1 ${math().formatPercentage(stats[1])}%  •  ` +
-        `<strong>Med ${math().formatPercentage(stats[2])}%</strong>  •  Q3 ${math().formatPercentage(stats[3])}%  •  ` +
+        `Min&nbsp;${math().formatPercentage(stats[0])}%  •  Q1&nbsp;${math().formatPercentage(stats[1])}%  •  ` +
+        `<strong>Med ${math().formatPercentage(stats[2])}%</strong>  •  Q3&nbsp;${math().formatPercentage(stats[3])}%  •  ` +
         `<strong>Max ${math().formatPercentage(stats[4])}%</strong>  •  <strong>Mean ${math().formatPercentage(data.mean)}%</strong>  •  ` +
-        `SD ${math().formatPercentage(data.sd)}`
+        `SD&nbsp;${math().formatPercentage(data.sd)}`
       );
       setHTML(ui.result, resultParts(data, mark, isOverall, userSize, estimatedSize, cohortSize).concat(possible || []).join('  •  '));
       remember();

@@ -25,7 +25,9 @@
       transform-origin: left center !important;
     }
     .connectea-row-wrapper > .connectea-panel {
-      flex: 0 0 auto !important;
+      /* Gives way to the Type dropdown and meter: WebKit keeps text at a minimum size under the display zoom,
+         so only wrapping (never the zoom) is sure to fit the task column */
+      flex: 0 1 auto !important;
       width: auto !important;
       max-width: fit-content !important;
       margin: 0 !important;
@@ -83,7 +85,8 @@
       /* Sized to the chosen type, never the longest option (older browsers keep the cap) */
       field-sizing: content;
       width: auto;
-      max-width: 160px;
+      /* 160px on screen: the row's zoom shrinks the cap, but not WebKit's text at its minimum size */
+      max-width: calc(160px / var(--cx-display-scale, 1));
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -136,6 +139,7 @@
     .connectea-result strong,
     .connectea-panel strong {
       font-weight: 700 !important;
+      white-space: nowrap;
     }
     .connectea-subject-controls {
       display: block !important;

@@ -4,7 +4,6 @@
   padding-top: 6px !important;
   padding-bottom: 6px !important;
   line-height: 1.5 !important;
-  white-space: nowrap !important;
 }
 
 /* Low and High are semibold; Mid (a strong, 700 from the panel's strong rules) stays the heaviest. Task rows sit in

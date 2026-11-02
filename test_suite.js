@@ -4000,7 +4000,7 @@ runTest('Test 122: Back to top button styling parity, expandAll multi-card dedup
   assert.ok(cohortStatsJs.includes('flex-wrap: nowrap !important;'), 'cohort-stats.js must use flex-wrap: nowrap on .connectea-row-wrapper');
   assert.ok(cohortStatsJs.includes('max-width: fit-content !important;'), 'cohort-stats.js must set max-width: fit-content on .connectea-panel');
   assert.ok(cssHas(sidebarCss, '.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:nowrap!important'), 'sidebar.css must use nowrap on .connectea-row-wrapper');
-  assert.ok(cssHas(sidebarCss, '.connectea-row-wrapper>.connectea-panel{flex:0 0 auto!important;width:auto!important;max-width:fit-content!important'), 'sidebar.css must set max-width: fit-content on .connectea-panel');
+  assert.ok(cssHas(sidebarCss, '.connectea-row-wrapper>.connectea-panel{flex:0 1 auto!important;width:auto!important;max-width:fit-content!important'), 'sidebar.css must set max-width: fit-content on .connectea-panel');
   assert.ok(cssHas(sidebarCss, ':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)'), 'sidebar.css must scale subject cards to 100% width');
   assert.ok(cssHas(themeCss, '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card {'), 'theme.css must scale subject cards to 100% width');
   assert.ok(!cssHas(sidebarCss, '.cvr-c-task__details{flex:1 1 auto!important'), 'sidebar.css must not force flex: 1 1 auto on .cvr-c-task__details');
@@ -12938,9 +12938,9 @@ runTest('Test 279: The playground feeds Connectify classes as the scraper would 
 runTest('Test 280: Type dropdowns size to the chosen type with a cap, and new category names are at most 16 characters', () => {
   const read = rel => origReadFileSync.call(fs, path.resolve(BASE_DIR, rel), 'utf8');
   for (const [file, css] of [['sidebar-weakness-types.css', read('src/sidebar/styles/sidebar-weakness-types.css')], ['cohort-styles.js', read('src/cohort/cohort-styles.js')]]) {
-    const rule = css.slice(css.indexOf('field-sizing: content;') - 300, css.indexOf('field-sizing: content;') + 200);
+    const rule = css.slice(css.indexOf('field-sizing: content;') - 300, css.indexOf('field-sizing: content;') + 320);
     assert.ok(rule.includes('.connectea-type-select'), `${file}: field-sizing sits on the Type dropdown`);
-    assert.ok(/max-width: 160px;/.test(rule) && rule.includes('text-overflow: ellipsis;'), `${file}: a long category name is truncated, never widening the row`);
+    assert.ok(rule.includes('max-width: calc(160px / var(--cx-display-scale, 1));') && rule.includes('text-overflow: ellipsis;'), `${file}: a long category name is truncated, never widening the row`);
   }
 
   const store = window.ConnectifyCategoryStore;
@@ -13810,6 +13810,24 @@ runTest('Test 303: Notifications are one glass surface in Liquid Glass, blurred 
   assert.ok(css.includes(`${glass} .cx-notification-details {\n  background: transparent !important;`), 'the details list stays clear (one surface per block)');
   const overlay = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-overlay-blur.css'), 'utf8');
   assert.ok(overlay.includes(`${glass} #connectify-notifications-container,`), 'notifications cover text, so they keep the overlay blur floor');
+});
+
+runTest('Test 304: A compact statistics panel gives way to the Type dropdown and meter, so the row fits its task column even where WebKit keeps text from shrinking under the zoom (iPad)', () => {
+  const read = rel => origReadFileSync.call(fs, path.resolve(BASE_DIR, rel), 'utf8');
+  const sheets = [['sidebar-weakness-types.css', read('src/sidebar/styles/sidebar-weakness-types.css')], ['cohort-styles.js', read('src/cohort/cohort-styles.js')]];
+  for (const [file, css] of sheets) {
+    const rule = css.match(/\.connectea-row-wrapper\s*>\s*\.connectea-panel \{([^}]*)\}/);
+    assert.ok(rule && /flex: 0 1 auto !important/.test(rule[1]), `${file}: the panel shrinks, wrapping its text, instead of pushing the controls into the marks column`);
+  }
+  const base = read('src/cohort/cohort-styles.js');
+  assert.ok(/\.connectea-panel \{[^}]*min-width: 0 !important/.test(base), 'a panel can shrink below its one-line width');
+  assert.ok(/\.connectea-panel strong \{[^}]*white-space: nowrap;/.test(base), 'a bold value never splits from its name');
+  const view = read('src/cohort/cohort-view.js');
+  for (const name of ['Min', 'Q1', 'Q3', 'SD']) assert.ok(view.includes(`${name}&nbsp;\${math().formatPercentage(`), `${name} stays with its value when the line wraps`);
+  const forecast = read('src/cohort/cohort-forecast.css');
+  assert.ok(!/white-space: nowrap/.test(forecast.slice(0, forecast.indexOf('}'))), 'a prediction line wraps rather than overflowing its panel in a very narrow column');
+  const fit = read('src/cohort/cohort-expanded-fit.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.ok(/\.connectea-row-wrapper > \.connectea-panel\.connectea-panel--expanded \{\s*flex: 0 0 auto !important;/.test(fit), 'expanded cards keep their one row: they zoom, never reflow');
 });
 
 Promise.all(pendingTestPromises).then(() => {
