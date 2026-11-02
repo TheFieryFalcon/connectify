@@ -11,6 +11,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Group and sort the task list your way.** Group By None, Subject, Type, Completed, Predicted Grade or Grade Achieved, with an arrow for ascending or descending; Sort By Chronological, Alphabetical or Grade Achieved; and Show Uncompleted Only. Grades group as High Distinction (A) from 80%, Distinction (B) from 70%, Credit (C) from 60%, Pass (C) from 50% and Fail (D).
 - **Export now happens on the list.** Press Export and the same list gains ticks, days and download buttons.
 - **Set as Goal now happens on the planner.** Choose the end and confirm under your task table, with the effort sliders still working, instead of in a popup.
+- **Finished goals say so in the notification's title.** It reads Goal Achieved with a green edge or Goal Missed with a gray edge, and goal names no longer start with the year level.
 
 ### Fixes
 - You can now see which tab is selected on the Predictor, Goal Setter, Estimator and Year Progression, in every theme.

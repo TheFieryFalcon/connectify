@@ -19,7 +19,7 @@ This document covers notifications, grade change tracking, DOM integrity monitor
 - **Role**: Universal notification and toast manager for Connectify.
 - **Key Functions**:
   - `show({ id, type, title, message, details, actions, duration, dismissible, onDismiss })`: Mounts toast notifications into `#connectify-notifications-container`.
-  - Supports types (`warning`, `success`, `info`, `grade`) with tailored theme colors, icons, and smooth slide-in/dismiss animations.
+  - Supports types (`warning`, `success`, `info`, `grade`, `neutral`) with tailored theme colors, icons, and smooth slide-in/dismiss animations.
   - Automatically stacks concurrent notifications vertically (`flex-direction: column-reverse`).
   - Action button dispatcher supporting custom callbacks with `{ id, element, close }`.
   - `dismiss(id)` and `clearAll()`: Smoothly animates out and cleans up DOM elements.

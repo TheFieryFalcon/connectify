@@ -100,7 +100,7 @@
    *
    * @param {Object} opts
    * @param {string} [opts.id] - Unique identifier to prevent duplicates or allow updating.
-   * @param {string} [opts.type] - 'info' | 'warning' | 'success' | 'grade'
+   * @param {string} [opts.type] - 'info' | 'warning' | 'success' | 'grade' | 'neutral'
    * @param {string} [opts.icon] - Emoji or custom HTML string for icon.
    * @param {string} opts.title - Header text.
    * @param {string} opts.message - Body text.

@@ -222,11 +222,9 @@ For each judged task in date order (school week, as the Predictor orders tasks),
 ## 8. Notifications and celebration
 
 ### 8.1 Goal Updated toast
-A toast of its own (`Goal Updated`, the goal's title as its message, one line under it, Dismiss and Jump to Subject), shown when a newly marked task in the goal's range is read (an outline expanded, Expand All, auto-expand) or the goal ends. The Class Updated toast carries no goal line: when Connect's running mark changes on a collapsed outline, the new task's mark is not read yet, so the tier would be stale. The line:
+A toast of its own (`Goal Updated`, the goal's title without its year level as its message, one line under it, Dismiss and Jump to Subject), shown when a newly marked task in the goal's range is read (an outline expanded, Expand All, auto-expand); a goal that ends brings `Goal Achieved` (green accent, plus the celebration) or `Goal Missed` (gray accent) instead, with no line under the goal's title. The Class Updated toast carries no goal line: when Connect's running mark changes on a collapsed outline, the new task's mark is not read yet, so the tier would be stale. The line:
 - unchanged: `Goal: Medium` (ATAR goals: `ATAR goal: Medium`);
-- tier changed: `Goal is now Hard (was Medium)`;
-- finished, achieved: `Goal complete!` plus the celebration;
-- finished, missed: `Goal missed!`.
+- tier changed: `Goal is now Hard (was Medium)`.
 
 Each goal stores the marked tasks it has announced (`seenMarked`, starting from `priorMarked`), so every result brings one toast, and its `lastTier`, so the "was" tier survives reloads.
 
@@ -236,7 +234,7 @@ Each goal stores the marked tasks it has announced (`seenMarked`, starting from 
 - A stronger screen shake, about 600 ms. The shake applies `translate` to Connect's app layout (`#main-content`'s layout root), never `<html>`/`<body>`, so fixed elements and the drawer keep their positions.
 - The goal card glows the next time the Goals dialog opens (§4.3).
 - **`prefers-reduced-motion: reduce`**: no shake. The confetti becomes a static burst that fades in and out without moving. The toast text is unchanged.
-- **ATAR goals**: one celebration (or one `Goal missed!`) for the ATAR goal; the children never celebrate.
+- **ATAR goals**: one celebration (or one `Goal Missed`) for the ATAR goal; the children never celebrate.
 
 ## 9. Goals in other tools
 - **Year Progression**: the subject's chart plots the goal's target mark for each task it covers (`.cx-goal-line` through `.cx-goal-target-point` markers, legend `Dashed: Target mark (Goal 85%)`): a completed task's requirement just before it was marked, a remaining task's requirement in the current plan. Tasks marked before the goal was set, or after its end week, have none. Weighted / rolling average modes average the targets like the scores (`Target weighted average`). ATAR Progression shows one dashed line at the ATAR goal. Drawn under the series, like the semester divider.

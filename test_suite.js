@@ -12315,7 +12315,7 @@ runTest('Test 264: Newly read results bring a Goal Updated toast of its own; goa
   G.save({ ...G.byId(goal.id), target: 88 });
   Object.assign(tasks[3], { pending: false, score: 60, earned: 30 });
   E.refresh();
-  assert.ok(/^Goal (missed!|is now \w+ \(was \w+\))$/.test(toasts[1].details[0]), `a changed tier says what it was (${toasts[1].details[0]})`);
+  assert.ok(toasts[1].title === 'Goal Missed' ? toasts[1].details.length === 0 : /^Goal is now \w+ \(was \w+\)$/.test(toasts[1].details[0]), `a changed tier says what it was (${toasts[1].title}, ${toasts[1].details[0]})`);
   const newGrade = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/new-grade.js'), 'utf8');
   assert.ok(!newGrade.includes('ConnectifyGoalEvents'), 'the Class Updated toast carries no goal line');
 
@@ -12324,7 +12324,7 @@ runTest('Test 264: Newly read results bring a Goal Updated toast of its own; goa
   const sure = G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 20, end: { type: 'semester', semester: 2 }, priorMarked: ['chemistry::t1', 'chemistry::t2', 'chemistry::t3'] });
   E.refresh();
   const complete = toasts.find(t => t.id === `connectify-goal-${sure.id}`);
-  assert.ok(complete && complete.details[0] === 'Goal complete!', 'a goal that locks in Achieved says so in its toast');
+  assert.deepStrictEqual([complete?.title, complete?.type, complete?.details], ['Goal Achieved', 'success', []], 'a goal that locks in Achieved says so in its title, on a green accent');
   assert.deepStrictEqual([G.byId(sure.id).status, played.length], ['achieved', 1], 'and celebrates');
   assert.ok(G.verdicts()[sure.id], 'its verdicts are frozen');
   E.refresh();
@@ -12333,8 +12333,16 @@ runTest('Test 264: Newly read results bring a Goal Updated toast of its own; goa
 
   const missed = G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 99.5, end: { type: 'semester', semester: 2 }, priorMarked: [] });
   E.refresh();
-  assert.strictEqual(toasts.find(t => t.id === `connectify-goal-${missed.id}`).details[0], 'Goal missed!', 'a target out of reach locks in Missed');
+  const missedToast = toasts.find(t => t.id === `connectify-goal-${missed.id}`);
+  assert.deepStrictEqual([missedToast.title, missedToast.type, missedToast.details], ['Goal Missed', 'neutral', []], 'a target out of reach locks in Missed, on a gray accent');
   assert.strictEqual(played.length, 1, 'with no celebration');
+  const toastCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-notifications.css'), 'utf8');
+  const toastDarkCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-notifications-dark.css'), 'utf8');
+  assert.ok(cssHas(toastCss, '.cx-notification--neutral { border-left-color: #94a3b8 !important;') && cssHas(toastDarkCss, '.connectea-dark .cx-notification--neutral { border-left-color: var(--cx-text-muted, #94a3b8) !important;'), 'the gray accent shows in light and dark themes');
+  const plan = win.ConnectifyGoalPlan;
+  const semesterOne = { kind: 'grade', target: 80, end: { type: 'semester', semester: 1 } };
+  assert.strictEqual(plan.title({ ...semesterOne, name: '12 Literature' }), 'Literature: 80% by Semester 1', 'the year level is trimmed');
+  assert.strictEqual(plan.title({ ...semesterOne, name: '3D Art' }), '3D Art: 80% by Semester 1', 'a number that is part of the name stays');
 
   G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 80, end: { type: 'semester', semester: 2 }, priorMarked: [] });
   win.dispatchEvent({ type: 'connectify-week-override-saved' });

@@ -4,9 +4,9 @@
  * Keeps every active goal's evaluation (re-worked after results, predictions, task types or goals change,
  * unless goals are held after a week change), ends goals that lock in (Guaranteed -> Achieved, Impossible ->
  * Missed) or finish (every task in range marked, or the final letter shows), freezing their verdicts. When a
- * newly marked task is read (an outline expanded, Expand All, auto-expand) or a goal ends, a Goal Updated toast
- * of its own names the tier; a completed goal celebrates with it, or, when no toast could show, the next time
- * the Goals dialog opens. Exposes window.ConnectifyGoalEvents.
+ * newly marked task is read (an outline expanded, Expand All, auto-expand) a Goal Updated toast of its own names
+ * the tier; a goal that ends brings Goal Achieved or Goal Missed instead. A completed goal celebrates with it, or,
+ * when no toast could show, the next time the Goals dialog opens. Exposes window.ConnectifyGoalEvents.
  */
 (() => {
   'use strict';
@@ -117,18 +117,18 @@
     if (pending) celebrate(pending);
   }
 
+  // A finished goal's toast says how it ended in its title, in its own accent colour
+  const OUTCOMES = {
+    achieved: { title: 'Goal Achieved', type: 'success' },
+    missed: { title: 'Goal Missed', type: 'neutral' }
+  };
+
   /**
-   * The goal's toast line: `Goal: Medium`, `Goal is now Hard (was Medium)`, `Goal complete!` (with the
-   * celebration) or `Goal missed!` (`ATAR goal ...` for an ATAR goal). Remembers the tier it named.
+   * An active goal's toast line: `Goal: Medium` or `Goal is now Hard (was Medium)` (`ATAR goal ...` for an ATAR
+   * goal). Remembers the tier it named.
    */
   function lineFor(goal) {
     const prefix = goal.kind === 'atar' ? 'ATAR goal' : 'Goal';
-    if (goal.status !== 'active') {
-      store().patch(goal.id, { announcePending: false });
-      if (goal.status !== 'achieved') return `${prefix} missed!`;
-      celebrate(goal);
-      return `${prefix} complete!`;
-    }
     const tier = stateOf(goal)?.tier;
     if (!tier) return null;
     const before = goal.lastTier;
@@ -143,10 +143,18 @@
     return cards[cards.length - 1] || null;
   }
 
-  /** The Goal Updated toast (one per goal at a time): the goal, and its line under it. */
+  /**
+   * The goal's toast (one per goal at a time): Goal Updated with the goal and its line under it, or Goal Achieved
+   * (with the celebration) / Goal Missed with the goal alone.
+   */
   function announce(goal, fresh = []) {
-    const line = lineFor(goal);
-    if (!line) return;
+    const outcome = OUTCOMES[goal.status];
+    const line = outcome ? null : lineFor(goal);
+    if (!outcome && !line) return;
+    if (outcome) {
+      store().patch(goal.id, { announcePending: false });
+      if (goal.status === 'achieved') celebrate(goal);
+    }
     const subject = (fresh[fresh.length - 1] || '').split('::')[0] || goal.subject;
     const card = cardFor(subject);
     // Jump to Subject lands on one of the newly read results (verdict keys `<subject>::<task id>`)
@@ -154,7 +162,8 @@
     const actions = [{ text: 'Dismiss', type: 'secondary', onClick: ({ close }) => close() }];
     if (card && window.ConnectifyNewGrade?.jumpToSubject) actions.push({ text: 'Jump to Subject', type: 'accent', onClick: () => window.ConnectifyNewGrade.jumpToSubject(card, taskIds) });
     window.ConnectifyNotifications?.show?.({
-      id: `connectify-goal-${goal.id}`, type: 'grade', title: 'Goal Updated', message: P().title(goal), details: [line], duration: 12000, actions
+      id: `connectify-goal-${goal.id}`, type: outcome?.type || 'grade', icon: '📈', title: outcome?.title || 'Goal Updated',
+      message: P().title(goal), details: line ? [line] : [], duration: 12000, actions
     });
   }
 

@@ -193,8 +193,8 @@
     return `${target} by ${end}`;
   }
 
-  /** "Chemistry: 85% by Semester 2", or "ATAR 95.00 by Semester 1". */
-  const title = goal => (goal.kind === 'atar' ? describe(goal) : `${goal.name || goal.subject}: ${describe(goal)}`);
+  /** "Chemistry: 85% by Semester 2" (no year level, as in "12 Chemistry"), or "ATAR 95.00 by Semester 1". */
+  const title = goal => (goal.kind === 'atar' ? describe(goal) : `${String(goal.name || goal.subject).replace(/^\d{1,2}\s+/, '')}: ${describe(goal)}`);
 
   /** Everything an evaluation reads, gathered once: every course, ATAR courses and the cached subjects. */
   function context() {

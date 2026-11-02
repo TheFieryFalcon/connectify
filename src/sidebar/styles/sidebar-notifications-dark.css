@@ -55,6 +55,10 @@
   border-left-color: #a78bfa !important;
 }
 
+.connectea-dark .cx-notification--neutral {
+  border-left-color: var(--cx-text-muted, #94a3b8) !important;
+}
+
 .connectea-dark .cx-notification-title {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
