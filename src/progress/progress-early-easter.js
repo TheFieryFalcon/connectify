@@ -1,10 +1,9 @@
 /**
  * Connectify Progress: Early Easter checkbox
  *
- * One Early Easter choice for the year (ConnectifySchoolTerms), shown both beside the Progress graph's
- * "Show:" dropdown and in the Export view. Changing it moves Term 2's start, so task weeks past Term 1's
- * end, date captions and export dates follow (connectify-terms-updated), and either view shows the other's
- * choice. Predictions depend only on the order of the tasks, which Early Easter almost never changes, so
+ * One Early Easter choice for the year (ConnectifySchoolTerms), shown on the Task Dates tab. Changing it
+ * moves Term 2's start, so task weeks past Term 1's end, date captions and export dates follow
+ * (connectify-terms-updated). Predictions depend only on the order of the tasks, which Early Easter almost never changes, so
  * they are recomputed only when it does; the page statistics are redrawn only when a task changes semester.
  * Exposes window.ConnectifyEarlyEaster.
  */
@@ -57,13 +56,5 @@
     return { wrap, input };
   }
 
-  /** The graph's control row: the "Show:" dropdown, then the Early Easter checkbox. */
-  function controls(showLabel, onChange) {
-    const row = document.createElement('div');
-    row.className = 'cx-progress-controls';
-    row.append(showLabel, checkbox('cx-progress-easter', onChange).wrap);
-    return row;
-  }
-
-  window.ConnectifyEarlyEaster = { checkbox, controls, taskOrder };
+  window.ConnectifyEarlyEaster = { checkbox, taskOrder };
 })();

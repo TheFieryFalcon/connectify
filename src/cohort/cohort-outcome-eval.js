@@ -44,7 +44,7 @@
     const semMatch = cardTitle.match(/Semester\s*([12])/i);
     const { id, occurrence } = rowTaskId(row);
     const caption = meta.labels?.[1] || '';
-    // A week typed in the Progress Graph wins over the week in the caption (by name only for the first occurrence)
+    // A week typed in Task Dates wins over the week in the caption (by name only for the first occurrence)
     const overrideOrder = customWeekOrder(readTimeOverride([meta.subjectName, cardTitle], [id, occurrence ? null : meta.taskName]));
     // A Semester 1 task listed on a Semester 2 panel is still a Semester 1 task
     const cardSemester = semMatch ? Number(semMatch[1]) : 1;

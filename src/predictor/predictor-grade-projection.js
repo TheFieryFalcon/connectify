@@ -73,7 +73,7 @@
           if (seenUpcomingTaskNames.has(t.id || normName)) continue;
           if (completedTasks.some(sameTask)) continue;
 
-          // Check if custom date is set in Progress Graph:
+          // Check if custom date is set in Task Dates:
           const customTime = resolveCustomDate(subj.name, t);
           if (customTime !== null) {
             if (customTime === '') {

@@ -6,7 +6,14 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ## Unreleased
 
+### Changes
+- **Year Progression has two tabs.** Progress Graph has the charts and each task's weight and mark. Task Dates has every task's date, the term dates and Export.
+- **Group and sort the task list your way.** Group By None, Subject, Type, Completed, Predicted Grade or Grade Achieved, in ascending or descending order; Sort By Chronological, Alphabetical or Grade Achieved; and Show Uncompleted Only. Grades group as High Distinction (A) from 80%, Distinction (B) from 70%, Credit (C) from 60%, Pass (C) from 50% and Fail (D).
+- **Export now happens on the list.** Press Export and the same list gains ticks, days and download buttons.
+- **Set as Goal now happens on the planner.** Choose the end and confirm under your task table, with the effort sliders still working, instead of in a popup.
+
 ### Fixes
+- Pressing Escape while changing a task's week now cancels the change without closing the sidebar.
 - Notifications now have the Liquid Glass effect in Liquid Glass themes.
 
 ## 3.3.1 (2026-11-01)

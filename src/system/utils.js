@@ -2,7 +2,7 @@
  * Connectify Shared Utilities
  *
  * Text normalisation, HTML escaping, the signed-in user's account key, localStorage key scanning, legacy baseline key resolution,
- * Progress Graph week overrides, the outlines page check and the chart resync request to the main-world bridge
+ * Task Dates week overrides, the outlines page check and the chart resync request to the main-world bridge
  * shared by every content script. Loaded first in the assessment outlines pipeline.
  * Exposes window.ConnectifyUtils.
  */
@@ -171,7 +171,7 @@
   const isBaselineKey = key => BASELINE_PREFIXES.some(prefix => key.startsWith(prefix));
 
   /**
-   * Converts a Progress Graph week override to the internal order (12-week terms, as formatTimestamp reads it).
+   * Converts a Task Dates week override to the internal order (12-week terms, as formatTimestamp reads it).
    * The editor saves "w17": school week 17 of the year through the term calendar, as the Export numbers
    * term starts (Early Easter: Term 2 starts at Week 10). Bare numbers were saved before Early Easter was
    * known and are the same school week of the year ("17" reads as "w17"); "t2w7" names a term and week.

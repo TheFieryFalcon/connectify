@@ -1,7 +1,7 @@
 /**
  * Connectify Goals: modal shell
  *
- * The solid dialog the Set as Goal and Goals popups share (the crop prompt's pattern): page dimmed behind,
+ * The solid dialog the Goals list and the overhaul notice share (the crop prompt's pattern): page dimmed behind,
  * focus moved in and given back to the opener, Escape / close button / a click outside close it, and clicks
  * inside never reach the sidebar's outside-click handler, so the drawer stays open. Also the small shared
  * pieces: elements, the tier label and the horizontal progress bar. Exposes window.ConnectifyGoalModal.

@@ -96,7 +96,7 @@
       };
     }
 
-    // 2. Check for numeric school week (e.g. 17 for Term 2 Week 5, matching Progress Graph schedule)
+    // 2. Check for numeric school week (e.g. 17 for Term 2 Week 5, matching the Task Dates schedule)
     const num = Number(str.replace(/^[^\d]*/, '').replace(/[^\d]*$/, ''));
     if (Number.isFinite(num) && num > 0) {
       if (window.ConnectifyProgressMath?.formatTimestamp) {
@@ -118,7 +118,7 @@
     return null;
   }
 
-  /** A Progress Graph override (school week of the year, "w17" or an older bare "17", or "t2w7") as { term, week, order, display }. */
+  /** A Task Dates override (school week of the year, "w17" or an older bare "17", or "t2w7") as { term, week, order, display }. */
   function formatOverrideWeek(val) {
     const order = window.ConnectifyUtils.customWeekOrder(val);
     if (order === null) return null;

@@ -102,69 +102,10 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-gla
   cursor: not-allowed;
 }
 
-.cx-goal-overlay .cx-goal-preview-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.cx-goal-overlay .cx-goal-end {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  color: var(--cx-text-secondary, #e2e8f0);
-}
-
-.cx-goal-overlay .cx-goal-end-label {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--cx-text-secondary, #e2e8f0);
-}
-
-.cx-goal-overlay .cx-goal-week {
-  width: 70px;
-}
-
-.cx-goal-overlay .cx-goal-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.cx-goal-overlay :is(.cx-goal-reason, .cx-goal-points, .cta-note) {
-  margin: 0;
-  color: var(--cx-text-secondary, #e2e8f0);
-}
-
 .cx-goal-overlay .cx-goal-dialog-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-}
-
-/* Preview: clear rows split by hairlines on the dialog's one surface */
-.cx-goal-overlay .cx-goal-preview-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.cx-goal-overlay .cx-goal-preview-table :is(th, td) {
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--cx-border-subtle, #2e3c4e);
-  background: transparent;
-  color: var(--cx-text-primary, #f8fafc);
-  text-align: left;
-  font-weight: 400;
-}
-
-.cx-goal-overlay .cx-goal-preview-table th {
-  font-weight: 700;
-  color: var(--cx-text-secondary, #e2e8f0);
 }
 
 /* Tier label: the tier's colour on a faint tint of it */

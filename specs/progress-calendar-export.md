@@ -1,6 +1,6 @@
 # Spec: Export Assessments to Google Calendar & Notion
 
-Status: implemented (2026-10-23).
+Status: implemented (2026-10-23). Revised 2026-11-02: Export is a toggle on the Task Dates list (`docs/modules_ui_analytics.md`), not a separate view; §2's layout below is superseded. Tasks with no week keep their week input on their row instead of a note.
 
 ## 1. Summary
 An **Export** view in the Progress panel that turns the student's upcoming (unmarked) assessments into two downloadable files:
@@ -30,7 +30,7 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 │ English ATAR            Day: [Thu ▾]                                            │
 │   [ ] Essay 2           Term 3 Week 2        [Fri ▾]           Fri 31 Jul       │
 │                                                                                 │
-│ No week: Practical Report (Physics ATAR). Set one in the Progress table.        │
+│ No week: Practical Report (Physics ATAR). Set one in Task Dates.        │
 │                                                                                 │
 │ [Google Calendar (.ics)]   [Notion (CSV)]                                       │
 │ To update an earlier export, import into a new calendar.                        │
@@ -51,7 +51,7 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 - **Merged exams**: while merging is on, each exam in a merged semester exam is disabled (`.cx-export-task--merged`, `aria-disabled`): no tick or day select, name in secondary ink, its week and date in their columns, tagged `In Semester N Exam`. Select None (or turning merging off) unticks / frees them.
 - **Ticks**: every task is ticked by default; unticked tasks stay unticked across visits (by task key); tasks first seen later arrive ticked.
 - **Order**: subjects by their next due task (earliest export date among their upcoming tasks, ticked or not, so ticking never reorders); subjects with no dated task last, A–Z. Within a subject, tasks by export date, undated ones last.
-- **No week**: tasks with no readable week are not rows; one line under the list names each (`No week: <task> (<subject>), …. Set one in the Progress table.`), the only note besides the import hint (UI copy rule: only what the screen cannot show). Tasks that would land after Term 4 are listed the same way (`After Term 4: …`).
+- **No week**: tasks with no readable week are not rows; one line under the list names each (`No week: <task> (<subject>), …. Set one in Task Dates.`), the only note besides the import hint (UI copy rule: only what the screen cannot show). Tasks that would land after Term 4 are listed the same way (`After Term 4: …`).
 - **Empty**: no upcoming tasks → the list is replaced by `No upcoming assessments.` and the buttons are disabled.
 
 ### 2.4 Buttons
@@ -94,11 +94,11 @@ Loaded before the caption parser in both content-script groups: `orderHint` read
 The export uses the Progress graph's own date system and never reads captions, overrides or the DOM itself:
 - Each task's **`order`** from `ConnectifyData.collectClasses(true)` (`resolveTaskOrder`: the Progress week override, else the parsed caption's week, a range's first; a date caption becomes its real term and week, §3.4).
 - Decoded by **`ConnectifyProgressMath.termWeek(order)`** (12 slots per term: `term = floor((o - 1) / 12) + 1`, `week = floor((o - 1) % 12) + 1`), the same function behind the graph's `formatTimestamp` label, which the list, `.ics` and CSV show (`Term 2, Week 6`).
-- No `order` → **no week** (§2.3); the student sets one in the Progress table, which the graph and the export then share.
+- No `order` → **no week** (§2.3); the student sets one in Task Dates, which the graph and the export then share.
 
 ### 4.2 Which day
 - The task's own day if set, else its subject's day (default Monday): that weekday of school week `W` of term `T`.
-- **Spill-over**: a week past its term's length moves into the next term (`Term 1 Week 10` under Early Easter → Term 2 Week 1; `Term 2 Week 11` without it → Term 3 Week 1). Past Term 4 → left out (`After Term 4`). Task orders already arrive spilled (`ConnectifySchoolTerms.normalizeOrder` in `resolveTaskOrder` and `formatTimestamp`), so the export's `Term / Week`, the Progress table and the Predictor name the same week. The Progress graph shows the same Early Easter checkbox beside `Show:` (`progress-early-easter.js`).
+- **Spill-over**: a week past its term's length moves into the next term (`Term 1 Week 10` under Early Easter → Term 2 Week 1; `Term 2 Week 11` without it → Term 3 Week 1). Past Term 4 → left out (`After Term 4`). Task orders already arrive spilled (`ConnectifySchoolTerms.normalizeOrder` in `resolveTaskOrder` and `formatTimestamp`), so the export's `Term / Week`, the Progress table and the Predictor name the same week. Early Easter is on the Task Dates tab (`progress-early-easter.js`).
 - **Clamp**: a day before Term 1's start (Mon/Tue of a Wednesday-start Week 1) moves to the start day.
 
 ### 4.3 Task fields

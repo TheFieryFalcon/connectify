@@ -34,7 +34,8 @@
       if (!head.contains(scanBtn)) head.append(scanBtn);
 
       choicesContainer = panel.querySelector('.cx-subjects') || createElement('div', null, 'cx-subjects');
-      chartContainer = panel.querySelector('div:not(.cx-subjects)') || createElement('div');
+      chartContainer = panel.querySelector('.cx-progress-chart') || panel.querySelector('div:not(.cx-subjects)') || createElement('div');
+      chartContainer.classList.add('cx-progress-chart');
       if (!panel.contains(choicesContainer)) panel.append(choicesContainer);
       if (!panel.contains(chartContainer)) panel.append(chartContainer);
     } else {
@@ -54,7 +55,7 @@
       head.append(title, scanBtn);
 
       choicesContainer = createElement('div', null, 'cx-subjects');
-      chartContainer = createElement('div');
+      chartContainer = createElement('div', null, 'cx-progress-chart');
 
       panel.append(head, choicesContainer, chartContainer);
       document.body.append(toggleBtn, panel);

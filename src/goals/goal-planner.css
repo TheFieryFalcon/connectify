@@ -1,9 +1,49 @@
 /**
  * Connectify Goals: planner controls (#connectea-atar)
  *
- * Set as Goal / Update Goal, Cancel Editing, the Goals (n) heading button, the saved status, and the effort
- * sliders in Target Grade's task table, Target ATAR's subject rows and the dialogs. Theme tokens only.
+ * Set as Goal / Update Goal and its end and Confirm on the planner (goal-compose.js), Cancel Editing, the Goals (n)
+ * heading button, the saved status, and the effort sliders in Target Grade's task table and Target ATAR's subject
+ * rows. Theme tokens only.
  */
+
+/* Set as Goal, open under the plan: clear on the panel like the rest of the planner */
+#connectea-atar .cx-goal-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--cx-border-subtle, #2e3c4e);
+}
+
+#connectea-atar .cx-goal-compose .cx-goal-actions {
+  margin-top: 0;
+}
+
+#connectea-atar .cx-goal-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+#connectea-atar .cx-goal-end-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+#connectea-atar .cx-goal-week {
+  width: 70px;
+}
+
+#connectea-atar .cx-goal-compose :is(.cx-goal-reason, .cx-goal-points, .cta-note) {
+  margin: 0;
+}
+
+#connectea-atar .cx-goal-reason:empty {
+  display: none;
+}
 
 #connectea-atar .cx-goal-actions {
   display: flex;

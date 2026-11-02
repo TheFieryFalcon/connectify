@@ -72,7 +72,8 @@
           'connectify:auto_expand',
           'connectify:semester_filter',
           'connectify:panel_view',
-          'connectify:school_terms'
+          'connectify:school_terms',
+          'connectify:task_dates_view'
         ];
         for (const k of directKeys) localStorage.removeItem(k);
         // Baselines live under singular and legacy plural prefixes (see ConnectifyUtils.BASELINE_PREFIXES)

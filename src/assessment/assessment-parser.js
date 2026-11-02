@@ -102,7 +102,7 @@
       mean: Number.isFinite(mean) ? mean : null,
       // Semester 2 outlines list the Semester 1 tasks too: the task's own week decides, not the card
       semester: window.ConnectifyParseHelpers.taskSemester(cardSemester, caption, overrideOrder),
-      // A week override typed in the Progress Graph wins; the generic name key only applies to the first occurrence
+      // A week override typed in Task Dates wins; the generic name key only applies to the first occurrence
       order: overrideOrder ?? orderHint(caption),
       sequence
     };

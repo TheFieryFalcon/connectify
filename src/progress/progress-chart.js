@@ -1,8 +1,8 @@
 /**
  * Connectify Progress Chart
  *
- * SVG chart rendering, polyline series generation, axes, tooltips, legend, and the data detail
- * table (week override cells: progress-week-editor.js). Exposes window.ConnectifyProgressChart.
+ * SVG chart rendering, polyline series generation, axes, tooltips, legend, and the detail table of
+ * marks and weights (dates are on the Task Dates tab). Exposes window.ConnectifyProgressChart.
  */
 (() => {
   'use strict';
@@ -38,10 +38,9 @@
    * @param {boolean} options.byAssessment
    * @param {string} [options.mode] - ConnectifyProgressModes id; average modes rename the series
    * @param {string} options.subjectName
-   * @param {Function} [options.onRefresh]
    */
   function renderChart(container, options) {
-    const { points, isHistory, byAssessment, subjectName, onRefresh, mode } = options;
+    const { points, isHistory, byAssessment, subjectName, mode } = options;
     const math = window.ConnectifyProgressMath;
     const modeInfo = window.ConnectifyProgressModes?.find(mode);
     const scoreLabel = modeInfo?.score || 'Your score';
@@ -198,7 +197,7 @@
     const headerRow = createElement('tr');
     const headers = isHistory
       ? ['When', 'Estimated ATAR']
-      : ['#', 'Assessment', 'When', scoreLabel, meanLabel];
+      : ['#', 'Assessment', 'Weight', scoreLabel, meanLabel];
 
     headers.forEach(h => headerRow.append(createElement('th', h)));
     table.append(headerRow);
@@ -210,14 +209,12 @@
         row.className = 'cx-task-pending';
       }
 
-      const whenCell = isHistory ? point.name : window.ConnectifyProgressWeekEditor.weekCell(point, points, subjectName, onRefresh);
-
       const cells = isHistory
         ? [point.name, point.display]
         : [
             String(idx + 1),
             point.name,
-            whenCell,
+            Number.isFinite(point.weight) ? `${Number(point.weight.toFixed(2))}%` : '—',
             Number.isFinite(point.score) ? `${Number(point.score.toFixed(2))}%` : '—',
             Number.isFinite(point.mean) ? `${Number(point.mean.toFixed(2))}%` : 'Unavailable'
           ];

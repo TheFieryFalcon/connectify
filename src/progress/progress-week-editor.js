@@ -1,7 +1,7 @@
 /**
- * Connectify Progress Chart: school week override editor
+ * Connectify Task Dates: school week override editor
  *
- * The "When" cell of a task in the Progress Graph table: the task's week with an edit button, or a
+ * The Date cell of a task on the Task Dates tab: the task's week with an edit button, or a
  * week input when no date could be read. Overrides are school weeks of the year, numbered through the term
  * calendar as the Export's term starts are (under Early Easter Term 2 starts at Week 10), saved as "w17"
  * under the student's own connectea:time_override:<subject>:<task id or name> (ConnectifyUtils.userKey); repeated task names each get their own id key.
@@ -144,7 +144,9 @@
           }
           commit();
         } else if (e.key === 'Escape') {
+          // Cancels this edit only, never the drawer around it
           e.preventDefault();
+          e.stopPropagation();
           input.value = initialVal;
           // The override as it was saved
           if (savedTime) localStorage.setItem(isDuplicateName && specificKey ? specificKey : (specificKey || genericKey), savedTime);

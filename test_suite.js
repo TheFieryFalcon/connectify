@@ -3885,7 +3885,20 @@ runTest('Test 120: In-memory prediction and category caching, chunked 95% bulk e
   assert.strictEqual(window.ConnectifyPredictorMath.getCachedPrediction(testSubj, testTaskId), null, 'Prediction must be cleared from memory');
 });
 
-runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, grays them out, flags invalid dates, and satisfies design rules', () => {
+// The Date cells of the Task Dates table, one row per task
+const drawWeekCells = (container, points, subjectName, onRefresh) => {
+  const table = document.createElement('table');
+  for (const point of points) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.appendChild(window.ConnectifyProgressWeekEditor.weekCell(point, points, subjectName, onRefresh));
+    row.appendChild(cell);
+    table.appendChild(row);
+  }
+  container.appendChild(table);
+};
+
+runTest('Test 121: Progress graph lists all tasks with marks and weights but no dates, grays uncompleted ones; Task Dates cells flag invalid dates', () => {
   const progressGraphJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8');
   const progressChartJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-chart.js'), 'utf8');
   const progressMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-math.js'), 'utf8');
@@ -3926,9 +3939,9 @@ runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, g
 
   const container = document.createElement('div');
   const mockPoints = [
-    { name: 'Completed Task', score: 85, mean: 70, order: 5, pending: false },
-    { name: 'Uncompleted Valid Date', score: null, mean: null, order: 15, pending: true },
-    { name: 'Uncompleted Invalid Date', score: null, mean: null, order: null, pending: true }
+    { name: 'Completed Task', score: 85, mean: 70, order: 5, pending: false, weight: 12.5 },
+    { name: 'Uncompleted Valid Date', score: null, mean: null, order: 15, pending: true, weight: 20 },
+    { name: 'Uncompleted Invalid Date', score: null, mean: null, order: null, pending: true, weight: null }
   ];
 
   window.ConnectifyProgressChart.renderChart(container, {
@@ -3940,6 +3953,8 @@ runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, g
 
   const table = container.querySelector('table');
   assert.ok(table, 'renderChart must generate a table');
+  assert.deepStrictEqual(Array.from(table.querySelectorAll('th')).map(th => th.textContent), ['#', 'Assessment', 'Weight', 'Your score', 'Cohort mean'], 'the table has weights and no date column');
+  assert.ok(!container.querySelector('.cx-time-edit-btn') && !container.querySelector('input'), 'the graph tab has no week editor');
   const rows = table.querySelectorAll('tr');
   // Header row + 3 task rows = 4 rows
   assert.strictEqual(rows.length, 4, 'Table must render header row + 3 task rows');
@@ -3948,6 +3963,7 @@ runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, g
   const row1 = rows[1];
   assert.ok(!row1.className.includes('cx-task-pending'), 'Completed task row must not be cx-task-pending');
   const r1Tds = row1.querySelectorAll('td');
+  assert.strictEqual(r1Tds[2].textContent, '12.5%', 'The weight is shown');
   assert.strictEqual(r1Tds[3].textContent, '85%', 'Completed score must be 85%');
 
   // Uncompleted valid date row
@@ -3955,15 +3971,21 @@ runTest('Test 121: Progress graph lists all tasks including uncompleted tasks, g
   assert.ok(row2.className.includes('cx-task-pending'), 'Uncompleted task row must have cx-task-pending class');
   const r2Tds = row2.querySelectorAll('td');
   assert.strictEqual(r2Tds[3].textContent, '—', 'Uncompleted score must display em-dash');
-  assert.ok(r2Tds[2].querySelector('.cx-time-edit-btn'), 'Valid date row must provide time edit button');
 
   // Uncompleted invalid date row
   const row3 = rows[3];
   assert.ok(row3.className.includes('cx-task-pending'), 'Invalid date task row must have cx-task-pending class');
   const r3Tds = row3.querySelectorAll('td');
+  assert.strictEqual(r3Tds[2].textContent, '—', 'An unknown weight displays an em-dash');
   assert.strictEqual(r3Tds[3].textContent, '—', 'Invalid date score must display em-dash');
-  assert.ok(r3Tds[2].querySelector('.cx-date-warning'), 'Invalid date row must show cx-date-warning message');
-  const inputEl = r3Tds[2].querySelector('input');
+
+  // The same tasks' Date cells on the Task Dates tab
+  const dateCells = document.createElement('div');
+  drawWeekCells(dateCells, mockPoints, 'English ATAR');
+  const dateRows = dateCells.querySelectorAll('tr');
+  assert.ok(dateRows[1].querySelector('.cx-time-edit-btn'), 'Valid date row must provide time edit button');
+  assert.ok(dateRows[2].querySelector('.cx-date-warning'), 'Invalid date row must show cx-date-warning message');
+  const inputEl = dateRows[2].querySelector('input');
   assert.ok(inputEl, 'Invalid date row must provide week input field');
   assert.strictEqual(inputEl.type, 'number', 'Week input must have type number');
 });
@@ -4094,21 +4116,15 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Chemistry ATAR:Extended response 1'), '17');
 
   let refreshed = false;
-  window.ConnectifyProgressChart.renderChart(container, {
-    points: mockPoints,
-    isHistory: false,
-    byAssessment: false,
-    subjectName: 'Chemistry ATAR',
-    onRefresh: () => { refreshed = true; }
-  });
+  drawWeekCells(container, mockPoints, 'Chemistry ATAR', () => { refreshed = true; });
 
   const table = container.querySelector('table');
   assert.ok(table, 'Table must be rendered');
   const rows = table.querySelectorAll('tr');
-  assert.strictEqual(rows.length, 3, 'Must render header + 2 task rows');
+  assert.strictEqual(rows.length, 2, 'Must render 2 task rows');
 
   // Row 1 (Task 1): First occurrence gets generic key 17
-  const row1 = rows[1];
+  const row1 = rows[0];
   const r1EditBtn = row1.querySelector('.cx-time-edit-btn');
   assert.ok(r1EditBtn, 'Task 1 must have edit button for week 17');
   // An older bare 17 is converted to school week 17, Early Easter or not
@@ -4116,7 +4132,7 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
 
   // Row 2 (Task 2): Second occurrence does NOT inherit generic key!
   // It has order: null, so it renders the input field with warning
-  const row2 = rows[2];
+  const row2 = rows[1];
   const r2Warning = row2.querySelector('.cx-date-warning');
   assert.ok(r2Warning, 'Task 2 must not inherit Task 1 date and should prompt for week input');
   const r2Input = row2.querySelector('input');
@@ -4160,7 +4176,7 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   assert.strictEqual(resolvedT2, 'w27', 'Task 2 must resolve to w27');
 });
 
-runTest('Test 125: Progress graph date editor protects active typing from premature refresh and commits on Enter or blur', () => {
+runTest('Test 125: Task Dates week editor protects active typing from premature refresh and commits on Enter or blur', () => {
   const chartJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-chart.js'), 'utf8');
   const graphJs = fs.readFileSync(path.resolve(BASE_DIR, 'progress-graph.js'), 'utf8');
 
@@ -4181,13 +4197,7 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   const task = { id: 'task_unscheduled', name: 'Practical Investigation', score: 80, mean: 65, order: null, sequence: 1, pending: false };
 
   let refreshCount = 0;
-  window.ConnectifyProgressChart.renderChart(container, {
-    points: [task],
-    isHistory: false,
-    byAssessment: false,
-    subjectName: 'Physics ATAR',
-    onRefresh: () => { refreshCount++; }
-  });
+  drawWeekCells(container, [task], 'Physics ATAR', () => { refreshCount++; });
 
   const input = container.querySelector('input');
   assert.ok(input, 'Must render input element for unconfigured task');
@@ -4237,13 +4247,7 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   let refreshCount2 = 0;
   mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated'), 'w19');
 
-  window.ConnectifyProgressChart.renderChart(container2, {
-    points: [taskWithDate],
-    isHistory: false,
-    byAssessment: false,
-    subjectName: 'Physics ATAR',
-    onRefresh: () => { refreshCount2++; }
-  });
+  drawWeekCells(container2, [taskWithDate], 'Physics ATAR', () => { refreshCount2++; });
 
   const editBtn = container2.querySelector('.cx-time-edit-btn');
   assert.ok(editBtn, 'Must render edit button for dated task');
@@ -4263,6 +4267,7 @@ runTest('Test 125: Progress graph date editor protects active typing from premat
   assert.strictEqual(editInput.value, '19', 'Escape must restore initial value 19 in input');
   assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated')), 'w19', 'Escape must restore initial value 19 in storage');
   assert.strictEqual(refreshCount2, 1, 'Escape must commit restored value and trigger onRefresh');
+  assert.ok(chartJs.includes("e.key === 'Escape') {\n          // Cancels this edit only, never the drawer around it\n          e.preventDefault();\n          e.stopPropagation();"), 'Escape cancels the edit, not the drawer');
 
   // 7. Test clear button '✕'
   const clearBtn = container2.querySelector('.cx-time-clear-btn');
@@ -4746,7 +4751,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-grade-ui.js'), 'utf8'));
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'target-planner-ui.js'), 'utf8'));
   // Goals load after the planners and before the calculator controller, as in manifest.json
-  for (const f of ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js', 'goal-modal.js', 'goal-sliders.js', 'goal-dialog.js', 'goal-list-ui.js', 'goal-editor.js']) {
+  for (const f of ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js', 'goal-modal.js', 'goal-sliders.js', 'goal-compose.js', 'goal-list-ui.js', 'goal-editor.js']) {
     eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals', f), 'utf8'));
   }
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8'));
@@ -11086,97 +11091,128 @@ runTest('Test 241: Export CSV for Notion: BOM, columns, quoting, dates, weights 
   assert.strictEqual(csv.build(exams, { merge: false }).split('\r\n').length, 5, 'unmerged: a row per task');
 });
 
-runTest('Test 242: Export view mounts in the Progress header, swaps out the graph and stores its choices', () => {
-  loadExportModules();
-  const saved = { progress: window.ConnectifyProgress, data: window.ConnectifyData, view: window.ConnectifyExportView, chart: window.ConnectifyProgressChart };
+// A Year Progression panel with the Task Dates and Export modules mounted on it (Tests 242, 311)
+function withTaskDatesPanel(subjects, body) {
+  const { terms } = loadExportModules();
+  const names = ['ConnectifyProgress', 'ConnectifyData', 'ConnectifyExportView', 'ConnectifyProgressChart', 'ConnectifyTaskDates', 'ConnectifyTaskDatesView', 'ConnectifyProgressTabs', 'ConnectifyProgressWeekEditor', 'ConnectifyEarlyEaster'];
+  const saved = Object.fromEntries(names.map(n => [n, window[n]]));
+  const evalSrc = f => eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8'));
   const panel = new MockElement('section');
   panel.id = 'connectify-progress';
   const head = new MockElement('header');
-  const scan = new MockElement('button', 'cx-refresh-btn');
-  scan.textContent = 'Refresh Assessments';
-  head.append(new MockElement('strong'), scan);
+  head.append(new MockElement('strong'));
   const chips = new MockElement('div', 'cx-subjects');
-  const chart = new MockElement('div');
+  const chart = new MockElement('div', 'cx-progress-chart');
   panel.append(head, chips, chart);
-  window.ConnectifyProgress = { panelRefs: { panel } };
-  window.ConnectifyProgressChart = saved.chart || { createElement: (tag, text, cls) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== null && text !== undefined) el.textContent = text; return el; } };
-  window.ConnectifyData = { collectClasses: () => [{ name: 'Physics ATAR', tasks: [{ id: 'p1', name: 'Lab', caption: 'Term 3 Week 2', order: 26, pending: true, sequence: 0 }] }] };
-  delete window.ConnectifyExportView;
+  document.body.append(panel);
+  let refreshes = 0;
+  window.ConnectifyProgress = { panelRefs: { panel, refresh: () => { refreshes++; } } };
+  window.ConnectifyData = { collectClasses: () => subjects };
+  for (const n of names.slice(2)) delete window[n];
   try {
-    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.js'), 'utf8'));
-    const view = window.ConnectifyExportView;
-    assert.ok(view, 'the view mounts');
-    assert.strictEqual(head.children.indexOf(view.toggleBtn), head.children.indexOf(scan) - 1, 'Export sits just before Refresh Assessments');
-    assert.strictEqual(view.toggleBtn.textContent, 'Export');
-    view.toggleBtn.dispatchEvent(new MockEvent('click'));
-    assert.ok(!view.view.hidden && chips.hidden && chart.hidden, 'the export view replaces the chips and chart');
-    assert.strictEqual(view.toggleBtn.textContent, '← Back to Graph');
+    for (const f of ['progress/progress-chart.js', 'progress/progress-week-editor.js', 'progress/progress-early-easter.js', 'progress/task-dates.js', 'progress/task-dates-view.js', 'progress/export-view.js', 'progress/progress-tabs.js']) evalSrc(f);
     const find = (root, pred) => { const out = []; (function walk(n) { for (const c of n.children || []) { if (pred(c)) out.push(c); walk(c); } })(root); return out; };
-    const text = find(view.view, () => true).map(n => n.textContent).join('|');
+    body({ terms, panel, head, chips, chart, find, refreshes: () => refreshes });
+  } finally {
+    panel.remove();
+    localStorage.removeItem('connectify:task_dates_view');
+    Object.assign(window, saved);
+  }
+}
+
+runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks and days added, uncompleted only forced on, choices stored', () => {
+  withTaskDatesPanel([{ name: 'Physics ATAR', tasks: [
+    { id: 'p0', name: 'Quiz', order: 5, score: 80, pending: false, sequence: 0 },
+    { id: 'p1', name: 'Lab', caption: 'Term 3 Week 2', order: 26, pending: true, sequence: 1 }
+  ] }], ({ terms: T, head, find }) => {
+    const view = window.ConnectifyExportView;
+    const dates = window.ConnectifyTaskDatesView;
+    window.ConnectifyProgressTabs.select('dates');
+    const names = () => find(dates.list, n => n.tagName === 'TD').map(n => n.textContent);
+    const box = () => find(dates.toolbar, n => n.type === 'checkbox')[0];
+    assert.ok(dates.toolbar.children.includes(view.toggleBtn) && !head.children.includes(view.toggleBtn), 'Export sits in the Task Dates toolbar, not the panel header');
+    assert.ok(names().includes('Quiz'), 'the list starts with every task');
+    assert.strictEqual(find(dates.list, n => n.tagName === 'SELECT').length, 0, 'with no export controls');
+    assert.strictEqual(box().disabled, false);
+
+    view.toggleBtn.dispatchEvent(new MockEvent('click'));
+    assert.strictEqual(view.toggleBtn.textContent, 'Export', 'one button, pressed: no second view to come back from');
+    assert.strictEqual(view.toggleBtn.getAttribute('aria-pressed'), 'true');
+    assert.ok(find(dates.section, n => n.className === 'cx-dates-table').length === 1 && !document.getElementById('cx-export-view'), 'still the one table');
+    assert.ok(box().checked && box().disabled, 'Show Uncompleted Only is forced on');
+    assert.ok(!find(dates.list, () => true).some(n => n.textContent === 'Quiz'), 'so a completed task leaves the list');
+    const heads = find(dates.list, n => n.tagName === 'TH').filter(n => n.children.length === 0).map(n => n.textContent);
+    assert.deepStrictEqual(heads, ['Assessment', 'Date', 'Day', 'Export Date'], 'the table gains the export columns');
     const year = new Date().getFullYear();
-    const T = window.ConnectifySchoolTerms;
-    const cells = find(view.view, n => n.className === 'cx-export-term').map(n => n.children.map(c => c.textContent).join(' '));
-    assert.deepStrictEqual(cells, T.terms(year, T.autoEarlyEaster(year)).map(t => `Term ${t.term} ${T.formatDate(t.start)} (Week ${t.yearWeek})`), 'each term has its own cell: its start and its first school week');
+    const cells = find(dates.section, n => n.className === 'cx-dates-term').map(n => n.children.map(c => c.textContent).join(' '));
+    assert.deepStrictEqual(cells, T.terms(year, T.earlyEaster(year)).map(t => `Term ${t.term} ${T.formatDate(t.start)} (Week ${t.yearWeek})`), 'each term has its own cell: its start and its first school week');
+    const text = find(dates.section, () => true).map(n => n.textContent).join('|');
     assert.ok(text.includes('Merge exams into one event per semester') && !text.includes('per semester (.ics)'), 'the merge option covers both files');
-    assert.strictEqual(find(view.view, n => n.dataset?.cxFocus === 'taskday:Physics ATAR::p1')[0].children[0].textContent, 'Default (Mon)', 'the task day defaults to the subject day, named');
+    assert.strictEqual(find(dates.list, n => n.dataset?.cxFocus === 'taskday:Physics ATAR::p1')[0].children[0].textContent, 'Default (Mon)', 'the task day defaults to the subject day, named');
     assert.ok(text.includes('Google Calendar (.ics)') && text.includes('Notion (CSV)'));
     assert.ok(text.includes('To update an earlier export, import into a new calendar.'));
-    const tick = find(view.view, n => n.type === 'checkbox' && n.dataset.cxFocus === 'tick:Physics ATAR::p1')[0];
+    const tick = find(dates.list, n => n.type === 'checkbox' && n.dataset.cxFocus === 'tick:Physics ATAR::p1')[0];
     tick.checked = false;
     tick.dispatchEvent(new MockEvent('change'));
     const stored = JSON.parse(localStorage.getItem(view.storageKey()));
     assert.deepStrictEqual(stored.unticked, ['Physics ATAR::p1'], 'unticks are stored by task key');
-    assert.ok(find(view.view, n => n.id === 'cx-export-ics')[0].disabled, 'nothing ticked disables the downloads');
-    // Opening Progress (or any tool) fires connectify-open, which returns the panel to the graph
-    assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.js'), 'utf8').includes("window.addEventListener('connectify-open', showGraph)"));
-    view.showGraph();
-    assert.ok(view.view.hidden && !chips.hidden && !chart.hidden, 'reopening Progress starts on the graph');
+    assert.ok(find(dates.footerSlot, n => n.id === 'cx-export-ics')[0].disabled, 'nothing ticked disables the downloads');
+    // Opening Progress (or any tool) fires connectify-open, which leaves Export mode
+    assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.js'), 'utf8').includes("window.addEventListener('connectify-open', () => setActive(false))"));
+    view.toggleBtn.dispatchEvent(new MockEvent('click'));
+    assert.ok(names().includes('Quiz') && box().disabled === false && box().checked === false, 'toggling off gives the same list back, its own option restored');
+    assert.ok(dates.optionsSlot.children.length === 0 && dates.footerSlot.children.length === 0);
     // A settings reset removes the choices; Clear Cache keeps them
     const cacheSrc = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/cache-versions.js'), 'utf8');
     assert.ok(cacheSrc.includes("k.startsWith('connectify:calendar_export:')"));
     localStorage.removeItem(view.storageKey());
-  } finally {
-    Object.assign(window, { ConnectifyProgress: saved.progress, ConnectifyData: saved.data, ConnectifyExportView: saved.view, ConnectifyProgressChart: saved.chart });
-  }
+  });
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(g => (g.js || []).includes('src/progress/progress-graph.js'));
-  const order = ['progress-graph.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js', 'export-rows.js', 'export-view.js'].map(f => group.js.indexOf(`src/progress/${f}`));
+  const order = ['progress-graph.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js', 'export-rows.js', 'task-dates.js', 'task-dates-view.js', 'export-view.js', 'progress-tabs.js'].map(f => group.js.indexOf(`src/progress/${f}`));
   assert.ok(order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), 'export scripts load after progress-graph.js in order');
   assert.ok(group.matches.every(m => m.includes('assessment-outlines')), 'outlines page only');
   assert.ok((group.css || []).includes('src/progress/export-view.css') || manifest.content_scripts.some(g => (g.css || []).includes('src/progress/export-view.css')));
   assert.deepStrictEqual(manifest.permissions, ['storage', 'unlimitedStorage'], 'no new permissions');
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.css'), 'utf8');
-  assert.ok(cssHasToken(css, '.connectea-dark #cx-export-view button.cx-export-download { background: #2563eb;'), 'dark download buttons take the primary button token');
+  assert.ok(cssHasToken(css, '.connectea-dark #cx-task-dates button.cx-export-download { background: #2563eb;'), 'dark download buttons take the primary button token');
   assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
 });
 
-runTest('Test 244: Exams merged into a semester exam show no tick or day; export and Weakness labels sit on their row', () => {
+runTest('Test 244: Exams merged into a semester exam show no tick or day, nor do tasks with no export date; Task Dates labels sit on their row', () => {
   loadExportModules();
   const saved = { types: window.ConnectifyTaskTypes, chart: window.ConnectifyProgressChart };
   window.ConnectifyTaskTypes = { getEffectiveType: (subject, task) => (/exam/i.test(task.name) ? 'Exam' : 'Test') };
   window.ConnectifyProgressChart = saved.chart || { createElement: (tag, text, cls) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text !== null && text !== undefined) el.textContent = text; return el; } };
   try {
-    const { groups } = window.ConnectifyExportTasks.build([
-      { name: 'Chemistry ATAR', tasks: [{ id: 'c1', name: 'Lab', order: 31, pending: true, sequence: 0, semester: 2 }, { id: 'c2', name: 'Exam', order: 41, pending: true, sequence: 1, semester: 2 }] },
+    const subjectDays = { 'Chemistry ATAR': 3 };
+    const { groups, leftOut } = window.ConnectifyExportTasks.build([
+      { name: 'Chemistry ATAR', tasks: [{ id: 'c1', name: 'Lab', order: 31, pending: true, sequence: 0, semester: 2 }, { id: 'c2', name: 'Exam', order: 41, pending: true, sequence: 1, semester: 2 }, { id: 'c3', name: 'Undated', order: null, pending: true, sequence: 2, semester: 2 }, { id: 'c4', name: 'Late', order: 60, pending: true, sequence: 3, semester: 2 }] },
       { name: 'Physics ATAR', tasks: [{ id: 'p1', name: 'Semester 2 exam', order: 42, pending: true, sequence: 0, semester: 2 }] }
-    ], { year: 2026, early: true, subjectDays: { 'Chemistry ATAR': 3 } });
+    ], { year: 2026, early: true, subjectDays });
     const mergedIn = new Map(window.ConnectifyExportTasks.examGroups(window.ConnectifyExportTasks.ticked(groups)).flatMap(g => g.exams.map(e => [e.key, g.semester])));
-    const chem = groups.find(g => g.subject === 'Chemistry ATAR');
-    const block = window.ConnectifyExportRows.subjectBlock(chem, { mergedIn, update: () => {}, track: el => el });
-    const rows = block.children.filter(n => n.className.includes('cx-export-task'));
+    const items = new Map([...groups.flatMap(g => g.tasks), ...leftOut].map(item => [item.key, item]));
+    const ctx = { items, mergedIn, subjectDays, update: () => {}, track: el => { el.dataset.cxFocus = 'x'; return el; } };
+    const cells = (id, name) => window.ConnectifyExportRows.taskCells({ key: `Chemistry ATAR::${id}`, name, subject: 'Chemistry ATAR' }, ctx);
     const walk = n => [n, ...(n.children || []).flatMap(walk)];
-    const [lab, exam] = rows.map(walk);
-    assert.ok(lab.some(n => n.type === 'checkbox') && lab.some(n => n.tagName === 'SELECT'), 'a task outside the merge keeps its tick and day');
-    assert.strictEqual(lab.find(n => n.tagName === 'SELECT').children[0].textContent, 'Default (Wed)', 'the default names the subject day');
-    assert.ok(rows[1].classList.contains('cx-export-task--merged') && rows[1].getAttribute('aria-disabled') === 'true', 'a merged exam row is disabled');
-    assert.ok(!exam.some(n => n.type === 'checkbox' || n.tagName === 'SELECT'), 'a merged exam renders no tick or day');
-    assert.ok(exam.some(n => n.textContent === 'In Semester 2 Exam'), 'and names the exam it is part of');
+    const lab = cells('c1', 'Lab');
+    assert.ok(walk(lab.name).some(n => n.type === 'checkbox') && lab.day.tagName === 'SELECT', 'a task outside the merge keeps its tick and day');
+    assert.strictEqual(lab.day.children[0].textContent, 'Default (Wed)', 'the default names the subject day');
+    const exam = cells('c2', 'Exam');
+    assert.ok(exam.merged && !walk(exam.name).some(n => n.type === 'checkbox') && exam.day.tagName !== 'SELECT', 'a merged exam renders no tick or day');
+    assert.strictEqual(exam.day.textContent, 'In Semester 2 Exam', 'and names the exam it is part of');
+    const undated = cells('c3', 'Undated');
+    assert.ok(!walk(undated.name).some(n => n.type === 'checkbox') && !undated.date.textContent, 'no week: no tick and no export date, its week input is on the same row');
+    assert.strictEqual(cells('c4', 'Late').day.textContent, 'After Term 4');
+    const head = window.ConnectifyExportRows.groupHead({ label: 'Chemistry ATAR', rows: [{ key: 'Chemistry ATAR::c1' }] }, { groupBy: 'subject' }, ctx);
+    assert.ok(walk(head).some(n => n.tagName === 'SELECT' && n.value === '3'), 'grouped by Subject, the heading holds the subject day');
+    assert.strictEqual(walk(head).find(n => n.className === 'cx-export-all').textContent, 'Select None');
+    assert.ok(!walk(window.ConnectifyExportRows.groupHead({ label: 'Exam', rows: [] }, { groupBy: 'type' }, ctx)).some(n => n.tagName === 'SELECT'), 'other groups have no subject day');
   } finally {
     Object.assign(window, { ConnectifyTaskTypes: saved.types, ConnectifyProgressChart: saved.chart });
   }
-  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.css'), 'utf8');
-  assert.ok(css.includes('#cx-export-view label { margin: 0; font-size: inherit; line-height: inherit; }'), "Connect's .eds.cvr label margin and size never lift export labels off their row");
-  assert.ok(/\.cx-export-task--merged \.cx-export-date \{ grid-column: 4; \}/.test(css), 'a merged row keeps its date in the date column');
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/task-dates.css'), 'utf8');
+  assert.ok(css.includes('#cx-task-dates label { margin: 0; font-size: inherit; line-height: inherit; }'), "Connect's .eds.cvr label margin and size never lift Task Dates labels off their row");
   const weakness = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-tool-menu.css'), 'utf8');
   assert.ok(/#connectify-weakness \.cx-radar-mode-label \{\s*margin: 0;/.test(weakness) && /\.cx-weakness-checkbox-label \{\s*display: flex !important;\s*margin: 0 !important;/.test(weakness), 'Weakness labels drop the Connect label margin');
 });
@@ -11291,10 +11327,8 @@ runTest('Test 246: Weeks past a term\'s end read as the next term\'s everywhere;
     let tasks = [{ id: 'a', order: 25 }, { id: 'b', order: 40 }];
     window.ConnectifyData = { collect: () => [{ name: 'Chemistry', tasks: tasks.map(t => ({ ...t, order: terms.normalizeOrder(t.order, year) })) }] };
     try {
-      const show = document.createElement('label');
-      const row = window.ConnectifyEarlyEaster.controls(show, () => {});
-      assert.strictEqual(row.className, 'cx-progress-controls');
-      const input = row.children[1].children[0];
+      const { wrap, input } = window.ConnectifyEarlyEaster.checkbox('cx-dates-check', () => {});
+      assert.strictEqual(wrap.className, 'cx-dates-check');
       assert.strictEqual(input.checked, false, 'the box shows this year\'s choice');
       input.checked = true;
       input.dispatchEvent(new MockEvent('change'));
@@ -11321,9 +11355,9 @@ runTest('Test 246: Weeks past a term\'s end read as the next term\'s everywhere;
   const resolve = read('assessment/assessment-scrape.js').slice(read('assessment/assessment-scrape.js').indexOf('function resolveTaskOrder'));
   assert.ok(resolve.includes('return termWeekOrder(order);') && resolve.includes('return termWeekOrder(task.order);'), 'overrides and week captions are placed by the calendar');
   assert.ok(!resolve.includes('termWeekOrder(fromDate)'), 'date captions already are (holiday weeks stay in the term before)');
-  assert.ok(read('progress/progress-graph.js').includes('window.ConnectifyEarlyEaster.controls(modes.select('), 'the graph shows the checkbox beside Show:');
-  assert.ok(read('progress/progress-graph.js').includes('JSON.stringify([data, window.ConnectifySchoolTerms?.earlyEaster('), 'a choice made in the export redraws the graph');
-  assert.ok(read('progress/export-view.js').includes("window.ConnectifyEarlyEaster.checkbox('cx-export-check'"), 'the export uses the same checkbox');
+  assert.ok(!read('progress/progress-graph.js').includes('ConnectifyEarlyEaster'), 'the graph tab has no dates, so no Early Easter checkbox');
+  assert.ok(read('progress/progress-graph.js').includes('JSON.stringify([data, window.ConnectifySchoolTerms?.earlyEaster('), 'a choice made on Task Dates redraws the graph');
+  assert.ok(read('progress/task-dates-view.js').includes("window.ConnectifyEarlyEaster.checkbox('cx-dates-check'"), 'Task Dates has the checkbox');
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8')).content_scripts.find(g => g.js.includes('src/progress/progress-graph.js')).js;
   assert.ok(manifest.indexOf('src/progress/progress-early-easter.js') > manifest.indexOf('src/assessment/school-terms.js') && manifest.indexOf('src/progress/progress-early-easter.js') < manifest.indexOf('src/progress/progress-graph.js'));
 });
@@ -11985,7 +12019,7 @@ function loadGoalModules(stubs = {}) {
   };
   const run = file => new Function('window', origReadFileSync.call(fs, resolveFilePath(file), 'utf8'))(win);
   ['scaling-data.js', 'atar-math.js', 'target-difficulty.js', 'target-solver.js'].forEach(run);
-  ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js', 'goal-modal.js', 'goal-sliders.js', 'goal-dialog.js', 'goal-list-ui.js', 'goal-editor.js',
+  ['goal-difficulty.js', 'goal-store.js', 'goal-plan.js', 'goal-replay.js', 'goal-modal.js', 'goal-sliders.js', 'goal-compose.js', 'goal-list-ui.js', 'goal-editor.js',
     'goal-celebrate.js', 'goal-events.js', 'goal-bars.js', 'goal-forecast.js'].forEach(f => run(path.resolve(SRC_DIR, 'goals', f)));
   run(path.resolve(SRC_DIR, 'progress/progress-modes.js'));
   run(path.resolve(SRC_DIR, 'progress/progress-goal-line.js'));
@@ -12182,49 +12216,48 @@ runTest('Test 263: Set as Goal previews the goal with its end and confirms it; t
 
   const draft = { kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 80, end: { type: 'semester', semester: 2 }, sliders: { t2: 1 } };
   let saved = 0;
-  win.ConnectifyGoalDialog.open({ goal: draft, onSaved: () => saved++ });
-  const dialog = document.getElementById('cx-goal-dialog');
-  assert.ok(dialog, 'the dialog opens over the page');
-  assert.strictEqual(dialog.querySelector('.cx-goal-modal').getAttribute('role'), 'dialog');
-  assert.ok(dialog.querySelector('.cx-goal-preview-head').children[0].textContent.includes('Chemistry · 80% by Semester 2'), 'the preview names the goal');
-  const rows = dialog.querySelectorAll('.cx-goal-preview tr');
-  assert.strictEqual(rows.length, 3, 'one row per remaining task');
-  assert.strictEqual(rows[1].children[1].textContent, 'More', 'with its effort notch');
-  const confirm = dialog.querySelector('.cx-goal-confirm');
-  assert.strictEqual(confirm.disabled, false, 'a goal within reach can be confirmed');
-  const select = dialog.querySelector('.cx-goal-end-select');
+  const ends = [];
+  let cancelled = 0;
+  const compose = goal => win.ConnectifyGoalCompose.create({ goal, onEnd: end => ends.push(end), onSaved: () => saved++, onCancel: () => cancelled++ });
+  const first = compose(draft);
+  assert.ok(!document.getElementById('cx-goal-dialog') && first.node.className === 'cx-goal-compose', 'Set as Goal opens on the planner, never a dialog over it');
+  assert.ok(!first.node.querySelector('table'), 'with no second copy of the planner\'s task table');
+  const confirm0 = first.node.querySelector('.cx-goal-confirm');
+  assert.strictEqual(confirm0.disabled, false, 'a goal within reach can be confirmed');
+  const select = first.node.querySelector('.cx-goal-end-select');
   select.value = 'week';
   select.dispatchEvent(new MockEvent('change'));
-  const week = dialog.querySelector('.cx-goal-week');
-  week.value = '20';
-  week.dispatchEvent(new MockEvent('input'));
-  assert.strictEqual(dialog.querySelectorAll('.cx-goal-preview tr').length, 2, 'a custom end week drops the tasks after it');
-  assert.strictEqual(dialog.querySelector('.cx-goal-week-hint').textContent, 'Term 2 Week 10', 'the week shows its term');
-  confirm.click();
+  assert.deepStrictEqual(ends, [{ type: 'week', week: 20 }], 'choosing an end goes back through the planner, which draws again');
+  const dated = compose({ ...draft, end: { type: 'week', week: 20 } });
+  assert.strictEqual(dated.node.querySelector('.cx-goal-week-hint').textContent, 'Term 2 Week 10', 'the week shows its term');
+  assert.strictEqual(dated.state.tasks.filter(t => t.weight > 0 && !win.ConnectifyGoalPlan.isMarked(t)).length, 1, 'a custom end week drops the tasks after it');
+  const week = dated.node.querySelector('.cx-goal-week');
+  week.value = '22';
+  week.dispatchEvent(new MockEvent('change'));
+  assert.deepStrictEqual(ends[1], { type: 'week', week: 22 }, 'a typed week applies on commit, so typing keeps its focus');
+  dated.node.querySelector('.cx-goal-confirm').click();
   assert.strictEqual(saved, 1, 'Confirm saves');
-  assert.ok(!document.getElementById('cx-goal-dialog'), 'and closes the dialog');
   const goal = win.ConnectifyGoalStore.active()[0];
   assert.deepStrictEqual([goal.end, goal.priorMarked], [{ type: 'week', week: 20 }, ['chemistry::t1']], 'with its end and the tasks already marked');
+  const editor = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-editor.js'), 'utf8');
+  assert.ok(editor.includes('function narrowToEnd(container, info)') && editor.includes("container.querySelector('.cx-goal-tasks')"), 'a custom end narrows the planner\'s own task table');
 
-  win.ConnectifyGoalDialog.open({ goal: { ...draft } });
-  const again = document.getElementById('cx-goal-dialog');
+  const again = compose({ ...draft }).node;
   assert.strictEqual(mockText(again.querySelector('.cx-goal-reason')), 'Chemistry already has a goal. Overwrite?', 'a second goal for the subject asks to overwrite the first');
   assert.ok(!again.querySelector('.cx-goal-reason .cx-goal-link'), 'with no Edit button');
   assert.strictEqual(again.querySelector('.cx-goal-confirm').disabled, false, 'Confirm answers it');
-  again.querySelector('.cx-goal-cancel').click();
-  assert.strictEqual(win.ConnectifyGoalStore.active()[0].id, goal.id, 'Cancel keeps the first goal');
-  win.ConnectifyGoalDialog.open({ goal: { ...draft, target: 82 } });
-  document.getElementById('cx-goal-dialog').querySelector('.cx-goal-confirm').click();
+  again.querySelector('.cx-goal-cancel-edit').click();
+  assert.strictEqual(cancelled, 1, 'Cancel closes it');
+  assert.strictEqual(win.ConnectifyGoalStore.active()[0].id, goal.id, 'and keeps the first goal');
+  compose({ ...draft, target: 82 }).node.querySelector('.cx-goal-confirm').click();
   const replaced = win.ConnectifyGoalStore.active();
   assert.deepStrictEqual([replaced.length, replaced[0].target, replaced[0].id !== goal.id], [1, 82, true], 'Confirm replaces the subject\'s goal with the new one');
   assert.ok(!win.ConnectifyGoalStore.all().some(g => g.id === goal.id), 'the overwritten goal is removed, not kept as a past goal');
   win.ConnectifyGoalStore.remove(replaced[0].id);
   win.ConnectifyGoalStore.save(goal);
-  win.ConnectifyGoalDialog.open({ goal: { ...draft, id: goal.id, target: 20 } });
-  const sure = document.getElementById('cx-goal-dialog');
+  const sure = compose({ ...draft, id: goal.id, target: 20 }).node;
   assert.deepStrictEqual([sure.querySelector('.cx-goal-confirm').disabled, mockText(sure.querySelector('.cx-goal-reason'))], [true, 'Already secured.'], 'a goal already met cannot be saved');
-  sure.querySelector('.cx-goal-modal__close').click();
-  assert.ok(!document.getElementById('cx-goal-dialog'), 'the close button closes it without saving');
+  assert.strictEqual(sure.querySelector('.cx-goal-confirm').textContent, 'Save Changes', 'editing names its action');
 
   win.ConnectifyGoalListUI.open();
   const list = document.getElementById('cx-goals-dialog');
@@ -13887,6 +13920,151 @@ runTest('Test 304: A compact statistics panel gives way to the Type dropdown and
   assert.ok(!/white-space: nowrap/.test(forecast.slice(0, forecast.indexOf('}'))), 'a prediction line wraps rather than overflowing its panel in a very narrow column');
   const fit = read('src/cohort/cohort-expanded-fit.css').replace(/\/\*[\s\S]*?\*\//g, '');
   assert.ok(/\.connectea-row-wrapper > \.connectea-panel\.connectea-panel--expanded \{\s*flex: 0 0 auto !important;/.test(fit), 'expanded cards keep their one row: they scale, never reflow');
+});
+
+runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the list has modular Group By, its direction and Sort By', () => {
+  const subjects = [
+    { name: 'Physics ATAR', tasks: [
+      { id: 'p1', name: 'Test 10', order: 30, pending: true, sequence: 0 },
+      { id: 'p2', name: 'Test 2', order: 5, score: 85, pending: false, sequence: 1 },
+      { id: 'p3', name: 'Undated', order: null, pending: true, sequence: 2 }
+    ] },
+    { name: 'Chemistry ATAR - Semester 2', tasks: [
+      { id: 'c1', name: 'Essay', order: 20, score: 55, pending: false, sequence: 0 },
+      { id: 'c2', name: 'lab', order: 6, pending: true, sequence: 1 },
+      { id: 'c3', name: 'Exam', order: 40, score: 72, pending: false, sequence: 2 }
+    ] }
+  ];
+  const savedTypes = window.ConnectifyTaskTypes, savedPred = window.ConnectifyPredictorMath;
+  window.ConnectifyTaskTypes = { getEffectiveType: (subject, task) => (/exam/i.test(task.name) ? 'Exam' : /test/i.test(task.name) ? 'Test' : 'Essay') };
+  const predicted = { p1: 91, c2: 63 };
+  window.ConnectifyPredictorMath = { getOrComputeTaskPrediction: (subject, task) => (predicted[task.id] ? { mid: predicted[task.id] } : null) };
+  try {
+    withTaskDatesPanel(subjects, ({ panel, head, chips, chart, find, refreshes }) => {
+      const tabs = window.ConnectifyProgressTabs;
+      const dates = window.ConnectifyTaskDatesView;
+      const T = window.ConnectifyTaskDates;
+      const math = window.ConnectifyProgressMath;
+
+      // Tabs: right under the header, on the Predictor's tab bar; graph first
+      assert.strictEqual(panel.children[panel.children.indexOf(head) + 1], tabs.bar, 'the tabs sit under the header');
+      assert.ok(tabs.bar.className.includes('cx-pred-main-tabs'), 'they reuse the Predictor tab bar');
+      assert.deepStrictEqual(tabs.bar.children.map(b => b.textContent), ['Progress Graph', 'Task Dates']);
+      assert.ok(!chips.hidden && !chart.hidden && dates.section.hidden, 'the panel opens on Progress Graph');
+      const before = refreshes();
+      tabs.bar.children[1].dispatchEvent(new MockEvent('click'));
+      assert.ok(chips.hidden && chart.hidden && !dates.section.hidden, 'Task Dates hides the chips and chart');
+      assert.strictEqual(tabs.bar.children[1].getAttribute('aria-selected'), 'true');
+      tabs.bar.children[0].dispatchEvent(new MockEvent('click'));
+      assert.ok(!chips.hidden && !chart.hidden && dates.section.hidden && refreshes() === before + 1, 'Progress Graph comes back current');
+      tabs.select('dates');
+
+      const tableRows = () => find(dates.list, n => n.tagName === 'TR');
+      const firstCells = () => tableRows().slice(1).map(tr => tr.children[0].textContent);
+      const selects = find(dates.toolbar, n => n.tagName === 'SELECT');
+      const [group, direction, sort] = selects;
+      const labelOf = sel => find(dates.toolbar, n => n.className === 'cx-dates-control' && n.children.includes(sel))[0];
+      const pick = (sel, value) => { sel.value = value; sel.dispatchEvent(new MockEvent('change')); };
+
+      assert.deepStrictEqual(group.children.map(o => o.textContent), ['None', 'Subject', 'Type', 'Completed', 'Predicted Grade', 'Grade Achieved']);
+      assert.deepStrictEqual(direction.children.map(o => o.textContent), ['Ascending', 'Descending']);
+      assert.deepStrictEqual(sort.children.map(o => o.textContent), ['Chronological', 'Alphabetical', 'Grade Achieved']);
+      assert.deepStrictEqual(find(dates.toolbar, n => n.tagName === 'LABEL').slice(0, 3).map(l => l.children[0].textContent), ['Group By:', 'Order:', 'Sort By:']);
+
+      // Default: grouped by Subject, Chronological
+      assert.deepStrictEqual(firstCells(), ['Chemistry ATAR', 'lab', 'Essay', 'Exam', 'Physics ATAR', 'Test 2', 'Test 10', 'Undated']);
+      assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date'], 'no marks, no weights, only dates');
+      assert.strictEqual(tableRows()[1].className, 'cx-dates-group');
+      assert.ok(find(tableRows()[2].children[1], n => n.textContent === math.formatTimestamp(6)).length, 'each row names its week');
+      assert.ok(tableRows()[2].children[1].querySelector('.cx-time-edit-btn'), 'and its week can be edited');
+      assert.ok(tableRows()[8].children[1].querySelector('.cx-date-warning'), 'a task with no week asks for one');
+
+      // The direction orders the groups; Sort By orders inside them, on its own
+      pick(direction, 'desc');
+      assert.deepStrictEqual(firstCells(), ['Physics ATAR', 'Test 2', 'Test 10', 'Undated', 'Chemistry ATAR', 'lab', 'Essay', 'Exam']);
+      pick(sort, 'alphabetical');
+      assert.deepStrictEqual(firstCells(), ['Physics ATAR', 'Test 2', 'Test 10', 'Undated', 'Chemistry ATAR', 'Essay', 'Exam', 'lab'], 'ignoring case, numbers in numeric order');
+      pick(sort, 'grade');
+      assert.deepStrictEqual(firstCells(), ['Physics ATAR', 'Test 2', 'Test 10', 'Undated', 'Chemistry ATAR', 'Exam', 'Essay', 'lab'], 'highest mark first, unmarked last');
+      pick(direction, 'asc');
+      pick(sort, 'chronological');
+
+      // None: no headings, a Subject column, undated last; no direction to choose
+      pick(group, 'none');
+      assert.deepStrictEqual(firstCells(), ['Test 2', 'lab', 'Essay', 'Test 10', 'Exam', 'Undated']);
+      assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Subject', 'Date']);
+      assert.strictEqual(tableRows()[1].children[1].textContent, 'Physics ATAR');
+      assert.strictEqual(tableRows()[2].children[1].textContent, 'Chemistry ATAR', 'the semester suffix is not part of the subject');
+      assert.strictEqual(labelOf(direction).hidden, true);
+      assert.deepStrictEqual(JSON.parse(localStorage.getItem(T.KEY)), { groupBy: 'none', direction: 'asc', sortBy: 'chronological', uncompletedOnly: false }, 'the choices are kept');
+
+      // Type, in both directions
+      pick(group, 'type');
+      assert.strictEqual(labelOf(direction).hidden, false);
+      assert.deepStrictEqual(firstCells().filter(c => ['Essay', 'Exam', 'Test'].includes(c)).slice(0, 2), ['Essay', 'Essay'], 'Essay group, then its Essay task');
+      pick(direction, 'desc');
+      assert.strictEqual(firstCells()[0], 'Test');
+      pick(direction, 'asc');
+
+      // Completed: fixed order, no direction
+      pick(group, 'completed');
+      assert.strictEqual(labelOf(direction).hidden, true);
+      assert.deepStrictEqual(firstCells(), ['Not completed', 'lab', 'Test 10', 'Undated', 'Completed', 'Test 2', 'Essay', 'Exam']);
+
+      // Predicted Grade: uncompleted tasks only, university bands tied to school letters, no prediction last
+      pick(group, 'predicted');
+      assert.deepStrictEqual(firstCells(), ['Credit (C)', 'lab', 'High Distinction (A)', 'Test 10', 'No prediction', 'Undated']);
+      pick(direction, 'desc');
+      assert.deepStrictEqual(firstCells(), ['High Distinction (A)', 'Test 10', 'Credit (C)', 'lab', 'No prediction', 'Undated'], '"No prediction" stays last in either direction');
+
+      // Grade Achieved: completed tasks only
+      pick(group, 'achieved');
+      assert.deepStrictEqual(firstCells(), ['High Distinction (A)', 'Test 2', 'Distinction (B)', 'Exam', 'Pass (C)', 'Essay']);
+      pick(direction, 'asc');
+      assert.deepStrictEqual(firstCells(), ['Pass (C)', 'Essay', 'Distinction (B)', 'Exam', 'High Distinction (A)', 'Test 2']);
+      assert.deepStrictEqual([95, 80, 79.9, 70, 69, 60, 50, 49.9, 0].map(v => T.gradeBand(v, '').label),
+        ['High Distinction (A)', 'High Distinction (A)', 'Distinction (B)', 'Distinction (B)', 'Credit (C)', 'Credit (C)', 'Pass (C)', 'Fail (D)', 'Fail (D)'], 'the bands\' cutoffs');
+
+      // Show Uncompleted Only: what needs completed tasks is off and falls back, the saved choice kept
+      const box = find(dates.toolbar, n => n.type === 'checkbox')[0];
+      box.checked = true;
+      box.dispatchEvent(new MockEvent('change'));
+      assert.strictEqual(group.value, 'subject', 'Grade Achieved says nothing about uncompleted tasks');
+      assert.ok(group.children.find(o => o.value === 'achieved').disabled && group.children.find(o => o.value === 'completed').disabled && sort.children.find(o => o.value === 'grade').disabled);
+      assert.ok(!find(dates.list, () => true).some(n => n.textContent === 'Exam'), 'completed tasks leave the list');
+      assert.strictEqual(T.readView().groupBy, 'achieved', 'the choice is still saved');
+      box.checked = false;
+      box.dispatchEvent(new MockEvent('change'));
+      assert.strictEqual(group.value, 'achieved', 'and comes back with the option off');
+
+      // A saved week moves the task at once, on the list and the graph
+      pick(group, 'none');
+      const count = refreshes();
+      const input = find(dates.list, n => n.tagName === 'INPUT')[0];
+      input.value = '1';
+      input.dispatchEvent(new MockEvent('input'));
+      assert.strictEqual(localStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:p3')), 'w1', 'keyed by the raw subject name, as the data module reads it');
+      input.dispatchEvent(new MockEvent('keydown', { key: 'Enter' }));
+      assert.strictEqual(refreshes(), count + 1, 'the graph is told too');
+      localStorage.removeItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:p3'));
+
+      assert.strictEqual(tabs.active(), 'dates', 'the tab is remembered for the next open');
+    });
+  } finally {
+    window.ConnectifyTaskTypes = savedTypes;
+    window.ConnectifyPredictorMath = savedPred;
+    localStorage.removeItem('connectify:task_dates_view');
+  }
+
+  const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
+  assert.ok(read('assessment/cache-versions.js').includes("'connectify:task_dates_view'"), 'a settings reset removes the choices; Clear Cache keeps them');
+  assert.ok(!read('progress/progress-chart.js').includes('ConnectifyProgressWeekEditor'), 'the graph table has no week editor');
+  assert.ok(read('goals/goal-compose.js').includes('Set one in Task Dates.'), 'goals point at the new home of week overrides');
+  const panelSrc = read('progress/progress-panel.js');
+  assert.ok(panelSrc.indexOf("querySelector('.cx-progress-chart')") < panelSrc.indexOf("querySelector('div:not(.cx-subjects)')"), 'a panel adopted after a reload never takes the tab bar for its chart');
+  const css = read('progress/task-dates.css');
+  assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
+  assert.ok(cssHasToken(css, '.connectea-dark #cx-task-dates .cx-dates-group th { color: #ffffff; }'), 'dark headings take the primary ink token');
 });
 
 Promise.all(pendingTestPromises).then(() => {

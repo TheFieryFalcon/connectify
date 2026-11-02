@@ -1,6 +1,6 @@
 # Connectify Goals Reference
 
-Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outline goal bars, lifecycle and celebration. Spec: `specs/goals.md`. All goal scripts are in the outlines group (manifest order: goal-difficulty, goal-store, goal-plan, goal-replay, goal-modal, goal-sliders, goal-dialog, goal-list-ui, goal-editor, goal-celebrate, goal-events, goal-bars, goal-forecast).
+Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outline goal bars, lifecycle and celebration. Spec: `specs/goals.md`. All goal scripts are in the outlines group (manifest order: goal-difficulty, goal-store, goal-plan, goal-replay, goal-modal, goal-sliders, goal-compose, goal-list-ui, goal-editor, goal-celebrate, goal-events, goal-bars, goal-forecast).
 
 ---
 
@@ -35,9 +35,9 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 
 ### Planners and dialogs
 - `goal-sliders.js` (`ConnectifyGoalSliders`): Target Grade's task table (Effort / Needs / Difficulty), Target ATAR's subject slider, needed mark and tier; drafts per subject; `reset` on the checkbox; keyboard focus kept across re-renders. A drag moves only the notch name (`input`); the planner re-renders on `change` (release, each key press), since replacing the slider mid-drag dropped the drag and selected text.
-- `goal-editor.js` (`ConnectifyGoalEditor`): the goal tier beside each planner headline, Set as Goal / Update Goal and Cancel Editing, `Goals (n)` in the panel heading (`paintGoalsButton`, from `paintModeTabs`), `edit(goal)` (loads its planner tab; semester by its button), `heldTarget` (an ATAR-held subject plans for its child target, read-only, `Set by your ATAR <n> goal`).
-- `goal-modal.js` (`ConnectifyGoalModal`): the shared dialog (solid surface, dimmed page, focus in and back, Escape / ✕ / outside click, clicks never reach the drawer's outside-click), `tierLabel`, `progressBar`.
-- `goal-dialog.js` (`#cx-goal-dialog`): preview, End (week input with term hint), Confirm / Save Changes; blocked with `Already secured.`, `Highest possible: X%.`, `Set by your ATAR <n> goal.`, `You already have an ATAR goal.`; an ATAR goal over subject goals asks to Replace them. New goals record `priorMarked`. A grade goal for a subject that already has one asks `<subject> already has a goal. Overwrite?`: Confirm stays enabled and replaces it (removed, not a past goal).
+- `goal-editor.js` (`ConnectifyGoalEditor`): the goal tier beside each planner headline, Set as Goal / Update Goal opening `goal-compose.js` on the planner (Cancel, or Cancel Editing), `Goals (n)` in the panel heading (`paintGoalsButton`, from `paintModeTabs`), `edit(goal)` (loads its planner tab; semester by its button), `heldTarget` (an ATAR-held subject plans for its child target, read-only, `Set by your ATAR <n> goal`).
+- `goal-modal.js` (`ConnectifyGoalModal`): the Goals list's and overhaul notice's dialog (solid surface, dimmed page, focus in and back, Escape / ✕ / outside click, clicks never reach the drawer's outside-click), `tierLabel`, `progressBar`.
+- `goal-compose.js` (`ConnectifyGoalCompose`, `.cx-goal-compose`): Set as Goal on the planner, under its live table and sliders, never a dialog: End (a semester is the planner's semester button; a custom week input with term hint applies on commit and narrows the planner's table, `narrowToEnd`), progress, Confirm / Save Changes; blocked with `Already secured.`, `Highest possible: X%.`, `Set by your ATAR <n> goal.`, `You already have an ATAR goal.`; an ATAR goal over subject goals asks to Replace them. New goals record `priorMarked`. A grade goal for a subject that already has one asks `<subject> already has a goal. Overwrite?`: Confirm stays enabled and replaces it (removed, not a past goal).
 - `goal-list-ui.js` (`#cx-goals-dialog`): cards (title, tier, progress, ATAR children's targets, Edit ✎ / Delete ✕ with inline confirm) and Past goals (Achieved / Missed, final mark, date).
 
 ### Outline bars (`goal-bars.js`, `ConnectifyGoalBars`)

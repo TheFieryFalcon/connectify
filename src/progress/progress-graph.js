@@ -129,7 +129,7 @@
         // Single tasks, running weighted average or rolling average of the last three (progress-modes.js)
         mode = modes.read();
         points = modes.apply(current.tasks, mode);
-        chartContainer.append(window.ConnectifyEarlyEaster.controls(modes.select(mode, () => render(data)), () => refresh(true)));
+        chartContainer.append(modes.select(mode, () => render(data)));
       }
 
       const chartRenderer = chartAPI?.renderChart || window.ConnectifyProgressChart?.renderChart;
@@ -141,11 +141,7 @@
           isHistory,
           byAssessment,
           mode,
-          subjectName: titleSubject,
-          onRefresh: (force = true) => {
-            lastDataSignature = '';
-            refresh(force);
-          }
+          subjectName: titleSubject
         });
       }
     }

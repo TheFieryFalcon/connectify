@@ -1,6 +1,6 @@
 # Spec: Goals
 
-Status: implemented (2026-10-26). Module reference: `docs/modules_goals.md`.
+Status: implemented (2026-10-26). Revised 2026-11-02: Set as Goal opens on the planner (`goal-compose.js`), not a dialog; §4.2's layout and preview are superseded (no second copy of the planner's table), and the rest of §4.2 applies as written. Module reference: `docs/modules_goals.md`.
 
 ## 1. Summary
 The Goal Setter's **Target Grade** and **Target ATAR** planners get a **Set as Goal** button that opens a modal dialog (preview, end point, Confirm) to save the plan as a **goal**. A **Goals** button opens a second modal listing saved goals. A saved goal:
@@ -23,10 +23,10 @@ Rule: **one active goal per subject**. A Target ATAR goal holds its four subject
 ### 2.1 What a goal measures
 - **Semester ends**: the subject's semester mark, the way Connect works it out (Semester 2 is cumulative and includes Semester 1 tasks). The tasks in range are the outline's tasks for that semester (`taskSemester`, school week 17 split, the same as everywhere else).
 - **Custom week** (grade goals only): the running weight-weighted mean of every task due up to the end of that school week (`ConnectifySchoolTerms.weekOrder`, Early Easter respected; Semester 2 weeks include Semester 1 tasks).
-  - **A task's week is its Year Progression week**: the week set in the Progress table (`connectea:time_override:`, read through `ConnectifyUtils.customWeekOrder`), else its caption. This is the same `order` the graph and the export use.
+  - **A task's week is its Year Progression week**: the week set in Task Dates (`connectea:time_override:`, read through `ConnectifyUtils.customWeekOrder`), else its caption. This is the same `order` the graph and the export use.
   - Tasks after the end week are out of range: no slider, no bars.
-  - Tasks with no readable week are also out of range. One line in the Set as Goal dialog names them (`No week: <task>. Set one in the Progress table.`); it is the only note besides errors.
-- **Week snapshot**: goal ranges use the weeks as they were when the page loaded (`ConnectifyGoalPlan.weekSnapshot()`, taken once per load, beside `ConnectifyPanelView`'s read-once pattern). Changing a week in the Year Progression table, or toggling Early Easter, does **not** recompute goals, bars, tiers or verdicts until the page is reloaded.
+  - Tasks with no readable week are also out of range. One line in the Set as Goal dialog names them (`No week: <task>. Set one in Task Dates.`); it is the only note besides errors.
+- **Week snapshot**: goal ranges use the weeks as they were when the page loaded (`ConnectifyGoalPlan.weekSnapshot()`, taken once per load, beside `ConnectifyPanelView`'s read-once pattern). Changing a week in Task Dates, or toggling Early Easter, does **not** recompute goals, bars, tiers or verdicts until the page is reloaded.
   - The graph, the export and predictions still update at once, as today.
   - The goal subsystem ignores `connectify-terms-updated` and week-override saves. After either one, goals are **held** (`ConnectifyGoalPlan.isHeld()`): no tier, bar, verdict, lock-in or toast-line recompute for the rest of the page's life, even when the predictions refresh. Rows and dialogs keep showing the last values until reload.
   - The Set as Goal dialog also uses the snapshot, so a preview always matches what the saved goal will show.
@@ -96,7 +96,7 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
 │ Semester 2 Exam         Less        79.0%     Medium        │
 │                                                             │
 │ ███████████░░░░░░░░░  41.2 of 80 weighted points            │
-│ No week: Practical Report. Set one in the Progress table.   │
+│ No week: Practical Report. Set one in Task Dates.   │
 │                                         [Cancel] [Confirm]  │
 └─────────────────────────────────────────────────────────────┘
 ```
