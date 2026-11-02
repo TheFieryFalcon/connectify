@@ -14098,7 +14098,8 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
   const cellsWindow = { ConnectifyUtils: { normalize: t => t.replace(/\s+/g, ' ').trim() } };
   new Function('window', read('progress/task-dates-cells.js'))(cellsWindow);
   assert.deepStrictEqual(['12 Chemistry ATAR', 'Chemistry ATAR Year 11', '3D Art'].map(subject => cellsWindow.ConnectifyTaskDatesCells.subjectText({ subject })), ['Chemistry', 'Chemistry', '3D Art'], 'the Subject column is cleaned');
-  assert.ok(css.includes('#cx-task-dates .cx-time-cell { display: flex;') && !read('progress/progress-week-editor.js').includes("containerSpan.style"), 'every row\'s pencil sits on one line');
+  assert.ok(css.includes('#cx-task-dates .cx-time-cell > span { min-width: 6.4em; }') && !read('progress/progress-week-editor.js').includes("containerSpan.style"), 'every row\'s pencil sits just after its week, on one line');
+  assert.ok(!/tr:hover \.cx-time-edit-btn/.test(css) && css.includes('.cx-time-edit-btn:hover { background: none; color: inherit; }'), 'pointing at a row or the pencil never changes it');
   // The sidebar's dark button rule weighs two ids (2,1,0): anything lighter leaves every button the same filled box
   const sidebarRule = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-handle-menu.css'), 'utf8');
   assert.ok(sidebarRule.includes('.connectea-dark #connectify-sidebar :is(button,'), 'the rule these outrank');

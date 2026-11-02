@@ -78,13 +78,14 @@
 #cx-task-dates .cx-dates-grade { font-variant-numeric: tabular-nums; }
 #cx-task-dates .cx-dates-table .cx-dates-type { max-width: min(160px, 100%); text-overflow: ellipsis; }
 #cx-task-dates .cx-dates-table .cx-dates-type.connectea-overridden { font-weight: 600; }
-/* Every row's pencil on one line, whatever its week's width */
-#cx-task-dates .cx-time-cell { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+/* Every row's pencil just after its week, on one line whatever the week's width */
+#cx-task-dates .cx-time-cell { display: flex; align-items: center; gap: 6px; }
+#cx-task-dates .cx-time-cell > span { min-width: 6.4em; }
 #cx-task-dates .cx-dates-empty { margin: 0; padding: 4px 8px; color: #4a5d70; font-weight: 400; }
-/* The pencil is faint until its row is pointed at; a saved override keeps its full ink */
-#connectify-progress #cx-task-dates .cx-time-edit-btn { color: inherit; }
+/* The pencil stays faint, the pointer never changes it; a saved override keeps its full ink */
+#connectify-progress #cx-task-dates .cx-time-edit-btn,
+#connectify-progress #cx-task-dates .cx-time-edit-btn:hover { background: none; color: inherit; }
 #connectify-progress #cx-task-dates .cx-time-edit-btn--unconfigured { opacity: 0.35; }
-#connectify-progress #cx-task-dates tr:hover .cx-time-edit-btn--unconfigured,
 #connectify-progress #cx-task-dates .cx-time-edit-btn--unconfigured:focus-visible { opacity: 1; }
 
 .connectea-dark #cx-task-dates .cx-dates-controls,
