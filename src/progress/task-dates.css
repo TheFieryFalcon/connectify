@@ -119,6 +119,8 @@
 #cx-task-dates .cx-dates-col-grade { width: 9%; }
 /* Every row one height, with a dropdown in it or not, in every browser */
 #cx-task-dates .cx-dates-row td { box-sizing: border-box; height: 35px; }
+/* A tick's label is a block in its cell: inline, Chrome's line box added 0.8px under it */
+#cx-task-dates .cx-dates-row td > .cx-dates-check { display: flex; }
 #cx-task-dates .cx-dates-head th { padding-top: 0; color: #4a5d70; font-size: 12px; font-weight: 600; }
 #cx-task-dates .cx-dates-table .cx-dates-group th { padding-top: 16px; color: #253b53; font-weight: 700; }
 #cx-task-dates .cx-dates-row:hover td { background: color-mix(in srgb, currentColor 5%, transparent); }
