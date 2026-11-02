@@ -5,9 +5,11 @@
 #connectify-progress .cx-progress-tab { padding: 8px 12px; border: 0; border-radius: 6px; background: transparent; font-size: 12px; font-weight: 600; color: #55667a; }
 #connectify-progress .cx-progress-tab:hover { color: #174c75; }
 #connectify-progress .cx-progress-tab.active { background: #ffffff; color: #215d90; font-weight: 700; }
-.connectea-dark #connectify-progress .cx-progress-tab { color: var(--cx-text-muted, #a0b2c6); }
-.connectea-dark #connectify-progress .cx-progress-tab:hover { color: var(--cx-text-secondary, #e1eaf3); }
-.connectea-dark #connectify-progress .cx-progress-tab.active {
+/* .connectea-dark #connectify-sidebar :is(button, ...) weighs two ids, so these name the sidebar too */
+.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab { border: 0; background: transparent; color: var(--cx-text-muted, #a0b2c6); }
+.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab:hover { background: transparent; color: var(--cx-text-secondary, #e1eaf3); }
+.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab.active,
+.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab.active:hover {
   background: color-mix(in srgb, var(--cx-accent, #3b82f6) 20%, var(--cx-surface-hover, #263344));
   color: var(--cx-text-secondary, #e0eefb);
 }
@@ -95,5 +97,7 @@
 }
 .connectea-dark #cx-task-dates .cx-dates-select:hover { border-color: var(--cx-border-strong, #556c84) !important; }
 .connectea-dark #cx-task-dates .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #connectify-progress .cx-dates-direction { border-color: var(--cx-nav-border, #3b4d5e); color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #connectify-progress .cx-dates-direction:hover { border-color: var(--cx-border-strong, #556c84); }
+.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid var(--cx-nav-border, #3b4d5e); background: transparent; color: var(--cx-text-primary, #ffffff); }
+.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction:hover { border-color: var(--cx-border-strong, #556c84); background: transparent; color: var(--cx-text-primary, #ffffff); }
+.connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn,
+.connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn:hover { background: none; color: inherit; }

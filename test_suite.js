@@ -11175,7 +11175,7 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
   assert.ok((group.css || []).includes('src/progress/export-view.css') || manifest.content_scripts.some(g => (g.css || []).includes('src/progress/export-view.css')));
   assert.deepStrictEqual(manifest.permissions, ['storage', 'unlimitedStorage'], 'no new permissions');
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.css'), 'utf8');
-  assert.ok(cssHasToken(css, '.connectea-dark #cx-task-dates button.cx-export-download { background: #2563eb;'), 'dark download buttons take the primary button token');
+  assert.ok(cssHasToken(css, '.connectea-dark #connectify-sidebar #cx-task-dates button.cx-export-download { background: #2563eb;'), 'dark download buttons take the primary button token');
   assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
 });
 
@@ -14068,6 +14068,14 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
   const css = read('progress/task-dates.css');
   assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
   assert.ok(cssHasToken(css, '.connectea-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: #ffffff; border-bottom-color: #3b4d5e; }'), 'dark headings take the primary ink and border tokens');
+  // The sidebar's dark button rule weighs two ids (2,1,0): anything lighter leaves every button the same filled box
+  const sidebarRule = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-handle-menu.css'), 'utf8');
+  assert.ok(sidebarRule.includes('.connectea-dark #connectify-sidebar :is(button,'), 'the rule these outrank');
+  assert.ok(css.includes('.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab { border: 0; background: transparent;'), 'dark inactive tabs stay clear, so the active one shows');
+  assert.ok(css.includes('.connectea-dark #connectify-sidebar #connectify-progress .cx-progress-tab.active,'), 'and the active tab keeps its fill');
+  assert.ok(css.includes('.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid'), 'the direction arrow is an outline in dark themes too');
+  const exportCss = read('progress/export-view.css');
+  assert.ok(exportCss.includes('.connectea-dark #connectify-sidebar #cx-task-dates .cx-export-all,') && exportCss.includes('.connectea-dark #connectify-sidebar #cx-export-toggle[aria-pressed="true"],'), 'Select All stays a link and Export shows it is pressed');
 });
 
 Promise.all(pendingTestPromises).then(() => {
