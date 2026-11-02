@@ -185,10 +185,7 @@
     if (Number.isFinite(point.order)) {
       const label = createElement('span', math.shortTimestamp(point.order, point.caption));
       label.title = math.formatTimestamp(point.order, point.caption);
-      const containerSpan = createElement('span');
-      containerSpan.style.display = 'inline-flex';
-      containerSpan.style.alignItems = 'center';
-      containerSpan.style.gap = '6px';
+      const containerSpan = createElement('span', null, 'cx-time-cell');
       containerSpan.append(label);
 
       const editBtn = createElement('button', '✎', savedTime !== null ? 'cx-time-edit-btn' : 'cx-time-edit-btn cx-time-edit-btn--unconfigured');

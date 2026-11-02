@@ -3,8 +3,10 @@
  *
  * The Year Progression panel's Task Dates tab (#cx-task-dates), one list for dates and export: the term starts with
  * Early Easter in one line, Group By (and its direction arrow), Sort By, Show Uncompleted Only and the Export toggle,
- * then the task table (each task with its short week and the week editor, progress-week-editor.js). Export mode (export-view.js) adds the ticks, days and downloads to this same table and forces Show
- * Uncompleted Only on.
+ * then the task table: each task with its short week and the week editor (progress-week-editor.js), then its subject,
+ * type and grade (task-dates-cells.js). Export mode (export-view.js) adds the ticks and downloads to this same table,
+ * swaps that right half for the day and export date, leaving the left half where it was, and forces Show Uncompleted
+ * Only on.
  * Exposes window.ConnectifyTaskDatesView.
  */
 (() => {
@@ -20,6 +22,7 @@
     const terms = window.ConnectifySchoolTerms;
     const dates = window.ConnectifyTaskDates;
     const exportRows = window.ConnectifyExportRows;
+    const taskCells = window.ConnectifyTaskDatesCells;
 
     const section = document.getElementById('cx-task-dates') || createElement('section', null, 'cx-task-dates');
     section.id = 'cx-task-dates';
@@ -114,23 +117,31 @@
       needs(sort.select, dates.SORTS);
     }
 
-    function taskRow(row, showSubject, exportCtx) {
+    function taskRow(row, columns, exportCtx, track) {
       const tr = createElement('tr', null, row.completed ? 'cx-dates-row cx-dates-row--done' : 'cx-dates-row');
       const cells = exportCtx ? exportRows.taskCells(row, exportCtx) : null;
       if (cells?.merged) tr.classList.add('cx-export-task--merged');
       tr.append(createElement('td', cells ? cells.name : row.name));
-      if (showSubject) tr.append(createElement('td', row.subject, 'cx-dates-subject-cell'));
       tr.append(createElement('td', window.ConnectifyProgressWeekEditor.weekCell(row.task, row.siblings, row.subjectName, onWeekSaved), 'cx-dates-when'));
-      if (cells) tr.append(createElement('td', cells.day), createElement('td', cells.date));
+      if (cells) {
+        tr.append(createElement('td', cells.day), createElement('td', cells.date));
+        return tr;
+      }
+      if (columns.subject) tr.append(createElement('td', taskCells.subjectText(row), 'cx-dates-subject-cell'));
+      tr.append(createElement('td', taskCells.typeSelect(row, track)));
+      if (columns.grade) tr.append(createElement('td', taskCells.gradeText(row), 'cx-dates-grade'));
       return tr;
     }
 
-    function table(groups, view, exportCtx) {
-      const showSubject = view.groupBy !== 'subject';
-      const headers = ['Assessment', ...(showSubject ? ['Subject'] : []), 'Date', ...(exportCtx ? ['Day', 'Export Date'] : [])];
+    function table(groups, view, exportCtx, track) {
+      // A subject heading already names the subject; Show Uncompleted Only lists no grades
+      const columns = { subject: view.groupBy !== 'subject', grade: !view.uncompletedOnly };
+      const rightHalf = exportCtx ? ['Day', 'Export Date'] : [...(columns.subject ? ['Subject'] : []), 'Type', ...(columns.grade ? ['Grade'] : [])];
+      const headers = ['Assessment', 'Date', ...rightHalf];
       const el = createElement('table', null, 'cx-dates-table');
       const head = createElement('tr', null, 'cx-dates-head');
-      headers.forEach(h => head.append(createElement('th', h)));
+      const columnClass = { Assessment: 'cx-dates-col-name', Date: 'cx-dates-col-when', Grade: 'cx-dates-col-grade' };
+      headers.forEach(h => head.append(createElement('th', h, columnClass[h] || null)));
       el.append(head);
       for (const item of groups) {
         if (item.label !== null) {
@@ -143,7 +154,7 @@
           heading.append(cell);
           el.append(heading);
         }
-        item.rows.forEach(row => el.append(taskRow(row, showSubject, exportCtx)));
+        item.rows.forEach(row => el.append(taskRow(row, columns, exportCtx, track)));
       }
       return el;
     }
@@ -180,7 +191,7 @@
       expandSlot.replaceChildren(...(uncached ? [window.ConnectifyTargetUiHelpers.expandOutlinesButton({ scanAndRefresh: () => render(true) })] : []));
       const exportCtx = exporting ? exportView.prepare(subjects, track) : null;
       const groups = dates.arrange(rows, view);
-      list.replaceChildren(groups.length ? table(groups, view, exportCtx) : createElement('p', emptyText(rows.length > 0, view), 'cx-dates-empty'));
+      list.replaceChildren(groups.length ? table(groups, view, exportCtx, track) : createElement('p', emptyText(rows.length > 0, view), 'cx-dates-empty'));
       if (focusId && focusables.has(focusId)) focusables.get(focusId).focus();
     }
 
@@ -190,9 +201,11 @@
       refs.refresh?.(true);
     }
 
-    for (const evt of ['connectify-results-updated', 'connectify-task-type-changed', 'connectify-predictions-updated', 'connectify-settings-updated', 'connectify-terms-updated']) {
+    for (const evt of ['connectify-results-updated', 'connectify-predictions-updated', 'connectify-settings-updated', 'connectify-terms-updated']) {
       window.addEventListener(evt, () => render());
     }
+    // A saved type can add a class category, which changes the options of rows whose own type stayed put
+    window.addEventListener('connectify-task-type-changed', () => render(true));
 
     window.ConnectifyTaskDatesView = { section, toolbar, list, optionsSlot, footerSlot, render };
   } catch (err) {

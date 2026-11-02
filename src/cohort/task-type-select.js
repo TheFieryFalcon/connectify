@@ -87,6 +87,21 @@
     }
   }
 
+  /** Saves a Type dropdown's choice ("+ Custom..." asks for a name) and re-syncs it; metaOf() names its task. */
+  function bindTypeSelect(select, metaOf) {
+    select.addEventListener('change', () => {
+      const meta = metaOf();
+      const custom = select.value === '__custom__';
+      const type = custom ? window.ConnectifyCategoryStore.promptName('Enter custom assessment type') : select.value;
+      // Saving adds the class category; the cohort pass that follows re-syncs every row's dropdown
+      if (type || !custom) types.saveTaskTypeOverride(meta.subjectName, meta.taskName, meta.labelsKey, type || undefined);
+      updateTypeSelect(select, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
+    });
+    for (const evt of ['click', 'mousedown', 'mouseup', 'keydown']) {
+      select.addEventListener(evt, e => e.stopPropagation());
+    }
+  }
+
   function rescanAllAutoAssessments() {
     const selects = Array.from(document.querySelectorAll('.connectea-type-select'));
     for (const select of selects) {
@@ -130,5 +145,5 @@
 
   window.addEventListener('connectify-rescan-auto-types', rescanAllAutoAssessments);
 
-  Object.assign(types, { getTaskMeta, updateTypeSelect, rescanAllAutoAssessments });
+  Object.assign(types, { getTaskMeta, updateTypeSelect, bindTypeSelect, rescanAllAutoAssessments });
 })();

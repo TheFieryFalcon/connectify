@@ -1,5 +1,8 @@
-/* Connectify Year Progression tabs and Task Dates (progress-tabs.js, task-dates-view.js). One surface, the panel: light
-   hairlines and bold subject headings carry the structure, no boxes. Dark themes route colours through tokens. */
+/* Connectify Year Progression tabs and Task Dates (progress-tabs.js, task-dates-view.js). One surface, the panel: one
+   hairline colour (rows, headings, control outlines, on both tabs), bold subject headings and spacing carry the
+   structure, no boxes or vertical dividers. Dark themes route colours through tokens. */
+#connectify-progress { --cx-progress-line: #d5dfe9; }
+.connectea-dark #connectify-progress { --cx-progress-line: var(--cx-nav-border, #3b4d5e); }
 #connectify-progress .cx-progress-tabs { margin: 0 0 12px; }
 /* The chips and chart are display: flex / block, which would override their hidden attribute */
 #connectify-progress > [hidden],
@@ -11,9 +14,8 @@
 
 /* Term starts: one line above the controls */
 #cx-task-dates .cx-dates-terms { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; color: #4a5d70; font-size: 12px; font-weight: 400; }
-#cx-task-dates .cx-dates-term-list { display: flex; flex-wrap: wrap; row-gap: 4px; }
-#cx-task-dates .cx-dates-term { display: inline-flex; gap: 5px; padding: 0 12px; border-left: 1px solid #d5dfe9; }
-#cx-task-dates .cx-dates-term:first-child { padding-left: 0; border-left: 0; }
+#cx-task-dates .cx-dates-term-list { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+#cx-task-dates .cx-dates-term { display: inline-flex; gap: 5px; }
 #cx-task-dates .cx-dates-term span:first-child { font-weight: 600; }
 
 /* Controls: thin outlines, so they read as controls without weighing on the list */
@@ -24,7 +26,7 @@
   field-sizing: content;
   max-width: 200px;
   padding: 3px 6px;
-  border: 1px solid #d5dfe9 !important;
+  border: 1px solid var(--cx-progress-line, #d5dfe9) !important;
   border-radius: 6px;
   background: transparent !important;
   background-image: none !important;
@@ -41,7 +43,7 @@
 #connectify-progress .cx-dates-direction {
   margin-left: -10px;
   padding: 2px 8px;
-  border: 1px solid #d5dfe9;
+  border: 1px solid var(--cx-progress-line, #d5dfe9);
   border-radius: 6px;
   background: transparent;
   color: #253b53;
@@ -51,17 +53,33 @@
 #cx-task-dates .cx-dates-check { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; cursor: pointer; }
 #cx-task-dates .cx-dates-check input { flex: none; width: 15px; height: 15px; margin: 0; cursor: pointer; }
 
-/* The list: light lines between rows, clear subject headings */
-#cx-task-dates .cx-dates-table :is(th, td) { padding: 6px 8px; border-bottom: 1px solid #e6ecf2; font-weight: 400; vertical-align: middle; }
-#cx-task-dates .cx-dates-head th { padding-top: 0; color: #4a5d70; font-size: 12px; font-weight: 600; border-bottom-color: #d5dfe9; }
-#cx-task-dates .cx-dates-table .cx-dates-group th { padding-top: 16px; color: #253b53; font-weight: 700; border-bottom-color: #d5dfe9; }
+/* Both tabs' tables: text starts and ends on the same edges as the controls and hairlines above it */
+#connectify-progress :is(th, td):first-child { padding-left: 0; }
+#connectify-progress :is(th, td):last-child { padding-right: 0; }
+/* The list: the panel's hairline between rows, clear subject headings */
+#cx-task-dates .cx-dates-table :is(th, td) { font-weight: 400; vertical-align: middle; }
+/* Assessment and Date are the left half in the Normal and Export views alike; what follows shares the right half */
+#cx-task-dates .cx-dates-table { table-layout: fixed; }
+#cx-task-dates .cx-dates-col-name { width: 34%; }
+#cx-task-dates .cx-dates-col-when { width: 16%; }
+#cx-task-dates .cx-dates-col-grade { width: 9%; }
+#cx-task-dates .cx-dates-head th { padding-top: 0; color: #4a5d70; font-size: 12px; font-weight: 600; }
+#cx-task-dates .cx-dates-table .cx-dates-group th { padding-top: 16px; color: #253b53; font-weight: 700; }
 #cx-task-dates .cx-dates-row:hover td { background: color-mix(in srgb, currentColor 5%, transparent); }
+/* The highlight reaches past the text, which sits on the panel's edge */
+#cx-task-dates .cx-dates-row:hover td:first-child { box-shadow: -8px 0 0 color-mix(in srgb, currentColor 5%, transparent); }
+#cx-task-dates .cx-dates-row:hover td:last-child { box-shadow: 8px 0 0 color-mix(in srgb, currentColor 5%, transparent); }
 /* Finished tasks recede, so what is coming stands out */
 #cx-task-dates .cx-dates-row--done td,
 #cx-task-dates .cx-dates-subject-cell { color: #4a5d70; }
-/* A week stays on one line, its column only as wide as it needs */
-#cx-task-dates .cx-dates-when { width: 1%; white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* A week stays on one line */
+#cx-task-dates .cx-dates-when { white-space: nowrap; font-variant-numeric: tabular-nums; }
 #cx-task-dates .cx-dates-when .cx-date-warning { font-size: inherit; }
+#cx-task-dates .cx-dates-grade { font-variant-numeric: tabular-nums; }
+#cx-task-dates .cx-dates-table .cx-dates-type { max-width: min(160px, 100%); text-overflow: ellipsis; }
+#cx-task-dates .cx-dates-table .cx-dates-type.connectea-overridden { font-weight: 600; }
+/* Every row's pencil on one line, whatever its week's width */
+#cx-task-dates .cx-time-cell { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 #cx-task-dates .cx-dates-empty { margin: 0; padding: 4px 8px; color: #4a5d70; font-weight: 400; }
 /* The pencil is faint until its row is pointed at; a saved override keeps its full ink */
 #connectify-progress #cx-task-dates .cx-time-edit-btn { color: inherit; }
@@ -69,23 +87,17 @@
 #connectify-progress #cx-task-dates tr:hover .cx-time-edit-btn--unconfigured,
 #connectify-progress #cx-task-dates .cx-time-edit-btn--unconfigured:focus-visible { opacity: 1; }
 
-.connectea-dark #cx-task-dates .cx-dates-term { border-left-color: var(--cx-nav-border, #3b4d5e); }
 .connectea-dark #cx-task-dates .cx-dates-controls,
 .connectea-dark #cx-task-dates .cx-dates-terms,
 .connectea-dark #cx-task-dates .cx-dates-head th,
 .connectea-dark #cx-task-dates .cx-dates-row--done td,
 .connectea-dark #cx-task-dates .cx-dates-subject-cell,
 .connectea-dark #cx-task-dates .cx-dates-empty { color: var(--cx-text-secondary, #dce2e8); }
-.connectea-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: var(--cx-text-primary, #ffffff); border-bottom-color: var(--cx-nav-border, #3b4d5e); }
-.connectea-dark #cx-task-dates .cx-dates-head th { border-bottom-color: var(--cx-nav-border, #3b4d5e); }
-.connectea-dark #cx-task-dates .cx-dates-table td { border-bottom-color: var(--cx-border-subtle, #2e3c4e); }
-.connectea-dark #cx-task-dates .cx-dates-select {
-  border-color: var(--cx-nav-border, #3b4d5e) !important;
-  color: var(--cx-text-primary, #ffffff) !important;
-}
+.connectea-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: var(--cx-text-primary, #ffffff); }
+.connectea-dark #cx-task-dates .cx-dates-select { color: var(--cx-text-primary, #ffffff) !important; }
 .connectea-dark #cx-task-dates .cx-dates-select:hover { border-color: var(--cx-border-strong, #556c84) !important; }
 .connectea-dark #cx-task-dates .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid var(--cx-nav-border, #3b4d5e); background: transparent; color: var(--cx-text-primary, #ffffff); }
+.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid var(--cx-progress-line, #3b4d5e); background: transparent; color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction:hover { border-color: var(--cx-border-strong, #556c84); background: transparent; color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn,
 .connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn:hover { background: none; color: inherit; }

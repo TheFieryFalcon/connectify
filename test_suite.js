@@ -11110,7 +11110,7 @@ function withTaskDatesPanel(subjects, body) {
   window.ConnectifyData = { collectClasses: () => subjects };
   for (const n of names.slice(2)) delete window[n];
   try {
-    for (const f of ['progress/progress-chart.js', 'progress/progress-week-editor.js', 'progress/progress-early-easter.js', 'progress/task-dates.js', 'progress/task-dates-view.js', 'progress/export-view.js', 'progress/progress-tabs.js']) evalSrc(f);
+    for (const f of ['progress/progress-chart.js', 'progress/progress-week-editor.js', 'progress/progress-early-easter.js', 'progress/task-dates.js', 'progress/task-dates-cells.js', 'progress/task-dates-view.js', 'progress/export-view.js', 'progress/progress-tabs.js']) evalSrc(f);
     const find = (root, pred) => { const out = []; (function walk(n) { for (const c of n.children || []) { if (pred(c)) out.push(c); walk(c); } })(root); return out; };
     body({ terms, panel, head, chips, chart, find, refreshes: () => refreshes });
   } finally {
@@ -11132,7 +11132,7 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     const box = () => find(dates.toolbar, n => n.type === 'checkbox')[0];
     assert.ok(dates.toolbar.children.includes(view.toggleBtn) && !head.children.includes(view.toggleBtn), 'Export sits in the Task Dates toolbar, not the panel header');
     assert.ok(names().includes('Quiz'), 'the list starts with every task');
-    assert.strictEqual(find(dates.list, n => n.tagName === 'SELECT').length, 0, 'with no export controls');
+    assert.ok(find(dates.list, n => n.tagName === 'SELECT').every(n => n.className.includes('cx-dates-type')), 'with no export controls, only each task\'s Type');
     assert.strictEqual(box().disabled, false);
 
     view.toggleBtn.dispatchEvent(new MockEvent('click'));
@@ -11142,7 +11142,8 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     assert.ok(box().checked && box().disabled, 'Show Uncompleted Only is forced on');
     assert.ok(!find(dates.list, () => true).some(n => n.textContent === 'Quiz'), 'so a completed task leaves the list');
     const heads = find(dates.list, n => n.tagName === 'TH').filter(n => n.children.length === 0).map(n => n.textContent);
-    assert.deepStrictEqual(heads, ['Assessment', 'Date', 'Day', 'Export Date'], 'the table gains the export columns');
+    assert.deepStrictEqual(heads, ['Assessment', 'Date', 'Day', 'Export Date'], 'the right half swaps to the export columns');
+    assert.strictEqual(find(dates.list, n => n.className.includes?.('cx-dates-type')).length, 0, 'no Type or Grade while exporting');
     const year = new Date().getFullYear();
     const cells = find(dates.section, n => n.className === 'cx-dates-term').map(n => n.children.map(c => c.textContent).join(' '));
     assert.deepStrictEqual(cells, T.terms(year, T.earlyEaster(year)).map(t => `Term ${t.term} ${T.formatDate(t.start)}`), 'each term names its start');
@@ -11169,7 +11170,7 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
   });
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(g => (g.js || []).includes('src/progress/progress-graph.js'));
-  const order = ['progress-graph.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js', 'export-rows.js', 'task-dates.js', 'task-dates-view.js', 'export-view.js', 'progress-tabs.js'].map(f => group.js.indexOf(`src/progress/${f}`));
+  const order = ['progress-graph.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js', 'export-rows.js', 'task-dates.js', 'task-dates-cells.js', 'task-dates-view.js', 'export-view.js', 'progress-tabs.js'].map(f => group.js.indexOf(`src/progress/${f}`));
   assert.ok(order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), 'export scripts load after progress-graph.js in order');
   assert.ok(group.matches.every(m => m.includes('assessment-outlines')), 'outlines page only');
   assert.ok((group.css || []).includes('src/progress/export-view.css') || manifest.content_scripts.some(g => (g.css || []).includes('src/progress/export-view.css')));
@@ -13001,7 +13002,7 @@ runTest('Test 280: Type dropdowns size to the chosen type with a cap, and new ca
   } finally {
     global.prompt = origPrompt;
   }
-  assert.ok(read('src/cohort/cohort-panel.js').includes("window.ConnectifyCategoryStore.promptName('Enter custom assessment type')"), 'the row\'s + Custom... asks through promptName');
+  assert.ok(read('src/cohort/task-type-select.js').includes("window.ConnectifyCategoryStore.promptName('Enter custom assessment type')"), 'the row\'s + Custom... asks through promptName');
   assert.ok(read('src/predictor/category-settings.js').includes("store.promptName('Enter new assessment category name"), 'Settings + Add Category asks through promptName');
 });
 
@@ -13944,7 +13945,13 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
     ] }
   ];
   const savedTypes = window.ConnectifyTaskTypes, savedPred = window.ConnectifyPredictorMath;
-  window.ConnectifyTaskTypes = { getEffectiveType: (subject, task) => (/exam/i.test(task.name) ? 'Exam' : /test/i.test(task.name) ? 'Test' : 'Essay') };
+  const typeSaves = [];
+  window.ConnectifyTaskTypes = {
+    getEffectiveType: (subject, task) => (/exam/i.test(task.name) ? 'Exam' : /test/i.test(task.name) ? 'Test' : 'Essay'),
+    labelsKeyOf: task => task.labelsKey || '',
+    updateTypeSelect: (select, subject, name) => { select.dataset.synced = `${subject}|${name}`; },
+    bindTypeSelect: (select, metaOf) => select.addEventListener('change', () => typeSaves.push([metaOf().subjectName, metaOf().taskName, select.value]))
+  };
   const predicted = { p1: 91, c2: 63 };
   window.ConnectifyPredictorMath = { getOrComputeTaskPrediction: (subject, task) => (predicted[task.id] ? { mid: predicted[task.id] } : null) };
   try {
@@ -13982,8 +13989,14 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
 
       // Default: grouped by Subject, Chronological
       assert.deepStrictEqual(firstCells(), ['Chemistry ATAR', 'lab', 'Essay', 'Exam', 'Physics ATAR', 'Test 2', 'Test 10', 'Undated']);
-      assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date'], 'no marks, no weights, only dates');
+      assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date', 'Type', 'Grade'], 'the date, then the type and grade');
       assert.strictEqual(tableRows()[1].className, 'cx-dates-group');
+      assert.deepStrictEqual([tableRows()[2].children[3].textContent, tableRows()[3].children[3].textContent], ['—', '55%'], 'a grade, or a dash while unmarked');
+      const typeSelect = find(tableRows()[3].children[2], n => n.tagName === 'SELECT')[0];
+      assert.strictEqual(typeSelect.dataset.synced, 'Chemistry ATAR - Semester 2|Essay', 'the Type dropdown is the outline rows\' own');
+      typeSelect.value = 'Exam';
+      typeSelect.dispatchEvent(new MockEvent('change'));
+      assert.deepStrictEqual(typeSaves, [['Chemistry ATAR - Semester 2', 'Essay', 'Exam']], 'and it saves the type from the list');
       assert.ok(find(tableRows()[2].children[1], n => n.textContent === 'Term 1 Wk 6' && n.title === math.formatTimestamp(6)).length, 'each row names its week, in full on hover');
       assert.strictEqual(find(tableRows()[8], n => n.className === 'cx-date-warning')[0].textContent, 'No week', 'and a missing week says so briefly');
       assert.ok(tableRows()[2].children[1].querySelector('.cx-time-edit-btn'), 'and its week can be edited');
@@ -14003,9 +14016,9 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
       // None: no headings, a Subject column, undated last; no direction to choose
       pick(group, 'none');
       assert.deepStrictEqual(firstCells(), ['Test 2', 'lab', 'Essay', 'Test 10', 'Exam', 'Undated']);
-      assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Subject', 'Date']);
-      assert.strictEqual(tableRows()[1].children[1].textContent, 'Physics ATAR');
-      assert.strictEqual(tableRows()[2].children[1].textContent, 'Chemistry ATAR', 'the semester suffix is not part of the subject');
+      assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date', 'Subject', 'Type', 'Grade']);
+      assert.strictEqual(tableRows()[1].children[2].textContent, 'Physics');
+      assert.strictEqual(tableRows()[2].children[2].textContent, 'Chemistry', 'the semester suffix is not part of the subject');
       assert.strictEqual(direction.hidden, true);
       assert.deepStrictEqual(JSON.parse(localStorage.getItem(T.KEY)), { groupBy: 'none', direction: 'asc', sortBy: 'chronological', uncompletedOnly: false }, 'the choices are kept');
 
@@ -14075,7 +14088,17 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
   assert.ok(panelSrc.indexOf("querySelector('.cx-progress-chart')") < panelSrc.indexOf("querySelector('div:not(.cx-subjects)')"), 'a panel adopted after a reload never takes the tab bar for its chart');
   const css = read('progress/task-dates.css');
   assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
-  assert.ok(cssHasToken(css, '.connectea-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: #ffffff; border-bottom-color: #3b4d5e; }'), 'dark headings take the primary ink and border tokens');
+  assert.ok(cssHasToken(css, '.connectea-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: #ffffff; }'), 'dark headings take the primary ink');
+  // One hairline: rows, headings and control outlines share a colour on both tabs, with no vertical dividers
+  assert.ok(cssHasToken(css, '.connectea-dark #connectify-progress { --cx-progress-line: #3b4d5e; }'), 'dark themes route the hairline through a token');
+  assert.ok(!/border-bottom-color|border-left/.test(css), 'no rule gives a row, heading or term a line of its own');
+  assert.ok(read('progress/progress.css').includes('border-bottom:1px solid var(--cx-progress-line, #d5dfe9)'), 'the graph table draws the same hairline');
+  assert.ok(css.includes('#connectify-progress :is(th, td):first-child { padding-left: 0; }') && css.includes('#connectify-progress :is(th, td):last-child { padding-right: 0; }'), 'table text lines up with the controls and hairlines');
+  assert.ok(css.includes('.cx-dates-table { table-layout: fixed; }') && css.includes('.cx-dates-col-name { width: 34%; }') && css.includes('.cx-dates-col-when { width: 16%; }'), 'Assessment and Date are a fixed left half in both views');
+  const cellsWindow = { ConnectifyUtils: { normalize: t => t.replace(/\s+/g, ' ').trim() } };
+  new Function('window', read('progress/task-dates-cells.js'))(cellsWindow);
+  assert.deepStrictEqual(['12 Chemistry ATAR', 'Chemistry ATAR Year 11', '3D Art'].map(subject => cellsWindow.ConnectifyTaskDatesCells.subjectText({ subject })), ['Chemistry', 'Chemistry', '3D Art'], 'the Subject column is cleaned');
+  assert.ok(css.includes('#cx-task-dates .cx-time-cell { display: flex;') && !read('progress/progress-week-editor.js').includes("containerSpan.style"), 'every row\'s pencil sits on one line');
   // The sidebar's dark button rule weighs two ids (2,1,0): anything lighter leaves every button the same filled box
   const sidebarRule = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-handle-menu.css'), 'utf8');
   assert.ok(sidebarRule.includes('.connectea-dark #connectify-sidebar :is(button,'), 'the rule these outrank');

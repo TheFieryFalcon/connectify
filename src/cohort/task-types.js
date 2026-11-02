@@ -170,14 +170,15 @@
     } catch { return ''; }
   }
 
+  // The every-label key a cached task's type is saved and detected under
+  const labelsKeyOf = task => task?.labelsKey || labelsFromId(task?.id);
+
   function getEffectiveType(subjectName, task, labelsKey) {
     const taskName = typeof task === 'string' ? task : task?.name;
     let actualLabelsKey = labelsKey;
     if (!actualLabelsKey && task && typeof task === 'object') {
-      if (task.labelsKey) {
-        actualLabelsKey = task.labelsKey;
-      } else if (labelsFromId(task.id)) {
-        actualLabelsKey = labelsFromId(task.id);
+      if (labelsKeyOf(task)) {
+        actualLabelsKey = labelsKeyOf(task);
       } else if (task.row) {
         const labels = Array.from(task.row.querySelectorAll('.cvr-c-task__details .v-label'))
           .map(e => (e.textContent || '').replace(/\s+/g, ' ').trim())
@@ -218,6 +219,7 @@
     addCustomCategoryForClass,
     categorizeTask,
     getEffectiveType,
+    labelsKeyOf,
     getCategoryColor,
     cleanSubject,
     invalidateTypesMemoryCache

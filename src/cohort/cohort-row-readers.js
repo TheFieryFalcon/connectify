@@ -36,6 +36,7 @@
       return {
         getTaskMeta: () => ({ subjectName: '', taskName: '', labels: [], labelsKey: '' }),
         updateTypeSelect: () => {},
+        bindTypeSelect: () => {},
         saveTaskTypeOverride: () => {},
         ...(t || {})
       };
