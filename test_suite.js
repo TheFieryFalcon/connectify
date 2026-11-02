@@ -13949,7 +13949,7 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
   window.ConnectifyTaskTypes = {
     getEffectiveType: (subject, task) => (/exam/i.test(task.name) ? 'Exam' : /test/i.test(task.name) ? 'Test' : 'Essay'),
     labelsKeyOf: task => task.labelsKey || '',
-    updateTypeSelect: (select, subject, name) => { select.dataset.synced = `${subject}|${name}`; },
+    updateTypeSelect: (select, subject, name, key, labels, opts = {}) => { select.dataset.synced = `${subject}|${name}`; select.dataset.chosenOnly = String(Boolean(opts.chosenOnly)); },
     bindTypeSelect: (select, metaOf) => select.addEventListener('change', () => typeSaves.push([metaOf().subjectName, metaOf().taskName, select.value]))
   };
   const predicted = { p1: 91, c2: 63 };
@@ -13994,6 +13994,9 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
       assert.deepStrictEqual([tableRows()[2].children[3].textContent, tableRows()[3].children[3].textContent], ['—', '55%'], 'a grade, or a dash while unmarked');
       const typeSelect = find(tableRows()[3].children[2], n => n.tagName === 'SELECT')[0];
       assert.strictEqual(typeSelect.dataset.synced, 'Chemistry ATAR - Semester 2|Essay', 'the Type dropdown is the outline rows\' own');
+      assert.strictEqual(typeSelect.dataset.chosenOnly, 'true', 'it holds only its choice until it is used');
+      typeSelect.dispatchEvent(new MockEvent('pointerdown'));
+      assert.strictEqual(typeSelect.dataset.chosenOnly, 'false', 'pressing it builds its options before it opens');
       typeSelect.value = 'Exam';
       typeSelect.dispatchEvent(new MockEvent('change'));
       assert.deepStrictEqual(typeSaves, [['Chemistry ATAR - Semester 2', 'Essay', 'Exam']], 'and it saves the type from the list');
@@ -14098,7 +14101,7 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
   const cellsWindow = { ConnectifyUtils: { normalize: t => t.replace(/\s+/g, ' ').trim() } };
   new Function('window', read('progress/task-dates-cells.js'))(cellsWindow);
   assert.deepStrictEqual(['12 Chemistry ATAR', 'Chemistry ATAR Year 11', '3D Art'].map(subject => cellsWindow.ConnectifyTaskDatesCells.subjectText({ subject })), ['Chemistry', 'Chemistry', '3D Art'], 'the Subject column is cleaned');
-  assert.ok(css.includes('#cx-task-dates .cx-time-cell > span { min-width: 6.4em; }') && !read('progress/progress-week-editor.js').includes("containerSpan.style"), 'every row\'s pencil sits just after its week, on one line');
+  assert.ok(css.includes('#cx-task-dates .cx-time-cell > span { min-width: 6.8em; }') && !read('progress/progress-week-editor.js').includes("containerSpan.style"), 'every row\'s pencil sits just after its week, on one line');
   assert.ok(!/tr:hover \.cx-time-edit-btn/.test(css) && css.includes('.cx-time-edit-btn:hover { background: none; color: inherit; }'), 'pointing at a row or the pencil never changes it');
   // The sidebar's dark button rule weighs two ids (2,1,0): anything lighter leaves every button the same filled box
   const sidebarRule = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-handle-menu.css'), 'utf8');

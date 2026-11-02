@@ -80,7 +80,7 @@
 #cx-task-dates .cx-dates-table .cx-dates-type.connectea-overridden { font-weight: 600; }
 /* Every row's pencil just after its week, on one line whatever the week's width */
 #cx-task-dates .cx-time-cell { display: flex; align-items: center; gap: 6px; }
-#cx-task-dates .cx-time-cell > span { min-width: 6.4em; }
+#cx-task-dates .cx-time-cell > span { min-width: 6.8em; }
 #cx-task-dates .cx-dates-empty { margin: 0; padding: 4px 8px; color: #4a5d70; font-weight: 400; }
 /* The pencil stays faint, the pointer never changes it; a saved override keeps its full ink */
 #connectify-progress #cx-task-dates .cx-time-edit-btn,

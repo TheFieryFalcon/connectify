@@ -10,6 +10,9 @@
 
   if (window.ConnectifyTaskDatesCells) return;
 
+  // Before a dropdown opens, by pointer or keyboard
+  const FILL_ON = ['pointerdown', 'focus'];
+
   /** "12 Chemistry ATAR" or "Chemistry ATAR Year 12" -> "Chemistry". */
   const subjectText = row => window.ConnectifyUtils.normalize(
     String(row.subject || '').replace(/\bATAR\b/gi, '').replace(/\bYear\s*\d+\b/gi, '').replace(/^\s*\d{1,2}\s+/, '')
@@ -18,7 +21,10 @@
   /** A completed task's grade ("85.5%"), or a dash. */
   const gradeText = row => (row.completed ? `${Math.round(row.score * 10) / 10}%` : '—');
 
-  /** The task's Type dropdown; `track` keeps its focus across the list's rebuilds. */
+  /**
+   * The task's Type dropdown; `track` keeps its focus across the list's rebuilds. It holds only its choice until it is
+   * used: the options of every row were two fifths of the list's elements, for dropdowns that are rarely opened.
+   */
   function typeSelect(row, track) {
     const types = window.ConnectifyTaskTypes;
     const { task, subjectName } = row;
@@ -27,7 +33,13 @@
     const select = document.createElement('select');
     select.className = 'cx-dates-select cx-dates-type';
     select.setAttribute('aria-label', `${row.name} type`);
-    types.updateTypeSelect(select, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels);
+    const sync = opts => types.updateTypeSelect(select, meta.subjectName, meta.taskName, meta.labelsKey, meta.labels, opts);
+    sync({ chosenOnly: true });
+    const fill = () => {
+      for (const evt of FILL_ON) select.removeEventListener(evt, fill);
+      sync();
+    };
+    for (const evt of FILL_ON) select.addEventListener(evt, fill);
     types.bindTypeSelect(select, () => meta);
     return track(select, `type:${row.key}`);
   }

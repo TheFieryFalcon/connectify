@@ -48,14 +48,15 @@
       }
       for (const pane of panel.querySelectorAll('.cx-subjects, .cx-progress-chart')) pane.hidden = id !== 'graph';
       datesView.section.hidden = id !== 'dates';
-      if (id === 'dates') datesView.render(true);
+      // Rebuilt only if a task or choice changed while it was hidden
+      if (id === 'dates') datesView.render();
       else refs.refresh?.(true);
     }
 
     select(active);
     // Reopening the panel shows what changed while it was closed on the tab it was left on
     window.addEventListener('connectify-open', e => {
-      if (e.detail === 'progress' && active === 'dates') datesView.render(true);
+      if (e.detail === 'progress' && active === 'dates') datesView.render();
     });
 
     window.ConnectifyProgressTabs = { TABS, select, active: () => active, bar };

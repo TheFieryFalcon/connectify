@@ -37,7 +37,8 @@
     return { subjectName, taskName, labels, labelsKey };
   }
 
-  function updateTypeSelect(select, subjectName, taskName, labelsKey, allLabels) {
+  // `chosenOnly` lists just the current choice: a long list of dropdowns builds the rest when one is used
+  function updateTypeSelect(select, subjectName, taskName, labelsKey, allLabels, { chosenOnly = false } = {}) {
     const autoType = categorizeTask(taskName, allLabels);
     const savedOverride = getSavedTaskType(subjectName, taskName, labelsKey);
     const categories = getCategories();
@@ -54,27 +55,31 @@
       allCatList.push(savedOverride);
     }
 
-    const optSignature = `${autoType}|${allCatList.join(',')}|${savedOverride || ''}`;
+    const optSignature = `${chosenOnly}|${autoType}|${allCatList.join(',')}|${savedOverride || ''}`;
     if (select.dataset.signature !== optSignature) {
       select.dataset.signature = optSignature;
       select.innerHTML = '';
 
-      const autoOpt = document.createElement('option');
-      autoOpt.value = '';
-      autoOpt.textContent = `Auto (${autoType})`;
-      select.appendChild(autoOpt);
+      if (!chosenOnly || !savedOverride) {
+        const autoOpt = document.createElement('option');
+        autoOpt.value = '';
+        autoOpt.textContent = `Auto (${autoType})`;
+        select.appendChild(autoOpt);
+      }
 
-      for (const cat of allCatList) {
+      for (const cat of chosenOnly ? (savedOverride ? [savedOverride] : []) : allCatList) {
         const opt = document.createElement('option');
         opt.value = cat;
         opt.textContent = cat;
         select.appendChild(opt);
       }
 
-      const addOpt = document.createElement('option');
-      addOpt.value = '__custom__';
-      addOpt.textContent = '+ Custom...';
-      select.appendChild(addOpt);
+      if (!chosenOnly) {
+        const addOpt = document.createElement('option');
+        addOpt.value = '__custom__';
+        addOpt.textContent = '+ Custom...';
+        select.appendChild(addOpt);
+      }
     }
 
     select.value = currentSelection;
