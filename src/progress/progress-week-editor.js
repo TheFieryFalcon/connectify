@@ -75,12 +75,13 @@
     const createInputField = (currentVal, showWarning = false) => {
       const wrapper = createElement('div');
       wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.gap = '4px';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.gap = '8px';
 
       if (showWarning) {
         const example = window.ConnectifyProgressMath.formatTimestamp(window.ConnectifySchoolTerms.weekOrder(17));
-        const msg = createElement('small', `No date detected. Enter school week (e.g. 17 for ${example}):`, 'cx-date-warning');
+        const msg = createElement('small', 'No week', 'cx-date-warning');
+        msg.title = `Enter its school week (e.g. 17 for ${example})`;
         wrapper.append(msg);
       }
 
@@ -93,9 +94,9 @@
       input.type = 'number';
       input.min = '1';
       input.max = '40';
-      input.placeholder = 'Week (e.g. 17)';
+      input.placeholder = 'Week';
       input.title = `School week of the year: ${weekRanges()}`;
-      input.style.width = '110px';
+      input.style.width = '64px';
       if (currentVal) input.value = currentVal;
       const initialVal = currentVal || '';
 
@@ -182,14 +183,15 @@
     };
 
     if (Number.isFinite(point.order)) {
-      const text = math.formatTimestamp(point.order, point.caption);
+      const label = createElement('span', math.shortTimestamp(point.order, point.caption));
+      label.title = math.formatTimestamp(point.order, point.caption);
       const containerSpan = createElement('span');
       containerSpan.style.display = 'inline-flex';
       containerSpan.style.alignItems = 'center';
       containerSpan.style.gap = '6px';
-      containerSpan.append(createElement('span', text));
+      containerSpan.append(label);
 
-      const editBtn = createElement('button', '✏️', savedTime !== null ? 'cx-time-edit-btn' : 'cx-time-edit-btn cx-time-edit-btn--unconfigured');
+      const editBtn = createElement('button', '✎', savedTime !== null ? 'cx-time-edit-btn' : 'cx-time-edit-btn cx-time-edit-btn--unconfigured');
       editBtn.type = 'button';
       const editLabel = savedTime !== null ? `Custom week ${shownWeek(savedTime)} (click to change)` : 'Edit date (set custom week)';
       editBtn.setAttribute('aria-label', editLabel);
@@ -197,7 +199,7 @@
       editBtn.style.background = 'none';
       editBtn.style.border = 'none';
       editBtn.style.cursor = 'pointer';
-      editBtn.style.fontSize = '12px';
+      editBtn.style.fontSize = '13px';
       editBtn.style.padding = '0';
       editBtn.onclick = () => {
         const inputWrapper = createInputField(shownWeek(savedTime), false);

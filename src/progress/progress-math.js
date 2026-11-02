@@ -22,6 +22,12 @@
     return `Term ${when.term}, Week ${when.week}`;
   }
 
+  /** The week in fewer characters ("Term 2 · Wk 5"), for lists; a caption or nothing without one. */
+  function shortTimestamp(order, fallbackCaption) {
+    const when = termWeek(window.ConnectifySchoolTerms?.normalizeOrder(order) ?? order);
+    return when ? `Term ${when.term} · Wk ${when.week}` : fallbackCaption || '';
+  }
+
   const getMonthName = (week) => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const monthIndex = 1 + Math.floor((week - 1) / 4.3);
@@ -191,6 +197,7 @@
   window.ConnectifyProgressMath = {
     termWeek,
     formatTimestamp,
+    shortTimestamp,
     getMonthName,
     history,
     aggregateMonthlyPoints,

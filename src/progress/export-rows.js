@@ -15,7 +15,7 @@
   const el = (tag, text, cls) => window.ConnectifyProgressChart.createElement(tag, text, cls);
 
   function daySelect(value, first) {
-    const select = el('select', null, 'cx-settings-select');
+    const select = el('select', null, 'cx-dates-select');
     const option = (value, label) => Object.assign(document.createElement('option'), { value, textContent: label });
     if (first) select.append(option('', first));
     DAYS.forEach((day, i) => select.append(option(String(i + 1), day)));

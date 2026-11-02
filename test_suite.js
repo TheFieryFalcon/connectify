@@ -11145,7 +11145,7 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     assert.deepStrictEqual(heads, ['Assessment', 'Date', 'Day', 'Export Date'], 'the table gains the export columns');
     const year = new Date().getFullYear();
     const cells = find(dates.section, n => n.className === 'cx-dates-term').map(n => n.children.map(c => c.textContent).join(' '));
-    assert.deepStrictEqual(cells, T.terms(year, T.earlyEaster(year)).map(t => `Term ${t.term} ${T.formatDate(t.start)} (Week ${t.yearWeek})`), 'each term has its own cell: its start and its first school week');
+    assert.deepStrictEqual(cells, T.terms(year, T.earlyEaster(year)).map(t => `Term ${t.term} ${T.formatDate(t.start)}`), 'each term names its start');
     const text = find(dates.section, () => true).map(n => n.textContent).join('|');
     assert.ok(text.includes('Merge exams into one event per semester') && !text.includes('per semester (.ics)'), 'the merge option covers both files');
     assert.strictEqual(find(dates.list, n => n.dataset?.cxFocus === 'taskday:Physics ATAR::p1')[0].children[0].textContent, 'Default (Mon)', 'the task day defaults to the subject day, named');
@@ -13962,31 +13962,34 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
       const tableRows = () => find(dates.list, n => n.tagName === 'TR');
       const firstCells = () => tableRows().slice(1).map(tr => tr.children[0].textContent);
       const selects = find(dates.toolbar, n => n.tagName === 'SELECT');
-      const [group, direction, sort] = selects;
-      const labelOf = sel => find(dates.toolbar, n => n.className === 'cx-dates-control' && n.children.includes(sel))[0];
+      const [group, sort] = selects;
+      const direction = find(dates.toolbar, n => n.className === 'cx-dates-direction')[0];
       const pick = (sel, value) => { sel.value = value; sel.dispatchEvent(new MockEvent('change')); };
+      const setDirection = value => { if (T.readView().direction !== value) direction.dispatchEvent(new MockEvent('click')); };
 
       assert.deepStrictEqual(group.children.map(o => o.textContent), ['None', 'Subject', 'Type', 'Completed', 'Predicted Grade', 'Grade Achieved']);
-      assert.deepStrictEqual(direction.children.map(o => o.textContent), ['Ascending', 'Descending']);
+      assert.deepStrictEqual([direction.textContent, direction.title], ['↑', 'Ascending'], 'the direction is one small arrow');
       assert.deepStrictEqual(sort.children.map(o => o.textContent), ['Chronological', 'Alphabetical', 'Grade Achieved']);
-      assert.deepStrictEqual(find(dates.toolbar, n => n.tagName === 'LABEL').slice(0, 3).map(l => l.children[0].textContent), ['Group By:', 'Order:', 'Sort By:']);
+      assert.deepStrictEqual(find(dates.toolbar, n => n.className === 'cx-dates-control').map(l => l.children[0].textContent), ['Group By:', 'Sort By:']);
 
       // Default: grouped by Subject, Chronological
       assert.deepStrictEqual(firstCells(), ['Chemistry ATAR', 'lab', 'Essay', 'Exam', 'Physics ATAR', 'Test 2', 'Test 10', 'Undated']);
       assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date'], 'no marks, no weights, only dates');
       assert.strictEqual(tableRows()[1].className, 'cx-dates-group');
-      assert.ok(find(tableRows()[2].children[1], n => n.textContent === math.formatTimestamp(6)).length, 'each row names its week');
+      assert.ok(find(tableRows()[2].children[1], n => n.textContent === 'Term 1 · Wk 6' && n.title === math.formatTimestamp(6)).length, 'each row names its week, in full on hover');
+      assert.strictEqual(find(tableRows()[8], n => n.className === 'cx-date-warning')[0].textContent, 'No week', 'and a missing week says so briefly');
       assert.ok(tableRows()[2].children[1].querySelector('.cx-time-edit-btn'), 'and its week can be edited');
       assert.ok(tableRows()[8].children[1].querySelector('.cx-date-warning'), 'a task with no week asks for one');
 
       // The direction orders the groups; Sort By orders inside them, on its own
-      pick(direction, 'desc');
+      setDirection('desc');
+      assert.strictEqual(direction.textContent, '↓');
       assert.deepStrictEqual(firstCells(), ['Physics ATAR', 'Test 2', 'Test 10', 'Undated', 'Chemistry ATAR', 'lab', 'Essay', 'Exam']);
       pick(sort, 'alphabetical');
       assert.deepStrictEqual(firstCells(), ['Physics ATAR', 'Test 2', 'Test 10', 'Undated', 'Chemistry ATAR', 'Essay', 'Exam', 'lab'], 'ignoring case, numbers in numeric order');
       pick(sort, 'grade');
       assert.deepStrictEqual(firstCells(), ['Physics ATAR', 'Test 2', 'Test 10', 'Undated', 'Chemistry ATAR', 'Exam', 'Essay', 'lab'], 'highest mark first, unmarked last');
-      pick(direction, 'asc');
+      setDirection('asc');
       pick(sort, 'chronological');
 
       // None: no headings, a Subject column, undated last; no direction to choose
@@ -13995,32 +13998,32 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
       assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Subject', 'Date']);
       assert.strictEqual(tableRows()[1].children[1].textContent, 'Physics ATAR');
       assert.strictEqual(tableRows()[2].children[1].textContent, 'Chemistry ATAR', 'the semester suffix is not part of the subject');
-      assert.strictEqual(labelOf(direction).hidden, true);
+      assert.strictEqual(direction.hidden, true);
       assert.deepStrictEqual(JSON.parse(localStorage.getItem(T.KEY)), { groupBy: 'none', direction: 'asc', sortBy: 'chronological', uncompletedOnly: false }, 'the choices are kept');
 
       // Type, in both directions
       pick(group, 'type');
-      assert.strictEqual(labelOf(direction).hidden, false);
+      assert.strictEqual(direction.hidden, false);
       assert.deepStrictEqual(firstCells().filter(c => ['Essay', 'Exam', 'Test'].includes(c)).slice(0, 2), ['Essay', 'Essay'], 'Essay group, then its Essay task');
-      pick(direction, 'desc');
+      setDirection('desc');
       assert.strictEqual(firstCells()[0], 'Test');
-      pick(direction, 'asc');
+      setDirection('asc');
 
       // Completed: fixed order, no direction
       pick(group, 'completed');
-      assert.strictEqual(labelOf(direction).hidden, true);
+      assert.strictEqual(direction.hidden, true);
       assert.deepStrictEqual(firstCells(), ['Not completed', 'lab', 'Test 10', 'Undated', 'Completed', 'Test 2', 'Essay', 'Exam']);
 
       // Predicted Grade: uncompleted tasks only, university bands tied to school letters, no prediction last
       pick(group, 'predicted');
       assert.deepStrictEqual(firstCells(), ['Credit (C)', 'lab', 'High Distinction (A)', 'Test 10', 'No prediction', 'Undated']);
-      pick(direction, 'desc');
+      setDirection('desc');
       assert.deepStrictEqual(firstCells(), ['High Distinction (A)', 'Test 10', 'Credit (C)', 'lab', 'No prediction', 'Undated'], '"No prediction" stays last in either direction');
 
       // Grade Achieved: completed tasks only
       pick(group, 'achieved');
       assert.deepStrictEqual(firstCells(), ['High Distinction (A)', 'Test 2', 'Distinction (B)', 'Exam', 'Pass (C)', 'Essay']);
-      pick(direction, 'asc');
+      setDirection('asc');
       assert.deepStrictEqual(firstCells(), ['Pass (C)', 'Essay', 'Distinction (B)', 'Exam', 'High Distinction (A)', 'Test 2']);
       assert.deepStrictEqual([95, 80, 79.9, 70, 69, 60, 50, 49.9, 0].map(v => T.gradeBand(v, '').label),
         ['High Distinction (A)', 'High Distinction (A)', 'Distinction (B)', 'Distinction (B)', 'Credit (C)', 'Credit (C)', 'Pass (C)', 'Fail (D)', 'Fail (D)'], 'the bands\' cutoffs');
@@ -14064,7 +14067,7 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
   assert.ok(panelSrc.indexOf("querySelector('.cx-progress-chart')") < panelSrc.indexOf("querySelector('div:not(.cx-subjects)')"), 'a panel adopted after a reload never takes the tab bar for its chart');
   const css = read('progress/task-dates.css');
   assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
-  assert.ok(cssHasToken(css, '.connectea-dark #cx-task-dates .cx-dates-group th { color: #ffffff; }'), 'dark headings take the primary ink token');
+  assert.ok(cssHasToken(css, '.connectea-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: #ffffff; border-bottom-color: #3b4d5e; }'), 'dark headings take the primary ink and border tokens');
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -1,10 +1,10 @@
 /**
  * Connectify Task Dates: view
  *
- * The Year Progression panel's Task Dates tab (#cx-task-dates), one list for dates and export: the generated term
- * starts with Early Easter, Group By (and its direction), Sort By, Show Uncompleted Only, the Export toggle and the
- * task table, each task with its week and the week editor (progress-week-editor.js). Export mode
- * (export-view.js) adds the ticks, days and downloads to this same table and forces Show Uncompleted Only on.
+ * The Year Progression panel's Task Dates tab (#cx-task-dates), one list for dates and export: the term starts with
+ * Early Easter in one line, Group By (and its direction arrow), Sort By, Show Uncompleted Only and the Export toggle,
+ * then the task table (each task with its short week and the week editor, progress-week-editor.js). Export mode (export-view.js) adds the ticks, days and downloads to this same table and forces Show
+ * Uncompleted Only on.
  * Exposes window.ConnectifyTaskDatesView.
  */
 (() => {
@@ -43,7 +43,7 @@
     };
     const dropdown = (label, options, onChange) => {
       const wrap = createElement('label', null, 'cx-dates-control');
-      const select = createElement('select', null, 'cx-settings-select');
+      const select = createElement('select', null, 'cx-dates-select');
       for (const option of options) {
         select.append(Object.assign(document.createElement('option'), { value: option.id, textContent: option.label }));
       }
@@ -53,7 +53,14 @@
       return { wrap, select };
     };
     const group = dropdown('Group By:', dates.GROUPS, groupBy => change({ groupBy }));
-    const direction = dropdown('Order:', dates.DIRECTIONS, value => change({ direction: value }));
+    // The groups' direction: an arrow beside Group By
+    const direction = createElement('button', null, 'cx-dates-direction');
+    direction.type = 'button';
+    direction.addEventListener('click', e => {
+      e.stopPropagation();
+      change({ direction: dates.readView().direction === 'desc' ? 'asc' : 'desc' });
+    });
+    controls.append(direction);
     const sort = dropdown('Sort By:', dates.SORTS, sortBy => change({ sortBy }));
     const uncompleted = exportRows.checkbox('Show Uncompleted Only', false, uncompletedOnly => change({ uncompletedOnly }));
     controls.append(uncompleted.wrap);
@@ -79,11 +86,11 @@
       });
     }
 
-    // Each term's start in its own cell: "Term 2" over "20 Apr (Week 10)" (its first school week of the year)
+    // Each term's start: "Term 2 20 Apr"
     function paintTerms(year, early) {
       starts.replaceChildren(...terms.terms(year, early).map(t => {
         const cell = createElement('span', null, 'cx-dates-term');
-        cell.append(createElement('strong', `Term ${t.term}`), createElement('span', `${terms.formatDate(t.start)} (Week ${t.yearWeek})`));
+        cell.append(createElement('span', `Term ${t.term}`), createElement('span', terms.formatDate(t.start)));
         return cell;
       }));
       easter.input.checked = early;
@@ -91,9 +98,12 @@
 
     function paintControls(view, exporting) {
       group.select.value = view.groupBy;
-      direction.select.value = view.direction;
       sort.select.value = view.sortBy;
-      direction.wrap.hidden = !dates.isOrdered(view.groupBy);
+      const descending = view.direction === 'desc';
+      direction.textContent = descending ? '↓' : '↑';
+      direction.title = descending ? 'Descending' : 'Ascending';
+      direction.setAttribute('aria-label', `Group order: ${direction.title}`);
+      direction.hidden = !dates.isOrdered(view.groupBy);
       uncompleted.input.checked = view.uncompletedOnly;
       uncompleted.input.disabled = exporting;
       // Options that say nothing about uncompleted tasks are off while only those are listed
@@ -105,11 +115,11 @@
     }
 
     function taskRow(row, showSubject, exportCtx) {
-      const tr = createElement('tr');
+      const tr = createElement('tr', null, row.completed ? 'cx-dates-row cx-dates-row--done' : 'cx-dates-row');
       const cells = exportCtx ? exportRows.taskCells(row, exportCtx) : null;
       if (cells?.merged) tr.classList.add('cx-export-task--merged');
       tr.append(createElement('td', cells ? cells.name : row.name));
-      if (showSubject) tr.append(createElement('td', row.subject));
+      if (showSubject) tr.append(createElement('td', row.subject, 'cx-dates-subject-cell'));
       tr.append(createElement('td', window.ConnectifyProgressWeekEditor.weekCell(row.task, row.siblings, row.subjectName, onWeekSaved), 'cx-dates-when'));
       if (cells) tr.append(createElement('td', cells.day), createElement('td', cells.date));
       return tr;
@@ -119,7 +129,7 @@
       const showSubject = view.groupBy !== 'subject';
       const headers = ['Assessment', ...(showSubject ? ['Subject'] : []), 'Date', ...(exportCtx ? ['Day', 'Export Date'] : [])];
       const el = createElement('table', null, 'cx-dates-table');
-      const head = createElement('tr');
+      const head = createElement('tr', null, 'cx-dates-head');
       headers.forEach(h => head.append(createElement('th', h)));
       el.append(head);
       for (const item of groups) {

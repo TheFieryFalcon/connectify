@@ -1,5 +1,5 @@
-/* Connectify Export mode of the Task Dates list (export-rows.js, export-view.js). One surface: the panel; the
-   table keeps its hairlines. Dark themes route colours through tokens. */
+/* Connectify Export mode of the Task Dates list (export-rows.js, export-view.js), in the list's own style; only the
+   downloads are filled. Dark themes route colours through tokens. */
 #cx-export-toggle { margin-left: auto; }
 #connectify-progress #cx-export-toggle[aria-pressed="true"] { background: #e2f0fd; border-color: #3474ab; }
 .connectea-dark #connectify-progress #cx-export-toggle[aria-pressed="true"] {
@@ -9,27 +9,30 @@
 }
 #cx-task-dates .cx-dates-export-options:empty,
 #cx-task-dates .cx-dates-export-footer:empty { display: none; }
-#cx-task-dates .cx-dates-export-options { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
-#cx-task-dates .cx-dates-export-footer { display: flex; flex-direction: column; gap: 12px; }
-#cx-task-dates .cx-export-group-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-#cx-task-dates .cx-export-group-name { font-weight: 700; margin-right: auto; }
+#cx-task-dates .cx-dates-export-options { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+#cx-task-dates .cx-dates-export-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+#cx-task-dates .cx-export-group-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+#cx-task-dates .cx-export-group-name { margin-right: auto; }
 #cx-task-dates .cx-export-day { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; }
-#cx-task-dates .cx-export-date { font-weight: 700; white-space: nowrap; }
+/* Select All / None reads as a link beside the heading, never a button in every group */
+#connectify-progress #cx-task-dates .cx-export-all { padding: 1px 4px; border: 0; border-radius: 4px; background: transparent; color: #245579; font-size: 12px; font-weight: 400; }
+#connectify-progress #cx-task-dates .cx-export-all:hover:not(:disabled) { text-decoration: underline; }
+#connectify-progress #cx-task-dates .cx-export-all:disabled { opacity: 0.55; cursor: default; }
+#cx-task-dates .cx-export-date { white-space: nowrap; font-variant-numeric: tabular-nums; }
 /* A row with no tick lines its name up with the ticked names */
-#cx-task-dates .cx-export-name { padding-left: 22px; }
+#cx-task-dates .cx-export-name { padding-left: 20px; }
 /* A task merged into the semester exam has no tick or day: its name is muted */
 #cx-task-dates .cx-export-task--merged .cx-export-name,
 #cx-task-dates .cx-export-tag,
 #cx-task-dates .cx-export-hint { color: #4a5d70; font-weight: 400; }
-#cx-task-dates .cx-export-tag { font-size: 12px; }
-#cx-task-dates .cx-export-hint { margin: 0; }
+#cx-task-dates .cx-export-tag { font-size: 12px; white-space: nowrap; }
+#cx-task-dates .cx-export-hint { margin: 0; font-size: 12px; }
 #cx-task-dates .cx-export-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 #cx-task-dates button.cx-export-download { background: #2563eb; color: #ffffff; border-color: #2563eb; font-weight: 600; padding: 6px 14px; }
 #cx-task-dates button.cx-export-download:hover { background: #1d4ed8; border-color: #1d4ed8; }
 #cx-task-dates button.cx-export-download:disabled { opacity: 0.55; cursor: default; }
 
-.connectea-dark #cx-task-dates .cx-export-group-name,
-.connectea-dark #cx-task-dates .cx-export-date { color: var(--cx-text-primary, #ffffff); }
+.connectea-dark #connectify-progress #cx-task-dates .cx-export-all { color: var(--cx-accent-link, #93bce0); }
 .connectea-dark #cx-task-dates .cx-export-task--merged .cx-export-name,
 .connectea-dark #cx-task-dates .cx-export-tag,
 .connectea-dark #cx-task-dates .cx-export-hint { color: var(--cx-text-secondary, #dce2e8); }
