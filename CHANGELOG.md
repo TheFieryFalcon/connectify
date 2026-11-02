@@ -4,7 +4,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
-## 3.3.1 (Unreleased)
+## 3.3.1 (2026-11-01)
 
 ### Additions
 - **Always blur sidebar, menus, and dialogs**: a new custom theme option, under Blur Strength. In Liquid Glass, it keeps the sidebar, menus, popups and dialogs blurred enough to read over, even when Blur Strength is set low. It's on by default.
