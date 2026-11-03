@@ -1,5 +1,5 @@
 /* Connectify Task Dates: the toolbar's second row. Subjects and Type look like its dropdowns, and open a list of ticks
-   over the table; the list is solid (surface over the opaque canvas), since table text runs under it. */
+   over the table: solid (surface over the opaque canvas) in solid themes, glass like the drawer in Liquid Glass. */
 #connectify-progress .cx-dates-filter-btn {
   display: block;
   flex: 1 1 0;
@@ -14,24 +14,26 @@
   background: transparent;
   color: #253b53;
   font: inherit;
-  font-weight: 500;
+  font-weight: 400;
   text-align: left;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 #connectify-progress .cx-dates-filter-btn:hover { border-color: #94adc3; }
-/* Under its button, at least as wide */
+/* In the top layer, placed under its button by task-dates-filter.js */
 #cx-task-dates .cx-dates-filter-list {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: calc(var(--cx-dates-label, 56px) + 6px);
-  z-index: 5;
+  position: fixed;
+  inset: auto;
+  top: var(--cx-list-top, 0);
+  left: var(--cx-list-left, 0);
   box-sizing: border-box;
   width: max-content;
-  min-width: calc(100% - var(--cx-dates-label, 56px) - 6px);
+  min-width: var(--cx-list-min, 150px);
   max-width: 280px;
-  max-height: 320px;
+  max-height: var(--cx-list-max, 320px);
+  margin: 0;
   overflow-y: auto;
+  color: inherit;
   padding: 10px;
   border: 1px solid #c7d6e4;
   border-radius: 6px;
@@ -59,4 +61,11 @@
   background-image: linear-gradient(var(--cx-surface-bg, #1e2632), var(--cx-surface-bg, #1e2632));
   box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.55);
   color: var(--cx-text-primary, #ffffff);
+}
+/* Liquid Glass: as translucent as the theme's other popups, blurring the table text under it */
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #cx-task-dates .cx-dates-filter-list {
+  background-color: var(--cx-surface-elevated, rgba(30, 38, 50, 0.65));
+  background-image: none;
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%);
 }

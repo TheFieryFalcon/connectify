@@ -17,6 +17,8 @@
 #cx-task-dates .cx-dates-export-footer { margin-top: 16px; }
 /* Connect's .eds.cvr label adds a 5px bottom margin and its own font size, lifting labels off their row */
 #cx-task-dates label { margin: 0; font-size: inherit; line-height: inherit; }
+/* Connect's label font and ink too, which left Group By in another font and colour than Subjects */
+#cx-task-dates label { color: inherit; font-family: inherit; }
 #cx-task-dates .cx-dates-expand:empty { display: none; }
 
 /* Term starts: one line above the controls */
@@ -53,7 +55,7 @@
   box-shadow: none !important;
   color: #253b53;
   font: inherit;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
 }
 #cx-task-dates .cx-dates-toolbar .cx-dates-select {
@@ -87,7 +89,7 @@
 #cx-task-dates .cx-dates-select:hover { border-color: #94adc3 !important; }
 #cx-task-dates .cx-dates-select:disabled { cursor: default; }
 /* Inside the table a day is a detail */
-#cx-task-dates .cx-dates-table .cx-dates-select { padding: 1px 4px; font-weight: 400; vertical-align: middle; }
+#cx-task-dates .cx-dates-table .cx-dates-select { padding: 1px 4px; vertical-align: middle; }
 #connectify-progress .cx-dates-direction {
   display: flex;
   align-items: center;
@@ -100,10 +102,13 @@
   border-radius: 6px;
   background: transparent;
   color: #253b53;
-  font-weight: 500;
+  font: inherit;
+  font-weight: 400;
 }
 #connectify-progress .cx-dates-direction:hover { border-color: #94adc3; }
 #connectify-progress .cx-refresh-btn { box-sizing: border-box; height: 28px; padding: 0 12px; }
+/* The toolbar's text is one font, size and weight, Export included */
+#connectify-progress #cx-export-toggle { font: inherit; font-weight: 400; }
 #cx-task-dates .cx-dates-check { display: inline-flex; align-items: center; gap: 6px; font-weight: 400; cursor: pointer; }
 #cx-task-dates .cx-dates-check input { flex: none; width: 15px; height: 15px; margin: 0; cursor: pointer; }
 

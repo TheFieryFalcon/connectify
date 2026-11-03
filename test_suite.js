@@ -14205,6 +14205,7 @@ runTest('Test 309: Task Dates shows predicted grades when grouped by them, its g
       const subjectsOf = parts(subjectWrap), typesOf = parts(typeWrap);
       assert.strictEqual(subjectsOf.button.textContent, 'All');
       assert.strictEqual(subjectsOf.popup.hidden, true, 'its list stays closed until pressed');
+      assert.strictEqual(subjectsOf.popup.getAttribute('popover'), 'manual', 'in the top layer, where its blur reaches the drawer\'s text');
       subjectsOf.button.dispatchEvent(new MockEvent('click'));
       assert.strictEqual(subjectsOf.popup.hidden, false);
       assert.strictEqual(subjectsOf.button.getAttribute('aria-expanded'), 'true');
@@ -14247,6 +14248,18 @@ runTest('Test 309: Task Dates shows predicted grades when grouped by them, its g
       assert.strictEqual(find(dates.list, n => n.className === 'cx-dates-empty')[0].textContent, 'All tasks are hidden.');
       assert.strictEqual(subjectsOf.button.textContent, 'None');
       assert.strictEqual(chemistry.checked, false);
+
+      // Fixed in the top layer, it closes when the panel scrolls, but not when it scrolls itself
+      if (!subjectsOf.popup.hidden) subjectsOf.button.dispatchEvent(new MockEvent('click'));
+      const realAdd = window.addEventListener;
+      const added = {};
+      window.addEventListener = (type, fn) => { added[type] = fn; };
+      subjectsOf.button.dispatchEvent(new MockEvent('click'));
+      window.addEventListener = realAdd;
+      added.scroll({ target: subjectsOf.popup });
+      assert.strictEqual(subjectsOf.popup.hidden, false, 'its own scrolling leaves it open');
+      added.scroll({ target: dates.list });
+      assert.strictEqual(subjectsOf.popup.hidden, true, 'the panel\'s scrolling closes it');
 
       // Escape closes the list only
       if (subjectsOf.popup.hidden) subjectsOf.button.dispatchEvent(new MockEvent('click'));
@@ -14311,6 +14324,18 @@ runTest('Test 310: The drawer has one side margin, and Task Dates\' controls sha
   assert.ok(css.includes('#cx-task-dates .cx-dates-terms > .cx-dates-check { margin-left: auto; }') && css.includes('#cx-task-dates .cx-dates-filters > .cx-dates-check { grid-column: 6; justify-self: end; }'), 'Early Easter and Show Uncompleted Only end on the right edge, like Export');
   assert.ok(css.includes('.cx-progress-tabs { margin: 0 0 16px; }') && /\.cx-dates-toolbar,\n#cx-task-dates \.cx-dates-export-options \{ margin-top: 12px; \}/.test(css) && css.includes('.cx-dates-filters { margin-top: 8px; }') && css.includes('.cx-dates-list { margin-top: 20px; }'), 'the gaps run 16, 12, 8, then 20 to the table');
   assert.ok(css.includes('#cx-task-dates .cx-dates-row td { box-sizing: border-box; height: 35px; }'), 'every row is one height');
+  // One font, size and weight across the toolbar
+  assert.ok(css.includes('#cx-task-dates label { color: inherit; font-family: inherit; }'), 'never Connect\'s label font or ink');
+  for (const [sheet, selector] of [[css, '#connectify-progress .cx-dates-direction'], [filter, '#connectify-progress .cx-dates-filter-btn'], [css, '#connectify-progress #cx-export-toggle']]) {
+    const rule = blockOf(sheet, selector);
+    assert.ok(/font: inherit;/.test(rule) && /font-weight: 400;/.test(rule), `${selector} takes the toolbar's font at the regular weight`);
+  }
+  assert.ok(/font: inherit;\s*font-weight: 400;/.test(blockOf(css, '#cx-task-dates .cx-dates-select')), 'and so do the dropdowns');
+  // The Subjects and Type lists are glass in Liquid Glass
+  const list = blockOf(filter, '#cx-task-dates .cx-dates-filter-list');
+  assert.ok(/position: fixed;/.test(list) && /inset: auto;/.test(list) && /margin: 0;/.test(list) && /color: inherit;/.test(list), 'the list overrides the browser\'s popover styles');
+  const glassList = blockOf(filter, 'html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #cx-task-dates .cx-dates-filter-list');
+  assert.ok(/background-color: var\(--cx-surface-elevated/.test(glassList) && /background-image: none;/.test(glassList) && /backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\)/.test(glassList), 'translucent and blurred in Liquid Glass');
   assert.ok(read('progress/export-view.css').includes('.cx-export-group-head .cx-export-all { margin-right: -4px; }'), 'Select All / None ends on the right edge');
 });
 

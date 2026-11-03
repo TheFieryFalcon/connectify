@@ -2,13 +2,19 @@
  * Connectify Task Dates: show or hide subjects and types
  *
  * A dropdown of ticks, with Hide All / Show All, for each of the second toolbar row's Subjects and Type. What is
- * unticked (connectify:task_dates_view) leaves the list and, in Export mode, the downloads.
+ * unticked (connectify:task_dates_view) leaves the list and, in Export mode, the downloads. The ticks open in the top
+ * layer (popover): in Liquid Glass a blur nested in the drawer never reaches the drawer's own text, so the table would
+ * show sharp through them. Fixed there, they close when the panel scrolls.
  * Exposes window.ConnectifyTaskDatesFilter.
  */
 (() => {
   'use strict';
 
   if (window.ConnectifyTaskDatesFilter) return;
+
+  const GAP = 4;
+  const MIN_HEIGHT = 120;
+  const MAX_HEIGHT = 320;
 
   /**
    * `{ wrap, paint(items, hidden) }`: paint with `[{ id, label }]` and the hidden ids. onChange gets the new hidden
@@ -25,6 +31,7 @@
     button.setAttribute('aria-expanded', 'false');
     const popup = el('div', null, 'cx-dates-filter-list');
     popup.hidden = true;
+    popup.setAttribute('popover', 'manual');
     popup.setAttribute('role', 'group');
     popup.setAttribute('aria-label', `${label} shown`);
     const all = el('button', 'Hide All', 'cx-export-all');
@@ -40,9 +47,25 @@
     const isOpen = () => !popup.hidden;
     function close() {
       if (!isOpen()) return;
+      popup.hidePopover?.();
       popup.hidden = true;
       button.setAttribute('aria-expanded', 'false');
       document.removeEventListener('click', onDocumentClick, true);
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', close);
+    }
+    function onScroll(e) {
+      if (!popup.contains(e.target)) close();
+    }
+    // Under its button, at least as wide, and never past the bottom of the window
+    function place() {
+      const rect = button.getBoundingClientRect?.();
+      if (!rect) return;
+      const top = rect.bottom + GAP;
+      popup.style.setProperty('--cx-list-left', `${rect.left}px`);
+      popup.style.setProperty('--cx-list-top', `${top}px`);
+      popup.style.setProperty('--cx-list-min', `${rect.width}px`);
+      popup.style.setProperty('--cx-list-max', `${Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, window.innerHeight - top - GAP))}px`);
     }
     // Captured, since the toolbar's other buttons stop their clicks
     function onDocumentClick(e) {
@@ -51,9 +74,13 @@
     button.addEventListener('click', e => {
       e.stopPropagation();
       if (isOpen()) { close(); return; }
+      place();
       popup.hidden = false;
+      popup.showPopover?.();
       button.setAttribute('aria-expanded', 'true');
       document.addEventListener('click', onDocumentClick, true);
+      window.addEventListener('scroll', onScroll, true);
+      window.addEventListener('resize', close);
     });
     // Escape closes the list only, never the drawer
     wrap.addEventListener('keydown', e => {
