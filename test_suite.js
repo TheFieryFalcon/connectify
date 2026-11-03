@@ -11180,7 +11180,7 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
   assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
 });
 
-runTest('Test 244: Exams merged into a semester exam show no tick or day, nor do tasks with no export date; Task Dates labels sit on their row', () => {
+runTest('Test 244: Exams merged into a semester exam keep their tick but show no day; tasks with no export date show neither; Task Dates labels sit on their row', () => {
   loadExportModules();
   const saved = { types: window.ConnectifyTaskTypes, chart: window.ConnectifyProgressChart };
   window.ConnectifyTaskTypes = { getEffectiveType: (subject, task) => (/exam/i.test(task.name) ? 'Exam' : 'Test') };
@@ -11200,8 +11200,19 @@ runTest('Test 244: Exams merged into a semester exam show no tick or day, nor do
     assert.ok(walk(lab.name).some(n => n.type === 'checkbox') && lab.day.tagName === 'SELECT', 'a task outside the merge keeps its tick and day');
     assert.strictEqual(lab.day.children[0].textContent, 'Default (Wed)', 'the default names the subject day');
     const exam = cells('c2', 'Exam');
-    assert.ok(exam.merged && !walk(exam.name).some(n => n.type === 'checkbox') && exam.day.tagName !== 'SELECT', 'a merged exam renders no tick or day');
+    assert.ok(walk(exam.name).some(n => n.type === 'checkbox' && n.checked) && exam.day.tagName !== 'SELECT', 'a merged exam keeps its tick, with no day');
     assert.strictEqual(exam.day.textContent, 'In Semester 2 Exam', 'and names the exam it is part of');
+    let prefs = {};
+    const unticking = window.ConnectifyExportRows.taskCells({ key: 'Chemistry ATAR::c2', name: 'Exam', subject: 'Chemistry ATAR' }, { ...ctx, update: change => change(prefs) });
+    const examTick = walk(unticking.name).find(n => n.type === 'checkbox');
+    examTick.checked = false;
+    examTick.dispatchEvent(new window.Event('change'));
+    assert.deepStrictEqual(prefs.unticked, ['Chemistry ATAR::c2'], 'unticking it leaves it out');
+    const left = window.ConnectifyExportTasks.build([
+      { name: 'Chemistry ATAR', tasks: [{ id: 'c2', name: 'Exam', order: 41, pending: true, semester: 2 }] },
+      { name: 'Physics ATAR', tasks: [{ id: 'p1', name: 'Semester 2 exam', order: 42, pending: true, semester: 2 }] }
+    ], { year: 2026, early: true, unticked: new Set(prefs.unticked) });
+    assert.deepStrictEqual(window.ConnectifyExportTasks.examGroups(window.ConnectifyExportTasks.ticked(left.groups)), [], 'and a semester left with one exam merges nothing');
     const undated = cells('c3', 'Undated');
     assert.ok(!walk(undated.name).some(n => n.type === 'checkbox') && !undated.date.textContent, 'no week: no tick and no export date, its week input is on the same row');
     assert.strictEqual(cells('c4', 'Late').day.textContent, 'After Term 4');

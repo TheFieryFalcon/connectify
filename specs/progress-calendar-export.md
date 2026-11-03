@@ -25,8 +25,7 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 │                                                                                 │
 │ Chemistry ATAR          Day: [Mon ▾]                      [Select All / None]   │
 │   [x] Test 3            Term 2, Week 6       [Default (Mon) ▾] Mon 25 May       │
-│       Exam              Term 2, Week 9                         Mon 15 Jun       │
-│       In Semester 1 Exam                                                        │
+│   [x] Exam              Term 2, Week 9       In Semester 1 Exam Mon 15 Jun      │
 │ English ATAR            Day: [Thu ▾]                                            │
 │   [ ] Essay 2           Term 3 Week 2        [Fri ▾]           Fri 31 Jul       │
 │                                                                                 │
@@ -48,7 +47,7 @@ Connect gives assessments a school week ("Term 2 Week 6/7"), never a date, so th
 - **Rows**: every unmarked task (`pending`) of every class from `ConnectifyData.collectClasses(true)` (so "Show this semester's classes only" applies, as in every sidebar tool), grouped under its subject.
 - **Subject heading**: cleaned subject name (same cleaning as the Progress chips / Predictor tabs: `- Semester N` suffix removed), a **Day** select (`Mon`–`Fri`, default `Mon`, `.cx-settings-select`) and Select All / None.
 - **Task row**: tick checkbox, task name, its week as the Progress graph shows it (`Term 2, Week 6`), a per-task day select (`Default (<subject day>)`, e.g. `Default (Mon)`, follows the heading; or `Mon`–`Fri`), and the export date preview (`Mon 25 May`), updated live on every change.
-- **Merged exams**: while merging is on, each exam in a merged semester exam is disabled (`.cx-export-task--merged`, `aria-disabled`): no tick or day select, name in secondary ink, its week and date in their columns, tagged `In Semester N Exam`. Select None (or turning merging off) unticks / frees them.
+- **Merged exams**: while merging is on, each exam in a merged semester exam keeps its tick, with no day select, its week and date in their columns, tagged `In Semester N Exam`. Unticking one takes it out of the merged exam; a semester left with one ticked exam merges nothing, so that exam gets its day select back. Turning merging off frees them.
 - **Ticks**: every task is ticked by default; unticked tasks stay unticked across visits (by task key); tasks first seen later arrive ticked.
 - **Order**: subjects by their next due task (earliest export date among their upcoming tasks, ticked or not, so ticking never reorders); subjects with no dated task last, A–Z. Within a subject, tasks by export date, undated ones last.
 - **No week**: tasks with no readable week are not rows; one line under the list names each (`No week: <task> (<subject>), …. Set one in Task Dates.`), the only note besides the import hint (UI copy rule: only what the screen cannot show). Tasks that would land after Term 4 are listed the same way (`After Term 4: …`).

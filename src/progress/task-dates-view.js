@@ -135,7 +135,6 @@
     function taskRow(row, columns, exportCtx, track) {
       const tr = createElement('tr', null, row.completed ? 'cx-dates-row cx-dates-row--done' : 'cx-dates-row');
       const cells = exportCtx ? exportRows.taskCells(row, exportCtx) : null;
-      if (cells?.merged) tr.classList.add('cx-export-task--merged');
       tr.append(createElement('td', cells ? cells.name : row.name));
       tr.append(createElement('td', window.ConnectifyProgressWeekEditor.weekCell(row.task, row.siblings, row.subjectName, onWeekSaved), 'cx-dates-when'));
       if (cells) {

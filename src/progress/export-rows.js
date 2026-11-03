@@ -3,8 +3,8 @@
  *
  * What Export mode adds to a row: a tick on the task's name, a weekday defaulting to its subject's and the export
  * date; and to a group heading: Select All / None, and the subject's weekday when grouped by Subject. A task merged
- * into the semester exam has no tick or weekday, tagged with the exam it is part of; a task with no week or past
- * Term 4 has no tick. Exposes window.ConnectifyExportRows.
+ * into the semester exam keeps its tick, which takes it out of that exam, and has no weekday, tagged with the exam
+ * it is part of; a task with no week or past Term 4 has no tick. Exposes window.ConnectifyExportRows.
  */
 (() => {
   'use strict';
@@ -63,26 +63,26 @@
     return head;
   }
 
-  /** `{ name, day, date, merged }`: the cells Export mode gives one row. */
+  /** `{ name, day, date }`: the cells Export mode gives one row. */
   function taskCells(row, ctx) {
     const formatDay = window.ConnectifySchoolTerms.formatDay;
     const item = ctx.items.get(row.key);
     const plainName = el('span', row.name, 'cx-export-name');
     const blank = () => el('span', null);
     if (!item?.date) {
-      return { name: plainName, day: item?.reason === 'afterTerm4' ? el('span', 'After Term 4', 'cx-export-tag') : blank(), date: blank(), merged: false };
+      return { name: plainName, day: item?.reason === 'afterTerm4' ? el('span', 'After Term 4', 'cx-export-tag') : blank(), date: blank() };
     }
     const date = el('span', formatDay(item.date), 'cx-export-date');
-    if (ctx.mergedIn.has(item.key)) {
-      // Part of the merged semester exam: no tick or day of its own
-      return { name: plainName, day: el('span', `In Semester ${ctx.mergedIn.get(item.key)} Exam`, 'cx-export-tag'), date, merged: true };
-    }
     const tick = checkbox(row.name, item.ticked, on => ctx.update(p => {
       const keys = new Set(p.unticked || []);
       on ? keys.delete(item.key) : keys.add(item.key);
       p.unticked = Array.from(keys);
     }));
     ctx.track(tick.input, `tick:${item.key}`);
+    if (ctx.mergedIn.has(item.key)) {
+      // Part of the merged semester exam: no day of its own
+      return { name: tick.wrap, day: el('span', `In Semester ${ctx.mergedIn.get(item.key)} Exam`, 'cx-export-tag'), date };
+    }
     const subjectDay = ctx.subjectDays[row.subject] || 1;
     const taskDay = ctx.track(daySelect(item.day, `Default (${DAYS[subjectDay - 1]})`), `taskday:${item.key}`);
     taskDay.setAttribute('aria-label', `Day for ${row.name}`);
@@ -92,7 +92,7 @@
       else delete days[item.key];
       p.taskDays = days;
     }));
-    return { name: tick.wrap, day: taskDay, date, merged: false };
+    return { name: tick.wrap, day: taskDay, date };
   }
 
   window.ConnectifyExportRows = { DAYS, daySelect, checkbox, selectAll, groupHead, taskCells };

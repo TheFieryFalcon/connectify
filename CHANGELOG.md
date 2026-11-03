@@ -17,6 +17,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Finished goals say so in the notification's title.** It reads Goal Achieved with a green edge or Goal Missed with a gray edge, and goal names no longer start with the year level.
 
 ### Fixes
+- Exams merged into one event on Export now keep their ticks, so you can leave one out, and a tick no longer vanishes as you click a second exam.
 - You can now see which tab is selected on the Predictor, Goal Setter, Estimator and Year Progression, in every theme.
 - Pressing Escape while changing a task's week now cancels the change without closing the sidebar.
 - Notifications now have the Liquid Glass effect in Liquid Glass themes.

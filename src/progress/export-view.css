@@ -25,8 +25,6 @@
 #cx-task-dates .cx-export-date { white-space: nowrap; font-variant-numeric: tabular-nums; }
 /* A row with no tick lines its name up with the ticked names */
 #cx-task-dates .cx-export-name { padding-left: 20px; }
-/* A task merged into the semester exam has no tick or day: its name is muted */
-#cx-task-dates .cx-export-task--merged .cx-export-name,
 #cx-task-dates .cx-export-tag,
 #cx-task-dates .cx-export-hint { color: #4a5d70; font-weight: 400; }
 #cx-task-dates .cx-export-tag { font-size: 12px; white-space: nowrap; }
@@ -38,7 +36,6 @@
 
 .connectea-dark #connectify-sidebar #cx-task-dates .cx-export-all,
 .connectea-dark #connectify-sidebar #cx-task-dates .cx-export-all:hover { border: 0; background: transparent; color: var(--cx-accent-link, #93bce0); }
-.connectea-dark #cx-task-dates .cx-export-task--merged .cx-export-name,
 .connectea-dark #cx-task-dates .cx-export-tag,
 .connectea-dark #cx-task-dates .cx-export-hint { color: var(--cx-text-secondary, #dce2e8); }
 .connectea-dark #connectify-sidebar #cx-task-dates button.cx-export-download {
