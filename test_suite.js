@@ -14421,6 +14421,56 @@ runTest('Test 311: With a custom end week, Set as Goal\'s headline and sliders m
   localStorage.clear();
 });
 
+runTest('Test 312: Mousing out of the drawer collapses it only on Assessment Outlines; other pages keep it open', () => {
+  const saved = { api: window.ConnectifySidebarHandle, open: window.ConnectifyOpenSidebar, close: window.ConnectifyCloseSidebar, href: location.href, setTimeout: global.setTimeout, clearTimeout: global.clearTimeout };
+  const timers = [];
+  try {
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-handle-position.js'), 'utf8'));
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-handle.js'), 'utf8'));
+    eval(fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-hover.js'), 'utf8'));
+    const api = window.ConnectifySidebarHandle;
+    const sb = api.getSidebar();
+    window.ConnectifyOpenSidebar = () => { sb.hidden = false; };
+    window.ConnectifyCloseSidebar = () => { sb.hidden = true; };
+    global.setTimeout = cb => { timers.push(cb); return timers.length; };
+    global.clearTimeout = id => { if (timers[id - 1]) timers[id - 1] = () => {}; };
+    const away = document.createElement('div');
+    const moveAway = () => api.handleMouseMove({ clientX: 1200, clientY: 400, target: away });
+    sb.classList.remove('cx-tool-active');
+    api.setJustReturnedToMenu(false);
+
+    location.href = 'https://connect.det.wa.edu.au/classes';
+    sb.hidden = false;
+    moveAway();
+    assert.strictEqual(timers.length, 0, 'Off Assessment Outlines moving away schedules no collapse');
+    api.handleMouseLeaveDoc();
+    assert.strictEqual(sb.hidden, false, 'Off Assessment Outlines leaving the page keeps the drawer open');
+
+    location.href = OUTLINES_HREF;
+    moveAway();
+    assert.strictEqual(timers.length, 1, 'On Assessment Outlines moving away schedules the collapse');
+    location.href = 'https://connect.det.wa.edu.au/classes';
+    timers.splice(0).forEach(cb => cb());
+    assert.strictEqual(sb.hidden, false, 'A collapse left over from the outlines page does not close the drawer elsewhere');
+    location.href = OUTLINES_HREF;
+    moveAway();
+    timers.splice(0).forEach(cb => cb());
+    assert.strictEqual(sb.hidden, true, 'and it collapses the drawer on Assessment Outlines');
+    sb.hidden = false;
+    api.handleMouseLeaveDoc();
+    assert.strictEqual(sb.hidden, true, 'as does leaving the page');
+  } finally {
+    global.setTimeout = saved.setTimeout;
+    global.clearTimeout = saved.clearTimeout;
+    location.href = saved.href;
+    const sb = window.ConnectifySidebarHandle?.getSidebar?.();
+    if (sb) sb.hidden = true;
+    window.ConnectifySidebarHandle = saved.api;
+    window.ConnectifyOpenSidebar = saved.open;
+    window.ConnectifyCloseSidebar = saved.close;
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

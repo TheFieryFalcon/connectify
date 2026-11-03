@@ -2,9 +2,9 @@
  * Connectify Sidebar: edge expand and hover collapse
  *
  * On Assessment Outlines, moving the mouse to the left screen edge opens the drawer, except in the top
- * left corner beside Connect's top bar (its home logo stays clickable); other pages never open it on
- * hover (the handle is clicked). While no tool is open (and the user did not just come back to the
- * menu), moving away collapses it after 120ms; leaving the page does too.
+ * left corner beside Connect's top bar (its home logo stays clickable), and while no tool is open (and
+ * the user did not just come back to the menu), moving away collapses it after 120ms; leaving the page
+ * does too. Other pages never open or collapse it on hover (the handle or an outside click does).
  * Extends window.ConnectifySidebarHandle.
  */
 (() => {
@@ -24,6 +24,7 @@
   const CORNER_MIN_HEIGHT = 60;
   const inLogoCorner = e => e.clientY <= Math.max(CORNER_MIN_HEIGHT, api.getTopBarBottom?.() || 0);
   const atOpeningEdge = e => e.clientX <= 12 && !inLogoCorner(e);
+  const collapsesOnHoverOut = sb => api.opensOnHover() && !sb.classList.contains('cx-tool-active') && !isJustReturnedToMenu();
 
   if (window._connectifyMouseMoveAttached) {
     document.removeEventListener('mousemove', window._connectifyMouseMoveAttached);
@@ -52,10 +53,10 @@
       return;
     }
 
-    // 2. If sidebar is open and NO panel is active:
+    // 2. If sidebar is open on Assessment Outlines and NO panel is active:
     // Collapse when mouse moves outside of the sidebar and handle,
     // unless user just returned to menu from an active tool panel
-    if (!sb.classList.contains('cx-tool-active') && !isJustReturnedToMenu()) {
+    if (collapsesOnHoverOut(sb)) {
       const sidebarRect = typeof sb.getBoundingClientRect === 'function' ? sb.getBoundingClientRect() : null;
       const handleRect = typeof handle.getBoundingClientRect === 'function' ? handle.getBoundingClientRect() : null;
 
@@ -75,14 +76,14 @@
           hoverCollapseTimeout = setTimeout(() => {
             hoverCollapseTimeout = null;
             const curSb = getSidebar();
-            if (curSb && !curSb.hidden && !curSb.classList.contains('cx-tool-active') && !isJustReturnedToMenu()) {
+            if (curSb && !curSb.hidden && collapsesOnHoverOut(curSb)) {
               closeSidebar();
             }
           }, 120);
         }
       }
     } else {
-      // A panel is active or user just returned to menu: hover-out should NOT collapse
+      // Off Assessment Outlines, a panel is active or user just returned to menu: hover-out should NOT collapse
       if (hoverCollapseTimeout) {
         clearTimeout(hoverCollapseTimeout);
         hoverCollapseTimeout = null;
@@ -115,7 +116,7 @@
   }
   const handleMouseLeaveDoc = () => {
     const sb = getSidebar();
-    if (sb && !sb.hidden && !sb.classList.contains('cx-tool-active') && !isJustReturnedToMenu()) {
+    if (sb && !sb.hidden && collapsesOnHoverOut(sb)) {
       closeSidebar();
     }
   };
