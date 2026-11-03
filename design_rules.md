@@ -5,125 +5,874 @@ Extremely concise summary of the core visual design language, contrast standards
 ---
 
 ## 1. Color Palette & Hierarchy
-- **Canvas / Background**: Light `#f7f9fc`, Dark `#12171f`, Quantum Dark `#282828` (Gruvbox bright green `#b8bb26` highlights), AMOLED `#000000`, Midnight `#0b132b`, Forest `#0a1914`, Liquid Glass (grey `#aeb4c2` canvas, `#8d99a6` panels at 30%) and Liquid Tinted Glass (navy `#0b1120`) diffusion.
-- **Top Navigation & Menus**: Light `#ffffff` / `#e9f2fb`, Dark `#1a222d`.
-- **Course Tiles (`.eds-c-tile`)**: Light `#ffffff` (border `#d8e3ee`), Dark `#1e2632` (border `#2e3c4e`, hover `#3d5066`). Translucent frosted glass (`rgba(18, 26, 40, 0.65)`) in Liquid Glass / custom background.
-- **Cohort Statistics Panel (`.connectea-panel`)**: Deep navy `#15263a`, border `#264669`, text `#d6e8f8`.
-- **Summary Marks Box (`.cvr-c-task__marks`)**: Box `#161e29`, divider `#2d3b4d`.
-- **Accordions & Section Headers**: `#222b39`, border `#2e3c4e`; transparent over custom wallpapers or Liquid Glass.
-- **Category Colors**: Exam (Red `#e74c3c`), Test (Green `#2ecc71`), Application (Blue `#3498db`), Essay (Purple `#9b59b6`), Take-Home (Yellow `#f1c40f`); defined once in `src/cohort/category-store.js`. Labels bind to `--cx-cat-color` via `.cx-cat-name-label`.
-- **Important Tiles** (`.eds-c-tile--important`, e.g. Maintenance Notice; `theme-alert-tiles.css`): keep Connect's red in every dark theme: `__header--negative` tinted (`#dc2626` 16%, or Connect's `#9d000b` 10% in light tone), red header divider, red `.eds-t-red` icons (`#f87171`, `#9d000b` in light tone, incl. `-webkit-text-fill-color`).
-- **Feed Class Bars** (`.card-scope` on feed cards, Connect's class colour; `theme-feed-3.css`): the class thumbnail and item icon keep Connect's white in every dark theme, never the theme ink (an id-weighted rule beats the generic icon rule).
-- **Assessment Type Label**: Always formatted as `"Type: "` with trailing colon and space. The dropdown sizes to the chosen type (`field-sizing: content`, max 160px on screen whatever the display zoom, ellipsis), never its longest option; new category names are at most 16 characters (`ConnectifyCategoryStore.promptName`).
-- **No Second Designs (Minimal Friction)**: a mode never swaps a view for another design of the same data, and a dialog never re-draws what the panel already shows. Toggle it in place: the same list or table gains the mode's controls and locks what the mode needs. Export is a toggle on the Task Dates list (ticks, days and downloads on the same rows, Show Uncompleted Only forced on); Set as Goal turns into Confirm and Cancel where its button was and adds End beside Recalculate, under no progress bar or points of its own (the planner already shows them), its task table and sliders live (a custom end week narrows that table). Reach for a dialog only for what the panel does not already show.
-- **Year Progression Tabs**: two subtabs on the Predictor's tab bar: **Progress Graph** (chips, `Show:`, chart, and a table of marks and weights, no dates or Early Easter) and **Task Dates** (term starts with Early Easter, every task's week, subject, type and grade, the week editor and Type dropdown, Export). The panel reopens on the tab it was left on.
-- **Tab Bars** (`.cx-pred-main-tabs` / `.cx-pred-main-tab`, `.cx-pred-subtab`; `sidebar-predictor.css`): one set of rules for the Predictor, Goal Setter, Estimator and Year Progression, written to outrank the drawer's button rules (`#connectify-sidebar button`, and `.connectea-dark #connectify-sidebar :is(button, ...)` through `#cx-specificity-anchor`), so the selected tab shows in every theme: inactive main tabs are clear, the active one is filled, each >= 5:1. No tool keeps its own copy (Test 306).
-- **Task Dates List**: the one place for a task's data beside the outlines. Normal view: Assessment, Date, Subject (cleaned: no year level or ATAR; no column when grouped by Subject), Type (the outline rows' own dropdown and saved overrides, each change reaching the other), Grade (`85.5%`, `—` unmarked; no column under Show Uncompleted Only; grouped by Predicted Grade it is `Predicted`, the Predictor's Mid, Show Uncompleted Only or not). A manually chosen type is never bold, here or on the outlines. Export view: Assessment, Date, Day, Export Date. Assessment and Date are a fixed left half (34% + 16%), in the same place in both views, so a toggle only swaps the right half. Light, not bare: one surface with one hairline colour (`--cx-progress-line`: rows, headings, column names and control outlines, on both Year Progression tabs), no vertical dividers (term starts are split by spacing), table text on the same edges as the controls, bold group headings, small column names, thin-outlined dropdowns (`.cx-dates-select`), weeks as `Term 2 Wk 5` (in full on hover), a faint ✎ right after the week, in one column, that the pointer never changes, finished tasks in muted ink, term starts on one small line above the controls; only the downloads are filled. Every task, modular: `Group By:` None / Subject / Type / Completed / Predicted Grade (uncompleted only) / Grade Achieved (completed only), a ↑ / ↓ arrow for the groups' direction (not None or Completed), `Sort By:` Chronological / Alphabetical / Grade Achieved/Predicted Grade inside each group (highest first: the predicted grade when grouped by Predicted Grade, else the grade achieved), and `Show Uncompleted Only`, which greys out and falls back from what needs completed tasks (the saved choice returns with the option off). Toolbar text (labels, dropdowns, arrow, Export) is one font, size and regular weight, never Connect's label font. Spacing: every toolbar control is 28px tall on one set of columns (Subjects under Group By, Type under Sort By, one arrow on each dropdown), Early Easter, Export and Show Uncompleted Only end on the right edge, and the gaps run 16 tabs to terms, 12 terms to controls, 8 between control rows, 20 to the table. A second row: `Subjects:` and `Type:` (each drawn like a dropdown: All, `4 of 6` or None, opening a list of ticks with Hide All / Show All over the table, solid in solid themes and translucent with a blur in Liquid Glass; it opens in the top layer (`popover`), because a blur nested in the drawer never reaches the drawer's own text, and closes when the panel scrolls) and `Show Uncompleted Only`; what is unticked leaves the list and the Export downloads. A group without the value ("No prediction") stays last in either direction.
-- **Grade Bands**: WA letter grades have no hard cutoffs, so marks group by the university scheme with the school letter in brackets: High Distinction (A) from 80%, Distinction (B) from 70%, Credit (C) from 60%, Pass (C) from 50%, Fail (D) below.
-- **No Dot Separators**: no `•` or `·` anywhere in the UI: runs of stats are split by an em space (`\u2003` / `&emsp;`, which still lets text wrap between stats), sentences by commas, lists by line breaks (Test 307).
-- **UI Copy**: no superfluous text that is self-evident from what is on screen (e.g. "From 1 of 2 unmarked tasks; blank tasks are left out until they are marked." under an estimate): show the result; a note only for what the screen cannot show (errors, missing data).
+- **Canvas / Background**
+  - Solid themes
+    - Light `#f7f9fc`
+    - Dark `#12171f`
+    - Quantum Dark `#282828` (Gruvbox bright green `#b8bb26` highlights)
+    - AMOLED `#000000`
+    - Midnight `#0b132b`
+    - Forest `#0a1914`
+  - Diffusion themes
+    - Liquid Glass (grey `#aeb4c2` canvas, `#8d99a6` panels at 30%)
+    - Liquid Tinted Glass (navy `#0b1120`)
+- **Top Navigation & Menus**
+  - Colours
+    - Light `#ffffff` / `#e9f2fb`
+    - Dark `#1a222d`
+- **Course Tiles (`.eds-c-tile`)**
+  - Solid
+    - Light `#ffffff` (border `#d8e3ee`)
+    - Dark `#1e2632` (border `#2e3c4e`, hover `#3d5066`)
+  - Glass
+    - Translucent frosted glass (`rgba(18, 26, 40, 0.65)`) in Liquid Glass / custom background
+- **Cohort Statistics Panel (`.connectea-panel`)**
+  - Colours
+    - Deep navy `#15263a`
+    - border `#264669`
+    - text `#d6e8f8`
+- **Summary Marks Box (`.cvr-c-task__marks`)**
+  - Colours
+    - Box `#161e29`
+    - divider `#2d3b4d`
+- **Accordions & Section Headers**
+  - Colours
+    - `#222b39`, border `#2e3c4e`
+    - transparent over custom wallpapers or Liquid Glass
+- **Category Colors**
+  - Values, defined once in `src/cohort/category-store.js`
+    - Exam (Red `#e74c3c`)
+    - Test (Green `#2ecc71`)
+    - Application (Blue `#3498db`)
+    - Essay (Purple `#9b59b6`)
+    - Take-Home (Yellow `#f1c40f`)
+  - Labels
+    - Labels bind to `--cx-cat-color` via `.cx-cat-name-label`
+- **Important Tiles** (`.eds-c-tile--important`, e.g. Maintenance Notice; `theme-alert-tiles.css`)
+  - Keep Connect's red in every dark theme
+    - `__header--negative` tinted (`#dc2626` 16%, or Connect's `#9d000b` 10% in light tone)
+    - red header divider
+    - red `.eds-t-red` icons (`#f87171`, `#9d000b` in light tone, incl. `-webkit-text-fill-color`)
+- **Feed Class Bars** (`.card-scope` on feed cards, Connect's class colour; `theme-feed-3.css`)
+  - The class thumbnail and item icon keep Connect's white in every dark theme
+    - never the theme ink
+    - an id-weighted rule beats the generic icon rule
+- **Assessment Type Label**
+  - Text
+    - Always formatted as `"Type: "` with trailing colon and space
+  - The dropdown sizes to the chosen type, never its longest option
+    - `field-sizing: content`
+    - max 160px on screen whatever the display zoom
+    - ellipsis
+  - New names
+    - new category names are at most 16 characters (`ConnectifyCategoryStore.promptName`)
+- **No Second Designs (Minimal Friction)**
+  - The rule
+    - a mode never swaps a view for another design of the same data
+    - a dialog never re-draws what the panel already shows
+    - Toggle it in place: the same list or table gains the mode's controls and locks what the mode needs
+    - Reach for a dialog only for what the panel does not already show
+  - Export is a toggle on the Task Dates list
+    - ticks, days and downloads on the same rows
+    - Show Uncompleted Only forced on
+  - Set as Goal turns into Confirm and Cancel where its button was and adds End beside Recalculate
+    - under no progress bar or points of its own (the planner already shows them)
+    - its task table and sliders live (a custom end week narrows that table)
+- **Year Progression Tabs**
+  - two subtabs on the Predictor's tab bar
+    - **Progress Graph** (chips, `Show:`, chart, and a table of marks and weights, no dates or Early Easter)
+    - **Task Dates** (term starts with Early Easter, every task's week, subject, type and grade, the week editor and Type dropdown, Export)
+  - Reopening
+    - The panel reopens on the tab it was left on
+- **Tab Bars** (`.cx-pred-main-tabs` / `.cx-pred-main-tab`, `.cx-pred-subtab`; `sidebar-predictor.css`)
+  - one set of rules for the Predictor, Goal Setter, Estimator and Year Progression
+    - No tool keeps its own copy (Test 306)
+  - written to outrank the drawer's button rules, so the selected tab shows in every theme
+    - `#connectify-sidebar button`
+    - `.connectea-dark #connectify-sidebar :is(button, ...)` through `#cx-specificity-anchor`
+  - Colours
+    - inactive main tabs are clear
+    - the active one is filled
+    - each >= 5:1
+- **Task Dates List**
+  - Role
+    - the one place for a task's data beside the outlines
+  - Normal view: Assessment, Date, Subject, Type, Grade
+    - Subject (cleaned: no year level or ATAR; no column when grouped by Subject)
+    - Type (the outline rows' own dropdown and saved overrides, each change reaching the other)
+    - Grade (`85.5%`, `—` unmarked; no column under Show Uncompleted Only)
+    - grouped by Predicted Grade it is `Predicted`, the Predictor's Mid, Show Uncompleted Only or not
+    - A manually chosen type is never bold, here or on the outlines
+  - Export view: Assessment, Date, Day, Export Date
+    - Assessment and Date are a fixed left half (34% + 16%), in the same place in both views
+    - so a toggle only swaps the right half
+  - Light, not bare
+    - one surface with one hairline colour (`--cx-progress-line`: rows, headings, column names and control outlines, on both Year Progression tabs)
+    - no vertical dividers (term starts are split by spacing)
+    - table text on the same edges as the controls
+    - bold group headings, small column names
+    - thin-outlined dropdowns (`.cx-dates-select`)
+    - weeks as `Term 2 Wk 5` (in full on hover)
+    - a faint ✎ right after the week, in one column, that the pointer never changes
+    - finished tasks in muted ink
+    - term starts on one small line above the controls
+    - only the downloads are filled
+  - Every task, modular
+    - `Group By:` None / Subject / Type / Completed / Predicted Grade (uncompleted only) / Grade Achieved (completed only)
+    - a ↑ / ↓ arrow for the groups' direction (not None or Completed)
+    - `Sort By:` Chronological / Alphabetical / Grade Achieved/Predicted Grade inside each group
+    - highest first: the predicted grade when grouped by Predicted Grade, else the grade achieved
+    - `Show Uncompleted Only`, which greys out and falls back from what needs completed tasks (the saved choice returns with the option off)
+    - A group without the value ("No prediction") stays last in either direction
+  - Toolbar text
+    - Toolbar text (labels, dropdowns, arrow, Export) is one font, size and regular weight
+    - never Connect's label font
+  - Spacing
+    - every toolbar control is 28px tall on one set of columns (Subjects under Group By, Type under Sort By, one arrow on each dropdown)
+    - Early Easter, Export and Show Uncompleted Only end on the right edge
+    - the gaps run 16 tabs to terms, 12 terms to controls, 8 between control rows, 20 to the table
+  - A second row: `Subjects:` and `Type:` and `Show Uncompleted Only`
+    - each drawn like a dropdown: All, `4 of 6` or None
+    - opening a list of ticks with Hide All / Show All over the table
+    - solid in solid themes and translucent with a blur in Liquid Glass
+    - it opens in the top layer (`popover`), because a blur nested in the drawer never reaches the drawer's own text
+    - closes when the panel scrolls
+    - what is unticked leaves the list and the Export downloads
+- **Grade Bands**
+  - Scheme
+    - WA letter grades have no hard cutoffs
+    - so marks group by the university scheme with the school letter in brackets
+  - Bands
+    - High Distinction (A) from 80%
+    - Distinction (B) from 70%
+    - Credit (C) from 60%
+    - Pass (C) from 50%
+    - Fail (D) below
+- **No Dot Separators**
+  - no `•` or `·` anywhere in the UI (Test 307)
+    - runs of stats are split by an em space (`\u2003` / `&emsp;`, which still lets text wrap between stats)
+    - sentences by commas
+    - lists by line breaks
+- **UI Copy**
+  - no superfluous text that is self-evident from what is on screen
+    - e.g. "From 1 of 2 unmarked tasks; blank tasks are left out until they are marked." under an estimate
+    - show the result
+    - a note only for what the screen cannot show (errors, missing data)
 
 ## 2. Contrast & Typography Standards
-- **WCAG AA Threshold**: Minimum **5:1 contrast ratio** across all foreground text and backgrounds in both light and dark modes.
-- **Liquid Glass & Panel Geometry**: 16px corner curvature (20px on modal dialogs) applies **only in Liquid Glass** (`[data-connectea-theme="liquid-glass"]` or `[data-connectea-glass="true"]`), on explicit panel, card, tile and modal classes, never `[class*=...]` substring matches. Clipping is limited to tiles and cards (`overflow: clip`, never `hidden`: hidden stops a last child's margin collapsing out of the tile, which drew an extra strip under the Maintenance Notice), never popups, tooltips or Connectify's statistics panels (the breakout meter rises above its row and glows). All other themes keep Connect's native geometry. Tile bodies are transparent in Liquid Glass. Non-Liquid-Glass panels are strictly opaque (`var(--cx-surface-bg, #1e2632) !important;`) even with custom wallpapers active. Liquid Glass **must NOT** alter the styling, border-radius, or geometry of buttons, inputs or expansion-panel headers; positive (View) buttons stay square like native Connect. Angular panels theme.css cannot name by class are rounded in `theme-glass-panels.css`: the `cnt-stream-notice-card` host (no clip, so the elevation shadow survives) and the Library table wrapper. **No contrast panels**: bars, banners and headings Connect leaves flat or surface-less (`cnt-scope-intro-class`, category bars, Library toolbar, Select All row, `p.mat-h2` headings, empty states, paginators; Light mode tabs, headers and toolbars over a wallpaper) get no panel, pill or card of their own (`theme-glass-surface.css`, `theme-control-bars.css`): they sit straight on the page (a category bar in Connect's fixed `.js-pos-category-toolbar-container`, the outlines' "All" bar, is a top bar and keeps the glass top-bar fill and blur, painted on its fixed container's `::before` so the class filter drawer inside the bar can blur the page itself: a blurring ancestor would be its backdrop root; `theme-category-menu.css`; in every dark theme that drawer is the menu's one surface, its panels and headers clear past Connect's focused-header `#363636`, hover and keyboard focus highlighted), and the wallpaper is dimmed or brightened for the theme's text instead (Wallpaper Layer). Blocks inside a glass card stay clear with hairline dividers (`theme-glass-class-pages.css`). **One surface per block**, in every dark theme (`theme-surface-nesting.css`): only the outermost painted element fills; everything inside it (lists, tables and their rows/cells, activity feeds, menu lists and rows, accordion panels, fieldsets, tab headers in cards, stat cells, cohort panel lines, the article wrapper around a home page tile, a promo inside a tile with no border or corners of its own, a Classes row's Favourite, Statistics and More buttons, whose dividers take `--cx-border-subtle` to stay as faint as Connect's on white) is clear, so no text sits on a box of a different shade; hover and active states keep their highlight. In Liquid Glass (`theme-glass-nesting.css`) only the outermost surface also blurs, because stacked translucent fills turn opaque and a blurred parent stops a child's blur reaching the page (a clear tab header blurring inside its card, such as Submissions Due, showed as a grey band). The header app's canvas is clear so the top bars blur the page. Assessment task rows (`theme-glass-task-rows.css`) sit inside the glass tile, so the statistics strip, the overall stats panel and the achievement column (marks and boxplot) are a 7% text-colour tint with a hairline, no fill or blur of their own (in every dark theme the chart background and Connect's white decoration shapes stay invisible, only the box keeps a fill); their text uses the primary ink. Rules that must beat id-weighted or `!important` Connect selectors use the unused `#cx-specificity-anchor` inside `:is()` (the expander writes it out as an id-weight pad, `:where(.x):not(#cx-n)`). Paginators and the Select All / Download row are clear (no fill, edge, shadow or pill) in every dark theme and in Light with a wallpaper; their labels keep the theme ink (`#334155` in Light). Former panel elements keep native margins, padding, borders and sizes, and clipped table wrappers use `overflow: clip` (hidden changes margin collapsing). Empty states are centred in every dark theme by alignment only (`theme-empty-states.css`, no spacing changes).
-- **Theme Dropdown & Customizer**: Sleek 28px height with 12x12 chevron and expanded 4px 6px padding (`.connectea-theme-arrow`). In-DOM Theme Customizer (`#cx-customizer-modal`) is styled by the active theme's tokens like the rest of the site (its headings and labels take the theme ink in every theme, Light included, never Connect's heading or label colours) on an always-solid dialog (surface layered over the opaque canvas, never translucent in glass themes) (only its live preview uses the draft palette) with Basic (6) & Full (20) modes; every token derives from the 6 Basic ones in two layers (Basic -> Full -> every other `--cx-*`, `theme-token-derive.js`) using the presets' own relationships: OKLCH lightness steps that keep the base hue and chroma/lightness ratio, flipping towards the text on light themes. Disabled and placeholder text follow the presets (no 5:1 floor); derived primary, secondary, muted, link and primary-button text keep >= 5:1, but a text token the user sets is used exactly as set (never contrast-swapped); ink on fills with no text token (accent, primary button, avatar) is the theme's own text when it reaches 5:1. **Full-mode tokens the user sets, and every colour of a picked preset, are kept as set** in both modes (e.g. Quantum Dark's green secondary text) **until a Basic token they derive from changes**: changing a Basic token re-derives every Full token based on it, including ones the user set (Full tokens it does not derive stay; ↺ resets one); themes save Basic tokens + those overrides. The colour picker's drag never selects text or scrolls the page (pointer capture, default cancelled). Live preview renders every Full token, interactive HSV/HEX color picker in a popover beside the token being edited (below it, or above when there is no room; closes on outside click, its ✕, Escape or reclicking the token), custom wallpaper upload (rescaled to no more than its largest crop needs, then resized (100–300%, slider, wheel or trackpad pinch) and placed by dragging in a screen-shaped frame (`#cx-wallpaper-crop`, `theme-wallpaper-crop.js`; Cancel / Escape / outside click cancels the upload), then cropped and scaled to the screen's device pixels before storing, `theme-wallpaper-fit.js`; the same prompt in Settings; animated GIFs up to 40 MB (4 MB in Chrome Web Store builds, which strip `unlimitedStorage`) are stored as uploaded so they keep animating, never flattened to JPEG; large JSON-imported wallpapers too, and wallpapers stored before fitting existed, active or in custom themes, are fitted once in the background and stored back in place, `theme-wallpaper-migrate.js`; SVG presets never) and caching, preset wallpapers (the six from Settings; a theme stores and exports the picked one by id, `wallpaperPreset`; a theme's own wallpaper shows only while that theme is active and never replaces the Settings wallpaper, which every theme without its own shows), import/export as `.ctme` theme files (also imported straight from the theme menu's Import Theme..., below Customize Theme...): a ZIP named after the theme (`Test Theme` -> `test_theme.ctme`) holding `theme.json` and the wallpaper image (`theme-ctme.js`); older `.json` theme files still import. Hovering over any element in the customizer preview displays a floating tooltip (`#cx-preview-tooltip`) showing the element name, the token colouring the text under the pointer (glyph hit test) and the fill tokens. Includes dual Liquid Glass sliders: **Blur Strength** (0–40px, default 12px, `--cx-glass-blur`) and **Transparency** (10%–100%, default 65%, `--cx-glass-opacity`). **Overlay blur floor**: layers that cover other text (the Connectify drawer, theme menu, outcome tooltip, notifications, Jump To list, Connect's top bars the page scrolls under, popups, dialogs and their backdrops) blur at least 12px under a lower Blur Strength, unless the theme's checkbox under the slider is off (`overlayBlurFloor: false`; `theme-overlay-blur.js` writes `--cx-glass-blur-overlay`, `theme-overlay-blur.css` hands it to those layers); tiles and panels over the wallpaper keep the theme's own blur. With Liquid Glass on, a custom theme is a recoloured Liquid Glass theme (`theme-glass-tokens.js`): surface, secondary, elevated, nav and input fills are its own colours at the Transparency opacity (scaled like the preset's 0.72 surface), and hover, border, button, table and badge layers are its text colour at the preset's overlay strengths. Custom themes in the menu have Edit (✎) and Delete (✕); editing saves by the theme's id, so a rename never duplicates it. Saving a new theme checks existing themes by name (case-insensitive), safely stores wallpapers across `localStorage` and `chrome.storage.local` quota limits, and immediately applies the theme via `ConnectifyTheme.applyTheme()`.
-- **Wallpaper Layer** (`theme-wallpaper-layer.css`, `theme-wallpaper-dim.js`): the wallpaper is one fixed layer under the page (`html::before`, 6px past the viewport), blurred 2px; `<html>`/`<body>` paint only the canvas. With light text (dark themes not in light tone) it is dimmed by the least black overlay that keeps white text >= 4.5:1 on its brightest sampled area (`--cx-wallpaper-dim`); with dark text (Light, light-tone and light custom themes) it is brightened by the least white overlay that keeps the theme's `--cx-text-primary` >= 4.5:1 on its darkest sampled area (`--cx-wallpaper-brighten`, re-measured when the theme's ink changes). Both are measured once per wallpaper and cached in `connectify:wallpaper_dim`. Chrome drops CSS `url()`s over 2 MB (a large Settings wallpaper turned the page off-white when a theme without its own wallpaper fell back to it), so there data URLs over 2 MB are painted through a `blob:` URL (`ConnectifyThemeBoot.cssUrl`); Firefox keeps the data URL.
-- **Instant Theme on Reload** (`theme-boot.js`, document_start): every theme apply saves a snapshot of `<html>` (theme classes and attributes, inline `--cx-*` tokens, canvas colour, wallpaper source; `connectify:theme_boot`), and the next page stamps it back before Connect renders, with a temporary `#cx-theme-boot` canvas (Firefox injects the theme stylesheets only at document_idle) that `theme.js` removes once the theme is applied. Never on login/logout pages, never when the saved theme id differs. Labels and other text get no text shadow (a 1px label shadow made text hard to read); the one exception is the breakout Score glow on expanded statistics cards (Section 4).
-- **Custom Wallpaper Pass-Through (every dark theme)**: layout containers (`#main-content`, `.cvr-c-app-layout*`, `.v-app`, `.v-ui`, `.v-scrollable`) that hold tiles (`:has(.eds-c-tile)`; detail views such as notices keep an opaque surface) and wrappers that only hold tiles (`.v-panel`, `.v-panel-content`, `.cvr-u-padding--md` with `:has(.eds-c-tile)`) are transparent, so the canvas or wallpaper shows in Connect's native 15px padding around tiles exactly as in Default. Tiles stay opaque outside Liquid Glass.
-- **Reading Views**: notice and discussion views (`cnt-notice-view`, `cnt-discussion-item-view`, dialogs) set `data-connectea-reading-view`. Solid themes: the canvas is opaque and outranks the wallpaper on `<html>`/`<body>`. Liquid Glass (`theme-glass-reading.css`): no reading panel; the page, the frame holding the view (`.cnt-ng-zone > div`) and the view are clear, so the text sits on the wallpaper, dimmed or brightened for the theme's text (Wallpaper Layer); the wallpaper layer stays visible. Notice and dialog text uses the primary ink (`--cx-text-primary`, cream `#fbf1c7` in Quantum Dark), never the secondary; feed cards keep the secondary ink.
-- **Pasted Rich Text** (`theme-rich-text.css`): Connect's CKEditor content (`.rtf-content`) keeps pasted inline styles, so text copied from a document carries `background-color: rgb(255, 255, 255)`; in every dark theme and in Light over a wallpaper a white inline background (`rgb(255, 255, 255)`, `#ffffff`, `white`) is cleared, other highlight colours kept.
-- **Light Mode over a Wallpaper**: feed tabs, sub-headers and toolbars have no panel (the white 90% contrast panels were removed); their labels keep crisp dark ink (`#334155` / `#0f172a`) on the brightened wallpaper.
-- **Parity Defect & Assessment Outlines**: `.cvr-u-padding--md` keeps Connect's native 15px padding (clear, never filled or zeroed, never `display: none`) in every theme; Connectify's own additions (the glass statistics strip) draw outside their box on `::before` so Connect rows keep their native size. Parity test checks button and input styling across all themes, ignoring only panels, cards, tiles, and modals under Liquid Glass.
-- **Scenario Values in Dark Mode**:
-  - Low: `#e1eaf3` on dark card.
-  - Middle / Expected: High-contrast white `#ffffff` on `#334c65`.
-  - High: High-contrast vibrant green `#4ade80` on dark card.
-- **Containers & Padding**: a container and its own padding are one surface and keep very similar colours; the audit skips adjacent-contrast between an element that fills its parent's content box and that parent, and warns (`PADDING_COLOR_MISMATCH`) when their colours differ. Icon-only buttons (class containing `icon`, or `.mat-icon-button`, even when bordered) keep native padding and size so webfont glyphs are never offset (`theme-icon-buttons.css`). Dialog title, content, footer and `cnt-*-dialog` host (`.connect-dialog`) regions, and floating fieldsets in a dialog (Add Discussion's Message and Image Gallery), are transparent over the dialog's one surface (`theme-dialog-surface.css`, `theme-surface-nesting.css`), and the reading-view canvas rule skips dialog contents; a `cnt-paginator` that wraps the table keeps native layout (only the paging bar is flexed).
-- **User Menu** (`theme-user-menu.css`, every dark theme): the avatar button has no fill of its own (the bar shows through, hover highlights); the user dropdown is one surface, so its header (avatar, name, role) and Sign Out row are clear with `--cx-text-primary` ink (>= 5:1, Test 194). Sign Out keeps Connect's geometry (full-width 50px bar, no border or radius, bold caption): the generic button rules skip `cvr-c-primary-navigation__button--*` and `.cvr-c-primary-navigation__user-controls` buttons (colours only).
-- **Card Header Buttons & Dividers**: card header links (Classes `View All`, `.mat-card-button` in `mat-card-header`) use `--cx-button-bg` / `--cx-button-text` / `--cx-button-hover`, and the class-coloured `.mat-divider--primary` under card headers uses `--cx-border-strong`, in every dark theme (colours only).
-- **Service Bar `+`**: the reveal-menu circle (`.c-control-panel-button .mat-icon-button--size-sm`) uses the primary button colours instead of Connect's class colour (colours only).
-- **Form Field Hover** (`theme-field-hover.css`, every dark theme and Light over a wallpaper): Connect's hover outlines are off (Material outline fields' 2px ink outline, floating fieldsets' 2px black one), since they spilled over neighbouring controls; the 1px outline stays, a focused Material field keeps its own outline, and the generic accent focus ring skips `.mat-input-element` (no second box inside the field).
-- **Settings Dropdowns**: `.cx-settings-select` matches the number inputs (white, `#b9cbe1` 1px border, 4px radius; input tokens in dark themes), never Connect's or the browser's unstyled select.
-- **Semantic Classes**: Use semantic classes (`.cx-settings-label`, `.cx-pred-scenario-value--mid`, `.cx-settings-col-header`) instead of hardcoded inline dark styles.
-- **Dynamic Surface Adaptation**: Use `data-connectea-surface` and `data-connectea-ink` on unstyled surfaces. Avoid inline style mutations.
-- **Light Tone**: a dark-classed theme with dark ink (grey Liquid Glass, light custom themes) sets `data-connectea-tone="light"` on `<html>`; `theme-light-tone.css` re-inks data colours (category labels, scenario labels, High pills/cards, chart keys, date warning, Attendance labels) at OKLCH lightness 0.34 keeping hue and chroma, turns Connect's dark status pills (Overdue, locked, blue-light) into light tints with dark ink, edges the sidebar handle in the ink colour, draws the ring around an empty state's icon in black (`#000000`; other themes keep Connect's pale ring), and in Liquid Glass brightens the page behind a dialog (white 45%) instead of the dark glass themes' navy dim, so detail views such as View Notice keep their dark text readable. The Weaknesses plot (dark `#333333` in every other theme, set in CSS, never inline) turns clear with an ink hairline: its labels, ring percentages and messages take the ink, and its scores and warning, like the Settings delete ✕ and "Cache cleared!" note, go to OKLCH 0.30 because they sit straight on the drawer glass (Test 186). Links use `--cx-accent-link` (each preset's accent-hover; derived themes ensure 5:1), never the raw accent; avatar initials use `--cx-avatar-text`.
-- **Typography Bolding Parity**: Dark and light modes enforce 1:1 bolding parity (`font-weight: 700 !important` on task titles `.cvr-c-task__details .v-label:first-child`, `.cvr-c-task__title`, group headers, task marks, and cohort stats `strong` tags; `font-weight: 400 !important` on secondary labels, out-of text, and subject summary marks).
-- **Login Screen Dark Mode Suppression & Post-Login Restoration**: Dark mode is strictly toggled off on `https://connect.det.wa.edu.au/login` (removing `.connectea-dark` and temporarily setting storage to `light`, recording `connectea:theme:restore_dark`) to prevent broken styles on the account selector. Upon successful login and navigation to normal Connect pages, dark mode is automatically restored.
+- **WCAG AA Threshold**
+  - Text
+    - Minimum **5:1 contrast ratio** across all foreground text and backgrounds in both light and dark modes
+- **Liquid Glass & Panel Geometry**
+  - Corners
+    - 16px corner curvature (20px on modal dialogs) applies **only in Liquid Glass** (`[data-connectea-theme="liquid-glass"]` or `[data-connectea-glass="true"]`)
+    - on explicit panel, card, tile and modal classes, never `[class*=...]` substring matches
+    - All other themes keep Connect's native geometry
+  - Clipping
+    - Clipping is limited to tiles and cards (`overflow: clip`)
+    - never `hidden`: hidden stops a last child's margin collapsing out of the tile, which drew an extra strip under the Maintenance Notice
+    - never popups, tooltips or Connectify's statistics panels (the breakout meter rises above its row and glows)
+  - Surfaces
+    - Tile bodies are transparent in Liquid Glass
+    - Non-Liquid-Glass panels are strictly opaque (`var(--cx-surface-bg, #1e2632) !important;`) even with custom wallpapers active
+  - Controls
+    - Liquid Glass **must NOT** alter the styling, border-radius, or geometry of buttons, inputs or expansion-panel headers
+    - positive (View) buttons stay square like native Connect
+  - Angular panels theme.css cannot name by class are rounded in `theme-glass-panels.css`
+    - the `cnt-stream-notice-card` host (no clip, so the elevation shadow survives)
+    - the Library table wrapper
+  - **No contrast panels**: bars, banners and headings Connect leaves flat or surface-less
+    - `cnt-scope-intro-class`, category bars, Library toolbar, Select All row, `p.mat-h2` headings, empty states, paginators
+    - Light mode tabs, headers and toolbars over a wallpaper
+    - get no panel, pill or card of their own (`theme-glass-surface.css`, `theme-control-bars.css`): they sit straight on the page
+    - the wallpaper is dimmed or brightened for the theme's text instead (Wallpaper Layer)
+  - The exception: a category bar in Connect's fixed `.js-pos-category-toolbar-container`, the outlines' "All" bar
+    - is a top bar and keeps the glass top-bar fill and blur
+    - painted on its fixed container's `::before` so the class filter drawer inside the bar can blur the page itself: a blurring ancestor would be its backdrop root (`theme-category-menu.css`)
+    - in every dark theme that drawer is the menu's one surface, its panels and headers clear past Connect's focused-header `#363636`, hover and keyboard focus highlighted
+  - **One surface per block**, in every dark theme (`theme-surface-nesting.css`)
+    - only the outermost painted element fills
+    - everything inside it is clear, so no text sits on a box of a different shade
+    - clear: lists, tables and their rows/cells, activity feeds, menu lists and rows, accordion panels, fieldsets, tab headers in cards, stat cells, cohort panel lines
+    - clear: the article wrapper around a home page tile, a promo inside a tile with no border or corners of its own
+    - clear: a Classes row's Favourite, Statistics and More buttons, whose dividers take `--cx-border-subtle` to stay as faint as Connect's on white
+    - hover and active states keep their highlight
+    - Blocks inside a glass card stay clear with hairline dividers (`theme-glass-class-pages.css`)
+  - Blur (`theme-glass-nesting.css`)
+    - In Liquid Glass only the outermost surface also blurs, because stacked translucent fills turn opaque and a blurred parent stops a child's blur reaching the page
+    - a clear tab header blurring inside its card, such as Submissions Due, showed as a grey band
+    - The header app's canvas is clear so the top bars blur the page
+  - Assessment task rows (`theme-glass-task-rows.css`) sit inside the glass tile
+    - so the statistics strip, the overall stats panel and the achievement column (marks and boxplot) are a 7% text-colour tint with a hairline, no fill or blur of their own
+    - in every dark theme the chart background and Connect's white decoration shapes stay invisible, only the box keeps a fill
+    - their text uses the primary ink
+  - Specificity
+    - Rules that must beat id-weighted or `!important` Connect selectors use the unused `#cx-specificity-anchor` inside `:is()`
+    - the expander writes it out as an id-weight pad, `:where(.x):not(#cx-n)`
+  - Former panels
+    - Paginators and the Select All / Download row are clear (no fill, edge, shadow or pill) in every dark theme and in Light with a wallpaper
+    - their labels keep the theme ink (`#334155` in Light)
+    - Former panel elements keep native margins, padding, borders and sizes
+    - clipped table wrappers use `overflow: clip` (hidden changes margin collapsing)
+    - Empty states are centred in every dark theme by alignment only (`theme-empty-states.css`, no spacing changes)
+- **Theme Dropdown & Customizer**
+  - Dropdown
+    - Sleek 28px height with 12x12 chevron and expanded 4px 6px padding (`.connectea-theme-arrow`)
+  - In-DOM Theme Customizer (`#cx-customizer-modal`)
+    - styled by the active theme's tokens like the rest of the site
+    - its headings and labels take the theme ink in every theme, Light included, never Connect's heading or label colours
+    - on an always-solid dialog (surface layered over the opaque canvas, never translucent in glass themes)
+    - only its live preview uses the draft palette
+    - with Basic (6) & Full (20) modes
+  - Token derivation (`theme-token-derive.js`)
+    - every token derives from the 6 Basic ones in two layers (Basic -> Full -> every other `--cx-*`)
+    - using the presets' own relationships: OKLCH lightness steps that keep the base hue and chroma/lightness ratio, flipping towards the text on light themes
+  - Text contrast
+    - Disabled and placeholder text follow the presets (no 5:1 floor)
+    - derived primary, secondary, muted, link and primary-button text keep >= 5:1
+    - a text token the user sets is used exactly as set (never contrast-swapped)
+    - ink on fills with no text token (accent, primary button, avatar) is the theme's own text when it reaches 5:1
+  - **Full-mode tokens the user sets, and every colour of a picked preset, are kept as set** in both modes
+    - e.g. Quantum Dark's green secondary text
+    - **until a Basic token they derive from changes**: changing a Basic token re-derives every Full token based on it, including ones the user set
+    - Full tokens it does not derive stay; ↺ resets one
+    - themes save Basic tokens + those overrides
+  - Colour picker
+    - interactive HSV/HEX color picker in a popover beside the token being edited (below it, or above when there is no room)
+    - closes on outside click, its ✕, Escape or reclicking the token
+    - The colour picker's drag never selects text or scrolls the page (pointer capture, default cancelled)
+  - Live preview
+    - Live preview renders every Full token
+    - Hovering over any element in the customizer preview displays a floating tooltip (`#cx-preview-tooltip`)
+    - it shows the element name, the token colouring the text under the pointer (glyph hit test) and the fill tokens
+  - Custom wallpaper upload and caching
+    - rescaled to no more than its largest crop needs
+    - then resized (100–300%, slider, wheel or trackpad pinch) and placed by dragging in a screen-shaped frame (`#cx-wallpaper-crop`, `theme-wallpaper-crop.js`; Cancel / Escape / outside click cancels the upload)
+    - then cropped and scaled to the screen's device pixels before storing, `theme-wallpaper-fit.js`
+    - the same prompt in Settings
+    - animated GIFs up to 40 MB (4 MB in Chrome Web Store builds, which strip `unlimitedStorage`) are stored as uploaded so they keep animating, never flattened to JPEG
+    - large JSON-imported wallpapers too, and wallpapers stored before fitting existed, active or in custom themes, are fitted once in the background and stored back in place, `theme-wallpaper-migrate.js`
+    - SVG presets never
+  - Preset wallpapers
+    - the six from Settings
+    - a theme stores and exports the picked one by id, `wallpaperPreset`
+    - a theme's own wallpaper shows only while that theme is active and never replaces the Settings wallpaper, which every theme without its own shows
+  - Import/export as `.ctme` theme files
+    - also imported straight from the theme menu's Import Theme..., below Customize Theme...
+    - a ZIP named after the theme (`Test Theme` -> `test_theme.ctme`) holding `theme.json` and the wallpaper image (`theme-ctme.js`)
+    - older `.json` theme files still import
+  - Includes dual Liquid Glass sliders
+    - **Blur Strength** (0–40px, default 12px, `--cx-glass-blur`)
+    - **Transparency** (10%–100%, default 65%, `--cx-glass-opacity`)
+  - **Overlay blur floor**
+    - layers that cover other text blur at least 12px under a lower Blur Strength
+    - the layers: the Connectify drawer, theme menu, outcome tooltip, notifications, Jump To list, Connect's top bars the page scrolls under, popups, dialogs and their backdrops
+    - unless the theme's checkbox under the slider is off (`overlayBlurFloor: false`)
+    - `theme-overlay-blur.js` writes `--cx-glass-blur-overlay`, `theme-overlay-blur.css` hands it to those layers
+    - tiles and panels over the wallpaper keep the theme's own blur
+  - With Liquid Glass on, a custom theme is a recoloured Liquid Glass theme (`theme-glass-tokens.js`)
+    - surface, secondary, elevated, nav and input fills are its own colours at the Transparency opacity (scaled like the preset's 0.72 surface)
+    - hover, border, button, table and badge layers are its text colour at the preset's overlay strengths
+  - Saved themes
+    - Custom themes in the menu have Edit (✎) and Delete (✕)
+    - editing saves by the theme's id, so a rename never duplicates it
+    - Saving a new theme checks existing themes by name (case-insensitive)
+    - safely stores wallpapers across `localStorage` and `chrome.storage.local` quota limits
+    - immediately applies the theme via `ConnectifyTheme.applyTheme()`
+- **Wallpaper Layer** (`theme-wallpaper-layer.css`, `theme-wallpaper-dim.js`)
+  - Layer
+    - the wallpaper is one fixed layer under the page (`html::before`, 6px past the viewport), blurred 2px
+    - `<html>`/`<body>` paint only the canvas
+  - Dimming and brightening
+    - With light text (dark themes not in light tone) it is dimmed by the least black overlay that keeps white text >= 4.5:1 on its brightest sampled area (`--cx-wallpaper-dim`)
+    - with dark text (Light, light-tone and light custom themes) it is brightened by the least white overlay that keeps the theme's `--cx-text-primary` >= 4.5:1 on its darkest sampled area (`--cx-wallpaper-brighten`, re-measured when the theme's ink changes)
+    - Both are measured once per wallpaper and cached in `connectify:wallpaper_dim`
+  - Large wallpapers
+    - Chrome drops CSS `url()`s over 2 MB (a large Settings wallpaper turned the page off-white when a theme without its own wallpaper fell back to it)
+    - so there data URLs over 2 MB are painted through a `blob:` URL (`ConnectifyThemeBoot.cssUrl`)
+    - Firefox keeps the data URL
+- **Instant Theme on Reload** (`theme-boot.js`, document_start)
+  - Snapshot
+    - every theme apply saves a snapshot of `<html>` (theme classes and attributes, inline `--cx-*` tokens, canvas colour, wallpaper source; `connectify:theme_boot`)
+    - the next page stamps it back before Connect renders
+    - with a temporary `#cx-theme-boot` canvas (Firefox injects the theme stylesheets only at document_idle) that `theme.js` removes once the theme is applied
+  - Limits
+    - Never on login/logout pages
+    - never when the saved theme id differs
+  - Text shadow
+    - Labels and other text get no text shadow (a 1px label shadow made text hard to read)
+    - the one exception is the breakout Score glow on expanded statistics cards (Section 4)
+- **Custom Wallpaper Pass-Through (every dark theme)**
+  - Transparent, so the canvas or wallpaper shows in Connect's native 15px padding around tiles exactly as in Default
+    - layout containers (`#main-content`, `.cvr-c-app-layout*`, `.v-app`, `.v-ui`, `.v-scrollable`) that hold tiles (`:has(.eds-c-tile)`; detail views such as notices keep an opaque surface)
+    - wrappers that only hold tiles (`.v-panel`, `.v-panel-content`, `.cvr-u-padding--md` with `:has(.eds-c-tile)`)
+  - Tiles
+    - Tiles stay opaque outside Liquid Glass
+- **Reading Views**
+  - Which
+    - notice and discussion views (`cnt-notice-view`, `cnt-discussion-item-view`, dialogs) set `data-connectea-reading-view`
+  - Solid themes
+    - the canvas is opaque and outranks the wallpaper on `<html>`/`<body>`
+  - Liquid Glass (`theme-glass-reading.css`)
+    - no reading panel
+    - the page, the frame holding the view (`.cnt-ng-zone > div`) and the view are clear
+    - so the text sits on the wallpaper, dimmed or brightened for the theme's text (Wallpaper Layer)
+    - the wallpaper layer stays visible
+  - Ink
+    - Notice and dialog text uses the primary ink (`--cx-text-primary`, cream `#fbf1c7` in Quantum Dark), never the secondary
+    - feed cards keep the secondary ink
+- **Pasted Rich Text** (`theme-rich-text.css`)
+  - Cause
+    - Connect's CKEditor content (`.rtf-content`) keeps pasted inline styles
+    - so text copied from a document carries `background-color: rgb(255, 255, 255)`
+  - Rule, in every dark theme and in Light over a wallpaper
+    - a white inline background (`rgb(255, 255, 255)`, `#ffffff`, `white`) is cleared
+    - other highlight colours kept
+- **Light Mode over a Wallpaper**
+  - feed tabs, sub-headers and toolbars
+    - have no panel (the white 90% contrast panels were removed)
+    - their labels keep crisp dark ink (`#334155` / `#0f172a`) on the brightened wallpaper
+- **Parity Defect & Assessment Outlines**
+  - Padding
+    - `.cvr-u-padding--md` keeps Connect's native 15px padding (clear, never filled or zeroed, never `display: none`) in every theme
+    - Connectify's own additions (the glass statistics strip) draw outside their box on `::before` so Connect rows keep their native size
+  - Parity test
+    - checks button and input styling across all themes
+    - ignoring only panels, cards, tiles, and modals under Liquid Glass
+- **Scenario Values in Dark Mode**
+  - Values
+    - Low: `#e1eaf3` on dark card
+    - Middle / Expected: High-contrast white `#ffffff` on `#334c65`
+    - High: High-contrast vibrant green `#4ade80` on dark card
+- **Containers & Padding**
+  - One surface
+    - a container and its own padding are one surface and keep very similar colours
+    - the audit skips adjacent-contrast between an element that fills its parent's content box and that parent
+    - and warns (`PADDING_COLOR_MISMATCH`) when their colours differ
+  - Icon-only buttons (class containing `icon`, or `.mat-icon-button`, even when bordered)
+    - keep native padding and size so webfont glyphs are never offset (`theme-icon-buttons.css`)
+  - Dialogs (`theme-dialog-surface.css`, `theme-surface-nesting.css`)
+    - Dialog title, content, footer and `cnt-*-dialog` host (`.connect-dialog`) regions are transparent over the dialog's one surface
+    - floating fieldsets in a dialog (Add Discussion's Message and Image Gallery) too
+    - the reading-view canvas rule skips dialog contents
+  - Paginators
+    - a `cnt-paginator` that wraps the table keeps native layout (only the paging bar is flexed)
+- **User Menu** (`theme-user-menu.css`, every dark theme)
+  - Avatar button
+    - has no fill of its own (the bar shows through, hover highlights)
+  - User dropdown
+    - is one surface, so its header (avatar, name, role) and Sign Out row are clear with `--cx-text-primary` ink (>= 5:1, Test 194)
+  - Sign Out
+    - keeps Connect's geometry (full-width 50px bar, no border or radius, bold caption)
+    - the generic button rules skip `cvr-c-primary-navigation__button--*` and `.cvr-c-primary-navigation__user-controls` buttons (colours only)
+- **Card Header Buttons & Dividers**
+  - In every dark theme (colours only)
+    - card header links (Classes `View All`, `.mat-card-button` in `mat-card-header`) use `--cx-button-bg` / `--cx-button-text` / `--cx-button-hover`
+    - the class-coloured `.mat-divider--primary` under card headers uses `--cx-border-strong`
+- **Service Bar `+`**
+  - the reveal-menu circle (`.c-control-panel-button .mat-icon-button--size-sm`)
+    - uses the primary button colours instead of Connect's class colour (colours only)
+- **Form Field Hover** (`theme-field-hover.css`, every dark theme and Light over a wallpaper)
+  - Connect's hover outlines are off, since they spilled over neighbouring controls
+    - Material outline fields' 2px ink outline
+    - floating fieldsets' 2px black one
+  - What stays
+    - the 1px outline stays
+    - a focused Material field keeps its own outline
+    - the generic accent focus ring skips `.mat-input-element` (no second box inside the field)
+- **Settings Dropdowns**
+  - `.cx-settings-select` matches the number inputs
+    - white, `#b9cbe1` 1px border, 4px radius
+    - input tokens in dark themes
+    - never Connect's or the browser's unstyled select
+- **Semantic Classes**
+  - Use semantic classes instead of hardcoded inline dark styles
+    - `.cx-settings-label`
+    - `.cx-pred-scenario-value--mid`
+    - `.cx-settings-col-header`
+- **Dynamic Surface Adaptation**
+  - Unstyled surfaces
+    - Use `data-connectea-surface` and `data-connectea-ink` on unstyled surfaces
+    - Avoid inline style mutations
+- **Light Tone**
+  - Which themes
+    - a dark-classed theme with dark ink (grey Liquid Glass, light custom themes) sets `data-connectea-tone="light"` on `<html>`
+  - `theme-light-tone.css`
+    - re-inks data colours (category labels, scenario labels, High pills/cards, chart keys, date warning, Attendance labels) at OKLCH lightness 0.34 keeping hue and chroma
+    - turns Connect's dark status pills (Overdue, locked, blue-light) into light tints with dark ink
+    - edges the sidebar handle in the ink colour
+    - draws the ring around an empty state's icon in black (`#000000`; other themes keep Connect's pale ring)
+    - in Liquid Glass brightens the page behind a dialog (white 45%) instead of the dark glass themes' navy dim, so detail views such as View Notice keep their dark text readable
+  - The Weaknesses plot (dark `#333333` in every other theme, set in CSS, never inline)
+    - turns clear with an ink hairline
+    - its labels, ring percentages and messages take the ink
+    - its scores and warning, like the Settings delete ✕ and "Cache cleared!" note, go to OKLCH 0.30 because they sit straight on the drawer glass (Test 186)
+  - Links and avatars
+    - Links use `--cx-accent-link` (each preset's accent-hover; derived themes ensure 5:1), never the raw accent
+    - avatar initials use `--cx-avatar-text`
+- **Typography Bolding Parity**
+  - Dark and light modes enforce 1:1 bolding parity
+    - `font-weight: 700 !important` on task titles `.cvr-c-task__details .v-label:first-child`, `.cvr-c-task__title`, group headers, task marks, and cohort stats `strong` tags
+    - `font-weight: 400 !important` on secondary labels, out-of text, and subject summary marks
+- **Login Screen Dark Mode Suppression & Post-Login Restoration**
+  - Suppression, to prevent broken styles on the account selector
+    - Dark mode is strictly toggled off on `https://connect.det.wa.edu.au/login`
+    - removing `.connectea-dark` and temporarily setting storage to `light`, recording `connectea:theme:restore_dark`
+  - Restoration
+    - Upon successful login and navigation to normal Connect pages, dark mode is automatically restored
 
 ## 3. Sidebar & Workspace Geometry
-- **Touch Targets** (`src/system/touch-targets.css`, `@media (any-pointer: coarse)` only; mouse-only screens unchanged, and a touchscreen used with a mouse or trackpad too: the first mouse input sets `<html data-cx-mouse>` (`pointer-kind.js`, document_start, remembered in `connectify:pointer_mouse`; a touch input clears it), and every rule is under `html:not([data-cx-mouse])`): every Connectify button, tab, dropdown, button-like link and checkbox label takes a tap of at least 44px each way (checkboxes 22px) by growing in the layout, so it pushes neighbours aside and never overlaps them. No invisible tap area reaches anything it does not visibly cover: the handle is 44px wide instead (`--cx-handle-width`, which the docked `left` also uses); the theme button's area spans Connect's bar height only (never sideways: nav links may be close), and its chevron's runs from the gap after the label to the button's edge (mirrored while turned). Custom themes' ✎ / ✕ reach into their row's padding, so rows keep their height. **iPadOS / iOS buttons** (`src/system/webkit-buttons.css`, `@supports (-webkit-touch-callout: none)` only): WebKit there gives every natively drawn button with a background a capsule radius over the stylesheet's own, so Connectify's buttons drop native appearance (`appearance: none`) and keep the geometry they have on desktop in every theme.
-- **Connect Loading Indicators Off** (`src/system/connect-loading.css`, every Connect page and theme): Vaadin's `.v-loading-indicator` (every server round trip) is invisible with no background, animation or transition, since its animation lagged WebKit (Orion) under the glass and wallpaper layers; it keeps its box (`visibility`, never `display: none` or a zero height: Vaadin holds back its first render up to 5s while it has no height). Angular's `cnt-progress-bar` is removed.
-- **Invisible Page Scrollbar** (`src/system/page-scrollbar.css`, every Connect page, theme and browser): the page's own scrollbar is never drawn (no grey track down the right edge over the canvas or wallpaper); the page still scrolls by wheel, trackpad, keys and touch.
-- **Toggle Handle (`#connectify-sidebar-handle`)**: Sleek 30px width handle (44px on touchscreens) with directional chevron (`❮` / `❯`). When the drawer is closed, anchors directly to Connect's native left navigation sidebar (`height >= 120`, excluding primary top menus) scrolling in sync with Connect's sidebar via `position: absolute`, or `position: fixed` if the sidebar is fixed/sticky. Switches to `position: fixed` docked to the drawer edge when the drawer is open. Falls back to dynamic viewport vertical centering below top navigation bars (`rect.top <= 25`) if no Connect sidebar is present.
-- **Every Page**: the drawer is on every Connect page (a sidebar-only content-script group off the outlines page) except login and logout pages (manifest `exclude_matches` for login URLs; `sidebar-handle.js` and `sidebar.js` also stop on `ConnectifyThemeAuth.isAuthDisabled()`). There only Settings is enabled; the other launchers are disabled under `.cx-page-notice` (Open Assessment Outlines link; launcher menu only, hidden while Settings is open). A Connect outline filter never disables tools: they read the cache. Off the outlines page no tile is ever read as a class card (`ConnectifyUtils.isOutlinesPage()`).
-- **Drawer Width (`#connectify-sidebar`)**: Compact 310px; expands to **900px** (`.cx-tool-active`) when any tool is active. One side margin runs down the whole drawer: header, launcher menu and every tool panel sit 20px in (12px on narrow screens).
-- **Drawer Slide Synchronization**: `#connectify-sidebar` and `#connectify-sidebar-handle` animate in lockstep with matching `0.2s cubic-bezier(0.16, 1, 0.3, 1)` transitions using `transform: translateX(-100%)` to `0`, preventing clipping.
-- **Left-Edge Push & Hover Dismissal**: On Assessment Outlines only, moving the mouse to `clientX <= 12` (or over the handle) expands the drawer, except in the top left corner (`clientY` within Connect's top bar, at least 60px; `sidebar-hover.js`) so Connect's home logo stays clickable; on every other page hover never opens it (`opensOnHover()`), a handle click does. On Assessment Outlines, moving mouse outside collapses it after 120ms debounce when no tool is active; on every other page mousing out never collapses it, a handle click, an outside click or Escape does. When a tool is active, hover collapse is suppressed and clicking outside collapses it. Only the user's own click dismisses it (`isTrusted`): Expand All's scripted heading clicks reach the document too, which made the drawer pop in and out during startup auto-expand with the pointer on the edge (Test 308). Returning from an active tool panel retains the launcher menu (`justReturnedToMenu`) without hover collapse. Clicking the handle always wins over hover: after a click-close nothing reopens the drawer until the pointer leaves the handle and the edge zone, and a click within 400ms of a hover-open keeps it open.
-- **Canonical Launcher Button Sequence**:
-  1. `connectify-goals-toggle` (Goal Setter: Target Grade / Target ATAR tabs)
-  2. `connectify-predictor-toggle` (Predictor)
-  3. `connectify-progress-toggle` (Year Progression)
-  4. `connectify-estimator-toggle` (Estimator: Estimate Grade / Estimate ATAR tabs)
-  5. `connectify-weakness-toggle` (Weakness Analyzer)
-  6. `connectify-categories-toggle` (Settings)
-- **Calculator Mode Tabs**: Goal Setter and Estimator share the calculator panel (`#connectea-atar`); its heading names the launcher and the mode tabs under it (`.cta-mode-tabs`) reuse the Predictor's tab bar (`.cx-pred-main-tabs` / `.cx-pred-main-tab`), so both tools look alike in every theme. Tool tabs carry their verb (`Target Grade` / `Target ATAR`, `Estimate Grade` / `Estimate ATAR`, `Predict Grade` / `Predict ATAR`), Grade first, ATAR second; Target Grade's and Target ATAR's semester buttons read plain `Semester N` (`Semester N (Closed)` once its grades are final); only Estimate ATAR's add the semester ATAR. Each launcher opens on Grade, then reopens on the tab it was left on.
-- **Secondary Tool Buttons**: Settings and Weakness Analyzer feature clean white buttons (`#ffffff`) in light mode with centered text (`text-align: center !important; justify-content: center !important;`).
-- **Workspace Navigation**: Dedicated `← Back to Menu` navigation header (`.cx-back-menu`) positioned at the top right of the header; single active tool policy enforced via `connectify-open` event; outside click and Escape key dismissal.
+- **Touch Targets** (`src/system/touch-targets.css`, `@media (any-pointer: coarse)` only)
+  - Where
+    - mouse-only screens unchanged, and a touchscreen used with a mouse or trackpad too
+    - the first mouse input sets `<html data-cx-mouse>` (`pointer-kind.js`, document_start, remembered in `connectify:pointer_mouse`; a touch input clears it)
+    - every rule is under `html:not([data-cx-mouse])`
+  - Size
+    - every Connectify button, tab, dropdown, button-like link and checkbox label takes a tap of at least 44px each way (checkboxes 22px)
+    - by growing in the layout, so it pushes neighbours aside and never overlaps them
+  - No invisible tap area reaches anything it does not visibly cover
+    - the handle is 44px wide instead (`--cx-handle-width`, which the docked `left` also uses)
+    - the theme button's area spans Connect's bar height only (never sideways: nav links may be close)
+    - its chevron's runs from the gap after the label to the button's edge (mirrored while turned)
+    - Custom themes' ✎ / ✕ reach into their row's padding, so rows keep their height
+  - **iPadOS / iOS buttons** (`src/system/webkit-buttons.css`, `@supports (-webkit-touch-callout: none)` only)
+    - WebKit there gives every natively drawn button with a background a capsule radius over the stylesheet's own
+    - so Connectify's buttons drop native appearance (`appearance: none`) and keep the geometry they have on desktop in every theme
+- **Connect Loading Indicators Off** (`src/system/connect-loading.css`, every Connect page and theme)
+  - Vaadin's `.v-loading-indicator` (every server round trip)
+    - is invisible with no background, animation or transition
+    - since its animation lagged WebKit (Orion) under the glass and wallpaper layers
+    - it keeps its box (`visibility`, never `display: none` or a zero height: Vaadin holds back its first render up to 5s while it has no height)
+  - Angular
+    - Angular's `cnt-progress-bar` is removed
+- **Invisible Page Scrollbar** (`src/system/page-scrollbar.css`, every Connect page, theme and browser)
+  - Scrollbar
+    - the page's own scrollbar is never drawn (no grey track down the right edge over the canvas or wallpaper)
+    - the page still scrolls by wheel, trackpad, keys and touch
+- **Toggle Handle (`#connectify-sidebar-handle`)**
+  - Look
+    - Sleek 30px width handle (44px on touchscreens)
+    - with directional chevron (`❮` / `❯`)
+  - When the drawer is closed
+    - anchors directly to Connect's native left navigation sidebar (`height >= 120`, excluding primary top menus)
+    - scrolling in sync with Connect's sidebar via `position: absolute`, or `position: fixed` if the sidebar is fixed/sticky
+  - When the drawer is open
+    - Switches to `position: fixed` docked to the drawer edge
+  - Fallback
+    - Falls back to dynamic viewport vertical centering below top navigation bars (`rect.top <= 25`) if no Connect sidebar is present
+- **Every Page**
+  - Where
+    - the drawer is on every Connect page (a sidebar-only content-script group off the outlines page)
+    - except login and logout pages (manifest `exclude_matches` for login URLs; `sidebar-handle.js` and `sidebar.js` also stop on `ConnectifyThemeAuth.isAuthDisabled()`)
+  - Off the outlines page
+    - There only Settings is enabled
+    - the other launchers are disabled under `.cx-page-notice` (Open Assessment Outlines link; launcher menu only, hidden while Settings is open)
+    - Off the outlines page no tile is ever read as a class card (`ConnectifyUtils.isOutlinesPage()`)
+  - Filters
+    - A Connect outline filter never disables tools: they read the cache
+- **Drawer Width (`#connectify-sidebar`)**
+  - Width
+    - Compact 310px
+    - expands to **900px** (`.cx-tool-active`) when any tool is active
+  - Margin
+    - One side margin runs down the whole drawer
+    - header, launcher menu and every tool panel sit 20px in (12px on narrow screens)
+- **Drawer Slide Synchronization**
+  - `#connectify-sidebar` and `#connectify-sidebar-handle` animate in lockstep
+    - with matching `0.2s cubic-bezier(0.16, 1, 0.3, 1)` transitions
+    - using `transform: translateX(-100%)` to `0`
+    - preventing clipping
+- **Left-Edge Push & Hover Dismissal**
+  - Opening
+    - On Assessment Outlines only, moving the mouse to `clientX <= 12` (or over the handle) expands the drawer
+    - except in the top left corner (`clientY` within Connect's top bar, at least 60px; `sidebar-hover.js`) so Connect's home logo stays clickable
+    - on every other page hover never opens it (`opensOnHover()`), a handle click does
+  - Collapsing
+    - On Assessment Outlines, moving mouse outside collapses it after 120ms debounce when no tool is active
+    - on every other page mousing out never collapses it, a handle click, an outside click or Escape does
+    - When a tool is active, hover collapse is suppressed and clicking outside collapses it
+    - Returning from an active tool panel retains the launcher menu (`justReturnedToMenu`) without hover collapse
+  - Clicks
+    - Only the user's own click dismisses it (`isTrusted`)
+    - Expand All's scripted heading clicks reach the document too, which made the drawer pop in and out during startup auto-expand with the pointer on the edge (Test 308)
+    - Clicking the handle always wins over hover: after a click-close nothing reopens the drawer until the pointer leaves the handle and the edge zone
+    - a click within 400ms of a hover-open keeps it open
+- **Canonical Launcher Button Sequence**
+  - Order
+    1. `connectify-goals-toggle` (Goal Setter: Target Grade / Target ATAR tabs)
+    2. `connectify-predictor-toggle` (Predictor)
+    3. `connectify-progress-toggle` (Year Progression)
+    4. `connectify-estimator-toggle` (Estimator: Estimate Grade / Estimate ATAR tabs)
+    5. `connectify-weakness-toggle` (Weakness Analyzer)
+    6. `connectify-categories-toggle` (Settings)
+- **Calculator Mode Tabs**
+  - Shared panel
+    - Goal Setter and Estimator share the calculator panel (`#connectea-atar`)
+    - its heading names the launcher
+    - the mode tabs under it (`.cta-mode-tabs`) reuse the Predictor's tab bar (`.cx-pred-main-tabs` / `.cx-pred-main-tab`), so both tools look alike in every theme
+  - Tool tabs
+    - carry their verb (`Target Grade` / `Target ATAR`, `Estimate Grade` / `Estimate ATAR`, `Predict Grade` / `Predict ATAR`)
+    - Grade first, ATAR second
+    - Each launcher opens on Grade, then reopens on the tab it was left on
+  - Semester buttons
+    - Target Grade's and Target ATAR's semester buttons read plain `Semester N` (`Semester N (Closed)` once its grades are final)
+    - only Estimate ATAR's add the semester ATAR
+- **Secondary Tool Buttons**
+  - Settings and Weakness Analyzer feature clean white buttons
+    - `#ffffff` in light mode
+    - with centered text (`text-align: center !important; justify-content: center !important;`)
+- **Workspace Navigation**
+  - Dedicated `← Back to Menu` navigation header (`.cx-back-menu`)
+    - positioned at the top right of the header
+  - Dismissal
+    - single active tool policy enforced via `connectify-open` event
+    - outside click and Escape key dismissal
 
 ## 4. Outcome Meter & Tooltip Architecture
-- **Bar Dimensions**: Width **18px**, total height **56px** (2–3x scale).
-- **Segments**:
-  - Baseline track: 4 segments (10px height each).
-  - Tier mapping: Red ($< \text{Low}$), Orange ($\text{Low} \le S < \text{Mid}$), Yellow ($\text{Mid} \le S < \text{High}$), Green ($S \ge \text{High}$).
-  - Active segment opacity: 100% in dark mode against inactive track `#334155`.
-- **Secret Purple Breakout**: When score $> 1.10 \times \text{High}$, bar erupts with a double-height 5th Purple segment (`.connectea-active-purple`, height 20px). **The purple breakout threshold is strictly secret**—never disclosed in legends or tooltips.
-- **Critical Shortfall**: When score $\le \text{Low} - 10\%$ (additive), bar renders 0 segments (empty) with pulsing red alarm glow (`.connectea-outcome-critical`); the pulse fades a glow layer's opacity (`::after`), which the compositor runs, never an animated `box-shadow` (that restyled the page every frame).
-- **Suppression Rules**:
-  - Suppress outcome bars on incomplete or unmarked assessments (`Number.isFinite(mark)` check).
-  - Suppress on a subject's first *marked* assessment unless a numeric subject baseline exists: prior data means an earlier marked row in the card or, for a Semester 2 task, a marked Semester 1 result. A task's semester is its own week, not its card's: **Semester 2 starts at canonical school week 17** through the term calendar: Term 2 Week 7 (chronological week 19), or Term 2 Week 8 (week 20) under Early Easter (`ConnectifyParseHelpers.semesterTwoOrder` / `taskSemester`); every earlier task is Semester 1, so the Semester 1 tasks a Semester 2 panel lists stay Semester 1 tasks and the first of them gets no meter (unmarked rows never count). First tasks of a type render normally when prior subject data exists.
-  - When baselines are cleared/removed, `saveBaselines()` thoroughly purges all legacy storage candidate keys to prevent zombie baseline resurrection, strictly suppressing outcome bars on first tasks.
-- **Compact Statistics Rows**: the row (`.connectea-row-wrapper`) is one line of panel, Type dropdown and meter that always fits the task column: the panel takes what the fixed controls leave (`flex: 0 1 auto`) and wraps its text between stats, a name staying with its value. The display zoom (`--cx-display-scale`) cannot guarantee the fit: it shrinks layout, but WebKit keeps text at a minimum size (below about 9px on macOS, higher still on iPad), so the row overflowed into the marks column on an iPad and never in Chrome or Firefox (Test 304).
-- **Expanded Statistics Panels** (Settings "Statistics Panels", `connectify:panel_view`: Compact view (default), Expanded view on subject panels only, Expanded view on all panels; applies on next page load): each panel becomes a wide, short card on the panel's own surface (inside it everything is clear, groups split by hairlines): one row of Score / Rank / Average, then Minimum / Lower Quartile / Median / Upper Quartile / Maximum after a vertical hairline, the meter at its end (`~` before an estimated cohort size), then a footer `SD, Z-Score, standing` with the Type dropdown; unavailable values are `—`. The one highlighted cell is the highest quantile the result has reached (Lower Quartile at least, even below it, unless the result is at the minimum: then Minimum on task cards): a faint tint of the theme accent (5%) drawn behind it, outside its box. Rows share one column grid (subgrid). Overall cards show only Lower Quartile / Median / Upper Quartile / Maximum as cells (their footer: `Minimum, SD, Z-Score, standing` and the cohort size input); with a class prediction, Predicted Low / Mid / High sit under wider Score / Rank / Average columns (below a hairline, no title) and the four quartile values sit two by two beside them, aligned with those rows; unmarked rows are one line: Low / Mid / High beside what the prediction is based on and the Type dropdown. Overall rows of a class without a final letter close the row with **Lowest Possible / Highest Possible** (the final mark with every unmarked weighted task at 0% / 100%) after a hairline, where task cards have their meter: one column (Lowest above Highest) beside the quartile values, which then sit two by two with or without a class prediction, so the card fits the row at 1280px; never in the footer. Compact overall panels end their result line with `Lowest possible X%  Highest possible Y%`. Labels 13px 400, values 700; the grid never reflows: the card keeps its natural size and is scaled with a transform to fit its task column (`cohort-expanded-fit.js`: its measured width against the column's, never above 1, down to 0.35; the height freed comes back through its bottom margin), never CSS `zoom` (WebKit keeps text at a minimum size under zoom, so a zoomed card still ran past the column on an iPad) or the window-width `--cx-display-scale`, so it never runs into the marks column or gets cut off. **Score colour**: the theme accent, more vivid the further the result sits above the task's Low–High (the class projection on overall rows; mid-scale with neither): lighter in dark themes, darker in Light and light tone, >= 5:1 at every step, set by `data-cx-score-step` (never inline styles). A task breakout is brighter still with a static pastel purple glow, the only text shadow in Connectify; the threshold itself stays secret (the meter tooltip only says the colour grows more vivid above the predicted range).
-- **Goal Bars** (`goal-bars.css`): beside the outcome meter, each 18px x 56px, rows never grow; on expanded task cards they take a grid column after the meter (the card widens), never wrapping under Score. **Goal-performance** (completed tasks): 4 pastel segments against the task's requirement R before it was marked (Red `#f4a3a3` < R-5, Orange `#f8c99b` < R, Yellow `#f5e19a` < R+5, Green `#a7e3b5`), plus a **secret** pastel purple (`#cdb5f7`, 20px) breakout above 1.10 x R on Green, never disclosed. **Year Progression** plots the goal's target mark per task as a dashed line, the remaining tasks' part starting at the last plotted score (ATAR Progression: one line at the ATAR goal). **Goal-progress**: one smooth unsegmented fill (earned / required weighted points) in the goal tier's colour (Guaranteed `#15803d`, Trivial `#22c55e`, Easy `#84cc16`, Medium `#eab308`, Hard `#f97316`, Hell `#ef4444`, Impossible `#991b1b`). Tooltips (the outcome meter's singleton) give numbers only. Goal dialogs are solid like the customizer. **Goal toasts**: a goal that ends says so in the title, with the goal under it and no further line: `Goal Achieved` on a green left edge, `Goal Missed` on a gray one (`Goal Updated` stays purple); goal titles leave out the name's leading year level (`12 Literature` -> `Literature: 80% by Semester 1`). **Goal target on prediction panels** (`goal-forecast.css`): unmarked tasks a goal covers show `Goal target 86%` (a cell after High on expanded cards, the end of the compact line, where the value is semibold (600) like Low and High, Mid alone 700), its text in the task tier's hue, desaturated (OKLCH chroma 0.075, lightness 0.46 on light panels, 0.80 on dark), never a tier label.
-- **Interaction**: Segments must have `pointer-events: none !important;` to eliminate hover boundary thrashing. Handled via singleton floating tooltip (`#connectea-outcome-tooltip`) using viewport-fixed coordinates; in Liquid Glass it blurs what is under it (`--cx-glass-blur`, `saturate(160%)`) like the theme's other glass. Outcome bars and segments must **never** set the native HTML `title` attribute to prevent overlapping dual tooltips.
+- **Bar Dimensions**
+  - Size
+    - Width **18px**
+    - total height **56px** (2–3x scale)
+- **Segments**
+  - Baseline track
+    - 4 segments (10px height each)
+  - Tier mapping
+    - Red ($< \text{Low}$)
+    - Orange ($\text{Low} \le S < \text{Mid}$)
+    - Yellow ($\text{Mid} \le S < \text{High}$)
+    - Green ($S \ge \text{High}$)
+  - Active segment opacity
+    - 100% in dark mode against inactive track `#334155`
+- **Secret Purple Breakout**
+  - When score $> 1.10 \times \text{High}$
+    - bar erupts with a double-height 5th Purple segment (`.connectea-active-purple`, height 20px)
+  - Secrecy
+    - **The purple breakout threshold is strictly secret**—never disclosed in legends or tooltips
+- **Critical Shortfall**
+  - When score $\le \text{Low} - 10\%$ (additive)
+    - bar renders 0 segments (empty) with pulsing red alarm glow (`.connectea-outcome-critical`)
+  - Pulse
+    - the pulse fades a glow layer's opacity (`::after`), which the compositor runs
+    - never an animated `box-shadow` (that restyled the page every frame)
+- **Suppression Rules**
+  - Suppress outcome bars on incomplete or unmarked assessments
+    - `Number.isFinite(mark)` check
+  - Suppress on a subject's first *marked* assessment unless a numeric subject baseline exists
+    - prior data means an earlier marked row in the card or, for a Semester 2 task, a marked Semester 1 result
+    - First tasks of a type render normally when prior subject data exists
+  - A task's semester is its own week, not its card's
+    - **Semester 2 starts at canonical school week 17** through the term calendar
+    - Term 2 Week 7 (chronological week 19), or Term 2 Week 8 (week 20) under Early Easter (`ConnectifyParseHelpers.semesterTwoOrder` / `taskSemester`)
+    - every earlier task is Semester 1, so the Semester 1 tasks a Semester 2 panel lists stay Semester 1 tasks and the first of them gets no meter (unmarked rows never count)
+  - When baselines are cleared/removed
+    - `saveBaselines()` thoroughly purges all legacy storage candidate keys to prevent zombie baseline resurrection
+    - strictly suppressing outcome bars on first tasks
+- **Compact Statistics Rows**
+  - The row (`.connectea-row-wrapper`) is one line of panel, Type dropdown and meter that always fits the task column
+    - the panel takes what the fixed controls leave (`flex: 0 1 auto`)
+    - and wraps its text between stats, a name staying with its value
+  - The display zoom (`--cx-display-scale`) cannot guarantee the fit
+    - it shrinks layout, but WebKit keeps text at a minimum size (below about 9px on macOS, higher still on iPad)
+    - so the row overflowed into the marks column on an iPad and never in Chrome or Firefox (Test 304)
+- **Expanded Statistics Panels** (Settings "Statistics Panels", `connectify:panel_view`)
+  - Setting
+    - Compact view (default), Expanded view on subject panels only, Expanded view on all panels
+    - applies on next page load
+  - Card: each panel becomes a wide, short card on the panel's own surface
+    - inside it everything is clear, groups split by hairlines
+    - one row of Score / Rank / Average, then Minimum / Lower Quartile / Median / Upper Quartile / Maximum after a vertical hairline
+    - the meter at its end (`~` before an estimated cohort size)
+    - then a footer `SD, Z-Score, standing` with the Type dropdown
+    - unavailable values are `—`
+    - Rows share one column grid (subgrid)
+  - The one highlighted cell is the highest quantile the result has reached
+    - Lower Quartile at least, even below it, unless the result is at the minimum: then Minimum on task cards
+    - a faint tint of the theme accent (5%) drawn behind it, outside its box
+  - Overall cards
+    - show only Lower Quartile / Median / Upper Quartile / Maximum as cells
+    - their footer: `Minimum, SD, Z-Score, standing` and the cohort size input
+    - with a class prediction, Predicted Low / Mid / High sit under wider Score / Rank / Average columns (below a hairline, no title)
+    - and the four quartile values sit two by two beside them, aligned with those rows
+  - Unmarked rows
+    - unmarked rows are one line: Low / Mid / High beside what the prediction is based on and the Type dropdown
+  - Overall rows of a class without a final letter close the row with **Lowest Possible / Highest Possible**
+    - the final mark with every unmarked weighted task at 0% / 100%
+    - after a hairline, where task cards have their meter
+    - one column (Lowest above Highest) beside the quartile values, which then sit two by two with or without a class prediction, so the card fits the row at 1280px
+    - never in the footer
+    - Compact overall panels end their result line with `Lowest possible X%  Highest possible Y%`
+  - Type and fit
+    - Labels 13px 400, values 700
+    - the grid never reflows: the card keeps its natural size and is scaled with a transform to fit its task column
+    - `cohort-expanded-fit.js`: its measured width against the column's, never above 1, down to 0.35; the height freed comes back through its bottom margin
+    - never CSS `zoom` (WebKit keeps text at a minimum size under zoom, so a zoomed card still ran past the column on an iPad) or the window-width `--cx-display-scale`
+    - so it never runs into the marks column or gets cut off
+  - **Score colour**
+    - the theme accent, more vivid the further the result sits above the task's Low–High (the class projection on overall rows; mid-scale with neither)
+    - lighter in dark themes, darker in Light and light tone, >= 5:1 at every step
+    - set by `data-cx-score-step` (never inline styles)
+    - A task breakout is brighter still with a static pastel purple glow, the only text shadow in Connectify
+    - the threshold itself stays secret (the meter tooltip only says the colour grows more vivid above the predicted range)
+- **Goal Bars** (`goal-bars.css`)
+  - Placement
+    - beside the outcome meter, each 18px x 56px, rows never grow
+    - on expanded task cards they take a grid column after the meter (the card widens), never wrapping under Score
+  - **Goal-performance** (completed tasks)
+    - 4 pastel segments against the task's requirement R before it was marked
+    - Red `#f4a3a3` < R-5, Orange `#f8c99b` < R, Yellow `#f5e19a` < R+5, Green `#a7e3b5`
+    - plus a **secret** pastel purple (`#cdb5f7`, 20px) breakout above 1.10 x R on Green, never disclosed
+  - **Year Progression**
+    - plots the goal's target mark per task as a dashed line
+    - the remaining tasks' part starting at the last plotted score
+    - ATAR Progression: one line at the ATAR goal
+  - **Goal-progress**
+    - one smooth unsegmented fill (earned / required weighted points) in the goal tier's colour
+    - Guaranteed `#15803d`, Trivial `#22c55e`, Easy `#84cc16`, Medium `#eab308`, Hard `#f97316`, Hell `#ef4444`, Impossible `#991b1b`
+  - Tooltips and dialogs
+    - Tooltips (the outcome meter's singleton) give numbers only
+    - Goal dialogs are solid like the customizer
+  - **Goal toasts**
+    - a goal that ends says so in the title, with the goal under it and no further line
+    - `Goal Achieved` on a green left edge, `Goal Missed` on a gray one (`Goal Updated` stays purple)
+    - goal titles leave out the name's leading year level (`12 Literature` -> `Literature: 80% by Semester 1`)
+  - **Goal target on prediction panels** (`goal-forecast.css`)
+    - unmarked tasks a goal covers show `Goal target 86%`
+    - a cell after High on expanded cards, the end of the compact line, where the value is semibold (600) like Low and High, Mid alone 700
+    - its text in the task tier's hue, desaturated (OKLCH chroma 0.075, lightness 0.46 on light panels, 0.80 on dark)
+    - never a tier label
+- **Interaction**
+  - Segments
+    - Segments must have `pointer-events: none !important;` to eliminate hover boundary thrashing
+  - Tooltip
+    - Handled via singleton floating tooltip (`#connectea-outcome-tooltip`) using viewport-fixed coordinates
+    - in Liquid Glass it blurs what is under it (`--cx-glass-blur`, `saturate(160%)`) like the theme's other glass
+  - Native titles
+    - Outcome bars and segments must **never** set the native HTML `title` attribute to prevent overlapping dual tooltips
 
 ## 5. Cold-Start & Mathematical Modeling
-- **Logarithmic Headroom Above 80%**: Taper achievable gains proportionally to remaining headroom $\frac{100 - \text{Score}}{20}$.
-- **Task Predictions from the Subject's Own Results**: Mid is the subject's own cached results (every earlier one for a marked task, every one for an unmarked task; recency-weighted, $0.85$ per later result, times $\sqrt{\text{weight}}$) shifted by half the student's type affinity, which is **never subject-specific**: every result of the type in every subject, each measured against its own subject's average and pooled (so a weak subject holding all of a type never drags the type down twice; else last year's type baseline minus the overall average). With no results the subject baseline stands in. Tasks order by school week alone (week 1–40 spans the year), so an unmarked Term 4 row without a semester still follows Semester 2's results.
-- **Variance-Scaled Symmetric Range**: $\sigma^2 = \frac{3\,\sigma_0^2 + (n_{\text{eff}} - 1)\,s^2}{3 + n_{\text{eff}} - 1}$ (the subject's own weighted spread $s$ blended with the student's pooled within-subject spread $\sigma_0 \in [4, 14]$), widened for few results ($\sigma_p = \sigma\sqrt{1 + 1/n_{\text{eff}}}$); Low and High sit $\Delta = \min(22, \max(2.5, 0.85\,\sigma_p))$ either side of Mid (about the 20th / 80th percentiles), High through the logarithmic headroom.
-- **New School Year Baselines** (`year-rollover.js`): when every class on the outlines page has a new name and the new set is a later year (by year level or calendar year, or never seen before when titles carry neither), last year's averages of assessment types and subjects (the cache's final state over the last snapshot; grade cache marks preferred, only last year's classes) become the baselines for types that are still categories and subjects still present (matched year-independently, e.g. `11 Chemistry ATAR` -> `12 Chemistry ATAR`). The class registry (`class-semesters.js`) triggers it as soon as it sees a wholly new class set. Connect never shows last year's marks again, so the cache is the only copy: last year's cached results are archived (`connectify:year_archive:`, last two years) before being cleared. Previous baselines are backed up, and viewing an earlier year never triggers it or enters the registry.
-- **Show This Semester's Classes Only** (`semester-filter.js`, Settings checkbox, off by default): the semester is always the detected one (no picker): Semester 2 only once a class shows a final A–E grade; marks never count (Semester 2 panels list the Semester 1 tasks and a cumulative percent from day one, and a Semester 2 task can be marked before Semester 1 grades are final). The Target ATAR / Grade planners use the same start rule. The other semester's outline tiles are hidden, only this semester's cards refresh the cache (the other semester's cached results stay frozen and are still used), and every sidebar tool reads the filtered cache (`collectClasses`, `readCourses`), never the tiles. A Connect filter showing only some classes never decides Semester 1 (its class may simply have no final letter; the class registry decides). When the option hides every outline in view, a centred message without a panel takes their place (`#cx-semester-notice`, `semester-filter-notice.js`): what is hidden, where to turn the option off, and "← Back to All" whenever Connect's top-level All filter is present. **Back to All** (here and in the sidebar's filter notice, `sidebar-filter.js`) presses Connect's top-level "All" heading only, never a "Semester N Classes" section's own "All", with one whole mouse press (pointer/mouse down, up, click): Vaadin's click listeners ignore a bare `click()`.
-- **Connect Overhaul Migration** (`overhaul-notice.js`, 3.3.0 only): the first Assessment Outlines visit after upgrading from an earlier version turns "Show this semester's classes only" off once (so semester detection caches every class) and shows a popup explaining Connect's overhaul and, when the option was on, that it can be turned back on in Settings; fresh installs see nothing.
-- **Settings Cold-Start Guidance**: When a subject lacks scores or baselines, display guidance card with a direct "Go to Settings" shortcut. Dynamically inject baseline inputs when custom categories are created.
+- **Logarithmic Headroom Above 80%**
+  - Gains
+    - Taper achievable gains proportionally to remaining headroom $\frac{100 - \text{Score}}{20}$
+- **Task Predictions from the Subject's Own Results**
+  - Mid is the subject's own cached results
+    - every earlier one for a marked task, every one for an unmarked task
+    - recency-weighted, $0.85$ per later result, times $\sqrt{\text{weight}}$
+    - With no results the subject baseline stands in
+  - shifted by half the student's type affinity, which is **never subject-specific**
+    - every result of the type in every subject, each measured against its own subject's average and pooled
+    - so a weak subject holding all of a type never drags the type down twice
+    - else last year's type baseline minus the overall average
+  - Order
+    - Tasks order by school week alone (week 1–40 spans the year)
+    - so an unmarked Term 4 row without a semester still follows Semester 2's results
+- **Variance-Scaled Symmetric Range**
+  - Spread
+    - $\sigma^2 = \frac{3\,\sigma_0^2 + (n_{\text{eff}} - 1)\,s^2}{3 + n_{\text{eff}} - 1}$
+    - the subject's own weighted spread $s$ blended with the student's pooled within-subject spread $\sigma_0 \in [4, 14]$
+    - widened for few results ($\sigma_p = \sigma\sqrt{1 + 1/n_{\text{eff}}}$)
+  - Range
+    - Low and High sit $\Delta = \min(22, \max(2.5, 0.85\,\sigma_p))$ either side of Mid (about the 20th / 80th percentiles)
+    - High through the logarithmic headroom
+- **New School Year Baselines** (`year-rollover.js`)
+  - When
+    - when every class on the outlines page has a new name and the new set is a later year (by year level or calendar year, or never seen before when titles carry neither)
+    - The class registry (`class-semesters.js`) triggers it as soon as it sees a wholly new class set
+    - viewing an earlier year never triggers it or enters the registry
+  - Baselines
+    - last year's averages of assessment types and subjects (the cache's final state over the last snapshot; grade cache marks preferred, only last year's classes)
+    - become the baselines for types that are still categories and subjects still present (matched year-independently, e.g. `11 Chemistry ATAR` -> `12 Chemistry ATAR`)
+    - Previous baselines are backed up
+  - Archive
+    - Connect never shows last year's marks again, so the cache is the only copy
+    - last year's cached results are archived (`connectify:year_archive:`, last two years) before being cleared
+- **Show This Semester's Classes Only** (`semester-filter.js`, Settings checkbox, off by default)
+  - The semester is always the detected one (no picker)
+    - Semester 2 only once a class shows a final A–E grade
+    - marks never count (Semester 2 panels list the Semester 1 tasks and a cumulative percent from day one, and a Semester 2 task can be marked before Semester 1 grades are final)
+    - The Target ATAR / Grade planners use the same start rule
+    - A Connect filter showing only some classes never decides Semester 1 (its class may simply have no final letter; the class registry decides)
+  - Effect
+    - The other semester's outline tiles are hidden
+    - only this semester's cards refresh the cache (the other semester's cached results stay frozen and are still used)
+    - every sidebar tool reads the filtered cache (`collectClasses`, `readCourses`), never the tiles
+  - When the option hides every outline in view
+    - a centred message without a panel takes their place (`#cx-semester-notice`, `semester-filter-notice.js`)
+    - what is hidden, where to turn the option off, and "← Back to All" whenever Connect's top-level All filter is present
+  - **Back to All** (here and in the sidebar's filter notice, `sidebar-filter.js`)
+    - presses Connect's top-level "All" heading only, never a "Semester N Classes" section's own "All"
+    - with one whole mouse press (pointer/mouse down, up, click): Vaadin's click listeners ignore a bare `click()`
+- **Connect Overhaul Migration** (`overhaul-notice.js`, 3.3.0 only)
+  - The first Assessment Outlines visit after upgrading from an earlier version
+    - turns "Show this semester's classes only" off once (so semester detection caches every class)
+    - shows a popup explaining Connect's overhaul and, when the option was on, that it can be turned back on in Settings
+  - Fresh installs
+    - fresh installs see nothing
+- **Settings Cold-Start Guidance**
+  - When a subject lacks scores or baselines
+    - display guidance card with a direct "Go to Settings" shortcut
+  - Custom categories
+    - Dynamically inject baseline inputs when custom categories are created
 
 ## 6. Runtime & DOM Safety
-- **World Isolation**: Respect `MAIN` world data bridge (`data.js` stamps `dataset.connectifyStats`) vs `ISOLATED` world UI scripts.
-- **Assessment Outlines from Connect's API** (`outline-api.js`): since Connect's October 2026 Angular outlines, every cache on the outlines page (subjects, boxplot stats, class registry, grade cache) fills from Connect's own API, never from the page, and each card Connect shows is drawn again in the old Vaadin look (`legacy-outlines.js`: Vaadin's markup and class lists, Highcharts-style SVG boxplots with the same fills so themes recolour them; Connect's filter menu still decides which cards show). API tasks are numbered exactly as the old rows were (`assignTaskIds` over the same labels and mark texts), so saved overrides, predictions and caches carry on. Connect fetches every boxplot one at a time (~250ms apart) and renders nothing until the last (~13s), so the outlines never wait for it: as soon as Connect's outlines list arrives (~2.7s) every card is drawn in the API's order (Connect's own) into Connect's zone (`#ng-zone__student-assessment-outline`), each boxplot filled in as its chart lands (`drawable()`; only the chart cells are swapped, so open outlines and their panels stay; other changes redraw the tile, never one Expand All is about to click), and Connect's cards are matched once they appear (by title, re-read when Connect rewrites a shown card's title: picking one class after another reuses the card); startup auto-expand opens them as soon as they are drawn, once "Show this semester's classes only" has hidden the other semester's (never opened, then hidden); the caches wait for the whole load. Connect's own cards render (~13s) before the drawn list, hidden, so the list is never moved (that restyled every tile); drawn tiles are `content-visibility: auto`, so the page-wide restyles Connect's Material stylesheets force then skip off-screen outlines; Connect's cards are hidden once matched, never as Angular inserts them (its charts then restyled the hidden card per init), and are built light: `connect-cards-trim.js` (page world, document_start) hands Connect its outlines response without task rows or class boxplots once Connectify has its own outlines (unchanged if Connectify's request fails, or after 10s), so Connect fetches no boxplots and renders bare cards whose titles, teacher links and filter menu Connectify still uses. Nothing is inserted into or removed from an expanded tile (Connect's CKEditor `+ *` rules restyle the whole tile): the compound progress bar fills a slot drawn with the tile.
-- **Zero-Flicker Observers**: Page-wide observation and periodic work go through `ConnectifyScheduler` (`onMutations` with a filter and `mute`, `every` gated on activity, visibility and open panels), never a new body observer or `setInterval` (a batch of 50+ records drops those inside a subtree it added: subscribers scan added subtrees); filter out `style` attribute mutations; track user activity with `ConnectifyIsUserActive()`. Work after a page change covers only what changed (the theme's surface adapter scans added or re-classed subtrees), and Connectify's own floating UI (tooltips, toasts) is never a page change.
-- **Strict Deduplication**: Purge redundant DOM elements on SPA transitions. Ensure all tool launchers and panels export standard `panelRefs` (`toggleBtn`, `panel`).
+- **World Isolation**
+  - Worlds
+    - Respect `MAIN` world data bridge (`data.js` stamps `dataset.connectifyStats`)
+    - vs `ISOLATED` world UI scripts
+- **Assessment Outlines from Connect's API** (`outline-api.js`)
+  - Since Connect's October 2026 Angular outlines
+    - every cache on the outlines page (subjects, boxplot stats, class registry, grade cache) fills from Connect's own API, never from the page
+    - each card Connect shows is drawn again in the old Vaadin look (`legacy-outlines.js`: Vaadin's markup and class lists, Highcharts-style SVG boxplots with the same fills so themes recolour them)
+    - Connect's filter menu still decides which cards show
+    - API tasks are numbered exactly as the old rows were (`assignTaskIds` over the same labels and mark texts), so saved overrides, predictions and caches carry on
+  - Connect fetches every boxplot one at a time (~250ms apart) and renders nothing until the last (~13s), so the outlines never wait for it
+    - as soon as Connect's outlines list arrives (~2.7s) every card is drawn in the API's order (Connect's own) into Connect's zone (`#ng-zone__student-assessment-outline`)
+    - each boxplot filled in as its chart lands (`drawable()`; only the chart cells are swapped, so open outlines and their panels stay; other changes redraw the tile, never one Expand All is about to click)
+    - Connect's cards are matched once they appear (by title, re-read when Connect rewrites a shown card's title: picking one class after another reuses the card)
+    - startup auto-expand opens them as soon as they are drawn, once "Show this semester's classes only" has hidden the other semester's (never opened, then hidden)
+    - the caches wait for the whole load
+  - Restyle costs
+    - Connect's own cards render (~13s) before the drawn list, hidden, so the list is never moved (that restyled every tile)
+    - drawn tiles are `content-visibility: auto`, so the page-wide restyles Connect's Material stylesheets force then skip off-screen outlines
+    - Connect's cards are hidden once matched, never as Angular inserts them (its charts then restyled the hidden card per init)
+    - Nothing is inserted into or removed from an expanded tile (Connect's CKEditor `+ *` rules restyle the whole tile): the compound progress bar fills a slot drawn with the tile
+  - Connect's cards are built light: `connect-cards-trim.js` (page world, document_start)
+    - hands Connect its outlines response without task rows or class boxplots once Connectify has its own outlines
+    - unchanged if Connectify's request fails, or after 10s
+    - so Connect fetches no boxplots and renders bare cards whose titles, teacher links and filter menu Connectify still uses
+- **Zero-Flicker Observers**
+  - Page-wide observation and periodic work go through `ConnectifyScheduler`
+    - `onMutations` with a filter and `mute`, `every` gated on activity, visibility and open panels
+    - never a new body observer or `setInterval`
+    - a batch of 50+ records drops those inside a subtree it added: subscribers scan added subtrees
+    - filter out `style` attribute mutations
+    - track user activity with `ConnectifyIsUserActive()`
+  - Work after a page change covers only what changed
+    - the theme's surface adapter scans added or re-classed subtrees
+    - Connectify's own floating UI (tooltips, toasts) is never a page change
+- **Strict Deduplication**
+  - SPA transitions
+    - Purge redundant DOM elements on SPA transitions
+  - Tools
+    - Ensure all tool launchers and panels export standard `panelRefs` (`toggleBtn`, `panel`)
 
 ## 7. Panel Lifecycle & Backwards Compatibility
-- **No Unauthorized Auto-Expansion**: Panels and subject outlines are **not allowed to be automatically expanded without user involvement** (e.g. clicking a button such as "Expand All", "Expand Subject Outlines", or an individual subject accordion). The **sole exception** is initial expansion on page load if auto expand all is checked (`connectify:auto_expand`).
-- **Settings Cache Backwards Compatibility**: Backwards compatibility must be maintained with cached data from previous versions. Stored user preferences, baselines, category configurations, and scaling calibrations must gracefully resolve legacy keys (`connectea:`, `cx-`, `connectify:`) without data loss.
+- **No Unauthorized Auto-Expansion**
+  - Panels and subject outlines are **not allowed to be automatically expanded without user involvement**
+    - e.g. clicking a button such as "Expand All", "Expand Subject Outlines", or an individual subject accordion
+  - The **sole exception**
+    - initial expansion on page load if auto expand all is checked (`connectify:auto_expand`)
+- **Settings Cache Backwards Compatibility**
+  - Backwards compatibility must be maintained with cached data from previous versions
+    - Stored user preferences, baselines, category configurations, and scaling calibrations must gracefully resolve legacy keys (`connectea:`, `cx-`, `connectify:`)
+    - without data loss
 
 ## 8. Subsystem Cache Invalidation & Algorithm Versioning Standards
-- **Independent Subsystem Invalidation Keys**: Subsystems (Predictor, Results, Settings, Cohort, Goals) must maintain separate, independent invalidation version strings (e.g. `PREDICTOR_ALGO_VERSION`, `RESULTS_ALGO_VERSION`, `SETTINGS_ALGO_VERSION`, `COHORT_ALGO_VERSION`) and corresponding storage keys (`connectify:cache_version:<subsystem>`).
-- **Mandatory Version Increment on Algorithm Changes**: Whenever mathematical algorithms, scraping heuristics, or data models are modified within any subsystem, that subsystem's specific invalidation version value **must** be updated.
-- **Isolated Subsystem Cache Clearing**: Clearing a subsystem cache must be strictly scoped to that subsystem's domain. Updating or invalidating the predictor cache must never purge user settings or cohort data, and vice versa.
-- **Memoized Row Rendering**: Cohort panels and outcome bars must memoize render state (`_lastMark`, `_lastStatsKey`, `_lastEstimatedSize`, `taskType`, `baselinesSig`). Skip PCHIP splines, historical aggregation, and DOM rebuilds if data has not changed, preventing frame drops during user scrolling.
-- **Prediction Cache Synchronization & Expansion Pipeline**: Changing a task's category, saving category settings keywords, or saving baselines immediately refreshes the prediction cache (`updatePredictionCache`): stale predictions are dropped at once and every request in the same task shares one recompute and one cohort pass, run after the change handler so the dropdown never waits (Test 196). When a subject grade update is detected, the subject is marked stale, and upon subsequent expansion, its cached predictions are refreshed via the expansion pipeline without background DOM scanning.
-- **Settings Save Button Styling Parity**: Assessment Categories Save Changes (`#cx-cat-save`) and Baselines Save (`saveBtn`) strictly share the identical canonical primary blue styling (`#2563eb`, white text, 6px 14px padding).
+- **Independent Subsystem Invalidation Keys**
+  - Subsystems (Predictor, Results, Settings, Cohort, Goals) must maintain separate, independent invalidation version strings
+    - e.g. `PREDICTOR_ALGO_VERSION`, `RESULTS_ALGO_VERSION`, `SETTINGS_ALGO_VERSION`, `COHORT_ALGO_VERSION`
+    - and corresponding storage keys (`connectify:cache_version:<subsystem>`)
+- **Mandatory Version Increment on Algorithm Changes**
+  - Whenever mathematical algorithms, scraping heuristics, or data models are modified within any subsystem
+    - that subsystem's specific invalidation version value **must** be updated
+- **Isolated Subsystem Cache Clearing**
+  - Clearing a subsystem cache must be strictly scoped to that subsystem's domain
+    - Updating or invalidating the predictor cache must never purge user settings or cohort data, and vice versa
+- **Memoized Row Rendering**
+  - Cohort panels and outcome bars must memoize render state
+    - `_lastMark`, `_lastStatsKey`, `_lastEstimatedSize`, `taskType`, `baselinesSig`
+    - Skip PCHIP splines, historical aggregation, and DOM rebuilds if data has not changed
+    - preventing frame drops during user scrolling
+- **Prediction Cache Synchronization & Expansion Pipeline**
+  - Changing a task's category, saving category settings keywords, or saving baselines immediately refreshes the prediction cache (`updatePredictionCache`)
+    - stale predictions are dropped at once
+    - every request in the same task shares one recompute and one cohort pass
+    - run after the change handler so the dropdown never waits (Test 196)
+  - When a subject grade update is detected
+    - the subject is marked stale
+    - upon subsequent expansion, its cached predictions are refreshed via the expansion pipeline without background DOM scanning
+- **Settings Save Button Styling Parity**
+  - Assessment Categories Save Changes (`#cx-cat-save`) and Baselines Save (`saveBtn`) strictly share the identical canonical primary blue styling
+    - `#2563eb`
+    - white text
+    - 6px 14px padding
 
 ## 9. Documentation Synchronization & Brevity Standards
-- **Continuous Documentation Sync**: Always update all files in `docs/` with every change made to their relevant subsystems, modules, or features.
-- **Extreme Brevity & High Signal**: Documentation must be kept extremely brief, concise, and focused strictly on useful architectural, mathematical, and implementation facts. Avoid fluff or redundant prose.
-- **Strict Line Count Constraint**: Every JS and CSS file in `src/` must be **$\le 250$ lines**. `test_suite.js` and the `scripts/` test tooling are exempt. Markdown files in `docs/` must remain strictly **$\le 150$ lines each** at all times; Markdown outside `docs/` (README, changelogs, `overview.md`, `design_rules.md`) has no line limit.
-- **New Features, New Files**: New features go in new, self-contained files (registered in `manifest.json` in dependency order). Never append a new feature to an existing module.
-- **Theme Scoping**: Every theme selector must be scoped to a theme hook (`.connectea-dark`, `data-connectea-*`, or a `cx`/`connectify` id/class). Unscoped rules that change native Connect styling are not allowed, apart from the explicit allowlist in `test_suite.js`.
-- **Keyed Ancestors**: ancestors (and `:not(... *)` exclusions) are named by class, never by a class substring (`[class*="feed"] span`, `:not([class*="icon"] *)`): the browser cannot key a substring to a class, so every class change on any element restyled its whole subtree against every rule, and Connect rewrites classes ~20 times per click (the outline filter menu spent 115ms restyling per open). Substrings stay allowed on the subject (Test 219). **Filterable theme hooks**: the dark hook is `.connectea-dark:not(cx-n)` (only `<html>` and `<body>` carry the class; `:not(cx-n)` keeps the old `:is(html.connectea-dark, ...)` specificity 0,1,1): a multi-argument `:is()` ancestor gives Chrome's ancestor filter nothing to reject on, so every element walked its ancestors for every rule, even in Light. **No positional pseudo-class on a generic subject** (`:is(.v-label, span, div):nth-child(2)` -> `.v-label:nth-child(2)`): it flagged nearly every parent, so each insertion (a progress bar, a panel) restyled the following siblings' whole subtrees; the two in `theme-cards.css` doubled Expand All's restyle in Dark (Test 269). **Keyed theme rules** (`src/theme/styles/`): every `:is()` / `:where()` list that is a compound's only key is written out, one selector per argument (`node scripts/expand-is.js --write <files>`, Test 270): a subject keyed only by a list sat in Chrome's universal bucket and was tried on every element, and an ancestor keyed only by one gave the Bloom filter nothing to reject on (Expand All restyled 4x slower in Dark than Light; 65% less after). The rewrite is exact: an argument as specific as the list stands alone, a less specific one is padded to it with `:not(.cx-n)` / `:not(cx-n)` / `:not(#cx-n)` (nothing carries `cx-n`; inside `:where()` when it outweighs the list in a lower column), complex arguments stay in their own `:is()`, and lists naming only `<html>` / `<body>` hooks (`:is(.connectea-dark, body, html)`) stay whole. **No single complex list after root hooks**: Chrome never buckets a single complex argument (`.connectea-dark :is(.a span)` was tried on every element), so after hooks only `<html>` / `<body>` carry the expander writes it one compound at a time (`.connectea-dark .a span`, `:where()` pieces stay `:where()`), the same matches and specificity; after any other ancestor the list stays. **One ancestor walk per compound**: the expander also merges a compound's ancestor exclusions (`:not(.a *):not(#b *)` -> `:not(:is(.a, #b) *)`, padded to the same specificity), since each `:not(X *)` walks every ancestor on its own (the typography rule tried on every div walked them seven times, Expand All's costliest rule in Dark). Sheets that outgrow 250 lines continue in `<name>-2.css` (next in the manifest). Author with lists as before, then run the expander.
-- **Token-Routed Colours**: dark and glass rules (theme, sidebar, ATAR, Predictor, Progress and injected cohort styles) write theme colours as `var(--cx-<token>, <Dark literal>)` (or `color-mix` of tokens) so custom themes reach every surface; only semantic colours (status, outcome segments, categories, success/warning cards) stay literal (Test 167). A wallpaper also paints the root, so short pages show it below the content.
+- **Continuous Documentation Sync**
+  - `docs/`
+    - Always update all files in `docs/` with every change made to their relevant subsystems, modules, or features
+- **Extreme Brevity & High Signal**
+  - Documentation must be kept extremely brief, concise
+    - focused strictly on useful architectural, mathematical, and implementation facts
+    - Avoid fluff or redundant prose
+- **Four Layers in This File**
+  - Every rule in `design_rules.md` has four layers, so no line runs on
+    - the section heading
+    - the rule's bold bullet
+    - a sub-bullet per topic
+    - a sub-sub-bullet per fact
+- **Strict Line Count Constraint**
+  - Every JS and CSS file in `src/` must be **$\le 250$ lines**
+    - `test_suite.js` and the `scripts/` test tooling are exempt
+  - Markdown files in `docs/` must remain strictly **$\le 150$ lines each** at all times
+    - Markdown outside `docs/` (README, changelogs, `overview.md`, `design_rules.md`) has no line limit
+- **New Features, New Files**
+  - New features go in new, self-contained files
+    - registered in `manifest.json` in dependency order
+    - Never append a new feature to an existing module
+- **Theme Scoping**
+  - Every theme selector must be scoped to a theme hook
+    - `.connectea-dark`, `data-connectea-*`, or a `cx`/`connectify` id/class
+    - Unscoped rules that change native Connect styling are not allowed, apart from the explicit allowlist in `test_suite.js`
+- **Keyed Ancestors**
+  - Ancestors (and `:not(... *)` exclusions) are named by class, never by a class substring (`[class*="feed"] span`, `:not([class*="icon"] *)`)
+    - the browser cannot key a substring to a class, so every class change on any element restyled its whole subtree against every rule
+    - Connect rewrites classes ~20 times per click (the outline filter menu spent 115ms restyling per open)
+    - Substrings stay allowed on the subject (Test 219)
+  - **Filterable theme hooks**: the dark hook is `.connectea-dark:not(cx-n)`
+    - only `<html>` and `<body>` carry the class; `:not(cx-n)` keeps the old `:is(html.connectea-dark, ...)` specificity 0,1,1
+    - a multi-argument `:is()` ancestor gives Chrome's ancestor filter nothing to reject on, so every element walked its ancestors for every rule, even in Light
+  - **No positional pseudo-class on a generic subject** (`:is(.v-label, span, div):nth-child(2)` -> `.v-label:nth-child(2)`)
+    - it flagged nearly every parent, so each insertion (a progress bar, a panel) restyled the following siblings' whole subtrees
+    - the two in `theme-cards.css` doubled Expand All's restyle in Dark (Test 269)
+  - **Keyed theme rules** (`src/theme/styles/`): every `:is()` / `:where()` list that is a compound's only key is written out, one selector per argument
+    - `node scripts/expand-is.js --write <files>`, Test 270
+    - a subject keyed only by a list sat in Chrome's universal bucket and was tried on every element
+    - an ancestor keyed only by one gave the Bloom filter nothing to reject on
+    - Expand All restyled 4x slower in Dark than Light; 65% less after
+  - The rewrite is exact
+    - an argument as specific as the list stands alone
+    - a less specific one is padded to it with `:not(.cx-n)` / `:not(cx-n)` / `:not(#cx-n)` (nothing carries `cx-n`; inside `:where()` when it outweighs the list in a lower column)
+    - complex arguments stay in their own `:is()`
+    - lists naming only `<html>` / `<body>` hooks (`:is(.connectea-dark, body, html)`) stay whole
+  - **No single complex list after root hooks**
+    - Chrome never buckets a single complex argument (`.connectea-dark :is(.a span)` was tried on every element)
+    - so after hooks only `<html>` / `<body>` carry the expander writes it one compound at a time (`.connectea-dark .a span`, `:where()` pieces stay `:where()`), the same matches and specificity
+    - after any other ancestor the list stays
+  - **One ancestor walk per compound**
+    - the expander also merges a compound's ancestor exclusions (`:not(.a *):not(#b *)` -> `:not(:is(.a, #b) *)`, padded to the same specificity)
+    - since each `:not(X *)` walks every ancestor on its own (the typography rule tried on every div walked them seven times, Expand All's costliest rule in Dark)
+  - Authoring
+    - Sheets that outgrow 250 lines continue in `<name>-2.css` (next in the manifest)
+    - Author with lists as before, then run the expander
+- **Token-Routed Colours**
+  - Dark and glass rules (theme, sidebar, ATAR, Predictor, Progress and injected cohort styles)
+    - write theme colours as `var(--cx-<token>, <Dark literal>)` (or `color-mix` of tokens) so custom themes reach every surface
+    - only semantic colours (status, outcome segments, categories, success/warning cards) stay literal (Test 167)
+  - Wallpapers
+    - A wallpaper also paints the root, so short pages show it below the content
 
 ## 10. Test Integrity & Direct Implementation
-- **User Instruction on Test Maintenance**: "In the future, when I ask you to change something, please change any tests that explicitly assert against that thing instead of using weird workarounds which may cause many more problems later, as that test was likely created out of a misunderstanding. Please push and commit always."
-- **Direct Test Updates**: When requested to change functionality, typography, markup, styling, or behavior, directly update the implementation and any tests that explicitly assert against that specific item.
-- **No Workarounds to Appease Tests**: Never use indirect workarounds (such as initializing an element with an old value only to overwrite it with `.textContent`, or adding redundant attributes) just to appease an outdated test assertion. Outdated test assertions were likely written under an earlier requirement or misunderstanding and must be updated directly to assert the newly specified behavior.
+- **User Instruction on Test Maintenance**
+  - The instruction
+    - "In the future, when I ask you to change something, please change any tests that explicitly assert against that thing instead of using weird workarounds which may cause many more problems later, as that test was likely created out of a misunderstanding. Please push and commit always."
+- **Direct Test Updates**
+  - When requested to change functionality, typography, markup, styling, or behavior
+    - directly update the implementation
+    - and any tests that explicitly assert against that specific item
+- **No Workarounds to Appease Tests**
+  - Never use indirect workarounds just to appease an outdated test assertion
+    - such as initializing an element with an old value only to overwrite it with `.textContent`
+    - or adding redundant attributes
+  - Outdated test assertions
+    - were likely written under an earlier requirement or misunderstanding
+    - must be updated directly to assert the newly specified behavior
