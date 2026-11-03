@@ -82,7 +82,13 @@
 
   const redraw = (kind, info) => (kind === 'target' ? info.ctx.renderTargetOutput() : info.ctx.renderGradeOutput());
 
-  /** Tier beside the headline, then Set as Goal / Update Goal, or its end and Confirm once open, and the saved status. */
+  const formOf = container => container.parentElement?.querySelector('.cta-form-controls');
+  /** Takes the end out of the planner's inputs: each render puts it back only while Set as Goal is open. */
+  function clearEnd(container) {
+    formOf(container)?.querySelector('.cx-goal-end')?.remove();
+  }
+
+  /** Tier beside the headline, then Set as Goal / Update Goal, or Confirm with the end beside the inputs, and the saved status. */
   function controls(container, kind, info, draftFor) {
     const headline = container.querySelector('strong');
     const draft = draftFor(info);
@@ -108,6 +114,7 @@
         onCancel: () => stopEditing(kind, info, Boolean(edit))
       });
       container.append(compose.node);
+      formOf(container)?.querySelector('.cta-reset')?.after(compose.endRow);
       compose.focus();
       return;
     }
@@ -195,5 +202,5 @@
     else info.ctx.renderGradeOutput();
   }
 
-  window.ConnectifyGoalEditor = { heldTarget, paintGoalsButton, afterGrade, afterTarget, edit, isEditing: kind => Boolean(editing[kind]), isComposing: kind => Boolean(composing[kind]) };
+  window.ConnectifyGoalEditor = { heldTarget, paintGoalsButton, afterGrade, afterTarget, clearEnd, edit, isEditing: kind => Boolean(editing[kind]), isComposing: kind => Boolean(composing[kind]) };
 })();

@@ -69,6 +69,7 @@
   }
 
   function renderTargetOutput(viewRefs, ctx) {
+    window.ConnectifyGoalEditor?.clearEnd(viewRefs.targetOutputContainer);
     const { targetInput, difficultyCheckbox, calculateTargetBtn, topFourContainer, targetOutputContainer } = viewRefs;
     const activeSemester = ctx.getActiveSemester();
     const isClosed = ctx.isTargetClosed(activeSemester);

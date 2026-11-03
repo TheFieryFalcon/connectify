@@ -103,6 +103,7 @@
     }
 
     gradeOutputContainer.replaceChildren();
+    window.ConnectifyGoalEditor?.clearEnd(gradeOutputContainer);
 
     if (!selected) {
       const expandBtn = expandOutlinesButton(ctx);

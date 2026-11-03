@@ -1,9 +1,10 @@
 /**
  * Connectify Goals: Set as Goal, in the planner
  *
- * Saving a plan as a goal happens on the planner itself, under its own task table and sliders, which stay live:
- * the End (Semester 1 / 2, which are the planner's semester buttons, or a custom school week for grade goals),
- * the progress so far and Confirm (Save Changes when editing). Confirm is disabled, with the reason, for a goal
+ * Saving a plan as a goal happens on the planner itself, whose task table and sliders stay live: the End (Semester
+ * 1 / 2, which are the planner's semester buttons, or a custom school week for grade goals), which goal-editor.js puts
+ * beside the planner's inputs, and Confirm (Save Changes when editing) where Set as Goal was; what the plan needs and
+ * how far along it is are on the planner already. Confirm is disabled, with the reason, for a goal
  * already secured or out of reach and for one that clashes with an ATAR goal; a grade goal for a subject that has
  * one asks to overwrite it (Confirm replaces it), and an ATAR goal over subject goals asks to replace them.
  * Exposes window.ConnectifyGoalCompose.
@@ -77,7 +78,7 @@
     const custom = draft.end.type === 'week';
     endSelect.value = custom ? 'week' : String(draft.end.semester === 1 ? 1 : 2);
     endSelect.disabled = lockEnd;
-    const endLabel = M().el('label', 'cx-goal-end-label', 'End ');
+    const endLabel = M().el('label', 'cta-target-label cx-goal-end-label', 'End ');
     endLabel.append(endSelect);
     endRow.append(endLabel);
     const week = M().el('input', 'cta-score cx-goal-week');
@@ -90,7 +91,6 @@
     }
 
     const state = window.ConnectifyGoalReplay.evaluate(draft, { ...ctx, noReplay: true });
-    const points = draft.kind === 'atar' ? null : M().el('span', 'cx-goal-points', M().pointsText(state.progress));
     const undated = state.undated?.length ? M().el('p', 'cta-note', `No week: ${state.undated.join(', ')}. Set one in Task Dates.`) : null;
     const block = blocker(draft, state);
     const reason = M().el('p', 'cx-goal-reason', block ? block.text : '');
@@ -103,7 +103,7 @@
     const cancel = M().el('button', 'cx-goal-cancel-edit', cancelLabel);
     cancel.type = 'button';
     actions.append(confirm, cancel);
-    node.append(...[endRow, M().progressBar(state.progress, state.tier), points, undated, reason, actions].filter(Boolean));
+    node.append(...[undated, reason, actions].filter(Boolean));
 
     const save = () => {
       for (const clash of store().conflicts(draft).subjects) if (clash.goal.kind !== 'atar') store().remove(clash.goal.id);
@@ -142,7 +142,7 @@
 
     const focused = refocus === 'end' ? endSelect : refocus === 'week' ? week : null;
     refocus = null;
-    return { node, state, focus: () => focused?.focus?.() };
+    return { node, endRow, state, focus: () => focused?.focus?.() };
   }
 
   window.ConnectifyGoalCompose = { create, blocker, markedNow };

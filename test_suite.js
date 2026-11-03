@@ -12225,14 +12225,16 @@ runTest('Test 263: Set as Goal previews the goal with its end and confirms it; t
   assert.ok(!first.node.querySelector('table'), 'with no second copy of the planner\'s task table');
   const confirm0 = first.node.querySelector('.cx-goal-confirm');
   assert.strictEqual(confirm0.disabled, false, 'a goal within reach can be confirmed');
-  const select = first.node.querySelector('.cx-goal-end-select');
+  assert.ok(!first.node.querySelector('.cx-goal-hbar') && !first.node.querySelector('.cx-goal-points'), 'and no progress bar or points: the planner already shows them');
+  assert.ok(!first.node.querySelector('.cx-goal-end'), 'the end goes up beside the planner\'s inputs');
+  const select = first.endRow.querySelector('.cx-goal-end-select');
   select.value = 'week';
   select.dispatchEvent(new MockEvent('change'));
   assert.deepStrictEqual(ends, [{ type: 'week', week: 20 }], 'choosing an end goes back through the planner, which draws again');
   const dated = compose({ ...draft, end: { type: 'week', week: 20 } });
-  assert.strictEqual(dated.node.querySelector('.cx-goal-week-hint').textContent, 'Term 2 Week 10', 'the week shows its term');
+  assert.strictEqual(dated.endRow.querySelector('.cx-goal-week-hint').textContent, 'Term 2 Week 10', 'the week shows its term');
   assert.strictEqual(dated.state.tasks.filter(t => t.weight > 0 && !win.ConnectifyGoalPlan.isMarked(t)).length, 1, 'a custom end week drops the tasks after it');
-  const week = dated.node.querySelector('.cx-goal-week');
+  const week = dated.endRow.querySelector('.cx-goal-week');
   week.value = '22';
   week.dispatchEvent(new MockEvent('change'));
   assert.deepStrictEqual(ends[1], { type: 'week', week: 22 }, 'a typed week applies on commit, so typing keeps its focus');
@@ -12241,6 +12243,10 @@ runTest('Test 263: Set as Goal previews the goal with its end and confirms it; t
   const goal = win.ConnectifyGoalStore.active()[0];
   assert.deepStrictEqual([goal.end, goal.priorMarked], [{ type: 'week', week: 20 }, ['chemistry::t1']], 'with its end and the tasks already marked');
   const editor = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-editor.js'), 'utf8');
+  assert.ok(editor.includes("formOf(container)?.querySelector('.cta-reset')?.after(compose.endRow);"), 'the planner places the end right after Recalculate');
+  const plannerCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/atar-planner.css'), 'utf8');
+  assert.ok(plannerCss.includes('grid-template-columns: max-content max-content max-content;') && /\.cta-subject-label \+ \.cta-target-label \{\s*grid-column: 1;/.test(plannerCss), 'in a third column, the target staying on its own row under Subject');
+  assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/target-grade-ui.js'), 'utf8').includes('ConnectifyGoalEditor?.clearEnd(gradeOutputContainer)'), 'and every render clears it');
   assert.ok(editor.includes('function narrowToEnd(container, info)') && editor.includes("container.querySelector('.cx-goal-tasks')"), 'a custom end narrows the planner\'s own task table');
 
   const again = compose({ ...draft }).node;

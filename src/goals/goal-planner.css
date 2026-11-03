@@ -6,14 +6,12 @@
  * rows. Theme tokens only.
  */
 
-/* Set as Goal, open under the plan: clear on the panel like the rest of the planner */
+/* Set as Goal, open: Confirm and Cancel where its button was */
 #connectea-atar .cx-goal-compose {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--cx-border-subtle, #2e3c4e);
 }
 
 #connectea-atar .cx-goal-compose .cx-goal-actions {
@@ -27,10 +25,12 @@
   gap: 8px;
 }
 
-#connectea-atar .cx-goal-end-label {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 400;
+/* The same height and text as the target input beside it */
+#connectea-atar .cx-goal-end-select {
+  box-sizing: border-box;
+  width: auto;
+  height: 32px;
+  font-size: 12px;
 }
 
 #connectea-atar .cx-goal-week {
@@ -62,6 +62,12 @@
   color: var(--cx-button-text, #f8fafc);
   font: inherit;
   cursor: pointer;
+}
+
+/* Cancel matches the Confirm beside it */
+#connectea-atar .cx-goal-actions .cx-goal-cancel-edit {
+  padding: 6px 14px;
+  font-weight: 600;
 }
 
 #connectea-atar :is(.cx-goal-cancel-edit, .cx-goals-open):hover:not(:disabled) {

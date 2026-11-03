@@ -10,7 +10,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Year Progression has two tabs.** Progress Graph has the charts and each task's weight and mark. Task Dates has every task's date, the term dates and Export.
 - **Group and sort the task list your way.** Group By None, Subject, Type, Completed, Predicted Grade or Grade Achieved, with an arrow for ascending or descending; Sort By Chronological, Alphabetical or Grade Achieved; and Show Uncompleted Only. Grades group as High Distinction (A) from 80%, Distinction (B) from 70%, Credit (C) from 60%, Pass (C) from 50% and Fail (D).
 - **Export now happens on the list.** Press Export and the same list gains ticks, days and download buttons.
-- **Set as Goal now happens on the planner.** Choose the end and confirm under your task table, with the effort sliders still working, instead of in a popup.
+- **Set as Goal now happens on the planner.** Choose the end beside Recalculate and confirm under your task table, with the effort sliders still working, instead of in a popup.
 - **Task Dates shows each task's subject, type and grade.** Change a task's type right there, and the outlines update with it. Export swaps those columns for Day and Export Date, leaving Assessment and Date where they are. Lines on Year Progression now all match.
 - **Show or hide subjects and types on Task Dates.** The new Subjects and Type dropdowns tick each one on or off, for the list and for Export's downloads.
 - **Group by Predicted Grade now shows the predictions.** The last column shows each task's predicted grade, and Sort By's Grade Achieved/Predicted Grade sorts by them.
