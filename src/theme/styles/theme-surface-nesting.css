@@ -138,6 +138,12 @@ html.connectea-dark[data-connectea-theme] cnt-school-class-metrics-summary-detai
   background-color: transparent !important;
 }
 
+/* Their dividers: Connect's pale #d4d4d4 is faint on its white but glares on a dark theme; the theme's subtle hairline
+   is as faint here */
+html.connectea-dark[data-connectea-theme] cnt-school-class-metrics-summary-detail .mat-icon-button.border-left:not(#cx-n) {
+  border-left-color: var(--cx-border-subtle, #2e3c4e) !important;
+}
+
 /* Home page portlets: the Liferay article wrapper around a tile sits 2px outside it with square corners, so its
    fill showed as a square box behind the rounded glass tile (Connect Help, notice promo). The tile is the surface. */
 html.connectea-dark[data-connectea-theme] .journal-content-article:has(> :is(.eds-c-tile, .cvr-c-tile)) {

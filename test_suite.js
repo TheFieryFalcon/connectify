@@ -14471,7 +14471,7 @@ runTest('Test 312: Mousing out of the drawer collapses it only on Assessment Out
   }
 });
 
-runTest('Test 313: Classes rows\' icon buttons and tab headers inside cards are clear, and the empty state ring is black in light tone', () => {
+runTest('Test 313: Classes rows\' icon buttons and tab headers inside cards are clear, the buttons\' dividers muted, and the empty state ring is black in light tone', () => {
   const read = name => origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles', name), 'utf8');
   const rule = (css, sel) => {
     const at = css.indexOf(sel);
@@ -14480,7 +14480,9 @@ runTest('Test 313: Classes rows\' icon buttons and tab headers inside cards are 
   };
   const buttons = rule(read('theme-surface-nesting.css'), 'html.connectea-dark[data-connectea-theme] cnt-school-class-metrics-summary-detail .mat-icon-button:not(:hover):not(#cx-n)');
   assert.ok(buttons.includes('background-color: transparent !important'), 'the buttons are clear in every dark theme, and hover keeps its highlight');
-  assert.ok(!/padding|margin|width|height|border/.test(buttons), 'only the fill changes: icon buttons keep their native geometry and divider');
+  assert.ok(!/padding|margin|width|height|border/.test(buttons), 'only the fill changes: icon buttons keep their native geometry');
+  const dividers = rule(read('theme-surface-nesting.css'), 'html.connectea-dark[data-connectea-theme] cnt-school-class-metrics-summary-detail .mat-icon-button.border-left:not(#cx-n)');
+  assert.ok(dividers.includes('border-left-color: var(--cx-border-subtle, #2e3c4e) !important') && !/border-left:|border-width|border-left-width|border: /.test(dividers.split('{')[1]), 'the dividers stay, in the theme\'s subtle hairline, and keep their 1px');
   const glass = read('theme-glass-nesting.css');
   for (const host of ['.mat-card', '.eds-c-tile', '.cvr-c-tile']) {
     for (const tab of [':where(mat-tab-header)', ':where(.mat-tab-header)']) {

@@ -25,7 +25,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Spacing is even across the drawer: every tool now lines up with the header, and Task Dates' controls line up in two tidy rows.
 - The sidebar no longer pops in and out if your cursor is on the left edge while Auto-expand opens your outlines.
 - Moving your mouse out of the sidebar no longer closes it on pages other than Assessment Outlines. Click the handle or outside the sidebar instead.
-- The Classes page's Favourite, Statistics and More buttons no longer have grey boxes, in dark themes. Neither do the Submissions Due tabs, in Liquid Glass.
+- The Classes page's Favourite, Statistics and More buttons no longer have grey boxes in dark themes, and the lines between them are as faint as in standard Connect. Neither do the Submissions Due tabs, in Liquid Glass.
 - The circle around the icon on empty cards is now black in themes with dark text.
 
 ## 3.3.1 (2026-11-01)
