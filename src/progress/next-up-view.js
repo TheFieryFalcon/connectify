@@ -4,7 +4,8 @@
  * The Year Progression panel's Next Up tab (#cx-next-up): one table, drawn like the Task Dates list, of this week's and
  * next week's assessments, each with its subject, type (the outline rows' own dropdown), weight, Low / Mid / High
  * prediction, or its grade once marked, and what an active goal asks of it (no Goal column when no goal covers these
- * tasks). A week with no tasks shows a happy face and "All Done!". A week is edited on Task Dates, which a note points to
+ * tasks). A week with no tasks shows a happy face: "All Done!" in the holidays or once no task is dated later, else
+ * "No Tasks This Week" or "No Tasks Next Week". A week is edited on Task Dates, which a note points to
  * when unmarked tasks have none.
  * Exposes window.ConnectifyNextUpView.
  */
@@ -38,7 +39,7 @@
     // Low, Mid and High, each a column in the outline panels' colours; a marked or unpredicted task spans the three
     function predictionCells(row) {
       if (!row.prediction) {
-        const cell = createElement('td', row.completed ? `Grade ${taskCells.gradeText(row)}` : '—', 'cx-next-prediction');
+        const cell = createElement('td', row.completed ? taskCells.gradeText(row) : '—', row.completed ? 'cx-next-prediction cx-next-grade' : 'cx-next-prediction');
         cell.setAttribute('colspan', '3');
         return [cell];
       }
@@ -49,8 +50,13 @@
     function goalCell(row) {
       const cell = createElement('td', row.goal ? null : '—', 'cx-next-goal');
       if (!row.goal) return cell;
-      cell.append(createElement('span', percent(row.goal.required), 'cx-next-goal-value'));
-      if (row.goal.tier && !row.completed) cell.append(window.ConnectifyGoalModal.tierLabel(row.goal.tier));
+      const value = createElement('span', percent(row.goal.required), 'cx-next-goal-value cx-goal-target__value');
+      cell.append(value);
+      if (row.goal.tier && !row.completed) {
+        // Tinted like the goal target on the outlines' prediction panels (goal-forecast.css)
+        value.dataset.tier = row.goal.tier;
+        cell.append(window.ConnectifyGoalModal.tierLabel(row.goal.tier));
+      }
       return cell;
     }
 
@@ -67,8 +73,8 @@
       return tr;
     }
 
-    // A minimalist happy face over "All Done!": a week with no tasks, or no school weeks left
-    function allDone() {
+    // A minimalist happy face over what a week with no tasks means
+    function weekFace(text) {
       const svg = window.ConnectifyProgressChart.createSvgElement;
       const face = svg('svg', { viewBox: '0 0 36 36', class: 'cx-next-face', 'aria-hidden': 'true' });
       face.append(
@@ -78,7 +84,7 @@
         svg('path', { d: 'M11 21.5c1.6 3.6 4.1 5.5 7 5.5s5.4-1.9 7-5.5' })
       );
       const box = createElement('div', null, 'cx-next-done');
-      box.append(face, createElement('span', 'All Done!', 'cx-next-done-text'));
+      box.append(face, createElement('span', text, 'cx-next-done-text'));
       return box;
     }
 
@@ -105,7 +111,7 @@
         heading.setAttribute('scope', 'colgroup');
         heading.append(createElement('span', week.label), createElement('span', week.detail, 'cx-next-week-detail'));
         if (week.rows.length) week.rows.forEach(row => el.append(taskRow(row, showGoal, track)));
-        else spanning('td', 'cx-next-none').append(allDone());
+        else spanning('td', 'cx-next-none').append(weekFace(week.done ? 'All Done!' : `No Tasks ${week.label}`));
       }
       return el;
     }
@@ -129,7 +135,7 @@
       const plan = model.build(subjects, model.now());
       const uncached = window.ConnectifyTaskDatesView.hasUncachedClasses(subjects);
       // What the tab shows, not the row's task records: a task elsewhere in the year changes nothing here
-      const shown = plan.weeks.map(w => [w.label, w.detail, w.rows.map(r => [r.key, r.name, r.subject, r.type, r.completed, r.score, r.weight, r.prediction, r.goal])]);
+      const shown = plan.weeks.map(w => [w.label, w.detail, w.done, w.rows.map(r => [r.key, r.name, r.subject, r.type, r.completed, r.score, r.weight, r.prediction, r.goal])]);
       const signature = JSON.stringify([shown, plan.undated, uncached]);
       if (!force && signature === lastSignature) return;
       lastSignature = signature;
@@ -141,8 +147,7 @@
       const track = (el, id) => { el.dataset.cxFocus = id; focusables.set(id, el); return el; };
 
       expandSlot.replaceChildren(...(uncached ? [window.ConnectifyTargetUiHelpers.expandOutlinesButton({ scanAndRefresh: () => render(true) })] : []));
-      if (!subjects.length) list.replaceChildren(createElement('p', 'No assessments found. Expand subjects in Connect to load data.', 'cx-next-empty'));
-      else list.replaceChildren(plan.weeks.length ? table(plan.weeks, track) : allDone());
+      list.replaceChildren(subjects.length ? table(plan.weeks, track) : createElement('p', 'No assessments found. Expand subjects in Connect to load data.', 'cx-next-empty'));
       noteSlot.replaceChildren(...note(plan.undated));
       if (focusId && focusables.has(focusId)) focusables.get(focusId).focus();
     }

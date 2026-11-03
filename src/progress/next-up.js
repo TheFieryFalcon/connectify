@@ -1,8 +1,7 @@
 /**
  * Connectify Next Up: which tasks and what is known about them
  *
- * The two school weeks the Next Up tab lists: this week and next week by the term calendar. A week with no school in it
- * gives way to the next school week, so in the holidays the tab shows the first two weeks back, named by term and week.
+ * The two weeks the Next Up tab lists: this week and next week by the calendar, each a school week or the holidays.
  * A task belongs to the week the Task Dates list shows it in. Each task carries its weight, its prediction (the
  * Predictor's Low / Mid / High) and what an active goal asks of it. Exposes window.ConnectifyNextUp.
  */
@@ -13,22 +12,22 @@
 
   const byText = (a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
 
-  /** `today` -> up to two `{ order, label, detail }` school weeks (none past Term 4's last). */
+  /** `today` -> this week and next week: `{ order, holiday, label, detail }`; a holiday week has no order. */
   function weeks(today) {
     const T = window.ConnectifySchoolTerms;
     const year = today.getFullYear();
     const early = T.earlyEaster(year);
     const day = T.utc(year, today.getMonth(), today.getDate());
     const monday = T.addDays(day, -((day.getUTCDay() + 6) % 7));
-    const nextMonday = T.addDays(monday, 7);
     const school = T.terms(year, early).flatMap(t => Array.from({ length: t.weeks }, (_, i) => ({
       term: t.term, week: i + 1, order: (t.term - 1) * 12 + i + 1, monday: T.addDays(t.monday, i * 7)
     })));
-    return school.filter(w => w.monday >= monday).slice(0, 2).map(w => {
-      const name = `Term ${w.term} Wk ${w.week}`;
+    return ['This Week', 'Next Week'].map((label, i) => {
+      const start = T.addDays(monday, i * 7);
+      const w = school.find(item => +item.monday === +start);
+      if (!w) return { order: null, holiday: true, label, detail: `School Holidays\u2003${T.formatDate(start)} – ${T.formatDate(T.addDays(start, 4))}` };
       const span = `${T.formatDate(T.dateFor(year, w.term, w.week, 1, early))} – ${T.formatDate(T.dateFor(year, w.term, w.week, 5, early))}`;
-      const label = +w.monday === +monday ? 'This Week' : +w.monday === +nextMonday ? 'Next Week' : null;
-      return { order: w.order, label: label || name, detail: label ? `${name} ${span}` : span };
+      return { order: w.order, holiday: false, label, detail: `Term ${w.term} Wk ${w.week}\u2003${span}` };
     });
   }
 
@@ -53,7 +52,10 @@
     };
   }
 
-  /** `{ weeks: [{ order, label, detail, rows }], undated }`; undated: unmarked tasks no week can show. */
+  /**
+   * `{ weeks: [{ order, holiday, label, detail, rows, done }], undated }`; undated: unmarked tasks no week can show.
+   * done: the holidays, or a week with no task dated in it or after it.
+   */
   function build(subjects, today) {
     const rows = window.ConnectifyTaskDates.rows(subjects);
     const goals = window.ConnectifyGoalStore?.all() || [];
@@ -61,7 +63,8 @@
       ...week,
       rows: rows.filter(row => Math.floor(row.at) === week.order)
         .sort((a, b) => a.at - b.at || byText(a.subject, b.subject) || a.sequence - b.sequence)
-        .map(row => detailed(row, subjects, goals))
+        .map(row => detailed(row, subjects, goals)),
+      done: week.holiday || !rows.some(row => Number.isFinite(row.at) && Math.floor(row.at) >= week.order)
     }));
     return { weeks: list, undated: rows.filter(row => !row.completed && !Number.isFinite(row.task.order)).length };
   }

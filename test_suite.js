@@ -13109,7 +13109,7 @@ runTest('Test 281: Prediction panels on unmarked tasks a goal covers show the go
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-forecast.css'), 'utf8');
   assert.ok(cssHas(css, 'color: oklch(from var(--cx-goal-tier) 0.46 0.075 h) !important;') && cssHas(css, 'color: oklch(from var(--cx-goal-tier) 0.8 0.075 h) !important;'),
     'the tier\'s hue, desaturated, at a lightness that keeps >= 5:1 (dark ink on light panels, light ink on dark ones)');
-  assert.ok(cssHas(css, ':is(#cx-specificity-anchor, .connectea-row-wrapper) .cx-goal-target__value[data-tier]'), 'the colour outranks the glass strip\'s ink rule');
+  assert.ok(cssHas(css, ':is(#cx-specificity-anchor, .connectea-row-wrapper, .cx-next-goal) .cx-goal-target__value[data-tier]'), 'the colour outranks the glass strip\'s ink rule');
   assert.ok(cssHas(css, ':is(#cx-specificity-anchor, .connectea-row-wrapper) span.cx-goal-target > .cx-goal-target__value { font-weight: 600 !important; }'),
     'the compact value is semibold like Low and High, outranking the task group\'s first-child span rule');
   const dialogCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-dialog.css'), 'utf8');
@@ -14566,9 +14566,9 @@ runTest('Test 314: Next Up lists this week and next week between Progress Graph 
       const on = (m, d) => model.weeks(new Date(year, m, d)).map(w => `${w.label}|${w.detail}`);
       assert.deepStrictEqual(on(10, 3), ['This Week|Term 4 Wk 4 2 Nov – 6 Nov', 'Next Week|Term 4 Wk 5 9 Nov – 13 Nov'], 'this week and next week, each named by its term week and days');
       assert.deepStrictEqual(on(10, 8), on(10, 3), 'Sunday still belongs to the week it ends');
-      assert.deepStrictEqual(on(8, 22), ['This Week|Term 3 Wk 10 21 Sep – 25 Sep', 'Term 4 Wk 1|12 Oct – 16 Oct'], 'the last week of term is followed by the first week back');
-      assert.deepStrictEqual(on(6, 8), ['Term 3 Wk 1|20 Jul – 24 Jul', 'Term 3 Wk 2|27 Jul – 31 Jul'], 'in the holidays: the first two school weeks');
-      assert.deepStrictEqual(on(11, 23), [], 'nothing after Term 4');
+      assert.deepStrictEqual(on(8, 22), ['This Week|Term 3 Wk 10\u200321 Sep – 25 Sep', 'Next Week|School Holidays\u200328 Sep – 2 Oct'], 'next week can be the holidays');
+      assert.deepStrictEqual(on(6, 8), ['This Week|School Holidays\u20036 Jul – 10 Jul', 'Next Week|School Holidays\u200313 Jul – 17 Jul'], 'the holidays are weeks of their own');
+      assert.deepStrictEqual(on(11, 23), ['This Week|School Holidays\u200321 Dec – 25 Dec', 'Next Week|School Holidays\u200328 Dec – 1 Jan'], 'and so is the end of the year');
       assert.strictEqual(model.weeks(new Date(2024, 0, 31))[0].detail.split(' ').pop(), '31 Jan – 2 Feb'.replace('31 Jan', T.formatDate(T.dateFor(2024, 1, 1, 1, T.earlyEaster(2024)))).replace('2 Feb', T.formatDate(T.dateFor(2024, 1, 1, 5, T.earlyEaster(2024)))), 'a Wednesday-start Week 1 starts on its first school day');
 
       // Only these weeks' tasks, sorted within each; a week past its term's end reads as the next term's
@@ -14591,7 +14591,7 @@ runTest('Test 314: Next Up lists this week and next week between Progress Graph 
       const parts = [4, 5, 6].map(i => find(first[i], n => n.className?.includes('connectea-forecast-value'))[0]).map(n => [n.tagName.toUpperCase(), n.textContent]);
       assert.deepStrictEqual(parts, [['SPAN', '62%'], ['STRONG', '70%'], ['SPAN', '79%']], 'Low, Mid and High each have a column, Mid heaviest, the breakout never shown');
       assert.ok(!JSON.stringify(plan).includes('86.5'), 'the secret breakout never leaves the prediction');
-      assert.strictEqual(trs()[3].children[4].textContent, 'Grade 85.5%', 'a marked task shows its grade');
+      assert.strictEqual(trs()[3].children[4].textContent, '85.5%', 'a marked task shows its grade, with no word for it');
       assert.strictEqual(trs()[3].children[4].getAttribute('colspan'), '3', 'across the three prediction columns');
       const component = trs()[6].children;
       assert.deepStrictEqual([component[3].textContent, component[4].textContent], ['—', '—'], 'unweighted and unpredicted cells are dashes');
@@ -14613,29 +14613,40 @@ runTest('Test 314: Next Up lists this week and next week between Progress Graph 
       assert.strictEqual(find(trs()[2], n => n.className === 'cx-next-goal').length, 1);
       assert.deepStrictEqual(asked[0], ['12 Physics ATAR', 'p1', 70.2, 1], 'the goal is asked about the task with its prediction');
       assert.deepStrictEqual(find(trs()[2].children[7], () => true).map(n => n.textContent), ['86%', 'hard']);
+      const goalValue = trs()[2].children[7].children[0];
+      assert.ok(goalValue.className.includes('cx-goal-target__value') && goalValue.dataset.tier === 'hard', 'the percentage takes the goal target\'s tier colour');
+      assert.strictEqual(trs()[3].children[5].children[0].dataset.tier, undefined, 'a marked task has no difficulty to colour it by');
       assert.deepStrictEqual(find(trs()[3].children[5], () => true).map(n => n.textContent), ['80%'], 'a marked task shows what it needed, with no difficulty');
       assert.strictEqual(trs()[5].children[7].textContent, '—');
 
-      // A week with no tasks is all done; two of them need no column names; past Term 4 the face stands alone
-      const done = () => find(view.list, n => n.className === 'cx-next-done');
-      assert.strictEqual(done().length, 0, 'no face while each week has tasks');
-      model.now = () => new Date(year, 10, 16);
-      view.render();
-      assert.deepStrictEqual(trs().map(tr => tr.className), ['cx-dates-group', 'cx-next-none', 'cx-dates-group', 'cx-next-none'], 'each empty week says so, under no column names');
-      assert.strictEqual(done().length, 2);
-      const face = done()[0];
-      assert.strictEqual(face.children[0].getAttribute('class'), 'cx-next-face', 'a face');
-      assert.strictEqual(face.children[0].getAttribute('aria-hidden'), 'true', 'which the words speak for');
-      assert.strictEqual(face.children[0].children.length, 4, 'a head, two eyes and a smile');
-      assert.strictEqual(face.children[1].textContent, 'All Done!');
-      model.now = () => new Date(year, 9, 26);
-      view.render();
-      assert.strictEqual(done().length, 1, 'one week with tasks, one all done');
+      // A week with no tasks: no tasks while one is dated later, all done in the holidays or with none left
+      const faces = () => find(view.list, n => n.className === 'cx-next-done');
+      const said = () => faces().map(n => n.children[1].textContent);
+      const on_ = (m, d) => { model.now = () => new Date(year, m, d); view.render(); };
+      assert.deepStrictEqual(said(), [], 'no face while each week has tasks');
+      on_(10, 16);
+      assert.deepStrictEqual(trs().map(tr => tr.className), ['cx-dates-group', 'cx-next-none', 'cx-dates-group', 'cx-next-none'], 'two empty weeks need no column names');
+      assert.deepStrictEqual(said(), ['No Tasks This Week', 'No Tasks Next Week'], 'a task is still to come, in Term 4 Week 9');
+      const face = faces()[0].children[0];
+      assert.strictEqual(face.getAttribute('class'), 'cx-next-face', 'the one face');
+      assert.strictEqual(face.getAttribute('aria-hidden'), 'true', 'which the words speak for');
+      assert.strictEqual(face.children.length, 4, 'a head, two eyes and a smile');
+      on_(9, 26);
+      assert.deepStrictEqual(said(), ['No Tasks This Week'], 'next week has tasks');
       assert.strictEqual(trs()[0].className, 'cx-dates-head');
-      model.now = () => new Date(year, 11, 23);
+      on_(11, 7);
+      assert.deepStrictEqual(said(), ['All Done!'], 'the last task is this week, so next week is all done');
+      on_(11, 14);
+      assert.deepStrictEqual(said(), ['All Done!', 'All Done!'], 'every task date has passed');
+      on_(8, 22);
+      assert.ok(faces().length === 2 && said()[1] === 'All Done!', 'next week is the holidays, with tasks still to come next term');
+      assert.strictEqual(said()[0], 'No Tasks This Week');
+      on_(6, 8);
+      assert.deepStrictEqual(said(), ['All Done!', 'All Done!'], 'the holidays are all done whatever comes after');
+      window.ConnectifyData.collectClasses = () => [];
       view.render();
-      assert.strictEqual(trs().length, 0);
-      assert.strictEqual(view.list.children[0].className, 'cx-next-done', 'no school weeks left: all done, with no table');
+      assert.strictEqual(view.list.children[0].className, 'cx-next-empty', 'no classes yet: says so, never all done');
+      window.ConnectifyData.collectClasses = () => subjects;
       T.setEarlyEaster(year, T.autoEarlyEaster(year));
       localStorage.removeItem('connectify:school_terms');
     });
@@ -14658,6 +14669,7 @@ runTest('Test 314: Next Up lists this week and next week between Progress Graph 
   assert.ok(!/[•·]/.test(read('progress/next-up-view.js') + read('progress/next-up.js')), 'no dot separators');
   const css = read('progress/next-up.css');
   assert.ok(css.includes('#cx-next-up .cx-dates-table :is(th, td) { padding-right: 16px; padding-left: 0;') && css.includes('.cx-next-col-assessment { width: 100%; }') && !css.includes('table-layout'), 'one 16px gap between columns as wide as their text, the name taking the rest');
+  assert.ok(read('goals/goal-forecast.css').includes(':is(#cx-specificity-anchor, .connectea-row-wrapper, .cx-next-goal) .cx-goal-target__value[data-tier]'), 'the goal percentage shares the outlines\' tier colours');
   assert.ok(cssHasToken(css, '.connectea-dark #cx-next-up .cx-next-done { color: #60a5fa; }'), 'the face takes the theme\'s link ink');
 });
 

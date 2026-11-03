@@ -24,7 +24,9 @@
 #cx-next-up .cx-next-empty { color: #4a5d70; }
 #cx-next-up :is(.cx-next-weight, .cx-next-prediction, .cx-next-goal) { font-variant-numeric: tabular-nums; }
 /* Low / Mid / High take the outline panels' colours and weights (cohort-upcoming.css) */
-#cx-next-up .cx-next-goal-value { margin-right: 6px; font-weight: 700; }
+#cx-next-up .cx-next-goal-value { margin-right: 6px; font-weight: 600; }
+/* A grade spans Low, Mid and High, so centred it never reads as the Low */
+#cx-next-up .cx-dates-table .cx-next-grade { text-align: center; }
 #cx-next-up .cx-dates-row--done .cx-next-goal-value { font-weight: 400; }
 #cx-next-up .cx-dates-select {
   max-width: 160px;
@@ -45,7 +47,7 @@
 #cx-next-up .cx-dates-select:hover { border-color: #94adc3 !important; }
 #cx-next-up .cx-next-note { display: flex; align-items: center; gap: 12px; margin: 16px 0 0; font-weight: 400; }
 #cx-next-up .cx-next-empty { margin: 0; font-weight: 400; }
-/* All Done!: a minimalist face in the link ink over the text, centred on the panel */
+/* A week with no tasks: a minimalist face in the link ink over the text, centred on the panel */
 #cx-next-up .cx-next-done { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0 16px; color: #174c75; }
 #cx-next-up .cx-next-done .cx-next-face { flex: none; width: 36px; height: 36px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 #cx-next-up .cx-next-done .cx-next-face-eye { fill: currentColor; stroke: none; }

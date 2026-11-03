@@ -87,20 +87,22 @@ Extremely concise summary of the core visual design language, contrast standards
     - The panel reopens on the tab it was left on
 - **Next Up** (`next-up-view.js`, `next-up.css`)
   - Weeks
-    - this week and next week by the term calendar, each heading naming its term week and days
-    - a week with no school gives way to the next school week, named by term and week (the holidays show the first two weeks back)
+    - this week and next week by the calendar, each heading naming its term week and days, or `School Holidays` and its days
     - a task sits in the week Task Dates shows it in
   - One table, drawn like the Task Dates list
     - Assessment, Subject, Type (the same dropdown), Weight, Low, Mid, High, Goal
-    - Low, Mid and High in the outline panels' colours; `Grade 85.5%` across the three once marked (finished tasks in muted ink)
-    - Goal is the mark the goal asks with the task's tier label, or what a marked task needed, no tier; no column when no goal covers these tasks
+    - Low, Mid and High in the outline panels' colours; `85.5%` centred across the three once marked (finished tasks in muted ink)
+    - Goal is the mark the goal asks, semibold in the task tier's desaturated hue like every goal target, with its tier label
+    - a marked task shows what it needed, no tier or colour; no column when no goal covers these tasks
   - Spacing
     - every column as wide as its text with one 16px gap, the last ending on the panel's right edge
     - Assessment takes the rest and alone wraps (the subject too at 840px or narrower)
     - Type is one width, never wider when its dropdown fills on first use
-  - All Done
-    - a week with no tasks shows a minimalist happy face in the link ink (head, two eyes, a smile, no fill) over a bold `All Done!`, centred
-    - two such weeks drop the column names; with no school weeks left the face stands alone
+  - A week with no tasks
+    - a minimalist happy face in the link ink (head, two eyes, a smile, no fill) over bold text, centred
+    - `All Done!` in the holidays, or once no task is dated in that week or later
+    - otherwise `No Tasks This Week` / `No Tasks Next Week`
+    - two such weeks drop the column names
   - A week is edited on Task Dates only
     - one note under the table counts unmarked tasks with no week and opens Task Dates
 - **Tab Bars** (`.cx-pred-main-tabs` / `.cx-pred-main-tab`, `.cx-pred-subtab`; `sidebar-predictor.css`)

@@ -37,16 +37,16 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 
 /* Tier colour. The glass task-row rule inks everything in the strip with the primary text, so the unused id
    outranks it (as for the Low / Mid / High colours, cohort-forecast.css) */
-:is(#cx-specificity-anchor, .connectea-row-wrapper) .cx-goal-target__value[data-tier] {
+:is(#cx-specificity-anchor, .connectea-row-wrapper, .cx-next-goal) .cx-goal-target__value[data-tier] {
   color: #203c5e !important;
   color: oklch(from var(--cx-goal-tier) 0.46 0.075 h) !important;
 }
-html.connectea-dark :is(#cx-specificity-anchor, .connectea-row-wrapper) .cx-goal-target__value[data-tier] {
+html.connectea-dark :is(#cx-specificity-anchor, .connectea-row-wrapper, .cx-next-goal) .cx-goal-target__value[data-tier] {
   color: var(--cx-text-primary, #f1f5f9) !important;
   color: oklch(from var(--cx-goal-tier) 0.8 0.075 h) !important;
 }
 /* Light-tone themes (grey Liquid Glass, light custom themes) have dark ink on light glass */
-html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-row-wrapper) .cx-goal-target__value[data-tier] {
+html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-row-wrapper, .cx-next-goal) .cx-goal-target__value[data-tier] {
   color: var(--cx-text-primary, #1d1c1c) !important;
   color: oklch(from var(--cx-goal-tier) 0.46 0.075 h) !important;
 }
