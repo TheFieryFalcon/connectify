@@ -6,6 +6,11 @@
  * for 5:1 on the light glass. Browsers without relative colours keep the theme's text colour (first declaration).
  */
 
+/* Empty states: the ring around the icon (Connect's pale grey fades into the light glass) */
+html.connectea-dark[data-connectea-tone="light"] .c-empty-content > .rounded-circle {
+  border-color: #000000 !important;
+}
+
 /* Category names and task-type badges (Settings, Predictor) */
 html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-cat-name-label,
 html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar .cx-pred-task-type-badge {

@@ -133,6 +133,11 @@ html.connectea-dark[data-connectea-theme] .cvr-c-tile :where(.mat-tab-header):no
   background-color: transparent !important;
 }
 
+/* Classes page: a class row's Favourite, Statistics and More buttons sit on the row (hover keeps its highlight) */
+html.connectea-dark[data-connectea-theme] cnt-school-class-metrics-summary-detail .mat-icon-button:not(:hover):not(#cx-n) {
+  background-color: transparent !important;
+}
+
 /* Home page portlets: the Liferay article wrapper around a tile sits 2px outside it with square corners, so its
    fill showed as a square box behind the rounded glass tile (Connect Help, notice promo). The tile is the surface. */
 html.connectea-dark[data-connectea-theme] .journal-content-article:has(> :is(.eds-c-tile, .cvr-c-tile)) {

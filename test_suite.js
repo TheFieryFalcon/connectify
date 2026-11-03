@@ -14471,6 +14471,28 @@ runTest('Test 312: Mousing out of the drawer collapses it only on Assessment Out
   }
 });
 
+runTest('Test 313: Classes rows\' icon buttons and tab headers inside cards are clear, and the empty state ring is black in light tone', () => {
+  const read = name => origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles', name), 'utf8');
+  const rule = (css, sel) => {
+    const at = css.indexOf(sel);
+    assert.ok(at > -1, `${sel} has a rule`);
+    return css.slice(at, css.indexOf('}', at));
+  };
+  const buttons = rule(read('theme-surface-nesting.css'), 'html.connectea-dark[data-connectea-theme] cnt-school-class-metrics-summary-detail .mat-icon-button:not(:hover):not(#cx-n)');
+  assert.ok(buttons.includes('background-color: transparent !important'), 'the buttons are clear in every dark theme, and hover keeps its highlight');
+  assert.ok(!/padding|margin|width|height|border/.test(buttons), 'only the fill changes: icon buttons keep their native geometry and divider');
+  const glass = read('theme-glass-nesting.css');
+  for (const host of ['.mat-card', '.eds-c-tile', '.cvr-c-tile']) {
+    for (const tab of [':where(mat-tab-header)', ':where(.mat-tab-header)']) {
+      assert.ok(glass.includes(`${host} ${tab}:not(#cx-n)`), `${host} ${tab} is listed`);
+    }
+  }
+  const header = rule(glass, '.mat-card :where(mat-tab-header):not(#cx-n)');
+  assert.ok(header.includes('backdrop-filter: none !important') && header.includes('-webkit-backdrop-filter: none !important'), 'a tab header inside a card does not blur the card\'s own fill into a grey band');
+  const ring = rule(read('theme-light-tone.css'), 'html.connectea-dark[data-connectea-tone="light"] .c-empty-content > .rounded-circle');
+  assert.ok(ring.includes('border-color: #000000 !important'), 'the ring is black, in light tone only');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
