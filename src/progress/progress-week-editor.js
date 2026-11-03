@@ -16,7 +16,10 @@
 
   // A saved override as the school week the editor shows ("w10", or an older bare "10")
   function shownWeek(saved) {
-    const order = window.ConnectifyUtils.customWeekOrder(saved);
+    return orderWeek(window.ConnectifyUtils.customWeekOrder(saved));
+  }
+
+  function orderWeek(order) {
     const week = order === null ? null : window.ConnectifySchoolTerms.schoolWeek(order);
     return Number.isFinite(week) ? String(week) : '';
   }
@@ -160,7 +163,7 @@
       });
 
       inputRow.append(input);
-      if (currentVal) {
+      if (shownWeek(savedTime)) {
         const clearBtn = createElement('button', '✕', 'cx-time-clear-btn');
         clearBtn.type = 'button';
         clearBtn.title = 'Clear custom time override';
@@ -199,7 +202,8 @@
       editBtn.style.fontSize = '13px';
       editBtn.style.padding = '0';
       editBtn.onclick = () => {
-        const inputWrapper = createInputField(shownWeek(savedTime), false);
+        // Opens on the week shown, read from the task until overridden; nothing is saved unless it is changed
+        const inputWrapper = createInputField(shownWeek(savedTime) || orderWeek(point.order), false);
         if (typeof containerSpan.replaceWith === 'function') {
           containerSpan.replaceWith(inputWrapper);
         } else if (containerSpan.parentElement) {

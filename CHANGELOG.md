@@ -20,6 +20,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Exams merged into one event on Export now keep their ticks, so you can leave one out, and a tick no longer vanishes as you click a second exam.
 - You can now see which tab is selected on the Predictor, Goal Setter, Estimator and Year Progression, in every theme.
 - Pressing Escape while changing a task's week now cancels the change without closing the sidebar.
+- Changing a task's week now starts from the week it already shows, instead of an empty box.
 - Notifications now have the Liquid Glass effect in Liquid Glass themes.
 - With a custom end week, Set as Goal's headline now matches its difficulty: it no longer says "Requires 80%" beside Impossible, and shows the tasks up to that week.
 - A task type you chose yourself is no longer bold.

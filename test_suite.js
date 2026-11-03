@@ -4275,6 +4275,26 @@ runTest('Test 125: Task Dates week editor protects active typing from premature 
   clearBtn.click();
   assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated')), null, 'Clear button must remove override');
   assert.strictEqual(refreshCount2, 2, 'Clear button must trigger onRefresh');
+
+  // 8. A week read from the task opens in the input too, and stays unsaved unless changed
+  const parsedKey = window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_parsed');
+  const parsedWeek = String(window.ConnectifySchoolTerms.schoolWeek(19));
+  const container3 = document.createElement('div');
+  let refreshCount3 = 0;
+  drawWeekCells(container3, [{ id: 'task_parsed', name: 'Essay', score: 70, mean: 60, order: 19, sequence: 3, pending: false }], 'Physics ATAR', () => { refreshCount3++; });
+  container3.querySelector('.cx-time-edit-btn').click();
+  const parsedInput = container3.querySelector('input');
+  assert.strictEqual(parsedInput.value, parsedWeek, 'Edit input must open on the parsed week, not blank');
+  assert.ok(!container3.querySelector('.cx-time-clear-btn'), 'A parsed week has no override to clear');
+  parsedInput.dispatchEvent(new MockEvent('keydown', { key: 'Enter' }));
+  assert.strictEqual(mockLocalStorage.getItem(parsedKey), null, 'Leaving the parsed week unchanged saves no override');
+  assert.strictEqual(refreshCount3, 1, 'Enter still closes the input');
+  parsedInput.value = '25';
+  parsedInput.dispatchEvent(new MockEvent('input'));
+  assert.strictEqual(mockLocalStorage.getItem(parsedKey), 'w25', 'Changing it saves the override');
+  parsedInput.dispatchEvent(new MockEvent('keydown', { key: 'Escape' }));
+  assert.strictEqual(parsedInput.value, parsedWeek, 'Escape must restore the parsed week');
+  assert.strictEqual(mockLocalStorage.getItem(parsedKey), null, 'Escape must remove the override again');
 });
 
 runTest('Test 126: Clicking outside the sidebar collapses the sidebar, Close button is removed, and Back to Menu is positioned at top right', () => {

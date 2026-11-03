@@ -114,6 +114,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - thin-outlined dropdowns (`.cx-dates-select`)
     - weeks as `Term 2 Wk 5` (in full on hover)
     - a faint ✎ right after the week, in one column, that the pointer never changes
+    - its week input opens on the week shown, read from the task until overridden, never blank
     - finished tasks in muted ink
     - term starts on one small line above the controls
     - only the downloads are filled
