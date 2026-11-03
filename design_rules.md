@@ -91,10 +91,16 @@ Extremely concise summary of the core visual design language, contrast standards
     - a week with no school gives way to the next school week, named by term and week (the holidays show the first two weeks back)
     - a task sits in the week Task Dates shows it in
   - One table, drawn like the Task Dates list
-    - Assessment, Subject, Type (the same dropdown), Weight, Prediction, Goal
-    - Prediction is Low / Mid / High in the outline panels' colours, or `Grade 85.5%` once marked (finished tasks in muted ink)
+    - Assessment, Subject, Type (the same dropdown), Weight, Low, Mid, High, Goal
+    - Low, Mid and High in the outline panels' colours; `Grade 85.5%` across the three once marked (finished tasks in muted ink)
     - Goal is the mark the goal asks with the task's tier label, or what a marked task needed, no tier; no column when no goal covers these tasks
-    - A week with no tasks says `No assessments`
+  - Spacing
+    - every column as wide as its text with one 16px gap, the last ending on the panel's right edge
+    - Assessment takes the rest and alone wraps (the subject too at 840px or narrower)
+    - Type is one width, never wider when its dropdown fills on first use
+  - All Done
+    - a week with no tasks shows a minimalist happy face in the link ink (head, two eyes, a smile, no fill) over a bold `All Done!`, centred
+    - two such weeks drop the column names; with no school weeks left the face stands alone
   - A week is edited on Task Dates only
     - one note under the table counts unmarked tasks with no week and opens Task Dates
 - **Tab Bars** (`.cx-pred-main-tabs` / `.cx-pred-main-tab`, `.cx-pred-subtab`; `sidebar-predictor.css`)

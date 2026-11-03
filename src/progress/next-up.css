@@ -2,33 +2,32 @@
    rows and headings on the panel's hairline, no boxes. Dark themes route colours through tokens. */
 #cx-next-up .cx-next-expand { margin-bottom: 12px; }
 #cx-next-up .cx-next-expand:empty { display: none; }
-#cx-next-up .cx-dates-table { table-layout: fixed; }
-#cx-next-up .cx-dates-table :is(th, td) { font-weight: 400; vertical-align: middle; }
-#cx-next-up .cx-next-col-name { width: auto; }
-#cx-next-up .cx-next-col-subject { width: 15%; }
-#cx-next-up .cx-next-col-type { width: 17%; }
-#cx-next-up .cx-next-col-weight { width: 7%; }
-#cx-next-up .cx-next-col-prediction { width: 25%; }
-#cx-next-up .cx-next-col-goal { width: 13%; }
+#cx-next-up .cx-dates-table :is(th, td) { padding-right: 16px; padding-left: 0; font-weight: 400; vertical-align: middle; white-space: nowrap; }
+#cx-next-up .cx-dates-table :is(th, td):last-child { padding-right: 0; }
+/* Every column as wide as its text with one 16px gap, so the table ends on the panel's right edge; the name takes the rest */
+#cx-next-up .cx-dates-table .cx-next-col-assessment { width: 100%; }
+#cx-next-up .cx-dates-row td:first-child { white-space: normal; }
+/* Never wider when a dropdown fills its options on first use */
+#cx-next-up .cx-dates-table .cx-next-col-type { min-width: 160px; }
 #cx-next-up .cx-dates-row td { box-sizing: border-box; height: 35px; }
 #cx-next-up .cx-dates-head th { padding-top: 0; color: #4a5d70; font-size: 12px; font-weight: 600; }
 #cx-next-up .cx-dates-table .cx-dates-group th { padding-top: 16px; color: #253b53; font-weight: 700; }
+/* With no column names the first heading sits on the tabs' own 16px */
+#cx-next-up .cx-dates-table .cx-dates-group:first-child th { padding-top: 0; }
 #cx-next-up .cx-dates-table .cx-dates-group .cx-next-week-detail { margin-left: 12px; color: #4a5d70; font-size: 12px; font-weight: 400; }
 #cx-next-up .cx-dates-row:hover td { background: color-mix(in srgb, currentColor 5%, transparent); }
 #cx-next-up .cx-dates-row:hover td:first-child { box-shadow: -8px 0 0 color-mix(in srgb, currentColor 5%, transparent); }
 #cx-next-up .cx-dates-row:hover td:last-child { box-shadow: 8px 0 0 color-mix(in srgb, currentColor 5%, transparent); }
 #cx-next-up .cx-dates-row--done td,
 #cx-next-up .cx-dates-subject-cell,
-#cx-next-up .cx-next-none td,
 #cx-next-up .cx-next-note,
 #cx-next-up .cx-next-empty { color: #4a5d70; }
 #cx-next-up :is(.cx-next-weight, .cx-next-prediction, .cx-next-goal) { font-variant-numeric: tabular-nums; }
 /* Low / Mid / High take the outline panels' colours and weights (cohort-upcoming.css) */
-#cx-next-up .cx-next-prediction { white-space: nowrap; }
 #cx-next-up .cx-next-goal-value { margin-right: 6px; font-weight: 700; }
 #cx-next-up .cx-dates-row--done .cx-next-goal-value { font-weight: 400; }
 #cx-next-up .cx-dates-select {
-  max-width: min(160px, 100%);
+  max-width: 160px;
   padding: 1px 4px;
   border: 1px solid var(--cx-progress-line, #d5dfe9) !important;
   border-radius: 6px;
@@ -45,16 +44,29 @@
 }
 #cx-next-up .cx-dates-select:hover { border-color: #94adc3 !important; }
 #cx-next-up .cx-next-note { display: flex; align-items: center; gap: 12px; margin: 16px 0 0; font-weight: 400; }
-#cx-next-up .cx-next-empty { margin: 0; padding: 4px 8px; font-weight: 400; }
+#cx-next-up .cx-next-empty { margin: 0; font-weight: 400; }
+/* All Done!: a minimalist face in the link ink over the text, centred on the panel */
+#cx-next-up .cx-next-done { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 0 16px; color: #174c75; }
+#cx-next-up .cx-next-done .cx-next-face { flex: none; width: 36px; height: 36px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+#cx-next-up .cx-next-done .cx-next-face-eye { fill: currentColor; stroke: none; }
+#cx-next-up .cx-next-done-text { font-weight: 700; }
 
 .connectea-dark #cx-next-up .cx-dates-head th,
 .connectea-dark #cx-next-up .cx-dates-row--done td,
 .connectea-dark #cx-next-up .cx-dates-subject-cell,
-.connectea-dark #cx-next-up .cx-next-none td,
 .connectea-dark #cx-next-up .cx-next-note,
 .connectea-dark #cx-next-up .cx-next-empty,
 .connectea-dark #cx-next-up .cx-dates-table .cx-dates-group .cx-next-week-detail { color: var(--cx-text-secondary, #dce2e8); }
+.connectea-dark #cx-next-up .cx-next-done { color: var(--cx-accent-link, #60a5fa); }
+.connectea-dark #cx-next-up .cx-next-done-text { color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #cx-next-up .cx-dates-table .cx-dates-group th { color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #cx-next-up .cx-dates-select { color: var(--cx-text-primary, #ffffff) !important; }
 .connectea-dark #cx-next-up .cx-dates-select:hover { border-color: var(--cx-border-strong, #556c84) !important; }
 .connectea-dark #cx-next-up .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
+
+/* A narrow window: the subject wraps and the dropdowns narrow, so the name keeps room */
+@media (max-width: 840px) {
+  #cx-next-up .cx-dates-row .cx-dates-subject-cell { white-space: normal; }
+  #cx-next-up .cx-dates-table .cx-next-col-type { min-width: 110px; }
+  #cx-next-up .cx-dates-select { max-width: 110px; }
+}

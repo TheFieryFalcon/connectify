@@ -4,7 +4,8 @@
  * The Year Progression panel's Next Up tab (#cx-next-up): one table, drawn like the Task Dates list, of this week's and
  * next week's assessments, each with its subject, type (the outline rows' own dropdown), weight, Low / Mid / High
  * prediction, or its grade once marked, and what an active goal asks of it (no Goal column when no goal covers these
- * tasks). A week is edited on Task Dates, which a note points to when unmarked tasks have none.
+ * tasks). A week with no tasks shows a happy face and "All Done!". A week is edited on Task Dates, which a note points to
+ * when unmarked tasks have none.
  * Exposes window.ConnectifyNextUpView.
  */
 (() => {
@@ -34,13 +35,15 @@
     let lastSignature = '';
     const percent = value => `${Math.round(value)}%`;
 
-    function predictionCell(row) {
-      if (row.completed) return createElement('td', `Grade ${taskCells.gradeText(row)}`, 'cx-next-prediction');
-      const cell = createElement('td', row.prediction ? null : '—', 'cx-next-prediction');
-      if (!row.prediction) return cell;
-      const value = (level, text, tag) => createElement(tag, `${text} ${percent(row.prediction[level])}`, `connectea-forecast-value connectea-forecast-value--${level}`);
-      cell.append(value('low', 'Low', 'span'), ' ', value('mid', 'Mid', 'strong'), ' ', value('high', 'High', 'span'));
-      return cell;
+    // Low, Mid and High, each a column in the outline panels' colours; a marked or unpredicted task spans the three
+    function predictionCells(row) {
+      if (!row.prediction) {
+        const cell = createElement('td', row.completed ? `Grade ${taskCells.gradeText(row)}` : '—', 'cx-next-prediction');
+        cell.setAttribute('colspan', '3');
+        return [cell];
+      }
+      const value = (level, tag) => createElement('td', createElement(tag, percent(row.prediction[level]), `connectea-forecast-value connectea-forecast-value--${level}`), 'cx-next-prediction');
+      return [value('low', 'span'), value('mid', 'strong'), value('high', 'span')];
     }
 
     function goalCell(row) {
@@ -58,19 +61,37 @@
         createElement('td', taskCells.subjectText(row), 'cx-dates-subject-cell'),
         createElement('td', taskCells.typeSelect(row, track)),
         createElement('td', row.weight === null ? '—' : `${Math.round(row.weight * 10) / 10}%`, 'cx-next-weight'),
-        predictionCell(row)
+        ...predictionCells(row)
       );
       if (showGoal) tr.append(goalCell(row));
       return tr;
     }
 
+    // A minimalist happy face over "All Done!": a week with no tasks, or no school weeks left
+    function allDone() {
+      const svg = window.ConnectifyProgressChart.createSvgElement;
+      const face = svg('svg', { viewBox: '0 0 36 36', class: 'cx-next-face', 'aria-hidden': 'true' });
+      face.append(
+        svg('circle', { cx: 18, cy: 18, r: 16.5 }),
+        svg('circle', { cx: 12.5, cy: 14.5, r: 2, class: 'cx-next-face-eye' }),
+        svg('circle', { cx: 23.5, cy: 14.5, r: 2, class: 'cx-next-face-eye' }),
+        svg('path', { d: 'M11 21.5c1.6 3.6 4.1 5.5 7 5.5s5.4-1.9 7-5.5' })
+      );
+      const box = createElement('div', null, 'cx-next-done');
+      box.append(face, createElement('span', 'All Done!', 'cx-next-done-text'));
+      return box;
+    }
+
     function table(weeks, track) {
       const showGoal = weeks.some(week => week.rows.some(row => row.goal));
-      const columns = [['Assessment', 'cx-next-col-name'], ['Subject', 'cx-next-col-subject'], ['Type', 'cx-next-col-type'], ['Weight', 'cx-next-col-weight'], ['Prediction', 'cx-next-col-prediction'], ...(showGoal ? [['Goal', 'cx-next-col-goal']] : [])];
+      const columns = ['Assessment', 'Subject', 'Type', 'Weight', 'Low', 'Mid', 'High', ...(showGoal ? ['Goal'] : [])];
       const el = createElement('table', null, 'cx-dates-table');
-      const head = createElement('tr', null, 'cx-dates-head');
-      columns.forEach(([text, className]) => head.append(createElement('th', text, className)));
-      el.append(head);
+      // Column names say nothing over two empty weeks
+      if (weeks.some(week => week.rows.length)) {
+        const head = createElement('tr', null, 'cx-dates-head');
+        columns.forEach(text => head.append(createElement('th', text, `cx-next-col-${text.toLowerCase()}`)));
+        el.append(head);
+      }
       const spanning = (tag, className) => {
         const tr = createElement('tr', null, className);
         const cell = createElement(tag);
@@ -84,7 +105,7 @@
         heading.setAttribute('scope', 'colgroup');
         heading.append(createElement('span', week.label), createElement('span', week.detail, 'cx-next-week-detail'));
         if (week.rows.length) week.rows.forEach(row => el.append(taskRow(row, showGoal, track)));
-        else spanning('td', 'cx-next-none').textContent = 'No assessments';
+        else spanning('td', 'cx-next-none').append(allDone());
       }
       return el;
     }
@@ -120,8 +141,8 @@
       const track = (el, id) => { el.dataset.cxFocus = id; focusables.set(id, el); return el; };
 
       expandSlot.replaceChildren(...(uncached ? [window.ConnectifyTargetUiHelpers.expandOutlinesButton({ scanAndRefresh: () => render(true) })] : []));
-      const empty = !subjects.length ? 'No assessments found. Expand subjects in Connect to load data.' : !plan.weeks.length ? 'No school weeks left this year.' : null;
-      list.replaceChildren(empty ? createElement('p', empty, 'cx-next-empty') : table(plan.weeks, track));
+      if (!subjects.length) list.replaceChildren(createElement('p', 'No assessments found. Expand subjects in Connect to load data.', 'cx-next-empty'));
+      else list.replaceChildren(plan.weeks.length ? table(plan.weeks, track) : allDone());
       noteSlot.replaceChildren(...note(plan.undated));
       if (focusId && focusables.has(focusId)) focusables.get(focusId).focus();
     }
