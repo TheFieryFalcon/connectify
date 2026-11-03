@@ -146,19 +146,27 @@
     redraw(kind, info);
   }
 
-  // A custom end week: the planner's table and headline show that range, never a second copy of the plan
+  // A custom end week: the planner's table and headline show that range, never a second copy of the plan. The
+  // semester's plan may have no table (all marked) where the range has tasks, and a table where the range has none
   function narrowToEnd(container, info) {
-    if (!composing.grade?.week) return;
-    const state = window.ConnectifyGoalReplay.evaluate(gradeDraft(info), { ...P().context(), noReplay: true });
-    const table = container.querySelector('.cx-goal-tasks');
-    if (state.error || !state.plan || state.plan.error || !table) return;
-    const parent = table.parentElement;
-    table.remove();
-    const tasks = (state.tasks || []).filter(t => !P().isMarked(t));
-    S().renderGradeTasks(parent, { course: { ...info.course, progress: { tasks } }, plan: state.plan, onChange: () => info.ctx.renderGradeOutput() });
+    const week = composing.grade?.week;
+    if (!week) return;
+    const draft = gradeDraft(info);
+    const state = window.ConnectifyGoalReplay.evaluate(draft, { ...P().context(), noReplay: true });
     const headline = container.querySelector('strong');
-    if (headline && Number.isFinite(state.plan.required)) {
-      headline.textContent = `Requires scores averaging ${M().round1(state.plan.required)}% on assessments up to Week ${composing.grade.week} to achieve ${info.refs.gradeTargetInput.value}% overall.`;
+    const table = container.querySelector('.cx-goal-tasks');
+    const parent = table?.parentElement || container.querySelector('.cta-assessment-details');
+    table?.remove();
+    if (state.error || !state.plan || state.plan.error) {
+      if (headline) headline.textContent = state.plan?.error || `No assessments up to Week ${week}.`;
+      return;
+    }
+    const tasks = (state.tasks || []).filter(t => !P().isMarked(t));
+    if (parent) S().renderGradeTasks(parent, { course: { ...info.course, progress: { tasks } }, plan: state.plan, onChange: () => info.ctx.renderGradeOutput() });
+    if (headline) {
+      headline.textContent = window.ConnectifyTargetGradeUI.planSummary(state.plan, info.refs.gradeTargetInput.value, {
+        difficulty: draft.difficultyWeighted, scope: `remaining assessments up to Week ${week}`
+      });
     }
   }
 

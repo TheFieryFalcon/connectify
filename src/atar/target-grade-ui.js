@@ -12,6 +12,16 @@
 
   const { createEl, round, prefs, savePref, expandOutlinesButton } = window.ConnectifyTargetUiHelpers;
 
+  /** A plan's headline. `scope` names the tasks it covers (a custom end week: only those up to that week). */
+  function planSummary(plan, target, { difficulty = false, scope = 'remaining assessments' } = {}) {
+    if (plan.impossible) return `Goal unattainable. Maximum achievable mark: ${round(plan.maximum)}%.`;
+    if (plan.finished) return `All weighted tasks completed. Final mark: ${round(plan.final)}%.`;
+    if (plan.required === 0) return `Target secured with ${scope} at 0%.`;
+    if (difficulty) return `Requires performance-adjusted scores (averaging ${round(plan.required)}%) on ${scope} to achieve ${target}% overall.`;
+    if (plan.effort) return `Requires scores averaging ${round(plan.required)}% on ${scope} to achieve ${target}% overall.`;
+    return `Requires ${plan.required}% on ${scope} to achieve ${target}% overall.`;
+  }
+
   function createGradeView(ctx) {
     const calc = ctx.calc;
     const gradeContainer = createEl('div', 'cta-planner');
@@ -143,20 +153,8 @@
       return;
     }
 
-    const summaryText = plan.impossible
-      ? `Goal unattainable. Maximum achievable mark: ${round(plan.maximum)}%.`
-      : plan.finished
-      ? `All weighted tasks completed. Final mark: ${round(plan.final)}%.`
-      : plan.required === 0
-      ? 'Target secured with remaining assessments at 0%.'
-      : isDifficulty
-      ? `Requires performance-adjusted scores (averaging ${round(plan.required)}%) on remaining assessments to achieve ${gradeTargetInput.value}% overall.`
-      : plan.effort
-      ? `Requires scores averaging ${round(plan.required)}% on remaining assessments to achieve ${gradeTargetInput.value}% overall.`
-      : `Requires ${plan.required}% on remaining assessments to achieve ${gradeTargetInput.value}% overall.`;
-
     gradeOutputContainer.append(
-      createEl('strong', '', summaryText),
+      createEl('strong', '', planSummary(plan, gradeTargetInput.value, { difficulty: isDifficulty })),
       createEl(
         'p',
         'cta-note',
@@ -204,6 +202,7 @@
 
   window.ConnectifyTargetGradeUI = {
     createGradeView,
-    renderGradeOutput
+    renderGradeOutput,
+    planSummary
   };
 })();

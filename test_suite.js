@@ -14345,6 +14345,82 @@ runTest('Test 310: The drawer has one side margin, and Task Dates\' controls sha
   assert.ok(read('progress/export-view.css').includes('.cx-export-group-head .cx-export-all { margin-right: -4px; }'), 'Select All / None ends on the right edge');
 });
 
+runTest('Test 311: With a custom end week, Set as Goal\'s headline and sliders match the plan for that range, whatever its outcome', () => {
+  localStorage.clear();
+  const savedHref = location.href;
+  location.href = OUTLINES_HREF;
+  const tasks = [
+    { id: 't1', name: 'Test 1', weight: 30, pending: false, score: 78, earned: 23.4, order: 5, semester: 1 },
+    { id: 't2', name: 'Test 2', weight: 30, pending: true, earned: 0, order: 15, semester: 1 },
+    { id: 't3', name: 'Exam', weight: 40, pending: true, earned: 0, order: 30, semester: 2 }
+  ];
+  const chem = { id: 'chemistry', name: 'Chemistry', subject: 'Chemistry ATAR', tasks };
+  const win = loadGoalModules({
+    ConnectifySchoolTerms: { schoolWeek: o => o, weekOrder: n => n },
+    ConnectifyProgressMath: { termWeek: o => ({ term: Math.floor((o - 1) / 10) + 1, week: ((o - 1) % 10) + 1 }) },
+    ConnectifyPredictorCache: { getOrComputeTaskPrediction: () => ({ low: 70, mid: 77, high: 84 }) },
+    ConnectifyAtarScraper: { readCourses: () => [[], [chem]] },
+    ConnectifyData: { collect: () => [] }
+  });
+  for (const f of ['atar/target-ui-helpers.js', 'atar/target-grade-ui.js']) new Function('window', origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8'))(win);
+  const { planSummary } = win.ConnectifyTargetGradeUI;
+  assert.strictEqual(planSummary({ required: 82 }, 80), 'Requires 82% on remaining assessments to achieve 80% overall.', 'the semester\'s wording is unchanged');
+  assert.strictEqual(planSummary({ required: 0 }, 30), 'Target secured with remaining assessments at 0%.');
+  assert.strictEqual(planSummary({ required: 81.25, effort: true }, 80), 'Requires scores averaging 81.3% on remaining assessments to achieve 80% overall.');
+  assert.strictEqual(planSummary({ required: 81, effort: true }, 80, { difficulty: true }), 'Requires performance-adjusted scores (averaging 81%) on remaining assessments to achieve 80% overall.');
+
+  // The planner flow itself: its output redrawn on every change, as renderGradeOutput does
+  let current = null;
+  let semesterHasTable = true;
+  const info = { refs: { gradeTargetInput: { value: '80' }, difficultyCheckbox: { checked: false } }, ctx: { getActiveSemester: () => 1 }, course: chem, plan: { required: 50 }, held: null };
+  const draw = () => {
+    current = document.createElement('div');
+    const headline = document.createElement('strong');
+    headline.textContent = 'The semester plan';
+    const details = document.createElement('section');
+    details.className = 'cta-assessment-details';
+    if (semesterHasTable) {
+      const table = document.createElement('table');
+      table.className = 'cx-goal-tasks';
+      details.append(table);
+    }
+    current.append(headline, details);
+    win.ConnectifyGoalEditor.afterGrade(current, info);
+  };
+  info.ctx.renderGradeOutput = draw;
+  const realCreate = win.ConnectifyGoalCompose.create;
+  let onEnd = null;
+  win.ConnectifyGoalCompose.create = opts => { onEnd = opts.onEnd; return realCreate(opts); };
+  draw();
+  current.querySelector('.cx-goal-set').click();
+  assert.ok(current.querySelector('.cx-goal-compose'), 'Set as Goal is open');
+  const at = (target, week) => {
+    info.refs.gradeTargetInput.value = String(target);
+    onEnd({ type: 'week', week });
+    return { headline: mockText(current.querySelector('strong')), rows: current.querySelectorAll('.cx-goal-tasks tr').length };
+  };
+
+  const within = at(80, 20);
+  assert.ok(within.headline.startsWith('Requires 82% on remaining assessments up to Week 20 to achieve 80% overall.'), `within reach names the week: ${within.headline}`);
+  assert.strictEqual(within.rows, 2, 'with the one task left in the range and its heading');
+  const beyond = at(95, 20);
+  assert.ok(beyond.headline.startsWith('Goal unattainable. Maximum achievable mark: 89%.') && beyond.headline.includes('Impossible'), `out of reach never says Requires beside Impossible: ${beyond.headline}`);
+  const secured = at(30, 20);
+  assert.ok(secured.headline.startsWith('Target secured with remaining assessments up to Week 20 at 0%.'), `already secured says so: ${secured.headline}`);
+  const finished = at(70, 6);
+  assert.ok(finished.headline.startsWith('All weighted tasks completed. Final mark: 78%.'), `all marked says so: ${finished.headline}`);
+  assert.strictEqual(finished.rows, 0, 'with no sliders left');
+  const none = at(80, 3);
+  assert.strictEqual(none.headline, 'No assessments up to Week 3.', 'an empty range says so, never the semester\'s plan');
+  assert.strictEqual(none.rows, 0, 'nor its sliders');
+  semesterHasTable = false;
+  const later = at(70, 40);
+  assert.ok(later.headline.startsWith('Requires') && later.headline.includes('up to Week 40'), `a finished semester still plans a later end week: ${later.headline}`);
+  assert.strictEqual(later.rows, 3, 'with sliders for both tasks in range');
+  location.href = savedHref;
+  localStorage.clear();
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
