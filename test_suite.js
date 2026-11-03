@@ -11114,7 +11114,7 @@ runTest('Test 241: Export CSV for Notion: BOM, columns, quoting, dates, weights 
 // A Year Progression panel with the Task Dates and Export modules mounted on it (Tests 242, 311)
 function withTaskDatesPanel(subjects, body) {
   const { terms } = loadExportModules();
-  const names = ['ConnectifyProgress', 'ConnectifyData', 'ConnectifyExportView', 'ConnectifyProgressChart', 'ConnectifyTaskDates', 'ConnectifyTaskDatesFilter', 'ConnectifyTaskDatesCells', 'ConnectifyTaskDatesView', 'ConnectifyProgressTabs', 'ConnectifyProgressWeekEditor', 'ConnectifyEarlyEaster'];
+  const names = ['ConnectifyProgress', 'ConnectifyData', 'ConnectifyExportView', 'ConnectifyProgressChart', 'ConnectifyTaskDates', 'ConnectifyTaskDatesFilter', 'ConnectifyTaskDatesCells', 'ConnectifyTaskDatesView', 'ConnectifyNextUp', 'ConnectifyNextUpView', 'ConnectifyProgressTabs', 'ConnectifyProgressWeekEditor', 'ConnectifyEarlyEaster'];
   const saved = Object.fromEntries(names.map(n => [n, window[n]]));
   const evalSrc = f => eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8'));
   const panel = new MockElement('section');
@@ -11130,7 +11130,7 @@ function withTaskDatesPanel(subjects, body) {
   window.ConnectifyData = { collectClasses: () => subjects };
   for (const n of names.slice(2)) delete window[n];
   try {
-    for (const f of ['progress/progress-chart.js', 'progress/progress-week-editor.js', 'progress/progress-early-easter.js', 'progress/task-dates.js', 'progress/task-dates-cells.js', 'progress/task-dates-filter.js', 'progress/task-dates-view.js', 'progress/export-view.js', 'progress/progress-tabs.js']) evalSrc(f);
+    for (const f of ['progress/progress-chart.js', 'progress/progress-week-editor.js', 'progress/progress-early-easter.js', 'progress/task-dates.js', 'progress/task-dates-cells.js', 'progress/task-dates-filter.js', 'progress/task-dates-view.js', 'progress/export-view.js', 'progress/next-up.js', 'progress/next-up-view.js', 'progress/progress-tabs.js']) evalSrc(f);
     const find = (root, pred) => { const out = []; (function walk(n) { for (const c of n.children || []) { if (pred(c)) out.push(c); walk(c); } })(root); return out; };
     body({ terms, panel, head, chips, chart, find, refreshes: () => refreshes });
   } finally {
@@ -13968,7 +13968,7 @@ runTest('Test 304: A compact statistics panel gives way to the Type dropdown and
   assert.ok(/\.connectea-row-wrapper > \.connectea-panel\.connectea-panel--expanded \{\s*flex: 0 0 auto !important;/.test(fit), 'expanded cards keep their one row: they scale, never reflow');
 });
 
-runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the list has modular Group By, its direction and Sort By', () => {
+runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates tabs; the list has modular Group By, its direction and Sort By', () => {
   const subjects = [
     { name: 'Physics ATAR', tasks: [
       { id: 'p1', name: 'Test 10', order: 30, pending: true, sequence: 0 },
@@ -14001,12 +14001,12 @@ runTest('Test 305: Year Progression has Progress Graph and Task Dates tabs; the 
       // Tabs: right under the header, on the Predictor's tab bar; graph first
       assert.strictEqual(panel.children[panel.children.indexOf(head) + 1], tabs.bar, 'the tabs sit under the header');
       assert.ok(tabs.bar.className.includes('cx-pred-main-tabs'), 'they reuse the Predictor tab bar');
-      assert.deepStrictEqual(tabs.bar.children.map(b => b.textContent), ['Progress Graph', 'Task Dates']);
+      assert.deepStrictEqual(tabs.bar.children.map(b => b.textContent), ['Progress Graph', 'Next Up', 'Task Dates']);
       assert.ok(!chips.hidden && !chart.hidden && dates.section.hidden, 'the panel opens on Progress Graph');
       const before = refreshes();
-      tabs.bar.children[1].dispatchEvent(new MockEvent('click'));
+      tabs.bar.children[2].dispatchEvent(new MockEvent('click'));
       assert.ok(chips.hidden && chart.hidden && !dates.section.hidden, 'Task Dates hides the chips and chart');
-      assert.strictEqual(tabs.bar.children[1].getAttribute('aria-selected'), 'true');
+      assert.strictEqual(tabs.bar.children[2].getAttribute('aria-selected'), 'true');
       tabs.bar.children[0].dispatchEvent(new MockEvent('click'));
       assert.ok(!chips.hidden && !chart.hidden && dates.section.hidden && refreshes() === before + 1, 'Progress Graph comes back current');
       tabs.select('dates');
@@ -14524,6 +14524,115 @@ runTest('Test 313: Classes rows\' icon buttons and tab headers inside cards are 
   assert.ok(header.includes('backdrop-filter: none !important') && header.includes('-webkit-backdrop-filter: none !important'), 'a tab header inside a card does not blur the card\'s own fill into a grey band');
   const ring = rule(read('theme-light-tone.css'), 'html.connectea-dark[data-connectea-tone="light"] .c-empty-content > .rounded-circle');
   assert.ok(ring.includes('border-color: #000000 !important'), 'the ring is black, in light tone only');
+});
+
+runTest('Test 314: Next Up lists this week and next week between Progress Graph and Task Dates, with each task\'s subject, type, weight, prediction and goal', () => {
+  const NOV_3 = new Date(2026, 10, 3);
+  // Term 4 2026 starts 12 Oct, so 3 Nov is Term 4 Week 4 (order 40)
+  const subjects = [
+    { name: '12 Physics ATAR', tasks: [
+      { id: 'p1', name: 'Waves Test', order: 40, pending: true, weight: 20, sequence: 0 },
+      { id: 'p2', name: 'Lab', order: 40, score: 85.5, pending: false, weight: 10, sequence: 1 },
+      { id: 'p3', name: 'Far Off', order: 45, pending: true, weight: 10, sequence: 2 },
+      { id: 'p4', name: 'Earlier', order: 38, pending: true, weight: 10, sequence: 3 }
+    ] },
+    { name: '12 Chemistry ATAR', tasks: [
+      { id: 'c1', name: 'Redox Exam', order: 41, pending: true, weight: 30, sequence: 0 },
+      { id: 'c2', name: 'Component', order: 41, pending: true, weight: 0, sequence: 1 },
+      { id: 'c3', name: 'Undated', order: null, pending: true, weight: 5, sequence: 2 }
+    ] }
+  ];
+  const saved = { types: window.ConnectifyTaskTypes, pred: window.ConnectifyPredictorMath, forecast: window.ConnectifyCohortForecast, goals: window.ConnectifyGoalForecast, store: window.ConnectifyGoalStore, modal: window.ConnectifyGoalModal };
+  window.ConnectifyTaskTypes = {
+    getEffectiveType: (subject, task) => (/exam/i.test(task.name) ? 'Exam' : 'Test'),
+    labelsKeyOf: task => task.labelsKey || '',
+    updateTypeSelect: () => {},
+    bindTypeSelect: () => {}
+  };
+  const predictions = { p1: { low: 62.4, mid: 70.2, high: 78.6, breakoutScore: 86.5 }, c1: { low: 55, mid: 60, high: 65 }, c2: { unpredicted: true } };
+  window.ConnectifyPredictorMath = { getOrComputeTaskPrediction: (subject, task) => predictions[task.id] || null };
+  window.ConnectifyCohortForecast = { isPredicted: p => Boolean(p) && !p.unpredicted && [p.low, p.mid, p.high].every(Number.isFinite) };
+  window.ConnectifyGoalStore = { all: () => [] };
+  try {
+    withTaskDatesPanel(subjects, ({ terms: T, find }) => {
+      const model = window.ConnectifyNextUp;
+      const tabs = window.ConnectifyProgressTabs;
+      const view = window.ConnectifyNextUpView;
+      const year = 2026;
+      T.setEarlyEaster(year, true);
+      model.now = () => NOV_3;
+
+      // Weeks by the calendar
+      const on = (m, d) => model.weeks(new Date(year, m, d)).map(w => `${w.label}|${w.detail}`);
+      assert.deepStrictEqual(on(10, 3), ['This Week|Term 4 Wk 4 2 Nov – 6 Nov', 'Next Week|Term 4 Wk 5 9 Nov – 13 Nov'], 'this week and next week, each named by its term week and days');
+      assert.deepStrictEqual(on(10, 8), on(10, 3), 'Sunday still belongs to the week it ends');
+      assert.deepStrictEqual(on(8, 22), ['This Week|Term 3 Wk 10 21 Sep – 25 Sep', 'Term 4 Wk 1|12 Oct – 16 Oct'], 'the last week of term is followed by the first week back');
+      assert.deepStrictEqual(on(6, 8), ['Term 3 Wk 1|20 Jul – 24 Jul', 'Term 3 Wk 2|27 Jul – 31 Jul'], 'in the holidays: the first two school weeks');
+      assert.deepStrictEqual(on(11, 23), [], 'nothing after Term 4');
+      assert.strictEqual(model.weeks(new Date(2024, 0, 31))[0].detail.split(' ').pop(), '31 Jan – 2 Feb'.replace('31 Jan', T.formatDate(T.dateFor(2024, 1, 1, 1, T.earlyEaster(2024)))).replace('2 Feb', T.formatDate(T.dateFor(2024, 1, 1, 5, T.earlyEaster(2024)))), 'a Wednesday-start Week 1 starts on its first school day');
+
+      // Only these weeks' tasks, sorted within each; a week past its term's end reads as the next term's
+      const plan = model.build(subjects, NOV_3);
+      assert.deepStrictEqual(plan.weeks.map(w => w.rows.map(r => r.name)), [['Waves Test', 'Lab'], ['Redox Exam', 'Component']]);
+      assert.strictEqual(plan.undated, 1, 'an unmarked task with no week is counted, never placed');
+
+      // The tab sits between the other two and fills only while shown
+      assert.deepStrictEqual(tabs.bar.children.map(b => b.textContent), ['Progress Graph', 'Next Up', 'Task Dates']);
+      assert.strictEqual(view.list.children.length, 0, 'nothing is built while hidden');
+      tabs.bar.children[1].dispatchEvent(new MockEvent('click'));
+      assert.ok(!view.section.hidden && window.ConnectifyTaskDatesView.section.hidden, 'Next Up shows alone');
+
+      const trs = () => find(view.list, n => n.tagName === 'TR');
+      assert.deepStrictEqual(trs()[0].children.map(n => n.textContent), ['Assessment', 'Subject', 'Type', 'Weight', 'Prediction'], 'no Goal column without a goal');
+      assert.deepStrictEqual(trs().map(tr => tr.className), ['cx-dates-head', 'cx-dates-group', 'cx-dates-row', 'cx-dates-row cx-dates-row--done', 'cx-dates-group', 'cx-dates-row', 'cx-dates-row'], 'one table, one heading per week');
+      assert.strictEqual(trs()[1].children[0].children[0].textContent, 'This Week');
+      const first = trs()[2].children;
+      assert.deepStrictEqual([first[0].textContent, first[1].textContent, first[3].textContent], ['Waves Test', 'Physics', '20%'], 'the cleaned subject and the weight');
+      const parts = find(first[4], n => n.className?.includes('connectea-forecast-value')).map(n => [n.tagName.toUpperCase(), n.textContent]);
+      assert.deepStrictEqual(parts, [['SPAN', 'Low 62%'], ['STRONG', 'Mid 70%'], ['SPAN', 'High 79%']], 'Low, Mid and High, Mid heaviest, the breakout never shown');
+      assert.ok(!JSON.stringify(plan).includes('86.5'), 'the secret breakout never leaves the prediction');
+      assert.strictEqual(trs()[3].children[4].textContent, 'Grade 85.5%', 'a marked task shows its grade');
+      const component = trs()[6].children;
+      assert.deepStrictEqual([component[3].textContent, component[4].textContent], ['—', '—'], 'unweighted and unpredicted cells are dashes');
+      const note = find(view.noteSlot, n => n.className === 'cx-next-note')[0];
+      assert.strictEqual(note.textContent.startsWith('1 unmarked task has no week.'), true);
+      find(note, n => n.tagName === 'BUTTON')[0].dispatchEvent(new MockEvent('click'));
+      assert.strictEqual(tabs.active(), 'dates', 'the note opens Task Dates, where a week is set');
+
+      // A goal adds its target and tier; rows it does not cover get a dash
+      const asked = [];
+      window.ConnectifyGoalStore = { all: () => [{ id: 'g' }] };
+      window.ConnectifyGoalForecast = { targetForTask: (subject, task, prediction, goals) => {
+        asked.push([subject, task.id, prediction?.mid, goals.length]);
+        return task.id === 'p1' ? { required: 86.4, tier: 'hard' } : task.id === 'p2' ? { required: 80, tier: 'trivial' } : null;
+      } };
+      window.ConnectifyGoalModal = { tierLabel: tier => Object.assign(new MockElement('span', 'cx-goal-tier'), { textContent: tier }) };
+      tabs.select('next');
+      assert.deepStrictEqual(trs()[0].children.map(n => n.textContent).pop(), 'Goal');
+      assert.deepStrictEqual(asked[0], ['12 Physics ATAR', 'p1', 70.2, 1], 'the goal is asked about the task with its prediction');
+      assert.deepStrictEqual(find(trs()[2].children[5], () => true).map(n => n.textContent), ['86%', 'hard']);
+      assert.deepStrictEqual(find(trs()[3].children[5], () => true).map(n => n.textContent), ['80%'], 'a marked task shows what it needed, with no difficulty');
+      assert.strictEqual(trs()[5].children[5].textContent, '—');
+      T.setEarlyEaster(year, T.autoEarlyEaster(year));
+      localStorage.removeItem('connectify:school_terms');
+    });
+  } finally {
+    window.ConnectifyTaskTypes = saved.types;
+    window.ConnectifyPredictorMath = saved.pred;
+    window.ConnectifyCohortForecast = saved.forecast;
+    window.ConnectifyGoalForecast = saved.goals;
+    window.ConnectifyGoalStore = saved.store;
+    window.ConnectifyGoalModal = saved.modal;
+  }
+  const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(g => (g.js || []).includes('src/progress/next-up-view.js'));
+  const at = f => group.js.indexOf(`src/progress/${f}`);
+  assert.ok(at('task-dates-view.js') < at('next-up.js') && at('next-up.js') < at('next-up-view.js') && at('next-up-view.js') < at('progress-tabs.js'), 'registered after what it reuses, before the tabs');
+  assert.ok(group.matches.every(m => m.includes('assessment-outlines')) && group.css.includes('src/progress/next-up.css'), 'outlines page only, with its stylesheet');
+  const upcoming = read('cohort/cohort-upcoming.css');
+  assert.ok(upcoming.includes(':is(#cx-specificity-anchor, .connectea-upcoming, .connectea-xp-prediction, .cx-next-prediction) .connectea-forecast-value--mid'), 'Low, Mid and High take the outline panels\' colours');
+  assert.ok(!/[•·]/.test(read('progress/next-up-view.js') + read('progress/next-up.js')), 'no dot separators');
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -42,6 +42,15 @@
     return task ? Number(task.weight) || 0 : undefined;
   }
 
+  // What the goal asks of a point on the chart's terms, with the task's own tier
+  function targetOfPoint(goal, point, prediction) {
+    const required = goal.targetOf(point);
+    if (!Number.isFinite(required)) return null;
+    const D = window.ConnectifyGoalDifficulty;
+    const tier = goal.plan.impossible ? 'impossible' : goal.plan.guaranteed ? 'guaranteed' : D?.taskTier(required, prediction) || null;
+    return { required: Math.max(0, Math.min(100, required)), tier };
+  }
+
   /** `{ required, tier }` the goal asks of an unmarked task row, or null when no active goal covers it. */
   function targetFor(row, prediction) {
     if (!store() || !pass().goals.length) return null;
@@ -50,11 +59,15 @@
     const id = goal && taskIdOf(row);
     if (!id) return null;
     const weight = weightOf(subjectName, id);
-    const required = goal.targetOf({ id, pending: true, weight: weight ?? 1 });
-    if (!Number.isFinite(required) || weight === 0) return null;
-    const D = window.ConnectifyGoalDifficulty;
-    const tier = goal.plan.impossible ? 'impossible' : goal.plan.guaranteed ? 'guaranteed' : D?.taskTier(required, prediction) || null;
-    return { required: Math.max(0, Math.min(100, required)), tier };
+    if (weight === 0) return null;
+    return targetOfPoint(goal, { id, pending: true, weight: weight ?? 1 }, prediction);
+  }
+
+  /** The same for a cached task, marked (what it needed) or not; `goals`: the stored goals. */
+  function targetForTask(subjectName, task, prediction, goals) {
+    if (!goals?.length) return null;
+    const goal = window.ConnectifyProgressGoalLine?.goalFor(subjectName, goals);
+    return goal ? targetOfPoint(goal, task, prediction) : null;
   }
 
   /** Memo key of what the row shows (joins the row's cohort memo), so a changed target redraws it. */
@@ -100,5 +113,5 @@
     }
   }
 
-  window.ConnectifyGoalForecast = { targetFor, signature, render };
+  window.ConnectifyGoalForecast = { targetFor, targetForTask, signature, render };
 })();

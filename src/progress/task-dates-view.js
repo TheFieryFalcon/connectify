@@ -225,7 +225,7 @@
     // A saved type can add a class category, which changes the options of rows whose own type stayed put
     window.addEventListener('connectify-task-type-changed', () => render(true));
 
-    window.ConnectifyTaskDatesView = { section, toolbar, filterRow, list, optionsSlot, footerSlot, render };
+    window.ConnectifyTaskDatesView = { section, toolbar, filterRow, list, optionsSlot, footerSlot, render, hasUncachedClasses };
   } catch (err) {
     console.error('Connectify error in task-dates-view.js:', err);
   }

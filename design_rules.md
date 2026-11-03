@@ -79,11 +79,24 @@ Extremely concise summary of the core visual design language, contrast standards
     - under no progress bar or points of its own (the planner already shows them)
     - its task table and sliders live (a custom end week narrows that table)
 - **Year Progression Tabs**
-  - two subtabs on the Predictor's tab bar
+  - three subtabs on the Predictor's tab bar, in this order
     - **Progress Graph** (chips, `Show:`, chart, and a table of marks and weights, no dates or Early Easter)
+    - **Next Up** (this week's and next week's assessments)
     - **Task Dates** (term starts with Early Easter, every task's week, subject, type and grade, the week editor and Type dropdown, Export)
   - Reopening
     - The panel reopens on the tab it was left on
+- **Next Up** (`next-up-view.js`, `next-up.css`)
+  - Weeks
+    - this week and next week by the term calendar, each heading naming its term week and days
+    - a week with no school gives way to the next school week, named by term and week (the holidays show the first two weeks back)
+    - a task sits in the week Task Dates shows it in
+  - One table, drawn like the Task Dates list
+    - Assessment, Subject, Type (the same dropdown), Weight, Prediction, Goal
+    - Prediction is Low / Mid / High in the outline panels' colours, or `Grade 85.5%` once marked (finished tasks in muted ink)
+    - Goal is the mark the goal asks with the task's tier label, or what a marked task needed, no tier; no column when no goal covers these tasks
+    - A week with no tasks says `No assessments`
+  - A week is edited on Task Dates only
+    - one note under the table counts unmarked tasks with no week and opens Task Dates
 - **Tab Bars** (`.cx-pred-main-tabs` / `.cx-pred-main-tab`, `.cx-pred-subtab`; `sidebar-predictor.css`)
   - one set of rules for the Predictor, Goal Setter, Estimator and Year Progression
     - No tool keeps its own copy (Test 306)

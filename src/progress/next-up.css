@@ -1,0 +1,60 @@
+/* Connectify Year Progression's Next Up tab (next-up-view.js): the Task Dates list's look on the panel's one surface,
+   rows and headings on the panel's hairline, no boxes. Dark themes route colours through tokens. */
+#cx-next-up .cx-next-expand { margin-bottom: 12px; }
+#cx-next-up .cx-next-expand:empty { display: none; }
+#cx-next-up .cx-dates-table { table-layout: fixed; }
+#cx-next-up .cx-dates-table :is(th, td) { font-weight: 400; vertical-align: middle; }
+#cx-next-up .cx-next-col-name { width: auto; }
+#cx-next-up .cx-next-col-subject { width: 15%; }
+#cx-next-up .cx-next-col-type { width: 17%; }
+#cx-next-up .cx-next-col-weight { width: 7%; }
+#cx-next-up .cx-next-col-prediction { width: 25%; }
+#cx-next-up .cx-next-col-goal { width: 13%; }
+#cx-next-up .cx-dates-row td { box-sizing: border-box; height: 35px; }
+#cx-next-up .cx-dates-head th { padding-top: 0; color: #4a5d70; font-size: 12px; font-weight: 600; }
+#cx-next-up .cx-dates-table .cx-dates-group th { padding-top: 16px; color: #253b53; font-weight: 700; }
+#cx-next-up .cx-dates-table .cx-dates-group .cx-next-week-detail { margin-left: 12px; color: #4a5d70; font-size: 12px; font-weight: 400; }
+#cx-next-up .cx-dates-row:hover td { background: color-mix(in srgb, currentColor 5%, transparent); }
+#cx-next-up .cx-dates-row:hover td:first-child { box-shadow: -8px 0 0 color-mix(in srgb, currentColor 5%, transparent); }
+#cx-next-up .cx-dates-row:hover td:last-child { box-shadow: 8px 0 0 color-mix(in srgb, currentColor 5%, transparent); }
+#cx-next-up .cx-dates-row--done td,
+#cx-next-up .cx-dates-subject-cell,
+#cx-next-up .cx-next-none td,
+#cx-next-up .cx-next-note,
+#cx-next-up .cx-next-empty { color: #4a5d70; }
+#cx-next-up :is(.cx-next-weight, .cx-next-prediction, .cx-next-goal) { font-variant-numeric: tabular-nums; }
+/* Low / Mid / High take the outline panels' colours and weights (cohort-upcoming.css) */
+#cx-next-up .cx-next-prediction { white-space: nowrap; }
+#cx-next-up .cx-next-goal-value { margin-right: 6px; font-weight: 700; }
+#cx-next-up .cx-dates-row--done .cx-next-goal-value { font-weight: 400; }
+#cx-next-up .cx-dates-select {
+  max-width: min(160px, 100%);
+  padding: 1px 4px;
+  border: 1px solid var(--cx-progress-line, #d5dfe9) !important;
+  border-radius: 6px;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  color: #253b53;
+  field-sizing: content;
+  font: inherit;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  cursor: pointer;
+}
+#cx-next-up .cx-dates-select:hover { border-color: #94adc3 !important; }
+#cx-next-up .cx-next-note { display: flex; align-items: center; gap: 12px; margin: 16px 0 0; font-weight: 400; }
+#cx-next-up .cx-next-empty { margin: 0; padding: 4px 8px; font-weight: 400; }
+
+.connectea-dark #cx-next-up .cx-dates-head th,
+.connectea-dark #cx-next-up .cx-dates-row--done td,
+.connectea-dark #cx-next-up .cx-dates-subject-cell,
+.connectea-dark #cx-next-up .cx-next-none td,
+.connectea-dark #cx-next-up .cx-next-note,
+.connectea-dark #cx-next-up .cx-next-empty,
+.connectea-dark #cx-next-up .cx-dates-table .cx-dates-group .cx-next-week-detail { color: var(--cx-text-secondary, #dce2e8); }
+.connectea-dark #cx-next-up .cx-dates-table .cx-dates-group th { color: var(--cx-text-primary, #ffffff); }
+.connectea-dark #cx-next-up .cx-dates-select { color: var(--cx-text-primary, #ffffff) !important; }
+.connectea-dark #cx-next-up .cx-dates-select:hover { border-color: var(--cx-border-strong, #556c84) !important; }
+.connectea-dark #cx-next-up .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
