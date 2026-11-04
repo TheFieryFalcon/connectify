@@ -11,6 +11,7 @@
  * 6. Enforces WCAG contrast standards (>= 4.5:1 body, >= 3.0:1 large, no critical < 2.0:1).
  * 7. Flags unadapted light background bleed in dark themes and native purple ink bars.
  * 8. Accepts multiple URLs sequentially via --urls-file, --urls, --paste, or crawled_urls.txt.
+ * 9. On Liquid Glass themes, flags layers too transparent, too opaque, without blur or too blurry (audit-glass.js).
  */
 
 'use strict';
@@ -21,7 +22,9 @@ const readline = require('readline');
 const crypto = require('crypto');
 const utils = require('./puppeteer-utils');
 const { launchAuthenticated } = require('./puppeteer-auth');
+const { GLASS_THEMES, auditGlass, auditFloatingGlass } = require('./audit-glass');
 
+const GLASS_ISSUE_TYPES = ['GLASS_TOO_TRANSPARENT', 'GLASS_TOO_OPAQUE', 'GLASS_WITHOUT_BLUR', 'GLASS_BLUR_TOO_WEAK', 'GLASS_TOO_BLURRY', 'NESTED_BACKDROP_BLUR'];
 const DEFAULT_PAGE = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
 
 function parseArgs() {
@@ -920,6 +923,22 @@ async function discoverSidebarViews(page, options = {}) {
                   isInitial: false
                 });
               });
+              // A plan on this tab can be set as a goal: End and Confirm join the same planner (nothing is saved). Last
+              // on its tab, since it stays open until cancelled; a theme pass keeps it, as reopening the tool redraws it
+              if (Array.from(sidebar.querySelectorAll('.cx-goal-set:not([disabled])')).some(b => b.getClientRects().length > 0)) {
+                views.push({
+                  id: `cx-sidebar-${cfg.id}-${mode}-compose`,
+                  title: `Sidebar: ${toolName} [${modeName} - Set as Goal]`,
+                  auditScope: 'sidebar',
+                  toolId: cfg.id,
+                  toolName,
+                  tabSelector,
+                  tabName: modeName,
+                  steps: [{ click: '.cx-goal-set:not([disabled])' }],
+                  keepOpen: true,
+                  isInitial: false
+                });
+              }
             } else {
               views.push({
                 id: `cx-sidebar-${cfg.id}-${mode}`,
@@ -932,6 +951,19 @@ async function discoverSidebarViews(page, options = {}) {
                 isInitial: false
               });
             }
+          }
+          // Goals (n), in the panel heading: enabled once a goal is saved; its dialog sits outside the drawer
+          const goalsBtn = sidebar.querySelector('#cx-goals-open');
+          if (goalsBtn && !goalsBtn.hidden && !goalsBtn.disabled) {
+            views.push({
+              id: `cx-sidebar-${cfg.id}-goals`,
+              title: `Sidebar: ${toolName} [Goals dialog]`,
+              auditScope: 'sidebar',
+              toolId: cfg.id,
+              toolName,
+              steps: [{ click: '#cx-goals-open' }],
+              isInitial: false
+            });
           }
         } else if (cfg.type === 'predictor') {
           const gradeBtn = sidebar.querySelector('#cx-pred-btn-grade');
@@ -997,31 +1029,58 @@ async function discoverSidebarViews(page, options = {}) {
             });
           }
         } else if (cfg.type === 'progress') {
-          const subButtons = Array.from(sidebar.querySelectorAll('.cx-subjects button'));
-          if (subButtons.length > 0) {
-            subButtons.forEach((subBtn, subIdx) => {
-              const subText = (subBtn.innerText || subBtn.textContent || `Subject ${subIdx + 1}`).trim();
-              views.push({
-                id: `cx-sidebar-prog-sub${subIdx}`,
-                title: `Sidebar: ${toolName} [${subText}]`,
-                auditScope: 'sidebar',
-                toolId: cfg.id,
-                toolName,
-                subTabSelector: `.cx-subjects button:nth-child(${subIdx + 1})`,
-                subTabIndex: subIdx,
-                subTabName: subText,
-                isInitial: false
+          // Each subtab on the panel's tab bar, read from the page so a new one is audited without a change here
+          const tabs = Array.from(sidebar.querySelectorAll('#cx-progress-tabs .cx-progress-tab'));
+          const tabViews = tabs.length ? tabs : [null];
+          tabViews.forEach((tab, tabIdx) => {
+            const tabName = tab ? (tab.innerText || tab.textContent || `Tab ${tabIdx + 1}`).trim() : '';
+            const tabSelector = tab ? `#cx-progress-tabs .cx-progress-tab:nth-child(${tabIdx + 1})` : undefined;
+            const base = { auditScope: 'sidebar', toolId: cfg.id, toolName, tabSelector, tabName: tabName || undefined, isInitial: false };
+            const slug = `cx-sidebar-prog-tab${tabIdx}`;
+            const label = tabName ? `${tabName}` : '';
+            if (tab && typeof tab.click === 'function') {
+              try { tab.click(); } catch {}
+            }
+            const subButtons = Array.from(sidebar.querySelectorAll('.cx-subjects button')).filter(b => !b.closest?.('[hidden]'));
+            if (subButtons.length > 0) {
+              // Progress Graph: one view per subject chip
+              subButtons.forEach((subBtn, subIdx) => {
+                const subText = (subBtn.innerText || subBtn.textContent || `Subject ${subIdx + 1}`).trim();
+                views.push({
+                  ...base,
+                  id: `${slug}-sub${subIdx}`,
+                  title: `Sidebar: ${toolName} [${label ? `${label} - ` : ''}${subText}]`,
+                  subTabSelector: `.cx-subjects button:nth-child(${subIdx + 1})`,
+                  subTabIndex: subIdx,
+                  subTabName: subText
+                });
               });
+              return;
+            }
+            const dates = sidebar.querySelector('#cx-task-dates');
+            if (!dates || dates.hidden) {
+              views.push({ ...base, id: tab ? slug : `cx-sidebar-${cfg.id}`, title: `Sidebar: ${toolName}${label ? ` [${label}]` : ''}` });
+              return;
+            }
+            // Task Dates: the list and each state of it that draws something else. Each starts from the plain list,
+            // since the panel keeps Export and Group By on through reopening
+            const groupSelect = '#cx-task-dates .cx-dates-controls .cx-dates-control:first-child select';
+            const plain = [{ press: '#cx-export-toggle', attr: 'aria-pressed', value: 'false' }, { select: groupSelect, value: 'none' }];
+            const state = (key, name, steps) => views.push({ ...base, id: `${slug}-${key}`, title: `Sidebar: ${toolName} [${label}${name ? ` - ${name}` : ''}]`, steps: [...plain, ...steps] });
+            state('list', '', []);
+            state('subject', 'Grouped by Subject', [{ select: groupSelect, value: 'subject' }]);
+            state('predicted', 'Grouped by Predicted Grade', [{ select: groupSelect, value: 'predicted' }]);
+            Array.from(dates.querySelectorAll('.cx-dates-filter-btn')).forEach((btn, i) => {
+              const name = (btn.getAttribute('aria-label') || `List ${i + 1}`).replace(/ shown$/, '');
+              // Closes when the panel scrolls, so it is opened again after each scroll (reopenAfterScroll)
+              views.push({ ...base, id: `${slug}-filter${i}`, title: `Sidebar: ${toolName} [${label} - ${name} list]`, reopenAfterScroll: true,
+                steps: [...plain, { press: `#cx-task-dates .cx-dates-filter:nth-child(${i + 1}) .cx-dates-filter-btn`, attr: 'aria-expanded', value: 'true' }] });
             });
-          } else {
-            views.push({
-              id: `cx-sidebar-${cfg.id}`,
-              title: `Sidebar: ${toolName}`,
-              auditScope: 'sidebar',
-              toolId: cfg.id,
-              toolName,
-              isInitial: false
-            });
+            state('export', 'Export', [{ press: '#cx-export-toggle', attr: 'aria-pressed', value: 'true' }]);
+          });
+          // Discovery leaves the panel on its first tab, where the audit's first view starts
+          if (tabs[0] && typeof tabs[0].click === 'function') {
+            try { tabs[0].click(); } catch {}
           }
         } else if (cfg.type === 'weakness') {
           const modeSelect = sidebar.querySelector('#cx-radar-mode');
@@ -1173,12 +1232,37 @@ async function activateSidebarView(page, currentView, delay = 1250) {
     }, currentView).catch(() => false);
 
     if (activated) {
+      await applyViewSteps(page, currentView);
       await new Promise(r => setTimeout(r, Math.min(delay, 500)));
       return true;
     }
     return false;
   } catch {
     return false;
+  }
+}
+
+/**
+ * The state a view needs inside its tab, one step per frame as each may redraw what the next reads. Every step is
+ * idempotent, so it runs again on each theme pass: `click` once, `select` a value, `press` a toggle to a state.
+ */
+async function applyViewSteps(page, view) {
+  for (const step of view.steps || []) {
+    await page.evaluate((s) => {
+      if (s.select) {
+        const sel = document.querySelector(s.select);
+        if (sel && sel.value !== s.value) {
+          sel.value = s.value;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        return;
+      }
+      const btn = document.querySelector(s.press || s.click);
+      if (!btn) return;
+      if (s.press && btn.getAttribute(s.attr) === s.value) return;
+      btn.click();
+    }, step).catch(() => {});
+    await new Promise(r => setTimeout(r, 60));
   }
 }
 
@@ -1322,6 +1406,10 @@ async function captureNativeBaseline(page, options = {}) {
             allElements.push(...Array.from(handleRoot.querySelectorAll('*')));
           }
         }
+        // A dialog the drawer opened (Goals) sits on <body>
+        if (typeof document.querySelectorAll === 'function') {
+          for (const dialog of document.querySelectorAll('.cx-goal-overlay')) allElements.push(dialog, ...Array.from(dialog.querySelectorAll('*')));
+        }
       } else {
         const bodyEls = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('body *')) : [];
         allElements = bodyEls.filter(el =>
@@ -1347,7 +1435,7 @@ async function captureNativeBaseline(page, options = {}) {
       
       if (isSidebarScope) {
         const inSidebar = el.id === 'connectify-sidebar' || el.id === 'connectify-sidebar-handle' ||
-                          Boolean(typeof el.closest === 'function' && el.closest('#connectify-sidebar, #connectify-sidebar-handle'));
+                          Boolean(typeof el.closest === 'function' && el.closest('#connectify-sidebar, #connectify-sidebar-handle, .cx-goal-overlay'));
         if (!inSidebar) continue;
         if (el.id === 'connectea-theme-toggle' || (typeof el.closest === 'function' && el.closest('#connectea-theme-toggle'))) continue;
       } else {
@@ -1656,6 +1744,10 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
             currentElements.push(...Array.from(handleRoot.querySelectorAll('*')));
           }
         }
+        // A dialog the drawer opened (Goals) sits on <body>
+        if (typeof document.querySelectorAll === 'function') {
+          for (const dialog of document.querySelectorAll('.cx-goal-overlay')) currentElements.push(dialog, ...Array.from(dialog.querySelectorAll('*')));
+        }
       } else {
         const bodyEls = typeof document.querySelectorAll === 'function' ? Array.from(document.querySelectorAll('body *')) : [];
         currentElements = bodyEls.filter(el =>
@@ -1770,7 +1862,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
       
       if (isSidebarScope) {
         const inSidebar = el.id === 'connectify-sidebar' || el.id === 'connectify-sidebar-handle' ||
-                          Boolean(typeof el.closest === 'function' && el.closest('#connectify-sidebar, #connectify-sidebar-handle'));
+                          Boolean(typeof el.closest === 'function' && el.closest('#connectify-sidebar, #connectify-sidebar-handle, .cx-goal-overlay'));
         if (!inSidebar) continue;
         if (el.id === 'connectea-theme-toggle' || (typeof el.closest === 'function' && el.closest('#connectea-theme-toggle'))) continue;
       } else {
@@ -2221,10 +2313,10 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           }
         }
 
-        // B2. Liquid Glass surface structure (design_rules.md, "One surface per block"): only the outermost painted
-        // element fills and blurs; a fill above a 12% tint inside another surface stacks into an opaque slab, a blur
-        // under a painted ancestor only sees that ancestor, a translucent outer surface needs its own blur, and
-        // full-width bars stay square. Controls, chips, avatars, active states, overlays and Connectify UI are exempt.
+        // B2. Surface structure (design_rules.md, "One surface per block"): only the outermost painted element fills;
+        // a fill above a 12% tint inside another surface stacks into an opaque slab, and full-width bars stay square.
+        // Controls, chips, avatars, active states, overlays and Connectify UI are exempt. Transparency and blur in
+        // Liquid Glass are audit-glass.js's, Connectify UI included.
         const isGlassTheme = ['liquid-glass', 'liquid-glass-clear'].includes(tid);
         if (isDark && rect.width >= 80 && rect.height >= 20 &&
             !['img', 'video', 'canvas', 'svg', 'button', 'input', 'select', 'textarea', 'a'].includes(tag) &&
@@ -2247,14 +2339,6 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
             if (inSurface && own.fill && own.bg.a > 0.12 && (isGlassTheme || differs)) {
               issues.push({ category: 'STYLE', type: 'NESTED_SURFACE_FILL', severity: 'HIGH', selector,
                 details: `Fill ${style.backgroundColor} inside the painted ${ancName}: inner blocks must be clear (or a tint <= 12%)` });
-            }
-            if (isGlassTheme && inSurface && own.blur) {
-              issues.push({ category: 'STYLE', type: 'NESTED_BACKDROP_BLUR', severity: 'HIGH', selector,
-                details: `backdrop-filter under the painted ${ancName}: only the outermost surface blurs` });
-            }
-            if (isGlassTheme && !inSurface && own.fill && own.bg.a < 0.95 && !own.blur) {
-              issues.push({ category: 'STYLE', type: 'GLASS_WITHOUT_BLUR', severity: 'HIGH', selector,
-                details: `Translucent surface ${style.backgroundColor} without backdrop-filter` });
             }
             const radius = parseFloat(style.borderTopLeftRadius) || 0;
             const parentWidth = el.parentElement?.getBoundingClientRect().width || window.innerWidth;
@@ -2425,8 +2509,10 @@ async function runThemeAudit(customOptions = {}) {
   // Headless by default; a visible window opens only while logging in (--headful keeps it visible)
   const needsAuth = targetUrls.some(u => u.includes('connect.det.wa.edu.au'));
   const headless = options.headless !== null ? options.headless : (options.headful ? false : null);
-  let browser;
-  if (needsAuth) {
+  let browser = options.browser || null;
+  if (browser) {
+    // Launched by the caller (a run against a stubbed Connect)
+  } else if (needsAuth) {
     try {
       const launched = await launchAuthenticated({
         headless,
@@ -2487,6 +2573,7 @@ async function runThemeAudit(customOptions = {}) {
         try { await d.dismiss(); } catch {}
       });
       await page.setViewport({ width: 1280, height: 900 });
+      if (options.preparePage) await options.preparePage(page);
 
       // Ensure session cookies are loaded into newly opened page
       if (fs.existsSync(options.session)) {
@@ -2621,7 +2708,8 @@ async function runThemeAudit(customOptions = {}) {
             await scrollEntirePage(page, { scope: currentView.auditScope, step: options.scrollStep, delayMs: options.scrollDelay, maxScrolls: options.maxScrolls });
           }
 
-          // C. Capture Connect Native Theme Baseline
+          // C. Capture Connect Native Theme Baseline (a list that closes on scroll is open again for it)
+          if (currentView.reopenAfterScroll) await applyViewSteps(page, currentView);
           console.log(`    └─ Capturing Connect Native Theme baseline for "${currentView.title}"...`);
           const baseline = await captureNativeBaseline(page, { auditScope: currentView.auditScope });
           console.log(`       └─ Baseline captured: ${baseline.visibleCount} visible elements.`);
@@ -2667,7 +2755,7 @@ async function runThemeAudit(customOptions = {}) {
 
             await new Promise(r => setTimeout(r, 300));
 
-            if (isSidebar) {
+            if (isSidebar && !currentView.keepOpen) {
               await activateSidebarView(page, currentView, 100);
             }
 
@@ -2676,18 +2764,28 @@ async function runThemeAudit(customOptions = {}) {
               await scrollEntirePage(page, { scope: currentView.auditScope, step: options.scrollStep, delayMs: options.scrollDelay, maxScrolls: options.maxScrolls });
             }
 
+            // A list that closes on scroll is open again for the measurements
+            if (currentView.reopenAfterScroll) await applyViewSteps(page, currentView);
+
             const auditResult = await auditThemeAgainstBaseline(page, t.id, t.isDark !== false, baseline, { ...options, auditScope: currentView.auditScope });
+            if (GLASS_THEMES.includes(t.id)) {
+              auditResult.issues.push(...await auditGlass(page, isSidebar ? 'sidebar' : 'page').catch(() => []));
+              // Layers that exist only while open, once per page
+              if (currentView.isInitial) auditResult.issues.push(...await auditFloatingGlass(page));
+            }
             viewThemeResults[t.id] = { theme: t, audit: auditResult };
 
             const issues = auditResult.issues;
             const parityDiffs = issues.filter(i => i.category === 'PARITY').length;
             const criticalContrast = issues.filter(i => i.type === 'CRITICAL_CONTRAST_VIOLATION').length;
             const styleIssues = issues.filter(i => i.category === 'STYLE' && i.type !== 'CRITICAL_CONTRAST_VIOLATION').length;
+            const glassIssues = issues.filter(i => GLASS_ISSUE_TYPES.includes(i.type)).length;
 
             console.log(
               `       - ${t.name.padEnd(16)} [${t.id}]: ` +
               `Visible: ${auditResult.visibleCount}/${auditResult.baselineVisibleCount} | ` +
-              `Parity: ${parityDiffs} | Crit: ${criticalContrast} | Style: ${styleIssues}`
+              `Parity: ${parityDiffs} | Crit: ${criticalContrast} | Style: ${styleIssues}` +
+              (GLASS_THEMES.includes(t.id) ? ` | Glass: ${glassIssues}` : '')
             );
 
             if (options.screenshots) {
@@ -2837,6 +2935,8 @@ async function runThemeAudit(customOptions = {}) {
     ? dataRows.map(d => `- ❌ **${d.type}** (${d.view}): ${d.details}`).join('\n') + '\n'
     : `All drawer tools list every subject with marked tasks. ✅\n`;
 
+  md += glassReport(allPageResults);
+
   const mdLines = md.split('\n');
   const finalMd = mdLines.length > 145 ? mdLines.slice(0, 140).join('\n') + '\n\n*Truncated to 150 lines.*' : md;
   fs.writeFileSync(options.outputMd, finalMd, 'utf8');
@@ -2845,6 +2945,32 @@ async function runThemeAudit(customOptions = {}) {
   await browser.close();
   console.log('[ThemeAudit] Theme testing complete.');
   return manifestData;
+}
+
+/** The Markdown report's Liquid Glass section: each kind of finding once, with how many views and themes show it. */
+function glassReport(allPageResults, maxRows = 30) {
+  const found = new Map();
+  for (const view of Object.values(allPageResults)) {
+    for (const [tid, item] of Object.entries(view.themes || {})) {
+      for (const issue of item.audit?.issues || []) {
+        if (!GLASS_ISSUE_TYPES.includes(issue.type)) continue;
+        const key = `${issue.type}:${issue.selector}:${issue.details}`;
+        if (!found.has(key)) found.set(key, { ...issue, views: new Set(), themes: new Set() });
+        found.get(key).views.add(view.viewTitle);
+        found.get(key).themes.add(tid);
+      }
+    }
+  }
+  let md = `\n## Liquid Glass Transparency & Blur\n\n`;
+  if (!found.size) return `${md}No layer too transparent, too opaque, without blur or too blurry. ✅\n`;
+  const rows = Array.from(found.values()).sort((a, b) => b.views.size - a.views.size);
+  const counts = GLASS_ISSUE_TYPES.map(type => [type, rows.filter(r => r.type === type).length]).filter(([, n]) => n);
+  md += counts.map(([type, n]) => `**${type}** ${n}`).join('&emsp;') + '\n\n';
+  for (const r of rows.slice(0, maxRows)) {
+    md += `- **${r.type}** \`${r.selector}\` (${Array.from(r.themes).join(', ')}; ${r.views.size} view(s)): ${r.details}\n`;
+  }
+  if (rows.length > maxRows) md += `- ... and ${rows.length - maxRows} more in the JSON report\n`;
+  return md;
 }
 
 /**
@@ -2932,7 +3058,9 @@ module.exports = {
   activateNavbarHeading,
   discoverSidebarViews,
   activateSidebarView,
+  applyViewSteps,
   auditToolSubjects,
+  glassReport,
   computeElementsSignature,
   scrollEntirePage
 };

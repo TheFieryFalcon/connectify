@@ -8395,9 +8395,12 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
 
 runTest('Test 180: The theme audit enforces one surface per block, square bars and blur on glass surfaces', () => {
   const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
-  for (const type of ['NESTED_SURFACE_FILL', 'NESTED_BACKDROP_BLUR', 'GLASS_WITHOUT_BLUR', 'ROUNDED_FULL_WIDTH_BAR']) {
+  for (const type of ['NESTED_SURFACE_FILL', 'ROUNDED_FULL_WIDTH_BAR']) {
     assert.ok(audit.includes(`type: '${type}'`), `the audit must report ${type}`);
   }
+  // Blur on glass surfaces is audit-glass.js's (Test 318)
+  const glassAudit = fs.readFileSync(path.join(BASE_DIR, 'scripts/audit-glass.js'), 'utf8');
+  for (const type of ['NESTED_BACKDROP_BLUR', 'GLASS_WITHOUT_BLUR']) assert.ok(glassAudit.includes(`report('${type}'`), `the audit must report ${type}`);
   assert.ok(audit.includes("own.bg.a > 0.12"), 'tints up to 12% are allowed inside a surface');
   assert.ok(audit.includes("const isGlassTheme = ['liquid-glass', 'liquid-glass-clear'].includes(tid);") && audit.includes('if (isDark && rect.width >= 80'), 'the surface checks run in every dark theme (blur and bar checks in Liquid Glass only)');
   assert.ok(audit.includes('(isGlassTheme || differs)'), 'solid themes flag a nested fill only when its colour differs from the surface (a visible box behind text)');
@@ -14919,6 +14922,121 @@ runTest('Test 317: Changing a goal\'s target or weighting keeps it the same goal
   assert.strictEqual(G.current({ ...atar }).id, atar.id);
   location.href = savedHref;
   localStorage.clear();
+});
+
+runTest('Test 318: The theme audit visits every Year Progression subtab and judges Liquid Glass transparency and blur by the theme\'s own tokens', () => {
+  const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
+  const { judgeGlass, GLASS_THEMES, ROLES, LIMITS } = require(path.join(BASE_DIR, 'scripts/audit-glass.js'));
+  const { glassReport, applyViewSteps, discoverSidebarViews } = require(path.join(BASE_DIR, 'scripts/test-theme-styles.js'));
+  assert.deepStrictEqual(GLASS_THEMES, ['liquid-glass', 'liquid-glass-clear']);
+  assert.ok(audit.includes("auditGlass(page, isSidebar ? 'sidebar' : 'page')") && audit.includes('if (GLASS_THEMES.includes(t.id))'), 'each view is judged on the Liquid Glass themes only');
+  assert.ok(audit.includes('auditFloatingGlass(page)'), 'layers that exist only while open are opened and judged');
+
+  // The judge: both presets' surface alphas, each kind of fault once
+  const clear = { surfaces: [0.3, 0.3, 0.28, 0.33, 0.31], blur: 12, overlayBlur: 12 };
+  const tinted = { surfaces: [0.72, 0.72, 0.68, 0.8, 0.75], blur: 12, overlayBlur: 12 };
+  const glass = (over = {}) => ({ selector: '.x', role: 'surface', alpha: 0.3, stack: 0.3, blur: 12, hasBlur: true, nestedIn: null, backdropRoot: null, topLayer: false, ...over });
+  const types = (tokens, ...layers) => judgeGlass({ tokens, layers }).map(i => i.type);
+  assert.deepStrictEqual(types(clear, glass()), [], 'a surface at the theme\'s alpha and blur passes');
+  assert.deepStrictEqual(types(tinted, glass({ alpha: 0.72, stack: 0.72 })), []);
+  assert.deepStrictEqual(types(tinted, glass()), ['GLASS_TOO_TRANSPARENT'], 'too transparent is the theme\'s own: 30% is right in Liquid Glass, too thin in Tinted');
+  assert.deepStrictEqual(types(clear, glass({ alpha: 0.72, stack: 0.72 })), ['GLASS_TOO_OPAQUE'], 'and 72% is right in Tinted, too thick in Liquid Glass');
+  assert.deepStrictEqual(types(clear, glass({ alpha: 0, stack: 0, hasBlur: false, blur: 0 })), ['GLASS_TOO_TRANSPARENT'], 'a tile or overlay must paint');
+  assert.deepStrictEqual(types(clear, glass({ role: 'generic', alpha: 0, stack: 0, hasBlur: false, blur: 0 })), [], 'anything else may be clear');
+  assert.deepStrictEqual(types(clear, glass({ role: 'generic', alpha: 0.02 })), ['GLASS_TOO_TRANSPARENT'], 'a blur with no fill shows as a band');
+  assert.deepStrictEqual(types(clear, glass({ alpha: 1, stack: 1, hasBlur: false, blur: 0 })), ['GLASS_TOO_OPAQUE'], 'a solid slab');
+  assert.deepStrictEqual(types({ ...clear, surfaces: [1] }, glass({ alpha: 1, stack: 1, hasBlur: false, blur: 0 })), [], 'a custom theme at 100% Transparency is judged by what it set');
+  assert.deepStrictEqual(types(clear, glass({ hasBlur: false, blur: 0 })), ['GLASS_WITHOUT_BLUR']);
+  assert.deepStrictEqual(types(clear, glass({ blur: 0 })), ['GLASS_WITHOUT_BLUR'], 'blur(0) is no blur');
+  assert.deepStrictEqual(types(clear, glass({ blur: 6 })), ['GLASS_BLUR_TOO_WEAK']);
+  assert.deepStrictEqual(types(clear, glass({ blur: 30 })), ['GLASS_TOO_BLURRY']);
+  assert.deepStrictEqual(types({ ...clear, blur: 30 }, glass({ blur: 30 })), [], 'a custom Blur Strength is judged by what it set');
+  assert.deepStrictEqual(types({ ...clear, blur: 4 }, glass({ role: 'overlay', blur: 4 })), ['GLASS_BLUR_TOO_WEAK'], 'layers over text keep the 12px floor token');
+  assert.deepStrictEqual(types({ ...clear, blur: 4 }, glass({ blur: 4 })), [], 'tiles keep the theme\'s own blur');
+  assert.deepStrictEqual(types(clear, { selector: 'p', role: 'content', contentBlur: 3 }), ['GLASS_TOO_BLURRY'], 'content never blurs');
+  assert.deepStrictEqual(types(clear, { selector: 'html::before', role: 'wallpaper', contentBlur: 2 }), [], 'the wallpaper layer blurs 2px');
+  assert.deepStrictEqual(types(clear, { selector: 'html::before', role: 'wallpaper', contentBlur: 8 }), ['GLASS_TOO_BLURRY']);
+  // Nested layers
+  assert.deepStrictEqual(types(clear, glass({ role: 'generic', nestedIn: '.tile', alpha: 0.07, stack: 0.35, hasBlur: false, blur: 0 })), [], 'a tint on a surface is fine');
+  assert.deepStrictEqual(types(clear, glass({ role: 'generic', nestedIn: '.tile', alpha: 0.33, stack: 0.53, hasBlur: false, blur: 0 })), ['GLASS_TOO_OPAQUE'], 'a second surface on a surface stacks');
+  assert.deepStrictEqual(types(tinted, glass({ role: 'generic', nestedIn: '.tile', alpha: 0.72, stack: 0.92, hasBlur: false, blur: 0 })), ['GLASS_TOO_OPAQUE'], 'in both presets');
+  assert.deepStrictEqual(types(clear, glass({ role: 'surface', nestedIn: '.drawer', alpha: 0, stack: 0.3, hasBlur: false, blur: 0 })), [], 'a tile inside a surface stays clear');
+  assert.deepStrictEqual(types(clear, glass({ role: 'generic', nestedIn: '.x', alpha: 0, backdropRoot: '.drawer' })), ['NESTED_BACKDROP_BLUR'], 'a blur under a backdrop root never reaches the page');
+  assert.deepStrictEqual(types(clear, glass({ role: 'overlay', backdropRoot: '.drawer', topLayer: true })), [], 'a popover in the top layer escapes it');
+  // Dialogs and backdrops
+  assert.deepStrictEqual(types(clear, glass({ role: 'solid', alpha: 1, hasBlur: false, blur: 0 })), [], 'solid dialogs are solid by design');
+  assert.deepStrictEqual(types(clear, glass({ role: 'solid', alpha: 0.5 })), ['GLASS_TOO_TRANSPARENT']);
+  assert.deepStrictEqual(types(clear, glass({ role: 'backdrop', alpha: 0.6 })), [], 'a backdrop dims and blurs');
+  assert.deepStrictEqual(types(clear, glass({ role: 'backdrop', alpha: 0.05 })), ['GLASS_TOO_TRANSPARENT']);
+  assert.deepStrictEqual(types(clear, glass({ role: 'backdrop', alpha: 0.95 })), ['GLASS_TOO_OPAQUE']);
+  assert.deepStrictEqual(types(clear, glass({ role: 'backdrop', alpha: 0.6, blur: 8 })), ['GLASS_BLUR_TOO_WEAK']);
+  assert.deepStrictEqual(judgeGlass({ tokens: clear, layers: [glass({ blur: 30 }), glass({ blur: 30 })] }).length, 1, 'each finding once');
+  assert.strictEqual(LIMITS.tint, 0.12, 'the one-surface rule\'s tint');
+  // The floor's layers, as the stylesheet lists them
+  const floor = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-overlay-blur.css'), 'utf8');
+  for (const sel of ['#connectify-sidebar', '#connectea-theme-menu', '#connectea-outcome-tooltip', '#cx-jump-subject-list', '.cvr-c-primary-navigation', '.cvr-c-location-bar', '.v-popupview-popup', '.modal-content', '.ui-dialog']) {
+    assert.ok(floor.includes(sel) && ROLES.overlay.includes(sel), `${sel} is judged against the overlay floor`);
+  }
+
+  // The report names each finding once
+  const view = (title, type) => ({ viewTitle: title, themes: { 'liquid-glass': { audit: { issues: [{ type, selector: '.x', details: 'd' }, { type: 'SIZE_MISMATCH', selector: '.y', details: 'e' }] } } } });
+  const report = glassReport({ a: view('A', 'GLASS_TOO_OPAQUE'), b: view('B', 'GLASS_TOO_OPAQUE') });
+  assert.ok(report.includes('**GLASS_TOO_OPAQUE** `.x` (liquid-glass; 2 view(s)): d') && !report.includes('SIZE_MISMATCH'), 'one line per finding, glass findings only');
+  assert.ok(glassReport({}).includes('No layer too transparent'));
+  assert.ok(audit.includes('md += glassReport(allPageResults);'), 'the Markdown report carries it');
+
+  // Discovery reads the subtabs from the page: Next Up, Task Dates and each of Task Dates' states
+  const tabsSource = fs.readFileSync(path.join(BASE_DIR, 'src/progress/progress-tabs.js'), 'utf8');
+  const labels = Array.from(tabsSource.matchAll(/label: '([^']+)'/g)).map(m => m[1]);
+  assert.deepStrictEqual(labels, ['Progress Graph', 'Next Up', 'Task Dates']);
+  const panes = { 'Progress Graph': 'graph', 'Next Up': 'next', 'Task Dates': 'dates' };
+  let active = 'graph';
+  const tabButtons = labels.map(label => ({ textContent: label, click: () => { active = panes[label]; } }));
+  const filterButtons = ['Subjects shown', 'Type shown'].map(name => ({ getAttribute: () => name }));
+  const taskDates = { get hidden() { return active !== 'dates'; }, querySelectorAll: sel => (sel === '.cx-dates-filter-btn' ? filterButtons : []) };
+  const toggle = { id: 'connectify-progress-toggle', textContent: 'Year Progression', click: () => {} };
+  const fixture = {
+    hidden: false, classList: { remove: () => {} },
+    querySelector: sel => (sel === '#cx-task-dates' ? taskDates : null),
+    querySelectorAll: sel => {
+      if (sel === '.cx-tool-menu button') return [toggle];
+      if (sel === '#cx-progress-tabs .cx-progress-tab') return tabButtons;
+      if (sel === '.cx-subjects button' && active === 'graph') return [{ textContent: 'Physics' }, { textContent: 'ATAR Progression' }];
+      return [];
+    }
+  };
+  const savedDocument = global.document;
+  const page = { evaluate: async (fn, arg) => {
+    global.document = Object.assign(Object.create(savedDocument), { getElementById: id => (id === 'connectify-sidebar' ? fixture : id === toggle.id ? toggle : null) });
+    try { return fn(arg); } finally { global.document = savedDocument; }
+  } };
+  return discoverSidebarViews(page).then(async views => {
+    const progress = views.filter(v => v.toolId === toggle.id);
+    const titles = progress.map(v => v.title.replace('Sidebar: Year Progression ', ''));
+    assert.deepStrictEqual(titles, ['[Progress Graph - Physics]', '[Progress Graph - ATAR Progression]', '[Next Up]', '[Task Dates]', '[Task Dates - Grouped by Subject]',
+      '[Task Dates - Grouped by Predicted Grade]', '[Task Dates - Subjects list]', '[Task Dates - Type list]', '[Task Dates - Export]']);
+    assert.ok(progress.every(v => /^#cx-progress-tabs \.cx-progress-tab:nth-child\([123]\)$/.test(v.tabSelector)), 'each view opens its own tab');
+    assert.strictEqual(active, 'graph', 'discovery leaves the panel on its first tab');
+    assert.ok(progress.filter(v => v.title.includes('list]')).every(v => v.reopenAfterScroll), 'the lists close on scroll, so they open again');
+    const exportView = progress.find(v => v.title.includes('Export'));
+    assert.deepStrictEqual(exportView.steps.at(-1), { press: '#cx-export-toggle', attr: 'aria-pressed', value: 'true' });
+    const list = progress.find(v => v.title.endsWith('[Task Dates]'));
+    assert.deepStrictEqual(list.steps[0], { press: '#cx-export-toggle', attr: 'aria-pressed', value: 'false' }, 'the plain list turns Export off, which the panel keeps on');
+
+    // Steps are idempotent: a toggle already in its state is left alone
+    let presses = 0;
+    const btn = { getAttribute: () => 'true', click: () => { presses++; } };
+    const select = { value: 'none', dispatchEvent: () => { presses++; } };
+    const stepPage = { evaluate: async (fn, arg) => {
+      global.document = Object.assign(Object.create(savedDocument), { querySelector: sel => (sel === 's' ? select : btn) });
+      try { return fn(arg); } finally { global.document = savedDocument; }
+    } };
+    await applyViewSteps(stepPage, { steps: [{ press: 'b', attr: 'aria-pressed', value: 'true' }, { select: 's', value: 'none' }] });
+    assert.strictEqual(presses, 0, 'nothing changes twice');
+    await applyViewSteps(stepPage, { steps: [{ press: 'b', attr: 'aria-pressed', value: 'false' }, { select: 's', value: 'subject' }] });
+    assert.strictEqual(presses, 2);
+    assert.strictEqual(select.value, 'subject');
+  });
 });
 
 Promise.all(pendingTestPromises).then(() => {
