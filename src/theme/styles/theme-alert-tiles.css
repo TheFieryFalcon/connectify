@@ -35,3 +35,30 @@ html.connectea-dark[data-connectea-tone="light"] .eds-c-tile--important :where(.
   color: #9d000b !important;
   -webkit-text-fill-color: #9d000b !important;
 }
+
+/* Connect's red status text (Submissions' Overdue) is an icon and caption with no box or padding: it stays that, in a
+   red that reads on the theme (>= 5:1, on Quantum Dark's warm surface too), never the button ink .text-primary gets.
+   On light glass it goes to OKLCH 0.30, as it sits on the translucent tile. Id-weighted past those rules */
+.connectea-dark:not(#cx-n) span.connect-red.text-primary {
+  background-color: transparent !important;
+}
+
+.connectea-dark:not(#cx-n) span.connect-red.text-primary,
+.connectea-dark:not(#cx-n) span.connect-red.text-primary .mat-caption,
+.connectea-dark:not(#cx-n) span.connect-red.text-primary cnt-icon,
+.connectea-dark:not(#cx-n) span.connect-red.text-primary svg,
+.connectea-dark:not(#cx-n) span.connect-red.text-primary svg * {
+  color: #fb8585 !important;
+  fill: #fb8585 !important;
+}
+
+html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary,
+html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary .mat-caption,
+html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary cnt-icon,
+html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary svg,
+html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary svg * {
+  color: #7a0008 !important;
+  color: oklch(from #dc2626 0.3 c h) !important;
+  fill: #7a0008 !important;
+  fill: oklch(from #dc2626 0.3 c h) !important;
+}

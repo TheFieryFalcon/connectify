@@ -15151,6 +15151,28 @@ runTest('Test 321: Page wrappers and dialog contents are clear, Connect\'s dialo
   assert.ok(audit.includes('Math.abs(curMarginTop - base.margin.top) > mTol ||'), 'top and bottom margins always count');
 });
 
+runTest('Test 322: Connect\'s red status text has no box: an icon and caption in one red, while real labels keep their pill', () => {
+  const styles = path.join(BASE_DIR, 'src/theme/styles');
+  const strip = f => fs.readFileSync(path.join(styles, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const pills = strip('theme-tile-actions.css');
+  assert.ok(pills.includes(':where(span.connect-red):not(.text-primary)') && pills.includes(':where(.connect-red:not(div)):not(.text-primary)'), 'the dark pill skips plain text');
+  assert.ok(pills.includes(':where(span.standard-label.connect-red)'), 'a real label keeps it');
+  const tone = strip('theme-light-tone.css');
+  assert.ok(tone.includes('span.connect-red:not(.text-primary),') && tone.includes('span.standard-label.connect-red,'), 'the light tint likewise');
+  const alert = strip('theme-alert-tiles.css');
+  for (const part of ['.mat-caption', 'cnt-icon', 'svg', 'svg *']) {
+    assert.ok(alert.includes(`.connectea-dark:not(#cx-n) span.connect-red.text-primary ${part},`) || alert.includes(`.connectea-dark:not(#cx-n) span.connect-red.text-primary ${part} {`), `${part} takes the one red`);
+    assert.ok(alert.includes(`[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary ${part}`), `${part} in light tone too`);
+  }
+  assert.ok(/span\.connect-red\.text-primary \{\s*background-color: transparent !important;/.test(alert), 'no fill');
+  assert.ok(!/span\.connect-red\.text-primary[^{}]*\{[^}]*\b(padding|margin|border)/.test(alert), 'and the geometry stays Connect\'s');
+  assert.ok(alert.includes('oklch(from #dc2626 0.3 c h)'), 'light tone reads on the translucent tile');
+  // >= 5:1 on the lightest dark surface (Quantum Dark's #32302f)
+  const lum = hex => { const v = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
+  assert.ok((lum('#fb8585') + 0.05) / (lum('#32302f') + 0.05) >= 5, 'the red on Quantum Dark');
+  assert.ok(fs.readFileSync(path.join(BASE_DIR, 'design_rules.md'), 'utf8').includes('**Red Status Text**'));
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

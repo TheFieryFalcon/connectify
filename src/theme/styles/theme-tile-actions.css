@@ -84,8 +84,9 @@
 .connectea-dark .cvr-c-class__status-label--locked:not(.cx-n):not(.cx-n),
 .connectea-dark :is(.eds-u-theme-multiplier.eds-t-red .cvr-c-standard-label),
 .connectea-dark :where(span.standard-label.connect-red):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark :where(span.connect-red):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark :where(.connect-red:not(div)):not(.cx-n):not(.cx-n):not(.cx-n),
+/* .text-primary marks plain coloured text (Submissions' Overdue), which has no box in Connect (theme-alert-tiles.css) */
+.connectea-dark :where(span.connect-red):not(.text-primary):not(.cx-n):not(.cx-n),
+.connectea-dark :where(.connect-red:not(div)):not(.text-primary):not(.cx-n):not(.cx-n),
 .connectea-dark .cvr-c-submission__status-label--overdue:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-entitystatus--reported:not(.cx-n):not(.cx-n),
 .connectea-dark .cvr-c-status-label--reported:not(.cx-n):not(.cx-n) {
   background-color: #2b171a !important;

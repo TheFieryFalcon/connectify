@@ -53,6 +53,10 @@ Extremely concise summary of the core visual design language, contrast standards
     - `__header--negative` tinted (`#dc2626` 16%, or Connect's `#9d000b` 10% in light tone)
     - red header divider
     - red `.eds-t-red` icons (`#f87171`, `#9d000b` in light tone, incl. `-webkit-text-fill-color`)
+- **Red Status Text** (`span.connect-red.text-primary`, e.g. Submissions' Overdue; `theme-alert-tiles.css`)
+  - Connect draws it as a red icon and caption with no box, and so does every theme
+    - no fill, padding or border: `.text-primary` marks it as text, never a pill (`.standard-label` is the pill)
+    - icon and caption share one red, `#fb8585`, OKLCH 0.30 in light tone, each >= 5:1
 - **Feed Class Bars** (`.card-scope` on feed cards, Connect's class colour; `theme-feed-3.css`)
   - The class thumbnail and item icon keep Connect's white in every dark theme
     - never the theme ink
