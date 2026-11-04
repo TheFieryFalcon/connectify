@@ -15039,6 +15039,50 @@ runTest('Test 318: The theme audit visits every Year Progression subtab and judg
   });
 });
 
+runTest('Test 319: The theme audit opens the sidebar on Assessment Outlines only', async () => {
+  const { isOutlinesUrl, runThemeAudit } = require(path.join(BASE_DIR, 'scripts/test-theme-styles.js'));
+  const outlines = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
+  assert.strictEqual(isOutlinesUrl(outlines), true);
+  assert.strictEqual(isOutlinesUrl(`${outlines}?x=1`), true);
+  assert.strictEqual(isOutlinesUrl('https://connect.det.wa.edu.au/group/students/ui/feed'), false);
+  assert.strictEqual(isOutlinesUrl('not a url'), false);
+  // An explicit list is audited as given, so a run can cover the other pages alone
+  const { resolveTargetUrls } = require(path.join(BASE_DIR, 'scripts/test-theme-styles.js'));
+  const feedOnly = ['https://connect.det.wa.edu.au/group/students/ui/feed'];
+  assert.deepStrictEqual(await resolveTargetUrls({ urlsList: feedOnly, noCrawled: true }), feedOnly);
+  assert.deepStrictEqual(await resolveTargetUrls({ urlsList: [...feedOnly, outlines] }), [outlines, ...feedOnly], 'listed, it still goes first');
+
+  // A whole run per page, against a page that records whether the audit reached for the drawer
+  const openedSidebar = async (url, landsOn = url, options = {}) => {
+    let opened = false;
+    const page = {
+      on: () => {}, setViewport: async () => {}, goto: async () => {}, url: () => landsOn, close: async () => {}, isClosed: () => false,
+      waitForFunction: async () => {},
+      evaluate: async fn => {
+        if (String(fn).includes('function ensureOpen()')) opened = true;
+        return [];
+      }
+    };
+    const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'cx-audit-'));
+    const log = console.log, warn = console.warn;
+    console.log = console.warn = () => {};
+    try {
+      await runThemeAudit({ browser: { newPage: async () => page, close: async () => {} }, url, noCrawled: true, theme: 'dark', session: path.join(dir, 'none'),
+        outputJson: path.join(dir, 'a.json'), outputMd: path.join(dir, 'a.md'), subPages: false, scroll: false, clickButtons: false, delay: 0, ...options });
+    } finally {
+      console.log = log;
+      console.warn = warn;
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+    return opened;
+  };
+  assert.strictEqual(await openedSidebar(outlines), true, 'the outlines page audits its sidebar');
+  const feed = 'https://connect.det.wa.edu.au/group/students/ui/feed';
+  assert.strictEqual(await openedSidebar(feed), false, 'no other page does');
+  assert.strictEqual(await openedSidebar(feed, feed, { sidebarOnly: true }), false, 'not even with --sidebar-only');
+  assert.strictEqual(await openedSidebar(outlines, feed), false, 'a redirect away from the outlines counts as the page it landed on');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

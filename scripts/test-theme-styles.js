@@ -27,6 +27,11 @@ const { GLASS_THEMES, auditGlass, auditFloatingGlass } = require('./audit-glass'
 const GLASS_ISSUE_TYPES = ['GLASS_TOO_TRANSPARENT', 'GLASS_TOO_OPAQUE', 'GLASS_WITHOUT_BLUR', 'GLASS_BLUR_TOO_WEAK', 'GLASS_TOO_BLURRY', 'NESTED_BACKDROP_BLUR'];
 const DEFAULT_PAGE = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
 
+// The sidebar's tools work on Assessment Outlines, so its views are audited there only (ConnectifyUtils.isOutlinesPage)
+function isOutlinesUrl(url) {
+  try { return new URL(url).pathname.startsWith(new URL(DEFAULT_PAGE).pathname); } catch { return false; }
+}
+
 function parseArgs() {
   const rawArgs = process.argv.slice(2);
   const isEnvInteractive = process.env.npm_config_interactive === 'true' ||
@@ -70,9 +75,9 @@ Targeting Options:
   --paste                  Paste URLs interactively
 
 Sidebar & View Options:
-  --sidebar                Audit sidebar and all tabs/sub-tabs (default: true)
+  --sidebar                Audit sidebar and all tabs/sub-tabs, on Assessment Outlines only (default: true)
   --no-sidebar             Disable sidebar audit
-  --sidebar-only           Audit ONLY sidebar views (menu, tools, tabs, sub-tabs)
+  --sidebar-only           Audit ONLY sidebar views (menu, tools, tabs, sub-tabs); other pages are skipped
   --sub-pages              Audit navbar heading sub-views (default: true)
   --no-sub-pages           Disable navbar heading sub-views
   --max-sub-pages <n>      Max navbar headings to audit per page (default: 8)
@@ -267,7 +272,7 @@ async function resolveTargetUrls(options) {
   if (defIdx > 0) {
     uniqueUrls.splice(defIdx, 1);
     uniqueUrls.unshift(DEFAULT_PAGE);
-  } else if (defIdx === -1 && !options.url && !options.file) {
+  } else if (defIdx === -1 && !options.url && !options.file && !options.urlsFile && !options.urlsList?.length && !options.paste) {
     uniqueUrls.unshift(DEFAULT_PAGE);
   }
   return uniqueUrls;
@@ -2616,13 +2621,16 @@ async function runThemeAudit(customOptions = {}) {
 
       // Discover Sidebar Views (sidebar drawer and all tabs/sub-tabs)
       let sidebarViews = [];
-      if (options.sidebar) {
+      // Never opened on any other page, including one Connect redirected to
+      const onOutlines = isOutlinesUrl(page.url());
+      if (options.sidebar && onOutlines) {
         sidebarViews = await discoverSidebarViews(page, options);
       }
 
       let viewsToAudit = [];
       if (options.sidebarOnly) {
         viewsToAudit = sidebarViews;
+        if (!onOutlines) console.log(`[ThemeAudit] Skipping ${targetUrl}: the sidebar is only audited on Assessment Outlines.`);
       } else {
         viewsToAudit = [...pageViews, ...sidebarViews];
       }
@@ -3048,6 +3056,7 @@ if (require.main === module) {
 
 module.exports = {
   parseArgs,
+  isOutlinesUrl,
   runThemeAudit,
   buildAuditManifest,
   resolveTargetUrls,
