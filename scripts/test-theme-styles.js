@@ -414,6 +414,11 @@ function computeElementsSignature(baseline) {
   return hash.digest('hex');
 }
 
+/** What makes a view a duplicate: the same elements in the same scope, whatever it is called and on whichever URL. */
+function viewKey(view, baseline) {
+  return `${view.auditScope === 'sidebar' ? 'sidebar:' : ''}${computeElementsSignature(baseline)}`;
+}
+
 /**
  * Dispatches clicks to interactive JavaScript buttons and accordion/tab triggers
  * on the page to expand collapsible panels and reveal dynamic UI components.
@@ -913,7 +918,9 @@ async function discoverSidebarViews(page, options = {}) {
             const semButtons = Array.from(sidebar.querySelectorAll('.cta-semesters:not(.cta-tabs) .cta-semester, .cta-semesters button'));
             if (semButtons.length > 0) {
               semButtons.forEach((sBtn, sIdx) => {
-                const semText = (sBtn.innerText || sBtn.textContent || `Semester ${sIdx + 1}`).trim();
+                // A closed semester's button does nothing, so its view would be the open semester's again
+                if (sBtn.disabled && semButtons.some(b => !b.disabled)) return;
+                const semText = (sBtn.innerText || sBtn.textContent || `Semester ${sIdx + 1}`).trim().replace(/\s+/g, ' ');
                 views.push({
                   id: `cx-sidebar-${cfg.id}-${mode}-sem${sIdx}`,
                   title: `Sidebar: ${toolName} [${modeName} - ${semText}]`,
@@ -1250,23 +1257,30 @@ async function activateSidebarView(page, currentView, delay = 1250) {
 /**
  * The state a view needs inside its tab, one step per frame as each may redraw what the next reads. Every step is
  * idempotent, so it runs again on each theme pass: `click` once, `select` a value, `press` a toggle to a state.
+ * What a step acts on may still be rendering (a planner draws after its tab opens), so it is waited for.
  */
-async function applyViewSteps(page, view) {
+async function applyViewSteps(page, view, tries = 15) {
   for (const step of view.steps || []) {
-    await page.evaluate((s) => {
-      if (s.select) {
-        const sel = document.querySelector(s.select);
-        if (sel && sel.value !== s.value) {
-          sel.value = s.value;
-          sel.dispatchEvent(new Event('change', { bubbles: true }));
+    for (let attempt = 0; attempt < tries; attempt++) {
+      const found = await page.evaluate((s) => {
+        if (s.select) {
+          const sel = document.querySelector(s.select);
+          if (!sel) return false;
+          if (sel.value !== s.value) {
+            sel.value = s.value;
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          return true;
         }
-        return;
-      }
-      const btn = document.querySelector(s.press || s.click);
-      if (!btn) return;
-      if (s.press && btn.getAttribute(s.attr) === s.value) return;
-      btn.click();
-    }, step).catch(() => {});
+        // The one on screen: every planner tab keeps its own, hidden, in the page
+        const btn = Array.from(document.querySelectorAll(s.press || s.click)).find(el => el.getClientRects?.().length !== 0);
+        if (!btn) return false;
+        if (!(s.press && btn.getAttribute(s.attr) === s.value)) btn.click();
+        return true;
+      }, step).catch(() => false);
+      if (found) break;
+      await new Promise(r => setTimeout(r, 100));
+    }
     await new Promise(r => setTimeout(r, 60));
   }
 }
@@ -2563,6 +2577,8 @@ async function runThemeAudit(customOptions = {}) {
 
   const allPageResults = {};
   const pageResults = {};
+  // Across every URL: a redirect or two identical pages are one audit
+  const seenViewSignatures = new Map();
 
   // Iterate across all target URLs one by one
   for (let pageIdx = 0; pageIdx < targetUrls.length; pageIdx++) {
@@ -2644,7 +2660,6 @@ async function runThemeAudit(customOptions = {}) {
         }
       }
 
-      const seenViewSignatures = new Map();
       const checkedTools = new Set();
 
       // Audit each view / content state under targetUrl
@@ -2723,10 +2738,10 @@ async function runThemeAudit(customOptions = {}) {
           console.log(`       └─ Baseline captured: ${baseline.visibleCount} visible elements.`);
 
           // D. Skip redundant view if it has the exact same elements as an already-audited view
-          const viewSignature = (isSidebar ? 'sidebar:' + (currentView.id || currentView.title) + ':' : '') + computeElementsSignature(baseline);
+          const viewSignature = viewKey(currentView, baseline);
           if (seenViewSignatures.has(viewSignature)) {
-            const existingTitle = seenViewSignatures.get(viewSignature);
-            console.log(`       └─ Skipping "${currentView.title}": exact same elements (${baseline.visibleCount} visible) as view "${existingTitle}".`);
+            const existing = seenViewSignatures.get(viewSignature);
+            console.log(`       └─ Skipping "${currentView.title}": exact same elements (${baseline.visibleCount} visible) as "${existing.title}" on ${existing.url}.`);
             await page.evaluate(() => {
               // The registry lives in the extension's isolated world: request the theme across worlds (theme-request.js)
               document.documentElement.setAttribute('data-connectify-theme-request', 'light');
@@ -2742,7 +2757,7 @@ async function runThemeAudit(customOptions = {}) {
             }).catch(() => {});
             continue;
           }
-          seenViewSignatures.set(viewSignature, currentView.title);
+          seenViewSignatures.set(viewSignature, { title: currentView.title, url: targetUrl });
 
           const viewThemeResults = {};
           console.log(`    └─ Auditing ${themesToTest.length} theme(s) against Connect Native baseline:`);
@@ -3070,6 +3085,7 @@ module.exports = {
   applyViewSteps,
   auditToolSubjects,
   glassReport,
+  viewKey,
   computeElementsSignature,
   scrollEntirePage
 };

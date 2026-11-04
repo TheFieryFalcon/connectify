@@ -14943,6 +14943,7 @@ runTest('Test 318: The theme audit visits every Year Progression subtab and judg
   assert.deepStrictEqual(types(clear, glass({ alpha: 0.72, stack: 0.72 })), ['GLASS_TOO_OPAQUE'], 'and 72% is right in Tinted, too thick in Liquid Glass');
   assert.deepStrictEqual(types(clear, glass({ alpha: 0, stack: 0, hasBlur: false, blur: 0 })), ['GLASS_TOO_TRANSPARENT'], 'a tile or overlay must paint');
   assert.deepStrictEqual(types(clear, glass({ role: 'generic', alpha: 0, stack: 0, hasBlur: false, blur: 0 })), [], 'anything else may be clear');
+  assert.deepStrictEqual(types(clear, glass({ role: 'overlay', alpha: 0, stack: 0, hasBlur: false, blur: 0, paintedByChild: true })), [], 'a clear wrapper its child fills is one surface (the service bar\'s container)');
   assert.deepStrictEqual(types(clear, glass({ role: 'generic', alpha: 0.02 })), ['GLASS_TOO_TRANSPARENT'], 'a blur with no fill shows as a band');
   assert.deepStrictEqual(types(clear, glass({ alpha: 1, stack: 1, hasBlur: false, blur: 0 })), ['GLASS_TOO_OPAQUE'], 'a solid slab');
   assert.deepStrictEqual(types({ ...clear, surfaces: [1] }, glass({ alpha: 1, stack: 1, hasBlur: false, blur: 0 })), [], 'a custom theme at 100% Transparency is judged by what it set');
@@ -15028,7 +15029,7 @@ runTest('Test 318: The theme audit visits every Year Progression subtab and judg
     const btn = { getAttribute: () => 'true', click: () => { presses++; } };
     const select = { value: 'none', dispatchEvent: () => { presses++; } };
     const stepPage = { evaluate: async (fn, arg) => {
-      global.document = Object.assign(Object.create(savedDocument), { querySelector: sel => (sel === 's' ? select : btn) });
+      global.document = Object.assign(Object.create(savedDocument), { querySelector: sel => (sel === 's' ? select : btn), querySelectorAll: () => [btn] });
       try { return fn(arg); } finally { global.document = savedDocument; }
     } };
     await applyViewSteps(stepPage, { steps: [{ press: 'b', attr: 'aria-pressed', value: 'true' }, { select: 's', value: 'none' }] });
@@ -15064,14 +15065,10 @@ runTest('Test 319: The theme audit opens the sidebar on Assessment Outlines only
       }
     };
     const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'cx-audit-'));
-    const log = console.log, warn = console.warn;
-    console.log = console.warn = () => {};
     try {
       await runThemeAudit({ browser: { newPage: async () => page, close: async () => {} }, url, noCrawled: true, theme: 'dark', session: path.join(dir, 'none'),
         outputJson: path.join(dir, 'a.json'), outputMd: path.join(dir, 'a.md'), subPages: false, scroll: false, clickButtons: false, delay: 0, ...options });
     } finally {
-      console.log = log;
-      console.warn = warn;
       fs.rmSync(dir, { recursive: true, force: true });
     }
     return opened;
@@ -15081,6 +15078,47 @@ runTest('Test 319: The theme audit opens the sidebar on Assessment Outlines only
   assert.strictEqual(await openedSidebar(feed), false, 'no other page does');
   assert.strictEqual(await openedSidebar(feed, feed, { sidebarOnly: true }), false, 'not even with --sidebar-only');
   assert.strictEqual(await openedSidebar(outlines, feed), false, 'a redirect away from the outlines counts as the page it landed on');
+});
+
+runTest('Test 320: The theme audit never audits the same view twice', async () => {
+  const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
+  const { viewKey, discoverSidebarViews, applyViewSteps } = require(path.join(BASE_DIR, 'scripts/test-theme-styles.js'));
+  const baseline = text => ({ visibleCount: 1, elements: { a: { tagName: 'div', selector: 'div.x', textSnippet: text, size: { width: 1, height: 1 } } } });
+  const sidebar = id => ({ auditScope: 'sidebar', id });
+  assert.strictEqual(viewKey(sidebar('sem1'), baseline('Same')), viewKey(sidebar('sem2'), baseline('Same')), 'two sidebar views with the same elements are one view, whatever their ids');
+  assert.notStrictEqual(viewKey(sidebar('sem1'), baseline('Physics')), viewKey(sidebar('sem2'), baseline('Chemistry')));
+  assert.notStrictEqual(viewKey(sidebar('a'), baseline('Same')), viewKey({ auditScope: 'page' }, baseline('Same')), 'scopes never match');
+  assert.ok(/const seenViewSignatures = new Map\(\);[\s\S]*for \(let pageIdx = 0;/.test(audit), 'duplicates are tracked across every URL, so a redirect or an identical page is skipped');
+
+  // A closed semester's button does nothing: no view for it, unless every semester is closed
+  const semesters = (...disabled) => disabled.map((d, i) => ({ disabled: d, textContent: `Semester ${i + 1}\n90`, click: () => {} }));
+  const discover = async buttons => {
+    const toggle = { id: 'connectify-goals-toggle', textContent: 'Goal Setter', click: () => {} };
+    const fixture = { hidden: false, classList: { remove: () => {} }, querySelector: () => null,
+      querySelectorAll: sel => (sel === '.cx-tool-menu button' ? [toggle] : sel.includes('.cta-semester') ? buttons : []) };
+    const saved = global.document;
+    const page = { evaluate: async fn => {
+      global.document = Object.assign(Object.create(saved), { getElementById: id => (id === 'connectify-sidebar' ? fixture : id === toggle.id ? toggle : null) });
+      try { return fn(); } finally { global.document = saved; }
+    } };
+    return (await discoverSidebarViews(page)).filter(v => v.toolId === toggle.id).map(v => v.title.replace('Sidebar: Goal Setter ', ''));
+  };
+  assert.deepStrictEqual(await discover(semesters(true, false)), ['[Target Grade - Semester 2 90]', '[Target ATAR - Semester 2 90]'], 'titles on one line');
+  assert.deepStrictEqual(await discover(semesters(false, false)).then(t => t.length), 4);
+  assert.deepStrictEqual(await discover(semesters(true, true)).then(t => t.length), 4, 'with every semester closed the panel is still audited');
+
+  // A step waits for what it acts on: Set as Goal draws after its tab opens
+  let tries = 0, clicks = 0, hidden = 0;
+  const saved = global.document;
+  const page = { evaluate: async (fn, arg) => {
+    global.document = Object.assign(Object.create(saved), { querySelectorAll: () => (++tries >= 3 ? [{ getClientRects: () => [], click: () => { hidden++; } }, { getClientRects: () => [1], click: () => { clicks++; } }] : []) });
+    try { return fn(arg); } finally { global.document = saved; }
+  } };
+  await applyViewSteps(page, { steps: [{ click: '.cx-goal-set' }] });
+  assert.deepStrictEqual([tries, clicks, hidden], [3, 1, 0], 'tried until it drew, and clicked the one on screen once, never a hidden tab\'s');
+  tries = -1000;
+  await applyViewSteps(page, { steps: [{ click: '.never' }] }, 2);
+  assert.strictEqual(tries, -998, 'and gives up in the end');
 });
 
 Promise.all(pendingTestPromises).then(() => {

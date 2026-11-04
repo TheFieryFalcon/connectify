@@ -98,7 +98,7 @@ function measureGlass({ scope, roles, notSurfaces, notSurfaceClass, canvasTolera
   };
   const nameOf = (el, pseudo) => {
     if (el.id) return `#${el.id}${pseudo}`;
-    const cls = typeof el.className === 'string' ? el.className.trim().split(/\s+/).filter(c => c && !c.startsWith('ng-')).slice(0, 2).join('.') : '';
+    const cls = typeof el.className === 'string' ? el.className.trim().split(/\s+/).filter(c => c && !/^(ng-|v-)/.test(c)).slice(0, 2).join('.') : '';
     return `${el.tagName.toLowerCase()}${cls ? `.${cls}` : ''}${pseudo}`;
   };
   const roleOf = (el, pseudo) => {
@@ -109,6 +109,13 @@ function measureGlass({ scope, roles, notSurfaces, notSurfaceClass, canvasTolera
     }
     return 'generic';
   };
+  // A clear wrapper whose child fills it is one surface painted by the child (the service bar's container)
+  const paintedByChild = (el, rect) => Array.from(el.querySelectorAll('*')).some(child => {
+    const box = child.getBoundingClientRect();
+    if (box.width < rect.width * 0.9 || box.height < rect.height * 0.9) return false;
+    const paint = paintOfEl(child);
+    return paint.alpha >= 0.05 || paint.hasBlur;
+  });
   // Backdrop roots: a blur under any of these sees only what that ancestor painted (top-layer elements escape them)
   const makesBackdropRoot = cs => (cs.backdropFilter && cs.backdropFilter !== 'none') || (cs.filter && cs.filter !== 'none') || parseFloat(cs.opacity) < 1 ||
     (cs.mixBlendMode && cs.mixBlendMode !== 'normal') || (cs.clipPath && cs.clipPath !== 'none') || (cs.maskImage && cs.maskImage !== 'none');
@@ -167,7 +174,8 @@ function measureGlass({ scope, roles, notSurfaces, notSurfaceClass, canvasTolera
       if (pseudo && (paintOfEl(el).alpha >= 0.05 || paintOfEl(el).hasBlur)) up.nestedIn = up.nestedIn || nameOf(el, '');
       layers.push({
         selector: nameOf(el, pseudo), role, alpha: paint.alpha, stack: 1 - (1 - paint.alpha) * (1 - up.stackBelow),
-        blur: paint.blur, hasBlur: paint.hasBlur, nestedIn: up.nestedIn, backdropRoot: up.backdropRoot, topLayer: up.topLayer
+        blur: paint.blur, hasBlur: paint.hasBlur, nestedIn: up.nestedIn, backdropRoot: up.backdropRoot, topLayer: up.topLayer,
+        paintedByChild: !pseudo && paint.alpha < 0.05 && !paint.hasBlur && role !== 'generic' && paintedByChild(el, rect)
       });
     }
   }
@@ -250,7 +258,7 @@ function judgeGlass({ tokens, layers }, limits = LIMITS) {
     }
 
     const paints = layer.alpha > limits.tint;
-    const mustPaint = layer.role === 'overlay' || layer.role === 'surface';
+    const mustPaint = (layer.role === 'overlay' || layer.role === 'surface') && !layer.paintedByChild;
     if (paints && layer.alpha >= limits.solid && hi < limits.solid - limits.alphaSlack) {
       report('GLASS_TOO_OPAQUE', layer.selector, `Solid ${pct(layer.alpha)} surface in a theme whose surfaces are ${pct(lo)}-${pct(hi)}`);
     } else if (layer.alpha > maxAlpha) {
