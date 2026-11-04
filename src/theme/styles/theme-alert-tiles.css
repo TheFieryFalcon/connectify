@@ -45,6 +45,7 @@ html.connectea-dark[data-connectea-tone="light"] .eds-c-tile--important :where(.
 
 .connectea-dark:not(#cx-n) span.connect-red.text-primary,
 .connectea-dark:not(#cx-n) span.connect-red.text-primary .mat-caption,
+.connectea-dark:not(#cx-n) span.connect-red.text-primary em,
 .connectea-dark:not(#cx-n) span.connect-red.text-primary cnt-icon,
 .connectea-dark:not(#cx-n) span.connect-red.text-primary svg,
 .connectea-dark:not(#cx-n) span.connect-red.text-primary svg * {
@@ -54,6 +55,7 @@ html.connectea-dark[data-connectea-tone="light"] .eds-c-tile--important :where(.
 
 html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary,
 html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary .mat-caption,
+html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary em,
 html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary cnt-icon,
 html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary svg,
 html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary svg * {

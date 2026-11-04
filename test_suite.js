@@ -15160,7 +15160,7 @@ runTest('Test 322: Connect\'s red status text has no box: an icon and caption in
   const tone = strip('theme-light-tone.css');
   assert.ok(tone.includes('span.connect-red:not(.text-primary),') && tone.includes('span.standard-label.connect-red,'), 'the light tint likewise');
   const alert = strip('theme-alert-tiles.css');
-  for (const part of ['.mat-caption', 'cnt-icon', 'svg', 'svg *']) {
+  for (const part of ['.mat-caption', 'em', 'cnt-icon', 'svg', 'svg *']) {
     assert.ok(alert.includes(`.connectea-dark:not(#cx-n) span.connect-red.text-primary ${part},`) || alert.includes(`.connectea-dark:not(#cx-n) span.connect-red.text-primary ${part} {`), `${part} takes the one red`);
     assert.ok(alert.includes(`[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary ${part}`), `${part} in light tone too`);
   }
