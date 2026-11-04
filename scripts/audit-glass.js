@@ -287,20 +287,19 @@ const FLOATING_LAYERS = [
 
 async function auditFloatingGlass(page) {
   const issues = [];
-  for (const { open, layer } of FLOATING_LAYERS) {
-    const opened = await page.evaluate((openSel, layerSel) => {
-      const button = document.querySelector(openSel);
-      if (!button) return false;
-      button.click();
-      const list = document.querySelector(layerSel);
-      return Boolean(list && list.getBoundingClientRect().height > 0);
-    }, open, layer).catch(() => false);
-    if (opened) {
-      await new Promise(r => setTimeout(r, 150));
-      issues.push(...await auditGlass(page, layer).catch(() => []));
-    }
-    await page.keyboard.press('Escape').catch(() => {});
-    await page.evaluate(() => document.body.click()).catch(() => {});
+  // Each closes by its own button: Escape or a click elsewhere would also close a dialog the audit opened on the page
+  const pressOpener = sel => page.evaluate((openSel, layerSel) => {
+    const button = document.querySelector(openSel);
+    if (!button) return false;
+    button.click();
+    const list = document.querySelector(layerSel);
+    return Boolean(list && list.getBoundingClientRect().height > 0);
+  }, sel.open, sel.layer).catch(() => false);
+  for (const layer of FLOATING_LAYERS) {
+    if (!await pressOpener(layer)) continue;
+    await new Promise(r => setTimeout(r, 150));
+    issues.push(...await auditGlass(page, layer.layer).catch(() => []));
+    await pressOpener(layer);
   }
   return issues;
 }

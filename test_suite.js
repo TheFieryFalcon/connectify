@@ -14973,6 +14973,10 @@ runTest('Test 318: The theme audit visits every Year Progression subtab and judg
   assert.deepStrictEqual(types(clear, glass({ role: 'backdrop', alpha: 0.6, blur: 8 })), ['GLASS_BLUR_TOO_WEAK']);
   assert.deepStrictEqual(judgeGlass({ tokens: clear, layers: [glass({ blur: 30 }), glass({ blur: 30 })] }).length, 1, 'each finding once');
   assert.strictEqual(LIMITS.tint, 0.12, 'the one-surface rule\'s tint');
+  // The theme menu and Jump To list close by their own button, so a dialog the audit opened stays open for the next theme
+  const glassSource = fs.readFileSync(path.join(BASE_DIR, 'scripts/audit-glass.js'), 'utf8');
+  assert.ok(!/keyboard\.press|document\.body\.click/.test(glassSource), 'no Escape and no click elsewhere');
+  assert.ok(/if \(!await pressOpener\(layer\)\) continue;[\s\S]*await pressOpener\(layer\);/.test(glassSource), 'opened, measured, closed by the same button');
   // The floor's layers, as the stylesheet lists them
   const floor = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-overlay-blur.css'), 'utf8');
   for (const sel of ['#connectify-sidebar', '#connectea-theme-menu', '#connectea-outcome-tooltip', '#cx-jump-subject-list', '.cvr-c-primary-navigation', '.cvr-c-location-bar', '.v-popupview-popup', '.modal-content', '.ui-dialog']) {
