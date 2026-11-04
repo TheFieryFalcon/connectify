@@ -88,6 +88,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Source Modules**: `src/content/content-files.js`, `src/content/content-download.js`
 - **DOM Insertion**: A `Download` button left of each section heading's `View` on a class's Content page.
 - **Functionality**: Saves every file under that heading without leaving the list: one file as itself, several as one ZIP named after the class and heading, so the browser never asks to allow multiple downloads. A heading with no files says `No Files`.
+- **Several at once**: `Download` on the Published Sections bar brings up a tick in each heading's left margin, with Select All and Cancel; pressing it again saves the ticked headings as one ZIP with a folder per heading.
 
 ### 10. Overall Subject Cohort Controls
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`cohort-estimator.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-estimator.js)

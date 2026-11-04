@@ -128,7 +128,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 
 **Background** (`src/system/update-reload.js`, GitHub and Firefox builds only; the Chrome Web Store zip drops it with `host_permissions`): browsers never load a new version into open tabs (Firefox leaves the old drawer with dead buttons), so after an install or update every open Connect tab is reloaded (`tabs.query` needs the Connect host permission in Chrome).
 
-**Class Content page** (`/group/*/ui/class/learning-content*`, after the sidebar group, which it reuses): `src/content/content-files.js` then `content-download.js` (Download beside each section heading's View; styles `content-download.css`).
+**Class Content page** (`/group/*/ui/class/learning-content*`, after the sidebar group, which it reuses): `src/content/content-files.js`, `content-save.js`, `content-download.js` (Download beside each section heading's View) and `content-bulk.js` (the bar's Download: ticks to save several headings at once); styles `content-download.css`, `content-bulk.css`.
 
 **Other Connect pages** load a sidebar-only group (`exclude_matches` the outlines page and login URLs; login and logged-out pages never build the drawer, `ConnectifyThemeAuth.isAuthDisabled()`): scheduler, utils, the assessment cache and data modules, categories, the predictor model, Settings (calibration, baselines, preferences) and the sidebar, in the order above. `ConnectifyUtils.isOutlinesPage()` keeps `collect()`, semester detection and the semester filter off other pages' tiles there, so tools read only the cache.
 

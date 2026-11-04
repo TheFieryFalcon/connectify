@@ -8,6 +8,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ### Changes
 - **Download a whole section from the Content page.** Each heading now has a Download button beside View. It saves everything under that heading without leaving the list, as one ZIP when there's more than one file.
+- **Download several sections at once.** Press Download at the top of the Content page, tick the headings you want in the left margin (or Select All), and press Download again to save them as one ZIP with a folder per heading.
 - **Year Progression has three tabs.** Progress Graph has the charts and each task's weight and mark. Next Up has what's due soon. Task Dates has every task's date, the term dates and Export.
 - **See what's next with the new Next Up tab.** It lists your assessments this week and next week, with each one's subject, type, weight and predicted Low, Mid and High, its grade once it's marked, and the mark and difficulty your goal asks of it. A week with nothing due shows a happy face and says No Tasks, or All Done! in the holidays and once your last task has passed.
 - **Group and sort the task list your way.** Group By None, Subject, Type, Completed, Predicted Grade or Grade Achieved, with an arrow for ascending or descending; Sort By Chronological, Alphabetical or Grade Achieved; and Show Uncompleted Only. Grades group as High Distinction (A) from 80%, Distinction (B) from 70%, Credit (C) from 60%, Pass (C) from 50% and Fail (D).

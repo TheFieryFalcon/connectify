@@ -1,0 +1,108 @@
+/**
+ * Connectify Content: the Published Sections bar's Download and the ticks it brings up in the headings' left margin.
+ * The buttons are Connect's standard ones, so every theme colours them like View; these rules only place and size them.
+ */
+.eds.cvr .cx-content-bulk-host {
+  position: relative;
+}
+
+.eds.cvr .cx-content-bulk {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateY(-50%);
+}
+
+/* Connect pads a bar's buttons to the bar's full height and fills them on hover, which hid the caption's grey ink */
+.eds.cvr .cvr-c-category-toolbar .cx-content-bulk .v-button {
+  min-width: 72px;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 5px 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.eds.cvr .cvr-c-category-toolbar .cx-content-bulk .v-button:hover,
+.eds.cvr .cvr-c-category-toolbar .cx-content-bulk .v-button:focus,
+.eds.cvr .cvr-c-category-toolbar .cx-content-bulk .v-button:active {
+  background-color: transparent;
+}
+
+.eds.cvr .cvr-c-category-toolbar .cx-content-bulk .v-button[hidden] {
+  display: none;
+}
+
+.eds.cvr .cvr-c-category-toolbar .cx-content-bulk .v-button.v-disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* The tick sits in the card's 30px left margin, so a card lets its children past its edge while it has one.
+   Two id weights outrank Liquid Glass's clip on cards (theme.css) */
+.eds.cvr .eds-c-card.cx-content-selectable:not(#cx-n):not(#cx-n) {
+  position: relative;
+  overflow: visible !important;
+}
+
+.eds.cvr .cx-content-check {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.eds.cvr .cx-content-check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--cx-text-primary, #4f4f4f);
+}
+
+/* Dark themes draw their own checkboxes (theme-controls.css), with a margin that would take the tick off centre */
+.eds.cvr .cx-content-check input:not(#cx-n):not(#cx-n) {
+  margin: 0 !important;
+}
+
+/* In light tone that drawing's accent is as pale as the page and its white check: the theme's ink stands out instead */
+html[data-connectea-tone="light"] .cx-content-check input:not(#cx-n):not(#cx-n) {
+  border-color: var(--cx-text-primary, #1d1c1c) !important;
+}
+
+html[data-connectea-tone="light"] .cx-content-check input:not(#cx-n):not(#cx-n):checked {
+  background-color: var(--cx-text-primary, #1d1c1c) !important;
+}
+
+/* A narrow bar has no room for the title beside three buttons */
+@media (max-width: 600px) {
+  .eds.cvr .cx-content-bulk-host:has(.cx-content-bulk--selecting) .cvr-c-category-toolbar__title {
+    visibility: hidden;
+  }
+}
+
+@media (any-pointer: coarse) {
+  html:not([data-cx-mouse]) .eds.cvr .cx-content-download {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  html:not([data-cx-mouse]) .eds.cvr .cvr-c-category-toolbar .cx-content-bulk .v-button {
+    min-height: 44px !important;
+    touch-action: manipulation;
+  }
+
+  html:not([data-cx-mouse]) .eds.cvr .cx-content-check input:not(#cx-n):not(#cx-n) {
+    width: 22px !important;
+    height: 22px !important;
+  }
+}

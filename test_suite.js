@@ -14724,7 +14724,7 @@ runTest('Test 315: Content\'s section headings keep Connect\'s margins and heigh
   const css = read('content/content-download.css');
   assert.ok(/\.cx-content-actions \{\s*white-space: nowrap;/.test(css), 'Connect\'s 1px cell never wraps the two buttons');
   const download = read('content/content-download.js');
-  assert.ok(download.includes('view.before(createButton())'), 'Download goes left of View');
+  assert.ok(download.includes("view.before(createButton('Download', download, BUTTON))"), 'Download goes left of View');
   assert.ok(download.includes("mute: false") && download.includes('ConnectifyScheduler.onMutations'), 'rows are watched through the shared scheduler');
   assert.ok(!/[•·]/.test(download + read('content/content-files.js')), 'no dot separators');
 
@@ -14737,6 +14737,63 @@ runTest('Test 315: Content\'s section headings keep Connect\'s margins and heigh
   assert.ok(manifest.content_scripts.indexOf(group) > manifest.content_scripts.findIndex(g => (g.js || []).includes('src/theme/theme-ctme.js')), 'after the ZIP writer');
   assert.strictEqual(read('assessment/outline-api.js').includes('content.fetch'), false, 'one pageFetch, in utils.js');
   assert.ok(read('system/utils.js').includes('content.fetch'));
+});
+
+runTest('Test 316: Content\'s top Download toggles ticks in the headings\' left margin on the same list and saves the ticked headings as one download', () => {
+  const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
+  const sandbox = { window: {}, document: { querySelector: () => null, scripts: [] }, location: { href: '' }, console, URLSearchParams, Intl, Date, Math, JSON, encodeURIComponent, decodeURIComponent, parseInt, String, Array, Promise };
+  vm.runInNewContext(read('content/content-files.js'), sandbox);
+  vm.runInNewContext(read('content/content-save.js'), sandbox);
+  const Save = sandbox.window.ConnectifyContentSave;
+  const plain = v => JSON.parse(JSON.stringify(v));
+  const group = (heading, ...urls) => ({ heading, urls });
+
+  // One file saves as itself, one heading as a flat ZIP, several as a folder per heading; empty headings add nothing
+  assert.deepStrictEqual(plain(Save.plan([group('T1 W2'), group('T1 W6', '/f/a/Sartre+%282014%29.pdf')], 'Mabey AEPAE')),
+    { name: 'Sartre (2014).pdf', files: [{ url: '/f/a/Sartre+%282014%29.pdf', path: 'Sartre (2014).pdf' }], archive: false });
+  const flat = plain(Save.plan([group('T1 W1 (Semester 1)', '/f/a/x.pdf', '/f/b/x.pdf')], 'Mabey AEPAE'));
+  assert.strictEqual(flat.name, 'Mabey AEPAE T1 W1 (Semester 1).zip');
+  assert.deepStrictEqual(flat.files.map(f => f.path), ['x.pdf', 'x (2).pdf'], 'one heading is flat, its names distinct');
+  const folders = plain(Save.plan([group('T1 W1', '/f/a/x.pdf', '/f/b/y.pdf'), group('Empty'), group('T1/W2', '/f/c/x.pdf'), group('T1 W1', '/f/d/z.pdf')], 'Mabey: AEPAE'));
+  assert.strictEqual(folders.name, 'Mabey AEPAE.zip', 'several headings are named after the class');
+  assert.deepStrictEqual(folders.files.map(f => f.path), ['T1 W1/x.pdf', 'T1 W1/y.pdf', 'T1 W2/x.pdf', 'T1 W1 (2)/z.pdf'], 'a folder per heading, safe and distinct');
+  assert.deepStrictEqual(plain(Save.plan([group('Empty')], 'Mabey')).files, [], 'nothing to save');
+
+  // Results keep the items' order, a few at a time
+  let running = 0, peak = 0;
+  const pooled = Save.pool([30, 1, 20, 2, 10, 3], async (ms, i) => {
+    peak = Math.max(peak, ++running);
+    await new Promise(resolve => setTimeout(resolve, ms));
+    running--;
+    return i;
+  }).then(results => {
+    assert.deepStrictEqual(Array.from(results), [0, 1, 2, 3, 4, 5], 'results in order');
+    assert.strictEqual(peak, 4, 'at most four at once');
+  });
+
+  // In place, never a second view: Download stays last where it was, the ticks sit in the card's left margin
+  const bulk = read('content/content-bulk.js');
+  assert.ok(bulk.includes('root.append(selectAll, cancel, download)'), 'Select All and Cancel join to the left of Download');
+  assert.ok(/if \(selecting\) downloadTicked\(\);\s*else setSelecting\(true\);/.test(bulk), 'Download toggles the mode, then saves');
+  assert.ok(bulk.includes("{ disabled: selecting && !ticked }"), 'nothing ticked, nothing to press');
+  assert.ok(bulk.includes('`Download (${ticked})`'), 'it counts the ticks');
+  assert.ok(/if \(!rows\.length \|\| !host\) \{[\s\S]*selecting = false;/.test(bulk), 'opening a section ends the mode');
+  assert.ok(!/[•·]/.test(bulk + read('content/content-save.js')), 'no dot separators');
+  const css = read('content/content-bulk.css');
+  assert.ok(/\.cx-content-check \{[^}]*left: -30px;[^}]*width: 30px;/.test(css), 'the tick fills the card\'s 30px margin');
+  assert.ok(/\.cx-content-selectable:not\(#cx-n\):not\(#cx-n\) \{[^}]*overflow: visible !important;/.test(css), 'a selectable card lets its tick past Liquid Glass\'s clip');
+  assert.ok(/\.cx-content-bulk \.v-button:hover,[^{]*\{\s*background-color: transparent;/.test(css), 'Connect\'s bar hover fill never hides the caption');
+  assert.ok(/accent-color: var\(--cx-text-primary/.test(css), 'ticks take the theme\'s ink');
+  assert.ok(/\[data-connectea-tone="light"\] \.cx-content-check input:not\(#cx-n\):not\(#cx-n\):checked \{\s*background-color: var\(--cx-text-primary/.test(css), 'in light tone too, over the theme\'s pale accent');
+
+  // Own controls are never page changes, and the group loads what it reuses first
+  assert.ok(read('content/content-download.js').includes('.cx-content-bulk, .cx-content-check'), 'captions and ticks changing never re-run sync');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const js = manifest.content_scripts.find(g => (g.js || []).includes('src/content/content-bulk.js'));
+  const at = f => js.js.indexOf(`src/content/${f}`);
+  assert.ok(at('content-files.js') < at('content-save.js') && at('content-save.js') < at('content-download.js') && at('content-download.js') < at('content-bulk.js'), 'dependency order');
+  assert.ok(js.css.includes('src/content/content-bulk.css'));
+  return pooled;
 });
 
 Promise.all(pendingTestPromises).then(() => {

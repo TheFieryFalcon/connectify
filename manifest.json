@@ -455,12 +455,15 @@
             "https://connect.det.wa.edu.au/group/*/ui/class/learning-content*"
          ],
          "css": [
-            "src/content/content-download.css"
+            "src/content/content-download.css",
+            "src/content/content-bulk.css"
          ],
          "js": [
             "src/system/scheduler.js",
             "src/content/content-files.js",
-            "src/content/content-download.js"
+            "src/content/content-save.js",
+            "src/content/content-download.js",
+            "src/content/content-bulk.js"
          ],
          "run_at": "document_idle"
       }

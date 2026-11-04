@@ -88,6 +88,13 @@ Extremely concise summary of the core visual design language, contrast standards
     - left of View on the same line, one of Connect's standard buttons, so rows keep their height in every theme
     - saves every file under the heading without leaving the list: one file as itself, several as one ZIP (`<class> <heading>.zip`)
     - its caption is its only status: `Preparing`, `2 of 5`, `No Files`, `2 Failed`
+  - Bulk Download (`content-bulk.js`, `content-bulk.css`)
+    - a Download at the right of the Published Sections bar, 32px tall, on the list only
+    - a toggle on the same list, never a second view: a tick in each heading's 30px left margin
+    - `Select All` / `Select None` and `Cancel` join to its left, and it stays where it was as `Download (3)`, disabled with nothing ticked
+    - ticks are the theme's own checkboxes, in the theme's ink in light tone (its accent is as pale as the page there), so they stand out on any wallpaper
+    - one download: one heading as for its own button, several as `<class>.zip` with a folder per heading, empty headings left out
+    - the mode ends once saved, on Cancel or on opening a section
 - **Year Progression Tabs**
   - three subtabs on the Predictor's tab bar, in this order
     - **Progress Graph** (chips, `Show:`, chart, and a table of marks and weights, no dates or Early Easter)
