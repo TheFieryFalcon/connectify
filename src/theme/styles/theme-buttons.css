@@ -181,7 +181,8 @@
 .connectea-dark .cvr-c-reports div.w-100, .connectea-dark .cvr-c-report-years div.w-100, .connectea-dark .cvr-c-year-selector div.w-100,
 .connectea-dark :where(mat-toolbar):not(.cx-n) div.w-100, .connectea-dark .mat-toolbar div.w-100,
 .connectea-dark :where(mat-tab-header):not(.cx-n) div.w-100, .connectea-dark .mat-tab-header div.w-100,
-.connectea-dark div.w-100:has([class*="year"], [class*="report"], mat-toolbar, .mat-toolbar) {
+/* Bars and year selectors only: a whole page's wrapper (Submissions' .mt-n4) holds a toolbar too, and stays clear as in Connect */
+.connectea-dark div.w-100:not(.mt-n4):has([class*="year"], [class*="report"], mat-toolbar, .mat-toolbar) {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
 }

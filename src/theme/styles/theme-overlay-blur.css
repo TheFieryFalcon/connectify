@@ -21,6 +21,7 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .j
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-popupview-popup,
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .modal-content,
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .ui-dialog,
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-dialog-container,
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-window-modalitycurtain,
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .modal-backdrop,
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .yui3-widget-mask,
@@ -33,4 +34,10 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c
 html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-overlay {
   --cx-glass-blur: var(--cx-glass-blur-overlay, 12px);
   --cx-gl-blur: blur(var(--cx-glass-blur-overlay, 12px)) saturate(160%);
+}
+
+/* Connect's Angular dialogs are glass like .modal-content: a translucent outer surface, so they blur too */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-dialog-container {
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
 }

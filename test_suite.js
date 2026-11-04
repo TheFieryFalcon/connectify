@@ -15125,6 +15125,32 @@ runTest('Test 320: The theme audit never audits the same view twice', async () =
   assert.strictEqual(tries, -998, 'and gives up in the end');
 });
 
+runTest('Test 321: Page wrappers and dialog contents are clear, Connect\'s dialogs blur, and side margins count only if the box moved', () => {
+  const styles = path.join(BASE_DIR, 'src/theme/styles');
+  const buttons = fs.readFileSync(path.join(styles, 'theme-buttons.css'), 'utf8');
+  assert.ok(buttons.includes('div.w-100:not(.mt-n4):has([class*="year"], [class*="report"], mat-toolbar, .mat-toolbar)'), 'Submissions\' page wrapper holds a toolbar but is no bar');
+  const dialog = fs.readFileSync(path.join(styles, 'theme-dialog-surface.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const clearRule = dialog.slice(dialog.lastIndexOf('}', dialog.indexOf('cnt-library-avatar-picker')) + 1);
+  for (const sel of ['cnt-library-avatar-picker', 'mat-drawer-container', 'mat-drawer-content', 'mat-drawer', '.example-container', 'mat-accordion', '.mat-accordion', 'mat-expansion-panel', '.mat-expansion-panel']) {
+    assert.ok(clearRule.includes(sel), `${sel} is clear on the dialog's one surface`);
+  }
+  assert.ok(/#cx-(specificity-anchor|n)/.test(clearRule), 'it outranks the general accordion and drawer fills');
+  const body = clearRule.slice(clearRule.indexOf('{'), clearRule.indexOf('}'));
+  for (const decl of ['background-color: transparent !important', 'background-image: none !important', 'backdrop-filter: none !important']) assert.ok(body.includes(decl), `dialog contents: ${decl}`);
+
+  const floor = fs.readFileSync(path.join(styles, 'theme-overlay-blur.css'), 'utf8');
+  assert.ok(/\) mat-dialog-container,/.test(floor), 'dialogs keep the overlay blur floor');
+  assert.ok(/\.connectea-dark:is\(\[data-connectea-theme="liquid-glass"\], \[data-connectea-glass="true"\]\) mat-dialog-container \{\s*backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\)/.test(floor), 'and blur in Liquid Glass only');
+  const { ROLES, judgeGlass } = require(path.join(BASE_DIR, 'scripts/audit-glass.js'));
+  assert.ok(ROLES.overlay.includes('mat-dialog-container'), 'the audit judges them against that floor');
+  const tokens = { surfaces: [0.3, 0.33], blur: 4, overlayBlur: 12 };
+  assert.deepStrictEqual(judgeGlass({ tokens, layers: [{ selector: 'mat-dialog-container', role: 'overlay', alpha: 0.33, stack: 0.33, blur: 12, hasBlur: true }] }), []);
+
+  const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
+  assert.ok(audit.includes('pageLeft: rect.left + (window.scrollX || 0)') && audit.includes('(boxMoved && Math.abs(curMarginLeft - base.margin.left) > mTol)'), 'a side margin that moved nothing is no finding');
+  assert.ok(audit.includes('Math.abs(curMarginTop - base.margin.top) > mTol ||'), 'top and bottom margins always count');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

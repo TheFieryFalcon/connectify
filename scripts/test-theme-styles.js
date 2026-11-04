@@ -1519,6 +1519,7 @@ async function captureNativeBaseline(page, options = {}) {
           bottom: parseFloat(style.marginBottom) || 0,
           left: parseFloat(style.marginLeft) || 0
         },
+        pageLeft: rect.left + (window.scrollX || 0),
         size: {
           width: Math.round(rect.width * 10) / 10,
           height: Math.round(rect.height * 10) / 10
@@ -1977,11 +1978,15 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
           const curMarginLeft = parseFloat(style.marginLeft) || 0;
           const mTol = opts.marginTolerance || 1.0;
 
+          // Side margins count only if the box moved: Connect's centred empty state reports 0 natively and 230px themed,
+          // sitting in the same place at the same width
+          const boxMoved = base.pageLeft === undefined || Math.abs(rect.left + (window.scrollX || 0) - base.pageLeft) > mTol;
+
           if (
             Math.abs(curMarginTop - base.margin.top) > mTol ||
-            Math.abs(curMarginRight - base.margin.right) > mTol ||
             Math.abs(curMarginBottom - base.margin.bottom) > mTol ||
-            Math.abs(curMarginLeft - base.margin.left) > mTol
+            (boxMoved && Math.abs(curMarginRight - base.margin.right) > mTol) ||
+            (boxMoved && Math.abs(curMarginLeft - base.margin.left) > mTol)
           ) {
             issues.push({
               category: 'PARITY',

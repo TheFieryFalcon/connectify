@@ -236,6 +236,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - clear: lists, tables and their rows/cells, activity feeds, menu lists and rows, accordion panels, fieldsets, tab headers in cards, stat cells, cohort panel lines
     - clear: the article wrapper around a home page tile, a promo inside a tile with no border or corners of its own
     - clear: a Classes row's Favourite, Statistics and More buttons, whose dividers take `--cx-border-subtle` to stay as faint as Connect's on white
+    - clear: a page's own wrapper holding a toolbar (Submissions' `.mt-n4`), which is no bar
     - hover and active states keep their highlight
     - Blocks inside a glass card stay clear with hairline dividers (`theme-glass-class-pages.css`)
   - Blur (`theme-glass-nesting.css`)
@@ -394,6 +395,8 @@ Extremely concise summary of the core visual design language, contrast standards
   - Dialogs (`theme-dialog-surface.css`, `theme-surface-nesting.css`)
     - Dialog title, content, footer and `cnt-*-dialog` host (`.connect-dialog`) regions are transparent over the dialog's one surface
     - floating fieldsets in a dialog (Add Discussion's Message and Image Gallery) too
+    - the avatar picker's drawer layers and Change Password's accordion too, with no blur of their own
+    - In Liquid Glass Connect's Angular dialog (`mat-dialog-container`) blurs like any translucent outer surface
     - the reading-view canvas rule skips dialog contents
   - Paginators
     - a `cnt-paginator` that wraps the table keeps native layout (only the paging bar is flexed)

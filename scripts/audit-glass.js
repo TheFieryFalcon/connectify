@@ -31,7 +31,7 @@ const ROLES = {
   solid: '.cx-goal-modal, #cx-customizer-modal > div, .cx-crop-dialog',
   backdrop: '.cx-goal-overlay, #cx-customizer-modal, #cx-wallpaper-crop, .v-window-modalitycurtain, .modal-backdrop, .yui3-widget-mask, .ui-widget-overlay, .cdk-overlay-dark-backdrop, .mat-drawer-backdrop, .eds-c-modal-overlay, .eds-c-overlay, .cvr-c-overlay, .cx-overlay',
   // The layers covering other text, as theme-overlay-blur.css lists them
-  overlay: '#connectify-sidebar, #connectea-theme-menu, #connectea-outcome-tooltip, #cx-jump-subject-list, .cx-dates-filter-list, .cx-notification, .cvr-c-primary-navigation, .cvr-c-location-bar, .cvr-c-service-bar__container, .cvr-c-service-bar, .cvr-c-service-menu, .cvr-c-category-menu, .c-category-menu, .js-pos-category-toolbar-container::before, .v-popupview-popup, .modal-content, .ui-dialog, .mat-menu-panel, .mat-select-panel',
+  overlay: '#connectify-sidebar, #connectea-theme-menu, #connectea-outcome-tooltip, #cx-jump-subject-list, .cx-dates-filter-list, .cx-notification, .cvr-c-primary-navigation, .cvr-c-location-bar, .cvr-c-service-bar__container, .cvr-c-service-bar, .cvr-c-service-menu, .cvr-c-category-menu, .c-category-menu, .js-pos-category-toolbar-container::before, .v-popupview-popup, .modal-content, .ui-dialog, mat-dialog-container, .mat-menu-panel, .mat-select-panel',
   surface: '.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, mat-card, .mat-card'
 };
 
