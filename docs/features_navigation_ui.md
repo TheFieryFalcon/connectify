@@ -84,6 +84,11 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **UI Appearance**: Compact dropdown selector (`Type: [ Auto (Exam) v ]`) with highlighted styling when overridden.
 - **Functionality**: Automated keyword categorizing; manual overrides (`Exam`, `Test`, `Application`, `Essay`, `Take-Home`); supports `+ Custom...` category creation shared across Semester 1 and 2 in that class (new names up to 16 characters). The dropdown is as wide as the chosen type (at most 160px, longer names end in an ellipsis), never its longest option.
 
+### 9b. Content Page Downloads
+- **Source Modules**: `src/content/content-files.js`, `src/content/content-download.js`
+- **DOM Insertion**: A `Download` button left of each section heading's `View` on a class's Content page.
+- **Functionality**: Saves every file under that heading without leaving the list: one file as itself, several as one ZIP named after the class and heading, so the browser never asks to allow multiple downloads. A heading with no files says `No Files`.
+
 ### 10. Overall Subject Cohort Controls
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`cohort-estimator.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-estimator.js)
 - **DOM Insertion**: Overall subject summary row (top row of each `.eds-c-tile` card).

@@ -133,7 +133,7 @@
 }
 
 /* Responsive display-width scaling for subject and task panels */
-:is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card) {
+:is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile) {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;

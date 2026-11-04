@@ -41,6 +41,12 @@ html.connectea-dark[data-connectea-theme] table :where(th):not(#cx-n), html.conn
   background-color: transparent !important;
 }
 
+/* A card's body and header (Content's section headings) are clear: the card is the surface, one glass layer */
+html.connectea-dark[data-connectea-theme] .eds-c-card > .eds-c-card__body:not(.cx-n):not(.cx-n),
+html.connectea-dark[data-connectea-theme] .eds-c-card > .eds-c-card__header:not(.cx-n):not(.cx-n) {
+  background-color: transparent !important;
+}
+
 /* A table inside a card or tile (Summary calendar) is clear too: the card is the surface */
 html.connectea-dark[data-connectea-theme] .mat-card :where(table):not(#cx-n),
 html.connectea-dark[data-connectea-theme] .eds-c-card :where(table):not(#cx-n),

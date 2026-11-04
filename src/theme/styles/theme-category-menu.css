@@ -19,6 +19,11 @@ html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connec
   -webkit-backdrop-filter: none !important;
 }
 
+/* Connect's Vaadin bar in that container (Content's Published Sections) sits on the same glass, with no second fill */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container > .cvr-c-category-toolbar:not(#cx-n) {
+  background-color: transparent !important;
+}
+
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container::before,
 html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container::before {
   content: '';

@@ -172,5 +172,5 @@
   /** Theme object from a picked .ctme or older .json file. */
   const unpackFile = async file => unpack((await readFile(file)).buffer);
 
-  window.ConnectifyThemeCtme = { fileName, zip, unzip, pack, unpack, unpackFile, crc32 };
+  window.ConnectifyThemeCtme = { fileName, zip, unzip, pack, unpack, unpackFile, readFile, crc32 };
 })();

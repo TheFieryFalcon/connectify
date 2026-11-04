@@ -78,6 +78,16 @@ Extremely concise summary of the core visual design language, contrast standards
   - Set as Goal turns into Confirm and Cancel where its button was and adds End beside Recalculate
     - under no progress bar or points of its own (the planner already shows them)
     - its task table and sliders live (a custom end week narrows that table)
+- **Content Page** (`src/content/`, `theme-category-menu.css`, `theme-surface-nesting.css`)
+  - Section headings
+    - Connect's own width and 30px margins on both sides, never forced to 100% (that ran 30px past the page, so it scrolled sideways)
+    - cards are left out of the `width: 100%` rule tiles get
+    - one glass layer in Liquid Glass: the card paints and blurs, its body and header are clear
+    - the Published Sections bar has no fill of its own over its container's glass
+  - Download
+    - left of View on the same line, one of Connect's standard buttons, so rows keep their height in every theme
+    - saves every file under the heading without leaving the list: one file as itself, several as one ZIP (`<class> <heading>.zip`)
+    - its caption is its only status: `Preparing`, `2 of 5`, `No Files`, `2 Failed`
 - **Year Progression Tabs**
   - three subtabs on the Predictor's tab bar, in this order
     - **Progress Graph** (chips, `Show:`, chart, and a table of marks and weights, no dates or Early Easter)

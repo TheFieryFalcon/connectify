@@ -223,8 +223,16 @@
   }
   window.ConnectifyDataSyncCharts = syncCharts;
 
+  // Firefox runs a content script's own fetch as the extension; content.fetch is the page's (its cookies)
+  function pageFetch(url, init) {
+    try {
+      if (typeof content !== 'undefined' && typeof content?.fetch === 'function') return content.fetch(url, init);
+    } catch {}
+    return fetch(url, init);
+  }
+
   window.ConnectifyUtils = {
-    normalize, escapeHtml, accountKey, signedInUserId, userKey, userKeys, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
+    pageFetch, normalize, escapeHtml, accountKey, signedInUserId, userKey, userKeys, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
     customWeekOrder, readTimeOverride, syncCharts, cardSemester, OUTLINES_URL, isOutlinesPage
   };
 })();

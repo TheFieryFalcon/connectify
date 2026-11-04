@@ -1,0 +1,19 @@
+/**
+ * Connectify Content: the Download button beside View. It is one of Connect's own standard buttons, so every theme
+ * colours it like View; these rules only place it and keep its width while its caption counts files.
+ */
+/* Connect's cell is 1px wide and grows to its content, so a second button would wrap under the first */
+.eds.cvr .cx-content-actions {
+  white-space: nowrap;
+}
+
+.eds.cvr .v-button.cx-content-download {
+  min-width: 96px;
+  margin-right: 8px;
+  text-align: center;
+}
+
+.eds.cvr .v-button.cx-content-download.v-disabled {
+  cursor: default;
+  opacity: 0.6;
+}

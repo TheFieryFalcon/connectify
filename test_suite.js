@@ -4023,8 +4023,8 @@ runTest('Test 122: Back to top button styling parity, expandAll multi-card dedup
   assert.ok(cohortStatsJs.includes('max-width: fit-content !important;'), 'cohort-stats.js must set max-width: fit-content on .connectea-panel');
   assert.ok(cssHas(sidebarCss, '.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:nowrap!important'), 'sidebar.css must use nowrap on .connectea-row-wrapper');
   assert.ok(cssHas(sidebarCss, '.connectea-row-wrapper>.connectea-panel{flex:0 1 auto!important;width:auto!important;max-width:fit-content!important'), 'sidebar.css must set max-width: fit-content on .connectea-panel');
-  assert.ok(cssHas(sidebarCss, ':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)'), 'sidebar.css must scale subject cards to 100% width');
-  assert.ok(cssHas(themeCss, '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card {'), 'theme.css must scale subject cards to 100% width');
+  assert.ok(cssHas(sidebarCss, ':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile) {'), 'sidebar.css must scale subject tiles to 100% width');
+  assert.ok(cssHas(themeCss, '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile {'), 'theme.css must scale subject tiles to 100% width');
   assert.ok(!cssHas(sidebarCss, '.cvr-c-task__details{flex:1 1 auto!important'), 'sidebar.css must not force flex: 1 1 auto on .cvr-c-task__details');
 });
 
@@ -7411,7 +7411,7 @@ runTest('Test 153: Theme CSS selectors are scoped to a theme hook (native Connec
     '.eds-c-accordion__panel', '.cvr-c-accordion__panel', // layout containment for accordion performance
     '.cvr-c-primary-navigation', // theme toggle mount point (toggle exists in every mode)
     ':is(.v-Notification-system, .v-Notification-system *)', // Connect timeout alerts are never themed
-    ':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, .eds-c-card, .cvr-c-card, .cvr-c-dashboard-card)', // display-width scaling
+    ':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile)', // display-width scaling
     '.cvr-c-task__details', // display-width scaling
     '#ng-zone__classes-metrics-summary', // classes list back panel in all modes
     'cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body))', '.cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body))',
@@ -14671,6 +14671,72 @@ runTest('Test 314: Next Up lists this week and next week between Progress Graph 
   assert.ok(css.includes('#cx-next-up .cx-dates-table :is(th, td) { padding-right: 16px; padding-left: 0;') && css.includes('.cx-next-col-assessment { width: 100%; }') && !css.includes('table-layout'), 'one 16px gap between columns as wide as their text, the name taking the rest');
   assert.ok(read('goals/goal-forecast.css').includes(':is(#cx-specificity-anchor, .connectea-row-wrapper, .cx-next-goal) .cx-goal-target__value[data-tier]'), 'the goal percentage shares the outlines\' tier colours');
   assert.ok(cssHasToken(css, '.connectea-dark #cx-next-up .cx-next-done { color: #60a5fa; }'), 'the face takes the theme\'s link ink');
+});
+
+runTest('Test 315: Content\'s section headings keep Connect\'s margins and height, are one glass layer, and each has a Download beside its View', () => {
+  const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
+  const sandbox = { window: {}, document: { querySelector: () => null, scripts: [] }, location: { href: '' }, console, URLSearchParams, Intl, Date, Math, JSON, encodeURIComponent, decodeURIComponent, parseInt, String };
+  vm.runInNewContext(read('content/content-files.js'), sandbox);
+  const Files = sandbox.window.ConnectifyContentFiles;
+
+  // Vaadin's bootstrap escapes its URLs; only the named app's script counts
+  const boot = Files.bootConfig('app-2', [
+    'vaadin.initApplication("app-1",{serviceUrl:"https://x/one"});',
+    'vaadin.initApplication("app-2",{serviceUrl:"https://x/ui?a\\x3d1\\x26b\\x3d2",browserDetailsUrl:"https://x/d?c\\x3d3",pathParameterName:"_p_v-resourcePath"});'
+  ]);
+  assert.strictEqual(boot.serviceUrl, 'https://x/ui?a=1&b=2', 'the service URL is unescaped');
+  assert.strictEqual(boot.detailsUrl, 'https://x/d?c=3');
+  assert.strictEqual(boot.pathParameter, '_p_v-resourcePath');
+  assert.strictEqual(Files.bootConfig('app-3', ['vaadin.initApplication("app-1",{})']), null, 'no script for this app, no config');
+
+  // Each View is matched to the heading in its own card
+  const landing = {
+    state: {
+      5: { text: 'T1 W1', styles: ['eds-c-heading', 'eds-c-heading--md'] }, 6: { text: 'View' },
+      8: { text: 'T1 W2', styles: ['eds-c-heading'] }, 9: { caption: 'View' }
+    },
+    hierarchy: { 1: ['2', '3'], 2: ['4', '6'], 4: ['5'], 3: ['7', '9'], 7: ['8'] }
+  };
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(Files.sections(landing))), [{ title: 'T1 W1', viewId: '6' }, { title: 'T1 W2', viewId: '9' }]);
+
+  // A section's reply: Vaadin's guard removed, only FileDownloader links count, in connector order
+  const reply = Files.parseUidl('for(;;);[{"syncId":3,"state":{"10":{"resources":{"icon":{"uRL":"fonticon://x"}}},"668":{"resources":{"dl":{"uRL":"/f/b/Law+%282007%29.pdf"}}},"659":{"resources":{"dl":{"uRL":"/f/a/Textbook pages.pdf"}}}}}]');
+  assert.strictEqual(reply.syncId, 3);
+  assert.deepStrictEqual(Array.from(Files.fileUrls(reply)), ['/f/a/Textbook pages.pdf', '/f/b/Law+%282007%29.pdf']);
+
+  // Names: form-encoded or raw, never a path
+  assert.strictEqual(Files.fileName('/f/b/Law+%282007%29+pp+14-21.pdf'), 'Law (2007) pp 14-21.pdf');
+  assert.strictEqual(Files.fileName('/f/a/Textbook pages 1-6 Scan.pdf'), 'Textbook pages 1-6 Scan.pdf');
+  assert.strictEqual(Files.fileName('/f/c/..%2F..%2Fevil.pdf'), '.. .. evil.pdf', 'an encoded path never reaches the archive');
+  assert.strictEqual(Files.fileName('/f/d/50%.pdf'), '50%.pdf', 'a stray percent keeps the name');
+  assert.deepStrictEqual(Array.from(Files.uniqueNames(['a.pdf', 'A.pdf', 'a.pdf', 'b'])), ['a.pdf', 'A (2).pdf', 'a (3).pdf', 'b']);
+
+  // Cards keep Connect's width: 100% on top of the section cards' 30px margins ran 30px past the page
+  for (const file of ['sidebar/styles/sidebar-progress-scaling.css', 'theme/styles/theme-search-scaling.css']) {
+    assert.ok(!/eds-c-card[^{}]*\{\s*width: 100% !important/.test(read(file)), `${file} leaves cards at Connect's width`);
+  }
+
+  // One glass layer: the card paints, its body and the bar's panel do not
+  assert.ok(/\.eds-c-card > \.eds-c-card__body[^{}]*\{\s*background-color: transparent !important;/.test(read('theme/styles/theme-surface-nesting.css')), 'a card\'s body is clear');
+  assert.ok(/\.js-pos-category-toolbar-container > \.cvr-c-category-toolbar:not\(#cx-n\) \{\s*background-color: transparent !important;/.test(read('theme/styles/theme-category-menu.css')), 'the Published Sections bar has no second fill');
+
+  // Download sits on View's line, so the row keeps its height
+  const css = read('content/content-download.css');
+  assert.ok(/\.cx-content-actions \{\s*white-space: nowrap;/.test(css), 'Connect\'s 1px cell never wraps the two buttons');
+  const download = read('content/content-download.js');
+  assert.ok(download.includes('view.before(createButton())'), 'Download goes left of View');
+  assert.ok(download.includes("mute: false") && download.includes('ConnectifyScheduler.onMutations'), 'rows are watched through the shared scheduler');
+  assert.ok(!/[•·]/.test(download + read('content/content-files.js')), 'no dot separators');
+
+  // Connect's own page: only the Content page, after what it reuses
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(g => (g.js || []).includes('src/content/content-download.js'));
+  assert.ok(group.matches.every(m => m.includes('/ui/class/learning-content')), 'Content page only');
+  assert.ok(group.js.indexOf('src/content/content-files.js') < group.js.indexOf('src/content/content-download.js'), 'files before the buttons');
+  assert.ok(group.css.includes('src/content/content-download.css'));
+  assert.ok(manifest.content_scripts.indexOf(group) > manifest.content_scripts.findIndex(g => (g.js || []).includes('src/theme/theme-ctme.js')), 'after the ZIP writer');
+  assert.strictEqual(read('assessment/outline-api.js').includes('content.fetch'), false, 'one pageFetch, in utils.js');
+  assert.ok(read('system/utils.js').includes('content.fetch'));
 });
 
 Promise.all(pendingTestPromises).then(() => {

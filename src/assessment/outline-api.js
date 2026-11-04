@@ -20,21 +20,13 @@
 
   if (window.ConnectifyOutlineApi) return;
 
-  const { normalize } = window.ConnectifyUtils;
+  const { normalize, pageFetch } = window.ConnectifyUtils;
   const BASE = '/connectapi/rest/api/v1/app/student/';
 
   const xsrfToken = () => {
     const match = String(document.cookie || '').match(/(?:^|;\s*)CONNECT_XSRF=([^;]*)/);
     return match ? decodeURIComponent(match[1]) : '';
   };
-
-  // Firefox runs a content script's own fetch as the extension; content.fetch is the page's (its cookies)
-  function pageFetch(url, init) {
-    try {
-      if (typeof content !== 'undefined' && typeof content?.fetch === 'function') return content.fetch(url, init);
-    } catch {}
-    return fetch(url, init);
-  }
 
   async function post(path, body) {
     const res = await pageFetch(BASE + path, {

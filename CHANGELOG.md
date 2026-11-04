@@ -7,6 +7,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ## Unreleased
 
 ### Changes
+- **Download a whole section from the Content page.** Each heading now has a Download button beside View. It saves everything under that heading without leaving the list, as one ZIP when there's more than one file.
 - **Year Progression has three tabs.** Progress Graph has the charts and each task's weight and mark. Next Up has what's due soon. Task Dates has every task's date, the term dates and Export.
 - **See what's next with the new Next Up tab.** It lists your assessments this week and next week, with each one's subject, type, weight and predicted Low, Mid and High, its grade once it's marked, and the mark and difficulty your goal asks of it. A week with nothing due shows a happy face and says No Tasks, or All Done! in the holidays and once your last task has passed.
 - **Group and sort the task list your way.** Group By None, Subject, Type, Completed, Predicted Grade or Grade Achieved, with an arrow for ascending or descending; Sort By Chronological, Alphabetical or Grade Achieved; and Show Uncompleted Only. Grades group as High Distinction (A) from 80%, Distinction (B) from 70%, Credit (C) from 60%, Pass (C) from 50% and Fail (D).
@@ -18,6 +19,8 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Finished goals say so in the notification's title.** It reads Goal Achieved with a green edge or Goal Missed with a gray edge, and goal names no longer start with the year level.
 
 ### Fixes
+- Section headings on the Content page no longer run off the right edge of the screen and make the page scroll sideways. They have even margins again.
+- Content page headings and the Published Sections bar now have a clean Liquid Glass look, without a second grey layer dulling them.
 - Exams merged into one event on Export now keep their ticks, so you can leave one out, and a tick no longer vanishes as you click a second exam.
 - You can now see which tab is selected on the Predictor, Goal Setter, Estimator and Year Progression, in every theme.
 - Pressing Escape while changing a task's week now cancels the change without closing the sidebar.
