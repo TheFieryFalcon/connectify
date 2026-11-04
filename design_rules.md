@@ -78,6 +78,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - Set as Goal turns into Confirm and Cancel where its button was and adds End beside Recalculate
     - under no progress bar or points of its own (the planner already shows them)
     - its task table and sliders live (a custom end week narrows that table)
+    - on a subject with a goal it is Update Goal and Save Changes: the same goal with its judged tasks, never deleted and set again
 - **Content Page** (`src/content/`, `theme-category-menu.css`, `theme-surface-nesting.css`)
   - Section headings
     - Connect's own width and 30px margins on both sides, never forced to 100% (that ran 30px past the page, so it scrolled sideways)

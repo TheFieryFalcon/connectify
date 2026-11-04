@@ -61,6 +61,19 @@
 
   const semesterButton = idx => document.querySelectorAll('#connectea-atar .cta-semester')[idx];
 
+  /** Opens the end and Confirm on a saved goal's own end, on its semester. */
+  function openOnEnd(kind, goal, info) {
+    const semIdx = P().semesterOf(goal) - 1;
+    composing[kind] = { week: goal.end?.type === 'week' ? goal.end.week : null };
+    if (kind === 'grade') info.refs.gradeSelectedSubjects[semIdx] = goal.subject;
+    if (info.ctx.getActiveSemester() !== semIdx) {
+      semesterButton(semIdx)?.click();
+      // A closed semester's button does nothing
+      if (info.ctx.getActiveSemester() === semIdx) return;
+    }
+    redraw(kind, info);
+  }
+
   function gradeDraft({ refs, ctx, course }) {
     const id = editing.grade?.goal.id;
     return {
@@ -107,8 +120,11 @@
         isClosed: semester => Boolean(semesterButton(semester - 1)?.disabled),
         onEnd: end => {
           composing[kind] = { week: end.type === 'week' ? end.week : null };
-          if (end.type === 'semester' && info.ctx.getActiveSemester() !== end.semester - 1) semesterButton(end.semester - 1)?.click();
-          else redraw(kind, info);
+          if (end.type === 'semester' && info.ctx.getActiveSemester() !== end.semester - 1) {
+            // Each semester remembers its own subject: a new end stays on this one
+            if (kind === 'grade') info.refs.gradeSelectedSubjects[end.semester - 1] = info.course.id;
+            semesterButton(end.semester - 1)?.click();
+          } else redraw(kind, info);
         },
         onSaved: () => saved(kind, info),
         onCancel: () => stopEditing(kind, info, Boolean(edit))
@@ -119,11 +135,14 @@
       return;
     }
 
+    // A goal the plan would change keeps its end unless the End control changes it
+    const current = info.held ? null : store().current(draft);
     const bar = M().el('div', 'cx-goal-actions');
-    const setBtn = M().el('button', 'cx-goal-set', info.held ? 'Update Goal' : 'Set as Goal');
+    const setBtn = M().el('button', 'cx-goal-set', info.held || current ? 'Update Goal' : 'Set as Goal');
     setBtn.type = 'button';
     setBtn.disabled = Boolean(info.plan.error) || !window.ConnectifyUtils.isOutlinesPage();
     setBtn.addEventListener('click', () => {
+      if (current) return openOnEnd(kind, current, info);
       composing[kind] = { week: null };
       redraw(kind, info);
     });
@@ -172,6 +191,8 @@
 
   function afterGrade(container, info) {
     latest.grade = info;
+    // Another subject is another goal, never this one renamed
+    if (editing.grade && editing.grade.goal.subject !== info.course.id) editing.grade = null;
     narrowToEnd(container, info);
     controls(container, 'grade', info, gradeDraft);
   }
@@ -188,12 +209,9 @@
     const info = latest[kind];
     if (!info) return;
     const { refs } = info;
-    const semIdx = P().semesterOf(goal) - 1;
-    composing[kind] = { week: goal.end?.type === 'week' ? goal.end.week : null };
     if (kind === 'grade') {
       const before = { subject: refs.gradeSelectedSubjects.slice(), target: refs.gradeTargetInput.value, checked: refs.difficultyCheckbox.checked, sliders: { ...S().gradeSliders(goal.subject) } };
       editing.grade = { goal, before: () => { refs.gradeSelectedSubjects.splice(0, 2, ...before.subject); refs.gradeTargetInput.value = before.target; refs.difficultyCheckbox.checked = before.checked; S().setGrade(goal.subject, before.sliders); } };
-      refs.gradeSelectedSubjects[semIdx] = goal.subject;
       refs.gradeTargetInput.value = String(goal.target);
       refs.difficultyCheckbox.checked = Boolean(goal.difficultyWeighted);
       S().setGrade(goal.subject, goal.sliders);
@@ -205,9 +223,7 @@
       S().setAtar(goal.subjectSliders);
       for (const child of store().childrenOf(goal.id)) S().setGrade(child.subject, child.sliders);
     }
-    if (info.ctx.getActiveSemester() !== semIdx) semesterButton(semIdx)?.click();
-    else if (kind === 'target') info.ctx.renderTargetOutput();
-    else info.ctx.renderGradeOutput();
+    openOnEnd(kind, goal, info);
   }
 
   window.ConnectifyGoalEditor = { heldTarget, paintGoalsButton, afterGrade, afterTarget, clearEnd, edit, isEditing: kind => Boolean(editing[kind]), isComposing: kind => Boolean(composing[kind]) };

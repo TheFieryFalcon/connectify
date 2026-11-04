@@ -20,6 +20,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Finished goals say so in the notification's title.** It reads Goal Achieved with a green edge or Goal Missed with a gray edge, and goal names no longer start with the year level.
 
 ### Fixes
+- Changing a goal's target or weighting now keeps it the same goal. The tasks it has already judged keep their bars, and it no longer asks to overwrite the goal or starts it over. Set as Goal reads Update Goal on a subject with a goal.
 - Section headings on the Content page no longer run off the right edge of the screen and make the page scroll sideways. They have even margins again.
 - Content page headings and the Published Sections bar now have a clean Liquid Glass look, without a second grey layer dulling them.
 - Exams merged into one event on Export now keep their ticks, so you can leave one out, and a tick no longer vanishes as you click a second exam.

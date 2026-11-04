@@ -65,6 +65,14 @@
     return goals.find(g => g.status === 'active' && !g.parent && subjectsOf(g).includes(key)) || null;
   }
 
+  /** The saved goal a draft changes: its own id's, or the active grade goal on its subject (one per subject), or null. */
+  function current(draft) {
+    const own = draft.id ? byId(draft.id) : null;
+    if (own || draft.kind === 'atar') return own;
+    const holder = activeFor(draft.subject);
+    return holder?.kind === 'atar' ? null : holder;
+  }
+
   /**
    * What stops a goal being saved: `{ subject, goal }` for each active goal already holding one of its subjects
    * (the goal being edited, and its own children, never count), and `atar` when another ATAR goal is active.
@@ -159,6 +167,6 @@
 
   window.ConnectifyGoalStore = {
     VERSION, GOALS_PREFIX, VERDICTS_PREFIX, subjectKey, all, active, past, byId, childrenOf, subjectsOf, activeFor,
-    conflicts, save, patch, remove, finish, verdicts, clearVerdicts, takeAll
+    current, conflicts, save, patch, remove, finish, verdicts, clearVerdicts, takeAll
   };
 })();

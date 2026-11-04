@@ -1,6 +1,6 @@
 # Spec: Goals
 
-Status: implemented (2026-10-26). Revised 2026-11-02: Set as Goal opens on the planner (`goal-compose.js`), not a dialog; §4.2's layout and preview are superseded (no second copy of the planner's table), and the rest of §4.2 applies as written. Module reference: `docs/modules_goals.md`.
+Status: implemented (2026-10-26). Revised 2026-11-02: Set as Goal opens on the planner (`goal-compose.js`), not a dialog; §4.2's layout and preview are superseded (no second copy of the planner's table), and the rest of §4.2 applies as written. Revised 2026-11-04: a plan for a subject with a goal changes that goal (§4.2, §7.1). Module reference: `docs/modules_goals.md`.
 
 ## 1. Summary
 The Goal Setter's **Target Grade** and **Target ATAR** planners get a **Set as Goal** button that opens a modal dialog (preview, end point, Confirm) to save the plan as a **goal**. A **Goals** button opens a second modal listing saved goals. A saved goal:
@@ -114,7 +114,7 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
   - the preview is **Guaranteed** (`Already secured.`) or **Impossible** (`Highest possible: 78.4%.`);
   - the subject is held by the ATAR goal (`Set by your ATAR 95.00 goal.`, §5.3);
   - another ATAR goal is active (`You already have an ATAR goal.`).
-- **Subject conflict**: when the subject already has an active grade goal, the line reads `<subject> already has a goal. Overwrite?` (no Edit link) and Confirm stays enabled: it deletes that goal (it does not go to Past goals), then saves.
+- **Subject with a goal**: when the subject already has an active grade goal, the plan changes that goal, as an edit does (§4.4, §7.1): Set as Goal reads **Update Goal** and opens on the goal's end, and Confirm reads **Save Changes**. Nothing is asked and nothing is deleted.
 - **ATAR conflict**: when a top-four subject already has a grade goal, Confirm turns into an in-dialog prompt: `Chemistry ATAR already has a goal (85% by Semester 2). Replace it?` **Replace** / **Back**. Replace deletes that grade goal (it does not go to Past goals), then saves.
 
 ### 4.3 Goals dialog (`#cx-goals-dialog`)
@@ -207,7 +207,7 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
 
 ### 7.1 Replay
 - Each goal records `priorMarked`: the task ids already marked when it was created (from `cardTaskIds` / the subjects cache).
-- Tasks in range that are not in `priorMarked` are judged by this goal, replayed live with its **current** settings. **Any edit keeps it the same goal** (target, sliders, end, checkbox), and its tasks are re-judged.
+- Tasks in range that are not in `priorMarked` are judged by this goal, replayed live with its **current** settings. **Any edit keeps it the same goal** (target, sliders, end, checkbox), and its tasks are re-judged. Its id, `priorMarked` and `createdAt` stay; an edit brings no Goal Updated toast, and the next toast's "was" tier starts from the edit.
 - Tasks in `priorMarked` show the **previous goal's verdict**: the most recent past goal that judged that task, frozen. If there is none, they get no bars.
 - Delete-and-create starts a new goal, so the old goal's frozen verdicts (if it finished) stay and its live ones disappear.
 

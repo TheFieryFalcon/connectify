@@ -12281,16 +12281,14 @@ runTest('Test 263: Set as Goal previews the goal with its end and confirms it; t
   assert.ok(editor.includes('function narrowToEnd(container, info)') && editor.includes("container.querySelector('.cx-goal-tasks')"), 'a custom end narrows the planner\'s own task table');
 
   const again = compose({ ...draft }).node;
-  assert.strictEqual(mockText(again.querySelector('.cx-goal-reason')), 'Chemistry already has a goal. Overwrite?', 'a second goal for the subject asks to overwrite the first');
-  assert.ok(!again.querySelector('.cx-goal-reason .cx-goal-link'), 'with no Edit button');
-  assert.strictEqual(again.querySelector('.cx-goal-confirm').disabled, false, 'Confirm answers it');
+  assert.strictEqual(mockText(again.querySelector('.cx-goal-reason')), '', 'a plan for a subject with a goal asks nothing');
+  assert.deepStrictEqual([again.querySelector('.cx-goal-confirm').disabled, again.querySelector('.cx-goal-confirm').textContent], [false, 'Save Changes'], 'it changes that goal');
   again.querySelector('.cx-goal-cancel-edit').click();
   assert.strictEqual(cancelled, 1, 'Cancel closes it');
-  assert.strictEqual(win.ConnectifyGoalStore.active()[0].id, goal.id, 'and keeps the first goal');
+  assert.strictEqual(win.ConnectifyGoalStore.active()[0].target, 80, 'and leaves the goal as it was');
   compose({ ...draft, target: 82 }).node.querySelector('.cx-goal-confirm').click();
   const replaced = win.ConnectifyGoalStore.active();
-  assert.deepStrictEqual([replaced.length, replaced[0].target, replaced[0].id !== goal.id], [1, 82, true], 'Confirm replaces the subject\'s goal with the new one');
-  assert.ok(!win.ConnectifyGoalStore.all().some(g => g.id === goal.id), 'the overwritten goal is removed, not kept as a past goal');
+  assert.deepStrictEqual([replaced.length, replaced[0].target, replaced[0].id], [1, 82, goal.id], 'Confirm changes the subject\'s goal, keeping it');
   win.ConnectifyGoalStore.remove(replaced[0].id);
   win.ConnectifyGoalStore.save(goal);
   const sure = compose({ ...draft, id: goal.id, target: 20 }).node;
@@ -14794,6 +14792,133 @@ runTest('Test 316: Content\'s top Download toggles ticks in the headings\' left 
   assert.ok(at('content-files.js') < at('content-save.js') && at('content-save.js') < at('content-download.js') && at('content-download.js') < at('content-bulk.js'), 'dependency order');
   assert.ok(js.css.includes('src/content/content-bulk.css'));
   return pooled;
+});
+
+runTest('Test 317: Changing a goal\'s target or weighting keeps it the same goal, with the tasks it judges and no new notice', () => {
+  localStorage.clear();
+  const savedHref = location.href;
+  location.href = OUTLINES_HREF;
+  const tasks = [
+    { id: 't1', name: 'Test 1', weight: 20, pending: false, score: 78, earned: 15.6, order: 6, semester: 1 },
+    { id: 't2', name: 'Test 2', weight: 15, pending: false, score: 72, earned: 10.8, order: 12, semester: 1 },
+    { id: 't3', name: 'Investigation', weight: 15, pending: true, earned: 0, order: 26, semester: 2 },
+    { id: 't4', name: 'Exam', weight: 50, pending: true, earned: 0, order: 33, semester: 2 }
+  ];
+  const chem = { id: 'chemistry', name: 'Chemistry', subject: 'Chemistry ATAR', tasks };
+  const physics = {
+    id: 'physics', name: 'Physics', subject: 'Physics ATAR',
+    tasks: [
+      { id: 'p1', name: 'Test', weight: 50, pending: false, score: 70, earned: 35, order: 6, semester: 1 },
+      { id: 'p2', name: 'Exam', weight: 50, pending: true, earned: 0, order: 30, semester: 2 }
+    ]
+  };
+  const toasts = [];
+  const win = loadGoalModules({
+    ConnectifySchoolTerms: { schoolWeek: o => o, weekOrder: n => n },
+    ConnectifyProgressMath: { termWeek: o => ({ term: Math.floor((o - 1) / 10) + 1, week: ((o - 1) % 10) + 1 }) },
+    ConnectifyPredictorCache: { getOrComputeTaskPrediction: () => ({ low: 68, mid: 75, high: 82 }) },
+    ConnectifyAtarScraper: { readCourses: () => [[], [chem, physics]] },
+    ConnectifyData: { collect: () => [] },
+    ConnectifyAtar: { openCalculator: () => {} },
+    ConnectifyNotifications: { show: t => toasts.push(t) }
+  });
+  for (const f of ['atar/target-ui-helpers.js', 'atar/target-grade-ui.js']) new Function('window', origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8'))(win);
+  const G = win.ConnectifyGoalStore;
+  const E = win.ConnectifyGoalEvents;
+  const R = win.ConnectifyGoalReplay;
+
+  // The planner, redrawn as renderGradeOutput does
+  let current = null;
+  let semester = 1;
+  const info = {
+    refs: { gradeTargetInput: { value: '80' }, difficultyCheckbox: { checked: true }, gradeSelectedSubjects: ['', ''] },
+    ctx: { getActiveSemester: () => semester }, course: chem, plan: { required: 82 }, held: null
+  };
+  const draw = () => {
+    current = document.createElement('div');
+    current.prepend = () => {};
+    current.append(document.createElement('strong'));
+    win.ConnectifyGoalEditor.afterGrade(current, info);
+  };
+  info.ctx.renderGradeOutput = draw;
+
+  // Set with Test 1 marked; Test 2 was marked since, so the goal judges it
+  const goal = G.save({
+    kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 75, end: { type: 'semester', semester: 2 }, sliders: {},
+    priorMarked: ['chemistry::t1'], seenMarked: ['chemistry::t1', 'chemistry::t2'], lastTier: 'trivial', createdAt: '2026-03-01T00:00:00.000Z'
+  });
+  win.ConnectifyGoalSliders.gradeSliders('chemistry').t4 = 1;
+  draw();
+  assert.strictEqual(current.querySelector('.cx-goal-set').textContent, 'Update Goal', 'a plan for a subject with a goal updates it');
+  current.querySelector('.cx-goal-set').click();
+  assert.strictEqual(mockText(current.querySelector('.cx-goal-reason')), '', 'with no question to answer');
+  assert.strictEqual(current.querySelector('.cx-goal-confirm').textContent, 'Save Changes');
+  current.querySelector('.cx-goal-confirm').click();
+
+  const edited = G.byId(goal.id);
+  assert.deepStrictEqual([G.all().length, edited.revision, edited.target, edited.difficultyWeighted, edited.sliders.t4], [1, 2, 80, true, 1], 'the same goal takes the new target and weighting');
+  assert.deepStrictEqual([edited.priorMarked, edited.createdAt], [['chemistry::t1'], '2026-03-01T00:00:00.000Z'], 'and keeps when it was set and what was marked then');
+  const verdicts = R.evaluate(edited).verdicts;
+  assert.ok(verdicts['chemistry::t2'] && !verdicts['chemistry::t1'], 'so it still judges the task marked since, and never the one before it');
+  E.refresh();
+  assert.strictEqual(toasts.length, 0, 'an edit is no new result');
+  assert.strictEqual(edited.lastTier, R.evaluate(edited, { ...win.ConnectifyGoalPlan.context(), noReplay: true }).tier, 'the toast\'s "was" tier starts from the edit');
+  Object.assign(tasks[2], { pending: false, score: 80, earned: 12 });
+  E.refresh();
+  assert.ok(toasts.length === 1 && !toasts[0].details[0].includes('Trivial'), `the next result never compares with the tier before the edit (${toasts[0]?.details[0]})`);
+  Object.assign(tasks[2], { pending: true, score: undefined, earned: 0 });
+
+  // A custom end, on the other semester: Update Goal opens on it, for the same subject
+  G.remove(goal.id);
+  Object.assign(tasks[1], { pending: true, score: undefined, earned: 0, order: 9 });
+  const weekGoal = G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 70, end: { type: 'week', week: 10 }, priorMarked: ['chemistry::t1'] });
+  const buttons = [0, 1].map(i => ({ click: () => { semester = i; draw(); } }));
+  const realAll = document.querySelectorAll;
+  document.querySelectorAll = sel => (sel.includes('.cta-semester') ? buttons : realAll.call(document, sel));
+  info.refs.gradeTargetInput.value = '72';
+  try {
+    draw();
+    current.querySelector('.cx-goal-set').click();
+  } finally {
+    document.querySelectorAll = realAll;
+  }
+  assert.deepStrictEqual([semester, info.refs.gradeSelectedSubjects[0]], [0, 'chemistry'], 'the planner moves to the goal\'s semester and subject');
+  current.querySelector('.cx-goal-confirm').click();
+  assert.deepStrictEqual([G.byId(weekGoal.id).end, G.byId(weekGoal.id).target, G.all().length], [{ type: 'week', week: 10 }, 72, 1], 'changing the target keeps the end');
+
+  // A wider end brings in a task marked while it was out of range: judged from now on, but no new result
+  Object.assign(tasks[1], { pending: false, score: 72, earned: 10.8, order: 12 });
+  semester = 1;
+  Object.assign(tasks[3], { pending: false, score: 70, earned: 35 });
+  G.remove(weekGoal.id);
+  const narrow = G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 70, end: { type: 'week', week: 28 }, priorMarked: ['chemistry::t1', 'chemistry::t2'], seenMarked: ['chemistry::t1', 'chemistry::t2'] });
+  const seen = toasts.length;
+  E.refresh();
+  win.ConnectifyGoalCompose.create({ goal: { kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 70, end: { type: 'semester', semester: 2 } } }).node.querySelector('.cx-goal-confirm').click();
+  E.refresh();
+  assert.strictEqual(toasts.length, seen, 'a wider end brings no notice');
+  assert.deepStrictEqual([G.byId(narrow.id).end, Boolean(R.evaluate(G.byId(narrow.id)).verdicts['chemistry::t4'])], [{ type: 'semester', semester: 2 }, true], 'and judges the task it now covers');
+  Object.assign(tasks[3], { pending: true, score: undefined, earned: 0 });
+
+  // Editing a goal, then picking another subject: that subject's goal, never this one renamed
+  win.ConnectifyGoalEditor.edit(G.byId(narrow.id));
+  assert.strictEqual(win.ConnectifyGoalEditor.isEditing('grade'), true);
+  info.course = physics;
+  draw();
+  assert.strictEqual(win.ConnectifyGoalEditor.isEditing('grade'), false, 'editing stops on another subject');
+  current.querySelector('.cx-goal-confirm').click();
+  const other = G.activeFor('Physics');
+  assert.deepStrictEqual([other.subject, other.priorMarked, other.id !== narrow.id], ['physics', ['physics::p1'], true], 'which gets a goal of its own, from what is marked now');
+  assert.deepStrictEqual([G.byId(narrow.id).subject, G.byId(narrow.id).revision], ['chemistry', 2], 'and the first goal is untouched');
+
+  assert.strictEqual(G.current({ kind: 'atar', topFour: ['chemistry'] }), null, 'no saved ATAR goal is changed without its id');
+  G.remove(narrow.id);
+  G.remove(other.id);
+  const atar = G.save({ kind: 'atar', target: 90, end: { type: 'semester', semester: 2 }, topFour: ['chemistry'], priorMarked: [] });
+  assert.strictEqual(G.current({ kind: 'grade', subject: 'chemistry' }), null, 'a subject an ATAR goal holds has no grade goal to change');
+  assert.strictEqual(G.current({ ...atar }).id, atar.id);
+  location.href = savedHref;
+  localStorage.clear();
 });
 
 Promise.all(pendingTestPromises).then(() => {

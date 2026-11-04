@@ -5,9 +5,9 @@
  * 1 / 2, which are the planner's semester buttons, or a custom school week for grade goals), which goal-editor.js puts
  * beside the planner's inputs, and Confirm (Save Changes when editing) where Set as Goal was; what the plan needs and
  * how far along it is are on the planner already. Confirm is disabled, with the reason, for a goal
- * already secured or out of reach and for one that clashes with an ATAR goal; a grade goal for a subject that has
- * one asks to overwrite it (Confirm replaces it), and an ATAR goal over subject goals asks to replace them.
- * Exposes window.ConnectifyGoalCompose.
+ * already secured or out of reach and for one that clashes with an ATAR goal; a plan for a subject that has a goal
+ * changes that goal (same id, tasks it has judged and notices kept), and an ATAR goal over subject goals asks to
+ * replace them. Exposes window.ConnectifyGoalCompose.
  */
 (() => {
   'use strict';
@@ -18,8 +18,6 @@
   const P = () => window.ConnectifyGoalPlan;
   const store = () => window.ConnectifyGoalStore;
   const keyOf = (...args) => window.ConnectifyGoalReplay.keyOf(...args);
-
-  const goalName = goal => (goal.kind === 'atar' ? 'ATAR' : goal.name || goal.subject);
 
   // A planner re-render replaces these controls, so the one in use gets focus back
   let refocus = null;
@@ -35,7 +33,7 @@
     return [...keys];
   }
 
-  /** Why Confirm is disabled (text), or a question Confirm answers (`overwrite`: the subject goal it replaces), or null. */
+  /** Why Confirm is disabled (text), or null. */
   function blocker(goal, state) {
     if (state.error) return { text: state.error === 'No tasks' ? 'No assessments up to that week.' : state.error };
     if (state.plan?.error) return { text: state.plan.error };
@@ -47,22 +45,19 @@
     const clash = store().conflicts(goal);
     if (clash.atar) return { text: 'You already have an ATAR goal.' };
     const other = clash.subjects[0]?.goal;
-    if (other && goal.kind !== 'atar') {
-      return other.kind === 'atar'
-        ? { text: `Set by your ATAR ${Number(other.target).toFixed(2)} goal.` }
-        : { text: `${goalName(goal)} already has a goal. Overwrite?`, overwrite: other };
-    }
+    if (other?.kind === 'atar' && goal.kind !== 'atar') return { text: `Set by your ATAR ${Number(other.target).toFixed(2)} goal.` };
     return null;
   }
 
   /**
-   * The controls for draft `goal` (an id in the store means editing). `onEnd(end)`: another end was picked; the
+   * The controls for draft `goal` (a saved goal it changes means editing). `onEnd(end)`: another end was picked; the
    * planner applies it and draws again. `isClosed(semester)`: that semester's button is disabled. `lockEnd`: the
    * end cannot change (ATAR-held subject). `cancelLabel` names the way out.
    */
   function create({ goal, lockEnd = false, onEnd, isClosed, onSaved, onCancel, cancelLabel = 'Cancel' }) {
-    const isEdit = Boolean(goal.id && store().byId(goal.id));
-    const draft = { ...goal, end: { ...(goal.end || { type: 'semester', semester: 2 }) } };
+    const saved = store().current(goal);
+    const isEdit = Boolean(saved);
+    const draft = { ...(saved || {}), ...goal, id: saved?.id, end: { ...(goal.end || { type: 'semester', semester: 2 }) } };
     const ctx = P().context();
     const node = M().el('div', 'cx-goal-compose');
 
@@ -99,7 +94,7 @@
     const actions = M().el('div', 'cx-goal-actions');
     const confirm = M().el('button', 'cx-goal-confirm', isEdit ? 'Save Changes' : 'Confirm');
     confirm.type = 'button';
-    confirm.disabled = Boolean(block) && !block.overwrite;
+    confirm.disabled = Boolean(block);
     const cancel = M().el('button', 'cx-goal-cancel-edit', cancelLabel);
     cancel.type = 'button';
     actions.append(confirm, cancel);
@@ -107,7 +102,9 @@
 
     const save = () => {
       for (const clash of store().conflicts(draft).subjects) if (clash.goal.kind !== 'atar') store().remove(clash.goal.id);
-      store().save({ ...draft, priorMarked: isEdit ? draft.priorMarked || [] : markedNow(draft, ctx) });
+      // An edit keeps what the goal judges; it is no new result, so the toast's next "was" tier starts from the edit
+      const marked = markedNow(draft, ctx);
+      store().save({ ...draft, ...(isEdit ? { seenMarked: marked, lastTier: state.tier } : { priorMarked: marked }) });
       onSaved?.();
     };
     confirm.addEventListener('click', () => {
