@@ -69,7 +69,7 @@
     }).join(' ') : '';
     const cohortPolygon = hasCohort ? `<polygon class="cx-radar-cohort" points="${cohortPts}"/>` : '';
     const legend = hasCohort
-      ? `<line x1="8" y1="16" x2="32" y2="16" stroke="#2ecc71" stroke-width="2.5"/><text x="38" y="20" font-size="11" font-family="system-ui">You</text><line class="cx-radar-cohort" x1="8" y1="34" x2="32" y2="34"/><text x="38" y="38" font-size="11" font-family="system-ui">Cohort</text>`
+      ? `<rect x="8" y="15" width="24" height="2.5" fill="#2ecc71"/><text x="38" y="20" font-size="11" font-family="system-ui">You</text><line class="cx-radar-cohort" x1="8" y1="34" x2="32" y2="34"/><text x="38" y="38" font-size="11" font-family="system-ui">Cohort</text>`
       : '';
 
     const dataPolygon = `
