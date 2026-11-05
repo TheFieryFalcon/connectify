@@ -237,6 +237,15 @@ Extremely concise summary of the core visual design language, contrast standards
   - Settings
     - no description of what a control or section does, or of its default: the label and placeholder say it
     - only what the screen cannot show stays: `Current Semester: Semester 2` under Show This Semester's Classes Only, `Takes effect after reload.` under Statistics Panels, the wallpaper status and notes on missing subjects
+- **Changelog Popup** (`changelog-popup.js`, `changelog-popup.css`)
+  - Opening
+    - What's new on the update notice opens the shared goal dialog, never GitHub or a new window
+  - Content
+    - `CHANGELOG.md` ships in every build (`web_accessible_resources`), so it shows the installed version's notes, offline too
+    - every release, newest first, without the file's own intro
+  - Look
+    - entries split by spacing, no bullets
+    - the heading and ✕ stay while the notes scroll
 
 ## 2. Contrast & Typography Standards
 - **WCAG AA Threshold**

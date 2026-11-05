@@ -12,6 +12,12 @@
       "storage",
       "unlimitedStorage"
    ],
+   "web_accessible_resources": [
+      {
+         "resources": ["CHANGELOG.md"],
+         "matches": ["https://connect.det.wa.edu.au/*"]
+      }
+   ],
    "host_permissions": [
       "https://connect.det.wa.edu.au/*"
    ],
@@ -97,7 +103,8 @@
             "src/goals/goal-forecast.css",
             "src/cohort/cohort-expanded-fit.css",
             "src/atar/outline-jump.css",
-            "src/goals/goal-celebrate.css"
+            "src/goals/goal-celebrate.css",
+            "src/system/changelog-popup.css"
          ],
          "js": [
             "src/system/scheduler.js",
@@ -236,6 +243,7 @@
             "src/sidebar/sidebar-glance.js",
             "src/sidebar/sidebar.js",
             "src/system/notifications.js",
+            "src/system/changelog-popup.js",
             "src/system/update-notice.js",
             "src/system/grade-snapshot.js",
             "src/system/grade-tasks.js",

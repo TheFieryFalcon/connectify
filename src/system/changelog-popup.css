@@ -1,0 +1,78 @@
+/**
+ * Connectify: changelog popup
+ *
+ * Inside the shared goal dialog, which scrolls: its heading and close button stay while the notes move under them.
+ * The id outranks Connect's `.eds.cvr` heading, list and paragraph rules. No bullets: entries split by spacing.
+ */
+
+#cx-changelog-dialog .cx-goal-modal__head {
+  position: sticky;
+  top: -16px; /* over the dialog's top padding too, or the notes show above the heading */
+  z-index: 1;
+  margin: -16px 0 0;
+  padding: 16px 0 12px;
+  background-color: var(--cx-canvas-bg, #12171f);
+  background-image: linear-gradient(var(--cx-surface-bg, #1e2632), var(--cx-surface-bg, #1e2632));
+}
+
+#cx-changelog-dialog .cx-goal-modal__body {
+  display: block;
+}
+
+#cx-changelog-dialog .cx-changelog-release + .cx-changelog-release {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--cx-border-subtle, #2e3c4e);
+}
+
+#cx-changelog-dialog .cx-changelog-version {
+  margin: 0 0 12px;
+  padding: 0;
+  color: var(--cx-text-primary, #f8fafc);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+#cx-changelog-dialog .cx-changelog-group {
+  margin: 14px 0 6px;
+  padding: 0;
+  color: var(--cx-text-secondary, #cbd5e1);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+#cx-changelog-dialog .cx-changelog-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#cx-changelog-dialog .cx-changelog-item,
+#cx-changelog-dialog .cx-changelog-text {
+  margin: 0 0 6px;
+  padding: 0;
+  color: var(--cx-text-primary, #f8fafc);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+#cx-changelog-dialog .cx-changelog-item strong,
+#cx-changelog-dialog .cx-changelog-text strong {
+  color: inherit;
+  font-weight: 700;
+}
+
+#cx-changelog-dialog code {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}

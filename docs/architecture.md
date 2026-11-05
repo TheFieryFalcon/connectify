@@ -117,7 +117,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 78. `src/sidebar/sidebar-shell.js` (drawer shell construction and attachment) / `sidebar-glance.js` (Next Up and Awaiting Results under the launcher buttons)
 79. `src/sidebar/sidebar.js` (slide-out tool drawer & launcher)
 80. `src/system/notifications.js` (vertical stacked toast engine)
-81. `src/system/update-notice.js` ("Connectify updated" toast linking to the changelog)
+81. `src/system/changelog-popup.js` (`CHANGELOG.md` in a dialog) / `update-notice.js` ("Connectify updated" toast opening it)
 82. `src/system/grade-snapshot.js` (subject running marks compared with the grade cache)
 82b. `src/system/grade-tasks.js` (newly marked tasks on outlines whose task rows are on screen)
 82c. `src/system/jump-target.js` (where Jump to Subject lands: a newly marked task row, else the overall row)

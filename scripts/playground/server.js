@@ -39,8 +39,9 @@ function page() {
 
 const TYPES = { '.js': 'text/javascript', '.html': 'text/html', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png' };
 
-/** Files under src/ and the playground folder only. */
+/** Files under src/ and the playground folder only, and the changelog the popup reads. */
 function staticFile(urlPath) {
+  if (urlPath === '/CHANGELOG.md') return path.join(ROOT, 'CHANGELOG.md');
   const base = urlPath.startsWith('/playground/') ? HERE : urlPath.startsWith('/src/') ? ROOT : null;
   if (!base) return null;
   const rel = urlPath.startsWith('/playground/') ? urlPath.slice('/playground/'.length) : urlPath.slice(1);

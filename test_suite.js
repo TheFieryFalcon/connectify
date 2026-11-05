@@ -8862,8 +8862,8 @@ runTest('Test 192: The first Semester 1 task listed on a Semester 2 panel gets n
   }
 });
 
-runTest('Test 193: An update to a newer version shows one notice whose "What\'s new" button opens the changelog', () => {
-  const saved = { chrome: global.chrome, notes: window.ConnectifyNotifications, open: window.open, timeout: global.setTimeout, notice: window.ConnectifyUpdateNotice };
+runTest('Test 193: An update to a newer version shows one notice whose "What\'s new" button opens the changelog in a popup', () => {
+  const saved = { chrome: global.chrome, notes: window.ConnectifyNotifications, open: window.open, timeout: global.setTimeout, notice: window.ConnectifyUpdateNotice, popup: window.ConnectifyChangelogPopup };
   let version = '3.2.3';
   const shown = [], opened = [];
   try {
@@ -8887,9 +8887,11 @@ runTest('Test 193: An update to a newer version shows one notice whose "What\'s 
     assert.ok(shown[0].message.includes('3.2.3'), 'the notice names the previous version');
     assert.strictEqual(shown[0].duration, 0, 'it stays until dismissed');
     const whatsNew = shown[0].actions.find(a => a.text === "What's new");
-    let closed = false;
+    let closed = false, popups = 0;
+    window.ConnectifyChangelogPopup = { open: () => { popups++; } };
     whatsNew.onClick({ close: () => { closed = true; } });
-    assert.deepStrictEqual(opened, [['https://github.com/TheFieryFalcon/connectify/blob/main/CHANGELOG.md', '_blank', 'noopener']], 'the button opens the changelog in a new tab');
+    assert.strictEqual(popups, 1, 'the button opens the changelog popup');
+    assert.deepStrictEqual(opened, [], 'never GitHub or a new window');
     assert.ok(closed, 'and closes the notice');
     assert.strictEqual(notice.check(), false, 'the notice shows once per version');
 
@@ -8901,7 +8903,7 @@ runTest('Test 193: An update to a newer version shows one notice whose "What\'s 
     assert.ok(js.indexOf('src/system/notifications.js') > -1 && js.indexOf('src/system/notifications.js') < js.indexOf('src/system/update-notice.js'), 'the notice loads after the notification engine');
   } finally {
     global.chrome = saved.chrome; window.ConnectifyNotifications = saved.notes; window.open = saved.open;
-    global.setTimeout = saved.timeout; window.ConnectifyUpdateNotice = saved.notice;
+    global.setTimeout = saved.timeout; window.ConnectifyUpdateNotice = saved.notice; window.ConnectifyChangelogPopup = saved.popup;
     mockLocalStorage.clear();
   }
 });
@@ -16076,6 +16078,50 @@ runTest('Test 342: The launcher buttons sit lower, Settings has no heading, and 
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(SRC_DIR, '..', 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(g => (g.js || []).includes('src/progress/weakness-radar.js'));
   assert.ok(group.js.indexOf('src/progress/weakness-type-filter.js') >= 0 && group.js.indexOf('src/progress/weakness-type-filter.js') < group.js.indexOf('src/progress/weakness-radar.js'), 'loaded before the radar');
+});
+
+runTest('Test 343: The changelog popup reads the file every build ships, as text', () => {
+  const saved = window.ConnectifyChangelogPopup;
+  try {
+    delete window.ConnectifyChangelogPopup;
+    const src = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/changelog-popup.js'), 'utf8');
+    eval(src);
+    const P = window.ConnectifyChangelogPopup;
+
+    const blocks = P.parse('# Changelog\n\nIntro with [a link](x.md).\n\n---\n\n## 3.3.2 (Unreleased)\n\n### Additions\n- **Next Up**: a tab.\n- Says `35/36`.\n\n## 3.3.0\n\n**Hotfix release**: update.\n\n### Fixes\n- See [the notes](y.md).\n');
+    assert.deepStrictEqual(blocks.map(b => b.kind), ['release', 'group', 'item', 'item', 'release', 'text', 'group', 'item'], 'releases, groups, items and paragraphs, without the file\'s own intro');
+    assert.strictEqual(blocks[0].text, '3.3.2 (Unreleased)');
+    assert.deepStrictEqual(P.inline('**Next Up**: `35/36` and [notes](y.md)'), [
+      { text: 'Next Up', bold: true, code: false }, { text: ': ', bold: false, code: false }, { text: '35/36', bold: false, code: true },
+      { text: ' and ', bold: false, code: false }, { text: 'notes', bold: false, code: false }
+    ], 'bold and code keep their runs, and a link keeps only its text');
+    assert.deepStrictEqual(P.inline('<img src=x onerror=y>'), [{ text: '<img src=x onerror=y>', bold: false, code: false }], 'markup stays text');
+    assert.ok(!src.includes('innerHTML') && !src.includes('window.open') && !src.includes('github.com'), 'never HTML, GitHub or a new window');
+
+    const body = document.createElement('div');
+    P.render(body, blocks);
+    assert.strictEqual(body.querySelectorAll('.cx-changelog-release').length, 2, 'a section per release');
+    assert.strictEqual(body.querySelectorAll('.cx-changelog-list').length, 2, 'a list per group');
+    assert.strictEqual(body.querySelectorAll('.cx-changelog-item').length, 3);
+
+    const real = P.parse(origReadFileSync.call(fs, path.join(BASE_DIR, 'CHANGELOG.md'), 'utf8'));
+    assert.strictEqual(real[0].kind, 'release', 'the real file starts on its newest release');
+    assert.ok(real.every(b => P.inline(b.text).every(part => !part.text.includes('**') && !part.text.includes('`'))), 'no Markdown shows through in the real file');
+
+    const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/changelog-popup.css'), 'utf8');
+    assert.ok(css.includes('list-style: none'), 'no bullets (Test 307)');
+    const manifest = JSON.parse(origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+    assert.ok(manifest.web_accessible_resources.some(w => w.resources.includes(P.FILE) && w.matches.includes('https://connect.det.wa.edu.au/*')), 'a content script may fetch the file on Connect');
+    const group = manifest.content_scripts.find(g => g.js?.includes('src/system/changelog-popup.js'));
+    assert.ok(group.js.indexOf('src/goals/goal-modal.js') > -1 && group.js.indexOf('src/system/changelog-popup.js') < group.js.indexOf('src/system/update-notice.js'), 'loads with the dialog and before the notice');
+    assert.ok(group.css.includes('src/system/changelog-popup.css'));
+    for (const file of ['publish.yml', 'publish-cws.yml']) {
+      const yml = origReadFileSync.call(fs, path.join(BASE_DIR, '.github/workflows', file), 'utf8');
+      assert.ok(!yml.includes('CHANGELOG.md'), `${file} keeps the changelog in its builds`);
+    }
+  } finally {
+    window.ConnectifyChangelogPopup = saved;
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {
