@@ -44,6 +44,7 @@
 /* One spacing scale, written past Connect's own label and paragraph margins (.eds.cvr label 5px, p 14px): 24 either
    side of a section's line, 12 under its heading, 16 between blocks, 8 between rows, 4 from a label to its control */
 #connectify-sidebar .cx-settings-section { margin: 24px 0 0; padding-top: 24px; }
+#connectify-sidebar .cx-settings-section:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 #connectify-sidebar #connectify-categories .cx-settings-section > header { margin-bottom: 12px; }
 #connectify-sidebar .cx-settings-check {
   display: flex;

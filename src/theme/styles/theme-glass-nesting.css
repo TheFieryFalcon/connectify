@@ -108,6 +108,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar :where(.cx-pred-task-card):not(#cx-n),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar :where(.cta-top-four-selector):not(#cx-n),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar #cx-weakness-filters,
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar #cx-weakness-type-filters,
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar #cx-sidebar-glance {
   background: color-mix(in srgb, var(--cx-text-primary, #ffffff) 7%, transparent) !important;
   border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;

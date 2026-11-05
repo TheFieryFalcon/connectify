@@ -206,6 +206,10 @@ Extremely concise summary of the core visual design language, contrast standards
     - by subject: plain weighted averages
   - Cohort
     - the cohort's means through the same sums, as a dashed line and a value under each label, with a You / Cohort legend
+  - Filters
+    - `Include Subjects:` and, under it in a card of its own, `Include Types:`, each with Select All / Deselect All
+    - only types with a marked result are listed, never `Unknown`; with none the card is left out
+    - an unticked subject or type leaves the sums, so the averages are worked out without it
   - Plot
     - no fill of its own in any theme, inside an ink hairline
 - **Grade Bands**
@@ -600,6 +604,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - Margin
     - One side margin runs down the whole drawer
     - header, launcher menu and every tool panel sit 20px in (12px on narrow screens)
+    - the launcher buttons start 28px under the header (24px on narrow screens), 16px under the notice off the outlines page
 - **Drawer Slide Synchronization**
   - `#connectify-sidebar` and `#connectify-sidebar-handle` animate in lockstep
     - with matching `0.2s cubic-bezier(0.16, 1, 0.3, 1)` transitions
@@ -659,7 +664,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - with centered text (`text-align: center !important; justify-content: center !important;`)
 - **Settings Spacing** (`sidebar-settings.css`)
   - One scale
-    - 24px either side of a section's line, the first section too
+    - 24px either side of a section's line
+    - the panel has no Settings heading: its first section starts at the panel's top, with no line above it
     - 12px under a section's heading
     - 16px between blocks (checkboxes to fields, field rows, a table to its buttons)
     - 8px between rows, 4px from a label to its control or note

@@ -82,8 +82,8 @@ This document covers the user interface and analytics modules, including target 
 - **Key Functions**:
   - `weakness-model.js` (`ConnectifyWeaknessModel.compute`): by type, the overall average plus each result's gap to its own subject's average, pooled; by subject, weighted averages; the cohort's means through the same sums; tasks with no type on no axis and counted (`#cx-radar-note`). Styles: `sidebar-radar.css` (no plot fill in any theme, dashed `.cx-radar-cohort`).
   - Plots multi-axis polygonal radar chart of student performance grouped by assessment type or subject (SVG, escaped labels and panel markup in `weakness-radar-view.js`) (labels sit 12px past each spoke's end, baselines set by `y` since Firefox does not pass `dominant-baseline` to the score `<tspan>`; 760-wide viewBox, `overflow: visible`, so long labels never clip; `Group by:` and the subject checkboxes drop Connect's `.eds.cvr label` margin) from the cache only (`collectClasses`; types from each task's stored `labelsKey`, never its row); skips rendering while hidden and redraws while open on `connectify-task-type-changed` / `connectify-results-updated`. Message colours live in `sidebar-radar.css` (`.cx-radar-message`, `.cx-radar-warning`).
-  - Interactive subject filtering checkboxes (`#cx-weakness-checkboxes`) .
-  - Persists deselected subjects in `connectify:weakness_disabled_subjects`.
+  - Include Subjects (`#cx-weakness-checkboxes`) and, under it, Include Types (`#cx-weakness-type-checkboxes`, `weakness-type-filter.js`: named types with a marked result; hidden with none): an unticked one's results leave the sums, so averages change too; untyped tasks are never listed.
+  - Persists what is unticked in `connectify:weakness_disabled_subjects` / `connectify:weakness_disabled_types`.
 - **Export**: `window.ConnectifyWeakness`.
 
 #### [`scaling-calibration.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/scaling-calibration.js)

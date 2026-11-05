@@ -7,6 +7,9 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ## Unreleased
 
 ### Changes
+- **Weakness Analyzer filters by type.** Under the subjects, Include Types lets you leave an assessment type out, and the averages are worked out without it.
+- Settings no longer repeats its name above General Preferences, and the tools menu's buttons sit a little lower.
+- Students Doing ATAR in Settings is now ATAR Student Percentage.
 - **Next Up and Awaiting Results in the tools menu.** On Assessment Outlines, a card under the buttons lists up to three tasks due this week or next, and up to three whose week has passed with no mark yet.
 - The tools menu no longer opens with "Select a tool below to view your analytics."
 - **The tools no longer ask you to expand outlines.** They already have your data, so the Expand All Outlines and Refresh Assessments buttons and the note about expanding are gone. Recalculate is gone too, as plans update while you type.

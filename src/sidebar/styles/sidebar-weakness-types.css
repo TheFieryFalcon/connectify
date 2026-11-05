@@ -2,7 +2,8 @@
  * Connectify Sidebar: weakness analyzer, radar chart, type dropdowns and outcome bar
  */
 
-.connectea-dark #cx-weakness-filters {
+.connectea-dark #cx-weakness-filters,
+.connectea-dark #cx-weakness-type-filters {
   background: var(--cx-surface-elevated, #253342) !important;
   border-color: var(--cx-border, #3b5066) !important;
 }
@@ -14,11 +15,15 @@
 .connectea-dark #connectify-weakness label,
 .connectea-dark #cx-weakness-filters,
 .connectea-dark #cx-weakness-filters span,
+.connectea-dark #cx-weakness-type-filters,
+.connectea-dark #cx-weakness-type-filters span,
 .connectea-dark .cx-weakness-checkbox-label,
 .connectea-dark .cx-weakness-checkbox-label span,
 html.connectea-dark #connectify-weakness label,
 html.connectea-dark #cx-weakness-filters,
 html.connectea-dark #cx-weakness-filters span,
+html.connectea-dark #cx-weakness-type-filters,
+html.connectea-dark #cx-weakness-type-filters span,
 html.connectea-dark .cx-weakness-checkbox-label,
 html.connectea-dark .cx-weakness-checkbox-label span,
 html.connectea-dark #connectify-weakness {

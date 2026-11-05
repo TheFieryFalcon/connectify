@@ -133,6 +133,10 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #c
 }
 
 /* Off the outlines page every launcher but Settings is disabled (sidebar-page-notice.js) */
+#connectify-sidebar.cx-page-limited .cx-tool-menu {
+  padding-top: 16px; /* the notice sits above the buttons, so they need no drop of their own */
+}
+
 #connectify-sidebar.cx-page-limited .cx-tool-menu > button:disabled {
   opacity: 0.38 !important;
   cursor: not-allowed !important;

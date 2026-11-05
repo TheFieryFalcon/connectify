@@ -197,6 +197,7 @@
             "src/progress/wace-countdown.js",
             "src/progress/compound-progress.js",
             "src/progress/weakness-model.js",
+            "src/progress/weakness-type-filter.js",
             "src/progress/weakness-radar-view.js",
             "src/progress/weakness-radar.js",
             "src/atar/scaling-calibration.js",

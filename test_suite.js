@@ -167,7 +167,7 @@ const SPLIT_PARTS = {
   'atar-features.js': ['outline-jump.js', 'outline-controls.js', 'atar-features.js'],
   'atar.css': ['atar.css', 'atar-compact.css', 'atar-planner.css', 'atar-estimator.css'],
   'progress-chart.js': ['school-terms.js', 'progress-semester-divider.js', 'progress-chart.js', 'progress-week-editor.js'],
-  'weakness-radar.js': ['weakness-radar-view.js', 'weakness-radar.js'],
+  'weakness-radar.js': ['weakness-type-filter.js', 'weakness-radar-view.js', 'weakness-radar.js'],
   'progress-graph.js': ['school-terms.js', 'progress-modes.js', 'progress-early-easter.js', 'progress-panel.js', 'progress-graph.js'],
   'new-grade.js': ['grade-snapshot.js', 'grade-tasks.js', 'new-grade.js'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-overlay-blur.js', 'theme-registry.js', 'theme-custom-themes.js'],
@@ -5072,7 +5072,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
 
   // Verify Settings internal elements
   const catTitle = catPanel.querySelector('header strong');
-  assert.strictEqual(catTitle.textContent, 'Settings', 'Settings title must render');
+  assert.strictEqual(catTitle.textContent, 'General Preferences', 'Settings opens on its first section, with no heading of its own');
   const autoExpandToggle = catPanel.querySelector('#cx-auto-expand-toggle');
   assert.ok(autoExpandToggle, 'Auto-expand checkbox toggle (#cx-auto-expand-toggle) must render');
   const cohortInput = catPanel.querySelector('#cx-general-cohort-input');
@@ -15832,7 +15832,7 @@ runTest('Test 334: Every list and export shows a subject\'s cleaned name; saved 
   const predictorTabs = read('predictor/predictor-grade-view.js');
   assert.ok(predictorTabs.includes('tabBtn.textContent = shown.get(subj.cleanName)') && !/esc\(activeSubject\.cleanName\)/.test(predictorTabs), 'Predictor tabs and headings');
   assert.ok(read('predictor/predictor-atar-view.js').includes('esc(window.ConnectifyUtils.cleanSubjectName(c.name) || c.name)'), 'Predict ATAR table');
-  assert.ok(read('progress/weakness-radar.js').includes('textSpan.textContent = shown.get(cleanName)') && read('progress/weakness-radar.js').includes('disabledWeaknessSubjects.add(cleanName)'), 'Weakness Analyzer, its unticks saved as before');
+  assert.ok(read('progress/weakness-radar.js').includes('typeFilter().checkbox(shown.get(cleanName), !isOff,') && read('progress/weakness-radar.js').includes('disabledWeaknessSubjects.add(cleanName)'), 'Weakness Analyzer, its unticks saved as before');
   assert.ok(read('system/new-grade.js').includes('${window.ConnectifyUtils.cleanSubjectName(entry.subjectName) || entry.subjectName} scores have been updated.'), 'the Class Updated toast');
   assert.ok(read('atar/outline-jump.js').includes('cleanSubjectName(title) || normalize(title)'), 'Jump To');
   eval(read('goals/goal-plan.js'));
@@ -16031,6 +16031,50 @@ runTest('Test 341: The launcher menu lists Next Up and Awaiting Results, three r
   assert.ok(withGlance[0].js.indexOf('src/progress/next-up.js') < withGlance[0].js.indexOf('src/sidebar/sidebar-glance.js'), 'after what it reads');
   assert.ok(withGlance[0].css.includes('src/sidebar/styles/sidebar-glance.css'));
   assert.ok(!/[•·]/.test(read('sidebar/sidebar-glance.js')), 'no dot separators');
+});
+
+runTest('Test 342: The launcher buttons sit lower, Settings has no heading, and the Weakness Analyzer filters types under subjects', () => {
+  const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
+  assert.ok(read('sidebar/styles/sidebar-drawer.css').includes('padding: 28px 20px 10px;'), 'the buttons start 28px under the header');
+  assert.ok(read('sidebar/styles/sidebar-outcome-filter.css').includes('#connectify-sidebar.cx-page-limited .cx-tool-menu {\n  padding-top: 16px;'), 'but 16px under the off-outlines notice');
+
+  eval(read('predictor/settings-markup.js'));
+  const settings = window.ConnectifySettingsMarkup.panelHtml();
+  assert.ok(settings.trim().startsWith('<section class="cx-settings-section">'), 'Settings starts at its first section');
+  assert.ok(settings.includes('>ATAR Student Percentage</label>') && !settings.includes('Students Doing ATAR'), 'the field\'s new name');
+  assert.ok(read('sidebar/styles/sidebar-settings.css').includes('#connectify-sidebar .cx-settings-section:first-child { margin-top: 0; padding-top: 0; border-top: 0; }'), 'with no line under the drawer header');
+
+  const stored = {};
+  const savedStorage = global.localStorage;
+  global.localStorage = { getItem: k => (k in stored ? stored[k] : null), setItem: (k, v) => { stored[k] = v; } };
+  try {
+    eval(read('progress/weakness-type-filter.js'));
+    const filter = window.ConnectifyWeaknessTypeFilter;
+    assert.deepStrictEqual(filter.typesOf([{ type: 'Test' }, { type: 'Exam' }, { type: 'Test' }, { type: 'Unknown', isUnknown: true }]), ['Exam', 'Test'], 'each named type once, a task with no type never');
+    filter.setAll(['Exam', 'Essay'], false);
+    assert.ok(!filter.isIncluded('Exam') && !filter.isIncluded('Essay') && filter.isIncluded('Test'), 'unticking');
+    filter.setAll(['Exam'], true);
+    assert.ok(filter.isIncluded('Exam') && !filter.isIncluded('Essay'), 'ticking one back');
+    const key = Object.keys(stored).find(k => k.endsWith('connectify:weakness_disabled_types'));
+    assert.deepStrictEqual(JSON.parse(stored[key]), ['Essay'], 'saved per user');
+    filter.setAll(['Essay'], true);
+  } finally {
+    global.localStorage = savedStorage;
+  }
+
+  eval(read('progress/weakness-radar-view.js'));
+  const panel = window.ConnectifyWeaknessView.PANEL_HTML;
+  assert.ok(panel.indexOf('Include Subjects:') > 0 && panel.indexOf('Include Subjects:') < panel.indexOf('Include Types:'), 'types come under subjects');
+  for (const id of ['cx-weakness-type-filters', 'cx-weakness-types-all', 'cx-weakness-types-none', 'cx-weakness-type-checkboxes']) assert.ok(panel.includes(`id="${id}"`), id);
+  const radar = read('progress/weakness-radar.js');
+  assert.ok(radar.includes('markedTasks(s).filter(t => t.isUnknown || typeFilter().isIncluded(t.type))'), 'an unticked type\'s results leave the analyzer; untyped tasks stay for the note');
+
+  assert.ok(read('sidebar/styles/sidebar-tool-menu.css').includes('#cx-weakness-filters,\n#cx-weakness-type-filters {'), 'the same card');
+  assert.ok(read('sidebar/styles/sidebar-weakness-types.css').includes('.connectea-dark #cx-weakness-type-filters {'), 'token-routed in dark themes');
+  assert.ok(read('theme/styles/theme-glass-nesting.css').includes('#connectify-sidebar #cx-weakness-type-filters,'), 'a 7% tint in Liquid Glass');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(SRC_DIR, '..', 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(g => (g.js || []).includes('src/progress/weakness-radar.js'));
+  assert.ok(group.js.indexOf('src/progress/weakness-type-filter.js') >= 0 && group.js.indexOf('src/progress/weakness-type-filter.js') < group.js.indexOf('src/progress/weakness-radar.js'), 'loaded before the radar');
 });
 
 Promise.all(pendingTestPromises).then(() => {

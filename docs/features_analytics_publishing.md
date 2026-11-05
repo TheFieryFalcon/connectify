@@ -31,7 +31,7 @@ This document details user-facing features 11 through 20, covering Goals and Est
 - **Source Module**: [`weakness-radar.js`](file:///Users/uwong/Downloads/2.1.14_0/weakness-radar.js)
 - **DOM Insertion**: Standalone panel (`#connectify-weakness`).
 - **UI Appearance**: Native SVG polygonal radar chart with 5 concentric percentage rings (20% to 100%), radial spoke axes, green performance polygon (`#2ecc71`), and perimeter labels.
-- **Functionality**: Plots performance by assessment category; interactive subject checkboxes (`#cx-weakness-checkboxes`) with Select/Deselect All; persists filters in `connectify:weakness_disabled_subjects`.
+- **Functionality**: Plots performance by assessment category; interactive subject checkboxes (`#cx-weakness-checkboxes`) and type checkboxes under them (`#cx-weakness-type-checkboxes`), each with Select/Deselect All; persists filters in `connectify:weakness_disabled_subjects` and `connectify:weakness_disabled_types`.
 
 ### 14. Settings & Scaling Calibration Panel
 - **Source Modules**: [`category-settings.js`](file:///Users/uwong/Downloads/2.1.14_0/category-settings.js), [`scaling-calibration.js`](file:///Users/uwong/Downloads/2.1.14_0/scaling-calibration.js)

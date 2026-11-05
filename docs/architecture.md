@@ -81,7 +81,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 46d. `src/progress/task-dates.js` (Task Dates rows, Group By, Sort By) / `task-dates-cells.js` (each task's cleaned subject, Type dropdown, grade and prediction) / `task-dates-filter.js` (Subjects and Type lists of ticks) / `task-dates-view.js` (the Task Dates tab) / `export-view.js` (Export mode of that list: ticks, weekdays, downloads) / `next-up.js` / `next-up-view.js` (the Next Up tab: this week's and next week's tasks) / `progress-tabs.js` (Progress Graph, Next Up and Task Dates subtabs)
 47. `src/progress/wace-countdown.js` (Year 12 exam countdown)
 48. `src/progress/compound-progress.js` (weighted completion progress bars)
-49. `src/progress/weakness-model.js` (what the radar plots: within-subject type measure, cohort line) / `weakness-radar-view.js` (radar SVG, status messages and panel markup)
+49. `src/progress/weakness-model.js` (what the radar plots: within-subject type measure, cohort line) / `weakness-type-filter.js` (the Include Types ticks) / `weakness-radar-view.js` (radar SVG, status messages and panel markup)
 50. `src/progress/weakness-radar.js` (SVG radar/spider chart)
 51. `src/atar/scaling-calibration.js` (school scaling calibration editor)
 52. `src/predictor/category-baselines.js` (baseline settings editor & storage)

@@ -128,6 +128,20 @@
     `;
   }
 
+  /** One card of include ticks with its Select All / Deselect All. */
+  const filterCard = (id, title, allId, noneId, boxesId) => `
+      <div id="${id}">
+         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong style="font-size:12px;">${title}</strong>
+            <div>
+              <button type="button" id="${allId}" class="cx-weakness-filter-btn">Select All</button>
+              <span style="color:#666; font-size:10px; margin:0 4px;">|</span>
+              <button type="button" id="${noneId}" class="cx-weakness-filter-btn">Deselect All</button>
+            </div>
+         </div>
+         <div id="${boxesId}"></div>
+      </div>`;
+
   const PANEL_HTML = `
       <header><strong>Weakness Analyzer</strong></header>
       <div style="margin-bottom:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
@@ -139,17 +153,8 @@
       </div>
       <div id="connectify-radar-chart" style="width:100%;height:350px;overflow:hidden;"></div>
       <p id="cx-radar-note" class="cx-radar-note" hidden></p>
-      <div id="cx-weakness-filters">
-         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <strong style="font-size:12px;">Include in Analyzer:</strong>
-            <div>
-              <button type="button" id="cx-weakness-all" class="cx-weakness-filter-btn">Select All</button>
-              <span style="color:#666; font-size:10px; margin:0 4px;">|</span>
-              <button type="button" id="cx-weakness-none" class="cx-weakness-filter-btn">Deselect All</button>
-            </div>
-         </div>
-         <div id="cx-weakness-checkboxes"></div>
-      </div>
+      ${filterCard('cx-weakness-filters', 'Include Subjects:', 'cx-weakness-all', 'cx-weakness-none', 'cx-weakness-checkboxes')}
+      ${filterCard('cx-weakness-type-filters', 'Include Types:', 'cx-weakness-types-all', 'cx-weakness-types-none', 'cx-weakness-type-checkboxes')}
     `;
 
   window.ConnectifyWeaknessView = { message, warning, radarSvg, PANEL_HTML };

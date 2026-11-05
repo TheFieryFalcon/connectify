@@ -9,7 +9,6 @@
   'use strict';
 
   const panelHtml = () => `
-      <header><strong style="font-size:18px;">Settings</strong></header>
       <section class="cx-settings-section">
         <header><strong>General Preferences</strong></header>
         <label class="cx-settings-check">
@@ -31,7 +30,7 @@
             </div>
           </div>
           <div>
-            <label for="cx-atar-percentage-input" class="cx-settings-label">Students Doing ATAR</label>
+            <label for="cx-atar-percentage-input" class="cx-settings-label">ATAR Student Percentage</label>
             <div style="display:flex;align-items:center;gap:6px;">
               <input type="number" id="cx-atar-percentage-input" class="cx-settings-number-input" min="1" max="100" step="1" placeholder="60" style="box-sizing:border-box;width:75px;padding:3px 6px;border-radius:4px;font-size:12px;">
               <span class="cx-settings-hint">%</span>

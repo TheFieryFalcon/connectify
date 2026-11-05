@@ -2,7 +2,7 @@
  * Connectify Weakness Radar Analyzer
  *
  * The Weaknesses panel: performance per assessment type or per subject over completed tasks,
- * drawn as a radar chart (weakness-radar-view.js), with per-subject include checkboxes.
+ * drawn as a radar chart (weakness-radar-view.js), with include checkboxes per subject and per type.
  * Provides `window.ConnectifyWeakness`.
  */
 (() => {
@@ -34,6 +34,14 @@
   const getEffectiveTaskType = (subjectName, task) => window.ConnectifyTaskTypes?.getEffectiveType?.(subjectName, task) || 'Take-Home';
 
   const view = () => window.ConnectifyWeaknessView;
+  const typeFilter = () => window.ConnectifyWeaknessTypeFilter;
+
+  /** A subject's completed weighted tasks, as weakness-model.js measures them. */
+  const markedTasks = s => (s.tasks || []).filter(t => t.weight > 0 && !t.pending && Number.isFinite(t.score)).map(t => {
+    const type = getEffectiveTaskType(s.name, t);
+    return { score: t.score, mean: t.mean, weight: t.weight, type, isUnknown: type === window.ConnectifyCategoryStore?.UNKNOWN_TYPE };
+  });
+  const markedTypes = collected => typeFilter().typesOf(collected.flatMap(markedTasks));
 
   /** Cleaned subject name -> raw name, for the subjects collected from the outlines. */
   function subjectList(collected) {
@@ -78,21 +86,19 @@
     };
     if (subjectMap.size === 0) return show(view().message('No subjects detected yet. Expand course outlines in Connect to load subjects.'));
     if (selectedCount === 0) return show(view().message('All subjects deselected. Please check at least 3 subjects below to view radar analytics.'));
+    const types = markedTypes(collected);
+    if (types.length && !types.some(typeFilter().isIncluded)) return show(view().message('All assessment types deselected. Please check the types to include below to view radar analytics.'));
 
-    // Completed weighted tasks of the included subjects, measured in weakness-model.js
+    // Completed weighted tasks of the included subjects and types, measured in weakness-model.js
     const mode = document.getElementById('cx-radar-mode')?.value || 'type';
     const shown = window.ConnectifyUtils.subjectLabels([...subjectMap.keys()]);
-    const unknown = window.ConnectifyCategoryStore?.UNKNOWN_TYPE;
     const groups = collected.filter(s => !isDisabled(cleanSubjectName(s.name) || s.name, s.name)).map(s => ({
       label: shown.get(cleanSubjectName(s.name) || s.name),
-      tasks: (s.tasks || []).filter(t => t.weight > 0 && !t.pending && Number.isFinite(t.score)).map(t => {
-        const type = getEffectiveTaskType(s.name, t);
-        return { score: t.score, mean: t.mean, weight: t.weight, type, isUnknown: type === unknown };
-      })
+      tasks: markedTasks(s).filter(t => t.isUnknown || typeFilter().isIncluded(t.type))
     }));
     const { labels, you: data, cohort, untyped } = window.ConnectifyWeaknessModel.compute(groups, mode);
 
-    if (labels.length === 0) return show(view().message('No completed assessments to plot for the selected subjects.'));
+    if (labels.length === 0) return show(view().message('No completed assessments to plot for the selected subjects and types.'));
     if (labels.length < 3) {
       const entityType = mode === 'type' ? 'assessment types' : 'subjects';
       return show(view().warning(`At least 3 ${entityType} must have graded tasks for radar charts!`));
@@ -114,17 +120,9 @@
     const shown = window.ConnectifyUtils.subjectLabels([...subjectMap.keys()]);
 
     subjectMap.forEach((rawName, cleanName) => {
-      const label = document.createElement('label');
-      label.className = 'cx-weakness-checkbox-label';
-      label.title = shown.get(cleanName);
-
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
       const isOff = disabledWeaknessSubjects.has(cleanName) || disabledWeaknessSubjects.has(rawName);
-      cb.checked = !isOff;
-
-      cb.onchange = () => {
-        if (cb.checked) {
+      boxContainer.appendChild(typeFilter().checkbox(shown.get(cleanName), !isOff, checked => {
+        if (checked) {
           disabledWeaknessSubjects.delete(cleanName);
           disabledWeaknessSubjects.delete(rawName);
         } else {
@@ -132,15 +130,14 @@
         }
         saveDisabledSubjects();
         renderChart();
-      };
-
-      const textSpan = document.createElement('span');
-      textSpan.textContent = shown.get(cleanName);
-
-      label.appendChild(cb);
-      label.appendChild(textSpan);
-      boxContainer.appendChild(label);
+      }));
     });
+
+    const types = markedTypes(collectClasses());
+    const typeCard = panel.querySelector('#cx-weakness-type-filters');
+    if (typeCard) typeCard.hidden = !types.length;
+    const typeBoxes = panel.querySelector('#cx-weakness-type-checkboxes');
+    if (typeBoxes) typeFilter().render(typeBoxes, types, renderChart);
   }
 
   function createWeaknessPanel() {
@@ -174,6 +171,13 @@
       updateCheckboxes(panel);
       renderChart();
     };
+    const setAllTypes = included => () => {
+      typeFilter().setAll(markedTypes(collectClasses()), included);
+      updateCheckboxes(panel);
+      renderChart();
+    };
+    panel.querySelector('#cx-weakness-types-all').onclick = setAllTypes(true);
+    panel.querySelector('#cx-weakness-types-none').onclick = setAllTypes(false);
 
     function openWeakness() {
       panel.hidden = false;
