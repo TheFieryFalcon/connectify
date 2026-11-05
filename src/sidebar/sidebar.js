@@ -161,6 +161,7 @@
         // The notice belongs to the launcher menu, never above an open tool (Settings)
         const noticeHidden = !limited || hasActiveTool;
         if (pageNotice && pageNotice.hidden !== noticeHidden) pageNotice.hidden = noticeHidden;
+        window.ConnectifySidebarGlance?.sync(!sidebar.hidden && !hasActiveTool);
 
         if (handle) {
           handle.dataset.toolActive = hasActiveTool ? 'true' : 'false';

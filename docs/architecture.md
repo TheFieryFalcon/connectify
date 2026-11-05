@@ -114,7 +114,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 76. `src/sidebar/sidebar-filter.js` (outline filter detection for the new-year rollover; presses the top-level "All" with a full mouse press)
 76b. `src/sidebar/sidebar-page-notice.js` (off-outlines notice; Settings is the only tool that works on every page)
 77. `src/sidebar/sidebar-tools.js` (launcher buttons, tool panels and pressed state)
-78. `src/sidebar/sidebar-shell.js` (drawer shell construction and attachment)
+78. `src/sidebar/sidebar-shell.js` (drawer shell construction and attachment) / `sidebar-glance.js` (Next Up and Awaiting Results under the launcher buttons)
 79. `src/sidebar/sidebar.js` (slide-out tool drawer & launcher)
 80. `src/system/notifications.js` (vertical stacked toast engine)
 81. `src/system/update-notice.js` ("Connectify updated" toast linking to the changelog)

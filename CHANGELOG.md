@@ -7,6 +7,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ## Unreleased
 
 ### Changes
+- **Next Up and Awaiting Results in the tools menu.** On Assessment Outlines, a card under the buttons lists up to three tasks due this week or next, and up to three whose week has passed with no mark yet.
 - The tools menu no longer opens with "Select a tool below to view your analytics."
 - **The tools no longer ask you to expand outlines.** They already have your data, so the Expand All Outlines and Refresh Assessments buttons and the note about expanding are gone. Recalculate is gone too, as plans update while you type.
 - **Weakness Analyzer compares like with like.** A type is now measured by how you do on it against each subject's own average, so a weak subject full of essays no longer makes essays look weak. The cohort shows as a dashed line beside you, and the plot no longer sits on a dark box.

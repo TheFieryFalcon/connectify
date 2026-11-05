@@ -15928,6 +15928,111 @@ runTest('Test 340: Target Grade is one table; an ATAR estimate carries its discl
   assert.ok(bin.includes('btn.innerHTML = BIN;') && !bin.includes("'cx-goal-card__delete', '✕'"), 'Delete is a bin, not the dialog\'s close cross');
 });
 
+runTest('Test 341: The launcher menu lists Next Up and Awaiting Results, three rows each, with no predicted marks', () => {
+  const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
+  const NOV_3 = new Date(2026, 10, 3); // Term 4 Week 4, order 40
+  const task = (id, order, weight, extra = {}) => ({ id, name: id, order, pending: true, weight, sequence: 0, ...extra });
+  const subjects = [
+    { name: '12 Physics ATAR', tasks: [
+      task('Waves Test', 40, 20),
+      task('Lab', 40, 10, { score: 85.5, pending: false }),
+      task('Far Off', 45, 10),
+      task('Week Three', 39, 10),
+      task('Week Two', 38, 10),
+      task('Week One', 37, 10),
+      task('Week Zero', 34, 10),
+      task('Marked Earlier', 35, 10, { score: 70, pending: false }),
+      task('Component', 39, 0),
+      task('Still Running', 39, 10, { caption: 'Term 4 Week 3-4' })
+    ] },
+    { name: '12 Chemistry ATAR', tasks: [
+      task('Redox Exam', 41, 30),
+      task('Titration', 41, 25),
+      task('Equilibrium', 41, 15),
+      task('Undated', null, 5),
+      task('Closed Off', 10, 10, { semester: 1 })
+    ] }
+  ];
+  const saved = { semesters: window.ConnectifyClassSemesters, glance: window.ConnectifySidebarGlance, types: window.ConnectifyTaskTypes, math: window.ConnectifyProgressMath, helpers: window.ConnectifyParseHelpers };
+  window.ConnectifyClassSemesters = { get: () => ({ '12 Chemistry ATAR': { 1: { finalLetter: true } } }) };
+  window.ConnectifyTaskTypes = { getEffectiveType: () => 'Test' };
+  try {
+    withTaskDatesPanel(subjects, () => {
+      const run = f => eval(read(f));
+      delete window.ConnectifySidebarGlance;
+      run('progress/progress-math.js');
+      run('assessment/assessment-parse-helpers.js');
+      run('sidebar/sidebar-glance.js');
+      const glance = window.ConnectifySidebarGlance;
+      const cleanName = window.ConnectifyUtils.cleanSubjectName;
+      window.ConnectifyUtils.cleanSubjectName = name => name.replace(/^12 | ATAR$/g, '');
+
+      const plan = glance.build(subjects, NOV_3);
+      assert.strictEqual(glance.MAX_ROWS, 3, 'three rows at most');
+      assert.deepStrictEqual(plan.nextUp.map(r => r.name), ['Waves Test', 'Redox Exam', 'Titration'], 'unmarked tasks of these two weeks, soonest first, cut at three');
+      assert.deepStrictEqual(plan.nextUp.map(r => r.detail), ['Physics, 20%, This Week', 'Chemistry, 30%, Next Week', 'Chemistry, 25%, Next Week'], 'each names its subject, weight and week');
+      assert.deepStrictEqual(plan.awaiting.map(r => r.name), ['Week Three', 'Week Two', 'Week One'], 'unmarked tasks whose week has passed, latest first, cut at three');
+      assert.strictEqual(plan.awaiting[0].detail, 'Physics, Term 4 Wk 3', 'each names its subject and week');
+      const all = JSON.stringify(plan);
+      for (const left of ['Lab', 'Component', 'Undated', 'Closed Off', 'Still Running', 'Far Off']) assert.ok(!all.includes(left), `${left} is left out`);
+      assert.ok(!/prediction|"mid"|"low"|"high"/.test(all), 'no predicted marks');
+
+      // In the holidays a week of no school has no tasks, and last term's are behind us
+      const holidays = glance.build([{ name: '12 Physics ATAR', tasks: [task('End Of Term', 34, 10), task('Next Term', 37, 10)] }], new Date(2026, 8, 30));
+      assert.deepStrictEqual(holidays.awaiting.map(r => r.name), ['End Of Term']);
+      assert.deepStrictEqual(holidays.nextUp, []);
+
+      // Nothing to show: no widget and no empty list
+      const sidebar = new MockElement('aside');
+      const findById = document.getElementById;
+      document.getElementById = id => (id === 'connectify-sidebar' ? sidebar : findById.call(document, id));
+      const onOutlines = window.ConnectifyUtils.isOutlinesPage;
+      window.ConnectifyUtils.isOutlinesPage = () => true;
+      window.ConnectifyNextUp.now = () => NOV_3;
+      let reads = 0;
+      let list = subjects;
+      window.ConnectifyData = { collectClasses: () => { reads++; return list; } };
+      try {
+        glance.sync(true);
+        assert.strictEqual(reads, 1, 'reads the cache as the menu comes into view');
+        glance.sync(true);
+        assert.strictEqual(reads, 1, 'never on each drawer sync');
+        const widget = sidebar.children.find(c => c.id === 'cx-sidebar-glance');
+        assert.strictEqual(widget.hidden, false);
+        assert.deepStrictEqual(widget.children.filter(c => c.className === 'cx-glance-heading').map(c => c.textContent), ['Next Up', 'Awaiting Results']);
+        glance.sync(false);
+        list = [];
+        glance.sync(true);
+        assert.strictEqual(reads, 2, 'reads it again when the menu comes back into view');
+        assert.strictEqual(widget.hidden, true, 'nothing to show hides the widget');
+        assert.strictEqual(widget.children.length, 0);
+      } finally {
+        glance.sync(false); // its result listeners stay on the mock window, for tests still running
+        window.ConnectifyUtils.isOutlinesPage = onOutlines;
+        window.ConnectifyUtils.cleanSubjectName = cleanName;
+        document.getElementById = findById;
+      }
+    });
+  } finally {
+    Object.assign(window, { ConnectifyClassSemesters: saved.semesters, ConnectifySidebarGlance: saved.glance, ConnectifyTaskTypes: saved.types, ConnectifyProgressMath: saved.math, ConnectifyParseHelpers: saved.helpers });
+  }
+
+  const css = read('sidebar/styles/sidebar-glance.css');
+  assert.ok(css.includes('#connectify-sidebar.cx-tool-active #cx-sidebar-glance') && css.includes('display: none'), 'an open tool hides it');
+  assert.ok(css.includes('flex: none'), 'it keeps its height, so a short window scrolls the drawer');
+  assert.ok(css.includes('var(--cx-surface-elevated, #253342)') && css.includes('var(--cx-text-secondary, #b7c5d6)'), 'token-routed in dark themes');
+  assert.ok(read('theme/styles/theme-glass-nesting.css').includes('#connectify-sidebar #cx-sidebar-glance {'), 'a 7% tint in Liquid Glass');
+  assert.ok(read('sidebar/sidebar.js').includes('window.ConnectifySidebarGlance?.sync(!sidebar.hidden && !hasActiveTool);'), 'the drawer tells it when the menu shows');
+  assert.ok(read('sidebar/sidebar-glance.js').includes('const whileShown = () => { if (wasShown) render(); };'), 'a closed menu reads nothing on new results');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(SRC_DIR, '..', 'manifest.json'), 'utf8'));
+  const groups = manifest.content_scripts.filter(g => (g.js || []).includes('src/sidebar/sidebar.js'));
+  const withGlance = groups.filter(g => g.js.includes('src/sidebar/sidebar-glance.js'));
+  assert.strictEqual(withGlance.length, 1, 'the outlines group only');
+  assert.ok(withGlance[0].js.indexOf('src/progress/next-up.js') < withGlance[0].js.indexOf('src/sidebar/sidebar-glance.js'), 'after what it reads');
+  assert.ok(withGlance[0].css.includes('src/sidebar/styles/sidebar-glance.css'));
+  assert.ok(!/[•·]/.test(read('sidebar/sidebar-glance.js')), 'no dot separators');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

@@ -628,6 +628,19 @@ Extremely concise summary of the core visual design language, contrast standards
     4. `connectify-estimator-toggle` (Estimator: Estimate Grade / Estimate ATAR tabs)
     5. `connectify-weakness-toggle` (Weakness Analyzer)
     6. `connectify-categories-toggle` (Settings)
+- **Next Up and Awaiting Results** (`sidebar-glance.js`, `sidebar-glance.css`)
+  - Place
+    - one padded card under the launcher buttons, at the bottom of the drawer, on the buttons' edges
+    - Assessment Outlines only, hidden while a tool is open; on a short window the drawer scrolls
+  - Next Up
+    - unmarked tasks in this week and next week, soonest first
+    - each `Biology, 8%, This Week`, no predicted marks
+  - Awaiting Results
+    - unmarked tasks whose week has passed, latest first, each `Physics, Term 4 Wk 3`
+    - never a semester with final grades, which will not mark them, or a 0% row
+  - Lists
+    - at most three rows each, split by spacing alone, no lines
+    - a list with nothing to show is left out, and the card with it when both have nothing
 - **Calculator Mode Tabs**
   - Shared panel
     - Goal Setter and Estimator share the calculator panel (`#connectea-atar`)
