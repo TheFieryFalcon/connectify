@@ -88,7 +88,11 @@
     };
   }
 
-  const subjectsOrCache = list => list || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+  // An ignored Certificate or General course feeds no prediction, whichever list a caller passes
+  const subjectsOrCache = list => {
+    const subjects = list || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+    return window.ConnectifyCourseFilter ? window.ConnectifyCourseFilter.filterSubjects(subjects) : subjects;
+  };
 
   // --- HISTORICAL PERFORMANCE SCRAPER ---
   function getHistoricalData(subjectList) {

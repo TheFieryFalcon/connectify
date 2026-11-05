@@ -2412,8 +2412,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v22_20261105_pred'"), 'predictor-math.js must use v22_20261105_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v22_20261105_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v22_20261105_pred');
+  assert.ok(predMathCode.includes("'v23_20261105_pred'"), 'predictor-math.js must use v23_20261105_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v23_20261105_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v23_20261105_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2506,9 +2506,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v22_20261105_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v23_20261105_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v22_20261105_pred'), 'predictor-math.js must bump version to v22_20261105_pred');
+  assert.ok(predMathJs.includes('v23_20261105_pred'), 'predictor-math.js must bump version to v23_20261105_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -15685,7 +15685,7 @@ runTest('Test 332: Baseline and calibration lists show cleaned subject names and
   assert.ok(calib.includes('`sem1_calibration:${course.id}`') && calib.includes('`sem1_calibration:${course.name}`'), 'calibration keys are unchanged');
 });
 
-runTest('Test 333: An ignored Certificate or General course is no option in any tool, and saved work on it rests', () => {
+runTest('Test 333: An ignored Certificate or General course is no option in any tool, feeds no prediction, raises no notification, and saved work on it rests', () => {
   localStorage.clear();
   const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
   const prev = { filter: window.ConnectifyCourseFilter, semester: window.ConnectifySemesterFilter };
@@ -15726,6 +15726,40 @@ runTest('Test 333: An ignored Certificate or General course is no option in any 
     filter.save(false);
     assert.deepStrictEqual(store.active().map(g => g.id), ['a', 'b', 'c'], 'and comes back');
     filter.save(true);
+
+    // Predictions: its results count towards nothing, whichever list a caller passes; a toggle recomputes
+    const history = window.ConnectifyPredictorHistory;
+    const results = [
+      { name: 'General English Year 12', tasks: [{ id: 'g1', name: 'Essay', score: 40, weight: 50, order: 3 }, { id: 'g2', name: 'Essay 2', score: 44, weight: 50, order: 4 }] },
+      { name: 'Literature ATAR Year 12', tasks: [{ id: 'l1', name: 'Essay', score: 90, weight: 50, order: 3 }, { id: 'l2', name: 'Essay 2', score: 94, weight: 50, order: 4 }] }
+    ];
+    const counted = history.getHistoricalData(results);
+    assert.deepStrictEqual(Object.keys(counted.subjects), ['Literature ATAR Year 12'], 'its average is not in the history');
+    assert.strictEqual(counted.overallAverage, 92, 'nor in the overall average');
+    assert.strictEqual(counted.totalCompletedTasks, 2);
+    const later = { id: 'l3', name: 'Essay 3', pending: true, score: null, weight: 50, order: 9 };
+    assert.deepStrictEqual(Object.keys(history.getHistoricalDataPriorTo(results, 'Literature ATAR Year 12', later).subjects), ['Literature ATAR Year 12'], 'nor before a task');
+    filter.save(false);
+    assert.strictEqual(history.getHistoricalData(results).overallAverage, 67, 'the option off counts it again');
+    filter.save(true);
+    assert.ok(read('predictor/predictor-cache.js').includes('window.ConnectifyCourseFilter.filterSubjects(listed)'), 'no prediction is cached for it');
+    assert.ok(read('predictor/settings-course-filter.js').includes('window.ConnectifyPredictorMath?.updatePredictionCache?.()'), 'a toggle recomputes every prediction');
+
+    // Notifications: no toast, while its mark is still saved, so turning the option off announces nothing old
+    const newGrade = read('system/new-grade.js');
+    assert.ok(newGrade.includes('if (window.ConnectifyCourseFilter?.ignores(entry.subjectName)) return;'), 'announce() says nothing for it');
+    const shown = [];
+    const realNotifications = window.ConnectifyNotifications;
+    window.ConnectifyNotifications = { show: n => shown.push(n.message) };
+    try {
+      window.ConnectifyNewGrade.announce({ subjectName: '11 General English' });
+      window.ConnectifyNewGrade.announce({ subjectName: '12 Cert III Sport' });
+      assert.deepStrictEqual(shown, [], 'neither path toasts an ignored class');
+      window.ConnectifyNewGrade.announce({ subjectName: '12 Literature' });
+      assert.deepStrictEqual(shown, ['Literature scores have been updated.'], 'any other class still does');
+    } finally {
+      window.ConnectifyNotifications = realNotifications;
+    }
 
     // Baselines: an ignored class has no field, and saving the others keeps its saved baseline
     const baselines = read('predictor/category-baselines.js');

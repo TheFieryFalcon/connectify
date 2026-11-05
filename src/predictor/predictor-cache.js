@@ -35,7 +35,8 @@
       return;
     }
 
-    const rawSubjects = subjectsList || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+    const listed = subjectsList || (window.ConnectifyData?.collect ? window.ConnectifyData.collect(true) : []);
+    const rawSubjects = window.ConnectifyCourseFilter ? window.ConnectifyCourseFilter.filterSubjects(listed) : listed;
     if (!rawSubjects || rawSubjects.length === 0) return;
     const memo = window.ConnectifyPredictorDates.withStampMemo || (fn => fn());
     memo(() => populateInOrder(rawSubjects));

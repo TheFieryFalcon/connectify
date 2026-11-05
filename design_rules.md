@@ -450,7 +450,13 @@ Extremely concise summary of the core visual design language, contrast standards
   - In every tool
     - it is no option: Goal Setter, Predictor, Year Progression, Estimator, Weakness Analyzer, the Task Dates export, Jump To and Settings' subject lists all leave it out
     - tools read `collectClasses` and `readCourses`, which filter it, never `collect()`
-    - predictions for other classes still count its results
+  - In predictions
+    - no prediction counts its results: the history (`predictor-history.js`) drops it from whichever list a caller passes
+    - so type shifts, spreads, overall averages and a new year's type baselines leave it out
+    - a toggle recomputes every prediction
+  - In notifications
+    - a Class Updated toast never names it, and a goal on it raises none
+    - its mark and task ids are still saved, so turning the option off announces nothing old
   - What is saved rests
     - a goal on it is neither judged, listed nor counted until the option is off (no toast, never judged Missed for having no tasks)
     - saving baselines keeps its saved baseline

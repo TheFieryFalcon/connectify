@@ -4,7 +4,8 @@
  * The Settings option (connectify:hide_course_stats, on by default, 'false' once turned off) leaves every class with
  * Certificate, Cert or General in its name as Connect drew it: no statistics or prediction panels, Type dropdowns,
  * meters or goal bars on its rows, and no restored overall row. It is also no option in any Connectify tool: every list
- * tools read (collectClasses, readCourses) and Jump To leave it out. Exposes window.ConnectifyCourseFilter.
+ * tools read (collectClasses, readCourses) and Jump To leave it out; no prediction counts its results and it raises no
+ * notification. Exposes window.ConnectifyCourseFilter.
  */
 (() => {
   'use strict';

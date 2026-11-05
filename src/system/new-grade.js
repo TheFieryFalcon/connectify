@@ -82,9 +82,11 @@
 
   /**
    * Stacked "Class Updated" toast for a subject ({ subjectName, card, taskIds }); one per subject at a time.
-   * Jump to Subject goes to one of the newly marked tasks (taskIds), else the subject's overall row.
+   * Jump to Subject goes to one of the newly marked tasks (taskIds), else the subject's overall row. An ignored
+   * course says nothing; its marks and task ids are still saved, so turning the option off announces nothing old.
    */
   function announce(entry, taskIds = entry.taskIds) {
+    if (window.ConnectifyCourseFilter?.ignores(entry.subjectName)) return;
     window.ConnectifyNotifications?.show?.({
       id: `connectify-grade-${entry.subjectName.replace(/\s+/g, '-').toLowerCase()}`,
       type: 'grade',
