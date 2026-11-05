@@ -65,10 +65,21 @@
   gap: 16px 20px;
   align-items: flex-start;
   margin-top: 16px;
-  padding-top: 16px;
 }
 #connectify-sidebar .cx-settings-fields .cx-settings-desc { margin: 4px 0 0; }
 #connectify-sidebar .cx-settings-label { margin-bottom: 4px; }
+#connectify-sidebar label.cx-settings-label { font-size: 12px; font-weight: 600; }
+/* Wallpaper rows share one grid: names in one column, Upload and the thumbnails on one edge, buttons one height */
+#connectify-sidebar .cx-bg-settings {
+  flex: 1 1 100%;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 8px 12px;
+  align-items: center;
+}
+#connectify-sidebar .cx-bg-settings .cx-settings-label { margin: 0; }
+#connectify-sidebar .cx-bg-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+#connectify-sidebar .cx-bg-actions .eds-c-button { box-sizing: border-box; height: 28px; line-height: 28px; margin: 0; }
 #connectify-sidebar .cx-settings-heading { margin-bottom: 8px; }
 .cx-settings-number-input,
 .cx-baseline-type-input,

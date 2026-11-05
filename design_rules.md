@@ -677,6 +677,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - the panel has no Settings heading: its first section starts at the panel's top, with no line above it
     - 12px under a section's heading
     - 16px between blocks (checkboxes to fields, field rows, a table to its buttons)
+    - a line only splits sections, never the inside of one
+    - the wallpaper rows share one grid: names in one column, Upload and the thumbnails on one edge, 28px buttons
     - 8px between rows, 4px from a label to its control or note
   - Written past Connect
     - `.eds.cvr label` (5px) and `p` (14px) would otherwise add their own margins

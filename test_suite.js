@@ -15610,7 +15610,7 @@ runTest('Test 330: Settings says nothing self-evident: only the current semester
   eval(read('predictor/settings-markup.js'));
   eval(read('predictor/settings-semester-filter.js'));
   const html = window.ConnectifySettingsMarkup.panelHtml();
-  const checkboxes = html.slice(html.indexOf('id="cx-auto-expand-toggle"'), html.indexOf('cx-settings-divider'));
+  const checkboxes = html.slice(html.indexOf('id="cx-auto-expand-toggle"'), html.indexOf('cx-settings-fields'));
   assert.deepStrictEqual([...checkboxes.matchAll(/<p [^>]*>(.*?)<\/p>/g)].map(m => m[0].includes('id="cx-semester-filter-detected"') && m[1] === ''), [true], 'the one note is the semester, filled in when bound');
 
   const notes = [...html.matchAll(/class="cx-settings-(?:desc|hint)"[^>]*>([^<]*)</g)].map(m => m[1]);
@@ -15644,7 +15644,9 @@ runTest('Test 331: Settings keeps one spacing scale, past Connect\'s own label a
     '#connectify-sidebar .cx-settings-label { margin-bottom: 4px; }',
     '#connectify-sidebar .cx-settings-heading { margin-bottom: 8px; }'
   ]) assert.ok(css.includes(rule), rule);
-  assert.ok(/gap: 16px 20px;\s+align-items: flex-start;\s+margin-top: 16px;\s+padding-top: 16px;/.test(css), 'fields sit 16px from the checkboxes and each other');
+  assert.ok(/gap: 16px 20px;\s+align-items: flex-start;\s+margin-top: 16px;\s+\}/.test(css), 'fields sit 16px from the checkboxes and each other');
+  assert.ok(!html.includes('cx-settings-divider'), 'a line only ever splits sections, never the inside of one');
+  assert.ok(/grid-template-columns: max-content minmax\(0, 1fr\);/.test(css) && html.includes('class="cx-bg-settings"'), 'the wallpaper rows share one grid');
 
   const drawer = read('sidebar/styles/sidebar-drawer.css');
   assert.ok(/\.cx-cat-wrap label \{\s+margin: 0;/.test(drawer), 'category names stay centred on their inputs');
