@@ -15611,6 +15611,32 @@ runTest('Test 330: Settings says nothing self-evident: only the current semester
   assert.strictEqual(panel.querySelector('#cx-semester-filter-detected').textContent, 'Current Semester: Semester 2');
 });
 
+runTest('Test 331: Settings keeps one spacing scale, past Connect\'s own label and paragraph margins', () => {
+  const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
+  eval(read('predictor/settings-markup.js'));
+  const html = window.ConnectifySettingsMarkup.panelHtml();
+  assert.strictEqual((html.match(/<section class="cx-settings-section">/g) || []).length, 5, 'every section is the same, none with spacing of its own');
+  assert.ok(!/<section[^>]*style=/.test(html) && !/<header[^>]*margin/.test(html), 'sections and headings have no inline margins');
+  assert.strictEqual((html.match(/<label class="cx-settings-check">/g) || []).length, 3, 'the checkboxes share one class');
+  assert.ok(!html.includes('rgba(255,255,255,0.08)'), 'no faint line above the wallpaper, which Light could not show');
+
+  const css = read('sidebar/styles/sidebar-settings.css');
+  for (const rule of [
+    '#connectify-sidebar .cx-settings-section { margin: 24px 0 0; padding-top: 24px; }',
+    '#connectify-sidebar #connectify-categories .cx-settings-section > header { margin-bottom: 12px; }',
+    '#connectify-sidebar .cx-settings-check + .cx-settings-desc { margin: 4px 0 0 24px; }',
+    '#connectify-sidebar .cx-settings-fields .cx-settings-desc { margin: 4px 0 0; }',
+    '#connectify-sidebar .cx-settings-label { margin-bottom: 4px; }',
+    '#connectify-sidebar .cx-settings-heading { margin-bottom: 8px; }'
+  ]) assert.ok(css.includes(rule), rule);
+  assert.ok(/gap: 16px 20px;\s+align-items: flex-start;\s+margin-top: 16px;\s+padding-top: 16px;/.test(css), 'fields sit 16px from the checkboxes and each other');
+
+  const drawer = read('sidebar/styles/sidebar-drawer.css');
+  assert.ok(/\.cx-cat-wrap label \{\s+margin: 0;/.test(drawer), 'category names stay centred on their inputs');
+  assert.ok(/\.cx-cat-wrap:last-child \{\s+margin-bottom: 0;/.test(drawer) && !read('predictor/category-settings.js').includes('margin-bottom:10px'), 'category rows take their spacing from the stylesheet');
+  assert.ok(read('predictor/category-baselines.js').includes("gap: '8px 12px', marginBottom: '16px'"), 'baseline grids are on the scale');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

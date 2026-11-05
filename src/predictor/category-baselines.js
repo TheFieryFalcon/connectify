@@ -10,22 +10,18 @@
 
   const make = (tag, className, text) => Object.assign(document.createElement(tag), className ? { className } : {}, text ? { textContent: text } : {});
 
-  function heading(title) {
-    const strong = make('strong', 'cx-settings-heading', title);
-    strong.style.marginBottom = '10px';
-    return strong;
-  }
+  const heading = title => make('strong', 'cx-settings-heading', title);
 
-  function grid(minColumn, marginBottom) {
+  function grid(minColumn) {
     const el = make('div');
-    Object.assign(el.style, { display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${minColumn}, 1fr))`, gap: '10px', marginBottom });
+    Object.assign(el.style, { display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${minColumn}, 1fr))`, gap: '8px 12px', marginBottom: '16px' });
     return el;
   }
 
   /** One labelled 0–100 number input; dataset carries the category or subject it belongs to. */
   function baselineField({ name, color, inputClass, dataKey, placeholder, value }) {
     const field = make('div');
-    Object.assign(field.style, { display: 'flex', flexDirection: 'column', gap: '3px' });
+    Object.assign(field.style, { display: 'flex', flexDirection: 'column' });
     const label = make('label', 'cx-settings-label', name);
     label.title = name;
     Object.assign(label.style, { fontSize: '11.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' });
@@ -118,7 +114,7 @@
 
     const baselines = window.ConnectifyPredictorMath?.getBaselines ? window.ConnectifyPredictorMath.getBaselines() : { types: {}, subjects: {} };
 
-    const typeGrid = grid('130px', '18px');
+    const typeGrid = grid('130px');
     for (const cat of allCategories(baselines)) {
       typeGrid.append(baselineField({
         name: cat,
@@ -130,7 +126,7 @@
       }));
     }
 
-    const subjGrid = grid('180px', '16px');
+    const subjGrid = grid('180px');
     const subjects = enrolledSubjects(baselines);
     if (subjects.length === 0) {
       const emptyNote = make('div', 'cx-settings-desc', 'No enrolled subjects detected yet. Expand course outlines on Connect to populate subject list.');

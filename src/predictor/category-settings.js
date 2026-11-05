@@ -23,7 +23,7 @@
       const wrap = document.createElement('div');
       wrap.className = 'cx-cat-wrap';
       wrap.dataset.cat = cat; // Save Changes reads each row's category from here
-      wrap.style.cssText = 'display:flex;align-items:center;margin-bottom:10px;gap:8px;';
+      wrap.style.cssText = 'display:flex;align-items:center;gap:8px;';
 
       const label = document.createElement('label');
       label.className = 'cx-cat-name-label';

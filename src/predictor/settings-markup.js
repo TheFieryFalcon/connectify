@@ -9,21 +9,21 @@
   'use strict';
 
   const panelHtml = () => `
-      <header style="margin-bottom:20px;"><strong style="font-size:18px;">Settings</strong></header>
-      <section class="cx-settings-section" style="margin-bottom:28px;">
-        <header style="margin-bottom:8px;"><strong>General Preferences</strong></header>
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;margin-top:8px;">
-          <input type="checkbox" id="cx-auto-expand-toggle" style="width:16px;height:16px;cursor:pointer;"> Auto-expand class tabs on page load
+      <header><strong style="font-size:18px;">Settings</strong></header>
+      <section class="cx-settings-section">
+        <header><strong>General Preferences</strong></header>
+        <label class="cx-settings-check">
+          <input type="checkbox" id="cx-auto-expand-toggle"> Auto-expand class tabs on page load
         </label>
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;margin-top:12px;">
-          <input type="checkbox" id="cx-semester-filter-toggle" style="width:16px;height:16px;cursor:pointer;"> Show this semester's classes only
+        <label class="cx-settings-check">
+          <input type="checkbox" id="cx-semester-filter-toggle"> Show this semester's classes only
         </label>
-        <p class="cx-settings-desc" id="cx-semester-filter-detected" style="margin:4px 0 0 24px;"></p>
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;margin-top:12px;">
-          <input type="checkbox" id="cx-course-filter-toggle" style="width:16px;height:16px;cursor:pointer;"> Hide statistics on Certificate and General courses
+        <p class="cx-settings-desc" id="cx-semester-filter-detected"></p>
+        <label class="cx-settings-check">
+          <input type="checkbox" id="cx-course-filter-toggle"> Hide statistics on Certificate and General courses
         </label>
 
-        <div class="cx-settings-divider" style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:14px;padding-top:12px;">
+        <div class="cx-settings-divider cx-settings-fields">
           <div>
             <label for="cx-general-cohort-input" class="cx-settings-label">General Cohort Size</label>
             <div style="display:flex;align-items:center;gap:6px;">
@@ -55,7 +55,7 @@
             </div>
             <p class="cx-settings-desc">Takes effect after reload.</p>
           </div>
-          <div id="cx-bg-settings-container" style="flex:1 1 100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
+          <div id="cx-bg-settings-container" style="flex:1 1 100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <label class="cx-settings-label" style="margin:0;">Custom Wallpaper:</label>
             <input type="file" id="cx-bg-upload-input" accept="image/*" style="display:none;">
             <button type="button" id="cx-bg-upload-btn" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">🖼 Upload Background</button>
@@ -69,18 +69,18 @@
         </div>
       </section>
 
-      <section class="cx-settings-section" style="margin-bottom:28px;border-top:1px solid #d8e3ee;padding-top:20px;">
-        <header style="margin-bottom:8px;"><strong>Semester 1 Scaling Calibration</strong></header>
-        <div id="cx-calibration-table" style="display:grid;grid-template-columns:minmax(140px, 220px) 85px 85px;gap:10px 14px;align-items:center;margin-top:12px;"></div>
+      <section class="cx-settings-section">
+        <header><strong>Semester 1 Scaling Calibration</strong></header>
+        <div id="cx-calibration-table" style="display:grid;grid-template-columns:minmax(140px, 220px) 85px 85px;gap:8px 14px;align-items:center;"></div>
       </section>
 
-      <section class="cx-settings-section" style="margin-bottom:28px;border-top:1px solid #d8e3ee;padding-top:20px;">
-        <header style="margin-bottom:8px;"><strong>Previous Year Baselines</strong></header>
+      <section class="cx-settings-section">
+        <header><strong>Previous Year Baselines</strong></header>
         <div id="cx-baselines-container"></div>
       </section>
 
-      <section class="cx-settings-section" style="margin-top:36px;border-top:1px solid #d8e3ee;padding-top:24px;">
-        <header style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+      <section class="cx-settings-section">
+        <header style="display:flex;justify-content:space-between;align-items:center;">
           <strong>Assessment Categories</strong>
           <button type="button" id="cx-cat-add" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">+ Add Category</button>
         </header>
@@ -91,8 +91,8 @@
         </div>
       </section>
 
-      <section class="cx-settings-section" style="margin-top:36px;border-top:1px solid #d8e3ee;padding-top:24px;">
-        <header style="margin-bottom:8px;"><strong>Developer Settings</strong></header>
+      <section class="cx-settings-section">
+        <header><strong>Developer Settings</strong></header>
         <div style="display:flex;align-items:center;gap:10px;">
           <button type="button" id="cx-clear-cache-btn" class="eds-c-button cx-clear-cache-btn" style="background:#e74c3c;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Clear Cache</button>
           <span id="cx-clear-cache-feedback" style="display:none;font-size:12px;color:#27ae60;font-weight:600;">Cache cleared!</span>

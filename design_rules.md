@@ -597,6 +597,15 @@ Extremely concise summary of the core visual design language, contrast standards
   - Settings and Weakness Analyzer feature clean white buttons
     - `#ffffff` in light mode
     - with centered text (`text-align: center !important; justify-content: center !important;`)
+- **Settings Spacing** (`sidebar-settings.css`)
+  - One scale
+    - 24px either side of a section's line, the first section too
+    - 12px under a section's heading
+    - 16px between blocks (checkboxes to fields, field rows, a table to its buttons)
+    - 8px between rows, 4px from a label to its control or note
+  - Written past Connect
+    - `.eds.cvr label` (5px) and `p` (14px) would otherwise add their own margins
+    - spacing lives in classes, never inline on the controls
 - **Workspace Navigation**
   - Dedicated `← Back to Menu` navigation header (`.cx-back-menu`)
     - positioned at the top right of the header

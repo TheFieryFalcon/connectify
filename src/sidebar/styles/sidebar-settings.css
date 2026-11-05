@@ -41,6 +41,34 @@
   color: #55667a;
   text-transform: uppercase;
 }
+/* One spacing scale, written past Connect's own label and paragraph margins (.eds.cvr label 5px, p 14px): 24 either
+   side of a section's line, 12 under its heading, 16 between blocks, 8 between rows, 4 from a label to its control */
+#connectify-sidebar .cx-settings-section { margin: 24px 0 0; padding-top: 24px; }
+#connectify-sidebar #connectify-categories .cx-settings-section > header { margin-bottom: 12px; }
+#connectify-sidebar .cx-settings-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+#connectify-sidebar header + .cx-settings-check { margin-top: 0; }
+#connectify-sidebar .cx-settings-check input { width: 16px; height: 16px; margin: 0; cursor: pointer; }
+#connectify-sidebar .cx-settings-check + .cx-settings-desc { margin: 4px 0 0 24px; }
+#connectify-sidebar .cx-settings-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 20px;
+  align-items: flex-start;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+#connectify-sidebar .cx-settings-fields .cx-settings-desc { margin: 4px 0 0; }
+#connectify-sidebar .cx-settings-label { margin-bottom: 4px; }
+#connectify-sidebar .cx-settings-heading { margin-bottom: 8px; }
 .cx-settings-number-input,
 .cx-baseline-type-input,
 .cx-baseline-subj-input {
