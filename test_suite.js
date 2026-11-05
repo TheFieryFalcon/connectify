@@ -7783,16 +7783,17 @@ runTest('Test 161: A dialog and its padding regions share one surface; a table-w
   assert.ok(cssHas(bar, 'cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)),'), 'a cnt-paginator wrapping the table must not get flex/space-between layout');
 });
 
-runTest('Test 162: Auto-login only fires for a saved password or browser autofill, never for typed input', () => {
+runTest('Test 162: Auto-login only fires for a saved password or browser autofill, never once the student is entering their own', () => {
   const js = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login.js'), 'utf8');
   // Chromium (Chrome, Dia) matches :autofill while it still withholds the password value: submitting then sends an empty password
   assert.ok(!/['"]:(-webkit-)?autofill['"]/.test(js) && js.includes("const isFilled = el => el.value.trim() !== '';"),
     'auto-login must wait for readable credential values, never treat :autofill alone as filled');
   assert.ok(js.includes('if (!isFilled(userField) || !isFilled(passField)) return;'), 'auto-login must require both credential fields to be filled');
   assert.ok(js.includes("passField.addEventListener('input', attemptLogin)"), 'the browser releasing an autofilled value must retry the login');
-  assert.ok(js.includes("field.addEventListener('keydown', markTyped)") && js.includes("field.addEventListener('paste', markTyped)"),
-    'typing or pasting in a credential field must mark the form as user-entered');
-  assert.ok(js.includes("=== false || userTyped) return;"), 'auto-login must not fire once the user typed');
+  assert.ok(js.includes("document.addEventListener('keydown', markEntering, true)"), 'a key press, Tab to a field included, must mark the form as user-entered');
+  assert.ok(js.includes("area.addEventListener('pointerdown', markEntering)") && js.includes("area.addEventListener('paste', markEntering)"),
+    'clicking or pasting in the form must mark it as user-entered: the click is what makes Chromium release a saved password, which then fires input');
+  assert.ok(js.includes("=== false || userEntering) return;"), 'auto-login must not fire once the student is entering their own');
 });
 
 runTest('Test 278: In Chromium, auto-login signs in with the password saved in the browser, which the page never sees autofilled', async () => {
@@ -7801,9 +7802,10 @@ runTest('Test 278: In Chromium, auto-login signs in with the password saved in t
   assert.deepStrictEqual(entry.js, ['src/system/auto-login-credentials.js', 'src/system/auto-login.js'], 'the credential reader loads first');
   const credSrc = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login-credentials.js'), 'utf8');
   const loginSrc = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login.js'), 'utf8');
-  const run = async ({ flags = {}, cred = { type: 'password', id: 'student', password: 'pw' }, chromium = true, typeFirst = false } = {}) => {
+  const run = async ({ flags = {}, cred = { type: 'password', id: 'student', password: 'pw' }, chromium = true, typeFirst = false, clickFirst = false } = {}) => {
     const field = id => ({ id, value: '', listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; } });
     const fields = { ssousername: field('ssousername'), password: field('password') };
+    const docListeners = {};
     let clicks = 0;
     let asked = null;
     fields.login = { value: 'Log in', style: {}, parentElement: { appendChild() {} }, addEventListener() {}, click: () => { clicks++; } };
@@ -7813,12 +7815,13 @@ runTest('Test 278: In Chromium, auto-login signs in with the password saved in t
       window,
       navigator: { credentials: { get: opts => { asked = opts; return new Promise(r => setTimeout(() => r(cred), 5)); } } },
       chrome: { storage: { local: { get: (keys, cb) => cb(flags), set() {}, remove() {} } } },
-      document: { getElementById: id => fields[id] || null, querySelector: () => terms, createElement: () => ({ style: {}, appendChild() {}, addEventListener() {} }), createTextNode: () => ({}) },
+      document: { addEventListener(type, fn) { docListeners[type] = fn; }, getElementById: id => fields[id] || null, querySelector: () => terms, createElement: () => ({ style: {}, appendChild() {}, addEventListener() {} }), createTextNode: () => ({}) },
       setInterval: () => 0, clearInterval() {}, setTimeout, Date, Promise
     };
     require('vm').runInNewContext(credSrc, sandbox);
     require('vm').runInNewContext(loginSrc, sandbox);
-    if (typeFirst) fields.password.listeners.keydown();
+    if (typeFirst) docListeners.keydown();
+    if (clickFirst) fields.password.listeners.pointerdown();
     await new Promise(r => setTimeout(r, 20));
     return { clicks, asked, user: fields.ssousername.value, pass: fields.password.value, terms: terms.checked };
   };
@@ -7830,6 +7833,8 @@ runTest('Test 278: In Chromium, auto-login signs in with the password saved in t
   assert.strictEqual((await run({ flags: { 'cx-manual-logout': true } })).asked, null, 'never after a manual logout');
   assert.strictEqual((await run({ flags: { 'cx-last-autologin': Date.now() - 5000 } })).clicks, 0, 'never within 30s of a login');
   assert.strictEqual((await run({ typeFirst: true })).clicks, 0, 'typing before the credential arrives leaves the form to the student');
+  const clicked = await run({ clickFirst: true });
+  assert.ok(clicked.clicks === 0 && clicked.pass === '', 'clicking into a field before the credential arrives leaves the form and its fields to the student');
   assert.strictEqual((await run({ cred: null })).clicks, 0, 'no saved password (or the chooser cancelled): nothing is submitted');
   assert.strictEqual((await run({ chromium: false })).asked, null, 'Firefox has no PasswordCredential: its autofill path is used');
 });

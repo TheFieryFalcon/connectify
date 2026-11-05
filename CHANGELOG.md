@@ -24,6 +24,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Finished goals say so in the notification's title.** It reads Goal Achieved with a green edge or Goal Missed with a gray edge, and goal names no longer start with the year level.
 
 ### Fixes
+- Auto-login no longer submits the sign-in page while you're entering your details. Clicking into the form, tabbing to it or picking a saved login yourself now leaves it to you, and it only signs in by itself if you haven't touched the form.
 - Jump To now lands on the subject you picked with Auto-expand on. It used to stop thousands of pixels short, somewhere in an earlier subject, because the outlines above it were still growing as the page scrolled past them.
 - Task dates written as just a week number now land in the right week. `35/36` means school weeks 35 and 36, so it now reads Term 4 Week 5-6 instead of Term 4 Week 1, and everything that orders tasks by date follows.
 - Connect's side menu (Profile, Preferences and so on) now reaches the bottom of the screen as soon as the page loads, instead of stopping short until you scroll. This was a bug in Connect itself.

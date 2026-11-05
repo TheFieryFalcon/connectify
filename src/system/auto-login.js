@@ -97,9 +97,10 @@
           return; // Do not auto-login: let a manual logout take effect
       }
 
-      // Only a saved password / browser autofill may log in: anything the user typed or pasted is left alone
-      let userTyped = false;
-      const markTyped = () => { userTyped = true; };
+      // Only a saved password / browser autofill may log in: a student who presses a key, or clicks or pastes
+      // in the form, is entering their own (the click is also what makes Chromium release a saved password)
+      let userEntering = false;
+      const markEntering = () => { userEntering = true; };
       // Chromium matches :autofill before it releases a saved password's value to the page (and to a submitted form):
       // only a readable value counts, and the release fires 'input', which retries the login
       const isFilled = el => el.value.trim() !== '';
@@ -110,7 +111,7 @@
         const passField = document.getElementById('password');
         const termsBox = document.querySelector('input[name="acceptterms"]');
         const loginBtn = document.getElementById('login');
-        if (submitted || userTyped || !userField || !passField || !loginBtn) return;
+        if (submitted || userEntering || !userField || !passField || !loginBtn) return;
         if (user !== undefined) {
           userField.value = user;
           passField.value = pass;
@@ -129,7 +130,7 @@
 
       const attemptLogin = () => {
         storageGet(['cx-autologin-enabled'], (res) => {
-            if (res['cx-autologin-enabled'] === false || userTyped) return;
+            if (res['cx-autologin-enabled'] === false || userEntering) return;
             submitLogin();
         });
       };
@@ -148,9 +149,10 @@
       const userField = document.getElementById('ssousername');
       const passField = document.getElementById('password');
       if (userField && passField) {
-          for (const field of [userField, passField]) {
-              field.addEventListener('keydown', markTyped);
-              field.addEventListener('paste', markTyped);
+          document.addEventListener('keydown', markEntering, true);
+          for (const area of userField.form ? [userField.form] : [userField, passField]) {
+              area.addEventListener('pointerdown', markEntering);
+              area.addEventListener('paste', markEntering);
           }
           userField.addEventListener('input', attemptLogin);
           passField.addEventListener('input', attemptLogin);
