@@ -220,7 +220,7 @@
   color: #15803d;
 }
 
-/* Expand All Outlines: filled in the cold-start notice, outlined (compact) beside the ATAR heading */
+/* Expand Subject Outlines, on Predict ATAR's card when too few subjects were read */
 .cx-pred-expand-outlines-btn {
   background: #24618c;
   color: #ffffff;

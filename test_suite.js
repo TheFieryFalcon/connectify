@@ -2435,6 +2435,7 @@ runTest('predictor-ui.js and atar-ui.js offer no Expand All button while they ha
 
   assert.ok(predUiJs.includes("closest('#cx-pred-expand-outlines, .cx-pred-expand-outlines-btn')"), 'the Predictor still handles the button its no-data card offers');
   assert.strictEqual(atarView.match(/cx-pred-expand-outlines-btn/g).length, 1, 'only the card shown when too few subjects were read has one');
+  assert.ok(atarView.includes('Expand Subject Outlines') && !atarView.includes('Expand All Outlines'), 'that button has the name the other tools give it');
   assert.ok(!atarUiJs.includes('expandAllBtn') && !atarUiJs.includes('Expand All Outlines'), 'Estimate ATAR has none');
 });
 

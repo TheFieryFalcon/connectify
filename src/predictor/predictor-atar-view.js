@@ -40,7 +40,7 @@
           </div>
           <div style="margin-top:14px;">
             <button type="button" class="cx-pred-expand-outlines-btn">
-              Expand All Outlines
+              Expand Subject Outlines
             </button>
           </div>
         </div>
