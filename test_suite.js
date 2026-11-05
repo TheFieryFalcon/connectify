@@ -98,6 +98,7 @@ const MODULE_BUNDLES = {
     'cohort-outcome.js',
     'cohort-row-readers.js',
     'cohort-panel-view.js',
+    'cohort-course-filter.js',
     'cohort-expanded.js',
     'cohort-panel.js',
     'cohort-outcome-eval.js',
@@ -113,6 +114,7 @@ const MODULE_BUNDLES = {
     'settings-markup.js',
     'settings-semester-filter.js',
     'settings-panel-view.js',
+    'settings-course-filter.js',
     'settings-preferences.js',
     'category-settings.js'
   ],
@@ -15488,6 +15490,104 @@ runTest('Test 328: The customizer\'s Basic mode names colours for what they pain
   assert.ok(controls.includes("state.mode === 'basic' ? window.ConnectifyCustomizerBasic.tooltipHtml(elem, textToken, fillToken)"), 'Basic mode uses the plain tooltip');
   const manifest = origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('theme-customizer-basic.js') > -1 && manifest.indexOf('theme-customizer-basic.js') < manifest.indexOf('theme-customizer-markup.js'), 'the words load before the markup');
+});
+
+runTest('Test 329: Settings can leave Certificate and General courses without statistics, straight away and in both directions', () => {
+  localStorage.clear();
+  const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
+  eval(read('cohort/cohort-course-filter.js'));
+  const filter = window.ConnectifyCourseFilter;
+
+  for (const name of ['12 Certificate II in Business', '11 General English', '12 MATHEMATICS ESSENTIAL GENERAL - Semester 1']) {
+    assert.ok(filter.matches(name), `${name} is hidden with the option on`);
+  }
+  for (const name of ['12 Literature ATAR', '11 Generalist Studies', '', undefined]) {
+    assert.ok(!filter.matches(name), `${name} keeps its statistics`);
+  }
+
+  // A cohort pass with a stand-in view: what it renders is what keeps its panels
+  const makeCard = title => {
+    const card = new MockElement('div', 'eds-c-tile');
+    const heading = new MockElement('div', 'eds-c-tile__title');
+    heading.textContent = title;
+    const row = new MockElement('div', 'cvr-c-task');
+    row.closest = () => card;
+    const panel = new MockElement('section', 'connectea-panel');
+    row.appendChild(panel);
+    card.append(heading, row);
+    card.querySelector = sel => sel.includes('.eds-c-tile__title') ? heading : null;
+    card.querySelectorAll = sel => sel === '.cvr-c-task' ? [row]
+      : sel.includes('.connectea-panel') ? row.children.filter(c => c === panel) : [];
+    return { card, row, panel };
+  };
+  const general = makeCard('11 General English');
+  const atar = makeCard('12 Literature ATAR');
+  const rendered = [];
+  const win = {
+    ConnectifyCourseFilter: filter,
+    ConnectifyCohortView: { render: row => rendered.push(row) },
+    ConnectifyCohortEstimator: { subjectKey: card => card.textContent, estimateCohortSize: () => 50 }
+  };
+  const doc = {
+    getElementById: () => ({}),
+    querySelector: () => null,
+    querySelectorAll: () => [general.card, atar.card]
+  };
+  new Function('window', 'document', read('cohort/cohort-stats.js'))(win, doc);
+
+  assert.ok(!filter.hides(general.card), 'off by default');
+  win.ConnectifyCohort.pass();
+  assert.deepStrictEqual(rendered, [general.row, atar.row], 'with the option off every course is drawn');
+
+  filter.save(true);
+  assert.strictEqual(localStorage.getItem(filter.KEY), 'true');
+  assert.ok(filter.hides(general.card) && filter.hidesRow(general.row) && !filter.hides(atar.card) && !filter.hidesRow(atar.row));
+  rendered.length = 0;
+  win.ConnectifyCohort.pass();
+  assert.deepStrictEqual(rendered, [atar.row], 'a General course is no longer drawn');
+  assert.ok(!general.row.children.includes(general.panel), 'its panel is removed from the open outline');
+  assert.ok(atar.row.children.includes(atar.panel), 'an ATAR course keeps its panel');
+
+  filter.save(false);
+  assert.strictEqual(localStorage.getItem(filter.KEY), null, 'off (the default) removes the setting');
+  rendered.length = 0;
+  win.ConnectifyCohort.pass();
+  assert.deepStrictEqual(rendered, [general.row, atar.row], 'turning it off draws the course again');
+
+  // The checkbox: shows the stored choice, and a change saves it and runs a pass at once
+  eval(read('predictor/settings-markup.js'));
+  eval(read('predictor/settings-course-filter.js'));
+  const panel = new MockElement('div');
+  panel.innerHTML = window.ConnectifySettingsMarkup.panelHtml();
+  const toggle = panel.querySelector('#cx-course-filter-toggle');
+  filter.save(true);
+  const origCohort = window.ConnectifyCohort;
+  let scheduled = 0;
+  window.ConnectifyCohort = { schedule: immediate => { if (immediate) scheduled++; } };
+  const refresh = window.ConnectifySettingsCourseFilter.bind(panel);
+  assert.strictEqual(toggle.checked, true, 'the checkbox shows the stored choice');
+  toggle.checked = false;
+  toggle.dispatchEvent(new MockEvent('change'));
+  window.ConnectifyCohort = origCohort;
+  assert.ok(!filter.isEnabled() && scheduled === 1, 'a change saves and redraws at once');
+  refresh();
+  assert.strictEqual(toggle.checked, false);
+  assert.ok(read('predictor/settings-preferences.js').includes('window.ConnectifySettingsCourseFilter?.bind(panel)'), 'General Preferences binds it');
+  assert.ok(/directKeys = \[[^\]]*'connectify:hide_course_stats'/.test(read('assessment/cache-versions.js')), 'a settings reset clears it');
+
+  // A row left without a panel on purpose is neither re-passed on every change nor reported as missing
+  assert.ok(read('cohort/cohort-observer.js').includes('if (window.ConnectifyCourseFilter?.hides(card)) continue;'), 'the observer skips it');
+  assert.ok(read('system/dom-sweeper.js').includes('if (window.ConnectifyCourseFilter?.hidesRow(row)) return;'), 'the DOM sweeper skips it');
+
+  // Both script groups have the Settings panel: the filter and its checkbox load in each
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const groups = manifest.content_scripts.filter(g => (g.js || []).includes('src/predictor/settings-preferences.js'));
+  assert.ok(groups.length >= 2, 'the outlines and sidebar-only groups');
+  for (const { js } of groups) {
+    assert.ok(js.includes('src/cohort/cohort-course-filter.js'), 'the filter is registered');
+    assert.ok(js.indexOf('src/predictor/settings-course-filter.js') > -1 && js.indexOf('src/predictor/settings-course-filter.js') < js.indexOf('src/predictor/settings-preferences.js'), 'the checkbox loads before General Preferences');
+  }
+  localStorage.clear();
 });
 
 Promise.all(pendingTestPromises).then(() => {

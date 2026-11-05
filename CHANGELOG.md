@@ -7,6 +7,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ## Unreleased
 
 ### Changes
+- **Hide statistics on Certificate and General courses.** A new option in Settings removes the statistics and prediction panels, Type dropdowns and meters from any class with Certificate or General in its name. It applies straight away, and the sidebar tools still include those classes.
 - **Basic Mode in the Theme Customizer speaks plainly.** Its six colours are now Page Background, Cards and Panels, Text, Buttons, Outlines, and Highlights and Links, with no colour codes to read. Hover over the preview to see which colours change that part. Full Mode keeps the codes and technical names.
 - **Download a whole section from the Content page.** Each heading now has a Download button beside View. It saves everything under that heading without leaving the list, as one ZIP when there's more than one file.
 - **Download several sections at once.** Press Download at the top of the Content page, tick the headings you want in the left margin (or Select All), and press Download again to save them as one ZIP with a folder per heading.

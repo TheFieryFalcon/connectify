@@ -44,6 +44,7 @@
   // A subject summary row without its panel (e.g. after Connect re-rendered a card) is filled in at once
   function hasMissingSummaryPanel() {
     for (const card of document.querySelectorAll(CARD_SELECTOR)) {
+      if (window.ConnectifyCourseFilter?.hides(card)) continue;
       const summaryRow = Array.from(card.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.cvr-c-tasks'));
       if (summaryRow && !summaryRow.querySelector('.connectea-panel')) return true;
     }

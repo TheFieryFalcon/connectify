@@ -52,6 +52,8 @@
 
         // Incomplete / pending tasks intentionally do not render statistics panels
         if (!isOverall && !isMarked) return;
+        // Settings can leave Certificate and General courses without panels
+        if (window.ConnectifyCourseFilter?.hidesRow(row)) return;
 
         const hasPanel = row.querySelector('.connectea-panel') || row.querySelector('.connectea-row-wrapper');
         if (!hasPanel) {

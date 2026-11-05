@@ -125,6 +125,7 @@
     const refreshWallpaper = bindWallpaper(panel);
     const refreshSemesterFilter = window.ConnectifySettingsSemesterFilter?.bind(panel) || (() => {});
     const refreshPanelView = window.ConnectifySettingsPanelView?.bind(panel) || (() => {});
+    const refreshCourseFilter = window.ConnectifySettingsCourseFilter?.bind(panel) || (() => {});
     bindClearCache(panel);
 
     const refresh = () => {
@@ -136,6 +137,7 @@
         refreshWallpaper();
         refreshSemesterFilter();
         refreshPanelView();
+        refreshCourseFilter();
       } catch (e) {
         console.warn('Connectify settings preferences error:', e);
       }

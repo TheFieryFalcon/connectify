@@ -438,6 +438,13 @@ Extremely concise summary of the core visual design language, contrast standards
     - the 1px outline stays
     - a focused Material field keeps its own outline
     - the generic accent focus ring skips `.mat-input-element` (no second box inside the field)
+- **Hide Statistics on Certificate and General Courses** (`cohort-course-filter.js`, Settings checkbox, off by default)
+  - Which courses
+    - a class with Certificate or General in its name (whole word, any case)
+  - Effect
+    - its rows stay as Connect drew them: no statistics or prediction panels, Type dropdowns, meters or goal bars, and no restored overall row
+    - applies at once in both directions, never after a reload
+    - the compound progress bar stays, and the sidebar tools still read these classes
 - **Settings Dropdowns**
   - `.cx-settings-select` matches the number inputs
     - white, `#b9cbe1` 1px border, 4px radius

@@ -52,6 +52,13 @@
     const subjectEstimates = {};
     const pending = new Set();
     for (const card of cards) {
+      // Settings can leave Certificate and General courses as Connect drew them
+      if (window.ConnectifyCourseFilter?.hides(card)) {
+        window.ConnectifyCourseFilter.clear(card);
+        card._cxTaskRows = [];
+        card._cxCohortKey = null;
+        continue;
+      }
       // A class Connect shows no overall row for gets Connectify's own subject average row first
       try { window.ConnectifyCohortSubjectAverage?.sync(card); } catch {}
       const rows = Array.from(card.querySelectorAll('.cvr-c-task')).filter(
