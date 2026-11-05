@@ -15590,6 +15590,23 @@ runTest('Test 329: Settings can leave Certificate and General courses without st
   localStorage.clear();
 });
 
+runTest('Test 330: Settings checkboxes say nothing self-evident: only the current semester sits under them', () => {
+  const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
+  eval(read('predictor/settings-markup.js'));
+  eval(read('predictor/settings-semester-filter.js'));
+  const html = window.ConnectifySettingsMarkup.panelHtml();
+  const checkboxes = html.slice(html.indexOf('id="cx-auto-expand-toggle"'), html.indexOf('cx-settings-divider'));
+  assert.deepStrictEqual([...checkboxes.matchAll(/<p [^>]*>(.*?)<\/p>/g)].map(m => m[0].includes('id="cx-semester-filter-detected"') && m[1] === ''), [true], 'the one note is the semester, filled in when bound');
+
+  const panel = new MockElement('div');
+  panel.innerHTML = html;
+  const origFilter = window.ConnectifySemesterFilter;
+  window.ConnectifySemesterFilter = { isEnabled: () => false, currentSemester: () => 2 };
+  window.ConnectifySettingsSemesterFilter.bind(panel);
+  window.ConnectifySemesterFilter = origFilter;
+  assert.strictEqual(panel.querySelector('#cx-semester-filter-detected').textContent, 'Current Semester: Semester 2');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

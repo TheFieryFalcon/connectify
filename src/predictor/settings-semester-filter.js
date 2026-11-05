@@ -2,7 +2,7 @@
  * Connectify Settings: "Show this semester's classes only"
  *
  * Wires the General Preferences checkbox to ConnectifySemesterFilter and names the detected semester
- * beside it. A change hides or shows outline tiles, refreshes the cache from this semester's cards,
+ * under it. A change hides or shows outline tiles, refreshes the cache from this semester's cards,
  * redraws the page statistics and tells the tools (connectify-settings-updated). bind(panel) returns
  * refresh(). Exposes window.ConnectifySettingsSemesterFilter.
  */
@@ -33,7 +33,7 @@
       const f = filter();
       if (!f) return;
       toggle.checked = f.isEnabled();
-      if (detectedLabel) detectedLabel.textContent = `This semester: Semester ${f.currentSemester()}.`;
+      if (detectedLabel) detectedLabel.textContent = `Current Semester: Semester ${f.currentSemester()}`;
     };
     refresh();
     return refresh;
