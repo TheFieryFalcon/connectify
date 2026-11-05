@@ -7,6 +7,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ## Unreleased
 
 ### Changes
+- The tools menu no longer opens with "Select a tool below to view your analytics."
 - **The tools no longer ask you to expand outlines.** They already have your data, so the Expand All Outlines and Refresh Assessments buttons and the note about expanding are gone. Recalculate is gone too, as plans update while you type.
 - **Weakness Analyzer compares like with like.** A type is now measured by how you do on it against each subject's own average, so a weak subject full of essays no longer makes essays look weak. The cohort shows as a dashed line beside you, and the plot no longer sits on a dark box.
 - **A new task type you can't mistake: Unknown.** A task Connectify can't identify is no longer guessed to be Take-Home. Its dropdown says Choose a type, its prediction uses only that subject's results, and the Weakness Analyzer leaves it out and says how many.

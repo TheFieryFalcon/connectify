@@ -4831,10 +4831,8 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.strictEqual(homeBtn.textContent, '← Back to Menu', 'Back button text must be "← Back to Menu"');
   assert.strictEqual(sidebar.querySelector('.cx-close-btn'), null, 'Stray close button (.cx-close-btn) must not exist');
 
-  // Verify intro text
-  const introText = sidebar.querySelector('.cx-tools-intro');
-  assert.ok(introText, 'Intro text (.cx-tools-intro) must exist');
-  assert.ok(introText.textContent.includes('Select a tool below'), 'Intro text must guide user to select a tool');
+  // The launcher buttons explain themselves: the menu has no intro line
+  assert.strictEqual(sidebar.querySelector('.cx-tools-intro'), null, 'The menu must have no intro line');
 
   // Verify tool navigation menu and canonical button sequence
   const toolMenu = sidebar.querySelector('.cx-tool-menu');
@@ -4885,7 +4883,6 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
 
   assert.strictEqual(sidebar.hidden, false, 'Sidebar must open on tool click');
   assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar must enter cx-tool-active mode');
-  assert.strictEqual(introText.hidden, true, 'Intro text must be hidden when tool is active');
   assert.strictEqual(goalsBtn.getAttribute('aria-pressed'), 'true', 'Goals button must be pressed');
 
   const atarPanel = document.getElementById('connectea-atar');
@@ -5093,7 +5090,6 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   homeBtn.click();
 
   assert.strictEqual(sidebar.classList.contains('cx-tool-active'), false, 'Sidebar must exit cx-tool-active mode on Back to Menu');
-  assert.strictEqual(introText.hidden, false, 'Intro text must be restored when returning to launcher menu');
   assert.strictEqual(sidebar.hidden, false, 'Sidebar must remain open when navigating Back to Menu');
 
   // Verify all panels are hidden
@@ -6894,7 +6890,6 @@ runTest('Test 146: The sidebar works on every page: off Assessment Outlines only
     assert.strictEqual(notice.querySelector('.cx-page-notice-title')?.textContent, 'Assessment Outlines Only', 'the notice is titled');
     const link = notice.querySelector('.cx-page-notice-link');
     assert.ok(link && link.tagName.toLowerCase() === 'a' && link.href === window.ConnectifyUtils.OUTLINES_URL, 'the notice links to the outlines');
-    assert.strictEqual(sidebar.querySelector('.cx-tools-intro').hidden, true, 'the outlines intro is hidden');
     toolBtns.forEach(btn => {
       const settings = btn.id === 'connectify-categories-toggle';
       assert.strictEqual(btn.disabled, !settings, `#${btn.id} is ${settings ? 'enabled' : 'disabled'} off the outlines page`);

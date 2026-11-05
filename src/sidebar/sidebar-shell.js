@@ -60,14 +60,9 @@
 
     let workspace = sidebar.querySelector('.cx-workspace') || Object.assign(createElement('div'), { className: 'cx-workspace' });
 
-    let introText = sidebar.querySelector('.cx-tools-intro') || Object.assign(
-      createElement('p', 'Select a tool below to view your analytics.'),
-      { className: 'cx-tools-intro' }
-    );
-
     const pageNotice = sidebar.querySelector('.cx-page-notice') || window.ConnectifySidebarPageNotice.create();
 
-    [header, pageNotice, introText, toolMenu, workspace].forEach(el => {
+    [header, pageNotice, toolMenu, workspace].forEach(el => {
       if (el && !sidebar.contains(el)) sidebar.append(el);
     });
 
@@ -86,7 +81,7 @@
       if (handle.parentElement !== parent) parent.appendChild(handle);
     }
 
-    return { sidebar, handle, header, homeBtn, toolMenu, workspace, introText, pageNotice, attach: attachSidebar };
+    return { sidebar, handle, header, homeBtn, toolMenu, workspace, pageNotice, attach: attachSidebar };
   }
 
   window.ConnectifySidebarShell = { build };

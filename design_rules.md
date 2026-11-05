@@ -228,6 +228,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - e.g. "From 1 of 2 unmarked tasks; blank tasks are left out until they are marked." under an estimate
     - show the result
     - a note only for what the screen cannot show (errors, missing data)
+  - Launcher menu
+    - no intro line above the buttons: their names say it
   - Settings
     - no description of what a control or section does, or of its default: the label and placeholder say it
     - only what the screen cannot show stays: `Current Semester: Semester 2` under Show This Semester's Classes Only, `Takes effect after reload.` under Statistics Panels, the wallpaper status and notes on missing subjects

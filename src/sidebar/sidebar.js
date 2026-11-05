@@ -24,7 +24,7 @@
     const updateHandleState = (isOpen) => (window.ConnectifySidebarHandle?.updateHandleState || function() {})(isOpen);
 
     const shell = window.ConnectifySidebarShell.build();
-    const { sidebar, handle, homeBtn, toolMenu, workspace, introText, pageNotice } = shell;
+    const { sidebar, handle, homeBtn, toolMenu, workspace, pageNotice } = shell;
     const attachSidebar = shell.attach;
 
     attachSidebar();
@@ -46,7 +46,6 @@
       window.dispatchEvent(new CustomEvent('connectify-open', { detail: 'home' }));
       for (const child of workspace.children) child.hidden = true;
       sidebar.classList.remove('cx-tool-active');
-      introText.hidden = isLimited();
       pageNotice.hidden = !isLimited();
       toolMenu.querySelectorAll('button').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
       if (handle) {
@@ -159,7 +158,6 @@
         }
         const hasActiveTool = Array.from(workspace.children).some(p => !p.hidden);
         sidebar.classList.toggle('cx-tool-active', hasActiveTool);
-        introText.hidden = hasActiveTool || limited;
         // The notice belongs to the launcher menu, never above an open tool (Settings)
         const noticeHidden = !limited || hasActiveTool;
         if (pageNotice && pageNotice.hidden !== noticeHidden) pageNotice.hidden = noticeHidden;

@@ -142,12 +142,3 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c
     box-shadow: none;
   }
 }
-
-#connectify-sidebar .cx-tools-intro {
-  padding: 14px 20px 4px 20px !important;
-  margin: 0 !important;
-  font-size: 12.5px !important;
-  line-height: 1.5 !important;
-  color: #4b647f !important;
-}
-.connectea-dark #connectify-sidebar .cx-tools-intro{color:var(--cx-text-muted, #94a3b8)!important}
