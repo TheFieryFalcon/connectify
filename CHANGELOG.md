@@ -4,7 +4,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
-## 3.3.2 (Unreleased)
+## 3.3.2 (2026-11-05)
 
 ### Additions
 - **Next Up**: a Year Progression tab with this week's and next week's assessments, their predictions and goal targets.
