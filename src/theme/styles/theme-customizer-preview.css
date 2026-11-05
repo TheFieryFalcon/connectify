@@ -145,6 +145,7 @@
 }
 #cx-preview-tooltip .cx-tooltip-elem { font-weight: 700; color: #38bdf8; }
 #cx-preview-tooltip .cx-tooltip-token { color: #cbd5e1; font-family: monospace; }
+#cx-preview-tooltip .cx-tooltip-plain { color: #cbd5e1; }
 #cx-customizer-preview [data-cx-elem]:hover { outline: 1.5px dashed rgba(56, 189, 248, 0.7); outline-offset: 1px; }
 
 .cx-customizer-footer {

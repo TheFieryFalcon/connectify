@@ -12,11 +12,7 @@
   const QUICK_EMOJIS = ['🎨', '⚡', '🌌', '💎', '🔮', '🪐', '🌿', '🌙', '🌸', '☕'];
   const SWATCHES = ['#0f141b', '#1e2632', '#202020', '#32302f', '#000000', '#3b82f6', '#fabd2f', '#10b981', '#f43f5e', '#ffffff'];
 
-  const BASIC_TOKENS = [
-    { key: 'canvas', label: 'Canvas Background' }, { key: 'surface', label: 'Panel / Surface' },
-    { key: 'textPrimary', label: 'Primary Text' }, { key: 'button', label: 'Button Color' },
-    { key: 'border', label: 'Outline / Border' }, { key: 'accent', label: 'Primary Accent' }
-  ];
+  const BASIC_TOKENS = window.ConnectifyCustomizerBasic.TOKENS;
   const FULL_TOKENS = [
     { key: 'canvas', label: 'Canvas Background' }, { key: 'canvasSubtle', label: 'Subtle Canvas' },
     { key: 'surface', label: 'Panel / Card Surface' }, { key: 'surfaceSecondary', label: 'Surface Secondary' },
@@ -30,16 +26,20 @@
     { key: 'inputBg', label: 'Input Background' }, { key: 'inputBorder', label: 'Input Border' }
   ];
 
+  const tokenLabel = (key, mode) => (mode === 'basic' && BASIC_TOKENS.find(t => t.key === key) || FULL_TOKENS.find(t => t.key === key))?.label || key;
+
   function tokenGridHtml(state) {
     return (state.mode === 'basic' ? BASIC_TOKENS : FULL_TOKENS).map(t => {
       const value = esc(state.tokens[t.key] || '#000');
       // A Full token the user set wins over the Basic tokens until it is reset
       const reset = state.mode === 'full' && state.overrides?.has(t.key)
         ? '<button type="button" class="cx-token-reset" title="Derive from the Basic tokens again" aria-label="Reset to derived colour">↺</button>' : '';
+      // Basic mode shows the colour itself, never its hex code
+      const code = state.mode === 'full' ? `<span class="cx-token-val">${value}</span>` : '';
       return `
       <div class="cx-token-item ${state.activeToken === t.key ? 'is-active' : ''}" data-key="${t.key}">
         <span class="cx-token-label">${t.label}</span>
-        <div class="cx-token-control-wrap">${reset}<span class="cx-token-val">${value}</span><div class="cx-token-chip" style="background-color:${value};"></div></div>
+        <div class="cx-token-control-wrap">${reset}${code}<div class="cx-token-chip" style="background-color:${value};"></div></div>
       </div>`;
     }).join('');
   }
@@ -55,11 +55,11 @@
             </div>
             <div class="cx-token-grid" id="cx-token-grid"></div>
             <div class="cx-color-picker-box" id="cx-picker-box">
-              <div class="cx-picker-head">Edit: <span id="cx-active-token-name">${esc(s.activeToken)}</span><button type="button" class="cx-picker-close" aria-label="Close colour picker">✕</button></div>
+              <div class="cx-picker-head">Edit: <span id="cx-active-token-name">${esc(tokenLabel(s.activeToken, s.mode))}</span><button type="button" class="cx-picker-close" aria-label="Close colour picker">✕</button></div>
               <div class="cx-picker-sv" id="cx-picker-sv"><div class="cx-picker-sv-cursor" id="cx-picker-cursor"></div></div>
               <input type="range" min="0" max="360" class="cx-picker-hue" id="cx-picker-hue">
               <div style="display: flex; gap: 8px; align-items: center;">
-                <input class="cx-customizer-input" id="cx-picker-hex" style="width: 90px; font-family: monospace;">
+                <input class="cx-customizer-input cx-full-only" id="cx-picker-hex" style="width: 90px; font-family: monospace;">
                 <div class="cx-picker-swatches">
                   ${SWATCHES.map(c => `<div class="cx-swatch-chip" data-color="${c}" style="background-color: ${c};"></div>`).join('')}
                 </div>
@@ -73,12 +73,12 @@
             <div class="cx-addon-toggles">
               <label class="cx-toggle-label">
                 <input type="checkbox" id="cx-glass-toggle" ${s.liquidGlass ? 'checked' : ''}>
-                <span>Frosted Liquid Glass Mode (Diffusion & Rounded Corners)</span>
+                <span>Frosted Glass with Rounded Corners</span>
               </label>
               <div id="cx-glass-sliders-wrap" style="display:${s.liquidGlass ? 'flex' : 'none'};flex-direction:column;gap:6px;margin:6px 0;padding:6px 8px;background:var(--cx-surface-secondary);border-radius:6px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--cx-text-muted);"><span>Blur Strength: <strong id="cx-glass-blur-val" style="color:var(--cx-text-primary);">${s.glassBlur}px</strong></span><input type="range" id="cx-glass-blur-slider" min="0" max="40" value="${s.glassBlur}" style="width:110px;cursor:pointer;"></div>
-                ${window.ConnectifyOverlayBlur?.html(s) || ''}
-                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--cx-text-muted);"><span>Transparency: <strong id="cx-glass-opacity-val" style="color:var(--cx-text-primary);">${opacityPct}%</strong></span><input type="range" id="cx-glass-opacity-slider" min="10" max="100" value="${opacityPct}" style="width:110px;cursor:pointer;"></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--cx-text-muted);"><span>Blur Strength<span class="cx-full-only">: <strong id="cx-glass-blur-val" style="color:var(--cx-text-primary);">${s.glassBlur}px</strong></span></span><input type="range" id="cx-glass-blur-slider" min="0" max="40" value="${s.glassBlur}" style="width:110px;cursor:pointer;"></div>
+                <div class="cx-full-only">${window.ConnectifyOverlayBlur?.html(s) || ''}</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--cx-text-muted);"><span>Transparency<span class="cx-full-only">: <strong id="cx-glass-opacity-val" style="color:var(--cx-text-primary);">${opacityPct}%</strong></span></span><input type="range" id="cx-glass-opacity-slider" min="10" max="100" value="${opacityPct}" style="width:110px;cursor:pointer;"></div>
               </div>
               <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
                 <input type="file" id="cx-bg-file-input" accept="image/*" style="display:none">
@@ -133,7 +133,7 @@
     const presetOptions = Object.entries(presets)
       .map(([k, v]) => `<option value="${esc(k)}">${esc(v.icon || v.emoji || '🎨')} ${esc(v.name)}</option>`).join('');
     return `
-      <div id="cx-customizer-dialog" role="dialog" aria-label="Theme Customizer">
+      <div id="cx-customizer-dialog" data-cx-mode="${esc(s.mode)}" role="dialog" aria-label="Theme Customizer">
         <div class="cx-customizer-header">
           <h2 class="cx-customizer-title"><span id="cx-header-icon">${esc(s.emoji)}</span> Theme Customizer</h2>
           <button class="cx-customizer-close" id="cx-close-btn" aria-label="Close">✕</button>
@@ -144,9 +144,9 @@
             <button class="cx-mode-tab ${s.mode === 'full' ? 'is-active' : ''}" id="cx-tab-full">Full Mode</button>
           </div>
           <div class="cx-preset-picker-wrap">
-            <label for="cx-preset-select">Inherit Preset:</label>
+            <label for="cx-preset-select">Start From:</label>
             <select class="cx-customizer-select" id="cx-preset-select">
-              <option value="">-- Choose Preset --</option>
+              <option value="">Choose a Theme</option>
               ${presetOptions}
             </select>
           </div>
@@ -170,5 +170,5 @@
     `;
   }
 
-  window.ConnectifyThemeCustomizerMarkup = { modalHtml, tokenGridHtml };
+  window.ConnectifyThemeCustomizerMarkup = { modalHtml, tokenGridHtml, tokenLabel };
 })();

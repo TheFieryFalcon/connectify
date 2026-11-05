@@ -169,7 +169,7 @@ const SPLIT_PARTS = {
   'progress-graph.js': ['school-terms.js', 'progress-modes.js', 'progress-early-easter.js', 'progress-panel.js', 'progress-graph.js'],
   'new-grade.js': ['grade-snapshot.js', 'grade-tasks.js', 'new-grade.js'],
   'theme-registry.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-overlay-blur.js', 'theme-registry.js', 'theme-custom-themes.js'],
-  'theme-customizer.js': ['theme-color-utils.js', 'theme-overlay-blur.js', 'theme-import.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
+  'theme-customizer.js': ['theme-color-utils.js', 'theme-overlay-blur.js', 'theme-import.js', 'theme-customizer-basic.js', 'theme-customizer-markup.js', 'theme-customizer-controls.js', 'theme-customizer.js'],
   // theme.js needs the registry stack loaded first, exactly as manifest.json orders it
   'theme.js': ['theme-auth.js', 'theme-custom-tokens.js', 'theme-palettes.js', 'theme-wallpaper-presets.js', 'theme-overlay-blur.js', 'theme-registry.js', 'theme-custom-themes.js',
     'theme-surface-adapter.js', 'theme-toggle.js', 'theme-menu.js', 'theme.js']
@@ -9699,7 +9699,7 @@ runTest('Test 211: Customizer headings and labels take the theme ink in every th
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-customizer.css'), 'utf8');
   const preview = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-customizer-preview.css'), 'utf8');
   assert.ok(cssHas(css, '#cx-customizer-modal .cx-customizer-title, #cx-customizer-modal .cx-toggle-label {\n  color: var(--cx-text-primary) !important;'), 'the title and Liquid Glass toggle use the primary ink');
-  assert.ok(cssHas(css, '#cx-customizer-modal .cx-preset-picker-wrap label {\n  color: var(--cx-text-secondary) !important;'), 'Inherit Preset uses the secondary ink');
+  assert.ok(cssHas(css, '#cx-customizer-modal .cx-preset-picker-wrap label {\n  color: var(--cx-text-secondary) !important;'), 'Start From uses the secondary ink');
   assert.ok(/#cx-customizer-modal \.cx-preview-pane-title \{[^}]*color: var\(--cx-text-secondary\) !important;/.test(preview), 'Live Preview uses the secondary ink, not Connect\'s heading colour');
   const lum = hex => hex.match(/[0-9a-f]{2}/gi).map(h => parseInt(h, 16) / 255).map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)).reduce((a, c, i) => a + c * [0.2126, 0.7152, 0.0722][i], 0);
   const ratio = (a, b) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
@@ -15423,6 +15423,71 @@ runTest('Test 324: A table in a dialog or written into a notice is clear, so no 
   const blur = glass.match(/:where\(table\.mat-table:not\(:is\(([^)]*)\) \*\)\):not\(#cx-n\)/);
   assert.ok(blur, 'outermost tables on the wallpaper blur');
   assert.ok(blur[1].includes('.mat-dialog-container') && blur[1].includes('.v-window'), 'tables in dialogs are not outermost');
+});
+
+runTest('Test 328: The customizer\'s Basic mode names colours for what they paint and shows no code, token or CSS name', () => {
+  const themeDir = path.join(BASE_DIR, 'src/theme');
+  const win = {};
+  for (const f of ['theme-color-utils.js', 'theme-oklch.js', 'theme-token-derive.js', 'theme-customizer-tokens.js', 'theme-customizer-basic.js', 'theme-customizer-markup.js']) {
+    new Function('window', origReadFileSync.call(fs, path.join(themeDir, f), 'utf8'))(win);
+  }
+  const B = win.ConnectifyCustomizerBasic, M = win.ConnectifyThemeCustomizerMarkup, T = win.ConnectifyCustomizerTokens;
+  const tokens = { canvas: '#12171f', surface: '#1e2632', textPrimary: '#f8fafc', button: '#202c3b', border: '#455a73', accent: '#3b82f6' };
+
+  // The six colours, in plain words, on the same tokens the rest of the customizer drives
+  assert.deepStrictEqual(B.TOKENS.map(t => t.key).sort(), [...T.BASIC].sort(), 'Basic mode still edits the 6 Basic tokens');
+  assert.deepStrictEqual(B.TOKENS.map(t => t.label), ['Page Background', 'Cards and Panels', 'Text', 'Buttons', 'Outlines', 'Highlights and Links']);
+
+  // No hex code on a Basic row, the colour itself instead; Full mode keeps its codes and technical names
+  const basic = M.tokenGridHtml({ mode: 'basic', tokens, activeToken: 'canvas' });
+  assert.ok(!basic.includes('cx-token-val') && !basic.replace(/style="[^"]*"/g, '').includes('#'), 'a Basic row shows no hex code');
+  assert.strictEqual((basic.match(/cx-token-chip/g) || []).length, 6, 'each Basic row keeps its colour chip');
+  const full = M.tokenGridHtml({ mode: 'full', tokens, activeToken: 'canvas', overrides: new Set() });
+  assert.ok(full.includes('cx-token-val') && full.includes('Canvas Background'), 'Full mode keeps the codes and technical names');
+
+  // The picker names the row being edited, never its token key
+  assert.strictEqual(M.tokenLabel('textPrimary', 'basic'), 'Text');
+  assert.strictEqual(M.tokenLabel('textPrimary', 'full'), 'Primary Text');
+  assert.strictEqual(M.tokenLabel('canvasSubtle', 'full'), 'Subtle Canvas');
+  assert.ok(origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer.js'), 'utf8').includes('markup.tokenLabel(key, state.mode)'), 'the picker heading uses the label');
+
+  // What Full mode alone shows hides in Basic: the hex box, pixel and percent readouts, the overlay blur checkbox
+  const preset = { dark: { name: 'Dark', icon: '🌙' } };
+  const modal = M.modalHtml({ mode: 'basic', tokens, name: 'T', emoji: '🎨', activeToken: 'canvas', glassBlur: 12, glassOpacity: 0.65, liquidGlass: true, wallpaper: null }, preset);
+  assert.ok(modal.includes('data-cx-mode="basic"'), 'the dialog carries its mode');
+  assert.ok(/class="cx-customizer-input cx-full-only" id="cx-picker-hex"/.test(modal), 'the hex box is Full-only');
+  assert.ok(/<span class="cx-full-only">: <strong id="cx-glass-blur-val"/.test(modal) && /<span class="cx-full-only">: <strong id="cx-glass-opacity-val"/.test(modal), 'the slider readouts are Full-only');
+  assert.ok(origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer-markup.js'), 'utf8').includes('<div class="cx-full-only">${window.ConnectifyOverlayBlur?.html(s)'), 'the overlay blur checkbox is Full-only');
+  const css = origReadFileSync.call(fs, path.join(themeDir, 'styles/theme-customizer.css'), 'utf8');
+  assert.ok(css.includes('#cx-customizer-dialog[data-cx-mode="basic"] .cx-full-only { display: none; }'), 'Basic mode hides them');
+  for (const word of ['Inherit Preset', 'Choose Preset', 'Diffusion']) assert.ok(!modal.includes(word), `no "${word}" in the customizer`);
+  assert.ok(modal.includes('Start From:') && modal.includes('Frosted Glass with Rounded Corners'), 'the shared controls use plain words');
+
+  // Each Full token really follows the Basic colour the tooltip names: change it and the token changes
+  for (const key of Object.keys(B.SOURCES)) {
+    const changed = { ...tokens, [B.SOURCES[key]]: B.SOURCES[key] === 'textPrimary' ? '#fde68a' : '#7c2d12' };
+    assert.notStrictEqual(T.derived(changed)[key], T.derived(tokens)[key], `${key} follows ${B.SOURCES[key]}`);
+  }
+  assert.ok(win.ConnectifyThemeColors.COLOR_KEYS.every(k => B.labelOf(k)), 'every Full token has a Basic colour to name');
+
+  // The preview tooltip in Basic mode names no CSS variable or token: every preview tag resolves to plain words
+  for (const m of modal.matchAll(/data-cx-(text|fill)="([^"]*)"/g)) {
+    assert.ok(B.colorsIn(m[2]).length > 0, `"${m[2]}" names a Basic colour`);
+  }
+  const html = B.tooltipHtml('Card Surface', '--cx-text-primary (textPrimary)', '--cx-surface-bg (surface), --cx-border (border)');
+  assert.ok(html.includes('>Card<') && html.includes('Colours: Text, Cards and Panels, Outlines'), html);
+  assert.ok(B.tooltipHtml('Action Button', null, '--cx-button-bg (button)').includes('Colour: Buttons'), 'one colour reads in the singular');
+  assert.ok(B.tooltipHtml('Input Field', '--cx-input-placeholder (from textPrimary)', null).includes('Colour: Text'), 'tags written "from <token>" resolve too');
+  const elems = [...modal.matchAll(/data-cx-elem="([^"]*)"/g)].map(m => m[1]);
+  assert.ok(elems.length > 15, 'the preview tags its elements');
+  for (const elem of elems) {
+    const shown = B.tooltipHtml(elem, '--cx-accent (accent)', null);
+    assert.ok(!/--cx|Canvas|Surface|Accent|Elevated|Muted|Subtle/.test(shown.split('</div>')[0]), `"${elem}" reads in plain words: ${shown}`);
+  }
+  const controls = origReadFileSync.call(fs, path.join(themeDir, 'theme-customizer-controls.js'), 'utf8');
+  assert.ok(controls.includes("state.mode === 'basic' ? window.ConnectifyCustomizerBasic.tooltipHtml(elem, textToken, fillToken)"), 'Basic mode uses the plain tooltip');
+  const manifest = origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8');
+  assert.ok(manifest.indexOf('theme-customizer-basic.js') > -1 && manifest.indexOf('theme-customizer-basic.js') < manifest.indexOf('theme-customizer-markup.js'), 'the words load before the markup');
 });
 
 Promise.all(pendingTestPromises).then(() => {

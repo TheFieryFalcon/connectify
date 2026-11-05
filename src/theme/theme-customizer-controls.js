@@ -205,7 +205,7 @@
     return null;
   }
 
-  function bindPreviewTooltip(modal) {
+  function bindPreviewTooltip({ state, modal }) {
     const preview = modal.querySelector('#cx-customizer-preview');
     const tooltip = modal.querySelector('#cx-preview-tooltip');
     if (!preview || !tooltip) return;
@@ -215,9 +215,10 @@
       const target = textEl?.closest('[data-cx-elem]') || e.target.closest('[data-cx-elem]');
       if (!target) { tooltip.style.display = 'none'; return; }
       const fillEl = e.target.closest('[data-cx-fill]');
-      tooltip.innerHTML = `<div class="cx-tooltip-elem">Element: ${colors.escapeHtml(target.getAttribute('data-cx-elem'))}</div>` +
-        (textEl ? row('Text', textEl.getAttribute('data-cx-text')) : '') +
-        (fillEl ? row('Fill', fillEl.getAttribute('data-cx-fill')) : '');
+      const elem = target.getAttribute('data-cx-elem'), textToken = textEl?.getAttribute('data-cx-text'), fillToken = fillEl?.getAttribute('data-cx-fill');
+      tooltip.innerHTML = state.mode === 'basic' ? window.ConnectifyCustomizerBasic.tooltipHtml(elem, textToken, fillToken)
+        : `<div class="cx-tooltip-elem">Element: ${colors.escapeHtml(elem)}</div>` +
+          (textEl ? row('Text', textToken) : '') + (fillEl ? row('Fill', fillToken) : '');
       tooltip.style.display = 'block';
       const rect = preview.getBoundingClientRect();
       let x = e.clientX - rect.left + 12, y = e.clientY - rect.top + 12;
@@ -233,7 +234,7 @@
     bindPicker(ctx);
     bindWallpaper(ctx);
     bindJson(ctx);
-    bindPreviewTooltip(ctx.modal);
+    bindPreviewTooltip(ctx);
     window.ConnectifyCustomizerPopover?.bind(ctx.modal);
   }
 

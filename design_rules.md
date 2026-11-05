@@ -273,6 +273,13 @@ Extremely concise summary of the core visual design language, contrast standards
     - on an always-solid dialog (surface layered over the opaque canvas, never translucent in glass themes)
     - only its live preview uses the draft palette
     - with Basic (6) & Full (20) modes
+  - Basic mode takes no knowledge of how a page is built (`theme-customizer-basic.js`)
+    - colours named for what they paint: Page Background, Cards and Panels, Text, Buttons, Outlines, Highlights and Links
+    - two columns of a name and its colour, no hex codes (the picker has no hex box either)
+    - the picker's heading names the row, never a token key, in both modes
+    - Blur Strength and Transparency are sliders alone; pixel and percent readouts and the overlay blur checkbox are Full mode's (`.cx-full-only`)
+    - the preview tooltip says what the pointer is over and which of the six colours change it, no CSS variable or token
+    - Full mode keeps the technical names, hex codes and token tooltip
   - Token derivation (`theme-token-derive.js`)
     - every token derives from the 6 Basic ones in two layers (Basic -> Full -> every other `--cx-*`)
     - using the presets' own relationships: OKLCH lightness steps that keep the base hue and chroma/lightness ratio, flipping towards the text on light themes
@@ -293,7 +300,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - Live preview
     - Live preview renders every Full token
     - Hovering over any element in the customizer preview displays a floating tooltip (`#cx-preview-tooltip`)
-    - it shows the element name, the token colouring the text under the pointer (glyph hit test) and the fill tokens
+    - in Full mode it shows the element name, the token colouring the text under the pointer (glyph hit test) and the fill tokens
   - Custom wallpaper upload and caching
     - rescaled to no more than its largest crop needs
     - then resized (100–300%, slider, wheel or trackpad pinch) and placed by dragging in a screen-shaped frame (`#cx-wallpaper-crop`, `theme-wallpaper-crop.js`; Cancel / Escape / outside click cancels the upload)

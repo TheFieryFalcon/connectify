@@ -100,7 +100,7 @@
     const rgb = colors.parseHex(state.tokens[key] || '#1e2632');
     const hsv = colors.rgbToHsv(rgb.r, rgb.g, rgb.b);
     state.pickerH = hsv.h; state.pickerS = hsv.s; state.pickerV = hsv.v;
-    const nameEl = $('#cx-active-token-name'); if (nameEl) nameEl.textContent = key;
+    const nameEl = $('#cx-active-token-name'); if (nameEl) nameEl.textContent = markup.tokenLabel(key, state.mode);
     const hueInput = $('#cx-picker-hue'); if (hueInput) hueInput.value = state.pickerH;
     const hexInput = $('#cx-picker-hex'); if (hexInput) hexInput.value = colors.toHex(rgb.r, rgb.g, rgb.b);
     const svBox = $('#cx-picker-sv'); if (svBox) svBox.style.backgroundColor = `hsl(${state.pickerH}, 100%, 50%)`;
@@ -130,6 +130,7 @@
 
   function setMode(mode) {
     state.mode = mode;
+    $('#cx-customizer-dialog').dataset.cxMode = mode;
     $('#cx-tab-basic').classList.toggle('is-active', mode === 'basic');
     $('#cx-tab-full').classList.toggle('is-active', mode === 'full');
     refresh();
