@@ -15590,13 +15590,17 @@ runTest('Test 329: Settings can leave Certificate and General courses without st
   localStorage.clear();
 });
 
-runTest('Test 330: Settings checkboxes say nothing self-evident: only the current semester sits under them', () => {
+runTest('Test 330: Settings says nothing self-evident: only the current semester and the reload note are left', () => {
   const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
   eval(read('predictor/settings-markup.js'));
   eval(read('predictor/settings-semester-filter.js'));
   const html = window.ConnectifySettingsMarkup.panelHtml();
   const checkboxes = html.slice(html.indexOf('id="cx-auto-expand-toggle"'), html.indexOf('cx-settings-divider'));
   assert.deepStrictEqual([...checkboxes.matchAll(/<p [^>]*>(.*?)<\/p>/g)].map(m => m[0].includes('id="cx-semester-filter-detected"') && m[1] === ''), [true], 'the one note is the semester, filled in when bound');
+
+  const notes = [...html.matchAll(/class="cx-settings-(?:desc|hint)"[^>]*>([^<]*)</g)].map(m => m[1]);
+  assert.deepStrictEqual(notes, ['', '%', 'Takes effect after reload.', 'No custom background set'], 'the only notes left: the semester, a unit, the reload note and the wallpaper status');
+  assert.ok(!/heading\([^)]*,/.test(read('predictor/category-baselines.js')), 'baseline headings carry no description');
 
   const panel = new MockElement('div');
   panel.innerHTML = html;

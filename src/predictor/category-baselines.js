@@ -10,11 +10,10 @@
 
   const make = (tag, className, text) => Object.assign(document.createElement(tag), className ? { className } : {}, text ? { textContent: text } : {});
 
-  function heading(title, description) {
+  function heading(title) {
     const strong = make('strong', 'cx-settings-heading', title);
-    const desc = make('p', 'cx-settings-desc', description);
-    desc.style.margin = '0 0 10px 0';
-    return [strong, desc];
+    strong.style.marginBottom = '10px';
+    return strong;
   }
 
   function grid(minColumn, marginBottom) {
@@ -156,9 +155,9 @@
     actions.append(saveBtn);
 
     container.append(
-      ...heading('Assessment Type Baselines (%)', 'Your historical or expected percentage average for each assessment category:'),
+      heading('Assessment Type Baselines (%)'),
       typeGrid,
-      ...heading('Previous Year Subject Grade Baselines (%)', 'Your final grade percentage from the previous year for enrolled subjects:'),
+      heading('Previous Year Subject Grade Baselines (%)'),
       subjGrid,
       actions
     );
