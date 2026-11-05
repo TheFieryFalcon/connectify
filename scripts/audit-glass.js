@@ -45,11 +45,31 @@ const NOT_SURFACE_CLASS = /badge|avatar|^connect-(red|green|blue|purple|orange|y
 /** Runs in the page. scope: 'sidebar' (the drawer and any dialog it opened), 'page', or a selector (one layer). */
 function measureGlass({ scope, roles, notSurfaces, notSurfaceClass, canvasTolerance = 3 }) {
   const notClass = new RegExp(notSurfaceClass);
+  // oklch(), oklab(), lab() and the like: the browser paints them and the pixel is read, so such a fill never reads as clear
+  let pixel = null;
+  const paintedColor = str => {
+    if (!/^(oklch|oklab|lab|lch|hsla?|hwb|color)\(/i.test(String(str).trim())) return null;
+    try {
+      if (!pixel) {
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 1;
+        pixel = canvas.getContext('2d', { willReadFrequently: true });
+      }
+      pixel.clearRect(0, 0, 1, 1);
+      pixel.fillStyle = str;
+      pixel.fillRect(0, 0, 1, 1);
+      const [r, g, b, a] = pixel.getImageData(0, 0, 1, 1).data;
+      return { r, g, b, a: a / 255 };
+    } catch {
+      return null;
+    }
+  };
   const color = str => {
     const srgb = String(str).match(/color\(srgb\s+([\d.e-]+)\s+([\d.e-]+)\s+([\d.e-]+)(?:\s*\/\s*([\d.e-]+))?\s*\)/i);
     if (srgb) return { r: srgb[1] * 255, g: srgb[2] * 255, b: srgb[3] * 255, a: srgb[4] === undefined ? 1 : Number(srgb[4]) };
     const rgb = String(str).match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
-    return rgb ? { r: Number(rgb[1]), g: Number(rgb[2]), b: Number(rgb[3]), a: rgb[4] === undefined ? 1 : Number(rgb[4]) } : null;
+    if (rgb) return { r: Number(rgb[1]), g: Number(rgb[2]), b: Number(rgb[3]), a: rgb[4] === undefined ? 1 : Number(rgb[4]) };
+    return paintedColor(str);
   };
   const rootStyle = getComputedStyle(document.documentElement);
   const probe = document.createElement('span');
@@ -81,7 +101,7 @@ function measureGlass({ scope, roles, notSurfaces, notSurfaceClass, canvasTolera
   function paintOf(cs) {
     const bg = color(cs.backgroundColor);
     const stops = String(cs.backgroundImage).includes('gradient')
-      ? (String(cs.backgroundImage).match(/rgba?\([^)]*\)|color\(srgb[^)]*\)/g) || []).map(s => color(s)?.a ?? 0) : [];
+      ? (String(cs.backgroundImage).match(/rgba?\([^)]*\)|(?:color|oklch|oklab|lab|lch)\([^)]*\)/g) || []).map(s => color(s)?.a ?? 0) : [];
     const gradient = stops.length ? stops.reduce((a, b) => a + b, 0) / stops.length : 0;
     const opacity = parseFloat(cs.opacity);
     const canvasFill = isCanvas(bg) && !gradient && !hasWallpaper;

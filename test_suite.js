@@ -12420,8 +12420,12 @@ runTest('Test 265: Goal bars sit beside the outcome meter: pastel performance ba
   const progress = bars.querySelector('.cx-goal-progress');
   assert.ok(progress.dataset.tier && progress.querySelectorAll('.cx-goal-seg').length === 0, 'the progress bar has no segments, only its tier');
   assert.ok(/^\d+(\.\d+)?%$/.test(progress.children[0].style['--cx-goal-fill']), 'and a fill');
-  assert.ok(!bars.hasAttribute('title') && !/purple|breakout|1\.1/i.test(bars.dataset.goalTooltip), 'no native title, and the breakout is never named');
-  assert.ok(/^Needed \d+\.\d%, got 72\.0%\n/.test(bars.dataset.goalTooltip), `numbers only (${bars.dataset.goalTooltip})`);
+  const perfBar = bars.querySelector('.cx-goal-perf');
+  for (const bar of [perfBar, progress]) assert.ok(!bar.hasAttribute('title') && !/purple|breakout|1\.1/i.test(bar.dataset.goalTooltip), 'no native title, and the breakout is never named');
+  assert.ok(!bars.hasAttribute('title') && bars.dataset.goalTooltip === undefined, 'each bar has its own tooltip, the pair none');
+  assert.ok(/^Needed \d+\.\d%, got 72\.0%$/.test(perfBar.dataset.goalTooltip), `the performance bar says only its numbers (${perfBar.dataset.goalTooltip})`);
+  assert.ok(/^(ATAR goal [\d.]+, needs [\d.]+%|Goal [\d.]+%): [\d.]+ of [\d.]+ weighted points/.test(progress.dataset.goalTooltip) && !progress.dataset.goalTooltip.includes('Needed'), `the progress bar only its own (${progress.dataset.goalTooltip})`);
+  assert.strictEqual(perfBar.getAttribute('aria-label'), perfBar.dataset.goalTooltip);
 
   win.ConnectifyGoalStore.remove(G.active()[0].id);
   B.render(ui, row, false);
@@ -15171,6 +15175,64 @@ runTest('Test 322: Connect\'s red status text has no box: an icon and caption in
   const lum = hex => { const v = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
   assert.ok((lum('#fb8585') + 0.05) / (lum('#32302f') + 0.05) >= 5, 'the red on Quantum Dark');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'design_rules.md'), 'utf8').includes('**Red Status Text**'));
+});
+
+runTest('Test 323: Goal bars have a tooltip each; drawer cards are a tint in glass; tier labels and primary buttons reach 5:1; the audit reads every colour syntax', () => {
+  // One tooltip per bar, in the outcome meter's singleton
+  const bars = fs.readFileSync(path.join(BASE_DIR, 'src/goals/goal-bars.js'), 'utf8');
+  assert.ok(bars.includes('data.perf && withTooltip(perfBar(data.perf), perfTooltip(data.perf))') && bars.includes('data.progress && withTooltip(progressBar(data.progress), progressTooltip(data.progress, data.goal))'), 'each bar is drawn with its own text');
+  assert.ok(!bars.includes("lines.join('\\n')") && !/wrap\.addEventListener/.test(bars), 'the pair no longer shares one');
+  assert.ok(/render\(ui, row, isOverall\)[\s\S]*hideFloatingTooltip[\s\S]*wrap\.replaceChildren/.test(bars), 'a redraw never strands a tooltip');
+
+  // Drawer cards in glass
+  const nesting = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-nesting.css'), 'utf8');
+  for (const sel of [':where(.cx-pred-card):not(#cx-n)', ':where(.cx-pred-task-card):not(#cx-n)', ':where(.cta-top-four-selector):not(#cx-n)', '#cx-weakness-filters']) {
+    assert.ok(nesting.includes(`[data-connectea-glass="true"]) #connectify-sidebar ${sel}`), `${sel} is a tint on the drawer's glass`);
+  }
+  assert.ok(nesting.includes('background: color-mix(in srgb, var(--cx-text-primary, #ffffff) 7%, transparent) !important;'), 'at most a tint');
+
+  // Contrast, computed for every tier and primary button
+  const lin = v => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const lum = c => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)]; return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const mix = (a, b, t) => a.map((v, i) => v * t + b[i] * (1 - t));
+  const oklchAt = (h, L) => {
+    const [r, g, b] = hex(h).map(lin);
+    const [l, m, q] = [0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b, 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b, 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b].map(Math.cbrt);
+    const A = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * q, B = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * q;
+    const [x, y, z] = [L + 0.3963377774 * A + 0.2158037573 * B, L - 0.1055613458 * A - 0.0638541728 * B, L - 0.0894841775 * A - 1.291485548 * B].map(v => v ** 3);
+    const gamma = v => { const c = Math.max(0, Math.min(1, v)); return 255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055); };
+    return [4.0767416621 * x - 3.3077115913 * y + 0.2309699292 * z, -1.2684380046 * x + 2.6097574011 * y - 0.3413193965 * z, -0.0041960863 * x - 0.7034186147 * y + 1.707614701 * z].map(gamma);
+  };
+  const dialog = fs.readFileSync(path.join(BASE_DIR, 'src/goals/goal-dialog.css'), 'utf8');
+  assert.ok(/data-connectea-tone="light"\] \.cx-goal-tier \{\s*color: #1d1c1c;\s*color: oklch\(from var\(--cx-goal-tier\) 0\.26 c h\);/.test(dialog), 'light tone darkens the tier\'s own hue');
+  const tiers = ['#15803d', '#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444', '#991b1b'];
+  const lightGlass = mix(hex('#8d99a6'), hex('#aeb4c2'), 0.3);
+  for (const tier of tiers) {
+    assert.ok(ratio(oklchAt(tier, 0.26), mix(hex(tier), lightGlass, 0.14)) >= 5, `${tier} on light glass`);
+    for (const [surface, ink] of [['#1e2632', '#f8fafc'], ['#32302f', '#fbf1c7'], ['#0d0d0d', '#ffffff'], ['#121e38', '#f1f5f9'], ['#122820', '#ecfdf5']]) {
+      assert.ok(ratio(mix(hex(tier), hex(ink), 0.4), mix(hex(tier), hex(surface), 0.14)) >= 5, `${tier} on ${surface}`);
+    }
+  }
+  const tokens = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-tokens.css'), 'utf8');
+  const primaries = Array.from(tokens.matchAll(/--cx-button-primary-bg: (#[0-9a-f]{6}); --cx-button-primary-hover: (#[0-9a-f]{6}); --cx-button-primary-text: (#[0-9a-f]{6})/g));
+  assert.ok(primaries.length >= 7, 'every preset names its primary button');
+  for (const [, bg, hover, text] of primaries) {
+    assert.ok(ratio(hex(text), hex(bg)) >= 5, `${text} on ${bg}`);
+    assert.ok(ratio(hex(text), hex(hover)) >= 5, `${text} on ${hover} when hovered`);
+  }
+
+  // Back to top keeps Connect's font stack, so the arrow is the same width
+  assert.ok(/\.connectea-dark #cx-back-to-top-btn \{\s*font-family: inherit !important;/.test(fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-action-buttons-2.css'), 'utf8')));
+
+  // The audit reads oklch() and the like by painting them, never none or a url
+  const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
+  const glass = fs.readFileSync(path.join(BASE_DIR, 'scripts/audit-glass.js'), 'utf8');
+  assert.strictEqual((audit.match(/if \(!match\) return paintedColor\(colorStr\);/g) || []).length, 2, 'both colour readers fall back to the pixel');
+  assert.ok(glass.includes('return paintedColor(str);'), 'and the glass check, so such a fill never reads as clear');
+  for (const source of [audit, glass]) assert.ok(source.includes('/^(oklch|oklab|lab|lch|hsla?|hwb|color)\\('), 'only colour functions');
+  assert.ok(audit.includes('.connectea-outcome-bar, .cvr-c-task__marks\')'), 'the Summary Marks box keeps its own colour by the palette');
 });
 
 Promise.all(pendingTestPromises).then(() => {

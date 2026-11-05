@@ -101,3 +101,13 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+/* The drawer is the surface: its cards are a tint and a hairline, since their own fills stacked to 53% in Liquid Glass and
+   94% in Tinted. Id-weighted past the cards' own !important fills */
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar :where(.cx-pred-card):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar :where(.cx-pred-task-card):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar :where(.cta-top-four-selector):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar #cx-weakness-filters {
+  background: color-mix(in srgb, var(--cx-text-primary, #ffffff) 7%, transparent) !important;
+  border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
+}

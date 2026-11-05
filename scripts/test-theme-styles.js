@@ -1351,13 +1351,33 @@ async function captureNativeBaseline(page, options = {}) {
   await new Promise(r => setTimeout(r, 400));
 
   return await page.evaluate((opts) => {
+    // oklch(), oklab(), lab() and the like: the browser paints them and the pixel is read (never `none` or a url)
+    let colourPixel = null;
+    function paintedColor(colorStr) {
+      if (!/^(oklch|oklab|lab|lch|hsla?|hwb|color)\(/i.test(String(colorStr).trim())) return null;
+      try {
+        if (!colourPixel) {
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 1;
+          colourPixel = canvas.getContext('2d', { willReadFrequently: true });
+        }
+        colourPixel.clearRect(0, 0, 1, 1);
+        colourPixel.fillStyle = colorStr;
+        colourPixel.fillRect(0, 0, 1, 1);
+        const [r, g, b, a] = colourPixel.getImageData(0, 0, 1, 1).data;
+        return { r, g, b, a: a / 255 };
+      } catch {
+        return null;
+      }
+    }
+
     function parseRgb(colorStr) {
       if (!colorStr) return null;
       // color-mix() computes to color(srgb r g b / a) with 0-1 channels
       const srgb = colorStr.match(/color\(srgb\s+([\d.e-]+)\s+([\d.e-]+)\s+([\d.e-]+)(?:\s*\/\s*([\d.e-]+))?\s*\)/i);
       if (srgb) return { r: parseFloat(srgb[1]) * 255, g: parseFloat(srgb[2]) * 255, b: parseFloat(srgb[3]) * 255, a: srgb[4] !== undefined ? parseFloat(srgb[4]) : 1.0 };
       const match = colorStr.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
-      if (!match) return null;
+      if (!match) return paintedColor(colorStr);
       return {
         r: parseFloat(match[1]),
         g: parseFloat(match[2]),
@@ -1577,13 +1597,33 @@ async function clearFocus(page) {
 async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineData, options) {
   await clearFocus(page);
   return await page.evaluate((tid, isDark, baseline, opts) => {
+    // oklch(), oklab(), lab() and the like: the browser paints them and the pixel is read (never `none` or a url)
+    let colourPixel = null;
+    function paintedColor(colorStr) {
+      if (!/^(oklch|oklab|lab|lch|hsla?|hwb|color)\(/i.test(String(colorStr).trim())) return null;
+      try {
+        if (!colourPixel) {
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 1;
+          colourPixel = canvas.getContext('2d', { willReadFrequently: true });
+        }
+        colourPixel.clearRect(0, 0, 1, 1);
+        colourPixel.fillStyle = colorStr;
+        colourPixel.fillRect(0, 0, 1, 1);
+        const [r, g, b, a] = colourPixel.getImageData(0, 0, 1, 1).data;
+        return { r, g, b, a: a / 255 };
+      } catch {
+        return null;
+      }
+    }
+
     function parseRgb(colorStr) {
       if (!colorStr) return null;
       // color-mix() computes to color(srgb r g b / a) with 0-1 channels
       const srgb = colorStr.match(/color\(srgb\s+([\d.e-]+)\s+([\d.e-]+)\s+([\d.e-]+)(?:\s*\/\s*([\d.e-]+))?\s*\)/i);
       if (srgb) return { r: parseFloat(srgb[1]) * 255, g: parseFloat(srgb[2]) * 255, b: parseFloat(srgb[3]) * 255, a: srgb[4] !== undefined ? parseFloat(srgb[4]) : 1.0 };
       const match = colorStr.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i);
-      if (!match) return null;
+      if (!match) return paintedColor(colorStr);
       return {
         r: parseFloat(match[1]),
         g: parseFloat(match[2]),
@@ -2339,12 +2379,13 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
 
         // B2. Surface structure (design_rules.md, "One surface per block"): only the outermost painted element fills;
         // a fill above a 12% tint inside another surface stacks into an opaque slab, and full-width bars stay square.
-        // Controls, chips, avatars, active states, overlays and Connectify UI are exempt. Transparency and blur in
+        // Controls, chips, avatars, active states, overlays, Connectify UI and the Summary Marks box (its own colour by
+        // design_rules.md's palette) are exempt. Transparency and blur in
         // Liquid Glass are audit-glass.js's, Connectify UI included.
         const isGlassTheme = ['liquid-glass', 'liquid-glass-clear'].includes(tid);
         if (isDark && rect.width >= 80 && rect.height >= 20 &&
             !['img', 'video', 'canvas', 'svg', 'button', 'input', 'select', 'textarea', 'a'].includes(tag) &&
-            !el.closest?.('button, a, [role="button"], [role="option"], mat-chip, .mat-chip, [class*="badge"], [class*="avatar"], .mat-progress-bar, .cdk-overlay-container, #connectify-sidebar, #connectify-sidebar-handle, #connectify-notifications-container, #connectea-theme-menu, #cx-customizer-modal, .connectea-outcome-bar') &&
+            !el.closest?.('button, a, [role="button"], [role="option"], mat-chip, .mat-chip, [class*="badge"], [class*="avatar"], .mat-progress-bar, .cdk-overlay-container, #connectify-sidebar, #connectify-sidebar-handle, #connectify-notifications-container, #connectea-theme-menu, #cx-customizer-modal, .connectea-outcome-bar, .cvr-c-task__marks') &&
             !el.closest?.('.eds-s-is-active, .v-selected, [aria-selected="true"], .mat-calendar-body-selected') && !el.matches?.(':hover') &&
             // Semantic colours (status pills, class-colour bands) are labels, not surfaces
             !Array.from(el.classList || []).some(c => /^connect-(red|green|blue|purple|orange|yellow|grey|gray|teal|pink)/.test(c) || c === 'card-scope')) {

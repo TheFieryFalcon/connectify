@@ -4,7 +4,7 @@
  * Two 18 x 56 bars right of the outcome meter, in its track style, so rows never grow. Goal-performance:
  * four pastel segments lit from the bottom (red, orange, yellow, green) and a secret purple breakout segment
  * (20px, the bar grows upwards like the meter's). Goal-progress: one smooth fill from the bottom in the goal
- * tier's colour (not pastel). Segments never take the pointer (one tooltip for the pair).
+ * tier's colour (not pastel). Segments never take the pointer (one tooltip per bar).
  */
 
 .cx-goal-bars {

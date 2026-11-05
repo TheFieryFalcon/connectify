@@ -6,7 +6,7 @@
  * yellow / green, plus the secret purple breakout) and the goal-progress bar (weighted points earned of those
  * needed, one smooth fill in the goal's tier colour as of that task); on the overall row of the goal's
  * semester card, progress now. Tasks marked before a goal was set show the last finished goal's frozen
- * verdict. Tooltips (the outcome meter's) give numbers only. Exposes window.ConnectifyGoalBars.
+ * verdict. Each bar has its own tooltip (the outcome meter's singleton), numbers only. Exposes window.ConnectifyGoalBars.
  */
 (() => {
   'use strict';
@@ -111,22 +111,30 @@
     return bar;
   }
 
-  function tooltip(data) {
-    const lines = [];
-    if (data.perf) lines.push(`Needed ${round1(data.perf.required)}%, got ${round1(data.perf.mark)}%`);
-    if (data.progress) {
-      const p = data.progress;
-      const goal = data.goal?.kind === 'atar' ? `ATAR goal ${Number(data.goal.target).toFixed(2)}, needs ${round1(p.target)}%` : `Goal ${round1(p.target)}%`;
-      lines.push(`${goal}: ${round1(p.earned)} of ${round1(p.required)} weighted points${p.tier ? ` (${D().name(p.tier) || p.tier})` : ''}`);
-    }
-    return lines.join('\n');
+  const perfTooltip = perf => `Needed ${round1(perf.required)}%, got ${round1(perf.mark)}%`;
+
+  function progressTooltip(p, goal) {
+    const target = goal?.kind === 'atar' ? `ATAR goal ${Number(goal.target).toFixed(2)}, needs ${round1(p.target)}%` : `Goal ${round1(p.target)}%`;
+    return `${target}: ${round1(p.earned)} of ${round1(p.required)} weighted points${p.tier ? ` (${D().name(p.tier) || p.tier})` : ''}`;
+  }
+
+  /** The bar's own tooltip, in the outcome meter's singleton: each bar says only what it shows. */
+  function withTooltip(bar, text) {
+    const out = window.ConnectifyCohortOutcome;
+    bar.dataset.goalTooltip = text;
+    bar.setAttribute('aria-label', text);
+    bar.addEventListener('mouseenter', e => out?.showFloatingTooltip?.(e, text));
+    bar.addEventListener('mousemove', e => out?.showFloatingTooltip?.(e, text));
+    bar.addEventListener('mouseleave', () => out?.hideFloatingTooltip?.());
+    return bar;
   }
 
   /** Memo key of what the row's bars show (joins the row's cohort memo): a row redraws only when they change. */
   function signature(row, isOverall) {
     if (!store() || !pass().goals.length) return '';
     const data = rowData(row, isOverall);
-    return `${data ? tooltip(data) : ''}|${data?.perf?.band || ''}|${data?.progress?.tier || ''}`;
+    const texts = data ? [data.perf && perfTooltip(data.perf), data.progress && progressTooltip(data.progress, data.goal)] : [];
+    return `${texts.join('|')}|${data?.perf?.band || ''}|${data?.progress?.tier || ''}`;
   }
 
   /** Draws (or removes) the row's goal bars, right of its outcome meter or at the end of an overall panel. */
@@ -144,21 +152,19 @@
     if (!wrap) {
       wrap = document.createElement('div');
       wrap.className = 'cx-goal-bars';
-      const out = window.ConnectifyCohortOutcome;
-      wrap.addEventListener('mouseenter', e => out?.showFloatingTooltip?.(e, wrap.dataset.goalTooltip));
-      wrap.addEventListener('mousemove', e => out?.showFloatingTooltip?.(e, wrap.dataset.goalTooltip));
-      wrap.addEventListener('mouseleave', () => out?.hideFloatingTooltip?.());
       ui.goalBars = wrap;
     }
-    const text = tooltip(data);
-    wrap.dataset.goalTooltip = text;
-    wrap.setAttribute('aria-label', text);
-    wrap.replaceChildren(...[data.perf && perfBar(data.perf), data.progress && progressBar(data.progress)].filter(Boolean));
+    // A redraw can take the bar under the pointer away, and its mouseleave with it
+    window.ConnectifyCohortOutcome?.hideFloatingTooltip?.();
+    wrap.replaceChildren(...[
+      data.perf && withTooltip(perfBar(data.perf), perfTooltip(data.perf)),
+      data.progress && withTooltip(progressBar(data.progress), progressTooltip(data.progress, data.goal))
+    ].filter(Boolean));
     if (isOverall) {
       ui.box.classList.add('cx-has-goal-bars');
       if (wrap.parentElement !== ui.box) ui.box.append(wrap);
     } else if (wrap.previousElementSibling !== ui.outcomeBar) ui.outcomeBar.insertAdjacentElement('afterend', wrap);
   }
 
-  window.ConnectifyGoalBars = { render, signature, rowData, tooltip };
+  window.ConnectifyGoalBars = { render, signature, rowData, perfTooltip, progressTooltip };
 })();

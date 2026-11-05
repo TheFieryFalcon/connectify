@@ -77,7 +77,7 @@ html.connectea-dark,
   --cx-accent: #38bdf8; --cx-accent-hover: #7dd3fc; --cx-accent-active: #0284c7; --cx-accent-subtle: rgba(56, 189, 248, 0.15); --cx-accent-text: #000000; --cx-accent-link: #7dd3fc;
   --cx-nav-bg: #050505; --cx-nav-border: #222222; --cx-nav-text: #e5e5e5; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #000000;
   --cx-tile-link-color: #ffffff;
-  --cx-button-bg: #121212; --cx-button-hover: #202020; --cx-button-active: #080808; --cx-button-border: #494949; --cx-button-border-hover: #444444; --cx-button-text: #ffffff; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #0284c7; --cx-button-primary-hover: #0369a1; --cx-button-primary-text: #ffffff;
+  --cx-button-bg: #121212; --cx-button-hover: #202020; --cx-button-active: #080808; --cx-button-border: #494949; --cx-button-border-hover: #444444; --cx-button-text: #ffffff; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #0369a1; --cx-button-primary-hover: #075985; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #050505; --cx-input-border: #262626; --cx-input-border-focus: #38bdf8; --cx-input-text: #ffffff; --cx-input-placeholder: #525252;
   --cx-table-header-bg: #0c0c0c; --cx-table-row-hover: #141414; --cx-table-row-alt: #080808; --cx-table-border: #1f1f1f;
   --cx-badge-bg: #181818; --cx-badge-border: #262626; --cx-badge-text: #ffffff;
@@ -113,7 +113,7 @@ html.connectea-dark,
   --cx-accent: #10b981; --cx-accent-hover: #34d399; --cx-accent-active: #059669; --cx-accent-subtle: rgba(16, 185, 129, 0.15); --cx-accent-text: #ffffff; --cx-accent-link: #34d399;
   --cx-nav-bg: #0d1f19; --cx-nav-border: #1d4134; --cx-nav-text: #d1fae5; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: #07130f;
   --cx-tile-link-color: #ecfdf5;
-  --cx-button-bg: #132c24; --cx-button-hover: #1a3b30; --cx-button-active: #0e201a; --cx-button-border: #2c5949; --cx-button-border-hover: #3c7a64; --cx-button-text: #ecfdf5; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #059669; --cx-button-primary-hover: #047857; --cx-button-primary-text: #ffffff;
+  --cx-button-bg: #132c24; --cx-button-hover: #1a3b30; --cx-button-active: #0e201a; --cx-button-border: #2c5949; --cx-button-border-hover: #3c7a64; --cx-button-text: #ecfdf5; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #047857; --cx-button-primary-hover: #065f46; --cx-button-primary-text: #ffffff;
   --cx-input-bg: #0d1f19; --cx-input-border: #224a3b; --cx-input-border-focus: #10b981; --cx-input-text: #ecfdf5; --cx-input-placeholder: #4b8b70;
   --cx-table-header-bg: #0e231c; --cx-table-row-hover: #17362c; --cx-table-row-alt: #10261f; --cx-table-border: #1b3b2f;
   --cx-badge-bg: #1a3b30; --cx-badge-border: #2c5949; --cx-badge-text: #ecfdf5;
@@ -132,7 +132,7 @@ html.connectea-dark,
   --cx-accent: #38bdf8; --cx-accent-hover: #7dd3fc; --cx-accent-active: #0284c7; --cx-accent-subtle: rgba(56, 189, 248, 0.20); --cx-accent-text: #0b1120; --cx-accent-link: #7dd3fc;
   --cx-nav-bg: rgba(15, 23, 42, 0.75); --cx-nav-border: rgba(255, 255, 255, 0.14); --cx-nav-text: #dbeafe; --cx-nav-text-hover: #ffffff; --cx-nav-item-active: rgba(0, 0, 0, 0.3);
   --cx-tile-link-color: #ffffff;
-  --cx-button-bg: rgba(255, 255, 255, 0.10); --cx-button-hover: rgba(255, 255, 255, 0.18); --cx-button-active: rgba(255, 255, 255, 0.24); --cx-button-border: rgba(255, 255, 255, 0.16); --cx-button-border-hover: rgba(255, 255, 255, 0.30); --cx-button-text: #ffffff; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #0284c7; --cx-button-primary-hover: #0369a1; --cx-button-primary-text: #ffffff;
+  --cx-button-bg: rgba(255, 255, 255, 0.10); --cx-button-hover: rgba(255, 255, 255, 0.18); --cx-button-active: rgba(255, 255, 255, 0.24); --cx-button-border: rgba(255, 255, 255, 0.16); --cx-button-border-hover: rgba(255, 255, 255, 0.30); --cx-button-text: #ffffff; --cx-button-text-hover: #ffffff; --cx-button-primary-bg: #0369a1; --cx-button-primary-hover: #075985; --cx-button-primary-text: #ffffff;
   --cx-input-bg: rgba(15, 23, 42, 0.60); --cx-input-border: rgba(255, 255, 255, 0.14); --cx-input-border-focus: #38bdf8; --cx-input-text: #ffffff; --cx-input-placeholder: #64748b;
   --cx-table-header-bg: rgba(20, 27, 40, 0.75); --cx-table-row-hover: rgba(255, 255, 255, 0.08); --cx-table-row-alt: rgba(255, 255, 255, 0.03); --cx-table-border: rgba(255, 255, 255, 0.10);
   --cx-badge-bg: rgba(255, 255, 255, 0.12); --cx-badge-border: rgba(255, 255, 255, 0.18); --cx-badge-text: #ffffff;

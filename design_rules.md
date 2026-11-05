@@ -243,6 +243,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - clear: a page's own wrapper holding a toolbar (Submissions' `.mt-n4`), which is no bar
     - hover and active states keep their highlight
     - Blocks inside a glass card stay clear with hairline dividers (`theme-glass-class-pages.css`)
+    - Cards in the Connectify drawer are a 7% ink tint with a hairline in Liquid Glass (`theme-glass-nesting.css`), never a fill of their own
   - Blur (`theme-glass-nesting.css`)
     - In Liquid Glass only the outermost surface also blurs, because stacked translucent fills turn opaque and a blurred parent stops a child's blur reaching the page
     - a clear tab header blurring inside its card, such as Submissions Due, showed as a grey band
@@ -454,6 +455,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - turns clear with an ink hairline
     - its labels, ring percentages and messages take the ink
     - its scores and warning, like the Settings delete ✕ and "Cache cleared!" note, go to OKLCH 0.30 because they sit straight on the drawer glass (Test 186)
+  - Goal tier labels
+    - the tier's own hue at OKLCH 0.26 (>= 5:1 for every tier on light glass); dark themes mix the tier 40% into the ink
   - Links and avatars
     - Links use `--cx-accent-link` (each preset's accent-hover; derived themes ensure 5:1), never the raw accent
     - avatar initials use `--cx-avatar-text`
@@ -676,7 +679,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - one smooth unsegmented fill (earned / required weighted points) in the goal tier's colour
     - Guaranteed `#15803d`, Trivial `#22c55e`, Easy `#84cc16`, Medium `#eab308`, Hard `#f97316`, Hell `#ef4444`, Impossible `#991b1b`
   - Tooltips and dialogs
-    - Tooltips (the outcome meter's singleton) give numbers only
+    - Each bar has its own tooltip (the outcome meter's singleton), numbers only: what it needed and got on the performance bar, the goal's points on the progress bar
     - Goal dialogs are solid like the customizer
   - **Goal toasts**
     - a goal that ends says so in the title, with the goal under it and no further line

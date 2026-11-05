@@ -41,6 +41,11 @@
 }
 
 /* Back to Top Button in Dark Mode (.cx-back-to-top-btn) */
+/* Connect's own font stack, as in Default: the generic button font falls back elsewhere for the arrow, 3px narrower */
+.connectea-dark #cx-back-to-top-btn {
+  font-family: inherit !important;
+}
+
 .connectea-dark .cx-back-to-top-btn {
   background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;

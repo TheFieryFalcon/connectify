@@ -123,6 +123,12 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-gla
   white-space: nowrap;
 }
 
+/* Light tone: the mix above lands mid-grey on glass, so the tier's own hue goes dark enough to read */
+html.connectea-dark[data-connectea-tone="light"] .cx-goal-tier {
+  color: #1d1c1c;
+  color: oklch(from var(--cx-goal-tier) 0.26 c h);
+}
+
 .cx-goal-tier--none {
   display: none;
 }
