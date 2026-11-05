@@ -155,7 +155,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - table text on the same edges as the controls
     - bold group headings, small column names
     - thin-outlined dropdowns (`.cx-dates-select`)
-    - weeks as `Term 2 Wk 5` (in full on hover)
+    - weeks as `Term 2 Wk 5` (in full on hover), a caption's range in one term as `Term 4 Wk 5-6`
+    - a week caption with no term (`35/36`) is a school week of the year
     - a faint ✎ right after the week, in one column, that the pointer never changes
     - its week input opens on the week shown, read from the task until overridden, never blank
     - finished tasks in muted ink

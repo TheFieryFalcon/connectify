@@ -8,6 +8,9 @@
 (() => {
   'use strict';
 
+  // A caption that is only a week or a range of weeks: "35/36", "Week 4", "Week 4/5"
+  const BARE_WEEK = /^(?:weeks?\s*)?(\d{1,2})(?:\s*[\/–-]\s*(\d{1,2}))?$/i;
+
   /** Order from a term/week caption ("Term 2 Week 3" -> 15, 12 slots per term), or null. */
   function weekOrder(text) {
     // Matches "Term 3, Week 5" or "Term 3 Week 5"
@@ -22,12 +25,19 @@
       return (+match[2] - 1) * 12 + (+match[1]);
     }
 
-    // Matches bare "Week 4" or "Week 4/5"
-    match = text.match(/^(?:week[s]?\s*)?(\d{1,2})(?:\s*[\/–-]\s*\d{1,2})?$/i);
+    // Bare "Week 4" or "35/36": with no term, a school week of the year (35 -> Term 4 Week 5)
+    match = text.match(BARE_WEEK);
     if (match) {
-      return +match[1];
+      return window.ConnectifySchoolTerms?.weekOrder(+match[1]) ?? +match[1];
     }
     return null;
+  }
+
+  /** How many weeks a caption's range runs past its first week ("35/36", "Term 2 Week 6/7" -> 1), else 0. */
+  function weekSpan(text) {
+    const value = String(text || '').trim();
+    const match = value.match(/weeks?\s*(\d+)\s*(?:&|and|[\/–-])\s*(\d+)/i) || value.match(BARE_WEEK);
+    return match?.[2] ? Math.max(0, +match[2] - +match[1]) : 0;
   }
 
   /**
@@ -129,11 +139,13 @@
    * The semester a task belongs to. Semester 2 outlines also list the Semester 1 tasks, so the card title
    * alone is not enough: a week override (order), a "Term N, Week W" caption or a date caption ("Thur 5th
    * March") decides first (a bare "Term 1" / "Term 3|4" too; Term 2 spans both), never later than the card's own semester.
+   * A bare week past any term's length ("14/15") can only be a school week, so it decides too; "Week 4" may not be one.
    */
   function taskSemester(cardSemester, caption, overrideOrder = null) {
     const card = Number(cardSemester) === 2 ? 2 : 1;
     const text = String(caption || '');
-    const order = Number.isFinite(overrideOrder) ? overrideOrder : (TERM_AND_WEEK.test(text) ? orderHint(text) : dateOrder(text));
+    const isWeek = TERM_AND_WEEK.test(text) || Number(text.trim().match(BARE_WEEK)?.[1]) > 10;
+    const order = Number.isFinite(overrideOrder) ? overrideOrder : (isWeek ? orderHint(text) : dateOrder(text));
     let semester = null;
     if (Number.isFinite(order)) semester = order < semesterTwoOrder() ? 1 : 2;
     else {
@@ -209,7 +221,7 @@
   }
 
   window.ConnectifyParseHelpers = {
-    orderHint, dateOrder, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_WEEK, semesterTwoOrder,
+    orderHint, dateOrder, weekSpan, cohortMean, weightedMean, taskSemester, SEMESTER_TWO_WEEK, semesterTwoOrder,
     markFromText, readTaskMark, taskLabels, assignTaskIds, cardTaskIds
   };
 })();

@@ -15,17 +15,32 @@
     return { term: Math.floor((order - 1) / 12) + 1, week: Math.floor((order - 1) % 12) + 1 };
   }
 
-  // Weeks past a term's end read as the next term's, as the term calendar places them
-  function formatTimestamp(order, fallbackCaption) {
-    const when = termWeek(window.ConnectifySchoolTerms?.normalizeOrder(order) ?? order);
-    if (!when) return fallbackCaption || 'Unknown';
-    return `Term ${when.term}, Week ${when.week}`;
+  /**
+   * The term and week to show: weeks past a term's end read as the next term's, as the term calendar
+   * places them, and a caption's range within one term reads "5-6". An override's order is not the
+   * caption's, so it reads as one week.
+   */
+  function shownWeek(order, caption) {
+    const normalize = value => window.ConnectifySchoolTerms?.normalizeOrder(value) ?? value;
+    const start = normalize(order);
+    const when = termWeek(start);
+    if (!when) return null;
+    const helpers = window.ConnectifyParseHelpers;
+    const span = caption ? helpers?.weekSpan?.(caption) || 0 : 0;
+    const end = start + span;
+    const isRange = span > 0 && normalize(helpers.orderHint(caption)) === start && normalize(end) === end && termWeek(end).term === when.term;
+    return { term: when.term, week: isRange ? `${when.week}-${when.week + span}` : when.week };
+  }
+
+  function formatTimestamp(order, caption) {
+    const when = shownWeek(order, caption);
+    return when ? `Term ${when.term}, Week ${when.week}` : caption || 'Unknown';
   }
 
   /** The week in fewer characters ("Term 2 Wk 5"), for lists; a caption or nothing without one. */
-  function shortTimestamp(order, fallbackCaption) {
-    const when = termWeek(window.ConnectifySchoolTerms?.normalizeOrder(order) ?? order);
-    return when ? `Term ${when.term} Wk ${when.week}` : fallbackCaption || '';
+  function shortTimestamp(order, caption) {
+    const when = shownWeek(order, caption);
+    return when ? `Term ${when.term} Wk ${when.week}` : caption || '';
   }
 
   const getMonthName = (week) => {

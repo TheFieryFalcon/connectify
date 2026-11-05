@@ -2410,8 +2410,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v21_20261024_pred'"), 'predictor-math.js must use v21_20261024_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v21_20261024_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v21_20261024_pred');
+  assert.ok(predMathCode.includes("'v22_20261105_pred'"), 'predictor-math.js must use v22_20261105_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v22_20261105_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v22_20261105_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2504,9 +2504,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v21_20261024_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v22_20261105_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v21_20261024_pred'), 'predictor-math.js must bump version to v21_20261024_pred');
+  assert.ok(predMathJs.includes('v22_20261105_pred'), 'predictor-math.js must bump version to v22_20261105_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -8793,7 +8793,7 @@ runTest('Test 191: Semester 2 starts at canonical school week 17 (Term 2 Week 7,
   assert.strictEqual(taskSemester(2, 'Thur 21st May'), 1);
   assert.strictEqual(taskSemester(2, 'Thur 27th August'), 2);
   assert.strictEqual(taskSemester(1, 'Thur 27th August'), 1, 'a dated task is never later than its own card');
-  assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/cache-versions.js'), 'utf8').includes("RESULTS: 'v15_20261029_results'"), 'cached tasks placed in the card\'s semester are re-read');
+  assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/cache-versions.js'), 'utf8').includes("RESULTS: 'v16_20261105_results'"), 'cached tasks placed in the card\'s semester are re-read');
   assert.strictEqual(taskSemester(1, 'Term 3, Week 2'), 1, 'a task is never later than its own card');
   assert.strictEqual(taskSemester(2, 'Term 3, Week 2', 5), 1, 'a week override wins over the caption');
   if (savedTerms === null) localStorage.removeItem('connectify:school_terms'); else localStorage.setItem('connectify:school_terms', savedTerms);
@@ -13952,6 +13952,54 @@ runTest('Test 325: Connect\'s side menu reaches the bottom of the screen before 
   assert.ok(/box-sizing: border-box !important/.test(css), 'the padding stays inside the menu');
   const padding = Number((css.match(/padding-bottom: (\d+)px !important/) || [])[1]);
   assert.ok(padding >= 141, 'bottom padding covers the 95px header and 46px service bar, so the last item can scroll onto the screen');
+});
+
+runTest('Test 326: A bare week caption is a school week of the year: 35/36 is Term 4 Week 5-6, not Term 4 Week 1', () => {
+  const { terms } = loadExportModules();
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/assessment-parse-helpers.js'), 'utf8'));
+  const helpers = window.ConnectifyParseHelpers;
+  const math = window.ConnectifyProgressMath;
+  const year = new Date().getFullYear();
+  const savedParse = window.ConnectifyParseHelpers;
+  localStorage.setItem('connectify:school_terms', JSON.stringify({ earlyEaster: { [year]: false } }));
+  try {
+    assert.strictEqual(helpers.orderHint('35/36'), 41, 'school week 35 is Term 4 Week 5 (slot 36 + 5)');
+    assert.strictEqual(helpers.orderHint('Week 35'), 41);
+    assert.strictEqual(helpers.orderHint('Week 4/5'), 4, 'early weeks read as before');
+    assert.strictEqual(helpers.orderHint('14'), terms.weekOrder(14), 'school week 14 is Term 2 Week 4, not slot 14');
+    assert.strictEqual(helpers.orderHint('14'), 16);
+    assert.strictEqual(helpers.orderHint('Term 2 Week 3'), 15, 'a caption naming its term is unchanged');
+    terms.setEarlyEaster(year, true);
+    assert.strictEqual(helpers.orderHint('20'), terms.weekOrder(20, year, true), 'Early Easter moves a school week');
+    assert.notStrictEqual(helpers.orderHint('20'), terms.weekOrder(20, year, false));
+    terms.setEarlyEaster(year, false);
+
+    assert.strictEqual(helpers.weekSpan('35/36'), 1);
+    assert.strictEqual(helpers.weekSpan('Term 2 Week 6/7'), 1);
+    assert.strictEqual(helpers.weekSpan('Weeks 5 and 7, Term 3'), 2);
+    assert.strictEqual(helpers.weekSpan('Week 5'), 0);
+    assert.strictEqual(helpers.weekSpan('13/3'), 0, 'a falling pair is no range');
+    assert.strictEqual(helpers.weekSpan('Fri 13 Mar'), 0);
+
+    assert.strictEqual(math.shortTimestamp(41, '35/36'), 'Term 4 Wk 5-6', 'the list shows the whole range');
+    assert.strictEqual(math.formatTimestamp(41, '35/36'), 'Term 4, Week 5-6');
+    assert.strictEqual(math.shortTimestamp(18, 'Term 2 Week 6/7'), 'Term 2 Wk 6-7');
+    assert.strictEqual(math.shortTimestamp(20, '35/36'), 'Term 2 Wk 8', 'a week override is one week, whatever the caption says');
+    assert.strictEqual(math.shortTimestamp(helpers.orderHint('10/11'), '10/11'), 'Term 1 Wk 10', 'a range across two terms shows its first week');
+    assert.strictEqual(math.shortTimestamp(41), 'Term 4 Wk 5', 'no caption, one week');
+
+    assert.strictEqual(helpers.taskSemester(2, '35/36'), 2);
+    assert.strictEqual(helpers.taskSemester(2, '14/15'), 1, 'a week no term reaches is a school week, so it decides on a Semester 2 card');
+    assert.strictEqual(helpers.taskSemester(1, '35/36'), 1, 'never later than the card');
+    assert.strictEqual(helpers.taskSemester(2, 'Week 4'), 2, 'a low week may be a term week, so the card decides');
+
+    const scrape = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/assessment-scrape.js'), 'utf8');
+    const resolve = scrape.slice(scrape.indexOf('function resolveTaskOrder'), scrape.indexOf('function formatCollectedSubjects'));
+    assert.ok(resolve.indexOf('orderHint(task.caption)') < resolve.indexOf('Number.isFinite(task.order)'), 'a week caption is read again before the cached order, so older caches and Early Easter stay current');
+  } finally {
+    localStorage.removeItem('connectify:school_terms');
+    window.ConnectifyParseHelpers = savedParse;
+  }
 });
 
 runTest('Test 303: Notifications are one glass surface in Liquid Glass, blurred at least as much as the other layers over text', () => {

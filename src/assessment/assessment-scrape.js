@@ -163,12 +163,14 @@
       (task.name && isFirstOfName(subjectName, task) ? readTimeOverride([subjectName], [task.name]) : null);
     const order = customWeekOrder(override);
     if (order !== null) return termWeekOrder(order);
-    // A date caption is read again each time, so the term calendar (Early Easter) and caches from
-    // before dates were placed in their real term and week both give today's order
+    // A caption is read again each time, so the term calendar (Early Easter: where school week 20 falls)
+    // and caches from before dates and school weeks were placed in their real term and week give today's order
     const fromDate = window.ConnectifyParseHelpers.dateOrder(task.caption);
     if (fromDate !== null) return fromDate;
+    const fromWeek = task.caption ? orderHint(task.caption) : null;
+    if (fromWeek !== null) return termWeekOrder(fromWeek);
     if (Number.isFinite(task.order)) return termWeekOrder(task.order);
-    return task.caption ? termWeekOrder(orderHint(task.caption)) : (task.order ?? null);
+    return task.order ?? null;
   }
 
   function formatCollectedSubjects(includePending) {
