@@ -19,11 +19,11 @@
   }
 
   /** One labelled 0–100 number input; dataset carries the category or subject it belongs to. */
-  function baselineField({ name, color, inputClass, dataKey, placeholder, value }) {
+  function baselineField({ name, shown = name, color, inputClass, dataKey, placeholder, value }) {
     const field = make('div');
     Object.assign(field.style, { display: 'flex', flexDirection: 'column' });
-    const label = make('label', 'cx-settings-label', name);
-    label.title = name;
+    const label = make('label', 'cx-settings-label', shown);
+    label.title = shown;
     Object.assign(label.style, { fontSize: '11.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' });
     if (color) label.style.color = color;
     const input = Object.assign(make('input', `${inputClass} cx-settings-number-input`), { type: 'number', min: '0', max: '100', step: '0.5', placeholder });
@@ -62,6 +62,13 @@
     }
     Object.keys(baselines.subjects || {}).forEach(s => { if (s) names.add(s); });
     return Array.from(names);
+  }
+
+  /** What each subject's field shows: its cleaned name, or its full name when two fields would read the same. */
+  function subjectLabels(names) {
+    const { cleanSubjectName } = window.ConnectifyUtils;
+    const cleaned = names.map(cleanSubjectName);
+    return new Map(names.map((name, i) => [name, (cleaned.indexOf(cleaned[i]) === cleaned.lastIndexOf(cleaned[i]) && cleaned[i]) || name]));
   }
 
   function readInputs(container, selector, dataKey) {
@@ -128,6 +135,7 @@
 
     const subjGrid = grid('180px');
     const subjects = enrolledSubjects(baselines);
+    const shown = subjectLabels(subjects);
     if (subjects.length === 0) {
       const emptyNote = make('div', 'cx-settings-desc', 'No enrolled subjects detected yet. Expand course outlines on Connect to populate subject list.');
       Object.assign(emptyNote.style, { fontSize: '11.5px', gridColumn: '1 / -1' });
@@ -136,6 +144,7 @@
     for (const sName of subjects) {
       subjGrid.append(baselineField({
         name: sName,
+        shown: shown.get(sName),
         inputClass: 'cx-baseline-subj-input',
         dataKey: 'subject',
         placeholder: 'e.g. 78',
@@ -159,5 +168,5 @@
     );
   }
 
-  window.ConnectifyCategoryBaselines = { renderBaselines };
+  window.ConnectifyCategoryBaselines = { renderBaselines, subjectLabels };
 })();

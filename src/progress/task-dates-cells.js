@@ -14,9 +14,7 @@
   const FILL_ON = ['pointerdown', 'focus'];
 
   /** "12 Chemistry ATAR" or "Chemistry ATAR Year 12" -> "Chemistry". */
-  const subjectText = row => window.ConnectifyUtils.normalize(
-    String(row.subject || '').replace(/\bATAR\b/gi, '').replace(/\bYear\s*\d+\b/gi, '').replace(/^\s*\d{1,2}\s+/, '')
-  ) || row.subject;
+  const subjectText = row => window.ConnectifyUtils.cleanSubjectName(row.subject) || row.subject;
 
   const percent = value => `${Math.round(value * 10) / 10}%`;
   /** A completed task's grade ("85.5%"), or a dash. */

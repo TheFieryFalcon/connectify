@@ -14311,7 +14311,7 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
   assert.ok(read('progress/progress.css').includes('border-bottom:1px solid var(--cx-progress-line, #d5dfe9)'), 'the graph table draws the same hairline');
   assert.ok(css.includes('#connectify-progress :is(th, td):first-child { padding-left: 0; }') && css.includes('#connectify-progress :is(th, td):last-child { padding-right: 0; }'), 'table text lines up with the controls and hairlines');
   assert.ok(css.includes('.cx-dates-table { table-layout: fixed; }') && css.includes('.cx-dates-col-name { width: 34%; }') && css.includes('.cx-dates-col-when { width: 16%; }'), 'Assessment and Date are a fixed left half in both views');
-  const cellsWindow = { ConnectifyUtils: { normalize: t => t.replace(/\s+/g, ' ').trim() } };
+  const cellsWindow = { ConnectifyUtils: { cleanSubjectName: window.ConnectifyUtils.cleanSubjectName } };
   new Function('window', read('progress/task-dates-cells.js'))(cellsWindow);
   assert.deepStrictEqual(['12 Chemistry ATAR', 'Chemistry ATAR Year 11', '3D Art'].map(subject => cellsWindow.ConnectifyTaskDatesCells.subjectText({ subject })), ['Chemistry', 'Chemistry', '3D Art'], 'the Subject column is cleaned');
   assert.ok(css.includes('#cx-task-dates .cx-time-cell > span { min-width: 6.8em; }') && !read('progress/progress-week-editor.js').includes("containerSpan.style"), 'every row\'s pencil sits just after its week, on one line');
@@ -15635,6 +15635,46 @@ runTest('Test 331: Settings keeps one spacing scale, past Connect\'s own label a
   assert.ok(/\.cx-cat-wrap label \{\s+margin: 0;/.test(drawer), 'category names stay centred on their inputs');
   assert.ok(/\.cx-cat-wrap:last-child \{\s+margin-bottom: 0;/.test(drawer) && !read('predictor/category-settings.js').includes('margin-bottom:10px'), 'category rows take their spacing from the stylesheet');
   assert.ok(read('predictor/category-baselines.js').includes("gap: '8px 12px', marginBottom: '16px'"), 'baseline grids are on the scale');
+});
+
+runTest('Test 332: Baseline fields show cleaned subject names and stay saved under the full name', () => {
+  const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
+  eval(read('system/utils.js'));
+  const { cleanSubjectName } = window.ConnectifyUtils;
+  for (const [raw, clean] of [
+    ['Chemistry ATAR Year 11', 'Chemistry'],
+    ['Mathematics Methods ATAR Year 11 - Semester 1', 'Mathematics Methods'],
+    ['12 Literature ATAR', 'Literature'],
+    ['Philosophy and Ethics ATAR Year 11', 'Philosophy and Ethics'],
+    ['English General Year 12', 'English General'],
+    ['', '']
+  ]) assert.strictEqual(cleanSubjectName(raw), clean, raw);
+
+  eval(read('predictor/category-baselines.js'));
+  const { subjectLabels, renderBaselines } = window.ConnectifyCategoryBaselines;
+  const labels = subjectLabels(['Chemistry ATAR Year 11', 'English ATAR Year 11', 'English ATAR Year 12', 'ATAR']);
+  assert.strictEqual(labels.get('Chemistry ATAR Year 11'), 'Chemistry');
+  assert.strictEqual(labels.get('English ATAR Year 11'), 'English ATAR Year 11', 'two fields never read the same');
+  assert.strictEqual(labels.get('English ATAR Year 12'), 'English ATAR Year 12');
+  assert.strictEqual(labels.get('ATAR'), 'ATAR', 'a name that cleans to nothing stays');
+
+  // Rendered: the label is cleaned, the input keeps the full name its baseline is saved under
+  const origData = window.ConnectifyData;
+  window.ConnectifyData = { collectClasses: () => [{ name: 'Chemistry ATAR Year 11 - Semester 1' }] };
+  const cleanInEngine = window.ConnectifyPredictorMath?.cleanSubject?.('Chemistry ATAR Year 11 - Semester 1');
+  const container = new MockElement('div');
+  container.id = 'cx-baselines-container';
+  renderBaselines({ querySelector: () => container });
+  window.ConnectifyData = origData;
+  const everything = descendants(container);
+  const input = everything.find(el => el.dataset?.subject);
+  assert.ok(input, 'the subject has a field');
+  assert.strictEqual(input.dataset.subject, cleanInEngine || 'Chemistry ATAR Year 11', 'its baseline key is unchanged');
+  const label = everything.find(el => el.className === 'cx-settings-label' && el.parentElement === input.parentElement);
+  assert.strictEqual(label.textContent, 'Chemistry');
+  assert.strictEqual(label.title, 'Chemistry');
+
+  assert.ok(read('progress/task-dates-cells.js').includes('cleanSubjectName(row.subject) || row.subject'), 'Task Dates uses the same cleaning');
 });
 
 Promise.all(pendingTestPromises).then(() => {

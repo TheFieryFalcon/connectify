@@ -606,6 +606,12 @@ Extremely concise summary of the core visual design language, contrast standards
   - Written past Connect
     - `.eds.cvr label` (5px) and `p` (14px) would otherwise add their own margins
     - spacing lives in classes, never inline on the controls
+- **Baseline Subject Names** (`category-baselines.js`)
+  - Shown
+    - the cleaned name: `Chemistry ATAR Year 11` reads `Chemistry`
+    - the full name only when two fields would read the same
+  - Saved
+    - baselines stay keyed by the full name, so saved ones and the new-year rollover carry on
 - **Workspace Navigation**
   - Dedicated `← Back to Menu` navigation header (`.cx-back-menu`)
     - positioned at the top right of the header

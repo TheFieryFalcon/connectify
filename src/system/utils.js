@@ -12,6 +12,11 @@
 
   const normalize = text => String(text ?? '').replace(/\s+/g, ' ').trim();
 
+  /** A class as students call it: "12 Chemistry ATAR" or "Chemistry ATAR Year 12 - Semester 1" -> "Chemistry". */
+  const cleanSubjectName = name => normalize(
+    String(name ?? '').replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').replace(/\bATAR\b/gi, '').replace(/\bYear\s*\d+\b/gi, '').replace(/^\s*\d{1,2}\s+/, '')
+  );
+
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
   ));
@@ -232,7 +237,7 @@
   }
 
   window.ConnectifyUtils = {
-    pageFetch, normalize, escapeHtml, accountKey, signedInUserId, userKey, userKeys, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
+    pageFetch, normalize, cleanSubjectName, escapeHtml, accountKey, signedInUserId, userKey, userKeys, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
     customWeekOrder, readTimeOverride, syncCharts, cardSemester, OUTLINES_URL, isOutlinesPage
   };
 })();
