@@ -16,6 +16,11 @@
   const cleanSubjectName = name => normalize(
     String(name ?? '').replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').replace(/\bATAR\b/gi, '').replace(/\bYear\s*\d+\b/gi, '').replace(/^\s*\d{1,2}\s+/, '')
   );
+  /** name -> what a list shows for it: its cleaned name, or its full name when two would read the same. */
+  const subjectLabels = names => {
+    const cleaned = names.map(cleanSubjectName);
+    return new Map(names.map((name, i) => [name, (cleaned.indexOf(cleaned[i]) === cleaned.lastIndexOf(cleaned[i]) && cleaned[i]) || name]));
+  };
 
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
@@ -237,7 +242,7 @@
   }
 
   window.ConnectifyUtils = {
-    pageFetch, normalize, cleanSubjectName, escapeHtml, accountKey, signedInUserId, userKey, userKeys, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
+    pageFetch, normalize, cleanSubjectName, subjectLabels, escapeHtml, accountKey, signedInUserId, userKey, userKeys, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
     customWeekOrder, readTimeOverride, syncCharts, cardSemester, OUTLINES_URL, isOutlinesPage
   };
 })();

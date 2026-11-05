@@ -61,12 +61,13 @@
     const prefsStr = localStorage.getItem(window.ConnectifyUtils.userKey('connectea:preferences'));
     const savedPrefs = prefsStr ? JSON.parse(prefsStr) : {};
 
+    const shown = window.ConnectifyUtils.subjectLabels([...courseList.values()].map(course => course.name));
     for (const course of courseList.values()) {
       const calibEntry = savedPrefs[`sem1_calibration:${course.id}`] || savedPrefs[`sem1_calibration:${course.name}`] || {};
       const knownSem1Raw = calibEntry.raw !== undefined ? calibEntry.raw : (course.mark !== undefined ? Math.round(course.mark * 10) / 10 : '');
 
       const nameLabel = document.createElement('span');
-      nameLabel.textContent = course.name;
+      nameLabel.textContent = shown.get(course.name);
       nameLabel.className = 'cx-settings-label';
       nameLabel.style.marginBottom = '0';
 

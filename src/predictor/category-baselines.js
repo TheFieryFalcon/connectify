@@ -64,13 +64,6 @@
     return Array.from(names);
   }
 
-  /** What each subject's field shows: its cleaned name, or its full name when two fields would read the same. */
-  function subjectLabels(names) {
-    const { cleanSubjectName } = window.ConnectifyUtils;
-    const cleaned = names.map(cleanSubjectName);
-    return new Map(names.map((name, i) => [name, (cleaned.indexOf(cleaned[i]) === cleaned.lastIndexOf(cleaned[i]) && cleaned[i]) || name]));
-  }
-
   function readInputs(container, selector, dataKey) {
     const values = {};
     container.querySelectorAll(selector).forEach(inp => {
@@ -135,7 +128,7 @@
 
     const subjGrid = grid('180px');
     const subjects = enrolledSubjects(baselines);
-    const shown = subjectLabels(subjects);
+    const shown = window.ConnectifyUtils.subjectLabels(subjects);
     if (subjects.length === 0) {
       const emptyNote = make('div', 'cx-settings-desc', 'No enrolled subjects detected yet. Expand course outlines on Connect to populate subject list.');
       Object.assign(emptyNote.style, { fontSize: '11.5px', gridColumn: '1 / -1' });
@@ -168,5 +161,5 @@
     );
   }
 
-  window.ConnectifyCategoryBaselines = { renderBaselines, subjectLabels };
+  window.ConnectifyCategoryBaselines = { renderBaselines };
 })();

@@ -15637,7 +15637,7 @@ runTest('Test 331: Settings keeps one spacing scale, past Connect\'s own label a
   assert.ok(read('predictor/category-baselines.js').includes("gap: '8px 12px', marginBottom: '16px'"), 'baseline grids are on the scale');
 });
 
-runTest('Test 332: Baseline fields show cleaned subject names and stay saved under the full name', () => {
+runTest('Test 332: Baseline and calibration lists show cleaned subject names and stay saved under the full name', () => {
   const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
   eval(read('system/utils.js'));
   const { cleanSubjectName } = window.ConnectifyUtils;
@@ -15651,8 +15651,8 @@ runTest('Test 332: Baseline fields show cleaned subject names and stay saved und
   ]) assert.strictEqual(cleanSubjectName(raw), clean, raw);
 
   eval(read('predictor/category-baselines.js'));
-  const { subjectLabels, renderBaselines } = window.ConnectifyCategoryBaselines;
-  const labels = subjectLabels(['Chemistry ATAR Year 11', 'English ATAR Year 11', 'English ATAR Year 12', 'ATAR']);
+  const { renderBaselines } = window.ConnectifyCategoryBaselines;
+  const labels = window.ConnectifyUtils.subjectLabels(['Chemistry ATAR Year 11', 'English ATAR Year 11', 'English ATAR Year 12', 'ATAR']);
   assert.strictEqual(labels.get('Chemistry ATAR Year 11'), 'Chemistry');
   assert.strictEqual(labels.get('English ATAR Year 11'), 'English ATAR Year 11', 'two fields never read the same');
   assert.strictEqual(labels.get('English ATAR Year 12'), 'English ATAR Year 12');
@@ -15675,6 +15675,11 @@ runTest('Test 332: Baseline fields show cleaned subject names and stay saved und
   assert.strictEqual(label.title, 'Chemistry');
 
   assert.ok(read('progress/task-dates-cells.js').includes('cleanSubjectName(row.subject) || row.subject'), 'Task Dates uses the same cleaning');
+
+  // The calibration list shows the same names; its saved keys still use the course's id and full name
+  const calib = read('atar/scaling-calibration.js');
+  assert.ok(calib.includes('window.ConnectifyUtils.subjectLabels([...courseList.values()].map(course => course.name))') && calib.includes('nameLabel.textContent = shown.get(course.name);'), 'calibration rows are cleaned');
+  assert.ok(calib.includes('`sem1_calibration:${course.id}`') && calib.includes('`sem1_calibration:${course.name}`'), 'calibration keys are unchanged');
 });
 
 Promise.all(pendingTestPromises).then(() => {
