@@ -41,6 +41,7 @@
    */
   function renderChart(container, options) {
     const { points, isHistory, byAssessment, subjectName, mode } = options;
+    const shownName = window.ConnectifyUtils.cleanSubjectName(subjectName) || subjectName;
     const math = window.ConnectifyProgressMath;
     const modeInfo = window.ConnectifyProgressModes?.find(mode);
     const scoreLabel = modeInfo?.score || 'Your score';
@@ -79,8 +80,8 @@
           ? 'Estimated ATAR progression by assessment round'
           : 'Estimated ATAR progression over months'
         : modeInfo?.score
-        ? `${subjectName}: ${scoreLabel.toLowerCase()} and ${meanLabel.toLowerCase()}`
-        : `${subjectName}: your assessment scores and estimated cohort means`
+        ? `${shownName}: ${scoreLabel.toLowerCase()} and ${meanLabel.toLowerCase()}`
+        : `${shownName}: your assessment scores and estimated cohort means`
     });
 
     // Render horizontal grid lines and Y-axis value labels

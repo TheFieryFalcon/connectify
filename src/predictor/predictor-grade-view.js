@@ -46,14 +46,15 @@
       const subTabsBar = document.createElement('div');
       subTabsBar.className = 'cx-pred-subtabs';
 
+      const shown = window.ConnectifyUtils.subjectLabels(subjects.map(s => s.cleanName));
       let activeTabBtn = null;
       subjects.forEach((subj, idx) => {
         const tabBtn = document.createElement('button');
         tabBtn.type = 'button';
         const isActive = idx === activeIndex;
         tabBtn.className = `cx-pred-subtab ${isActive ? 'active' : ''}`;
-        tabBtn.textContent = subj.cleanName;
-        tabBtn.title = subj.cleanName;
+        tabBtn.textContent = shown.get(subj.cleanName);
+        tabBtn.title = shown.get(subj.cleanName);
         tabBtn.dataset.idx = String(idx);
         tabBtn.onclick = () => {
           lastSavedSubTabsScroll = subTabsBar.scrollLeft;
@@ -87,7 +88,7 @@
         subjectView.innerHTML = `
           <div class="cx-pred-no-average-card">
             <div style="font-size:28px; margin-bottom:10px;">📋</div>
-            <strong style="display:block; font-size:15px; margin-bottom:8px;">No Grades or Baselines for ${esc(activeSubject.cleanName)}</strong>
+            <strong style="display:block; font-size:15px; margin-bottom:8px;">No Grades or Baselines for ${esc(shown.get(activeSubject.cleanName))}</strong>
             <p style="font-size:12px; line-height:1.55; max-width:420px; margin:0 auto 18px auto; opacity:0.85;">
               Connectify needs either completed assessment marks or a previous year grade to project your final mark. Please go to <strong>Settings</strong> to enter your baseline grade, or wait for assessments to be returned.
             </p>
@@ -121,7 +122,7 @@
       headerCard.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div>
-            <strong style="font-size:15px; font-weight:700;">${esc(activeSubject.cleanName)}</strong>
+            <strong style="font-size:15px; font-weight:700;">${esc(shown.get(activeSubject.cleanName))}</strong>
             <div style="font-size:11px; opacity:0.8; margin-top:2px;">
               ${activeSubject.completedWeight}% completed (${activeSubject.completedCount} graded)&emsp;${currentScoreLabel}
             </div>

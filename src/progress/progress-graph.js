@@ -57,9 +57,9 @@
       const current = data.find(s => s.name === selectedSubject) || data[0];
 
       // Build subject selector buttons
+      const shown = window.ConnectifyUtils.subjectLabels(data.map(s => s.name));
       for (const subject of data) {
-        const displayName = subject.name.replace(/\bATAR\b|\bYear\s*\d+\b/gi, '').trim();
-        const btn = createElement('button', displayName);
+        const btn = createElement('button', shown.get(subject.name));
         btn.type = 'button';
         btn.setAttribute('aria-pressed', String(!isHistory && subject === current));
         btn.onclick = () => {

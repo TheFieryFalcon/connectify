@@ -111,7 +111,7 @@
       const replace = draft.kind === 'atar' ? store().conflicts(draft).subjects.filter(c => c.goal.kind !== 'atar') : [];
       if (!replace.length) return save();
       const [first] = replace;
-      const names = replace.map(c => c.goal.name || c.subject).join(', ');
+      const names = replace.map(c => window.ConnectifyGoalPlan.shownName(c.goal)).join(', ');
       reason.replaceChildren(`${names} already ${replace.length > 1 ? 'have goals' : `has a goal (${P().describe(first.goal)})`}. Replace ${replace.length > 1 ? 'them' : 'it'}?`);
       const yes = M().el('button', 'cx-goal-confirm', 'Replace');
       const back = M().el('button', 'cx-goal-cancel-edit', 'Back');

@@ -61,7 +61,7 @@
       if (clean) names.add(clean);
     }
     Object.keys(baselines.subjects || {}).forEach(s => { if (s) names.add(s); });
-    return Array.from(names);
+    return Array.from(names).filter(s => !window.ConnectifyCourseFilter?.ignores(s));
   }
 
   function readInputs(container, selector, dataKey) {
@@ -84,6 +84,9 @@
   function save(container, saveBtn, renderCategoryInputsCallback) {
     const types = readInputs(container, '.cx-baseline-type-input', 'type');
     const subjects = readInputs(container, '.cx-baseline-subj-input', 'subject');
+    // An ignored class has no field here, so its saved baseline stays for when the option is off
+    const saved = window.ConnectifyPredictorMath?.getBaselines?.()?.subjects || {};
+    for (const [name, value] of Object.entries(saved)) if (window.ConnectifyCourseFilter?.ignores(name)) subjects[name] = value;
     window.ConnectifyPredictorMath?.saveBaselines?.({ types, subjects });
 
     // A baseline for an unknown category creates that category (saved to every store, so it survives reload)

@@ -46,7 +46,7 @@
       heading.append(btn);
     }
     const goals = store()?.all().filter(g => !g.parent) || [];
-    btn.textContent = `Goals (${goals.filter(g => g.status === 'active').length})`;
+    btn.textContent = `Goals (${store()?.active().filter(g => !g.parent).length || 0})`;
     btn.disabled = !goals.length;
     btn.hidden = !show;
   }
@@ -110,7 +110,7 @@
     if (headline && tier) headline.append(' ', M().tierLabel(tier));
 
     const edit = editing[kind];
-    if (edit) container.prepend(M().el('p', 'cx-goal-editing', `Editing ${kind === 'target' ? 'ATAR' : edit.goal.name || 'subject'} goal`));
+    if (edit) container.prepend(M().el('p', 'cx-goal-editing', `Editing ${kind === 'target' ? 'ATAR' : P().shownName(edit.goal)} goal`));
     else if (info.held) container.prepend(M().el('p', 'cx-goal-editing', `Set by your ATAR ${Number(info.held.goal.target).toFixed(2)} goal`));
 
     if (composing[kind]) {

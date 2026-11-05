@@ -53,9 +53,11 @@
     const head = el('div', null, 'cx-export-group-head');
     head.append(el('span', group.label, 'cx-export-group-name'));
     if (view.groupBy === 'subject') {
+      // Saved under the subject's own name, whatever its heading shows
+      const subject = group.rows[0].subject;
       const dayLabel = el('label', null, 'cx-export-day');
-      const subjectDay = ctx.track(daySelect(ctx.subjectDays[group.label] || 1), `day:${group.label}`);
-      subjectDay.addEventListener('change', () => ctx.update(p => { p.subjectDays = { ...(p.subjectDays || {}), [group.label]: Number(subjectDay.value) }; }));
+      const subjectDay = ctx.track(daySelect(ctx.subjectDays[subject] || 1), `day:${group.label}`);
+      subjectDay.addEventListener('change', () => ctx.update(p => { p.subjectDays = { ...(p.subjectDays || {}), [subject]: Number(subjectDay.value) }; }));
       dayLabel.append(el('span', 'Day:'), subjectDay);
       head.append(dayLabel);
     }

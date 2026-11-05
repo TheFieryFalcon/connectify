@@ -14,7 +14,8 @@
 
   /** A class as students call it: "12 Chemistry ATAR" or "Chemistry ATAR Year 12 - Semester 1" -> "Chemistry". */
   const cleanSubjectName = name => normalize(
-    String(name ?? '').replace(/\s*[-–—]\s*Semester\s*[12].*$/i, '').replace(/\bATAR\b/gi, '').replace(/\bYear\s*\d+\b/gi, '').replace(/^\s*\d{1,2}\s+/, '')
+    String(name ?? '').replace(/\s*[-–—]\s*Sem(?:ester)?\s*[12].*$/i, '').replace(/\s*\(\s*Sem(?:ester)?\s*[12][^)]*\)/gi, '').replace(/\s+Sem(?:ester)?\s*[12]\s*$/i, '')
+      .replace(/\bATAR\b/gi, '').replace(/\b(?:Year|Yr)\s*\d+\b/gi, '').replace(/^\s*\d{1,2}\s+/, '').replace(/^[\s:–—-]+|[\s:–—-]+$/g, '')
   );
   /** name -> what a list shows for it: its cleaned name, or its full name when two would read the same. */
   const subjectLabels = names => {

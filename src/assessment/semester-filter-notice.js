@@ -34,7 +34,8 @@
   }
 
   /** The notice's title and text for the active semester, the Connect filter and the hidden count. */
-  function texts(active, filterTitle, hiddenCount) {
+  function texts(active, connectTitle, hiddenCount) {
+    const filterTitle = connectTitle && (window.ConnectifyUtils.cleanSubjectName(connectTitle) || connectTitle);
     const other = active === 1 ? 2 : 1;
     const outlines = hiddenCount === 1 ? `its Semester ${other} outline is` : `its ${hiddenCount} Semester ${other} outlines are`;
     return {

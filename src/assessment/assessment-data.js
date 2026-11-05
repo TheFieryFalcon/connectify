@@ -162,10 +162,11 @@
   }
 
 
-  /** collect() limited to the classes "Show this semester's classes only" keeps; for sidebar tools. */
+  /** collect() limited to the classes "Show this semester's classes only" and "Ignore Certificate and General courses" keep; for sidebar tools. */
   function collectClasses(includePending = false, forceRefresh = false) {
     const subjects = collect(includePending, forceRefresh);
-    return window.ConnectifySemesterFilter ? window.ConnectifySemesterFilter.filterSubjects(subjects) : subjects;
+    const kept = window.ConnectifySemesterFilter ? window.ConnectifySemesterFilter.filterSubjects(subjects) : subjects;
+    return window.ConnectifyCourseFilter ? window.ConnectifyCourseFilter.filterSubjects(kept) : kept;
   }
 
     // Connect's outlines arrived: every tool and panel refreshes from them

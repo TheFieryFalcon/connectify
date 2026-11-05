@@ -441,13 +441,21 @@ Extremely concise summary of the core visual design language, contrast standards
     - the 1px outline stays
     - a focused Material field keeps its own outline
     - the generic accent focus ring skips `.mat-input-element` (no second box inside the field)
-- **Hide Statistics on Certificate and General Courses** (`cohort-course-filter.js`, Settings checkbox, off by default)
+- **Ignore Certificate and General Courses** (`cohort-course-filter.js`, Settings checkbox, on by default)
   - Which courses
     - a class with Certificate, Cert or General in its name (whole word, any case)
-  - Effect
+  - On its outline
     - its rows stay as Connect drew them: no statistics or prediction panels, Type dropdowns, meters or goal bars, and no restored overall row
+    - the outline and its compound progress bar stay on the page
+  - In every tool
+    - it is no option: Goal Setter, Predictor, Year Progression, Estimator, Weakness Analyzer, the Task Dates export, Jump To and Settings' subject lists all leave it out
+    - tools read `collectClasses` and `readCourses`, which filter it, never `collect()`
+    - predictions for other classes still count its results
+  - What is saved rests
+    - a goal on it is neither judged, listed nor counted until the option is off (no toast, never judged Missed for having no tasks)
+    - saving baselines keeps its saved baseline
+  - Timing
     - applies at once in both directions, never after a reload
-    - the compound progress bar stays, and the sidebar tools still read these classes
 - **Settings Dropdowns**
   - `.cx-settings-select` matches the number inputs
     - white, `#b9cbe1` 1px border, 4px radius
@@ -606,12 +614,15 @@ Extremely concise summary of the core visual design language, contrast standards
   - Written past Connect
     - `.eds.cvr label` (5px) and `p` (14px) would otherwise add their own margins
     - spacing lives in classes, never inline on the controls
-- **Subject Names in Settings** (`category-baselines.js`, `scaling-calibration.js`, `ConnectifyUtils.subjectLabels`)
+- **Subject Names** (`ConnectifyUtils.cleanSubjectName`, `ConnectifyUtils.subjectLabels`)
   - Shown
-    - the cleaned name on Previous Year Subject Grade Baselines and Semester 1 Scaling Calibration: `Chemistry ATAR Year 11` reads `Chemistry`
-    - the full name only when two rows would read the same
+    - every tool list, heading, chart, toast and export shows the cleaned name, through this one cleaner: `Chemistry ATAR Year 11` and `12 Chemistry ATAR - Semester 2` read `Chemistry`
+    - no semester, ATAR or year level (`Year 12`, `Yr 12`, a leading `12`)
+    - the full name only when two rows of a list would read the same
+    - Connect's own outline titles stay as Connect wrote them
   - Saved
-    - baselines and calibrations stay keyed as before, so saved ones and the new-year rollover carry on
+    - baselines, calibrations, course ids, goals, overrides, export days and calendar UIDs stay keyed as before, so saved ones and the new-year rollover carry on
+    - so a tool shows the cleaned name and keeps its own key, never a second cleaner on screen
 - **Workspace Navigation**
   - Dedicated `← Back to Menu` navigation header (`.cx-back-menu`)
     - positioned at the top right of the header

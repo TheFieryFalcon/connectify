@@ -22,6 +22,8 @@
   const dateText = date => `${MONTHS[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
 
   /** items: ticked, dated tasks in list order; opts: { merge }. */
+  const shownSubject = item => window.ConnectifyUtils.cleanSubjectName(item.subject) || item.subject;
+
   function build(items, opts = {}) {
     const merged = opts.merge ? window.ConnectifyExportTasks.examGroups(items) : [];
     const inMerge = new Set(merged.flatMap(g => g.exams.map(e => e.key)));
@@ -29,11 +31,12 @@
     for (const item of items) {
       if (!item.date || inMerge.has(item.key)) continue;
       const weight = item.weight !== null && item.weight !== undefined ? Math.round(item.weight * 100) / 100 : '';
-      rows.push([`${item.name} (${item.subject})`, dateText(item.date), item.subject, item.type, weight, item.when]);
+      const subject = shownSubject(item);
+      rows.push([`${item.name} (${subject})`, dateText(item.date), subject, item.type, weight, item.when]);
     }
     for (const group of merged) {
       const first = group.exams[0], last = group.exams[group.exams.length - 1];
-      const subjects = Array.from(new Set(group.exams.map(e => e.subject))).join(', ');
+      const subjects = Array.from(new Set(group.exams.map(shownSubject))).join(', ');
       const when = first.when === last.when ? first.when : `${first.when} – ${last.when}`;
       rows.push([`Semester ${group.semester} Exam`, `${dateText(group.start)} → ${dateText(group.end)}`, subjects, 'Exam', '', when]);
     }

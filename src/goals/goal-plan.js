@@ -194,7 +194,9 @@
   }
 
   /** "Chemistry: 85% by Semester 2" (no year level, as in "12 Chemistry"), or "ATAR 95.00 by Semester 1". */
-  const title = goal => (goal.kind === 'atar' ? describe(goal) : `${String(goal.name || goal.subject).replace(/^\d{1,2}\s+/, '')}: ${describe(goal)}`);
+  /** What a goal's subject reads as (goals saved earlier hold the name as it was, year level and all). */
+  const shownName = goal => window.ConnectifyUtils.cleanSubjectName(goal.name || goal.subject) || goal.name || goal.subject;
+  const title = goal => (goal.kind === 'atar' ? describe(goal) : `${shownName(goal)}: ${describe(goal)}`);
 
   /** Everything an evaluation reads, gathered once: every course, ATAR courses and the cached subjects. */
   function context() {
@@ -204,7 +206,7 @@
   }
 
   window.ConnectifyGoalPlan = {
-    weekTerm, describe, title, context,
+    weekTerm, describe, shownName, title, context,
     NOTCHES, POINTS_PER_NOTCH, notchName, isMarked, isHeld: () => held, hold, weekOf, readCourses, entryFor, semesterOf,
     rangeTasks, byWeek, asOf, points, offsets, gradePlan, requiredOf, atarRows, atarOffsets, atarPlan
   };

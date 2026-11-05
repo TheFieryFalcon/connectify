@@ -82,12 +82,13 @@
     // Weighted average per assessment type (or per subject) over completed tasks
     const perf = {};
     const mode = document.getElementById('cx-radar-mode')?.value || 'type';
+    const shown = window.ConnectifyUtils.subjectLabels([...subjectMap.keys()]);
     for (const subject of collected) {
       const cleaned = cleanSubjectName(subject.name) || subject.name;
       if (isDisabled(cleaned, subject.name)) continue;
       for (const t of subject.tasks) {
         if (!(t.weight > 0) || t.pending || t.score === null) continue;
-        const label = mode === 'subject' ? cleaned : getEffectiveTaskType(subject.name, t);
+        const label = mode === 'subject' ? shown.get(cleaned) : getEffectiveTaskType(subject.name, t);
         if (!perf[label]) perf[label] = { earned: 0, total: 0 };
         perf[label].earned += (t.score / 100) * t.weight;
         perf[label].total += t.weight;
@@ -110,11 +111,12 @@
     if (!boxContainer) return;
     boxContainer.innerHTML = '';
     const subjectMap = getSubjectList();
+    const shown = window.ConnectifyUtils.subjectLabels([...subjectMap.keys()]);
 
     subjectMap.forEach((rawName, cleanName) => {
       const label = document.createElement('label');
       label.className = 'cx-weakness-checkbox-label';
-      label.title = cleanName;
+      label.title = shown.get(cleanName);
 
       const cb = document.createElement('input');
       cb.type = 'checkbox';
@@ -133,7 +135,7 @@
       };
 
       const textSpan = document.createElement('span');
-      textSpan.textContent = cleanName;
+      textSpan.textContent = shown.get(cleanName);
 
       label.appendChild(cb);
       label.appendChild(textSpan);

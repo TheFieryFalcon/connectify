@@ -175,8 +175,15 @@
       console.warn('Connectify failed to ingest grade cache into courses:', e);
     }
 
+    // Ids stay what they were (saved marks, goals and calibrations are keyed by them); names are what lists show
+    for (const list of result) {
+      const shown = window.ConnectifyUtils.subjectLabels(list.map(c => c.name));
+      for (const course of list) course.name = shown.get(course.name);
+    }
+
     const filter = window.ConnectifySemesterFilter;
-    return filter ? filter.filterCourses(result) : result;
+    const kept = filter ? filter.filterCourses(result) : result;
+    return window.ConnectifyCourseFilter ? window.ConnectifyCourseFilter.filterCourses(kept) : kept;
   }
 
   function scanOutlineDetails() {

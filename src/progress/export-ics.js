@@ -56,7 +56,7 @@
   }
 
   const weightText = weight => `${Math.round(weight * 100) / 100}%`;
-  const title = item => `${item.name} (${item.subject})`;
+  const title = item => `${item.name} (${window.ConnectifyUtils.cleanSubjectName(item.subject) || item.subject})`;
 
   function event(lines, { uid, start, end, summary, description, now }) {
     lines.push(

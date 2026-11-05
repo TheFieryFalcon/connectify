@@ -89,7 +89,7 @@
       const cards = window.ConnectifySemesterFilter?.allowedCards ? window.ConnectifySemesterFilter.allowedCards(tiles) : tiles;
       return cards.some(card => {
         const info = window.ConnectifyClassSemesters?.cardInfo(card);
-        return info?.subject && info.semester && !known.has(info.subject);
+        return info?.subject && info.semester && !known.has(info.subject) && !window.ConnectifyCourseFilter?.ignores(info.subject);
       });
     }
 

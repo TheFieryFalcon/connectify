@@ -1,8 +1,9 @@
 /**
- * Connectify Settings: "Hide statistics on Certificate and General courses"
+ * Connectify Settings: "Ignore Certificate and General courses"
  *
- * Wires the General Preferences checkbox to ConnectifyCourseFilter. A change redraws the outline rows straight away:
- * the cohort pass clears a matching card's panels, or draws them again. bind(panel) returns refresh().
+ * Wires the General Preferences checkbox to ConnectifyCourseFilter. A change applies straight away: the cohort pass
+ * clears a matching card's panels or draws them again, the tools are told (connectify-settings-updated) and Settings'
+ * own class lists are redrawn. bind(panel) returns refresh().
  * Exposes window.ConnectifySettingsCourseFilter.
  */
 (() => {
@@ -17,6 +18,10 @@
     toggle.addEventListener('change', () => {
       filter()?.save(toggle.checked);
       window.ConnectifyCohort?.schedule?.(true);
+      window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
+      const settings = window.ConnectifyCategorySettings?.panelRefs;
+      settings?.renderCalibTable?.();
+      settings?.renderBaselines?.();
     });
 
     const refresh = () => {

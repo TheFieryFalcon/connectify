@@ -16,7 +16,7 @@
   const store = () => window.ConnectifyGoalStore;
   const stateOf = goal => window.ConnectifyGoalEvents?.stateOf(goal) || window.ConnectifyGoalReplay.evaluate(goal);
 
-  const goalTitle = goal => (goal.kind === 'atar' ? 'ATAR' : goal.name || goal.subject);
+  const goalTitle = goal => (goal.kind === 'atar' ? 'ATAR' : P().shownName(goal));
   const order = (a, b) => (a.kind === 'atar' ? -1 : 0) - (b.kind === 'atar' ? -1 : 0) || (P().semesterOf(a) - P().semesterOf(b)) ||
     ((a.end?.week ?? 99) - (b.end?.week ?? 99));
   const finalText = goal => (Number.isFinite(goal.finalValue)

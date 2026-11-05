@@ -20,7 +20,7 @@
         </label>
         <p class="cx-settings-desc" id="cx-semester-filter-detected"></p>
         <label class="cx-settings-check">
-          <input type="checkbox" id="cx-course-filter-toggle"> Hide statistics on Certificate and General courses
+          <input type="checkbox" id="cx-course-filter-toggle"> Ignore Certificate and General courses
         </label>
 
         <div class="cx-settings-divider cx-settings-fields">

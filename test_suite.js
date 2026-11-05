@@ -9924,7 +9924,7 @@ runTest('Test 217: Filtering Assessment Outlines with "Show this semester\'s cla
     const shown = document.getElementById(notice.ID);
     assert.ok(shown && art.previousElementSibling === shown, 'the notice sits where the hidden outline was');
     const [title, text, button] = shown.children;
-    assert.strictEqual(title.textContent, '12 Art has no Semester 2 outline');
+    assert.strictEqual(title.textContent, 'Art has no Semester 2 outline');
     assert.ok(text.textContent.includes('"Show this semester\'s classes only" is on, so its Semester 1 outline is hidden'), text.textContent);
     assert.ok(text.textContent.includes('Connectify Settings'), 'the notice says where to turn the option off');
     assert.strictEqual(button.hidden, false, 'Back to All is offered while a Connect filter is applied');
@@ -11072,16 +11072,16 @@ runTest('Test 240: Export .ics: all-day events, stable UIDs, escaping, folding a
   const text = ics.build(items, { account: '12345', year: 2026, merge: true, now });
   assert.ok(!/[^\r]\n/.test(text) && text.endsWith('\r\n'), 'CRLF line endings');
   assert.ok(text.includes('X-WR-CALNAME:Connectify Assessments') && text.includes('PRODID:-//Connectify//Assessments//EN'));
-  assert.ok(text.includes('SUMMARY:Essay\\; part 1\\, draft (English ATAR)'), 'text is escaped');
+  assert.ok(text.includes('SUMMARY:Essay\\; part 1\\, draft (English)'), 'text is escaped');
   assert.ok(text.includes('DESCRIPTION:Type: Test\\nWeight: 12.5%\\nTerm 2\\, Week 9'));
   assert.ok(text.includes('DTSTART;VALUE=DATE:20260525\r\nDTEND;VALUE=DATE:20260526'), 'all-day with an exclusive end');
   assert.ok(text.includes('SUMMARY:Semester 1 Exam') && text.includes('DTSTART;VALUE=DATE:20260608\r\nDTEND;VALUE=DATE:20260620'), 'the merged span runs first to last exam');
-  assert.ok(!text.includes('SUMMARY:Exam (Chemistry ATAR)'), 'merged exams have no event of their own');
-  assert.ok(text.includes('SUMMARY:Exam (Literature ATAR)'), 'a lone semester exam stays');
+  assert.ok(!text.includes('SUMMARY:Exam (Chemistry)'), 'merged exams have no event of their own');
+  assert.ok(text.includes('SUMMARY:Exam (Literature)'), 'a lone semester exam stays');
   assert.ok(text.includes('TRANSP:TRANSPARENT') && text.includes('DTSTAMP:20261023T010203Z'));
   const unmerged = ics.build(items, { account: '12345', year: 2026, merge: false, now });
-  assert.ok(unmerged.includes('SUMMARY:Exam (Chemistry ATAR)') && !unmerged.includes('Semester 1 Exam'));
-  assert.ok(!/Weight/.test(unmerged.split('SUMMARY:Exam (Physics ATAR)')[1].split('END:VEVENT')[0]), 'no Weight line when unknown');
+  assert.ok(unmerged.includes('SUMMARY:Exam (Chemistry)') && !unmerged.includes('Semester 1 Exam'));
+  assert.ok(!/Weight/.test(unmerged.split('SUMMARY:Exam (Physics)')[1].split('END:VEVENT')[0]), 'no Weight line when unknown');
   const uids = t => t.match(/UID:[^\r]+/g);
   assert.deepStrictEqual(uids(ics.build(items, { account: '12345', year: 2026, merge: true })), uids(text), 'UIDs are stable across exports');
   assert.notDeepStrictEqual(uids(ics.build(items, { account: '999', year: 2026, merge: true })), uids(text), 'UIDs differ per account');
@@ -11100,8 +11100,8 @@ runTest('Test 241: Export CSV for Notion: BOM, columns, quoting, dates, weights 
   assert.ok(text.startsWith('﻿'), 'UTF-8 BOM');
   const lines = text.slice(1).split('\r\n');
   assert.strictEqual(lines[0], 'Name,Date,Subject,Type,Weight (%),Term / Week');
-  assert.strictEqual(lines[1], 'Exam (Chemistry ATAR),"June 8, 2026",Chemistry ATAR,Exam,30,"Term 2, Week 9"');
-  assert.strictEqual(lines[2], '"Essay ""final"", v2 (English ATAR)","May 25, 2026",English ATAR,Test,,"Term 2, Week 6"');
+  assert.strictEqual(lines[1], 'Exam (Chemistry),"June 8, 2026",Chemistry,Exam,30,"Term 2, Week 9"');
+  assert.strictEqual(lines[2], '"Essay ""final"", v2 (English)","May 25, 2026",English,Test,,"Term 2, Week 6"');
   assert.strictEqual(lines[3], '', 'ends with CRLF');
   const exams = [
     exportItem('a', 'Exam', 'Chemistry ATAR', '2026-06-08', { type: 'Exam', weight: 30, when: 'Term 2, Week 7' }),
@@ -11110,8 +11110,8 @@ runTest('Test 241: Export CSV for Notion: BOM, columns, quoting, dates, weights 
   ];
   const merged = csv.build(exams, { merge: true }).slice(1).split('\r\n');
   assert.deepStrictEqual(merged.slice(1, 3), [
-    'Essay (English ATAR),"May 25, 2026",English ATAR,Test,,"Term 2, Week 9"',
-    'Semester 1 Exam,"June 8, 2026 → June 19, 2026","Chemistry ATAR, Physics ATAR",Exam,,"Term 2, Week 7 – Term 2, Week 9"'
+    'Essay (English),"May 25, 2026",English,Test,,"Term 2, Week 9"',
+    'Semester 1 Exam,"June 8, 2026 → June 19, 2026","Chemistry, Physics",Exam,,"Term 2, Week 7 – Term 2, Week 9"'
   ], 'merged exams become one row spanning first to last exam (Notion date range)');
   assert.strictEqual(csv.build(exams, { merge: false }).split('\r\n').length, 5, 'unmerged: a row per task');
 });
@@ -11241,7 +11241,7 @@ runTest('Test 244: Exams merged into a semester exam keep their tick but show no
     const undated = cells('c3', 'Undated');
     assert.ok(!walk(undated.name).some(n => n.type === 'checkbox') && !undated.date.textContent, 'no week: no tick and no export date, its week input is on the same row');
     assert.strictEqual(cells('c4', 'Late').day.textContent, 'After Term 4');
-    const head = window.ConnectifyExportRows.groupHead({ label: 'Chemistry ATAR', rows: [{ key: 'Chemistry ATAR::c1' }] }, { groupBy: 'subject' }, ctx);
+    const head = window.ConnectifyExportRows.groupHead({ label: 'Chemistry', rows: [{ key: 'Chemistry ATAR::c1', subject: 'Chemistry ATAR' }] }, { groupBy: 'subject' }, ctx);
     assert.ok(walk(head).some(n => n.tagName === 'SELECT' && n.value === '3'), 'grouped by Subject, the heading holds the subject day');
     assert.strictEqual(walk(head).find(n => n.className === 'cx-export-all').textContent, 'Select None');
     assert.ok(!walk(window.ConnectifyExportRows.groupHead({ label: 'Exam', rows: [] }, { groupBy: 'type' }, ctx)).some(n => n.tagName === 'SELECT'), 'other groups have no subject day');
@@ -14201,7 +14201,7 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
       assert.deepStrictEqual(find(dates.toolbar, n => n.className === 'cx-dates-control').map(l => l.children[0].textContent), ['Group By:', 'Sort By:']);
 
       // Default: grouped by Subject, Chronological
-      assert.deepStrictEqual(firstCells(), ['Chemistry ATAR', 'lab', 'Essay', 'Exam', 'Physics ATAR', 'Test 2', 'Test 10', 'Undated']);
+      assert.deepStrictEqual(firstCells(), ['Chemistry', 'lab', 'Essay', 'Exam', 'Physics', 'Test 2', 'Test 10', 'Undated']);
       assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date', 'Type', 'Grade'], 'the date, then the type and grade');
       assert.strictEqual(tableRows()[1].className, 'cx-dates-group');
       assert.deepStrictEqual([tableRows()[2].children[3].textContent, tableRows()[3].children[3].textContent], ['—', '55%'], 'a grade, or a dash while unmarked');
@@ -14221,11 +14221,11 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
       // The direction orders the groups; Sort By orders inside them, on its own
       setDirection('desc');
       assert.strictEqual(direction.textContent, '↓');
-      assert.deepStrictEqual(firstCells(), ['Physics ATAR', 'Test 2', 'Test 10', 'Undated', 'Chemistry ATAR', 'lab', 'Essay', 'Exam']);
+      assert.deepStrictEqual(firstCells(), ['Physics', 'Test 2', 'Test 10', 'Undated', 'Chemistry', 'lab', 'Essay', 'Exam']);
       pick(sort, 'alphabetical');
-      assert.deepStrictEqual(firstCells(), ['Physics ATAR', 'Test 2', 'Test 10', 'Undated', 'Chemistry ATAR', 'Essay', 'Exam', 'lab'], 'ignoring case, numbers in numeric order');
+      assert.deepStrictEqual(firstCells(), ['Physics', 'Test 2', 'Test 10', 'Undated', 'Chemistry', 'Essay', 'Exam', 'lab'], 'ignoring case, numbers in numeric order');
       pick(sort, 'grade');
-      assert.deepStrictEqual(firstCells(), ['Physics ATAR', 'Test 2', 'Test 10', 'Undated', 'Chemistry ATAR', 'Exam', 'Essay', 'lab'], 'highest mark first, unmarked last');
+      assert.deepStrictEqual(firstCells(), ['Physics', 'Test 2', 'Test 10', 'Undated', 'Chemistry', 'Exam', 'Essay', 'lab'], 'highest mark first, unmarked last');
       setDirection('asc');
       pick(sort, 'chronological');
 
@@ -15492,14 +15492,14 @@ runTest('Test 328: The customizer\'s Basic mode names colours for what they pain
   assert.ok(manifest.indexOf('theme-customizer-basic.js') > -1 && manifest.indexOf('theme-customizer-basic.js') < manifest.indexOf('theme-customizer-markup.js'), 'the words load before the markup');
 });
 
-runTest('Test 329: Settings can leave Certificate and General courses without statistics, straight away and in both directions', () => {
+runTest('Test 329: Certificate and General courses are ignored by default: no statistics, straight away and in both directions', () => {
   localStorage.clear();
   const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
   eval(read('cohort/cohort-course-filter.js'));
   const filter = window.ConnectifyCourseFilter;
 
   for (const name of ['12 Certificate II in Business', '12 Cert III Sport', '12 CERT II Hospitality', '11 General English', '12 MATHEMATICS ESSENTIAL GENERAL - Semester 1']) {
-    assert.ok(filter.matches(name), `${name} is hidden with the option on`);
+    assert.ok(filter.matches(name), `${name} is ignored with the option on`);
   }
   for (const name of ['12 Literature ATAR', '11 Generalist Studies', '12 Concert Band', '12 Certainty Studies', '', undefined]) {
     assert.ok(!filter.matches(name), `${name} keeps its statistics`);
@@ -15535,7 +15535,9 @@ runTest('Test 329: Settings can leave Certificate and General courses without st
   };
   new Function('window', 'document', read('cohort/cohort-stats.js'))(win, doc);
 
-  assert.ok(!filter.hides(general.card), 'off by default');
+  assert.ok(filter.isEnabled() && localStorage.getItem(filter.KEY) === null, 'on by default, with nothing saved');
+  filter.save(false);
+  assert.ok(!filter.hides(general.card));
   win.ConnectifyCohort.pass();
   assert.deepStrictEqual(rendered, [general.row, atar.row], 'with the option off every course is drawn');
 
@@ -15549,7 +15551,7 @@ runTest('Test 329: Settings can leave Certificate and General courses without st
   assert.ok(atar.row.children.includes(atar.panel), 'an ATAR course keeps its panel');
 
   filter.save(false);
-  assert.strictEqual(localStorage.getItem(filter.KEY), null, 'off (the default) removes the setting');
+  assert.strictEqual(localStorage.getItem(filter.KEY), 'false', 'off is saved, since nothing saved means on');
   rendered.length = 0;
   win.ConnectifyCohort.pass();
   assert.deepStrictEqual(rendered, [general.row, atar.row], 'turning it off draws the course again');
@@ -15570,6 +15572,7 @@ runTest('Test 329: Settings can leave Certificate and General courses without st
   toggle.dispatchEvent(new MockEvent('change'));
   window.ConnectifyCohort = origCohort;
   assert.ok(!filter.isEnabled() && scheduled === 1, 'a change saves and redraws at once');
+  assert.ok(read('predictor/settings-course-filter.js').includes("new CustomEvent('connectify-settings-updated')"), 'and tells the tools');
   refresh();
   assert.strictEqual(toggle.checked, false);
   assert.ok(read('predictor/settings-preferences.js').includes('window.ConnectifySettingsCourseFilter?.bind(panel)'), 'General Preferences binds it');
@@ -15680,6 +15683,118 @@ runTest('Test 332: Baseline and calibration lists show cleaned subject names and
   const calib = read('atar/scaling-calibration.js');
   assert.ok(calib.includes('window.ConnectifyUtils.subjectLabels([...courseList.values()].map(course => course.name))') && calib.includes('nameLabel.textContent = shown.get(course.name);'), 'calibration rows are cleaned');
   assert.ok(calib.includes('`sem1_calibration:${course.id}`') && calib.includes('`sem1_calibration:${course.name}`'), 'calibration keys are unchanged');
+});
+
+runTest('Test 333: An ignored Certificate or General course is no option in any tool, and saved work on it rests', () => {
+  localStorage.clear();
+  const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
+  const prev = { filter: window.ConnectifyCourseFilter, semester: window.ConnectifySemesterFilter };
+  eval(read('cohort/cohort-course-filter.js'));
+  const filter = window.ConnectifyCourseFilter;
+  try {
+    const subjects = [{ name: '12 Certificate II in Business', tasks: [] }, { name: 'General English Year 12', tasks: [] }, { name: 'Literature ATAR Year 12', tasks: [] }];
+    assert.deepStrictEqual(filter.filterSubjects(subjects).map(s => s.name), ['Literature ATAR Year 12'], 'tools lose them by default');
+    const courses = [[{ id: '12 cert ii', name: 'Cert II Sport' }, { id: 'literature', name: 'Literature' }], [{ id: 'general english', name: 'General English' }]];
+    assert.deepStrictEqual(filter.filterCourses(courses), [[courses[0][1]], []], 'and the planners and calculators too');
+    assert.ok(filter.ignores('General English') && !filter.ignores('Literature'));
+
+    filter.save(false);
+    assert.strictEqual(filter.filterSubjects(subjects), subjects, 'the option off lists every class');
+    assert.strictEqual(filter.filterCourses(courses), courses);
+    assert.ok(!filter.ignores('General English'));
+    filter.save(true);
+
+    // Every list a sidebar tool reads goes through these
+    window.ConnectifySemesterFilter = undefined;
+    assert.ok(/ConnectifyCourseFilter\.filterSubjects\(kept\)/.test(read('assessment/assessment-data.js')), 'collectClasses filters');
+    assert.ok(/ConnectifyCourseFilter\.filterCourses\(kept\)/.test(read('atar/atar-scraper.js')), 'readCourses filters');
+    for (const f of ['progress/progress-graph.js', 'progress/next-up-view.js', 'progress/task-dates-view.js', 'progress/weakness-radar.js', 'predictor/predictor-ui.js', 'predictor/category-baselines.js']) {
+      assert.ok(read(f).includes('collectClasses'), `${f} reads collectClasses, never collect()`);
+    }
+    assert.ok(read('atar/outline-jump.js').includes('window.ConnectifyCourseFilter?.hides(card)'), 'Jump To leaves its tile out');
+    assert.ok(read('progress/task-dates-view.js').includes('window.ConnectifyCourseFilter?.ignores(info.subject)'), 'Task Dates never waits for its tile to load');
+
+    // Goals: one on an ignored class is neither judged nor counted, and comes back with the option off
+    eval(read('goals/goal-store.js'));
+    const store = window.ConnectifyGoalStore;
+    localStorage.setItem(`${store.GOALS_PREFIX}${window.ConnectifyUtils.accountKey()}`, JSON.stringify({ version: 1, goals: [
+      { id: 'a', kind: 'grade', subject: 'general english', name: 'General English', status: 'active' },
+      { id: 'b', kind: 'grade', subject: 'literature', name: 'Literature', status: 'active' },
+      { id: 'c', kind: 'atar', target: 90, status: 'active' }
+    ] }));
+    assert.deepStrictEqual(store.active().map(g => g.id), ['b', 'c'], 'an ignored class\'s goal rests');
+    filter.save(false);
+    assert.deepStrictEqual(store.active().map(g => g.id), ['a', 'b', 'c'], 'and comes back');
+    filter.save(true);
+
+    // Baselines: an ignored class has no field, and saving the others keeps its saved baseline
+    const baselines = read('predictor/category-baselines.js');
+    assert.ok(baselines.includes('Array.from(names).filter(s => !window.ConnectifyCourseFilter?.ignores(s))'), 'no field for it');
+    assert.ok(baselines.includes('if (window.ConnectifyCourseFilter?.ignores(name)) subjects[name] = value;'), 'its baseline survives a save');
+  } finally {
+    window.ConnectifyCourseFilter = prev.filter;
+    window.ConnectifySemesterFilter = prev.semester;
+    localStorage.clear();
+  }
+});
+
+runTest('Test 334: Every list and export shows a subject\'s cleaned name; saved keys and course ids stay as they were', () => {
+  localStorage.clear();
+  const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
+  const { cleanSubjectName: clean, subjectLabels } = window.ConnectifyUtils;
+  for (const [raw, want] of [
+    ['12 Chemistry ATAR', 'Chemistry'], ['Chemistry ATAR Year 11 - Semester 2', 'Chemistry'], ['Literature ATAR Year 11', 'Literature'],
+    ['Year 12 Physics ATAR - Semester 1', 'Physics'], ['12 ATAR Literature', 'Literature'], ['Biology (Sem 1)', 'Biology'], ['Biology Sem 2', 'Biology'],
+    ['Economics Yr 11 – Semester 1', 'Economics'], ['Physics - ATAR', 'Physics'], ['12 Philosophy and Ethics ATAR', 'Philosophy and Ethics'], ['11 3D Art', '3D Art'],
+    ['General English', 'General English'], ['ATAR', '']
+  ]) assert.strictEqual(clean(raw), want, raw);
+  assert.strictEqual(subjectLabels(['11 Chemistry', '12 Chemistry', '12 Physics']).get('11 Chemistry'), '11 Chemistry', 'two that would read the same stay in full');
+  assert.strictEqual(subjectLabels(['11 Chemistry', '12 Chemistry', '12 Physics']).get('12 Physics'), 'Physics');
+
+  // readCourses: names are clean for every list, ids stay what saved marks, goals and calibrations are keyed by
+  const prev = { filter: window.ConnectifyCourseFilter, semester: window.ConnectifySemesterFilter, classes: window.ConnectifyClassSemesters, data: window.ConnectifyData, scraper: window.ConnectifyAtarScraper };
+  window.ConnectifyCourseFilter = undefined;
+  window.ConnectifySemesterFilter = undefined;
+  window.ConnectifyAtarScraper = undefined;
+  window.ConnectifyData = { getSubjectTasks: () => [], collect: () => [] };
+  window.ConnectifyClassSemesters = { get: () => ({
+    '12 Chemistry ATAR': { 1: { title: '12 Chemistry ATAR - Semester 1', mark: 80 } },
+    'Literature ATAR Year 12': { 1: { title: 'Literature ATAR Year 12 - Semester 1', mark: 70 } }
+  }) };
+  try {
+    eval(read('atar/atar-scraper.js'));
+    const [sem1] = window.ConnectifyAtarScraper.readCourses(false);
+    assert.deepStrictEqual(sem1.map(c => c.name), ['Chemistry', 'Literature'], 'the planners\' and calculators\' lists');
+    assert.deepStrictEqual(sem1.map(c => c.id), ['12 chemistry', 'literature'], 'ids are unchanged');
+  } finally {
+    Object.assign(window, { ConnectifyCourseFilter: prev.filter, ConnectifySemesterFilter: prev.semester, ConnectifyClassSemesters: prev.classes, ConnectifyData: prev.data, ConnectifyAtarScraper: prev.scraper });
+  }
+
+  // The exports: clean text; the UID and day still key on the subject's own name
+  eval(read('progress/export-csv.js'));
+  const when = new Date(2026, 9, 26);
+  const item = { key: 'Literature ATAR Year 11::oral', name: 'Oral', subject: 'Literature ATAR Year 11', type: 'Take-Home', weight: 10, date: when, when: 'Term 4, Week 3' };
+  const csv = window.ConnectifyExportCsv.build([item]);
+  assert.ok(csv.includes('Oral (Literature),') && csv.includes(',Literature,Take-Home,') && !csv.includes('ATAR'), 'a CSV row names the clean subject');
+  assert.ok(read('progress/export-ics.js').includes('(${window.ConnectifyUtils.cleanSubjectName(item.subject) || item.subject})'), 'and a calendar event too');
+
+  // Task Dates: the Subject heading is clean; a subject's export day stays saved under its own name
+  eval(read('progress/task-dates.js'));
+  const groupOf = window.ConnectifyTaskDates.GROUPS.find(g => g.id === 'subject').of;
+  assert.deepStrictEqual(groupOf({ subject: '12 Chemistry ATAR' }), { key: 'Chemistry', label: 'Chemistry' });
+  assert.ok(read('progress/export-rows.js').includes('[subject]: Number(subjectDay.value)') && read('progress/export-rows.js').includes('group.rows[0].subject'));
+
+  // No tool shows a raw name any more
+  assert.ok(read('progress/progress-graph.js').includes('createElement(\'button\', shown.get(subject.name))'), 'Year Progression chips');
+  const predictorTabs = read('predictor/predictor-grade-view.js');
+  assert.ok(predictorTabs.includes('tabBtn.textContent = shown.get(subj.cleanName)') && !/esc\(activeSubject\.cleanName\)/.test(predictorTabs), 'Predictor tabs and headings');
+  assert.ok(read('predictor/predictor-atar-view.js').includes('esc(window.ConnectifyUtils.cleanSubjectName(c.name) || c.name)'), 'Predict ATAR table');
+  assert.ok(read('progress/weakness-radar.js').includes('textSpan.textContent = shown.get(cleanName)') && read('progress/weakness-radar.js').includes('disabledWeaknessSubjects.add(cleanName)'), 'Weakness Analyzer, its unticks saved as before');
+  assert.ok(read('system/new-grade.js').includes('${window.ConnectifyUtils.cleanSubjectName(entry.subjectName) || entry.subjectName} scores have been updated.'), 'the Class Updated toast');
+  assert.ok(read('atar/outline-jump.js').includes('cleanSubjectName(title) || normalize(title)'), 'Jump To');
+  eval(read('goals/goal-plan.js'));
+  assert.strictEqual(window.ConnectifyGoalPlan.shownName({ name: '12 Literature ATAR' }), 'Literature', 'a goal saved with its year level');
+  localStorage.clear();
 });
 
 Promise.all(pendingTestPromises).then(() => {

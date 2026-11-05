@@ -50,7 +50,8 @@
     window.dispatchEvent(new CustomEvent('connectify-goals-changed'));
   };
 
-  const active = () => all().filter(g => g.status === 'active');
+  // A goal on an ignored class rests (never judged, listed or counted) until the option is off
+  const active = () => all().filter(g => g.status === 'active' && !window.ConnectifyCourseFilter?.ignores(g.name || g.subject));
   const past = () => all().filter(g => g.status !== 'active' && !g.parent);
   const byId = id => all().find(g => g.id === id) || null;
   const childrenOf = id => all().filter(g => g.parent === id);

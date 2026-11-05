@@ -37,7 +37,10 @@
   // needsCompleted: says nothing once only uncompleted tasks are listed
   const GROUPS = [
     { id: 'none', label: 'None' },
-    { id: 'subject', label: 'Subject', ordered: true, of: r => ({ key: r.subject, label: r.subject }) },
+    { id: 'subject', label: 'Subject', ordered: true, of: r => {
+      const label = window.ConnectifyUtils.cleanSubjectName(r.subject) || r.subject;
+      return { key: label, label };
+    } },
     { id: 'type', label: 'Type', ordered: true, of: r => ({ key: r.type, label: r.type || 'No type' }) },
     { id: 'completed', label: 'Completed', needsCompleted: true, of: r => ({ key: r.completed ? 1 : 0, label: r.completed ? 'Completed' : 'Not completed' }) },
     { id: 'predicted', label: 'Predicted Grade', ordered: true, only: r => !r.completed, of: r => gradeBand(r.predicted, 'No prediction') },

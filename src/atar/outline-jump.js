@@ -15,16 +15,9 @@
 
   const TILE_SELECTOR = '.eds-c-tile, .cvr-c-tile';
   const TITLE_SELECTOR = '.eds-c-tile__title, .cvr-c-tile__title';
-  const { normalize, cardSemester } = window.ConnectifyUtils;
+  const { normalize, cleanSubjectName, cardSemester } = window.ConnectifyUtils;
 
-  // Same cleaning as the grade snapshot: no semester suffix, ATAR or year level
-  const cleanName = title => normalize(
-    String(title || '')
-      .replace(/\s*[-–—]\s*Sem(?:ester)?\s*[12].*$/i, '')
-      .replace(/\s*[(]?\s*Sem(?:ester)?\s*[12][^)]*\)?/gi, '')
-      .replace(/\bATAR\b/gi, '')
-      .replace(/\bYear\s*\d+\b/gi, '')
-  ) || normalize(title);
+  const cleanName = title => cleanSubjectName(title) || normalize(title);
 
   /**
    * Shown outlines as [{ name, card }], one per subject in page order. A subject with both semesters' outlines
@@ -34,7 +27,7 @@
     const current = window.ConnectifySemesterFilter?.currentSemester?.() || null;
     const byName = new Map();
     for (const card of document.querySelectorAll(TILE_SELECTOR)) {
-      if (card.classList.contains('cx-semester-hidden')) continue;
+      if (card.classList.contains('cx-semester-hidden') || window.ConnectifyCourseFilter?.hides(card)) continue;
       const title = normalize(card.querySelector(TITLE_SELECTOR)?.textContent);
       if (!title) continue;
       const name = cleanName(title);

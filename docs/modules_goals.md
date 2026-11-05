@@ -28,6 +28,7 @@ Saved Target Grade / Target ATAR goals: difficulty tiers, effort sliders, outlin
 ### Store (`goal-store.js`, `ConnectifyGoalStore`)
 - `connectify:goals:<account>`: `{ version: 1, goals }` (id, revision, kind, subject, name, parent, target, end, difficultyWeighted, sliders, subjectSliders, included, topFour, priorMarked, status, createdAt, finishedAt, finalValue, finalProgress, lastTier, seenMarked, announcePending, celebratePending, celebrated, glowPending). Unknown versions read as none; unknown fields are kept.
 - `connectify:goal_verdicts:<account>`: frozen verdicts of finished goals. Clear Cache and the `goals` cache version (`clearGoalsCache`) clear only these; a settings reset removes goals too.
+- `active()` leaves out a goal on a class `ConnectifyCourseFilter` ignores: it rests, unjudged and uncounted, until the option is off.
 - **Conflicts** (`conflicts`): one active goal per subject, one active ATAR goal; the goal being edited never counts. `save` keeps the id and counts a revision; an ATAR save rewrites its children (`childSliders`).
 - `finish`, `remove`, `takeAll` (new-year archive). Events: `connectify-goals-changed` on every write.
 

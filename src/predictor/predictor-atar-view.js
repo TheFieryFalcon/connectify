@@ -98,7 +98,7 @@
               const displayScore = c.score !== undefined ? (Number.isFinite(c.score) ? Math.round(c.score) : c.score) : '—';
               return `
                 <tr class="${isTop ? 'cx-pred-top-row' : ''}">
-                  <td style="padding:8px 4px; font-weight:600;">${esc(c.name)}</td>
+                  <td style="padding:8px 4px; font-weight:600;">${esc(window.ConnectifyUtils.cleanSubjectName(c.name) || c.name)}</td>
                   <td style="padding:8px 4px; text-align:right; opacity:0.9;">${c.mark !== undefined ? c.mark + '%' : '—'}</td>
                   <td style="padding:8px 4px; text-align:right; font-weight:700;">${displayScore}</td>
                   <td style="padding:8px 4px; text-align:center;">

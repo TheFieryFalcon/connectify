@@ -89,7 +89,7 @@
       id: `connectify-grade-${entry.subjectName.replace(/\s+/g, '-').toLowerCase()}`,
       type: 'grade',
       title: 'Class Updated',
-      message: `${entry.subjectName} scores have been updated.`,
+      message: `${window.ConnectifyUtils.cleanSubjectName(entry.subjectName) || entry.subjectName} scores have been updated.`,
       duration: 12000,
       actions: [
         { text: 'Dismiss', type: 'secondary', onClick: ({ close }) => close() },

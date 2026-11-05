@@ -1305,9 +1305,9 @@ async function auditToolSubjects(page, toolId) {
     const cfg = lists[id];
     const panel = cfg && document.querySelector(cfg.panel);
     if (!panel) return [];
-    // "Chemistry ATAR Year 11 - Semester 2", "Chemistry Year 11" and "Chemistry" all reduce to "chemistry"
+    // "Chemistry ATAR Year 11 - Semester 2", "12 Chemistry" and "Chemistry" all reduce to "chemistry"
     const key = s => String(s || '').toLowerCase().replace(/\s*[-–—]\s*semester\s*[12].*$/, '')
-      .replace(/\b(atar|general|year\s*\d+)\b/g, ' ').replace(/[^a-z0-9& ]+/g, ' ').replace(/\s+/g, ' ').trim();
+      .replace(/\b(atar|general|year\s*\d+)\b/g, ' ').replace(/[^a-z0-9& ]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/^\d{1,2} /, '');
     const listed = new Set(Array.from(panel.querySelectorAll(cfg.items)).map(e => key(e.textContent)).filter(Boolean));
     if (!listed.size) return [];
     const expected = new Map();
