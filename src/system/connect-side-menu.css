@@ -1,0 +1,14 @@
+/**
+ * Connect's side menu (Profile, Preferences, ...) reaches the bottom of the screen on load, in every
+ * theme. It is absolute in a zero-height wrapper, so its height is only the inline min-height that
+ * Connect's setMenuHeight writes (window height minus the menu's top at that moment). That goes stale
+ * on load and is only worked out again once the page scrolls, so the menu stopped short of the bottom.
+ * The menu runs past the screen instead. Its bottom padding is at least as tall as the bars above it
+ * (95px header + 46px service bar), so a long list can still scroll fully into view.
+ */
+
+.eds.cvr .cvr-c-service-menu {
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+  padding-bottom: 150px !important;
+}

@@ -501,6 +501,12 @@ Extremely concise summary of the core visual design language, contrast standards
   - Scrollbar
     - the page's own scrollbar is never drawn (no grey track down the right edge over the canvas or wallpaper)
     - the page still scrolls by wheel, trackpad, keys and touch
+- **Connect's Side Menu** (`src/system/connect-side-menu.css`, every Connect page, theme and browser)
+  - Height
+    - reaches the bottom of the screen before any scroll (`min-height: 100vh`)
+    - Connect's own inline `min-height` goes stale on load, so the menu stopped short until a scroll
+  - Long lists
+    - `padding-bottom: 150px`, at least the bars above it, so the last item still scrolls into view
 - **Toggle Handle (`#connectify-sidebar-handle`)**
   - Look
     - Sleek 30px width handle (44px on touchscreens)

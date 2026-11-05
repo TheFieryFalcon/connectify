@@ -13942,6 +13942,18 @@ runTest('Test 302: The page scrollbar is invisible on every Connect page, in eve
   assert.ok(!/overflow/.test(css), 'the page keeps scrolling (overflow untouched)');
 });
 
+runTest('Test 325: Connect\'s side menu reaches the bottom of the screen before any scroll, and a long list still scrolls fully into view', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/connect-side-menu.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const group = manifest.content_scripts.find(c => (c.css || []).includes('src/system/connect-side-menu.css'));
+  assert.ok(group && group.matches.includes('https://connect.det.wa.edu.au/*'), 'loaded on every Connect page');
+  assert.ok(!/@(media|supports)/.test(css), 'in every browser and theme');
+  assert.ok(/\.eds\.cvr \.cvr-c-service-menu \{[^}]*min-height: 100vh !important/.test(css), 'beats the stale inline min-height Connect writes');
+  assert.ok(/box-sizing: border-box !important/.test(css), 'the padding stays inside the menu');
+  const padding = Number((css.match(/padding-bottom: (\d+)px !important/) || [])[1]);
+  assert.ok(padding >= 141, 'bottom padding covers the 95px header and 46px service bar, so the last item can scroll onto the screen');
+});
+
 runTest('Test 303: Notifications are one glass surface in Liquid Glass, blurred at least as much as the other layers over text', () => {
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-notifications-dark.css'), 'utf8');
   const glass = 'html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
