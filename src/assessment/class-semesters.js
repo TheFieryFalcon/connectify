@@ -129,43 +129,79 @@
   /** Subject names with an outline in the given semester. */
   const classesIn = semester => Object.keys(load()).filter(s => load()[s]?.[semester]);
 
-  // Semester 2 starts only once a class has a final A–E grade. Marks never count: a Semester 2 panel's
-  // cumulative percent and its Semester 1 task rows are marked from day one, and a Semester 2 task can
-  // be marked before Semester 1 grades are final. (A letter on a Semester 2 card means the year is over.)
-  // A page showing only some of this year's classes (a Connect filter, or tiles still rendering) can
-  // prove Semester 2 but not Semester 1: the filtered class may simply have no final letter, so the
-  // registry decides. Classes the registry has never seen (a new year) are a whole page.
+  const SEMESTER_KEY = 'connectify:current_semester';
+
+  function isNewYear() {
+    if (window.ConnectifyUtils?.isOutlinesPage?.() === false) return false;
+    const records = window.ConnectifyOutlineApi?.drawable?.() || [];
+    const cards = records.length ? records : (typeof document !== 'undefined' ? Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester) : []);
+    if (!cards.length) return false;
+    const known = Object.keys(load());
+    if (!known.length) return false;
+    const live = [...new Set(cards.map(card => cardInfo(card).subject).filter(Boolean))];
+    if (live.length && !live.some(s => known.includes(s))) {
+      return true;
+    }
+    return false;
+  }
+
+  function isSemesterTwoCutoff(date = new Date(Date.now())) {
+    const terms = window.ConnectifySchoolTerms;
+    const helpers = window.ConnectifyParseHelpers;
+    if (terms) {
+      const order = terms.orderOf(date);
+      const cutoff = helpers?.semesterTwoOrder ? helpers.semesterTwoOrder(date.getFullYear()) : (terms.weekOrder ? terms.weekOrder(helpers?.SEMESTER_TWO_WEEK ?? 17, date.getFullYear()) : 19);
+      if (Number.isFinite(order) && Number.isFinite(cutoff)) {
+        return order >= cutoff;
+      }
+      const sw = terms.schoolWeek ? terms.schoolWeek(order, date.getFullYear()) : null;
+      if (Number.isFinite(sw)) {
+        return sw >= (helpers?.SEMESTER_TWO_WEEK ?? 17);
+      }
+    }
+    return date.getMonth() >= 5;
+  }
+
   function evidenceFromPage() {
     if (!window.ConnectifyUtils.isOutlinesPage()) return null;
-    // Connect's API lists every class whatever the page's filter shows, so it always decides, from its
-    // first outlines (grades arrive with them, before any boxplot)
     const records = window.ConnectifyOutlineApi?.drawable?.() || [];
-    if (records.length) return records.some(r => cardSummary(r).finalLetter) ? 2 : 1;
+    if (records.length) return records.some(r => cardSummary(r).finalLetter || r?.semester === 2) ? 2 : 1;
     const cards = Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester);
     if (!cards.length) return null;
     if (cards.some(card => cardSummary(card).finalLetter)) return 2;
-    return isPartialPage(cards) ? null : 1;
-  }
-
-  function isPartialPage(cards) {
-    const known = Object.keys(load());
-    const live = new Set(cards.map(card => cardInfo(card).subject));
-    return [...live].every(s => known.includes(s)) && known.some(s => !live.has(s));
-  }
-
-  function evidenceFromRegistry() {
-    return Object.values(load()).some(e => e?.[1]?.finalLetter || e?.[2]?.finalLetter) ? 2 : 1;
+    return isNewYear() ? 1 : null;
   }
 
   let detected = null;
   let detectedAt = 0;
-  /** Current semester (1 or 2), re-read from the page at most once a second. */
-  function detectSemester() {
+
+  function setSemester(sem) {
+    const s = Number(sem) === 1 ? 1 : 2;
+    detected = s;
+    detectedAt = Date.now();
+    try { localStorage.setItem(SEMESTER_KEY, String(s)); } catch {}
+    return s;
+  }
+
+  /**
+   * Sets the current semester using existing semester cutoff times instead of searching for letter grades.
+   * If the current school week is in Semester 2, set the current semester to 2; if a new year is detected, set to 1.
+   */
+  function detectSemester(forDate = new Date(Date.now())) {
     const now = Date.now();
     if (detected && now - detectedAt < 1000) return detected;
-    detected = evidenceFromPage() || evidenceFromRegistry();
-    detectedAt = now;
-    return detected;
+
+    if (isNewYear()) {
+      return setSemester(1);
+    }
+
+    if (window.ConnectifySchoolTerms || window.ConnectifyParseHelpers) {
+      return setSemester(isSemesterTwoCutoff(forDate) ? 2 : 1);
+    }
+
+    const fromPage = evidenceFromPage();
+    if (fromPage !== null) return setSemester(fromPage);
+    return setSemester(isSemesterTwoCutoff(forDate) ? 2 : 1);
   }
 
   // Connect's first outlines decide at once (startup Expand All hides the other semester's tiles first)
@@ -179,7 +215,7 @@
   }
 
   window.ConnectifyClassSemesters = {
-    PREFIX, cardInfo, cardSummary, recordCards, recordTasks, classesIn, detectSemester, clear,
+    PREFIX, SEMESTER_KEY, cardInfo, cardSummary, recordCards, recordTasks, classesIn, detectSemester, setSemester, isSemesterTwoCutoff, clear,
     get: () => load()
   };
 })();

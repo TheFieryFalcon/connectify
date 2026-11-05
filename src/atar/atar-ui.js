@@ -56,8 +56,12 @@
     }
     const isGradeMode = () => markupMod.isGradeMode(mode);
 
-    const hasSemesterTwoStarted = () => markupMod.hasSemesterTwoStarted(gradeCourses);
-    const isTargetClosed = semesterIdx => markupMod.isTargetClosed(gradeCourses, semesterIdx);
+    const hasSemesterTwoStarted = () =>
+      window.ConnectifyClassSemesters?.detectSemester?.() === 2 ||
+      markupMod.hasSemesterTwoStarted(gradeCourses);
+    const isTargetClosed = semesterIdx =>
+      (semesterIdx === 0 && (window.ConnectifyClassSemesters?.detectSemester?.() === 2 || hasSemesterTwoStarted())) ||
+      markupMod.isTargetClosed(gradeCourses, semesterIdx);
 
     const semesterButtons = markupMod.semesterButtons(semesterCardsContainer, semesterIdx => {
       if (isTargetClosed(semesterIdx)) return;
