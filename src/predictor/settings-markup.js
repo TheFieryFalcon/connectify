@@ -21,8 +21,6 @@
         <label class="cx-settings-check">
           <input type="checkbox" id="cx-course-filter-toggle"> Ignore Certificate and General subjects
         </label>
-      </section>
-      <section class="cx-settings-section">
       		<div class="cx-settings-fields">
                 <div>
                   <label for="cx-general-cohort-input" class="cx-settings-label">Year Group Size</label>
