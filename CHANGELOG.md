@@ -6,63 +6,76 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ## Unreleased
 
+### Additions
+- **Next Up**: a new Year Progression tab listing this week's and next week's assessments, each with its subject, type, weight, Low, Mid and High (its mark once marked), and the mark and difficulty your goal asks of it. A week with nothing due shows a happy face and says No Tasks, or All Done! in the holidays and once your last task has passed.
+- **Task Dates**: a new Year Progression tab listing every task with its week, subject, type and mark. Changing a type there changes it on the outlines too. Tasks sharing a name show their semester, and only an unmarked task with no week is flagged in red.
+- **Group By and Sort By** on Task Dates: Group By None, Subject, Type, Completed, Predicted Grade or Grade Achieved, with an arrow for the direction, and Sort By Chronological, Alphabetical or Mark. Grades group as High Distinction (A) from 80%, Distinction (B) from 70%, Credit (C) from 60%, Pass (C) from 50% and Fail (D). Grouped by Predicted Grade, the last column shows each task's prediction.
+- **Task Dates filters**: Subjects and Type dropdowns tick each one on or off, for the list and for Export's downloads, and Show Uncompleted Only hides finished tasks.
+- **Next Up and Awaiting Results** in the tools menu: on Assessment Outlines, a card under the buttons lists up to three tasks due this week or next, and up to three whose week has passed with no mark yet.
+- **Content page downloads**: a Download button beside each heading's View saves everything under that heading without leaving the list, as one ZIP when there's more than one file.
+- **Download several sections**: Download at the top of the Content page lets you tick the headings you want, or Select All, and saves them as one ZIP with a folder per heading.
+- **Ignore Certificate and General subjects**: a new Settings option, on by default. A class with Certificate, Cert or General in its name loses its statistics and prediction panels, Type dropdowns and meters, is no option in any tool, no longer affects predictions for your other classes and sends no notifications. A goal on one waits until the option is off.
+- **Include Types** in the Weakness Analyzer: under the subjects, leave out an assessment type and the averages are worked out without it.
+- **Cohort line** in the Weakness Analyzer: the cohort's averages show as a dashed line beside yours.
+- **ATAR disclaimer**: Predict ATAR and Estimate ATAR note that they use school marks only, without WACE exams or moderation.
+- Outcome meters and goal bars can be reached with the keyboard, which shows their tooltip.
+
+### Removals
+- The Expand All Outlines and Refresh Assessments buttons and the note about expanding outlines: the tools already have your data, and only offer to expand outlines when they have nothing to show.
+- The Recalculate button: plans update as you type.
+- Descriptions of what each Settings option does. Only what you can't see otherwise stays, such as the current semester and which setting needs a reload.
+- The tools menu's "Select a tool below to view your analytics." line and the Settings heading above General Preferences.
+- The dots between stats, across statistics panels, tooltips, goals and the Predictor. Stats are split by spacing instead.
+
 ### Changes
-- **Weakness Analyzer filters by type.** Under the subjects, Include Types lets you leave an assessment type out, and the averages are worked out without it.
-- Settings no longer repeats its name above General Preferences, and the tools menu's buttons sit a little lower.
-- Students Doing ATAR in Settings is now ATAR Student Percentage.
-- **Next Up and Awaiting Results in the tools menu.** On Assessment Outlines, a card under the buttons lists up to three tasks due this week or next, and up to three whose week has passed with no mark yet.
-- The tools menu no longer opens with "Select a tool below to view your analytics."
-- **The tools no longer ask you to expand outlines.** They already have your data, so the Expand All Outlines and Refresh Assessments buttons and the note about expanding are gone. Recalculate is gone too, as plans update while you type.
-- **Weakness Analyzer compares like with like.** A type is now measured by how you do on it against each subject's own average, so a weak subject full of essays no longer makes essays look weak. The cohort shows as a dashed line beside you, and the plot no longer sits on a dark box.
-- **A new task type you can't mistake: Unknown.** A task Connectify can't identify is no longer guessed to be Take-Home. Its dropdown says Choose a type, its prediction uses only that subject's results, and the Weakness Analyzer leaves it out and says how many.
-- **The outcome meter waits for three results.** One or two results are too few to judge a mark by, so a subject's meters start from its fourth marked task, or straight away if you've set a baseline. Meters and goal bars also work from the keyboard now.
-- **Your subject follows you between tools.** Pick Physics in the Predictor and Year Progression, Goal Setter and Estimator open on Physics too.
-- **Jump To is one step.** Choose a subject from the list and you're there.
-- **Target Grade has one table.** Each task's mark, weight, effort, needed mark and difficulty are together, rather than the exam appearing twice.
-- **Target ATAR says what its numbers mean.** A subject shows its Final mark, and each task what it needs.
-- **Task Dates is calmer.** A marked task with no week no longer shows a red warning and an input, tasks with the same name show their semester, and the ✎ is easy to see and click.
-- **Plainer words everywhere.** Low, Mid and High are the only names for predictions, a task's result in the tools is a Mark, and Settings says Year Group Size, Students Doing ATAR and Semester 1 Scaled Marks.
-- Goals' Delete is a bin, so it can't be mistaken for closing the dialog.
-- Predict ATAR and Estimate ATAR now note that they use school marks only, without WACE exams or moderation.
-- **Settings is shorter and evenly spaced.** Descriptions of what each option does are gone, leaving only what you can't see otherwise, such as the current semester and which setting needs a reload, and every section now uses the same margins.
-- **Certificate and General courses are ignored by default.** Any class with Certificate, Cert or General in its name loses its statistics and prediction panels, Type dropdowns and meters, no longer appears as an option in Year Progression, the Predictor, Goal Setter, Estimator, Weakness Analyzer, Jump To or Settings, no longer affects predictions for your other classes, and no longer sends notifications. Turn off "Ignore Certificate and General courses" in Settings to bring them back straight away.
-- **Subject names read the same everywhere.** Year Progression, the Predictor, Goal Setter, Estimator, Weakness Analyzer, Jump To, notifications and your calendar and Notion exports now all say `Chemistry` rather than `12 Chemistry ATAR` or `Chemistry ATAR Year 11`. Your saved marks, goals and settings carry on as before.
-- **Basic Mode in the Theme Customizer speaks plainly.** Its six colours are now Page Background, Cards and Panels, Text, Buttons, Outlines, and Highlights and Links, with no colour codes to read. Hover over the preview to see which colours change that part. Full Mode keeps the codes and technical names.
-- **Download a whole section from the Content page.** Each heading now has a Download button beside View. It saves everything under that heading without leaving the list, as one ZIP when there's more than one file.
-- **Download several sections at once.** Press Download at the top of the Content page, tick the headings you want in the left margin (or Select All), and press Download again to save them as one ZIP with a folder per heading.
-- **Year Progression has three tabs.** Progress Graph has the charts and each task's weight and mark. Next Up has what's due soon. Task Dates has every task's date, the term dates and Export.
-- **See what's next with the new Next Up tab.** It lists your assessments this week and next week, with each one's subject, type, weight and predicted Low, Mid and High, its grade once it's marked, and the mark and difficulty your goal asks of it. A week with nothing due shows a happy face and says No Tasks, or All Done! in the holidays and once your last task has passed.
-- **Group and sort the task list your way.** Group By None, Subject, Type, Completed, Predicted Grade or Grade Achieved, with an arrow for ascending or descending; Sort By Chronological, Alphabetical or Grade Achieved; and Show Uncompleted Only. Grades group as High Distinction (A) from 80%, Distinction (B) from 70%, Credit (C) from 60%, Pass (C) from 50% and Fail (D).
-- **Export now happens on the list.** Press Export and the same list gains ticks, days and download buttons.
-- **Set as Goal now happens on the planner.** Choose the end beside Recalculate and confirm under your task table, with the effort sliders still working, instead of in a popup.
-- **Task Dates shows each task's subject, type and grade.** Change a task's type right there, and the outlines update with it. Export swaps those columns for Day and Export Date, leaving Assessment and Date where they are. Lines on Year Progression now all match.
-- **Show or hide subjects and types on Task Dates.** The new Subjects and Type dropdowns tick each one on or off, for the list and for Export's downloads.
-- **Group by Predicted Grade now shows the predictions.** The last column shows each task's predicted grade, and Sort By's Grade Achieved/Predicted Grade sorts by them.
-- **Finished goals say so in the notification's title.** It reads Goal Achieved with a green edge or Goal Missed with a gray edge, and goal names no longer start with the year level.
+- Year Progression now has three tabs: Progress Graph, Next Up and Task Dates. Progress Graph keeps the charts and each task's weight and mark, while dates, term starts, Early Easter and Export move to Task Dates.
+- Export is now a toggle on the Task Dates list, which gains ticks, days and download buttons, instead of a separate view.
+- Set as Goal now happens on the planner instead of in a popup: End sits beside your target, Confirm takes the button's place, and the effort sliders keep working.
+- Set as Goal reads Update Goal on a subject with a goal. Saving changes that goal and keeps the bars on the tasks it has judged, instead of asking to overwrite it and starting over.
+- Finished goals say so in the notification's title: Goal Achieved with a green edge or Goal Missed with a gray edge. Goal names no longer start with the year level.
+- The Weakness Analyzer now measures a type by how you do on it against each subject's own average, so a weak subject full of essays no longer makes essays look weak. The plot no longer sits on a dark box.
+- A task Connectify can't identify now reads Unknown instead of being guessed as Take-Home. Its dropdown says Choose a type, its prediction uses only that subject's results, and the Weakness Analyzer leaves it out and says how many.
+- The outcome meter now waits for three results, as one or two are too few to judge a mark by. A subject's meters start from its fourth marked task, or straight away with a baseline.
+- The subject you pick now carries over: choose Physics in the Predictor, and Year Progression, Goal Setter and Estimator open on Physics too.
+- Jump To is one step: choosing a subject from the list takes you there, with no second button.
+- Target Grade now has one table, with each task's mark, weight, effort, needed mark and difficulty together, rather than the exam appearing twice.
+- Target ATAR now shows a subject's Final mark apart from what each task needs.
+- Subject names now read the same everywhere: every tool, notification and your calendar and Notion exports say `Chemistry` rather than `12 Chemistry ATAR` or `Chemistry ATAR Year 11`. Your saved marks, goals and settings carry on as before.
+- Plainer words: Low, Mid and High are the only names for predictions, a task's result in the tools is a Mark, and Settings now says Year Group Size, ATAR Student Percentage and Semester 1 Scaled Marks.
+- Basic Mode in the Theme Customizer now names its six colours Page Background, Cards and Panels, Text, Buttons, Outlines, and Highlights and Links, with no colour codes. Hovering over the preview says which colours change that part. Full Mode keeps the codes and technical names.
+- Goals' Delete is now a bin, so it can't be mistaken for closing the dialog.
+- A task type you chose yourself is no longer bold.
+- The ✎ on a task's week is now easier to see and click.
+- The tools menu's buttons sit a little lower.
+- The circle around the icon on empty cards is now black in themes with dark text.
 
 ### Fixes
+- Jump To now lands on the subject you picked with Auto-expand on, instead of stopping thousands of pixels short in an earlier subject.
+- Auto-login no longer submits the sign-in page while you're entering your details. Clicking into the form, tabbing to it or picking a saved login now leaves it to you.
+- Task dates written as just a week number now land in the right week: `35/36` reads Term 4 Week 5-6 instead of Term 4 Week 1, and everything that orders tasks by date follows.
+- The outcome meter now counts only results that came before a task.
+- Statistics rows and expanded cards no longer run into the marks column on iPad.
+- With a custom end week, Set as Goal's headline now matches its difficulty, instead of saying "Requires 80%" beside Impossible.
+- Hovering a goal bar now shows only that bar's numbers, not both bars'.
+- Exams merged into one event on Export keep their ticks, so you can leave one out, and a tick no longer vanishes as you click a second exam.
+- Changing a task's week now starts from the week it already shows, instead of an empty box.
+- Pressing Escape while changing a task's week now cancels the change without closing the sidebar.
+- You can now see which tab is selected on the Predictor, Goal Setter, Estimator and Year Progression, in every theme.
+- The sidebar no longer pops in and out if your cursor is on the left edge while Auto-expand opens your outlines.
+- Moving your mouse out of the sidebar no longer closes it on pages other than Assessment Outlines.
+- Spacing is even across the sidebar and Settings, and every tool lines up with the header.
 - Auto-expand now reads as off in Settings on a fresh install, which is how it behaved.
 - Category names in Settings are now easy to read in the default theme.
 - The theme customizer's preview no longer shows a real teacher's name.
-- Auto-login no longer submits the sign-in page while you're entering your details. Clicking into the form, tabbing to it or picking a saved login yourself now leaves it to you, and it only signs in by itself if you haven't touched the form.
-- Jump To now lands on the subject you picked with Auto-expand on. It used to stop thousands of pixels short, somewhere in an earlier subject, because the outlines above it were still growing as the page scrolled past them.
-- Task dates written as just a week number now land in the right week. `35/36` means school weeks 35 and 36, so it now reads Term 4 Week 5-6 instead of Term 4 Week 1, and everything that orders tasks by date follows.
-- Connect's side menu (Profile, Preferences and so on) now reaches the bottom of the screen as soon as the page loads, instead of stopping short until you scroll. This was a bug in Connect itself.
-- Changing a goal's target or weighting now keeps it the same goal. The tasks it has already judged keep their bars, and it no longer asks to overwrite the goal or starts it over. Set as Goal reads Update Goal on a subject with a goal.
-- Section headings on the Content page no longer run off the right edge of the screen and make the page scroll sideways. They have even margins again.
-- Content page headings and the Published Sections bar now have a clean Liquid Glass look, without a second grey layer dulling them.
-- Exams merged into one event on Export now keep their ticks, so you can leave one out, and a tick no longer vanishes as you click a second exam.
-- You can now see which tab is selected on the Predictor, Goal Setter, Estimator and Year Progression, in every theme.
-- Pressing Escape while changing a task's week now cancels the change without closing the sidebar.
-- Changing a task's week now starts from the week it already shows, instead of an empty box.
-- Notifications now have the Liquid Glass effect in Liquid Glass themes.
-- With a custom end week, Set as Goal's headline now matches its difficulty: it no longer says "Requires 80%" beside Impossible, and shows the tasks up to that week.
-- A task type you chose yourself is no longer bold.
-- Spacing is even across the drawer: every tool now lines up with the header, and Task Dates' controls line up in two tidy rows.
-- The sidebar no longer pops in and out if your cursor is on the left edge while Auto-expand opens your outlines.
-- Moving your mouse out of the sidebar no longer closes it on pages other than Assessment Outlines. Click the handle or outside the sidebar instead.
+- Connect's side menu now reaches the bottom of the screen as soon as the page loads, instead of stopping short until you scroll. This was a bug in Connect itself.
+- Content page headings no longer run off the right edge of the screen and make the page scroll sideways.
+- Content page headings and the Published Sections bar no longer have a second grey layer in Liquid Glass.
+- Notifications now have the Liquid Glass effect in Liquid Glass themes, and so do Connect's own dialogs.
+- Sidebar cards no longer turn nearly opaque in Liquid Glass, and tables in dialogs and notices (such as Class Stats) no longer show a grey slab.
+- The avatar picker and Change Password no longer stack extra layers on their dialog in Liquid Glass.
+- Goal difficulty labels are now readable on light glass, and white text on primary buttons is now readable in AMOLED, Forest and Liquid Tinted Glass.
+- Overdue on Submissions no longer has a box around it, and its caption is red like its icon.
 - The Classes page's Favourite, Statistics and More buttons no longer have grey boxes in dark themes, and the lines between them are as faint as in standard Connect. Neither do the Submissions Due tabs, in Liquid Glass.
-- The circle around the icon on empty cards is now black in themes with dark text.
 
 ## 3.3.1 (2026-11-01)
 
