@@ -1,8 +1,8 @@
 /**
  * Connectify Cohort: no statistics on Certificate and General courses
  *
- * The Settings option (connectify:hide_course_stats, off by default) leaves every class with Certificate or General
- * in its name as Connect drew it: no statistics or prediction panels, Type dropdowns, meters or goal bars on its
+ * The Settings option (connectify:hide_course_stats, off by default) leaves every class with Certificate, Cert or
+ * General in its name as Connect drew it: no statistics or prediction panels, Type dropdowns, meters or goal bars on its
  * rows, and no restored overall row. Only the outline rows change; the sidebar tools still read these classes.
  * Exposes window.ConnectifyCourseFilter.
  */
@@ -10,7 +10,7 @@
   'use strict';
 
   const KEY = 'connectify:hide_course_stats';
-  const COURSE = /\b(?:certificate|general)\b/i;
+  const COURSE = /\b(?:certificate|cert|general)\b/i;
   const CARD = '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile';
   const TITLE = '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading';
   const OWN_UI = '.connectea-row-wrapper, .connectea-panel, .connectea-subject-average-row, .connectea-xp-fit-probe';

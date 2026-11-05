@@ -15498,10 +15498,10 @@ runTest('Test 329: Settings can leave Certificate and General courses without st
   eval(read('cohort/cohort-course-filter.js'));
   const filter = window.ConnectifyCourseFilter;
 
-  for (const name of ['12 Certificate II in Business', '11 General English', '12 MATHEMATICS ESSENTIAL GENERAL - Semester 1']) {
+  for (const name of ['12 Certificate II in Business', '12 Cert III Sport', '12 CERT II Hospitality', '11 General English', '12 MATHEMATICS ESSENTIAL GENERAL - Semester 1']) {
     assert.ok(filter.matches(name), `${name} is hidden with the option on`);
   }
-  for (const name of ['12 Literature ATAR', '11 Generalist Studies', '', undefined]) {
+  for (const name of ['12 Literature ATAR', '11 Generalist Studies', '12 Concert Band', '12 Certainty Studies', '', undefined]) {
     assert.ok(!filter.matches(name), `${name} keeps its statistics`);
   }
 

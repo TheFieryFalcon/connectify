@@ -23,7 +23,7 @@
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;margin-top:12px;">
           <input type="checkbox" id="cx-course-filter-toggle" style="width:16px;height:16px;cursor:pointer;"> Hide statistics on Certificate and General courses
         </label>
-        <p class="cx-settings-desc" style="margin:4px 0 0 24px;">Removes the statistics and prediction panels from outlines with Certificate or General in their name.</p>
+        <p class="cx-settings-desc" style="margin:4px 0 0 24px;">Removes the statistics and prediction panels from outlines with Certificate, Cert or General in their name.</p>
 
         <div class="cx-settings-divider" style="display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start;margin-top:14px;padding-top:12px;">
           <div>

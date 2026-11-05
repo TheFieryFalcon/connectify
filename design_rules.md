@@ -440,7 +440,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - the generic accent focus ring skips `.mat-input-element` (no second box inside the field)
 - **Hide Statistics on Certificate and General Courses** (`cohort-course-filter.js`, Settings checkbox, off by default)
   - Which courses
-    - a class with Certificate or General in its name (whole word, any case)
+    - a class with Certificate, Cert or General in its name (whole word, any case)
   - Effect
     - its rows stay as Connect drew them: no statistics or prediction panels, Type dropdowns, meters or goal bars, and no restored overall row
     - applies at once in both directions, never after a reload
