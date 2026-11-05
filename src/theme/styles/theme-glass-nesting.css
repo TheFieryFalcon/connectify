@@ -89,7 +89,7 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 }
 
 /* Outermost tables, paginator bars and the Classes summary on the wallpaper blur like every glass surface */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(table.mat-table:not(:is(.mat-card, .eds-c-tile, .cvr-c-tile, .v-panel, mat-accordion, .mat-accordion) *)):not(#cx-n),
+html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) :where(table.mat-table:not(:is(.mat-card, .eds-c-tile, .cvr-c-tile, .v-panel, mat-accordion, .mat-accordion, .mat-dialog-container, .v-window) *)):not(#cx-n),
 html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #ng-zone__classes-metrics-summary {
   backdrop-filter: var(--cx-gl-blur) !important;
   -webkit-backdrop-filter: var(--cx-gl-blur) !important;

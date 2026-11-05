@@ -241,6 +241,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - clear: the article wrapper around a home page tile, a promo inside a tile with no border or corners of its own
     - clear: a Classes row's Favourite, Statistics and More buttons, whose dividers take `--cx-border-subtle` to stay as faint as Connect's on white
     - clear: a page's own wrapper holding a toolbar (Submissions' `.mt-n4`), which is no bar
+    - clear: a table in a dialog (Class Stats), with no blur of its own
+    - clear: a table written into a notice or section (rich text, or no Connect table class), which is text on the page, its hairlines kept
     - hover and active states keep their highlight
     - Blocks inside a glass card stay clear with hairline dividers (`theme-glass-class-pages.css`)
     - Cards in the Connectify drawer are a 7% ink tint with a hairline in Liquid Glass (`theme-glass-nesting.css`), never a fill of their own

@@ -15235,6 +15235,27 @@ runTest('Test 323: Goal bars have a tooltip each; drawer cards are a tint in gla
   assert.ok(audit.includes('.connectea-outcome-bar, .cvr-c-task__marks\')'), 'the Summary Marks box keeps its own colour by the palette');
 });
 
+runTest('Test 324: A table in a dialog or written into a notice is clear, so no grey slab sits on the glass; data tables on the page keep their fill', () => {
+  const hook = 'html.connectea-dark[data-connectea-theme]';
+  const nesting = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-surface-nesting.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  const clearRule = sel => {
+    const at = nesting.indexOf(`${hook} ${sel}`);
+    assert.ok(at > -1, `${sel} has a clearing rule`);
+    return /^[^{]*\{\s*background-color: transparent !important;/.test(nesting.slice(at));
+  };
+  for (const sel of ['.mat-dialog-container :where(table):not(#cx-n)', '.v-window :where(table):not(#cx-n)',
+    ':where(table:not([class*="table"]):not(.cvr-c-tree-panel)):not(#cx-n):not(.cx-n)',
+    '.rtf-content :where(table):not(#cx-n)', '.rtf-content .table-responsive:not(#cx-n)']) {
+    assert.ok(clearRule(sel), `${sel} is clear`);
+  }
+
+  // No blur of its own in a dialog: the dialog already blurs the page. An outermost data table still blurs
+  const glass = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-nesting.css'), 'utf8');
+  const blur = glass.match(/:where\(table\.mat-table:not\(:is\(([^)]*)\) \*\)\):not\(#cx-n\)/);
+  assert.ok(blur, 'outermost tables on the wallpaper blur');
+  assert.ok(blur[1].includes('.mat-dialog-container') && blur[1].includes('.v-window'), 'tables in dialogs are not outermost');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
