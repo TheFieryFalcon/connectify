@@ -21,8 +21,7 @@
         <header class="cx-pred-header">
           <div class="cx-pred-header-row">
             <strong class="cx-pred-title">Predictor</strong>
-            <span class="cx-pred-subtitle">Momentum & Assessment Modeling</span>
-          </div>
+                      </div>
           <div class="cx-pred-main-tabs">
             <button type="button" id="cx-pred-btn-grade" class="cx-pred-main-tab ${activeMainTab === 'grade' ? 'active' : ''}">Predict Grade</button>
             <button type="button" id="cx-pred-btn-atar" class="cx-pred-main-tab ${activeMainTab === 'atar' ? 'active' : ''}">Predict ATAR</button>
@@ -35,9 +34,9 @@
     if (atarProj.error || !atarProj.mid?.courses) {
       container.innerHTML = `
         <div class="cx-pred-card" style="text-align:center; padding:28px 16px;">
-          <p class="cx-pred-hint" style="margin:0; font-size:12.5px; line-height:1.5;">${esc(atarProj.error || atarProj.mid?.error || 'At least four ATAR courses are required to project ATAR.')}</p>
+          <p class="cx-pred-hint" style="margin:0; font-size:12.5px; line-height:1.5;">${esc(atarProj.error || atarProj.mid?.error || 'At least four ATAR subjects are required to project ATAR.')}</p>
           <div style="font-size:11px; margin-top:6px; opacity:0.8;">
-            Ensure at least four Year 11/12 ATAR course outlines are expanded on Connect.
+            Ensure at least four Year 11/12 ATAR subject outlines are expanded on Connect.
           </div>
           <div style="margin-top:14px;">
             <button type="button" class="cx-pred-expand-outlines-btn">
@@ -51,27 +50,22 @@
 
     container.innerHTML = `
       <div class="cx-pred-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;">
-            Predicted Final ATAR
-          </div>
-          <button type="button" class="cx-pred-expand-outlines-btn cx-pred-expand-outlines-btn--compact">
-            Expand All Outlines
-          </button>
+        <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8; margin-bottom:10px;">
+          Predicted Final ATAR
         </div>
         <div style="display:grid; grid-template-columns:1fr 1.3fr 1fr; gap:8px; text-align:center; align-items:center;">
           <div class="cx-pred-scenario-card cx-pred-scenario-card--low" style="padding:10px 6px;">
-            <div class="cx-pred-scenario-label cx-pred-scenario-label--low">Low Scenario</div>
+            <div class="cx-pred-scenario-label cx-pred-scenario-label--low">Low</div>
             <div class="cx-pred-scenario-value cx-pred-scenario-value--low" style="font-size:19px; margin-top:3px;">${atarProj.low?.atar ?? '—'}</div>
             <div class="cx-pred-scenario-sub cx-pred-scenario-sub--low">TEA ${atarProj.low?.tea ?? 0}</div>
           </div>
           <div class="cx-pred-scenario-card cx-pred-scenario-card--mid" style="padding:12px 6px;">
-            <div class="cx-pred-scenario-label cx-pred-scenario-label--mid">Expected ATAR</div>
+            <div class="cx-pred-scenario-label cx-pred-scenario-label--mid">Mid</div>
             <div class="cx-pred-scenario-value cx-pred-scenario-value--mid cx-pred-scenario-value--atar">${atarProj.mid?.atar ?? '—'}</div>
             <div class="cx-pred-scenario-sub cx-pred-scenario-sub--mid">TEA ${atarProj.mid?.tea ?? 0}</div>
           </div>
           <div class="cx-pred-scenario-card cx-pred-scenario-card--high" style="padding:10px 6px;">
-            <div class="cx-pred-scenario-label cx-pred-scenario-label--high">High Scenario</div>
+            <div class="cx-pred-scenario-label cx-pred-scenario-label--high">High</div>
             <div class="cx-pred-scenario-value cx-pred-scenario-value--high" style="font-size:19px; margin-top:3px;">${atarProj.high?.atar ?? '—'}</div>
             <div class="cx-pred-scenario-sub cx-pred-scenario-sub--high">TEA ${atarProj.high?.tea ?? 0}</div>
           </div>
@@ -82,11 +76,11 @@
       </div>
 
       <div class="cx-pred-atar-table-section" style="margin-top:20px;">
-        <strong style="display:block; font-size:13px; font-weight:650; margin-bottom:8px;">Contributing ATAR Courses</strong>
+        <strong style="display:block; font-size:13px; font-weight:650; margin-bottom:8px;">Contributing Subjects</strong>
         <table class="cx-pred-courses-table">
           <thead>
             <tr>
-              <th style="padding:7px 4px;">Course</th>
+              <th style="padding:7px 4px;">Subject</th>
               <th style="padding:7px 4px; text-align:right;">Projected</th>
               <th style="padding:7px 4px; text-align:right;">Scaled</th>
               <th style="padding:7px 4px; text-align:center;">Status</th>
@@ -112,6 +106,7 @@
           </tbody>
         </table>
       </div>
+      <p class="cx-pred-hint cx-atar-disclaimer">${esc(window.ConnectifyAtarMarkup?.ATAR_DISCLAIMER || '')}</p>
     `;
   }
 

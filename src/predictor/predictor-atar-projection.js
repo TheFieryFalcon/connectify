@@ -26,7 +26,7 @@
 
     if (eligibleCourses.length < 4) {
       return {
-        error: 'At least four ATAR courses are required to project ATAR.',
+        error: 'At least four ATAR subjects are required to project ATAR.',
         eligibleCount: eligibleCourses.length
       };
     }

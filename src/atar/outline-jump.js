@@ -1,14 +1,12 @@
 /**
  * Connectify Outlines: Jump To subject
  *
- * A subject dropdown and a "Jump To" button (#cx-jump-subject) above the floating Expand All / Collapse All
- * buttons. The dropdown lists each shown outline's cleaned subject name once, in page order; Jump To expands
- * that subject's card, scrolls to its overall row (the subject average panel) and pulses it
- * (ConnectifyNewGrade.jumpToSubject).
+ * A "Jump To" dropdown (#cx-jump-subject) above the floating Expand All / Collapse All buttons. It lists each
+ * shown outline's cleaned subject name once, in page order; choosing one expands that subject's card, scrolls to
+ * its overall row (the subject average panel) and pulses it (ConnectifyNewGrade.jumpToSubject).
  * The dropdown is Connectify's own listbox, not a native <select>: the row sits at the bottom of the screen,
  * where macOS opens a native list downwards from the chosen name and cuts it off, so the list opens upwards
- * and shows every subject without scrolling. The closed box (108px) ends a long name in an ellipsis; the list
- * shows full names. Styles: outline-jump.css. Exposes window.ConnectifyOutlineJump.
+ * and shows every subject without scrolling. Styles: outline-jump.css. Exposes window.ConnectifyOutlineJump.
  */
 (() => {
   'use strict';
@@ -53,11 +51,9 @@
   });
   const options = list => Array.from(list?.children || []);
 
-  /** Shows a subject as chosen: the closed box's text and the list's selected option. */
+  /** Remembers the subject last jumped to: the list opens on it. */
   function choose(trigger, list, name) {
     trigger.dataset.value = name || '';
-    trigger.textContent = name || '';
-    trigger.title = name || '';
     for (const opt of options(list)) opt.setAttribute('aria-selected', String(opt.dataset.value === name));
   }
 
@@ -108,8 +104,6 @@
     choose(trigger, list, names.includes(chosen) ? chosen : names[0]);
     trigger.disabled = names.length === 0;
     if (!names.length) close();
-    const btn = document.getElementById('cx-jump-subject-btn');
-    if (btn) btn.disabled = names.length === 0;
   }
 
   function onListKey(e, trigger, list) {
@@ -125,7 +119,7 @@
     e.preventDefault();
   }
 
-  /** The dropdown (box and upward list) and Jump To button row. */
+  /** The dropdown: its box and the upward list. */
   function create() {
     const row = document.createElement('div');
     row.id = 'cx-jump-subject';
@@ -133,7 +127,7 @@
     trigger.type = 'button';
     trigger.id = 'cx-jump-subject-select';
     trigger.className = 'cx-jump-subject-select';
-    trigger.setAttribute('aria-label', 'Subject to jump to');
+    trigger.textContent = 'Jump To';
     trigger.setAttribute('aria-haspopup', 'listbox');
     trigger.setAttribute('aria-controls', 'cx-jump-subject-list');
     trigger.setAttribute('aria-expanded', 'false');
@@ -154,15 +148,10 @@
       if (!opt) return;
       choose(trigger, list, opt.dataset.value);
       close(true);
+      jump(opt.dataset.value);
     });
     list.addEventListener('keydown', e => onListKey(e, trigger, list));
-    const btn = document.createElement('button');
-    btn.id = 'cx-jump-subject-btn';
-    btn.type = 'button';
-    btn.className = 'eds-c-button cx-jump-subject-btn';
-    btn.textContent = 'Jump To';
-    btn.onclick = () => jump(trigger.dataset.value);
-    row.append(trigger, list, btn);
+    row.append(trigger, list);
     return row;
   }
 

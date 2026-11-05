@@ -1,0 +1,76 @@
+/**
+ * Connectify Sidebar: the Weakness Analyzer's radar plot and its note
+ */
+
+/* The plot has no fill of its own in any theme: it sits on the panel, inside an ink hairline */
+#connectify-radar-chart {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, #1d1c1c 22%, transparent);
+  border-radius: 8px;
+}
+
+#connectify-radar-chart .cx-radar-message {
+  color: #4a5d70;
+}
+
+#connectify-radar-chart .cx-radar-warning {
+  color: #6b4e16;
+  color: oklch(from #d4b483 0.30 c h);
+}
+
+#connectify-radar-chart text {
+  fill: #1d1c1c !important;
+  color: #1d1c1c !important;
+}
+
+/* Scores in the polygon's green, dark enough to read straight on the drawer */
+#connectify-radar-chart tspan {
+  fill: #0f5c2e !important;
+  fill: oklch(from #2ecc71 0.30 c h) !important;
+}
+
+#connectify-radar-chart .cx-radar-cohort-value {
+  fill: #4a5d70 !important;
+  font-weight: 400;
+}
+
+#connectify-radar-chart .cx-radar-cohort {
+  fill: none;
+  stroke: #4a5d70;
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+
+.connectea-dark #connectify-radar-chart {
+  border-color: var(--cx-border, #3a3a3a);
+}
+
+.connectea-dark #connectify-radar-chart .cx-radar-message {
+  color: var(--cx-text-muted, #a8a8a8);
+}
+
+.connectea-dark #connectify-radar-chart .cx-radar-warning {
+  color: #d4b483;
+}
+
+.connectea-dark #connectify-radar-chart text {
+  fill: var(--cx-text-secondary, #e1eaf3) !important;
+  color: var(--cx-text-secondary, #e1eaf3) !important;
+}
+
+.connectea-dark #connectify-radar-chart tspan {
+  fill: #2ecc71 !important;
+}
+
+.connectea-dark #connectify-radar-chart .cx-radar-cohort-value {
+  fill: var(--cx-text-muted, #a0b2c6) !important;
+}
+
+.connectea-dark #connectify-radar-chart .cx-radar-cohort {
+  stroke: var(--cx-text-muted, #a0b2c6);
+}
+
+.cx-radar-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+}

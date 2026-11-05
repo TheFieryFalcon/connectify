@@ -14,11 +14,11 @@
 
   /** A plan's headline. `scope` names the tasks it covers (a custom end week: only those up to that week). */
   function planSummary(plan, target, { difficulty = false, scope = 'remaining assessments' } = {}) {
-    if (plan.impossible) return `Goal unattainable. Maximum achievable mark: ${round(plan.maximum)}%.`;
+    if (plan.impossible) return `Goal unattainable. Highest possible mark: ${round(plan.maximum)}%.`;
     if (plan.finished) return `All weighted tasks completed. Final mark: ${round(plan.final)}%.`;
     if (plan.required === 0) return `Target secured with ${scope} at 0%.`;
-    if (difficulty) return `Requires performance-adjusted scores (averaging ${round(plan.required)}%) on ${scope} to achieve ${target}% overall.`;
-    if (plan.effort) return `Requires scores averaging ${round(plan.required)}% on ${scope} to achieve ${target}% overall.`;
+    if (difficulty) return `Requires marks averaging ${round(plan.required)}% on ${scope} to achieve ${target}% overall.`;
+    if (plan.effort) return `Requires marks averaging ${round(plan.required)}% on ${scope} to achieve ${target}% overall.`;
     return `Requires ${plan.required}% on ${scope} to achieve ${target}% overall.`;
   }
 
@@ -39,17 +39,13 @@
     gradeTargetInput.value = saved.gradeTarget ?? '80';
     gradeTargetLabel.append(gradeTargetInput);
 
-    const calculateGradeBtn = createEl('button', 'cta-reset', 'Recalculate');
-    calculateGradeBtn.type = 'button';
-    calculateGradeBtn.addEventListener('click', () => ctx.scanAndRefresh());
-
     const difficultyLabel = createEl('label', 'cta-difficulty-label');
     const difficultyCheckbox = createEl('input');
     difficultyCheckbox.type = 'checkbox';
     difficultyCheckbox.checked = Boolean(saved.gradeDifficultyWeighted);
     difficultyLabel.append(
       difficultyCheckbox,
-      document.createTextNode(' Dynamically adjust required grade based on prior performance')
+      document.createTextNode(' Adjust by how you do on each task type')
     );
 
     difficultyCheckbox.addEventListener('change', () => {
@@ -63,12 +59,13 @@
 
     const gradeControls = createEl('div', 'cta-form-controls');
     subjectLabel.classList.add('cta-subject-label');
-    gradeControls.append(subjectLabel, gradeTargetLabel, calculateGradeBtn, difficultyLabel);
+    gradeControls.append(subjectLabel, gradeTargetLabel, difficultyLabel);
     gradeContainer.append(gradeControls, gradeOutputContainer);
 
     const gradeSelectedSubjects = ['', ''];
     subjectSelect.addEventListener('change', () => {
       gradeSelectedSubjects[ctx.getActiveSemester()] = subjectSelect.value;
+      window.ConnectifySubjectChoice?.set(subjectSelect.selectedOptions[0]?.textContent);
       ctx.renderGradeOutput();
     });
 
@@ -82,7 +79,6 @@
       subjectSelect,
       gradeTargetInput,
       difficultyCheckbox,
-      calculateGradeBtn,
       gradeOutputContainer,
       gradeSelectedSubjects
     };
@@ -93,6 +89,13 @@
     const activeSemester = ctx.getActiveSemester();
     const gradeCourses = ctx.getGradeCourses();
     const available = gradeCourses[activeSemester] || [];
+    // A subject picked in another tool since the last draw
+    const choice = window.ConnectifySubjectChoice;
+    if (choice && viewRefs.choiceVersion !== choice.version()) {
+      viewRefs.choiceVersion = choice.version();
+      const chosen = choice.find(available, r => r.name);
+      if (chosen) gradeSelectedSubjects[activeSemester] = chosen.id;
+    }
     const wanted = gradeSelectedSubjects[activeSemester];
     const selected = available.find(r => r.id === wanted) || available[0];
 
@@ -147,7 +150,7 @@
 
       gradeOutputContainer.append(
         createEl('p', '', plan.error),
-        createEl('p', 'cta-note', 'Expand assessment details in Connect, then recalculate. Ensure full outline is visible.'),
+        createEl('p', 'cta-note', 'Expand assessment details in Connect. Ensure full outline is visible.'),
         expandBtn
       );
       return;
@@ -158,45 +161,19 @@
       createEl(
         'p',
         'cta-note',
-        `Outline total: ${round(progress.total)} annual-weight points. Completed: ${round(
-          progress.total - progress.rawRemaining
-        )}; remaining: ${round(progress.rawRemaining)} (${round(
-          progress.remaining
-        )}% of this semester). Current completed-task average: ${
+        `${round(progress.total - progress.rawRemaining)} of ${round(progress.total)} marked, ${round(progress.rawRemaining)} still to come, average so far ${
           progress.remaining < 100 ? `${round((progress.earned / (100 - progress.remaining)) * 100)}%` : 'not marked'
         }.`
       )
     );
 
-    const table = createEl('table', 'cta-grade-table');
-    const headerRow = createEl('tr');
-    ['Assessment', 'Score', 'Weight'].forEach(t => headerRow.append(createEl('th', '', t)));
-    table.append(headerRow);
-
-    for (const task of progress.allTasks || []) {
-      const tr = createEl('tr');
-      tr.append(
-        createEl('td', '', task.name),
-        createEl(
-          'td',
-          '',
-          task.pending ? 'Pending' : `${round(task.score ?? (task.weight ? (task.earned / task.weight) * 100 : 0))}%`
-        ),
-        createEl('td', '', `${round(task.weight)}%`)
-      );
-      table.append(tr);
-    }
-
     const assessmentDetails = createEl('section', 'cta-assessment-details');
-    assessmentDetails.append(
-      createEl('strong', 'cta-breakdown-title', `Assessment breakdown (${(progress.allTasks || []).length})`),
-      table
-    );
+    assessmentDetails.append(createEl('strong', 'cta-breakdown-title', `Assessments (${(progress.allTasks || []).length})`));
     gradeOutputContainer.append(assessmentDetails);
 
-    // Each remaining task: its effort slider, the mark it needs and its difficulty; then Set as Goal
+    // One table: every task's mark and weight, and each remaining task's effort slider, needed mark and difficulty
     const rerender = () => renderGradeOutput(viewRefs, ctx);
-    window.ConnectifyGoalSliders?.renderGradeTasks(assessmentDetails, { course: selected, plan, onChange: rerender });
+    window.ConnectifyGoalSliders?.renderGradeTasks(assessmentDetails, { course: selected, tasks: progress.allTasks || [], plan, onChange: rerender });
     window.ConnectifyGoalEditor?.afterGrade(gradeOutputContainer, { refs: viewRefs, ctx, course: selected, plan, held });
   }
 

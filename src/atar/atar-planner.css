@@ -92,9 +92,10 @@
   grid-column: 1;
 }
 
+/* One width, whatever else the grid holds: Set as Goal's End never widens it */
 #connectea-atar .cta-form-controls .cta-subject-select {
-  flex: 1;
-  width: 100%;
+  flex: 0 1 240px;
+  width: 240px;
   min-width: 0;
 }
 

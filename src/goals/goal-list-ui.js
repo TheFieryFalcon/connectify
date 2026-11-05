@@ -27,9 +27,12 @@
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
   };
 
-  /** Delete ✕ that asks first, inline. */
+  const BIN = '<svg class="cx-goal-bin" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"/></svg>';
+
+  /** A bin that asks first, inline. */
   function deleteButton(goal, rerender) {
-    const btn = M().el('button', 'cx-goal-card__delete', '✕');
+    const btn = M().el('button', 'cx-goal-card__delete');
+    btn.innerHTML = BIN;
     btn.type = 'button';
     btn.setAttribute('aria-label', `Delete ${goalTitle(goal)} goal`);
     btn.addEventListener('click', () => {

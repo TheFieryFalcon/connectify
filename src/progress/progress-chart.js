@@ -44,7 +44,7 @@
     const shownName = window.ConnectifyUtils.cleanSubjectName(subjectName) || subjectName;
     const math = window.ConnectifyProgressMath;
     const modeInfo = window.ConnectifyProgressModes?.find(mode);
-    const scoreLabel = modeInfo?.score || 'Your score';
+    const scoreLabel = modeInfo?.score || 'Your mark';
     const meanLabel = modeInfo?.mean || 'Cohort mean';
 
     container.replaceChildren();
@@ -65,7 +65,7 @@
     if (!isHistory) {
       legend = createElement('div', null, 'cx-legend');
       const redKey = createElement('span', modeInfo?.mean ? `Red: ${meanLabel}` : 'Red: Cohort Mean', 'cx-red-key');
-      const blueKey = createElement('span', modeInfo?.score ? `Blue: ${scoreLabel}` : 'Blue: Student Score', 'cx-blue-key');
+      const blueKey = createElement('span', modeInfo?.score ? `Blue: ${scoreLabel}` : 'Blue: Your Mark', 'cx-blue-key');
       legend.append(redKey, blueKey);
       container.append(legend);
     }
@@ -186,12 +186,6 @@
     svg.append(createSvgElement('text', { x: 350, y: 306, 'text-anchor': 'middle' }, isHistory ? (byAssessment ? 'Assessment round' : 'Month') : 'Assessment'));
 
     container.append(svg);
-
-    if (!isHistory && points.some(p => p.mean === null)) {
-      container.append(
-        createElement('p', 'Note: Discontinuities in the cohort trend indicate tasks without available cohort statistics.')
-      );
-    }
 
     // Detail table of plotted points
     const table = createElement('table');

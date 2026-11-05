@@ -130,7 +130,7 @@
 
     const refresh = () => {
       try {
-        if (autoExpand) autoExpand.checked = localStorage.getItem('connectify:auto_expand') !== 'false';
+        if (autoExpand) autoExpand.checked = localStorage.getItem('connectify:auto_expand') === 'true';
         refreshCohort();
         refreshAtarPct();
         if (themeSelect) renderThemeOptions(themeSelect);

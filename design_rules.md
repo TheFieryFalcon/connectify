@@ -40,6 +40,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - `#222b39`, border `#2e3c4e`
     - transparent over custom wallpapers or Liquid Glass
 - **Category Colors**
+  - Text
+    - a category name on a light surface keeps its hue and chroma at OKLCH lightness 0.34 (>= 5:1); the saved colour stays for bars and badges
   - Values, defined once in `src/cohort/category-store.js`
     - Exam (Red `#e74c3c`)
     - Test (Green `#2ecc71`)
@@ -62,6 +64,9 @@ Extremely concise summary of the core visual design language, contrast standards
     - never the theme ink
     - an id-weighted rule beats the generic icon rule
 - **Assessment Type Label**
+  - A task nothing identifies
+    - reads as `Unknown` (grey `#94a3b8`), never a guess at Take-Home; its dropdown says `Choose a type`
+    - its prediction takes the subject's results alone, and it is on no axis of the Weakness Analyzer, which counts such tasks in a note
   - Text
     - Always formatted as `"Type: "` with trailing colon and space
   - The dropdown sizes to the chosen type, never its longest option
@@ -79,7 +84,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - Export is a toggle on the Task Dates list
     - ticks, days and downloads on the same rows
     - Show Uncompleted Only forced on
-  - Set as Goal turns into Confirm and Cancel where its button was and adds End beside Recalculate
+  - Set as Goal turns into Confirm and Cancel where its button was and adds End beside the target
     - under no progress bar or points of its own (the planner already shows them)
     - its task table and sliders live (a custom end week narrows that table)
     - on a subject with a goal it is Update Goal and Save Changes: the same goal with its judged tasks, never deleted and set again
@@ -143,7 +148,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - Normal view: Assessment, Date, Subject, Type, Grade
     - Subject (cleaned: no year level or ATAR; no column when grouped by Subject)
     - Type (the outline rows' own dropdown and saved overrides, each change reaching the other)
-    - Grade (`85.5%`, `—` unmarked; no column under Show Uncompleted Only)
+    - Mark (`85.5%`, `—` unmarked; no column under Show Uncompleted Only)
     - grouped by Predicted Grade it is `Predicted`, the Predictor's Mid, Show Uncompleted Only or not
     - A manually chosen type is never bold, here or on the outlines
   - Export view: Assessment, Date, Day, Export Date
@@ -157,7 +162,9 @@ Extremely concise summary of the core visual design language, contrast standards
     - thin-outlined dropdowns (`.cx-dates-select`)
     - weeks as `Term 2 Wk 5` (in full on hover), a caption's range in one term as `Term 4 Wk 5-6`
     - a week caption with no term (`35/36`) is a school week of the year
-    - a faint ✎ right after the week, in one column, that the pointer never changes
+    - a ✎ right after the week, in one column: the row's ink, a 24px target, tinted on hover
+    - a marked task with no week reads a quiet `No week` with its ✎; only an unmarked one has the red `No week` and an open input
+    - a name a subject lists in both semesters reads with its semester (`Close reading (Semester 1)`), here and on Next Up
     - its week input opens on the week shown, read from the task until overridden, never blank
     - finished tasks in muted ink
     - term starts on one small line above the controls
@@ -165,7 +172,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - Every task, modular
     - `Group By:` None / Subject / Type / Completed / Predicted Grade (uncompleted only) / Grade Achieved (completed only)
     - a ↑ / ↓ arrow for the groups' direction (not None or Completed)
-    - `Sort By:` Chronological / Alphabetical / Grade Achieved/Predicted Grade inside each group
+    - `Sort By:` Chronological / Alphabetical / Mark inside each group
     - highest first: the predicted grade when grouped by Predicted Grade, else the grade achieved
     - `Show Uncompleted Only`, which greys out and falls back from what needs completed tasks (the saved choice returns with the option off)
     - A group without the value ("No prediction") stays last in either direction
@@ -183,6 +190,24 @@ Extremely concise summary of the core visual design language, contrast standards
     - it opens in the top layer (`popover`), because a blur nested in the drawer never reaches the drawer's own text
     - closes when the panel scrolls
     - what is unticked leaves the list and the Export downloads
+- **Words**
+  - One name each
+    - Low / Mid / High, never Middle, Expected or Scenario, and no captions under them
+    - a task's result in a tool is its Mark; Grade is a subject's overall result, a letter or a band; outline statistics panels keep Score
+    - Subject, never Course
+- **Estimated ATAR**
+  - Precision
+    - kept to two decimals
+  - Disclaimer
+    - at the bottom of Predict ATAR and Estimate ATAR: school marks only, WACE exams and moderation not included (`ATAR_DISCLAIMER`)
+- **Weakness Analyzer** (`weakness-model.js`, `sidebar-radar.css`)
+  - Measure
+    - by type: the overall average plus how each result of the type sits against its own subject's average, pooled, so a weak subject full of one type says nothing about the type
+    - by subject: plain weighted averages
+  - Cohort
+    - the cohort's means through the same sums, as a dashed line and a value under each label, with a You / Cohort legend
+  - Plot
+    - no fill of its own in any theme, inside an ink hairline
 - **Grade Bands**
   - Scheme
     - WA letter grades have no hard cutoffs
@@ -462,6 +487,13 @@ Extremely concise summary of the core visual design language, contrast standards
     - saving baselines keeps its saved baseline
   - Timing
     - applies at once in both directions, never after a reload
+- **No Buttons Around the Cache**
+  - The tools read the cache Connect's API fills
+    - so none offers Expand All Outlines, Refresh Assessments or Recalculate while it has data
+    - Expand Subject Outlines appears only when a tool found nothing to show
+- **Shared Subject** (`subject-choice.js`)
+  - The subject picked in the Predictor, Year Progression, Target Grade or Estimate Grade
+    - is the one the others open on, matched by cleaned name, for as long as the page is open
 - **Settings Dropdowns**
   - `.cx-settings-select` matches the number inputs
     - white, `#b9cbe1` 1px border, 4px radius
@@ -485,8 +517,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - edges the sidebar handle in the ink colour
     - draws the ring around an empty state's icon in black (`#000000`; other themes keep Connect's pale ring)
     - in Liquid Glass brightens the page behind a dialog (white 45%) instead of the dark glass themes' navy dim, so detail views such as View Notice keep their dark text readable
-  - The Weaknesses plot (dark `#333333` in every other theme, set in CSS, never inline)
-    - turns clear with an ink hairline
+  - The Weaknesses plot
     - its labels, ring percentages and messages take the ink
     - its scores and warning, like the Settings delete ✕ and "Cache cleared!" note, go to OKLCH 0.30 because they sit straight on the drawer glass (Test 186)
   - Goal tier labels
@@ -629,6 +660,9 @@ Extremely concise summary of the core visual design language, contrast standards
   - Saved
     - baselines, calibrations, course ids, goals, overrides, export days and calendar UIDs stay keyed as before, so saved ones and the new-year rollover carry on
     - so a tool shows the cleaned name and keeps its own key, never a second cleaner on screen
+- **Jump To** (`outline-jump.js`)
+  - One step
+    - a box reading `Jump To` opens the list upwards, as wide as the buttons under it; choosing a subject jumps, with no second button
 - **Workspace Navigation**
   - Dedicated `← Back to Menu` navigation header (`.cx-back-menu`)
     - positioned at the top right of the header
@@ -665,9 +699,10 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Suppression Rules**
   - Suppress outcome bars on incomplete or unmarked assessments
     - `Number.isFinite(mark)` check
-  - Suppress on a subject's first *marked* assessment unless a numeric subject baseline exists
-    - prior data means an earlier marked row in the card or, for a Semester 2 task, a marked Semester 1 result
-    - First tasks of a type render normally when prior subject data exists
+  - Suppress until a subject has three earlier marked results, unless a numeric subject baseline exists (`MIN_PRIOR_RESULTS`)
+    - a prediction from one or two results is too unsure to judge a mark by: a 100% then an 87% in the top fifth read red
+    - prior results are the earlier marked rows in the card or, for a Semester 2 task, its marked Semester 1 results
+    - First tasks of a type render normally once the subject has enough
   - A task's semester is its own week, not its card's
     - **Semester 2 starts at canonical school week 17** through the term calendar
     - Term 2 Week 7 (chronological week 19), or Term 2 Week 8 (week 20) under Early Easter (`ConnectifyParseHelpers.semesterTwoOrder` / `taskSemester`)
@@ -749,6 +784,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - its text in the task tier's hue, desaturated (OKLCH chroma 0.075, lightness 0.46 on light panels, 0.80 on dark)
     - never a tier label
 - **Interaction**
+  - Keyboard
+    - meters and goal bars take focus (`tabindex="0"`, `role="img"`, a label), which shows their tooltip beside them
   - Segments
     - Segments must have `pointer-events: none !important;` to eliminate hover boundary thrashing
   - Tooltip

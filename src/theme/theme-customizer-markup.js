@@ -110,7 +110,7 @@
                   <div class="cx-mock-progress-fill" data-cx-elem="Progress Fill" data-cx-fill="--cx-accent (accent)"></div>
                   <div class="cx-mock-accent-indicator" data-cx-elem="Accent Indicator" data-cx-fill="--cx-accent-hover (accentHover)"></div>
                 </div>
-                <div class="cx-mock-meta" data-cx-elem="Secondary Text" data-cx-text="${T.secondary}">Leon Harris, Willetton Senior High School</div>
+                <div class="cx-mock-meta" data-cx-elem="Secondary Text" data-cx-text="${T.secondary}">Sam Taylor, Example Senior High School</div>
                 <div class="cx-mock-muted" data-cx-elem="Muted Text" data-cx-text="--cx-text-muted (textMuted)">Due 14 Nov, Weighting 15%</div>
                 <div class="cx-mock-stats-panel" data-cx-elem="Statistics Panel" data-cx-fill="--cx-surface-secondary (surfaceSecondary), --cx-border-subtle (borderSubtle)" data-cx-text="${T.secondary}">
                   Min 30.2% &emsp; Q1 62.3% &emsp; <strong data-cx-elem="Highlighted Value" data-cx-text="${T.primary}">Med 70.8%</strong> &emsp; Q3 79.1% &emsp; <strong data-cx-elem="Highlighted Value" data-cx-text="${T.primary}">Max 92.7%</strong>

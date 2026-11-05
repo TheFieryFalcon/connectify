@@ -11,7 +11,7 @@
 
   if (window.ConnectifyTaskTypes) return;
 
-  const { defaultCategories, isCategoryName } = window.ConnectifyCategoryStore;
+  const { UNKNOWN_TYPE, UNKNOWN_COLOR, defaultCategories, isCategoryName } = window.ConnectifyCategoryStore;
   const { normalize } = window.ConnectifyUtils;
 
   function cleanSubject(subjectName) {
@@ -159,7 +159,7 @@
     if (/\b(?:essay|short answer)\b/i.test(labelsStr)) return 'Essay';
     if (/\b(?:investigation|practical|experiment|validation|portfolio)\b/i.test(labelsStr)) return 'Application';
 
-    return 'Take-Home';
+    return UNKNOWN_TYPE;
   }
 
   // Task ids are JSON.stringify([labels, maxScore]) + ':n', so tasks cached before labelsKey existed still carry their labels
@@ -203,6 +203,7 @@
     const cats = getCategories();
     if (cats?.[cat]?.color) return cats[cat].color;
     if (defaultCategories[cat]?.color) return defaultCategories[cat].color;
+    if (cat === UNKNOWN_TYPE) return UNKNOWN_COLOR;
     const palette = ['#1abc9c', '#e67e22', '#16a085', '#d35400', '#27ae60', '#8e44ad', '#2980b9', '#f39c12', '#9c27b0', '#009688'];
     let hash = 0;
     for (let i = 0; i < (cat || '').length; i++) hash = (hash << 5) - hash + cat.charCodeAt(i);
@@ -210,6 +211,7 @@
   }
 
   window.ConnectifyTaskTypes = {
+    UNKNOWN_TYPE,
     defaultCategories,
     getCategories,
     getOverrides: getTaskTypeOverrides,

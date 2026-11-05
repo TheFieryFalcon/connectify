@@ -16,7 +16,7 @@
     if (/test|quiz|in-class|in class/.test(lower)) return 'Test';
     if (/essay|short answer|written response|close reading/.test(lower)) return 'Essay';
     if (/application|investigation|portfolio|validation|practical|speaking|listening/.test(lower)) return 'Application';
-    return 'Take-Home';
+    return 'Unknown';
   }
 
   /** The task's type, honouring the student's override for this subject. */

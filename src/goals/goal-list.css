@@ -89,3 +89,14 @@
   flex: 1 1 auto;
   color: var(--cx-text-primary, #f8fafc);
 }
+
+.cx-goal-bin {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

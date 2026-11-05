@@ -65,7 +65,10 @@
   function openOnEnd(kind, goal, info) {
     const semIdx = P().semesterOf(goal) - 1;
     composing[kind] = { week: goal.end?.type === 'week' ? goal.end.week : null };
-    if (kind === 'grade') info.refs.gradeSelectedSubjects[semIdx] = goal.subject;
+    if (kind === 'grade') {
+      window.ConnectifySubjectChoice?.set(goal.name);
+      info.refs.gradeSelectedSubjects[semIdx] = goal.subject;
+    }
     if (info.ctx.getActiveSemester() !== semIdx) {
       semesterButton(semIdx)?.click();
       // A closed semester's button does nothing
@@ -130,7 +133,7 @@
         onCancel: () => stopEditing(kind, info, Boolean(edit))
       });
       container.append(compose.node);
-      formOf(container)?.querySelector('.cta-reset')?.after(compose.endRow);
+      formOf(container)?.querySelector('.cta-difficulty-label')?.before(compose.endRow);
       compose.focus();
       return;
     }
@@ -180,8 +183,8 @@
       if (headline) headline.textContent = state.plan?.error || `No assessments up to Week ${week}.`;
       return;
     }
-    const tasks = (state.tasks || []).filter(t => !P().isMarked(t));
-    if (parent) S().renderGradeTasks(parent, { course: { ...info.course, progress: { tasks } }, plan: state.plan, onChange: () => info.ctx.renderGradeOutput() });
+    const tasks = state.tasks || [];
+    if (parent) S().renderGradeTasks(parent, { course: { ...info.course, progress: { tasks: tasks.filter(t => !P().isMarked(t)) } }, tasks: tasks.map(t => ({ ...t, pending: !P().isMarked(t) })), plan: state.plan, onChange: () => info.ctx.renderGradeOutput() });
     if (headline) {
       headline.textContent = window.ConnectifyTargetGradeUI.planSummary(state.plan, info.refs.gradeTargetInput.value, {
         difficulty: draft.difficultyWeighted, scope: `remaining assessments up to Week ${week}`

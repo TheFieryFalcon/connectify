@@ -43,7 +43,7 @@
   const getOrComputeTaskPrediction = viaCache('getOrComputeTaskPrediction');
   const clearSubjectPredictionCache = viaCache('clearSubjectPredictionCache');
   const updatePredictionCache = viaCache('updatePredictionCache');
-  const PREDICTOR_ALGO_VERSION = cacheModule.PREDICTOR_ALGO_VERSION || 'v23_20261105_pred';
+  const PREDICTOR_ALGO_VERSION = cacheModule.PREDICTOR_ALGO_VERSION || 'v24_20261105_pred';
 
   const projectSubjectGrades = viaProjection('projectSubjectGrades');
   const projectATAR = viaProjection('projectATAR');
@@ -70,12 +70,12 @@
       : round(1.10 * high, 2);
 
     const legend = [
-      'Target Tiers & Color Guide:',
-      `Green: High Target (≥ ${high}%)`,
-      `Yellow: Mid Momentum Target (≥ ${mid}%)`,
-      `Orange: Low Boundary (≥ ${low}%)`,
+      'Colour Guide:',
+      `Green: High (≥ ${high}%)`,
+      `Yellow: Mid (≥ ${mid}%)`,
+      `Orange: Low (≥ ${low}%)`,
       `Red: Below Low (< ${low}%)`,
-      `Empty (Glowing Red): Critical Shortfall (≤ ${round(low - 10, 1)}%)`
+      `Empty, glowing red: far below Low (≤ ${round(low - 10, 1)}%)`
     ].join('\n');
 
     // 1. Breakout (> 1.10 * High multiplicative) - secret purple segment
@@ -86,7 +86,7 @@
         critical: false,
         colors: ['red', 'orange', 'yellow', 'green', 'purple'],
         label: `Breakout! Scored ${round(score, 1)}% (Exceptional Achievement)`,
-        details: `Actual Score: ${round(score, 1)}%\nOutcome: Breakout! Surpassed High prediction.\n\n${legend}`
+        details: `Your mark: ${round(score, 1)}%\nAbove your High prediction.\n\n${legend}`
       };
     }
 
@@ -98,7 +98,7 @@
         critical: false,
         colors: ['red', 'orange', 'yellow', 'green'],
         label: `High Target Met! Scored ${round(score, 1)}% (High: ${high}%)`,
-        details: `Actual Score: ${round(score, 1)}%\nOutcome: High Target Met (Green - 4 segments)\n\n${legend}`
+        details: `Your mark: ${round(score, 1)}%\nReached High (green, 4 segments)\n\n${legend}`
       };
     }
 
@@ -109,8 +109,8 @@
         broken: false,
         critical: false,
         colors: ['red', 'orange', 'yellow'],
-        label: `Mid Momentum Met! Scored ${round(score, 1)}% (Mid: ${mid}%)`,
-        details: `Actual Score: ${round(score, 1)}%\nOutcome: Mid Momentum Met (Yellow - 3 segments)\n\n${legend}`
+        label: `Reached Mid: scored ${round(score, 1)}% (Mid: ${mid}%)`,
+        details: `Your mark: ${round(score, 1)}%\nReached Mid (yellow, 3 segments)\n\n${legend}`
       };
     }
 
@@ -122,7 +122,7 @@
         critical: false,
         colors: ['red', 'orange'],
         label: `Low Target Met! Scored ${round(score, 1)}% (Low: ${low}%)`,
-        details: `Actual Score: ${round(score, 1)}%\nOutcome: Low Target Met (Orange - 2 segments)\n\n${legend}`
+        details: `Your mark: ${round(score, 1)}%\nReached Low (orange, 2 segments)\n\n${legend}`
       };
     }
 
@@ -134,7 +134,7 @@
         critical: true,
         colors: [],
         label: `Critical Shortfall! Scored ${round(score, 1)}% (≥10% below Low estimate ${low}%)`,
-        details: `Actual Score: ${round(score, 1)}%\nOutcome: Critical Shortfall (Empty Bar - Glowing Red)\nScore is ${round(low - score, 1)}% below Low estimate.\n\n${legend}`
+        details: `Your mark: ${round(score, 1)}%\nFar below Low (empty, glowing red)\nYour mark is ${round(low - score, 1)}% below Low estimate.\n\n${legend}`
       };
     }
 
@@ -145,7 +145,7 @@
       critical: false,
       colors: ['red'],
       label: `Below Low! Scored ${round(score, 1)}% (under Low estimate ${low}%)`,
-      details: `Actual Score: ${round(score, 1)}%\nOutcome: Below Low (Red - 1 segment)\n\n${legend}`
+      details: `Your mark: ${round(score, 1)}%\nBelow Low (red, 1 segment)\n\n${legend}`
     };
   }
 

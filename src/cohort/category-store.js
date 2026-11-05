@@ -17,6 +17,9 @@
     Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
     'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'presentation', 'oral', 'creative'] }
   };
+  // What a task reads as when nothing about it names a category: never a guess, until the student chooses
+  const UNKNOWN_TYPE = 'Unknown';
+  const UNKNOWN_COLOR = '#94a3b8';
   const copyDefaults = () => JSON.parse(JSON.stringify(defaultCategories));
 
   // Settings once saved every category under the key "undefined" (the save read a data-cat its rows never
@@ -128,5 +131,5 @@
   if (!window.cxCategories) window.cxCategories = copyDefaults();
   resolveCategories();
 
-  window.ConnectifyCategoryStore = { defaultCategories, copyDefaults, isCategoryName, MAX_NAME_LENGTH, promptName, sanitize, resolveCategories, saveCategories, resetCategories };
+  window.ConnectifyCategoryStore = { UNKNOWN_TYPE, UNKNOWN_COLOR, defaultCategories, copyDefaults, isCategoryName, MAX_NAME_LENGTH, promptName, sanitize, resolveCategories, saveCategories, resetCategories };
 })();

@@ -113,7 +113,7 @@
       `<div class="cvr-c-task__achievement v-layout v-widget"><div class="cvr-c-task__marks v-layout v-widget">${cells}</div>${summaryChart(record)}</div></div></div>`;
   }
 
-  // "Leon Harris from Willetton Senior High School"; names are links in Connect (legacy-outlines.js forwards clicks)
+  // "Sam Taylor from Example Senior High School"; names are links in Connect (legacy-outlines.js forwards clicks)
   function staffLine(record) {
     const link = (text, edge) => label(text, `eds-c-caption v-label-eds-c-caption eds-u-flush v-label-eds-u-flush eds-u-interactive v-label-eds-u-interactive cvr-c-data-nav-link v-label-cvr-c-data-nav-link eds-c-link--reversed v-label-eds-c-link--reversed ${edge}`);
     const parts = [];

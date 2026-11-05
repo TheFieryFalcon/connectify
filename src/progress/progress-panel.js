@@ -2,7 +2,7 @@
  * Connectify Progress Graph: panel markup
  *
  * Builds the Progress launcher (#connectify-progress-toggle) and panel (#connectify-progress):
- * header with title and Refresh Assessments button, subject chips and chart area. A panel or launcher
+ * header with title, subject chips and chart area. A panel or launcher
  * left by an earlier injection is adopted rather than duplicated. Exposes window.ConnectifyProgressPanel.
  */
 (() => {
@@ -17,7 +17,7 @@
     toggleBtn.setAttribute('aria-expanded', 'false');
 
     let panel = document.getElementById('connectify-progress');
-    let title, choicesContainer, chartContainer, scanBtn, head;
+    let title, choicesContainer, chartContainer, head;
     if (panel) {
       head = panel.querySelector('header');
       if (!head) {
@@ -27,11 +27,6 @@
       title = head.querySelector('strong') || createElement('strong', 'Year Progression');
       title.tabIndex = -1;
       if (!head.contains(title)) head.prepend(title);
-
-      scanBtn = Array.from(panel.querySelectorAll('button')).find(b => b.textContent.includes('Refresh Assessments')) || createElement('button', 'Refresh Assessments');
-      scanBtn.type = 'button';
-      scanBtn.className = 'cx-refresh-btn';
-      if (!head.contains(scanBtn)) head.append(scanBtn);
 
       choicesContainer = panel.querySelector('.cx-subjects') || createElement('div', null, 'cx-subjects');
       chartContainer = panel.querySelector('.cx-progress-chart') || panel.querySelector('div:not(.cx-subjects)') || createElement('div');
@@ -48,11 +43,7 @@
       title = createElement('strong', 'Year Progression');
       title.tabIndex = -1;
 
-      scanBtn = createElement('button', 'Refresh Assessments');
-      scanBtn.type = 'button';
-      scanBtn.className = 'cx-refresh-btn';
-
-      head.append(title, scanBtn);
+      head.append(title);
 
       choicesContainer = createElement('div', null, 'cx-subjects');
       chartContainer = createElement('div', null, 'cx-progress-chart');
@@ -61,7 +52,7 @@
       document.body.append(toggleBtn, panel);
     }
 
-    return { toggleBtn, panel, title, scanBtn, choicesContainer, chartContainer };
+    return { toggleBtn, panel, title, choicesContainer, chartContainer };
   }
 
   window.ConnectifyProgressPanel = { build };

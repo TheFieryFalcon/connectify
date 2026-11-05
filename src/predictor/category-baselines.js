@@ -25,7 +25,11 @@
     const label = make('label', 'cx-settings-label', shown);
     label.title = shown;
     Object.assign(label.style, { fontSize: '11.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' });
-    if (color) label.style.color = color;
+    if (color) {
+      label.style.color = color;
+      label.style.setProperty('--cx-cat-color', color);
+      label.classList.add('cx-cat-text');
+    }
     const input = Object.assign(make('input', `${inputClass} cx-settings-number-input`), { type: 'number', min: '0', max: '100', step: '0.5', placeholder });
     input.dataset[dataKey] = name;
     Object.assign(input.style, { boxSizing: 'border-box', width: '100%', padding: '4px 6px', borderRadius: '4px', fontSize: '12px' });

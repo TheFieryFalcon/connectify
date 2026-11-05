@@ -61,7 +61,7 @@
     let workspace = sidebar.querySelector('.cx-workspace') || Object.assign(createElement('div'), { className: 'cx-workspace' });
 
     let introText = sidebar.querySelector('.cx-tools-intro') || Object.assign(
-      createElement('p', 'Select a tool below to view your analytics. Ensure subject outlines are expanded in Connect to load assessment data.'),
+      createElement('p', 'Select a tool below to view your analytics.'),
       { className: 'cx-tools-intro' }
     );
 

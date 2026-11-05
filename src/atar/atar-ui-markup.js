@@ -3,8 +3,7 @@
  *
  * Builds the calculator panel (#connectea-atar): the Goals and Estimates launchers the sidebar
  * mounts, the mode tabs (Target Grade / Target ATAR, Estimate Grade / Estimate ATAR), the semester
- * buttons, course list, summary, reset and Expand All Outlines buttons, and the
- * methodology notes; plus the semester labels and closing rules. Behaviour lives in atar-ui.js.
+ * buttons, course list, summary, reset button, the methodology notes and the disclaimer; plus the semester labels and closing rules. Behaviour lives in atar-ui.js.
  * Exposes window.ConnectifyAtarMarkup.
  */
 (() => {
@@ -13,9 +12,12 @@
   const { createEl } = window.ConnectifyTargetUiHelpers;
 
   const METHOD_NOTES = [
-    'Scores round to whole numbers before the best four and bonuses are calculated; exact .5 values round down (69.9 → 70; 69.5 → 69). Each school mark (entered or from Connect) is scaled with TISC Average Marks Scaling; best four included scaled scores, plus 10% of Methods, 10% of Specialist and 10% of the best language score. General and other non-ATAR courses are excluded. Estimates interpolate the published 2025 TISC table. Below the table range, <30 is shown.',
-    'Semester 2 uses the cumulative percentage shown by Connect. This does not check WACE eligibility, English competency or unacceptable course combinations. Exclude an incompatible course before calculating. No marks are sent to another website.'
+    'Scores round to whole numbers before the best four and bonuses are calculated; exact .5 values round down (69.9 → 70; 69.5 → 69). Each school mark (entered or from Connect) is scaled with TISC Average Marks Scaling; best four included scaled scores, plus 10% of Methods, 10% of Specialist and 10% of the best language score. General and other non-ATAR subjects are excluded. Estimates interpolate the published 2025 TISC table. Below the table range, <30 is shown.',
+    'Semester 2 uses the cumulative percentage shown by Connect. This does not check WACE eligibility, English competency or unacceptable course combinations. Exclude an incompatible subject before calculating. No marks are sent to another website.'
   ];
+
+  // Under every estimated ATAR: what the screen cannot show
+  const ATAR_DISCLAIMER = 'Based on your school marks only. WACE exams and moderation are not included, so your final ATAR may differ.';
 
   // Each launcher opens one group of modes; the tabs under the heading switch between its modes
   const GROUPS = {
@@ -82,9 +84,7 @@
 
     const resetBtn = createEl('button', 'cta-reset', 'Reset to School Marks');
     resetBtn.type = 'button';
-    const expandAllBtn = createEl('button', 'cta-reset cta-expand-outlines', 'Expand All Outlines');
-    expandAllBtn.type = 'button';
-    expandAllBtn.style.marginLeft = '8px';
+    const disclaimer = createEl('p', 'cta-note cx-atar-disclaimer', ATAR_DISCLAIMER);
 
     const calculationDetails = createEl('details', 'cta-method');
     calculationDetails.append(createEl('summary', '', 'Calculation Methodology & Sources'));
@@ -95,7 +95,7 @@
     const semesterCardsContainer = createEl('div', 'cta-semesters');
     const courseListContainer = createEl('div', 'cta-courses');
 
-    calculatorPanel.append(headingContainer, modeTabs.bar, semesterCardsContainer, courseListContainer, detailSummary, resetBtn, expandAllBtn, calculationDetails);
+    calculatorPanel.append(headingContainer, modeTabs.bar, semesterCardsContainer, courseListContainer, detailSummary, resetBtn, calculationDetails, disclaimer);
     return {
       calculatorPanel,
       panelTitle,
@@ -106,8 +106,8 @@
       courseListContainer,
       detailSummary,
       resetBtn,
-      expandAllBtn,
-      calculationDetails
+      calculationDetails,
+      disclaimer
     };
   }
 
@@ -156,5 +156,5 @@
     });
   }
 
-  window.ConnectifyAtarMarkup = { GROUPS, MODES, groupOf, isGradeMode, paintModeTabs, build, semesterLabel, paintSemesterButton, semesterButtons, hasSemesterTwoStarted, isTargetClosed };
+  window.ConnectifyAtarMarkup = { ATAR_DISCLAIMER, GROUPS, MODES, groupOf, isGradeMode, paintModeTabs, build, semesterLabel, paintSemesterButton, semesterButtons, hasSemesterTwoStarted, isTargetClosed };
 })();

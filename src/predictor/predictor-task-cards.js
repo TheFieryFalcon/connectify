@@ -2,7 +2,7 @@
  * Connectify Predictor: upcoming task cards
  *
  * The "Upcoming Assessments" list for a subject: one card per weighted task with its category badge
- * and low / middle / high predictions, or the cold-start notice when it cannot be predicted yet.
+ * and low / mid / high predictions, or the cold-start notice when it cannot be predicted yet.
  * Exposes window.ConnectifyPredictorTaskCards.
  */
 (() => {
@@ -40,7 +40,7 @@
     doneNote.style.textAlign = 'center';
     doneNote.style.padding = '18px';
     doneNote.style.fontSize = '12px';
-    doneNote.textContent = 'All scheduled assessments for this subject have been graded!';
+    doneNote.textContent = 'All scheduled assessments for this subject have been marked.';
     upcomingContainer.append(doneNote);
   } else {
     validUpcoming.forEach(({ task, prediction }) => {
@@ -52,7 +52,7 @@
       const typeColor = window.ConnectifyTaskTypes?.getCategoryColor
         ? window.ConnectifyTaskTypes.getCategoryColor(taskType)
         : '#3498db';
-      const isLightType = typeColor.toLowerCase() === '#f1c40f' || typeColor.toLowerCase() === '#f39c12' || typeColor.toLowerCase() === '#2ecc71';
+      const isLightType = ['#f1c40f', '#f39c12', '#2ecc71', '#94a3b8'].includes(typeColor.toLowerCase());
       const typeTextColor = isLightType ? '#111827' : '#ffffff';
 
       const taskHeader = document.createElement('div');
@@ -97,7 +97,7 @@
             <strong style="font-size:13.5px;">${pred.low ?? '—'}%</strong>
           </div>
           <div class="cx-pred-pill cx-pred-pill--mid">
-            <span style="font-size:9.5px; font-weight:700; display:block; text-transform:uppercase;">Middle</span>
+            <span style="font-size:9.5px; font-weight:700; display:block; text-transform:uppercase;">Mid</span>
             <strong style="font-size:14px;">${pred.mid ?? '—'}%</strong>
           </div>
           <div class="cx-pred-pill cx-pred-pill--high">

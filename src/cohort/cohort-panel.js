@@ -17,7 +17,7 @@
     /** The cohort size notice: the estimate, the small-cohort warning and whether the override was saved. */
     function noticeText(estimatedSize, size, status = 'Saved.') {
       const warning = estimatedSize < 50 ? SMALL_COHORT : '';
-      if (size === undefined) return warning ? warning.trim() : 'Enter custom size to override.';
+      if (size === undefined) return warning.trim();
       return estimatedSize === undefined ? status : `Original Estimate ~${estimatedSize}${warning}\u2003${status}`;
     }
 

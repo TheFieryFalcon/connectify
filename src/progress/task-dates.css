@@ -144,11 +144,22 @@
 #cx-task-dates .cx-time-cell { display: flex; align-items: center; gap: 6px; }
 #cx-task-dates .cx-time-cell > span { min-width: 6.8em; }
 #cx-task-dates .cx-dates-empty { margin: 0; padding: 4px 8px; color: #4a5d70; font-weight: 400; }
-/* The pencil stays faint, the pointer never changes it; a saved override keeps its full ink */
-#connectify-progress #cx-task-dates .cx-time-edit-btn,
-#connectify-progress #cx-task-dates .cx-time-edit-btn:hover { background: none; color: inherit; }
-#connectify-progress #cx-task-dates .cx-time-edit-btn--unconfigured { opacity: 0.35; }
-#connectify-progress #cx-task-dates .cx-time-edit-btn--unconfigured:focus-visible { opacity: 1; }
+/* The pencil: the row's ink and a 24px target */
+#connectify-progress #cx-task-dates .cx-time-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+#connectify-progress #cx-task-dates .cx-time-edit-btn:hover { background: color-mix(in srgb, currentColor 12%, transparent); color: inherit; }
 
 .connectea-dark #cx-task-dates .cx-dates-controls,
 .connectea-dark #cx-task-dates .cx-dates-filters,
@@ -165,8 +176,8 @@
 .connectea-dark #cx-task-dates .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid var(--cx-progress-line, #3b4d5e); background: transparent; color: var(--cx-text-primary, #ffffff); }
 .connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction:hover { border-color: var(--cx-border-strong, #556c84); background: transparent; color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn,
-.connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn:hover { background: none; color: inherit; }
+.connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn { background: none; color: inherit; }
+.connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn:hover { background: color-mix(in srgb, currentColor 12%, transparent); color: inherit; }
 
 /* A narrow window: the rows wrap instead of holding their columns */
 @media (max-width: 840px) {

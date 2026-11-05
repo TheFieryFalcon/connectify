@@ -207,14 +207,3 @@
   font-weight: 600;
 }
 
-#connectify-sidebar .cx-weakness-expand-btn, .cx-weakness-expand-btn {
-  background: #edf4fa !important;
-  border: 1px solid #c8d9e8 !important;
-  color: #24618c !important;
-  font-size: 11px !important;
-  padding: 4px 8px !important;
-  border-radius: 4px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  transition: background-color .15s,border-color .15s;
-}

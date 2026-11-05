@@ -135,7 +135,7 @@
     function taskRow(row, columns, exportCtx, track) {
       const tr = createElement('tr', null, row.completed ? 'cx-dates-row cx-dates-row--done' : 'cx-dates-row');
       const cells = exportCtx ? exportRows.taskCells(row, exportCtx) : null;
-      tr.append(createElement('td', cells ? cells.name : row.name));
+      tr.append(createElement('td', cells ? cells.name : row.label));
       tr.append(createElement('td', window.ConnectifyProgressWeekEditor.weekCell(row.task, row.siblings, row.subjectName, onWeekSaved), 'cx-dates-when'));
       if (cells) {
         tr.append(createElement('td', cells.day), createElement('td', cells.date));
@@ -151,11 +151,11 @@
       // A subject heading already names the subject; Show Uncompleted Only lists no grades, only predicted ones
       const predicted = dates.showsPredicted(view.groupBy);
       const columns = { subject: view.groupBy !== 'subject', grade: predicted || !view.uncompletedOnly, predicted };
-      const rightHalf = exportCtx ? ['Day', 'Export Date'] : [...(columns.subject ? ['Subject'] : []), 'Type', ...(columns.grade ? [predicted ? 'Predicted' : 'Grade'] : [])];
+      const rightHalf = exportCtx ? ['Day', 'Export Date'] : [...(columns.subject ? ['Subject'] : []), 'Type', ...(columns.grade ? [predicted ? 'Predicted' : 'Mark'] : [])];
       const headers = ['Assessment', 'Date', ...rightHalf];
       const el = createElement('table', null, 'cx-dates-table');
       const head = createElement('tr', null, 'cx-dates-head');
-      const columnClass = { Assessment: 'cx-dates-col-name', Date: 'cx-dates-col-when', Grade: 'cx-dates-col-grade', Predicted: 'cx-dates-col-grade' };
+      const columnClass = { Assessment: 'cx-dates-col-name', Date: 'cx-dates-col-when', Mark: 'cx-dates-col-grade', Predicted: 'cx-dates-col-grade' };
       headers.forEach(h => head.append(createElement('th', h, columnClass[h] || null)));
       el.append(head);
       for (const item of groups) {

@@ -25,16 +25,13 @@
     targetInput.value = saved.target ?? '98';
     targetLabel.append(targetInput);
 
-    const calculateTargetBtn = createEl('button', 'cta-reset', 'Recalculate');
-    calculateTargetBtn.type = 'button';
-
     const difficultyLabel = createEl('label', 'cta-difficulty-label');
     const difficultyCheckbox = createEl('input');
     difficultyCheckbox.type = 'checkbox';
     difficultyCheckbox.checked = Boolean(saved.targetDifficultyWeighted);
     difficultyLabel.append(
       difficultyCheckbox,
-      document.createTextNode(' Adjust marks by subject & task type performance')
+      document.createTextNode(' Adjust by how you do in each subject and task type')
     );
 
     difficultyCheckbox.addEventListener('change', () => {
@@ -48,7 +45,7 @@
     targetOutputContainer.setAttribute('aria-live', 'polite');
 
     const targetControls = createEl('div', 'cta-form-controls');
-    targetControls.append(targetLabel, calculateTargetBtn, difficultyLabel);
+    targetControls.append(targetLabel, difficultyLabel);
     plannerContainer.append(targetControls, topFourContainer, targetOutputContainer);
 
     targetInput.addEventListener('input', () => {
@@ -56,13 +53,10 @@
       ctx.renderTargetOutput();
     });
 
-    calculateTargetBtn.addEventListener('click', () => ctx.scanAndRefresh(false));
-
     return {
       container: plannerContainer,
       targetInput,
       difficultyCheckbox,
-      calculateTargetBtn,
       topFourContainer,
       targetOutputContainer
     };
@@ -70,10 +64,10 @@
 
   function renderTargetOutput(viewRefs, ctx) {
     window.ConnectifyGoalEditor?.clearEnd(viewRefs.targetOutputContainer);
-    const { targetInput, difficultyCheckbox, calculateTargetBtn, topFourContainer, targetOutputContainer } = viewRefs;
+    const { targetInput, difficultyCheckbox, topFourContainer, targetOutputContainer } = viewRefs;
     const activeSemester = ctx.getActiveSemester();
     const isClosed = ctx.isTargetClosed(activeSemester);
-    targetInput.disabled = calculateTargetBtn.disabled = isClosed;
+    targetInput.disabled = isClosed;
 
     if (isClosed) {
       topFourContainer.replaceChildren();
@@ -106,11 +100,11 @@
       topHeader.style.alignItems = 'center';
       topHeader.style.marginBottom = '6px';
 
-      const topTitle = createEl('strong', '', 'Targeted Subjects for Top Four:');
+      const topTitle = createEl('strong', '', 'Subjects That Can Count:');
       topTitle.style.fontSize = '12px';
 
       const selectedCount = eligibleCourses.filter(c => !excludedSubjects.has(c.id || c.name)).length;
-      const countSpan = createEl('span', 'cta-count-span', `${selectedCount} of ${eligibleCourses.length} selected`);
+      const countSpan = createEl('span', 'cta-count-span', `${selectedCount} of ${eligibleCourses.length} ticked, your best 4 count`);
 
       topHeader.append(topTitle, countSpan);
       topFourContainer.append(topHeader);
@@ -167,7 +161,7 @@
         createEl(
           'p',
           'cta-note',
-          'Please select at least 4 subjects above to target for your top four.'
+          'Tick at least 4 subjects.'
         )
       );
       return;
@@ -195,7 +189,7 @@
     } catch (err) {
       console.warn('Target ATAR plan calculation error:', err);
       targetOutputContainer.replaceChildren(
-        createEl('p', 'cta-note', 'Error calculating Target ATAR plan. Please expand all outlines and retry.')
+        createEl('p', 'cta-note', 'Error calculating Target ATAR plan. Please expand all outlines.')
       );
       return;
     }
@@ -210,7 +204,7 @@
         createEl(
           'p',
           'cta-note',
-          'Expand assessment details in Connect, then recalculate. Missing task weights cannot be omitted.'
+          'Expand assessment details in Connect. Missing task weights cannot be omitted.'
         ),
         expandBtn
       );

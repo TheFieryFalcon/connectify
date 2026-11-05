@@ -232,17 +232,3 @@
   cursor: pointer;
 }
 
-.cx-pred-expand-outlines-btn--compact {
-  background: transparent;
-  border: 1px solid #2563eb;
-  color: #1d4ed8;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-}
-
-/* Text colour, not accent: an accent such as Forest's green or Dark's blue falls under 5:1 on the card */
-.connectea-dark .cx-pred-expand-outlines-btn--compact {
-  border-color: var(--cx-accent, #3b82f6);
-  color: var(--cx-text-primary, #e1eaf3);
-}

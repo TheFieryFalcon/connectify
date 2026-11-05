@@ -63,7 +63,7 @@
     function taskRow(row, showGoal, track) {
       const tr = createElement('tr', null, row.completed ? 'cx-dates-row cx-dates-row--done' : 'cx-dates-row');
       tr.append(
-        createElement('td', row.name),
+        createElement('td', row.label),
         createElement('td', taskCells.subjectText(row), 'cx-dates-subject-cell'),
         createElement('td', taskCells.typeSelect(row, track)),
         createElement('td', row.weight === null ? '—' : `${Math.round(row.weight * 10) / 10}%`, 'cx-next-weight'),

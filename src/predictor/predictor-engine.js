@@ -142,8 +142,10 @@
 
     // 2. The type: how the student does on it across all subjects, each result against its own subject's
     //    average (else the type average against the overall one, or last year's type average), at half strength
-    const shifted = typeShift(historical, taskType);
-    const typeCount = shifted ? shifted.count : (historical?.typeCounts?.[taskType] || 0);
+    // A task with no type yet takes the subject's results alone
+    const typed = taskType !== window.ConnectifyCategoryStore?.UNKNOWN_TYPE;
+    const shifted = typed ? typeShift(historical, taskType) : null;
+    const typeCount = shifted ? shifted.count : (typed && historical?.typeCounts?.[taskType]) || 0;
     const overall = Number.isFinite(historical?.overallAverage) ? historical.overallAverage : subject.mean;
     const typeBaseline = Number(baselines?.types?.[taskType]);
     let typeSource = 'subject';

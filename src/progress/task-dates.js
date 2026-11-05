@@ -50,7 +50,7 @@
   const SORTS = [
     { id: 'chronological', label: 'Chronological' },
     { id: 'alphabetical', label: 'Alphabetical' },
-    { id: 'grade', label: 'Grade Achieved/Predicted Grade', needsCompleted: true }
+    { id: 'grade', label: 'Mark', needsCompleted: true }
   ];
   const pick = (list, id) => list.find(item => item.id === id) || list[0];
 
@@ -148,7 +148,18 @@
         });
       }
     }
-    return out;
+    return labelled(out);
+  }
+
+  // A name a subject lists in both semesters (each exam's "Close reading") reads with its semester
+  function labelled(list) {
+    const semesters = new Map();
+    const keyOf = row => `${row.subject}::${row.name.trim().toLowerCase()}`;
+    for (const row of list) {
+      if (!semesters.has(keyOf(row))) semesters.set(keyOf(row), new Set());
+      semesters.get(keyOf(row)).add(row.task.semester || 1);
+    }
+    return list.map(row => ({ ...row, label: semesters.get(keyOf(row)).size > 1 ? `${row.name} (Semester ${row.task.semester || 1})` : row.name }));
   }
 
   /** Whether the Subjects and Type filters leave a row on the list. */

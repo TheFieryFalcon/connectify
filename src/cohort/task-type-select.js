@@ -55,6 +55,7 @@
       allCatList.push(savedOverride);
     }
 
+    const isUnknown = autoType === types.UNKNOWN_TYPE;
     const optSignature = `${chosenOnly}|${autoType}|${allCatList.join(',')}|${savedOverride || ''}`;
     if (select.dataset.signature !== optSignature) {
       select.dataset.signature = optSignature;
@@ -63,7 +64,7 @@
       if (!chosenOnly || !savedOverride) {
         const autoOpt = document.createElement('option');
         autoOpt.value = '';
-        autoOpt.textContent = `Auto (${autoType})`;
+        autoOpt.textContent = isUnknown ? 'Choose a type' : `Auto (${autoType})`;
         select.appendChild(autoOpt);
       }
 
@@ -88,7 +89,7 @@
       select.title = `Assessment type manually set to "${currentSelection}". Click to change or reset to Auto.`;
     } else {
       select.classList.remove('connectea-overridden');
-      select.title = `Automatically detected as "${autoType}". Click to override.`;
+      select.title = isUnknown ? 'Its type could not be detected. Click to choose one.' : `Automatically detected as "${autoType}". Click to override.`;
     }
   }
 

@@ -153,7 +153,7 @@ const SPLIT_PARTS = {
   'theme-surface-base.css': ['theme-surface-base.css', 'theme-surface-base-2.css'],
   'theme-tile-actions.css': ['theme-tile-actions.css', 'theme-tile-actions-2.css', 'theme-tile-actions-3.css'],
   'theme-tile-bodies.css': ['theme-tile-bodies.css', 'theme-tile-bodies-2.css', 'theme-tile-bodies-3.css'],
-  'sidebar-drawer.css': ['sidebar-drawer.css', 'sidebar-handle-menu.css', 'sidebar-tool-menu.css', 'sidebar-weakness-types.css', 'sidebar-outcome-filter.css'],
+  'sidebar-drawer.css': ['sidebar-drawer.css', 'sidebar-handle-menu.css', 'sidebar-tool-menu.css', 'sidebar-radar.css', 'sidebar-weakness-types.css', 'sidebar-outcome-filter.css'],
   'sidebar-notifications.css': ['sidebar-notifications.css', 'sidebar-notifications-dark.css'],
   'sidebar-predictor.css': ['sidebar-predictor.css', 'sidebar-predictor-results.css', 'sidebar-predictor-scroll.css'],
   'sidebar-settings.css': ['sidebar-settings.css', 'sidebar-progress-scaling.css'],
@@ -2292,7 +2292,7 @@ runTest('target-solver.js and target-grade-ui.js support dynamic prior performan
   assert.ok(solverCode.includes('options.difficultyWeighted') || solverCode.includes('difficultyWeighted = Boolean(options.difficultyWeighted)'), 'target-solver.js gradePlan must accept options.difficultyWeighted');
   assert.ok(solverCode.includes('taskMetaList') && solverCode.includes('calcTaskScore'), 'target-solver.js gradePlan must calculate category baselines and adjust task requirements');
   assert.ok(gradeUiCode.includes('cta-difficulty-label'), 'target-grade-ui.js must mount difficulty label');
-  assert.ok(gradeUiCode.includes('Dynamically adjust required grade based on prior performance'), 'target-grade-ui.js must contain prior performance adjustment checkbox text');
+  assert.ok(gradeUiCode.includes('Adjust by how you do on each task type'), 'target-grade-ui.js must contain prior performance adjustment checkbox text');
   assert.ok(gradeUiCode.includes('gradeDifficultyWeighted'), 'target-grade-ui.js must persist gradeDifficultyWeighted preference');
 });
 
@@ -2412,8 +2412,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v23_20261105_pred'"), 'predictor-math.js must use v23_20261105_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v23_20261105_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v23_20261105_pred');
+  assert.ok(predMathCode.includes("'v24_20261105_pred'"), 'predictor-math.js must use v24_20261105_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v24_20261105_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v24_20261105_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2428,14 +2428,14 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   assert.ok(pred.low <= 82, `Low prediction (${pred.low}%) must reflect downside risk dialed back with calibrated variance`);
 });
 
-runTest('predictor-ui.js and atar-ui.js render user-prompted Expand All buttons', () => {
+runTest('predictor-ui.js and atar-ui.js offer no Expand All button while they have data: the tools read the cache', () => {
   const predUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-ui.js'), 'utf8');
   const atarUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
+  const atarView = fs.readFileSync(path.resolve(SRC_DIR, 'predictor/predictor-atar-view.js'), 'utf8');
 
-  assert.ok(predUiJs.includes('cx-pred-expand-outlines-btn'), 'predictor-ui.js must include cx-pred-expand-outlines-btn in Predict ATAR');
-  assert.ok(predUiJs.includes("closest('#cx-pred-expand-outlines, .cx-pred-expand-outlines-btn')"), 'predictor-ui.js click delegation must handle cx-pred-expand-outlines-btn');
-  assert.ok(atarUiJs.includes('cta-expand-outlines') || atarUiJs.includes('Expand All Outlines'), 'atar-ui.js must include Expand All Outlines button');
-  assert.ok(atarUiJs.includes('expandAllBtn.hidden'), 'atar-ui.js must manage expandAllBtn visibility in selectTab');
+  assert.ok(predUiJs.includes("closest('#cx-pred-expand-outlines, .cx-pred-expand-outlines-btn')"), 'the Predictor still handles the button its no-data card offers');
+  assert.strictEqual(atarView.match(/cx-pred-expand-outlines-btn/g).length, 1, 'only the card shown when too few subjects were read has one');
+  assert.ok(!atarUiJs.includes('expandAllBtn') && !atarUiJs.includes('Expand All Outlines'), 'Estimate ATAR has none');
 });
 
 runTest('theme.css normalizes accordion panels and sidebar.css enforces distinct Low/Mid/High predictor text colors', () => {
@@ -2506,9 +2506,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v23_20261105_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v24_20261105_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v23_20261105_pred'), 'predictor-math.js must bump version to v23_20261105_pred');
+  assert.ok(predMathJs.includes('v24_20261105_pred'), 'predictor-math.js must bump version to v24_20261105_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -2706,14 +2706,13 @@ runTest('Test 99: assessment-data.js readiness polling and cohort-stats.js rePas
   assert.ok(cohortJs.includes('function runPass()'), 'cohort-stats.js must use runPass with try/finally to drain rePassPending');
 });
 
-runTest('Test 100: weakness-radar.js renders Expand All Outlines button and sidebar.css provides responsive styling', () => {
+runTest('Test 100: The Weakness Analyzer has no Expand All Outlines button: it reads the cache', () => {
   const weaknessJs = fs.readFileSync(path.resolve(BASE_DIR, 'weakness-radar.js'), 'utf8');
+  const view = fs.readFileSync(path.resolve(SRC_DIR, 'progress/weakness-radar-view.js'), 'utf8');
   const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
 
-  assert.ok(weaknessJs.includes('id="cx-weakness-expand-all"'), 'weakness-radar.js must define #cx-weakness-expand-all');
-  assert.ok(weaknessJs.includes('window.ConnectifyData.expandAll(true)'), 'weakness-radar.js must wire button to ConnectifyData.expandAll(true)');
-  assert.ok(cssHas(sidebarCss, '.cx-weakness-expand-btn'), 'sidebar.css must style .cx-weakness-expand-btn');
-  assert.ok(cssHas(sidebarCss, '.connectea-dark #connectify-sidebar .cx-weakness-expand-btn'), 'sidebar.css must style button in dark mode');
+  assert.ok(!view.includes('cx-weakness-expand-all') && !weaknessJs.includes('cx-weakness-expand-all'), 'no button');
+  assert.ok(!sidebarCss.includes('.cx-weakness-expand-btn'), 'and no styles left for it');
 });
 
 runTest('Test 101: Expand all progress pill adapts correctly across light and dark themes', () => {
@@ -2886,14 +2885,18 @@ runTest('Test 107: Outcome bar is strictly suppressed on first task of subject/t
   window.ConnectifyCohortView.render(row2, false, 'chem-k2', 50, null, subjectsList);
   const panel2 = window.ConnectifyCohortView.panels.get(row2);
   assert.ok(panel2, 'Panel 2 must exist');
-  assert.strictEqual(panel2.outcomeBar.hidden, false, 'Task 2 (first task of type Investigation with prior subject data) outcome bar must NOT be hidden');
+  assert.strictEqual(panel2.outcomeBar.hidden, true, 'Task 2 (one earlier result) waits: too few to judge it by');
 
   // Row for task 3 (second of type 'Test', has prior subject data)
   const row3 = makeTaskRow('Test 2', 'Term 2, Week 3', '44 Out of 50');
   window.ConnectifyCohortView.render(row3, false, 'chem-k3', 50, null, subjectsList);
   const panel3 = window.ConnectifyCohortView.panels.get(row3);
   assert.ok(panel3, 'Panel 3 must exist');
-  assert.strictEqual(panel3.outcomeBar.hidden, false, 'Task 3 (second task of type Test) outcome bar must NOT be hidden');
+  assert.strictEqual(panel3.outcomeBar.hidden, true, 'Task 3 (two earlier results) still waits');
+
+  const row4 = makeTaskRow('Test 3', 'Term 2, Week 6', '40 Out of 50');
+  window.ConnectifyCohortView.render(row4, false, 'chem-k4', 50, null, subjectsList);
+  assert.strictEqual(window.ConnectifyCohortView.panels.get(row4).outcomeBar.hidden, false, 'Task 4 has three earlier results: the meter shows, first of its type or not');
 
   // Now set cold-start baseline for subject and type, and verify Task 1 renders outcome bar
   predMath.saveBaselines({
@@ -3333,9 +3336,11 @@ runTest('Test 164: The outcome bar stays hidden on the first marked assessment o
     eval(fs.readFileSync(path.resolve(BASE_DIR, 'cohort-outcome-eval.js'), 'utf8'));
     const { evaluateRow } = window.ConnectifyCohortOutcomeEval;
 
-    const s1 = makeCard('Chemistry - Semester 1', [null, 72, 80]);
+    const s1 = makeCard('Chemistry - Semester 1', [null, 72, 80, 75, 90]);
     assert.strictEqual(evaluateRow(s1[1], 72, meta, []), null, 'The first marked task after unmarked rows must not show a bar');
-    assert.strictEqual(evaluateRow(s1[2], 80, meta, []), 'bar', 'A task after an earlier marked task shows the bar');
+    assert.strictEqual(evaluateRow(s1[2], 80, meta, []), null, 'One earlier result is too few');
+    assert.strictEqual(evaluateRow(s1[3], 75, meta, []), null, 'And so are two');
+    assert.strictEqual(evaluateRow(s1[4], 90, meta, []), 'bar', 'Three earlier marked results show the bar');
 
     baselineSubjects = { Chemistry: '' };
     assert.strictEqual(evaluateRow(s1[1], 72, meta, []), null, 'An empty baseline value is not a baseline');
@@ -3346,8 +3351,18 @@ runTest('Test 164: The outcome bar stays hidden on the first marked assessment o
     cards.forEach(c => c.remove());
     const s2 = makeCard('Chemistry - Semester 2', [65]);
     assert.strictEqual(evaluateRow(s2[0], 65, meta, []), null, 'Semester 2 without any marked Semester 1 work must not show a bar');
-    const collected = [{ name: 'Chemistry', tasks: [{ semester: 1, score: 70, pending: false }] }];
-    assert.strictEqual(evaluateRow(s2[0], 65, meta, collected), 'bar', 'Semester 2 after marked Semester 1 results shows the bar');
+    const one = [{ name: 'Chemistry', tasks: [{ semester: 1, score: 70, pending: false }] }];
+    assert.strictEqual(evaluateRow(s2[0], 65, meta, one), null, 'One marked Semester 1 result is too few');
+    const collected = [{ name: 'Chemistry', tasks: [70, 72, 74].map(score => ({ semester: 1, score, pending: false })) }];
+    assert.strictEqual(evaluateRow(s2[0], 65, meta, collected), 'bar', 'Semester 2 after three marked Semester 1 results shows the bar');
+    // A later task never counts as before this one, whatever semester a bare week caption gives this row
+    const later = [{ name: 'Chemistry', tasks: [5, 12, 20].map(order => ({ semester: 1, score: 70, pending: false, order })) }];
+    const dataBefore = window.ConnectifyData;
+    window.ConnectifyData = { ...dataBefore, orderHint: () => 4 };
+    assert.strictEqual(evaluateRow(s2[0], 65, meta, later), null, 'Results dated after this task are not earlier results');
+    window.ConnectifyData = { ...dataBefore, orderHint: () => 30 };
+    assert.strictEqual(evaluateRow(s2[0], 65, meta, later), 'bar', 'All three before it count');
+    window.ConnectifyData = dataBefore;
   } finally {
     cards.forEach(c => c.remove());
     window.ConnectifyCohortRows = saved.rows;
@@ -3402,7 +3417,7 @@ runTest('Test 111: Typography parity (unbolded overall % and letter grade), star
 
   // 4. Four-segment outcome bar: renders for first task of type, fast O(1) prediction lookup
   assert.ok(!cohortViewJs.includes('const isFirstOfType ='), 'cohort-view.js must not suppress outcome bar for first task of type');
-  assert.ok(cohortViewJs.includes('const isFirstOfSubject = !hasPriorSubjectData && !hasSubjectBaseline;'), 'cohort-view.js must suppress outcome bar only on first task of subject without baseline');
+  assert.ok(cohortViewJs.includes('const tooFewResults = priorResults < MIN_PRIOR_RESULTS && !hasSubjectBaseline;'), 'the meter waits for enough earlier results in the subject, or a baseline');
   assert.ok(cohortViewJs.includes('card._cxTaskRows'), 'cohort-view.js must memoize card task rows to eliminate quadratic scans');
 
   // 5. Overall stats panel stability and MutationObserver loop elimination
@@ -3429,7 +3444,7 @@ runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, 
   // 2. First task outcome bar suppression via .cvr-c-tasks .cvr-c-task query
   assert.ok(cohortViewJs.includes("card.querySelectorAll('.cvr-c-tasks .cvr-c-task')"), 'cohort-view.js must index tasks inside .cvr-c-tasks');
   // Only the first row of the Semester 1 card lacks earlier work in the subject (the old per-task scan could never match)
-  assert.ok(cohortViewJs.includes('const hasPriorSubjectData = hasPriorMarkedWork(task, row, meta, precollectedSubjects, predMath);'), 'cohort-view.js must count only earlier marked results as prior subject data (Test 164 checks the behaviour)');
+  assert.ok(cohortViewJs.includes('const priorResults = priorMarkedCount(task, row, meta, precollectedSubjects, predMath);'), 'cohort-view.js must count only earlier marked results as prior subject data (Test 164 checks the behaviour)');
 
   // 3. Panel formatting: entire score display bolded, Z-Score formatted, colons and equals and Rank removed
   assert.ok(cohortViewJs.includes('<strong>Score ${math().formatPercentage(mark)}%</strong>'), 'cohort-view.js must bold entire score display without colon');
@@ -3912,7 +3927,7 @@ runTest('Test 121: Progress graph lists all tasks with marks and weights but no 
 
   // 2. Verify progress-chart.js handles pending tasks, edit button for valid dates, and dash score
   assert.ok(progressChartJs.includes("row.className = 'cx-task-pending'"), 'progress-chart.js must assign cx-task-pending to uncompleted rows');
-  assert.ok(progressChartJs.includes("cx-time-edit-btn cx-time-edit-btn--unconfigured"), 'progress-chart.js must support unconfigured edit buttons');
+  assert.ok(progressChartJs.includes("createElement('button', '✎', 'cx-time-edit-btn')") && !progressChartJs.includes('--unconfigured'), 'one pencil, overridden or not');
   assert.ok(progressChartJs.includes("Number.isFinite(point.score) ? `${Number(point.score.toFixed(2))}%` : '—'"), 'progress-chart.js must display em-dash for uncompleted tasks without throwing TypeError');
   assert.ok(progressChartJs.includes('cx-date-warning'), 'progress-chart.js must use semantic class cx-date-warning for missing dates');
 
@@ -3955,7 +3970,7 @@ runTest('Test 121: Progress graph lists all tasks with marks and weights but no 
 
   const table = container.querySelector('table');
   assert.ok(table, 'renderChart must generate a table');
-  assert.deepStrictEqual(Array.from(table.querySelectorAll('th')).map(th => th.textContent), ['#', 'Assessment', 'Weight', 'Your score', 'Cohort mean'], 'the table has weights and no date column');
+  assert.deepStrictEqual(Array.from(table.querySelectorAll('th')).map(th => th.textContent), ['#', 'Assessment', 'Weight', 'Your mark', 'Cohort mean'], 'the table has weights and no date column');
   assert.ok(!container.querySelector('.cx-time-edit-btn') && !container.querySelector('input'), 'the graph tab has no week editor');
   const rows = table.querySelectorAll('tr');
   // Header row + 3 task rows = 4 rows
@@ -4196,7 +4211,7 @@ runTest('Test 125: Task Dates week editor protects active typing from premature 
   eval(chartJs);
 
   const container = document.createElement('div');
-  const task = { id: 'task_unscheduled', name: 'Practical Investigation', score: 80, mean: 65, order: null, sequence: 1, pending: false };
+  const task = { id: 'task_unscheduled', name: 'Practical Investigation', score: null, mean: 65, order: null, sequence: 1, pending: true };
 
   let refreshCount = 0;
   drawWeekCells(container, [task], 'Physics ATAR', () => { refreshCount++; });
@@ -4913,16 +4928,14 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.ok(plannerContainer && !plannerContainer.hidden, 'Target planner container (.cta-planner) must be unhidden');
   const targetScoreInput = atarPanel.querySelector('input.cta-score');
   assert.ok(targetScoreInput, 'Target ATAR score input (input.cta-score) must render');
-  const targetRecalcBtn = atarPanel.querySelector('.cta-form-controls button.cta-reset');
-  assert.ok(targetRecalcBtn && targetRecalcBtn.textContent.includes('Recalculate'), 'Recalculate button must render in Target ATAR');
+  assert.ok(!Array.from(atarPanel.querySelectorAll('button')).some(b => b.textContent.includes('Recalculate')), 'no Recalculate: Target ATAR updates as the target is typed');
   const targetDiffLabel = atarPanel.querySelector('label.cta-difficulty-label');
   assert.ok(targetDiffLabel && targetDiffLabel.querySelector('input[type="checkbox"]'), 'Difficulty weighting checkbox must render');
   const topFourContainer = atarPanel.querySelector('.cta-top-four-selector');
   assert.ok(topFourContainer, 'Top four subject container (.cta-top-four-selector) must render');
   const targetOutput = atarPanel.querySelector('.cta-target-output');
   assert.ok(targetOutput, 'Target requirement output container (.cta-target-output) must render');
-  const targetExpandOutlines = atarPanel.querySelector('.cta-expand-outlines');
-  assert.ok(targetExpandOutlines, 'Expand All Outlines button (.cta-expand-outlines) must render');
+  assert.ok(!atarPanel.querySelector('.cta-expand-outlines'), 'no Expand All Outlines button: the tools read the cache');
 
   // -------------------------------------------------------------------------
   // TOOL 3: Predictor
@@ -4941,8 +4954,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.ok(predHeader, 'Predictor header (.cx-pred-header) must render');
   const predTitle = predPanel.querySelector('.cx-pred-title');
   assert.strictEqual(predTitle.textContent, 'Predictor', 'Predictor title must render');
-  const predSubtitle = predPanel.querySelector('.cx-pred-subtitle');
-  assert.strictEqual(predSubtitle.textContent, 'Momentum & Assessment Modeling', 'Predictor subtitle must render');
+  assert.ok(!predPanel.querySelector('.cx-pred-subtitle'), 'the Predictor has no subtitle');
   const predTabs = predPanel.querySelector('.cx-pred-main-tabs');
   assert.ok(predTabs, 'Predictor tabs container (.cx-pred-main-tabs) must render');
   const gradePredTab = predPanel.querySelector('#cx-pred-btn-grade');
@@ -4970,8 +4982,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.strictEqual(progTitle.textContent, 'Year Progression', 'Year Progression title must render');
   const subjectsContainer = progPanel.querySelector('.cx-subjects');
   assert.ok(subjectsContainer, 'Subjects chip selector container (.cx-subjects) must render');
-  const refreshAssessmentsBtn = progPanel.querySelector('button');
-  assert.ok(refreshAssessmentsBtn && refreshAssessmentsBtn.textContent.includes('Refresh Assessments'), 'Refresh Assessments button must render');
+  assert.ok(!Array.from(progPanel.querySelectorAll('button')).some(b => b.textContent.includes('Refresh Assessments')), 'no Refresh Assessments: it never fetched anything');
   const chartContainer = progPanel.querySelector('div:not(.cx-subjects)');
   assert.ok(chartContainer, 'Progress chart container must render');
 
@@ -5008,7 +5019,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.ok(courseList && !courseList.hidden, 'Courses list container (.cta-courses) must be unhidden');
   const breakdownSummary = atarPanel.querySelector('.cta-breakdown');
   assert.ok(breakdownSummary && !breakdownSummary.hidden, 'Breakdown summary (.cta-breakdown) must be unhidden');
-  const resetBtn = Array.from(atarPanel.querySelectorAll('button.cta-reset')).find(b => !b.classList.contains('cta-expand-outlines'));
+  const resetBtn = Array.from(atarPanel.querySelectorAll('button.cta-reset'))[0];
   assert.ok(resetBtn && !resetBtn.hidden && resetBtn.textContent.includes('Reset to School Marks'), 'Reset button must be unhidden');
   assert.ok(methodDetails && !methodDetails.hidden, 'Methodology details (details.cta-method) must be unhidden');
   const methodSummary = methodDetails.querySelector('summary');
@@ -5038,8 +5049,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.strictEqual(weakTitle.textContent, 'Weakness Analyzer', 'Weakness Analyzer title must render');
   const radarModeSelect = weakPanel.querySelector('#cx-radar-mode');
   assert.ok(radarModeSelect, 'Group by dropdown selector (#cx-radar-mode) must render');
-  const weakExpandAllBtn = weakPanel.querySelector('#cx-weakness-expand-all');
-  assert.ok(weakExpandAllBtn && weakExpandAllBtn.textContent.includes('Expand All Outlines'), 'Expand All Outlines button must render');
+  assert.ok(!weakPanel.querySelector('#cx-weakness-expand-all'), 'no Expand All Outlines button');
   const radarChart = weakPanel.querySelector('#connectify-radar-chart');
   assert.ok(radarChart, 'Radar chart container (#connectify-radar-chart) must render');
   const weakFilters = weakPanel.querySelector('#cx-weakness-filters');
@@ -8198,12 +8208,12 @@ runTest('Test 186: Light-tone themes never leave dark-ink radar labels on the da
   const O = win.ConnectifyThemeOklch, pal = win.ConnectifyThemePalettes.BUILTIN_PALETTES;
   const chartTag = win.ConnectifyWeaknessView.PANEL_HTML.match(/<div id="connectify-radar-chart"[^>]*>/)[0];
   assert.ok(!/background|border:/.test(chartTag), 'the plot surface lives in CSS so a light tone can restyle it (no inline background)');
-  const sideCss = fs.readFileSync(path.join(BASE_DIR, 'src/sidebar/styles/sidebar-weakness-types.css'), 'utf8');
-  assert.ok(cssHas(sideCss, '#connectify-radar-chart {\n  background: #333333;'), 'the plot keeps its dark surface outside light tones');
+  const sideCss = fs.readFileSync(path.join(BASE_DIR, 'src/sidebar/styles/sidebar-radar.css'), 'utf8');
+  assert.ok(cssHas(sideCss, '#connectify-radar-chart {\n  background: transparent;'), 'the plot has no fill of its own in any theme');
   const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-light-tone.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   const rule = sel => (css.split('}').find(b => b.split('{')[0].trim().endsWith(sel)) || '').split('{')[1] || '';
   const tone = 'html.connectea-dark[data-connectea-tone="light"] ';
-  assert.ok(/background: transparent !important/.test(rule(`${tone}#connectify-radar-chart`)), 'light tone clears the dark plot surface');
+  assert.ok(/color-mix\(in srgb, var\(--cx-text-primary/.test(rule(`${tone}#connectify-radar-chart`)), 'light tone edges it in the ink');
   assert.ok(/fill: var\(--cx-text-primary, #1d1c1c\) !important/.test(rule(`${tone}#connectify-radar-chart .cx-radar-message`)) &&
     /opacity: 1 !important/.test(rule(`${tone}#connectify-radar-chart .cx-radar-message`)), 'labels, ring percentages and messages take the ink at full opacity');
   // Contrast on the grey Liquid Glass drawer: its surface at the glass opacity over the canvas
@@ -8218,11 +8228,11 @@ runTest('Test 186: Light-tone themes never leave dark-ink radar labels on the da
     const src = O.toOklch(m[1]), ink = O.fromOklch(Number(m[2]) * 100, src.C, src.h);
     assert.ok(O.contrast(ink, drawer) >= 5, `${sel} must reach 5:1 on the drawer glass (${O.contrast(ink, drawer).toFixed(2)})`);
   }
-  // Outside light tones the labels take the theme's secondary text on the dark plot
+  // Dark themes: the labels take the theme's secondary text straight on its own surface
   for (const [id, p] of Object.entries(pal)) {
-    if (/^#[0-9a-f]{6}$/i.test(p.textSecondary || '')) assert.ok(O.contrast(p.textSecondary, '#333333') >= 5, `${id} radar labels must reach 5:1 on the dark plot`);
+    if (/^#[0-9a-f]{6}$/i.test(p.textSecondary || '') && /^#[0-9a-f]{6}$/i.test(p.surface || '')) assert.ok(O.contrast(p.textSecondary, p.surface) >= 5, `${id} radar labels must reach 5:1 on its surface`);
   }
-  assert.ok(O.contrast('#a8a8a8', '#333333') >= 5 && cssHas(sideCss, '.cx-radar-message {\n  color: #a8a8a8;'), 'radar messages must reach 5:1 on the dark plot');
+  assert.ok(O.contrast('#1d1c1c', '#f7f9fc') >= 5 && O.contrast('#4a5d70', '#f7f9fc') >= 5, 'in Light labels and messages reach 5:1 on the drawer');
 });
 
 runTest('Test 173: The Theme Customizer dialog is always solid, even when glass themes make the surface token translucent', () => {
@@ -8828,9 +8838,9 @@ runTest('Test 192: The first Semester 1 task listed on a Semester 2 panel gets n
     const overall = new MockElement('div', 'cvr-c-task'); overall._mark = 58.7; card.appendChild(overall);
     const list = new MockElement('div', 'cvr-c-tasks'); card.appendChild(list);
     const makeRow = mark => { const row = new MockElement('div', 'cvr-c-task'); row._mark = mark; list.appendChild(row); return row; };
-    const first = makeRow(64), second = makeRow(80);
+    const first = makeRow(64), second = makeRow(80), third = makeRow(70), fourth = makeRow(75);
     // cohort-stats caches every row of the card, the overall row first
-    card._cxTaskRows = [overall, first, second];
+    card._cxTaskRows = [overall, first, second, third, fourth];
     window.ConnectifyCohortRows = { readMark: row => row._mark };
     window.ConnectifyData = { orderHint: window.ConnectifyParseHelpers.orderHint };
     window.ConnectifyPredictorMath = {
@@ -8849,7 +8859,8 @@ runTest('Test 192: The first Semester 1 task listed on a Semester 2 panel gets n
     assert.strictEqual(firstTask.semester, 1, 'a Term 1 task on a Semester 2 panel is a Semester 1 task');
     assert.strictEqual(evalApi.evaluateRow(first, 64, meta('Short written response - Play', 'Term 1, Week 5'), subjects), null,
       'the first marked task of the class has nothing before it (the overall row and its own Semester 1 copy never count), so no meter');
-    assert.ok(evalApi.evaluateRow(second, 80, meta('Extended written response - Prose', 'Term 2, Week 1'), subjects), 'the next task has the first one before it');
+    assert.strictEqual(evalApi.evaluateRow(second, 80, meta('Extended written response - Prose', 'Term 2, Week 1'), subjects), null, 'the next task has one result before it, too few');
+    assert.ok(evalApi.evaluateRow(fourth, 75, meta('Oral', 'Term 2, Week 5'), subjects), 'the fourth has three: the overall row never counted, so neither would it be the fourth by that');
   } finally {
     window.ConnectifyCohortRows = saved.rows; window.ConnectifyPredictorMath = saved.pred; window.ConnectifyData = saved.data;
   }
@@ -12393,7 +12404,7 @@ runTest('Test 263: Set as Goal previews the goal with its end and confirms it; t
   const goal = win.ConnectifyGoalStore.active()[0];
   assert.deepStrictEqual([goal.end, goal.priorMarked], [{ type: 'week', week: 20 }, ['chemistry::t1']], 'with its end and the tasks already marked');
   const editor = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-editor.js'), 'utf8');
-  assert.ok(editor.includes("formOf(container)?.querySelector('.cta-reset')?.after(compose.endRow);"), 'the planner places the end right after Recalculate');
+  assert.ok(editor.includes("formOf(container)?.querySelector('.cta-difficulty-label')?.before(compose.endRow);"), 'the planner places the end right after the target');
   const plannerCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/atar-planner.css'), 'utf8');
   assert.ok(plannerCss.includes('grid-template-columns: max-content max-content max-content;') && /\.cta-subject-label \+ \.cta-target-label \{\s*grid-column: 1;/.test(plannerCss), 'in a third column, the target staying on its own row under Subject');
   assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/target-grade-ui.js'), 'utf8').includes('ConnectifyGoalEditor?.clearEnd(gradeOutputContainer)'), 'and every render clears it');
@@ -13261,13 +13272,12 @@ runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once
     const row = J.create();
     const box = row.querySelector('#cx-jump-subject-select');
     const list = row.querySelector('#cx-jump-subject-list');
-    const btn = row.querySelector('#cx-jump-subject-btn');
-    assert.ok(box.tagName === 'BUTTON' && row.children[0] === box && row.children[1] === list && row.children[2] === btn,
-      'the dropdown box, its list, then the button (never a native <select>, whose macOS list falls off the bottom of the screen)');
+    assert.ok(box.tagName === 'BUTTON' && row.children[0] === box && row.children[1] === list && row.children.length === 2,
+      'the dropdown box and its list, no button (never a native <select>, whose macOS list falls off the bottom of the screen)');
     assert.strictEqual(box.getAttribute('aria-haspopup'), 'listbox');
     assert.strictEqual(list.getAttribute('role'), 'listbox');
     assert.ok(list.hidden, 'the list starts closed');
-    assert.strictEqual(btn.textContent, 'Jump To');
+    assert.strictEqual(box.textContent, 'Jump To', 'the box says what it does');
     const origById = document.getElementById;
     document.getElementById = id => row.querySelector(`#${id}`) || origById(id);
     try {
@@ -13275,15 +13285,14 @@ runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once
       assert.deepStrictEqual(list.children.map(o => o.textContent), ['Physics', 'English', 'Biology'], 'the list shows them in page order');
       assert.ok(list.children.every(o => o.dataset.value === o.textContent && o.getAttribute('role') === 'option'), 'each option shows the full name, never cut short');
       assert.strictEqual(box.dataset.value, 'Physics', 'the first subject is chosen');
-      assert.strictEqual(box.textContent, 'Physics');
+      assert.strictEqual(box.textContent, 'Jump To', 'whatever was chosen last');
       J.open();
       assert.ok(!list.hidden && box.getAttribute('aria-expanded') === 'true', 'the box opens the list');
       list.dispatchEvent({ type: 'click', target: list.children[1] });
       assert.strictEqual(box.dataset.value, 'English', 'picking an option chooses it');
       assert.ok(list.hidden, 'and closes the list');
       assert.deepStrictEqual(list.children.map(o => o.getAttribute('aria-selected')), ['false', 'true', 'false']);
-      btn.onclick();
-      assert.deepStrictEqual(jumped, [cards[1]], 'Jump To expands, scrolls to and highlights the chosen subject\'s card');
+      assert.deepStrictEqual(jumped, [cards[1]], 'choosing a subject expands, scrolls to and highlights its card, with no second step');
     } finally {
       document.getElementById = origById;
     }
@@ -13297,7 +13306,7 @@ runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once
     assert.ok(outlines.css.includes('src/atar/outline-jump.css'));
     const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/outline-jump.css'), 'utf8');
     assert.ok(cssHas(css, '.connectea-dark #cx-jump-subject .cx-jump-subject-select { background-color: var(--cx-input-bg, #141a22) !important;'), 'dark themes use the input tokens');
-    assert.ok(cssHas(css, '#cx-jump-subject .cx-jump-subject-select { box-sizing: border-box; width: 108px; flex: 0 0 auto;'), 'a fixed narrow dropdown keeps the row close to the buttons\' width');
+    assert.ok(cssHas(css, '#cx-jump-subject .cx-jump-subject-select { box-sizing: border-box; width: 100%;'), 'the dropdown is as wide as the buttons under it');
     assert.ok(/#cx-jump-subject \.cx-jump-subject-select \{[^}]*text-overflow: ellipsis;/.test(css), 'only the closed dropdown ends a long name in an ellipsis');
     assert.ok(/#cx-jump-subject \.cx-jump-subject-list \{[^}]*bottom: calc\(100% \+ 6px\);[^}]*max-height: calc\(100vh - 140px\);/.test(css),
       'the list opens upwards from the box and is as tall as its subjects (seven or more without scrolling)');
@@ -13317,7 +13326,7 @@ runTest('Test 283: Outlines come from Connect\'s API: records number tasks as th
   const s2Tasks = [...s1Tasks, task(13, 'Examination', undefined, 'Close reading', undefined, '25', undefined, '5')];
   const group = (id, semester, tasks, mark, grade) => ({
     assessmentGroupId: id, chartAssessmentOutlineId: id + 1000, name: 'Chemistry ATAR Year 11', semester,
-    staff: [{ fullName: 'Leon Harris' }], school: { name: 'Willetton Senior High School' },
+    staff: [{ fullName: 'Sam Taylor' }], school: { name: 'Example Senior High School' },
     statusLine: semester === 1 ? 'Semester 1 Total Percent and Progress Grade' : 'Semester 2 Cumulative Percent',
     groupResultsData: { mark, grade, showGroupChart: true },
     outlines: [{ assessmentOutlineId: id + 1000, description: 'AECHE', taskGroups: [{ tasks, groups: [] }] }]
@@ -14202,12 +14211,12 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
 
       assert.deepStrictEqual(group.children.map(o => o.textContent), ['None', 'Subject', 'Type', 'Completed', 'Predicted Grade', 'Grade Achieved']);
       assert.deepStrictEqual([direction.textContent, direction.title], ['↑', 'Ascending'], 'the direction is one small arrow');
-      assert.deepStrictEqual(sort.children.map(o => o.textContent), ['Chronological', 'Alphabetical', 'Grade Achieved/Predicted Grade']);
+      assert.deepStrictEqual(sort.children.map(o => o.textContent), ['Chronological', 'Alphabetical', 'Mark']);
       assert.deepStrictEqual(find(dates.toolbar, n => n.className === 'cx-dates-control').map(l => l.children[0].textContent), ['Group By:', 'Sort By:']);
 
       // Default: grouped by Subject, Chronological
       assert.deepStrictEqual(firstCells(), ['Chemistry', 'lab', 'Essay', 'Exam', 'Physics', 'Test 2', 'Test 10', 'Undated']);
-      assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date', 'Type', 'Grade'], 'the date, then the type and grade');
+      assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date', 'Type', 'Mark'], 'the date, then the type and mark');
       assert.strictEqual(tableRows()[1].className, 'cx-dates-group');
       assert.deepStrictEqual([tableRows()[2].children[3].textContent, tableRows()[3].children[3].textContent], ['—', '55%'], 'a grade, or a dash while unmarked');
       const typeSelect = find(tableRows()[3].children[2], n => n.tagName === 'SELECT')[0];
@@ -14237,7 +14246,7 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
       // None: no headings, a Subject column, undated last; no direction to choose
       pick(group, 'none');
       assert.deepStrictEqual(firstCells(), ['Test 2', 'lab', 'Essay', 'Test 10', 'Exam', 'Undated']);
-      assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date', 'Subject', 'Type', 'Grade']);
+      assert.deepStrictEqual(tableRows()[0].children.map(n => n.textContent), ['Assessment', 'Date', 'Subject', 'Type', 'Mark']);
       assert.strictEqual(tableRows()[1].children[2].textContent, 'Physics');
       assert.strictEqual(tableRows()[2].children[2].textContent, 'Chemistry', 'the semester suffix is not part of the subject');
       assert.strictEqual(direction.hidden, true);
@@ -14320,7 +14329,7 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
   new Function('window', read('progress/task-dates-cells.js'))(cellsWindow);
   assert.deepStrictEqual(['12 Chemistry ATAR', 'Chemistry ATAR Year 11', '3D Art'].map(subject => cellsWindow.ConnectifyTaskDatesCells.subjectText({ subject })), ['Chemistry', 'Chemistry', '3D Art'], 'the Subject column is cleaned');
   assert.ok(css.includes('#cx-task-dates .cx-time-cell > span { min-width: 6.8em; }') && !read('progress/progress-week-editor.js').includes("containerSpan.style"), 'every row\'s pencil sits just after its week, on one line');
-  assert.ok(!/tr:hover \.cx-time-edit-btn/.test(css) && css.includes('.cx-time-edit-btn:hover { background: none; color: inherit; }'), 'pointing at a row or the pencil never changes it');
+  assert.ok(/\.cx-time-edit-btn \{\s*display: inline-flex;[\s\S]*?width: 24px;\s*height: 24px;/.test(css) && !css.includes('.cx-time-edit-btn--unconfigured'), 'the pencil is the row\'s ink and a 24px target');
   // The sidebar's dark button rule weighs two ids (2,1,0): anything lighter leaves every button the same filled box
   const sidebarRule = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-handle-menu.css'), 'utf8');
   assert.ok(sidebarRule.includes('.connectea-dark #connectify-sidebar :is(button,'), 'the rule these outrank');
@@ -14401,13 +14410,13 @@ runTest('Test 309: Task Dates shows predicted grades when grouped by them, its g
       assert.strictEqual(sort.value, 'grade');
       assert.deepStrictEqual(names(), ['High', 'Lab', 'Low', 'Unknown'], 'highest prediction first, none last');
       pick(group, 'none');
-      assert.ok(!head().includes('Grade') && !head().includes('Predicted'), 'other groupings under Show Uncompleted Only list no grades');
+      assert.ok(!head().includes('Mark') && !head().includes('Predicted'), 'other groupings under Show Uncompleted Only list no grades');
       assert.strictEqual(sort.value, 'chronological', 'and have no grade to sort by');
       assert.strictEqual(sort.children.find(o => o.value === 'grade').disabled, true);
       setUncompleted(false);
 
       // Any other grouping sorts by the grade achieved
-      assert.strictEqual(head().at(-1), 'Grade');
+      assert.strictEqual(head().at(-1), 'Mark');
       assert.strictEqual(sort.value, 'grade', 'the saved sort returns');
       assert.strictEqual(names()[0], 'Marked', 'by grade achieved, unmarked last, whatever they are predicted');
       pick(sort, 'chronological');
@@ -14578,8 +14587,8 @@ runTest('Test 311: With a custom end week, Set as Goal\'s headline and sliders m
   const { planSummary } = win.ConnectifyTargetGradeUI;
   assert.strictEqual(planSummary({ required: 82 }, 80), 'Requires 82% on remaining assessments to achieve 80% overall.', 'the semester\'s wording is unchanged');
   assert.strictEqual(planSummary({ required: 0 }, 30), 'Target secured with remaining assessments at 0%.');
-  assert.strictEqual(planSummary({ required: 81.25, effort: true }, 80), 'Requires scores averaging 81.3% on remaining assessments to achieve 80% overall.');
-  assert.strictEqual(planSummary({ required: 81, effort: true }, 80, { difficulty: true }), 'Requires performance-adjusted scores (averaging 81%) on remaining assessments to achieve 80% overall.');
+  assert.strictEqual(planSummary({ required: 81.25, effort: true }, 80), 'Requires marks averaging 81.3% on remaining assessments to achieve 80% overall.');
+  assert.strictEqual(planSummary({ required: 81, effort: true }, 80, { difficulty: true }), 'Requires marks averaging 81% on remaining assessments to achieve 80% overall.');
 
   // The planner flow itself: its output redrawn on every change, as renderGradeOutput does
   let current = null;
@@ -14609,26 +14618,26 @@ runTest('Test 311: With a custom end week, Set as Goal\'s headline and sliders m
   const at = (target, week) => {
     info.refs.gradeTargetInput.value = String(target);
     onEnd({ type: 'week', week });
-    return { headline: mockText(current.querySelector('strong')), rows: current.querySelectorAll('.cx-goal-tasks tr').length };
+    return { headline: mockText(current.querySelector('strong')), rows: current.querySelectorAll('.cx-goal-tasks tr').length, sliders: current.querySelectorAll('.cx-goal-slider').length };
   };
 
   const within = at(80, 20);
   assert.ok(within.headline.startsWith('Requires 82% on remaining assessments up to Week 20 to achieve 80% overall.'), `within reach names the week: ${within.headline}`);
-  assert.strictEqual(within.rows, 2, 'with the one task left in the range and its heading');
+  assert.deepStrictEqual([within.rows, within.sliders], [3, 1], 'one table: the marked task, the one left in the range and the heading, and that one\'s slider');
   const beyond = at(95, 20);
-  assert.ok(beyond.headline.startsWith('Goal unattainable. Maximum achievable mark: 89%.') && beyond.headline.includes('Impossible'), `out of reach never says Requires beside Impossible: ${beyond.headline}`);
+  assert.ok(beyond.headline.startsWith('Goal unattainable. Highest possible mark: 89%.') && beyond.headline.includes('Impossible'), `out of reach never says Requires beside Impossible: ${beyond.headline}`);
   const secured = at(30, 20);
   assert.ok(secured.headline.startsWith('Target secured with remaining assessments up to Week 20 at 0%.'), `already secured says so: ${secured.headline}`);
   const finished = at(70, 6);
   assert.ok(finished.headline.startsWith('All weighted tasks completed. Final mark: 78%.'), `all marked says so: ${finished.headline}`);
-  assert.strictEqual(finished.rows, 0, 'with no sliders left');
+  assert.deepStrictEqual([finished.rows, finished.sliders], [2, 0], 'its marked task, with no sliders left');
   const none = at(80, 3);
   assert.strictEqual(none.headline, 'No assessments up to Week 3.', 'an empty range says so, never the semester\'s plan');
   assert.strictEqual(none.rows, 0, 'nor its sliders');
   semesterHasTable = false;
   const later = at(70, 40);
   assert.ok(later.headline.startsWith('Requires') && later.headline.includes('up to Week 40'), `a finished semester still plans a later end week: ${later.headline}`);
-  assert.strictEqual(later.rows, 3, 'with sliders for both tasks in range');
+  assert.deepStrictEqual([later.rows, later.sliders], [4, 2], 'with sliders for both tasks left in range');
   location.href = savedHref;
   localStorage.clear();
 });
@@ -15834,6 +15843,94 @@ runTest('Test 334: Every list and export shows a subject\'s cleaned name; saved 
   eval(read('goals/goal-plan.js'));
   assert.strictEqual(window.ConnectifyGoalPlan.shownName({ name: '12 Literature ATAR' }), 'Literature', 'a goal saved with its year level');
   localStorage.clear();
+});
+
+runTest('Test 335: Auto-expand reads off in Settings on a fresh install, as it behaves', () => {
+  const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
+  assert.ok(read('predictor/settings-preferences.js').includes("autoExpand.checked = localStorage.getItem('connectify:auto_expand') === 'true'"), 'the checkbox');
+  assert.ok(read('atar/atar-features.js').includes("return val === 'true';"), 'and startup auto-expand read the same default');
+});
+
+runTest('Test 336: A subject picked in one tool is the subject another tool opens on, by its cleaned name', () => {
+  const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
+  const win = { ConnectifyUtils: { cleanSubjectName: window.ConnectifyUtils.cleanSubjectName } };
+  new Function('window', read('system/subject-choice.js'))(win);
+  const choice = win.ConnectifySubjectChoice;
+  const list = [{ name: 'Chemistry ATAR Year 11 - Semester 2' }, { name: 'Physics ATAR Year 11 - Semester 2' }];
+  assert.strictEqual(choice.find(list, s => s.name), null, 'nothing chosen yet: each tool keeps its own default');
+  choice.set('Physics');
+  assert.strictEqual(choice.find(list, s => s.name), list[1], 'matched whichever form of the name a tool lists');
+  const seen = choice.version();
+  choice.set('Physics ATAR Year 11 - Semester 1');
+  assert.strictEqual(choice.version(), seen, 'the same subject is no new choice');
+  for (const [file, text] of [['predictor/predictor-ui.js', 'selectSubject'], ['progress/progress-graph.js', 'choice?.set(subject.name)'], ['atar/target-grade-ui.js', 'ConnectifySubjectChoice?.set('], ['atar/grade-estimate-ui.js', 'ConnectifySubjectChoice?.set(']]) {
+    assert.ok(read(file).includes(text) && read(file).includes('choice.find('), `${file} sets and reads it`);
+  }
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
+  const groups = manifest.content_scripts.filter(g => g.js?.includes('src/system/utils.js'));
+  assert.ok(groups.length && groups.every(g => g.js.indexOf('src/system/subject-choice.js') > g.js.indexOf('src/system/utils.js')), 'it loads after utils in every group');
+});
+
+runTest('Test 337: The radar measures a type within each subject and draws the cohort beside the student', () => {
+  const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
+  const win = {};
+  new Function('window', read('progress/weakness-model.js'))(win);
+  const task = (score, mean, type) => ({ score, mean, weight: 10, type, isUnknown: type === 'Unknown' });
+  // Essay appears only in a weak subject, where it is no worse than that subject's other tasks
+  const groups = [
+    { label: 'Literature', tasks: [task(60, 60, 'Essay'), task(60, 60, 'Exam')] },
+    { label: 'Physics', tasks: [task(90, 70, 'Test'), task(90, 70, 'Exam'), task(90, 70, 'Unknown')] }
+  ];
+  const byType = win.ConnectifyWeaknessModel.compute(groups, 'type');
+  assert.ok(!byType.labels.includes('Unknown') && byType.untyped === 1, 'a task with no type is on no axis, and counted');
+  assert.strictEqual(byType.you[byType.labels.indexOf('Essay')], byType.you[byType.labels.indexOf('Test')], 'a weak subject full of one type says nothing about the type');
+  assert.strictEqual(byType.you.length, byType.cohort.length, 'the cohort has a value per axis');
+  const bySubject = win.ConnectifyWeaknessModel.compute(groups, 'subject');
+  assert.deepStrictEqual([bySubject.labels, bySubject.you, bySubject.cohort], [['Literature', 'Physics'], [60, 90], [60, 70]], 'by subject: plain averages');
+  const noMeans = win.ConnectifyWeaknessModel.compute([{ label: 'Art', tasks: [{ score: 70, weight: 10, type: 'Essay' }] }], 'subject');
+  assert.deepStrictEqual(noMeans.cohort, [null], 'no cohort value without a mean');
+
+  eval(read('progress/weakness-radar-view.js'));
+  const svg = window.ConnectifyWeaknessView.radarSvg(['Exam', 'Test', 'Essay'], [72, 85, 64], [60, 70, 62]);
+  assert.ok(svg.includes('class="cx-radar-cohort"') && svg.includes('Cohort 62%') && svg.includes('>You</text>'), 'a dashed cohort line, its values and a legend');
+  assert.ok(!window.ConnectifyWeaknessView.radarSvg(['Exam', 'Test', 'Essay'], [72, 85, 64], [60, null, 62]).includes('cx-radar-cohort'), 'no partial cohort line');
+});
+
+runTest('Test 338: A task nothing identifies reads as Unknown: never a guess at Take-Home', () => {
+  const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
+  const store = read('cohort/category-store.js'), typesJs = read('cohort/task-types.js'), select = read('cohort/task-type-select.js'), engine = read('predictor/predictor-engine.js');
+  assert.ok(store.includes("const UNKNOWN_TYPE = 'Unknown';") && typesJs.includes('return UNKNOWN_TYPE;'), 'the fallback');
+  assert.ok(!/return 'Take-Home';\s*\}\s*\/\/ Task ids/.test(typesJs), 'no fallback to Take-Home');
+  assert.ok(/\b(?:assignment\|project\|take\[- \]home\|oral\|creative)/.test(typesJs), 'named take-home work still reads as Take-Home');
+  assert.ok(select.includes("isUnknown ? 'Choose a type'"), 'its dropdown asks');
+  assert.ok(engine.includes('const shifted = typed ? typeShift(historical, taskType) : null;'), 'and its prediction takes the subject\'s results alone');
+  assert.ok(typesJs.includes('if (cat === UNKNOWN_TYPE) return UNKNOWN_COLOR;'), 'in one neutral colour');
+});
+
+runTest('Test 339: Task Dates tells a repeated name by its semester, and asks for a week only on unmarked tasks', () => {
+  const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
+  const dates = read('progress/task-dates.js'), week = read('progress/progress-week-editor.js');
+  assert.ok(dates.includes('(Semester ${row.task.semester || 1})') && dates.includes('return labelled(out);'), 'the label');
+  assert.ok(read('progress/task-dates-view.js').includes('cells ? cells.name : row.label') && read('progress/next-up-view.js').includes("createElement('td', row.label)"), 'on both lists');
+  assert.ok(week.includes("hasWeek ? math.shortTimestamp(point.order, point.caption) : 'No week', hasWeek ? null : 'cx-date-none'") && week.includes('if (hasWeek || isMarked) {'), 'a marked task with no week reads quietly, with its pencil');
+  assert.ok(week.includes('return createInputField(shownWeek(savedTime), true);'), 'an unmarked one still asks');
+});
+
+runTest('Test 340: Target Grade is one table; an ATAR estimate carries its disclaimer; words are one each', () => {
+  const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
+  const sliders = read('goals/goal-sliders.js');
+  assert.ok(sliders.includes("['Assessment', 'Mark', 'Weight', ...(planned.length ? ['Effort', 'Needs', 'Difficulty'] : [])]"), 'one table');
+  assert.ok(!read('atar/target-grade-ui.js').includes("createEl('table'"), 'the planner draws no second one');
+  assert.ok(sliders.includes('`Final mark ${M().round1(target)}%`') && read('atar/target-atar-breakdown.js').includes('needs ${round(plan.required)}%'), 'a subject\'s final mark and a task\'s needed mark are named apart');
+  assert.ok(read('atar/atar-ui-markup.js').includes('WACE exams and moderation are not included') && read('predictor/predictor-atar-view.js').includes('ATAR_DISCLAIMER'), 'the disclaimer on Estimate ATAR and Predict ATAR');
+  for (const word of ['Middle (Expected)', 'Expected ATAR', 'Current momentum', 'Relaxed pace', 'Extra effort', 'normalized points', 'Momentum']) {
+    for (const file of ['predictor/predictor-grade-view.js', 'predictor/predictor-atar-view.js', 'predictor/predictor-math.js', 'atar/target-atar-breakdown.js']) {
+      assert.ok(!read(file).includes(word), `${file} says ${word}`);
+    }
+  }
+  assert.ok(read('cohort/cohort-outcome.js').includes("bar.tabIndex = 0;") && read('goals/goal-bars.js').includes('bar.tabIndex = 0;'), 'meters take keyboard focus and show their tooltip');
+  const bin = read('goals/goal-list-ui.js');
+  assert.ok(bin.includes('btn.innerHTML = BIN;') && !bin.includes("'cx-goal-card__delete', '✕'"), 'Delete is a bin, not the dialog\'s close cross');
 });
 
 Promise.all(pendingTestPromises).then(() => {

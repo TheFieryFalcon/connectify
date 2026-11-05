@@ -79,23 +79,18 @@
     if (subjectMap.size === 0) return show(view().message('No subjects detected yet. Expand course outlines in Connect to load subjects.'));
     if (selectedCount === 0) return show(view().message('All subjects deselected. Please check at least 3 subjects below to view radar analytics.'));
 
-    // Weighted average per assessment type (or per subject) over completed tasks
-    const perf = {};
+    // Completed weighted tasks of the included subjects, measured in weakness-model.js
     const mode = document.getElementById('cx-radar-mode')?.value || 'type';
     const shown = window.ConnectifyUtils.subjectLabels([...subjectMap.keys()]);
-    for (const subject of collected) {
-      const cleaned = cleanSubjectName(subject.name) || subject.name;
-      if (isDisabled(cleaned, subject.name)) continue;
-      for (const t of subject.tasks) {
-        if (!(t.weight > 0) || t.pending || t.score === null) continue;
-        const label = mode === 'subject' ? shown.get(cleaned) : getEffectiveTaskType(subject.name, t);
-        if (!perf[label]) perf[label] = { earned: 0, total: 0 };
-        perf[label].earned += (t.score / 100) * t.weight;
-        perf[label].total += t.weight;
-      }
-    }
-    const labels = Object.keys(perf);
-    const data = labels.map(label => (perf[label].total > 0 ? Math.round((perf[label].earned / perf[label].total) * 100) : 0));
+    const unknown = window.ConnectifyCategoryStore?.UNKNOWN_TYPE;
+    const groups = collected.filter(s => !isDisabled(cleanSubjectName(s.name) || s.name, s.name)).map(s => ({
+      label: shown.get(cleanSubjectName(s.name) || s.name),
+      tasks: (s.tasks || []).filter(t => t.weight > 0 && !t.pending && Number.isFinite(t.score)).map(t => {
+        const type = getEffectiveTaskType(s.name, t);
+        return { score: t.score, mean: t.mean, weight: t.weight, type, isUnknown: type === unknown };
+      })
+    }));
+    const { labels, you: data, cohort, untyped } = window.ConnectifyWeaknessModel.compute(groups, mode);
 
     if (labels.length === 0) return show(view().message('No completed assessments to plot for the selected subjects.'));
     if (labels.length < 3) {
@@ -103,7 +98,12 @@
       return show(view().warning(`At least 3 ${entityType} must have graded tasks for radar charts!`));
     }
 
-    chartDiv.innerHTML = view().radarSvg(labels, data);
+    chartDiv.innerHTML = view().radarSvg(labels, data, cohort);
+    const note = document.getElementById('cx-radar-note');
+    if (note) {
+      note.hidden = !(mode === 'type' && untyped);
+      note.textContent = `${untyped} marked ${untyped === 1 ? 'task has' : 'tasks have'} no type yet, so ${untyped === 1 ? 'it is' : 'they are'} not shown.`;
+    }
   }
 
   function updateCheckboxes(panel) {
@@ -157,15 +157,6 @@
     panel.hidden = true;
     panel.className = 'cx-workspace-panel';
     panel.innerHTML = view().PANEL_HTML;
-
-    const expandAllBtn = panel.querySelector('#cx-weakness-expand-all');
-    if (expandAllBtn) {
-      expandAllBtn.onclick = () => {
-        if (window.ConnectifyData?.expandAll) {
-          window.ConnectifyData.expandAll(true);
-        }
-      };
-    }
 
     panel.querySelector('#cx-radar-mode').onchange = renderChart;
     panel.querySelector('#cx-weakness-all').onclick = () => {

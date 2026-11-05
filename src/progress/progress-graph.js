@@ -26,10 +26,11 @@
 
     const createElement = chartAPI.createElement;
 
-    const { toggleBtn, panel, title, scanBtn, choicesContainer, chartContainer } = window.ConnectifyProgressPanel.build();
+    const { toggleBtn, panel, title, choicesContainer, chartContainer } = window.ConnectifyProgressPanel.build();
 
     let selectedSubject = '';
     let lastDataSignature = '';
+    let seenChoice = 0;
 
     function refresh(force = false) {
       if (panel.hidden) return;
@@ -53,6 +54,12 @@
         return;
       }
 
+      // A subject picked in another tool since the last draw
+      const choice = window.ConnectifySubjectChoice;
+      if (choice && seenChoice !== choice.version()) {
+        seenChoice = choice.version();
+        selectedSubject = choice.find(data, s => s.name)?.name ?? selectedSubject;
+      }
       const isHistory = selectedSubject === '__atar';
       const current = data.find(s => s.name === selectedSubject) || data[0];
 
@@ -64,6 +71,8 @@
         btn.setAttribute('aria-pressed', String(!isHistory && subject === current));
         btn.onclick = () => {
           selectedSubject = subject.name;
+          choice?.set(subject.name);
+          seenChoice = choice?.version();
           render(data);
         };
         choicesContainer.append(btn);
@@ -146,12 +155,6 @@
       }
     }
 
-    function expandAndRefresh() {
-      if (dataAPI?.expandAll) dataAPI.expandAll();
-      lastDataSignature = '';
-      refresh(true);
-    }
-
     // Toggle button interactions
     function openProgress() {
       panel.hidden = false;
@@ -185,8 +188,6 @@
         toggleBtn.focus();
       }
     });
-
-    scanBtn.onclick = expandAndRefresh;
 
     window.addEventListener('connectify-open', e => {
       if (e.detail === 'progress') {
@@ -227,8 +228,7 @@
         panel,
         openProgress,
         closeProgress,
-        refresh,
-        expandAndRefresh
+        refresh
       }
     };
 

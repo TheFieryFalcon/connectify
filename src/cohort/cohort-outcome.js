@@ -62,6 +62,12 @@
       tooltip.style.top = `${top}px`;
     }
 
+    /** The tooltip for a keyboard focus: beside the element, as a pointer there would place it. */
+    function focusTooltip(el, text) {
+      const r = el.getBoundingClientRect();
+      showFloatingTooltip({ clientX: r.right, clientY: r.top }, text);
+    }
+
     function hideFloatingTooltip() {
       if (floatingTooltipEl) {
         floatingTooltipEl.classList.remove('connectea-tooltip-visible');
@@ -94,6 +100,10 @@
         bar.addEventListener('mouseleave', () => {
           hideFloatingTooltip();
         });
+        bar.tabIndex = 0;
+        bar.setAttribute('role', 'img');
+        bar.addEventListener('focus', () => focusTooltip(bar, bar.dataset.connecteaTooltip));
+        bar.addEventListener('blur', hideFloatingTooltip);
       }
 
       // Memoize rendered outcome segments to avoid destroying and recreating DOM nodes on scroll
@@ -128,6 +138,7 @@
     window.ConnectifyCohortOutcome = {
       getFloatingTooltip,
       showFloatingTooltip,
+      focusTooltip,
       hideFloatingTooltip,
       renderOutcomeBar
     };

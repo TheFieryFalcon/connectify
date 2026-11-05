@@ -19,7 +19,7 @@
         createEl(
           'strong',
           '',
-          `Goal unattainable with remaining tasks. Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'} (assuming 100% on all remaining assessments).`
+          `Goal unattainable. Highest possible ATAR: ${plan.maximum?.atar ?? '—'}, with 100% on every remaining assessment.`
         )
       );
     } else {
@@ -27,7 +27,7 @@
         plan.required === 0
           ? 'Target secured under current assumptions.'
           : difficultyWeighted
-          ? `Requires performance-adjusted scores (averaging ${round(plan.required)}%) on remaining assessments for an estimated ATAR of ${
+          ? `Requires marks averaging ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
               plan.result?.atar ?? '—'
             }.`
           : `Requires ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
@@ -37,20 +37,20 @@
       targetOutputContainer.append(createEl('strong', '', bannerText));
     }
 
-    const bonusNote = plan.bonus > 0 ? ` (assumes current TEA bonus of ${round(plan.bonus)} points)` : '';
+    const bonusNote = plan.bonus > 0 ? `, with your current TEA bonus of ${round(plan.bonus)}` : '';
     targetOutputContainer.append(
       createEl(
         'p',
         'cta-note',
         difficultyWeighted
-          ? `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}. Marks are scaled proportionally based on demonstrated subject and assessment type performance.`
-          : `Maximum achievable ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}. Assumes uniform performance across remaining tasks.`
+          ? `Highest possible ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}. Each task's mark follows how you do in that subject and task type.`
+          : `Highest possible ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}. The same mark on every remaining task.`
       )
     );
 
     const taskDetails = createEl('section', 'cta-assessment-details');
     taskDetails.append(
-      createEl('strong', 'cta-breakdown-title', `Subject and assessment breakdown (${rows.length} subjects)`)
+      createEl('strong', 'cta-breakdown-title', `Subjects (${rows.length})`)
     );
     targetOutputContainer.append(taskDetails);
 
@@ -61,11 +61,11 @@
       if (!course.include) {
         block.style.opacity = '0.65';
         block.append(
-          createEl('strong', '', `${course.name} (Excluded from top four target)`),
+          createEl('strong', '', `${course.name} (Not counted)`),
           createEl(
             'small',
             '',
-            `Current score: ${
+            `Current scaled mark: ${
               course.score !== undefined
                 ? wholeScore(course.score)
                 : course.mark !== undefined
@@ -83,11 +83,7 @@
         createEl(
           'small',
           '',
-          `Outline weight ${round(course.progress?.total ?? 0)}%, ${round(
-            course.progress?.earned ?? 0
-          )} normalized points earned, ${round(course.progress?.remaining ?? 0)}% of semester remaining, projected rounded score ${wholeScore(
-            projectedScore
-          )}`
+          `${round(course.progress?.earned ?? 0)} of ${round(course.progress?.total ?? 0)} marks earned, ${round(course.progress?.remaining ?? 0)}% still to come, scaled mark ${wholeScore(projectedScore)} at this target`
         )
       );
 
@@ -101,9 +97,9 @@
           const meta = plan.taskRequirements?.[`${course.name}::${task.id || task.name}`];
           const reqVal = meta ? meta.required : plan.required;
           const baseVal = meta ? meta.baseline : null;
-          reqText = `required ${round(reqVal)}%${baseVal !== null ? ` (baseline: ${round(baseVal)}%)` : ''}`;
+          reqText = `needs ${round(reqVal)}%${baseVal !== null ? ` (usually ${round(baseVal)}%)` : ''}`;
         } else {
-          reqText = `required ${round(plan.required)}%`;
+          reqText = `needs ${round(plan.required)}%`;
         }
 
         block.append(

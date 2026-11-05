@@ -14,6 +14,8 @@
   let activeMainTab = 'grade'; // 'grade' | 'atar'
   let activeSubjectIndex = 0;
   let predictorInstance = null;
+  let seenChoice = 0;
+  let shownSubjects = [];
 
   function createPredictorPanel() {
     let toggleBtn = document.getElementById('connectify-predictor-toggle');
@@ -65,15 +67,29 @@
     }
 
     function renderGradePredictor(container, subjects) {
+      // A subject picked in another tool since the last draw
+      const choice = window.ConnectifySubjectChoice;
+      if (choice && seenChoice !== choice.version()) {
+        seenChoice = choice.version();
+        const chosen = choice.find(subjects, s => s.cleanName);
+        if (chosen) activeSubjectIndex = subjects.indexOf(chosen);
+      }
+      shownSubjects = subjects;
       if (window.ConnectifyPredictorGradeView?.renderGradePredictor) {
         window.ConnectifyPredictorGradeView.renderGradePredictor(
           container,
           subjects,
           activeSubjectIndex,
-          idx => { activeSubjectIndex = idx; },
+          selectSubject,
           renderPanel
         );
       }
+    }
+
+    function selectSubject(idx) {
+      activeSubjectIndex = idx;
+      window.ConnectifySubjectChoice?.set(shownSubjects[idx]?.cleanName);
+      seenChoice = window.ConnectifySubjectChoice?.version();
     }
 
     function renderAtarPredictor(container, allSubjects) {
@@ -147,7 +163,7 @@
 
       const subtab = e.target.closest('.cx-pred-subtab');
       if (subtab && subtab.dataset.idx !== undefined) {
-        activeSubjectIndex = Number(subtab.dataset.idx);
+        selectSubject(Number(subtab.dataset.idx));
         renderPanel();
         return;
       }
@@ -173,20 +189,12 @@
       if (e.detail !== 'predictor') closePredictor();
     });
 
-    window.addEventListener('connectify-baselines-updated', () => {
-      const livePanel = document.getElementById('connectify-predictor') || panel;
-      if (!livePanel.hidden) renderPanel();
-    });
-
-    window.addEventListener('connectify-results-updated', () => {
-      const livePanel = document.getElementById('connectify-predictor') || panel;
-      if (!livePanel.hidden) renderPanel();
-    });
-
-    window.addEventListener('connectify-task-type-changed', () => {
-      const livePanel = document.getElementById('connectify-predictor') || panel;
-      if (!livePanel.hidden) renderPanel();
-    });
+    for (const evt of ['connectify-baselines-updated', 'connectify-results-updated', 'connectify-task-type-changed']) {
+      window.addEventListener(evt, () => {
+        const livePanel = document.getElementById('connectify-predictor') || panel;
+        if (!livePanel.hidden) renderPanel();
+      });
+    }
 
     return {
       toggleBtn,

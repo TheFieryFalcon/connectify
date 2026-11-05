@@ -20,18 +20,18 @@
         </label>
         <p class="cx-settings-desc" id="cx-semester-filter-detected"></p>
         <label class="cx-settings-check">
-          <input type="checkbox" id="cx-course-filter-toggle"> Ignore Certificate and General courses
+          <input type="checkbox" id="cx-course-filter-toggle"> Ignore Certificate and General subjects
         </label>
 
         <div class="cx-settings-divider cx-settings-fields">
           <div>
-            <label for="cx-general-cohort-input" class="cx-settings-label">General Cohort Size</label>
+            <label for="cx-general-cohort-input" class="cx-settings-label">Year Group Size</label>
             <div style="display:flex;align-items:center;gap:6px;">
               <input type="number" id="cx-general-cohort-input" class="cx-settings-number-input" min="1" step="1" placeholder="500" style="box-sizing:border-box;width:80px;padding:3px 6px;border-radius:4px;font-size:12px;">
             </div>
           </div>
           <div>
-            <label for="cx-atar-percentage-input" class="cx-settings-label">ATAR Percentage</label>
+            <label for="cx-atar-percentage-input" class="cx-settings-label">Students Doing ATAR</label>
             <div style="display:flex;align-items:center;gap:6px;">
               <input type="number" id="cx-atar-percentage-input" class="cx-settings-number-input" min="1" max="100" step="1" placeholder="60" style="box-sizing:border-box;width:75px;padding:3px 6px;border-radius:4px;font-size:12px;">
               <span class="cx-settings-hint">%</span>
@@ -70,7 +70,7 @@
       </section>
 
       <section class="cx-settings-section">
-        <header><strong>Semester 1 Scaling Calibration</strong></header>
+        <header><strong>Semester 1 Scaled Marks</strong></header>
         <div id="cx-calibration-table" style="display:grid;grid-template-columns:minmax(140px, 220px) 85px 85px;gap:8px 14px;align-items:center;"></div>
       </section>
 

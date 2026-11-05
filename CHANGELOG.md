@@ -7,6 +7,18 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ## Unreleased
 
 ### Changes
+- **The tools no longer ask you to expand outlines.** They already have your data, so the Expand All Outlines and Refresh Assessments buttons and the note about expanding are gone. Recalculate is gone too, as plans update while you type.
+- **Weakness Analyzer compares like with like.** A type is now measured by how you do on it against each subject's own average, so a weak subject full of essays no longer makes essays look weak. The cohort shows as a dashed line beside you, and the plot no longer sits on a dark box.
+- **A new task type you can't mistake: Unknown.** A task Connectify can't identify is no longer guessed to be Take-Home. Its dropdown says Choose a type, its prediction uses only that subject's results, and the Weakness Analyzer leaves it out and says how many.
+- **The outcome meter waits for three results.** One or two results are too few to judge a mark by, so a subject's meters start from its fourth marked task, or straight away if you've set a baseline. Meters and goal bars also work from the keyboard now.
+- **Your subject follows you between tools.** Pick Physics in the Predictor and Year Progression, Goal Setter and Estimator open on Physics too.
+- **Jump To is one step.** Choose a subject from the list and you're there.
+- **Target Grade has one table.** Each task's mark, weight, effort, needed mark and difficulty are together, rather than the exam appearing twice.
+- **Target ATAR says what its numbers mean.** A subject shows its Final mark, and each task what it needs.
+- **Task Dates is calmer.** A marked task with no week no longer shows a red warning and an input, tasks with the same name show their semester, and the ✎ is easy to see and click.
+- **Plainer words everywhere.** Low, Mid and High are the only names for predictions, a task's result in the tools is a Mark, and Settings says Year Group Size, Students Doing ATAR and Semester 1 Scaled Marks.
+- Goals' Delete is a bin, so it can't be mistaken for closing the dialog.
+- Predict ATAR and Estimate ATAR now note that they use school marks only, without WACE exams or moderation.
 - **Settings is shorter and evenly spaced.** Descriptions of what each option does are gone, leaving only what you can't see otherwise, such as the current semester and which setting needs a reload, and every section now uses the same margins.
 - **Certificate and General courses are ignored by default.** Any class with Certificate, Cert or General in its name loses its statistics and prediction panels, Type dropdowns and meters, no longer appears as an option in Year Progression, the Predictor, Goal Setter, Estimator, Weakness Analyzer, Jump To or Settings, no longer affects predictions for your other classes, and no longer sends notifications. Turn off "Ignore Certificate and General courses" in Settings to bring them back straight away.
 - **Subject names read the same everywhere.** Year Progression, the Predictor, Goal Setter, Estimator, Weakness Analyzer, Jump To, notifications and your calendar and Notion exports now all say `Chemistry` rather than `12 Chemistry ATAR` or `Chemistry ATAR Year 11`. Your saved marks, goals and settings carry on as before.
@@ -24,6 +36,9 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - **Finished goals say so in the notification's title.** It reads Goal Achieved with a green edge or Goal Missed with a gray edge, and goal names no longer start with the year level.
 
 ### Fixes
+- Auto-expand now reads as off in Settings on a fresh install, which is how it behaved.
+- Category names in Settings are now easy to read in the default theme.
+- The theme customizer's preview no longer shows a real teacher's name.
 - Auto-login no longer submits the sign-in page while you're entering your details. Clicking into the form, tabbing to it or picking a saved login yourself now leaves it to you, and it only signs in by itself if you haven't touched the form.
 - Jump To now lands on the subject you picked with Auto-expand on. It used to stop thousands of pixels short, somewhere in an earlier subject, because the outlines above it were still growing as the page scrolled past them.
 - Task dates written as just a week number now land in the right week. `35/36` means school weeks 35 and 36, so it now reads Term 4 Week 5-6 instead of Term 4 Week 1, and everything that orders tasks by date follows.

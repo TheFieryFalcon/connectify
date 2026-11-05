@@ -15,7 +15,7 @@
   const warning = text => `<div class="cx-radar-warning" style="padding:30px 20px;text-align:center;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;box-sizing:border-box;"><span style="font-size:26px;margin-bottom:8px;">⚠️</span><span>${escapeHtml(text)}</span></div>`;
 
   /** SVG markup: 20-100% grid rings, spokes, the score polygon, vertex markers and outer labels. */
-  function radarSvg(labels, data) {
+  function radarSvg(labels, data, cohort = []) {
     const N = labels.length;
     // Wide enough for a 24-character label (plus its score) beside a side spoke
     const width = 760;
@@ -61,6 +61,17 @@
     }
     const polyPts = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
 
+    // The cohort's line where every axis has a mean, dashed under the student's
+    const hasCohort = N > 0 && cohort.length === N && cohort.every(Number.isFinite);
+    const cohortPts = hasCohort ? cohort.map((val, i) => {
+      const r = (R * Math.max(0, Math.min(100, val))) / 100;
+      return `${(cx + r * Math.cos(angle(i))).toFixed(1)},${(cy + r * Math.sin(angle(i))).toFixed(1)}`;
+    }).join(' ') : '';
+    const cohortPolygon = hasCohort ? `<polygon class="cx-radar-cohort" points="${cohortPts}"/>` : '';
+    const legend = hasCohort
+      ? `<line x1="8" y1="16" x2="32" y2="16" stroke="#2ecc71" stroke-width="2.5"/><text x="38" y="20" font-size="11" font-family="system-ui">You</text><line class="cx-radar-cohort" x1="8" y1="34" x2="32" y2="34"/><text x="38" y="38" font-size="11" font-family="system-ui">Cohort</text>`
+      : '';
+
     const dataPolygon = `
       <polygon points="${polyPts}" fill="#2ecc71" fill-opacity="0.32" stroke="#2ecc71" stroke-width="2.5" stroke-linejoin="round"/>
     `;
@@ -70,7 +81,7 @@
     dataPoints.forEach(p => {
       markers += `
         <circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#2ecc71" stroke="#ffffff" stroke-width="1.5" style="cursor:pointer;">
-          <title>${escapeHtml(p.label)}: ${p.val}%</title>
+          <title>${escapeHtml(p.label)}: ${p.val}%${hasCohort ? `, cohort ${cohort[dataPoints.indexOf(p)]}%` : ''}</title>
         </circle>
       `;
     });
@@ -79,6 +90,7 @@
     // Baselines are set with y (never dominant-baseline, which Firefox does not pass to the score's tspan).
     const GAP = 12;
     const FONT = 11;
+    const LINE = 14;
     let labelElements = '';
     for (let i = 0; i < N; i++) {
       const a = angle(i);
@@ -88,6 +100,7 @@
       let ly = cy + (R + GAP) * sinA;
       if (sinA > 0.5) ly += FONT * 0.8; // below the ring: hang from the point
       else if (sinA >= -0.5) ly += FONT * 0.35; // beside it: centred on the point
+      else if (hasCohort) ly -= LINE; // above it: both lines clear the ring
 
       let anchor = 'middle';
       if (cosA > 0.3) anchor = 'start';
@@ -99,15 +112,18 @@
 
       // No whitespace around the label: it would shift the anchored text
       labelElements += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" fill="#e1eaf3" font-size="${FONT}" font-weight="600" font-family="system-ui">${displayName} <tspan fill="#2ecc71" font-weight="700">(${val}%)</tspan></text>`;
+      if (hasCohort) labelElements += `<text class="cx-radar-cohort-value" x="${lx.toFixed(1)}" y="${(ly + LINE).toFixed(1)}" text-anchor="${anchor}" font-size="${FONT - 1}" font-family="system-ui">Cohort ${cohort[i]}%</text>`;
     }
 
     return `
       <svg viewBox="0 0 ${width} ${height}" style="width:100%;height:100%;display:block;overflow:visible;user-select:none;" role="img" aria-label="Weaknesses radar chart">
         ${gridPolygons}
         ${spokes}
+        ${cohortPolygon}
         ${dataPolygon}
         ${markers}
         ${labelElements}
+        ${legend}
       </svg>
     `;
   }
@@ -120,9 +136,9 @@
             <option value="type">Assessment Type</option>
             <option value="subject">Subject</option>
          </select>
-         <button type="button" id="cx-weakness-expand-all" class="cx-weakness-expand-btn" style="margin-left:auto;">Expand All Outlines</button>
       </div>
       <div id="connectify-radar-chart" style="width:100%;height:350px;overflow:hidden;"></div>
+      <p id="cx-radar-note" class="cx-radar-note" hidden></p>
       <div id="cx-weakness-filters">
          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <strong style="font-size:12px;">Include in Analyzer:</strong>

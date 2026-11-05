@@ -38,7 +38,7 @@
     const markupMod = window.ConnectifyAtarMarkup;
     const {
       calculatorPanel, panelTitle, goalsTab, estimatorTab, modeButtons,
-      semesterCardsContainer, courseListContainer, detailSummary, resetBtn, expandAllBtn, calculationDetails
+      semesterCardsContainer, courseListContainer, detailSummary, resetBtn, calculationDetails, disclaimer
     } = markupMod.build();
     const launchers = { goals: goalsTab, estimator: estimatorTab };
     // The mode each launcher reopens on
@@ -70,11 +70,6 @@
         calc.resetPreferencesForSemester(courses[activeSemester], activeSemester);
       }
       renderCourseRows();
-    });
-
-    expandAllBtn.addEventListener('click', () => {
-      window.ConnectifyData?.expandAll?.(true);
-      plannerContext.scanAndRefresh();
     });
 
     // Planner UI Context
@@ -134,7 +129,7 @@
 
       setPressed(mode);
 
-      courseListContainer.hidden = detailSummary.hidden = resetBtn.hidden = expandAllBtn.hidden = calculationDetails.hidden =
+      courseListContainer.hidden = detailSummary.hidden = resetBtn.hidden = calculationDetails.hidden = disclaimer.hidden =
         mode !== 'estimate';
 
       if (plannerRefs) plannerRefs.container.hidden = mode !== 'target';

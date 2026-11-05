@@ -185,25 +185,23 @@
       return wrapper;
     };
 
-    if (Number.isFinite(point.order)) {
-      const label = createElement('span', math.shortTimestamp(point.order, point.caption));
-      label.title = math.formatTimestamp(point.order, point.caption);
+    // A week shown beside its pencil; a marked task with no week reads quietly, as nothing depends on it now
+    const hasWeek = Number.isFinite(point.order);
+    const isMarked = !point.pending && Number.isFinite(point.score);
+    if (hasWeek || isMarked) {
+      const label = createElement('span', hasWeek ? math.shortTimestamp(point.order, point.caption) : 'No week', hasWeek ? null : 'cx-date-none');
+      if (hasWeek) label.title = math.formatTimestamp(point.order, point.caption);
       const containerSpan = createElement('span', null, 'cx-time-cell');
       containerSpan.append(label);
 
-      const editBtn = createElement('button', '✎', savedTime !== null ? 'cx-time-edit-btn' : 'cx-time-edit-btn cx-time-edit-btn--unconfigured');
+      const editBtn = createElement('button', '✎', 'cx-time-edit-btn');
       editBtn.type = 'button';
       const editLabel = savedTime !== null ? `Custom week ${shownWeek(savedTime)} (click to change)` : 'Edit date (set custom week)';
       editBtn.setAttribute('aria-label', editLabel);
       editBtn.title = editLabel;
-      editBtn.style.background = 'none';
-      editBtn.style.border = 'none';
-      editBtn.style.cursor = 'pointer';
-      editBtn.style.fontSize = '13px';
-      editBtn.style.padding = '0';
       editBtn.onclick = () => {
         // Opens on the week shown, read from the task until overridden; nothing is saved unless it is changed
-        const inputWrapper = createInputField(shownWeek(savedTime) || orderWeek(point.order), false);
+        const inputWrapper = createInputField(shownWeek(savedTime) || (hasWeek ? orderWeek(point.order) : ''), false);
         if (typeof containerSpan.replaceWith === 'function') {
           containerSpan.replaceWith(inputWrapper);
         } else if (containerSpan.parentElement) {

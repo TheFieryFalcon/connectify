@@ -45,6 +45,7 @@
     const refs = { container, subjectSelect, clearBtn, output, tasksContainer, selected: ['', ''], inputs: [], course: null };
     subjectSelect.addEventListener('change', () => {
       refs.selected[ctx.getActiveSemester()] = subjectSelect.value;
+      window.ConnectifySubjectChoice?.set(subjectSelect.selectedOptions[0]?.textContent);
       render(refs, ctx);
     });
     clearBtn.addEventListener('click', () => {
@@ -123,6 +124,13 @@
 
   function render(refs, ctx) {
     const available = ctx.getGradeCourses()[ctx.getActiveSemester()] || [];
+    // A subject picked in another tool since the last draw
+    const choice = window.ConnectifySubjectChoice;
+    if (choice && refs.choiceVersion !== choice.version()) {
+      refs.choiceVersion = choice.version();
+      const chosen = choice.find(available, r => r.name);
+      if (chosen) refs.selected[ctx.getActiveSemester()] = chosen.id;
+    }
     const wanted = refs.selected[ctx.getActiveSemester()];
     const course = available.find(r => r.id === wanted) || available[0];
 

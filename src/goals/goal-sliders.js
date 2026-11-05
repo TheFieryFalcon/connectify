@@ -76,35 +76,43 @@
     return subjectsMemo;
   };
 
+  const markText = task => {
+    if (task.pending) return '—';
+    const mark = task.score ?? (task.weight ? (task.earned / task.weight) * 100 : 0);
+    return Number.isFinite(mark) ? `${M().round1(mark)}%` : '—';
+  };
+
   /**
-   * Target Grade: a table of the remaining weighted tasks: effort slider (unless `readOnly`), required mark and
-   * tier. `onChange()` re-renders the planner after a notch moves.
+   * Target Grade's one table: every task's mark and weight (`tasks`), and on each remaining weighted task its effort
+   * slider, required mark and tier. `onChange()` re-renders the planner after a notch moves.
    */
-  function renderGradeTasks(container, { course, plan, onChange, readOnly = false }) {
-    const tasks = (course.progress?.tasks || []).filter(t => t.weight > 0);
-    if (!tasks.length || plan.error || plan.finished) return null;
+  function renderGradeTasks(container, { course, tasks = course.progress?.tasks || [], plan, onChange }) {
+    if (!tasks.length) return null;
+    const planned = plan.error || plan.finished ? [] : (course.progress?.tasks || []).filter(t => t.weight > 0);
+    const isPlanned = task => planned.some(t => (t.id || t.name) === (task.id || task.name));
     const sliders = gradeSliders(course.id);
     const table = M().el('table', 'cta-grade-table cx-goal-tasks');
     const head = M().el('tr');
-    ['Assessment', 'Effort', 'Needs', 'Difficulty'].forEach(t => head.append(M().el('th', '', t)));
+    ['Assessment', 'Mark', 'Weight', ...(planned.length ? ['Effort', 'Needs', 'Difficulty'] : [])].forEach(t => head.append(M().el('th', '', t)));
     table.append(head);
     for (const task of tasks) {
-      const key = task.id || task.name;
-      const required = plan.impossible ? null : P().requiredOf(plan, key);
-      const tier = D().taskTier(required, D().predictionFor(course.subject || course.name, task, allSubjects()));
       const row = M().el('tr');
-      const effort = M().el('td', 'cx-goal-tasks__effort');
-      if (readOnly) effort.textContent = P().notchName(sliders[key]);
-      else {
+      row.append(M().el('td', '', task.name), M().el('td', '', markText(task)), M().el('td', '', `${M().round1(task.weight)}%`));
+      if (planned.length && !isPlanned(task)) row.append(M().el('td'), M().el('td'), M().el('td'));
+      else if (planned.length) {
+        const key = task.id || task.name;
+        const required = plan.impossible ? null : P().requiredOf(plan, key);
+        const tier = D().taskTier(required, D().predictionFor(course.subject || course.name, task, allSubjects()));
+        const effort = M().el('td', 'cx-goal-tasks__effort');
         effort.append(control(key, sliders[key], notch => {
           if (notch) sliders[key] = notch;
           else delete sliders[key];
           onChange();
         }));
+        const tierCell = M().el('td');
+        tierCell.append(M().tierLabel(tier));
+        row.append(effort, M().el('td', '', Number.isFinite(required) ? `${M().round1(required)}%` : '—'), tierCell);
       }
-      const tierCell = M().el('td');
-      tierCell.append(M().tierLabel(tier));
-      row.append(M().el('td', '', task.name), effort, M().el('td', '', Number.isFinite(required) ? `${M().round1(required)}%` : '—'), tierCell);
       table.append(row);
     }
     container.append(table);
@@ -126,7 +134,7 @@
     if (Number.isFinite(target)) {
       const tasks = (course.tasks || []).filter(t => t.weight > 0);
       const range = D().projectTasks(course.subject || course.name, tasks, P().isMarked, allSubjects());
-      line.append(M().el('span', 'cx-goal-subject-needs', `Needs ${M().round1(target)}%`), M().tierLabel(D().tierFor({ chance: D().chance(target, range) })));
+      line.append(M().el('span', 'cx-goal-subject-needs', `Final mark ${M().round1(target)}%`), M().tierLabel(D().tierFor({ chance: D().chance(target, range) })));
     }
     block.append(line);
     refocus(block.parentElement || block);

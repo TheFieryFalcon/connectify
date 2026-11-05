@@ -2,7 +2,7 @@
  * Connectify Cohort: outcome meter evaluation for a task row
  *
  * Builds the predictor's view of a marked task row (semester, position in the card, school week and
- * weight), hides the meter on a subject's first marked result without a baseline, and evaluates the mark
+ * weight), hides the meter until a subject has MIN_PRIOR_RESULTS earlier results or a baseline, and evaluates the mark
  * against the cached or freshly computed prediction. Unmarked rows get their prediction pre-cached.
  * Exposes window.ConnectifyCohortOutcomeEval.
  */
@@ -68,27 +68,34 @@
   const hasMark = row => Number.isFinite(window.ConnectifyCohortRows?.readMark?.(row));
   const isFiniteBaseline = v => v !== null && v !== '' && v !== undefined && Number.isFinite(Number(v));
 
+  // A prediction from one or two results is too unsure to judge a mark by: a 100% then an 87% in the top fifth read red
+  const MIN_PRIOR_RESULTS = 3;
+
   /**
-   * Whether the subject has a marked result before this one: an earlier marked row in this card, or for
-   * a Semester 2 task a marked Semester 1 task (collected results first, then a Semester 1 card on the page).
-   * A Semester 1 task listed on a Semester 2 panel is a Semester 1 task (taskSemester), so only rows above
-   * it count. Unmarked and pending rows don't count, so the first marked assessment of a class has no precedent.
+   * How many marked results the subject has before this one: the earlier marked rows in this card, or for a
+   * Semester 2 task its marked Semester 1 tasks (collected results, then a Semester 1 card on the page), whichever
+   * shows most (a Semester 2 card lists Semester 1's too). A Semester 1 task listed on a Semester 2 panel is a
+   * Semester 1 task (taskSemester), so only rows above it count. Unmarked and pending rows don't count.
    */
-  function hasPriorMarkedWork(task, row, meta, subjects, predMath) {
+  function priorMarkedCount(task, row, meta, subjects, predMath) {
     const card = row.closest(CARD_SELECTOR);
-    if (card && cardTaskRows(card, row).slice(0, task.sequence).some(hasMark)) return true;
-    if (task.semester <= 1) return false;
+    let count = card ? cardTaskRows(card, row).slice(0, task.sequence).filter(hasMark).length : 0;
+    if (task.semester <= 1) return count;
     const clean = name => (predMath.cleanSubject ? predMath.cleanSubject(name) : normalize(name).replace(/\s*[-–—]\s*(Semester|Sem)\s*[12].*$/i, ''));
     const subjectKey = clean(meta.subjectName);
     const subject = (subjects || []).find(s => s.name === meta.subjectName || clean(s.name) === subjectKey);
-    if (subject?.tasks?.some(t => !t.pending && Number.isFinite(t.score) && (t.semester || 1) < task.semester)) return true;
+    // Only results that came before this one: a bare week caption leaves Term 1 tasks reading as Semester 2 here
+    const isEarlier = t => !Number.isFinite(t.order) || !Number.isFinite(task.order) || t.order < task.order;
+    if (subject?.tasks?.length) {
+      return Math.max(count, subject.tasks.filter(t => !t.pending && Number.isFinite(t.score) && (t.semester || 1) < task.semester && isEarlier(t)).length);
+    }
     for (const other of document.querySelectorAll(CARD_SELECTOR)) {
       if (other === card) continue;
       const title = normalize(other.querySelector(TITLE_SELECTOR)?.textContent);
       if (!/Semester\s*1\b/i.test(title) || clean(title) !== subjectKey) continue;
-      if (Array.from(other.querySelectorAll('.cvr-c-tasks .cvr-c-task')).some(hasMark)) return true;
+      count = Math.max(count, Array.from(other.querySelectorAll('.cvr-c-tasks .cvr-c-task')).filter(hasMark).length);
     }
-    return false;
+    return count;
   }
 
   // One prediction per task: same-named tasks (each semester's exam) have their own ids
@@ -103,10 +110,10 @@
     const baselines = predMath.getBaselines ? predMath.getBaselines() : { subjects: {}, types: {} };
     const hasSubjectBaseline = isFiniteBaseline(baselines?.subjects?.[cleanSubj]) || isFiniteBaseline(baselines?.subjects?.[meta.subjectName]);
 
-    // The first marked assessment of a class has nothing to be measured against unless a baseline is set
-    const hasPriorSubjectData = hasPriorMarkedWork(task, row, meta, precollectedSubjects, predMath);
-    const isFirstOfSubject = !hasPriorSubjectData && !hasSubjectBaseline;
-    if (isFirstOfSubject) return null;
+    // Too few earlier results to measure this one against, unless a baseline is set
+    const priorResults = priorMarkedCount(task, row, meta, precollectedSubjects, predMath);
+    const tooFewResults = priorResults < MIN_PRIOR_RESULTS && !hasSubjectBaseline;
+    if (tooFewResults) return null;
 
     let prediction = predMath.getCachedPrediction ? predMath.getCachedPrediction(meta.subjectName, predictionKey(task)) : null;
     if (!prediction || prediction.unpredicted) {
@@ -138,5 +145,5 @@
     }
   }
 
-  window.ConnectifyCohortOutcomeEval = { taskFromRow, evaluateRow, precacheUpcoming, cardTaskRows };
+  window.ConnectifyCohortOutcomeEval = { MIN_PRIOR_RESULTS, taskFromRow, evaluateRow, precacheUpcoming, cardTaskRows };
 })();

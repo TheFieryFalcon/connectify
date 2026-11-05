@@ -49,11 +49,11 @@
     hSubject.className = 'cx-settings-col-header';
 
     const hRaw = document.createElement('span');
-    hRaw.textContent = 'Sem 1 Raw (%)';
+    hRaw.textContent = 'School Mark (%)';
     hRaw.className = 'cx-settings-col-header';
 
     const hScaled = document.createElement('span');
-    hScaled.textContent = 'Sem 1 Scaled';
+    hScaled.textContent = 'Scaled Mark';
     hScaled.className = 'cx-settings-col-header';
 
     table.append(hSubject, hRaw, hScaled);
@@ -73,8 +73,8 @@
 
       const rawInput = document.createElement('input');
       rawInput.type = 'number';
-      rawInput.placeholder = 'Raw';
-      rawInput.title = 'Semester 1 School Raw Mark (%)';
+      rawInput.placeholder = 'Mark';
+      rawInput.title = 'Your Semester 1 school mark (%)';
       rawInput.value = knownSem1Raw !== undefined ? knownSem1Raw : '';
       rawInput.className = 'cx-settings-number-input';
       rawInput.style.width = '85px';
@@ -84,7 +84,7 @@
       const scaledInput = document.createElement('input');
       scaledInput.type = 'number';
       scaledInput.placeholder = 'Scaled';
-      scaledInput.title = 'Semester 1 School Scaled Mark';
+      scaledInput.title = 'Your Semester 1 scaled mark';
       scaledInput.value = calibEntry.scaled !== undefined ? calibEntry.scaled : '';
       scaledInput.className = 'cx-settings-number-input';
       scaledInput.style.width = '85px';

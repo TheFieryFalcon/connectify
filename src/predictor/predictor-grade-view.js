@@ -88,7 +88,7 @@
         subjectView.innerHTML = `
           <div class="cx-pred-no-average-card">
             <div style="font-size:28px; margin-bottom:10px;">📋</div>
-            <strong style="display:block; font-size:15px; margin-bottom:8px;">No Grades or Baselines for ${esc(shown.get(activeSubject.cleanName))}</strong>
+            <strong style="display:block; font-size:15px; margin-bottom:8px;">No Marks or Baselines for ${esc(shown.get(activeSubject.cleanName))}</strong>
             <p style="font-size:12px; line-height:1.55; max-width:420px; margin:0 auto 18px auto; opacity:0.85;">
               Connectify needs either completed assessment marks or a previous year grade to project your final mark. Please go to <strong>Settings</strong> to enter your baseline grade, or wait for assessments to be returned.
             </p>
@@ -124,7 +124,7 @@
           <div>
             <strong style="font-size:15px; font-weight:700;">${esc(shown.get(activeSubject.cleanName))}</strong>
             <div style="font-size:11px; opacity:0.8; margin-top:2px;">
-              ${activeSubject.completedWeight}% completed (${activeSubject.completedCount} graded)&emsp;${currentScoreLabel}
+              ${activeSubject.completedWeight}% completed (${activeSubject.completedCount} marked)&emsp;${currentScoreLabel}
             </div>
           </div>
         </div>
@@ -132,17 +132,14 @@
           <div class="cx-pred-scenario-card cx-pred-scenario-card--low">
             <div class="cx-pred-scenario-label cx-pred-scenario-label--low">Low</div>
             <div class="cx-pred-scenario-value cx-pred-scenario-value--low">${activeSubject.projected.low ?? '—'}%</div>
-            <div class="cx-pred-scenario-sub cx-pred-scenario-sub--low">Relaxed pace</div>
           </div>
           <div class="cx-pred-scenario-card cx-pred-scenario-card--mid">
-            <div class="cx-pred-scenario-label cx-pred-scenario-label--mid">Middle (Expected)</div>
+            <div class="cx-pred-scenario-label cx-pred-scenario-label--mid">Mid</div>
             <div class="cx-pred-scenario-value cx-pred-scenario-value--mid">${activeSubject.projected.mid ?? '—'}%</div>
-            <div class="cx-pred-scenario-sub cx-pred-scenario-sub--mid">Current momentum</div>
           </div>
           <div class="cx-pred-scenario-card cx-pred-scenario-card--high">
             <div class="cx-pred-scenario-label cx-pred-scenario-label--high">High</div>
             <div class="cx-pred-scenario-value cx-pred-scenario-value--high">${activeSubject.projected.high ?? '—'}%</div>
-            <div class="cx-pred-scenario-sub cx-pred-scenario-sub--high">Extra effort</div>
           </div>
         </div>
       `;

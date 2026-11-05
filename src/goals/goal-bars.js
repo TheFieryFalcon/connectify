@@ -126,6 +126,10 @@
     bar.addEventListener('mouseenter', e => out?.showFloatingTooltip?.(e, text));
     bar.addEventListener('mousemove', e => out?.showFloatingTooltip?.(e, text));
     bar.addEventListener('mouseleave', () => out?.hideFloatingTooltip?.());
+    bar.tabIndex = 0;
+    bar.setAttribute('role', 'img');
+    bar.addEventListener('focus', () => out?.focusTooltip?.(bar, text));
+    bar.addEventListener('blur', () => out?.hideFloatingTooltip?.());
     return bar;
   }
 
