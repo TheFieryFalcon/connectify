@@ -17,6 +17,13 @@
   const TASK_WAIT_MS = 1500;
   const RETRY_MS = 100;
   const PULSE_MS = 2200;
+  const DRAWN_TILES = '#cx-legacy-outlines .eds-c-tile';
+  const MEASURING = 'cx-jump-measuring';
+  const FOLLOW_MS = 50;
+  const SETTLE_MS = 150;
+  const CENTRED_PX = 40;
+  const MAX_REAIMS = 3;
+  const STUDENT_SCROLL = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
 
   /** The card's overall (summary) row: its first task row outside the task list. */
   function overallRow(card) {
@@ -46,11 +53,67 @@
   }
 
   /**
-   * Scrolls to the jump's target and pulses the card (and a task row landed on), in the next frame: scrolling straight after the expand click
-   * laid the freshly expanded card out synchronously, a ~60ms hitch on the click.
+   * Off-screen drawn outlines skip layout (content-visibility: auto) at a 600px stand-in until first shown, and an
+   * expanded one is ~2000px, so a scroll worked out over them landed thousands of pixels short as each grew on the
+   * way. The card and every outline above it are laid out for real for the jump, which also makes the browser
+   * remember their heights; returns the function that lets them skip layout again.
+   */
+  function measureAbove(card) {
+    const tiles = Array.from(document.querySelectorAll(DRAWN_TILES));
+    const above = tiles.slice(0, tiles.indexOf(card) + 1);
+    above.forEach(tile => tile.classList.add(MEASURING));
+    return () => above.forEach(tile => tile.classList.remove(MEASURING));
+  }
+
+  const offCentre = target => {
+    const rect = target.getBoundingClientRect();
+    return rect.top + rect.height / 2 - window.innerHeight / 2;
+  };
+
+  let stopFollowing = null;
+
+  /**
+   * Re-aims once the scroll stops if the target has moved (a boxplot or panel arriving above it), until it is
+   * centred, or MAX_REAIMS (the page's end can keep it from centring). The student scrolling ends it, as does the next jump.
+   */
+  function follow(target, done) {
+    let lastY = window.scrollY;
+    let movedAt = Date.now();
+    let reaims = 0;
+    let timer = null;
+    const stop = () => {
+      clearTimeout(timer);
+      for (const type of STUDENT_SCROLL) window.removeEventListener(type, stop, true);
+      stopFollowing = null;
+      done();
+    };
+    const tick = () => {
+      if (window.scrollY !== lastY) {
+        lastY = window.scrollY;
+        movedAt = Date.now();
+      } else if (Date.now() - movedAt >= SETTLE_MS) {
+        if (Math.abs(offCentre(target)) <= CENTRED_PX || reaims++ >= MAX_REAIMS) { stop(); return; }
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        movedAt = Date.now();
+      }
+      timer = setTimeout(tick, FOLLOW_MS);
+    };
+    for (const type of STUDENT_SCROLL) window.addEventListener(type, stop, { capture: true, passive: true });
+    stopFollowing = stop;
+    timer = setTimeout(tick, FOLLOW_MS);
+  }
+
+  /**
+   * Scrolls to the jump's target and pulses the card (and a task row landed on), in a later frame: scrolling straight after the expand click
+   * laid the freshly expanded card out synchronously, a ~60ms hitch on the click. Expand All holds the page's
+   * scroll while it runs, so a jump made during it waits.
    */
   function go(card, taskIds, startedAt = Date.now()) {
     if (!card) return;
+    if (window.ConnectifyIsBulkExpanding) {
+      setTimeout(() => go(card, taskIds), RETRY_MS);
+      return;
+    }
     requestAnimationFrame(() => {
       const row = taskRow(card, taskIds);
       if (!row && taskIds?.length && Date.now() - startedAt < TASK_WAIT_MS) {
@@ -58,11 +121,17 @@
         return;
       }
       const target = row || overallRow(card) || card;
-      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      pulse(card);
-      if (row) pulse(row);
+      stopFollowing?.();
+      const release = measureAbove(card);
+      // This frame lays them out and records their heights; the scroll is worked out from those in the next
+      requestAnimationFrame(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        pulse(card);
+        if (row) pulse(row);
+        follow(target, release);
+      });
     });
   }
 
-  window.ConnectifyJumpTarget = { TASK_WAIT_MS, overallRow, taskRow, resolve, go };
+  window.ConnectifyJumpTarget = { TASK_WAIT_MS, overallRow, taskRow, resolve, measureAbove, go };
 })();

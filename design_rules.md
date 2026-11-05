@@ -794,6 +794,12 @@ Extremely concise summary of the core visual design language, contrast standards
     - drawn tiles are `content-visibility: auto`, so the page-wide restyles Connect's Material stylesheets force then skip off-screen outlines
     - Connect's cards are hidden once matched, never as Angular inserts them (its charts then restyled the hidden card per init)
     - Nothing is inserted into or removed from an expanded tile (Connect's CKEditor `+ *` rules restyle the whole tile): the compound progress bar fills a slot drawn with the tile
+  - Jumps over skipped tiles (`jump-target.js`)
+    - an off-screen tile is a 600px stand-in until first shown and an expanded one ~2000px, so a scroll worked out over them landed thousands of pixels short
+    - a jump lays out its card and every tile above it for real first (`.cx-jump-measuring`), scrolls a frame later, and they skip layout again once it lands
+    - `contain: layout` while measured: none lets a child's margin collapse out of the tile, all of auto's containment leaves Firefox skipping it and never scrolling
+    - it re-aims when the scroll stops if the target moved, 3 times at most; the student scrolling ends it
+    - a jump made during Expand All waits for it, which holds the page's scroll
   - Connect's cards are built light: `connect-cards-trim.js` (page world, document_start)
     - hands Connect its outlines response without task rows or class boxplots once Connectify has its own outlines
     - unchanged if Connectify's request fails, or after 10s

@@ -16,6 +16,14 @@
   contain-intrinsic-size: auto 600px;
 }
 
+/* A jump's scroll needs the real heights of the outlines above its target (jump-target.js). Layout containment
+   as under auto keeps a child's margin from collapsing out of the tile and changing its height. Never all of
+   auto's containment (layout style paint): Firefox then keeps skipping the tile and never scrolls */
+#cx-legacy-outlines .eds-c-tile.cx-jump-measuring {
+  content-visibility: visible;
+  contain: layout;
+}
+
 #cx-legacy-outlines,
 #cx-legacy-outlines > .v-ui {
   height: auto !important;

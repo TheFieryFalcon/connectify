@@ -11999,6 +11999,115 @@ runTest('Test 293: Jump to Subject lands on a newly marked task from a grade not
   assert.ok(manifest.indexOf('src/system/jump-target.js') < manifest.indexOf('src/system/new-grade.js'), 'jump-target.js loads before the notifier');
 });
 
+runTest('Test 327: A jump lands on its target over outlines that skip layout: those above are measured first, the scroll re-aimed, Expand All waited for', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/legacy-outlines.css'), 'utf8');
+  assert.ok(cssHas(css, '#cx-legacy-outlines .eds-c-tile.cx-jump-measuring { content-visibility: visible; contain: layout;'),
+    'a measured tile is laid out for real, its margins kept in as under auto; all of auto\'s containment leaves Firefox skipping it and never scrolling');
+
+  const saved = {
+    target: window.ConnectifyJumpTarget, qsa: document.querySelectorAll, raf: global.requestAnimationFrame, timeout: global.setTimeout,
+    clear: global.clearTimeout, now: Date.now, scrollY: window.scrollY, innerHeight: window.innerHeight, bulk: window.ConnectifyIsBulkExpanding,
+    add: window.addEventListener, remove: window.removeEventListener
+  };
+  const tiles = ['A', 'B', 'C'].map(name => makeOutlineCard(`${name} ATAR Year 12 - Semester 1`, { overall: '80%', tasks: [['Test 1', '8 Out of 10']] }));
+  const [above, card, below] = tiles;
+  const overall = card.querySelectorAll('.cvr-c-task').find(row => !row.closest('.cvr-c-tasks'));
+  const measuring = () => tiles.map(tile => tile.classList.contains('cx-jump-measuring'));
+  const NONE = [false, false, false];
+  const ABOVE = [true, true, false];
+  let now = 1000;
+  let frames = [];
+  let timers = [];
+  let nextTimer = 0;
+  let listeners = new Map();
+  const frame = () => frames.splice(0).forEach(fn => fn());
+  const advance = ms => {
+    now += ms;
+    for (const t of timers.filter(t => t.at <= now)) {
+      timers = timers.filter(other => other !== t);
+      t.fn();
+    }
+  };
+  try {
+    window.ConnectifyJumpTarget = undefined;
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/jump-target.js'), 'utf8'));
+    const jump = window.ConnectifyJumpTarget;
+    document.querySelectorAll = sel => (sel === '#cx-legacy-outlines .eds-c-tile' ? tiles : saved.qsa.call(document, sel));
+    global.requestAnimationFrame = fn => { frames.push(fn); return frames.length; };
+    global.setTimeout = (fn, ms = 0) => { const t = { id: ++nextTimer, fn, at: now + ms }; timers.push(t); return t.id; };
+    global.clearTimeout = id => { timers = timers.filter(t => t.id !== id); };
+    Date.now = () => now;
+    window.innerHeight = 900;
+    window.scrollY = 0;
+    window.addEventListener = (type, fn) => listeners.set(type, fn);
+    window.removeEventListener = type => listeners.delete(type);
+    overall.getBoundingClientRect = () => ({ top: 2000, height: 100 });
+
+    window.ConnectifyIsBulkExpanding = true;
+    jump.go(card);
+    assert.strictEqual(frames.length, 0, 'Expand All holds the page\'s scroll: a jump made during it waits');
+    window.ConnectifyIsBulkExpanding = false;
+    advance(100);
+
+    frame();
+    assert.deepStrictEqual(measuring(), ABOVE, 'the card and the outlines above it are laid out for real; those below cannot move the target');
+    assert.ok(!overall.scrollCount, 'the scroll waits a frame, for the real heights');
+    frame();
+    assert.strictEqual(overall.scrollCount, 1, 'then scrolls to the target');
+    assert.ok(card.classList.contains('cx-card-jump-highlight') || frames.length > 0, 'and pulses the card');
+    frame();
+
+    window.scrollY = 500;
+    advance(50);
+    assert.strictEqual(overall.scrollCount, 1, 'never re-aimed while the scroll is moving');
+    advance(50);
+    assert.strictEqual(overall.scrollCount, 1, 'nor before it has stopped for a moment');
+    advance(150);
+    assert.strictEqual(overall.scrollCount, 2, 'the target moved while scrolling: the jump re-aims once the scroll stops');
+    assert.deepStrictEqual(measuring(), ABOVE, 'with the outlines still measured');
+    overall.getBoundingClientRect = () => ({ top: 430, height: 100 });
+    advance(250);
+    assert.deepStrictEqual(measuring(), NONE, 'landed on the target: the outlines skip layout again');
+    assert.strictEqual(listeners.size, 0, 'and the jump stops listening for the student\'s scrolling');
+    assert.strictEqual(overall.scrollCount, 2);
+
+    overall.getBoundingClientRect = () => ({ top: 2000, height: 100 });
+    overall.scrollCount = 0;
+    jump.go(card);
+    frame(); frame(); frame();
+    for (let i = 0; i < 40; i++) advance(50);
+    assert.strictEqual(overall.scrollCount, 4, 'a target the page cannot centre (its end) is aimed at no more than 3 more times');
+    assert.deepStrictEqual(measuring(), NONE, 'then the jump lets go');
+
+    overall.scrollCount = 0;
+    jump.go(card);
+    frame(); frame(); frame();
+    assert.deepStrictEqual(measuring(), ABOVE);
+    listeners.get('wheel')();
+    assert.deepStrictEqual(measuring(), NONE, 'the student scrolling ends the jump');
+    for (let i = 0; i < 40; i++) advance(50);
+    assert.strictEqual(overall.scrollCount, 1, 'and it never scrolls again');
+
+    jump.go(card);
+    frame(); frame(); frame();
+    assert.strictEqual(listeners.size, 4);
+    jump.go(above);
+    frame(); frame(); frame();
+    assert.deepStrictEqual(measuring(), [true, false, false], 'the next jump replaces this one');
+    assert.strictEqual(listeners.size, 4);
+    listeners.get('wheel')();
+    assert.deepStrictEqual(measuring(), NONE);
+    assert.ok(below, 'three outlines');
+  } finally {
+    document.querySelectorAll = saved.qsa;
+    global.requestAnimationFrame = saved.raf;
+    global.setTimeout = saved.timeout;
+    global.clearTimeout = saved.clear;
+    Date.now = saved.now;
+    Object.assign(window, { ConnectifyJumpTarget: saved.target, scrollY: saved.scrollY, innerHeight: saved.innerHeight, ConnectifyIsBulkExpanding: saved.bulk, addEventListener: saved.add, removeEventListener: saved.remove });
+  }
+});
+
 runTest('Test 256: Uploads are rescaled, then resized and placed by the student in the crop prompt, then cropped', async () => {
   const src = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-wallpaper-fit.js'), 'utf8');
   const made = [];
