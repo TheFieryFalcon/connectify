@@ -11,6 +11,7 @@ The full rule set is always loaded into context via these imports:
 @docs/modules_system.md
 @docs/modules_ui_analytics.md
 @docs/modules_goals.md
+@docs/modules_past_years.md
 @docs/features_navigation_ui.md
 @docs/features_analytics_publishing.md
 
@@ -43,9 +44,11 @@ Isolated world content scripts run in the exact dependency order listed in `mani
 - `category-settings.js` & `category-baselines.js`: Category keywords, custom categories, previous-year baselines with candidate key purging.
 - `predictor-math.js` & submodules (`predictor-engine.js`, `predictor-dates.js`, `predictor-cache.js`): `predictionMemoryCache` Map for zero-disk lookups, task prediction, grade/ATAR projections.
 - `predictor-ui.js` & `predictor-grade-view.js`: Predictor drawer panel, one tab per subject (no cap), upcoming task projections, ATAR hero cards.
-- `sidebar.js` & `sidebar-handle.js`: Canonical launcher sequence (Goal Setter, Predictor, Year Progression, Estimator, Weakness Analyzer, Settings); Goal Setter holds Target Grade / Target ATAR and Estimator holds Estimate Grade / Estimate ATAR as tabs of the calculator panel (Predictor: Predict Grade / Predict ATAR); Grade before ATAR.
+- `sidebar.js` & `sidebar-handle.js`: Canonical launcher sequence (Goal Setter, Predictor, Year Progression, Estimator, Weakness Analyzer, Past Years once a year is archived, Settings); Goal Setter holds Target Grade / Target ATAR and Estimator holds Estimate Grade / Estimate ATAR as tabs of the calculator panel (Predictor: Predict Grade / Predict ATAR); Grade before ATAR.
 
 ---
+
+- Past Years & Backup (`docs/modules_past_years.md`): Connect's outline records are kept through the year (`year-capsule.js`) and archived at the rollover (`year-archive.js`, both stores, last three years); Past Years opens a year as it ended on a copy of its data (`past-year-mode.js`: `accountKey()` + `~p<id>`, that year's last day as the clock; read-only); Settings' Backup exports and imports everything (`backup-*.js`, allowlisted keys, replaced data unticked).
 
 ## 4. System & Styling Summary (`docs/modules_system.md`, `docs/apis_and_storage.md`)
 - `notifications.js`: Universal vertical stacked toast manager (`#connectify-notifications-container`).
@@ -54,7 +57,7 @@ Isolated world content scripts run in the exact dependency order listed in `mani
 - Theme (`src/theme/`): `theme-auth.js`, `theme-custom-tokens.js`, `theme-palettes.js`, `theme-registry.js`, `theme-custom-themes.js`, customizer modules and `theme.js` engine (see `docs/modules_system.md`): 7 preset palettes, in-DOM customizer, wallpaper upload/caching, Liquid Glass, unstyled surface adaptation (`data-connectea-surface`).
 - Modular styles: `src/sidebar/sidebar-*.css`, `src/atar/atar.css` (+ `atar-compact.css`, `atar-planner.css`), `src/progress/progress.css`, and the theme cascade in `src/theme/styles/` (one concern per file, ending with `theme.css`; `:is()` lists written out by `scripts/expand-is.js`, Test 270).
 - Connect CSS reference: `./connect_css/` contains upstream Connect portal stylesheets (`main_aDnd.css`, `clay_aDnd.css`, etc.) providing native DOM selectors, layout classes, and UI structures.
-- Storage keys: `connectea:theme:v1`, `connectea:theme:id`, `connectea:theme:last_theme`, `connectea:theme:custom_themes`, `connectea:theme:wallpaper`, `connectea:theme:liquid_glass`, `connectea:task_type_overrides`, `connectea:class_categories:`, `cx-categories`, `connectify:prediction:`, `connectify:stats_cache:`, `connectify:grade_cache:`, `connectify:class_semesters:`, `connectify:semester_filter`, `connectify:panel_view`, `connectify:hide_course_stats`, `connectify:year_archive:`, `connectify:cache_version:<subsystem>`.
+- Storage keys: `connectea:theme:v1`, `connectea:theme:id`, `connectea:theme:last_theme`, `connectea:theme:custom_themes`, `connectea:theme:wallpaper`, `connectea:theme:liquid_glass`, `connectea:task_type_overrides`, `connectea:class_categories:`, `cx-categories`, `connectify:prediction:`, `connectify:stats_cache:`, `connectify:grade_cache:`, `connectify:class_semesters:`, `connectify:semester_filter`, `connectify:panel_view`, `connectify:hide_course_stats`, `connectify:year_archive:`, `connectify:cache_version:<subsystem>`, `connectify:year_archive:` (also extension storage), `connectify:outline_records:`, `connectify:past_year` (sessionStorage).
  
 ---
  

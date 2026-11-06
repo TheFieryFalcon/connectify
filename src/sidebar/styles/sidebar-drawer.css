@@ -118,11 +118,11 @@
   box-sizing: border-box;
 }
 
-#connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor,#connectify-progress) header {
+#connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor,#connectify-progress,#connectify-past-years) header {
   margin-bottom: 16px;
 }
 
-#connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor) header strong {
+#connectify-sidebar :is(#connectify-weakness,#connectify-categories,#connectify-predictor,#connectify-past-years) header strong {
   font-size: 18px;
   font-weight: 650;
   color: inherit;

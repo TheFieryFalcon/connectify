@@ -37,7 +37,7 @@
         preferences = window.ConnectifyAtarCalc.getPreferences() || {};
       } else {
         const account = getAccountKey();
-        const storageKey = `connectea:atar:2025:${account}:${new Date().getFullYear()}`;
+        const storageKey = `connectea:atar:2025:${account}:${window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()}`;
         preferences = JSON.parse(localStorage.getItem(storageKey) || '{}');
         const rawPrefs = localStorage.getItem(window.ConnectifyUtils.userKey('connectea:preferences'));
         if (rawPrefs) {

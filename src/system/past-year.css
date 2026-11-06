@@ -1,0 +1,108 @@
+/**
+ * Connectify Past Years: a past year's outlines page (past-year-mode.js, past-year-bar.js)
+ *
+ * Connect's own cards and its class filter bar are this year's, so while a past year is viewed only the outlines
+ * Connectify draws from the year's records show, under one notice. Its teacher and school names link nowhere: their
+ * links belong to Connect's cards. The notice is one surface in the theme's tokens, kept under Connect's top bars.
+ */
+
+html[data-cx-past-year] cnt-sao-card,
+html[data-cx-past-year] cnt-category-bar,
+html[data-cx-past-year] .js-pos-category-toolbar-container,
+html[data-cx-past-year] #cx-semester-notice,
+html[data-cx-past-year] #connectify-wace-countdown {
+  display: none !important;
+}
+
+html[data-cx-past-year] #cx-legacy-outlines .cvr-c-data-nav-link {
+  pointer-events: none;
+  cursor: default;
+}
+
+html[data-cx-past-year] #cx-past-year-bar {
+  position: sticky;
+  top: var(--cx-past-year-top, 0px);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-sizing: border-box;
+  margin: 15px 15px 0;
+  padding: 10px 16px;
+  font-family: system-ui;
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #d8e3ee;
+  border-radius: 8px;
+}
+
+html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  min-width: 0;
+}
+
+html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__label {
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 700;
+}
+
+html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__saved {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+  color: #4a5d70;
+}
+
+html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back {
+  flex: none;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 12px;
+  font: 600 12px/26px system-ui;
+  border-radius: 6px;
+  border: 1px solid #bacddd;
+  background: #ffffff;
+  color: #245579;
+  cursor: pointer;
+}
+
+html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back:hover {
+  background: #e9f2fb;
+  border-color: #709fc4;
+  color: #174c75;
+}
+
+html.connectea-dark[data-cx-past-year] #cx-past-year-bar {
+  background: var(--cx-surface-bg, #1e2632);
+  color: var(--cx-text-primary, #e6edf5);
+  border-color: var(--cx-border, #2e3c4e);
+}
+
+html.connectea-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__saved {
+  color: var(--cx-text-secondary, #b7c5d6);
+}
+
+html.connectea-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back {
+  background: var(--cx-button-bg, var(--cx-nav-bg, #18222d));
+  color: var(--cx-button-text, var(--cx-text-secondary, #e1eaf3));
+  border-color: var(--cx-button-border, var(--cx-nav-border, #3b4d5e));
+}
+
+html.connectea-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back:hover {
+  background: var(--cx-button-hover, var(--cx-badge-bg, #24303e));
+  border-color: var(--cx-border-strong, #556c84);
+  color: var(--cx-text-primary, #ffffff);
+}
+
+/* Liquid Glass: one glass surface like the theme's top bars, rounded like its panels */
+html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-cx-past-year] #cx-past-year-bar {
+  background: var(--cx-surface-elevated, rgba(18, 26, 40, 0.65));
+  backdrop-filter: blur(var(--cx-glass-blur-overlay, 12px)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur-overlay, 12px)) saturate(160%);
+  border-radius: 16px;
+}

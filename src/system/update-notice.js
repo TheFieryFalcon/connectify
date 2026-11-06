@@ -36,7 +36,7 @@
   function check() {
     const version = currentVersion();
     const notices = window.ConnectifyNotifications;
-    if (!version || !notices?.show) return false;
+    if (!version || !notices?.show || window.ConnectifyPastYearMode?.active()) return false;
     let seen = null;
     try { seen = localStorage.getItem(KEY); } catch {}
     try { localStorage.setItem(KEY, version); } catch {}

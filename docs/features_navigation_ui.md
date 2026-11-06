@@ -45,6 +45,7 @@ This document details user-facing visual features 1 through 10, covering direct 
   - **Year Progression** (`#connectify-progress-toggle`)
   - **Estimator** (`#connectify-estimator-toggle`): Estimate Grade and Estimate ATAR tabs.
   - **Weakness Analyzer** (`#connectify-weakness-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
+  - **Past Years** (`#connectify-past-years-toggle`, once a year is archived, on every page): each past year with View, which opens Assessment Outlines and every tool as that year ended, read-only, under a notice with Back to This Year (`modules_past_years.md`).
   - **Settings & Calibration** (`#connectify-categories-toggle`): Clean white button (`#ffffff`) in light mode with centered text.
 - **Next Up and Awaiting Results**: on Assessment Outlines a card at the bottom of the launcher menu lists up to three unmarked tasks due this week or next and up to three whose week has passed, each with its subject and when. A semester with final grades and 0% rows are left out; a list with nothing to show disappears.
 - **Functionality**:

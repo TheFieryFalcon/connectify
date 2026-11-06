@@ -126,6 +126,7 @@
     const refreshSemesterFilter = window.ConnectifySettingsSemesterFilter?.bind(panel) || (() => {});
     const refreshPanelView = window.ConnectifySettingsPanelView?.bind(panel) || (() => {});
     const refreshCourseFilter = window.ConnectifySettingsCourseFilter?.bind(panel) || (() => {});
+    window.ConnectifySettingsBackup?.bind(panel);
     const refreshEarlyMeters = window.ConnectifySettingsEarlyMeters?.bind(panel) || (() => {});
     bindClearCache(panel);
 

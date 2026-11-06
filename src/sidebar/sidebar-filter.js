@@ -64,6 +64,8 @@
 
   /** True on the outlines page when a filter is applied or fewer than four courses are visible (year-rollover.js). */
   function isOutlinesFilterRestricted() {
+    // A past year (Past Years) shows every class, whatever Connect's filter holds
+    if (window.ConnectifyPastYearMode?.active()) return false;
     const outlinesRoot = document.querySelector('.assessmentoutlinesui, [class*="assessmentoutline"], .cvr-c-category-toolbar, .eds-c-accordion--dark, cnt-category-bar');
     if (!outlinesRoot) return false;
     const tiles = document.querySelectorAll('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile, [class*="subject-card"]');

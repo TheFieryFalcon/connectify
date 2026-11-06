@@ -2,8 +2,8 @@
  * Connectify Sidebar Drawer & Tool Launcher Workspace
  *
  * The slide-out drawer hosting Connectify's tools on every Connect page: builds the shell, opens and
- * closes it, keeps the active tool in sync and, away from Assessment Outlines, leaves only Settings
- * enabled under a notice linking there (sidebar-page-notice.js). The shell is built in sidebar-shell.js,
+ * closes it, keeps the active tool in sync and, away from Assessment Outlines, leaves only Settings and
+ * Past Years enabled under a notice linking there (sidebar-page-notice.js). The shell is built in sidebar-shell.js,
  * tools are mounted and launched by sidebar-tools.js.
  */
 (() => {
@@ -16,9 +16,11 @@
     const tools = window.ConnectifySidebarTools;
     const { ANYWHERE_TOOLS } = window.ConnectifySidebarPageNotice;
     const onOutlines = () => window.ConnectifyUtils.isOutlinesPage();
-    // Off the outlines page only Settings opens
+    // Off the outlines page only Settings and Past Years open; in a past year (Past Years) Settings is off, as it
+    // would change the year's copy, never the student's own settings
     const isLimited = () => !onOutlines();
-    const allowsTool = id => !isLimited() || ANYWHERE_TOOLS.has(id);
+    const pastYear = () => Boolean(window.ConnectifyPastYearMode?.active());
+    const allowsTool = id => (!isLimited() || ANYWHERE_TOOLS.has(id)) && !(pastYear() && id === 'connectify-categories-toggle');
 
     const updateHandlePosition = () => (window._connectifyUpdateHandlePosition || window.ConnectifySidebarHandle?.updateHandlePosition || function() {})();
     const updateHandleState = (isOpen) => (window.ConnectifySidebarHandle?.updateHandleState || function() {})(isOpen);
@@ -106,7 +108,7 @@
     document.addEventListener('click', handleToolLaunchClick);
 
     const handleConnectifyOpen = e => {
-      if (isLimited() && e.detail !== 'home' && e.detail !== 'categories') return;
+      if (isLimited() && !['home', 'categories', 'past-years'].includes(e.detail)) return;
       if (e.detail !== 'home') openSidebar();
       const activeTool = e.detail;
       const btnMap = {
@@ -114,6 +116,7 @@
         predictor: ['connectify-predictor-toggle'],
         progress: ['connectify-progress-toggle'],
         weakness: ['connectify-weakness-toggle'],
+        'past-years': ['connectify-past-years-toggle'],
         categories: ['connectify-categories-toggle']
       };
       if (activeTool === 'calculator') {
@@ -154,7 +157,7 @@
           if (!off && btn.hasAttribute('aria-disabled')) btn.removeAttribute('aria-disabled');
         }
         if (limited) {
-          for (const child of workspace.children) if (child.id !== 'connectify-categories' && !child.hidden) child.hidden = true;
+          for (const child of workspace.children) if (!['connectify-categories', 'connectify-past-years'].includes(child.id) && !child.hidden) child.hidden = true;
         }
         const hasActiveTool = Array.from(workspace.children).some(p => !p.hidden);
         sidebar.classList.toggle('cx-tool-active', hasActiveTool);

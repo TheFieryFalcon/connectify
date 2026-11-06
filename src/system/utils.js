@@ -112,21 +112,20 @@
 
   /**
    * The student account: the signed-in user's own (see accountForUser); on a page that does not name its
-   * user, ?coisp=... (class ids excluded), else the last account seen, else 'current'.
+   * user, ?coisp=... (class ids excluded), else the last account seen, else 'current'. accountKey() is this one, but
+   * while a past year is viewed (past-year-mode.js) it names that year's copy, so every per-student key is the copy's.
    */
-  function accountKey() {
+  function liveAccountKey() {
     if (userAccount) return userAccount;
     let coisp = null;
     try { coisp = new URL(location.href).searchParams.get('coisp'); } catch {}
     if (coisp && /^DomainSchool/i.test(coisp)) coisp = null;
     const user = signedInUserId();
     if (user) return accountForUser(user, coisp);
-    if (coisp) {
-      rememberAccount(coisp);
-      return coisp;
-    }
+    if (coisp) { rememberAccount(coisp); return coisp; }
     return rememberedAccount() || 'current';
   }
+  const accountKey = () => liveAccountKey() + (window.ConnectifyPastYearMode?.suffix() || '');
 
   /** Returns every localStorage key accepted by predicate (keys are collected before any removal). */
   function storageKeys(predicate) {
@@ -243,7 +242,7 @@
   }
 
   window.ConnectifyUtils = {
-    pageFetch, normalize, cleanSubjectName, subjectLabels, escapeHtml, accountKey, signedInUserId, userKey, userKeys, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
+    pageFetch, normalize, cleanSubjectName, subjectLabels, escapeHtml, accountKey, liveAccountKey, signedInUserId, userKey, userKeys, storageKeys, removeStorageKeys, BASELINE_PREFIXES, baselineKeys, isBaselineKey,
     customWeekOrder, readTimeOverride, syncCharts, cardSemester, OUTLINES_URL, isOutlinesPage
   };
 })();

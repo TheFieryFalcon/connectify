@@ -69,5 +69,5 @@
     return { weeks: list, undated: rows.filter(row => !row.completed && !Number.isFinite(row.task.order)).length };
   }
 
-  window.ConnectifyNextUp = { now: () => new Date(), weeks, build };
+  window.ConnectifyNextUp = { now: () => (window.ConnectifyPastYearMode?.today() ?? new Date()), weeks, build };
 })();

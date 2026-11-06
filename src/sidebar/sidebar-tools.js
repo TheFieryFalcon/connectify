@@ -11,11 +11,14 @@
   const CANONICAL_BUTTONS = [
     { id: 'connectify-goals-toggle', label: 'Goal Setter' }, { id: 'connectify-predictor-toggle', label: 'Predictor' },
     { id: 'connectify-progress-toggle', label: 'Year Progression' }, { id: 'connectify-estimator-toggle', label: 'Estimator' },
-    { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' }, { id: 'connectify-categories-toggle', label: 'Settings' }
+    { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer' },
+    // Only once a past year is archived (sidebar-past-years.js)
+    { id: 'connectify-past-years-toggle', label: 'Past Years', shown: () => window.ConnectifyPastYears?.available() === true },
+    { id: 'connectify-categories-toggle', label: 'Settings' }
   ];
-  const SECONDARY_TOOLS = new Set(['connectify-weakness-toggle', 'connectify-categories-toggle']);
+  const SECONDARY_TOOLS = new Set(['connectify-weakness-toggle', 'connectify-past-years-toggle', 'connectify-categories-toggle']);
   const LAUNCHER_SELECTOR = '#connectify-goals-toggle, #connectify-estimator-toggle, #connectify-predictor-toggle, ' +
-    '#connectify-progress-toggle, #connectify-weakness-toggle, #connectify-categories-toggle';
+    '#connectify-progress-toggle, #connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle';
   // Both open the calculator panel: Goal Setter (Target Grade, Target ATAR), Estimator (Estimate Grade, Estimate ATAR)
   const CALCULATOR_GROUPS = { 'connectify-goals-toggle': 'goals', 'connectify-estimator-toggle': 'estimator' };
 
@@ -32,6 +35,10 @@
       getRefs: () => window.ConnectifyWeakness?.panelRefs || window.ConnectifyWeakness?.ensureWeaknessPanel?.(),
       panelId: 'connectify-weakness', open: r => r?.openWeakness?.(), close: r => r?.closeWeakness?.(), detail: 'weakness'
     },
+    'connectify-past-years-toggle': {
+      getRefs: () => window.ConnectifyPastYears?.panelRefs,
+      panelId: 'connectify-past-years', open: r => r?.openPastYears?.(), close: r => r?.closePastYears?.(), detail: 'past-years'
+    },
     'connectify-categories-toggle': {
       getRefs: () => window.ConnectifyCategorySettings?.panelRefs || window.ConnectifyCategorySettings?.ensureSettingsPanel?.(),
       panelId: 'connectify-categories', open: r => r?.openCategories?.(), close: r => r?.closeCategories?.(), detail: 'categories'
@@ -43,6 +50,7 @@
     ['connectify-predictor', () => window.ConnectifyPredictorUI?.panelRefs?.panel || window.ConnectifyPredictorUI?.getInstance?.()?.panel],
     ['connectify-progress', () => document.getElementById('connectify-progress') || window.ConnectifyProgress?.panelRefs?.panel],
     ['connectify-weakness', () => window.ConnectifyWeakness?.panelRefs?.panel || (window.ConnectifyWeakness?.ensureWeaknessPanel && window.ConnectifyWeakness.ensureWeaknessPanel().panel)],
+    ['connectify-past-years', () => window.ConnectifyPastYears?.panelRefs?.panel],
     ['connectify-categories', () => window.ConnectifyCategorySettings?.panelRefs?.catPanel || (window.ConnectifyCategorySettings?.ensureSettingsPanel && window.ConnectifyCategorySettings.ensureSettingsPanel().catPanel)]
   ];
 
@@ -61,6 +69,7 @@
       (item.id === 'connectify-predictor-toggle' && (window.ConnectifyPredictorUI?.panelRefs?.toggleBtn || window.ConnectifyPredictorUI?.getInstance?.()?.toggleBtn)) ||
       (item.id === 'connectify-progress-toggle' && (document.getElementById('connectify-progress-toggle') || window.ConnectifyProgress?.panelRefs?.toggleBtn)) ||
       (item.id === 'connectify-weakness-toggle' && window.ConnectifyWeakness?.panelRefs?.toggleBtn) ||
+      (item.id === 'connectify-past-years-toggle' && window.ConnectifyPastYears?.panelRefs?.toggleBtn) ||
       (item.id === 'connectify-categories-toggle' && window.ConnectifyCategorySettings?.panelRefs?.catBtn) || null;
   }
 
@@ -79,6 +88,8 @@
     if (btn.textContent !== item.label) btn.textContent = item.label;
     const className = SECONDARY_TOOLS.has(item.id) ? 'cx-secondary-tool' : 'cx-calculator-tool';
     if (btn.className !== className) btn.className = className;
+    const hidden = item.shown ? !item.shown() : false;
+    if (btn.hidden !== hidden) btn.hidden = hidden;
     return btn;
   }
 
@@ -143,7 +154,7 @@
     if (panel && !panel.hidden) {
       cfg.close(refs);
       openEvent('home');
-    } else if (refs && (refs.openPredictor || refs.openProgress || refs.openWeakness || refs.openCategories)) {
+    } else if (refs && (refs.openPredictor || refs.openProgress || refs.openWeakness || refs.openPastYears || refs.openCategories)) {
       cfg.open(refs);
     } else if (panel) {
       panel.hidden = false;

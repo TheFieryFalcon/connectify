@@ -51,7 +51,7 @@
       .replace(/(\d)(st|nd|rd|th)\b/gi, '$1')
       .replace(/^(mon|tue|wed|thu|fri|sat|sun)\w*\s+/i, '');
     if (!/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(cleaned)) return null;
-    const year = new Date().getFullYear();
+    const year = window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear();
     const parsed = new Date(Date.parse(`${cleaned} ${year}`));
     if (!Number.isFinite(parsed.getTime())) return null;
     const date = new Date(Date.UTC(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()));
@@ -131,7 +131,7 @@
   // Semester 2 starts at canonical school week 17 through the term calendar: Term 2 Week 7 (order 19,
   // 12 per term), or Term 2 Week 8 (order 20) under Early Easter, whose Term 1 has nine weeks
   const SEMESTER_TWO_WEEK = 17;
-  const semesterTwoOrder = (year = new Date().getFullYear()) =>
+  const semesterTwoOrder = (year = (window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear())) =>
     window.ConnectifySchoolTerms?.weekOrder(SEMESTER_TWO_WEEK, year) ?? 19;
   const TERM_AND_WEEK = /term\s*\d[\s\S]*?weeks?\s*\d|weeks?\s*\d+[\s\S]*?term\s*\d/i;
 

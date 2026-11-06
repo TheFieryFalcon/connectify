@@ -11,7 +11,8 @@
  * Show / Hide Details adds
  * and removes the task rows as Vaadin did, so Expand All, Jump To, the cohort panels and every other
  * outline feature work on them unchanged. Clicking a teacher or school forwards to Connect's own link.
- * Cards without a record, or a page where the API failed, keep Connect's new look.
+ * Cards without a record, or a page where the API failed, keep Connect's new look. A past year (Past Years) draws
+ * all its saved records and never Connect's cards, which past-year.css hides with its filter bar.
  * Exposes window.ConnectifyLegacyOutlines.
  */
 (() => {
@@ -116,7 +117,8 @@
     let shown = [];
     let parent = null;
     let before = null;
-    if (connectPending()) {
+    // A past year's records (Past Years) are drawn whatever Connect shows, after its hidden cards
+    if (connectPending() || window.ConnectifyPastYearMode?.active()) {
       parent = zone();
       if (!parent) return;
       shown = records;

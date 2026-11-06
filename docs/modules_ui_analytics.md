@@ -128,7 +128,7 @@ This document covers the user interface and analytics modules, including target 
   - `sidebar-filter.js` (`isOutlinesFilterRestricted` for the year rollover, `clickConnectAllButton`), `sidebar-page-notice.js` (`.cx-page-notice` with an Open Assessment Outlines link; `ANYWHERE_TOOLS`: Settings), `sidebar-tools.js`, `sidebar-shell.js`: launcher/panel mounting (DOM only touched when out of place; launchers pressed only while their panel is open) and the drawer shell.
 - **Key Functions**:
   - Drawer slide synchronization and 900px workspace expansion (`.cx-tool-active`) with `← Back to Menu` navigation.
-  - Canonical launcher buttons: Goal Setter, Predictor, Year Progression, Estimator, Weakness Analyzer, Settings (`CALCULATOR_GROUPS` maps the two calculator launchers to `openCalculator('goals' | 'estimator')`).
+  - Canonical launcher buttons: Goal Setter, Predictor, Year Progression, Estimator, Weakness Analyzer, Past Years (once a year is archived), Settings (`CALCULATOR_GROUPS` maps the two calculator launchers to `openCalculator('goals' | 'estimator')`).
   - Centralized delegated click handling and single active tool policy.
 - **Export**: `window.ConnectifyInitSidebar`.
 

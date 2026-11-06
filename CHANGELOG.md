@@ -7,6 +7,8 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 ## Unreleased
 
 ### Additions
+- **Past Years**: a sidebar tool, once a school year has ended, that opens Assessment Outlines and every tool as that year stood at its end, read-only. Connect stops showing last year's marks, so Connectify now keeps them, in both of the browser's stores.
+- **Backup**: Export Data and Import Data in Settings move everything Connectify keeps (goals, types, weeks, calibration, baselines, categories, past years, themes and preferences) to another browser or computer. An import lists what it would change, and nothing that would replace data starts ticked.
 - **Hide potentially inaccurate prediction bars**: a Settings option, off by default, that hides the outcome meter on a subject's second and third marked results, when the prediction behind it rests on only one or two results.
 
 ### Changes

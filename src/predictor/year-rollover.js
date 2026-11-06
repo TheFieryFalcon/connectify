@@ -5,9 +5,10 @@
  * assessment outlines page has a new name (a new school year), the snapshot becomes the previous-year
  * baselines for the assessment types and subjects still present, and last year's cached results are
  * cleared. Connect never shows last year's marks again, so before clearing, the final cached averages
- * (last year's classes only) are taken and the cached results are archived. The class registry
+ * (last year's classes only) are taken and the year is archived (year-archive.js) with Connect's outline
+ * records of its last load (year-capsule.js), which Past Years draws. The class registry
  * (class-semesters.js) calls handleClassChange() as soon as it sees a wholly new class set. Viewing an
- * earlier year never triggers it. Exposes window.ConnectifyYearRollover.
+ * earlier year, on Connect or in Past Years, never triggers it. Exposes window.ConnectifyYearRollover.
  */
 (() => {
   'use strict';
@@ -16,7 +17,6 @@
   const TITLE_SELECTOR = '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading';
   const { normalize, accountKey } = window.ConnectifyUtils;
   const stateKey = () => `connectify:year_snapshot:${accountKey()}`;
-  const archiveKey = () => `connectify:year_archive:${accountKey()}`;
   const readJson = key => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
   const round1 = n => Math.round(n * 10) / 10;
 
@@ -42,17 +42,8 @@
       .trim();
   }
 
-  /** Highest calendar year and school year level named in class titles (null when absent). */
-  function yearMarker(names) {
-    let calendar = null;
-    let level = null;
-    for (const name of names) {
-      for (const m of name.matchAll(/\b(20\d{2})\b/g)) calendar = Math.max(calendar ?? 0, Number(m[1]));
-      const lv = name.match(/\byear\s*(\d{1,2})\b/i) || name.match(/^(\d{1,2})\s/);
-      if (lv) level = Math.max(level ?? 0, Number(lv[1]));
-    }
-    return { calendar, level };
-  }
+  // Shared with the archive, which labels each year by it
+  const yearMarker = names => window.ConnectifyYearArchive.yearMarker(names);
 
   const signature = names => [...names].sort().join('|');
 
@@ -127,25 +118,24 @@
     return { types: { ...(snapshot.types || {}), ...final.types }, subjects: { ...(snapshot.subjects || {}), ...final.subjects } };
   }
 
-  // The cache is the only copy of last year's marks once Connect moves on: keep the last two years
+  // The cache is the only copy of last year's marks once Connect moves on: Past Years shows them from the archive
+  // (year-archive.js), drawn from Connect's own records of the year's last load (year-capsule.js)
   function archiveYear(state, averages) {
     const cache = window.ConnectifyCache;
+    const archive = window.ConnectifyYearArchive;
     const entry = {
       classNames: state.classNames || [],
       averages,
       subjects: cache?.serializeSubjects?.(cache.subjectsCache) || {},
       grades: readJson(`connectify:grade_cache:${accountKey()}`) || {},
       classSemesters: window.ConnectifyClassSemesters?.get?.() || {},
+      records: window.ConnectifyYearCapsule?.takeRecords?.(state.classNames || []) || null,
+      settings: window.ConnectifyYearCapsule?.settings?.() || {},
       goals: window.ConnectifyGoalEvents?.endYear?.() || null,
       archivedAt: Date.now()
     };
-    const previous = Array.isArray(readJson(archiveKey())) ? readJson(archiveKey()) : [];
-    try {
-      localStorage.setItem(archiveKey(), JSON.stringify([...previous, entry].slice(-2)));
-    } catch {
-      // Over quota: the averages, marks and class list still fit without the task lists
-      try { localStorage.setItem(archiveKey(), JSON.stringify([...previous.slice(-1), { ...entry, subjects: {} }])); } catch {}
-    }
+    entry.year = archive.yearOf(entry);
+    archive.write([entry]);
   }
 
   function rollOver(state, liveNames) {
@@ -183,6 +173,8 @@
    * or 'restricted' while a Connect filter hides classes or a rollover is running.
    */
   function handleClassChange(liveNames, previousNames = []) {
+    // A past year's copy (Past Years) is never a new year
+    if (window.ConnectifyPastYearMode?.active()) return 'past-year';
     if (rollingOver || window.ConnectifySidebarFilter?.isOutlinesFilterRestricted?.()) return 'restricted';
     const state = loadState() || { classNames: [], seen: [], snapshot: null };
     if (!state.classNames?.length && previousNames.length) state.classNames = previousNames;
@@ -192,6 +184,7 @@
   }
 
   function check() {
+    if (window.ConnectifyPastYearMode?.active()) return;
     if (window.ConnectifySidebarFilter?.isOutlinesFilterRestricted?.()) return;
     const liveNames = liveClassNames();
     if (liveNames.length < 2) return;

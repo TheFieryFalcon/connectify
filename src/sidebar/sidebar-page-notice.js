@@ -1,15 +1,15 @@
 /**
  * Connectify Sidebar: off-outlines notice
  *
- * The sidebar is on every Connect page, but only Settings works away from Assessment Outlines: the
+ * The sidebar is on every Connect page, but only Settings and Past Years work away from Assessment Outlines: the
  * other tools open there. Builds the notice shown above the launchers on other pages, with a link to
  * the outlines. Exposes window.ConnectifySidebarPageNotice.
  */
 (() => {
   'use strict';
 
-  // The one launcher that works on every page
-  const ANYWHERE_TOOLS = new Set(['connectify-categories-toggle']);
+  // The launchers that work on every page: Past Years opens the outlines on the year picked
+  const ANYWHERE_TOOLS = new Set(['connectify-past-years-toggle', 'connectify-categories-toggle']);
 
   /** The notice with an "Open Assessment Outlines" link (hidden until the sidebar shows it). */
   function create() {

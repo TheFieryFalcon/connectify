@@ -10,7 +10,7 @@
   if (window.ConnectifyAtarCalc) return;
 
   const account = window.ConnectifyUtils.accountKey();
-  const storageKey = `connectea:atar:2025:${account}:${new Date().getFullYear()}`;
+  const storageKey = `connectea:atar:2025:${account}:${window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()}`;
   let savedPreferences = {};
 
   try {

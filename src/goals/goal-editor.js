@@ -143,7 +143,7 @@
     const bar = M().el('div', 'cx-goal-actions');
     const setBtn = M().el('button', 'cx-goal-set', info.held || current ? 'Update Goal' : 'Set as Goal');
     setBtn.type = 'button';
-    setBtn.disabled = Boolean(info.plan.error) || !window.ConnectifyUtils.isOutlinesPage();
+    setBtn.disabled = Boolean(info.plan.error) || !window.ConnectifyUtils.isOutlinesPage() || Boolean(window.ConnectifyPastYearMode?.active());
     setBtn.addEventListener('click', () => {
       if (current) return openOnEnd(kind, current, info);
       composing[kind] = { week: null };

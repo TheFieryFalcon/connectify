@@ -157,8 +157,11 @@
     return date.getMonth() >= 5;
   }
 
+  // A past year (Past Years) is seen from its last day
+  const today = (now = Date.now()) => (window.ConnectifyPastYearMode?.active() ? window.ConnectifyPastYearMode.today() : new Date(now));
+
   /** Whether a date falls in Semester 2: past the cutoff, unless this school year began after it. */
-  function isSemesterTwoCutoff(date = new Date(Date.now())) {
+  function isSemesterTwoCutoff(date = today()) {
     if (!pastCutoff(date)) return false;
     const at = newYearAt();
     if (!at || at > date.getTime()) return true;
@@ -186,7 +189,7 @@
   function detectSemester(forDate) {
     const now = Date.now();
     if (!forDate && detected && now - detectedAt < 1000) return detected;
-    const semester = isNewYear() ? 1 : (isSemesterTwoCutoff(forDate || new Date(now)) ? 2 : 1);
+    const semester = isNewYear() ? 1 : (isSemesterTwoCutoff(forDate || today(now)) ? 2 : 1);
     if (!forDate) {
       detected = semester;
       detectedAt = now;

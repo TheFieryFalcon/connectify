@@ -22,7 +22,7 @@
     const utils = window.ConnectifyUtils;
     try {
       if (localStorage.getItem(DONE_KEY)) return true;
-      if (!utils.signedInUserId()) return false;
+      if (!utils.signedInUserId() || window.ConnectifyPastYearMode?.active()) return false;
       for (const key of utils.storageKeys(isUserSetting)) {
         const target = utils.userKey(key);
         if (localStorage.getItem(target) === null) localStorage.setItem(target, localStorage.getItem(key));

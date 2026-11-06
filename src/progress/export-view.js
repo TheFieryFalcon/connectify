@@ -33,6 +33,8 @@
     toggleBtn.type = 'button';
     toggleBtn.setAttribute('aria-pressed', 'false');
     if (!dates.toolbar.contains(toggleBtn)) dates.toolbar.append(toggleBtn);
+    // A past year has nothing left to put in a calendar
+    toggleBtn.hidden = Boolean(window.ConnectifyPastYearMode?.active());
 
     let exporting = false;
     let latest = null;
@@ -48,7 +50,7 @@
     /** Paints the option and download rows; returns what the table's rows need (export-rows.js). */
     function prepare(subjects, track) {
       const prefs = load();
-      const year = new Date().getFullYear();
+      const year = window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear();
       const merge = prefs.mergeExams !== false;
       const update = change => {
         const next = load();

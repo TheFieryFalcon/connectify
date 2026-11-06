@@ -29,8 +29,9 @@
 
   const BIN = '<svg class="cx-goal-bin" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m5 4v6m4-6v6"/></svg>';
 
-  /** A bin that asks first, inline. */
+  /** A bin that asks first, inline; none in a past year (Past Years), whose goals are only read. */
   function deleteButton(goal, rerender) {
+    if (window.ConnectifyPastYearMode?.active()) return '';
     const btn = M().el('button', 'cx-goal-card__delete');
     btn.innerHTML = BIN;
     btn.type = 'button';
@@ -95,7 +96,8 @@
 
   /** Opens the Goals dialog; a goal that finished with no toast celebrates now. */
   function open(opener) {
-    const readOnly = !window.ConnectifyUtils.isOutlinesPage();
+    // Off the outlines, and in a past year (Past Years), goals are only read
+    const readOnly = !window.ConnectifyUtils.isOutlinesPage() || Boolean(window.ConnectifyPastYearMode?.active());
     M().open({
       id: 'cx-goals-dialog',
       title: 'Goals',

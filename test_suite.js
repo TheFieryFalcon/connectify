@@ -90,6 +90,7 @@ const MODULE_BUNDLES = {
     'sidebar-hover.js',
     'sidebar-filter.js',
     'sidebar-page-notice.js',
+    'sidebar-past-years.js',
     'sidebar-tools.js',
     'sidebar-shell.js',
     'sidebar.js'
@@ -625,6 +626,7 @@ global.MutationObserver = class {
 
 // manifest.json loads src/system/scheduler.js and src/system/utils.js before every other content script
 eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/scheduler.js'), 'utf8'));
+eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/past-year-mode.js'), 'utf8'));
 eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/utils.js'), 'utf8'));
 
 // CSS assertions compare rule text, not formatting: comments and whitespace around CSS punctuation are
@@ -826,9 +828,9 @@ runTest('WCAG AA Color Contrast Ratios meet or exceed 5:1 threshold', () => {
 });
 
 runTest('White button styling for Settings and Weaknesses in sidebar', () => {
-  assert.ok(cssHas(sidebarCss, '#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)'), 'sidebar.css must style weakness and categories toggles');
+  assert.ok(cssHas(sidebarCss, '#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle)'), 'sidebar.css must style the Weakness Analyzer, Past Years and Settings toggles');
   assert.ok(cssHas(sidebarCss, 'background: #ffffff !important;'), 'Must specify #ffffff white background for light mode');
-  assert.ok(cssHas(sidebarCss, '.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)'), 'Must preserve dark mode style');
+  assert.ok(cssHas(sidebarCss, '.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle)'), 'Must preserve dark mode style');
 });
 
 runTest('theme.css covers Classes accordion, Feed filter funnel, and Follow pills with >= 5:1 contrast', () => {
@@ -1253,10 +1255,11 @@ runTest('Sidebar mounts launcher buttons in canonical order', () => {
     'connectify-progress-toggle',
     'connectify-estimator-toggle',
     'connectify-weakness-toggle',
+    'connectify-past-years-toggle',
     'connectify-categories-toggle'
   ];
 
-  assert.deepStrictEqual(buttonIds, expectedOrder, 'Sidebar button order must place Weaknesses below Estimates');
+  assert.deepStrictEqual(buttonIds, expectedOrder, 'Sidebar button order must place Weaknesses below Estimates, then Past Years before Settings');
 });
 
 runTest('Goals and Estimates launchers and panel in sidebar', () => {
@@ -1393,7 +1396,7 @@ console.log('\n--- SECTION 6: Regression Verification (Centered Buttons, First-A
 runTest('Weaknesses & Settings button text is centered in sidebar.css', () => {
   const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
   assert.ok(
-    cssHas(sidebarCss, '#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)') ||
+    cssHas(sidebarCss, '#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle)') ||
     cssHas(sidebarCss, '.cx-secondary-tool'),
     'sidebar.css must select weakness and categories buttons'
   );
@@ -4869,10 +4872,12 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
     { id: 'connectify-progress-toggle', label: 'Year Progression', class: 'cx-calculator-tool' },
     { id: 'connectify-estimator-toggle', label: 'Estimator', class: 'cx-calculator-tool' },
     { id: 'connectify-weakness-toggle', label: 'Weakness Analyzer', class: 'cx-secondary-tool' },
+    { id: 'connectify-past-years-toggle', label: 'Past Years', class: 'cx-secondary-tool' },
     { id: 'connectify-categories-toggle', label: 'Settings', class: 'cx-secondary-tool' }
   ];
 
-  assert.strictEqual(toolMenu.children.length, 6, 'Tool menu must contain exactly 6 buttons');
+  assert.strictEqual(toolMenu.children.length, 7, 'Tool menu must contain exactly 7 buttons');
+  assert.strictEqual(document.getElementById('connectify-past-years-toggle').hidden, true, 'Past Years shows only once a past year is archived');
   expectedButtons.forEach((exp, idx) => {
     const btn = toolMenu.children[idx];
     assert.strictEqual(btn.id, exp.id, `Button at index ${idx} must have id ${exp.id}`);
@@ -4889,9 +4894,10 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
     'connectify-predictor',
     'connectify-progress',
     'connectify-weakness',
+    'connectify-past-years',
     'connectify-categories'
   ];
-  assert.strictEqual(workspace.children.length, 5, 'Workspace must contain exactly 5 tool panels');
+  assert.strictEqual(workspace.children.length, 6, 'Workspace must contain exactly 6 tool panels');
   expectedPanels.forEach(panelId => {
     const p = workspace.querySelector('#' + panelId);
     assert.ok(p, `Panel #${panelId} must be mounted inside workspace`);
@@ -6839,7 +6845,7 @@ runTest('Test 145: Puppeteer theme unstyled element auditor and Connect director
   assert.strictEqual(pkg.scripts['crawl'], 'node scripts/crawl-connect-directories.js', 'package.json must define crawl script');
 });
 
-runTest('Test 146: The sidebar works on every page: off Assessment Outlines only Settings is enabled, and a Connect filter never disables tools', async () => {
+runTest('Test 146: The sidebar works on every page: off Assessment Outlines only Settings and Past Years are enabled, and a Connect filter never disables tools', async () => {
   await Promise.all(pendingTestPromises);
   const sidebarJs = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.js'), 'utf8');
   const drawerCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar-drawer.css'), 'utf8');
@@ -6893,7 +6899,7 @@ runTest('Test 146: The sidebar works on every page: off Assessment Outlines only
     const notice = sidebar.querySelector('.cx-page-notice');
     assert.ok(notice, 'the page notice exists');
     const toolBtns = Array.from(sidebar.querySelectorAll('.cx-tool-menu button'));
-    assert.strictEqual(toolBtns.length, 6, 'all six launchers are mounted');
+    assert.strictEqual(toolBtns.length, 7, 'all seven launchers are mounted (Past Years hidden until a year is archived)');
 
     assert.strictEqual(window.ConnectifySidebar.isLimited(), false, 'the outlines page is never limited, filtered or not');
     assert.strictEqual(sidebar.classList.contains('cx-page-limited'), false);
@@ -6914,7 +6920,7 @@ runTest('Test 146: The sidebar works on every page: off Assessment Outlines only
     const link = notice.querySelector('.cx-page-notice-link');
     assert.ok(link && link.tagName.toLowerCase() === 'a' && link.href === window.ConnectifyUtils.OUTLINES_URL, 'the notice links to the outlines');
     toolBtns.forEach(btn => {
-      const settings = btn.id === 'connectify-categories-toggle';
+      const settings = btn.id === 'connectify-categories-toggle' || btn.id === 'connectify-past-years-toggle';
       assert.strictEqual(btn.disabled, !settings, `#${btn.id} is ${settings ? 'enabled' : 'disabled'} off the outlines page`);
       assert.strictEqual(btn.getAttribute('aria-disabled'), settings ? null : 'true');
     });
@@ -7533,8 +7539,9 @@ runTest('Test 154: Shared utilities, settings reset clears every baseline key, a
 
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
   const outlines = manifest.content_scripts.find(cs => (cs.js || []).includes('src/assessment/assessment-cache.js'));
-  // The shared scheduler comes first (it depends on nothing), then utils.js before every other outlines script
-  assert.deepStrictEqual(outlines.js.slice(0, 2), ['src/system/scheduler.js', 'src/system/utils.js'], 'scheduler.js then utils.js must load before every other outlines content script');
+  // The shared scheduler comes first (it depends on nothing), then the past-year switch utils.js reads, then utils.js
+  // before every other outlines script
+  assert.deepStrictEqual(outlines.js.slice(0, 3), ['src/system/scheduler.js', 'src/system/past-year-mode.js', 'src/system/utils.js'], 'scheduler.js, past-year-mode.js then utils.js must load before every other outlines content script');
   // The document_start boot group (pointer-kind.js, theme-boot.js) runs before the scheduler exists and never uses it
   const usesScheduler = c => (c.js || []).some(f => origReadFileSync.call(fs, path.resolve(__dirname, f), 'utf8').includes('ConnectifyScheduler'));
   for (const cs of manifest.content_scripts.filter(c => c.world !== 'MAIN' && (c.js || []).some(f => !f.includes('auto-login')) && (c.run_at !== 'document_start' || usesScheduler(c)))) {
@@ -7664,6 +7671,7 @@ runTest('Test 156: Sidebar sync leaves the DOM alone when nothing changed and ke
 });
 
 runTest('Test 157: A new school year turns last year\'s averages into baselines for types and subjects still present', () => {
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/year-archive.js'), 'utf8'));
   eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/year-rollover.js'), 'utf8'));
   const yr = window.ConnectifyYearRollover;
 
@@ -8775,6 +8783,7 @@ runTest('Test 190: A wholly new class registry rolls last year\'s cached average
   try {
     mockLocalStorage.clear();
     const { classes } = loadSemesterModules();
+    eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/year-archive.js'), 'utf8'));
     eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/year-rollover.js'), 'utf8'));
     const account = window.ConnectifyUtils.accountKey();
     const savedBaselines = [];
@@ -15676,7 +15685,7 @@ runTest('Test 330: Settings says nothing self-evident: only the current semester
   assert.deepStrictEqual([...checkboxes.matchAll(/<p [^>]*>(.*?)<\/p>/g)].map(m => m[0].includes('id="cx-semester-filter-detected"') && m[1] === ''), [true], 'the one note is the semester, filled in when bound');
 
   const notes = [...html.matchAll(/class="cx-settings-(?:desc|hint)"[^>]*>([^<]*)</g)].map(m => m[1]);
-  assert.deepStrictEqual(notes, ['', '%', 'Takes effect after reload.', 'No custom background set'], 'the only notes left: the semester, a unit, the reload note and the wallpaper status');
+  assert.deepStrictEqual(notes, ['', '%', 'Takes effect after reload.', 'No custom background set', ''], 'the only notes left: the semester, a unit, the reload note, the wallpaper status and the backup status (empty until it reports)');
   assert.ok(!/heading\([^)]*,/.test(read('predictor/category-baselines.js')), 'baseline headings carry no description');
 
   const panel = new MockElement('div');
@@ -15979,7 +15988,7 @@ runTest('Test 339: Task Dates tells a repeated name by its semester, and asks fo
   const dates = read('progress/task-dates.js'), week = read('progress/progress-week-editor.js');
   assert.ok(dates.includes('(Semester ${row.task.semester || 1})') && dates.includes('return labelled(out);'), 'the label');
   assert.ok(read('progress/task-dates-view.js').includes('cells ? cells.name : row.label') && read('progress/next-up-view.js').includes("createElement('td', row.label)"), 'on both lists');
-  assert.ok(week.includes("hasWeek ? math.shortTimestamp(point.order, point.caption) : 'No week', hasWeek ? null : 'cx-date-none'") && week.includes('if (hasWeek || isMarked) {'), 'a marked task with no week reads quietly, with its pencil');
+  assert.ok(week.includes("hasWeek ? math.shortTimestamp(point.order, point.caption) : 'No week', hasWeek ? null : 'cx-date-none'") && week.includes('if (hasWeek || isMarked || locked) {'), 'a marked task with no week reads quietly, with its pencil (a past year\'s every task, with none)');
   assert.ok(week.includes('return createInputField(shownWeek(savedTime), true);'), 'an unmarked one still asks');
 });
 
@@ -16241,6 +16250,485 @@ runTest('Test 344: "Hide potentially inaccurate prediction bars" is a Settings c
   const outlines = groups.find(g => g.js.includes('src/cohort/cohort-outcome-eval.js'));
   assert.ok(outlines.js.indexOf('src/cohort/cohort-early-meters.js') < outlines.js.indexOf('src/cohort/cohort-outcome-eval.js'), 'loaded before the meter reads it');
   localStorage.clear();
+});
+
+// Past Years: a tab viewing a past year (past-year-mode.js) runs on that year's copy
+const PAST_YEAR_KEY = 'connectify:past_year';
+function reloadPastYearMode() {
+  window.ConnectifyPastYearMode = undefined;
+  eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'system/past-year-mode.js'), 'utf8'));
+  return window.ConnectifyPastYearMode;
+}
+function withPastYear(info, fn) {
+  sessionStorage.setItem(PAST_YEAR_KEY, JSON.stringify(info));
+  reloadPastYearMode();
+  try {
+    return fn(window.ConnectifyPastYearMode);
+  } finally {
+    sessionStorage.removeItem(PAST_YEAR_KEY);
+    document.documentElement.removeAttribute('data-cx-past-year');
+    reloadPastYearMode();
+  }
+}
+
+runTest('Test 345: With no past year viewed nothing changes; viewing one names its copy and its last day, and leaving the outlines ends it', () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  mockLocalStorage.clear();
+  const mode = reloadPastYearMode();
+  const utils = window.ConnectifyUtils;
+  const live = utils.accountKey();
+  assert.strictEqual(mode.active(), false);
+  assert.strictEqual(live, utils.liveAccountKey(), "no past year: the student's own account");
+  assert.strictEqual(mode.suffix(), '');
+  assert.strictEqual(mode.year(), new Date().getFullYear());
+  assert.strictEqual(utils.userKey('x'), `connectify:user:${live}:x`);
+
+  withPastYear({ id: 'abc1', year: 2025, label: 'Year 10, 2025', savedAt: 1 }, m => {
+    assert.ok(m.active());
+    assert.strictEqual(utils.accountKey(), `${live}~pabc1`, "every per-student key resolves to the year's copy");
+    assert.strictEqual(utils.liveAccountKey(), live, 'the archive is still read under the student\'s own account');
+    assert.strictEqual(utils.userKey('x'), `connectify:user:${live}~pabc1:x`);
+    assert.strictEqual(m.year(), 2025);
+    assert.strictEqual(m.today().getFullYear(), 2025);
+    assert.strictEqual(m.today().getMonth(), 11, 'seen from the year\'s last day');
+    assert.strictEqual(document.documentElement.getAttribute('data-cx-past-year'), 'abc1', 'past-year.css hides Connect\'s cards under it');
+  });
+  assert.strictEqual(utils.accountKey(), live, 'Back to This Year returns every key');
+
+  // Another page ends the view, so the notice over the outlines can never be wrong
+  location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-connect';
+  sessionStorage.setItem(PAST_YEAR_KEY, JSON.stringify({ id: 'abc1', year: 2025 }));
+  assert.strictEqual(reloadPastYearMode().active(), false);
+  assert.strictEqual(sessionStorage.getItem(PAST_YEAR_KEY), null);
+  location.href = OUTLINES_HREF;
+  sessionStorage.setItem(PAST_YEAR_KEY, JSON.stringify({ id: 'bad id!', year: 2025 }));
+  assert.strictEqual(reloadPastYearMode().active(), false, 'an id that could reach other keys is never taken');
+  sessionStorage.removeItem(PAST_YEAR_KEY);
+  reloadPastYearMode();
+
+  // Every decision the date makes follows the year shown
+  const offenders = [];
+  (function walk(dir) {
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, ent.name);
+      if (ent.isDirectory()) { if (!['theme', 'content'].includes(ent.name)) walk(full); continue; }
+      if (!full.endsWith('.js') || full.endsWith('past-year-mode.js')) continue;
+      origReadFileSync.call(fs, full, 'utf8').split('\n').forEach((line, i) => {
+        if (line.includes('new Date().getFullYear()') && !line.includes('ConnectifyPastYearMode')) offenders.push(`${path.relative(SRC_DIR, full)}:${i + 1}`);
+      });
+    }
+  })(SRC_DIR);
+  assert.deepStrictEqual(offenders, [], 'this year is never read straight off the clock');
+  assert.ok(read('progress/next-up.js').includes('now: () => (window.ConnectifyPastYearMode?.today() ?? new Date())'), 'Next Up sees the year\'s last day');
+  assert.ok(read('assessment/class-semesters.js').includes('isSemesterTwoCutoff(forDate || today(now))'), 'so does semester detection');
+  assert.ok(read('system/utils.js').includes("const accountKey = () => liveAccountKey() + (window.ConnectifyPastYearMode?.suffix() || '');"));
+});
+
+runTest('Test 346: The year archive keeps one copy of each year in both stores, the richer one, the last three, and lists only past years', () => {
+  mockLocalStorage.clear();
+  const archiveSrc = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'predictor/year-archive.js'), 'utf8');
+  window.ConnectifyYearArchive = undefined;
+  eval(archiveSrc);
+  const A = window.ConnectifyYearArchive;
+  const y = (names, tasks, at, extra = {}) => ({ classNames: names, subjects: { [names[0]]: Array.from({ length: tasks }, (_, i) => ({ id: `t${i}` })) }, archivedAt: at, ...extra });
+  const y10 = y(['10 Science'], 3, Date.UTC(2025, 10, 30));
+  const y11 = y(['11 Physics ATAR', '11 Chemistry ATAR'], 5, Date.UTC(2026, 10, 20), { year: 2026 });
+  const y11poor = y(['11 Chemistry ATAR', '11 Physics ATAR'], 0, Date.UTC(2027, 0, 20), { goals: { goals: [{ id: 'g' }], verdicts: {} } });
+  const merged = A.merge([y10, y11], [y11poor]);
+  assert.strictEqual(merged.length, 2, 'one entry per class set');
+  const kept = merged.find(e => e.classNames.includes('11 Physics ATAR'));
+  assert.strictEqual(A.taskCount(kept), 5, 'the copy with more tasks wins');
+  assert.deepStrictEqual(kept.goals.goals.map(g => g.id), ['g'], 'and is filled in from the other');
+  assert.deepStrictEqual(A.merge([2021, 2022, 2023, 2024].map(yr => y([`C${yr}`], 1, Date.UTC(yr, 10, 1)))).map(e => e.classNames[0]), ['C2022', 'C2023', 'C2024'], 'the last three years');
+
+  assert.strictEqual(A.label(y11), 'Year 11, 2026');
+  assert.strictEqual(A.yearOf({ classNames: ['11 Chemistry'], archivedAt: Date.UTC(2027, 1, 3) }), 2026, 'archived early in a year: the year before');
+  assert.strictEqual(A.yearOf({ classNames: ['11 Chemistry'], archivedAt: Date.UTC(2026, 10, 3) }), 2026, 'archived in Term 4, as Year 12 courses start: that year');
+  assert.strictEqual(A.label({ classNames: ['Art'], archivedAt: Date.UTC(2026, 10, 3) }), '2026', 'no year level: the year alone');
+
+  const acct = window.ConnectifyUtils.accountKey();
+  A.write([y10, y11]);
+  assert.strictEqual(JSON.parse(localStorage.getItem(`connectify:year_archive:${acct}`)).length, 2);
+  localStorage.setItem(`connectify:class_semesters:${acct}`, JSON.stringify({ '11 Chemistry ATAR': {} }));
+  assert.deepStrictEqual(A.years().map(x => x.label), ['Year 10, 2025'], "a year sharing a class with this year is this year (a backup's copy)");
+  localStorage.removeItem(`connectify:class_semesters:${acct}`);
+  assert.deepStrictEqual(A.years().map(x => x.label), ['Year 11, 2026', 'Year 10, 2025'], 'newest first');
+  assert.strictEqual(A.find(A.idOf(y10)).entry.classNames[0], '10 Science');
+
+  // Over quota (a large wallpaper shares it): extension storage keeps everything, localStorage what fits
+  const ext = {};
+  const savedChrome = global.chrome;
+  global.chrome = { storage: { local: { get: (keys, cb) => cb(Object.fromEntries(keys.filter(k => k in ext).map(k => [k, ext[k]]))), set: obj => Object.assign(ext, obj) } } };
+  const origSet = mockLocalStorage.setItem;
+  try {
+    window.ConnectifyYearArchive = undefined;
+    eval(archiveSrc);
+    const B = window.ConnectifyYearArchive;
+    mockLocalStorage.setItem = function (k, v) {
+      if (k.startsWith('connectify:year_archive:') && v.includes('"t0"')) throw new Error('QuotaExceededError');
+      return origSet.call(this, k, v);
+    };
+    B.write([y11]);
+    mockLocalStorage.setItem = origSet;
+    const local = JSON.parse(localStorage.getItem(B.key()));
+    assert.ok(local.length === 2 && local.every(e => !Object.keys(e.subjects).length), 'localStorage keeps the years without their task lists');
+    assert.ok(JSON.parse(ext[B.key()]).some(e => A.taskCount(e) === 5), 'extension storage keeps them whole');
+    assert.strictEqual(A.taskCount(B.read().find(e => e.classNames.includes('11 Physics ATAR'))), 5, 'read() merges the two');
+  } finally {
+    mockLocalStorage.setItem = origSet;
+    global.chrome = savedChrome;
+    window.ConnectifyYearArchive = undefined;
+    eval(archiveSrc);
+    mockLocalStorage.clear();
+  }
+});
+
+runTest("Test 347: Connect's outline records are kept through the year and go to the archive at the rollover, never replaced by the next year's first load", () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  mockLocalStorage.clear();
+  window.ConnectifyBackupSections = undefined;
+  eval(read('system/backup-sections.js'));
+  window.ConnectifyYearCapsule = undefined;
+  eval(read('predictor/year-capsule.js'));
+  const C = window.ConnectifyYearCapsule;
+  const acct = window.ConnectifyUtils.accountKey();
+  const rec = (subject, semester = 1) => ({ apiOutline: true, title: `${subject} - Semester ${semester}`, subject, semester, outlines: [{ tasks: [{ name: 'Test' }] }] });
+  const savedApi = window.ConnectifyOutlineApi;
+  let records = [rec('11 Chemistry ATAR')];
+  window.ConnectifyOutlineApi = { records: () => records };
+  try {
+    assert.ok(C.capture(), 'saved');
+    assert.ok(!C.capture(), 'an unchanged load is not written again');
+    records = [rec('11 Chemistry ATAR'), rec('11 Chemistry ATAR', 2)];
+    assert.ok(C.capture(), 'a change is saved');
+    records = [rec('12 Chemistry ATAR')];
+    assert.ok(!C.capture(), 'a wholly new class set waits for the rollover');
+    assert.strictEqual(JSON.parse(localStorage.getItem(C.key())).records.length, 2, "last year's records stay");
+    assert.strictEqual(C.takeRecords(['12 Chemistry ATAR']), null, 'only their own classes take them');
+    assert.strictEqual(C.takeRecords(['11 Chemistry ATAR']).length, 2, 'the rollover takes them');
+    assert.strictEqual(localStorage.getItem(C.key()), null);
+    assert.ok(C.capture(), 'then the new year is saved');
+    // Once the year snapshot names the new classes, a rollover that never took them never blocks the new year
+    localStorage.setItem(C.key(), JSON.stringify({ classNames: ['11 Chemistry ATAR'], records: [rec('11 Chemistry ATAR')] }));
+    localStorage.setItem(`connectify:year_snapshot:${acct}`, JSON.stringify({ classNames: ['12 Chemistry ATAR'] }));
+    assert.ok(C.capture());
+  } finally {
+    window.ConnectifyOutlineApi = savedApi;
+  }
+
+  localStorage.setItem(window.ConnectifyUtils.userKey('connectea:task_type_overrides'), '{"a":"Exam"}');
+  localStorage.setItem(`connectify:goals:${acct}`, '{"version":1,"goals":[]}');
+  localStorage.setItem('connectify:auto_expand', 'true');
+  localStorage.setItem(`connectea:cohort:v3:${acct}:2026:chemistry`, '120');
+  const settings = C.settings();
+  assert.strictEqual(settings['connectify:user:{account}:connectea:task_type_overrides'], '{"a":"Exam"}', 'templated by account');
+  assert.strictEqual(settings['connectea:cohort:v3:{account}:2026:chemistry'], '120', "the student's cohort sizes belong to the year");
+  assert.ok(!('connectify:auto_expand' in settings) && !Object.keys(settings).some(k => k.startsWith('connectify:goals:')), 'never browser preferences, nor goals (the rollover archives those through endYear)');
+
+  const roll = read('predictor/year-rollover.js');
+  assert.ok(roll.includes('records: window.ConnectifyYearCapsule?.takeRecords?.(state.classNames || []) || null') && roll.includes('archive.write([entry]);') && roll.includes('entry.year = archive.yearOf(entry);'), 'the rollover archives them with the year');
+  assert.ok(!read('assessment/cache-versions.js').includes('outline_records'), 'no cache clear removes them');
+  mockLocalStorage.clear();
+});
+
+runTest('Test 348: Opening a past year writes its copy under the copy account with allowed keys only, rebuilding records the same ids find', () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  mockLocalStorage.clear();
+  eval(read('assessment/assessment-parse-helpers.js'));
+  const savedParse = window.ConnectifyApiParse;
+  window.ConnectifyApiParse = undefined;
+  eval(read('assessment/assessment-api-parse.js'));
+  const P = window.ConnectifyApiParse;
+  window.ConnectifyBackupSections = undefined;
+  eval(read('system/backup-sections.js'));
+  window.ConnectifyPastYearOpen = undefined;
+  eval(read('predictor/past-year-open.js'));
+  const O = window.ConnectifyPastYearOpen;
+  try {
+    const record = {
+      apiOutline: true, title: '11 Chemistry ATAR - Semester 1', subject: '11 Chemistry ATAR', semester: 1, outlines: [{ tasks: [
+        { type: 'Test', when: 'Term 1 Week 4', name: 'Stoichiometry', mark: '17', max: '20', weighted: '8.5', weightedMax: '10', showChart: true, stats: [40, 55, 66, 78, 95], percent: 85 },
+        { type: 'Exam', when: '', name: 'Semester 1 Exam', mark: '', max: '80', weighted: '', weightedMax: '30', showChart: true, stats: null, percent: null },
+        { type: 'Test', when: 'Term 1 Week 4', name: 'Stoichiometry', mark: '9', max: '20', weighted: '4.5', weightedMax: '10', showChart: true, stats: null, percent: 45 }
+      ] }]
+    };
+    const ids = P.ids(record).map(e => e.id);
+    const tasks = [
+      { id: ids[0], name: 'Stoichiometry', score: 85, pending: false, weight: 10, stats: [40, 55, 66, 78, 95] },
+      { id: ids[1], name: 'Semester 1 Exam', score: null, pending: true, weight: 30 },
+      { id: ids[2], name: 'Stoichiometry', score: 45, pending: false, weight: 10 }
+    ];
+    const entry = {
+      classNames: ['11 Chemistry ATAR'], archivedAt: Date.UTC(2026, 10, 20), year: 2026,
+      subjects: { '11 Chemistry ATAR': tasks },
+      classSemesters: { '11 Chemistry ATAR': { 1: { title: '11 Chemistry ATAR - Semester 1', mark: 70, finalLetter: true, tasks: tasks.map(t => [t.id, t.name]) } } },
+      goals: { goals: [{ id: 'g1', status: 'achieved' }], verdicts: { g1: {} } },
+      settings: {
+        'connectify:user:{account}:connectea:task_type_overrides': '{"x":"Exam"}',
+        'connectify:user:{account}:connectea:time_override:11 Chemistry ATAR:Stoichiometry': 'not a week',
+        'cx-autologin-enabled': 'true',
+        'connectea:atar:2025:{account}:2026': '{"raw":80}'
+      }
+    };
+    const rebuilt = O.recordsFrom(entry);
+    assert.strictEqual(rebuilt.length, 1, 'one record per class and semester its registry lists');
+    assert.deepStrictEqual(P.ids(rebuilt[0]).map(e => e.id), ids, 'every task keeps its id, so overrides, caches and predictions still match');
+    assert.strictEqual(rebuilt[0].outlines[0].tasks[0].weightedMax, '10');
+    assert.strictEqual(P.markText(rebuilt[0].outlines[0].tasks[1]), '- Out of 80', 'an unmarked task reads as it did');
+
+    const live = window.ConnectifyUtils.liveAccountKey();
+    const copy = O.copyOf(entry, `${live}~pzz`);
+    assert.ok(JSON.parse(copy[`connectify:outline_records:${live}~pzz`]).records.length === 1, 'records rebuilt into the copy');
+    assert.deepStrictEqual(JSON.parse(copy[`connectify:goals:${live}~pzz`]).goals.map(g => g.id), ['g1'], "the year's goals as the rollover left them");
+    assert.strictEqual(copy[`connectify:user:${live}~pzz:connectea:task_type_overrides`], '{"x":"Exam"}');
+    assert.strictEqual(copy[`connectea:atar:2025:${live}~pzz:2026`], '{"raw":80}', 'year-keyed calculator values under the copy');
+    assert.ok(!Object.keys(copy).some(k => k.includes('time_override') || k.includes('autologin')), 'a key outside the allowlist, or a value of the wrong shape, is never written');
+    assert.ok(Object.keys(copy).every(k => k.includes(`${live}~pzz`)), 'nothing is written under the student\'s own keys');
+
+    localStorage.setItem(`connectify:goals:${live}`, '{"version":1,"goals":[{"id":"mine"}]}');
+    assert.ok(O.materialize(entry, 'zz'));
+    assert.strictEqual(localStorage.getItem(`connectify:goals:${live}`), '{"version":1,"goals":[{"id":"mine"}]}', "this year's goals are untouched");
+    O.clearCopies();
+    assert.ok(!Object.keys(mockLocalStorage.store).some(k => k.includes(`${live}~p`)), 'Back to This Year removes the copy');
+
+    // No room: nothing is left behind
+    const origSet = mockLocalStorage.setItem;
+    mockLocalStorage.setItem = function (k, v) { if (k.includes('grade_cache')) throw new Error('QuotaExceededError'); return origSet.call(this, k, v); };
+    try { assert.strictEqual(O.materialize(entry, 'zz'), false); } finally { mockLocalStorage.setItem = origSet; }
+    assert.ok(!Object.keys(mockLocalStorage.store).some(k => k.includes(`${live}~p`)));
+
+    // View: the copy, the tab's choice, then the outlines reload
+    const savedArchive = window.ConnectifyYearArchive;
+    const origReload = location.reload;
+    let reloaded = 0;
+    location.reload = () => { reloaded++; };
+    window.ConnectifyYearArchive = { find: id => (id === 'zz' ? { id, year: 2026, label: 'Year 11, 2026', entry } : null) };
+    try {
+      assert.strictEqual(O.view('nope'), 'missing');
+      assert.strictEqual(O.view('zz'), 'opening');
+      assert.strictEqual(reloaded, 1);
+      assert.deepStrictEqual(JSON.parse(sessionStorage.getItem(PAST_YEAR_KEY)), { id: 'zz', year: 2026, label: 'Year 11, 2026', savedAt: entry.archivedAt });
+      O.back();
+      assert.strictEqual(sessionStorage.getItem(PAST_YEAR_KEY), null);
+      assert.strictEqual(reloaded, 2);
+    } finally {
+      window.ConnectifyYearArchive = savedArchive;
+      location.reload = origReload;
+    }
+  } finally {
+    window.ConnectifyApiParse = savedParse;
+    mockLocalStorage.clear();
+  }
+});
+
+runTest('Test 349: A past year is read-only and quiet: drawn from its records, no rollover, news or filters, its edits locked and Settings off', () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  const G = 'window.ConnectifyPastYearMode?.active()';
+  const api = read('assessment/outline-api.js');
+  assert.ok(api.includes('(window.ConnectifyPastYearMode?.active() ? pastRecords() : fetchRecords())') && api.includes('`connectify:outline_records:${window.ConnectifyUtils.accountKey()}`'), "the year's saved records stand in for Connect's, nothing is fetched");
+  assert.ok(read('assessment/legacy-outlines.js').includes('if (connectPending() || window.ConnectifyPastYearMode?.active()) {'), 'every record is drawn, never matched to Connect\'s cards');
+  const css = read('system/past-year.css');
+  assert.ok(cssHas(css, 'html[data-cx-past-year] cnt-sao-card') && cssHas(css, 'html[data-cx-past-year] cnt-category-bar'), "Connect's cards and filter bar are this year's: hidden");
+  for (const [file, what] of [
+    ['system/new-grade.js', 'grade toasts'], ['system/grade-tasks.js', 'new results'], ['goals/goal-events.js', 'goal toasts'],
+    ['system/update-notice.js', 'the update notice'], ['system/overhaul-notice.js', 'the overhaul notice'], ['progress/wace-countdown.js', 'the countdown'],
+    ['sidebar/sidebar-filter.js', "Connect's filter"], ['assessment/semester-filter.js', 'the semester filter'], ['system/user-settings-migrate.js', 'the settings move'],
+    ['sidebar/sidebar-glance.js', 'Next Up and Awaiting Results'], ['cohort/task-type-select.js', 'Type dropdowns'], ['progress/progress-week-editor.js', 'week edits'],
+    ['goals/goal-editor.js', 'Set as Goal'], ['goals/goal-list-ui.js', 'goal edits'], ['cohort/cohort-panel.js', 'cohort sizes'], ['progress/export-view.js', 'Export']
+  ]) assert.ok(read(file).includes(G), `${what} are off or locked`);
+
+  // The rollover never runs on a past year's copy
+  if (!window.ConnectifyYearRollover) {
+    eval(read('predictor/year-archive.js'));
+    eval(read('predictor/year-rollover.js'));
+  }
+  withPastYear({ id: 'q1', year: 2025 }, () => {
+    assert.strictEqual(window.ConnectifyYearRollover.handleClassChange(['12 Chemistry ATAR'], ['11 Chemistry ATAR']), 'past-year');
+  });
+
+  // Settings is off in a past year: it would change the copy, never the student's own settings
+  const sidebar = read('sidebar/sidebar.js');
+  assert.ok(sidebar.includes("!(pastYear() && id === 'connectify-categories-toggle')"));
+  assert.ok(read('predictor/year-capsule.js').includes("if (window.ConnectifyPastYearMode?.active() || !utils.isOutlinesPage()) return false;"), 'a past year never overwrites the records it was drawn from');
+});
+
+function loadBackupModules() {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  for (const [name, file] of [['ConnectifyBackupSections', 'system/backup-sections.js'], ['ConnectifyBackup', 'system/backup-file.js'],
+    ['ConnectifyBackupImport', 'system/backup-import.js'], ['ConnectifyYearArchive', 'predictor/year-archive.js']]) {
+    window[name] = undefined;
+    eval(read(file));
+  }
+  return { S: window.ConnectifyBackupSections, B: window.ConnectifyBackup, I: window.ConnectifyBackupImport, A: window.ConnectifyYearArchive };
+}
+
+// Synchronous: an async test's later steps can run while another test has swapped window
+runTest('Test 350: A backup moves every section to another browser and account, and an import validates it and never replaces data unasked', () => {
+  mockLocalStorage.clear();
+  const { S, B, I, A } = loadBackupModules();
+  const saved = { baselines: window.ConnectifyPredictorBaselines, store: window.ConnectifyCategoryStore, registry: window.ConnectifyThemeRegistry, cache: window.ConnectifyCache };
+  const baselineSaves = [];
+  let categories = null;
+  window.ConnectifyPredictorBaselines = { saveBaselines: b => baselineSaves.push(b) };
+  window.ConnectifyCategoryStore = { saveCategories: c => { categories = c; } };
+  window.ConnectifyThemeRegistry = undefined;
+  window.ConnectifyCache = { clearPredictorCache: () => {} };
+  try {
+    // This browser, account 12345
+    location.href = OUTLINES_HREF;
+    const a = window.ConnectifyUtils.accountKey();
+    const U = k => `connectify:user:${a}:${k}`;
+    localStorage.setItem(`connectify:goals:${a}`, JSON.stringify({ version: 1, goals: [{ id: 'g1' }, { id: 'g2', parent: 'g1' }] }));
+    localStorage.setItem(U('connectea:task_type_overrides'), '{"Chem::Test":"Exam"}');
+    localStorage.setItem(U('connectea:time_override:Chem:Test'), 'w17');
+    localStorage.setItem(U('connectea:preferences'), '{"sem1_calibration:chem":{"raw":80}}');
+    localStorage.setItem(`connectify:baseline:types:${a}`, '{"Exam":70}');
+    localStorage.setItem('cx-categories', '{"Exam":{"keywords":["exam"]}}');
+    localStorage.setItem('connectify:auto_expand', 'true');
+    localStorage.setItem(`connectify:year_snapshot:${a}`, JSON.stringify({ classNames: ['11 Chemistry ATAR'], snapshot: { types: { Exam: 70 }, subjects: {} } }));
+    localStorage.setItem(`connectify:subjects_cache:${a}`, JSON.stringify({ '11 Chemistry ATAR': [{ id: 't1', score: 80 }] }));
+    localStorage.setItem('cx-autologin-enabled', 'true');
+    localStorage.setItem(`connectify:prediction:${a}:chem:t1`, '{}');
+    A.write([{ classNames: ['10 Science'], subjects: { '10 Science': [{ id: 'x' }] }, archivedAt: Date.UTC(2025, 10, 1) }]);
+    const file = B.build({}, A.read());
+    assert.strictEqual(file.format, 'connectify-backup');
+    assert.ok(file.sections.goals['connectify:goals:{account}'], 'the account is written as {account}');
+    assert.ok(file.sections.types['connectify:user:{account}:connectea:task_type_overrides'] && file.sections.weeks['connectify:user:{account}:connectea:time_override:Chem:Test']);
+    const all = JSON.stringify(file);
+    assert.ok(!all.includes('autologin') && !all.includes('connectify:prediction:'), 'never flags or caches');
+    assert.ok(/^connectify_backup_\d{4}-\d{2}-\d{2}\.json$/.test(B.fileName()));
+
+    // Another browser, where the same student has another account key
+    mockLocalStorage.clear();
+    location.href = OUTLINES_HREF.replace('12345', '67890');
+    const b = window.ConnectifyUtils.accountKey();
+    assert.notStrictEqual(a, b);
+    localStorage.setItem(`connectify:user:${b}:connectea:task_type_overrides`, '{"Mine":"Essay"}');
+    const parsed = B.parse(JSON.stringify(file));
+    const rows = I.plan(parsed);
+    const row = id => rows.find(r => r.id === id);
+    assert.strictEqual(row('goals').state, 'adds');
+    assert.strictEqual(row('goals').file, '1 goal', 'child goals of an ATAR goal are not counted twice');
+    assert.ok(row('goals').ticked, 'what only adds starts ticked');
+    assert.strictEqual(row('types').state, 'replaces');
+    assert.ok(!row('types').ticked && /^Replaces 1 type here$/.test(row('types').here), 'what would replace data here starts unticked and says so');
+    assert.ok(row('archive').file.includes('Year 10, 2025') && row('archive').file.includes('Year 11'), 'the archive and the year in progress');
+
+    I.apply(parsed, rows.filter(r => r.ticked).map(r => r.id));
+    assert.deepStrictEqual(JSON.parse(localStorage.getItem(`connectify:goals:${b}`)).goals.map(g => g.id), ['g1', 'g2'], 'written under this browser\'s account');
+    assert.strictEqual(localStorage.getItem(`connectify:user:${b}:connectea:time_override:Chem:Test`), 'w17');
+    assert.strictEqual(localStorage.getItem(`connectify:user:${b}:connectea:task_type_overrides`), '{"Mine":"Essay"}', 'an unticked section is left as it was');
+    assert.deepStrictEqual(baselineSaves[0].types, { Exam: 70 }, 'baselines through their own store (which purges older keys)');
+    assert.deepStrictEqual(Object.keys(categories), ['Exam'], 'categories through theirs');
+    assert.strictEqual(localStorage.getItem(`connectify:year_snapshot:${b}`), file.sections.archive['connectify:year_snapshot:{account}'], 'a snapshot where this browser had none');
+    const years = A.read();
+    assert.deepStrictEqual(years.map(e => e.classNames[0]), ['10 Science', '11 Chemistry ATAR'], "the year in progress joins the archive");
+    assert.deepStrictEqual(A.years().map(y => y.label), ['Year 10, 2025'], 'and stays hidden while it is this year');
+
+    // An older snapshot never replaces one here: it would start a second rollover
+    localStorage.setItem(`connectify:year_snapshot:${b}`, JSON.stringify({ classNames: ['12 Chemistry ATAR'] }));
+    I.applyStored(B.parse(JSON.stringify(file)), ['archive']);
+    assert.deepStrictEqual(JSON.parse(localStorage.getItem(`connectify:year_snapshot:${b}`)).classNames, ['12 Chemistry ATAR']);
+    assert.deepStrictEqual(A.years().map(y => y.label), ['Year 11, 2026', 'Year 10, 2025'], "once this is the next year, the backup's year is listed under Past Years");
+
+    // Validation
+    const code = text => { try { B.parse(text); return null; } catch (err) { return err.code; } };
+    assert.strictEqual(code('not json'), 'invalid');
+    assert.strictEqual(code(JSON.stringify({ format: 'something', version: 1, sections: {} })), 'invalid');
+    assert.strictEqual(code(JSON.stringify({ ...file, version: 99 })), 'newer');
+    const tampered = JSON.parse(JSON.stringify(file));
+    tampered.sections.preferences['cx-autologin-enabled'] = 'true';
+    tampered.sections.goals['connectify:goals:{account}'] = '{"goals":"nope"}';
+    const checked = B.parse(JSON.stringify(tampered));
+    assert.ok(checked.sections.preferences.invalid && !('cx-autologin-enabled' in checked.sections.preferences.values), 'a key outside the allowlist is never taken');
+    assert.ok(checked.sections.goals.invalid && !Object.keys(checked.sections.goals.values).length, 'nor a value of the wrong shape');
+    assert.strictEqual(I.plan(checked).find(r => r.id === 'goals').state, 'invalid');
+    assert.strictEqual(I.plan(B.parse(JSON.stringify(file))).find(r => r.id === 'goals').state, 'same', 'a section already here changes nothing');
+
+    // No room: every write is undone together
+    localStorage.removeItem(`connectify:goals:${b}`);
+    const stored = () => JSON.stringify(Object.entries(mockLocalStorage.store).sort());
+    const before = stored();
+    const origSet = mockLocalStorage.setItem;
+    // The quota runs out once, on the file's week; putting back what was here still fits
+    let full = true;
+    mockLocalStorage.setItem = function (k, v) { if (full && k.includes('time_override')) { full = false; throw new Error('QuotaExceededError'); } return origSet.call(this, k, v); };
+    let failed = null;
+    try { I.applyStored(B.parse(JSON.stringify(file)), ['goals', 'weeks']); } catch (err) { failed = err.code; } finally { mockLocalStorage.setItem = origSet; }
+    assert.strictEqual(failed, 'full');
+    assert.strictEqual(stored(), before, 'nothing changed');
+  } finally {
+    Object.assign(window, { ConnectifyPredictorBaselines: saved.baselines, ConnectifyCategoryStore: saved.store, ConnectifyThemeRegistry: saved.registry, ConnectifyCache: saved.cache });
+    location.href = OUTLINES_HREF;
+    mockLocalStorage.clear();
+  }
+});
+
+runTest('Test 351: Past Years shows once a year is archived; Settings has Backup; every new file is registered in both groups', () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  const savedArchive = window.ConnectifyYearArchive;
+  const savedOpen = window.ConnectifyPastYearOpen;
+  let years = [];
+  window.ConnectifyYearArchive = { years: () => years };
+  const opened = [];
+  window.ConnectifyPastYearOpen = { view: id => { opened.push(id); return 'full'; }, back: () => opened.push('back') };
+  // Earlier tests' sidebars still listen for connectify-open
+  const origDispatch = window.dispatchEvent;
+  window.dispatchEvent = () => true;
+  try {
+    document.querySelectorAll('#connectify-past-years, #connectify-past-years-toggle').forEach(el => el.remove());
+    window.ConnectifyPastYears = undefined;
+    eval(read('sidebar/sidebar-past-years.js'));
+    const P = window.ConnectifyPastYears;
+    assert.strictEqual(P.available(), false, 'no launcher before a year is archived');
+    years = [{ id: 'k1', label: 'Year 11, 2026', year: 2026, entry: { classNames: ['11 Chemistry ATAR', '11 Physics ATAR'] } }];
+    assert.strictEqual(P.available(), true);
+    P.panelRefs.openPastYears();
+    const panel = P.panelRefs.panel;
+    const rows = panel.querySelectorAll('.cx-past-year');
+    assert.strictEqual(rows.length, 1);
+    assert.strictEqual(rows[0].querySelector('.cx-past-year__label').textContent, 'Year 11, 2026');
+    assert.strictEqual(rows[0].querySelector('.cx-past-year__classes').textContent, 'Chemistry, Physics', 'cleaned subject names');
+    rows[0].querySelector('.cx-past-year__view').click();
+    assert.deepStrictEqual(opened, ['k1']);
+    assert.strictEqual(panel.querySelector('.cx-past-years-status').textContent, 'There is not enough room in this browser to open this year.');
+    withPastYear({ id: 'k1', year: 2026, label: 'Year 11, 2026' }, () => {
+      P.render();
+      const btn = panel.querySelector('.cx-past-year__view');
+      assert.strictEqual(btn.textContent, 'Back to This Year', 'the year being viewed');
+      btn.click();
+      assert.strictEqual(opened[1], 'back');
+    });
+    P.panelRefs.closePastYears();
+  } finally {
+    window.dispatchEvent = origDispatch;
+    window.ConnectifyYearArchive = savedArchive;
+    window.ConnectifyPastYearOpen = savedOpen;
+  }
+  assert.ok(read('sidebar/sidebar-page-notice.js').includes("new Set(['connectify-past-years-toggle', 'connectify-categories-toggle'])"), 'Past Years works on every page');
+
+  const markup = read('predictor/settings-markup.js');
+  assert.ok(markup.indexOf('<strong>Backup</strong>') > -1 && markup.indexOf('<strong>Backup</strong>') < markup.indexOf('<strong>Developer Settings</strong>'), 'Backup before Developer Settings');
+  assert.ok(markup.includes('id="cx-backup-export"') && markup.includes('>Export Data<') && markup.includes('>Import Data<'));
+  assert.ok(read('predictor/settings-backup.js').includes('reader') === false && read('system/backup-file.js').includes('reader.readAsText(file);'), 'a picked file is read as text (Firefox Manifest V3)');
+
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const outlines = manifest.content_scripts.find(g => (g.js || []).includes('src/assessment/outline-api.js'));
+  const sidebarOnly = manifest.content_scripts.find(g => g.exclude_matches && (g.js || []).includes('src/sidebar/sidebar.js'));
+  const both = ['src/system/past-year-mode.js', 'src/system/backup-sections.js', 'src/system/backup-file.js', 'src/system/backup-import.js',
+    'src/predictor/settings-backup.js', 'src/predictor/year-archive.js', 'src/predictor/past-year-open.js', 'src/sidebar/sidebar-past-years.js'];
+  for (const group of [outlines, sidebarOnly]) {
+    for (const f of both) assert.ok(group.js.includes(f), `${f} in every sidebar group`);
+    const at = f => group.js.indexOf(f);
+    assert.ok(at('src/system/past-year-mode.js') < at('src/system/utils.js'), 'utils.js reads the past-year switch');
+    assert.ok(at('src/predictor/settings-backup.js') < at('src/predictor/settings-preferences.js'), 'bound by General Preferences');
+    assert.ok(at('src/sidebar/sidebar-past-years.js') < at('src/sidebar/sidebar-tools.js'));
+    for (const css of ['src/sidebar/styles/sidebar-past-years.css', 'src/sidebar/styles/sidebar-backup.css']) assert.ok(group.css.includes(css), `${css} registered`);
+  }
+  const at = f => outlines.js.indexOf(f);
+  assert.ok(at('src/predictor/year-archive.js') < at('src/predictor/year-capsule.js') && at('src/predictor/year-capsule.js') < at('src/predictor/year-rollover.js'), 'the archive and the kept records load before the rollover');
+  assert.ok(at('src/system/past-year-bar.js') > at('src/assessment/legacy-outlines.js') && outlines.css.includes('src/system/past-year.css'), 'the notice over a past year\'s outlines');
+  for (const f of [...both, 'src/predictor/year-capsule.js', 'src/system/past-year-bar.js']) assert.ok(read(f.replace('src/', '')).split('\n').length <= 251, `${f} within 250 lines`);
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -106,7 +106,7 @@
 
   /** Plays a completed goal's celebration once and makes its card glow next time the Goals dialog opens. */
   function celebrate(goal) {
-    if (goal.celebrated) return;
+    if (goal.celebrated || window.ConnectifyPastYearMode?.active()) return;
     store().patch(goal.id, { celebrated: true, celebratePending: false, glowPending: true });
     window.ConnectifyGoalCelebrate?.play();
   }
@@ -148,6 +148,7 @@
    * (with the celebration) / Goal Missed with the goal alone.
    */
   function announce(goal, fresh = []) {
+    if (window.ConnectifyPastYearMode?.active()) return;
     const outcome = OUTCOMES[goal.status];
     const line = outcome ? null : lineFor(goal);
     if (!outcome && !line) return;

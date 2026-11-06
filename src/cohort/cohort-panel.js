@@ -98,6 +98,8 @@
         input.setAttribute('aria-label', 'Students in this subject');
         const saved = estimator().loadCohortSize(key);
         input.value = saved !== undefined ? String(saved) : '';
+        // A past year (Past Years) keeps the size it had
+        input.disabled = Boolean(window.ConnectifyPastYearMode?.active());
         label.append(input);
 
         notice = createElement('span', 'connectea-notice', noticeText(estimatedSize, saved));

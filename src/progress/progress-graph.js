@@ -36,7 +36,7 @@
       if (panel.hidden) return;
       if (!force && panel.contains(document.activeElement) && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName) && document.activeElement.type !== 'checkbox') return;
       const data = dataAPI ? (dataAPI.collectClasses || dataAPI.collect)(true) : [];
-      const sig = JSON.stringify([data, window.ConnectifySchoolTerms?.earlyEaster(new Date().getFullYear())]);
+      const sig = JSON.stringify([data, window.ConnectifySchoolTerms?.earlyEaster((window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()))]);
       if (sig === lastDataSignature) return;
       lastDataSignature = sig;
       render(data);

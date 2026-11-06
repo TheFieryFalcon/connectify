@@ -24,6 +24,7 @@ Connectify requests only the minimum permissions necessary to deliver its featur
 - **`storage` Permission (`chrome.storage.local` / `localStorage`):**
   - **Purpose:** Used strictly to save user interface preferences (such as auto-expand toggles, dark/light theme choice), course include/exclude selections for ATAR calculation, and local cache of running subject averages to detect grade updates.
   - **Location:** All data is stored locally in your browser's private extension storage and never leaves your computer.
+  - **Backups:** Settings' Export Data saves a file of your Connectify data, including your marks, to your own computer, only when you press it. Import Data reads a file you pick. Neither sends anything anywhere.
 - **`unlimitedStorage` Permission (Firefox and GitHub builds only; not requested by the Chrome Web Store version):**
   - **Purpose:** Lifts the browser's local storage quota so animated GIF wallpapers up to 40 MB can be kept. Nothing else is stored, and everything stays on your computer.
 

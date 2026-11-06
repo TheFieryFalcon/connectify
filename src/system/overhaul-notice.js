@@ -42,7 +42,7 @@
    * returns { filterWasOn } for the popup; otherwise (fresh install, already run) null.
    */
   function migrate() {
-    if (!window.ConnectifyUtils?.isOutlinesPage?.() || window.ConnectifyThemeAuth?.isAuthDisabled?.()) return null;
+    if (!window.ConnectifyUtils?.isOutlinesPage?.() || window.ConnectifyThemeAuth?.isAuthDisabled?.() || window.ConnectifyPastYearMode?.active()) return null;
     if (read(DONE_KEY)) return null;
     write(DONE_KEY, 'true');
     const seen = read(SEEN_KEY);

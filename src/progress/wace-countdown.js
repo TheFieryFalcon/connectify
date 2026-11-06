@@ -12,7 +12,8 @@
 
   function updateCountdown() {
     const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent || '');
-    const isYear12 = titles.some(t => /\b(?:year\s*12|12)\b/i.test(t) || /\bAT[A-Z]{3}\b/.test(t));
+    // A past year has no exams to count down to
+    const isYear12 = !window.ConnectifyPastYearMode?.active() && titles.some(t => /\b(?:year\s*12|12)\b/i.test(t) || /\bAT[A-Z]{3}\b/.test(t));
     if (!isYear12) {
       document.getElementById('connectify-wace-countdown')?.remove();
       return;

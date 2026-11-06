@@ -26,7 +26,8 @@
     return { enabled: false };
   }
 
-  const isEnabled = () => readSetting().enabled === true;
+  // A past year (Past Years) shows both semesters
+  const isEnabled = () => readSetting().enabled === true && !window.ConnectifyPastYearMode?.active();
   /** The semester being filtered to, or null when the option is off. */
   const activeSemester = () => (isEnabled() ? currentSemester() : null);
 

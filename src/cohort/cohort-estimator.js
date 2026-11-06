@@ -33,7 +33,7 @@
 
     const student = window.ConnectifyUtils.accountKey();
     const subject = title.replace(/\s*[-–—]\s*Semester\s+[12]\s*$/i, '').trim();
-    return `connectea:cohort:v3:${student}:${new Date().getFullYear()}:${subject}`;
+    return `connectea:cohort:v3:${student}:${window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()}:${subject}`;
   }
 
   const lower = text => normalize(text).toLowerCase();

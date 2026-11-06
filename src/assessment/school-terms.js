@@ -127,7 +127,7 @@
    * as dateFor places it: under Early Easter Term 1 has nine weeks, so Term 1 Week 10 is Term 2 Week 1.
    * Past Term 4 it is left as it is.
    */
-  function normalizeOrder(order, year = new Date().getFullYear(), early = earlyEaster(year)) {
+  function normalizeOrder(order, year = (window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()), early = earlyEaster(year)) {
     if (!Number.isFinite(order) || order < 1) return order;
     const list = terms(year, early);
     let t = Math.floor((order - 1) / 12) + 1;
@@ -144,7 +144,7 @@
    * list numbers them (under Early Easter Term 1 is Weeks 1-9 and Term 2 starts at Week 10). Weeks past
    * Term 4's last run on in Term 4. Null for anything but a positive number.
    */
-  function weekOrder(n, year = new Date().getFullYear(), early = earlyEaster(year)) {
+  function weekOrder(n, year = (window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()), early = earlyEaster(year)) {
     if (!Number.isFinite(n) || n < 1) return null;
     const list = terms(year, early);
     let i = 3;
@@ -153,7 +153,7 @@
   }
 
   /** The school week of the year for a 12-slot order (the inverse of weekOrder: Term 4 runs on past Week 40). */
-  function schoolWeek(order, year = new Date().getFullYear(), early = earlyEaster(year)) {
+  function schoolWeek(order, year = (window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()), early = earlyEaster(year)) {
     const n = normalizeOrder(order, year, early);
     if (!Number.isFinite(n) || n < 1) return null;
     const t = Math.min(4, Math.floor((n - 1) / 12) + 1);

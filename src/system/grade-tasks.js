@@ -112,6 +112,7 @@
 
   /** Called by new-grade.js once the page's marks are compared and saved. */
   function start() {
+    if (window.ConnectifyPastYearMode?.active()) return;
     started = true;
     schedule();
   }

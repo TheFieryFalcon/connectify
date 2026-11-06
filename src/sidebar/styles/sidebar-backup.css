@@ -1,0 +1,114 @@
+/**
+ * Connectify Settings: Backup (settings-backup.js)
+ *
+ * Export Data and Import Data are the canonical primary blue of Settings' Save buttons, on one 28px row with the
+ * status beside them. An imported file is reviewed in place under them: a tick per section in three columns (section,
+ * what the file holds, what importing does here), split by hairlines, then Import (n) and Cancel. Spacing follows
+ * Settings' scale: 16px between blocks, 8px between rows.
+ */
+
+#connectify-sidebar .cx-backup-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+
+#connectify-sidebar .cx-backup-btn {
+  box-sizing: border-box;
+  height: 28px;
+  margin: 0;
+  padding: 0 14px;
+  border: none;
+  border-radius: 4px;
+  background: #2563eb;
+  color: #ffffff;
+  font: 600 12px/28px system-ui;
+  cursor: pointer;
+}
+
+#connectify-sidebar .cx-backup-btn--secondary {
+  background: #4b5563;
+}
+
+#connectify-sidebar .cx-backup-btn:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+#connectify-sidebar .cx-backup-review {
+  margin-top: 16px;
+}
+
+#connectify-sidebar .cx-backup-review[hidden] {
+  display: none;
+}
+
+#connectify-sidebar .cx-backup-review :is(.cx-backup-file, .cx-backup-warning) {
+  margin: 0 0 8px;
+  font: 400 12px/1.4 system-ui;
+}
+
+#connectify-sidebar .cx-backup-review .cx-backup-file {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+#connectify-sidebar .cx-backup-review .cx-backup-warning {
+  color: #b45309;
+}
+
+#connectify-sidebar .cx-backup-list {
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid #d8e3ee;
+}
+
+#connectify-sidebar .cx-backup-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(0, 1.4fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+  border-bottom: 1px solid #d8e3ee;
+  font: 400 12px/1.4 system-ui;
+}
+
+#connectify-sidebar .cx-backup-row .cx-settings-check {
+  margin: 0;
+}
+
+#connectify-sidebar .cx-backup-row :is(.cx-backup-what, .cx-backup-effect) {
+  overflow-wrap: anywhere;
+  color: #55667a;
+}
+
+#connectify-sidebar .cx-backup-row--replaces .cx-backup-effect {
+  color: #b45309;
+}
+
+#connectify-sidebar .cx-backup-row:is(.cx-backup-row--same, .cx-backup-row--invalid) .cx-settings-check {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.connectea-dark #connectify-sidebar :is(.cx-backup-list, .cx-backup-row) {
+  border-color: var(--cx-border, #3b4d5e);
+}
+
+.connectea-dark #connectify-sidebar .cx-backup-row :is(.cx-backup-what, .cx-backup-effect) {
+  color: var(--cx-text-secondary, #b7c5d6);
+}
+
+.connectea-dark #connectify-sidebar :is(.cx-backup-row--replaces .cx-backup-effect, .cx-backup-warning) {
+  color: #fbbf24;
+}
+
+@media (max-width: 650px) {
+  #connectify-sidebar .cx-backup-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

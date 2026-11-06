@@ -101,6 +101,8 @@
 
     /** From the drawer's sync, which runs every 1.5s: reads the cache only as the launcher menu comes into view. */
     function sync(shown) {
+      // A past year has nothing coming up and nothing awaiting
+      if (window.ConnectifyPastYearMode?.active()) { if (widget) widget.hidden = true; return; }
       if (shown && !wasShown) render();
       wasShown = shown;
     }

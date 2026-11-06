@@ -15,7 +15,7 @@ Connectify executes across both the webpage's `MAIN` execution world and the ext
 ### Execution Lifecycle & Dependency Pipeline
 All scripts for the assessment outlines page (`/group/students/ui/my-settings/assessment-outlines*`) load in strict dependency sequence under `src/`:
 1. `src/system/scheduler.js` (shared page observer and heartbeat; first in every isolated group)
-2. `src/system/utils.js` (shared helpers: `normalize`, the signed-in user's account and `userKey`, storage key scans, baseline keys), then `src/system/user-settings-migrate.js` (once: shared student settings move to the signed-in student's keys) and `src/system/subject-choice.js` (the subject picked across tools)
+2. `src/system/past-year-mode.js` (the tab's Past Years choice, read by `accountKey()`), then `src/system/utils.js` (shared helpers: `normalize`, the signed-in user's account and `userKey`, storage key scans, baseline keys), then `src/system/user-settings-migrate.js` (once: shared student settings move to the signed-in student's keys) and `src/system/subject-choice.js` (the subject picked across tools)
 3. `src/assessment/cache-versions.js` (subsystem cache versions and isolated clearing, ConnectifyCache)
 4. `src/assessment/assessment-cache.js` (in-memory subjects and persistent stats cache)
 4b. `src/assessment/school-terms.js` (generated WA term dates, Early Easter choice, a date's term and week)
@@ -32,7 +32,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 11. `src/assessment/assessment-expand.js` (paced Expand All / Collapse All)
 12. `src/assessment/assessment-scrape.js` (per-card task scraping and chronological order)
 13. `src/assessment/assessment-data.js` (scraper coordinator & cache manager)
-13a. `src/assessment/legacy-outlines-markup.js` / `legacy-outlines.js` (Connect's cards drawn again in the old Vaadin markup; styles `legacy-outlines.css`)
+13a. `src/assessment/legacy-outlines-markup.js` / `legacy-outlines.js` (Connect's cards drawn again in the old Vaadin markup; styles `legacy-outlines.css`), then `src/system/past-year-bar.js` (the notice over a past year's outlines; `past-year.css`)
 14. `src/cohort/cohort-math.js` (PCHIP interpolation & quantile stats)
 15. `src/cohort/cohort-size-baselines.js` (typical cohort sizes per subject and year level)
 16. `src/cohort/cohort-estimator.js` (cohort size estimate refined by boxplot spreads)
@@ -87,7 +87,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 52. `src/predictor/category-baselines.js` (baseline settings editor & storage)
 53. `src/predictor/settings-markup.js` (settings panel markup)
 54. `src/predictor/settings-semester-filter.js` ("Show this semester's classes only" checkbox)
-54b. `src/predictor/settings-panel-view.js` (Statistics Panels dropdown) / `settings-course-filter.js` (Certificate and General checkbox) / `settings-early-meters.js` (Hide potentially inaccurate prediction bars checkbox)
+54b. `src/predictor/settings-backup.js` (Backup: Export Data / Import Data; `backup-sections.js`, `backup-file.js`, `backup-import.js` load after `subject-choice.js`) / `src/predictor/settings-panel-view.js` (Statistics Panels dropdown) / `settings-course-filter.js` (Certificate and General checkbox) / `settings-early-meters.js` (Hide potentially inaccurate prediction bars checkbox)
 55. `src/predictor/settings-preferences.js` (general preferences, theme list, wallpaper, cache clearing)
 56. `src/predictor/category-settings.js` (category keyword settings coordinator)
 57. `src/predictor/predictor-baselines.js` (previous-year baselines store)
@@ -99,7 +99,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 63. `src/predictor/predictor-grade-projection.js` (subject grade projection)
 64. `src/predictor/predictor-atar-projection.js` (ATAR projection)
 65. `src/predictor/predictor-math.js` (predictor coordinator & Grade/ATAR projections)
-66. `src/predictor/year-rollover.js` (new school year: last year's averages become baselines, last year archived)
+66. `src/predictor/year-archive.js` / `year-capsule.js` / `past-year-open.js` (Past Years: the archive, Connect's records kept through the year, opening a year's copy; `modules_past_years.md`), then `year-rollover.js` (new school year: last year's averages become baselines, last year archived)
 67. `src/predictor/predictor-task-cards.js` (upcoming assessment cards with escaped names)
 67b. `src/predictor/predictor-tab-scroll.js` (plain scrollbar under the subject tabs, no hover change)
 68. `src/predictor/predictor-grade-view.js` (subject grade predictor sub-tab renderer)
@@ -112,7 +112,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 74. `src/sidebar/sidebar-handle.js` (sidebar handle anchor & slide coordinator)
 75. `src/sidebar/sidebar-hover.js` (left-edge expand and hover collapse)
 76. `src/sidebar/sidebar-filter.js` (outline filter detection for the new-year rollover; presses the top-level "All" with a full mouse press)
-76b. `src/sidebar/sidebar-page-notice.js` (off-outlines notice; Settings is the only tool that works on every page)
+76b. `src/sidebar/sidebar-page-notice.js` (off-outlines notice; Settings and Past Years work on every page) / `sidebar-past-years.js` (Past Years launcher and panel)
 77. `src/sidebar/sidebar-tools.js` (launcher buttons, tool panels and pressed state)
 78. `src/sidebar/sidebar-shell.js` (drawer shell construction and attachment) / `sidebar-glance.js` (Next Up and Awaiting Results under the launcher buttons)
 79. `src/sidebar/sidebar.js` (slide-out tool drawer & launcher)
@@ -130,7 +130,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 
 **Class Content page** (`/group/*/ui/class/learning-content*`, after the sidebar group, which it reuses): `src/content/content-files.js`, `content-save.js`, `content-download.js` (Download beside each section heading's View) and `content-bulk.js` (the bar's Download: ticks to save several headings at once); styles `content-download.css`, `content-bulk.css`.
 
-**Other Connect pages** load a sidebar-only group (`exclude_matches` the outlines page and login URLs; login and logged-out pages never build the drawer, `ConnectifyThemeAuth.isAuthDisabled()`): scheduler, utils, the assessment cache and data modules, categories, the predictor model, Settings (calibration, baselines, preferences) and the sidebar, in the order above. `ConnectifyUtils.isOutlinesPage()` keeps `collect()`, semester detection and the semester filter off other pages' tiles there, so tools read only the cache.
+**Other Connect pages** load a sidebar-only group (`exclude_matches` the outlines page and login URLs; login and logged-out pages never build the drawer, `ConnectifyThemeAuth.isAuthDisabled()`): scheduler, utils, the assessment cache and data modules, categories, the predictor model, Settings (calibration, baselines, preferences, backup), the year archive and the sidebar (with Past Years), in the order above. `ConnectifyUtils.isOutlinesPage()` keeps `collect()`, semester detection and the semester filter off other pages' tiles there, so tools read only the cache.
 
 ### SPA Navigation & DOM Sweeping
 Connect is built on Vaadin / Liferay SPA navigation where the DOM re-renders asynchronously on page transitions.

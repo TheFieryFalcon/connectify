@@ -2,7 +2,7 @@
  * Connectify Settings: panel markup
  *
  * Static HTML for the Settings panel: general preferences (incl. "Show this semester's classes only"), scaling calibration, previous-year
- * baselines, assessment categories and developer settings. The theme options are filled in from the
+ * baselines, assessment categories, backup (settings-backup.js) and developer settings. The theme options are filled in from the
  * theme registry when the panel opens. Exposes window.ConnectifySettingsMarkup.
  */
 (() => {
@@ -89,6 +89,17 @@
            <button type="button" id="cx-cat-save" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Save Changes</button>
            <button type="button" id="cx-cat-reset" class="eds-c-button" style="background:#4b5563;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-weight:600;">Reset Defaults</button>
         </div>
+      </section>
+
+      <section class="cx-settings-section cx-backup">
+        <header><strong>Backup</strong></header>
+        <div class="cx-backup-actions">
+          <button type="button" id="cx-backup-export" class="eds-c-button cx-backup-btn">Export Data</button>
+          <button type="button" id="cx-backup-import" class="eds-c-button cx-backup-btn">Import Data</button>
+          <input type="file" id="cx-backup-file" accept=".json,application/json" hidden>
+          <span id="cx-backup-status" class="cx-settings-hint" aria-live="polite"></span>
+        </div>
+        <div id="cx-backup-review" class="cx-backup-review" hidden></div>
       </section>
 
       <section class="cx-settings-section">

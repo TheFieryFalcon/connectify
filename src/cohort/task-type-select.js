@@ -84,6 +84,8 @@
     }
 
     select.value = currentSelection;
+    // A past year (Past Years) shows its types as they were, never changed
+    select.disabled = Boolean(window.ConnectifyPastYearMode?.active());
     if (currentSelection) {
       select.classList.add('connectea-overridden');
       select.title = `Assessment type manually set to "${currentSelection}". Click to change or reset to Auto.`;

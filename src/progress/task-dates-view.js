@@ -186,7 +186,7 @@
       const active = document.activeElement;
       if (!force && section.contains(active) && active.tagName === 'INPUT' && active.type === 'number') return;
       const subjects = window.ConnectifyData ? window.ConnectifyData.collectClasses(true) : [];
-      const year = new Date().getFullYear();
+      const year = window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear();
       const early = terms.earlyEaster(year);
       const exportView = window.ConnectifyExportView;
       const exporting = Boolean(exportView?.active());

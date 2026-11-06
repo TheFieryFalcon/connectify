@@ -12,7 +12,7 @@
 
   if (window.ConnectifyEarlyEaster) return;
 
-  const year = () => new Date().getFullYear();
+  const year = () => (window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear());
 
   /**
    * { order, semesters }: every cached task in the predictor's chronological order (tied stamps marked

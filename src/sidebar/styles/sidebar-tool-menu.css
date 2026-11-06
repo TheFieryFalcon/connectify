@@ -16,9 +16,9 @@
   border-color: var(--cx-border-focus, #81acca);
 }
 
-#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle),
 #connectify-sidebar .cx-tool-menu > .cx-secondary-tool,
-#connectify-sidebar .cx-back-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+#connectify-sidebar .cx-back-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle),
 #connectify-sidebar .cx-back-menu > .cx-secondary-tool {
   background: #ffffff !important;
   color: #245579 !important;
@@ -27,35 +27,35 @@
   justify-content: center !important;
 }
 
-#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle):hover {
+#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle):hover {
   background: #f1f5f9 !important;
   border-color: #94a3b8 !important;
   color: #174c75 !important;
 }
 
-#connectify-sidebar.cx-tool-active .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)[aria-pressed=true] {
+#connectify-sidebar.cx-tool-active .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle)[aria-pressed=true] {
   background: #e2e8f0 !important;
   border-color: #64748b !important;
   color: #174c75 !important;
 }
 
-.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle),
 .connectea-dark #connectify-sidebar .cx-tool-menu > .cx-secondary-tool,
-.connectea-dark #connectify-sidebar .cx-back-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle),
+.connectea-dark #connectify-sidebar .cx-back-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle),
 .connectea-dark #connectify-sidebar .cx-back-menu > .cx-secondary-tool {
   background: var(--cx-button-bg, var(--cx-surface-elevated, #18222d)) !important;
   color: var(--cx-button-text, var(--cx-text-primary, #e1eaf3)) !important;
   border: 1px solid var(--cx-button-border, var(--cx-border, #3b4d5e)) !important;
 }
 
-.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle):hover,
+.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle):hover,
 .connectea-dark #connectify-sidebar .cx-tool-menu > .cx-secondary-tool:hover {
   background: var(--cx-surface-hover, #24303e) !important;
   border-color: var(--cx-border-hover, #556c84) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
-.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-categories-toggle)[aria-pressed=true],
+.connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle)[aria-pressed=true],
 .connectea-dark #connectify-sidebar.cx-tool-active .cx-tool-menu > .cx-secondary-tool[aria-pressed=true] {
   background: var(--cx-surface-active, #2f3e50) !important;
   border-color: var(--cx-border-focus, #6e88a3) !important;

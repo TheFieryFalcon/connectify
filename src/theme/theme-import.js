@@ -2,8 +2,9 @@
  * Connectify Theme: theme file import
  *
  * Imports .ctme theme files (and older .json ones) from the theme menu's Import Theme and the customizer.
- * sanitize(raw) keeps only the valid fields of an untrusted theme object; pick() opens a file picker and
- * importFile(file) saves the theme as a custom theme (a theme of the same name is updated) and applies it.
+ * sanitize(raw) keeps only the valid fields of an untrusted theme object; saveTheme(raw) saves one as a custom theme
+ * (a theme of the same name is updated), as a backup's themes are; pick() opens a file picker and importFile(file)
+ * saves the theme in it that way and applies it.
  * wallpaperFields(url) stores a preset wallpaper by id (wallpaperPreset), any other image as it is.
  * Exposes window.ConnectifyThemeImport.
  */
@@ -40,9 +41,9 @@
     return out;
   }
 
-  /** Saves a theme file as a custom theme and applies it; resolves with the saved theme. */
-  async function importFile(file) {
-    const theme = sanitize(await window.ConnectifyThemeCtme.unpackFile(file));
+  /** Saves an untrusted theme object as a custom theme (a theme of the same name is updated); resolves with it. */
+  async function saveTheme(raw) {
+    const theme = sanitize(raw);
     if (!theme.colors || !Object.keys(theme.colors).length) throw new Error('The theme has no colours');
     const fit = window.ConnectifyWallpaperFit;
     if (fit?.needsFit(theme.wallpaper)) theme.wallpaper = await fit.fromDataUrl(theme.wallpaper).catch(() => theme.wallpaper);
@@ -56,7 +57,13 @@
       overlayBlurFloor: theme.overlayBlurFloor !== false, wallpaper: theme.wallpaper ?? null, wallpaperPreset: theme.wallpaperPreset ?? null,
       swatch: [colors.canvas, colors.surface, colors.accent], colors
     });
-    if (saved) reg.setTheme(saved.id);
+    return saved;
+  }
+
+  /** Saves a theme file as a custom theme and applies it; resolves with the saved theme. */
+  async function importFile(file) {
+    const saved = await saveTheme(await window.ConnectifyThemeCtme.unpackFile(file));
+    if (saved) window.ConnectifyThemeRegistry.setTheme(saved.id);
     return saved;
   }
 
@@ -78,5 +85,5 @@
     input.click();
   }
 
-  window.ConnectifyThemeImport = { sanitize, wallpaperFields, importFile, pick, failText };
+  window.ConnectifyThemeImport = { sanitize, wallpaperFields, saveTheme, importFile, pick, failText };
 })();

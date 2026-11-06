@@ -509,6 +509,15 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Shared Subject** (`subject-choice.js`)
   - The subject picked in the Predictor, Year Progression, Target Grade or Estimate Grade
     - is the one the others open on, matched by cleaned name, for as long as the page is open
+- **Backup** (Settings, `settings-backup.js`, `backup-*.js`)
+  - Export Data
+    - one file of everything Connectify keeps for the signed-in student: goals, task types, week overrides, calibration and calculators, baselines, categories, past years and this year's records, themes and wallpaper, preferences
+    - never caches or sign-in flags; the account written as `{account}`, so the file moves to a browser where the same student has another account key
+  - Import Data
+    - reviewed in place under the buttons, never a dialog: a tick per section with what the file holds and what importing does here
+    - anything that would replace data here starts unticked; Past Years and Themes merge (a year is never lost)
+    - only allowlisted keys in the shape they need are written; a file from another account says so
+    - all or nothing in localStorage (`Not enough room, nothing was changed`); then the page reloads
 - **Settings Dropdowns**
   - `.cx-settings-select` matches the number inputs
     - white, `#b9cbe1` 1px border, 4px radius
@@ -601,7 +610,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - the drawer is on every Connect page (a sidebar-only content-script group off the outlines page)
     - except login and logout pages (manifest `exclude_matches` for login URLs; `sidebar-handle.js` and `sidebar.js` also stop on `ConnectifyThemeAuth.isAuthDisabled()`)
   - Off the outlines page
-    - There only Settings is enabled
+    - There only Settings and Past Years are enabled
     - the other launchers are disabled under `.cx-page-notice` (Open Assessment Outlines link; launcher menu only, hidden while Settings is open)
     - Off the outlines page no tile is ever read as a class card (`ConnectifyUtils.isOutlinesPage()`)
   - Filters
@@ -641,7 +650,8 @@ Extremely concise summary of the core visual design language, contrast standards
     3. `connectify-progress-toggle` (Year Progression)
     4. `connectify-estimator-toggle` (Estimator: Estimate Grade / Estimate ATAR tabs)
     5. `connectify-weakness-toggle` (Weakness Analyzer)
-    6. `connectify-categories-toggle` (Settings)
+    6. `connectify-past-years-toggle` (Past Years, only once a past year is archived)
+    7. `connectify-categories-toggle` (Settings)
 - **Next Up and Awaiting Results** (`sidebar-glance.js`, `sidebar-glance.css`)
   - Place
     - one padded card under the launcher buttons, at the bottom of the drawer, on the buttons' edges
@@ -869,7 +879,24 @@ Extremely concise summary of the core visual design language, contrast standards
     - Previous baselines are backed up
   - Archive
     - Connect never shows last year's marks again, so the cache is the only copy
-    - last year's cached results are archived (`connectify:year_archive:`, last two years) before being cleared
+    - last year's cached results are archived (`connectify:year_archive:`, last three years) before being cleared
+    - with Connect's own outline records of the year's last load, kept through the year apart from every cache (`year-capsule.js`), and the year's per-student settings
+    - in localStorage and in extension storage, one copy per class set (the richer one), so neither a full localStorage nor clearing the site's data loses a year
+- **Past Years** (`sidebar-past-years.js`, `past-year-open.js`, `past-year-mode.js`, `past-year-bar.js`)
+  - What it is
+    - a past year as it stood at its end: Assessment Outlines and every tool, run on a copy of that year's data, never a second design
+    - View opens it in this tab only; any other page ends it
+  - A copy
+    - every per-student key is the year's copy (`<account>~p<id>`), so nothing done there reaches this year's data
+    - the clock is that year's last day wherever the date decides something (term weeks, Early Easter, semesters, Next Up)
+    - Connect's cards and filter bar are this year's, so they are hidden; the outlines are drawn from the year's records
+  - Read-only, in place
+    - Type dropdowns, the week ✎, Set as Goal, goal Edit and Delete, cohort sizes and Export are locked where they are; Settings is disabled
+    - no rollover, grade or goal toasts, notices, countdown, semester or Connect filter
+    - Estimator inputs stay: what-ifs, gone with the copy
+  - The notice
+    - one bar over the outlines, under Connect's top bars as the page scrolls: the year, `Marks as of <date>`, Back to This Year
+    - in the theme's tokens, glass in Liquid Glass
 - **Show This Semester's Classes Only** (`semester-filter.js`, Settings checkbox, off by default)
   - The semester is always the detected one (no picker), from the term calendar (`ConnectifyClassSemesters.detectSemester`)
     - Semester 2 from canonical school week 17, the week a task's own semester turns (Term 2 Week 7, Week 8 under Early Easter)

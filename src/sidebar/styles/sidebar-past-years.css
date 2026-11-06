@@ -1,0 +1,119 @@
+/**
+ * Connectify Sidebar: the Past Years panel (sidebar-past-years.js)
+ *
+ * One list of years split by hairlines, each with its classes and a View button at the right, as light as the
+ * Task Dates list: no fill of its own, so it sits on the drawer's surface in every theme.
+ */
+
+#connectify-sidebar #connectify-past-years[hidden] {
+  display: none !important;
+}
+
+#connectify-sidebar #connectify-past-years header strong:focus {
+  outline: none;
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-years-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--cx-progress-line, #d5dfe9);
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-year {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+  padding: 12px 0;
+  list-style: none;
+  border-bottom: 1px solid var(--cx-progress-line, #d5dfe9);
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-year__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-year__label,
+#connectify-sidebar #connectify-past-years .cx-past-year__classes {
+  display: block;
+  overflow-wrap: anywhere;
+  font-family: system-ui;
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-year__label {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-year__classes {
+  font-size: 12.5px;
+  line-height: 18px;
+  font-weight: 400;
+  color: #4a5d70;
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-year__view {
+  flex: none;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 12px;
+  font: 600 12px/26px system-ui;
+  border-radius: 6px;
+  border: 1px solid #bacddd;
+  background: #ffffff;
+  color: #245579;
+  cursor: pointer;
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-year__view:hover {
+  background: #e9f2fb;
+  border-color: #709fc4;
+  color: #174c75;
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-year__view:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-years-status {
+  margin: 12px 0 0;
+  font: 400 12.5px/18px system-ui;
+  color: #b91c1c;
+}
+
+#connectify-sidebar #connectify-past-years .cx-past-years-status:empty {
+  display: none;
+}
+
+.connectea-dark #connectify-sidebar #connectify-past-years :is(.cx-past-years-list, .cx-past-year) {
+  border-color: var(--cx-border, #3b4d5e);
+}
+
+.connectea-dark #connectify-sidebar #connectify-past-years .cx-past-year__label {
+  color: var(--cx-text-primary, #e6edf5);
+}
+
+.connectea-dark #connectify-sidebar #connectify-past-years .cx-past-year__classes {
+  color: var(--cx-text-secondary, #b7c5d6);
+}
+
+.connectea-dark #connectify-sidebar #connectify-past-years .cx-past-year__view {
+  background: var(--cx-button-bg, var(--cx-nav-bg, #18222d));
+  color: var(--cx-button-text, var(--cx-text-secondary, #e1eaf3));
+  border-color: var(--cx-button-border, var(--cx-nav-border, #3b4d5e));
+}
+
+.connectea-dark #connectify-sidebar #connectify-past-years .cx-past-year__view:hover {
+  background: var(--cx-button-hover, var(--cx-badge-bg, #24303e));
+  border-color: var(--cx-border-strong, #556c84);
+  color: var(--cx-text-primary, #ffffff);
+}
+
+.connectea-dark #connectify-sidebar #connectify-past-years .cx-past-years-status {
+  color: #fca5a5;
+}

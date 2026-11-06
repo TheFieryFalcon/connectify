@@ -12,7 +12,7 @@
   'use strict';
 
   const createElement = (...args) => window.ConnectifyProgressChart.createElement(...args);
-  const thisYear = () => new Date().getFullYear();
+  const thisYear = () => (window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear());
 
   // A saved override as the school week the editor shows ("w10", or an older bare "10")
   function shownWeek(saved) {
@@ -188,11 +188,14 @@
     // A week shown beside its pencil; a marked task with no week reads quietly, as nothing depends on it now
     const hasWeek = Number.isFinite(point.order);
     const isMarked = !point.pending && Number.isFinite(point.score);
-    if (hasWeek || isMarked) {
+    // A past year (Past Years) is read-only: its weeks are shown, never edited
+    const locked = Boolean(window.ConnectifyPastYearMode?.active());
+    if (hasWeek || isMarked || locked) {
       const label = createElement('span', hasWeek ? math.shortTimestamp(point.order, point.caption) : 'No week', hasWeek ? null : 'cx-date-none');
       if (hasWeek) label.title = math.formatTimestamp(point.order, point.caption);
       const containerSpan = createElement('span', null, 'cx-time-cell');
       containerSpan.append(label);
+      if (locked) return containerSpan;
 
       const editBtn = createElement('button', '✎', 'cx-time-edit-btn');
       editBtn.type = 'button';

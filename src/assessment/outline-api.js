@@ -12,7 +12,8 @@
  * are drawable (drawable(), connectify-outlines-preview) as soon as they arrive, each boxplot filled in as its
  * chart lands; the caches wait for the whole load. A record whose content is unchanged keeps its object, so
  * only tiles that changed are drawn again.
- * Loads once per outlines page; fires connectify-outlines-loaded / connectify-outlines-failed.
+ * Loads once per outlines page; fires connectify-outlines-loaded / connectify-outlines-failed. While a past year is
+ * viewed (Past Years), its saved records stand in for Connect's and nothing is fetched.
  * Exposes window.ConnectifyOutlineApi.
  */
 (() => {
@@ -146,11 +147,22 @@
     return build();
   }
 
+  // A past year (past-year-mode.js) is drawn from Connect's records of its last load, kept in its copy
+  async function pastRecords() {
+    // After the rest of the group has loaded, as a fetch would: every listener hears the events
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const saved = JSON.parse(localStorage.getItem(`connectify:outline_records:${window.ConnectifyUtils.accountKey()}`) || 'null');
+    if (!Array.isArray(saved?.records)) throw new Error('The past year has no outline records');
+    preview = saved.records;
+    window.dispatchEvent(new CustomEvent('connectify-outlines-preview'));
+    return preview;
+  }
+
   /** Loads (or with force, reloads) every outline; resolves to the records, or null when Connect refused. */
   function load({ force = false } = {}) {
     if (pending) return pending;
     if (records && !force) return Promise.resolve(records);
-    pending = fetchRecords().then(list => {
+    pending = (window.ConnectifyPastYearMode?.active() ? pastRecords() : fetchRecords()).then(list => {
       records = list;
       failed = null;
       version++;
