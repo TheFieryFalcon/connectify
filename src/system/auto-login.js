@@ -97,10 +97,19 @@
           return; // Do not auto-login: let a manual logout take effect
       }
 
-      // Only a saved password / browser autofill may log in: a student who presses a key, or clicks or pastes
-      // in the form, is entering their own (the click is also what makes Chromium release a saved password)
+      // Only a saved password / browser autofill may log in: a student who types, pastes or clicks in a credential
+      // field (or tabs to one) is entering their own (the click is also what makes Chromium release a saved password).
+      // Never counted: password managers' own fill events (Bitwarden, 1Password simulate keydown: isTrusted false),
+      // clicks elsewhere on the page (the DET form wraps the whole layout) and modifiers or shortcuts (Ctrl+Tab, Cmd)
       let userEntering = false;
-      const markEntering = () => { userEntering = true; };
+      const isCredentialField = el => !!el && (el.id === 'ssousername' || el.id === 'password');
+      const MODIFIER_KEYS = new Set(['Shift', 'Control', 'Alt', 'AltGraph', 'Meta', 'OS', 'CapsLock', 'Fn', 'FnLock', 'NumLock', 'ScrollLock']);
+      const markEntering = e => { if (e && e.isTrusted) userEntering = true; };
+      const markKeyEntry = e => {
+        if (!e || !e.isTrusted || MODIFIER_KEYS.has(e.key)) return;
+        if ((e.ctrlKey || e.metaKey) && !e.getModifierState?.('AltGraph')) return;
+        if (e.key === 'Tab' || isCredentialField(e.target)) userEntering = true;
+      };
       // Chromium matches :autofill before it releases a saved password's value to the page (and to a submitted form):
       // only a readable value counts, and the release fires 'input', which retries the login
       const isFilled = el => el.value.trim() !== '';
@@ -149,10 +158,9 @@
       const userField = document.getElementById('ssousername');
       const passField = document.getElementById('password');
       if (userField && passField) {
-          document.addEventListener('keydown', markEntering, true);
-          for (const area of userField.form ? [userField.form] : [userField, passField]) {
-              area.addEventListener('pointerdown', markEntering);
-              area.addEventListener('paste', markEntering);
+          document.addEventListener('keydown', markKeyEntry, true);
+          for (const field of [userField, passField]) {
+              for (const type of ['pointerdown', 'paste', 'drop']) field.addEventListener(type, markEntering);
           }
           userField.addEventListener('input', attemptLogin);
           passField.addEventListener('input', attemptLogin);

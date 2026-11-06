@@ -7819,16 +7819,19 @@ runTest('Test 161: A dialog and its padding regions share one surface; a table-w
   assert.ok(cssHas(bar, 'cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body)),'), 'a cnt-paginator wrapping the table must not get flex/space-between layout');
 });
 
-runTest('Test 162: Auto-login only fires for a saved password or browser autofill, never once the student is entering their own', () => {
+runTest('Test 162: Auto-login only fires for a saved password, browser or password-manager autofill, never once the student is entering their own', () => {
   const js = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login.js'), 'utf8');
   // Chromium (Chrome, Dia) matches :autofill while it still withholds the password value: submitting then sends an empty password
   assert.ok(!/['"]:(-webkit-)?autofill['"]/.test(js) && js.includes("const isFilled = el => el.value.trim() !== '';"),
     'auto-login must wait for readable credential values, never treat :autofill alone as filled');
   assert.ok(js.includes('if (!isFilled(userField) || !isFilled(passField)) return;'), 'auto-login must require both credential fields to be filled');
   assert.ok(js.includes("passField.addEventListener('input', attemptLogin)"), 'the browser releasing an autofilled value must retry the login');
-  assert.ok(js.includes("document.addEventListener('keydown', markEntering, true)"), 'a key press, Tab to a field included, must mark the form as user-entered');
-  assert.ok(js.includes("area.addEventListener('pointerdown', markEntering)") && js.includes("area.addEventListener('paste', markEntering)"),
-    'clicking or pasting in the form must mark it as user-entered: the click is what makes Chromium release a saved password, which then fires input');
+  assert.ok(js.includes("document.addEventListener('keydown', markKeyEntry, true)") && js.includes("if (e.key === 'Tab' || isCredentialField(e.target)) userEntering = true;"),
+    'a key press in a credential field, or Tab to one, must mark the form as user-entered');
+  assert.ok(js.includes("if (!e || !e.isTrusted || MODIFIER_KEYS.has(e.key)) return;") && js.includes("const markEntering = e => { if (e && e.isTrusted) userEntering = true; };"),
+    'password managers\' own fill events (isTrusted false) and bare modifier keys must never count as the student entering');
+  assert.ok(js.includes("for (const type of ['pointerdown', 'paste', 'drop']) field.addEventListener(type, markEntering);") && !js.includes('userField.form'),
+    'clicking or pasting in a credential field marks it as user-entered (the click is what makes Chromium release a saved password); the DET form wraps the whole page, so a click elsewhere never does');
   assert.ok(js.includes("=== false || userEntering) return;"), 'auto-login must not fire once the student is entering their own');
 });
 
@@ -7856,8 +7859,8 @@ runTest('Test 278: In Chromium, auto-login signs in with the password saved in t
     };
     require('vm').runInNewContext(credSrc, sandbox);
     require('vm').runInNewContext(loginSrc, sandbox);
-    if (typeFirst) docListeners.keydown();
-    if (clickFirst) fields.password.listeners.pointerdown();
+    if (typeFirst) docListeners.keydown({ isTrusted: true, key: 'a', target: fields.ssousername, ...typeFirst });
+    if (clickFirst) fields.password.listeners.pointerdown({ isTrusted: true });
     await new Promise(r => setTimeout(r, 20));
     return { clicks, asked, user: fields.ssousername.value, pass: fields.password.value, terms: terms.checked };
   };
@@ -7868,7 +7871,12 @@ runTest('Test 278: In Chromium, auto-login signs in with the password saved in t
   assert.strictEqual((await run({ flags: { 'cx-autologin-enabled': false } })).asked, null, 'Auto-login off: the password manager is never asked');
   assert.strictEqual((await run({ flags: { 'cx-manual-logout': true } })).asked, null, 'never after a manual logout');
   assert.strictEqual((await run({ flags: { 'cx-last-autologin': Date.now() - 5000 } })).clicks, 0, 'never within 30s of a login');
-  assert.strictEqual((await run({ typeFirst: true })).clicks, 0, 'typing before the credential arrives leaves the form to the student');
+  assert.strictEqual((await run({ typeFirst: {} })).clicks, 0, 'typing before the credential arrives leaves the form to the student');
+  assert.strictEqual((await run({ typeFirst: { key: 'Tab', target: {} } })).clicks, 0, 'tabbing into the form leaves it to the student');
+  assert.strictEqual((await run({ typeFirst: { isTrusted: false } })).clicks, 1, 'a password manager simulating key presses as it fills is no student typing');
+  assert.strictEqual((await run({ typeFirst: { key: 'Control', target: {} } })).clicks, 1, 'a bare modifier (Ctrl+Tab, Alt+Tab, Cmd) is no typing');
+  assert.strictEqual((await run({ typeFirst: { key: 't', ctrlKey: true } })).clicks, 1, 'a shortcut is no typing');
+  assert.strictEqual((await run({ typeFirst: { key: 'a', target: {} } })).clicks, 1, 'a key pressed outside the credential fields is no typing');
   const clicked = await run({ clickFirst: true });
   assert.ok(clicked.clicks === 0 && clicked.pass === '', 'clicking into a field before the credential arrives leaves the form and its fields to the student');
   assert.strictEqual((await run({ cred: null })).clicks, 0, 'no saved password (or the chooser cancelled): nothing is submitted');
