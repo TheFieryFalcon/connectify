@@ -126,6 +126,7 @@
     const refreshSemesterFilter = window.ConnectifySettingsSemesterFilter?.bind(panel) || (() => {});
     const refreshPanelView = window.ConnectifySettingsPanelView?.bind(panel) || (() => {});
     const refreshCourseFilter = window.ConnectifySettingsCourseFilter?.bind(panel) || (() => {});
+    const refreshEarlyMeters = window.ConnectifySettingsEarlyMeters?.bind(panel) || (() => {});
     bindClearCache(panel);
 
     const refresh = () => {
@@ -138,6 +139,7 @@
         refreshSemesterFilter();
         refreshPanelView();
         refreshCourseFilter();
+        refreshEarlyMeters();
       } catch (e) {
         console.warn('Connectify settings preferences error:', e);
       }

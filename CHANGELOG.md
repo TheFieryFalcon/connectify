@@ -4,6 +4,16 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
+## Unreleased
+
+### Additions
+- **Hide potentially inaccurate prediction bars**: a Settings option, off by default, that hides the outcome meter on a subject's second and third marked results, when the prediction behind it rests on only one or two results.
+
+### Changes
+- The outcome meter shows again from a subject's second marked result, as before 3.3.2. Turn on Hide potentially inaccurate prediction bars to keep the 3.3.2 behaviour.
+
+---
+
 ## 3.3.2 (2026-11-05)
 
 ### Additions

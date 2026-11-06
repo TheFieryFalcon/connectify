@@ -99,6 +99,7 @@ const MODULE_BUNDLES = {
     'cohort-row-readers.js',
     'cohort-panel-view.js',
     'cohort-course-filter.js',
+    'cohort-early-meters.js',
     'cohort-expanded.js',
     'cohort-panel.js',
     'cohort-outcome-eval.js',
@@ -115,6 +116,7 @@ const MODULE_BUNDLES = {
     'settings-semester-filter.js',
     'settings-panel-view.js',
     'settings-course-filter.js',
+    'settings-early-meters.js',
     'settings-preferences.js',
     'category-settings.js'
   ],
@@ -2886,18 +2888,28 @@ runTest('Test 107: Outcome bar is strictly suppressed on first task of subject/t
   window.ConnectifyCohortView.render(row2, false, 'chem-k2', 50, null, subjectsList);
   const panel2 = window.ConnectifyCohortView.panels.get(row2);
   assert.ok(panel2, 'Panel 2 must exist');
-  assert.strictEqual(panel2.outcomeBar.hidden, true, 'Task 2 (one earlier result) waits: too few to judge it by');
+  assert.strictEqual(panel2.outcomeBar.hidden, false, 'Task 2 (one earlier result) shows its meter by default');
 
   // Row for task 3 (second of type 'Test', has prior subject data)
   const row3 = makeTaskRow('Test 2', 'Term 2, Week 3', '44 Out of 50');
   window.ConnectifyCohortView.render(row3, false, 'chem-k3', 50, null, subjectsList);
   const panel3 = window.ConnectifyCohortView.panels.get(row3);
   assert.ok(panel3, 'Panel 3 must exist');
-  assert.strictEqual(panel3.outcomeBar.hidden, true, 'Task 3 (two earlier results) still waits');
+  assert.strictEqual(panel3.outcomeBar.hidden, false, 'Task 3 (two earlier results) shows its meter by default');
 
   const row4 = makeTaskRow('Test 3', 'Term 2, Week 6', '40 Out of 50');
   window.ConnectifyCohortView.render(row4, false, 'chem-k4', 50, null, subjectsList);
   assert.strictEqual(window.ConnectifyCohortView.panels.get(row4).outcomeBar.hidden, false, 'Task 4 has three earlier results: the meter shows, first of its type or not');
+
+  // "Hide potentially inaccurate prediction bars": the second and third results wait, the fourth shows
+  window.ConnectifyEarlyMeters.save(true);
+  window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
+  for (const [row, key] of [[row2, 'chem-k2'], [row3, 'chem-k3'], [row4, 'chem-k4']]) window.ConnectifyCohortView.render(row, false, key, 50, null, subjectsList);
+  assert.strictEqual(panel2.outcomeBar.hidden, true, 'With the option on, Task 2 (one earlier result) waits');
+  assert.strictEqual(panel3.outcomeBar.hidden, true, 'and so does Task 3 (two earlier results)');
+  assert.strictEqual(window.ConnectifyCohortView.panels.get(row4).outcomeBar.hidden, false, 'Task 4 (three earlier results) still shows');
+  window.ConnectifyEarlyMeters.save(false);
+  window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
 
   // Now set cold-start baseline for subject and type, and verify Task 1 renders outcome bar
   predMath.saveBaselines({
@@ -3339,6 +3351,15 @@ runTest('Test 164: The outcome bar stays hidden on the first marked assessment o
 
     const s1 = makeCard('Chemistry - Semester 1', [null, 72, 80, 75, 90]);
     assert.strictEqual(evaluateRow(s1[1], 72, meta, []), null, 'The first marked task after unmarked rows must not show a bar');
+    assert.strictEqual(evaluateRow(s1[2], 80, meta, []), 'bar', 'One earlier result shows the bar by default');
+    assert.strictEqual(evaluateRow(s1[3], 75, meta, []), 'bar', 'And so do two');
+
+    // "Hide potentially inaccurate prediction bars" (off by default) holds the second and third results back
+    eval(fs.readFileSync(path.join(SRC_DIR, 'cohort/cohort-early-meters.js'), 'utf8'));
+    const early = window.ConnectifyEarlyMeters;
+    assert.ok(!early.isEnabled() && localStorage.getItem(early.KEY) === null, 'off by default, with nothing saved');
+    early.save(true);
+    assert.strictEqual(evaluateRow(s1[1], 72, meta, []), null, 'With the option on the first task still has no bar');
     assert.strictEqual(evaluateRow(s1[2], 80, meta, []), null, 'One earlier result is too few');
     assert.strictEqual(evaluateRow(s1[3], 75, meta, []), null, 'And so are two');
     assert.strictEqual(evaluateRow(s1[4], 90, meta, []), 'bar', 'Three earlier marked results show the bar');
@@ -3365,6 +3386,7 @@ runTest('Test 164: The outcome bar stays hidden on the first marked assessment o
     assert.strictEqual(evaluateRow(s2[0], 65, meta, later), 'bar', 'All three before it count');
     window.ConnectifyData = dataBefore;
   } finally {
+    localStorage.removeItem('connectify:hide_early_meters');
     cards.forEach(c => c.remove());
     window.ConnectifyCohortRows = saved.rows;
     window.ConnectifyPredictorMath = saved.pred;
@@ -3418,7 +3440,7 @@ runTest('Test 111: Typography parity (unbolded overall % and letter grade), star
 
   // 4. Four-segment outcome bar: renders for first task of type, fast O(1) prediction lookup
   assert.ok(!cohortViewJs.includes('const isFirstOfType ='), 'cohort-view.js must not suppress outcome bar for first task of type');
-  assert.ok(cohortViewJs.includes('const tooFewResults = priorResults < MIN_PRIOR_RESULTS && !hasSubjectBaseline;'), 'the meter waits for enough earlier results in the subject, or a baseline');
+  assert.ok(cohortViewJs.includes('const tooFewResults = priorResults < minPriorResults() && !hasSubjectBaseline;'), 'the meter waits for enough earlier results in the subject (one, or three with the option on), or a baseline');
   assert.ok(cohortViewJs.includes('card._cxTaskRows'), 'cohort-view.js must memoize card task rows to eliminate quadratic scans');
 
   // 5. Overall stats panel stability and MutationObserver loop elimination
@@ -8855,9 +8877,14 @@ runTest('Test 192: The first Semester 1 task listed on a Semester 2 panel gets n
     assert.strictEqual(firstTask.semester, 1, 'a Term 1 task on a Semester 2 panel is a Semester 1 task');
     assert.strictEqual(evalApi.evaluateRow(first, 64, meta('Short written response - Play', 'Term 1, Week 5'), subjects), null,
       'the first marked task of the class has nothing before it (the overall row and its own Semester 1 copy never count), so no meter');
-    assert.strictEqual(evalApi.evaluateRow(second, 80, meta('Extended written response - Prose', 'Term 2, Week 1'), subjects), null, 'the next task has one result before it, too few');
+    assert.ok(evalApi.evaluateRow(second, 80, meta('Extended written response - Prose', 'Term 2, Week 1'), subjects), 'the next task has the first one before it');
+    // "Hide potentially inaccurate prediction bars": one result before it is too few, the fourth has three
+    eval(fs.readFileSync(path.join(SRC_DIR, 'cohort/cohort-early-meters.js'), 'utf8'));
+    window.ConnectifyEarlyMeters.save(true);
+    assert.strictEqual(evalApi.evaluateRow(second, 80, meta('Extended written response - Prose', 'Term 2, Week 1'), subjects), null, 'with the option on the next task waits');
     assert.ok(evalApi.evaluateRow(fourth, 75, meta('Oral', 'Term 2, Week 5'), subjects), 'the fourth has three: the overall row never counted, so neither would it be the fourth by that');
   } finally {
+    localStorage.removeItem('connectify:hide_early_meters');
     window.ConnectifyCohortRows = saved.rows; window.ConnectifyPredictorMath = saved.pred; window.ConnectifyData = saved.data;
   }
 });
@@ -15632,7 +15659,7 @@ runTest('Test 331: Settings keeps one spacing scale, past Connect\'s own label a
   const html = window.ConnectifySettingsMarkup.panelHtml();
   assert.strictEqual((html.match(/<section class="cx-settings-section">/g) || []).length, 5, 'every section is the same, none with spacing of its own');
   assert.ok(!/<section[^>]*style=/.test(html) && !/<header[^>]*margin/.test(html), 'sections and headings have no inline margins');
-  assert.strictEqual((html.match(/<label class="cx-settings-check">/g) || []).length, 3, 'the checkboxes share one class');
+  assert.strictEqual((html.match(/<label class="cx-settings-check">/g) || []).length, 4, 'the checkboxes share one class');
   assert.ok(!html.includes('rgba(255,255,255,0.08)'), 'no faint line above the wallpaper, which Light could not show');
 
   const css = read('sidebar/styles/sidebar-settings.css');
@@ -16124,6 +16151,56 @@ runTest('Test 343: The changelog popup reads the file every build ships, as text
   } finally {
     window.ConnectifyChangelogPopup = saved;
   }
+});
+
+runTest('Test 344: "Hide potentially inaccurate prediction bars" is a Settings checkbox, off by default, applied at once', () => {
+  localStorage.clear();
+  const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
+  eval(read('cohort/cohort-early-meters.js'));
+  const early = window.ConnectifyEarlyMeters;
+  assert.ok(!early.isEnabled() && early.minPriorResults() === 1, 'off by default: the meter shows from the second result');
+  early.save(true);
+  assert.ok(early.isEnabled() && early.minPriorResults() === 3, 'on: from the fourth');
+  early.save(false);
+
+  eval(read('predictor/settings-markup.js'));
+  eval(read('predictor/settings-early-meters.js'));
+  const panel = new MockElement('div');
+  panel.innerHTML = window.ConnectifySettingsMarkup.panelHtml();
+  assert.ok(window.ConnectifySettingsMarkup.panelHtml().includes('id="cx-early-meters-toggle"> Hide potentially inaccurate prediction bars'), 'the label');
+  const toggle = panel.querySelector('#cx-early-meters-toggle');
+  const origCohort = window.ConnectifyCohort;
+  let scheduled = 0;
+  let updated = 0;
+  const origDispatch = window.dispatchEvent;
+  window.dispatchEvent = e => { if (e.type === 'connectify-settings-updated') updated++; return true; };
+  window.ConnectifyCohort = { schedule: immediate => { if (immediate) scheduled++; } };
+  try {
+    const refresh = window.ConnectifySettingsEarlyMeters.bind(panel);
+    assert.strictEqual(toggle.checked, false, 'the checkbox shows the stored choice');
+    toggle.checked = true;
+    toggle.dispatchEvent(new MockEvent('change'));
+    assert.ok(early.isEnabled() && scheduled === 1 && updated === 1, 'a change saves, drops every row memo and redraws at once');
+    early.save(false);
+    refresh();
+    assert.strictEqual(toggle.checked, false);
+  } finally {
+    window.ConnectifyCohort = origCohort;
+    window.dispatchEvent = origDispatch;
+  }
+  assert.ok(read('predictor/settings-preferences.js').includes('window.ConnectifySettingsEarlyMeters?.bind(panel)'), 'General Preferences binds it');
+  assert.ok(/directKeys = \[[^\]]*'connectify:hide_early_meters'/.test(read('assessment/cache-versions.js')), 'a settings reset clears it');
+
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const groups = manifest.content_scripts.filter(g => (g.js || []).includes('src/predictor/settings-preferences.js'));
+  assert.ok(groups.length >= 2, 'the outlines and sidebar-only groups');
+  for (const { js } of groups) {
+    assert.ok(js.includes('src/cohort/cohort-early-meters.js'), 'the option is registered');
+    assert.ok(js.indexOf('src/predictor/settings-early-meters.js') > -1 && js.indexOf('src/predictor/settings-early-meters.js') < js.indexOf('src/predictor/settings-preferences.js'), 'the checkbox loads before General Preferences');
+  }
+  const outlines = groups.find(g => g.js.includes('src/cohort/cohort-outcome-eval.js'));
+  assert.ok(outlines.js.indexOf('src/cohort/cohort-early-meters.js') < outlines.js.indexOf('src/cohort/cohort-outcome-eval.js'), 'loaded before the meter reads it');
+  localStorage.clear();
 });
 
 Promise.all(pendingTestPromises).then(() => {

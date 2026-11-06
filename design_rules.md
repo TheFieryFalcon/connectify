@@ -731,10 +731,13 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Suppression Rules**
   - Suppress outcome bars on incomplete or unmarked assessments
     - `Number.isFinite(mark)` check
-  - Suppress until a subject has three earlier marked results, unless a numeric subject baseline exists (`MIN_PRIOR_RESULTS`)
-    - a prediction from one or two results is too unsure to judge a mark by: a 100% then an 87% in the top fifth read red
+  - Suppress on a subject's first marked result, unless a numeric subject baseline exists
     - prior results are the earlier marked rows in the card or, for a Semester 2 task, its marked Semester 1 results
-    - First tasks of a type render normally once the subject has enough
+    - First tasks of a type render normally once the subject has an earlier result
+  - **Hide potentially inaccurate prediction bars** (`cohort-early-meters.js`, Settings checkbox, off by default)
+    - on, the second and third results wait too: a meter needs three earlier results or a numeric subject baseline (`minPriorResults`)
+    - a prediction from one or two results is unsure: a 100% then an 87% in the top fifth read red
+    - applies at once, never after a reload
   - A task's semester is its own week, not its card's
     - **Semester 2 starts at canonical school week 17** through the term calendar
     - Term 2 Week 7 (chronological week 19), or Term 2 Week 8 (week 20) under Early Easter (`ConnectifyParseHelpers.semesterTwoOrder` / `taskSemester`)

@@ -2,7 +2,7 @@
  * Connectify Cohort: outcome meter evaluation for a task row
  *
  * Builds the predictor's view of a marked task row (semester, position in the card, school week and
- * weight), hides the meter until a subject has MIN_PRIOR_RESULTS earlier results or a baseline, and evaluates the mark
+ * weight), hides the meter until a subject has enough earlier results (ConnectifyEarlyMeters) or a baseline, and evaluates the mark
  * against the cached or freshly computed prediction. Unmarked rows get their prediction pre-cached.
  * Exposes window.ConnectifyCohortOutcomeEval.
  */
@@ -68,8 +68,8 @@
   const hasMark = row => Number.isFinite(window.ConnectifyCohortRows?.readMark?.(row));
   const isFiniteBaseline = v => v !== null && v !== '' && v !== undefined && Number.isFinite(Number(v));
 
-  // A prediction from one or two results is too unsure to judge a mark by: a 100% then an 87% in the top fifth read red
-  const MIN_PRIOR_RESULTS = 3;
+  // Earlier results a subject needs before its meter shows: one, or three under "Hide potentially inaccurate prediction bars"
+  const minPriorResults = () => window.ConnectifyEarlyMeters?.minPriorResults?.() ?? 1;
 
   /**
    * How many marked results the subject has before this one: the earlier marked rows in this card, or for a
@@ -112,7 +112,7 @@
 
     // Too few earlier results to measure this one against, unless a baseline is set
     const priorResults = priorMarkedCount(task, row, meta, precollectedSubjects, predMath);
-    const tooFewResults = priorResults < MIN_PRIOR_RESULTS && !hasSubjectBaseline;
+    const tooFewResults = priorResults < minPriorResults() && !hasSubjectBaseline;
     if (tooFewResults) return null;
 
     let prediction = predMath.getCachedPrediction ? predMath.getCachedPrediction(meta.subjectName, predictionKey(task)) : null;
@@ -145,5 +145,5 @@
     }
   }
 
-  window.ConnectifyCohortOutcomeEval = { MIN_PRIOR_RESULTS, taskFromRow, evaluateRow, precacheUpcoming, cardTaskRows };
+  window.ConnectifyCohortOutcomeEval = { taskFromRow, evaluateRow, precacheUpcoming, cardTaskRows };
 })();

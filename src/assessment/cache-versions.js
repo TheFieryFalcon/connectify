@@ -73,6 +73,7 @@
           'connectify:semester_filter',
           'connectify:panel_view',
           'connectify:hide_course_stats',
+          'connectify:hide_early_meters',
           'connectify:school_terms',
           'connectify:task_dates_view'
         ];
