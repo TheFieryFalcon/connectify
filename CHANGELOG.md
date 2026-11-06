@@ -19,6 +19,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - Everything Connectify still named after its old name, Connectea, is now named Connectify: page classes and attributes, events and saved keys. Saved themes, wallpapers, task types, week overrides, categories, calibration and cohort sizes move to the new names once on the first page load, and backups and past years saved before the change still import and open.
 
 ### Fixes
+- The class filter button on Assessment Outlines no longer takes a custom theme's Buttons colour: it keeps the theme's own surface and ink, and a faint tint on Liquid Glass.
 - Auto-login signs in again with password managers such as Bitwarden and 1Password, and after a click elsewhere on the sign-in page or a shortcut such as Ctrl+Tab. Only typing, pasting or clicking in the username or password field leaves the page to you.
 
 ---

@@ -16792,6 +16792,25 @@ runTest('Test 352: Saved keys under the old name, connectea, move to connectify 
   assert.deepStrictEqual(hits.split('\n').filter(f => f && !allowed.has(f)), [], 'no file names connectea or connext');
 });
 
+runTest('Test 353: Connect\'s toolbar icon toggles (the outlines\' class filter) never take the theme\'s button colour', () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles', f), 'utf8');
+  const bars = read('theme-reports-menus-2.css');
+  const fill = bars.split('}').find(b => b.includes('background-color: var(--cx-button-bg, #24303f) !important;')) || '';
+  const hover = bars.split('}').find(b => b.includes('.connectify-dark .mat-toolbar .mat-button:hover')) || '';
+  for (const block of [fill, hover]) {
+    const sels = block.slice(0, block.indexOf('{')).split(/,\s*(?=\.connectify-dark)/).map(s => s.trim()).filter(s => /:where\((button|a)\)/.test(s));
+    assert.ok(sels.length >= 10 && sels.every(s => s.includes(':not(:is(.c-toolbar-button, .mat-icon-button))')),
+      'every toolbar button and link selector skips icon toggles');
+  }
+  const action = read('theme-action-buttons.css');
+  assert.ok(action.includes('.connectify-dark:not(cx-n) .c-toolbar-button:hover:not(cx-n), .connectify-dark:not(cx-n) .mat-toolbar button.mat-icon-button:hover {\n  background-color: var(--cx-surface-hover, #313f50) !important;'),
+    'they keep the icon-button surface and highlight on hover');
+  const menu = read('theme-category-menu.css');
+  assert.ok(menu.includes('.js-pos-category-toolbar-container .c-toolbar-button:not(#cx-n) {\n  background-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 10%, transparent) !important;') &&
+    menu.includes('.js-pos-category-toolbar-container .c-toolbar-button:hover:not(#cx-n) {\n  background-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;'),
+    'in Liquid Glass the filter toggle is a faint ink tint on the bar, never a pane of its own');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

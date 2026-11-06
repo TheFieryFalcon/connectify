@@ -50,3 +50,12 @@ html:not(.connectify-dark):is([data-connectify-theme="liquid-glass"], [data-conn
   backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
 }
+
+/* The bar's filter toggle is a faint ink tint on the glass, never a pane of its own or the button colour */
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .js-pos-category-toolbar-container .c-toolbar-button:not(#cx-n) {
+  background-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 10%, transparent) !important;
+}
+
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .js-pos-category-toolbar-container .c-toolbar-button:hover:not(#cx-n) {
+  background-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;
+}

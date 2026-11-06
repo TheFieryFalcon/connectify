@@ -159,30 +159,31 @@
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-.connectify-dark :where(mat-toolbar):not(.cx-n) :where(button):not(.cx-n), .connectify-dark :where(mat-toolbar):not(.cx-n) .v-button,
-.connectify-dark :where(mat-toolbar):not(.cx-n) :where(a):not(.cx-n), .connectify-dark :where(mat-toolbar):not(.cx-n) .mat-button,
-.connectify-dark .mat-toolbar :where(button):not(.cx-n), .connectify-dark .mat-toolbar .v-button, .connectify-dark .mat-toolbar :where(a):not(.cx-n),
-.connectify-dark .mat-toolbar .mat-button, .connectify-dark .cvr-c-reports :where(button):not(.cx-n), .connectify-dark .cvr-c-reports .v-button,
-.connectify-dark .cvr-c-reports :where(a):not(.cx-n), .connectify-dark .cvr-c-reports .mat-button,
-.connectify-dark .cvr-c-report-years :where(button):not(.cx-n), .connectify-dark .cvr-c-report-years .v-button,
-.connectify-dark .cvr-c-report-years :where(a):not(.cx-n), .connectify-dark .cvr-c-report-years .mat-button,
-.connectify-dark .cvr-c-year-selector :where(button):not(.cx-n), .connectify-dark .cvr-c-year-selector .v-button,
-.connectify-dark .cvr-c-year-selector :where(a):not(.cx-n), .connectify-dark .cvr-c-year-selector .mat-button {
+/* Text buttons in toolbars take the button colours; icon toggles (the outlines' class filter) stay icon buttons */
+.connectify-dark :where(mat-toolbar):not(.cx-n) :where(button):not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark :where(mat-toolbar):not(.cx-n) .v-button,
+.connectify-dark :where(mat-toolbar):not(.cx-n) :where(a):not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark :where(mat-toolbar):not(.cx-n) .mat-button,
+.connectify-dark .mat-toolbar :where(button):not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .mat-toolbar .v-button, .connectify-dark .mat-toolbar :where(a):not(:is(.c-toolbar-button, .mat-icon-button)),
+.connectify-dark .mat-toolbar .mat-button, .connectify-dark .cvr-c-reports :where(button):not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-reports .v-button,
+.connectify-dark .cvr-c-reports :where(a):not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-reports .mat-button,
+.connectify-dark .cvr-c-report-years :where(button):not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-report-years .v-button,
+.connectify-dark .cvr-c-report-years :where(a):not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-report-years .mat-button,
+.connectify-dark .cvr-c-year-selector :where(button):not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-year-selector .v-button,
+.connectify-dark .cvr-c-year-selector :where(a):not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-year-selector .mat-button {
   background-color: var(--cx-button-bg, #24303f) !important;
   color: var(--cx-button-text, #f8fafc) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
 }
 
-.connectify-dark :where(mat-toolbar):not(.cx-n) :where(button):hover:not(.cx-n), .connectify-dark :where(mat-toolbar):not(.cx-n) .v-button:hover,
-.connectify-dark :where(mat-toolbar):not(.cx-n) :where(a):hover:not(.cx-n), .connectify-dark :where(mat-toolbar):not(.cx-n) .mat-button:hover,
-.connectify-dark .mat-toolbar :where(button):hover:not(.cx-n), .connectify-dark .mat-toolbar .v-button:hover,
-.connectify-dark .mat-toolbar :where(a):hover:not(.cx-n), .connectify-dark .mat-toolbar .mat-button:hover,
-.connectify-dark .cvr-c-reports :where(button):hover:not(.cx-n), .connectify-dark .cvr-c-reports .v-button:hover,
-.connectify-dark .cvr-c-reports :where(a):hover:not(.cx-n), .connectify-dark .cvr-c-reports .mat-button:hover,
-.connectify-dark .cvr-c-report-years :where(button):hover:not(.cx-n), .connectify-dark .cvr-c-report-years .v-button:hover,
-.connectify-dark .cvr-c-report-years :where(a):hover:not(.cx-n), .connectify-dark .cvr-c-report-years .mat-button:hover,
-.connectify-dark .cvr-c-year-selector :where(button):hover:not(.cx-n), .connectify-dark .cvr-c-year-selector .v-button:hover,
-.connectify-dark .cvr-c-year-selector :where(a):hover:not(.cx-n), .connectify-dark .cvr-c-year-selector .mat-button:hover {
+.connectify-dark :where(mat-toolbar):not(.cx-n) :where(button):hover:not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark :where(mat-toolbar):not(.cx-n) .v-button:hover,
+.connectify-dark :where(mat-toolbar):not(.cx-n) :where(a):hover:not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark :where(mat-toolbar):not(.cx-n) .mat-button:hover,
+.connectify-dark .mat-toolbar :where(button):hover:not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .mat-toolbar .v-button:hover,
+.connectify-dark .mat-toolbar :where(a):hover:not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .mat-toolbar .mat-button:hover,
+.connectify-dark .cvr-c-reports :where(button):hover:not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-reports .v-button:hover,
+.connectify-dark .cvr-c-reports :where(a):hover:not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-reports .mat-button:hover,
+.connectify-dark .cvr-c-report-years :where(button):hover:not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-report-years .v-button:hover,
+.connectify-dark .cvr-c-report-years :where(a):hover:not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-report-years .mat-button:hover,
+.connectify-dark .cvr-c-year-selector :where(button):hover:not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-year-selector .v-button:hover,
+.connectify-dark .cvr-c-year-selector :where(a):hover:not(:is(.c-toolbar-button, .mat-icon-button)), .connectify-dark .cvr-c-year-selector .mat-button:hover {
   background-color: var(--cx-surface-hover, #313f50) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
   border-color: var(--cx-border-strong, #5c7899) !important;

@@ -45,6 +45,11 @@
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
+/* Toolbar icon toggles (the outlines' class filter) highlight on hover like the bar's other controls, never in the button colour */
+.connectify-dark:not(cx-n) .c-toolbar-button:hover:not(cx-n), .connectify-dark:not(cx-n) .mat-toolbar button.mat-icon-button:hover {
+  background-color: var(--cx-surface-hover, #313f50) !important;
+}
+
 /* Icon buttons inside table cells (row ⋯ menus) are clear like Connect's: a fill a shade off the row read as a smudge */
 .connectify-dark:not(cx-n) :where(td):not(.cx-n) button.mat-icon-button, .connectify-dark:not(cx-n) .mat-cell button.mat-icon-button {
   background-color: transparent !important;

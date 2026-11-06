@@ -473,6 +473,11 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Service Bar `+`**
   - the reveal-menu circle (`.c-control-panel-button .mat-icon-button--size-sm`)
     - uses the primary button colours instead of Connect's class colour (colours only)
+- **Toolbar Icon Toggles** (`.c-toolbar-button`, e.g. the outlines' class filter; `theme-action-buttons.css`, `theme-category-menu.css`)
+  - Never the theme's button colour
+    - the toolbar button rule (`--cx-button-bg`) skips `.c-toolbar-button` and `.mat-icon-button`, so a custom theme's Buttons colour never fills them
+    - every dark theme: `--cx-surface-secondary` with the theme ink, `--cx-surface-hover` on hover
+    - Liquid Glass: on the outlines' fixed "All" bar a 10% ink tint (14% on hover), never a pane of its own
 - **Form Field Hover** (`theme-field-hover.css`, every dark theme and Light over a wallpaper)
   - Connect's hover outlines are off, since they spilled over neighbouring controls
     - Material outline fields' 2px ink outline
