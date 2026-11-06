@@ -34,7 +34,7 @@ Past Years shows a finished school year as it stood at its end: Assessment Outli
 ### The page
 - `outline-api.js`: the copy's records stand in for Connect's (`pastRecords`, after the rest of the group has loaded); nothing is fetched.
 - `legacy-outlines.js`: every record is drawn, after Connect's cards, which `past-year.css` hides with its filter bar, the fixed All bar, the semester notice and the countdown. Teacher and school names link nowhere.
-- `past-year-bar.js` (`#cx-past-year-bar`): above the drawn outlines, sticky under Connect's fixed top bars (`--cx-past-year-top`, measured): the year, `Marks as of <date>`, Back to This Year.
+- `past-year-bar.js` (`#cx-past-year-bar`): above the drawn outlines, sticky under Connect's fixed top bars (`--cx-past-year-top`, measured again after each scroll, since Connect moves its service bar up as the page scrolls): the year, `Marks as of <date>`, Back to This Year.
 
 ### Off and locked
 - Off: the rollover (`handleClassChange` returns `'past-year'`), grade and goal toasts, new results, the update and overhaul notices, the WACE countdown, Connect's filter (`isOutlinesFilterRestricted` false), the semester filter, the settings move, the record capture, Next Up and Awaiting Results.
