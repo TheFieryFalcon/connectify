@@ -2,7 +2,7 @@
    hairline colour (rows, headings, control outlines, on both tabs), bold subject headings and spacing carry the
    structure, no boxes or vertical dividers. Dark themes route colours through tokens. */
 #connectify-progress { --cx-progress-line: #d5dfe9; }
-.connectea-dark #connectify-progress { --cx-progress-line: var(--cx-nav-border, #3b4d5e); }
+.connectify-dark #connectify-progress { --cx-progress-line: var(--cx-nav-border, #3b4d5e); }
 #connectify-progress .cx-progress-tabs { margin: 0 0 16px; }
 /* The chips and chart are display: flex / block, which would override their hidden attribute */
 #connectify-progress > [hidden],
@@ -161,23 +161,23 @@
 }
 #connectify-progress #cx-task-dates .cx-time-edit-btn:hover { background: color-mix(in srgb, currentColor 12%, transparent); color: inherit; }
 
-.connectea-dark #cx-task-dates .cx-dates-controls,
-.connectea-dark #cx-task-dates .cx-dates-filters,
-.connectea-dark #cx-task-dates .cx-dates-terms,
-.connectea-dark #cx-task-dates .cx-dates-head th,
-.connectea-dark #cx-task-dates .cx-dates-row--done td,
-.connectea-dark #cx-task-dates .cx-dates-subject-cell,
-.connectea-dark #cx-task-dates .cx-dates-empty { color: var(--cx-text-secondary, #dce2e8); }
-.connectea-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #cx-task-dates .cx-dates-select { color: var(--cx-text-primary, #ffffff) !important; }
-.connectea-dark #cx-task-dates .cx-dates-toolbar .cx-dates-control::after,
-.connectea-dark #cx-task-dates .cx-dates-filter::after { border-color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #cx-task-dates .cx-dates-select:hover { border-color: var(--cx-border-strong, #556c84) !important; }
-.connectea-dark #cx-task-dates .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid var(--cx-progress-line, #3b4d5e); background: transparent; color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction:hover { border-color: var(--cx-border-strong, #556c84); background: transparent; color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn { background: none; color: inherit; }
-.connectea-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn:hover { background: color-mix(in srgb, currentColor 12%, transparent); color: inherit; }
+.connectify-dark #cx-task-dates .cx-dates-controls,
+.connectify-dark #cx-task-dates .cx-dates-filters,
+.connectify-dark #cx-task-dates .cx-dates-terms,
+.connectify-dark #cx-task-dates .cx-dates-head th,
+.connectify-dark #cx-task-dates .cx-dates-row--done td,
+.connectify-dark #cx-task-dates .cx-dates-subject-cell,
+.connectify-dark #cx-task-dates .cx-dates-empty { color: var(--cx-text-secondary, #dce2e8); }
+.connectify-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: var(--cx-text-primary, #ffffff); }
+.connectify-dark #cx-task-dates .cx-dates-select { color: var(--cx-text-primary, #ffffff) !important; }
+.connectify-dark #cx-task-dates .cx-dates-toolbar .cx-dates-control::after,
+.connectify-dark #cx-task-dates .cx-dates-filter::after { border-color: var(--cx-text-primary, #ffffff); }
+.connectify-dark #cx-task-dates .cx-dates-select:hover { border-color: var(--cx-border-strong, #556c84) !important; }
+.connectify-dark #cx-task-dates .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
+.connectify-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid var(--cx-progress-line, #3b4d5e); background: transparent; color: var(--cx-text-primary, #ffffff); }
+.connectify-dark #connectify-sidebar #connectify-progress .cx-dates-direction:hover { border-color: var(--cx-border-strong, #556c84); background: transparent; color: var(--cx-text-primary, #ffffff); }
+.connectify-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn { background: none; color: inherit; }
+.connectify-dark #connectify-sidebar #cx-task-dates .cx-time-edit-btn:hover { background: color-mix(in srgb, currentColor 12%, transparent); color: inherit; }
 
 /* A narrow window: the rows wrap instead of holding their columns */
 @media (max-width: 840px) {

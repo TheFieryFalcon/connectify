@@ -35,7 +35,7 @@
 }
 
 /* Dark mode overrides for notifications */
-.connectea-dark .cx-notification {
+.connectify-dark .cx-notification {
   background: var(--cx-button-bg, #1e293b) !important;
   background-color: var(--cx-button-bg, #1e293b) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
@@ -43,80 +43,80 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
 }
 
-.connectea-dark .cx-notification--warning {
+.connectify-dark .cx-notification--warning {
   border-left-color: #facc15 !important;
 }
 
-.connectea-dark .cx-notification--success {
+.connectify-dark .cx-notification--success {
   border-left-color: #34d399 !important;
 }
 
-.connectea-dark .cx-notification--grade {
+.connectify-dark .cx-notification--grade {
   border-left-color: #a78bfa !important;
 }
 
-.connectea-dark .cx-notification--neutral {
+.connectify-dark .cx-notification--neutral {
   border-left-color: var(--cx-text-muted, #94a3b8) !important;
 }
 
-.connectea-dark .cx-notification-title {
+.connectify-dark .cx-notification-title {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-.connectea-dark .cx-notification-close {
+.connectify-dark .cx-notification-close {
   display: none !important;
 }
 
-.connectea-dark .cx-notification-body {
+.connectify-dark .cx-notification-body {
   color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
-.connectea-dark .cx-notification-details {
+.connectify-dark .cx-notification-details {
   background: var(--cx-nav-item-active, #0f172a) !important;
   color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
-.connectea-dark .cx-notification-btn--primary {
+.connectify-dark .cx-notification-btn--primary {
   background: var(--cx-accent-active, #2563eb) !important;
   background-color: var(--cx-accent-active, #2563eb) !important;
   color: var(--cx-button-primary-text, #ffffff) !important;
   border-color: #1d4ed8 !important;
 }
 
-.connectea-dark .cx-notification-btn--primary:hover {
+.connectify-dark .cx-notification-btn--primary:hover {
   background: var(--cx-button-primary-hover, #1d4ed8) !important;
   background-color: var(--cx-button-primary-hover, #1d4ed8) !important;
   color: var(--cx-button-primary-text, #ffffff) !important;
 }
 
-.connectea-dark .cx-notification-btn--secondary {
+.connectify-dark .cx-notification-btn--secondary {
   background: var(--cx-button-hover, #334155) !important;
   background-color: var(--cx-button-hover, #334155) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
   border-color: var(--cx-input-border, #475569) !important;
 }
 
-.connectea-dark .cx-notification-btn--secondary:hover {
+.connectify-dark .cx-notification-btn--secondary:hover {
   background: var(--cx-button-hover, #475569) !important;
   background-color: var(--cx-button-hover, #475569) !important;
   color: var(--cx-text-primary, #ffffff) !important;
 }
 
-.connectea-dark .cx-notification-btn--accent {
+.connectify-dark .cx-notification-btn--accent {
   background: #8b5cf6 !important;
   background-color: #8b5cf6 !important;
   color: var(--cx-text-primary, #ffffff) !important;
   border-color: #7c3aed !important;
 }
 
-.connectea-dark .cx-notification-btn--accent:hover {
+.connectify-dark .cx-notification-btn--accent:hover {
   background: #7c3aed !important;
   background-color: #7c3aed !important;
   color: var(--cx-text-primary, #ffffff) !important;
 }
 
 /* Liquid Glass: a toast is one glass surface over the page, like the drawer; what is inside it stays clear */
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-notification {
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cx-notification {
   background: var(--cx-surface-elevated, rgba(38, 51, 72, 0.80)) !important;
   background-color: var(--cx-surface-elevated, rgba(38, 51, 72, 0.80)) !important;
   border-radius: 16px !important;
@@ -125,7 +125,7 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c
   box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 16px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -10px rgba(0, 0, 0, 0.45) !important;
 }
 
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-notification-details {
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cx-notification-details {
   background: transparent !important;
 }
 

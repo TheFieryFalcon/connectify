@@ -25,11 +25,11 @@
 
     /** A <dl> of labelled cells; returns the list and each cell's <dd>. */
     function grid(labels, modifier) {
-      const dl = createElement('dl', `connectea-xp-grid ${modifier}`);
+      const dl = createElement('dl', `connectify-xp-grid ${modifier}`);
       const values = labels.map(label => {
-        const cell = createElement('div', 'connectea-xp-cell');
-        const value = createElement('dd', 'connectea-xp-value');
-        cell.append(createElement('dt', 'connectea-xp-label', label), value);
+        const cell = createElement('div', 'connectify-xp-cell');
+        const value = createElement('dd', 'connectify-xp-value');
+        cell.append(createElement('dt', 'connectify-xp-label', label), value);
         dl.append(cell);
         return value;
       });
@@ -37,28 +37,28 @@
     }
 
     function footer() {
-      const foot = createElement('div', 'connectea-xp-foot');
-      const summary = createElement('span', 'connectea-xp-summary');
+      const foot = createElement('div', 'connectify-xp-foot');
+      const summary = createElement('span', 'connectify-xp-summary');
       foot.append(summary);
       return { foot, summary };
     }
 
     /** The statistics card in a panel: one row of values (meter at its end), then the footer. */
     function buildStats(box, { overall, meter, type, controls }) {
-      box.classList.add('connectea-panel--expanded', 'connectea-xp-stats');
-      if (overall) box.classList.add('connectea-xp-overall');
-      const head = createElement('div', 'connectea-xp-head');
-      const top = grid(HEAD, 'connectea-xp-grid--head');
+      box.classList.add('connectify-panel--expanded', 'connectify-xp-stats');
+      if (overall) box.classList.add('connectify-xp-overall');
+      const head = createElement('div', 'connectify-xp-head');
+      const top = grid(HEAD, 'connectify-xp-grid--head');
       const [score, rank, average] = top.values;
-      score.classList.add('connectea-xp-score');
-      const rankValue = createElement('span', 'connectea-xp-rank-value');
+      score.classList.add('connectify-xp-score');
+      const rankValue = createElement('span', 'connectify-xp-rank-value');
       rank.append(rankValue);
       // Overall cards leave Minimum to the footer: quantile cells start at stats[first]
       const first = overall ? 1 : 0;
-      const quantiles = grid(QUANTILES.slice(first), 'connectea-xp-grid--quantiles');
+      const quantiles = grid(QUANTILES.slice(first), 'connectify-xp-grid--quantiles');
       head.append(top.dl, quantiles.dl);
       // Overall cards: the final mark still possible (cohort-grade-range.js), after the quartiles
-      const possible = overall ? grid(POSSIBLE, 'connectea-xp-grid--possible') : null;
+      const possible = overall ? grid(POSSIBLE, 'connectify-xp-grid--possible') : null;
       if (possible) {
         possible.dl.hidden = true;
         head.append(possible.dl);
@@ -70,7 +70,7 @@
       box.append(head);
       let prediction = null;
       if (overall) {
-        prediction = createElement('div', 'connectea-xp-prediction');
+        prediction = createElement('div', 'connectify-xp-prediction');
         prediction.hidden = true;
         box.append(prediction);
       }
@@ -80,8 +80,8 @@
 
     /** The prediction card on an unmarked row: Low / Mid / High beside the basis and the Type dropdown. */
     function buildForecast(box) {
-      box.classList.add('connectea-panel--expanded', 'connectea-xp-forecast');
-      const body = createElement('div', 'connectea-xp-body');
+      box.classList.add('connectify-panel--expanded', 'connectify-xp-forecast');
+      const body = createElement('div', 'connectify-xp-body');
       const { foot, summary } = footer();
       box.append(body, foot);
       return { body, foot, summary };
@@ -118,7 +118,7 @@
         if (reached < 1) reached = !first && mark <= stats[0] + 0.01 ? 0 : 1;
         reached -= first;
       }
-      cells.forEach((el, i) => el.parentElement.classList.toggle('connectea-xp-cell--reached', i === reached));
+      cells.forEach((el, i) => el.parentElement.classList.toggle('connectify-xp-cell--reached', i === reached));
     }
 
     const percent = v => (Number.isFinite(v) ? `${math().formatPercentage(v)}%` : DASH);
@@ -162,10 +162,10 @@
     function heroCells(p, digits, prefix = '') {
       const cell = (level, name) => {
         const label = prefix ? `${prefix} ${name}` : name;
-        return `<div class="connectea-xp-cell"><dt class="connectea-xp-label">${label}</dt>` +
-          `<dd class="connectea-xp-value connectea-forecast-value connectea-forecast-value--${level}">${p[level].toFixed(digits)}%</dd></div>`;
+        return `<div class="connectify-xp-cell"><dt class="connectify-xp-label">${label}</dt>` +
+          `<dd class="connectify-xp-value connectify-forecast-value connectify-forecast-value--${level}">${p[level].toFixed(digits)}%</dd></div>`;
       };
-      return `<dl class="connectea-xp-grid connectea-xp-grid--hero">${cell('low', 'Low')}${cell('mid', 'Mid')}${cell('high', 'High')}</dl>`;
+      return `<dl class="connectify-xp-grid connectify-xp-grid--hero">${cell('low', 'Low')}${cell('mid', 'Mid')}${cell('high', 'High')}</dl>`;
     }
 
     /** "Literature" from Connect's "Literature ATAR Year 11 - Semester 1" (or "12 Literature ATAR"): no
@@ -214,7 +214,7 @@
     /** The overall card's class prediction: Predicted Low / Mid / High under Score / Rank / Average (hidden
      *  by the caller once the class has a letter). */
     function fillPrediction(section, p, needs) {
-      setHTML(section, p ? heroCells(p, 1, 'Predicted') : `<div class="connectea-xp-needs">${needs}</div>`);
+      setHTML(section, p ? heroCells(p, 1, 'Predicted') : `<div class="connectify-xp-needs">${needs}</div>`);
       section.hidden = false;
     }
 

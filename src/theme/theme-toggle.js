@@ -9,24 +9,24 @@
 
   const SVG_CHEVRON = '<svg width="12" height="12" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;"><path d="M2 3.75L5 6.75L8 3.75"/></svg>';
 
-  let button = document.getElementById('connectea-theme-toggle');
+  let button = document.getElementById('connectify-theme-toggle');
   if (!button) {
     button = document.createElement('button');
-    button.id = 'connectea-theme-toggle';
+    button.id = 'connectify-theme-toggle';
     button.type = 'button';
   }
-  button.className = 'connectea-theme-toggle';
+  button.className = 'connectify-theme-toggle';
 
   // Distance from the navbar's right edge, measured from the notification bell (or avatar)
   let headerRightInset = null;
 
   /** Removes stale copies of the toggle and legacy dark/light mode buttons from older versions. */
   function cleanupDuplicateButtons() {
-    for (const btn of document.querySelectorAll('#connectea-theme-toggle, .connectea-theme-toggle')) if (btn !== button) btn.remove();
-    for (const btn of document.querySelectorAll('#connectea-theme-select-btn, .connectea-theme-select-btn')) btn.remove();
+    for (const btn of document.querySelectorAll('#connectify-theme-toggle, .connectify-theme-toggle')) if (btn !== button) btn.remove();
+    for (const btn of document.querySelectorAll('#connectify-theme-select-btn, .connectify-theme-select-btn')) btn.remove();
     const containers = [document.querySelector('.cvr-c-primary-navigation'), document.body].filter(Boolean);
     for (const container of containers) {
-      for (const btn of container.querySelectorAll('button:not(#connectea-theme-toggle):not(.cx-calculator-tool):not(.cx-back-menu):not(.cx-close-btn)')) {
+      for (const btn of container.querySelectorAll('button:not(#connectify-theme-toggle):not(.cx-calculator-tool):not(.cx-back-menu):not(.cx-close-btn)')) {
         if (btn.closest('#connectify-sidebar')) continue;
         const text = (btn.textContent || '').trim().toLowerCase();
         const aria = (btn.getAttribute('aria-label') || '').toLowerCase();
@@ -42,7 +42,7 @@
     button.setAttribute('aria-label', label);
     button.setAttribute('aria-pressed', String(dark));
     const arrow = document.createElement('span');
-    arrow.className = 'connectea-theme-arrow';
+    arrow.className = 'connectify-theme-arrow';
     arrow.setAttribute('title', 'Theme options');
     arrow.setAttribute('aria-label', 'Open theme menu');
     arrow.innerHTML = SVG_CHEVRON;

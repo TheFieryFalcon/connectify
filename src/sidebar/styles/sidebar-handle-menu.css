@@ -29,7 +29,7 @@
 }
 
 /* Dark and custom themes: the handle is the theme's primary button */
-.connectea-dark #connectify-sidebar-handle {
+.connectify-dark #connectify-sidebar-handle {
   background: var(--cx-button-primary-bg, #185c8c);
   color: var(--cx-button-primary-text, #ffffff);
   border-color: var(--cx-accent-hover, #84b3d3);
@@ -85,31 +85,31 @@
   display: none !important;
 }
 
-.connectea-dark #connectify-sidebar {
+.connectify-dark #connectify-sidebar {
   background: var(--cx-surface-bg, #202933);
   color: var(--cx-text-primary, #e1eaf3);
   border-color: var(--cx-border, #425567);
 }
 
-.connectea-dark #connectify-sidebar :is(button,#connectea-atar-toggle,#connectify-progress-toggle) {
+.connectify-dark #connectify-sidebar :is(button,#connectify-atar-toggle,#connectify-progress-toggle) {
   background: var(--cx-button-bg, var(--cx-surface-elevated, #2a3b4c));
   color: var(--cx-button-text, var(--cx-text-primary, #e1eaf3));
   border-color: var(--cx-button-border, var(--cx-border, #496178));
 }
 
-.connectea-dark #connectify-sidebar :is(header,.cx-outline-actions) {
+.connectify-dark #connectify-sidebar :is(header,.cx-outline-actions) {
   border-color: var(--cx-border, #3b4d5e);
 }
 
-.connectea-dark .cx-red-key {
+.connectify-dark .cx-red-key {
   color: #ff8893;
 }
 
-.connectea-dark .cx-blue-key {
+.connectify-dark .cx-blue-key {
   color: var(--cx-accent-hover, #83c3ff);
 }
 
-.connectea-dark .cx-improved {
+.connectify-dark .cx-improved {
   display: none !important;
 }
 
@@ -120,7 +120,7 @@
   #connectify-sidebar.cx-tool-active .cx-tool-menu {
     grid-template-columns: 1fr 1fr;
   }
-  #connectify-sidebar :is(#connectea-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel) {
+  #connectify-sidebar :is(#connectify-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel) {
     padding: 15px 12px !important;
   }
   #connectify-sidebar>header {
@@ -194,7 +194,7 @@
   border-color: #709fc4;
 }
 
-.connectea-dark #connectify-sidebar .cta-tabs .cta-semester[aria-pressed=true] {
+.connectify-dark #connectify-sidebar .cta-tabs .cta-semester[aria-pressed=true] {
   background: var(--cx-surface-active, #41627d);
   color: var(--cx-text-primary, #fff);
   border-color: var(--cx-border-focus, #81acca);
@@ -228,8 +228,8 @@
   color: #174c75;
 }
 
-.connectea-dark #connectify-sidebar .cx-tool-menu>button,
-.connectea-dark #connectify-sidebar .cx-tool-menu>.cx-calculator-tool {
+.connectify-dark #connectify-sidebar .cx-tool-menu>button,
+.connectify-dark #connectify-sidebar .cx-tool-menu>.cx-calculator-tool {
   background: var(--cx-button-bg, var(--cx-surface-elevated, #2a3b4c));
   color: var(--cx-button-text, var(--cx-text-primary, #e1eaf3));
   border-color: var(--cx-button-border, var(--cx-border, #496178));

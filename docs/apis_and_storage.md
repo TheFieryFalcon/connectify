@@ -65,22 +65,22 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 
 | Key Pattern | Storage Type | Module | Description |
 |---|---|---|---|
-| `connectea:theme:v1` | `localStorage` | `theme.js` | Current theme (`'dark'` or `'light'`) |
-| `connectea:theme:id` | `localStorage` | `theme-registry.js` | Active theme identifier (`'dark'`, `'quantum'`, `'amoled'`, `'midnight'`, `'forest'`, `'liquid-glass-clear'`, `'liquid-glass'`, `'custom'`, `'light'`) |
-| `connectea:theme:last_theme` | `localStorage` | `theme.js` | Identifier of active theme restored on startup |
-| `connectea:theme:custom_themes` | `localStorage` & `storage.local` | `theme-registry.js` | Array of custom theme configurations (tokens, `tokenVersion`, glassBlur, glassOpacity, `overlayBlurFloor` (missing = on: layers over text blur at least 12px), wallpaper, or `wallpaperPreset`: a preset wallpaper id) with name-based overwrite |
-| `connectea:custom_background` | `localStorage` & `storage.local` | `theme-custom-tokens.js` | Data URI of the wallpaper picked in Settings (extension storage keeps it when over quota); a theme's own wallpaper is shown over it only while that theme is active, never stored here; `connectify:wallpaper_fit_done` (`theme-wallpaper-migrate.js`) is set once large stored wallpapers were fitted; `connectify:wallpaper_dim` (`theme-wallpaper-dim.js`) caches `{ key, dim, brighten: { <ink>: value } }` for the active wallpaper |
-| `connectea:theme:liquid_glass` | `localStorage` | `theme.js` | Boolean flag enabling Liquid Glass diffusion mode |
-| `connectea:theme:restore_dark` / `restore_theme` / `custom_colors` | `localStorage` | `theme.js` / `theme-registry.js` | Dark-mode flag and saved theme ID restored after navigating away from the login page; custom theme JSON palette (`canvas`, `surface`, `accent`) |
-| `connectea:cohort:v3:<student>:<year>:<subject>` | `localStorage` | `cohort-estimator.js` | Custom user-override cohort size |
-| `connectea:observed_spreads:<key>` | `sessionStorage` | `cohort-estimator.js` | Legacy (no longer read; removed by `clearCohortCache`): spreads now come from `connectify:stats_cache:` |
-| `connectea:task_type_overrides` (per user, `userKey`) | `localStorage` | `task-types.js` | Map of assessment manual category overrides |
-| `connectea:class_categories:<subjectKey>` (per user) | `localStorage` | `task-types.js` | Custom categories shared across Sem 1 & 2 for a class |
-| `cx-categories` / `connectea:categories` | `localStorage` & `browser.storage.local` | `category-settings.js` | Custom category definitions, keywords, colors |
-| `connectea:atar:2025:<account>:<year>` | `localStorage` | `atar-calculator.js` | `<semester>:<course>`: `{ include, raw }` (typed school mark; older entries hold a scaled `score`), `gradeEstimates` (`{ <course>: { <task>: typed mark } }`, Estimate Grade), top four selections, targets |
-| `connectea:preferences` (per user) | `localStorage` | `scaling-calibration.js` | Calibration table (`sem1_calibration:<courseId>`) |
+| `connectify:theme:v1` | `localStorage` | `theme.js` | Current theme (`'dark'` or `'light'`) |
+| `connectify:theme:id` | `localStorage` | `theme-registry.js` | Active theme identifier (`'dark'`, `'quantum'`, `'amoled'`, `'midnight'`, `'forest'`, `'liquid-glass-clear'`, `'liquid-glass'`, `'custom'`, `'light'`) |
+| `connectify:theme:last_theme` | `localStorage` | `theme.js` | Identifier of active theme restored on startup |
+| `connectify:theme:custom_themes` | `localStorage` & `storage.local` | `theme-registry.js` | Array of custom theme configurations (tokens, `tokenVersion`, glassBlur, glassOpacity, `overlayBlurFloor` (missing = on: layers over text blur at least 12px), wallpaper, or `wallpaperPreset`: a preset wallpaper id) with name-based overwrite |
+| `connectify:custom_background` | `localStorage` & `storage.local` | `theme-custom-tokens.js` | Data URI of the wallpaper picked in Settings (extension storage keeps it when over quota); a theme's own wallpaper is shown over it only while that theme is active, never stored here; `connectify:wallpaper_fit_done` (`theme-wallpaper-migrate.js`) is set once large stored wallpapers were fitted; `connectify:wallpaper_dim` (`theme-wallpaper-dim.js`) caches `{ key, dim, brighten: { <ink>: value } }` for the active wallpaper |
+| `connectify:theme:liquid_glass` | `localStorage` | `theme.js` | Boolean flag enabling Liquid Glass diffusion mode |
+| `connectify:theme:restore_dark` / `restore_theme` / `custom_colors` | `localStorage` | `theme.js` / `theme-registry.js` | Dark-mode flag and saved theme ID restored after navigating away from the login page; custom theme JSON palette (`canvas`, `surface`, `accent`) |
+| `connectify:cohort:v3:<student>:<year>:<subject>` | `localStorage` | `cohort-estimator.js` | Custom user-override cohort size |
+| `connectify:observed_spreads:<key>` | `sessionStorage` | `cohort-estimator.js` | Legacy (no longer read; removed by `clearCohortCache`): spreads now come from `connectify:stats_cache:` |
+| `connectify:task_type_overrides` (per user, `userKey`) | `localStorage` | `task-types.js` | Map of assessment manual category overrides |
+| `connectify:class_categories:<subjectKey>` (per user) | `localStorage` | `task-types.js` | Custom categories shared across Sem 1 & 2 for a class |
+| `cx-categories` / `connectify:categories` | `localStorage` & `browser.storage.local` | `category-settings.js` | Custom category definitions, keywords, colors |
+| `connectify:atar:2025:<account>:<year>` | `localStorage` | `atar-calculator.js` | `<semester>:<course>`: `{ include, raw }` (typed school mark; older entries hold a scaled `score`), `gradeEstimates` (`{ <course>: { <task>: typed mark } }`, Estimate Grade), top four selections, targets |
+| `connectify:preferences` (per user) | `localStorage` | `scaling-calibration.js` | Calibration table (`sem1_calibration:<courseId>`) |
 | `connectify:weakness_disabled_subjects`, `connectify:weakness_disabled_types` (per user) / `connectify:progress_mode` / `connectify:task_dates_view` / `connectify:calendar_export:<account>` | `localStorage` | `weakness-radar.js` / `progress-modes.js` / `task-dates.js` / `export-view.js` | Subjects and types excluded from Weaknesses; Progress data point mode (`tasks`, `weighted`, `rolling`); Task Dates `{ groupBy, direction, sortBy, uncompletedOnly, hiddenSubjects, hiddenTypes }`; export choices `{ unticked, subjectDays, taskDays, mergeExams }` (older ones also hold `earlyEaster`, still read); `connectify:school_terms` (`school-terms.js`): `{ earlyEaster: { <year>: bool } }`, shared by the graph and export (both settings: Clear Cache keeps them) |
-| `connectea:time_override:<subject>:<task|taskId>` (per user) | `localStorage` | `progress-chart.js` | Manual school week overrides: `w17` (school week of the year through the term calendar, as the Export numbers term starts; Early Easter: Term 2 starts at Week 10), older bare numbers (saved before Early Easter was known) read as the same school week (`17` = `w17`) or `t2w7`, read via `ConnectifyUtils.customWeekOrder` (disambiguated by task ID for duplicate names) |
+| `connectify:time_override:<subject>:<task|taskId>` (per user) | `localStorage` | `progress-chart.js` | Manual school week overrides: `w17` (school week of the year through the term calendar, as the Export numbers term starts; Early Easter: Term 2 starts at Week 10), older bare numbers (saved before Early Easter was known) read as the same school week (`17` = `w17`) or `t2w7`, read via `ConnectifyUtils.customWeekOrder` (disambiguated by task ID for duplicate names) |
 | `connectify:auto_expand` | `localStorage` | `category-settings.js` / `atar-features.js` | Boolean setting to auto-expand course outlines on load |
 | `connectify:stale_subjects:<account>` | `localStorage` | `assessment-data.js` / `new-grade.js` | Set of subjects whose collapsed grade/stats changed, awaiting targeted re-scrape upon expansion (the untagged legacy key moves to the first account that reads it) |
 | `connectify:subjects_cache:<student>` | `localStorage` | `assessment-data.js` | Persisted scraped subjects and tasks for instant collection without DOM rescrape |
@@ -102,7 +102,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `cx-manual-logout` | `browser.storage.local` | `navigation.js` / `auto-login.js` | Flag set when user explicitly clicks logout |
 | `cx-last-autologin` | `browser.storage.local` | `auto-login.js` | Timestamp to prevent rapid login loops (<30s) |
 | `connectify:account` / `connectify:accounts` | `localStorage` | `utils.js` | Last account in use (pages that name no user fall back to it); the first account seen copies keys saved under `current` it lacks. `{ <Connect user id>: <account> }`: each signed-in user's account, fixed when first seen (Connect's `coisp`, else for the first user only the account already in use, else `user<id>`), so signing in as someone else never shows the last user's caches and signing back in brings them back |
-| `connectify:seen_version` / `connectify:overhaul_notice` / `connectify:theme_boot` / `connectify:pointer_mouse` | `localStorage` | `update-notice.js` / `overhaul-notice.js` / `theme-boot.js` / `pointer-kind.js` | Last extension version seen; `'true'` once the 3.3.0 overhaul migration ran (or a fresh install skipped it); a newer manifest version shows the update notice once (fresh installs only record it); `{ id, dark, attrs, props, canvas, bg }` snapshot of the applied theme (`bg`: `{ url }` small, `{ settings }`, `{ theme }`), applied at document_start; `'true'` once a mouse was used (touch clears it) |
+| `connectify:seen_version` / `connectify:overhaul_notice` / `connectify:theme_boot` / `connectify:pointer_mouse` / `connectify:storage_renamed` | `localStorage` | `update-notice.js` / `overhaul-notice.js` / `theme-boot.js` / `pointer-kind.js` | Last extension version seen; `'true'` once the 3.3.0 overhaul migration ran (or a fresh install skipped it); a newer manifest version shows the update notice once (fresh installs only record it); `{ id, dark, attrs, props, canvas, bg }` snapshot of the applied theme (`bg`: `{ url }` small, `{ settings }`, `{ theme }`), applied at document_start; `'true'` once a mouse was used (touch clears it); `'true'` once keys saved under the old name `connectea:` were moved to `connectify:` (`storage-rename.js`; `connectify:storage_renamed_ext` in extension storage) |
 
 ---
 
@@ -133,9 +133,9 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
   - Task labels: `.cvr-c-task__details .v-label`
 - **Injected Containers**:
   - `#connectify-sidebar` & `#connectify-sidebar-handle`
-  - `.connectea-panel` & `.connectea-row-wrapper`
+  - `.connectify-panel` & `.connectify-row-wrapper`
   - `#cx-expand-progress` (Animated bulk outline expansion loading pill)
-  - `#connectea-atar` (Calculator modal)
+  - `#connectify-atar` (Calculator modal)
   - `#connectify-progress` (Progress graph modal)
   - `#connectify-weakness` (Weaknesses panel)
   - `#connectify-categories` (Settings & Calibration panel)

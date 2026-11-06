@@ -60,9 +60,9 @@
 
   /** Keeps a card (a task row's wrapper, or an overall panel) fitted to its task column. */
   function watch(card, column) {
-    card.classList.add('connectea-xp-fit');
+    card.classList.add('connectify-xp-fit');
     if (!observer || !column) return;
-    const probe = column.querySelector(':scope > .connectea-xp-fit-probe') || column.appendChild(Object.assign(document.createElement('div'), { className: 'connectea-xp-fit-probe' }));
+    const probe = column.querySelector(':scope > .connectify-xp-fit-probe') || column.appendChild(Object.assign(document.createElement('div'), { className: 'connectify-xp-fit-probe' }));
     if (fits.get(card)?.probe === probe) return;
     // Observing an observed probe reports nothing, so a redraw's new card starts it again
     if (fits.has(probe)) observer.unobserve(probe);

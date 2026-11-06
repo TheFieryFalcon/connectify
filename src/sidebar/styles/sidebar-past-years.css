@@ -90,34 +90,34 @@
   display: none;
 }
 
-.connectea-dark #connectify-sidebar #connectify-past-years :is(.cx-past-years-list, .cx-past-year) {
+.connectify-dark #connectify-sidebar #connectify-past-years :is(.cx-past-years-list, .cx-past-year) {
   border-color: var(--cx-border, #3b4d5e);
 }
 
-.connectea-dark #connectify-sidebar #connectify-past-years .cx-past-year__label {
+.connectify-dark #connectify-sidebar #connectify-past-years .cx-past-year__label {
   color: var(--cx-text-primary, #e6edf5);
 }
 
-.connectea-dark #connectify-sidebar #connectify-past-years .cx-past-year__classes {
+.connectify-dark #connectify-sidebar #connectify-past-years .cx-past-year__classes {
   color: var(--cx-text-secondary, #b7c5d6);
 }
 
-.connectea-dark #connectify-sidebar #connectify-past-years .cx-past-year__view {
+.connectify-dark #connectify-sidebar #connectify-past-years .cx-past-year__view {
   background: var(--cx-button-bg, var(--cx-nav-bg, #18222d));
   color: var(--cx-button-text, var(--cx-text-secondary, #e1eaf3));
   border-color: var(--cx-button-border, var(--cx-nav-border, #3b4d5e));
 }
 
-.connectea-dark #connectify-sidebar #connectify-past-years .cx-past-year__view:hover {
+.connectify-dark #connectify-sidebar #connectify-past-years .cx-past-year__view:hover {
   background: var(--cx-button-hover, var(--cx-badge-bg, #24303e));
   border-color: var(--cx-border-strong, #556c84);
   color: var(--cx-text-primary, #ffffff);
 }
 
-.connectea-dark #connectify-sidebar #connectify-past-years .cx-past-years-status {
+.connectify-dark #connectify-sidebar #connectify-past-years .cx-past-years-status {
   color: #fca5a5;
 }
 
-html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar #connectify-past-years .cx-past-years-status {
+html.connectify-dark[data-connectify-tone="light"] #connectify-sidebar #connectify-past-years .cx-past-years-status {
   color: oklch(from #b91c1c 0.30 c h);
 }

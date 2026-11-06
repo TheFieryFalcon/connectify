@@ -383,6 +383,7 @@
             "https://connect.det.wa.edu.au/*"
          ],
          "js": [
+            "src/system/storage-rename.js",
             "src/system/pointer-kind.js",
             "src/theme/theme-boot.js"
          ],

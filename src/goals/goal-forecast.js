@@ -89,14 +89,14 @@
     const tinted = el => { if (target.tier) el.dataset.tier = target.tier; return el; };
     if (ui.xpForecast) {
       const cell = document.createElement('dl');
-      cell.className = 'cx-goal-target connectea-xp-grid';
+      cell.className = 'cx-goal-target connectify-xp-grid';
       const wrap = document.createElement('div');
-      wrap.className = 'connectea-xp-cell';
+      wrap.className = 'connectify-xp-cell';
       const dt = document.createElement('dt');
-      dt.className = 'connectea-xp-label';
+      dt.className = 'connectify-xp-label';
       dt.textContent = 'Goal target';
       const dd = document.createElement('dd');
-      dd.className = 'connectea-xp-value cx-goal-target__value';
+      dd.className = 'connectify-xp-value cx-goal-target__value';
       dd.textContent = value;
       tinted(dd);
       wrap.append(dt, dd);

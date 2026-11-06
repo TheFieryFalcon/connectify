@@ -12,9 +12,9 @@
   if (window.ConnectifyThemeLoaded) return;
   window.ConnectifyThemeLoaded = true;
 
-  const STORAGE_KEY = 'connectea:theme:v1';
-  const RESTORE_KEY = 'connectea:theme:restore_dark';
-  const STORAGE_THEME_ID = 'connectea:theme:id';
+  const STORAGE_KEY = 'connectify:theme:v1';
+  const RESTORE_KEY = 'connectify:theme:restore_dark';
+  const STORAGE_THEME_ID = 'connectify:theme:id';
 
   const { isLoginUrl, isLogoutUrl, isAuthDisabled, markAuthPage, rememberThemeForLogin, takeThemeToRestore } = window.ConnectifyThemeAuth;
   const registry = window.ConnectifyThemeRegistry;
@@ -35,13 +35,13 @@
       return;
     }
     const root = document.documentElement;
-    root.removeAttribute('data-connectea-login');
-    root.removeAttribute('data-connectea-logout');
+    root.removeAttribute('data-connectify-login');
+    root.removeAttribute('data-connectify-logout');
     const cur = themeId || registry.getTheme();
     for (const el of [root, document.body].filter(Boolean)) {
-      el.classList.toggle('connectea-dark', dark);
-      if (dark) el.dataset.connecteaTheme = cur;
-      else { delete el.dataset.connecteaTheme; el.removeAttribute('data-connectea-theme'); }
+      el.classList.toggle('connectify-dark', dark);
+      if (dark) el.dataset.connectifyTheme = cur;
+      else { delete el.dataset.connectifyTheme; el.removeAttribute('data-connectify-theme'); }
     }
   }
 
@@ -83,8 +83,8 @@
   function checkReadingView() {
     if (typeof document === 'undefined' || !document.documentElement) return;
     const isReading = Boolean(document.querySelector('cnt-notice-view, [class*="notice-view"], cnt-discussion-view, cnt-discussion-item-view, [class*="discussion-view"], cnt-notice-item-view-dialog'));
-    if (isReading) document.documentElement.setAttribute('data-connectea-reading-view', 'true');
-    else document.documentElement.removeAttribute('data-connectea-reading-view');
+    if (isReading) document.documentElement.setAttribute('data-connectify-reading-view', 'true');
+    else document.documentElement.removeAttribute('data-connectify-reading-view');
   }
 
   // Without records the whole page is adapted (a theme change); with them only what they added or re-classed
@@ -112,11 +112,11 @@
   }
 
   // Clicking the button switches between Default and the last dark theme; the chevron opens the menu.
-  // registry.setTheme() fires connectea:themechange, whose listener below applies the theme.
+  // registry.setTheme() fires connectify:themechange, whose listener below applies the theme.
   let lastToggleTime = 0;
   toggleButton.onclick = e => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
-    if (e?.target?.closest?.('.connectea-theme-arrow')) {
+    if (e?.target?.closest?.('.connectify-theme-arrow')) {
       menu.toggle(toggleButton);
       return;
     }
@@ -125,7 +125,7 @@
     lastToggleTime = now;
     if (isAuthDisabled()) { applyTheme(false); return; }
     try { localStorage.removeItem(RESTORE_KEY); } catch {}
-    const nextDark = !document.documentElement.classList.contains('connectea-dark');
+    const nextDark = !document.documentElement.classList.contains('connectify-dark');
     try { localStorage.setItem(STORAGE_KEY, nextDark ? 'dark' : 'light'); } catch {}
     registry.setTheme(nextDark ? registry.getLastTheme() : 'light');
   };
@@ -146,7 +146,7 @@
       const changes = syncRecords;
       syncRecords = [];
       if (isAuthDisabled()) {
-        if (isDarkMode || document.documentElement.classList.contains('connectea-dark')) {
+        if (isDarkMode || document.documentElement.classList.contains('connectify-dark')) {
           rememberThemeForLogin();
           applyTheme(false);
         }
@@ -166,21 +166,21 @@
   // Page changes through the shared scheduler (muted during accordion animations): added or removed
   // nodes and class changes outside the toggle, the sidebar, accordions, task rows and Connectify's floating UI
   // (the outcome tooltip shows on every hover)
-  const OWN_UI = '#connectify-sidebar, #connectea-outcome-tooltip, #cx-preview-tooltip, #connectify-notifications-container, #cx-expand-btn, #cx-expand-progress, #cx-jump-subject, #connectea-theme-menu';
+  const OWN_UI = '#connectify-sidebar, #connectify-outcome-tooltip, #cx-preview-tooltip, #connectify-notifications-container, #cx-expand-btn, #cx-expand-progress, #cx-jump-subject, #connectify-theme-menu';
   const isOwnUi = n => n.nodeType !== 1 || Boolean(n.closest(OWN_UI));
   window.ConnectifyScheduler.onMutations(debouncedSync, {
     mute: true,
     filter: r => {
       if (r.type === 'characterData' || (r.type === 'attributes' && r.attributeName !== 'class')) return false;
-      if (r.target === toggleButton || r.target.parentElement?.closest('#connectea-theme-toggle') || r.target.closest?.(OWN_UI)) return false;
+      if (r.target === toggleButton || r.target.parentElement?.closest('#connectify-theme-toggle') || r.target.closest?.(OWN_UI)) return false;
       if (r.type === 'childList' && [...r.addedNodes, ...r.removedNodes].every(isOwnUi)) return false;
-      return !r.target?.closest?.('.eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectea-panel');
+      return !r.target?.closest?.('.eds-c-accordion, .eds-c-accordion__panel, .cvr-c-task, .cvr-c-tasks, .connectify-panel');
     }
   });
 
   window.addEventListener('resize', () => updateTogglePosition(true));
   window.addEventListener('storage', e => { if (e.key === STORAGE_KEY && e.newValue) applyTheme(!isAuthDisabled() && e.newValue === 'dark'); });
-  window.addEventListener('connectea:themechange', e => {
+  window.addEventListener('connectify:themechange', e => {
     if (isAuthDisabled()) return;
     const tId = e.detail?.themeId || 'dark';
     const isDark = e.detail?.theme ? e.detail.theme.isDark : (tId !== 'light');
@@ -205,7 +205,7 @@
       if (isAuthDisabled()) {
         updateDomThemeAttributes(false, 'light', true);
       } else {
-        if (document.body) document.body.classList.toggle('connectea-dark', isDarkMode);
+        if (document.body) document.body.classList.toggle('connectify-dark', isDarkMode);
         updateTogglePosition(true);
         if (isDarkMode) scheduleAdaptSurfaces(800);
       }

@@ -53,10 +53,10 @@
 
   const isAuthDisabled = url => isLoginUrl(url) || isLogoutUrl(url);
 
-  const STORAGE_KEY = 'connectea:theme:v1';
-  const STORAGE_THEME_ID = 'connectea:theme:id';
-  const RESTORE_KEY = 'connectea:theme:restore_dark';
-  const RESTORE_THEME_KEY = 'connectea:theme:restore_theme';
+  const STORAGE_KEY = 'connectify:theme:v1';
+  const STORAGE_THEME_ID = 'connectify:theme:id';
+  const RESTORE_KEY = 'connectify:theme:restore_dark';
+  const RESTORE_THEME_KEY = 'connectify:theme:restore_theme';
 
   // On the login/logout page: remember the active dark theme so it returns after signing in
   function rememberThemeForLogin(themeId) {
@@ -91,13 +91,13 @@
     const root = typeof document !== 'undefined' ? document.documentElement : null;
     if (!root) return;
     for (const el of [root, document.body].filter(Boolean)) {
-      el.classList.remove('connectea-dark');
-      delete el.dataset.connecteaTheme;
-      el.removeAttribute('data-connectea-theme');
+      el.classList.remove('connectify-dark');
+      delete el.dataset.connectifyTheme;
+      el.removeAttribute('data-connectify-theme');
     }
-    root.setAttribute('data-connectea-login', 'true');
-    if (isLogoutUrl()) root.setAttribute('data-connectea-logout', 'true');
-    else root.removeAttribute('data-connectea-logout');
+    root.setAttribute('data-connectify-login', 'true');
+    if (isLogoutUrl()) root.setAttribute('data-connectify-logout', 'true');
+    else root.removeAttribute('data-connectify-logout');
   }
 
   window.ConnectifyThemeAuth = { isLoginUrl, isLogoutUrl, isAuthDisabled, markAuthPage, rememberThemeForLogin, forgetThemeForLogin, takeThemeToRestore };

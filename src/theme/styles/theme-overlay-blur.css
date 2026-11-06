@@ -6,38 +6,38 @@
  * --cx-glass-blur-overlay on <html>; every blur rule on these layers reads --cx-glass-blur or --cx-gl-blur, so
  * redefining both here reaches them (and anything inside them) without touching the rules themselves.
  */
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-sidebar,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectea-theme-menu,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectea-outcome-tooltip,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #cx-jump-subject-list,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectify-notifications-container,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-primary-navigation,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-location-bar,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-bar__container,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-bar,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-service-menu,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-category-menu,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-popupview-popup,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .modal-content,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .ui-dialog,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-dialog-container,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .v-window-modalitycurtain,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .modal-backdrop,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .yui3-widget-mask,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .ui-widget-overlay,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cdk-overlay-backdrop,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-drawer-backdrop,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-modal-overlay,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .eds-c-overlay,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cvr-c-overlay,
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cx-overlay {
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) #connectify-sidebar,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) #connectify-theme-menu,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) #connectify-outcome-tooltip,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) #cx-jump-subject-list,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) #connectify-notifications-container,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cvr-c-primary-navigation,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cvr-c-location-bar,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cvr-c-service-bar__container,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cvr-c-service-bar,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cvr-c-service-menu,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cvr-c-category-menu,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .js-pos-category-toolbar-container,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .v-popupview-popup,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .modal-content,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .ui-dialog,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) mat-dialog-container,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .v-window-modalitycurtain,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .modal-backdrop,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .yui3-widget-mask,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .ui-widget-overlay,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cdk-overlay-backdrop,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .mat-drawer-backdrop,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .eds-c-modal-overlay,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .eds-c-overlay,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cvr-c-overlay,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cx-overlay {
   --cx-glass-blur: var(--cx-glass-blur-overlay, 12px);
   --cx-gl-blur: blur(var(--cx-glass-blur-overlay, 12px)) saturate(160%);
 }
 
 /* Connect's Angular dialogs are glass like .modal-content: a translucent outer surface, so they blur too */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) mat-dialog-container {
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) mat-dialog-container {
   backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
 }

@@ -2,25 +2,25 @@
  * Connectify Theme: active nav tab, left sidebar, subheaders and sort controls
  */
 
-.connectea-dark .cvr-c-primary-navigation:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation__links:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation__links a:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation__links div:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation__title:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation__bar:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(cx-n):not(.cx-n):not(.cx-n) {
+.connectify-dark .cvr-c-primary-navigation:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation__links:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation__links a:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation__links div:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation__title:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation__bar:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.eds-c-icon-button):not([class*="icon"]):not(cx-n):not(.cx-n):not(.cx-n) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
   -webkit-font-smoothing: antialiased !important;
 }
 
-.connectea-dark .cvr-c-primary-navigation__container, .connectea-dark .cvr-c-primary-navigation__bar {
+.connectify-dark .cvr-c-primary-navigation__container, .connectify-dark .cvr-c-primary-navigation__bar {
   background-color: transparent !important;
   border-bottom: none !important;
   color: inherit !important;
   height: 50px !important;
 }
 
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div),
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__trigger > div) {
+.connectify-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div),
+.connectify-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__trigger > div) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
   font-size: 14px !important;
   font-weight: 700 !important;
@@ -35,17 +35,17 @@
 }
 
 /* Nav links; the active tab is left to the Active Tab Indicator (theme-reports-menus.css), which this rule's ids would outrank */
-.connectea-dark .cvr-c-primary-navigation a:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation a:link:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation a:visited:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation a span:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation .v-link:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(cx-n):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation .v-link a:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation .cvr-js-greedy__item a:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation .cvr-js-greedy__item a span:not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div > a):not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__trigger > div > a):not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation__links :is(.v-link a):not(cx-n):not(#connectea-theme-toggle):not(:is(#connectea-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(.cx-n):not(.cx-n) {
+.connectify-dark .cvr-c-primary-navigation a:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation a:link:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation a:visited:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation a span:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation .v-link:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(cx-n):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation .v-link a:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation .cvr-js-greedy__item a:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation .cvr-js-greedy__item a span:not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div > a):not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__trigger > div > a):not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation__links :is(.v-link a):not(cx-n):not(#connectify-theme-toggle):not(:is(#connectify-theme-toggle, .eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon, .eds-s-is-active) *):not(.eds-c-icon-button):not([class*="icon"]):not(.v-button-wrap):not(.v-button-caption):not(.eds-s-is-active):not(.cx-n):not(.cx-n):not(.cx-n) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
   font-size: 14px !important;
   font-weight: 700 !important;
@@ -61,19 +61,19 @@
   text-decoration: none !important;
 }
 
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div:hover),
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__trigger > div:hover),
-.connectea-dark .cvr-c-primary-navigation__links :is(.v-link a:hover), .connectea-dark .cvr-c-primary-navigation__button:hover {
+.connectify-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item > div:hover),
+.connectify-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__trigger > div:hover),
+.connectify-dark .cvr-c-primary-navigation__links :is(.v-link a:hover), .connectify-dark .cvr-c-primary-navigation__button:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
 /* Active tab in top navigation matches light mode: pure background color, NO side/top borders, NO outlines, NO radius */
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div),
-.connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a),
-.connectea-dark .cvr-c-primary-navigation__links :is(.eds-s-is-active a):not(.cx-n),
-.connectea-dark .cvr-c-primary-navigation__links .v-link.eds-s-is-active:not(cx-n),
-.connectea-dark .cvr-c-primary-navigation__links .eds-s-is-active:not(.cx-n):not(cx-n) {
+.connectify-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div),
+.connectify-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a),
+.connectify-dark .cvr-c-primary-navigation__links :is(.eds-s-is-active a):not(.cx-n),
+.connectify-dark .cvr-c-primary-navigation__links .v-link.eds-s-is-active:not(cx-n),
+.connectify-dark .cvr-c-primary-navigation__links .eds-s-is-active:not(.cx-n):not(cx-n) {
   background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
   border: none !important;
@@ -84,21 +84,21 @@
   text-decoration: none !important;
 }
 
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div) a,
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div) span,
-.connectea-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div) div,
-.connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a) a,
-.connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a) span,
-.connectea-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a) div,
-.connectea-dark .cvr-c-primary-navigation__links :is(.eds-s-is-active a):not(.cx-n) a,
-.connectea-dark .cvr-c-primary-navigation__links :is(.eds-s-is-active a):not(.cx-n) span,
-.connectea-dark .cvr-c-primary-navigation__links :is(.eds-s-is-active a):not(.cx-n) div,
-.connectea-dark .cvr-c-primary-navigation__links .v-link.eds-s-is-active:not(cx-n) a,
-.connectea-dark .cvr-c-primary-navigation__links .v-link.eds-s-is-active:not(cx-n) span,
-.connectea-dark .cvr-c-primary-navigation__links .v-link.eds-s-is-active:not(cx-n) div,
-.connectea-dark .cvr-c-primary-navigation__links .eds-s-is-active:not(.cx-n):not(cx-n) a,
-.connectea-dark .cvr-c-primary-navigation__links .eds-s-is-active:not(.cx-n):not(cx-n) span,
-.connectea-dark .cvr-c-primary-navigation__links .eds-s-is-active:not(.cx-n):not(cx-n) div {
+.connectify-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div) a,
+.connectify-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div) span,
+.connectify-dark .cvr-c-primary-navigation__links :is(.cvr-js-greedy__item.eds-s-is-active > div) div,
+.connectify-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a) a,
+.connectify-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a) span,
+.connectify-dark .cvr-c-primary-navigation__links :is(.v-link.eds-s-is-active a) div,
+.connectify-dark .cvr-c-primary-navigation__links :is(.eds-s-is-active a):not(.cx-n) a,
+.connectify-dark .cvr-c-primary-navigation__links :is(.eds-s-is-active a):not(.cx-n) span,
+.connectify-dark .cvr-c-primary-navigation__links :is(.eds-s-is-active a):not(.cx-n) div,
+.connectify-dark .cvr-c-primary-navigation__links .v-link.eds-s-is-active:not(cx-n) a,
+.connectify-dark .cvr-c-primary-navigation__links .v-link.eds-s-is-active:not(cx-n) span,
+.connectify-dark .cvr-c-primary-navigation__links .v-link.eds-s-is-active:not(cx-n) div,
+.connectify-dark .cvr-c-primary-navigation__links .eds-s-is-active:not(.cx-n):not(cx-n) a,
+.connectify-dark .cvr-c-primary-navigation__links .eds-s-is-active:not(.cx-n):not(cx-n) span,
+.connectify-dark .cvr-c-primary-navigation__links .eds-s-is-active:not(.cx-n):not(cx-n) div {
   color: var(--cx-nav-text-hover, #ffffff) !important;
   text-decoration: none !important;
 }
@@ -106,33 +106,33 @@
 /* --------------------------------------------------------------------------
    4. Left Sidebar / Navigation Drawer (.cvr-c-service-menu)
    -------------------------------------------------------------------------- */
-.connectea-dark .cvr-c-service-menu, .connectea-dark .cvr-c-service-menu__wrapper, .connectea-dark .cvr-c-service-menu__list {
+.connectify-dark .cvr-c-service-menu, .connectify-dark .cvr-c-service-menu__wrapper, .connectify-dark .cvr-c-service-menu__list {
   background-color: var(--cx-nav-bg, var(--cx-surface-elevated, #1a222d)) !important;
   color: var(--cx-nav-text, #cbd5e1) !important;
   border-right: none !important;
 }
 
-.connectea-dark .cvr-c-service-menu__item {
+.connectify-dark .cvr-c-service-menu__item {
   background-color: transparent !important;
   color: var(--cx-nav-text, #cbd5e1) !important;
   transition: background-color 0.15s ease;
 }
 
-.connectea-dark .cvr-c-service-menu__item:hover {
+.connectify-dark .cvr-c-service-menu__item:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
 /* Active item (e.g. Assessment Outlines) */
-.connectea-dark .cvr-c-service-menu__item.eds-s-is-active,
-.connectea-dark .cvr-c-service-menu__item.v-selected {
+.connectify-dark .cvr-c-service-menu__item.eds-s-is-active,
+.connectify-dark .cvr-c-service-menu__item.v-selected {
   background-color: var(--cx-nav-item-active, var(--cx-canvas-bg, #121820)) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
   box-shadow: inset 3px 0 var(--cx-accent, #3b82f6) !important;
   border-left-color: var(--cx-accent, #3b82f6) !important;
 }
 
-.connectea-dark .cvr-c-service-menu__item .v-label, .connectea-dark .cvr-c-service-menu__item .eds-o-media__body {
+.connectify-dark .cvr-c-service-menu__item .v-label, .connectify-dark .cvr-c-service-menu__item .eds-o-media__body {
   color: inherit !important;
   background-color: transparent !important;
 }
@@ -140,70 +140,70 @@
 /* --------------------------------------------------------------------------
    5. Subheader Bars, Heading Bars & Page Headers (Classes, Preferences, etc.)
    -------------------------------------------------------------------------- */
-.connectea-dark .cvr-c-category-toolbar:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
-.connectea-dark .cvr-c-service-bar__control-panel:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
-.connectea-dark .cvr-c-page-header:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
-.connectea-dark .cvr-c-heading-bar:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
-.connectea-dark .eds-c-heading-bar:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
-.connectea-dark .cvr-c-sub-header:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
-.connectea-dark .v-page-header:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
-.connectea-dark .cvr-c-toolbar:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]) {
+.connectify-dark .cvr-c-category-toolbar:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
+.connectify-dark .cvr-c-service-bar__control-panel:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
+.connectify-dark .cvr-c-page-header:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
+.connectify-dark .cvr-c-heading-bar:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
+.connectify-dark .eds-c-heading-bar:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
+.connectify-dark .cvr-c-sub-header:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
+.connectify-dark .v-page-header:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]),
+.connectify-dark .cvr-c-toolbar:not(.cvr-c-classes__sort):not(.cvr-c-sort-by):not(.eds-c-sort-by):not([class*="sort-by"]) {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-.connectea-dark .cvr-c-service-bar {
+.connectify-dark .cvr-c-service-bar {
   background-color: var(--cx-canvas-bg, #121820) !important;
   border: none !important;
 }
 
-.connectea-dark .cvr-c-service-bar__container {
+.connectify-dark .cvr-c-service-bar__container {
   background-color: var(--cx-canvas-bg, #121820) !important;
   border-bottom: 1px solid var(--cx-border, #2e3c4e) !important;
 }
 
-.connectea-dark .cvr-c-category-toolbar :where(h1):not(.cx-n), .connectea-dark .cvr-c-category-toolbar :where(h2):not(.cx-n),
-.connectea-dark .cvr-c-category-toolbar :where(h3):not(.cx-n), .connectea-dark .cvr-c-category-toolbar :where(h4):not(.cx-n),
-.connectea-dark .cvr-c-category-toolbar :where(span):not(.cx-n), .connectea-dark .cvr-c-category-toolbar :where(div):not(.cx-n),
-.connectea-dark .cvr-c-category-toolbar .v-label, .connectea-dark .cvr-c-category-toolbar .eds-c-heading,
-.connectea-dark .cvr-c-service-bar :where(h1):not(.cx-n), .connectea-dark .cvr-c-service-bar :where(h2):not(.cx-n),
-.connectea-dark .cvr-c-service-bar :where(h3):not(.cx-n), .connectea-dark .cvr-c-service-bar :where(h4):not(.cx-n),
-.connectea-dark .cvr-c-service-bar :where(span):not(.cx-n), .connectea-dark .cvr-c-service-bar :where(div):not(.cx-n),
-.connectea-dark .cvr-c-service-bar .v-label, .connectea-dark .cvr-c-service-bar .eds-c-heading,
-.connectea-dark .cvr-c-service-bar__title :where(h1):not(.cx-n), .connectea-dark .cvr-c-service-bar__title :where(h2):not(.cx-n),
-.connectea-dark .cvr-c-service-bar__title :where(h3):not(.cx-n), .connectea-dark .cvr-c-service-bar__title :where(h4):not(.cx-n),
-.connectea-dark .cvr-c-service-bar__title :where(span):not(.cx-n), .connectea-dark .cvr-c-service-bar__title :where(div):not(.cx-n),
-.connectea-dark .cvr-c-service-bar__title .v-label, .connectea-dark .cvr-c-service-bar__title .eds-c-heading,
-.connectea-dark .cvr-c-page-header :where(h1):not(.cx-n), .connectea-dark .cvr-c-page-header :where(h2):not(.cx-n),
-.connectea-dark .cvr-c-page-header :where(h3):not(.cx-n), .connectea-dark .cvr-c-page-header :where(h4):not(.cx-n),
-.connectea-dark .cvr-c-page-header :where(span):not(.cx-n), .connectea-dark .cvr-c-page-header :where(div):not(.cx-n),
-.connectea-dark .cvr-c-page-header .v-label, .connectea-dark .cvr-c-page-header .eds-c-heading,
-.connectea-dark .cvr-c-heading-bar :where(h1):not(.cx-n), .connectea-dark .cvr-c-heading-bar :where(h2):not(.cx-n),
-.connectea-dark .cvr-c-heading-bar :where(h3):not(.cx-n), .connectea-dark .cvr-c-heading-bar :where(h4):not(.cx-n),
-.connectea-dark .cvr-c-heading-bar :where(span):not(.cx-n), .connectea-dark .cvr-c-heading-bar :where(div):not(.cx-n),
-.connectea-dark .cvr-c-heading-bar .v-label, .connectea-dark .cvr-c-heading-bar .eds-c-heading,
-.connectea-dark .eds-c-heading-bar :where(h1):not(.cx-n), .connectea-dark .eds-c-heading-bar :where(h2):not(.cx-n),
-.connectea-dark .eds-c-heading-bar :where(h3):not(.cx-n), .connectea-dark .eds-c-heading-bar :where(h4):not(.cx-n),
-.connectea-dark .eds-c-heading-bar :where(span):not(.cx-n), .connectea-dark .eds-c-heading-bar :where(div):not(.cx-n),
-.connectea-dark .eds-c-heading-bar .v-label, .connectea-dark .eds-c-heading-bar .eds-c-heading,
-.connectea-dark .cvr-c-sub-header :where(h1):not(.cx-n), .connectea-dark .cvr-c-sub-header :where(h2):not(.cx-n),
-.connectea-dark .cvr-c-sub-header :where(h3):not(.cx-n), .connectea-dark .cvr-c-sub-header :where(h4):not(.cx-n),
-.connectea-dark .cvr-c-sub-header :where(span):not(.cx-n), .connectea-dark .cvr-c-sub-header :where(div):not(.cx-n),
-.connectea-dark .cvr-c-sub-header .v-label, .connectea-dark .cvr-c-sub-header .eds-c-heading, .connectea-dark .v-page-header :where(h1):not(.cx-n),
-.connectea-dark .v-page-header :where(h2):not(.cx-n), .connectea-dark .v-page-header :where(h3):not(.cx-n),
-.connectea-dark .v-page-header :where(h4):not(.cx-n), .connectea-dark .v-page-header :where(span):not(.cx-n),
-.connectea-dark .v-page-header :where(div):not(.cx-n), .connectea-dark .v-page-header .v-label, .connectea-dark .v-page-header .eds-c-heading,
-.connectea-dark .cvr-c-toolbar :where(h1):not(.cx-n), .connectea-dark .cvr-c-toolbar :where(h2):not(.cx-n),
-.connectea-dark .cvr-c-toolbar :where(h3):not(.cx-n), .connectea-dark .cvr-c-toolbar :where(h4):not(.cx-n),
-.connectea-dark .cvr-c-toolbar :where(span):not(.cx-n), .connectea-dark .cvr-c-toolbar :where(div):not(.cx-n),
-.connectea-dark .cvr-c-toolbar .v-label, .connectea-dark .cvr-c-toolbar .eds-c-heading {
+.connectify-dark .cvr-c-category-toolbar :where(h1):not(.cx-n), .connectify-dark .cvr-c-category-toolbar :where(h2):not(.cx-n),
+.connectify-dark .cvr-c-category-toolbar :where(h3):not(.cx-n), .connectify-dark .cvr-c-category-toolbar :where(h4):not(.cx-n),
+.connectify-dark .cvr-c-category-toolbar :where(span):not(.cx-n), .connectify-dark .cvr-c-category-toolbar :where(div):not(.cx-n),
+.connectify-dark .cvr-c-category-toolbar .v-label, .connectify-dark .cvr-c-category-toolbar .eds-c-heading,
+.connectify-dark .cvr-c-service-bar :where(h1):not(.cx-n), .connectify-dark .cvr-c-service-bar :where(h2):not(.cx-n),
+.connectify-dark .cvr-c-service-bar :where(h3):not(.cx-n), .connectify-dark .cvr-c-service-bar :where(h4):not(.cx-n),
+.connectify-dark .cvr-c-service-bar :where(span):not(.cx-n), .connectify-dark .cvr-c-service-bar :where(div):not(.cx-n),
+.connectify-dark .cvr-c-service-bar .v-label, .connectify-dark .cvr-c-service-bar .eds-c-heading,
+.connectify-dark .cvr-c-service-bar__title :where(h1):not(.cx-n), .connectify-dark .cvr-c-service-bar__title :where(h2):not(.cx-n),
+.connectify-dark .cvr-c-service-bar__title :where(h3):not(.cx-n), .connectify-dark .cvr-c-service-bar__title :where(h4):not(.cx-n),
+.connectify-dark .cvr-c-service-bar__title :where(span):not(.cx-n), .connectify-dark .cvr-c-service-bar__title :where(div):not(.cx-n),
+.connectify-dark .cvr-c-service-bar__title .v-label, .connectify-dark .cvr-c-service-bar__title .eds-c-heading,
+.connectify-dark .cvr-c-page-header :where(h1):not(.cx-n), .connectify-dark .cvr-c-page-header :where(h2):not(.cx-n),
+.connectify-dark .cvr-c-page-header :where(h3):not(.cx-n), .connectify-dark .cvr-c-page-header :where(h4):not(.cx-n),
+.connectify-dark .cvr-c-page-header :where(span):not(.cx-n), .connectify-dark .cvr-c-page-header :where(div):not(.cx-n),
+.connectify-dark .cvr-c-page-header .v-label, .connectify-dark .cvr-c-page-header .eds-c-heading,
+.connectify-dark .cvr-c-heading-bar :where(h1):not(.cx-n), .connectify-dark .cvr-c-heading-bar :where(h2):not(.cx-n),
+.connectify-dark .cvr-c-heading-bar :where(h3):not(.cx-n), .connectify-dark .cvr-c-heading-bar :where(h4):not(.cx-n),
+.connectify-dark .cvr-c-heading-bar :where(span):not(.cx-n), .connectify-dark .cvr-c-heading-bar :where(div):not(.cx-n),
+.connectify-dark .cvr-c-heading-bar .v-label, .connectify-dark .cvr-c-heading-bar .eds-c-heading,
+.connectify-dark .eds-c-heading-bar :where(h1):not(.cx-n), .connectify-dark .eds-c-heading-bar :where(h2):not(.cx-n),
+.connectify-dark .eds-c-heading-bar :where(h3):not(.cx-n), .connectify-dark .eds-c-heading-bar :where(h4):not(.cx-n),
+.connectify-dark .eds-c-heading-bar :where(span):not(.cx-n), .connectify-dark .eds-c-heading-bar :where(div):not(.cx-n),
+.connectify-dark .eds-c-heading-bar .v-label, .connectify-dark .eds-c-heading-bar .eds-c-heading,
+.connectify-dark .cvr-c-sub-header :where(h1):not(.cx-n), .connectify-dark .cvr-c-sub-header :where(h2):not(.cx-n),
+.connectify-dark .cvr-c-sub-header :where(h3):not(.cx-n), .connectify-dark .cvr-c-sub-header :where(h4):not(.cx-n),
+.connectify-dark .cvr-c-sub-header :where(span):not(.cx-n), .connectify-dark .cvr-c-sub-header :where(div):not(.cx-n),
+.connectify-dark .cvr-c-sub-header .v-label, .connectify-dark .cvr-c-sub-header .eds-c-heading, .connectify-dark .v-page-header :where(h1):not(.cx-n),
+.connectify-dark .v-page-header :where(h2):not(.cx-n), .connectify-dark .v-page-header :where(h3):not(.cx-n),
+.connectify-dark .v-page-header :where(h4):not(.cx-n), .connectify-dark .v-page-header :where(span):not(.cx-n),
+.connectify-dark .v-page-header :where(div):not(.cx-n), .connectify-dark .v-page-header .v-label, .connectify-dark .v-page-header .eds-c-heading,
+.connectify-dark .cvr-c-toolbar :where(h1):not(.cx-n), .connectify-dark .cvr-c-toolbar :where(h2):not(.cx-n),
+.connectify-dark .cvr-c-toolbar :where(h3):not(.cx-n), .connectify-dark .cvr-c-toolbar :where(h4):not(.cx-n),
+.connectify-dark .cvr-c-toolbar :where(span):not(.cx-n), .connectify-dark .cvr-c-toolbar :where(div):not(.cx-n),
+.connectify-dark .cvr-c-toolbar .v-label, .connectify-dark .cvr-c-toolbar .eds-c-heading {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 /* Classes Page Sort Header & Controls: transparent background matching light mode */
-.connectea-dark .cvr-c-classes__sort:not(.cx-n), .connectea-dark .cvr-c-sort-by:not(.cx-n), .connectea-dark .eds-c-sort-by:not(.cx-n),
-.connectea-dark .cvr-c-classes .cvr-c-classes__sort, .connectea-dark .cvr-c-classes-header:not(.cx-n),
-.connectea-dark .cvr-c-classes__header:not(.cx-n), .connectea-dark .cvr-c-classes-list__header:not(.cx-n) {
+.connectify-dark .cvr-c-classes__sort:not(.cx-n), .connectify-dark .cvr-c-sort-by:not(.cx-n), .connectify-dark .eds-c-sort-by:not(.cx-n),
+.connectify-dark .cvr-c-classes .cvr-c-classes__sort, .connectify-dark .cvr-c-classes-header:not(.cx-n),
+.connectify-dark .cvr-c-classes__header:not(.cx-n), .connectify-dark .cvr-c-classes-list__header:not(.cx-n) {
   background: transparent !important;
   background-color: transparent !important;
   border: none !important;

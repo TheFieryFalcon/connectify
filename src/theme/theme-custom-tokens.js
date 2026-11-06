@@ -9,8 +9,8 @@
 (() => {
   'use strict';
 
-  const STORAGE_CUSTOM_COLORS = 'connectea:theme:custom_colors';
-  const STORAGE_CUSTOM_BG = 'connectea:custom_background';
+  const STORAGE_CUSTOM_COLORS = 'connectify:theme:custom_colors';
+  const STORAGE_CUSTOM_BG = 'connectify:custom_background';
   const DEFAULT_CUSTOM_COLORS = {
     canvas: '#111827',
     surface: '#1f2937',
@@ -63,7 +63,7 @@
 
   function clearCustomTokens() {
     for (const el of tokenTargets()) for (const prop of TOKEN_PROPS) el.style.removeProperty(prop);
-    if (typeof document !== 'undefined') document.documentElement?.removeAttribute('data-connectea-tone');
+    if (typeof document !== 'undefined') document.documentElement?.removeAttribute('data-connectify-tone');
   }
 
   /** Dark-classed themes with dark ink (the grey Liquid Glass preset, light custom themes): data colours made for
@@ -71,7 +71,7 @@
   function markTone(textPrimary) {
     const lum = window.ConnectifyThemeOklch?.luminance;
     if (!lum || !/^#[0-9a-f]{6}$/i.test(textPrimary || '') || lum(textPrimary) >= 0.2) return;
-    document.documentElement.setAttribute('data-connectea-tone', 'light');
+    document.documentElement.setAttribute('data-connectify-tone', 'light');
   }
 
   /** glass: { opacity } when the theme has Liquid Glass on, so its panels take the translucent glass recipe. */
@@ -113,11 +113,11 @@
     if (typeof document === 'undefined' || !document.documentElement) return;
     const root = document.documentElement;
     if (bgUrl && !isAuthDisabled()) {
-      root.setAttribute('data-connectea-has-custom-bg', 'true');
+      root.setAttribute('data-connectify-has-custom-bg', 'true');
       // Chrome drops CSS url()s over 2 MB: large data URLs are painted through a blob: URL (theme-boot.js)
       root.style.setProperty('--cx-custom-bg-image', `url("${window.ConnectifyThemeBoot?.cssUrl(bgUrl) ?? bgUrl}")`);
     } else {
-      root.removeAttribute('data-connectea-has-custom-bg');
+      root.removeAttribute('data-connectify-has-custom-bg');
       root.style.removeProperty('--cx-custom-bg-image');
     }
     // Dim the wallpaper just enough for white text (theme-wallpaper-dim.js loads after this script and measures on its own)
@@ -173,8 +173,8 @@
 
   function setGlassDiffusion(enable) {
     if (typeof document === 'undefined' || !document.documentElement) return;
-    if (enable) document.documentElement.setAttribute('data-connectea-glass', 'true');
-    else document.documentElement.removeAttribute('data-connectea-glass');
+    if (enable) document.documentElement.setAttribute('data-connectify-glass', 'true');
+    else document.documentElement.removeAttribute('data-connectify-glass');
   }
 
   window.ConnectifyThemeTokens = {

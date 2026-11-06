@@ -67,11 +67,11 @@
   function describe(id, values, acct, parsed) {
     if (id === 'goals') return plural((json(values[`connectify:goals:${acct}`])?.goals || []).filter(g => !g.parent).length, 'goal');
     if (id === 'baselines') { const b = mergedBaselines(values, acct); return plural(Object.keys(b.types).length + Object.keys(b.subjects).length, 'baseline'); }
-    if (id === 'categories') return plural(Object.keys(json(values['cx-categories'] || values['connectea:categories']) || {}).length, 'category', 'categories');
+    if (id === 'categories') return plural(Object.keys(json(values['cx-categories'] || values['connectify:categories']) || {}).length, 'category', 'categories');
     if (id === 'themes') {
-      const themes = json(values['connectea:custom_themes_list']) || [];
-      return [themes.length ? plural(themes.length, 'theme') : '', values['connectea:custom_background'] ? 'a wallpaper' : '',
-        values['connectea:theme:id'] ? 'the theme in use' : ''].filter(Boolean).join(', ').replace(/^t/, 'T');
+      const themes = json(values['connectify:custom_themes_list']) || [];
+      return [themes.length ? plural(themes.length, 'theme') : '', values['connectify:custom_background'] ? 'a wallpaper' : '',
+        values['connectify:theme:id'] ? 'the theme in use' : ''].filter(Boolean).join(', ').replace(/^t/, 'T');
     }
     if (id === 'archive') return (parsed ? incomingYears(parsed, acct) : archive().read()).map(e => archive().label(e)).join(', ');
     const words = { types: 'type', weeks: 'week', calibration: 'saved value', preferences: 'setting' };
@@ -94,7 +94,7 @@
         row.state = JSON.stringify(archive().merge(archive().read(), incomingYears(parsed, acct))) === before ? 'same' : 'adds';
       } else if (id === 'themes') {
         const mine = window.ConnectifyThemeRegistry?.getCustomThemes?.() || [];
-        const theirs = json(section.values['connectea:custom_themes_list']) || [];
+        const theirs = json(section.values['connectify:custom_themes_list']) || [];
         const clashes = theirs.filter(t => mine.some(m => themeName(m) === themeName(t)));
         if (clashes.length) { row.state = 'replaces'; row.here = `Replaces ${plural(clashes.length, 'theme')} here`; }
       } else if (Object.keys(here).length) {
@@ -146,7 +146,7 @@
       if (values('baselines')[backupKey]) try { localStorage.setItem(backupKey, values('baselines')[backupKey]); } catch {}
       window.ConnectifyPredictorBaselines?.saveBaselines?.(mergedBaselines(values('baselines'), acct));
     }
-    if (values('categories')) window.ConnectifyCategoryStore?.saveCategories?.(json(values('categories')['cx-categories'] || values('categories')['connectea:categories']));
+    if (values('categories')) window.ConnectifyCategoryStore?.saveCategories?.(json(values('categories')['cx-categories'] || values('categories')['connectify:categories']));
     if (values('themes')) await importThemes(values('themes'));
     window.ConnectifyCache?.clearPredictorCache?.();
   }
@@ -156,15 +156,15 @@
     const reg = window.ConnectifyThemeRegistry;
     const importer = window.ConnectifyThemeImport;
     const savedIds = new Map();
-    for (const theme of json(themeValues['connectea:custom_themes_list']) || []) {
+    for (const theme of json(themeValues['connectify:custom_themes_list']) || []) {
       try {
         const saved = await importer?.saveTheme(theme);
         if (saved && theme?.id) savedIds.set(String(theme.id), saved.id);
       } catch (err) { console.warn('Connectify: a backed-up theme was not imported', err); }
     }
-    const wallpaper = themeValues['connectea:custom_background'];
+    const wallpaper = themeValues['connectify:custom_background'];
     if (wallpaper) window.ConnectifyTheme?.setCustomBackground?.(wallpaper);
-    const active = themeValues['connectea:theme:id'];
+    const active = themeValues['connectify:theme:id'];
     const id = savedIds.get(active) || active;
     if (!id || (id !== 'light' && !reg?.getThemeDefinition?.(id))) return;
     if (window.ConnectifyTheme?.setTheme) window.ConnectifyTheme.setTheme(id); else reg.setTheme(id);

@@ -2,36 +2,36 @@
  * Connectify Theme: search, filters, class pages, developer settings and display-width scaling
  */
 
-.connectea-dark .cvr-c-status-label--reported {
+.connectify-dark .cvr-c-status-label--reported {
   background-color: #991b1b !important;
   color: #fee2e2 !important;
   border-color: #ef4444 !important;
 }
 
-.connectea-dark .cvr-c-switch label:not(.cx-n), .connectea-dark .eds-c-switch__slider:not(.cx-n):not(cx-n),
-.connectea-dark :is(.custom-switch .custom-control-label::before) {
+.connectify-dark .cvr-c-switch label:not(.cx-n), .connectify-dark .eds-c-switch__slider:not(.cx-n):not(cx-n),
+.connectify-dark :is(.custom-switch .custom-control-label::before) {
   background-color: var(--cx-input-bg, #202c3b) !important;
   border: 1px solid var(--cx-border, #4a617a) !important;
 }
 
-.connectea-dark :where(.cvr-c-switch) :where(input:checked) + :where(label):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n),
-.connectea-dark .eds-c-switch input:checked + .eds-c-switch__slider:not(.cx-n),
-.connectea-dark :is(.custom-switch .custom-control-input:checked ~ .custom-control-label::before) {
+.connectify-dark :where(.cvr-c-switch) :where(input:checked) + :where(label):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n),
+.connectify-dark .eds-c-switch input:checked + .eds-c-switch__slider:not(.cx-n),
+.connectify-dark :is(.custom-switch .custom-control-input:checked ~ .custom-control-label::before) {
   background-color: var(--cx-accent, #2563eb) !important;
   border-color: var(--cx-accent-hover, #3b82f6) !important;
 }
 
-.connectea-dark :where(.cvr-c-switch) :where(label:before):not(.cx-n):not(.cx-n):not(cx-n),
-.connectea-dark :is(.eds-c-switch__slider:before):not(.cx-n), .connectea-dark :is(.custom-switch .custom-control-label::after) {
+.connectify-dark :where(.cvr-c-switch) :where(label:before):not(.cx-n):not(.cx-n):not(cx-n),
+.connectify-dark :is(.eds-c-switch__slider:before):not(.cx-n), .connectify-dark :is(.custom-switch .custom-control-label::after) {
   background-color: var(--cx-button-text, #f1f5f9) !important;
 }
 
-.connectea-dark .cvr-c-wizard-steps, .connectea-dark .cvr-c-wizard-step, .connectea-dark .multi-step-item {
+.connectify-dark .cvr-c-wizard-steps, .connectify-dark .cvr-c-wizard-step, .connectify-dark .multi-step-item {
   color: var(--cx-text-muted, #94a3b8) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark .cvr-c-wizard-step--current:not(.cx-n), .connectea-dark .multi-step-item.active {
+.connectify-dark .cvr-c-wizard-step--current:not(.cx-n), .connectify-dark .multi-step-item.active {
   color: var(--cx-accent-hover, #60a5fa) !important;
   font-weight: 700 !important;
 }
@@ -39,101 +39,101 @@
 /* --------------------------------------------------------------------------
    30. Search, Floating Filters, Rich Media, Editors & KaTeX
    -------------------------------------------------------------------------- */
-.connectea-dark .eds-c-search__field:not(cx-n), .connectea-dark .cvr-c-search input, .connectea-dark .site-search__field:not(cx-n) {
+.connectify-dark .eds-c-search__field:not(cx-n), .connectify-dark .cvr-c-search input, .connectify-dark .site-search__field:not(cx-n) {
   background-color: var(--cx-input-bg, #141a22) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border: 1px solid var(--cx-border, #42556d) !important;
   border-radius: 6px !important;
 }
 
-.connectea-dark .cvr-c-service-float-bar-search-panel, .connectea-dark .cvr-c-service-float-bar-filter-panel {
+.connectify-dark .cvr-c-service-float-bar-search-panel, .connectify-dark .cvr-c-service-float-bar-filter-panel {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
   color: var(--cx-text-primary, #e2e8f0) !important;
   border: 1px solid var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark .v-richtextarea, .connectea-dark .cvr-c-richtextarea {
+.connectify-dark .v-richtextarea, .connectify-dark .cvr-c-richtextarea {
   border: 1px solid var(--cx-border, #42556d) !important;
   border-radius: 6px !important;
 }
 
-.connectea-dark .v-richtextarea .gwt-RichTextArea, .connectea-dark :where(.cvr-c-richtextarea) :where(iframe):not(.cx-n):not(.cx-n) {
+.connectify-dark .v-richtextarea .gwt-RichTextArea, .connectify-dark :where(.cvr-c-richtextarea) :where(iframe):not(.cx-n):not(.cx-n) {
   background-color: var(--cx-input-bg, #141a22) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-.connectea-dark .v-richtextarea .gwt-RichTextToolbar {
+.connectify-dark .v-richtextarea .gwt-RichTextToolbar {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
   border-bottom: 1px solid var(--cx-border, #36485e) !important;
   color: var(--cx-text-primary, #e2e8f0) !important;
 }
 
-.connectea-dark .v-multifileupload-dropzone, .connectea-dark .cvr-c-upload-control, .connectea-dark .cvr-c-upload-gallery {
+.connectify-dark .v-multifileupload-dropzone, .connectify-dark .cvr-c-upload-control, .connectify-dark .cvr-c-upload-gallery {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   border: 1.5px dashed var(--cx-border, #4a617a) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border-radius: 8px !important;
 }
 
-.connectea-dark .v-multifileupload-dropzone:hover, .connectea-dark .cvr-c-upload-control:hover {
+.connectify-dark .v-multifileupload-dropzone:hover, .connectify-dark .cvr-c-upload-control:hover {
   background-color: var(--cx-surface-hover, #202c3b) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
-.connectea-dark .cvr-c-attachment-row {
+.connectify-dark .cvr-c-attachment-row {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
   border: 1px solid var(--cx-border, #36485e) !important;
   color: var(--cx-text-primary, #e2e8f0) !important;
 }
 
-.connectea-dark .eds-c-empty-content, .connectea-dark .c-empty-state, .connectea-dark .c-empty-state-title, .connectea-dark .c-empty-state-text {
+.connectify-dark .eds-c-empty-content, .connectify-dark .c-empty-state, .connectify-dark .c-empty-state-title, .connectify-dark .c-empty-state-text {
   color: var(--cx-text-muted, #94a3b8) !important;
 }
 
-.connectea-dark .slick-slide__image-wrapper, .connectea-dark .cvr-c-thumbnail {
+.connectify-dark .slick-slide__image-wrapper, .connectify-dark .cvr-c-thumbnail {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark .slick-next, .connectea-dark .slick-prev {
+.connectify-dark .slick-next, .connectify-dark .slick-prev {
   background-color: var(--cx-surface-hover, #24303f) !important;
   border: 1px solid var(--cx-border, #4a617a) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-.connectea-dark .katex, .connectea-dark .katex-display, .connectea-dark .katex-html {
+.connectify-dark .katex, .connectify-dark .katex-display, .connectify-dark .katex-html {
   color: inherit !important;
 }
 
 /* Angular Material Class Pages (.eds.cvr.ngm) Contrast Normalization */
-.connectea-dark:not(cx-n).eds.cvr.ngm .connect-purple.theme-multiplier.text-primary,
-.connectea-dark:not(cx-n).eds.cvr.ngm .connect-purple.theme-multiplier .text-primary,
-.connectea-dark:not(cx-n).eds.cvr.ngm .connect-purple.text-primary:not(.cx-n),
-.connectea-dark:not(cx-n).eds.cvr.ngm .connect-purple .text-primary:not(.cx-n),
-.connectea-dark:not(cx-n).eds.cvr.ngm .theme-multiplier.text-primary:not(.cx-n),
-.connectea-dark:not(cx-n).eds.cvr.ngm :is(.theme-multiplier .text-primary):not(.cx-n),
-.connectea-dark:not(cx-n).eds.cvr.ngm .text-primary:not(.cx-n):not(.cx-n),
-.connectea-dark:not(cx-n) .eds.cvr.ngm .connect-purple.theme-multiplier.text-primary,
-.connectea-dark:not(cx-n) .eds.cvr.ngm :is(.connect-purple.theme-multiplier .text-primary),
-.connectea-dark:not(cx-n) .eds.cvr.ngm .connect-purple.text-primary:not(.cx-n),
-.connectea-dark:not(cx-n) .eds.cvr.ngm :is(.connect-purple .text-primary):not(.cx-n),
-.connectea-dark:not(cx-n) .eds.cvr.ngm .theme-multiplier.text-primary:not(.cx-n),
-.connectea-dark:not(cx-n) .eds.cvr.ngm :is(.theme-multiplier .text-primary):not(.cx-n),
-.connectea-dark:not(cx-n) .eds.cvr.ngm .text-primary:not(.cx-n):not(.cx-n) {
+.connectify-dark:not(cx-n).eds.cvr.ngm .connect-purple.theme-multiplier.text-primary,
+.connectify-dark:not(cx-n).eds.cvr.ngm .connect-purple.theme-multiplier .text-primary,
+.connectify-dark:not(cx-n).eds.cvr.ngm .connect-purple.text-primary:not(.cx-n),
+.connectify-dark:not(cx-n).eds.cvr.ngm .connect-purple .text-primary:not(.cx-n),
+.connectify-dark:not(cx-n).eds.cvr.ngm .theme-multiplier.text-primary:not(.cx-n),
+.connectify-dark:not(cx-n).eds.cvr.ngm :is(.theme-multiplier .text-primary):not(.cx-n),
+.connectify-dark:not(cx-n).eds.cvr.ngm .text-primary:not(.cx-n):not(.cx-n),
+.connectify-dark:not(cx-n) .eds.cvr.ngm .connect-purple.theme-multiplier.text-primary,
+.connectify-dark:not(cx-n) .eds.cvr.ngm :is(.connect-purple.theme-multiplier .text-primary),
+.connectify-dark:not(cx-n) .eds.cvr.ngm .connect-purple.text-primary:not(.cx-n),
+.connectify-dark:not(cx-n) .eds.cvr.ngm :is(.connect-purple .text-primary):not(.cx-n),
+.connectify-dark:not(cx-n) .eds.cvr.ngm .theme-multiplier.text-primary:not(.cx-n),
+.connectify-dark:not(cx-n) .eds.cvr.ngm :is(.theme-multiplier .text-primary):not(.cx-n),
+.connectify-dark:not(cx-n) .eds.cvr.ngm .text-primary:not(.cx-n):not(.cx-n) {
   color: var(--cx-button-text, #f1f5f9) !important;
 }
 
-.connectea-dark:not(cx-n) .eds.cvr.ngm .mat-divider:not(.mat-divider--primary):not(.cx-n):not(.cx-n),
-.connectea-dark:not(cx-n) .eds.cvr.ngm :is(.connect-purple.theme-multiplier .mat-divider:not(.mat-divider--primary)),
-.connectea-dark:not(cx-n) :is(.eds.cvr.ngm *) .mat-divider:not(.mat-divider--primary):not(.cx-n):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.eds.cvr.ngm *) :is(.connect-purple.theme-multiplier .mat-divider:not(.mat-divider--primary)) {
+.connectify-dark:not(cx-n) .eds.cvr.ngm .mat-divider:not(.mat-divider--primary):not(.cx-n):not(.cx-n),
+.connectify-dark:not(cx-n) .eds.cvr.ngm :is(.connect-purple.theme-multiplier .mat-divider:not(.mat-divider--primary)),
+.connectify-dark:not(cx-n) :is(.eds.cvr.ngm *) .mat-divider:not(.mat-divider--primary):not(.cx-n):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.eds.cvr.ngm *) :is(.connect-purple.theme-multiplier .mat-divider:not(.mat-divider--primary)) {
   border-top-color: var(--cx-border-hover, #3d5066) !important;
   border-color: var(--cx-border-hover, #3d5066) !important;
 }
 
 /* The class-coloured rule under card headers (Connect's green) takes the theme's strong border */
-.connectea-dark:not(cx-n) .mat-divider--primary {
+.connectify-dark:not(cx-n) .mat-divider--primary {
   border-top-color: var(--cx-border-strong, #5a7391) !important;
   border-color: var(--cx-border-strong, #5a7391) !important;
 }
@@ -153,12 +153,12 @@
   background: #c0392b !important;
   border-color: #a93226 !important;
 }
-.connectea-dark:not(cx-n) .cx-clear-cache-btn {
+.connectify-dark:not(cx-n) .cx-clear-cache-btn {
   background: #c0392b !important;
   color: #ffffff !important;
   border: 1px solid #962d22 !important;
 }
-.connectea-dark:not(cx-n) .cx-clear-cache-btn:hover {
+.connectify-dark:not(cx-n) .cx-clear-cache-btn:hover {
   background: #962d22 !important;
   border-color: #78241c !important;
 }
@@ -182,8 +182,8 @@
   box-sizing: border-box !important;
 }
 
-.connectea-type-container,
-.connectea-outcome-bar {
+.connectify-type-container,
+.connectify-outcome-bar {
   flex: 0 0 auto !important;
   white-space: nowrap !important;
 }
@@ -197,27 +197,27 @@
 @media (max-width: 1050px) { :root { --cx-display-scale: 0.76; } }
 @media (max-width: 950px)  {
   :root { --cx-display-scale: 0.62; }
-  .connectea-row-wrapper { gap: 8px !important; }
-  .connectea-panel { padding: 6px 10px !important; }
+  .connectify-row-wrapper { gap: 8px !important; }
+  .connectify-panel { padding: 6px 10px !important; }
 }
 @media (max-width: 800px)  {
   :root { --cx-display-scale: 0.55; }
-  .connectea-row-wrapper { gap: 6px !important; }
-  .connectea-panel { padding: 5px 8px !important; }
+  .connectify-row-wrapper { gap: 6px !important; }
+  .connectify-panel { padding: 5px 8px !important; }
 }
 @media (max-width: 650px)  {
   :root { --cx-display-scale: 0.48; }
-  .connectea-row-wrapper { gap: 4px !important; }
-  .connectea-panel { padding: 4px 6px !important; }
+  .connectify-row-wrapper { gap: 4px !important; }
+  .connectify-panel { padding: 4px 6px !important; }
 }
 
-.connectea-row-wrapper {
+.connectify-row-wrapper {
   zoom: var(--cx-display-scale, 1) !important;
   transform-origin: left center !important;
 }
 
 @supports not (zoom: 1) {
-  .connectea-row-wrapper {
+  .connectify-row-wrapper {
     transform: scale(var(--cx-display-scale, 1)) !important;
     transform-origin: left center !important;
   }

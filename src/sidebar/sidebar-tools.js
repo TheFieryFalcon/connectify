@@ -46,7 +46,7 @@
   };
 
   const PANEL_DEFS = [
-    ['connectea-atar', () => window.ConnectifyAtar?.calculatorPanel],
+    ['connectify-atar', () => window.ConnectifyAtar?.calculatorPanel],
     ['connectify-predictor', () => window.ConnectifyPredictorUI?.panelRefs?.panel || window.ConnectifyPredictorUI?.getInstance?.()?.panel],
     ['connectify-progress', () => document.getElementById('connectify-progress') || window.ConnectifyProgress?.panelRefs?.panel],
     ['connectify-weakness', () => window.ConnectifyWeakness?.panelRefs?.panel || (window.ConnectifyWeakness?.ensureWeaknessPanel && window.ConnectifyWeakness.ensureWeaknessPanel().panel)],
@@ -124,7 +124,7 @@
    * group-specific state atar-ui gives them while the calculator is open, and are both released when it closes.
    */
   function syncPressedState(toolMenu) {
-    const calculatorPanel = document.getElementById('connectea-atar');
+    const calculatorPanel = document.getElementById('connectify-atar');
     const calculatorOpen = Boolean(calculatorPanel && !calculatorPanel.hidden);
     for (const btn of toolMenu.children) {
       if (CALCULATOR_GROUPS[btn.id]) {

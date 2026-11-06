@@ -33,7 +33,7 @@
 
     const student = window.ConnectifyUtils.accountKey();
     const subject = title.replace(/\s*[-–—]\s*Semester\s+[12]\s*$/i, '').trim();
-    return `connectea:cohort:v3:${student}:${window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()}:${subject}`;
+    return `connectify:cohort:v3:${student}:${window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()}:${subject}`;
   }
 
   const lower = text => normalize(text).toLowerCase();
@@ -103,7 +103,7 @@
   function chartsPending(card) {
     if (performance.now() >= CHART_WAIT_MS) return false;
     const readMark = window.ConnectifyCohortRows?.readMark;
-    return cardRows(card).some(row => !row.classList.contains('connectea-subject-average-row') &&
+    return cardRows(card).some(row => !row.classList.contains('connectify-subject-average-row') &&
       Number.isFinite(readMark?.(row)) && !readRowStats(row));
   }
 
@@ -186,7 +186,7 @@
     try {
       let stored = localStorage.getItem(key);
       if (stored === null) {
-        const oldKey = key.replace('connectea:cohort:v3:', 'connectea:cohort:v2:');
+        const oldKey = key.replace('connectify:cohort:v3:', 'connectify:cohort:v2:');
         const migrated =
           math().validCohortSize(localStorage.getItem(`${oldKey} - Semester 2`)) ??
           math().validCohortSize(localStorage.getItem(`${oldKey} - Semester 1`));

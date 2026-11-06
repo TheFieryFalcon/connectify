@@ -5,20 +5,20 @@
  * its top left corner; the height the scale frees comes back through its bottom margin. Compact panels wrap instead.
  */
 
-.cvr-c-task__details:has(> .connectea-xp-fit) {
+.cvr-c-task__details:has(> .connectify-xp-fit) {
   contain: inline-size;
   flex: 1 1 0% !important;
   min-width: 0 !important;
 }
 
 /* Reports the column's width to cohort-expanded-fit.js */
-.connectea-xp-fit-probe {
+.connectify-xp-fit-probe {
   display: block;
   height: 0;
 }
 
 /* The unused id outranks Liquid Glass's fit-content strip and the display zoom's !important rules */
-.cvr-c-task__details > :is(#cx-specificity-anchor, .connectea-xp-fit) {
+.cvr-c-task__details > :is(#cx-specificity-anchor, .connectify-xp-fit) {
   zoom: 1 !important;
   width: max-content !important;
   max-width: none !important;
@@ -27,16 +27,16 @@
   margin-bottom: calc(var(--cx-fit-margin, 4px) - var(--cx-fit-slack, 0px)) !important;
 }
 
-.cvr-c-task__details > .connectea-panel.connectea-xp-fit {
+.cvr-c-task__details > .connectify-panel.connectify-xp-fit {
   --cx-fit-margin: 8px;
 }
 
 /* A compact panel gives way to the Type dropdown and meter (cohort-styles.js); a card never reflows */
-.connectea-row-wrapper > .connectea-panel.connectea-panel--expanded {
+.connectify-row-wrapper > .connectify-panel.connectify-panel--expanded {
   flex: 0 0 auto !important;
 }
 
 /* The scale is the whole card's, so the Type dropdown's cap needs no display zoom correction here */
-.connectea-panel--expanded .connectea-type-select {
+.connectify-panel--expanded .connectify-type-select {
   max-width: 160px;
 }

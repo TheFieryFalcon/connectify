@@ -5,7 +5,7 @@
 /* --------------------------------------------------------------------------
    10. Accordion Section Header ("Hide Details" / "Show Details")
    -------------------------------------------------------------------------- */
-.connectea-dark .eds-c-accordion__section-heading {
+.connectify-dark .eds-c-accordion__section-heading {
   background-color: transparent !important;
   border-top: none !important;
   border-left: none !important;
@@ -15,26 +15,26 @@
   transition: color 0.15s ease;
 }
 
-.connectea-dark :is(.eds-c-accordion__section, .eds-c-accordion__section-heading, .autofit-section).eds-s-is-active .eds-c-accordion__section-heading {
+.connectify-dark :is(.eds-c-accordion__section, .eds-c-accordion__section-heading, .autofit-section).eds-s-is-active .eds-c-accordion__section-heading {
   border-bottom: none !important;
 }
 
-.connectea-dark .eds-c-accordion__section-heading .v-label, .connectea-dark .eds-c-accordion__section-heading .eds-c-accordion__section-label,
-.connectea-dark .eds-c-accordion__section-heading :where(span):not(.cx-n), .connectea-dark .eds-c-accordion__section-heading :where(div):not(.cx-n) {
+.connectify-dark .eds-c-accordion__section-heading .v-label, .connectify-dark .eds-c-accordion__section-heading .eds-c-accordion__section-label,
+.connectify-dark .eds-c-accordion__section-heading :where(span):not(.cx-n), .connectify-dark .eds-c-accordion__section-heading :where(div):not(.cx-n) {
   background-color: transparent !important;
   border: none !important;
   color: inherit !important;
 }
 
-.connectea-dark .eds-c-accordion__section-heading:hover {
+.connectify-dark .eds-c-accordion__section-heading:hover {
   background-color: transparent !important;
   color: var(--cx-button-text, #f1f5f9) !important;
 }
 
-.connectea-dark .eds-c-accordion__section-heading:hover .v-label,
-.connectea-dark .eds-c-accordion__section-heading:hover .eds-c-accordion__section-label,
-.connectea-dark .eds-c-accordion__section-heading:hover :where(span):not(.cx-n),
-.connectea-dark .eds-c-accordion__section-heading:hover :where(div):not(.cx-n) {
+.connectify-dark .eds-c-accordion__section-heading:hover .v-label,
+.connectify-dark .eds-c-accordion__section-heading:hover .eds-c-accordion__section-label,
+.connectify-dark .eds-c-accordion__section-heading:hover :where(span):not(.cx-n),
+.connectify-dark .eds-c-accordion__section-heading:hover :where(div):not(.cx-n) {
   background-color: transparent !important;
   color: var(--cx-button-text, #f1f5f9) !important;
 }
@@ -48,147 +48,147 @@
 /* --------------------------------------------------------------------------
    11. Assessment Task Rows (.cvr-c-task)
    -------------------------------------------------------------------------- */
-.connectea-dark:not(cx-n) .cvr-c-task, .connectea-dark:not(cx-n) .cvr-c-tasks, .connectea-dark:not(cx-n) .cvr-c-task-group,
-.connectea-dark:not(cx-n).eds.cvr .cvr-c-task, .connectea-dark:not(cx-n).eds.cvr .cvr-c-tasks, .connectea-dark:not(cx-n).eds.cvr .cvr-c-task-group,
-.connectea-dark:not(cx-n) .eds.cvr .cvr-c-task, .connectea-dark:not(cx-n) .eds.cvr .cvr-c-tasks, .connectea-dark:not(cx-n) .eds.cvr .cvr-c-task-group {
+.connectify-dark:not(cx-n) .cvr-c-task, .connectify-dark:not(cx-n) .cvr-c-tasks, .connectify-dark:not(cx-n) .cvr-c-task-group,
+.connectify-dark:not(cx-n).eds.cvr .cvr-c-task, .connectify-dark:not(cx-n).eds.cvr .cvr-c-tasks, .connectify-dark:not(cx-n).eds.cvr .cvr-c-task-group,
+.connectify-dark:not(cx-n) .eds.cvr .cvr-c-task, .connectify-dark:not(cx-n) .eds.cvr .cvr-c-tasks, .connectify-dark:not(cx-n) .eds.cvr .cvr-c-task-group {
   background-color: transparent !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
-.connectea-dark:not(cx-n) .eds-c-accordion__panel, .connectea-dark:not(cx-n) .cvr-c-accordion__panel,
-.connectea-dark:not(cx-n) .eds-c-accordion__section-body, .connectea-dark:not(cx-n) .eds.cvr .eds-c-accordion__panel,
-.connectea-dark:not(cx-n) .eds.cvr .cvr-c-accordion__panel, .connectea-dark:not(cx-n) .eds.cvr .eds-c-accordion__section-body {
+.connectify-dark:not(cx-n) .eds-c-accordion__panel, .connectify-dark:not(cx-n) .cvr-c-accordion__panel,
+.connectify-dark:not(cx-n) .eds-c-accordion__section-body, .connectify-dark:not(cx-n) .eds.cvr .eds-c-accordion__panel,
+.connectify-dark:not(cx-n) .eds.cvr .cvr-c-accordion__panel, .connectify-dark:not(cx-n) .eds.cvr .eds-c-accordion__section-body {
   border-bottom: 1px solid var(--cx-border, #3d5066) !important;
 }
 
-.connectea-dark:not(cx-n) .eds-c-accordion__panel:before,
-.connectea-dark:not(cx-n) .eds.cvr .eds-c-accordion__panel:before {
+.connectify-dark:not(cx-n) .eds-c-accordion__panel:before,
+.connectify-dark:not(cx-n) .eds.cvr .eds-c-accordion__panel:before {
   display: none !important;
   content: none !important;
 }
 
-.connectea-dark .cvr-c-task__details {
+.connectify-dark .cvr-c-task__details {
   background-color: transparent !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
 }
 
-.connectea-dark .cvr-c-task .v-label, .connectea-dark .cvr-c-task .cvr-c-task__title {
+.connectify-dark .cvr-c-task .v-label, .connectify-dark .cvr-c-task .cvr-c-task__title {
   color: var(--cx-text-primary, #f8fafc) !important;
   font-weight: 400 !important;
 }
 
-.connectea-dark .cvr-c-task {
+.connectify-dark .cvr-c-task {
   border-top: 1px solid var(--cx-border-subtle, #2e3c4e) !important;
   border-bottom: 1px solid var(--cx-border-subtle, #2e3c4e) !important;
 }
 
-.connectea-dark .cvr-c-task-group {
+.connectify-dark .cvr-c-task-group {
   border-top: none !important;
 }
 
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__title:not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__group-name:not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :where(.cvr-c-task-group) :where(h2):not(.cx-n):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :where(.cvr-c-task-group) :where(h3):not(.cx-n):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) :where(.cvr-c-task-group) :where(h4):not(.cx-n):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group .v-label:first-child,
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group :where(span):first-child:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group :where(strong):first-child:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group :where(h2):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group :where(h3):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group :where(h4):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group [class*="title"]:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__header :where(h2):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__header :where(h3):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__header :where(h4):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__header [class*="title"]:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__headers :where(h2):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__headers :where(h3):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__headers :where(h4):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__headers [class*="title"]:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__heading :where(h2):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__heading :where(h3):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__heading :where(h4):not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task-group__heading [class*="title"]:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__group-title:not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__title:not(.cx-n):not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__details .v-label:first-child,
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__details > .v-label:first-child,
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__details > :where(span):first-child:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__details > :where(div):first-child:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__details > :where(h2):first-child:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__details > :where(h3):first-child:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__details > :where(h4):first-child:not(.cx-n),
-:is(.connectea-dark, body, html, html.connectea-dark, body.connectea-dark) .cvr-c-task__details > :where(strong):first-child:not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-task .cvr-c-task__title:not(.cx-n):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details .v-label:first-child),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > .v-label:first-child),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(span):first-child:not(.cx-n)),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(div):first-child:not(.cx-n)),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h2):first-child:not(.cx-n)),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h3):first-child:not(.cx-n)),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h4):first-child:not(.cx-n)),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(strong):first-child:not(.cx-n)) {
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__title:not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__group-name:not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) :where(.cvr-c-task-group) :where(h2):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) :where(.cvr-c-task-group) :where(h3):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) :where(.cvr-c-task-group) :where(h4):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group .v-label:first-child,
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group :where(span):first-child:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group :where(strong):first-child:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group :where(h2):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group :where(h3):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group :where(h4):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group [class*="title"]:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__header :where(h2):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__header :where(h3):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__header :where(h4):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__header [class*="title"]:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__headers :where(h2):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__headers :where(h3):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__headers :where(h4):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__headers [class*="title"]:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__heading :where(h2):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__heading :where(h3):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__heading :where(h4):not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task-group__heading [class*="title"]:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__group-title:not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__title:not(.cx-n):not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__details .v-label:first-child,
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__details > .v-label:first-child,
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__details > :where(span):first-child:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__details > :where(div):first-child:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__details > :where(h2):first-child:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__details > :where(h3):first-child:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__details > :where(h4):first-child:not(.cx-n),
+:is(.connectify-dark, body, html, html.connectify-dark, body.connectify-dark) .cvr-c-task__details > :where(strong):first-child:not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-task .cvr-c-task__title:not(.cx-n):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details .v-label:first-child),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > .v-label:first-child),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(span):first-child:not(.cx-n)),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(div):first-child:not(.cx-n)),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h2):first-child:not(.cx-n)),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h3):first-child:not(.cx-n)),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h4):first-child:not(.cx-n)),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(strong):first-child:not(.cx-n)) {
   font-weight: 700 !important;
 }
 
-.connectea-dark .cvr-c-task-group__title:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task__group-name:not(.cx-n):not(.cx-n),
-.connectea-dark :where(.cvr-c-task-group) :where(h2):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark :where(.cvr-c-task-group) :where(h3):not(.cx-n):not(.cx-n):not(.cx-n),
-.connectea-dark :where(.cvr-c-task-group) :where(h4):not(.cx-n):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task-group .v-label:first-child,
-.connectea-dark .cvr-c-task-group :where(span):first-child:not(.cx-n), .connectea-dark .cvr-c-task-group :where(strong):first-child:not(.cx-n),
-.connectea-dark .cvr-c-task-group :where(h2):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task-group :where(h3):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-task-group :where(h4):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task-group [class*="title"]:not(.cx-n),
-.connectea-dark .cvr-c-task-group__header :where(h2):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-task-group__header :where(h3):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-task-group__header :where(h4):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task-group__header [class*="title"]:not(.cx-n),
-.connectea-dark .cvr-c-task-group__headers :where(h2):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-task-group__headers :where(h3):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-task-group__headers :where(h4):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task-group__headers [class*="title"]:not(.cx-n),
-.connectea-dark .cvr-c-task-group__heading :where(h2):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-task-group__heading :where(h3):not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-task-group__heading :where(h4):not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task-group__heading [class*="title"]:not(.cx-n),
-.connectea-dark .cvr-c-task__group-title:not(.cx-n):not(.cx-n), .connectea-dark .cvr-c-task__title:not(.cx-n):not(.cx-n),
-.connectea-dark .cvr-c-task__details .v-label:first-child, .connectea-dark .cvr-c-task__details > .v-label:first-child,
-.connectea-dark .cvr-c-task__details > :where(span):first-child:not(.cx-n), .connectea-dark .cvr-c-task__details > :where(div):first-child:not(.cx-n),
-.connectea-dark .cvr-c-task__details > :where(h2):first-child:not(.cx-n), .connectea-dark .cvr-c-task__details > :where(h3):first-child:not(.cx-n),
-.connectea-dark .cvr-c-task__details > :where(h4):first-child:not(.cx-n),
-.connectea-dark .cvr-c-task__details > :where(strong):first-child:not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-task .cvr-c-task__title:not(.cx-n):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details .v-label:first-child),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > .v-label:first-child),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(span):first-child:not(.cx-n)),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(div):first-child:not(.cx-n)),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h2):first-child:not(.cx-n)),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h3):first-child:not(.cx-n)),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h4):first-child:not(.cx-n)),
-.connectea-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(strong):first-child:not(.cx-n)) {
+.connectify-dark .cvr-c-task-group__title:not(.cx-n):not(.cx-n), .connectify-dark .cvr-c-task__group-name:not(.cx-n):not(.cx-n),
+.connectify-dark :where(.cvr-c-task-group) :where(h2):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark :where(.cvr-c-task-group) :where(h3):not(.cx-n):not(.cx-n):not(.cx-n),
+.connectify-dark :where(.cvr-c-task-group) :where(h4):not(.cx-n):not(.cx-n):not(.cx-n), .connectify-dark .cvr-c-task-group .v-label:first-child,
+.connectify-dark .cvr-c-task-group :where(span):first-child:not(.cx-n), .connectify-dark .cvr-c-task-group :where(strong):first-child:not(.cx-n),
+.connectify-dark .cvr-c-task-group :where(h2):not(.cx-n):not(.cx-n), .connectify-dark .cvr-c-task-group :where(h3):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-task-group :where(h4):not(.cx-n):not(.cx-n), .connectify-dark .cvr-c-task-group [class*="title"]:not(.cx-n),
+.connectify-dark .cvr-c-task-group__header :where(h2):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-task-group__header :where(h3):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-task-group__header :where(h4):not(.cx-n):not(.cx-n), .connectify-dark .cvr-c-task-group__header [class*="title"]:not(.cx-n),
+.connectify-dark .cvr-c-task-group__headers :where(h2):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-task-group__headers :where(h3):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-task-group__headers :where(h4):not(.cx-n):not(.cx-n), .connectify-dark .cvr-c-task-group__headers [class*="title"]:not(.cx-n),
+.connectify-dark .cvr-c-task-group__heading :where(h2):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-task-group__heading :where(h3):not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-task-group__heading :where(h4):not(.cx-n):not(.cx-n), .connectify-dark .cvr-c-task-group__heading [class*="title"]:not(.cx-n),
+.connectify-dark .cvr-c-task__group-title:not(.cx-n):not(.cx-n), .connectify-dark .cvr-c-task__title:not(.cx-n):not(.cx-n),
+.connectify-dark .cvr-c-task__details .v-label:first-child, .connectify-dark .cvr-c-task__details > .v-label:first-child,
+.connectify-dark .cvr-c-task__details > :where(span):first-child:not(.cx-n), .connectify-dark .cvr-c-task__details > :where(div):first-child:not(.cx-n),
+.connectify-dark .cvr-c-task__details > :where(h2):first-child:not(.cx-n), .connectify-dark .cvr-c-task__details > :where(h3):first-child:not(.cx-n),
+.connectify-dark .cvr-c-task__details > :where(h4):first-child:not(.cx-n),
+.connectify-dark .cvr-c-task__details > :where(strong):first-child:not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-task .cvr-c-task__title:not(.cx-n):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details .v-label:first-child),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > .v-label:first-child),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(span):first-child:not(.cx-n)),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(div):first-child:not(.cx-n)),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h2):first-child:not(.cx-n)),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h3):first-child:not(.cx-n)),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(h4):first-child:not(.cx-n)),
+.connectify-dark:not(cx-n) .cvr-c-task :is(.cvr-c-task__details > :where(strong):first-child:not(.cx-n)) {
   color: var(--cx-button-text, #f1f5f9) !important;
 }
 
-/* Assessment Type Dropdowns (.connectea-type-select) */
-.connectea-dark .connectea-type-label {
+/* Assessment Type Dropdowns (.connectify-type-select) */
+.connectify-dark .connectify-type-label {
   color: var(--cx-text-muted, #94a3b8) !important;
 }
 
-.connectea-dark .connectea-type-select {
+.connectify-dark .connectify-type-select {
   background-color: var(--cx-input-bg, #182330) !important;
   border: 1px solid var(--cx-input-border, #385170) !important;
   color: var(--cx-text-primary, #dceaf7) !important;
   border-radius: 6px !important;
 }
 
-.connectea-dark .connectea-type-select:hover {
+.connectify-dark .connectify-type-select:hover {
   background-color: var(--cx-surface-hover, #202d3e) !important;
   border-color: var(--cx-border-strong, #4b6a8f) !important;
 }
 
-.connectea-dark .connectea-type-select:focus {
+.connectify-dark .connectify-type-select:focus {
   border-color: var(--cx-accent, #60a5fa) !important;
   outline: 2px solid var(--cx-accent, #60a5fa) !important;
 }
 
-.connectea-dark .connectea-type-select.connectea-overridden {
+.connectify-dark .connectify-type-select.connectify-overridden {
   background-color: var(--cx-surface-elevated, #22374e) !important;
   border-color: var(--cx-accent, #43719e) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;

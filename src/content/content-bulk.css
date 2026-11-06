@@ -75,11 +75,11 @@
 }
 
 /* In light tone that drawing's accent is as pale as the page and its white check: the theme's ink stands out instead */
-html[data-connectea-tone="light"] .cx-content-check input:not(#cx-n):not(#cx-n) {
+html[data-connectify-tone="light"] .cx-content-check input:not(#cx-n):not(#cx-n) {
   border-color: var(--cx-text-primary, #1d1c1c) !important;
 }
 
-html[data-connectea-tone="light"] .cx-content-check input:not(#cx-n):not(#cx-n):checked {
+html[data-connectify-tone="light"] .cx-content-check input:not(#cx-n):not(#cx-n):checked {
   background-color: var(--cx-text-primary, #1d1c1c) !important;
 }
 

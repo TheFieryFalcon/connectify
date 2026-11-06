@@ -5,14 +5,14 @@
 
 /* The notice card host paints its own background around the 16px mat-card, so it needs the same radius.
    No overflow clip here: it would cut off the card's elevation shadow. */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) cnt-stream-notice-card {
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) cnt-stream-notice-card {
   border-radius: 16px !important;
 }
 
 /* Library: the wrapper around the file table is a panel (paginator pills are drawn in theme-glass-surface.css).
    clip, not hidden: hidden starts a formatting context, so the table's margin stopped collapsing and the
    wrapper grew 17px */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .cdk-drop-list:has(> table.mat-table) {
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cdk-drop-list:has(> table.mat-table) {
   border-radius: 16px !important;
   overflow: clip !important;
 }
@@ -20,6 +20,6 @@ html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-gl
 /* Notice cards are subgrid items (mat-card spans rows of card-deck-grid). overflow: hidden makes a grid item's
    minimum size 0 in Firefox, which shrank the shared rows and cut off the View footer; clip rounds the corners
    without touching layout. */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .mat-card {
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .mat-card {
   overflow: clip !important;
 }

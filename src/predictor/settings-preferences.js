@@ -34,7 +34,7 @@
       value: t.id,
       textContent: `${t.icon || '🎨'} ${t.name}`
     })));
-    select.value = theme ? theme.getTheme() : (localStorage.getItem('connectea:theme:id') || 'dark');
+    select.value = theme ? theme.getTheme() : (localStorage.getItem('connectify:theme:id') || 'dark');
   }
 
   function bindWallpaper(panel) {

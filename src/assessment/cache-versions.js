@@ -62,10 +62,10 @@
     clearSettingsCache() {
       try {
         const directKeys = [
-          'connectea:categories',
+          'connectify:categories',
           'cx-categories',
-          'connectea:task_type_overrides',
-          'connectea:preferences',
+          'connectify:task_type_overrides',
+          'connectify:preferences',
           'connectify:preferences',
           'connectify:general_cohort_size',
           'connectify:atar_percentage',
@@ -79,7 +79,7 @@
         ];
         for (const k of directKeys) localStorage.removeItem(k);
         // Baselines live under singular and legacy plural prefixes (see ConnectifyUtils.BASELINE_PREFIXES)
-        removeStorageKeys(k => isBaselineKey(k) || k.startsWith('connectea:class_categories:') || k.startsWith('connectify:user:') || k.startsWith('connectify:calendar_export:') ||
+        removeStorageKeys(k => isBaselineKey(k) || k.startsWith('connectify:class_categories:') || k.startsWith('connectify:user:') || k.startsWith('connectify:calendar_export:') ||
           k.startsWith('connectify:goals:') || k.startsWith('connectify:goal_verdicts:'));
         localStorage.setItem(CACHE_KEYS.SETTINGS, CACHE_VERSIONS.SETTINGS);
         // Predictor modules memoise baselines; this event drops their in-memory copy
@@ -94,14 +94,14 @@
     clearCohortCache({ keepOverrides = false } = {}) {
       try {
         ConnectifyCache.statsCache?.clear();
-        removeStorageKeys(k => (!keepOverrides && k.startsWith('connectea:cohort:v3:')) || k.startsWith('connectify:stats_cache:'));
+        removeStorageKeys(k => (!keepOverrides && k.startsWith('connectify:cohort:v3:')) || k.startsWith('connectify:stats_cache:'));
         if (window.ConnectifyCohortEstimator?.memory) {
           window.ConnectifyCohortEstimator.memory.clear();
           window.ConnectifyCohortEstimator.spreadPools?.clear();
         }
         // Spreads once kept per tab (keyed by panel text, so one row counted several times)
         try {
-          for (const k of Object.keys(sessionStorage)) if (k.startsWith('connectea:observed_spreads:')) sessionStorage.removeItem(k);
+          for (const k of Object.keys(sessionStorage)) if (k.startsWith('connectify:observed_spreads:')) sessionStorage.removeItem(k);
         } catch {}
         localStorage.setItem(CACHE_KEYS.COHORT, CACHE_VERSIONS.COHORT);
         window.dispatchEvent(new CustomEvent('connectify-cohort-invalidated'));

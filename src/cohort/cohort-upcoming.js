@@ -80,7 +80,7 @@
         return null;
       }
       if (!ui.upcoming?.isConnected) {
-        ui.upcoming = createElement('section', 'connectea-panel connectea-upcoming');
+        ui.upcoming = createElement('section', 'connectify-panel connectify-upcoming');
         ui.upcoming.setAttribute('aria-label', 'Connectify predicted class result');
         ui.box.insertAdjacentElement('afterend', ui.upcoming);
       }
@@ -88,7 +88,7 @@
       if (p) {
         const value = (level, text, v) => {
           const tag = level === 'mid' ? 'strong' : 'span';
-          return `<${tag} class="connectea-forecast-value connectea-forecast-value--${level}">${text} ${v.toFixed(1)}%</${tag}>`;
+          return `<${tag} class="connectify-forecast-value connectify-forecast-value--${level}">${text} ${v.toFixed(1)}%</${tag}>`;
         };
         setHTML(ui.upcoming, `Predicted class result: ${value('low', 'Low', p.low)}\u2003${value('mid', 'Mid', p.mid)}\u2003${value('high', 'High', p.high)}`);
       } else {

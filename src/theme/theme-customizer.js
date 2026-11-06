@@ -202,7 +202,7 @@
     };
     const reg = window.ConnectifyThemeRegistry;
     const saved = reg?.saveCustomTheme?.(themeDef);
-    // setTheme fires connectea:themechange, which the theme engine applies to the page
+    // setTheme fires connectify:themechange, which the theme engine applies to the page
     if (saved) reg.setTheme(saved.id);
     close();
   }

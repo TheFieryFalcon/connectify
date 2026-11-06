@@ -1,6 +1,6 @@
 /* Prediction panel on unmarked task rows (cohort-forecast.js): one compact line in the statistics panel's
-   style (theme fills and glass strip come from the .connectea-panel rules); horizontal padding follows them */
-.connectea-row-wrapper > .connectea-panel.connectea-forecast {
+   style (theme fills and glass strip come from the .connectify-panel rules); horizontal padding follows them */
+.connectify-row-wrapper > .connectify-panel.connectify-forecast {
   padding-top: 6px !important;
   padding-bottom: 6px !important;
   line-height: 1.5 !important;
@@ -8,35 +8,35 @@
 
 /* Low and High are semibold; Mid (a strong, 700 from the panel's strong rules) stays the heaviest. Task rows sit in
    .cvr-c-task-group, whose theme rule bolds every first-child span (Low), so the unused id outranks it */
-:is(#cx-specificity-anchor, .connectea-row-wrapper) :is(.connectea-forecast-value--low, .connectea-forecast-value--high) { font-weight: 600 !important; }
+:is(#cx-specificity-anchor, .connectify-row-wrapper) :is(.connectify-forecast-value--low, .connectify-forecast-value--high) { font-weight: 600 !important; }
 
 /* Low / Mid / High ink matches the Predictor's pills and scenario values (sidebar-predictor*.css). The glass
    task-row rule inks everything in the strip with the primary text, so the unused id outranks it */
-:is(#cx-specificity-anchor, .connectea-row-wrapper) .connectea-forecast-value--low { color: #475569 !important; }
-:is(#cx-specificity-anchor, .connectea-row-wrapper) .connectea-forecast-value--mid { color: #174c75 !important; }
-:is(#cx-specificity-anchor, .connectea-row-wrapper) .connectea-forecast-value--high { color: #15803d !important; }
+:is(#cx-specificity-anchor, .connectify-row-wrapper) .connectify-forecast-value--low { color: #475569 !important; }
+:is(#cx-specificity-anchor, .connectify-row-wrapper) .connectify-forecast-value--mid { color: #174c75 !important; }
+:is(#cx-specificity-anchor, .connectify-row-wrapper) .connectify-forecast-value--high { color: #15803d !important; }
 
-html.connectea-dark :is(#cx-specificity-anchor, .connectea-row-wrapper) .connectea-forecast-value--low {
+html.connectify-dark :is(#cx-specificity-anchor, .connectify-row-wrapper) .connectify-forecast-value--low {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 /* The Predictor's Mid label colour: accent lifted towards the text so it stays >= 5:1 */
-html.connectea-dark :is(#cx-specificity-anchor, .connectea-row-wrapper) .connectea-forecast-value--mid {
+html.connectify-dark :is(#cx-specificity-anchor, .connectify-row-wrapper) .connectify-forecast-value--mid {
   color: color-mix(in srgb, var(--cx-accent-hover, #93c5fd) 60%, var(--cx-text-primary, #ffffff)) !important;
 }
-html.connectea-dark :is(#cx-specificity-anchor, .connectea-row-wrapper) .connectea-forecast-value--high {
+html.connectify-dark :is(#cx-specificity-anchor, .connectify-row-wrapper) .connectify-forecast-value--high {
   color: #4ade80 !important;
 }
 
 /* Light-tone themes (grey Liquid Glass, light custom themes): the Predictor's re-inking at OKLCH 0.34
    (theme-light-tone.css); browsers without relative colours keep the text colour */
-html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-row-wrapper) .connectea-forecast-value--low {
+html.connectify-dark[data-connectify-tone="light"] :is(#cx-specificity-anchor, .connectify-row-wrapper) .connectify-forecast-value--low {
   color: var(--cx-text-primary, #1d1c1c) !important;
 }
-html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-row-wrapper) .connectea-forecast-value--mid {
+html.connectify-dark[data-connectify-tone="light"] :is(#cx-specificity-anchor, .connectify-row-wrapper) .connectify-forecast-value--mid {
   color: var(--cx-text-primary, #1d1c1c) !important;
   color: oklch(from var(--cx-accent, #38bdf8) 0.34 c h) !important;
 }
-html.connectea-dark[data-connectea-tone="light"] :is(#cx-specificity-anchor, .connectea-row-wrapper) .connectea-forecast-value--high {
+html.connectify-dark[data-connectify-tone="light"] :is(#cx-specificity-anchor, .connectify-row-wrapper) .connectify-forecast-value--high {
   color: var(--cx-text-primary, #1d1c1c) !important;
   color: oklch(from #22c55e 0.34 c h) !important;
 }

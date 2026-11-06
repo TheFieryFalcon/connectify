@@ -14,19 +14,19 @@
   const { schedule, runPass } = cohort;
 
   const CARD_SELECTOR = '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile';
-  const OWN_UI = '.connectea-panel, .connectea-type-container, .connectea-row-wrapper';
-  const OWN_NODES = '.connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-outcome-bar, .connectea-subject-controls, .connectea-subject-average-row, .connectea-xp-fit-probe';
+  const OWN_UI = '.connectify-panel, .connectify-type-container, .connectify-row-wrapper';
+  const OWN_NODES = '.connectify-panel, .connectify-row-wrapper, .connectify-type-container, .connectify-outcome-bar, .connectify-subject-controls, .connectify-subject-average-row, .connectify-xp-fit-probe';
   const STATS_ATTRIBUTES = ['data-highcharts-chart', 'data-connectify-stats'];
 
   const isOwnNode = node => node.nodeType === 1 && Boolean(
-    node.matches?.(OWN_NODES) || ['connectea-panel', 'connectea-row-wrapper', 'connectea-type-container'].some(c => node.classList?.contains(c))
+    node.matches?.(OWN_NODES) || ['connectify-panel', 'connectify-row-wrapper', 'connectify-type-container'].some(c => node.classList?.contains(c))
   );
   const onlyOwnNodes = nodes => !nodes || Array.prototype.every.call(nodes, isOwnNode);
   const hasTaskNodes = nodes => Array.prototype.some.call(nodes || [], node => node.nodeType === 1 && (node.matches?.('.cvr-c-task') || node.querySelector?.('.cvr-c-task')));
 
   function isRelevant(r) {
     const target = r.target;
-    if (target.id === 'connectea-style') return false;
+    if (target.id === 'connectify-style') return false;
     const element = target.closest ? target : target.parentElement;
     if (element?.closest?.(OWN_UI)) return false;
     // Stats stamped by the main-world bridge; other attribute changes (e.g. class) are not ours
@@ -46,7 +46,7 @@
     for (const card of document.querySelectorAll(CARD_SELECTOR)) {
       if (window.ConnectifyCourseFilter?.hides(card)) continue;
       const summaryRow = Array.from(card.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.cvr-c-tasks'));
-      if (summaryRow && !summaryRow.querySelector('.connectea-panel')) return true;
+      if (summaryRow && !summaryRow.querySelector('.connectify-panel')) return true;
     }
     return false;
   }
@@ -62,10 +62,10 @@
   window.addEventListener('hashchange', () => schedule(true));
   window.addEventListener('popstate', () => schedule(true));
   window.addEventListener('storage', e => {
-    if (e.key?.startsWith('connectea:cohort:v3:')) {
+    if (e.key?.startsWith('connectify:cohort:v3:')) {
       window.ConnectifyCohortEstimator?.memory?.delete(e.key);
       schedule(true);
-    } else if (e.key === window.ConnectifyUtils.userKey('connectea:task_type_overrides')) {
+    } else if (e.key === window.ConnectifyUtils.userKey('connectify:task_type_overrides')) {
       schedule(true);
     }
   });

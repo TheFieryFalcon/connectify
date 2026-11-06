@@ -3,145 +3,145 @@
  */
 
 /* Nav Lists, Resource Links, and Connect Help */
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-nav-list,
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-nav-list__item,
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-nav-list__link,
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-resource,
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-resource-item,
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-resource,
-:is(html, body).connectea-dark:not([data-connectea-login]) [class*="guide"],
-:is(html, body).connectea-dark:not([data-connectea-login]) [class*="help"] {
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-nav-list,
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-nav-list__item,
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-nav-list__link,
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-resource,
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-resource-item,
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-resource,
+:is(html, body).connectify-dark:not([data-connectify-login]) [class*="guide"],
+:is(html, body).connectify-dark:not([data-connectify-login]) [class*="help"] {
   background-color: var(--cx-surface-bg) !important;
   border-color: var(--cx-border-subtle) !important;
   color: var(--cx-text-secondary) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-nav-list__item:hover,
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-nav-list__link:hover,
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-resource-item:hover {
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-nav-list__item:hover,
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-nav-list__link:hover,
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-resource-item:hover {
   background-color: var(--cx-surface-hover) !important;
   color: var(--cx-text-primary) !important;
 }
 
 /* Tables, Grids & Submission Marksbooks */
-:is(html, body).connectea-dark:not([data-connectea-login]) :where(table):not(#connectify-sidebar *):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) .table:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .table-striped:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .table-hover:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .table-bordered:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-table:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-table--marksbook:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-submission-students-table:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-table:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-grid:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-treetable:not(#connectify-sidebar *) {
+:is(html, body).connectify-dark:not([data-connectify-login]) :where(table):not(#connectify-sidebar *):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) .table:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .table-striped:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .table-hover:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .table-bordered:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-table:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-table--marksbook:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-submission-students-table:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-table:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-grid:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-treetable:not(#connectify-sidebar *) {
   background-color: var(--cx-surface-bg) !important;
   color: var(--cx-text-secondary) !important;
   border-color: var(--cx-table-border) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) :where(thead) :where(th):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) :where(thead) :where(td):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-table-header, :is(html, body).connectea-dark:not([data-connectea-login]) .v-grid-header {
+:is(html, body).connectify-dark:not([data-connectify-login]) :where(thead) :where(th):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) :where(thead) :where(td):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-table-header, :is(html, body).connectify-dark:not([data-connectify-login]) .v-grid-header {
   background-color: var(--cx-table-header-bg) !important;
   color: var(--cx-text-primary) !important;
   border-color: var(--cx-table-border) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) tbody tr:hover {
+:is(html, body).connectify-dark:not([data-connectify-login]) tbody tr:hover {
   background-color: var(--cx-table-row-hover) !important;
 }
 
 /* Dropdowns, Menubars, Context Menus & Popups */
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-filterselect-suggestpopup:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-menubar-popup:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-contextmenu:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-context-menu-container:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-popupview-popup:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .dropdown-menu:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .clay-dropdown-menu:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .ui-menu:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .ui-autocomplete:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-datefield-popup:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-datefield-calendarpanel:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-window:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-window-contents:not(#connectify-sidebar *),
-:is(html, body).connectea-dark:not([data-connectea-login]) .mat-dialog-container:not(#connectify-sidebar *) {
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-filterselect-suggestpopup:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-menubar-popup:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-contextmenu:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-context-menu-container:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-popupview-popup:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .dropdown-menu:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .clay-dropdown-menu:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .ui-menu:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .ui-autocomplete:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-datefield-popup:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-datefield-calendarpanel:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-window:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-window-contents:not(#connectify-sidebar *),
+:is(html, body).connectify-dark:not([data-connectify-login]) .mat-dialog-container:not(#connectify-sidebar *) {
   background-color: var(--cx-surface-elevated) !important;
   color: var(--cx-text-secondary) !important;
   border-color: var(--cx-border-strong) !important;
 }
 
 /* Primary Navigation Bar (Matches Connect light mode Open Sans typography) */
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-primary-navigation__links:not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.cx-n):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-primary-navigation__title:not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.cx-n):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-primary-navigation .v-button-caption:not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.cx-n) {
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-primary-navigation__links:not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.cx-n):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-primary-navigation__title:not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.cx-n):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-primary-navigation .v-button-caption:not(:is(.eds-c-icon-button, .mat-icon-button, .mat-icon, mat-icon, cnt-icon, .cvr-c-primary-navigation__user-controls--icon) *):not(.cx-n) {
   font-family: "Open Sans", Arial, Helvetica, Verdana, sans-serif !important;
 }
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-primary-navigation,
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-service-menu,
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-primary-menu {
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-primary-navigation,
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-service-menu,
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-primary-menu {
   background-color: var(--cx-nav-bg) !important;
   border-bottom-color: var(--cx-nav-border) !important;
 }
 
 /* Buttons and Action Elements (top-bar icon buttons such as the Connect home logo stay on the nav surface) */
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-button:not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-button:not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-standard-button:not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n) {
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-button:not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-button:not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-standard-button:not(.cx-clear-cache-btn):not(.cvr-c-pri-nav-icon-button):not(.cvr-c-primary-navigation .eds-c-icon-button):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n) {
   background-color: var(--cx-button-bg) !important;
   color: var(--cx-button-text) !important;
   border-color: var(--cx-button-border) !important;
 }
 
-:is(html, body).connectea-dark:not([data-connectea-login]) .v-button:hover:not(.cx-clear-cache-btn):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-button:hover:not(.cx-clear-cache-btn):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-standard-button:hover:not(.cx-clear-cache-btn):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n) {
+:is(html, body).connectify-dark:not([data-connectify-login]) .v-button:hover:not(.cx-clear-cache-btn):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-button:hover:not(.cx-clear-cache-btn):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-standard-button:hover:not(.cx-clear-cache-btn):not(:is(#connectify-sidebar, .cvr-c-primary-navigation__user-controls) *):not([class*="cvr-c-primary-navigation__button--"]):not(.eds-o-button--positive):not([class*="positive"]):not([class*="view"]):not(.eds-c-action-button):not(.v-button-eds-c-action-button):not(.cx-n) {
   background-color: var(--cx-surface-hover) !important;
   border-color: var(--cx-border-strong) !important;
 }
 
 /* Form Inputs, Textareas & Selects */
-:is(html, body).connectea-dark:not([data-connectea-login]) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not(.mat-input-element),
-:is(html, body).connectea-dark:not([data-connectea-login]) textarea:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) select:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
-:is(html, body).connectea-dark:not([data-connectea-login]) .connectea-type-select:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n) {
+:is(html, body).connectify-dark:not([data-connectify-login]) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not(.mat-input-element),
+:is(html, body).connectify-dark:not([data-connectify-login]) textarea:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) select:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n),
+:is(html, body).connectify-dark:not([data-connectify-login]) .connectify-type-select:not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n) {
   background-color: var(--cx-input-bg) !important;
   color: var(--cx-text-primary) !important;
   border-color: var(--cx-input-border) !important;
 }
 
 /* Links & Accents */
-:is(html, body).connectea-dark:not([data-connectea-login]) .eds-c-tile a:not(.eds-c-tile__action):not(.cvr-c-tile__action),
-:is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-tile a:not(.eds-c-tile__action):not(.cvr-c-tile__action),
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(.connectea-panel a):not(.eds-c-tile__action):not(.cvr-c-tile__action),
-:is(html, body).connectea-dark:not([data-connectea-login]) :is(.portlet-body a):not(.eds-c-tile__action):not(.cvr-c-tile__action) {
+:is(html, body).connectify-dark:not([data-connectify-login]) .eds-c-tile a:not(.eds-c-tile__action):not(.cvr-c-tile__action),
+:is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-tile a:not(.eds-c-tile__action):not(.cvr-c-tile__action),
+:is(html, body).connectify-dark:not([data-connectify-login]) :is(.connectify-panel a):not(.eds-c-tile__action):not(.cvr-c-tile__action),
+:is(html, body).connectify-dark:not([data-connectify-login]) :is(.portlet-body a):not(.eds-c-tile__action):not(.cvr-c-tile__action) {
   color: var(--cx-tile-link-color, var(--cx-text-primary, #f8fafc)) !important;
 }
 
 /* Login & Logout Page Guard: Disable all themes completely */
-[data-connectea-login], [data-connectea-logout], :is([data-connectea-login] *), :is([data-connectea-logout] *) {
+[data-connectify-login], [data-connectify-logout], :is([data-connectify-login] *), :is([data-connectify-logout] *) {
   --cx-canvas-bg: initial !important; --cx-surface-bg: initial !important; --cx-surface-secondary: initial !important;
   --cx-surface-elevated: initial !important; --cx-border: initial !important; --cx-border-subtle: initial !important;
   --cx-text-primary: initial !important; --cx-text-secondary: initial !important; --cx-accent: initial !important;
 }
 
-[data-connectea-login] #connectea-theme-toggle, [data-connectea-login] #connectea-theme-menu, [data-connectea-logout] #connectea-theme-toggle,
-[data-connectea-logout] #connectea-theme-menu {
+[data-connectify-login] #connectify-theme-toggle, [data-connectify-login] #connectify-theme-menu, [data-connectify-logout] #connectify-theme-toggle,
+[data-connectify-logout] #connectify-theme-menu {
   display: none !important;
 }
 
 /* Theme Selector Popover Menu, Trigger Button & Swatches */
-.connectea-theme-arrow {
+.connectify-theme-arrow {
   display: inline-block;
   padding: 4px 6px; margin-left: 6px; font-size: 10px; opacity: 0.8; vertical-align: middle; line-height: 1;
   background: transparent;
   border: none;
   cursor: pointer; transition: transform 0.15s ease, opacity 0.15s ease;
 }
-.connectea-theme-arrow:hover { opacity: 1; }
+.connectify-theme-arrow:hover { opacity: 1; }
 
-#connectea-theme-menu {
+#connectify-theme-menu {
   position: fixed; width: 250px; background: var(--cx-surface-bg, #1e2632) !important;
   border: 1px solid var(--cx-border, #3d5066) !important; border-radius: 10px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65); padding: 10px; z-index: 10035;
@@ -150,21 +150,21 @@
   font-size: 13.5px; box-sizing: border-box;
 }
 
-#connectea-theme-menu .connectea-theme-option {
+#connectify-theme-menu .connectify-theme-option {
   display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 40px;
   border-radius: 8px; background: transparent !important; border: 1px solid transparent !important;
   color: var(--cx-text-secondary, #cbd5e1) !important; cursor: pointer; width: 100%;
   text-align: left; box-sizing: border-box; font-size: 14px; font-weight: 500; font-family: inherit;
   transition: background 0.12s ease, color 0.12s ease;
 }
-#connectea-theme-menu .connectea-theme-option:hover {
+#connectify-theme-menu .connectify-theme-option:hover {
   background: var(--cx-surface-hover, #2b394b) !important; color: #ffffff !important;
 }
-#connectea-theme-menu .connectea-theme-option.eds-s-is-active,
-#connectea-theme-menu .connectea-theme-option[aria-selected="true"] {
+#connectify-theme-menu .connectify-theme-option.eds-s-is-active,
+#connectify-theme-menu .connectify-theme-option[aria-selected="true"] {
   background: var(--cx-surface-active, #121820) !important; color: #ffffff !important; font-weight: 600; border-color: var(--cx-border-subtle, #334155) !important;
 }
-.connectea-theme-swatch {
+.connectify-theme-swatch {
   width: 16px;
   height: 16px;
   border-radius: 50%;
@@ -172,15 +172,15 @@
   flex-shrink: 0;
   box-sizing: border-box;
 }
-.connectea-theme-icon {
+.connectify-theme-icon {
   display: inline-flex; align-items: center; justify-content: center; font-size: 17px; width: 22px; height: 22px; flex-shrink: 0; color: var(--cx-text-primary, #f1f5f9) !important;
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", sans-serif !important;
 }
-.connectea-theme-name {
+.connectify-theme-name {
   color: inherit !important; font-size: 14px !important; font-weight: 600 !important; font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
-.connectea-theme-toggle-icon {
+.connectify-theme-toggle-icon {
   display: inline-flex; align-items: center; justify-content: center; font-size: 15px; width: 18px; height: 18px; margin-right: 2px;
   font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Apple Symbols", "Segoe UI Symbol", "Symbola", "Noto Sans Symbols", sans-serif !important;
 }

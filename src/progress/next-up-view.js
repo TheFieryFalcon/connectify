@@ -43,7 +43,7 @@
         cell.setAttribute('colspan', '3');
         return [cell];
       }
-      const value = (level, tag) => createElement('td', createElement(tag, percent(row.prediction[level]), `connectea-forecast-value connectea-forecast-value--${level}`), 'cx-next-prediction');
+      const value = (level, tag) => createElement('td', createElement(tag, percent(row.prediction[level]), `connectify-forecast-value connectify-forecast-value--${level}`), 'cx-next-prediction');
       return [value('low', 'span'), value('mid', 'strong'), value('high', 'span')];
     }
 

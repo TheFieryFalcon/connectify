@@ -12,7 +12,7 @@
     .cvr-c-task__details {
       overflow: visible !important;
     }
-    .connectea-row-wrapper {
+    .connectify-row-wrapper {
       display: flex !important;
       align-items: center !important;
       gap: 14px !important;
@@ -24,7 +24,7 @@
       zoom: var(--cx-display-scale, 1);
       transform-origin: left center !important;
     }
-    .connectea-row-wrapper > .connectea-panel {
+    .connectify-row-wrapper > .connectify-panel {
       /* Gives way to the Type dropdown and meter: WebKit keeps text at a minimum size under the display zoom,
          so only wrapping (never the zoom) is sure to fit the task column */
       flex: 0 1 auto !important;
@@ -32,7 +32,7 @@
       max-width: fit-content !important;
       margin: 0 !important;
     }
-    .connectea-panel {
+    .connectify-panel {
       box-sizing: border-box !important;
       display: block !important;
       min-width: 0 !important;
@@ -49,16 +49,16 @@
       white-space: normal !important;
       overflow-wrap: anywhere !important;
     }
-    .connectea-panel[hidden],
-    .connectea-panel.connectea-hidden {
+    .connectify-panel[hidden],
+    .connectify-panel.connectify-hidden {
       display: none !important;
     }
-    .connectea-type-container {
+    .connectify-type-container {
       display: inline-flex;
       align-items: center;
       flex: 0 0 auto;
     }
-    .connectea-type-label {
+    .connectify-type-label {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -68,7 +68,7 @@
       cursor: pointer;
       user-select: none;
     }
-    .connectea-type-select {
+    .connectify-type-select {
       box-sizing: border-box;
       min-height: 26px;
       padding: 2px 8px;
@@ -91,42 +91,42 @@
       white-space: nowrap;
       text-overflow: ellipsis;
     }
-    .connectea-type-select:hover {
+    .connectify-type-select:hover {
       border-color: #3575b9;
       background: #ffffff;
     }
-    .connectea-type-select:focus {
+    .connectify-type-select:focus {
       border-color: #3575b9;
       outline: 2px solid #3575b9;
       outline-offset: 1px;
     }
-    .connectea-type-select.connectea-overridden {
+    .connectify-type-select.connectify-overridden {
       border-color: #24618c;
       background: #e9f2fb;
       color: #174c75;
     }
-    .connectea-dark .connectea-type-label {
+    .connectify-dark .connectify-type-label {
       color: var(--cx-text-muted, #a0b2c6);
     }
-    .connectea-dark .connectea-type-select {
+    .connectify-dark .connectify-type-select {
       background: var(--cx-input-bg, #2a3b4c);
       color: var(--cx-input-text, #e1eaf3);
       border-color: var(--cx-input-border, #496178);
     }
-    .connectea-dark .connectea-type-select:hover {
+    .connectify-dark .connectify-type-select:hover {
       border-color: var(--cx-accent-hover, #6ba5d6);
       background: var(--cx-surface-hover, #33485d);
     }
-    .connectea-dark .connectea-type-select:focus {
+    .connectify-dark .connectify-type-select:focus {
       border-color: var(--cx-accent-hover, #6ba5d6);
       outline: 2px solid var(--cx-accent-hover, #6ba5d6);
     }
-    .connectea-dark .connectea-type-select.connectea-overridden {
+    .connectify-dark .connectify-type-select.connectify-overridden {
       border-color: var(--cx-accent-hover, #6ba5d6);
       background: color-mix(in srgb, var(--cx-accent, #3b82f6) 22%, var(--cx-surface-bg, #1e2632));
       color: var(--cx-text-primary, #ffffff);
     }
-    .connectea-distribution {
+    .connectify-distribution {
       display: block !important;
       width: 100% !important;
       font-weight: 400 !important;
@@ -134,13 +134,13 @@
       line-height: 1.5 !important;
       clear: both !important;
     }
-    .connectea-distribution strong,
-    .connectea-result strong,
-    .connectea-panel strong {
+    .connectify-distribution strong,
+    .connectify-result strong,
+    .connectify-panel strong {
       font-weight: 700 !important;
       white-space: nowrap;
     }
-    .connectea-subject-controls {
+    .connectify-subject-controls {
       display: block !important;
       width: 100% !important;
       margin-top: 10px !important;
@@ -148,12 +148,12 @@
       border-top: 1px solid #d3dfed !important;
       clear: both !important;
     }
-    .connectea-title {
+    .connectify-title {
       display: block;
       font-size: 13px;
       color: #203c5e;
     }
-    .connectea-controls {
+    .connectify-controls {
       font-size: 11px !important;
       display: inline-flex !important;
       align-items: center !important;
@@ -162,7 +162,7 @@
       margin: 4px 6px 3px 0 !important;
       font-weight: 500 !important;
     }
-    .connectea-controls input {
+    .connectify-controls input {
       box-sizing: border-box;
       width: 76px;
       min-height: 24px;
@@ -173,20 +173,20 @@
       padding: 2px 6px;
       font: inherit;
     }
-    .connectea-controls input:focus {
+    .connectify-controls input:focus {
       outline: 2px solid #3575b9;
       outline-offset: 2px;
     }
-    .connectea-controls input[aria-invalid=true] {
+    .connectify-controls input[aria-invalid=true] {
       border-color: #b62727;
     }
-    .connectea-notice {
+    .connectify-notice {
       display: block !important;
       color: #4e6076 !important;
       font-size: 11px !important;
       margin-top: 3px !important;
     }
-    .connectea-result-row {
+    .connectify-result-row {
       display: flex !important;
       align-items: baseline !important;
       gap: 8px 14px !important;
@@ -196,23 +196,23 @@
       margin-bottom: 6px !important;
       clear: both !important;
     }
-    .connectea-result {
+    .connectify-result {
       font-weight: 400 !important;
       line-height: 1.5 !important;
       flex: 1 1 260px !important;
     }
-    .connectea-dark .connectea-panel {
+    .connectify-dark .connectify-panel {
       background: var(--cx-surface-elevated, #333333) !important;
       color: var(--cx-text-secondary, #cccccc) !important;
       border-color: var(--cx-border, #3a3a3a) !important;
     }
-    .connectea-dark .connectea-subject-controls {
+    .connectify-dark .connectify-subject-controls {
       border-top-color: var(--cx-border, #3a3a3a) !important;
     }
-    .connectea-dark .connectea-notice {
+    .connectify-dark .connectify-notice {
       color: var(--cx-text-muted, #999999) !important;
     }
-    .connectea-dark .connectea-controls input {
+    .connectify-dark .connectify-controls input {
       background: var(--cx-input-bg, #212121) !important;
       color: var(--cx-text-primary, #dddddd) !important;
       border-color: var(--cx-input-border, #4a4a4a) !important;
@@ -222,18 +222,18 @@
     @media (max-width: 1050px) { :root { --cx-display-scale: 0.76; } }
     @media (max-width: 950px)  {
       :root { --cx-display-scale: 0.62; }
-      .connectea-row-wrapper { gap: 8px !important; }
-      .connectea-panel { padding: 6px 10px !important; }
+      .connectify-row-wrapper { gap: 8px !important; }
+      .connectify-panel { padding: 6px 10px !important; }
     }
     @media (max-width: 800px)  {
       :root { --cx-display-scale: 0.55; }
-      .connectea-row-wrapper { gap: 6px !important; }
-      .connectea-panel { padding: 5px 8px !important; }
+      .connectify-row-wrapper { gap: 6px !important; }
+      .connectify-panel { padding: 5px 8px !important; }
     }
     @media (max-width: 650px)  {
       :root { --cx-display-scale: 0.48; }
-      .connectea-row-wrapper { gap: 4px !important; }
-      .connectea-panel { padding: 4px 6px !important; }
+      .connectify-row-wrapper { gap: 4px !important; }
+      .connectify-panel { padding: 4px 6px !important; }
     }
   `;
 

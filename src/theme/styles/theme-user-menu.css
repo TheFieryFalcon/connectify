@@ -7,75 +7,75 @@
  */
 
 /* Avatar button: the bar shows through; hover, focus and the open state highlight like the other bar buttons */
-html.connectea-dark :where(.cvr-c-primary-navigation__button--avatar):not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation) :where(.v-popupview:has(.cvr-c-avatar)):not(#cx-n) {
+html.connectify-dark :where(.cvr-c-primary-navigation__button--avatar):not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation) :where(.v-popupview:has(.cvr-c-avatar)):not(#cx-n) {
   background-color: transparent !important;
   background-image: none !important;
   color: var(--cx-nav-text, #cbd5e1) !important;
 }
 
-html.connectea-dark :where(.cvr-c-primary-navigation__button--avatar):hover:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__button--avatar):focus-visible:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__button--avatar).eds-s-is-active:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation) :where(.v-popupview:has(.cvr-c-avatar)):hover:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation) :where(.v-popupview:has(.cvr-c-avatar)):focus-visible:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation) :where(.v-popupview:has(.cvr-c-avatar)).eds-s-is-active:not(#cx-n) {
+html.connectify-dark :where(.cvr-c-primary-navigation__button--avatar):hover:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__button--avatar):focus-visible:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__button--avatar).eds-s-is-active:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation) :where(.v-popupview:has(.cvr-c-avatar)):hover:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation) :where(.v-popupview:has(.cvr-c-avatar)):focus-visible:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation) :where(.v-popupview:has(.cvr-c-avatar)).eds-s-is-active:not(#cx-n) {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
 /* Dropdown header: Connect fills it #383838 under white text; here it is the popup's surface in the theme ink,
    with its divider in the border colour. The avatar keeps its own colours */
-html.connectea-dark :where(.cvr-c-primary-navigation__user-display):not(#cx-n) {
+html.connectify-dark :where(.cvr-c-primary-navigation__user-display):not(#cx-n) {
   background-color: transparent !important;
   background-image: none !important;
   border-bottom-color: var(--cx-border, #36485e) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-html.connectea-dark .cvr-c-primary-navigation__user-display :where(div):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
-html.connectea-dark .cvr-c-primary-navigation__user-display :where(span):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
-html.connectea-dark .cvr-c-primary-navigation__user-display :where(label):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
-html.connectea-dark .cvr-c-primary-navigation__user-display :where(p):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
-html.connectea-dark .cvr-c-primary-navigation__user-display :where(a):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
-html.connectea-dark .cvr-c-primary-navigation__user-display :where(strong):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
-html.connectea-dark .cvr-c-primary-navigation__user-display :where(.v-label):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n) {
+html.connectify-dark .cvr-c-primary-navigation__user-display :where(div):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
+html.connectify-dark .cvr-c-primary-navigation__user-display :where(span):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
+html.connectify-dark .cvr-c-primary-navigation__user-display :where(label):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
+html.connectify-dark .cvr-c-primary-navigation__user-display :where(p):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
+html.connectify-dark .cvr-c-primary-navigation__user-display :where(a):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
+html.connectify-dark .cvr-c-primary-navigation__user-display :where(strong):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n),
+html.connectify-dark .cvr-c-primary-navigation__user-display :where(.v-label):not([class*="avatar"]):not(:is(.cvr-c-avatar, .cvr-c-primary-navigation__avatar, .cvr-c-primary-navigation__button--avatar) *):not(#cx-n) {
   background-color: transparent !important;
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
 /* Sign Out row: clear on the popup surface (or the side menu on narrow screens) */
-html.connectea-dark :where(.cvr-c-primary-navigation__user-controls):not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__user-controls) > :where(*):not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-menu__footer):not(#cx-n) {
+html.connectify-dark :where(.cvr-c-primary-navigation__user-controls):not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__user-controls) > :where(*):not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-menu__footer):not(#cx-n) {
   background-color: transparent !important;
   background-image: none !important;
 }
 
-html.connectea-dark :where(.cvr-c-primary-navigation__button--sign-out):not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__user-controls) :where(.eds-o-button):not(#cx-n) {
+html.connectify-dark :where(.cvr-c-primary-navigation__button--sign-out):not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__user-controls) :where(.eds-o-button):not(#cx-n) {
   background-color: transparent !important;
   background-image: none !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   box-shadow: none !important;
 }
 
-html.connectea-dark :where(.cvr-c-primary-navigation__button--sign-out):hover:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__button--sign-out):focus:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__button--sign-out):active:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__button--sign-out).eds-s-is-active:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__user-controls) :where(.eds-o-button):hover:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__user-controls) :where(.eds-o-button):focus:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__user-controls) :where(.eds-o-button):active:not(#cx-n),
-html.connectea-dark :where(.cvr-c-primary-navigation__user-controls) :where(.eds-o-button).eds-s-is-active:not(#cx-n) {
+html.connectify-dark :where(.cvr-c-primary-navigation__button--sign-out):hover:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__button--sign-out):focus:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__button--sign-out):active:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__button--sign-out).eds-s-is-active:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__user-controls) :where(.eds-o-button):hover:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__user-controls) :where(.eds-o-button):focus:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__user-controls) :where(.eds-o-button):active:not(#cx-n),
+html.connectify-dark :where(.cvr-c-primary-navigation__user-controls) :where(.eds-o-button).eds-s-is-active:not(#cx-n) {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
 }
 
-html.connectea-dark .cvr-c-primary-navigation__button--sign-out:not(.cx-n) :where(.v-button-wrap):not(#cx-n),
-html.connectea-dark .cvr-c-primary-navigation__button--sign-out:not(.cx-n) :where(.v-button-caption):not(#cx-n),
-html.connectea-dark .cvr-c-primary-navigation__user-controls .eds-o-button :where(.v-button-wrap):not(#cx-n),
-html.connectea-dark .cvr-c-primary-navigation__user-controls .eds-o-button :where(.v-button-caption):not(#cx-n) {
+html.connectify-dark .cvr-c-primary-navigation__button--sign-out:not(.cx-n) :where(.v-button-wrap):not(#cx-n),
+html.connectify-dark .cvr-c-primary-navigation__button--sign-out:not(.cx-n) :where(.v-button-caption):not(#cx-n),
+html.connectify-dark .cvr-c-primary-navigation__user-controls .eds-o-button :where(.v-button-wrap):not(#cx-n),
+html.connectify-dark .cvr-c-primary-navigation__user-controls .eds-o-button :where(.v-button-caption):not(#cx-n) {
   background-color: transparent !important;
   color: inherit !important;
 }

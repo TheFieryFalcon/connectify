@@ -35,7 +35,7 @@
 
   /** The Goals (n) button in the panel heading, shown with the Goal Setter's tabs only. */
   function paintGoalsButton(show) {
-    const heading = document.querySelector('#connectea-atar .cta-heading');
+    const heading = document.querySelector('#connectify-atar .cta-heading');
     if (!heading) return;
     let btn = heading.querySelector('#cx-goals-open');
     if (!btn) {
@@ -59,7 +59,7 @@
     ? { type: 'week', week: composing[kind].week }
     : { type: 'semester', semester: ctx.getActiveSemester() + 1 });
 
-  const semesterButton = idx => document.querySelectorAll('#connectea-atar .cta-semester')[idx];
+  const semesterButton = idx => document.querySelectorAll('#connectify-atar .cta-semester')[idx];
 
   /** Opens the end and Confirm on a saved goal's own end, on its semester. */
   function openOnEnd(kind, goal, info) {

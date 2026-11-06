@@ -27,10 +27,10 @@
     let floatingTooltipEl = null;
     function getFloatingTooltip() {
       if (!floatingTooltipEl || !floatingTooltipEl.isConnected) {
-        floatingTooltipEl = document.getElementById('connectea-outcome-tooltip');
+        floatingTooltipEl = document.getElementById('connectify-outcome-tooltip');
         if (!floatingTooltipEl) {
           floatingTooltipEl = createElement('div', '');
-          floatingTooltipEl.id = 'connectea-outcome-tooltip';
+          floatingTooltipEl.id = 'connectify-outcome-tooltip';
           floatingTooltipEl.setAttribute('role', 'tooltip');
           document.body.append(floatingTooltipEl);
         }
@@ -42,7 +42,7 @@
       if (!text) return;
       const tooltip = getFloatingTooltip();
       tooltip.textContent = text;
-      tooltip.classList.add('connectea-tooltip-visible');
+      tooltip.classList.add('connectify-tooltip-visible');
 
       const pad = 14;
       let left = e.clientX + pad;
@@ -70,7 +70,7 @@
 
     function hideFloatingTooltip() {
       if (floatingTooltipEl) {
-        floatingTooltipEl.classList.remove('connectea-tooltip-visible');
+        floatingTooltipEl.classList.remove('connectify-tooltip-visible');
       }
     }
 
@@ -83,26 +83,26 @@
       }
 
       const tooltipText = outcome.details || outcome.label || '';
-      bar.dataset.connecteaTooltip = tooltipText;
+      bar.dataset.connectifyTooltip = tooltipText;
       bar.removeAttribute('title');
       bar.setAttribute('aria-label', tooltipText);
-      bar.classList.toggle('connectea-outcome-broken', Boolean(outcome.broken));
-      bar.classList.toggle('connectea-outcome-critical', Boolean(outcome.critical));
+      bar.classList.toggle('connectify-outcome-broken', Boolean(outcome.broken));
+      bar.classList.toggle('connectify-outcome-critical', Boolean(outcome.critical));
 
       if (!bar._tooltipBound) {
         bar._tooltipBound = true;
         bar.addEventListener('mouseenter', (e) => {
-          showFloatingTooltip(e, bar.dataset.connecteaTooltip);
+          showFloatingTooltip(e, bar.dataset.connectifyTooltip);
         });
         bar.addEventListener('mousemove', (e) => {
-          showFloatingTooltip(e, bar.dataset.connecteaTooltip);
+          showFloatingTooltip(e, bar.dataset.connectifyTooltip);
         });
         bar.addEventListener('mouseleave', () => {
           hideFloatingTooltip();
         });
         bar.tabIndex = 0;
         bar.setAttribute('role', 'img');
-        bar.addEventListener('focus', () => focusTooltip(bar, bar.dataset.connecteaTooltip));
+        bar.addEventListener('focus', () => focusTooltip(bar, bar.dataset.connectifyTooltip));
         bar.addEventListener('blur', hideFloatingTooltip);
       }
 
@@ -119,15 +119,15 @@
 
       const baseColors = ['red', 'orange', 'yellow', 'green'];
       for (const colorName of baseColors) {
-        const seg = createElement('div', 'connectea-outcome-segment');
+        const seg = createElement('div', 'connectify-outcome-segment');
         if (outcome.colors && outcome.colors.includes(colorName)) {
-          seg.classList.add(`connectea-active-${colorName}`);
+          seg.classList.add(`connectify-active-${colorName}`);
         }
         bar.append(seg);
       }
 
       if (outcome.broken) {
-        const purpleSeg = createElement('div', 'connectea-outcome-segment connectea-active-purple');
+        const purpleSeg = createElement('div', 'connectify-outcome-segment connectify-active-purple');
         bar.append(purpleSeg);
       }
 

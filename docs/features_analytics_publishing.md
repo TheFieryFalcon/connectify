@@ -8,7 +8,7 @@ This document details user-facing features 11 through 20, covering Goals and Est
 
 ### 11. Goals & Estimates
 - **Source Modules**: [`target-atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-atar-ui.js), [`target-grade-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/target-grade-ui.js), [`grade-estimate-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/grade-estimate-ui.js), [`atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-ui.js)
-- **DOM Insertion**: One calculator panel (`#connectea-atar`) in the sidebar workspace, opened by two launchers: **Goal Setter** (Target Grade, Target ATAR) and **Estimator** (Estimate Grade, Estimate ATAR).
+- **DOM Insertion**: One calculator panel (`#connectify-atar`) in the sidebar workspace, opened by two launchers: **Goal Setter** (Target Grade, Target ATAR) and **Estimator** (Estimate Grade, Estimate ATAR).
 - **UI Appearance**: Launcher name as heading, then the Predictor-style mode tabs (`.cta-mode-tabs`), the semester buttons and the active mode's view; tabs name their mode (`Target Grade` / `Target ATAR`, `Estimate Grade` / `Estimate ATAR`), Grade first; Target Grade's and Target ATAR's semester buttons read plain `Semester N`; each launcher opens on Grade, then reopens on its last tab.
 - **Functionality**:
   - **Estimate ATAR**: Aggregates scaled scores across enrolled ATAR courses using TISC Average Marks Scaling (each course's 2025 scaled mean + SD x z, z from the standardised mean 60 / SD 14); selects top 4 subjects for Tertiary Entrance Aggregate (TEA); applies 10% bonus for Methods, Specialist, and Languages (up to 2 bonus courses); calculates projected ATAR. Each course takes a school mark (Connect's by default) and shows its scaled score; a semester with final grades is Closed.
@@ -36,7 +36,7 @@ This document details user-facing features 11 through 20, covering Goals and Est
 ### 14. Settings & Scaling Calibration Panel
 - **Source Modules**: [`category-settings.js`](file:///Users/uwong/Downloads/2.1.14_0/category-settings.js), [`scaling-calibration.js`](file:///Users/uwong/Downloads/2.1.14_0/scaling-calibration.js)
 - **DOM Insertion**: Standalone panel (`#connectify-categories`).
-- **UI Appearance**: Three distinct sections: General Preferences (`connectify:auto_expand`, `connectify:general_cohort_size`, `connectify:atar_percentage`), Semester 1 Scaling Calibration grid table (`connectea:preferences`), and Assessment Categories editor (`+ Add Category`, custom colors, keyword editor).
+- **UI Appearance**: Three distinct sections: General Preferences (`connectify:auto_expand`, `connectify:general_cohort_size`, `connectify:atar_percentage`), Semester 1 Scaling Calibration grid table (`connectify:preferences`), and Assessment Categories editor (`+ Add Category`, custom colors, keyword editor).
 - **Functionality**: Synchronizes custom categories across storage; triggers `rescanAllAutoAssessments()` upon saving.
 - **Statistics Panels** (`connectify:panel_view`): Compact view (default), Expanded view on subject panels only, or Expanded view on all panels; takes effect after reload.
 - **Ignore Certificate and General subjects** (`connectify:hide_course_stats`, on by default): outlines with Certificate, Cert or General in their name stay as Connect drew them, with no statistics or prediction panels, Type dropdowns, meters or goal bars, and the class is no option in any tool (Goal Setter, Predictor, Year Progression, Estimator, Weakness Analyzer, the export, Jump To, Settings' subject lists). Its results feed no prediction and it raises no notification. A goal on one rests until the option is off. Applies at once.
@@ -62,19 +62,19 @@ This document details user-facing features 11 through 20, covering Goals and Est
 
 ### 18. Predictions (Predict Grade, Predict ATAR) & Dynamic Breakout Performance Meter
 - **Source Modules**: [`predictor-math.js`](file:///Users/uwong/Downloads/2.1.14_0/predictor-math.js), [`predictor-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/predictor-ui.js), [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`category-settings.js`](file:///Users/uwong/Downloads/2.1.14_0/category-settings.js)
-- **DOM Insertion**: Launcher button `Predictor` (`#connectify-predictor-toggle`), workspace panel (`#connectify-predictor`), vertical outcome meter (`.connectea-outcome-bar`), and "Previous Year Baselines" card in Settings.
+- **DOM Insertion**: Launcher button `Predictor` (`#connectify-predictor-toggle`), workspace panel (`#connectify-predictor`), vertical outcome meter (`.connectify-outcome-bar`), and "Previous Year Baselines" card in Settings.
 - **Functionality**:
   - **Cold-Start Baselines**: Previous-year category and subject averages kickstart predictions; dynamically injects baseline inputs for custom categories.
   - **Logarithmic Ceiling**: Tapers gains above 80% proportionally to headroom $\frac{100 - \text{Score}}{20}$.
   - **Predict Grade**: one scrollable sub-tab per subject (no cap, so a dropped course plus its replacement still shows every class) with Low, Mid, High task estimates. Secret purple breakout threshold is strictly hidden. Unparsable dates excluded unless custom override exists in Progress Graph.
   - **Predict ATAR**: Aggregates projected subject marks into Low, Mid, High ATAR and TEA without Year 11 scaling deductions, with a disclaimer at the bottom (school marks only; also on Estimate ATAR).
-  - **Dynamic Breakout Performance Meter**: 18px wide, 56px tall; 4 baseline segments: Red ($< \text{Low}$), Orange ($\text{Low} \le S < \text{Mid}$), Yellow ($\text{Mid} \le S < \text{High}$), Green ($S \ge \text{High}$). Suppressed on incomplete tasks and on a subject's first result without a baseline; Settings "Hide potentially inaccurate prediction bars" (off by default) holds back the second and third results too. Secret double-height Purple breakout segment (height 20px) appears when $S > 1.10 \times \text{High}$. Critical shortfall ($S \le \text{Low} - 10\%$ additive) renders 0 segments with pulsing red alarm glow (`.connectea-outcome-critical`).
+  - **Dynamic Breakout Performance Meter**: 18px wide, 56px tall; 4 baseline segments: Red ($< \text{Low}$), Orange ($\text{Low} \le S < \text{Mid}$), Yellow ($\text{Mid} \le S < \text{High}$), Green ($S \ge \text{High}$). Suppressed on incomplete tasks and on a subject's first result without a baseline; Settings "Hide potentially inaccurate prediction bars" (off by default) holds back the second and third results too. Secret double-height Purple breakout segment (height 20px) appears when $S > 1.10 \times \text{High}$. Critical shortfall ($S \le \text{Low} - 10\%$ additive) renders 0 segments with pulsing red alarm glow (`.connectify-outcome-critical`).
 
 ### 19. Sidebar Integration & Theme Navigation Stabilization
 - **Canonical Sequence**: Goal Setter, Predictor, Year Progression, Estimator, Weakness Analyzer, Past Years (once a year is archived), Settings.
 - **Button Styling**: Settings (`#connectify-categories-toggle`) and Weakness Analyzer (`#connectify-weakness-toggle`) feature white buttons (`#ffffff`) in light mode with centered text.
 - **Category Colors**: Category labels bind to `--cx-cat-color` via `.cx-cat-name-label` for vibrant visibility in dark mode.
-- **Theme Button Mount**: `#connectea-theme-toggle` auto-discovers `.cvr-c-primary-navigation` and centers at `top: 50%; transform: translateY(-50%)`.
+- **Theme Button Mount**: `#connectify-theme-toggle` auto-discovers `.cvr-c-primary-navigation` and centers at `top: 50%; transform: translateY(-50%)`.
 
 ### 20. Master Unified Test Suite (`test_suite.js`)
 - **Source Module**: [`test_suite.js`](file:///Users/uwong/Downloads/2.1.14_0/test_suite.js)

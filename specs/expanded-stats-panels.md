@@ -17,7 +17,7 @@ A Settings option that renders the assessment outlines' statistics and predictio
 - **Apply on next page load only**: the mode is read once when the outlines scripts load. Changing it writes storage and shows the hint; no live re-render, no `connectify-settings-updated` dispatch, no memo field.
 
 ## 3. Card layouts
-All cards keep the `.connectea-panel` element (dom-sweeper, Test 185 and existing theme rules find it) and add `.connectea-panel--expanded`. Inner markup uses `<dl>` grids (`<div><dt>label</dt><dd>value</dd></div>`); never the `.v-label` class, so `getTaskMeta` never reads card labels as task labels. Labels are 400 weight in secondary ink; values 700 (bolding parity in light and dark).
+All cards keep the `.connectify-panel` element (dom-sweeper, Test 185 and existing theme rules find it) and add `.connectify-panel--expanded`. Inner markup uses `<dl>` grids (`<div><dt>label</dt><dd>value</dd></div>`); never the `.v-label` class, so `getTaskMeta` never reads card labels as task labels. Labels are 400 weight in secondary ink; values 700 (bolding parity in light and dark).
 
 ### 3.1 Marked assessment row (`all` only)
 ```
@@ -32,7 +32,7 @@ All cards keep the `.connectea-panel` element (dom-sweeper, Test 185 and existin
 - Header: **Score** (`formatPercentage(mark)%`, tinted, §4), **Rank** (`rank / total`, `~` before an estimated total; `Top of assessment` text for rank 1 as today), **Average** (`data.mean`). Outcome meter sits in the header's right column, unchanged in size and behaviour.
 - Quantile row: the five boxplot values. **No highlighted cell.**
 - Footer: `SD x, Z-Score y, <standing()>` (existing `math().standing` wording, e.g. "Top of cohort", "Top 5%"); the `Type:` dropdown right-aligned in the footer, under the meter.
-- The card replaces the compact panel inside `.connectea-row-wrapper`; the wrapper's Type container and meter move into the card (same elements, same listeners).
+- The card replaces the compact panel inside `.connectify-row-wrapper`; the wrapper's Type container and meter move into the card (same elements, same listeners).
 
 ### 3.2 Overall subject row (`subjects` and `all`)
 ```
@@ -48,7 +48,7 @@ All cards keep the `.connectea-panel` element (dom-sweeper, Test 185 and existin
 ```
 - No outcome meter (as today). Rank reads `Top of subject` for rank 1.
 - **Cohort Size input and its notice sit directly under the Rank value** (same input element, listeners, `noticeText` wording and small-cohort warning).
-- **Merged class prediction**: below a hairline divider (`--cx-border-subtle`), "Predicted class result" with three hero cells Low / Mid / High (1 decimal, Predictor colours via existing `.connectea-forecast-value--low|mid|high`, Mid 700, Low/High 600), or the `ConnectifyCohortUpcoming.NEEDS` text. The section is omitted once the class shows a final A–E letter. In expanded modes no separate `.connectea-upcoming` line is created.
+- **Merged class prediction**: below a hairline divider (`--cx-border-subtle`), "Predicted class result" with three hero cells Low / Mid / High (1 decimal, Predictor colours via existing `.connectify-forecast-value--low|mid|high`, Mid 700, Low/High 600), or the `ConnectifyCohortUpcoming.NEEDS` text. The section is omitted once the class shows a final A–E letter. In expanded modes no separate `.connectify-upcoming` line is created.
 
 ### 3.3 Unmarked task row — forecast (`all` only)
 ```
@@ -77,7 +77,7 @@ Only the **Score** value is tinted; everything else uses theme ink.
 - **Floor**: step 0 must still be >= 5:1 on the panel in every preset (verified by the theme audit).
 - **Breakout** (task rows only; `outcome.broken`): `data-cx-score-step="breakout"` — substantially brighter than step 10 (dark: extra lightness and full chroma; light: darkest, full chroma) plus a **static pastel purple glow** (`text-shadow` in `#c4b5fd` / `#a78bfa`, no animation). Overall rows never glow.
 - Browsers without relative colour syntax fall back to the base ink (glow kept).
-- **Explanation**: the outcome meter's singleton tooltip (`#connectea-outcome-tooltip`) gains one line in expanded modes: "The Score colour grows more vivid the further your result sits above your predicted range." ("vivid", not "brightens": light themes go darker). It never mentions the glow, purple or any threshold. No `title` attributes.
+- **Explanation**: the outcome meter's singleton tooltip (`#connectify-outcome-tooltip`) gains one line in expanded modes: "The Score colour grows more vivid the further your result sits above your predicted range." ("vivid", not "brightens": light themes go darker). It never mentions the glow, purple or any threshold. No `title` attributes.
 
 ## 5. Prediction basis (engine change)
 - `predictTask` adds `basis: { typeSource, typeCount, subjectSource, subjectCount }` to predicted results: the type average comes from this year's results (`history`, `typeCount` of them), the previous-year type baseline (`baseline`) or falls back to the subject average (`subject`); the subject average comes from this year's results (`history`, `subjectCount` from the new `subjectCounts` in predictor-history.js) or the previous-year subject baseline (`baseline`).
@@ -86,11 +86,11 @@ Only the **Score** value is tinted; everything else uses theme ink.
 - Bump `PREDICTOR` in `cache-versions.js` (data model change) so cached predictions gain `basis`. A prediction without `basis` shows "Predicted from your <Type> results".
 
 ## 6. Theming, geometry, scaling
-- **Surface**: identical to today's `.connectea-panel` in every theme (navy `#15263a` in solid dark, Light card, 7% text tint strip in Liquid Glass via `theme-glass-task-rows.css`). Inside the card everything is clear: no sub-boxes, pills or highlighted cells (one surface per block); rows separated by hairlines only.
+- **Surface**: identical to today's `.connectify-panel` in every theme (navy `#15263a` in solid dark, Light card, 7% text tint strip in Liquid Glass via `theme-glass-task-rows.css`). Inside the card everything is clear: no sub-boxes, pills or highlighted cells (one surface per block); rows separated by hairlines only.
 - **Typography** (before zoom): labels 11px, headline values 20px, quantile values 14px, footer 12px. All text >= 5:1 (Score steps included).
-- **Scaling**: keeps the `--cx-display-scale` zoom ladder (0.92 → 0.48) on `.connectea-row-wrapper` / the overall panel; the grid never reflows; `white-space: nowrap`.
+- **Scaling**: keeps the `--cx-display-scale` zoom ladder (0.92 → 0.48) on `.connectify-row-wrapper` / the overall panel; the grid never reflows; `white-space: nowrap`.
 - **Token-routed colours**: every colour is `var(--cx-…, <Dark literal>)`; only the glow purple and Predictor Low/Mid/High inks are literal (semantic).
-- Selectors scoped to `.connectea-panel--expanded` (Connectify class); no `[class*=…]` ancestors (Test 219).
+- Selectors scoped to `.connectify-panel--expanded` (Connectify class); no `[class*=…]` ancestors (Test 219).
 
 ## 7. Architecture
 New files (new feature, new files; each <= 250 lines):
@@ -117,13 +117,13 @@ Performance: skeletons are built once; repaints only touch text nodes and one da
 - Mode parsing: missing/unknown → `compact`; each mode's `expandsOverall` / `expandsTasks`.
 - Settings dropdown writes `connectify:panel_view`; Clear Cache keeps it, a settings reset clears it.
 - Skeletons: marked card has Score/Rank/Average, five quantile labels (Minimum, Lower Quartile, Median, Upper Quartile, Maximum), footer with Type select; meter inside header; no `.v-label` inside cards; no highlighted cell.
-- Overall card: cohort input under Rank; merged prediction present without a letter, absent with one; no `.connectea-upcoming` in expanded modes.
+- Overall card: cohort input under Rank; merged prediction present without a letter, absent with one; no `.connectify-upcoming` in expanded modes.
 - Forecast card: three cells with Predictor classes, basis sentence from `basis`, NEEDS text when unpredicted.
 - Missing data renders `—` and the compact wording.
 - `scoreStep`: clamping, 11 steps, `0.5 → 5` when no comparison, `breakout` only for task rows with `broken`.
 - `predictTask` `basis` for each type and subject source; sentence wording for every combination; PREDICTOR version changed.
 - Tooltip line present in expanded modes and never contains "purple", "glow", "1.1" or "breakout".
-- CSS: step 0 ink >= 5:1 on every preset's panel (light and dark); only `.connectea-panel--expanded` value selectors use `text-shadow`; Tests 153 / 167 / 219 still pass.
+- CSS: step 0 ink >= 5:1 on every preset's panel (light and dark); only `.connectify-panel--expanded` value selectors use `text-shadow`; Tests 153 / 167 / 219 still pass.
 - Theme audit run with `connectify:panel_view = all`.
 
 ## 10. Out of scope

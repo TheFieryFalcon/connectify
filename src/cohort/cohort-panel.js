@@ -28,24 +28,24 @@
       const view = window.ConnectifyPanelView;
       const expandedMod = window.ConnectifyCohortExpanded;
       const expanded = Boolean(view && expandedMod && (isOverall ? view.expandsOverall() : view.expandsTasks()));
-      const box = createElement('section', 'connectea-panel');
+      const box = createElement('section', 'connectify-panel');
       box.setAttribute(
         'aria-label',
         isOverall ? 'Connectify overall subject statistics' : 'Connectify assessment statistics'
       );
 
-      const distribution = createElement('div', 'connectea-distribution');
-      const result = createElement('div', 'connectea-result');
+      const distribution = createElement('div', 'connectify-distribution');
+      const result = createElement('div', 'connectify-result');
       result.setAttribute('aria-live', 'polite');
 
-      const resultRow = createElement('div', 'connectea-result-row');
+      const resultRow = createElement('div', 'connectify-result-row');
       resultRow.append(result);
       if (!expanded) box.append(distribution, resultRow);
 
       const isMarked = Number.isFinite(readMark(row));
       if (!isOverall && !isMarked) {
         box.hidden = true;
-        box.classList.add('connectea-hidden');
+        box.classList.add('connectify-hidden');
         box.style.setProperty('display', 'none', 'important');
       }
 
@@ -55,19 +55,19 @@
       let outcomeBar;
 
       if (!isOverall) {
-        wrapper = createElement('div', 'connectea-row-wrapper');
-        typeContainer = createElement('div', 'connectea-type-container');
+        wrapper = createElement('div', 'connectify-row-wrapper');
+        typeContainer = createElement('div', 'connectify-type-container');
 
-        const typeLabel = createElement('label', 'connectea-type-label');
-        const typeTitle = createElement('span', 'connectea-type-title', 'Type: ');
+        const typeLabel = createElement('label', 'connectify-type-label');
+        const typeTitle = createElement('span', 'connectify-type-title', 'Type: ');
 
-        typeSelect = createElement('select', 'connectea-type-select');
+        typeSelect = createElement('select', 'connectify-type-select');
         typeSelect.setAttribute('aria-label', 'Assessment type override');
 
         typeLabel.append(typeTitle, typeSelect);
         typeContainer.append(typeLabel);
 
-        outcomeBar = createElement('div', 'connectea-outcome-bar');
+        outcomeBar = createElement('div', 'connectify-outcome-bar');
         outcomeBar.hidden = true;
         outcomeBar.style.setProperty('display', 'none', 'important');
 
@@ -89,8 +89,8 @@
       const stateRef = {};
 
       if (isOverall && key) {
-        const label = createElement('label', 'connectea-controls', 'Cohort Size ');
-        input = createElement('input', 'connectea-subject-cohort-input');
+        const label = createElement('label', 'connectify-controls', 'Cohort Size ');
+        input = createElement('input', 'connectify-subject-cohort-input');
         input.type = 'number';
         input.min = '1';
         input.step = '1';
@@ -102,10 +102,10 @@
         input.disabled = Boolean(window.ConnectifyPastYearMode?.active());
         label.append(input);
 
-        notice = createElement('span', 'connectea-notice', noticeText(estimatedSize, saved));
+        notice = createElement('span', 'connectify-notice', noticeText(estimatedSize, saved));
         notice.setAttribute('aria-live', 'polite');
 
-        controls = createElement('div', 'connectea-subject-controls');
+        controls = createElement('div', 'connectify-subject-controls');
         controls.append(label, notice);
         if (!expanded) box.append(controls);
 
@@ -135,7 +135,7 @@
         : null;
 
       const target = row.querySelector('.cvr-c-task__details') || row;
-      target.querySelectorAll('.connectea-panel, .connectea-row-wrapper').forEach(el => {
+      target.querySelectorAll('.connectify-panel, .connectify-row-wrapper').forEach(el => {
         if (el !== wrapper && el !== box) el.remove();
       });
       if (!target.contains(wrapper)) {

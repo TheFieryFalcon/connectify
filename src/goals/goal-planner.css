@@ -1,5 +1,5 @@
 /**
- * Connectify Goals: planner controls (#connectea-atar)
+ * Connectify Goals: planner controls (#connectify-atar)
  *
  * Set as Goal / Update Goal and its end and Confirm on the planner (goal-compose.js), Cancel Editing, the Goals (n)
  * heading button, the saved status, and the effort sliders in Target Grade's task table and Target ATAR's subject
@@ -7,18 +7,18 @@
  */
 
 /* Set as Goal, open: Confirm and Cancel where its button was */
-#connectea-atar .cx-goal-compose {
+#connectify-atar .cx-goal-compose {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 12px;
 }
 
-#connectea-atar .cx-goal-compose .cx-goal-actions {
+#connectify-atar .cx-goal-compose .cx-goal-actions {
   margin-top: 0;
 }
 
-#connectea-atar .cx-goal-end {
+#connectify-atar .cx-goal-end {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -26,26 +26,26 @@
 }
 
 /* The same height and text as the target input beside it */
-#connectea-atar .cx-goal-end-select {
+#connectify-atar .cx-goal-end-select {
   box-sizing: border-box;
   width: auto;
   height: 32px;
   font-size: 12px;
 }
 
-#connectea-atar .cx-goal-week {
+#connectify-atar .cx-goal-week {
   width: 70px;
 }
 
-#connectea-atar .cx-goal-compose :is(.cx-goal-reason, .cx-goal-points, .cta-note) {
+#connectify-atar .cx-goal-compose :is(.cx-goal-reason, .cx-goal-points, .cta-note) {
   margin: 0;
 }
 
-#connectea-atar .cx-goal-reason:empty {
+#connectify-atar .cx-goal-reason:empty {
   display: none;
 }
 
-#connectea-atar .cx-goal-actions {
+#connectify-atar .cx-goal-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -54,7 +54,7 @@
 }
 
 /* Secondary planner buttons wear the theme's button tokens, like the goal dialogs' Cancel and Edit */
-#connectea-atar :is(.cx-goal-cancel-edit, .cx-goals-open) {
+#connectify-atar :is(.cx-goal-cancel-edit, .cx-goals-open) {
   padding: 5px 10px;
   border: 1px solid var(--cx-button-border, #455a73);
   border-radius: 5px;
@@ -65,27 +65,27 @@
 }
 
 /* Cancel matches the Confirm beside it */
-#connectea-atar .cx-goal-actions .cx-goal-cancel-edit {
+#connectify-atar .cx-goal-actions .cx-goal-cancel-edit {
   padding: 6px 14px;
   font-weight: 600;
 }
 
-#connectea-atar :is(.cx-goal-cancel-edit, .cx-goals-open):hover:not(:disabled) {
+#connectify-atar :is(.cx-goal-cancel-edit, .cx-goals-open):hover:not(:disabled) {
   background: var(--cx-button-hover, #31415a);
 }
 
-#connectea-atar .cta-heading .cx-goals-open {
+#connectify-atar .cta-heading .cx-goals-open {
   margin-left: auto;
 }
 
-#connectea-atar :is(.cx-goal-status, .cx-goal-editing) {
+#connectify-atar :is(.cx-goal-status, .cx-goal-editing) {
   margin: 0;
   font-size: 12px;
   font-weight: 600;
   color: var(--cx-text-secondary, #334155);
 }
 
-#connectea-atar .cx-goal-subject-effort {
+#connectify-atar .cx-goal-subject-effort {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -93,7 +93,7 @@
   margin: 4px 0;
 }
 
-:is(#connectea-atar, .cx-goal-overlay) .cx-goal-effort {
+:is(#connectify-atar, .cx-goal-overlay) .cx-goal-effort {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -104,14 +104,14 @@
   -webkit-user-select: none;
 }
 
-:is(#connectea-atar, .cx-goal-overlay) .cx-goal-slider {
+:is(#connectify-atar, .cx-goal-overlay) .cx-goal-slider {
   width: 90px;
   margin: 0;
   padding: 0;
   accent-color: var(--cx-accent, #3b82f6);
 }
 
-:is(#connectea-atar, .cx-goal-overlay) .cx-goal-notch {
+:is(#connectify-atar, .cx-goal-overlay) .cx-goal-notch {
   min-width: 64px;
   color: var(--cx-text-secondary, #334155);
 }

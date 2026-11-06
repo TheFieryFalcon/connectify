@@ -53,18 +53,18 @@
 #cx-next-up .cx-next-done .cx-next-face-eye { fill: currentColor; stroke: none; }
 #cx-next-up .cx-next-done-text { font-weight: 700; }
 
-.connectea-dark #cx-next-up .cx-dates-head th,
-.connectea-dark #cx-next-up .cx-dates-row--done td,
-.connectea-dark #cx-next-up .cx-dates-subject-cell,
-.connectea-dark #cx-next-up .cx-next-note,
-.connectea-dark #cx-next-up .cx-next-empty,
-.connectea-dark #cx-next-up .cx-dates-table .cx-dates-group .cx-next-week-detail { color: var(--cx-text-secondary, #dce2e8); }
-.connectea-dark #cx-next-up .cx-next-done { color: var(--cx-accent-link, #60a5fa); }
-.connectea-dark #cx-next-up .cx-next-done-text { color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #cx-next-up .cx-dates-table .cx-dates-group th { color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #cx-next-up .cx-dates-select { color: var(--cx-text-primary, #ffffff) !important; }
-.connectea-dark #cx-next-up .cx-dates-select:hover { border-color: var(--cx-border-strong, #556c84) !important; }
-.connectea-dark #cx-next-up .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
+.connectify-dark #cx-next-up .cx-dates-head th,
+.connectify-dark #cx-next-up .cx-dates-row--done td,
+.connectify-dark #cx-next-up .cx-dates-subject-cell,
+.connectify-dark #cx-next-up .cx-next-note,
+.connectify-dark #cx-next-up .cx-next-empty,
+.connectify-dark #cx-next-up .cx-dates-table .cx-dates-group .cx-next-week-detail { color: var(--cx-text-secondary, #dce2e8); }
+.connectify-dark #cx-next-up .cx-next-done { color: var(--cx-accent-link, #60a5fa); }
+.connectify-dark #cx-next-up .cx-next-done-text { color: var(--cx-text-primary, #ffffff); }
+.connectify-dark #cx-next-up .cx-dates-table .cx-dates-group th { color: var(--cx-text-primary, #ffffff); }
+.connectify-dark #cx-next-up .cx-dates-select { color: var(--cx-text-primary, #ffffff) !important; }
+.connectify-dark #cx-next-up .cx-dates-select:hover { border-color: var(--cx-border-strong, #556c84) !important; }
+.connectify-dark #cx-next-up .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
 
 /* A narrow window: the subject wraps and the dropdowns narrow, so the name keeps room */
 @media (max-width: 840px) {

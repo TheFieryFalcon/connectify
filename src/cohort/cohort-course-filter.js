@@ -14,7 +14,7 @@
   const COURSE = /\b(?:certificate|cert|general)\b/i;
   const CARD = '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile';
   const TITLE = '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading';
-  const OWN_UI = '.connectea-row-wrapper, .connectea-panel, .connectea-subject-average-row, .connectea-xp-fit-probe';
+  const OWN_UI = '.connectify-row-wrapper, .connectify-panel, .connectify-subject-average-row, .connectify-xp-fit-probe';
 
   function isEnabled() {
     try {

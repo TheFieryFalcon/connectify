@@ -38,10 +38,10 @@
   margin: 0;
   font-weight: 500;
 }
-.connectea-dark .cx-compound-bar {
+.connectify-dark .cx-compound-bar {
   border-color: var(--cx-input-border, #475569) !important;
   background: var(--cx-button-bg, #1e293b) !important;
 }
-.connectea-dark .cx-compound-label {
+.connectify-dark .cx-compound-label {
   color: var(--cx-text-muted, #94a3b8) !important;
 }

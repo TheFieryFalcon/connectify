@@ -211,7 +211,7 @@
   window.addEventListener('connectify-terms-updated', scheduleUpdate);
   window.addEventListener('connectify-results-updated', scheduleUpdate);
   window.addEventListener('storage', e => {
-    if (e.key === window.ConnectifyUtils.userKey('connectea:task_type_overrides') || e.key?.startsWith(window.ConnectifyUtils.userKey('connectea:class_categories:'))) {
+    if (e.key === window.ConnectifyUtils.userKey('connectify:task_type_overrides') || e.key?.startsWith(window.ConnectifyUtils.userKey('connectify:class_categories:'))) {
       scheduleUpdate();
     }
   });

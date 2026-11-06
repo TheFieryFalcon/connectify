@@ -43,11 +43,11 @@
     const names = new Set(Object.keys(window.ConnectifyCategoryStore?.defaultCategories || {}));
     Object.keys(window.cxCategories || {}).forEach(c => names.add(c));
     try {
-      const stored = JSON.parse(localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories') || 'null');
+      const stored = JSON.parse(localStorage.getItem('connectify:categories') || localStorage.getItem('cx-categories') || 'null');
       if (stored && typeof stored === 'object') Object.keys(stored).forEach(c => names.add(c));
     } catch {}
     Object.keys(baselines.types || {}).forEach(c => names.add(c));
-    for (const key of window.ConnectifyUtils.userKeys(k => k.startsWith('connectea:class_categories:'))) {
+    for (const key of window.ConnectifyUtils.userKeys(k => k.startsWith('connectify:class_categories:'))) {
       let arr = null;
       try { arr = JSON.parse(localStorage.getItem(key)); } catch {} // one bad entry must not hide the rest
       if (Array.isArray(arr)) arr.forEach(c => { if (typeof c === 'string' && c.trim()) names.add(c.trim()); });

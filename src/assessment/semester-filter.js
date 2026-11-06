@@ -73,7 +73,7 @@
   }
 
   // Connectify's own nodes (e.g. compound progress bars) can sit beside a tile
-  const isOwnNode = el => /(^|\s)(cx-|connectify|connectea)/.test(el.className || '') || /^(cx-|connectify)/.test(el.id || '');
+  const isOwnNode = el => /(^|\s)(cx-|connectify|connectify)/.test(el.className || '') || /^(cx-|connectify)/.test(el.id || '');
 
   // The tile and its layout slot, when the slot holds only that tile, so no gap is left behind
   function hideTargets(tile) {

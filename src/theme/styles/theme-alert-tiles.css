@@ -7,31 +7,31 @@
  */
 
 /* Solid dark themes and Liquid Tinted Glass: translucent red tint, a red divider and light red icons (>= 5:1) */
-html.connectea-dark[data-connectea-theme] :where(.eds-c-tile__header--negative):not(#cx-n) {
+html.connectify-dark[data-connectify-theme] :where(.eds-c-tile__header--negative):not(#cx-n) {
   background-color: color-mix(in srgb, #dc2626 16%, transparent) !important;
 }
 
-html.connectea-dark[data-connectea-theme] :where(.eds-c-tile--important) > :where(.eds-c-tile__header):not(#cx-n) {
+html.connectify-dark[data-connectify-theme] :where(.eds-c-tile--important) > :where(.eds-c-tile__header):not(#cx-n) {
   border-bottom-color: #dc2626 !important;
 }
 
-html.connectea-dark[data-connectea-theme] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n)::before {
+html.connectify-dark[data-connectify-theme] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n)::before {
   color: #f87171 !important;
   -webkit-text-fill-color: #f87171 !important;
 }
 
 /* Light tone (grey Liquid Glass, light custom themes): Connect's own red on the light glass */
-html.connectea-dark[data-connectea-tone="light"] :where(.eds-c-tile__header--negative):not(#cx-n) {
+html.connectify-dark[data-connectify-tone="light"] :where(.eds-c-tile__header--negative):not(#cx-n) {
   background-color: color-mix(in srgb, #9d000b 10%, transparent) !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"] :where(.eds-c-tile--important) > :where(.eds-c-tile__header):not(#cx-n) {
+html.connectify-dark[data-connectify-tone="light"] :where(.eds-c-tile--important) > :where(.eds-c-tile__header):not(#cx-n) {
   border-bottom-color: #9d000b !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n),
-html.connectea-dark[data-connectea-tone="light"] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n)::before {
+html.connectify-dark[data-connectify-tone="light"] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .eds-c-tile--important :where(.cvr-c-icon.eds-t-red):not(#cx-n)::before {
   color: #9d000b !important;
   -webkit-text-fill-color: #9d000b !important;
 }
@@ -39,26 +39,26 @@ html.connectea-dark[data-connectea-tone="light"] .eds-c-tile--important :where(.
 /* Connect's red status text (Submissions' Overdue) is an icon and caption with no box or padding: it stays that, in a
    red that reads on the theme (>= 5:1, on Quantum Dark's warm surface too), never the button ink .text-primary gets.
    On light glass it goes to OKLCH 0.30, as it sits on the translucent tile. Id-weighted past those rules */
-.connectea-dark:not(#cx-n) span.connect-red.text-primary {
+.connectify-dark:not(#cx-n) span.connect-red.text-primary {
   background-color: transparent !important;
 }
 
-.connectea-dark:not(#cx-n) span.connect-red.text-primary,
-.connectea-dark:not(#cx-n) span.connect-red.text-primary .mat-caption,
-.connectea-dark:not(#cx-n) span.connect-red.text-primary em,
-.connectea-dark:not(#cx-n) span.connect-red.text-primary cnt-icon,
-.connectea-dark:not(#cx-n) span.connect-red.text-primary svg,
-.connectea-dark:not(#cx-n) span.connect-red.text-primary svg * {
+.connectify-dark:not(#cx-n) span.connect-red.text-primary,
+.connectify-dark:not(#cx-n) span.connect-red.text-primary .mat-caption,
+.connectify-dark:not(#cx-n) span.connect-red.text-primary em,
+.connectify-dark:not(#cx-n) span.connect-red.text-primary cnt-icon,
+.connectify-dark:not(#cx-n) span.connect-red.text-primary svg,
+.connectify-dark:not(#cx-n) span.connect-red.text-primary svg * {
   color: #fb8585 !important;
   fill: #fb8585 !important;
 }
 
-html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary,
-html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary .mat-caption,
-html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary em,
-html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary cnt-icon,
-html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary svg,
-html.connectea-dark[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary svg * {
+html.connectify-dark[data-connectify-tone="light"]:not(#cx-n) span.connect-red.text-primary,
+html.connectify-dark[data-connectify-tone="light"]:not(#cx-n) span.connect-red.text-primary .mat-caption,
+html.connectify-dark[data-connectify-tone="light"]:not(#cx-n) span.connect-red.text-primary em,
+html.connectify-dark[data-connectify-tone="light"]:not(#cx-n) span.connect-red.text-primary cnt-icon,
+html.connectify-dark[data-connectify-tone="light"]:not(#cx-n) span.connect-red.text-primary svg,
+html.connectify-dark[data-connectify-tone="light"]:not(#cx-n) span.connect-red.text-primary svg * {
   color: #7a0008 !important;
   color: oklch(from #dc2626 0.3 c h) !important;
   fill: #7a0008 !important;

@@ -7,19 +7,19 @@
  */
 
 /* The root and body paint only the canvas (seen until the image loads); the layer sits between them and the page */
-html[data-connectea-has-custom-bg="true"] {
+html[data-connectify-has-custom-bg="true"] {
   background: var(--cx-canvas-bg, #12171f) !important;
 }
 
 /* body must stay clear or it covers the layer. The dark canvas rule in theme-surface-base.css weighs (1,2,1)
-   (:is(body, #main-content, ...) under :is(html, body).connectea-dark:not([data-connectea-login])), so two unused
+   (:is(body, #main-content, ...) under :is(html, body).connectify-dark:not([data-connectify-login])), so two unused
    ids (2,1,1) outrank it and every other canvas fill on body */
-html[data-connectea-has-custom-bg="true"]:not(#cx-specificity-anchor) :where(body):not(#cx-n) {
+html[data-connectify-has-custom-bg="true"]:not(#cx-specificity-anchor) :where(body):not(#cx-n) {
   background: transparent !important;
 }
 
 /* The layer reaches 6px past the viewport so the blur never fades its edges */
-html[data-connectea-has-custom-bg="true"]::before {
+html[data-connectify-has-custom-bg="true"]::before {
   content: '';
   position: fixed;
   inset: -6px;
@@ -33,16 +33,16 @@ html[data-connectea-has-custom-bg="true"]::before {
 }
 
 /* Light text dims the wallpaper; dark text (Light and light-tone themes) brightens it */
-html.connectea-dark[data-connectea-has-custom-bg="true"]:not([data-connectea-tone="light"]) {
+html.connectify-dark[data-connectify-has-custom-bg="true"]:not([data-connectify-tone="light"]) {
   --cx-wallpaper-dim-active: var(--cx-wallpaper-dim, 0.45);
 }
 
-html[data-connectea-has-custom-bg="true"]:not(.connectea-dark), html[data-connectea-has-custom-bg="true"][data-connectea-tone="light"] {
+html[data-connectify-has-custom-bg="true"]:not(.connectify-dark), html[data-connectify-has-custom-bg="true"][data-connectify-tone="light"] {
   --cx-wallpaper-brighten-active: var(--cx-wallpaper-brighten, 0.45);
 }
 
 /* Solid themes' reading views sit on the opaque canvas (theme-surface-base.css); Liquid Glass keeps the wallpaper */
-html.connectea-dark[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"])::before,
-html:not(.connectea-dark)[data-connectea-reading-view="true"]::before {
+html.connectify-dark[data-connectify-reading-view="true"]:not([data-connectify-theme="liquid-glass"]):not([data-connectify-glass="true"])::before,
+html:not(.connectify-dark)[data-connectify-reading-view="true"]::before {
   display: none;
 }

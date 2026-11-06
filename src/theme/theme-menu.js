@@ -3,7 +3,7 @@
  *
  * Lists the registered dark themes (with Edit ✎ and Delete ✕ buttons on custom ones), Customize Theme and Import Theme,
  * anchored under the navbar toggle. Selecting a theme goes through the registry, whose
- * connectea:themechange event lets theme.js apply it. Exposes window.ConnectifyThemeMenu.
+ * connectify:themechange event lets theme.js apply it. Exposes window.ConnectifyThemeMenu.
  */
 (() => {
   'use strict';
@@ -23,16 +23,16 @@
     const reg = window.ConnectifyThemeRegistry;
     const opt = document.createElement('button');
     opt.type = 'button';
-    opt.className = `connectea-theme-option${theme.id === activeId ? ' eds-s-is-active' : ''}`;
+    opt.className = `connectify-theme-option${theme.id === activeId ? ' eds-s-is-active' : ''}`;
     opt.setAttribute('role', 'menuitem');
     const swatch = document.createElement('span');
-    swatch.className = 'connectea-theme-swatch';
+    swatch.className = 'connectify-theme-swatch';
     swatch.style.backgroundColor = (theme.swatch && theme.swatch[1]) || '#1e2632';
     const icon = document.createElement('span');
-    icon.className = 'connectea-theme-icon';
+    icon.className = 'connectify-theme-icon';
     icon.textContent = theme.icon;
     const name = document.createElement('span');
-    name.className = 'connectea-theme-name';
+    name.className = 'connectify-theme-name';
     name.textContent = theme.name;
     opt.append(swatch, icon, name);
     if (theme.isCustom) {
@@ -50,14 +50,14 @@
         return btn;
       };
       const actions = document.createElement('span');
-      actions.className = 'connectea-theme-actions';
+      actions.className = 'connectify-theme-actions';
       actions.append(
         // Opens the customizer on this theme; saving updates it in place, even after a rename
-        actionButton('connectea-theme-edit-btn', '✎', 'Edit theme', () => {
+        actionButton('connectify-theme-edit-btn', '✎', 'Edit theme', () => {
           close();
           window.ConnectifyThemeCustomizer?.open(reg?.getThemeDefinition?.(theme.id) || theme);
         }),
-        actionButton('connectea-theme-delete-btn', '✕', 'Delete theme', () => {
+        actionButton('connectify-theme-delete-btn', '✕', 'Delete theme', () => {
           if (reg?.deleteCustomTheme) { reg.deleteCustomTheme(theme.id); open(anchorEl); }
         })
       );
@@ -77,7 +77,7 @@
     if (!reg || window.ConnectifyThemeAuth?.isAuthDisabled()) return;
     toggleButton()?.setAttribute('aria-expanded', 'true');
     themeMenu = document.createElement('div');
-    themeMenu.id = 'connectea-theme-menu';
+    themeMenu.id = 'connectify-theme-menu';
     themeMenu.setAttribute('role', 'menu');
 
     const activeId = reg.getTheme();
@@ -89,9 +89,9 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.id = id;
-      btn.className = 'connectea-theme-customize-btn connectea-customize-action';
+      btn.className = 'connectify-theme-customize-btn connectify-customize-action';
       btn.setAttribute('role', 'menuitem');
-      btn.innerHTML = `<span class="connectea-customize-icon">${icon}</span><span class="connectea-theme-name">${label}</span>`;
+      btn.innerHTML = `<span class="connectify-customize-icon">${icon}</span><span class="connectify-theme-name">${label}</span>`;
       btn.onclick = e => {
         e.stopPropagation();
         close();
@@ -99,9 +99,9 @@
       };
       themeMenu.appendChild(btn);
     };
-    action('connectea-theme-customize', '✨', 'Customize Theme...', () => window.ConnectifyThemeCustomizer?.open());
+    action('connectify-theme-customize', '✨', 'Customize Theme...', () => window.ConnectifyThemeCustomizer?.open());
     // A .ctme (or older .json) file is saved as a custom theme and applied (theme-import.js)
-    action('connectea-theme-import', '📥', 'Import Theme...', () => window.ConnectifyThemeImport?.pick());
+    action('connectify-theme-import', '📥', 'Import Theme...', () => window.ConnectifyThemeImport?.pick());
 
     const rect = (anchorEl || toggleButton()).getBoundingClientRect();
     themeMenu.style.position = 'fixed';

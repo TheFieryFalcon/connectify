@@ -428,7 +428,7 @@ async function auditPageUiContrast(page) {
       '[class*="eds-c-icon"]',
       '.connect-webfont',
       '.cx-handle-arrow',
-      '.connectea-theme-arrow',
+      '.connectify-theme-arrow',
       'svg',
       'i',
       '.v-icon',

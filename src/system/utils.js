@@ -41,7 +41,7 @@
 
   /** Copies what was saved under the 'current' placeholder to the first real account seen (never overwriting). */
   function adoptPlaceholderKeys(account) {
-    for (const key of storageKeys(k => /^(connectify|connectea):.*:current(:|$)/.test(k))) {
+    for (const key of storageKeys(k => /^connectify:.*:current(:|$)/.test(k))) {
       const target = key.replace(/:current(?=:|$)/, `:${account}`);
       try {
         if (localStorage.getItem(target) === null) localStorage.setItem(target, localStorage.getItem(key));
@@ -159,7 +159,7 @@
   }
 
   // Every prefix baselines have ever been stored under (singular is current, plural is legacy)
-  const BASELINE_PREFIXES = ['connectea:baseline:', 'connectea:baselines:', 'connectify:baseline:', 'connectify:baselines:'];
+  const BASELINE_PREFIXES = ['connectify:baseline:', 'connectify:baselines:'];
 
   /**
    * Candidate storage keys for a baseline kind ('types' or 'subjects'), oldest first so that
@@ -167,12 +167,8 @@
    */
   function baselineKeys(kind, account) {
     return [
-      `connectea:baseline:${kind}`,
-      `connectea:baselines:${kind}`,
       `connectify:baseline:${kind}`,
       `connectify:baselines:${kind}`,
-      `connectea:baseline:${kind}:${account}`,
-      `connectea:baselines:${kind}:${account}`,
       `connectify:baselines:${kind}:${account}`,
       `connectify:baseline:${kind}:${account}`
     ];
@@ -203,12 +199,10 @@
       if (!id) continue;
       for (const subject of subjects) {
         if (!subject) continue;
-        for (const prefix of ['connectea', 'connectify']) {
-          try {
-            const value = localStorage.getItem(userKey(`${prefix}:time_override:${subject}:${id}`));
-            if (value !== null && value !== '') return value;
-          } catch {}
-        }
+        try {
+          const value = localStorage.getItem(userKey(`connectify:time_override:${subject}:${id}`));
+          if (value !== null && value !== '') return value;
+        } catch {}
       }
     }
     return null;

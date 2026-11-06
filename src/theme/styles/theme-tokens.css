@@ -24,8 +24,8 @@
 
 /* Base Dark Theme (v3.2.x parity). Declared on <html> for every dark theme so custom themes inherit dark
    fallbacks; never redeclared on <body> for custom themes, which would shadow their inline tokens. */
-html.connectea-dark,
-[data-connectea-theme="dark"].connectea-dark, [data-connectea-theme="dark"] .connectea-dark, html.connectea-dark[data-connectea-theme="dark"] {
+html.connectify-dark,
+[data-connectify-theme="dark"].connectify-dark, [data-connectify-theme="dark"] .connectify-dark, html.connectify-dark[data-connectify-theme="dark"] {
   --cx-canvas-bg: #12171f; --cx-canvas-subtle: #0a0d12;
   --cx-surface-bg: #1e2632; --cx-surface-secondary: #18202b; --cx-surface-elevated: #263242;
   --cx-surface-hover: #263344; --cx-surface-active: #2c3b4e;
@@ -47,7 +47,7 @@ html.connectea-dark,
 }
 
 /* Quantum Dark (Evolve / Gruvbox Inspiration Palette) */
-[data-connectea-theme="quantum"].connectea-dark, [data-connectea-theme="quantum"] .connectea-dark, html.connectea-dark[data-connectea-theme="quantum"] {
+[data-connectify-theme="quantum"].connectify-dark, [data-connectify-theme="quantum"] .connectify-dark, html.connectify-dark[data-connectify-theme="quantum"] {
   --cx-canvas-bg: #282828; --cx-canvas-subtle: #191b1c;
   --cx-surface-bg: #32302f; --cx-surface-secondary: #282828; --cx-surface-elevated: #3c3836;
   --cx-surface-hover: #504944; --cx-surface-active: #1d2021;
@@ -68,7 +68,7 @@ html.connectea-dark,
 }
 
 /* AMOLED Pitch Black */
-[data-connectea-theme="amoled"].connectea-dark, [data-connectea-theme="amoled"] .connectea-dark, html.connectea-dark[data-connectea-theme="amoled"] {
+[data-connectify-theme="amoled"].connectify-dark, [data-connectify-theme="amoled"] .connectify-dark, html.connectify-dark[data-connectify-theme="amoled"] {
   --cx-canvas-bg: #000000; --cx-canvas-subtle: #050505;
   --cx-surface-bg: #0d0d0d; --cx-surface-secondary: #141414; --cx-surface-elevated: #1a1a1a;
   --cx-surface-hover: #1f1f1f; --cx-surface-active: #262626;
@@ -86,7 +86,7 @@ html.connectea-dark,
 }
 
 /* Midnight Navy */
-[data-connectea-theme="midnight"].connectea-dark, [data-connectea-theme="midnight"] .connectea-dark, html.connectea-dark[data-connectea-theme="midnight"] {
+[data-connectify-theme="midnight"].connectify-dark, [data-connectify-theme="midnight"] .connectify-dark, html.connectify-dark[data-connectify-theme="midnight"] {
   --cx-canvas-bg: #0b132b; --cx-canvas-subtle: #050914;
   --cx-surface-bg: #121e38; --cx-surface-secondary: #18284a; --cx-surface-elevated: #1f325c;
   --cx-surface-hover: #253c6e; --cx-surface-active: #2c4782;
@@ -104,7 +104,7 @@ html.connectea-dark,
 }
 
 /* Emerald Forest */
-[data-connectea-theme="forest"].connectea-dark, [data-connectea-theme="forest"] .connectea-dark, html.connectea-dark[data-connectea-theme="forest"] {
+[data-connectify-theme="forest"].connectify-dark, [data-connectify-theme="forest"] .connectify-dark, html.connectify-dark[data-connectify-theme="forest"] {
   --cx-canvas-bg: #0a1914; --cx-canvas-subtle: #050d0a;
   --cx-surface-bg: #122820; --cx-surface-secondary: #173329; --cx-surface-elevated: #1e4235;
   --cx-surface-hover: #244f3f; --cx-surface-active: #2b5d4b;
@@ -123,7 +123,7 @@ html.connectea-dark,
 
 /* Liquid Tinted Glass (Translucent Frosted Palette, id liquid-glass). The grey Liquid Glass preset
    (liquid-glass-clear) has no block here: its tokens are derived from its basic colours at runtime. */
-[data-connectea-theme="liquid-glass"].connectea-dark, [data-connectea-theme="liquid-glass"] .connectea-dark, html.connectea-dark[data-connectea-theme="liquid-glass"] {
+[data-connectify-theme="liquid-glass"].connectify-dark, [data-connectify-theme="liquid-glass"] .connectify-dark, html.connectify-dark[data-connectify-theme="liquid-glass"] {
   --cx-canvas-bg: #0b1120; --cx-canvas-subtle: #080d19;
   --cx-surface-bg: rgba(26, 36, 52, 0.72); --cx-surface-secondary: rgba(18, 24, 38, 0.68); --cx-surface-elevated: rgba(38, 51, 72, 0.80);
   --cx-surface-hover: rgba(255, 255, 255, 0.14); --cx-surface-active: rgba(255, 255, 255, 0.22);
@@ -141,35 +141,35 @@ html.connectea-dark,
   --cx-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25); --cx-shadow-md: 0 8px 32px rgba(0, 0, 0, 0.35); --cx-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
 }
 
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.eds-c-card):not(#cx-n),
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.cvr-c-card):not(#cx-n),
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.eds-c-tile):not(#cx-n),
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.cvr-c-tile):not(#cx-n),
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.c-tile):not(#cx-n),
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.connectea-panel):not(#cx-n),
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark #connectify-sidebar,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark #connectea-theme-menu,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.v-panel):not(#cx-n),
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.modal-content):not(#cx-n),
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.ui-dialog):not(#cx-n),
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.cvr-c-service-bar):not(#cx-n),
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark :where(.cvr-c-service-bar__container):not(#cx-n) {
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.eds-c-card):not(#cx-n),
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.cvr-c-card):not(#cx-n),
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.eds-c-tile):not(#cx-n),
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.cvr-c-tile):not(#cx-n),
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.c-tile):not(#cx-n),
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.connectify-panel):not(#cx-n),
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark #connectify-sidebar,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark #connectify-theme-menu,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.v-panel):not(#cx-n),
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.modal-content):not(#cx-n),
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.ui-dialog):not(#cx-n),
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.cvr-c-service-bar):not(#cx-n),
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark :where(.cvr-c-service-bar__container):not(#cx-n) {
   backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) contrast(102%) !important;
   box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.55), inset 0 0 16px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -10px rgba(0, 0, 0, 0.45) !important;
 }
 
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .v-window-modalitycurtain,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .modal-backdrop,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .yui3-widget-mask,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .ui-widget-overlay,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cdk-overlay-backdrop,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cdk-overlay-dark-backdrop,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .mat-drawer-backdrop,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .eds-c-modal-overlay,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .eds-c-overlay,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cvr-c-overlay,
-:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]).connectea-dark .cx-overlay {
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .v-window-modalitycurtain,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .modal-backdrop,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .yui3-widget-mask,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .ui-widget-overlay,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .cdk-overlay-backdrop,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .cdk-overlay-dark-backdrop,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .mat-drawer-backdrop,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .eds-c-modal-overlay,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .eds-c-overlay,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .cvr-c-overlay,
+:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]).connectify-dark .cx-overlay {
   backdrop-filter: blur(var(--cx-glass-blur, 14px)) saturate(150%) !important;
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 14px)) saturate(150%) !important;
   background-color: rgba(11, 17, 32, 0.45) !important;
@@ -177,11 +177,11 @@ html.connectea-dark,
 }
 
 /* The wallpaper itself is a fixed, blurred and dimmed layer under the page (theme-wallpaper-layer.css) */
-[data-connectea-has-custom-bg="true"] :where(.cvr-c-app-layout):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
-[data-connectea-has-custom-bg="true"] :where(.cvr-c-app-layout__body):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
-[data-connectea-has-custom-bg="true"] #main-content:has(.eds-c-tile, .cvr-c-tile),
-[data-connectea-has-custom-bg="true"] :where(.v-app):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
-[data-connectea-has-custom-bg="true"] :where(.v-ui):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
-[data-connectea-has-custom-bg="true"] :where(.v-scrollable):has(.eds-c-tile, .cvr-c-tile):not(#cx-n) {
+[data-connectify-has-custom-bg="true"] :where(.cvr-c-app-layout):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+[data-connectify-has-custom-bg="true"] :where(.cvr-c-app-layout__body):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+[data-connectify-has-custom-bg="true"] #main-content:has(.eds-c-tile, .cvr-c-tile),
+[data-connectify-has-custom-bg="true"] :where(.v-app):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+[data-connectify-has-custom-bg="true"] :where(.v-ui):has(.eds-c-tile, .cvr-c-tile):not(#cx-n),
+[data-connectify-has-custom-bg="true"] :where(.v-scrollable):has(.eds-c-tile, .cvr-c-tile):not(#cx-n) {
   background-color: transparent !important;
 }

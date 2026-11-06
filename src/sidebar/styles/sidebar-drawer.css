@@ -72,7 +72,7 @@
   grid-template-columns: repeat(3,minmax(0,1fr));
 }
 
-#connectify-sidebar #connectea-atar-toggle, #connectify-sidebar #connectify-progress-toggle {
+#connectify-sidebar #connectify-atar-toggle, #connectify-sidebar #connectify-progress-toggle {
   position: static !important;
   inset: auto !important;
   z-index: auto;
@@ -102,7 +102,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-#connectify-sidebar :is(#connectea-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel) {
+#connectify-sidebar :is(#connectify-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel) {
   position: static !important;
   inset: auto !important;
   width: 100% !important;
@@ -137,7 +137,7 @@
   font: inherit;
 }
 
-.connectea-dark #connectify-sidebar #connectify-weakness #cx-radar-mode {
+.connectify-dark #connectify-sidebar #connectify-weakness #cx-radar-mode {
   background: var(--cx-button-hover, #2a3b4c);
   color: var(--cx-text-secondary, #e1eaf3);
   border-color: var(--cx-badge-border, #496178);
@@ -173,7 +173,7 @@
   color: inherit;
 }
 
-.connectea-dark #connectify-sidebar #connectify-categories .cx-cat-wrap input {
+.connectify-dark #connectify-sidebar #connectify-categories .cx-cat-wrap input {
   background: var(--cx-button-hover, #2a3b4c);
   color: var(--cx-text-secondary, #e1eaf3);
   border-color: var(--cx-badge-border, #496178);

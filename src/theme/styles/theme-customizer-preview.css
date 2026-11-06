@@ -180,23 +180,23 @@
   background-color: var(--cx-button-primary-hover) !important; color: var(--cx-button-primary-text) !important;
 }
 
-#connectea-theme-menu .connectea-theme-customize-btn {
+#connectify-theme-menu .connectify-theme-customize-btn {
   display: flex; align-items: center; gap: 10px; padding: 10px 14px; min-height: 40px;
   border-radius: 8px; background: transparent !important; border: 1px dashed var(--cx-border, #3d5066) !important;
   color: var(--cx-text-primary, #f8fafc) !important; cursor: pointer; width: 100%;
   text-align: left; box-sizing: border-box; font-size: 14px; font-weight: 600; font-family: inherit;
   transition: background 0.12s ease, color 0.12s ease; margin-top: 4px;
 }
-:root:not(.connectea-dark) #connectea-theme-menu .connectea-theme-customize-btn { color: var(--cx-text-primary, #0f172a) !important; }
-#connectea-theme-menu .connectea-theme-customize-btn:hover {
+:root:not(.connectify-dark) #connectify-theme-menu .connectify-theme-customize-btn { color: var(--cx-text-primary, #0f172a) !important; }
+#connectify-theme-menu .connectify-theme-customize-btn:hover {
   background: var(--cx-surface-hover, #2b394b) !important;
   color: var(--cx-accent-hover, #ffffff) !important;
 }
-:root:not(.connectea-dark) #connectea-theme-menu .connectea-theme-customize-btn:hover {
+:root:not(.connectify-dark) #connectify-theme-menu .connectify-theme-customize-btn:hover {
   background: var(--cx-surface-hover, #f1f5f9) !important;
   color: var(--cx-accent-hover, #2563eb) !important;
 }
-#connectea-theme-menu .connectea-theme-customize-btn :where(span):not(.cx-n),
-#connectea-theme-menu .connectea-theme-customize-btn .connectea-theme-name,
-#connectea-theme-menu .connectea-theme-customize-btn .connectea-customize-icon { color: inherit !important; }
-.connectea-customize-icon { display: inline-flex; align-items: center; justify-content: center; font-size: 17px; width: 22px; height: 22px; flex-shrink: 0; }
+#connectify-theme-menu .connectify-theme-customize-btn :where(span):not(.cx-n),
+#connectify-theme-menu .connectify-theme-customize-btn .connectify-theme-name,
+#connectify-theme-menu .connectify-theme-customize-btn .connectify-customize-icon { color: inherit !important; }
+.connectify-customize-icon { display: inline-flex; align-items: center; justify-content: center; font-size: 17px; width: 22px; height: 22px; flex-shrink: 0; }

@@ -48,7 +48,7 @@ Past Years shows a finished school year as it stood at its end: Assessment Outli
 
 ### Sections (`backup-sections.js`, `ConnectifyBackupSections`, both groups)
 - `SECTIONS`: Goals, Task Types, Week Overrides, Calibration and Calculators, Baselines, Categories, Past Years, Themes, Preferences. `sectionOf(key, acct)` is the allowlist: nothing else is ever exported or written (never caches, cache versions, account maps, theme boot or auto-login flags).
-- Past Years also carries this year's records, results cache, class registry, grade cache, snapshot and new-year mark. Themes: `connectea:custom_themes_list`, `connectea:custom_background`, `connectea:theme:id`.
+- Past Years also carries this year's records, results cache, class registry, grade cache, snapshot and new-year mark. Themes: `connectify:custom_themes_list`, `connectify:custom_background`, `connectify:theme:id`.
 - `template` / `untemplate`: the account as `{account}`; `collect(ids, acct)`; `check(key, raw)`: the shape each key needs.
 
 ### File (`backup-file.js`, `ConnectifyBackup`)

@@ -20,12 +20,12 @@
  * - #cx-specificity-anchor (an id nothing carries, written into a list to give it id weight) sets the specificity
  *   the other arguments are padded to and is then dropped.
  * The selector list as a whole matches the same elements, and every selector in it has the original specificity.
- * An ancestor list made only of <html> / <body> hooks (:is(.connectea-dark, body, html)) is left whole: those are
+ * An ancestor list made only of <html> / <body> hooks (:is(.connectify-dark, body, html)) is left whole: those are
  * ancestors of everything, so expanding it would only add rules.
  *
- * A single complex argument is never bucketed (`.connectea-dark :is(.a span)` is tried on every element, not on
+ * A single complex argument is never bucketed (`.connectify-dark :is(.a span)` is tried on every element, not on
  * spans), so after root hooks that sit only on <html> / <body> it is written one compound at a time:
- * `.connectea-dark :is(.a span)` -> `.connectea-dark .a :is(span)` (:where() likewise), the same matches (every
+ * `.connectify-dark :is(.a span)` -> `.connectify-dark .a :is(span)` (:where() likewise), the same matches (every
  * element but <html> is inside <html>, and the first compound names a Connect component, never <html> / <body>)
  * and the same specificity. A compound after any other ancestor keeps its list (`.tile :is(.a span)` also matches
  * an .a outside the tile).
@@ -193,7 +193,7 @@ function alternatives(comp) {
 }
 
 // An ancestor whose every alternative sits on <html> / <body> gives the Bloom filter nothing to reject on: left whole
-const ROOT_PART = /^(html|body|\.connectea-dark|\[data-connectea-[\w-]+(="[^"]*")?\]|:not\([^()]*\))$/;
+const ROOT_PART = /^(html|body|\.connectify-dark|\[data-connectify-[\w-]+(="[^"]*")?\]|:not\([^()]*\))$/;
 function rootLevel(comp) {
   try {
     const parts = simples(comp);
@@ -212,11 +212,11 @@ function expandSelector(sel) {
   return combos.map(render);
 }
 
-// Root hooks: only <html> and <body> carry .connectea-dark and these attributes
-const ROOT_ATTR = /^\[data-connectea-(theme|glass|tone|reading-view|has-custom-bg|login|logout)(=("[^"]*"|'[^']*'))?\]$/;
+// Root hooks: only <html> and <body> carry .connectify-dark and these attributes
+const ROOT_ATTR = /^\[data-connectify-(theme|glass|tone|reading-view|has-custom-bg|login|logout)(=("[^"]*"|'[^']*'))?\]$/;
 function rootOnly(comp) {
   let parts; try { parts = simples(comp); } catch { return false; }
-  if (parts.some(p => p === '.connectea-dark' || /^(html|body)$/i.test(p))) return true;
+  if (parts.some(p => p === '.connectify-dark' || /^(html|body)$/i.test(p))) return true;
   return parts.every(p => ROOT_ATTR.test(p) || /^:not\([^()]*\)$/.test(p) || (/^:(is|where)\(/.test(p) && listArgs(p).every(rootOnly)));
 }
 // A compound naming a Connect component (class or id) or an element <html> / <body> never are

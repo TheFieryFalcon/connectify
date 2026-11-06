@@ -2,35 +2,35 @@
  * Connectify Sidebar: weakness analyzer, radar chart, type dropdowns and outcome bar
  */
 
-.connectea-dark #cx-weakness-filters,
-.connectea-dark #cx-weakness-type-filters {
+.connectify-dark #cx-weakness-filters,
+.connectify-dark #cx-weakness-type-filters {
   background: var(--cx-surface-elevated, #253342) !important;
   border-color: var(--cx-border, #3b5066) !important;
 }
 
-.connectea-dark #connectify-sidebar .cx-weakness-filter-btn {
+.connectify-dark #connectify-sidebar .cx-weakness-filter-btn {
   color: var(--cx-accent-link, var(--cx-accent-hover, #83c3ff)) !important;
 }
 
-.connectea-dark #connectify-weakness label,
-.connectea-dark #cx-weakness-filters,
-.connectea-dark #cx-weakness-filters span,
-.connectea-dark #cx-weakness-type-filters,
-.connectea-dark #cx-weakness-type-filters span,
-.connectea-dark .cx-weakness-checkbox-label,
-.connectea-dark .cx-weakness-checkbox-label span,
-html.connectea-dark #connectify-weakness label,
-html.connectea-dark #cx-weakness-filters,
-html.connectea-dark #cx-weakness-filters span,
-html.connectea-dark #cx-weakness-type-filters,
-html.connectea-dark #cx-weakness-type-filters span,
-html.connectea-dark .cx-weakness-checkbox-label,
-html.connectea-dark .cx-weakness-checkbox-label span,
-html.connectea-dark #connectify-weakness {
+.connectify-dark #connectify-weakness label,
+.connectify-dark #cx-weakness-filters,
+.connectify-dark #cx-weakness-filters span,
+.connectify-dark #cx-weakness-type-filters,
+.connectify-dark #cx-weakness-type-filters span,
+.connectify-dark .cx-weakness-checkbox-label,
+.connectify-dark .cx-weakness-checkbox-label span,
+html.connectify-dark #connectify-weakness label,
+html.connectify-dark #cx-weakness-filters,
+html.connectify-dark #cx-weakness-filters span,
+html.connectify-dark #cx-weakness-type-filters,
+html.connectify-dark #cx-weakness-type-filters span,
+html.connectify-dark .cx-weakness-checkbox-label,
+html.connectify-dark .cx-weakness-checkbox-label span,
+html.connectify-dark #connectify-weakness {
   color: var(--cx-text-primary, #e1eaf3) !important;
 }
 
-html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-mode {
+html.connectify-dark #connectify-weakness select, html.connectify-dark #cx-radar-mode {
   background: var(--cx-input-bg, #2a3b4c) !important;
   color: var(--cx-input-text, #e1eaf3) !important;
   border-color: var(--cx-input-border, #496178) !important;
@@ -40,7 +40,7 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
   overflow: visible !important;
 }
 
-.connectea-row-wrapper {
+.connectify-row-wrapper {
   display: flex !important;
   align-items: center !important;
   gap: 14px !important;
@@ -53,20 +53,20 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
   transform-origin: left center;
 }
 
-.connectea-row-wrapper>.connectea-panel {
+.connectify-row-wrapper>.connectify-panel {
   flex: 0 1 auto !important;
   width: auto !important;
   max-width: fit-content !important;
   margin: 0 !important;
 }
 
-.connectea-type-container {
+.connectify-type-container {
   display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
 }
 
-.connectea-type-label {
+.connectify-type-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -77,7 +77,7 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
   user-select: none;
 }
 
-.connectea-type-select {
+.connectify-type-select {
   box-sizing: border-box;
   min-height: 26px;
   padding: 2px 8px;
@@ -95,7 +95,7 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
 
 /* Sized to the chosen type, never the longest option (field-sizing; older browsers keep the cap), so a long
    category name never widens the row on narrower screens such as an iPad */
-.connectea-type-select {
+.connectify-type-select {
   field-sizing: content;
   width: auto;
   max-width: calc(160px / var(--cx-display-scale, 1));
@@ -104,51 +104,51 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
   text-overflow: ellipsis;
 }
 
-.connectea-type-select:hover {
+.connectify-type-select:hover {
   border-color: #3575b9;
   background: #fff;
 }
 
-.connectea-type-select:focus {
+.connectify-type-select:focus {
   border-color: #3575b9;
   outline: 2px solid #3575b9;
   outline-offset: 1px;
 }
 
-.connectea-type-select.connectea-overridden {
+.connectify-type-select.connectify-overridden {
   border-color: #24618c;
   background: #e9f2fb;
   color: #174c75;
 }
 
-.connectea-dark .connectea-type-label {
+.connectify-dark .connectify-type-label {
   color: var(--cx-text-muted, #a0b2c6);
 }
 
-.connectea-dark .connectea-type-select {
+.connectify-dark .connectify-type-select {
   background: var(--cx-input-bg, #2a3b4c);
   color: var(--cx-input-text, #e1eaf3);
   border-color: var(--cx-input-border, #496178);
 }
 
-.connectea-dark .connectea-type-select:hover {
+.connectify-dark .connectify-type-select:hover {
   border-color: var(--cx-border-hover, #6ba5d6);
   background: var(--cx-surface-hover, #33485d);
 }
 
-.connectea-dark .connectea-type-select:focus {
+.connectify-dark .connectify-type-select:focus {
   border-color: var(--cx-border-focus, #6ba5d6);
   outline: 2px solid var(--cx-accent, #6ba5d6);
 }
 
-.connectea-dark .connectea-type-select.connectea-overridden {
+.connectify-dark .connectify-type-select.connectify-overridden {
   border-color: var(--cx-accent, #6ba5d6);
   background: var(--cx-surface-elevated, #364e65);
   color: var(--cx-text-primary, #fff);
 }
 
 /* Vertical Outcome & Breakout Performance Meter */
-.connectea-outcome-bar {
+.connectify-outcome-bar {
   display: inline-flex !important;
   flex-direction: column-reverse !important;
   align-items: center !important;
@@ -166,17 +166,17 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
   position: relative !important;
 }
 
-.connectea-outcome-bar:hover {
+.connectify-outcome-bar:hover {
   transform: scale(1.1) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
-.connectea-outcome-bar:focus-visible {
+.connectify-outcome-bar:focus-visible {
   outline: 2px solid currentColor !important;
   outline-offset: 2px !important;
 }
 
-.connectea-outcome-bar.connectea-outcome-broken {
+.connectify-outcome-bar.connectify-outcome-broken {
   height: 70px !important;
   margin-top: -14px !important;
   background: rgba(168, 85, 247, 0.12) !important;
@@ -184,15 +184,15 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
   box-shadow: 0 0 10px rgba(168, 85, 247, 0.45) !important;
 }
 
-.connectea-outcome-bar.connectea-outcome-critical {
+.connectify-outcome-bar.connectify-outcome-critical {
   border-color: #ef4444 !important;
   background: rgba(239, 68, 68, 0.12) !important;
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.8), inset 0 0 4px rgba(239, 68, 68, 0.3) !important;
 }
 
-/* The pulse fades a brighter glow (connectea-glow-critical, opacity only) in and out on a layer of its own, so the
+/* The pulse fades a brighter glow (connectify-glow-critical, opacity only) in and out on a layer of its own, so the
    compositor runs it: an animated box-shadow restyled and repainted the page every frame for as long as it showed */
-.connectea-outcome-bar.connectea-outcome-critical::after {
+.connectify-outcome-bar.connectify-outcome-critical::after {
   content: '' !important;
   position: absolute !important;
   inset: -1px !important;
@@ -202,5 +202,5 @@ html.connectea-dark #connectify-weakness select, html.connectea-dark #cx-radar-m
   pointer-events: none !important;
   opacity: 0;
   will-change: opacity;
-  animation: connectea-glow-critical 1.6s ease-in-out infinite alternate;
+  animation: connectify-glow-critical 1.6s ease-in-out infinite alternate;
 }

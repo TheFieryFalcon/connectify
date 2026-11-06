@@ -55,7 +55,7 @@
         // Settings can leave Certificate and General courses without panels
         if (window.ConnectifyCourseFilter?.hidesRow(row)) return;
 
-        const hasPanel = row.querySelector('.connectea-panel') || row.querySelector('.connectea-row-wrapper');
+        const hasPanel = row.querySelector('.connectify-panel') || row.querySelector('.connectify-row-wrapper');
         if (!hasPanel) {
           missingPanelCount++;
         }
@@ -185,7 +185,7 @@
 
   // SPA navigation: nodes added or removed outside accordion panels and Connectify's own UI
   const isNavigationChange = m => m.type === 'childList' && (m.addedNodes.length > 0 || m.removedNodes.length > 0) &&
-    !m.target?.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .connectea-panel, .connectea-row-wrapper, #connectify-sidebar');
+    !m.target?.closest?.('.eds-c-accordion__panel, .cvr-c-accordion__panel, .connectify-panel, .connectify-row-wrapper, #connectify-sidebar');
   const scheduler = window.ConnectifyScheduler;
   scheduler.onMutations(() => scheduleSweep(1500), { filter: isNavigationChange, mute: true });
 

@@ -26,7 +26,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - Dark `#1e2632` (border `#2e3c4e`, hover `#3d5066`)
   - Glass
     - Translucent frosted glass (`rgba(18, 26, 40, 0.65)`) in Liquid Glass / custom background
-- **Cohort Statistics Panel (`.connectea-panel`)**
+- **Cohort Statistics Panel (`.connectify-panel`)**
   - Colours
     - Deep navy `#15263a`
     - border `#264669`
@@ -137,7 +137,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - No tool keeps its own copy (Test 306)
   - written to outrank the drawer's button rules, so the selected tab shows in every theme
     - `#connectify-sidebar button`
-    - `.connectea-dark #connectify-sidebar :is(button, ...)` through `#cx-specificity-anchor`
+    - `.connectify-dark #connectify-sidebar :is(button, ...)` through `#cx-specificity-anchor`
   - Colours
     - inactive main tabs are clear
     - the active one is filled
@@ -253,7 +253,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - Minimum **5:1 contrast ratio** across all foreground text and backgrounds in both light and dark modes
 - **Liquid Glass & Panel Geometry**
   - Corners
-    - 16px corner curvature (20px on modal dialogs) applies **only in Liquid Glass** (`[data-connectea-theme="liquid-glass"]` or `[data-connectea-glass="true"]`)
+    - 16px corner curvature (20px on modal dialogs) applies **only in Liquid Glass** (`[data-connectify-theme="liquid-glass"]` or `[data-connectify-glass="true"]`)
     - on explicit panel, card, tile and modal classes, never `[class*=...]` substring matches
     - All other themes keep Connect's native geometry
   - Clipping
@@ -309,7 +309,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - Empty states are centred in every dark theme by alignment only (`theme-empty-states.css`, no spacing changes)
 - **Theme Dropdown & Customizer**
   - Dropdown
-    - Sleek 28px height with 12x12 chevron and expanded 4px 6px padding (`.connectea-theme-arrow`)
+    - Sleek 28px height with 12x12 chevron and expanded 4px 6px padding (`.connectify-theme-arrow`)
   - In-DOM Theme Customizer (`#cx-customizer-modal`)
     - styled by the active theme's tokens like the rest of the site
     - its headings and labels take the theme ink in every theme, Light included, never Connect's heading or label colours
@@ -409,7 +409,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - Tiles stay opaque outside Liquid Glass
 - **Reading Views**
   - Which
-    - notice and discussion views (`cnt-notice-view`, `cnt-discussion-item-view`, dialogs) set `data-connectea-reading-view`
+    - notice and discussion views (`cnt-notice-view`, `cnt-discussion-item-view`, dialogs) set `data-connectify-reading-view`
   - Solid themes
     - the canvas is opaque and outranks the wallpaper on `<html>`/`<body>`
   - Liquid Glass (`theme-glass-reading.css`)
@@ -530,11 +530,11 @@ Extremely concise summary of the core visual design language, contrast standards
     - `.cx-settings-col-header`
 - **Dynamic Surface Adaptation**
   - Unstyled surfaces
-    - Use `data-connectea-surface` and `data-connectea-ink` on unstyled surfaces
+    - Use `data-connectify-surface` and `data-connectify-ink` on unstyled surfaces
     - Avoid inline style mutations
 - **Light Tone**
   - Which themes
-    - a dark-classed theme with dark ink (grey Liquid Glass, light custom themes) sets `data-connectea-tone="light"` on `<html>`
+    - a dark-classed theme with dark ink (grey Liquid Glass, light custom themes) sets `data-connectify-tone="light"` on `<html>`
   - `theme-light-tone.css`
     - re-inks data colours (category labels, scenario labels, High pills/cards, chart keys, date warning, Attendance labels) at OKLCH lightness 0.34 keeping hue and chroma
     - turns Connect's dark status pills (Overdue, locked, blue-light) into light tints with dark ink
@@ -556,7 +556,7 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Login Screen Dark Mode Suppression & Post-Login Restoration**
   - Suppression, to prevent broken styles on the account selector
     - Dark mode is strictly toggled off on `https://connect.det.wa.edu.au/login`
-    - removing `.connectea-dark` and temporarily setting storage to `light`, recording `connectea:theme:restore_dark`
+    - removing `.connectify-dark` and temporarily setting storage to `light`, recording `connectify:theme:restore_dark`
   - Restoration
     - Upon successful login and navigation to normal Connect pages, dark mode is automatically restored
 
@@ -667,7 +667,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - a list with nothing to show is left out, and the card with it when both have nothing
 - **Calculator Mode Tabs**
   - Shared panel
-    - Goal Setter and Estimator share the calculator panel (`#connectea-atar`)
+    - Goal Setter and Estimator share the calculator panel (`#connectify-atar`)
     - its heading names the launcher
     - the mode tabs under it (`.cta-mode-tabs`) reuse the Predictor's tab bar (`.cx-pred-main-tabs` / `.cx-pred-main-tab`), so both tools look alike in every theme
   - Tool tabs
@@ -733,12 +733,12 @@ Extremely concise summary of the core visual design language, contrast standards
     - 100% in dark mode against inactive track `#334155`
 - **Secret Purple Breakout**
   - When score $> 1.10 \times \text{High}$
-    - bar erupts with a double-height 5th Purple segment (`.connectea-active-purple`, height 20px)
+    - bar erupts with a double-height 5th Purple segment (`.connectify-active-purple`, height 20px)
   - Secrecy
     - **The purple breakout threshold is strictly secret**—never disclosed in legends or tooltips
 - **Critical Shortfall**
   - When score $\le \text{Low} - 10\%$ (additive)
-    - bar renders 0 segments (empty) with pulsing red alarm glow (`.connectea-outcome-critical`)
+    - bar renders 0 segments (empty) with pulsing red alarm glow (`.connectify-outcome-critical`)
   - Pulse
     - the pulse fades a glow layer's opacity (`::after`), which the compositor runs
     - never an animated `box-shadow` (that restyled the page every frame)
@@ -760,7 +760,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - `saveBaselines()` thoroughly purges all legacy storage candidate keys to prevent zombie baseline resurrection
     - strictly suppressing outcome bars on first tasks
 - **Compact Statistics Rows**
-  - The row (`.connectea-row-wrapper`) is one line of panel, Type dropdown and meter that always fits the task column
+  - The row (`.connectify-row-wrapper`) is one line of panel, Type dropdown and meter that always fits the task column
     - the panel takes what the fixed controls leave (`flex: 0 1 auto`)
     - and wraps its text between stats, a name staying with its value
   - The display zoom (`--cx-display-scale`) cannot guarantee the fit
@@ -838,7 +838,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - Segments
     - Segments must have `pointer-events: none !important;` to eliminate hover boundary thrashing
   - Tooltip
-    - Handled via singleton floating tooltip (`#connectea-outcome-tooltip`) using viewport-fixed coordinates
+    - Handled via singleton floating tooltip (`#connectify-outcome-tooltip`) using viewport-fixed coordinates
     - in Liquid Glass it blurs what is under it (`--cx-glass-blur`, `saturate(160%)`) like the theme's other glass
   - Native titles
     - Outcome bars and segments must **never** set the native HTML `title` attribute to prevent overlapping dual tooltips
@@ -983,7 +983,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - initial expansion on page load if auto expand all is checked (`connectify:auto_expand`)
 - **Settings Cache Backwards Compatibility**
   - Backwards compatibility must be maintained with cached data from previous versions
-    - Stored user preferences, baselines, category configurations, and scaling calibrations must gracefully resolve legacy keys (`connectea:`, `cx-`, `connectify:`)
+    - Stored user preferences, baselines, category configurations, and scaling calibrations must gracefully resolve legacy keys (`cx-`, older `connectify:` names; keys saved under the old name `connectea:` are moved to `connectify:` once by `storage-rename.js`, and backups and archived years naming them are read under the new names)
     - without data loss
 
 ## 8. Subsystem Cache Invalidation & Algorithm Versioning Standards
@@ -1041,15 +1041,15 @@ Extremely concise summary of the core visual design language, contrast standards
     - Never append a new feature to an existing module
 - **Theme Scoping**
   - Every theme selector must be scoped to a theme hook
-    - `.connectea-dark`, `data-connectea-*`, or a `cx`/`connectify` id/class
+    - `.connectify-dark`, `data-connectify-*`, or a `cx`/`connectify` id/class
     - Unscoped rules that change native Connect styling are not allowed, apart from the explicit allowlist in `test_suite.js`
 - **Keyed Ancestors**
   - Ancestors (and `:not(... *)` exclusions) are named by class, never by a class substring (`[class*="feed"] span`, `:not([class*="icon"] *)`)
     - the browser cannot key a substring to a class, so every class change on any element restyled its whole subtree against every rule
     - Connect rewrites classes ~20 times per click (the outline filter menu spent 115ms restyling per open)
     - Substrings stay allowed on the subject (Test 219)
-  - **Filterable theme hooks**: the dark hook is `.connectea-dark:not(cx-n)`
-    - only `<html>` and `<body>` carry the class; `:not(cx-n)` keeps the old `:is(html.connectea-dark, ...)` specificity 0,1,1
+  - **Filterable theme hooks**: the dark hook is `.connectify-dark:not(cx-n)`
+    - only `<html>` and `<body>` carry the class; `:not(cx-n)` keeps the old `:is(html.connectify-dark, ...)` specificity 0,1,1
     - a multi-argument `:is()` ancestor gives Chrome's ancestor filter nothing to reject on, so every element walked its ancestors for every rule, even in Light
   - **No positional pseudo-class on a generic subject** (`:is(.v-label, span, div):nth-child(2)` -> `.v-label:nth-child(2)`)
     - it flagged nearly every parent, so each insertion (a progress bar, a panel) restyled the following siblings' whole subtrees
@@ -1063,10 +1063,10 @@ Extremely concise summary of the core visual design language, contrast standards
     - an argument as specific as the list stands alone
     - a less specific one is padded to it with `:not(.cx-n)` / `:not(cx-n)` / `:not(#cx-n)` (nothing carries `cx-n`; inside `:where()` when it outweighs the list in a lower column)
     - complex arguments stay in their own `:is()`
-    - lists naming only `<html>` / `<body>` hooks (`:is(.connectea-dark, body, html)`) stay whole
+    - lists naming only `<html>` / `<body>` hooks (`:is(.connectify-dark, body, html)`) stay whole
   - **No single complex list after root hooks**
-    - Chrome never buckets a single complex argument (`.connectea-dark :is(.a span)` was tried on every element)
-    - so after hooks only `<html>` / `<body>` carry the expander writes it one compound at a time (`.connectea-dark .a span`, `:where()` pieces stay `:where()`), the same matches and specificity
+    - Chrome never buckets a single complex argument (`.connectify-dark :is(.a span)` was tried on every element)
+    - so after hooks only `<html>` / `<body>` carry the expander writes it one compound at a time (`.connectify-dark .a span`, `:where()` pieces stay `:where()`), the same matches and specificity
     - after any other ancestor the list stays
   - **One ancestor walk per compound**
     - the expander also merges a compound's ancestor exclusions (`:not(.a *):not(#b *)` -> `:not(:is(.a, #b) *)`, padded to the same specificity)

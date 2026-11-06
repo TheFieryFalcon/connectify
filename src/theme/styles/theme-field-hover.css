@@ -4,14 +4,14 @@
  * floating fieldset (Message, Image Gallery) drew a 2px black one; both spilled over the controls around them.
  * The 1px outline stays on hover, and a focused field keeps Material's focus outline.
  */
-.connectea-dark .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline-thick,
-.connectea-dark .c-floating-form-field:hover:not(:focus-within) .c-floating-form-field-outline-thick,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline-thick,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .c-floating-form-field:hover:not(:focus-within) .c-floating-form-field-outline-thick {
+.connectify-dark .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline-thick,
+.connectify-dark .c-floating-form-field:hover:not(:focus-within) .c-floating-form-field-outline-thick,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline-thick,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .c-floating-form-field:hover:not(:focus-within) .c-floating-form-field-outline-thick {
   opacity: 0 !important;
 }
 
-.connectea-dark .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline:not(.mat-form-field-outline-thick),
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline:not(.mat-form-field-outline-thick) {
+.connectify-dark .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline:not(.mat-form-field-outline-thick),
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline:not(.mat-form-field-outline-thick) {
   opacity: 1 !important;
 }

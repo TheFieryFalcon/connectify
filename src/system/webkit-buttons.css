@@ -8,9 +8,9 @@
  */
 
 @supports (-webkit-touch-callout: none) {
-  :is(#connectify-sidebar, #connectea-theme-menu, #cx-customizer-modal, #cx-wallpaper-crop, #connectify-notifications-container, #cx-expand-btn, #cx-back-to-top-container, #cx-semester-notice, #connectea-atar, #connectify-progress, .cx-goal-overlay, .connectea-row-wrapper, .connectea-panel) button,
+  :is(#connectify-sidebar, #connectify-theme-menu, #cx-customizer-modal, #cx-wallpaper-crop, #connectify-notifications-container, #cx-expand-btn, #cx-back-to-top-container, #cx-semester-notice, #connectify-atar, #connectify-progress, .cx-goal-overlay, .connectify-row-wrapper, .connectify-panel) button,
   #connectify-sidebar-handle,
-  #connectea-theme-toggle {
+  #connectify-theme-toggle {
     -webkit-appearance: none;
     appearance: none;
   }

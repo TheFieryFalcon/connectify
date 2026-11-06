@@ -4,7 +4,7 @@
  * The Date cell of a task on the Task Dates tab: the task's week with an edit button, or a
  * week input when no date could be read. Overrides are school weeks of the year, numbered through the term
  * calendar as the Export's term starts are (under Early Easter Term 2 starts at Week 10), saved as "w17"
- * under the student's own connectea:time_override:<subject>:<task id or name> (ConnectifyUtils.userKey); repeated task names each get their own id key.
+ * under the student's own connectify:time_override:<subject>:<task id or name> (ConnectifyUtils.userKey); repeated task names each get their own id key.
  * Older bare numbers, saved before Early Easter was known, are the same school week ("17" is "w17").
  * Exposes window.ConnectifyProgressWeekEditor.
  */
@@ -46,8 +46,8 @@
 
     // Build specific key using point.id (or sequence if id missing) for duplicate-named tasks
     const disambiguator = taskId || (isDuplicateName && point.sequence !== undefined ? `seq_${point.sequence}` : null);
-    const specificKey = disambiguator ? window.ConnectifyUtils.userKey(`connectea:time_override:${subjectName}:${disambiguator}`) : null;
-    const genericKey = window.ConnectifyUtils.userKey(`connectea:time_override:${subjectName}:${taskName}`);
+    const specificKey = disambiguator ? window.ConnectifyUtils.userKey(`connectify:time_override:${subjectName}:${disambiguator}`) : null;
+    const genericKey = window.ConnectifyUtils.userKey(`connectify:time_override:${subjectName}:${taskName}`);
 
     // Retrieve saved custom date:
     // Priority 1: Specific key (exact task instance)
@@ -55,23 +55,19 @@
     // This ensures subsequent tasks of the same name (like Row 9 & 10) never inherit the first task's date.
     let savedTime = null;
     if (specificKey) {
-      savedTime = localStorage.getItem(specificKey) ||
-                  localStorage.getItem(specificKey.replace('connectea:', 'connectify:'));
+      savedTime = localStorage.getItem(specificKey);
     }
     if (savedTime === null && isFirstOccurrence && genericKey) {
-      savedTime = localStorage.getItem(genericKey) ||
-                  localStorage.getItem(genericKey.replace('connectea:', 'connectify:'));
+      savedTime = localStorage.getItem(genericKey);
     }
 
     // Clears this task's override, and the shared name key only when this is the first task of that name
     const removeOverride = () => {
       if (specificKey) {
         localStorage.removeItem(specificKey);
-        localStorage.removeItem(specificKey.replace('connectea:', 'connectify:'));
       }
       if (isFirstOccurrence && genericKey) {
         localStorage.removeItem(genericKey);
-        localStorage.removeItem(genericKey.replace('connectea:', 'connectify:'));
       }
     };
 

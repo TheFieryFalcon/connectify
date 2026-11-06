@@ -1,7 +1,7 @@
 /**
  * Connectify ATAR calculator: panel markup
  *
- * Builds the calculator panel (#connectea-atar): the Goals and Estimates launchers the sidebar
+ * Builds the calculator panel (#connectify-atar): the Goals and Estimates launchers the sidebar
  * mounts, the mode tabs (Target Grade / Target ATAR, Estimate Grade / Estimate ATAR), the semester
  * buttons, course list, summary, reset button, the methodology notes and the disclaimer; plus the semester labels and closing rules. Behaviour lives in atar-ui.js.
  * Exposes window.ConnectifyAtarMarkup.
@@ -39,7 +39,7 @@
     const button = createEl('button', 'cx-calculator-tool', GROUPS[group].title);
     button.type = 'button';
     button.id = GROUPS[group].launcher;
-    button.setAttribute('aria-controls', 'connectea-atar');
+    button.setAttribute('aria-controls', 'connectify-atar');
     return button;
   }
 
@@ -72,7 +72,7 @@
   /** The panel and its static parts; semester buttons are added by the caller. */
   function build() {
     const calculatorPanel = createEl('aside', '', '');
-    calculatorPanel.id = 'connectea-atar';
+    calculatorPanel.id = 'connectify-atar';
     calculatorPanel.hidden = true;
     calculatorPanel.setAttribute('aria-label', '2025 ATAR estimates');
 

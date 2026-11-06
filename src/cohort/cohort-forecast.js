@@ -18,7 +18,7 @@
     /** The forecast panel after the (hidden) statistics panel, created once per row. */
     function forecastBox(ui) {
       if (ui.forecast?.isConnected) return ui.forecast;
-      const box = createElement('section', 'connectea-panel connectea-forecast');
+      const box = createElement('section', 'connectify-panel connectify-forecast');
       box.setAttribute('aria-label', 'Connectify predicted result');
       ui.box.insertAdjacentElement('afterend', box);
       ui.forecast = box;
@@ -33,14 +33,14 @@
       if (!ui?.box) return;
       const box = forecastBox(ui);
       const predicted = isPredicted(prediction);
-      box.classList.toggle('connectea-forecast--empty', !predicted);
+      box.classList.toggle('connectify-forecast--empty', !predicted);
       if (ui.xpForecast) {
         window.ConnectifyCohortExpanded.fillForecast(ui, prediction, predicted, NEEDS);
       } else if (predicted) {
         // Coloured like the Predictor's Low / Mid / High pills (cohort-forecast.css)
         const value = (level, text, v) => {
           const tag = level === 'mid' ? 'strong' : 'span';
-          return `<${tag} class="connectea-forecast-value connectea-forecast-value--${level}">${text} ${Math.round(v)}%</${tag}>`;
+          return `<${tag} class="connectify-forecast-value connectify-forecast-value--${level}">${text} ${Math.round(v)}%</${tag}>`;
         };
         setHTML(
           box,

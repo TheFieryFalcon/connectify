@@ -14,7 +14,7 @@
   const { cleanSubject, categorizeTask, getSavedTaskType, getCategories, getCustomCategoriesForClass, invalidateTypesMemoryCache } = types;
 
   // Connectify's own panel inside a row: its text must never become part of a task key
-  const INJECTED = '.connectea-row-wrapper, .connectea-panel, .connectea-type-container, .connectea-outcome-bar';
+  const INJECTED = '.connectify-row-wrapper, .connectify-panel, .connectify-type-container, .connectify-outcome-bar';
 
   function getTaskMeta(row) {
     const card = row.closest('.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile');
@@ -87,10 +87,10 @@
     // A past year (Past Years) shows its types as they were, never changed
     select.disabled = Boolean(window.ConnectifyPastYearMode?.active());
     if (currentSelection) {
-      select.classList.add('connectea-overridden');
+      select.classList.add('connectify-overridden');
       select.title = `Assessment type manually set to "${currentSelection}". Click to change or reset to Auto.`;
     } else {
-      select.classList.remove('connectea-overridden');
+      select.classList.remove('connectify-overridden');
       select.title = isUnknown ? 'Its type could not be detected. Click to choose one.' : `Automatically detected as "${autoType}". Click to override.`;
     }
   }
@@ -111,7 +111,7 @@
   }
 
   function rescanAllAutoAssessments() {
-    const selects = Array.from(document.querySelectorAll('.connectea-type-select'));
+    const selects = Array.from(document.querySelectorAll('.connectify-type-select'));
     for (const select of selects) {
       const row = select.closest('.cvr-c-task');
       if (!row) continue;
@@ -135,14 +135,14 @@
   }
 
   window.addEventListener('storage', e => {
-    if (e.key === 'cx-categories' || e.key === 'connectea:categories') {
+    if (e.key === 'cx-categories' || e.key === 'connectify:categories') {
       try {
         const saved = e.newValue && window.ConnectifyCategoryStore.sanitize(JSON.parse(e.newValue));
         if (saved) window.cxCategories = saved;
       } catch {}
       invalidateTypesMemoryCache();
       rescanAllAutoAssessments();
-    } else if (e.key === window.ConnectifyUtils.userKey('connectea:task_type_overrides') || e.key?.startsWith(window.ConnectifyUtils.userKey('connectea:class_categories:'))) {
+    } else if (e.key === window.ConnectifyUtils.userKey('connectify:task_type_overrides') || e.key?.startsWith(window.ConnectifyUtils.userKey('connectify:class_categories:'))) {
       invalidateTypesMemoryCache();
     }
   });

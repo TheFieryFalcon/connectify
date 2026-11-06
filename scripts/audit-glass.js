@@ -31,15 +31,15 @@ const ROLES = {
   solid: '.cx-goal-modal, #cx-customizer-modal > div, .cx-crop-dialog',
   backdrop: '.cx-goal-overlay, #cx-customizer-modal, #cx-wallpaper-crop, .v-window-modalitycurtain, .modal-backdrop, .yui3-widget-mask, .ui-widget-overlay, .cdk-overlay-dark-backdrop, .mat-drawer-backdrop, .eds-c-modal-overlay, .eds-c-overlay, .cvr-c-overlay, .cx-overlay',
   // The layers covering other text, as theme-overlay-blur.css lists them
-  overlay: '#connectify-sidebar, #connectea-theme-menu, #connectea-outcome-tooltip, #cx-jump-subject-list, .cx-dates-filter-list, .cx-notification, .cvr-c-primary-navigation, .cvr-c-location-bar, .cvr-c-service-bar__container, .cvr-c-service-bar, .cvr-c-service-menu, .cvr-c-category-menu, .c-category-menu, .js-pos-category-toolbar-container::before, .v-popupview-popup, .modal-content, .ui-dialog, mat-dialog-container, .mat-menu-panel, .mat-select-panel',
+  overlay: '#connectify-sidebar, #connectify-theme-menu, #connectify-outcome-tooltip, #cx-jump-subject-list, .cx-dates-filter-list, .cx-notification, .cvr-c-primary-navigation, .cvr-c-location-bar, .cvr-c-service-bar__container, .cvr-c-service-bar, .cvr-c-service-menu, .cvr-c-category-menu, .c-category-menu, .js-pos-category-toolbar-container::before, .v-popupview-popup, .modal-content, .ui-dialog, mat-dialog-container, .mat-menu-panel, .mat-select-panel',
   surface: '.eds-c-tile, .cvr-c-tile, .c-tile, .eds-c-card, .cvr-c-card, mat-card, .mat-card'
 };
 
 // Controls, marks and labels are never glass surfaces: their fills are their meaning
 // (the Weaknesses plot is dark by rule outside light tone, design_rules.md)
 const NOT_SURFACES = '#connectify-radar-chart, button, a, input, select, textarea, option, [role="button"], [role="option"], [role="tab"], mat-chip, .mat-chip, .mat-progress-bar, mat-progress-bar, svg, .highcharts-container, ' +
-  '.cvr-c-task__chart, .cx-compound-progress-container, .connectea-outcome-bar, .cx-goal-bars, .cx-goal-hbar, .cx-goal-tier, .card-scope, #cx-expand-progress, #cx-expand-btn, ' +
-  '.eds-s-is-active, .v-selected, [aria-selected="true"], .mat-calendar-body-selected, .cx-progress-chart-tooltip, #cx-preview-tooltip, #connectea-theme-toggle';
+  '.cvr-c-task__chart, .cx-compound-progress-container, .connectify-outcome-bar, .cx-goal-bars, .cx-goal-hbar, .cx-goal-tier, .card-scope, #cx-expand-progress, #cx-expand-btn, ' +
+  '.eds-s-is-active, .v-selected, [aria-selected="true"], .mat-calendar-body-selected, .cx-progress-chart-tooltip, #cx-preview-tooltip, #connectify-theme-toggle';
 const NOT_SURFACE_CLASS = /badge|avatar|^connect-(red|green|blue|purple|orange|yellow|grey|gray|teal|pink)|^cx-pred-pill|^cx-pred-scenario-card--|^cx-notification--|^cx-cat-/;
 
 /** Runs in the page. scope: 'sidebar' (the drawer and any dialog it opened), 'page', or a selector (one layer). */
@@ -85,7 +85,7 @@ function measureGlass({ scope, roles, notSurfaces, notSurfaceClass, canvasTolera
     .map(tokenColor).filter(Boolean).map(c => c.a);
   const canvas = tokenColor('--cx-canvas-bg');
   probe.remove();
-  const hasWallpaper = document.documentElement.getAttribute('data-connectea-has-custom-bg') === 'true';
+  const hasWallpaper = document.documentElement.getAttribute('data-connectify-has-custom-bg') === 'true';
   const tokens = {
     surfaces,
     blur: parseFloat(rootStyle.getPropertyValue('--cx-glass-blur')),
@@ -301,7 +301,7 @@ async function auditGlass(page, scope) {
 
 // Layers that exist only while open: each opened, measured and closed again on the page's first view
 const FLOATING_LAYERS = [
-  { open: '.connectea-theme-arrow', layer: '#connectea-theme-menu' },
+  { open: '.connectify-theme-arrow', layer: '#connectify-theme-menu' },
   { open: '#cx-jump-subject-select', layer: '#cx-jump-subject-list' }
 ];
 

@@ -16,6 +16,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - A new school year is Semester 1 until its own Semester 2, even when its classes appear in Term 4.
 - The outcome meter shows again from a subject's second marked result, as before 3.3.2. Turn on Hide potentially inaccurate prediction bars to keep the 3.3.2 behaviour.
 - Settings' General Preferences line up: every field is the same height, the reload note sits beside Statistics Panels, and the wallpaper rows keep an even gap below the fields.
+- Everything Connectify still named after its old name, Connectea, is now named Connectify: page classes and attributes, events and saved keys. Saved themes, wallpapers, task types, week overrides, categories, calibration and cohort sizes move to the new names once on the first page load, and backups and past years saved before the change still import and open.
 
 ---
 

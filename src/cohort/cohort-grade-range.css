@@ -3,20 +3,20 @@
    class prediction the quartile values sit two by two and the range is one column beside them, Lowest beside
    their first row and Highest beside their second, at the same size: nine cells in one row did not fit the
    row at 1280px. Without a prediction Score / Rank / Average sit centred against both rows */
-.connectea-panel.connectea-xp-stats.connectea-xp-overall:has(.connectea-xp-grid--possible:not([hidden])) {
+.connectify-panel.connectify-xp-stats.connectify-xp-overall:has(.connectify-xp-grid--possible:not([hidden])) {
   grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(3, minmax(60px, max-content)) !important;
 }
-.connectea-xp-overall:has(.connectea-xp-grid--possible:not([hidden])) .connectea-xp-grid--quantiles {
+.connectify-xp-overall:has(.connectify-xp-grid--possible:not([hidden])) .connectify-xp-grid--quantiles {
   grid-column: 4 / 6 !important;
   grid-row: 1 / span 2 !important;
   grid-template-rows: auto auto !important;
   grid-template-rows: subgrid !important;
 }
-.connectea-xp-overall:not(:has(> .connectea-xp-prediction:not([hidden]))):has(.connectea-xp-grid--possible:not([hidden])) .connectea-xp-grid--head {
+.connectify-xp-overall:not(:has(> .connectify-xp-prediction:not([hidden]))):has(.connectify-xp-grid--possible:not([hidden])) .connectify-xp-grid--head {
   grid-row: 1 / span 2 !important;
   align-self: center !important;
 }
-.connectea-panel.connectea-xp-stats .connectea-xp-grid--possible {
+.connectify-panel.connectify-xp-stats .connectify-xp-grid--possible {
   grid-column: 6 / 7 !important;
   grid-row: 1 / span 2 !important;
   padding-left: 18px !important;
@@ -26,12 +26,12 @@
   grid-template-rows: auto auto !important;
   grid-template-rows: subgrid !important;
 }
-.connectea-panel.connectea-xp-stats .connectea-xp-grid--possible[hidden] { display: none !important; }
-.connectea-xp-overall:has(.connectea-xp-grid--possible:not([hidden])) :is(.connectea-xp-grid--quantiles, .connectea-xp-grid--possible) .connectea-xp-value {
+.connectify-panel.connectify-xp-stats .connectify-xp-grid--possible[hidden] { display: none !important; }
+.connectify-xp-overall:has(.connectify-xp-grid--possible:not([hidden])) :is(.connectify-xp-grid--quantiles, .connectify-xp-grid--possible) .connectify-xp-value {
   font-size: 20px !important;
   line-height: 1.3 !important;
 }
-html.connectea-dark .connectea-panel--expanded .connectea-xp-grid--possible { border-color: var(--cx-border, #3b6088) !important; }
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .connectea-panel--expanded .connectea-xp-grid--possible {
+html.connectify-dark .connectify-panel--expanded .connectify-xp-grid--possible { border-color: var(--cx-border, #3b6088) !important; }
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .connectify-panel--expanded .connectify-xp-grid--possible {
   border-color: var(--cx-gl-hairline, rgba(255, 255, 255, 0.14)) !important;
 }

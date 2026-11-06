@@ -33,9 +33,9 @@
   const estimated = new Set();
 
   function pass(precollectedAllSubjects = null) {
-    if (!document.getElementById('connectea-style')) {
+    if (!document.getElementById('connectify-style')) {
       const styleEl = document.createElement('style');
-      styleEl.id = 'connectea-style';
+      styleEl.id = 'connectify-style';
       styleEl.textContent = styles;
       document.head.append(styleEl);
     }

@@ -9,10 +9,10 @@
 (() => {
   'use strict';
 
-  const STORAGE_KEY = 'connectea:theme:v1';
-  const STORAGE_THEME_ID = 'connectea:theme:id';
-  const STORAGE_LAST_THEME = 'connectea:last_theme_id';
-  const RESTORE_KEY = 'connectea:theme:restore_dark';
+  const STORAGE_KEY = 'connectify:theme:v1';
+  const STORAGE_THEME_ID = 'connectify:theme:id';
+  const STORAGE_LAST_THEME = 'connectify:last_theme_id';
+  const RESTORE_KEY = 'connectify:theme:restore_dark';
 
   const auth = window.ConnectifyThemeAuth;
   const tokens = window.ConnectifyThemeTokens;
@@ -109,7 +109,7 @@
   function isDarkMode() {
     if (isAuthDisabled()) return false;
     if (typeof document !== 'undefined' && document.documentElement) {
-      return document.documentElement.classList.contains('connectea-dark');
+      return document.documentElement.classList.contains('connectify-dark');
     }
     const theme = registry.get(getTheme());
     return theme ? theme.isDark : true;
@@ -137,7 +137,7 @@
   function applyGlass(theme, customColors) {
     const root = document.documentElement;
     if (theme.id === 'liquid-glass' || theme.liquidGlass || customColors?.glassDiffusion) {
-      root.setAttribute('data-connectea-glass', 'true');
+      root.setAttribute('data-connectify-glass', 'true');
       const blur = theme.glassBlur ?? customColors?.glassBlur ?? 12;
       root.style.setProperty('--cx-glass-blur', `${blur}px`);
       // Layers over text keep a 12px floor unless the theme turns it off (theme-overlay-blur.js)
@@ -145,7 +145,7 @@
       root.style.setProperty('--cx-glass-blur-overlay', `${window.ConnectifyOverlayBlur?.of(blur, keep) ?? (keep ? Math.max(12, blur) : blur)}px`);
       root.style.setProperty('--cx-glass-opacity', `${theme.glassOpacity ?? customColors?.glassOpacity ?? 0.65}`);
     } else {
-      root.removeAttribute('data-connectea-glass');
+      root.removeAttribute('data-connectify-glass');
     }
   }
 
@@ -157,9 +157,9 @@
   function applyToDocument(theme, customColors) {
     const isDark = theme.isDark;
     for (const el of tokens.tokenTargets()) {
-      el.classList.toggle('connectea-dark', isDark);
-      if (isDark) el.dataset.connecteaTheme = theme.id;
-      else { delete el.dataset.connecteaTheme; el.removeAttribute('data-connectea-theme'); }
+      el.classList.toggle('connectify-dark', isDark);
+      if (isDark) el.dataset.connectifyTheme = theme.id;
+      else { delete el.dataset.connectifyTheme; el.removeAttribute('data-connectify-theme'); }
     }
     applyGlass(theme, customColors);
     if (isCustomTheme(theme) || customColors || theme.colors) {
@@ -195,7 +195,7 @@
     notifyThemeListeners(theme.id, theme);
     if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
       try {
-        window.dispatchEvent(new CustomEvent('connectea:themechange', { detail: { themeId: theme.id, theme } }));
+        window.dispatchEvent(new CustomEvent('connectify:themechange', { detail: { themeId: theme.id, theme } }));
       } catch {}
     }
     window.ConnectifyThemeBoot?.save(); // the next page load paints this theme before Connect renders

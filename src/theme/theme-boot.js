@@ -15,11 +15,11 @@
   if (window.ConnectifyThemeBoot) return;
 
   const KEY = 'connectify:theme_boot';
-  const THEME_ID = 'connectea:theme:id';
-  const SETTINGS_BG = 'connectea:custom_background';
-  const THEMES_LIST = 'connectea:custom_themes_list';
+  const THEME_ID = 'connectify:theme:id';
+  const SETTINGS_BG = 'connectify:custom_background';
+  const THEMES_LIST = 'connectify:custom_themes_list';
   const STYLE_ID = 'cx-theme-boot';
-  const ATTRS = ['data-connectea-theme', 'data-connectea-glass', 'data-connectea-tone', 'data-connectea-has-custom-bg'];
+  const ATTRS = ['data-connectify-theme', 'data-connectify-glass', 'data-connectify-tone', 'data-connectify-has-custom-bg'];
   const CSS_URL_MAX = 2 * 1024 * 1024 - 64; // Chrome's URL length limit, less the url("") around it
   const INLINE_BG_MAX = 64 * 1024;          // small wallpapers (SVG presets) are kept in the snapshot itself
   const blobUrls = new Map();               // data URL -> blob: URL, the last two wallpapers
@@ -76,12 +76,12 @@
     let snap = null;
     try { snap = JSON.parse(read(KEY) || 'null'); } catch {}
     if (!snap || snap.id !== read(THEME_ID)) return; // the theme changed elsewhere since: leave it to theme.js
-    root.classList.toggle('connectea-dark', Boolean(snap.dark));
+    root.classList.toggle('connectify-dark', Boolean(snap.dark));
     for (const [name, value] of Object.entries(snap.attrs || {})) if (ATTRS.includes(name)) root.setAttribute(name, String(value));
     for (const [prop, value] of Object.entries(snap.props || {})) if (prop.startsWith('--cx-')) root.style.setProperty(prop, String(value));
     const wallpaper = wallpaperOf(snap.bg, snap.id);
     if (wallpaper) root.style.setProperty('--cx-custom-bg-image', `url("${cssUrl(wallpaper)}")`);
-    else root.removeAttribute('data-connectea-has-custom-bg');
+    else root.removeAttribute('data-connectify-has-custom-bg');
     const canvas = /^rgba?\([\d.,\s]+\)$/.test(snap.canvas || '') && !/,\s*0\)$/.test(snap.canvas) ? snap.canvas : null;
     if (!canvas) return;
     const style = document.createElement('style');
@@ -101,7 +101,7 @@
     const attrs = {};
     for (const name of ATTRS) if (root.hasAttribute(name)) attrs[name] = root.getAttribute(name);
     const bg = window.ConnectifyThemeTokens?.backgroundSource?.() || null;
-    const snap = { id: read(THEME_ID), dark: root.classList.contains('connectea-dark'), attrs, props, canvas: getComputedStyle(root).backgroundColor, bg };
+    const snap = { id: read(THEME_ID), dark: root.classList.contains('connectify-dark'), attrs, props, canvas: getComputedStyle(root).backgroundColor, bg };
     try { localStorage.setItem(KEY, JSON.stringify(snap)); } catch {}
   }
 

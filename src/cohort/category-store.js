@@ -2,7 +2,7 @@
  * Connectify: assessment category store
  *
  * The default assessment categories (colour and detection keywords) and the user's saved categories,
- * kept in localStorage (cx-categories, legacy connectea:categories) and mirrored to extension storage.
+ * kept in localStorage (cx-categories, legacy connectify:categories) and mirrored to extension storage.
  * The live set is window.cxCategories. Exposes window.ConnectifyCategoryStore.
  */
 (() => {
@@ -76,7 +76,7 @@
   function writeLocal(categories) {
     try {
       localStorage.setItem('cx-categories', JSON.stringify(categories));
-      localStorage.setItem('connectea:categories', JSON.stringify(categories));
+      localStorage.setItem('connectify:categories', JSON.stringify(categories));
     } catch {}
   }
 
@@ -89,7 +89,7 @@
   /** Loads saved categories into window.cxCategories (localStorage now, extension storage when it answers). */
   function resolveCategories() {
     try {
-      const stored = localStorage.getItem('connectea:categories') || localStorage.getItem('cx-categories');
+      const stored = localStorage.getItem('connectify:categories') || localStorage.getItem('cx-categories');
       const parsed = stored ? JSON.parse(stored) : null;
       const clean = sanitize(parsed);
       if (clean) window.cxCategories = clean;
@@ -122,7 +122,7 @@
     extensionRemove('cx-categories');
     try {
       localStorage.removeItem('cx-categories');
-      localStorage.removeItem('connectea:categories');
+      localStorage.removeItem('connectify:categories');
     } catch {}
     window.cxCategories = copyDefaults();
   }

@@ -3,11 +3,11 @@
  */
 
 /* Circular Action Buttons (e.g. trash/delete, circular controls) */
-.connectea-dark:not(cx-n) .btn-monospaced:not(.cx-n), .connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n),
-.connectea-dark:not(cx-n) :is([class*="delete"]:where(button):not(.cx-n)), .connectea-dark:not(cx-n) :is([class*="delete"]:where(a):not(.cx-n)),
-.connectea-dark:not(cx-n) [class*="delete"].btn, .connectea-dark:not(cx-n) :is([class*="trash"]:where(button):not(.cx-n)),
-.connectea-dark:not(cx-n) :is([class*="trash"]:where(a):not(.cx-n)), .connectea-dark:not(cx-n) [class*="trash"].btn {
+.connectify-dark:not(cx-n) .btn-monospaced:not(.cx-n), .connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n),
+.connectify-dark:not(cx-n) :is([class*="delete"]:where(button):not(.cx-n)), .connectify-dark:not(cx-n) :is([class*="delete"]:where(a):not(.cx-n)),
+.connectify-dark:not(cx-n) [class*="delete"].btn, .connectify-dark:not(cx-n) :is([class*="trash"]:where(button):not(.cx-n)),
+.connectify-dark:not(cx-n) :is([class*="trash"]:where(a):not(.cx-n)), .connectify-dark:not(cx-n) [class*="trash"].btn {
   background-color: var(--cx-button-bg, var(--cx-surface-secondary, #202c3b)) !important;
   background-image: none !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
@@ -15,229 +15,229 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
 }
 
-.connectea-dark:not(cx-n) .eds-c-icon-button:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-pri-nav-icon-button:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n),
-.connectea-dark:not(cx-n) .mat-icon-button:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n),
-.connectea-dark:not(cx-n) .c-toolbar-button:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n),
-.connectea-dark:not(cx-n) :where(button.mat-menu-trigger):not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n):not(.cx-n),
-.connectea-dark:not(cx-n) :where(button.mat-tooltip-trigger):not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n):not(.cx-n),
-.connectea-dark:not(cx-n) .v-button.eds-o-button--captionless:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button) {
+.connectify-dark:not(cx-n) .eds-c-icon-button:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-pri-nav-icon-button:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n),
+.connectify-dark:not(cx-n) .mat-icon-button:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n),
+.connectify-dark:not(cx-n) .c-toolbar-button:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n),
+.connectify-dark:not(cx-n) :where(button.mat-menu-trigger):not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n):not(.cx-n),
+.connectify-dark:not(cx-n) :where(button.mat-tooltip-trigger):not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button):not(.cx-n):not(.cx-n),
+.connectify-dark:not(cx-n) .v-button.eds-o-button--captionless:not([class*="border"]):not([class*="separator"]):not(.eds-u-separator--left):not(.border-left):not(.mat-stroked-button) {
   border: none !important;
   box-shadow: none !important;
 }
 
-.connectea-dark:not(cx-n) .mat-stroked-button:not(.cx-n):not(cx-n), .connectea-dark:not(cx-n) button.mat-focus-indicator.border,
-.connectea-dark:not(cx-n) .mat-icon-button.border:not(cx-n), .connectea-dark:not(cx-n) [class*="button"].border:not(cx-n) {
+.connectify-dark:not(cx-n) .mat-stroked-button:not(.cx-n):not(cx-n), .connectify-dark:not(cx-n) button.mat-focus-indicator.border,
+.connectify-dark:not(cx-n) .mat-icon-button.border:not(cx-n), .connectify-dark:not(cx-n) [class*="button"].border:not(cx-n) {
   border: 1px solid var(--cx-button-border, var(--cx-border, #455a73)) !important;
 }
 
-.connectea-dark:not(cx-n) .border-left, .connectea-dark:not(cx-n) [class*="border-left"], .connectea-dark:not(cx-n) .eds-u-separator--left,
-.connectea-dark:not(cx-n) [class*="separator--left"] {
+.connectify-dark:not(cx-n) .border-left, .connectify-dark:not(cx-n) [class*="border-left"], .connectify-dark:not(cx-n) .eds-u-separator--left,
+.connectify-dark:not(cx-n) [class*="separator--left"] {
   border-left: 1px solid var(--cx-border, #455a73) !important;
 }
 
-.connectea-dark:not(cx-n) .c-toolbar-button:not(cx-n), .connectea-dark:not(cx-n) .toggle--white-rounded:not(cx-n),
-.connectea-dark:not(cx-n) .toggle--grey-light:not(cx-n), .connectea-dark:not(cx-n) [class*="toggle--grey"]:not(cx-n),
-.connectea-dark:not(cx-n) button.mat-icon-button, .connectea-dark:not(cx-n) button.mat-menu-trigger,
-.connectea-dark:not(cx-n) button.mat-tooltip-trigger {
+.connectify-dark:not(cx-n) .c-toolbar-button:not(cx-n), .connectify-dark:not(cx-n) .toggle--white-rounded:not(cx-n),
+.connectify-dark:not(cx-n) .toggle--grey-light:not(cx-n), .connectify-dark:not(cx-n) [class*="toggle--grey"]:not(cx-n),
+.connectify-dark:not(cx-n) button.mat-icon-button, .connectify-dark:not(cx-n) button.mat-menu-trigger,
+.connectify-dark:not(cx-n) button.mat-tooltip-trigger {
   background-color: var(--cx-surface-secondary, #202c3b) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
 /* Icon buttons inside table cells (row ⋯ menus) are clear like Connect's: a fill a shade off the row read as a smudge */
-.connectea-dark:not(cx-n) :where(td):not(.cx-n) button.mat-icon-button, .connectea-dark:not(cx-n) .mat-cell button.mat-icon-button {
+.connectify-dark:not(cx-n) :where(td):not(.cx-n) button.mat-icon-button, .connectify-dark:not(cx-n) .mat-cell button.mat-icon-button {
   background-color: transparent !important;
 }
 
-html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-light .mat-icon,
-html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-light :where(mat-icon):not(.cx-n),
-html.eds.cvr.ngm.connectea-dark .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-light :where(cnt-icon):not(.cx-n),
-:is(html, body).connectea-dark .toggle--grey-light .mat-icon, :is(html, body).connectea-dark .toggle--grey-light :where(mat-icon):not(.cx-n),
-:is(html, body).connectea-dark .toggle--grey-light :where(cnt-icon):not(.cx-n), :is(html, body).connectea-dark .toggle--grey-light .mat-ligature-font,
-:is(html, body).connectea-dark .toggle--grey-light .material-icons, :is(html, body).connectea-dark .toggle--grey-dark .mat-icon,
-:is(html, body).connectea-dark .toggle--grey-dark :where(mat-icon):not(.cx-n),
-:is(html, body).connectea-dark .toggle--grey-dark :where(cnt-icon):not(.cx-n), :is(html, body).connectea-dark .toggle--grey-dark .mat-ligature-font,
-:is(html, body).connectea-dark .toggle--grey-dark .material-icons, :is(html, body).connectea-dark .c-toolbar-button .mat-icon,
-:is(html, body).connectea-dark .c-toolbar-button :where(mat-icon):not(.cx-n),
-:is(html, body).connectea-dark .c-toolbar-button :where(cnt-icon):not(.cx-n), :is(html, body).connectea-dark .c-toolbar-button .mat-ligature-font,
-:is(html, body).connectea-dark .c-toolbar-button .material-icons {
+html.eds.cvr.ngm.connectify-dark .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-light .mat-icon,
+html.eds.cvr.ngm.connectify-dark .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-light :where(mat-icon):not(.cx-n),
+html.eds.cvr.ngm.connectify-dark .mat-button-base:not(.mat-primary):not(.mat-accent):not(.mat-warn):not(.mat-disabled):not(.mat-button-disabled).toggle-trigger.toggle--grey-light :where(cnt-icon):not(.cx-n),
+:is(html, body).connectify-dark .toggle--grey-light .mat-icon, :is(html, body).connectify-dark .toggle--grey-light :where(mat-icon):not(.cx-n),
+:is(html, body).connectify-dark .toggle--grey-light :where(cnt-icon):not(.cx-n), :is(html, body).connectify-dark .toggle--grey-light .mat-ligature-font,
+:is(html, body).connectify-dark .toggle--grey-light .material-icons, :is(html, body).connectify-dark .toggle--grey-dark .mat-icon,
+:is(html, body).connectify-dark .toggle--grey-dark :where(mat-icon):not(.cx-n),
+:is(html, body).connectify-dark .toggle--grey-dark :where(cnt-icon):not(.cx-n), :is(html, body).connectify-dark .toggle--grey-dark .mat-ligature-font,
+:is(html, body).connectify-dark .toggle--grey-dark .material-icons, :is(html, body).connectify-dark .c-toolbar-button .mat-icon,
+:is(html, body).connectify-dark .c-toolbar-button :where(mat-icon):not(.cx-n),
+:is(html, body).connectify-dark .c-toolbar-button :where(cnt-icon):not(.cx-n), :is(html, body).connectify-dark .c-toolbar-button .mat-ligature-font,
+:is(html, body).connectify-dark .c-toolbar-button .material-icons {
   color: var(--cx-text-primary, #f1f5f9) !important;
   fill: currentColor !important;
 }
 
-.connectea-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n), .connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover,
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n),
-.connectea-dark:not(cx-n) :is([class*="delete"]:where(button):not(.cx-n)):hover,
-.connectea-dark:not(cx-n) :is([class*="delete"]:where(a):not(.cx-n)):hover, .connectea-dark:not(cx-n) [class*="delete"].btn:hover,
-.connectea-dark:not(cx-n) :is([class*="trash"]:where(button):not(.cx-n)):hover,
-.connectea-dark:not(cx-n) :is([class*="trash"]:where(a):not(.cx-n)):hover, .connectea-dark:not(cx-n) [class*="trash"].btn:hover {
+.connectify-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n), .connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover,
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n),
+.connectify-dark:not(cx-n) :is([class*="delete"]:where(button):not(.cx-n)):hover,
+.connectify-dark:not(cx-n) :is([class*="delete"]:where(a):not(.cx-n)):hover, .connectify-dark:not(cx-n) [class*="delete"].btn:hover,
+.connectify-dark:not(cx-n) :is([class*="trash"]:where(button):not(.cx-n)):hover,
+.connectify-dark:not(cx-n) :is([class*="trash"]:where(a):not(.cx-n)):hover, .connectify-dark:not(cx-n) [class*="trash"].btn:hover {
   background-color: var(--cx-surface-hover, #2c3b4e) !important;
   border-color: var(--cx-border-hover, #6482a6) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
-.connectea-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) :where(mat-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) :where(cnt-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) :where(mat-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) :where(cnt-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .mat-icon-button:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .mat-icon-button:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .mat-icon-button:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .mat-icon-button:not(.cx-n) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .mat-icon-button:not(.cx-n) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .mat-icon-button:not(.cx-n) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .mat-icon-button:not(.cx-n) :where(mat-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .mat-icon-button:not(.cx-n) :where(cnt-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .mat-icon-button:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .btn-monospaced:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .btn-monospaced:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .btn-monospaced:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .btn-monospaced:not(.cx-n) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .btn-monospaced:not(.cx-n) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .btn-monospaced:not(.cx-n) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .btn-monospaced:not(.cx-n) :where(mat-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .btn-monospaced:not(.cx-n) :where(cnt-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .btn-monospaced:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) :where(mat-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) :where(cnt-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) :where(mat-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) :where(cnt-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) :where(mat-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) :where(cnt-icon):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) [class^="cvr-c-icon--"]:not([data-original-color]) {
+.connectify-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) :where(mat-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) :where(cnt-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .eds-c-icon-button:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) :where(mat-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) :where(cnt-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .mat-icon-button:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .mat-icon-button:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .mat-icon-button:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .mat-icon-button:not(.cx-n) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .mat-icon-button:not(.cx-n) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .mat-icon-button:not(.cx-n) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .mat-icon-button:not(.cx-n) :where(mat-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .mat-icon-button:not(.cx-n) :where(cnt-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .mat-icon-button:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .btn-monospaced:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .btn-monospaced:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .btn-monospaced:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .btn-monospaced:not(.cx-n) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .btn-monospaced:not(.cx-n) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .btn-monospaced:not(.cx-n) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .btn-monospaced:not(.cx-n) :where(mat-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .btn-monospaced:not(.cx-n) :where(cnt-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .btn-monospaced:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) :where(mat-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) :where(cnt-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) :where(mat-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) :where(cnt-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):not(.cx-n):not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) :where(mat-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) :where(cnt-icon):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)) [class^="cvr-c-icon--"]:not([data-original-color]) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
   fill: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover :where(svg):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover :where(i):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover :where(span):not([data-original-color]):not(.cx-n),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover .lexicon-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover .v-icon:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover [class*="icon"]:not([data-original-color]),
-.connectea-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover [class^="cvr-c-icon--"]:not([data-original-color]) {
+.connectify-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .eds-c-icon-button:hover:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .cvr-c-icon-button:hover:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .mat-icon-button:hover:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) .btn-monospaced:hover:not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.rounded-circle:is(button, a, .btn)):hover [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :where(button:has([class*="trash"], [class*="delete"], [class*="bin"])):hover:not(.cx-n):not(.cx-n) [class^="cvr-c-icon--"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover :where(svg):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover :where(i):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover :where(span):not([data-original-color]):not(.cx-n),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover .lexicon-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover .v-icon:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover [class*="icon"]:not([data-original-color]),
+.connectify-dark:not(cx-n) :is(.delete-button:is(button, a, .btn)):hover [class^="cvr-c-icon--"]:not([data-original-color]) {
   color: var(--cx-button-text-hover, #ffffff) !important;
   fill: var(--cx-button-text-hover, #ffffff) !important;
 }
 
 /* Primary Action Buttons */
-.connectea-dark .v-button--primary:not(cx-n), .connectea-dark .eds-c-button--primary:not(cx-n), .connectea-dark .cvr-c-button--primary:not(cx-n),
-.connectea-dark .eds-c-standard-button--primary:not(cx-n), .connectea-dark button[type="submit"], .connectea-dark .cx-btn-primary:not(cx-n) {
+.connectify-dark .v-button--primary:not(cx-n), .connectify-dark .eds-c-button--primary:not(cx-n), .connectify-dark .cvr-c-button--primary:not(cx-n),
+.connectify-dark .eds-c-standard-button--primary:not(cx-n), .connectify-dark button[type="submit"], .connectify-dark .cx-btn-primary:not(cx-n) {
   background-color: var(--cx-accent, #2563eb) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
   color: var(--cx-accent-text, #ffffff) !important;
   font-weight: 600 !important;
 }
 
-.connectea-dark .v-button--primary:hover:not(cx-n), .connectea-dark .eds-c-button--primary:hover:not(cx-n),
-.connectea-dark .cvr-c-button--primary:hover:not(cx-n), .connectea-dark .eds-c-standard-button--primary:hover:not(cx-n),
-.connectea-dark button[type="submit"]:hover, .connectea-dark .cx-btn-primary:hover:not(cx-n) {
+.connectify-dark .v-button--primary:hover:not(cx-n), .connectify-dark .eds-c-button--primary:hover:not(cx-n),
+.connectify-dark .cvr-c-button--primary:hover:not(cx-n), .connectify-dark .eds-c-standard-button--primary:hover:not(cx-n),
+.connectify-dark button[type="submit"]:hover, .connectify-dark .cx-btn-primary:hover:not(cx-n) {
   background-color: var(--cx-accent-hover, #1d4ed8) !important;
   border-color: var(--cx-accent-hover, #60a5fa) !important;
   color: var(--cx-accent-text, #ffffff) !important;
 }
 
 /* Secondary & Ghost Buttons */
-.connectea-dark .v-button--secondary, .connectea-dark .eds-c-button--secondary, .connectea-dark .v-button--flat, .connectea-dark .eds-c-button--flat {
+.connectify-dark .v-button--secondary, .connectify-dark .eds-c-button--secondary, .connectify-dark .v-button--flat, .connectify-dark .eds-c-button--flat {
   background-color: transparent !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-.connectea-dark .v-button--secondary:hover, .connectea-dark .eds-c-button--secondary:hover, .connectea-dark .v-button--flat:hover,
-.connectea-dark .eds-c-button--flat:hover {
+.connectify-dark .v-button--secondary:hover, .connectify-dark .eds-c-button--secondary:hover, .connectify-dark .v-button--flat:hover,
+.connectify-dark .eds-c-button--flat:hover {
   background-color: var(--cx-surface-hover, #202c3b) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
   border-color: var(--cx-border-hover, #5b7594) !important;
 }
 
-:is(html, body, .connectea-dark) .cx-btn-secondary:not(#cx-n), :is(html, body, .connectea-dark) :where(button.cx-btn-secondary):not(#cx-n):not(.cx-n),
-:is(html, body, .connectea-dark) :is(#cx-customizer-modal .cx-btn-secondary) {
+:is(html, body, .connectify-dark) .cx-btn-secondary:not(#cx-n), :is(html, body, .connectify-dark) :where(button.cx-btn-secondary):not(#cx-n):not(.cx-n),
+:is(html, body, .connectify-dark) :is(#cx-customizer-modal .cx-btn-secondary) {
   background-color: var(--cx-button-bg, #243042) !important;
   border: 1px solid var(--cx-border, #3b506c) !important;
   color: var(--cx-button-text, #e2e8f0) !important;
 }
 
-:is(html, body, .connectea-dark) .cx-btn-secondary:hover:not(#cx-n),
-:is(html, body, .connectea-dark) :where(button.cx-btn-secondary:hover):not(#cx-n):not(.cx-n):not(.cx-n),
-:is(html, body, .connectea-dark) :is(#cx-customizer-modal .cx-btn-secondary:hover) {
+:is(html, body, .connectify-dark) .cx-btn-secondary:hover:not(#cx-n),
+:is(html, body, .connectify-dark) :where(button.cx-btn-secondary:hover):not(#cx-n):not(.cx-n):not(.cx-n),
+:is(html, body, .connectify-dark) :is(#cx-customizer-modal .cx-btn-secondary:hover) {
   background-color: var(--cx-button-hover, #31425a) !important;
   border-color: var(--cx-border-hover, #4f6b8f) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;

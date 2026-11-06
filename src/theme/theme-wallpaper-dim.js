@@ -150,12 +150,12 @@
   window.ConnectifyWallpaperDim = { update, dimFor, brightenFor, keyOf, TARGET };
 
   // A theme change can change the ink: brighten for the new text colour once the theme has applied
-  window.addEventListener?.('connectea:themechange', () => {
+  window.addEventListener?.('connectify:themechange', () => {
     requestAnimationFrame(() => { if (currentUrl) apply(currentUrl, currentKey); });
   });
 
   // theme-custom-tokens.js ran first: measure the wallpaper it already applied
-  if (document.documentElement?.hasAttribute('data-connectea-has-custom-bg')) {
+  if (document.documentElement?.hasAttribute('data-connectify-has-custom-bg')) {
     update(window.ConnectifyThemeTokens?.getActiveBackground?.());
   }
 })();

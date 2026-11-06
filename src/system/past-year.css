@@ -77,30 +77,30 @@ html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back:hover {
   color: #174c75;
 }
 
-html.connectea-dark[data-cx-past-year] #cx-past-year-bar {
+html.connectify-dark[data-cx-past-year] #cx-past-year-bar {
   background: var(--cx-surface-bg, #1e2632);
   color: var(--cx-text-primary, #e6edf5);
   border-color: var(--cx-border, #2e3c4e);
 }
 
-html.connectea-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__saved {
+html.connectify-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__saved {
   color: var(--cx-text-secondary, #b7c5d6);
 }
 
-html.connectea-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back {
+html.connectify-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back {
   background: var(--cx-button-bg, var(--cx-nav-bg, #18222d));
   color: var(--cx-button-text, var(--cx-text-secondary, #e1eaf3));
   border-color: var(--cx-button-border, var(--cx-nav-border, #3b4d5e));
 }
 
-html.connectea-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back:hover {
+html.connectify-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back:hover {
   background: var(--cx-button-hover, var(--cx-badge-bg, #24303e));
   border-color: var(--cx-border-strong, #556c84);
   color: var(--cx-text-primary, #ffffff);
 }
 
 /* Liquid Glass: one glass surface like the theme's top bars, rounded like its panels */
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])[data-cx-past-year] #cx-past-year-bar {
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])[data-cx-past-year] #cx-past-year-bar {
   background: var(--cx-surface-elevated, rgba(18, 26, 40, 0.65));
   backdrop-filter: blur(var(--cx-glass-blur-overlay, 12px)) saturate(160%);
   -webkit-backdrop-filter: blur(var(--cx-glass-blur-overlay, 12px)) saturate(160%);

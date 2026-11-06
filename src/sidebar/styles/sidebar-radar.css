@@ -41,32 +41,32 @@
   stroke-dasharray: 5 4;
 }
 
-.connectea-dark #connectify-radar-chart {
+.connectify-dark #connectify-radar-chart {
   border-color: var(--cx-border, #3a3a3a);
 }
 
-.connectea-dark #connectify-radar-chart .cx-radar-message {
+.connectify-dark #connectify-radar-chart .cx-radar-message {
   color: var(--cx-text-muted, #a8a8a8);
 }
 
-.connectea-dark #connectify-radar-chart .cx-radar-warning {
+.connectify-dark #connectify-radar-chart .cx-radar-warning {
   color: #d4b483;
 }
 
-.connectea-dark #connectify-radar-chart text {
+.connectify-dark #connectify-radar-chart text {
   fill: var(--cx-text-secondary, #e1eaf3) !important;
   color: var(--cx-text-secondary, #e1eaf3) !important;
 }
 
-.connectea-dark #connectify-radar-chart tspan {
+.connectify-dark #connectify-radar-chart tspan {
   fill: #2ecc71 !important;
 }
 
-.connectea-dark #connectify-radar-chart .cx-radar-cohort-value {
+.connectify-dark #connectify-radar-chart .cx-radar-cohort-value {
   fill: var(--cx-text-muted, #a0b2c6) !important;
 }
 
-.connectea-dark #connectify-radar-chart .cx-radar-cohort {
+.connectify-dark #connectify-radar-chart .cx-radar-cohort {
   stroke: var(--cx-text-muted, #a0b2c6);
 }
 

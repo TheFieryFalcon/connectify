@@ -8,24 +8,24 @@
  * bar, never an ancestor of the drawer), and the drawer is a glass surface of its own with the same fill and blur.
  */
 
-html.connectea-dark[data-connectea-theme] .c-category-menu.toggle-drawer:not(#cx-n) {
+html.connectify-dark[data-connectify-theme] .c-category-menu.toggle-drawer:not(#cx-n) {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container > mat-toolbar.c-category-bar,
-html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container > mat-toolbar.c-category-bar {
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .js-pos-category-toolbar-container > mat-toolbar.c-category-bar,
+html:not(.connectify-dark):is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .js-pos-category-toolbar-container > mat-toolbar.c-category-bar {
   background-color: transparent !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
 /* Connect's Vaadin bar in that container (Content's Published Sections) sits on the same glass, with no second fill */
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container > .cvr-c-category-toolbar:not(#cx-n) {
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .js-pos-category-toolbar-container > .cvr-c-category-toolbar:not(#cx-n) {
   background-color: transparent !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container::before,
-html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container::before {
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .js-pos-category-toolbar-container::before,
+html:not(.connectify-dark):is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .js-pos-category-toolbar-container::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -35,18 +35,18 @@ html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connec
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%);
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container::before,
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n) {
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .js-pos-category-toolbar-container::before,
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n) {
   background-color: color-mix(in srgb, color-mix(in srgb, var(--cx-canvas-bg, #0b1120) 92%, var(--cx-text-primary, #ffffff)) calc(var(--cx-glass-opacity, 0.75) * 100%), transparent) !important;
 }
 
-html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .js-pos-category-toolbar-container::before,
-html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n) {
+html:not(.connectify-dark):is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .js-pos-category-toolbar-container::before,
+html:not(.connectify-dark):is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n) {
   background-color: rgba(255, 255, 255, var(--cx-glass-opacity, 0.75)) !important;
 }
 
-html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n),
-html:not(.connectea-dark):is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n) {
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n),
+html:not(.connectify-dark):is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .c-category-menu.toggle-drawer:not(#cx-n) {
   backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
 }

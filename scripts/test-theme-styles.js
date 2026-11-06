@@ -543,7 +543,7 @@ async function clickInteractiveButtons(page) {
       try {
         for (const el of elements) {
           // Skip theme toggle and Connectify sidebar controls
-          if (el.id === 'connectea-theme-toggle' || el.closest?.('#connectea-theme-toggle')) continue;
+          if (el.id === 'connectify-theme-toggle' || el.closest?.('#connectify-theme-toggle')) continue;
           if (el.closest?.('#connectify-sidebar, #connectify-sidebar-handle')) continue;
 
           // Skip site navigation, headers, breadcrumbs, pagination
@@ -718,7 +718,7 @@ async function discoverSubPages(page) {
 
       nodes.forEach((el, idx) => {
         // Skip theme toggle or controls outside main content/nav
-        if (el.id === 'connectea-theme-toggle' || el.closest('#connectea-theme-toggle')) return;
+        if (el.id === 'connectify-theme-toggle' || el.closest('#connectify-theme-toggle')) return;
         if (el.closest('#connectify-sidebar, #connectify-sidebar-handle')) return;
 
         const text = (el.innerText || el.getAttribute('aria-label') || el.title || '').trim().replace(/\s+/g, ' ');
@@ -792,7 +792,7 @@ async function activateNavbarHeading(page, headingTitle, delay = 1250) {
 
       const nodes = Array.from(document.querySelectorAll(NAVBAR_SELECTORS));
       const target = nodes.find(el => {
-        if (el.id === 'connectea-theme-toggle' || el.closest('#connectea-theme-toggle')) return false;
+        if (el.id === 'connectify-theme-toggle' || el.closest('#connectify-theme-toggle')) return false;
         if (el.closest('#connectify-sidebar, #connectify-sidebar-handle')) return false;
         const t = (el.innerText || el.getAttribute('aria-label') || el.title || '').trim().replace(/\s+/g, ' ');
         return t.toLowerCase() === title.toLowerCase();
@@ -1313,7 +1313,7 @@ async function auditToolSubjects(page, toolId) {
     const expected = new Map();
     for (const tile of document.querySelectorAll('.eds-c-tile')) {
       const title = tile.querySelector('.eds-c-tile__title')?.textContent?.trim();
-      if (title && tile.querySelector('.cvr-c-tasks .cvr-c-task .connectea-panel')) expected.set(key(title), title.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, ''));
+      if (title && tile.querySelector('.cvr-c-tasks .cvr-c-task .connectify-panel')) expected.set(key(title), title.replace(/\s*[-–—]\s*Semester\s*[12].*$/i, ''));
     }
     const missing = Array.from(expected.entries()).filter(([k]) => !listed.has(k)).map(([, name]) => name);
     if (!missing.length) return [];
@@ -1334,13 +1334,13 @@ async function captureNativeBaseline(page, options = {}) {
     // The registry lives in the extension's isolated world: request the theme across worlds (theme-request.js)
     document.documentElement.setAttribute('data-connectify-theme-request', 'light');
     document.dispatchEvent(new CustomEvent('connectify-request-theme'));
-    document.documentElement.classList.remove('connectea-dark');
-    document.documentElement.removeAttribute('data-connectea-theme');
-    delete document.documentElement.dataset.connecteaTheme;
+    document.documentElement.classList.remove('connectify-dark');
+    document.documentElement.removeAttribute('data-connectify-theme');
+    delete document.documentElement.dataset.connectifyTheme;
     if (document.body) {
-      document.body.classList.remove('connectea-dark');
-      document.body.removeAttribute('data-connectea-theme');
-      delete document.body.dataset.connecteaTheme;
+      document.body.classList.remove('connectify-dark');
+      document.body.removeAttribute('data-connectify-theme');
+      delete document.body.dataset.connectifyTheme;
     }
     if (opts?.auditScope === 'sidebar') {
       const sidebar = document.getElementById('connectify-sidebar');
@@ -1476,9 +1476,9 @@ async function captureNativeBaseline(page, options = {}) {
         const inSidebar = el.id === 'connectify-sidebar' || el.id === 'connectify-sidebar-handle' ||
                           Boolean(typeof el.closest === 'function' && el.closest('#connectify-sidebar, #connectify-sidebar-handle, .cx-goal-overlay'));
         if (!inSidebar) continue;
-        if (el.id === 'connectea-theme-toggle' || (typeof el.closest === 'function' && el.closest('#connectea-theme-toggle'))) continue;
+        if (el.id === 'connectify-theme-toggle' || (typeof el.closest === 'function' && el.closest('#connectify-theme-toggle'))) continue;
       } else {
-        if (el.closest?.('#cx-expand-progress, #cx-expand-btn, [id*="cx-expand-"], [class*="cx-expand-"], mat-progress-bar, .mat-progress-bar, mat-spinner, .mat-spinner, mat-progress-spinner, #connectea-theme-toggle, #connectea-theme-menu, #connectify-sidebar, #connectify-sidebar-handle, [class*="connectify-"], [id*="connectify-"], .connectify-cohort-panel, .cx-compound-progress-container, .cx-workspace-panel, .cx-refresh-btn, .highcharts-container, svg.highcharts-root, .connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-type-select, .connectea-outcome-bar, .connectea-subject-controls')) continue;
+        if (el.closest?.('#cx-expand-progress, #cx-expand-btn, [id*="cx-expand-"], [class*="cx-expand-"], mat-progress-bar, .mat-progress-bar, mat-spinner, .mat-spinner, mat-progress-spinner, #connectify-theme-toggle, #connectify-theme-menu, #connectify-sidebar, #connectify-sidebar-handle, [class*="connectify-"], [id*="connectify-"], .connectify-cohort-panel, .cx-compound-progress-container, .cx-workspace-panel, .cx-refresh-btn, .highcharts-container, svg.highcharts-root, .connectify-panel, .connectify-row-wrapper, .connectify-type-container, .connectify-type-select, .connectify-outcome-bar, .connectify-subject-controls')) continue;
       }
 
       const style = window.getComputedStyle(el);
@@ -1924,12 +1924,12 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         const inSidebar = el.id === 'connectify-sidebar' || el.id === 'connectify-sidebar-handle' ||
                           Boolean(typeof el.closest === 'function' && el.closest('#connectify-sidebar, #connectify-sidebar-handle, .cx-goal-overlay'));
         if (!inSidebar) continue;
-        if (el.id === 'connectea-theme-toggle' || (typeof el.closest === 'function' && el.closest('#connectea-theme-toggle'))) continue;
+        if (el.id === 'connectify-theme-toggle' || (typeof el.closest === 'function' && el.closest('#connectify-theme-toggle'))) continue;
       } else {
         // Progress pills, spinners and Connect's own Highcharts are transient or native: not audited
         if (el.closest?.('#cx-expand-progress, #cx-expand-btn, [id*="cx-expand-"], [class*="cx-expand-"], mat-progress-bar, .mat-progress-bar, mat-spinner, .mat-spinner, mat-progress-spinner, .highcharts-container, svg.highcharts-root, #connectify-sidebar, #connectify-sidebar-handle')) continue;
         // Connectify UI: contrast only (the drawer is audited in full in sidebar scope)
-        if (el.closest?.('#connectea-theme-toggle, #connectea-theme-menu, [class*="connectify-"], [id*="connectify-"], .connectify-cohort-panel, .cx-compound-progress-container, .cx-workspace-panel, .cx-refresh-btn, .connectea-panel, .connectea-row-wrapper, .connectea-type-container, .connectea-type-select, .connectea-outcome-bar, .connectea-subject-controls')) {
+        if (el.closest?.('#connectify-theme-toggle, #connectify-theme-menu, [class*="connectify-"], [id*="connectify-"], .connectify-cohort-panel, .cx-compound-progress-container, .cx-workspace-panel, .cx-refresh-btn, .connectify-panel, .connectify-row-wrapper, .connectify-type-container, .connectify-type-select, .connectify-outcome-bar, .connectify-subject-controls')) {
           ownUiElements.push(el);
           continue;
         }
@@ -2385,7 +2385,7 @@ async function auditThemeAgainstBaseline(page, themeId, isDarkTheme, baselineDat
         const isGlassTheme = ['liquid-glass', 'liquid-glass-clear'].includes(tid);
         if (isDark && rect.width >= 80 && rect.height >= 20 &&
             !['img', 'video', 'canvas', 'svg', 'button', 'input', 'select', 'textarea', 'a'].includes(tag) &&
-            !el.closest?.('button, a, [role="button"], [role="option"], mat-chip, .mat-chip, [class*="badge"], [class*="avatar"], .mat-progress-bar, .cdk-overlay-container, #connectify-sidebar, #connectify-sidebar-handle, #connectify-notifications-container, #connectea-theme-menu, #cx-customizer-modal, .connectea-outcome-bar, .cvr-c-task__marks') &&
+            !el.closest?.('button, a, [role="button"], [role="option"], mat-chip, .mat-chip, [class*="badge"], [class*="avatar"], .mat-progress-bar, .cdk-overlay-container, #connectify-sidebar, #connectify-sidebar-handle, #connectify-notifications-container, #connectify-theme-menu, #cx-customizer-modal, .connectify-outcome-bar, .cvr-c-task__marks') &&
             !el.closest?.('.eds-s-is-active, .v-selected, [aria-selected="true"], .mat-calendar-body-selected') && !el.matches?.(':hover') &&
             // Semantic colours (status pills, class-colour bands) are labels, not surfaces
             !Array.from(el.classList || []).some(c => /^connect-(red|green|blue|purple|orange|yellow|grey|gray|teal|pink)/.test(c) || c === 'card-scope')) {
@@ -2792,13 +2792,13 @@ async function runThemeAudit(customOptions = {}) {
               // The registry lives in the extension's isolated world: request the theme across worlds (theme-request.js)
               document.documentElement.setAttribute('data-connectify-theme-request', 'light');
               document.dispatchEvent(new CustomEvent('connectify-request-theme'));
-              document.documentElement.classList.remove('connectea-dark');
-              delete document.documentElement.dataset.connecteaTheme;
-              document.documentElement.removeAttribute('data-connectea-theme');
+              document.documentElement.classList.remove('connectify-dark');
+              delete document.documentElement.dataset.connectifyTheme;
+              document.documentElement.removeAttribute('data-connectify-theme');
               if (document.body) {
-                document.body.classList.remove('connectea-dark');
-                delete document.body.dataset.connecteaTheme;
-                document.body.removeAttribute('data-connectea-theme');
+                document.body.classList.remove('connectify-dark');
+                delete document.body.dataset.connectifyTheme;
+                document.body.removeAttribute('data-connectify-theme');
               }
             }).catch(() => {});
             continue;
@@ -2814,11 +2814,11 @@ async function runThemeAudit(customOptions = {}) {
               // The registry lives in the extension's isolated world: request the theme across worlds (theme-request.js)
               document.documentElement.setAttribute('data-connectify-theme-request', tid);
               document.dispatchEvent(new CustomEvent('connectify-request-theme'));
-              document.documentElement.classList.add('connectea-dark');
-              document.documentElement.dataset.connecteaTheme = tid;
+              document.documentElement.classList.add('connectify-dark');
+              document.documentElement.dataset.connectifyTheme = tid;
               if (document.body) {
-                document.body.classList.add('connectea-dark');
-                document.body.dataset.connecteaTheme = tid;
+                document.body.classList.add('connectify-dark');
+                document.body.dataset.connectifyTheme = tid;
               }
             }, t.id);
 
@@ -2926,13 +2926,13 @@ async function runThemeAudit(customOptions = {}) {
             // The registry lives in the extension's isolated world: request the theme across worlds (theme-request.js)
             document.documentElement.setAttribute('data-connectify-theme-request', 'light');
             document.dispatchEvent(new CustomEvent('connectify-request-theme'));
-            document.documentElement.classList.remove('connectea-dark');
-            delete document.documentElement.dataset.connecteaTheme;
-            document.documentElement.removeAttribute('data-connectea-theme');
+            document.documentElement.classList.remove('connectify-dark');
+            delete document.documentElement.dataset.connectifyTheme;
+            document.documentElement.removeAttribute('data-connectify-theme');
             if (document.body) {
-              document.body.classList.remove('connectea-dark');
-              delete document.body.dataset.connecteaTheme;
-              document.body.removeAttribute('data-connectea-theme');
+              document.body.classList.remove('connectify-dark');
+              delete document.body.dataset.connectifyTheme;
+              document.body.removeAttribute('data-connectify-theme');
             }
           }).catch(() => {});
           await page.keyboard.press('Escape').catch(() => {});

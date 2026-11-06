@@ -3,177 +3,177 @@
  * list > row, lists and fieldsets inside cards, table rows and cells inside the table, accordion panels inside the
  * accordion, card hosts around cards); each inner layer then draws a box behind its text in a different shade. Only
  * the outermost surface paints; everything inside it is clear (hover and active states keep their highlight).
- * [data-connectea-theme] gives these rules the weight of the Liquid Glass hook, which some Connect rules need.
+ * [data-connectify-theme] gives these rules the weight of the Liquid Glass hook, which some Connect rules need.
  * Blur and glass placement stay in theme-glass-nesting.css.
  */
 
 /* The active top tab: its inner block carries the highlight, the item around it stays clear */
-html.connectea-dark[data-connectea-theme] .cvr-c-primary-navigation__links .cvr-js-greedy__item.eds-s-is-active {
+html.connectify-dark[data-connectify-theme] .cvr-c-primary-navigation__links .cvr-js-greedy__item.eds-s-is-active {
   background-color: transparent !important;
 }
 
-html.connectea-dark[data-connectea-theme] .cvr-c-service-menu__wrapper:not(.cx-n):not(.cx-n),
-html.connectea-dark[data-connectea-theme] .cvr-c-service-menu__list:not(.cx-n):not(.cx-n),
-html.connectea-dark[data-connectea-theme] .cvr-c-service-menu__item:not(.eds-s-is-active):not(.v-selected) {
+html.connectify-dark[data-connectify-theme] .cvr-c-service-menu__wrapper:not(.cx-n):not(.cx-n),
+html.connectify-dark[data-connectify-theme] .cvr-c-service-menu__list:not(.cx-n):not(.cx-n),
+html.connectify-dark[data-connectify-theme] .cvr-c-service-menu__item:not(.eds-s-is-active):not(.v-selected) {
   background-color: transparent !important;
 }
 
 /* Lists and activity feeds inside a card or tile are clear (Reports lists, User Activity and its rows) */
-html.connectea-dark[data-connectea-theme] .mat-card .mat-list-base, html.connectea-dark[data-connectea-theme] .mat-card .cvr-c-recent-event-activity,
-html.connectea-dark[data-connectea-theme] .mat-card .eds-c-selection-list, html.connectea-dark[data-connectea-theme] .mat-card .eds-o-list__item,
-html.connectea-dark[data-connectea-theme] .eds-c-tile .mat-list-base,
-html.connectea-dark[data-connectea-theme] .eds-c-tile .cvr-c-recent-event-activity,
-html.connectea-dark[data-connectea-theme] .eds-c-tile .eds-c-selection-list, html.connectea-dark[data-connectea-theme] .eds-c-tile .eds-o-list__item,
-html.connectea-dark[data-connectea-theme] .cvr-c-tile .mat-list-base,
-html.connectea-dark[data-connectea-theme] .cvr-c-tile .cvr-c-recent-event-activity,
-html.connectea-dark[data-connectea-theme] .cvr-c-tile .eds-c-selection-list, html.connectea-dark[data-connectea-theme] .cvr-c-tile .eds-o-list__item,
-html.connectea-dark[data-connectea-theme] .v-panel .mat-list-base, html.connectea-dark[data-connectea-theme] .v-panel .cvr-c-recent-event-activity,
-html.connectea-dark[data-connectea-theme] .v-panel .eds-c-selection-list, html.connectea-dark[data-connectea-theme] .v-panel .eds-o-list__item {
+html.connectify-dark[data-connectify-theme] .mat-card .mat-list-base, html.connectify-dark[data-connectify-theme] .mat-card .cvr-c-recent-event-activity,
+html.connectify-dark[data-connectify-theme] .mat-card .eds-c-selection-list, html.connectify-dark[data-connectify-theme] .mat-card .eds-o-list__item,
+html.connectify-dark[data-connectify-theme] .eds-c-tile .mat-list-base,
+html.connectify-dark[data-connectify-theme] .eds-c-tile .cvr-c-recent-event-activity,
+html.connectify-dark[data-connectify-theme] .eds-c-tile .eds-c-selection-list, html.connectify-dark[data-connectify-theme] .eds-c-tile .eds-o-list__item,
+html.connectify-dark[data-connectify-theme] .cvr-c-tile .mat-list-base,
+html.connectify-dark[data-connectify-theme] .cvr-c-tile .cvr-c-recent-event-activity,
+html.connectify-dark[data-connectify-theme] .cvr-c-tile .eds-c-selection-list, html.connectify-dark[data-connectify-theme] .cvr-c-tile .eds-o-list__item,
+html.connectify-dark[data-connectify-theme] .v-panel .mat-list-base, html.connectify-dark[data-connectify-theme] .v-panel .cvr-c-recent-event-activity,
+html.connectify-dark[data-connectify-theme] .v-panel .eds-c-selection-list, html.connectify-dark[data-connectify-theme] .v-panel .eds-o-list__item {
   background-color: transparent !important;
 }
 
 /* Tables: the table is the surface; rows and cells (each given the surface fill by the dark table rules, whose
    :is() lists outrank a plain selector) stay clear. Hovered rows keep their highlight. */
-html.connectea-dark[data-connectea-theme] table :where(thead):not(#cx-n), html.connectea-dark[data-connectea-theme] table :where(tbody):not(#cx-n),
-html.connectea-dark[data-connectea-theme] table :where(tfoot):not(#cx-n),
-html.connectea-dark[data-connectea-theme] table :where(tr:not(:hover)):not(#cx-n),
-html.connectea-dark[data-connectea-theme] table :where(th):not(#cx-n), html.connectea-dark[data-connectea-theme] table :where(td):not(#cx-n) {
+html.connectify-dark[data-connectify-theme] table :where(thead):not(#cx-n), html.connectify-dark[data-connectify-theme] table :where(tbody):not(#cx-n),
+html.connectify-dark[data-connectify-theme] table :where(tfoot):not(#cx-n),
+html.connectify-dark[data-connectify-theme] table :where(tr:not(:hover)):not(#cx-n),
+html.connectify-dark[data-connectify-theme] table :where(th):not(#cx-n), html.connectify-dark[data-connectify-theme] table :where(td):not(#cx-n) {
   background-color: transparent !important;
 }
 
 /* A card's body and header (Content's section headings) are clear: the card is the surface, one glass layer */
-html.connectea-dark[data-connectea-theme] .eds-c-card > .eds-c-card__body:not(.cx-n):not(.cx-n),
-html.connectea-dark[data-connectea-theme] .eds-c-card > .eds-c-card__header:not(.cx-n):not(.cx-n) {
+html.connectify-dark[data-connectify-theme] .eds-c-card > .eds-c-card__body:not(.cx-n):not(.cx-n),
+html.connectify-dark[data-connectify-theme] .eds-c-card > .eds-c-card__header:not(.cx-n):not(.cx-n) {
   background-color: transparent !important;
 }
 
 /* A table inside a card, tile or dialog (Summary calendar, Class Stats) is clear too: the card is the surface */
-html.connectea-dark[data-connectea-theme] .mat-card :where(table):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .eds-c-card :where(table):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .eds-c-tile :where(table):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .cvr-c-tile :where(table):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .v-panel :where(table):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-dialog-container :where(table):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .v-window :where(table):not(#cx-n) {
+html.connectify-dark[data-connectify-theme] .mat-card :where(table):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .eds-c-card :where(table):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .eds-c-tile :where(table):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .cvr-c-tile :where(table):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .v-panel :where(table):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-dialog-container :where(table):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .v-window :where(table):not(#cx-n) {
   background-color: transparent !important;
 }
 
 /* A table written into a notice or section (rich text, or no Connect table class) is text, not a data table: it sits
    on the page as on Connect's white one, its hairlines kept. Any fill of its own showed as a grey slab on the wallpaper */
-html.connectea-dark[data-connectea-theme] :where(table:not([class*="table"]):not(.cvr-c-tree-panel)):not(#cx-n):not(.cx-n),
-html.connectea-dark[data-connectea-theme] .rtf-content :where(table):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .rtf-content .table-responsive:not(#cx-n) {
+html.connectify-dark[data-connectify-theme] :where(table:not([class*="table"]):not(.cvr-c-tree-panel)):not(#cx-n):not(.cx-n),
+html.connectify-dark[data-connectify-theme] .rtf-content :where(table):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .rtf-content .table-responsive:not(#cx-n) {
   background-color: transparent !important;
 }
 
-html.connectea-dark[data-connectea-theme] mat-accordion:not(.cx-n) :where(mat-expansion-panel):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-accordion:not(.cx-n) :where(.mat-expansion-panel):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-accordion:not(.cx-n) :where(.mat-expansion-panel-content):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-accordion:not(.cx-n) :where(.mat-expansion-panel-body):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-accordion:not(.cx-n) :where(mat-accordion):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-accordion:not(.cx-n) :where(.mat-accordion):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-accordion:not(.cx-n) :where(table):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-accordion:not(.cx-n) :where(.connect-paginator-container):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-accordion:not(.cx-n) :where(mat-paginator):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-accordion:not(cx-n) :where(mat-expansion-panel):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-accordion:not(cx-n) :where(.mat-expansion-panel):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-accordion:not(cx-n) :where(.mat-expansion-panel-content):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-accordion:not(cx-n) :where(.mat-expansion-panel-body):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-accordion:not(cx-n) :where(mat-accordion):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-accordion:not(cx-n) :where(.mat-accordion):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-accordion:not(cx-n) :where(table):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-accordion:not(cx-n) :where(.connect-paginator-container):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-accordion:not(cx-n) :where(mat-paginator):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-toolbar.c-category-bar :where(mat-expansion-panel):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-toolbar.c-category-bar :where(.mat-expansion-panel):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-toolbar.c-category-bar :where(.mat-expansion-panel-content):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-toolbar.c-category-bar :where(.mat-expansion-panel-body):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-toolbar.c-category-bar :where(mat-accordion):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-toolbar.c-category-bar :where(.mat-accordion):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-toolbar.c-category-bar :where(table):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-toolbar.c-category-bar :where(.connect-paginator-container):not(#cx-n),
-html.connectea-dark[data-connectea-theme] mat-toolbar.c-category-bar :where(mat-paginator):not(#cx-n) {
+html.connectify-dark[data-connectify-theme] mat-accordion:not(.cx-n) :where(mat-expansion-panel):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-accordion:not(.cx-n) :where(.mat-expansion-panel):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-accordion:not(.cx-n) :where(.mat-expansion-panel-content):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-accordion:not(.cx-n) :where(.mat-expansion-panel-body):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-accordion:not(.cx-n) :where(mat-accordion):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-accordion:not(.cx-n) :where(.mat-accordion):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-accordion:not(.cx-n) :where(table):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-accordion:not(.cx-n) :where(.connect-paginator-container):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-accordion:not(.cx-n) :where(mat-paginator):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-accordion:not(cx-n) :where(mat-expansion-panel):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-accordion:not(cx-n) :where(.mat-expansion-panel):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-accordion:not(cx-n) :where(.mat-expansion-panel-content):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-accordion:not(cx-n) :where(.mat-expansion-panel-body):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-accordion:not(cx-n) :where(mat-accordion):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-accordion:not(cx-n) :where(.mat-accordion):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-accordion:not(cx-n) :where(table):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-accordion:not(cx-n) :where(.connect-paginator-container):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-accordion:not(cx-n) :where(mat-paginator):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-toolbar.c-category-bar :where(mat-expansion-panel):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-toolbar.c-category-bar :where(.mat-expansion-panel):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-toolbar.c-category-bar :where(.mat-expansion-panel-content):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-toolbar.c-category-bar :where(.mat-expansion-panel-body):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-toolbar.c-category-bar :where(mat-accordion):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-toolbar.c-category-bar :where(.mat-accordion):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-toolbar.c-category-bar :where(table):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-toolbar.c-category-bar :where(.connect-paginator-container):not(#cx-n),
+html.connectify-dark[data-connectify-theme] mat-toolbar.c-category-bar :where(mat-paginator):not(#cx-n) {
   background-color: transparent !important;
 }
 
 /* Feed notice cards: the inner mat-card is the surface; the host only keeps its rounded shadow */
-html.connectea-dark[data-connectea-theme] cnt-stream-notice-card {
+html.connectify-dark[data-connectify-theme] cnt-stream-notice-card {
   background-color: transparent !important;
 }
 
 /* Right-hand category drawer: the menu paints, its wrapper and rows stay clear (the active row keeps its mark) */
-html.connectea-dark[data-connectea-theme] .cvr-c-category-menu__wrapper:not(.cx-n):not(.cx-n):not(.cx-n),
-html.connectea-dark[data-connectea-theme] .cvr-c-category-menu .v-label:not(.eds-s-is-active):not(.v-selected),
-html.connectea-dark[data-connectea-theme] .cvr-c-category-menu .v-link:not(.eds-s-is-active):not(.v-selected),
-html.connectea-dark[data-connectea-theme] .cvr-c-category-menu .eds-u-interactive:not(.eds-s-is-active):not(.v-selected) {
+html.connectify-dark[data-connectify-theme] .cvr-c-category-menu__wrapper:not(.cx-n):not(.cx-n):not(.cx-n),
+html.connectify-dark[data-connectify-theme] .cvr-c-category-menu .v-label:not(.eds-s-is-active):not(.v-selected),
+html.connectify-dark[data-connectify-theme] .cvr-c-category-menu .v-link:not(.eds-s-is-active):not(.v-selected),
+html.connectify-dark[data-connectify-theme] .cvr-c-category-menu .eds-u-interactive:not(.eds-s-is-active):not(.v-selected) {
   background-color: transparent !important;
 }
 
 /* Form fieldsets inside a card (Profile) or a dialog (Add Discussion's Message and Image Gallery) are clear */
-html.connectea-dark[data-connectea-theme] .mat-card :where(fieldset.c-floating-form-field):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-dialog-container :where(fieldset.c-floating-form-field):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .eds-c-tile :where(fieldset.c-floating-form-field):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .v-panel :where(fieldset.c-floating-form-field):not(#cx-n) {
+html.connectify-dark[data-connectify-theme] .mat-card :where(fieldset.c-floating-form-field):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-dialog-container :where(fieldset.c-floating-form-field):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .eds-c-tile :where(fieldset.c-floating-form-field):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .v-panel :where(fieldset.c-floating-form-field):not(#cx-n) {
   background-color: transparent !important;
 }
 
 /* Vaadin popup panels are one surface: their bars and labels stay clear */
-html.connectea-dark[data-connectea-theme] .v-popupview-popup :where(.v-csslayout):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .v-popupview-popup :where(.v-label):not(#cx-n) {
+html.connectify-dark[data-connectify-theme] .v-popupview-popup :where(.v-csslayout):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .v-popupview-popup :where(.v-label):not(#cx-n) {
   background-color: transparent !important;
 }
 
 /* Cohort statistics panels: their lines sit on the panel, never on a band of their own */
-html.connectea-dark[data-connectea-theme] .connectea-panel .connectea-distribution,
-html.connectea-dark[data-connectea-theme] .connectea-panel .connectea-result,
-html.connectea-dark[data-connectea-theme] .connectea-panel .connectea-result-row,
-html.connectea-dark[data-connectea-theme] .connectea-panel .connectea-panel-distribution,
-html.connectea-dark[data-connectea-theme] .connectea-panel .connectea-panel-standing {
+html.connectify-dark[data-connectify-theme] .connectify-panel .connectify-distribution,
+html.connectify-dark[data-connectify-theme] .connectify-panel .connectify-result,
+html.connectify-dark[data-connectify-theme] .connectify-panel .connectify-result-row,
+html.connectify-dark[data-connectify-theme] .connectify-panel .connectify-panel-distribution,
+html.connectify-dark[data-connectify-theme] .connectify-panel .connectify-panel-standing {
   background-color: transparent !important;
 }
 
 /* Class Summary: stat cells and the calendar sit on their card */
-html.connectea-dark[data-connectea-theme] .c-scope-statistic:not(cx-n),
-html.connectea-dark[data-connectea-theme] .c-scope-statistic-control:not(cx-n), html.connectea-dark[data-connectea-theme] table.mat-calendar-table,
-html.connectea-dark[data-connectea-theme] .mat-calendar-table-header:not(cx-n) {
+html.connectify-dark[data-connectify-theme] .c-scope-statistic:not(cx-n),
+html.connectify-dark[data-connectify-theme] .c-scope-statistic-control:not(cx-n), html.connectify-dark[data-connectify-theme] table.mat-calendar-table,
+html.connectify-dark[data-connectify-theme] .mat-calendar-table-header:not(cx-n) {
   background-color: transparent !important;
 }
 
 /* Tab headers inside a card (Classes) sit on the card */
-html.connectea-dark[data-connectea-theme] .mat-card :where(mat-tab-header):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .mat-card :where(.mat-tab-header):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .eds-c-tile :where(mat-tab-header):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .eds-c-tile :where(.mat-tab-header):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .cvr-c-tile :where(mat-tab-header):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .cvr-c-tile :where(.mat-tab-header):not(#cx-n) {
+html.connectify-dark[data-connectify-theme] .mat-card :where(mat-tab-header):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .mat-card :where(.mat-tab-header):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .eds-c-tile :where(mat-tab-header):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .eds-c-tile :where(.mat-tab-header):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .cvr-c-tile :where(mat-tab-header):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .cvr-c-tile :where(.mat-tab-header):not(#cx-n) {
   background-color: transparent !important;
 }
 
 /* Classes page: a class row's Favourite, Statistics and More buttons sit on the row (hover keeps its highlight) */
-html.connectea-dark[data-connectea-theme] cnt-school-class-metrics-summary-detail .mat-icon-button:not(:hover):not(#cx-n) {
+html.connectify-dark[data-connectify-theme] cnt-school-class-metrics-summary-detail .mat-icon-button:not(:hover):not(#cx-n) {
   background-color: transparent !important;
 }
 
 /* Their dividers: Connect's pale #d4d4d4 is faint on its white but glares on a dark theme; the theme's subtle hairline
    is as faint here */
-html.connectea-dark[data-connectea-theme] cnt-school-class-metrics-summary-detail .mat-icon-button.border-left:not(#cx-n) {
+html.connectify-dark[data-connectify-theme] cnt-school-class-metrics-summary-detail .mat-icon-button.border-left:not(#cx-n) {
   border-left-color: var(--cx-border-subtle, #2e3c4e) !important;
 }
 
 /* Home page portlets: the Liferay article wrapper around a tile sits 2px outside it with square corners, so its
    fill showed as a square box behind the rounded glass tile (Connect Help, notice promo). The tile is the surface. */
-html.connectea-dark[data-connectea-theme] .journal-content-article:has(> :is(.eds-c-tile, .cvr-c-tile)) {
+html.connectify-dark[data-connectify-theme] .journal-content-article:has(> :is(.eds-c-tile, .cvr-c-tile)) {
   background-color: transparent !important;
 }
 
 /* A promo inside a tile (notice of the month) is the tile's body: clear, with Connect's native geometry (no border
    or corners of its own), so its text sits on the tile instead of a darker box. Beats the id-weighted promo rule. */
-html.connectea-dark[data-connectea-theme] .eds-c-tile :where(.cvr-c-promo):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .cvr-c-tile :where(.cvr-c-promo):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .eds-c-tile .cvr-c-promo :where(.cvr-c-promo__body):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .eds-c-tile .cvr-c-promo :where(.cvr-c-promo__content):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .cvr-c-tile .cvr-c-promo :where(.cvr-c-promo__body):not(#cx-n),
-html.connectea-dark[data-connectea-theme] .cvr-c-tile .cvr-c-promo :where(.cvr-c-promo__content):not(#cx-n) {
+html.connectify-dark[data-connectify-theme] .eds-c-tile :where(.cvr-c-promo):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .cvr-c-tile :where(.cvr-c-promo):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .eds-c-tile .cvr-c-promo :where(.cvr-c-promo__body):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .eds-c-tile .cvr-c-promo :where(.cvr-c-promo__content):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .cvr-c-tile .cvr-c-promo :where(.cvr-c-promo__body):not(#cx-n),
+html.connectify-dark[data-connectify-theme] .cvr-c-tile .cvr-c-promo :where(.cvr-c-promo__content):not(#cx-n) {
   background-color: transparent !important;
   border: 0 !important;
   border-radius: 0 !important;

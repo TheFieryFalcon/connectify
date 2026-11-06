@@ -124,7 +124,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 83. `src/system/new-grade.js` (grade change detector & jump-to-card dispatcher)
 84. `src/system/dom-sweeper.js` (health check & component restoration)
 
-**Document start** (every Connect page, before Connect renders): `src/system/pointer-kind.js` (`<html data-cx-mouse>` after a mouse input, so touch targets stay normal size) and `src/theme/theme-boot.js` (the last theme's snapshot stamped on `<html>`, so a reload never flashes white; Chrome-safe wallpaper URLs).
+**Document start** (every Connect page, before Connect renders): `src/system/storage-rename.js` (first: keys saved under the old name `connectea:` move to `connectify:` once, in localStorage and extension storage, `connectify:storage_renamed` / `_ext`; `ConnectifyStorageRename.key` renames a backup's or archived year's keys as they are read), `src/system/pointer-kind.js` (`<html data-cx-mouse>` after a mouse input, so touch targets stay normal size) and `src/theme/theme-boot.js` (the last theme's snapshot stamped on `<html>`, so a reload never flashes white; Chrome-safe wallpaper URLs).
 
 **Background** (`src/system/update-reload.js`, GitHub and Firefox builds only; the Chrome Web Store zip drops it with `host_permissions`): browsers never load a new version into open tabs (Firefox leaves the old drawer with dead buttons), so after an install or update every open Connect tab is reloaded (`tabs.query` needs the Connect host permission in Chrome).
 

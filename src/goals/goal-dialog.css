@@ -20,8 +20,8 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-html[data-connectea-tone="light"] .cx-goal-overlay,
-html:not(.connectea-dark) .cx-goal-overlay {
+html[data-connectify-tone="light"] .cx-goal-overlay,
+html:not(.connectify-dark) .cx-goal-overlay {
   background-color: rgba(15, 23, 42, 0.45);
 }
 
@@ -43,7 +43,7 @@ html:not(.connectea-dark) .cx-goal-overlay {
   font-size: 13px;
 }
 
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-glass-clear"], [data-connectea-glass="true"]) .cx-goal-overlay .cx-goal-modal {
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-theme="liquid-glass-clear"], [data-connectify-glass="true"]) .cx-goal-overlay .cx-goal-modal {
   border-radius: 20px;
 }
 
@@ -82,7 +82,7 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-gla
 }
 
 /* Primary goal buttons: the anchor outranks the sidebar's id-weighted dark button rule (#cx-specificity-anchor) */
-:is(.cx-goal-overlay, #connectea-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set) {
+:is(.cx-goal-overlay, #connectify-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set) {
   padding: 6px 14px;
   border: 1px solid transparent;
   border-radius: 5px;
@@ -93,11 +93,11 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-gla
   cursor: pointer;
 }
 
-:is(.cx-goal-overlay, #connectea-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set):hover:not(:disabled) {
+:is(.cx-goal-overlay, #connectify-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set):hover:not(:disabled) {
   background: var(--cx-button-primary-hover, #1d4ed8);
 }
 
-:is(.cx-goal-overlay, #connectea-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set, .cx-goals-open):disabled {
+:is(.cx-goal-overlay, #connectify-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set, .cx-goals-open):disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -124,7 +124,7 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-theme="liquid-gla
 }
 
 /* Light tone: the mix above lands mid-grey on glass, so the tier's own hue goes dark enough to read */
-html.connectea-dark[data-connectea-tone="light"] .cx-goal-tier {
+html.connectify-dark[data-connectify-tone="light"] .cx-goal-tier {
   color: #1d1c1c;
   color: oklch(from var(--cx-goal-tier) 0.26 c h);
 }

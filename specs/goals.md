@@ -23,7 +23,7 @@ Rule: **one active goal per subject**. A Target ATAR goal holds its four subject
 ### 2.1 What a goal measures
 - **Semester ends**: the subject's semester mark, the way Connect works it out (Semester 2 is cumulative and includes Semester 1 tasks). The tasks in range are the outline's tasks for that semester (`taskSemester`, school week 17 split, the same as everywhere else).
 - **Custom week** (grade goals only): the running weight-weighted mean of every task due up to the end of that school week (`ConnectifySchoolTerms.weekOrder`, Early Easter respected; Semester 2 weeks include Semester 1 tasks).
-  - **A task's week is its Year Progression week**: the week set in Task Dates (`connectea:time_override:`, read through `ConnectifyUtils.customWeekOrder`), else its caption. This is the same `order` the graph and the export use.
+  - **A task's week is its Year Progression week**: the week set in Task Dates (`connectify:time_override:`, read through `ConnectifyUtils.customWeekOrder`), else its caption. This is the same `order` the graph and the export use.
   - Tasks after the end week are out of range: no slider, no bars.
   - Tasks with no readable week are also out of range. One line in the Set as Goal dialog names them (`No week: <task>. Set one in Task Dates.`); it is the only note besides errors.
 - **Week snapshot**: goal ranges use the weeks as they were when the page loaded (`ConnectifyGoalPlan.weekSnapshot()`, taken once per load, beside `ConnectifyPanelView`'s read-once pattern). Changing a week in Task Dates, or toggling Early Easter, does **not** recompute goals, bars, tiers or verdicts until the page is reloaded.
@@ -175,7 +175,7 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
 - **Completed task rows** judged by a goal (§7) get a performance bar and a progress bar.
 - **The overall row** of a subject with a goal (active, or the latest past goal) gets a progress bar only.
 - Unmarked rows get none.
-- **Tooltips**: the outcome meter's singleton floating tooltip (`#connectea-outcome-tooltip`: viewport-fixed, `pointer-events: none` on segments, never a `title` attribute), giving numbers only:
+- **Tooltips**: the outcome meter's singleton floating tooltip (`#connectify-outcome-tooltip`: viewport-fixed, `pointer-events: none` on segments, never a `title` attribute), giving numbers only:
   - performance: `Needed 78.0%, Got 82.5%`;
   - progress: `Goal 80%: 41.2 of 80 weighted points, Hard` (ATAR children: `ATAR goal 95.00, Chemistry needs 84.0%: 41.2 of 67.2 weighted points, Hard`).
   - Purple is never mentioned.

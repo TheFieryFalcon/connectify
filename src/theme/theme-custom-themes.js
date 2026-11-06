@@ -11,7 +11,7 @@
   const tokens = window.ConnectifyThemeTokens;
   if (!registry || !tokens) return;
 
-  const STORAGE_CUSTOM_THEMES_LIST = 'connectea:custom_themes_list';
+  const STORAGE_CUSTOM_THEMES_LIST = 'connectify:custom_themes_list';
   const extensionStorage = () => (typeof chrome !== 'undefined' && chrome.storage?.local) || null;
   // Version 2 themes were saved with the 20-token Full mode. Older ones never let the user edit these
   // six, so their stored values are inherited preset leftovers (e.g. a near-black input background on a
@@ -64,7 +64,7 @@
         } catch {}
         // A custom theme only known to extension storage could not be applied at startup
         const active = registry.getThemeDefinition(registry.getTheme());
-        if (active?.isCustom && document.documentElement?.dataset.connecteaTheme !== active.id) registry.setTheme(active.id);
+        if (active?.isCustom && document.documentElement?.dataset.connectifyTheme !== active.id) registry.setTheme(active.id);
         else if (active?.isCustom) tokens.setThemeBackground(registry.themeWallpaper(active)); // a wallpaper only extension storage held
       });
     } catch {}

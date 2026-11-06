@@ -20,7 +20,7 @@
 
     // Desktop greedy navigation bar
     for (const menu of document.querySelectorAll('.cvr-c-primary-navigation__links')) {
-      if (menu.querySelector('[data-connectea-shortcut]')) continue;
+      if (menu.querySelector('[data-connectify-shortcut]')) continue;
 
       const originalLink = menu.querySelector('a[href="/group/students/ui/my-connect"]');
       const item = originalLink?.closest('.cvr-js-greedy__item');
@@ -28,7 +28,7 @@
 
       const shortcut = document.createElement('div');
       shortcut.className = 'v-csslayout v-layout v-widget cvr-js-greedy__item v-csslayout-cvr-js-greedy__item';
-      shortcut.dataset.connecteaShortcut = '';
+      shortcut.dataset.connectifyShortcut = '';
       shortcut.style.display = 'inline-block';
 
       const wrapper = document.createElement('div');
@@ -48,7 +48,7 @@
 
     // Mobile / small-screen primary menu drawer
     for (const menu of document.querySelectorAll('.cvr-c-primary-menu__list')) {
-      if (menu.querySelector('[data-connectea-shortcut]')) continue;
+      if (menu.querySelector('[data-connectify-shortcut]')) continue;
 
       const originalLabel = Array.from(menu.querySelectorAll('.cvr-c-primary-menu__item-label')).find(
         e => e.textContent.trim() === 'My Connect'
@@ -57,7 +57,7 @@
       if (!item) continue;
 
       const link = document.createElement('a');
-      link.dataset.connecteaShortcut = '';
+      link.dataset.connectifyShortcut = '';
       link.href = DESTINATION_URL;
       link.className = 'cvr-c-primary-menu__item';
       link.style.cssText = 'display:block;color:inherit;text-decoration:none';
@@ -80,12 +80,12 @@
     const onOutlines = new URL(location.href).pathname.startsWith(OUTLINES_PATH);
     for (const item of document.querySelectorAll('.cvr-js-greedy__item, .cvr-c-primary-menu__item')) {
       let want;
-      if ('connecteaShortcut' in item.dataset) want = onOutlines;
+      if ('connectifyShortcut' in item.dataset) want = onOutlines;
       else if (onOutlines && isMyConnect(item)) {
-        if (item.classList.contains(ACTIVE)) item.dataset.connecteaActiveMoved = '';
+        if (item.classList.contains(ACTIVE)) item.dataset.connectifyActiveMoved = '';
         want = false;
-      } else if ('connecteaActiveMoved' in item.dataset) {
-        delete item.dataset.connecteaActiveMoved;
+      } else if ('connectifyActiveMoved' in item.dataset) {
+        delete item.dataset.connectifyActiveMoved;
         want = true;
       } else continue;
       if (item.classList.contains(ACTIVE) !== want) item.classList.toggle(ACTIVE, want);

@@ -100,21 +100,21 @@
   cursor: default;
 }
 
-.connectea-dark #connectify-sidebar :is(.cx-backup-list, .cx-backup-row) {
+.connectify-dark #connectify-sidebar :is(.cx-backup-list, .cx-backup-row) {
   border-color: var(--cx-border, #3b4d5e);
 }
 
-.connectea-dark #connectify-sidebar .cx-backup-row :is(.cx-backup-what, .cx-backup-effect) {
+.connectify-dark #connectify-sidebar .cx-backup-row :is(.cx-backup-what, .cx-backup-effect) {
   color: var(--cx-text-secondary, #b7c5d6);
 }
 
-.connectea-dark #connectify-sidebar :is(.cx-backup-row--replaces .cx-backup-effect, .cx-backup-warning) {
+.connectify-dark #connectify-sidebar :is(.cx-backup-row--replaces .cx-backup-effect, .cx-backup-warning) {
   color: #fbbf24;
 }
 
 /* Light tone (light glass, light custom themes): the dark themes' amber sits on light glass, so it takes the hue at
    OKLCH 0.30, as the Settings delete ✕ does (theme-light-tone.css) */
-html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar :is(.cx-backup-row--replaces .cx-backup-effect, .cx-backup-warning) {
+html.connectify-dark[data-connectify-tone="light"] #connectify-sidebar :is(.cx-backup-row--replaces .cx-backup-effect, .cx-backup-warning) {
   color: oklch(from #92400e 0.30 c h);
 }
 

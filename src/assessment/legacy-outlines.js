@@ -99,7 +99,7 @@
       if (html) achievement.insertAdjacentHTML('beforeend', html);
     };
     if (chartsOf(old) !== chartsOf(record)) {
-      const summary = Array.from(tile.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.eds-c-accordion, .connectea-subject-average-row'));
+      const summary = Array.from(tile.querySelectorAll('.cvr-c-task')).find(row => !row.closest('.eds-c-accordion, .connectify-subject-average-row'));
       swap(summary, markup().summaryChart(record));
     }
     const before = tasksOf(old);

@@ -10,7 +10,7 @@
   if (window.ConnectifyAtarCalc) return;
 
   const account = window.ConnectifyUtils.accountKey();
-  const storageKey = `connectea:atar:2025:${account}:${window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()}`;
+  const storageKey = `connectify:atar:2025:${account}:${window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear()}`;
   let savedPreferences = {};
 
   try {
@@ -21,7 +21,7 @@
   } catch {}
 
   function reloadPreferences() {
-    const rawPrefs = localStorage.getItem(window.ConnectifyUtils.userKey('connectea:preferences'));
+    const rawPrefs = localStorage.getItem(window.ConnectifyUtils.userKey('connectify:preferences'));
     if (rawPrefs) {
       try {
         const parsed = JSON.parse(rawPrefs);
@@ -149,7 +149,7 @@
 
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
-      checkbox.className = 'connectea-subject-checkbox';
+      checkbox.className = 'connectify-subject-checkbox';
       checkbox.checked = state.include;
 
       const span = document.createElement('span');

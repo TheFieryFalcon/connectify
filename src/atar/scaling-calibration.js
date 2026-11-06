@@ -58,7 +58,7 @@
 
     table.append(hSubject, hRaw, hScaled);
 
-    const prefsStr = localStorage.getItem(window.ConnectifyUtils.userKey('connectea:preferences'));
+    const prefsStr = localStorage.getItem(window.ConnectifyUtils.userKey('connectify:preferences'));
     const savedPrefs = prefsStr ? JSON.parse(prefsStr) : {};
 
     const shown = window.ConnectifyUtils.subjectLabels([...courseList.values()].map(course => course.name));
@@ -94,7 +94,7 @@
       table.append(nameLabel, rawInput, scaledInput);
 
       const updateCalib = () => {
-        const currentPrefsStr = localStorage.getItem(window.ConnectifyUtils.userKey('connectea:preferences'));
+        const currentPrefsStr = localStorage.getItem(window.ConnectifyUtils.userKey('connectify:preferences'));
         const prefs = currentPrefsStr ? JSON.parse(currentPrefsStr) : {};
         const key = `sem1_calibration:${course.id}`;
         prefs[key] = {
@@ -104,7 +104,7 @@
         if (course.name && course.name !== course.id) {
           prefs[`sem1_calibration:${course.name}`] = prefs[key];
         }
-        localStorage.setItem(window.ConnectifyUtils.userKey('connectea:preferences'), JSON.stringify(prefs));
+        localStorage.setItem(window.ConnectifyUtils.userKey('connectify:preferences'), JSON.stringify(prefs));
         window.dispatchEvent(new CustomEvent('connectify-settings-updated'));
       };
 

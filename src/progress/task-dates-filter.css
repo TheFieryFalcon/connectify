@@ -53,9 +53,9 @@
 }
 #cx-task-dates .cx-dates-filter-ticks .cx-dates-check { white-space: nowrap; }
 
-.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-filter-btn { border: 1px solid var(--cx-progress-line, #3b4d5e); background: transparent; color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-filter-btn:hover { border-color: var(--cx-border-strong, #556c84); background: transparent; color: var(--cx-text-primary, #ffffff); }
-.connectea-dark #cx-task-dates .cx-dates-filter-list {
+.connectify-dark #connectify-sidebar #connectify-progress .cx-dates-filter-btn { border: 1px solid var(--cx-progress-line, #3b4d5e); background: transparent; color: var(--cx-text-primary, #ffffff); }
+.connectify-dark #connectify-sidebar #connectify-progress .cx-dates-filter-btn:hover { border-color: var(--cx-border-strong, #556c84); background: transparent; color: var(--cx-text-primary, #ffffff); }
+.connectify-dark #cx-task-dates .cx-dates-filter-list {
   border-color: var(--cx-border, #3d5066);
   background-color: var(--cx-canvas-bg, #12171f);
   background-image: linear-gradient(var(--cx-surface-bg, #1e2632), var(--cx-surface-bg, #1e2632));
@@ -63,7 +63,7 @@
   color: var(--cx-text-primary, #ffffff);
 }
 /* Liquid Glass: as translucent as the theme's other popups, blurring the table text under it */
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #cx-task-dates .cx-dates-filter-list {
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) #cx-task-dates .cx-dates-filter-list {
   background-color: var(--cx-surface-elevated, rgba(30, 38, 50, 0.65));
   background-image: none;
   backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%);

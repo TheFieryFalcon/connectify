@@ -24,7 +24,7 @@
     if (!countdown) {
       countdown = document.createElement('div');
       countdown.id = 'connectify-wace-countdown';
-      countdown.className = 'connectea-panel';
+      countdown.className = 'connectify-panel';
       countdown.style.textAlign = 'center';
       countdown.style.fontWeight = 'bold';
       countdown.style.fontSize = '14px';

@@ -8,14 +8,14 @@
 
 @media (any-pointer: coarse) {
   /* Every Connectify button, tab, dropdown and button-like link (never the customizer's mock preview) */
-  html:not([data-cx-mouse]) :is(#connectify-sidebar, #connectea-theme-menu, #cx-customizer-modal, #cx-wallpaper-crop, #connectify-notifications-container, #cx-expand-btn, #cx-back-to-top-container, #cx-semester-notice, .connectea-row-wrapper, .connectea-panel) :is(button, select, a[href], [role="button"], [role="tab"], summary):not(#cx-customizer-preview *) {
+  html:not([data-cx-mouse]) :is(#connectify-sidebar, #connectify-theme-menu, #cx-customizer-modal, #cx-wallpaper-crop, #connectify-notifications-container, #cx-expand-btn, #cx-back-to-top-container, #cx-semester-notice, .connectify-row-wrapper, .connectify-panel) :is(button, select, a[href], [role="button"], [role="tab"], summary):not(#cx-customizer-preview *) {
     min-height: 44px;
     min-width: 44px;
     touch-action: manipulation;
   }
 
   /* Checkboxes and radios grow, and the label around one is a whole 44px row */
-  html:not([data-cx-mouse]) :is(#connectify-sidebar, #cx-customizer-modal, .connectea-row-wrapper, .connectea-panel) input:is([type="checkbox"], [type="radio"]) {
+  html:not([data-cx-mouse]) :is(#connectify-sidebar, #cx-customizer-modal, .connectify-row-wrapper, .connectify-panel) input:is([type="checkbox"], [type="radio"]) {
     min-width: 22px;
     min-height: 22px;
   }
@@ -27,7 +27,7 @@
   }
 
   /* A custom theme's Edit / Delete reach into its row's padding, so the row keeps its height */
-  html:not([data-cx-mouse]) #connectea-theme-menu .connectea-theme-actions {
+  html:not([data-cx-mouse]) #connectify-theme-menu .connectify-theme-actions {
     margin-block: -10px;
   }
 
@@ -40,7 +40,7 @@
 
   /* Theme button: the height of Connect's 48-50px bar. Nothing else shares its column of the bar,
      and it never reaches sideways (the bell is 12px away, the nav links may be closer). */
-  html:not([data-cx-mouse]) #connectea-theme-toggle::before {
+  html:not([data-cx-mouse]) #connectify-theme-toggle::before {
     content: "";
     position: absolute;
     inset: -10px 0;
@@ -48,18 +48,18 @@
 
   /* Its chevron opens the theme menu: a wider glyph box, and a tap area over the button's height,
      from the gap after the label to the button's right edge (mirrored while the chevron is turned) */
-  html:not([data-cx-mouse]) #connectea-theme-toggle .connectea-theme-arrow {
+  html:not([data-cx-mouse]) #connectify-theme-toggle .connectify-theme-arrow {
     position: relative;
     padding-inline: 10px;
   }
 
-  html:not([data-cx-mouse]) #connectea-theme-toggle .connectea-theme-arrow::before {
+  html:not([data-cx-mouse]) #connectify-theme-toggle .connectify-theme-arrow::before {
     content: "";
     position: absolute;
     inset: -14px -12px -14px -6px;
   }
 
-  html:not([data-cx-mouse]) #connectea-theme-toggle[aria-expanded="true"] .connectea-theme-arrow::before {
+  html:not([data-cx-mouse]) #connectify-theme-toggle[aria-expanded="true"] .connectify-theme-arrow::before {
     inset: -14px -6px -14px -12px;
   }
 }

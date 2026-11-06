@@ -23,7 +23,7 @@ This document covers the user interface and analytics modules, including target 
 - **Export**: `window.ConnectifyTargetPlannerUI`.
 
 #### [`atar-ui.js`](file:///Users/uwong/Downloads/2.1.14_0/src/atar/atar-ui.js)
-- **Role**: Coordinates the main calculator modal (`#connectea-atar`), tab switching, semester toggling, and data synchronization.
+- **Role**: Coordinates the main calculator modal (`#connectify-atar`), tab switching, semester toggling, and data synchronization.
 - **Key Functions**:
   - `atar-ui-markup.js`: panel markup (the Goal Setter and Estimator launchers the sidebar mounts, mode tabs, semester buttons, methodology), `GROUPS` (`goals`: `grade`, `target`; `estimator`: `grade-estimate`, `estimate`), `MODES` (tabs `Target Grade` / `Target ATAR`, `Estimate Grade` / `Estimate ATAR`, Grade first), `paintModeTabs`, semester labels and closing rules.
   - `selectTab(mode)`: Switches between `'target'`, `'grade'`, `'estimate'` and `'grade-estimate'`: heading = launcher name, `aria-label` = mode title, only the group's tabs shown.
@@ -90,7 +90,7 @@ This document covers the user interface and analytics modules, including target 
 - **Role**: Implements the Semester 1 Scaled Scores calibration table in Settings.
 - **Key Functions**:
   - `renderCalibTable(panel)`: Generates editable table of enrolled subjects (names through `ConnectifyUtils.subjectLabels`) with Semester 1 School Raw (%) and Semester 1 Scaled Mark inputs.
-  - Saves calibration offsets to `localStorage` under `connectea:preferences` (`sem1_calibration:<courseId>`).
+  - Saves calibration offsets to `localStorage` under `connectify:preferences` (`sem1_calibration:<courseId>`).
 - **Export**: `window.ConnectifyCalibration`.
 
 #### Settings (`src/predictor/`, `src/cohort/category-store.js`)

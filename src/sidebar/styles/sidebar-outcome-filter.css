@@ -2,7 +2,7 @@
  * Connectify Sidebar: outcome meter segments, tooltip and filter-applied state
  */
 
-.connectea-outcome-segment {
+.connectify-outcome-segment {
   width: 100% !important;
   height: 10px !important;
   border-radius: 2.5px !important;
@@ -12,89 +12,89 @@
   pointer-events: none !important;
 }
 
-.connectea-outcome-segment.connectea-active-red {
+.connectify-outcome-segment.connectify-active-red {
   background: #ef4444 !important;
   opacity: 1 !important;
 }
 
-.connectea-outcome-segment.connectea-active-orange {
+.connectify-outcome-segment.connectify-active-orange {
   background: #f97316 !important;
   opacity: 1 !important;
 }
 
-.connectea-outcome-segment.connectea-active-yellow {
+.connectify-outcome-segment.connectify-active-yellow {
   background: #eab308 !important;
   opacity: 1 !important;
 }
 
-.connectea-outcome-segment.connectea-active-green {
+.connectify-outcome-segment.connectify-active-green {
   background: #10b981 !important;
   opacity: 1 !important;
 }
 
-.connectea-outcome-segment.connectea-active-purple {
+.connectify-outcome-segment.connectify-active-purple {
   background: #a855f7 !important;
   height: 20px !important;
   opacity: 1 !important;
   box-shadow: 0 0 8px rgba(168, 85, 247, 0.8) !important;
 }
 
-.connectea-dark .connectea-outcome-bar {
+.connectify-dark .connectify-outcome-bar {
   background: color-mix(in srgb, var(--cx-text-primary, #ffffff) 6%, transparent) !important;
   border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 16%, transparent) !important;
 }
 
-.connectea-dark .connectea-outcome-segment:not([class*="connectea-active-"]) {
+.connectify-dark .connectify-outcome-segment:not([class*="connectify-active-"]) {
   background: var(--cx-button-hover, #334155) !important;
   opacity: 0.4 !important;
 }
 
-.connectea-dark .connectea-outcome-segment.connectea-active-red {
+.connectify-dark .connectify-outcome-segment.connectify-active-red {
   background: #ef4444 !important;
   opacity: 1 !important;
 }
 
-.connectea-dark .connectea-outcome-segment.connectea-active-orange {
+.connectify-dark .connectify-outcome-segment.connectify-active-orange {
   background: #f97316 !important;
   opacity: 1 !important;
 }
 
-.connectea-dark .connectea-outcome-segment.connectea-active-yellow {
+.connectify-dark .connectify-outcome-segment.connectify-active-yellow {
   background: #eab308 !important;
   opacity: 1 !important;
 }
 
-.connectea-dark .connectea-outcome-segment.connectea-active-green {
+.connectify-dark .connectify-outcome-segment.connectify-active-green {
   background: #10b981 !important;
   opacity: 1 !important;
 }
 
-.connectea-dark .connectea-outcome-segment.connectea-active-purple {
+.connectify-dark .connectify-outcome-segment.connectify-active-purple {
   background: #c084fc !important;
   height: 20px !important;
   opacity: 1 !important;
   box-shadow: 0 0 10px rgba(192, 132, 252, 0.85) !important;
 }
 
-.connectea-dark .connectea-outcome-bar.connectea-outcome-broken {
+.connectify-dark .connectify-outcome-bar.connectify-outcome-broken {
   background: rgba(168, 85, 247, 0.25) !important;
   border-color: rgba(168, 85, 247, 0.7) !important;
   box-shadow: 0 0 12px rgba(168, 85, 247, 0.6) !important;
 }
 
-.connectea-dark .connectea-outcome-bar.connectea-outcome-critical {
+.connectify-dark .connectify-outcome-bar.connectify-outcome-critical {
   background: rgba(239, 68, 68, 0.22) !important;
   border-color: rgba(239, 68, 68, 0.9) !important;
   box-shadow: 0 0 14px rgba(239, 68, 68, 0.85), inset 0 0 5px rgba(239, 68, 68, 0.4) !important;
 }
 
-@keyframes connectea-glow-critical {
+@keyframes connectify-glow-critical {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 /* Floating Instant Tooltip for Outcome Performance Meter */
-#connectea-outcome-tooltip {
+#connectify-outcome-tooltip {
   position: fixed !important;
   z-index: 100050 !important;
   pointer-events: none !important;
@@ -113,13 +113,13 @@
   visibility: hidden;
 }
 
-#connectea-outcome-tooltip.connectea-tooltip-visible {
+#connectify-outcome-tooltip.connectify-tooltip-visible {
   opacity: 1 !important;
   transform: scale(1) !important;
   visibility: visible !important;
 }
 
-.connectea-dark #connectea-outcome-tooltip {
+.connectify-dark #connectify-outcome-tooltip {
   background: var(--cx-surface-elevated, #182230) !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
@@ -127,7 +127,7 @@
 }
 
 /* Liquid Glass: the tooltip's translucent surface blurs what is under it, like the theme's other glass */
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectea-outcome-tooltip {
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) #connectify-outcome-tooltip {
   backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
 }
@@ -154,7 +154,7 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #c
   box-sizing: border-box;
 }
 
-.connectea-dark #connectify-sidebar .cx-page-notice {
+.connectify-dark #connectify-sidebar .cx-page-notice {
   background: var(--cx-surface-elevated, #1a222d);
   border-color: var(--cx-border, #3b4d5e);
   border-left: 4px solid var(--cx-border-focus, #5f7a99);
@@ -169,7 +169,7 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #c
   letter-spacing: -0.2px;
 }
 
-.connectea-dark #connectify-sidebar .cx-page-notice-title {
+.connectify-dark #connectify-sidebar .cx-page-notice-title {
   color: var(--cx-text-muted, #94a3b8);
 }
 
@@ -180,7 +180,7 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #c
   margin: 0 0 12px 0;
 }
 
-.connectea-dark #connectify-sidebar .cx-page-notice-text {
+.connectify-dark #connectify-sidebar .cx-page-notice-text {
   color: var(--cx-text-secondary, #94a3b8);
 }
 
@@ -206,12 +206,12 @@ html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #c
   background: #1a4d70 !important;
 }
 
-.connectea-dark #connectify-sidebar .cx-page-notice-link {
+.connectify-dark #connectify-sidebar .cx-page-notice-link {
   background: var(--cx-accent, #3b82f6) !important;
   border-color: var(--cx-accent-hover, #2563eb) !important;
   color: var(--cx-button-primary-text, #ffffff) !important;
 }
 
-.connectea-dark #connectify-sidebar .cx-page-notice-link:hover {
+.connectify-dark #connectify-sidebar .cx-page-notice-link:hover {
   background: var(--cx-accent-hover, #2563eb) !important;
 }

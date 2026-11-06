@@ -2,66 +2,66 @@
  * Connectify ATAR calculator: planner details, form controls, top-four selector, and the outline Back to top button.
  */
 
-#connectea-atar .cta-assessment-details>summary {
+#connectify-atar .cta-assessment-details>summary {
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   color: #426580;
 }
 
-#connectea-atar .cta-assessment-details .cta-course {
+#connectify-atar .cta-assessment-details .cta-course {
   display: block;
 }
 
-#connectea-atar .cta-assessment-details .cta-course small {
+#connectify-atar .cta-assessment-details .cta-course small {
   display: block;
   margin: 3px 0;
   font-size: 11px;
 }
 
-#connectea-atar .cta-method {
+#connectify-atar .cta-method {
   margin-top: 10px;
 }
 
-.connectea-dark #connectea-atar .cta-tabs {
+.connectify-dark #connectify-atar .cta-tabs {
   background: var(--cx-table-row-alt, #191f27);
 }
 
-.connectea-dark #connectea-atar .cta-tabs .cta-semester[aria-pressed=true] {
+.connectify-dark #connectify-atar .cta-tabs .cta-semester[aria-pressed=true] {
   background: color-mix(in srgb, var(--cx-accent, #3b82f6) 20%, var(--cx-surface-hover, #263344));
   color: var(--cx-text-secondary, #e0eefb);
 }
 
 /* Primary text: a coloured secondary text (Quantum's green) falls under 5:1 on the hover surface. !important
-   outranks the sidebar's blanket paragraph colour (.connectea-dark #connectify-sidebar p) */
-.connectea-dark #connectea-atar :is(.cta-breakdown,.cta-target-output>strong) {
+   outranks the sidebar's blanket paragraph colour (.connectify-dark #connectify-sidebar p) */
+.connectify-dark #connectify-atar :is(.cta-breakdown,.cta-target-output>strong) {
   background: var(--cx-surface-hover, #293746);
   color: var(--cx-text-primary, #d9e6f3) !important;
 }
 
-.connectea-dark #connectea-atar .cta-assessment-details {
+.connectify-dark #connectify-atar .cta-assessment-details {
   border-color: var(--cx-nav-border, #414954);
 }
 
-.connectea-dark #connectea-atar .cta-assessment-details>summary {
+.connectify-dark #connectify-atar .cta-assessment-details>summary {
   color: var(--cx-text-secondary, #a9cbeb);
 }
 
 @media(max-width:420px) {
-  #connectea-atar {
+  #connectify-atar {
     padding: 12px;
   }
   .cta-tabs {
     gap: 2px;
   }
-  #connectea-atar .cta-tabs .cta-semester {
+  #connectify-atar .cta-tabs .cta-semester {
     padding: 7px 4px;
     font-size: 11px;
   }
 }
 
 /* Clearly separated controls and permanently visible breakdowns. */
-#connectea-atar .cta-form-controls {
+#connectify-atar .cta-form-controls {
   display: grid;
   /* The third is Set as Goal's End, beside Recalculate */
   grid-template-columns: max-content max-content max-content;
@@ -70,7 +70,7 @@
   margin: 12px 0 16px;
 }
 
-#connectea-atar .cta-form-controls .cta-target-label {
+#connectify-atar .cta-form-controls .cta-target-label {
   display: flex !important;
   align-items: center;
   gap: 10px;
@@ -78,55 +78,55 @@
   white-space: nowrap;
 }
 
-#connectea-atar .cta-target-label>.cta-score {
+#connectify-atar .cta-target-label>.cta-score {
   text-align: left;
 }
 
-#connectea-atar .cta-form-controls .cta-subject-label {
+#connectify-atar .cta-form-controls .cta-subject-label {
   grid-column: 1/3;
   white-space: normal;
 }
 
 /* Starts the next row, or the grid would fill the third column beside Subject */
-#connectea-atar .cta-form-controls .cta-subject-label + .cta-target-label {
+#connectify-atar .cta-form-controls .cta-subject-label + .cta-target-label {
   grid-column: 1;
 }
 
 /* One width, whatever else the grid holds: Set as Goal's End never widens it */
-#connectea-atar .cta-form-controls .cta-subject-select {
+#connectify-atar .cta-form-controls .cta-subject-select {
   flex: 0 1 240px;
   width: 240px;
   min-width: 0;
 }
 
-#connectea-atar .cta-form-controls>.cta-reset {
+#connectify-atar .cta-form-controls>.cta-reset {
   padding: 7px 14px;
   border-radius: 6px;
   min-height: 32px;
 }
 
-#connectea-atar .cta-breakdown-title {
+#connectify-atar .cta-breakdown-title {
   display: block;
   font-size: 12px;
   color: #426580;
   margin-bottom: 8px;
 }
 
-.connectea-dark #connectea-atar .cta-breakdown-title {
+.connectify-dark #connectify-atar .cta-breakdown-title {
   color: var(--cx-text-secondary, #a9cbeb);
 }
 
 @media(max-width:380px) {
-  #connectea-atar .cta-form-controls {
+  #connectify-atar .cta-form-controls {
     grid-template-columns: minmax(0,1fr);
     gap: 12px;
   }
-  #connectea-atar .cta-form-controls>.cta-reset {
+  #connectify-atar .cta-form-controls>.cta-reset {
     justify-self: start;
   }
 }
 
-#connectea-atar .cta-difficulty-label {
+#connectify-atar .cta-difficulty-label {
   grid-column: 1/-1;
   display: flex !important;
   align-items: center !important;
@@ -137,7 +137,7 @@
   user-select: none !important;
 }
 
-#connectea-atar .cta-difficulty-label input {
+#connectify-atar .cta-difficulty-label input {
   margin: 0 !important;
   width: 15px !important;
   height: 15px !important;
@@ -153,7 +153,7 @@
   border-radius: 8px;
 }
 
-.connectea-dark .cta-top-four-selector {
+.connectify-dark .cta-top-four-selector {
   background: var(--cx-surface-elevated, #253342) !important;
   border-color: var(--cx-input-border, #3b5066) !important;
   color: var(--cx-text-secondary, #e1eaf3) !important;
@@ -236,6 +236,6 @@
   color: #55667a;
 }
 
-.connectea-dark .cta-count-span {
+.connectify-dark .cta-count-span {
   color: var(--cx-nav-text, #cbd5e1) !important;
 }

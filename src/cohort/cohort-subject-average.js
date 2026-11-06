@@ -15,7 +15,7 @@
 
   try {
     const { readMark, createElement, setText, normalize } = window.ConnectifyCohortRows;
-    const ROW_CLASS = 'connectea-subject-average-row';
+    const ROW_CLASS = 'connectify-subject-average-row';
     const NOTE = 'Worked out by Connectify from your marked tasks (Connect shows no average for this class)';
     const HEADING = /\b(?:Cumulative Percent|Total Percent)\b/i;
     const TITLE = '.eds-c-tile__title, .cvr-c-tile__title, [class*="tile__title"], [class*="card-title"], h1, h2, h3, h4, .c-tile__title, .eds-c-heading';
@@ -73,7 +73,7 @@
     function buildRow() {
       const row = createElement('div', `cvr-c-task v-layout v-widget eds-s-is-first cvr-c-task-eds-s-is-first eds-s-is-last cvr-c-task-eds-s-is-last ${ROW_CLASS}`);
       const details = createElement('div', 'cvr-c-task__details v-layout v-widget');
-      details.append(createElement('div', 'connectea-subject-average-note', NOTE));
+      details.append(createElement('div', 'connectify-subject-average-note', NOTE));
       const achievement = createElement('div', 'cvr-c-task__achievement v-layout v-widget');
       const marks = createElement('div', 'cvr-c-task__marks v-layout v-widget');
       for (let i = 0; i < 2; i++) {

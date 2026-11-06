@@ -5,10 +5,10 @@
 /* --------------------------------------------------------------------------
    23. Dropdowns, Menubars, Context Menus & Auto-Suggest Popups
    -------------------------------------------------------------------------- */
-.connectea-dark .v-filterselect-suggestpopup:not(#connectify-sidebar *), .connectea-dark .v-menubar-popup:not(#connectify-sidebar *),
-.connectea-dark .v-contextmenu:not(#connectify-sidebar *), .connectea-dark .v-context-menu-container:not(#connectify-sidebar *),
-.connectea-dark .dropdown-menu:not(#connectify-sidebar *), .connectea-dark .clay-dropdown-menu:not(#connectify-sidebar *),
-.connectea-dark .ui-menu:not(#connectify-sidebar *), .connectea-dark .ui-autocomplete:not(#connectify-sidebar *) {
+.connectify-dark .v-filterselect-suggestpopup:not(#connectify-sidebar *), .connectify-dark .v-menubar-popup:not(#connectify-sidebar *),
+.connectify-dark .v-contextmenu:not(#connectify-sidebar *), .connectify-dark .v-context-menu-container:not(#connectify-sidebar *),
+.connectify-dark .dropdown-menu:not(#connectify-sidebar *), .connectify-dark .clay-dropdown-menu:not(#connectify-sidebar *),
+.connectify-dark .ui-menu:not(#connectify-sidebar *), .connectify-dark .ui-autocomplete:not(#connectify-sidebar *) {
   background-color: var(--cx-surface-elevated, #1a222d) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
   border: 1px solid var(--cx-border, #3d5066) !important;
@@ -16,32 +16,32 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
 }
 
-.connectea-dark .v-filterselect-suggestmenu .gwt-MenuItem:not(#connectify-sidebar *),
-.connectea-dark .v-menubar-menuitem:not(#connectify-sidebar *):not(.cx-n), .connectea-dark .dropdown-item:not(#connectify-sidebar *):not(.cx-n),
-.connectea-dark .ui-menu-item:not(#connectify-sidebar *):not(.cx-n), .connectea-dark .ui-menu-item-wrapper:not(#connectify-sidebar *):not(.cx-n),
-.connectea-dark .v-context-menu-item-basic:not(#connectify-sidebar *):not(.cx-n) {
+.connectify-dark .v-filterselect-suggestmenu .gwt-MenuItem:not(#connectify-sidebar *),
+.connectify-dark .v-menubar-menuitem:not(#connectify-sidebar *):not(.cx-n), .connectify-dark .dropdown-item:not(#connectify-sidebar *):not(.cx-n),
+.connectify-dark .ui-menu-item:not(#connectify-sidebar *):not(.cx-n), .connectify-dark .ui-menu-item-wrapper:not(#connectify-sidebar *):not(.cx-n),
+.connectify-dark .v-context-menu-item-basic:not(#connectify-sidebar *):not(.cx-n) {
   background-color: transparent !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   padding: 6px 12px !important;
   transition: background-color 0.15s ease, color 0.15s ease !important;
 }
 
-.connectea-dark .v-filterselect-suggestmenu .gwt-MenuItem-selected:not(#connectify-sidebar *),
-.connectea-dark .v-menubar-menuitem-selected:not(#connectify-sidebar *):not(.cx-n), .connectea-dark .dropdown-item:hover:not(#connectify-sidebar *),
-.connectea-dark .dropdown-item:focus:not(#connectify-sidebar *), .connectea-dark .dropdown-item.active:not(#connectify-sidebar *),
-.connectea-dark .ui-menu-item.ui-state-focus:not(#connectify-sidebar *),
-.connectea-dark .ui-menu-item-wrapper.ui-state-active:not(#connectify-sidebar *) {
+.connectify-dark .v-filterselect-suggestmenu .gwt-MenuItem-selected:not(#connectify-sidebar *),
+.connectify-dark .v-menubar-menuitem-selected:not(#connectify-sidebar *):not(.cx-n), .connectify-dark .dropdown-item:hover:not(#connectify-sidebar *),
+.connectify-dark .dropdown-item:focus:not(#connectify-sidebar *), .connectify-dark .dropdown-item.active:not(#connectify-sidebar *),
+.connectify-dark .ui-menu-item.ui-state-focus:not(#connectify-sidebar *),
+.connectify-dark .ui-menu-item-wrapper.ui-state-active:not(#connectify-sidebar *) {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
-.connectea-dark .dropdown-divider, .connectea-dark .v-menubar-separator {
+.connectify-dark .dropdown-divider, .connectify-dark .v-menubar-separator {
   border-top: 1px solid var(--cx-border-subtle, #2e3c4e) !important;
   height: 1px !important;
   margin: 4px 0 !important;
 }
 
-.connectea-dark .dropdown-header, .connectea-dark .dropdown-subheader, .connectea-dark .dropdown-caption {
+.connectify-dark .dropdown-header, .connectify-dark .dropdown-subheader, .connectify-dark .dropdown-caption {
   color: var(--cx-text-muted, #94a3b8) !important;
   font-weight: 600 !important;
   font-size: 11px !important;
@@ -51,74 +51,74 @@
 /* --------------------------------------------------------------------------
    24. Calendars, Datepickers & Time Controls
    -------------------------------------------------------------------------- */
-.connectea-dark .v-calendar, .connectea-dark .v-calendar-month, .connectea-dark .ui-datepicker, .connectea-dark .clay-date-picker {
+.connectify-dark .v-calendar, .connectify-dark .v-calendar-month, .connectify-dark .ui-datepicker, .connectify-dark .clay-date-picker {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark .v-calendar-header-day:not(cx-n):not(cx-n), .connectea-dark .v-calendar-header-month:not(cx-n):not(cx-n),
-.connectea-dark .v-calendar-header-week:not(cx-n):not(cx-n), .connectea-dark .ui-datepicker-header:not(cx-n):not(cx-n),
-.connectea-dark :is(.ui-datepicker-calendar th):not(cx-n), .connectea-dark .v-datefield-calendarpanel-weekdays td strong {
+.connectify-dark .v-calendar-header-day:not(cx-n):not(cx-n), .connectify-dark .v-calendar-header-month:not(cx-n):not(cx-n),
+.connectify-dark .v-calendar-header-week:not(cx-n):not(cx-n), .connectify-dark .ui-datepicker-header:not(cx-n):not(cx-n),
+.connectify-dark :is(.ui-datepicker-calendar th):not(cx-n), .connectify-dark .v-datefield-calendarpanel-weekdays td strong {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark .v-calendar-month-day:not(cx-n), .connectea-dark .v-calendar-datecell:not(cx-n),
-.connectea-dark .v-datefield-calendarpanel-day:not(cx-n), .connectea-dark :is(.ui-datepicker-calendar td),
-.connectea-dark :is(.ui-datepicker-calendar a) {
+.connectify-dark .v-calendar-month-day:not(cx-n), .connectify-dark .v-calendar-datecell:not(cx-n),
+.connectify-dark .v-datefield-calendarpanel-day:not(cx-n), .connectify-dark :is(.ui-datepicker-calendar td),
+.connectify-dark :is(.ui-datepicker-calendar a) {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border-color: var(--cx-border-subtle, #2e3c4e) !important;
 }
 
-.connectea-dark .v-calendar-month-day:hover:not(.cx-n):not(cx-n),
-.connectea-dark .v-datefield-calendarpanel-body td:hover .v-datefield-calendarpanel-day,
-.connectea-dark :where(.ui-datepicker-calendar td a:hover):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n) {
+.connectify-dark .v-calendar-month-day:hover:not(.cx-n):not(cx-n),
+.connectify-dark .v-datefield-calendarpanel-body td:hover .v-datefield-calendarpanel-day,
+.connectify-dark :where(.ui-datepicker-calendar td a:hover):not(.cx-n):not(.cx-n):not(.cx-n):not(cx-n) {
   background-color: var(--cx-badge-bg, #24303f) !important;
   color: var(--cx-button-text-hover, #ffffff) !important;
 }
 
-.connectea-dark .v-calendar-month-day-today, .connectea-dark .v-datefield-calendarpanel-day-today, .connectea-dark .ui-datepicker-today,
-.connectea-dark .ui-state-highlight {
+.connectify-dark .v-calendar-month-day-today, .connectify-dark .v-datefield-calendarpanel-day-today, .connectify-dark .ui-datepicker-today,
+.connectify-dark .ui-state-highlight {
   background-color: color-mix(in srgb, var(--cx-accent, #3b82f6) 22%, var(--cx-surface-bg, #1e2632)) !important;
   color: color-mix(in srgb, var(--cx-accent-hover, #60a5fa) 70%, var(--cx-text-primary, #ffffff)) !important;
   border: 1px solid var(--cx-accent, #3b82f6) !important;
   font-weight: 700 !important;
 }
 
-.connectea-dark .v-calendar-month-day-selected, .connectea-dark .v-datefield-calendarpanel-day-selected, .connectea-dark .ui-datepicker-current-day,
-.connectea-dark .ui-state-active {
+.connectify-dark .v-calendar-month-day-selected, .connectify-dark .v-datefield-calendarpanel-day-selected, .connectify-dark .ui-datepicker-current-day,
+.connectify-dark .ui-state-active {
   background-color: var(--cx-button-primary-bg, #2563eb) !important;
   color: var(--cx-button-primary-text, #ffffff) !important;
   border-color: var(--cx-accent, #3b82f6) !important;
   font-weight: 700 !important;
 }
 
-.connectea-dark .v-calendar-month-day.v-calendar-month-day-dragemphasis, .connectea-dark .v-datefield-calendarpanel-day-offmonth:not(.cx-n),
-.connectea-dark .ui-datepicker-other-month:not(.cx-n) {
+.connectify-dark .v-calendar-month-day.v-calendar-month-day-dragemphasis, .connectify-dark .v-datefield-calendarpanel-day-offmonth:not(.cx-n),
+.connectify-dark .ui-datepicker-other-month:not(.cx-n) {
   background-color: var(--cx-table-row-alt, #151c26) !important;
   color: var(--cx-text-disabled, #64748b) !important;
 }
 
-.connectea-dark .v-datefield-popup, .connectea-dark .v-inline-datefield-popup, .connectea-dark .v-datefield-calendarpanel {
+.connectify-dark .v-datefield-popup, .connectify-dark .v-inline-datefield-popup, .connectify-dark .v-datefield-calendarpanel {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   border: 1px solid var(--cx-border-hover, #3d5066) !important;
   border-radius: 8px !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
 }
 
-.connectea-dark .v-datefield-calendarpanel-prevmonth button, .connectea-dark .v-datefield-calendarpanel-nextmonth button,
-.connectea-dark .v-datefield-calendarpanel-prevyear button, .connectea-dark .v-datefield-calendarpanel-nextyear button,
-.connectea-dark .ui-datepicker-prev:not(cx-n), .connectea-dark .ui-datepicker-next:not(cx-n) {
+.connectify-dark .v-datefield-calendarpanel-prevmonth button, .connectify-dark .v-datefield-calendarpanel-nextmonth button,
+.connectify-dark .v-datefield-calendarpanel-prevyear button, .connectify-dark .v-datefield-calendarpanel-nextyear button,
+.connectify-dark .ui-datepicker-prev:not(cx-n), .connectify-dark .ui-datepicker-next:not(cx-n) {
   background-color: var(--cx-badge-bg, #24303f) !important;
   color: var(--cx-button-text, #f1f5f9) !important;
   border: 1px solid var(--cx-badge-border, #4a617a) !important;
   border-radius: 4px !important;
 }
 
-.connectea-dark .v-calendar-event, .connectea-dark .v-calendar-event-content, .connectea-dark .v-calendar-event-all-day {
+.connectify-dark .v-calendar-event, .connectify-dark .v-calendar-event-content, .connectify-dark .v-calendar-event-all-day {
   background-color: color-mix(in srgb, var(--cx-accent, #3b82f6) 18%, var(--cx-surface-bg, #1e2632)) !important;
   color: var(--cx-text-primary, #e2effa) !important;
   border: 1px solid color-mix(in srgb, var(--cx-accent, #3b82f6) 40%, var(--cx-surface-bg, #1e2632)) !important;
@@ -128,41 +128,41 @@
 /* --------------------------------------------------------------------------
    25. Tabsheets, Navs, Breadcrumbs & Pagination
    -------------------------------------------------------------------------- */
-.connectea-dark .v-tabsheet:not(.cx-n), .connectea-dark .v-tabsheet-tabsheetpanel:not(.cx-n), .connectea-dark .v-tabsheet-content:not(.cx-n),
-.connectea-dark .v-tabsheet-content .v-scrollable {
+.connectify-dark .v-tabsheet:not(.cx-n), .connectify-dark .v-tabsheet-tabsheetpanel:not(.cx-n), .connectify-dark .v-tabsheet-content:not(.cx-n),
+.connectify-dark .v-tabsheet-content .v-scrollable {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-secondary, #e2e8f0) !important;
   border-color: var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark .v-tabsheet-tabitem {
+.connectify-dark .v-tabsheet-tabitem {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border: 1px solid var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark .v-tabsheet-tabitem:hover {
+.connectify-dark .v-tabsheet-tabitem:hover {
   background-color: var(--cx-surface-hover, #24303f) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
 }
 
-.connectea-dark .v-tabsheet-tabitem-selected {
+.connectify-dark .v-tabsheet-tabitem-selected {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
   border-bottom-color: var(--cx-surface-bg, #1e2632) !important;
   border-top: 2px solid var(--cx-accent, #3b82f6) !important;
 }
 
-.connectea-dark .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-c-tabs__tab:not(.cx-n),
-.connectea-dark .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-o-list__item .eds-c-tabs__tab {
+.connectify-dark .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-c-tabs__tab:not(.cx-n),
+.connectify-dark .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-o-list__item .eds-c-tabs__tab {
   background-color: var(--cx-surface-secondary, #18202b) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;
   border: 1px solid var(--cx-border, #36485e) !important;
 }
 
-.connectea-dark .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-c-tabs__tab.eds-s-is-active:not(.cx-n),
-.connectea-dark .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-c-tabs__tab:hover:not(.cx-n),
-.connectea-dark .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-o-list__item .eds-c-tabs__tab.eds-s-is-active {
+.connectify-dark .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-c-tabs__tab.eds-s-is-active:not(.cx-n),
+.connectify-dark .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-c-tabs__tab:hover:not(.cx-n),
+.connectify-dark .eds-c-tabs--heavy > .eds-c-tabs__tab-list > .eds-o-list__item .eds-c-tabs__tab.eds-s-is-active {
   background-color: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-nav-text-hover, #ffffff) !important;
   border-bottom: 2px solid var(--cx-accent, #3b82f6) !important;

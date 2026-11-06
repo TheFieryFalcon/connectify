@@ -1,8 +1,8 @@
 /**
  * Connectify Theme: surface adapter
  *
- * Tags Connect surfaces that keep a hard-coded light background (data-connectea-surface) and the
- * dark text on them (data-connectea-ink) so dark themes can restyle them without inline styles.
+ * Tags Connect surfaces that keep a hard-coded light background (data-connectify-surface) and the
+ * dark text on them (data-connectify-ink) so dark themes can restyle them without inline styles.
  * A theme change scans the whole page; a page change scans only the subtrees it added or re-classed
  * (a whole-page scan, with a computed style per candidate, after every tooltip or row change made every
  * interaction lag). Exposes window.ConnectifyThemeSurfaceAdapter.
@@ -22,13 +22,13 @@
 
   // Connectify UI, charts, the navbar and Connect's own session alerts are never adapted
   const OUTSIDE_PROTECTED_AREAS = [
-    ':not(.cvr-c-primary-navigation *)', ':not(.cvr-c-header *)', ':not(#connectify-sidebar *)', ':not(#connectea-theme-toggle)',
-    ':not(.connectea-panel *)', ':not(.cvr-c-task__chart *)', ':not(.highcharts-container *)', ':not(#cx-expand-progress)',
+    ':not(.cvr-c-primary-navigation *)', ':not(.cvr-c-header *)', ':not(#connectify-sidebar *)', ':not(#connectify-theme-toggle)',
+    ':not(.connectify-panel *)', ':not(.cvr-c-task__chart *)', ':not(.highcharts-container *)', ':not(#cx-expand-progress)',
     ':not(#cx-expand-progress *)', ':not(.v-Notification-system)', ':not(.v-Notification-system *)'
   ].join('');
 
-  const SURFACE_SELECTOR = `:is(${SURFACE_TARGETS}):not([data-connectea-surface]):not(.cvr-c-primary-navigation):not(.cvr-c-header)${OUTSIDE_PROTECTED_AREAS}`;
-  const INK_SELECTOR = `[data-connectea-surface] :is(${INK_TARGETS}):not([data-connectea-ink])${OUTSIDE_PROTECTED_AREAS}`;
+  const SURFACE_SELECTOR = `:is(${SURFACE_TARGETS}):not([data-connectify-surface]):not(.cvr-c-primary-navigation):not(.cvr-c-header)${OUTSIDE_PROTECTED_AREAS}`;
+  const INK_SELECTOR = `[data-connectify-surface] :is(${INK_TARGETS}):not([data-connectify-ink])${OUTSIDE_PROTECTED_AREAS}`;
 
   const SKIP_ANCESTORS = [
     '.cvr-c-task__chart', '.highcharts-container', '#cx-expand-progress', '.cvr-c-primary-navigation', '.cvr-c-header',
@@ -65,7 +65,7 @@
 
   /** Tags light surfaces and the dark ink on them, in roots (elements) or, without roots, the whole page. */
   function adaptSurfaces(roots) {
-    const isDark = document.documentElement.classList.contains('connectea-dark');
+    const isDark = document.documentElement.classList.contains('connectify-dark');
     if (!isDark || window.ConnectifyThemeAuth?.isAuthDisabled()) return;
     // Every computed style is read before any tag is written: a tag restyles the page, so reading after each
     // one forced a fresh restyle per element (five back-to-back restyles once Connect's cards rendered)
@@ -76,14 +76,14 @@
         const bgRgb = parseRgb(window.getComputedStyle(el).backgroundColor);
         if (isNeutralColor(bgRgb) && Math.min(...bgRgb) > 165) surfaces.push(el);
       }
-      surfaces.forEach(el => el.setAttribute('data-connectea-surface', ''));
+      surfaces.forEach(el => el.setAttribute('data-connectify-surface', ''));
       const inks = [];
       for (const el of candidates(roots, INK_SELECTOR)) {
-        if (el.children.length > 2 || el.hasAttribute('data-connectea-surface') || el.closest(SKIP_ANCESTORS)) continue;
+        if (el.children.length > 2 || el.hasAttribute('data-connectify-surface') || el.closest(SKIP_ANCESTORS)) continue;
         const fgRgb = parseRgb(window.getComputedStyle(el).color, true);
         if (isDarkColor(fgRgb)) inks.push(el);
       }
-      inks.forEach(el => el.setAttribute('data-connectea-ink', ''));
+      inks.forEach(el => el.setAttribute('data-connectify-ink', ''));
     } catch {}
   }
 

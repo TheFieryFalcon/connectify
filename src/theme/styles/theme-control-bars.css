@@ -3,25 +3,25 @@
  * the page; the wallpaper is dimmed or brightened for the theme's text instead (theme-wallpaper-dim.js). Only
  * colours change here: margins, padding and sizes stay native in every theme.
  */
-.connectea-dark .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {
+.connectify-dark .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) {
   color: var(--cx-text-secondary, #cbd5e1) !important;
 }
 
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-paginator-page-size-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-paginator-range-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .connect-paginator-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-select-value,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-checkbox-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-paginator-page-size-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-paginator-range-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .connect-paginator-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-select-value,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-checkbox-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-paginator-page-size-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-paginator-range-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .connect-paginator-label,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-select-value,
-html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-checkbox-label {
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-paginator-page-size-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-paginator-range-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .connect-paginator-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-select-value,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] mat-paginator:not(.cx-n):not(.cx-n):not(cx-n) .mat-checkbox-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-paginator-page-size-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-paginator-range-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .connect-paginator-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-select-value,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .connect-paginator-container:not(.cx-n):not(cx-n):not(cx-n) .mat-checkbox-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-paginator-page-size-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-paginator-range-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .connect-paginator-label,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-select-value,
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .cvr-c-pagination__body > div.d-flex:has(> mat-checkbox) .mat-checkbox-label {
   color: #334155 !important;
 }
 
@@ -29,21 +29,21 @@ html:not(.connectea-dark)[data-connectea-has-custom-bg="true"] .cvr-c-pagination
    the Select All row paint no fill, edge or shadow in every dark theme and in Light with a wallpaper (a wrapper
    holding a table or an empty state keeps its own). An id weight (:not(#cx-n)) outranks the paging bar fills in
    theme-dialogs-paginator.css, whose :not(:has()) weigh more */
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(mat-paginator):not(#cx-n),
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.mat-paginator):not(#cx-n),
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.mat-paginator-container):not(#cx-n),
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.mat-paginator-outer-container):not(#cx-n),
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.connect-paginator-container):not(#cx-n),
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))):not(#cx-n),
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))) :where(.container-fluid):not(#cx-n),
-:is(html.connectea-dark, html[data-connectea-has-custom-bg="true"]) :where(.cvr-c-pagination__body) > :where(div.d-flex:has(> mat-checkbox)):not(#cx-n) {
+:is(html.connectify-dark, html[data-connectify-has-custom-bg="true"]) :where(mat-paginator):not(#cx-n),
+:is(html.connectify-dark, html[data-connectify-has-custom-bg="true"]) :where(.mat-paginator):not(#cx-n),
+:is(html.connectify-dark, html[data-connectify-has-custom-bg="true"]) :where(.mat-paginator-container):not(#cx-n),
+:is(html.connectify-dark, html[data-connectify-has-custom-bg="true"]) :where(.mat-paginator-outer-container):not(#cx-n),
+:is(html.connectify-dark, html[data-connectify-has-custom-bg="true"]) :where(.connect-paginator-container):not(#cx-n),
+:is(html.connectify-dark, html[data-connectify-has-custom-bg="true"]) :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))):not(#cx-n),
+:is(html.connectify-dark, html[data-connectify-has-custom-bg="true"]) :where(cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))) :where(.container-fluid):not(#cx-n),
+:is(html.connectify-dark, html[data-connectify-has-custom-bg="true"]) :where(.cvr-c-pagination__body) > :where(div.d-flex:has(> mat-checkbox)):not(#cx-n) {
   background-color: transparent !important;
   border-top-color: transparent !important;
   box-shadow: none !important;
 }
 
 /* A disabled Download button reads as disabled, not as a faint ghost */
-.connectea-dark .cvr-c-pagination__body button.mat-stroked-button.mat-button-disabled {
+.connectify-dark .cvr-c-pagination__body button.mat-stroked-button.mat-button-disabled {
   background-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 6%, transparent) !important;
   border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 22%, transparent) !important;
   color: var(--cx-text-secondary, #cbd5e1) !important;

@@ -57,35 +57,35 @@
 }
 
 /* Dark Mode Progress Pill */
-.connectea-dark:not(cx-n) :is(#cx-expand-progress, .cx-expand-progress-pill) {
+.connectify-dark:not(cx-n) :is(#cx-expand-progress, .cx-expand-progress-pill) {
   background: var(--cx-surface-bg, #1e2632) !important;
   color: var(--cx-text-primary, #f8fafc) !important;
   border-color: var(--cx-border, #2e3c4e) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38) !important;
 }
-.connectea-dark:not(cx-n) .cx-expand-spinner {
+.connectify-dark:not(cx-n) .cx-expand-spinner {
   border-color: var(--cx-accent, #3b82f6) !important;
   border-top-color: transparent !important;
 }
-.connectea-dark:not(cx-n) .cx-expand-label {
+.connectify-dark:not(cx-n) .cx-expand-label {
   color: var(--cx-text-primary, #f8fafc) !important;
 }
-.connectea-dark:not(cx-n) .cx-expand-track {
+.connectify-dark:not(cx-n) .cx-expand-track {
   background: var(--cx-canvas-bg, #12171f) !important;
   border-color: var(--cx-border, #2e3c4e) !important;
 }
-.connectea-dark:not(cx-n) .cx-expand-bar {
+.connectify-dark:not(cx-n) .cx-expand-bar {
   background: linear-gradient(90deg, var(--cx-accent, #3b82f6), var(--cx-accent-hover, #60a5fa)) !important;
 }
 
 /* Typography parity across light and dark modes */
-:is(.connectea-panel, .connectea-distribution, .connectea-result) strong {
+:is(.connectify-panel, .connectify-distribution, .connectify-result) strong {
   font-weight: 700 !important;
 }
 :is(.cvr-c-task-group__title, .cvr-c-task__group-name, .cx-cat-name-label, .cvr-c-task__title, .cvr-c-task__details .v-label:first-child, .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child) {
   font-weight: 700 !important;
 }
-.connectea-dark:not(cx-n) :is(
+.connectify-dark:not(cx-n) :is(
   .cvr-c-task-group__title,
   .cvr-c-task__group-name,
   .cx-cat-name-label,
@@ -93,7 +93,7 @@
   .cvr-c-task__details .v-label:first-child,
   .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
 ),
-.connectea-dark:not(cx-n) .cvr-c-task :is(
+.connectify-dark:not(cx-n) .cvr-c-task :is(
   .cvr-c-task__title,
   .cvr-c-task__details .v-label:first-child,
   .cvr-c-task__details > :is(.v-label, span, div, h2, h3, h4, strong):first-child
@@ -122,12 +122,12 @@
   background: #c0392b !important;
   border-color: #a93226 !important;
 }
-.connectea-dark:not(cx-n) .cx-clear-cache-btn {
+.connectify-dark:not(cx-n) .cx-clear-cache-btn {
   background: #c0392b !important;
   color: var(--cx-text-primary, #ffffff) !important;
   border: 1px solid #962d22 !important;
 }
-.connectea-dark:not(cx-n) .cx-clear-cache-btn:hover {
+.connectify-dark:not(cx-n) .cx-clear-cache-btn:hover {
   background: #962d22 !important;
   border-color: #78241c !important;
 }
@@ -151,8 +151,8 @@
   box-sizing: border-box !important;
 }
 
-.connectea-type-container,
-.connectea-outcome-bar {
+.connectify-type-container,
+.connectify-outcome-bar {
   flex: 0 0 auto !important;
   white-space: nowrap !important;
 }
@@ -166,22 +166,22 @@
 @media (max-width: 1050px) { :root { --cx-display-scale: 0.76; } }
 @media (max-width: 950px)  {
   :root { --cx-display-scale: 0.62; }
-  .connectea-row-wrapper { gap: 8px !important; }
-  .connectea-panel { padding: 6px 10px !important; }
+  .connectify-row-wrapper { gap: 8px !important; }
+  .connectify-panel { padding: 6px 10px !important; }
 }
 @media (max-width: 800px)  {
   :root { --cx-display-scale: 0.55; }
-  .connectea-row-wrapper { gap: 6px !important; }
-  .connectea-panel { padding: 5px 8px !important; }
+  .connectify-row-wrapper { gap: 6px !important; }
+  .connectify-panel { padding: 5px 8px !important; }
 }
 @media (max-width: 650px)  {
   :root { --cx-display-scale: 0.48; }
-  .connectea-row-wrapper { gap: 4px !important; }
-  .connectea-panel { padding: 4px 6px !important; }
+  .connectify-row-wrapper { gap: 4px !important; }
+  .connectify-panel { padding: 4px 6px !important; }
 }
 
 @supports not (zoom: 1) {
-  .connectea-row-wrapper {
+  .connectify-row-wrapper {
     transform: scale(var(--cx-display-scale, 1)) !important;
     transform-origin: left center !important;
   }

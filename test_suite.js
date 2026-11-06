@@ -725,14 +725,14 @@ runTest('theme.css styles Classes and Preferences heading bars and cards', () =>
 
 runTest('theme.js implements flicker-free attribute surface adaptation', () => {
   assert.ok(themeJs.includes('function adaptSurfaces(roots)'), 'theme.js must define adaptSurfaces(roots)');
-  assert.ok(themeJs.includes('data-connectea-surface'), 'theme.js must tag data-connectea-surface');
-  assert.ok(themeJs.includes('data-connectea-ink'), 'theme.js must tag data-connectea-ink');
+  assert.ok(themeJs.includes('data-connectify-surface'), 'theme.js must tag data-connectify-surface');
+  assert.ok(themeJs.includes('data-connectify-ink'), 'theme.js must tag data-connectify-ink');
   assert.ok(!themeJs.includes('savedTextColors'), 'theme.js must NOT mutate inline style properties');
 });
 
 runTest('Theme button mounting & positioning in primary navigation', () => {
   assert.ok(cssHas(themeCss, '.cvr-c-primary-navigation {'), 'theme.css must style .cvr-c-primary-navigation');
-  assert.ok(cssHas(themeCss, 'top: 50% !important;'), 'theme.css must vertically center #connectea-theme-toggle with top: 50%');
+  assert.ok(cssHas(themeCss, 'top: 50% !important;'), 'theme.css must vertically center #connectify-theme-toggle with top: 50%');
   assert.ok(cssHas(themeCss, 'transform: translateY(-50%) !important;'), 'theme.css must center with translateY(-50%)');
   assert.ok(themeJs.includes('mountPollInterval'), 'theme.js must include initial mounting poll interval');
   assert.ok(themeJs.includes('cleanupDuplicateButtons'), 'theme.js must cleanup duplicate theme buttons');
@@ -781,9 +781,9 @@ runTest('Hardcoded inline colors replaced with semantic classes in settings and 
 
 runTest('Brighter dark mode borders in theme.css and sidebar.css', () => {
   assert.ok(cssHasToken(themeCss, 'border: 1px solid #3d5066 !important'), 'eds-c-tile must use brighter border #3d5066');
-  assert.ok(cssHas(themeCss, '.connectea-dark .eds-c-accordion__section-heading'), 'accordion header must be styled');
+  assert.ok(cssHas(themeCss, '.connectify-dark .eds-c-accordion__section-heading'), 'accordion header must be styled');
   assert.ok(cssHasToken(themeCss, 'border-bottom: 1px solid #36485e !important'), 'navigation & tasks must use brighter border #36485e');
-  assert.ok(cssHas(sidebarCss, '.connectea-dark .cx-pred-scenario-card--mid'), 'sidebar.css must style dark mode scenario mid');
+  assert.ok(cssHas(sidebarCss, '.connectify-dark .cx-pred-scenario-card--mid'), 'sidebar.css must style dark mode scenario mid');
 });
 
 runTest('WCAG AA Color Contrast Ratios meet or exceed 5:1 threshold', () => {
@@ -830,7 +830,7 @@ runTest('WCAG AA Color Contrast Ratios meet or exceed 5:1 threshold', () => {
 runTest('White button styling for Settings and Weaknesses in sidebar', () => {
   assert.ok(cssHas(sidebarCss, '#connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle)'), 'sidebar.css must style the Weakness Analyzer, Past Years and Settings toggles');
   assert.ok(cssHas(sidebarCss, 'background: #ffffff !important;'), 'Must specify #ffffff white background for light mode');
-  assert.ok(cssHas(sidebarCss, '.connectea-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle)'), 'Must preserve dark mode style');
+  assert.ok(cssHas(sidebarCss, '.connectify-dark #connectify-sidebar .cx-tool-menu > :is(#connectify-weakness-toggle, #connectify-past-years-toggle, #connectify-categories-toggle)'), 'Must preserve dark mode style');
 });
 
 runTest('theme.css covers Classes accordion, Feed filter funnel, and Follow pills with >= 5:1 contrast', () => {
@@ -851,19 +851,19 @@ console.log('\n--- SECTION 2: Outcome Meter & Hover Tooltip Reliability ---');
 const cohortJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
 
 runTest('Outcome meter segments disable pointer-events to prevent hover boundary thrashing', () => {
-  const segMatch = sidebarCss.match(/\.connectea-outcome-segment\s*\{([^}]+)\}/);
-  assert.ok(segMatch, 'Found .connectea-outcome-segment in sidebar.css');
+  const segMatch = sidebarCss.match(/\.connectify-outcome-segment\s*\{([^}]+)\}/);
+  assert.ok(segMatch, 'Found .connectify-outcome-segment in sidebar.css');
   assert.ok(segMatch[1].includes('pointer-events: none'), 'segment must have pointer-events: none !important');
 });
 
 runTest('Singleton floating tooltip is styled with fixed positioning and high z-index', () => {
-  assert.ok(cssHas(sidebarCss, '#connectea-outcome-tooltip'), 'sidebar.css must style #connectea-outcome-tooltip');
+  assert.ok(cssHas(sidebarCss, '#connectify-outcome-tooltip'), 'sidebar.css must style #connectify-outcome-tooltip');
   assert.ok(cssHas(sidebarCss, 'position: fixed'), 'tooltip must use fixed viewport positioning');
   assert.ok(cssHas(sidebarCss, 'z-index: 100050'), 'tooltip must have z-index: 100050');
 });
 
 runTest('cohort-view.js manages floating outcome tooltip on mouseenter/mousemove/mouseleave', () => {
-  assert.ok(cohortJs.includes('connectea-outcome-tooltip'), 'cohort-view.js must reference #connectea-outcome-tooltip');
+  assert.ok(cohortJs.includes('connectify-outcome-tooltip'), 'cohort-view.js must reference #connectify-outcome-tooltip');
   assert.ok(cohortJs.includes('showFloatingTooltip'), 'cohort-view.js must define showFloatingTooltip');
   assert.ok(cohortJs.includes('hideFloatingTooltip'), 'cohort-view.js must define hideFloatingTooltip');
   assert.ok(cohortJs.includes('mouseenter'), 'cohort-view.js must bind mouseenter listener');
@@ -874,9 +874,9 @@ runTest('Outcome bar 2-3x sizing and dark mode segment color preservation', () =
   assert.ok(cssHas(sidebarCss, 'height: 56px !important;'), 'Outcome bar height must be enlarged (56px)');
   assert.ok(cssHas(sidebarCss, 'height: 10px !important;'), 'Outcome segment height must be enlarged (10px)');
   assert.ok(cssHas(sidebarCss, 'height: 20px !important;'), 'Outcome purple segment height must be 20px');
-  assert.ok(cssHas(sidebarCss, '.connectea-dark .connectea-outcome-segment:not([class*="connectea-active-"])'), 'Dark mode must only target inactive segments');
-  assert.ok(cssHas(sidebarCss, '.connectea-outcome-bar.connectea-outcome-critical'), 'sidebar.css must style critical outcome bar');
-  assert.ok(cssHas(sidebarCss, 'connectea-glow-critical'), 'sidebar.css must define connectea-glow-critical animation');
+  assert.ok(cssHas(sidebarCss, '.connectify-dark .connectify-outcome-segment:not([class*="connectify-active-"])'), 'Dark mode must only target inactive segments');
+  assert.ok(cssHas(sidebarCss, '.connectify-outcome-bar.connectify-outcome-critical'), 'sidebar.css must style critical outcome bar');
+  assert.ok(cssHas(sidebarCss, 'connectify-glow-critical'), 'sidebar.css must define connectify-glow-critical animation');
 });
 
 // Load predictor-math.js for mathematical evaluation
@@ -1128,7 +1128,7 @@ runTest('Low estimate variance scaling penalizes volatile performers appropriate
 
 runTest('Progress Graph custom date sync & unparsable date suppression', () => {
   mockLocalStorage.clear();
-  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Chemistry ATAR:Task Override Test'), 't3w5');
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectify:time_override:Chemistry ATAR:Task Override Test'), 't3w5');
 
   const mockSubjects = [
     {
@@ -1278,7 +1278,7 @@ runTest('Sidebar workspace drawer expands to 900px on active tool and provides b
 runTest('Category settings preserves colored text in dark mode and supports dynamic categories in cold-start', () => {
   const catSettingsJs = fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8');
   assert.ok(catSettingsJs.includes("label.className = 'cx-cat-name-label'"), 'Must set cx-cat-name-label class');
-  assert.ok(cssHas(sidebarCss, '.connectea-dark #connectify-sidebar .cx-cat-name-label'), 'sidebar.css must style .cx-cat-name-label with var(--cx-cat-color)');
+  assert.ok(cssHas(sidebarCss, '.connectify-dark #connectify-sidebar .cx-cat-name-label'), 'sidebar.css must style .cx-cat-name-label with var(--cx-cat-color)');
 
   // Cold-start dynamic custom categories
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8'));
@@ -1715,7 +1715,7 @@ runTest('design_rules.md mandates no unauthorized auto-expansion, backwards comp
   assert.ok(content.includes('title'), 'design_rules.md must prohibit setting native title attribute on outcome bars');
 });
 
-runTest('cohort-view.js removes native title attribute from outcome bar and relies only on dataset.connecteaTooltip', () => {
+runTest('cohort-view.js removes native title attribute from outcome bar and relies only on dataset.connectifyTooltip', () => {
   delete window.ConnectifyCohortView;
   const cohortJs = fs.readFileSync(path.resolve(BASE_DIR, 'cohort-view.js'), 'utf8');
   eval(cohortJs);
@@ -1747,14 +1747,14 @@ runTest('Predictor, Weaknesses, Calculator, and Grade Checker do not programmati
   assert.ok(procSubjMatch && !procSubjMatch[1].includes('.click()'), 'processChangedSubject must not automatically click buttons');
 });
 
-runTest('predictor-math.js getBaselines resolves legacy keys across connectea and connectify namespaces', () => {
+runTest('predictor-math.js getBaselines resolves legacy keys across connectify and connectify namespaces', () => {
   delete window.ConnectifyPredictorMath;
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   eval(predMathJs);
 
   mockLocalStorage.clear();
-  mockLocalStorage.setItem('connectea:baseline:types', JSON.stringify({ Exam: 78, Test: 82 }));
-  mockLocalStorage.setItem('connectea:baseline:subjects', JSON.stringify({ Chemistry: 80 }));
+  mockLocalStorage.setItem('connectify:baseline:types', JSON.stringify({ Exam: 78, Test: 82 }));
+  mockLocalStorage.setItem('connectify:baseline:subjects', JSON.stringify({ Chemistry: 80 }));
 
   const baselines = window.ConnectifyPredictorMath.getBaselines();
   assert.strictEqual(baselines.types.Exam, 78, 'Legacy type baseline must be resolved');
@@ -1820,18 +1820,18 @@ runTest('ConnectifyCache manages independent subsystem versions and isolated cle
 
   // Verify isolated clearing: clearing predictor cache does NOT clear settings or cohort
   localStorage.setItem('connectify:prediction:current:chem:t1', JSON.stringify({ mid: 75 }));
-  localStorage.setItem('connectea:categories', JSON.stringify({ test: {} }));
-  localStorage.setItem('connectea:cohort:v3:test', JSON.stringify({ size: 60 }));
+  localStorage.setItem('connectify:categories', JSON.stringify({ test: {} }));
+  localStorage.setItem('connectify:cohort:v3:test', JSON.stringify({ size: 60 }));
 
   window.ConnectifyCache.clearPredictorCache();
   assert.strictEqual(localStorage.getItem('connectify:prediction:current:chem:t1'), null, 'Predictor cache must be cleared');
-  assert.ok(localStorage.getItem('connectea:categories'), 'Settings cache must NOT be wiped by predictor clear');
-  assert.ok(localStorage.getItem('connectea:cohort:v3:test'), 'Cohort cache must NOT be wiped by predictor clear');
+  assert.ok(localStorage.getItem('connectify:categories'), 'Settings cache must NOT be wiped by predictor clear');
+  assert.ok(localStorage.getItem('connectify:cohort:v3:test'), 'Cohort cache must NOT be wiped by predictor clear');
 
   // Invalidate cohort subsystem
   window.ConnectifyCache.invalidateSubsystem('cohort');
-  assert.strictEqual(localStorage.getItem('connectea:cohort:v3:test'), null, 'Cohort cache must be cleared');
-  assert.ok(localStorage.getItem('connectea:categories'), 'Settings cache must remain intact');
+  assert.strictEqual(localStorage.getItem('connectify:cohort:v3:test'), null, 'Cohort cache must be cleared');
+  assert.ok(localStorage.getItem('connectify:categories'), 'Settings cache must remain intact');
 
   // Goals: a version bump or Clear Cache drops finished goals' verdicts, never the goals
   localStorage.setItem('connectify:goals:12345', '{"version":1,"goals":[]}');
@@ -1839,7 +1839,7 @@ runTest('ConnectifyCache manages independent subsystem versions and isolated cle
   window.ConnectifyCache.invalidateSubsystem('goals');
   assert.strictEqual(localStorage.getItem('connectify:goal_verdicts:12345'), null, 'goal verdicts must be cleared');
   assert.ok(localStorage.getItem('connectify:goals:12345'), 'goals must stay');
-  assert.ok(localStorage.getItem('connectea:categories'), 'Settings cache must remain intact');
+  assert.ok(localStorage.getItem('connectify:categories'), 'Settings cache must remain intact');
   window.ConnectifyCache.clearSettingsCache();
   assert.strictEqual(localStorage.getItem('connectify:goals:12345'), null, 'a settings reset removes goals');
 });
@@ -2083,16 +2083,16 @@ runTest('predictor-math.js strictly honors custom dates and suppresses unparsabl
   assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), false, 'Task with no date should not be parsable');
 
   // Add custom date override via progress graph key
-  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:Unscheduled Investigation'), '17'); // Term 2 Week 7
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:Unscheduled Investigation'), '17'); // Term 2 Week 7
   assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), true, 'Task with custom date 17 must be parsable');
 
   // Test custom date override with connectify: namespace
-  mockLocalStorage.removeItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:Unscheduled Investigation'));
+  mockLocalStorage.removeItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:Unscheduled Investigation'));
   mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:Unscheduled Investigation'), 'Term 3, Week 4');
   assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), true, 'Task with connectify: time override must be parsable');
 
   // Explicitly cleared custom date (empty string) must suppress task
-  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:Unscheduled Investigation'), '');
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:Unscheduled Investigation'), '');
   assert.strictEqual(predMath.hasParsableDate(noDateTask, 'Physics ATAR'), false, 'Explicitly cleared custom date must suppress task');
 });
 
@@ -2218,7 +2218,7 @@ runTest('theme.css covers circular trash buttons, View All buttons, Clay/Materia
   assert.ok(cssHas(css, '.eds-c-action-button') || cssHas(css, '.eds-c-tile__header .v-button'), 'theme.css must style View All tile header action button');
   assert.ok(cssHas(css, '.custom-checkbox') && cssHas(css, '.custom-control-label::before'), 'theme.css must style Clay custom checkboxes');
   assert.ok(cssHas(css, '.mat-checkbox-frame'), 'theme.css must style Angular Material checkbox frames');
-  assert.ok(cssHas(css, '.connectea-dark:not(cx-n)') && cssHas(css, '.eds.cvr'), 'theme.css must provide maximum specificity covering .eds.cvr');
+  assert.ok(cssHas(css, '.connectify-dark:not(cx-n)') && cssHas(css, '.eds.cvr'), 'theme.css must provide maximum specificity covering .eds.cvr');
   assert.ok(cssHasToken(css, 'border-top: 1px solid #2e3c4e !important;') && cssHasToken(css, 'border-bottom: 1px solid #2e3c4e !important;'), 'theme.css must set dark borders on task rows to eliminate light #888 lines');
 });
 
@@ -2323,7 +2323,7 @@ runTest('theme.css and theme.js normalize class page red outlines and headers wi
   assert.ok(cssHas(css, '.eds.cvr.ngm') && cssHas(css, '.mat-divider--primary'), 'theme.css must normalize .mat-divider--primary in .eds.cvr.ngm');
   assert.ok(!/div\.w-100[^{}]*\{[^}]*background-color: transparent/.test(css), 'theme.css must not have generic transparent div.w-100 rule');
   assert.ok(js.includes('isDarkColor'), 'theme.js must implement isDarkColor helper');
-  assert.ok(js.includes("el.hasAttribute('data-connectea-surface')"), 'theme.js must not tag surface containers as ink');
+  assert.ok(js.includes("el.hasAttribute('data-connectify-surface')"), 'theme.js must not tag surface containers as ink');
 });
 
 runTest('assessment-data.js strictly ignores summary rows outside .cvr-c-tasks and never synthesizes phantom tasks', () => {
@@ -2389,7 +2389,7 @@ runTest('theme.css styles mat-toolbar, mat-tab-header, and eliminates stroke fro
   const themeJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme.js'), 'utf8');
   assert.ok(cssHas(themeCss, 'mat-toolbar') && cssHas(themeCss, 'mat-tab-header'), 'theme.css must explicitly style mat-toolbar and mat-tab-header');
   assert.ok(cssHasToken(themeCss, 'background-color: #1a222d !important'), 'theme.css must use solid #1a222d background for headers and toolbars');
-  assert.ok(!cssHas(themeCss, '[class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before,\n  .cvr-c-icon:before,\n  .cvr-c-icon--switch:before,\n  [class*="switch"]:before,\n  [class*="role"]:before,\n  .eds-c-icon:before,\n  [class^="cvr-c-icon--"],\n  [class*=" cvr-c-icon--"],\n  .cvr-c-icon,\n  .cvr-c-icon--switch\n),\n:is(html.connectea-dark, body.connectea-dark, .connectea-dark).eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n),\n:is(html.connectea-dark, body.connectea-dark, .connectea-dark) .eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n) {\n  color: #cbd5e1 !important;\n  fill: #cbd5e1 !important;\n  stroke: currentColor !important;'), 'theme.css must not apply stroke: currentColor to font icon :before selectors');
+  assert.ok(!cssHas(themeCss, '[class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before,\n  .cvr-c-icon:before,\n  .cvr-c-icon--switch:before,\n  [class*="switch"]:before,\n  [class*="role"]:before,\n  .eds-c-icon:before,\n  [class^="cvr-c-icon--"],\n  [class*=" cvr-c-icon--"],\n  .cvr-c-icon,\n  .cvr-c-icon--switch\n),\n:is(html.connectify-dark, body.connectify-dark, .connectify-dark).eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n),\n:is(html.connectify-dark, body.connectify-dark, .connectify-dark) .eds.cvr :is(\n  .cvr-c-icon,\n  .cvr-c-icon--switch,\n  [class^="cvr-c-icon--"]:before,\n  [class*=" cvr-c-icon--"]:before\n) {\n  color: #cbd5e1 !important;\n  fill: #cbd5e1 !important;\n  stroke: currentColor !important;'), 'theme.css must not apply stroke: currentColor to font icon :before selectors');
   assert.ok(themeJs.includes('mat-toolbar') && themeJs.includes('mat-tab-header'), 'theme.js adaptSurfaces must include mat-toolbar and mat-tab-header');
 });
 
@@ -2449,15 +2449,15 @@ runTest('theme.css normalizes accordion panels and sidebar.css enforces distinct
   const sidebarCss = fs.readFileSync(path.resolve(BASE_DIR, 'sidebar.css'), 'utf8');
 
   assert.ok(
-    cssHas(themeCss, '.connectea-dark .eds-c-accordion__section-heading') &&
+    cssHas(themeCss, '.connectify-dark .eds-c-accordion__section-heading') &&
     cssHas(themeCss, 'background-color: transparent !important;') &&
     cssHas(themeCss, 'border: none !important;'),
     'theme.css must make accordion section headings flat and transparent with no borders'
   );
 
-  assert.ok(cssHas(sidebarCss, '.connectea-dark :is(.cx-pred-pill, .cx-pred-pill--low) strong'), 'sidebar.css must style low pill numbers');
-  assert.ok(cssHas(sidebarCss, '.connectea-dark .cx-pred-pill--mid strong'), 'sidebar.css must style mid pill numbers');
-  assert.ok(cssHas(sidebarCss, '.connectea-dark .cx-pred-pill--high strong'), 'sidebar.css must style high pill numbers');
+  assert.ok(cssHas(sidebarCss, '.connectify-dark :is(.cx-pred-pill, .cx-pred-pill--low) strong'), 'sidebar.css must style low pill numbers');
+  assert.ok(cssHas(sidebarCss, '.connectify-dark .cx-pred-pill--mid strong'), 'sidebar.css must style mid pill numbers');
+  assert.ok(cssHas(sidebarCss, '.connectify-dark .cx-pred-pill--high strong'), 'sidebar.css must style high pill numbers');
   assert.ok(cssHas(sidebarCss, '#cbd5e1 !important') && cssHas(sidebarCss, '#4ade80 !important'), 'sidebar.css must define #cbd5e1 for low and #4ade80 for high with !important');
 });
 
@@ -2732,8 +2732,8 @@ runTest('Test 101: Expand all progress pill adapts correctly across light and da
   assert.ok(cssHas(sidebarCss, 'background: #e2e8f0;'), 'sidebar.css must style progress track with #e2e8f0 in light mode');
 
   // Verify dark theme overrides in sidebar.css and theme.css
-  assert.ok(cssHas(sidebarCss, '.connectea-dark') && cssHas(sidebarCss, '#cx-expand-progress'), 'sidebar.css must provide dark mode overrides for #cx-expand-progress');
-  assert.ok(cssHas(themeCss, '.connectea-dark') && cssHas(themeCss, '#cx-expand-progress'), 'theme.css must provide dark mode overrides for #cx-expand-progress');
+  assert.ok(cssHas(sidebarCss, '.connectify-dark') && cssHas(sidebarCss, '#cx-expand-progress'), 'sidebar.css must provide dark mode overrides for #cx-expand-progress');
+  assert.ok(cssHas(themeCss, '.connectify-dark') && cssHas(themeCss, '#cx-expand-progress'), 'theme.css must provide dark mode overrides for #cx-expand-progress');
   assert.ok(cssHasToken(themeCss, 'background: #1e2632 !important;'), 'theme.css must use #1e2632 dark background for progress pill');
   assert.ok(cssHasToken(themeCss, 'color: #f8fafc !important;'), 'theme.css must use #f8fafc text for progress pill in dark mode');
 
@@ -2994,10 +2994,10 @@ runTest('Test 108: Accordion expansion multi-click fix, scroll freeze during bul
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
 
   // 1. Dark mode font unbolding and antialiasing
-  assert.ok(cssHasToken(themeCss, '.connectea-dark .cvr-c-task .v-label, .connectea-dark .cvr-c-task .cvr-c-task__title {\n  color: #f8fafc !important;\n  font-weight: 400 !important;\n}'), 'theme.css must set task title font-weight to 400 in dark mode');
-  assert.ok(cssHas(themeCss, '.connectea-dark .connectea-panel, .connectea-dark .connectea-distribution, .connectea-dark .connectea-result,\n.connectea-dark .connectea-panel-distribution, .connectea-dark .connectea-panel-standing {\n  font-weight: 400 !important;\n}'), 'theme.css must unbold connectea panel typography');
+  assert.ok(cssHasToken(themeCss, '.connectify-dark .cvr-c-task .v-label, .connectify-dark .cvr-c-task .cvr-c-task__title {\n  color: #f8fafc !important;\n  font-weight: 400 !important;\n}'), 'theme.css must set task title font-weight to 400 in dark mode');
+  assert.ok(cssHas(themeCss, '.connectify-dark .connectify-panel, .connectify-dark .connectify-distribution, .connectify-dark .connectify-result,\n.connectify-dark .connectify-panel-distribution, .connectify-dark .connectify-panel-standing {\n  font-weight: 400 !important;\n}'), 'theme.css must unbold connectify panel typography');
   assert.ok(cssHas(themeCss, '-webkit-font-smoothing: antialiased !important;'), 'theme.css must apply font antialiasing in dark mode');
-  assert.ok(cohortJs.includes('.connectea-result {\n      font-weight: 400 !important;'), 'cohort-stats.js must use font-weight: 400 for .connectea-result');
+  assert.ok(cohortJs.includes('.connectify-result {\n      font-weight: 400 !important;'), 'cohort-stats.js must use font-weight: 400 for .connectify-result');
 
   // 2. Removal and cleanup of improvement arrows
   assert.ok(progJs.includes('cleanupImprovementArrows'), 'progress-graph.js must define and run cleanupImprovementArrows');
@@ -3039,12 +3039,12 @@ runTest('Test 109: Text bolding parity across light and dark modes for Test head
   assert.ok(cohortViewJs.includes('<strong>${rankStr}</strong>'), 'cohort-view.js must wrap Rank in strong tag');
 
   // 2. Verify cohort-stats.js styles panel strong tags with font-weight 700
-  assert.ok(cohortStatsJs.includes('.connectea-distribution strong,\n    .connectea-result strong,\n    .connectea-panel strong {\n      font-weight: 700 !important;'), 'cohort-stats.js must style strong tags with font-weight 700');
+  assert.ok(cohortStatsJs.includes('.connectify-distribution strong,\n    .connectify-result strong,\n    .connectify-panel strong {\n      font-weight: 700 !important;'), 'cohort-stats.js must style strong tags with font-weight 700');
 
   // 3. Verify theme.css and sidebar.css enforce bolding for Test headers, mark numbers, and stats strong tags
   assert.ok(cssHas(themeCss, '.cvr-c-task-group__title'), 'theme.css must target task group title');
-  assert.ok(cssHas(themeCss, '.connectea-panel strong, .connectea-distribution strong, .connectea-result strong, .connectea-panel-distribution strong,\n.connectea-panel-standing strong'), 'theme.css must bold panel strong tags in light and dark modes');
-  assert.ok(cssHas(sidebarCss, ':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold panel strong tags');
+  assert.ok(cssHas(themeCss, '.connectify-panel strong, .connectify-distribution strong, .connectify-result strong, .connectify-panel-distribution strong,\n.connectify-panel-standing strong'), 'theme.css must bold panel strong tags in light and dark modes');
+  assert.ok(cssHas(sidebarCss, ':is(.connectify-panel, .connectify-distribution, .connectify-result) strong'), 'sidebar.css must bold panel strong tags');
   assert.ok(cssHas(sidebarCss, ':is(.cvr-c-task-group__title, .cvr-c-task__group-name'), 'sidebar.css must bold task group titles');
   assert.ok(cssHas(sidebarCss, '.cvr-c-tasks :is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child)'), 'sidebar.css must bold task mark scores inside .cvr-c-tasks');
   assert.ok(cssHas(sidebarCss, '.cvr-c-task:not(.cvr-c-tasks *)'), 'sidebar.css must explicitly unbold summary marks outside cvr-c-tasks');
@@ -3159,7 +3159,7 @@ runTest('Test 159: Cohort observer re-runs when the main-world bridge stamps box
     host.className = 'cvr-c-task__chart';
     row.appendChild(host);
     const panel = document.createElement('section');
-    panel.className = 'connectea-panel';
+    panel.className = 'connectify-panel';
     row.appendChild(panel);
     const elsewhere = document.createElement('div');
 
@@ -3192,7 +3192,7 @@ runTest('Test 160: Progress Graph week overrides mean the same week to the scrap
   const dates = window.ConnectifyPredictorDates;
   assert.strictEqual(dates.formatOverrideWeek('17').order, customWeekOrder('w17'), 'the predictor reads week 17 as the scraper does');
   mockLocalStorage.clear();
-  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:Overridden Task'), '17');
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:Overridden Task'), '17');
   const overridden = dates.getTaskChronologicalStamp({ name: 'Overridden Task', semester: 1, sequence: 0 }, 'Physics ATAR');
   const captioned = dates.getTaskChronologicalStamp({ name: 'Captioned Task', semester: 1, sequence: 0, order: customWeekOrder('w17') }, 'Physics ATAR');
   assert.strictEqual(overridden, captioned, 'An override of 17 must sort exactly where the scraper places school week 17');
@@ -3400,7 +3400,7 @@ runTest('Test 164: The outcome bar stays hidden on the first marked assessment o
 runTest('Test 165: Custom themes can be edited in place from the theme menu', () => {
   const menuJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-menu.js'), 'utf8');
   const customizerJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-customizer.js'), 'utf8');
-  assert.ok(menuJs.includes("actionButton('connectea-theme-edit-btn', '✎', 'Edit theme'"), 'Custom themes must have an Edit button in the theme menu');
+  assert.ok(menuJs.includes("actionButton('connectify-theme-edit-btn', '✎', 'Edit theme'"), 'Custom themes must have an Edit button in the theme menu');
   assert.ok(menuJs.includes('window.ConnectifyThemeCustomizer?.open(reg?.getThemeDefinition?.(theme.id) || theme)'), 'Edit must open the customizer on that theme');
   assert.ok(customizerJs.includes('editingId: themeToEdit?.isCustom ? themeToEdit.id : null') && customizerJs.includes('id: state.editingId || undefined'), 'Saving an edited theme must keep its id');
 
@@ -3427,9 +3427,9 @@ runTest('Test 111: Typography parity (unbolded overall % and letter grade), star
 
   // 1. Typography rules: overall % and letter grades are unbolded (400), task marks and stats strong are bold (700)
   assert.ok(cssHas(sideCss, ':is(.cvr-c-task__score, .cvr-c-task__grade'), 'sidebar.css must set font-weight 400 for overall percent and letter grades');
-  assert.ok(cssHas(themeCss, ':is(.connectea-dark, body, html) .cvr-c-task__score:not(.cx-n):not(.cx-n), :is(.connectea-dark, body, html) .cvr-c-task__grade:not(.cx-n):not(.cx-n)'), 'theme.css must set font-weight 400 for overall percent and letter grades');
+  assert.ok(cssHas(themeCss, ':is(.connectify-dark, body, html) .cvr-c-task__score:not(.cx-n):not(.cx-n), :is(.connectify-dark, body, html) .cvr-c-task__grade:not(.cx-n):not(.cx-n)'), 'theme.css must set font-weight 400 for overall percent and letter grades');
   assert.ok(cssHas(sideCss, '.cvr-c-tasks :is(.cvr-c-task__mark-score, .cvr-c-task__marks .cvr-c-task__mark :is(.v-label, span, div):first-child) {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold task marks');
-  assert.ok(cssHas(sideCss, ':is(.connectea-panel, .connectea-distribution, .connectea-result) strong {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold stats panel strong elements');
+  assert.ok(cssHas(sideCss, ':is(.connectify-panel, .connectify-distribution, .connectify-result) strong {\n  font-weight: 700 !important;\n}'), 'sidebar.css must bold stats panel strong elements');
 
   // 2. Startup auto-expand: decoupled from user activity, runs immediately on page load
   assert.ok(atarFeatJs.includes('function checkStartupAutoExpand()'), 'atar-features.js must define checkStartupAutoExpand');
@@ -3477,8 +3477,8 @@ runTest('Test 112: Subject grade unbolding, first task outcome bar suppression, 
   assert.ok(cohortViewJs.includes('<strong>Z-Score ${zStr}</strong>'), 'cohort-view.js must format Z-Score without colon or equals sign');
   assert.ok(!cohortViewJs.includes('z ≈'), 'cohort-view.js must not contain z ≈');
   assert.ok(cohortViewJs.includes('${data.rank} / ${totalDisplay}'), 'cohort-view.js must format rank without word Rank or colon');
-  assert.ok(cohortViewJs.includes("'connectea-type-title', 'Type: '"), 'cohort-view.js must format Type label with trailing colon and space');
-  assert.ok(cohortViewJs.includes("'connectea-controls', 'Cohort Size '"), 'cohort-view.js must remove colon from Cohort Size');
+  assert.ok(cohortViewJs.includes("'connectify-type-title', 'Type: '"), 'cohort-view.js must format Type label with trailing colon and space');
+  assert.ok(cohortViewJs.includes("'connectify-controls', 'Cohort Size '"), 'cohort-view.js must remove colon from Cohort Size');
   assert.ok(cohortViewJs.includes('Original Estimate ~'), 'cohort-view.js must remove colon from Original Estimate');
 
   // 4. Fast auto-expansion without collapsed flash
@@ -3492,17 +3492,17 @@ runTest('Test 113: Typography bolding parity between dark and light modes for ta
 
   // 1. Task titles and first details labels bolding in light and dark modes (font-weight: 700 !important)
   assert.ok(cssHas(sideCss, '.cvr-c-task__details .v-label:first-child'), 'sidebar.css must bold first details label');
-  assert.ok(cssHas(sideCss, '.connectea-dark:not(cx-n)'), 'sidebar.css must enforce dark mode bolding parity');
+  assert.ok(cssHas(sideCss, '.connectify-dark:not(cx-n)'), 'sidebar.css must enforce dark mode bolding parity');
   assert.ok(cssHas(themeCss, '.cvr-c-task__details .v-label:first-child'), 'theme.css must bold first details label in dark mode');
-  assert.ok(cssHas(themeCss, '.connectea-dark:not(cx-n) .cvr-c-task :is('), 'theme.css must override task details unbolding for task headers');
+  assert.ok(cssHas(themeCss, '.connectify-dark:not(cx-n) .cvr-c-task :is('), 'theme.css must override task details unbolding for task headers');
 
   // 2. Summary mark and non-task score unbolding parity (font-weight: 400 !important)
   assert.ok(cssHas(sideCss, '.cvr-c-task:not(.cvr-c-tasks *) :is(.cvr-c-task__mark'), 'sidebar.css must unbold subject summary mark');
   assert.ok(cssHas(themeCss, ':is(.cvr-c-task:not(.cvr-c-tasks *)) .cvr-c-task__mark'), 'theme.css must unbold subject summary mark');
 
   // 3. Stats panel strong elements parity
-  assert.ok(cssHas(sideCss, ':is(.connectea-panel, .connectea-distribution, .connectea-result) strong'), 'sidebar.css must bold stats panel strong elements');
-  assert.ok(cssHas(themeCss, '.connectea-panel strong, .connectea-distribution strong, .connectea-result strong, .connectea-panel-distribution strong,\n.connectea-panel-standing strong'), 'theme.css must bold stats panel strong elements in dark mode');
+  assert.ok(cssHas(sideCss, ':is(.connectify-panel, .connectify-distribution, .connectify-result) strong'), 'sidebar.css must bold stats panel strong elements');
+  assert.ok(cssHas(themeCss, '.connectify-panel strong, .connectify-distribution strong, .connectify-result strong, .connectify-panel-distribution strong,\n.connectify-panel-standing strong'), 'theme.css must bold stats panel strong elements in dark mode');
 });
 
 runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.edu.au/login and restored after login', () => {
@@ -3510,7 +3510,7 @@ runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.
 
   // 1. Static checks: theme.js must check isLoginUrl, set RESTORE_KEY, and restore dark mode post-login
   assert.ok(themeJs.includes('const isLoginUrl ='), 'theme.js must define isLoginUrl');
-  assert.ok(themeJs.includes('connectea:theme:restore_dark'), 'theme.js must define RESTORE_KEY for post-login restoration');
+  assert.ok(themeJs.includes('connectify:theme:restore_dark'), 'theme.js must define RESTORE_KEY for post-login restoration');
   assert.ok(themeJs.includes("url === 'https://connect.det.wa.edu.au/login'") || themeJs.includes("startsWith('https://connect.det.wa.edu.au/login')"), 'theme.js must verify connect login url');
   assert.ok(themeJs.includes("localStorage.setItem(RESTORE_KEY, 'true')"), 'theme.js must record restore flag on login URL');
   assert.ok(themeJs.includes('localStorage.removeItem(RESTORE_KEY)'), 'theme.js must clear restore flag when restored');
@@ -3519,8 +3519,8 @@ runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.
   // 2. Functional evaluation of isLoginUrl across login and normal URLs
   delete window.ConnectifyThemeLoaded;
   window.location.href = 'https://connect.det.wa.edu.au/login';
-  window.localStorage.setItem('connectea:theme:v1', 'dark');
-  window.localStorage.removeItem('connectea:theme:restore_dark');
+  window.localStorage.setItem('connectify:theme:v1', 'dark');
+  window.localStorage.removeItem('connectify:theme:restore_dark');
 
   eval(themeJs);
 
@@ -3531,10 +3531,10 @@ runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.
   assert.strictEqual(window.ConnectifyTheme.isLoginUrl('https://connect.det.wa.edu.au/classes'), false, 'classes must not be login URL');
 
   // 3. Functional verification of dark mode suppression and storage toggle off on login page
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'light', 'storage must be toggled to light on login page');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), 'true', 'restore flag must be saved on login page');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'connectea-dark must not be on documentElement on login page');
-  assert.strictEqual(document.body?.classList.contains('connectea-dark'), false, 'connectea-dark must not be on body on login page');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:v1'), 'light', 'storage must be toggled to light on login page');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_dark'), 'true', 'restore flag must be saved on login page');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), false, 'connectify-dark must not be on documentElement on login page');
+  assert.strictEqual(document.body?.classList.contains('connectify-dark'), false, 'connectify-dark must not be on body on login page');
   assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false on login page');
 
   // 4. Functional verification of dark mode restoration after logging in and navigating to normal Connect page
@@ -3542,26 +3542,26 @@ runTest('Test 114: Dark mode disabled and toggled off on https://connect.det.wa.
   window.location.href = 'https://connect.det.wa.edu.au/classes';
   eval(themeJs);
 
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'dark', 'storage must be restored to dark after login');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), null, 'restore flag must be cleared after restoration');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true, 'connectea-dark must be restored on documentElement');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:v1'), 'dark', 'storage must be restored to dark after login');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_dark'), null, 'restore flag must be cleared after restoration');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), true, 'connectify-dark must be restored on documentElement');
   assert.strictEqual(window.ConnectifyTheme.isDarkMode(), true, 'isDarkMode must return true after login restoration');
 
   // 5. Functional verification: Light mode user logging in keeps light mode
   delete window.ConnectifyThemeLoaded;
-  window.localStorage.setItem('connectea:theme:v1', 'light');
-  window.localStorage.removeItem('connectea:theme:restore_dark');
+  window.localStorage.setItem('connectify:theme:v1', 'light');
+  window.localStorage.removeItem('connectify:theme:restore_dark');
   window.location.href = 'https://connect.det.wa.edu.au/login';
   eval(themeJs);
 
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), null, 'restore flag must not be set for light mode users');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_dark'), null, 'restore flag must not be set for light mode users');
 
   delete window.ConnectifyThemeLoaded;
   window.location.href = 'https://connect.det.wa.edu.au/classes';
   eval(themeJs);
 
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'light', 'light mode remains light after login');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'connectea-dark must remain off');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:v1'), 'light', 'light mode remains light after login');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), false, 'connectify-dark must remain off');
   assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false for light mode user');
 });
 
@@ -3823,7 +3823,7 @@ runTest('Test 119: Immediate summary panel recovery, scoped surface adaptation, 
   assert.ok(cohortViewJs.includes('const baselinesSig = getBaselinesSig();'), 'cohort-view.js render must use memoized getBaselinesSig');
 
   // 4. Verify scoped surface/ink candidate queries in theme.js
-  assert.ok(themeJs.includes('[data-connectea-surface] :is('), 'theme.js must scope ink candidates to elements inside data-connectea-surface');
+  assert.ok(themeJs.includes('[data-connectify-surface] :is('), 'theme.js must scope ink candidates to elements inside data-connectify-surface');
   assert.ok(themeJs.includes('const pageStartTime = Date.now();'), 'theme.js must track pageStartTime for startup cooldown');
   assert.ok(themeJs.includes('scheduleAdaptSurfaces(600)'), 'theme.js must schedule startup surface adaptation without blocking render');
 
@@ -3855,10 +3855,10 @@ runTest('Test 119: Immediate summary panel recovery, scoped surface adaptation, 
   eval(cohortStatsJs);
 
   try {
-    assert.strictEqual(summaryRow.querySelector('.connectea-panel'), null, 'Panel not initially present on newly inserted row');
+    assert.strictEqual(summaryRow.querySelector('.connectify-panel'), null, 'Panel not initially present on newly inserted row');
     // Calling runPass attaches panel synchronously
     window.ConnectifyCohort.pass();
-    assert.ok(summaryRow.querySelector('.connectea-panel'), 'Panel immediately attached to summary row');
+    assert.ok(summaryRow.querySelector('.connectify-panel'), 'Panel immediately attached to summary row');
   } finally {
     card.remove();
   }
@@ -4046,7 +4046,7 @@ runTest('Test 122: Back to top button styling parity, expandAll multi-card dedup
   assert.ok(cssHas(atarCss, 'border-radius: 6px !important;'), 'atar.css .cx-back-to-top-btn must have border-radius: 6px');
   assert.ok(cssHas(atarCss, 'font-weight: 500 !important;'), 'atar.css .cx-back-to-top-btn must have font-weight: 500');
   assert.ok(cssHas(atarCss, 'background-color: #ffffff !important;'), 'atar.css .cx-back-to-top-btn must have background-color: #ffffff');
-  assert.ok(cssHas(themeCss, '.connectea-dark .cx-back-to-top-btn'), 'theme.css must style dark mode .cx-back-to-top-btn');
+  assert.ok(cssHas(themeCss, '.connectify-dark .cx-back-to-top-btn'), 'theme.css must style dark mode .cx-back-to-top-btn');
 
   // 2. expandAll multi-card deduplication
   assert.ok(!assessJs.includes('[class*="card"]'), 'expandAll must not deduplicate using [class*="card"] to avoid merging cards into outer dashboard card');
@@ -4062,10 +4062,10 @@ runTest('Test 122: Back to top button styling parity, expandAll multi-card dedup
   assert.ok(sidebarJs.includes('ensureProgressPanel'), 'sidebar.js must instantiate progress panel alongside other tools');
 
   // 5. Constant 1920x1080 display-width scaling and single-line stats panel layout
-  assert.ok(cohortStatsJs.includes('flex-wrap: nowrap !important;'), 'cohort-stats.js must use flex-wrap: nowrap on .connectea-row-wrapper');
-  assert.ok(cohortStatsJs.includes('max-width: fit-content !important;'), 'cohort-stats.js must set max-width: fit-content on .connectea-panel');
-  assert.ok(cssHas(sidebarCss, '.connectea-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:nowrap!important'), 'sidebar.css must use nowrap on .connectea-row-wrapper');
-  assert.ok(cssHas(sidebarCss, '.connectea-row-wrapper>.connectea-panel{flex:0 1 auto!important;width:auto!important;max-width:fit-content!important'), 'sidebar.css must set max-width: fit-content on .connectea-panel');
+  assert.ok(cohortStatsJs.includes('flex-wrap: nowrap !important;'), 'cohort-stats.js must use flex-wrap: nowrap on .connectify-row-wrapper');
+  assert.ok(cohortStatsJs.includes('max-width: fit-content !important;'), 'cohort-stats.js must set max-width: fit-content on .connectify-panel');
+  assert.ok(cssHas(sidebarCss, '.connectify-row-wrapper{display:flex!important;align-items:center!important;gap:14px!important;flex-wrap:nowrap!important'), 'sidebar.css must use nowrap on .connectify-row-wrapper');
+  assert.ok(cssHas(sidebarCss, '.connectify-row-wrapper>.connectify-panel{flex:0 1 auto!important;width:auto!important;max-width:fit-content!important'), 'sidebar.css must set max-width: fit-content on .connectify-panel');
   assert.ok(cssHas(sidebarCss, ':is(.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile) {'), 'sidebar.css must scale subject tiles to 100% width');
   assert.ok(cssHas(themeCss, '.eds-c-tile, .cvr-c-tile, [data-subject-card], .c-tile {'), 'theme.css must scale subject tiles to 100% width');
   assert.ok(!cssHas(sidebarCss, '.cvr-c-task__details{flex:1 1 auto!important'), 'sidebar.css must not force flex: 1 1 auto on .cvr-c-task__details');
@@ -4156,7 +4156,7 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   const mockPoints = [task1, task2];
 
   // Set an old generic override (e.g. 17)
-  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Chemistry ATAR:Extended response 1'), '17');
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectify:time_override:Chemistry ATAR:Extended response 1'), '17');
 
   let refreshed = false;
   drawWeekCells(container, mockPoints, 'Chemistry ATAR', () => { refreshed = true; });
@@ -4188,9 +4188,9 @@ runTest('Test 124: Tasks of the same name have independent date overrides and ar
   r2Input.dispatchEvent(new MockEvent('input'));
 
   // Task 2 must be saved under its specific key
-  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Chemistry ATAR:id_sem2_er1')), 'w27', 'Task 2 must save to its specific key, as a school week of the year');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectify:time_override:Chemistry ATAR:id_sem2_er1')), 'w27', 'Task 2 must save to its specific key, as a school week of the year');
   // Task 1's generic key must NOT be overwritten by Task 2
-  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Chemistry ATAR:Extended response 1')), '17', 'Task 1 generic key must remain 17');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectify:time_override:Chemistry ATAR:Extended response 1')), '17', 'Task 1 generic key must remain 17');
 
   // Test resolveTaskOrder in assessment-data.js
   delete window.ConnectifyData;
@@ -4254,7 +4254,7 @@ runTest('Test 125: Task Dates week editor protects active typing from premature 
   input.dispatchEvent(new MockEvent('input'));
 
   // Synchronous storage check: partial input saved
-  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_unscheduled')), 'w1', 'Must save to storage on input, as a school week of the year');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:task_unscheduled')), 'w1', 'Must save to storage on input, as a school week of the year');
   // BUT onRefresh must NOT have fired because input is focused
   assert.strictEqual(refreshCount, 0, 'Must NOT trigger onRefresh while actively focused on input');
 
@@ -4277,7 +4277,7 @@ runTest('Test 125: Task Dates week editor protects active typing from premature 
   // 4. Simulate typing '7' -> '17'
   input.value = '17';
   input.dispatchEvent(new MockEvent('input'));
-  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_unscheduled')), 'w17', 'Must update storage to 17');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:task_unscheduled')), 'w17', 'Must update storage to 17');
   assert.strictEqual(refreshCount, 0, 'Still must NOT trigger onRefresh while typing');
 
   // 5. User presses Enter to commit
@@ -4288,7 +4288,7 @@ runTest('Test 125: Task Dates week editor protects active typing from premature 
   const taskWithDate = { id: 'task_dated', name: 'Midyear Exam', score: 85, mean: 70, order: 19, sequence: 2, pending: false };
   const container2 = document.createElement('div');
   let refreshCount2 = 0;
-  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated'), 'w19');
+  mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:task_dated'), 'w19');
 
   drawWeekCells(container2, [taskWithDate], 'Physics ATAR', () => { refreshCount2++; });
 
@@ -4304,11 +4304,11 @@ runTest('Test 125: Task Dates week editor protects active typing from premature 
   // User changes value to 25 but presses Escape
   editInput.value = '25';
   editInput.dispatchEvent(new MockEvent('input'));
-  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated')), 'w25', 'Storage updated on input');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:task_dated')), 'w25', 'Storage updated on input');
 
   editInput.dispatchEvent(new MockEvent('keydown', { key: 'Escape' }));
   assert.strictEqual(editInput.value, '19', 'Escape must restore initial value 19 in input');
-  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated')), 'w19', 'Escape must restore initial value 19 in storage');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:task_dated')), 'w19', 'Escape must restore initial value 19 in storage');
   assert.strictEqual(refreshCount2, 1, 'Escape must commit restored value and trigger onRefresh');
   assert.ok(chartJs.includes("e.key === 'Escape') {\n          // Cancels this edit only, never the drawer around it\n          e.preventDefault();\n          e.stopPropagation();"), 'Escape cancels the edit, not the drawer');
 
@@ -4316,11 +4316,11 @@ runTest('Test 125: Task Dates week editor protects active typing from premature 
   const clearBtn = container2.querySelector('.cx-time-clear-btn');
   assert.ok(clearBtn, 'Must render clear button when currentVal exists');
   clearBtn.click();
-  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_dated')), null, 'Clear button must remove override');
+  assert.strictEqual(mockLocalStorage.getItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:task_dated')), null, 'Clear button must remove override');
   assert.strictEqual(refreshCount2, 2, 'Clear button must trigger onRefresh');
 
   // 8. A week read from the task opens in the input too, and stays unsaved unless changed
-  const parsedKey = window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:task_parsed');
+  const parsedKey = window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:task_parsed');
   const parsedWeek = String(window.ConnectifySchoolTerms.schoolWeek(19));
   const container3 = document.createElement('div');
   let refreshCount3 = 0;
@@ -4789,7 +4789,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   [
     'connectify-sidebar',
     'connectify-sidebar-handle',
-    'connectea-atar',
+    'connectify-atar',
     'connectify-progress',
     'connectify-weakness',
     'connectify-categories',
@@ -4890,7 +4890,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   const workspace = sidebar.querySelector('.cx-workspace');
   assert.ok(workspace, 'Workspace container (.cx-workspace) must exist');
   const expectedPanels = [
-    'connectea-atar',
+    'connectify-atar',
     'connectify-predictor',
     'connectify-progress',
     'connectify-weakness',
@@ -4914,8 +4914,8 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar must enter cx-tool-active mode');
   assert.strictEqual(goalsBtn.getAttribute('aria-pressed'), 'true', 'Goals button must be pressed');
 
-  const atarPanel = document.getElementById('connectea-atar');
-  assert.strictEqual(atarPanel.hidden, false, 'Goals panel (#connectea-atar) must be visible');
+  const atarPanel = document.getElementById('connectify-atar');
+  assert.strictEqual(atarPanel.hidden, false, 'Goals panel (#connectify-atar) must be visible');
   assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target Grade Planner', 'Goals must open on the Target Grade Planner');
 
   // Verify Goals heading and its mode tabs: Target Grade before Target ATAR
@@ -4944,7 +4944,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.ok(sidebar.classList.contains('cx-tool-active'), 'Sidebar remains in cx-tool-active mode');
   assert.strictEqual(goalsBtn.getAttribute('aria-pressed'), 'true', 'Goals stays pressed on its ATAR tab');
   assert.ok(modeTab('target').classList.contains('active') && !modeTab('grade').classList.contains('active'), 'ATAR tab must be selected');
-  assert.strictEqual(atarPanel.hidden, false, '#connectea-atar remains visible for Target ATAR');
+  assert.strictEqual(atarPanel.hidden, false, '#connectify-atar remains visible for Target ATAR');
   assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Target ATAR Planner', 'Panel label must indicate Target ATAR Planner');
   const targetHeading = atarPanel.querySelector('.cta-heading strong');
   assert.strictEqual(targetHeading.textContent, 'Goal Setter', 'Goal Setter heading stays on its ATAR tab');
@@ -5022,7 +5022,7 @@ runTest('Test 130: Sidebar renders canonical navigation and workspace hierarchy,
   assert.strictEqual(estBtn.getAttribute('aria-pressed'), 'true', 'Estimates button must be pressed');
   assert.strictEqual(goalsBtn.getAttribute('aria-pressed'), 'false', 'Goals button must not be pressed');
   assert.strictEqual(progPanel.hidden, true, 'Progress panel must be hidden');
-  assert.strictEqual(atarPanel.hidden, false, 'ATAR panel (#connectea-atar) must be visible');
+  assert.strictEqual(atarPanel.hidden, false, 'ATAR panel (#connectify-atar) must be visible');
   assert.strictEqual(atarPanel.getAttribute('aria-label'), 'Estimated Grade', 'Estimates must open on Estimated Grade');
 
   // Verify Estimates heading, its tabs and the Estimate Grade elements
@@ -5400,7 +5400,7 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   const manifest = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'manifest.json'), 'utf8'));
 
   // 1. Static checks: CSS controls exclude navbar and header buttons from padding inflation
-  assert.ok(cssHas(themeControlsCss, ':not(:is(#connectify-sidebar, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-primary-navigation__user-controls) *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation):not(.cvr-c-header):not(#connectea-theme-toggle)'),
+  assert.ok(cssHas(themeControlsCss, ':not(:is(#connectify-sidebar, .cvr-c-primary-navigation, .cvr-c-header, .cvr-c-primary-navigation__user-controls) *):not(#connectify-sidebar-handle):not(.cvr-c-primary-navigation):not(.cvr-c-header):not(#connectify-theme-toggle)'),
     'theme-controls.css must exclude primary navigation and header buttons from generic button padding');
   assert.ok(cssHas(themeCoreCss, 'min-height: 48px !important;'), 'theme-core.css must enforce min-height on cvr-c-primary-navigation');
   assert.ok(cssHas(themeCoreCss, 'box-sizing: border-box !important;'), 'theme-core.css must enforce box-sizing on cvr-c-primary-navigation');
@@ -5412,12 +5412,12 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
 
   // 3. Static checks: theme-tokens.css defines custom properties and multiple palettes
   assert.ok(cssHas(themeTokensCss, '--cx-canvas-bg:') && cssHas(themeTokensCss, '--cx-surface-bg:'), 'theme-tokens.css must define CSS custom properties');
-  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="amoled"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #000000;'), 'theme-tokens.css must define AMOLED black theme');
-  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="midnight"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0b132b;'), 'theme-tokens.css must define Midnight navy theme');
-  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="forest"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0a1914;'), 'theme-tokens.css must define Forest theme');
-  assert.ok(!cssHas(themeTokensCss, '[data-connectea-theme="sunset"]'), 'the Twilight Plum (sunset) theme was removed');
-  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="liquid-glass"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0b1120;'), 'theme-tokens.css must define Liquid Tinted Glass theme');
-  assert.ok(cssHas(themeTokensCss, '#connectea-theme-menu'), 'theme-tokens.css must style the theme popover menu');
+  assert.ok(cssHas(themeTokensCss, '[data-connectify-theme="amoled"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #000000;'), 'theme-tokens.css must define AMOLED black theme');
+  assert.ok(cssHas(themeTokensCss, '[data-connectify-theme="midnight"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0b132b;'), 'theme-tokens.css must define Midnight navy theme');
+  assert.ok(cssHas(themeTokensCss, '[data-connectify-theme="forest"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0a1914;'), 'theme-tokens.css must define Forest theme');
+  assert.ok(!cssHas(themeTokensCss, '[data-connectify-theme="sunset"]'), 'the Twilight Plum (sunset) theme was removed');
+  assert.ok(cssHas(themeTokensCss, '[data-connectify-theme="liquid-glass"]') && cssHas(themeTokensCss, '--cx-canvas-bg: #0b1120;'), 'theme-tokens.css must define Liquid Tinted Glass theme');
+  assert.ok(cssHas(themeTokensCss, '#connectify-theme-menu'), 'theme-tokens.css must style the theme popover menu');
 
   // 4. Manifest checks: theme-tokens.css, theme-registry.js, and theme-customizer files are registered
   const contentScript = manifest.content_scripts.find(s => s.matches && s.matches.includes('https://connect.det.wa.edu.au/*'));
@@ -5456,8 +5456,8 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   // Switch to AMOLED theme
   reg.setTheme('amoled');
   assert.strictEqual(reg.getTheme(), 'amoled', 'Active theme must be amoled');
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'amoled', 'dataset.connecteaTheme must be amoled');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true, 'connectea-dark must be active for amoled');
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'amoled', 'dataset.connectifyTheme must be amoled');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), true, 'connectify-dark must be active for amoled');
 
   // Switch to custom theme with custom palette
   reg.setTheme('custom', { canvas: '#101014', surface: '#181820', accent: '#a855f7' });
@@ -5476,7 +5476,7 @@ runTest('Test 135: Modular theme tokens, theme registry, custom palettes, and to
   assert.strictEqual(registered, true, 'registerTheme must succeed');
   reg.setTheme('cyberpunk');
   assert.strictEqual(reg.getTheme(), 'cyberpunk', 'Active theme must be cyberpunk');
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'cyberpunk', 'dataset.connecteaTheme must be cyberpunk');
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'cyberpunk', 'dataset.connectifyTheme must be cyberpunk');
 
   // Switch back to Classic Dark
   reg.setTheme('dark');
@@ -5493,12 +5493,12 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   const themeRegistryJs = fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8');
   const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
 
-  // 1. Static CSS checks: all theme tokens require .connectea-dark and exclude [data-connectea-login]
-  assert.ok(cssHas(themeTokensCss, 'html.connectea-dark[data-connectea-theme="amoled"]'),
-    'theme-tokens.css amoled theme must require .connectea-dark');
-  assert.ok(cssHas(themeTokensCss, '[data-connectea-login]'),
-    'theme-tokens.css must define [data-connectea-login] rule block');
-  assert.ok(cssHas(themeTokensCss, '[data-connectea-login] #connectea-theme-toggle, [data-connectea-login] #connectea-theme-menu'),
+  // 1. Static CSS checks: all theme tokens require .connectify-dark and exclude [data-connectify-login]
+  assert.ok(cssHas(themeTokensCss, 'html.connectify-dark[data-connectify-theme="amoled"]'),
+    'theme-tokens.css amoled theme must require .connectify-dark');
+  assert.ok(cssHas(themeTokensCss, '[data-connectify-login]'),
+    'theme-tokens.css must define [data-connectify-login] rule block');
+  assert.ok(cssHas(themeTokensCss, '[data-connectify-login] #connectify-theme-toggle, [data-connectify-login] #connectify-theme-menu'),
     'theme-tokens.css must hide theme toggle and popover on login page');
 
   // 2. Functional check: AMOLED theme active, navigate to login page
@@ -5508,7 +5508,7 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   eval(themeJs);
   window.ConnectifyTheme.setTheme('amoled');
   assert.strictEqual(window.ConnectifyTheme.getTheme(), 'amoled');
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'amoled');
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'amoled');
 
   // Navigate to login page
   delete window.ConnectifyThemeLoaded;
@@ -5520,18 +5520,18 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false on login page');
   assert.strictEqual(window.ConnectifyTheme.getTheme(), 'light', 'getTheme must return light on login page');
   assert.strictEqual(window.ConnectifyThemeRegistry.getTheme(), 'light', 'Registry getTheme must return light on login page');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'connectea-dark must be removed on login');
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined, 'data-connectea-theme must be removed on login');
-  assert.strictEqual(document.documentElement.getAttribute('data-connectea-login'), 'true', 'data-connectea-login must be set on login');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'light', 'storage v1 must be light on login');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'light', 'storage theme id must be light on login');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), 'true', 'restore_dark must be true');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), 'amoled', 'restore_theme must save amoled');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), false, 'connectify-dark must be removed on login');
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, undefined, 'data-connectify-theme must be removed on login');
+  assert.strictEqual(document.documentElement.getAttribute('data-connectify-login'), 'true', 'data-connectify-login must be set on login');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:v1'), 'light', 'storage v1 must be light on login');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:id'), 'light', 'storage theme id must be light on login');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_dark'), 'true', 'restore_dark must be true');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_theme'), 'amoled', 'restore_theme must save amoled');
 
   // Setting theme on login page must be rejected
   const loginSetThemeResult = window.ConnectifyTheme.setTheme('forest');
   assert.strictEqual(loginSetThemeResult, false, 'setTheme on login page must return false');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'theme must not activate on login page');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), false, 'theme must not activate on login page');
 
   // Navigate back to classes page - AMOLED must be restored
   delete window.ConnectifyThemeLoaded;
@@ -5539,12 +5539,12 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   eval(themeRegistryJs);
   eval(themeJs);
 
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'dark', 'storage must be restored to dark');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'amoled', 'storage theme id must be restored to amoled');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), null, 'restore flag must be cleared');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), null, 'restore theme flag must be cleared');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true, 'connectea-dark must be restored');
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'amoled', 'data-connectea-theme must be amoled');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:v1'), 'dark', 'storage must be restored to dark');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:id'), 'amoled', 'storage theme id must be restored to amoled');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_dark'), null, 'restore flag must be cleared');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_theme'), null, 'restore theme flag must be cleared');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), true, 'connectify-dark must be restored');
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'amoled', 'data-connectify-theme must be amoled');
   assert.strictEqual(window.ConnectifyTheme.getTheme(), 'amoled', 'getTheme must return amoled');
 
   // 3. Functional check with Custom Palette on login.det.wa.edu.au
@@ -5561,10 +5561,10 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   assert.strictEqual(window.ConnectifyTheme.isLoginUrl('https://login.det.wa.edu.au/'), true);
   assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false);
   assert.strictEqual(window.ConnectifyTheme.getTheme(), 'light');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false);
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined);
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), false);
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, undefined);
   assert.strictEqual(document.documentElement.style.getPropertyValue('--cx-canvas-bg'), '', 'custom inline css properties must be cleared on login');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), 'custom', 'restore_theme must save custom');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_theme'), 'custom', 'restore_theme must save custom');
 
   // Return to normal page - custom theme must be restored
   delete window.ConnectifyThemeLoaded;
@@ -5572,10 +5572,10 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   eval(themeRegistryJs);
   eval(themeJs);
 
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'custom', 'storage must be restored to custom');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:id'), 'custom', 'storage must be restored to custom');
   assert.strictEqual(window.ConnectifyTheme.getTheme(), 'custom', 'theme must be restored to custom');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'custom');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), true);
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'custom');
 
   // 4. Functional check: Logout screen disables theme and restores after login
   window.ConnectifyTheme.setTheme('forest');
@@ -5592,10 +5592,10 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   assert.strictEqual(window.ConnectifyTheme.isLogoutUrl('https://connect.det.wa.edu.au/classes'), false);
   assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false on logout page');
   assert.strictEqual(window.ConnectifyTheme.getTheme(), 'light', 'getTheme must return light on logout page');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'connectea-dark must be removed on logout');
-  assert.strictEqual(document.documentElement.getAttribute('data-connectea-logout'), 'true', 'data-connectea-logout must be set on logout');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_dark'), 'true', 'restore_dark must be true on logout');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), 'forest', 'restore_theme must save forest on logout');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), false, 'connectify-dark must be removed on logout');
+  assert.strictEqual(document.documentElement.getAttribute('data-connectify-logout'), 'true', 'data-connectify-logout must be set on logout');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_dark'), 'true', 'restore_dark must be true on logout');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_theme'), 'forest', 'restore_theme must save forest on logout');
 
   // Return to normal page - forest theme must be restored
   delete window.ConnectifyThemeLoaded;
@@ -5603,11 +5603,11 @@ runTest('Test 136: Login page disables all themes (preset, custom palettes) and 
   eval(themeRegistryJs);
   eval(themeJs);
 
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'forest', 'storage must be restored to forest');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:id'), 'forest', 'storage must be restored to forest');
   assert.strictEqual(window.ConnectifyTheme.getTheme(), 'forest', 'theme must be restored to forest');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'forest');
-  assert.strictEqual(document.documentElement.getAttribute('data-connectea-logout'), null);
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), true);
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'forest');
+  assert.strictEqual(document.documentElement.getAttribute('data-connectify-logout'), null);
 });
 
 runTest('Test 137: Dark, Default, and Quantum Dark themes correspond to previous versions and legacy palettes', () => {
@@ -5616,7 +5616,7 @@ runTest('Test 137: Dark, Default, and Quantum Dark themes correspond to previous
   const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
 
   // 1. Static checks: Quantum Dark palette corresponds to inspiration / legacy theme tokens
-  assert.ok(cssHas(themeTokensCss, '[data-connectea-theme="quantum"]'), 'theme-tokens.css must define Quantum Dark selector');
+  assert.ok(cssHas(themeTokensCss, '[data-connectify-theme="quantum"]'), 'theme-tokens.css must define Quantum Dark selector');
   assert.ok(cssHas(themeTokensCss, '--cx-canvas-bg: #282828;') || cssHas(themeTokensCss, '--cx-canvas-bg: #292929;'), 'Quantum Dark must have canvas color');
   assert.ok(cssHas(themeTokensCss, '--cx-surface-bg: #32302f;') || cssHas(themeTokensCss, '--cx-surface-bg: #333333;'), 'Quantum Dark must have surface color');
   assert.ok(cssHas(themeTokensCss, '--cx-accent: #fabd2f;') || cssHas(themeTokensCss, '--cx-accent: #d4b483;'), 'Quantum Dark must have golden accent color');
@@ -5645,25 +5645,25 @@ runTest('Test 137: Dark, Default, and Quantum Dark themes correspond to previous
   // Switch to Quantum Dark
   reg.setTheme('quantum');
   assert.strictEqual(reg.getTheme(), 'quantum');
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'quantum');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'quantum');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'dark');
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'quantum');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), true);
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:id'), 'quantum');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:v1'), 'dark');
 
   // Switch to Default (Light mode from previous versions)
   reg.setTheme('light');
   assert.strictEqual(reg.getTheme(), 'light');
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined, 'Default theme must remove data-connectea-theme');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false, 'Default theme must remove connectea-dark');
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, undefined, 'Default theme must remove data-connectify-theme');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), false, 'Default theme must remove connectify-dark');
   assert.strictEqual(window.ConnectifyTheme.isDarkMode(), false, 'isDarkMode must return false for Default theme');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:v1'), 'light');
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:id'), 'light');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:v1'), 'light');
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:id'), 'light');
 
   // Switch to Dark (Dark mode from previous versions)
   reg.setTheme('dark');
   assert.strictEqual(reg.getTheme(), 'dark');
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'dark');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'dark');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), true);
   assert.strictEqual(window.ConnectifyTheme.isDarkMode(), true);
 
   // Quantum Dark login/restore cycle
@@ -5673,9 +5673,9 @@ runTest('Test 137: Dark, Default, and Quantum Dark themes correspond to previous
   eval(themeRegistryJs);
   eval(themeJs);
 
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), false);
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined);
-  assert.strictEqual(window.localStorage.getItem('connectea:theme:restore_theme'), 'quantum');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), false);
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, undefined);
+  assert.strictEqual(window.localStorage.getItem('connectify:theme:restore_theme'), 'quantum');
 
   // Return to classes
   delete window.ConnectifyThemeLoaded;
@@ -5684,8 +5684,8 @@ runTest('Test 137: Dark, Default, and Quantum Dark themes correspond to previous
   eval(themeJs);
 
   assert.strictEqual(window.ConnectifyTheme.getTheme(), 'quantum', 'Quantum Dark must restore post-login');
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'quantum');
-  assert.strictEqual(document.documentElement.classList.contains('connectea-dark'), true);
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'quantum');
+  assert.strictEqual(document.documentElement.classList.contains('connectify-dark'), true);
 });
 
 runTest('Test 138: Dark theme v3.2.1 parity, Connect Help and tile contrast, abundant token coverage, dedicated theme button, and line limits', () => {
@@ -5720,7 +5720,7 @@ runTest('Test 138: Dark theme v3.2.1 parity, Connect Help and tile contrast, abu
   assert.ok(cssHas(themeTilesCss, 'var(--cx-text-primary, #f8fafc) !important;'), 'theme-tiles.css must set high contrast primary text on headings');
 
   // 3. Top bar theme toggle button and theme menu in theme-core.css and theme.js
-  assert.ok(cssHas(themeCoreCss, '#connectea-theme-toggle'), 'theme-core.css must style #connectea-theme-toggle');
+  assert.ok(cssHas(themeCoreCss, '#connectify-theme-toggle'), 'theme-core.css must style #connectify-theme-toggle');
   assert.ok(themeJs.includes('document.body.appendChild(themeMenu)'), 'theme.js must attach themeMenu to document.body to prevent button nesting issues');
 
   // 4. Color Theme selector in Category Settings
@@ -5772,15 +5772,15 @@ runTest('Test 139: Font stack enforcement, dark surfaces styled with theme token
   assert.ok(cssHas(themeCardsCss, 'var(--cx-surface-secondary'), 'theme-cards.css must use var(--cx-surface-secondary) for task marks');
   assert.ok(cohortStylesJs.includes('var(--cx-surface-elevated'), 'cohort-styles.js must use var(--cx-surface-elevated) for panels');
   assert.ok(cohortStylesJs.includes('var(--cx-input-bg'), 'cohort-styles.js must use var(--cx-input-bg) for inputs');
-  assert.ok(cssHas(themeTokensCss, '.connectea-panel') && cssHas(themeTokensCss, 'var(--cx-surface-elevated)'),
-    'theme-tokens.css must dynamically theme .connectea-panel');
+  assert.ok(cssHas(themeTokensCss, '.connectify-panel') && cssHas(themeTokensCss, 'var(--cx-surface-elevated)'),
+    'theme-tokens.css must dynamically theme .connectify-panel');
   assert.ok(cssHas(themeTokensCss, '.cvr-c-task__marks') && cssHas(themeTokensCss, 'var(--cx-surface-secondary)'),
     'theme-tokens.css must dynamically theme .cvr-c-task__marks');
 
   // 3. Separate themes button is removed
-  assert.ok(!cssHas(themeCoreCss, '#connectea-theme-select-btn {'), 'theme-core.css must not style removed #connectea-theme-select-btn');
-  assert.ok(!themeJs.includes("createElement('button')\n    themeSelectBtn.id = 'connectea-theme-select-btn'") && !themeJs.includes("themeSelectBtn = document.createElement('button')"),
-    'theme.js must not create #connectea-theme-select-btn');
+  assert.ok(!cssHas(themeCoreCss, '#connectify-theme-select-btn {'), 'theme-core.css must not style removed #connectify-theme-select-btn');
+  assert.ok(!themeJs.includes("createElement('button')\n    themeSelectBtn.id = 'connectify-theme-select-btn'") && !themeJs.includes("themeSelectBtn = document.createElement('button')"),
+    'theme.js must not create #connectify-theme-select-btn');
 
   // 4. Toggle button text is Themes and Default (not Dark mode and Light mode)
   assert.ok(!themeJs.includes("'☾ Dark mode'") && !themeJs.includes("'☀ Light mode'"),
@@ -5796,8 +5796,8 @@ runTest('Test 139: Font stack enforcement, dark surfaces styled with theme token
     'settings theme select must list Default plus the registry themes');
 
   // 6. Custom theme option and color palettes removed from theme menu
-  assert.ok(!cssHas(themeTokensCss, '.connectea-theme-custom-panel'), 'theme-tokens.css must not style custom color panel');
-  assert.ok(!themeJs.includes('connectea-theme-custom-panel'), 'theme.js must not render custom color panel');
+  assert.ok(!cssHas(themeTokensCss, '.connectify-theme-custom-panel'), 'theme-tokens.css must not style custom color panel');
+  assert.ok(!themeJs.includes('connectify-theme-custom-panel'), 'theme.js must not render custom color panel');
   assert.ok(!themeJs.includes('input type="color"'), 'theme.js must not render color inputs');
 
   // 7. Functional test of toggle button labels and theme switching
@@ -5810,7 +5810,7 @@ runTest('Test 139: Font stack enforcement, dark surfaces styled with theme token
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'theme-registry.js'), 'utf8'));
   eval(themeJs);
 
-  const toggleBtn = document.getElementById('connectea-theme-toggle');
+  const toggleBtn = document.getElementById('connectify-theme-toggle');
   assert.ok(toggleBtn, 'Toggle button must exist');
 
   // In default (light) mode:
@@ -5820,12 +5820,12 @@ runTest('Test 139: Font stack enforcement, dark surfaces styled with theme token
   // In theme/dark mode:
   window.ConnectifyTheme.applyTheme(true, 'quantum');
   assert.ok(toggleBtn.textContent.includes('Default'), `Dark mode button text must contain Default, got "${toggleBtn.textContent}"`);
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'quantum');
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'quantum');
 
   // Switch back to Default:
   window.ConnectifyTheme.applyTheme(false);
   assert.ok(toggleBtn.textContent.includes('Themes'), `Switched back button text must contain Themes, got "${toggleBtn.textContent}"`);
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, undefined);
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, undefined);
 });
 
 runTest('Test 140: Webfont icon preservation and complete dark surface token styling across all themes', () => {
@@ -5912,7 +5912,7 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
     '--cx-nav-bg', '--cx-button-bg', '--cx-input-bg', '--cx-table-header-bg'
   ];
   for (const th of themes) {
-    const selector = `[data-connectea-theme="${th}"]`;
+    const selector = `[data-connectify-theme="${th}"]`;
     assert.ok(cssHas(themeTokensCss, selector), `theme-tokens.css must define selector for ${th}`);
     for (const tok of requiredTokens) {
       assert.ok(cssHas(themeTokensCss, tok), `theme-tokens.css must define ${tok} for all themes`);
@@ -5926,30 +5926,30 @@ runTest('Test 140: Webfont icon preservation and complete dark surface token sty
 
   for (const th of themes) {
     window.ConnectifyTheme.applyTheme(true, th);
-    assert.strictEqual(document.documentElement.dataset.connecteaTheme, th,
-      `applyTheme(true, '${th}') must set data-connectea-theme to '${th}'`);
-    assert.ok(document.documentElement.classList.contains('connectea-dark'),
-      `applyTheme(true, '${th}') must keep connectea-dark class on html`);
+    assert.strictEqual(document.documentElement.dataset.connectifyTheme, th,
+      `applyTheme(true, '${th}') must set data-connectify-theme to '${th}'`);
+    assert.ok(document.documentElement.classList.contains('connectify-dark'),
+      `applyTheme(true, '${th}') must keep connectify-dark class on html`);
   }
 
   // 5. Themes menu click and icon structure
-  const toggleBtn = document.getElementById('connectea-theme-toggle');
+  const toggleBtn = document.getElementById('connectify-theme-toggle');
   assert.ok(toggleBtn, 'Toggle button must exist');
-  const arrowEl = toggleBtn.querySelector('.connectea-theme-arrow');
-  assert.ok(arrowEl, 'Toggle button must contain .connectea-theme-arrow');
+  const arrowEl = toggleBtn.querySelector('.connectify-theme-arrow');
+  assert.ok(arrowEl, 'Toggle button must contain .connectify-theme-arrow');
   arrowEl.click();
-  const themeMenu = document.getElementById('connectea-theme-menu');
-  assert.ok(themeMenu, 'Clicking .connectea-theme-arrow must open #connectea-theme-menu');
-  const options = themeMenu.querySelectorAll('.connectea-theme-option');
+  const themeMenu = document.getElementById('connectify-theme-menu');
+  assert.ok(themeMenu, 'Clicking .connectify-theme-arrow must open #connectify-theme-menu');
+  const options = themeMenu.querySelectorAll('.connectify-theme-option');
   assert.strictEqual(options.length, 7, 'Themes menu must render all 7 built-in dark themes');
-  const icons = themeMenu.querySelectorAll('.connectea-theme-icon');
-  assert.strictEqual(icons.length, 7, 'Every theme option must contain a .connectea-theme-icon element');
+  const icons = themeMenu.querySelectorAll('.connectify-theme-icon');
+  assert.strictEqual(icons.length, 7, 'Every theme option must contain a .connectify-theme-icon element');
 
   // Click Quantum Dark option in menu
-  const quantumOpt = Array.from(options).find(opt => opt.querySelector('.connectea-theme-name')?.textContent.includes('Quantum Dark'));
+  const quantumOpt = Array.from(options).find(opt => opt.querySelector('.connectify-theme-name')?.textContent.includes('Quantum Dark'));
   assert.ok(quantumOpt, 'Themes menu must include Quantum Dark option');
   quantumOpt.click();
-  assert.strictEqual(document.documentElement.dataset.connecteaTheme, 'quantum');
+  assert.strictEqual(document.documentElement.dataset.connectifyTheme, 'quantum');
 });
 
 runTest('Test 141: Top navbar Open Sans typography, height, white text, and light-mode margin, size, and outline parity', () => {
@@ -5999,29 +5999,29 @@ runTest('Test 142: Sleek compact theme toggle button geometry and elimination of
   const themeCoreCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-core.css'), 'utf8');
   const themeTokensCss = fs.readFileSync(path.resolve(BASE_DIR, 'theme-tokens.css'), 'utf8');
 
-  // 1. Sleek compact dimensions on #connectea-theme-toggle
+  // 1. Sleek compact dimensions on #connectify-theme-toggle
   assert.ok(cssHas(themeCoreCss, 'height: 28px;'),
-    'theme-core.css must set sleek 28px height on #connectea-theme-toggle');
+    'theme-core.css must set sleek 28px height on #connectify-theme-toggle');
   assert.ok(cssHas(themeCoreCss, 'padding: 5px 12px;'),
-    'theme-core.css must set sleek 5px 12px padding on #connectea-theme-toggle');
+    'theme-core.css must set sleek 5px 12px padding on #connectify-theme-toggle');
   assert.ok(cssHas(themeCoreCss, 'border-radius: 6px;'),
-    'theme-core.css must set sleek 6px border-radius on #connectea-theme-toggle');
+    'theme-core.css must set sleek 6px border-radius on #connectify-theme-toggle');
   assert.ok(cssHas(themeCoreCss, 'font-size: 12px;'),
-    'theme-core.css must set sleek 12px font size on #connectea-theme-toggle');
+    'theme-core.css must set sleek 12px font size on #connectify-theme-toggle');
   assert.ok(cssHas(themeCoreCss, 'background: #25313f !important;'),
-    'theme-core.css must set #25313f light-mode background on #connectea-theme-toggle');
+    'theme-core.css must set #25313f light-mode background on #connectify-theme-toggle');
   assert.ok(cssHasToken(themeCoreCss, 'background: #24303f !important;'),
-    'theme-core.css must set #24303f dark-mode background on #connectea-theme-toggle');
+    'theme-core.css must set #24303f dark-mode background on #connectify-theme-toggle');
 
-  // 2. Elimination of nested box styling on .connectea-theme-arrow
-  assert.ok(cssHas(themeTokensCss, '.connectea-theme-arrow {\n  display: inline-block;') &&
+  // 2. Elimination of nested box styling on .connectify-theme-arrow
+  assert.ok(cssHas(themeTokensCss, '.connectify-theme-arrow {\n  display: inline-block;') &&
             cssHas(themeTokensCss, 'background: transparent;') &&
             cssHas(themeTokensCss, 'border: none;'),
-    'theme-tokens.css must use sleek inline-block transparent borderless styling on .connectea-theme-arrow');
+    'theme-tokens.css must use sleek inline-block transparent borderless styling on .connectify-theme-arrow');
   assert.ok(!cssHas(themeTokensCss, 'background: rgba(255, 255, 255, 0.14);'),
-    'theme-tokens.css must not add an awkward nested box background to .connectea-theme-arrow');
+    'theme-tokens.css must not add an awkward nested box background to .connectify-theme-arrow');
   assert.ok(!cssHas(themeTokensCss, 'border: 1px solid rgba(255, 255, 255, 0.2);'),
-    'theme-tokens.css must not add an awkward nested border to .connectea-theme-arrow');
+    'theme-tokens.css must not add an awkward nested border to .connectify-theme-arrow');
 });
 
 runTest('Test 143: Token-based theme styling, notice action buttons, top navbar typography, and webfont protection', () => {
@@ -6051,7 +6051,7 @@ runTest('Test 143: Token-based theme styling, notice action buttons, top navbar 
     'theme-feed.css must style follow pills with 9999px border-radius and elevated tokens');
 
   // 4. Themes popover contrast and emoji font stack
-  assert.ok(cssHas(themeTokensCss, '#connectea-theme-menu .connectea-theme-option') &&
+  assert.ok(cssHas(themeTokensCss, '#connectify-theme-menu .connectify-theme-option') &&
             cssHas(themeTokensCss, 'var(--cx-text-secondary'),
     'theme-tokens.css must enforce high contrast text on theme menu options');
   assert.ok(cssHas(themeTokensCss, '"Apple Color Emoji"') && cssHas(themeTokensCss, '"Segoe UI Emoji"'),
@@ -6976,7 +6976,7 @@ runTest('Test 231: Off the outlines page the cache is read as is: no tile is scr
   const settingsCss = read('src/sidebar/styles/sidebar-settings.css').replace(/\/\*[\s\S]*?\*\//g, '');
   const light = settingsCss.match(/#connectify-sidebar \.cx-settings-select \{([^}]*)\}/);
   assert.ok(light && /background-color: #ffffff/.test(light[1]) && /border: 1px solid #b9cbe1/.test(light[1]) && /border-radius: 4px/.test(light[1]), 'light dropdowns are white with the inputs\' border');
-  assert.ok(/\.connectea-dark #connectify-sidebar \.cx-settings-select \{[^}]*var\(--cx-input-bg/.test(settingsCss), 'dark dropdowns use the input tokens');
+  assert.ok(/\.connectify-dark #connectify-sidebar \.cx-settings-select \{[^}]*var\(--cx-input-bg/.test(settingsCss), 'dark dropdowns use the input tokens');
 });
 
 runTest('Test 147: Style test JSON manifest aggregates all audited views under pages and views', async () => {
@@ -7189,7 +7189,7 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   const parityTestJs = fs.readFileSync(path.resolve(__dirname, 'scripts/test-theme-styles.js'), 'utf8');
 
   // 1. Panels opaque when Liquid Glass is off
-  assert.ok(cssHas(themeCss, ':not([data-connectea-theme="liquid-glass"])') &&
+  assert.ok(cssHas(themeCss, ':not([data-connectify-theme="liquid-glass"])') &&
             cssHas(themeCss, 'background-color: var(--cx-surface-bg, #1e2632) !important'),
             'theme.css must ensure panels are opaque when Liquid Glass is off');
 
@@ -7197,18 +7197,18 @@ runTest('Test 149: Liquid Glass refinements, dual sliders, opaque non-glass pane
   assert.ok(cssHas(themeCss, 'border-bottom-left-radius: 16px !important') &&
             cssHas(themeCss, 'border-bottom-right-radius: 16px !important'),
             'theme.css must round bottom corners with 16px radius');
-  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-c-card {\n  overflow: clip !important;'),
+  assert.ok(cssHas(themeCss, '[data-connectify-glass="true"]) .cvr-c-card {\n  overflow: clip !important;'),
             'theme.css must clip liquid glass tiles and cards with overflow: clip (hidden stops margins collapsing)');
-  assert.ok(!cssHas(themeCss, '[data-connectea-glass="true"]) .connectea-panel {\n  overflow: clip'),
+  assert.ok(!cssHas(themeCss, '[data-connectify-glass="true"]) .connectify-panel {\n  overflow: clip'),
             'statistics panels are never clipped: the breakout meter rises above its row and glows');
   assert.ok(cssHas(themeCss, '.eds-c-tile__body') &&
             cssHas(themeCss, 'background-color: transparent !important'),
             'theme.css must make tile body transparent in Liquid Glass mode');
 
   // 3. Buttons and inputs must NOT be styled with liquid-glass radii
-  assert.ok(!cssHas(themeCss, 'body[data-connectea-theme="liquid-glass"] button'),
+  assert.ok(!cssHas(themeCss, 'body[data-connectify-theme="liquid-glass"] button'),
             'theme.css must NOT modify button border-radius for Liquid Glass');
-  assert.ok(!cssHas(themeTokensCss, 'body[data-connectea-theme="liquid-glass"] button'),
+  assert.ok(!cssHas(themeTokensCss, 'body[data-connectify-theme="liquid-glass"] button'),
             'theme-tokens.css must NOT modify button border-radius for Liquid Glass');
 
   // 4. Parity test does not ignore buttons for liquid-glass and ignores panels/cards/tiles/modals
@@ -7271,11 +7271,11 @@ runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, p
     'theme-tiles.css must not hide .cvr-u-padding--md');
 
   // 2. 16px panel & tile body curvature in Liquid Glass only
-  assert.ok(cssHas(themeCss, '[data-connectea-glass="true"]) .cvr-c-card__body {\n  border-bottom-left-radius: 16px !important;\n  border-bottom-right-radius: 16px !important;'),
+  assert.ok(cssHas(themeCss, '[data-connectify-glass="true"]) .cvr-c-card__body {\n  border-bottom-left-radius: 16px !important;\n  border-bottom-right-radius: 16px !important;'),
     'theme.css must round tile body bottom corners in Liquid Glass');
-  assert.ok(!cssHas(themeTokensCss, ':is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .connectea-panel, .cx-compound-progress-bar, #ng-zone__classes-metrics-summary) { border-radius: 0 !important; }'),
+  assert.ok(!cssHas(themeTokensCss, ':is(.eds-c-card, .cvr-c-card, .eds-c-tile, .cvr-c-tile, .c-tile, .v-panel, .mat-card, .mat-expansion-panel, .connectify-panel, .cx-compound-progress-bar, #ng-zone__classes-metrics-summary) { border-radius: 0 !important; }'),
     'theme-tokens.css must not force 0 border radius on panels when liquid glass is off');
-  assert.ok(cssHas(themeMaterialCss, '.connectea-dark .v-panel-content') &&
+  assert.ok(cssHas(themeMaterialCss, '.connectify-dark .v-panel-content') &&
             cssHas(themeMaterialCss, 'background-color: transparent !important'),
     'theme-material.css must make .v-panel-content transparent');
   assert.ok(cssHas(themeTilesCss, '.eds-c-tile__body') &&
@@ -7300,7 +7300,7 @@ runTest('Test 150: Assessment outlines 0px padding, universal panel curvature, p
   // 4. Robust theme saving and immediate application
   assert.ok(registryJs.includes("typeof chrome !== 'undefined' && chrome.storage?.local") && registryJs.includes('store.get([STORAGE_CUSTOM_THEMES_LIST]'),
     'loadSavedCustomThemes must read saved themes from chrome.storage.local');
-  // Saving goes through the registry; its connectea:themechange event makes the theme engine apply it once
+  // Saving goes through the registry; its connectify:themechange event makes the theme engine apply it once
   assert.ok(customizerJs.includes('if (saved) reg.setTheme(saved.id);') && !customizerJs.includes('applyTheme(true, saved.id)'),
     'theme-customizer.js must apply a saved theme through the registry exactly once');
 });
@@ -7313,9 +7313,9 @@ runTest('Test 151: Custom theme colors reach body, View button stays square, and
   const themeJs = fs.readFileSync(path.resolve(__dirname, 'src/theme/theme.js'), 'utf8');
 
   // 1. Base dark tokens live on <html> for every dark theme and are never redeclared on <body> for custom themes
-  assert.ok(themeTokensCss.indexOf('/* Base Dark Theme (v3.2.x parity)') >= 0 && /\*\/\nhtml\.connectea-dark,\n\[data-connectea-theme="dark"\]\.connectea-dark,/.test(themeTokensCss),
-    'theme-tokens.css base dark rule must target html.connectea-dark and dark-themed elements only');
-  assert.ok(!cssHas(themeTokensCss, 'body.connectea-dark:not([data-connectea-theme])'),
+  assert.ok(themeTokensCss.indexOf('/* Base Dark Theme (v3.2.x parity)') >= 0 && /\*\/\nhtml\.connectify-dark,\n\[data-connectify-theme="dark"\]\.connectify-dark,/.test(themeTokensCss),
+    'theme-tokens.css base dark rule must target html.connectify-dark and dark-themed elements only');
+  assert.ok(!cssHas(themeTokensCss, 'body.connectify-dark:not([data-connectify-theme])'),
     'theme-tokens.css must not redeclare dark tokens on an unthemed body');
 
   // 2. Functional: custom tokens (incl. card and nav) apply to html AND body, the body carries the theme id,
@@ -7331,15 +7331,15 @@ runTest('Test 151: Custom theme colors reach body, View button stays square, and
     assert.strictEqual(el.style.getPropertyValue('--cx-canvas-bg'), '#101014', 'custom canvas must be applied to html and body');
     assert.strictEqual(el.style.getPropertyValue('--cx-card-bg'), '#181820', 'custom surface must drive --cx-card-bg');
     assert.strictEqual(el.style.getPropertyValue('--cx-nav-bg'), '#181820', 'custom surface must drive --cx-nav-bg');
-    assert.strictEqual(el.dataset.connecteaTheme, 'custom_a', 'html and body must both carry the custom theme id');
+    assert.strictEqual(el.dataset.connectifyTheme, 'custom_a', 'html and body must both carry the custom theme id');
   }
   reg.setTheme('custom_b');
   assert.strictEqual(document.body.style.getPropertyValue('--cx-canvas-bg'), '#202024', 'second custom theme must replace canvas');
   assert.strictEqual(document.body.style.getPropertyValue('--cx-input-bg'), '', 'tokens from a previous custom theme must be cleared');
   reg.setTheme('dark');
   assert.strictEqual(document.body.style.getPropertyValue('--cx-canvas-bg'), '', 'preset theme must clear body custom tokens');
-  assert.strictEqual(document.body.dataset.connecteaTheme, 'dark', 'body must carry the preset theme id');
-  assert.ok(registryJs.includes('if (active?.isCustom && document.documentElement?.dataset.connecteaTheme !== active.id) registry.setTheme(active.id);'),
+  assert.strictEqual(document.body.dataset.connectifyTheme, 'dark', 'body must carry the preset theme id');
+  assert.ok(registryJs.includes('if (active?.isCustom && document.documentElement?.dataset.connectifyTheme !== active.id) registry.setTheme(active.id);'),
     'loadSavedCustomThemes must re-apply a custom theme found only in chrome.storage');
 
   // 3. View / positive buttons are square; curvature only targets explicit panel, card and tile classes
@@ -7349,7 +7349,7 @@ runTest('Test 151: Custom theme colors reach body, View button stays square, and
 
   // 4. Every dark theme: layout containers and tile-only wrappers are clear around tiles (the padding shows the
   //    canvas or wallpaper, as in Default); the tiles themselves stay opaque outside Liquid Glass
-  assert.ok(cssHas(themeCss, 'html.connectea-dark[data-connectea-theme]:not([data-connectea-login]) #main-content:has(.eds-c-tile, .cvr-c-tile)'),
+  assert.ok(cssHas(themeCss, 'html.connectify-dark[data-connectify-theme]:not([data-connectify-login]) #main-content:has(.eds-c-tile, .cvr-c-tile)'),
     'theme.css must make layout containers around tiles clear in every dark theme');
   assert.ok(cssHas(themeCss, ':has(.eds-c-tile, .cvr-c-tile):not(.eds-c-tile):not(.cvr-c-tile)'),
     'theme.css must only clear wrappers that contain tiles, never the tiles themselves');
@@ -7440,7 +7440,7 @@ runTest('Test 153: Theme CSS selectors are scoped to a theme hook (native Connec
     return parts;
   }
 
-  const HOOK = /connectea|connectify|\bcx-|#cx|\.cx|data-cx/;
+  const HOOK = /connectify|connectify|\bcx-|#cx|\.cx|data-cx/;
   // Intentional rules that apply in every mode, including Default (native) styling
   const ALLOWED = new Set([
     ':root', // light token defaults and display-width scale variables
@@ -7486,13 +7486,13 @@ runTest('Test 153: Theme CSS selectors are scoped to a theme hook (native Connec
   const themeCss = origReadFileSync.call(fs, path.join(themeDir, 'styles/theme.css'), 'utf8');
   const tokensCss = fs.readFileSync(path.join(themeDir, 'theme-tokens.css'), 'utf8'); // all parts
   const controlsCss = fs.readFileSync(path.join(themeDir, 'theme-controls.css'), 'utf8'); // all parts
-  const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  const glass = 'html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])';
   assert.ok(cssHas(themeCss, `${glass} :where(.eds-c-card):not(#cx-n),\n${glass} :where(.cvr-c-card):not(#cx-n)`) && /border-radius: 16px !important;/.test(themeCss),
     'panel curvature must be scoped to Liquid Glass');
   assert.ok(!/\[class\*="(card|panel|tile)"\]/.test(themeCss + tokensCss), 'curvature must not use [class*=card/panel/tile] substring selectors');
   assert.ok(!cssHas(themeCss, '.mat-expansion-panel-header') && !cssHas(tokensCss, 'Universal Panel & Tile Background Curvature'),
     'expansion panel headers must keep native geometry and curvature must live only in theme.css');
-  assert.ok(!/:not\(\[data-connectea-[a-z-]+="[a-z-]+"\]\):not\(\[data-connectea-[a-z-]+="[a-z-]+"\]\)(\.connectea-dark|:is\(html\.connectea-dark, body)/.test(fs.readFileSync(path.join(themeDir, 'theme.css'), 'utf8')),
+  assert.ok(!/:not\(\[data-connectify-[a-z-]+="[a-z-]+"\]\):not\(\[data-connectify-[a-z-]+="[a-z-]+"\]\)(\.connectify-dark|:is\(html\.connectify-dark, body)/.test(fs.readFileSync(path.join(themeDir, 'theme.css'), 'utf8')),
     'non-glass negations must be anchored on html, never matched on body');
   assert.ok(!cssHas(controlsCss, 'font-size: 24px !important;\n  width: 24px !important;'), 'icon buttons must keep native icon sizes');
   assert.ok(!cssHas(controlsCss, '.mat-icon-button .mat-button-wrapper {'), 'icon button wrappers must keep native layout');
@@ -7507,7 +7507,7 @@ runTest('Test 154: Shared utilities, settings reset clears every baseline key, a
   // clearSettingsCache must remove singular and plural baseline keys and drop memoised baselines
   eval(fs.readFileSync(path.resolve(__dirname, 'src/assessment/assessment-cache.js'), 'utf8'));
   localStorage.clear();
-  const seeded = ['connectify:baseline:types:acc', 'connectea:baseline:subjects', 'connectify:baselines:types', 'connectea:class_categories:Chem'];
+  const seeded = ['connectify:baseline:types:acc', 'connectify:baseline:subjects', 'connectify:baselines:types', 'connectify:class_categories:Chem'];
   for (const k of seeded) localStorage.setItem(k, '{}');
   localStorage.setItem('connectify:prediction:acc:Chem:1', '{}');
   const dispatched = [];
@@ -7578,26 +7578,26 @@ runTest('Test 155: Custom theme deletion, wallpaper storage fallback and customi
 
     // A deleted theme must not come back from the extension-storage copy on the next page load
     const saved = reg.saveCustomTheme({ name: 'Ocean', colors: { canvas: '#001122', surface: '#112233' } });
-    assert.ok(JSON.parse(extStore['connectea:custom_themes_list']).some(t => t.id === saved.id), 'saved themes must reach extension storage');
+    assert.ok(JSON.parse(extStore['connectify:custom_themes_list']).some(t => t.id === saved.id), 'saved themes must reach extension storage');
     reg.deleteCustomTheme(saved.id);
-    assert.ok(!JSON.parse(extStore['connectea:custom_themes_list']).some(t => t.id === saved.id), 'deleting must also remove the extension-storage copy');
+    assert.ok(!JSON.parse(extStore['connectify:custom_themes_list']).some(t => t.id === saved.id), 'deleting must also remove the extension-storage copy');
     eval(fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8'));
     reg = window.ConnectifyThemeRegistry;
     assert.ok(!reg.getAvailableThemes().some(t => t.id === saved.id), 'a deleted theme must stay deleted after reload');
 
     // A wallpaper too large for localStorage survives in extension storage and is restored on load
     const origSetItem = localStorage.setItem;
-    localStorage.setItem = function(k, v) { if (k === 'connectea:custom_background') throw new Error('QuotaExceededError'); return origSetItem.call(this, k, v); };
+    localStorage.setItem = function(k, v) { if (k === 'connectify:custom_background') throw new Error('QuotaExceededError'); return origSetItem.call(this, k, v); };
     try {
       reg.setCustomBackground('data:image/png;base64,AAAA');
-      assert.strictEqual(extStore['connectea:custom_background'], 'data:image/png;base64,AAAA', 'over-quota wallpaper must be kept in extension storage');
+      assert.strictEqual(extStore['connectify:custom_background'], 'data:image/png;base64,AAAA', 'over-quota wallpaper must be kept in extension storage');
       assert.strictEqual(reg.getCustomBackground(), 'data:image/png;base64,AAAA', 'over-quota wallpaper must stay active for the session');
     } finally {
       localStorage.setItem = origSetItem;
     }
     eval(fs.readFileSync(path.resolve(__dirname, 'src/theme/theme-registry.js'), 'utf8'));
     assert.strictEqual(window.ConnectifyThemeRegistry.getCustomBackground(), 'data:image/png;base64,AAAA', 'wallpaper must be restored from extension storage after reload');
-    assert.strictEqual(document.documentElement.getAttribute('data-connectea-has-custom-bg'), 'true');
+    assert.strictEqual(document.documentElement.getAttribute('data-connectify-has-custom-bg'), 'true');
   } finally {
     delete global.chrome;
     localStorage.clear();
@@ -7793,7 +7793,7 @@ runTest('Test 160: Padding and margins that are 0px in the Default theme stay 0p
   for (const r of themeRules) {
     if (ZERO.test(r.value)) continue;
     // A rule that targets Connectify's own elements can never collide with native Connect spacing
-    if (/connectea|connectify|\bcx-|#cx|\.cx/.test(r.target) || !/^[.#]/.test(r.target)) continue; // bare element tags are too coarse to compare
+    if (/connectify|connectify|\bcx-|#cx|\.cx/.test(r.target) || !/^[.#]/.test(r.target)) continue; // bare element tags are too coarse to compare
     const key = `${r.target}|${r.prop}`;
     // Older than this check: the menu divider's margin sat in an :is() list the check could not read until the
     // lists were expanded (2026-10); changing it is a visual change of its own
@@ -7811,7 +7811,7 @@ runTest('Test 160: Padding and margins that are 0px in the Default theme stay 0p
 
 runTest('Test 161: A dialog and its padding regions share one surface; a table-wrapping paginator keeps native layout', () => {
   const dialogCss = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-dialog-surface.css'), 'utf8');
-  assert.ok(cssHas(dialogCss, '.connectea-dark .mat-dialog-container :where(div):not([class*="avatar"])') && cssHas(dialogCss, '.connectea-dark .mat-dialog-container :where(footer):not(') && cssHas(dialogCss, 'background-color: transparent !important'),
+  assert.ok(cssHas(dialogCss, '.connectify-dark .mat-dialog-container :where(div):not([class*="avatar"])') && cssHas(dialogCss, '.connectify-dark .mat-dialog-container :where(footer):not(') && cssHas(dialogCss, 'background-color: transparent !important'),
     'dialog title, content and footer regions must be transparent so the container colour shows through');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('theme-dialog-surface.css'), 'theme-dialog-surface.css must be registered in the manifest');
   const pagCss = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-dialogs-paginator.css'), 'utf8');
@@ -7912,7 +7912,7 @@ runTest('Test 277: With Auto-login on, Connect\'s sign-in chooser presses Studen
 runTest('Test 163: Liquid Glass rounds the notice card host and Library table wrapper, paginators have no pill; icon buttons keep native padding', () => {
   const styles = path.join(BASE_DIR, 'src/theme/styles');
   const css = fs.readFileSync(path.join(styles, 'theme-glass-panels.css'), 'utf8');
-  const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  const glass = 'html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])';
   assert.ok(cssHas(css, `${glass} cnt-stream-notice-card {\n  border-radius: 16px !important;`), 'the notice card host must be rounded to match its mat-card');
   assert.ok(!/cnt-stream-notice-card[^{]*\{[^}]*overflow/.test(css), 'the notice card host must not clip (it would cut off the elevation shadow)');
   assert.ok(cssHas(css, `${glass} .cdk-drop-list:has(> table.mat-table) {\n  border-radius: 16px !important;\n  overflow: clip !important;`),
@@ -7931,14 +7931,14 @@ runTest('Test 163: Liquid Glass rounds the notice card host and Library table wr
 runTest('Test 164: Liquid Glass Class page banners, bars, headings and empty states sit on the page with no panel', () => {
   const styles = path.join(BASE_DIR, 'src/theme/styles');
   const manifest = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
-  const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  const glass = 'html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])';
   for (const file of ['theme-glass-surface.css', 'theme-glass-class-pages.css']) {
     const css = fs.readFileSync(path.join(styles, file), 'utf8');
     assert.ok(manifest.includes(file) && manifest.indexOf(file) < manifest.indexOf('styles/theme.css'), `${file} must be registered before theme.css`);
     assert.ok(css.split('\n').length <= 250, `${file} must stay <= 250 lines`);
     assert.ok(!/\[class\*=/.test(css), `${file} must name explicit elements/classes`);
     for (const sel of css.replace(/\/\*[\s\S]*?\*\//g, '').split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(b => b && !b.startsWith('@'))) {
-      assert.ok(sel.startsWith('html.connectea-dark') || sel.startsWith('html.eds'), `${file}: selector must be scoped to the theme hook: ${sel.slice(0, 60)}`);
+      assert.ok(sel.startsWith('html.connectify-dark') || sel.startsWith('html.eds'), `${file}: selector must be scoped to the theme hook: ${sel.slice(0, 60)}`);
       assert.ok(sel.includes('liquid-glass'), `${file}: selector must be Liquid Glass only: ${sel.slice(0, 60)}`);
     }
   }
@@ -7952,16 +7952,16 @@ runTest('Test 164: Liquid Glass Class page banners, bars, headings and empty sta
   assert.ok(!/::before/.test(surface) && !/--cx-gl-fill/.test(surface) && !/border-radius/.test(surface), 'no glass pills, cards or panels remain');
   const pages = fs.readFileSync(path.join(styles, 'theme-glass-class-pages.css'), 'utf8');
   assert.ok(cssHas(pages, `:is(.cvr-c-pagination__body:has(> table.mat-table)),\n${glass} mat-accordion:not(.cx-n):not(.cx-n) {\n  border-radius: 16px !important;\n  overflow: clip !important;`), 'the Learners table and accordion must be rounded and clipped');
-  assert.ok(cssHas(pages, `${glass}:not([data-connectea-login]) :where(.v-app.librarylearningcontentui):not(#cx-n),\n${glass}:not([data-connectea-login]) :where(.v-app.librarylearningcontentui) > :where(.v-ui.v-scrollable):not(#cx-n)`),
+  assert.ok(cssHas(pages, `${glass}:not([data-connectify-login]) :where(.v-app.librarylearningcontentui):not(#cx-n),\n${glass}:not([data-connectify-login]) :where(.v-app.librarylearningcontentui) > :where(.v-ui.v-scrollable):not(#cx-n)`),
     'the Content canvas must be transparent with or without sections, scoped to the Content app');
   const empty = fs.readFileSync(path.join(styles, 'theme-empty-states.css'), 'utf8');
-  assert.ok(cssHas(empty, '.connectea-dark cnt-paginator:has(.c-empty-content) {\n  justify-content: center !important;') && cssHas(empty, '.eds-c-empty-content'),
+  assert.ok(cssHas(empty, '.connectify-dark cnt-paginator:has(.c-empty-content) {\n  justify-content: center !important;') && cssHas(empty, '.eds-c-empty-content'),
     'empty states must be centred in every dark theme, not only Liquid Glass');
   const bars = fs.readFileSync(path.join(styles, 'theme-control-bars.css'), 'utf8');
   assert.ok(!/(surface-bg|rgba\(255, 255, 255, 0\.9\))/.test(bars.replace(/\/\*[\s\S]*?\*\//g, '')), 'the Select All row has no surface of its own in any theme');
   // Paginators and the Select All row have no panel: bar, Page N of M box, bar wrapper and Select All row are clear (empty-state and table wrappers keep theirs)
   const clear = (bars.split('}').find(b => b.includes(':where(mat-paginator):not(#cx-n)')) || '');
-  assert.ok(clear.includes(':is(html.connectea-dark, html[data-connectea-has-custom-bg="true"])') && clear.includes('.connect-paginator-container') &&
+  assert.ok(clear.includes(':is(html.connectify-dark, html[data-connectify-has-custom-bg="true"])') && clear.includes('.connect-paginator-container') &&
     clear.includes('cnt-paginator:not(:has(mat-table, table, .cvr-c-pagination__body, .c-empty-content))') && clear.includes(':where(.cvr-c-pagination__body) > :where(div.d-flex:has(> mat-checkbox))') &&
     /background-color: transparent !important;/.test(clear) && /box-shadow: none !important;/.test(clear), 'paginators sit on the page with no panel');
   assert.ok(!/(mat-paginator|paginator-container)[^{}]*\{[^}]*rgba\(255, 255, 255, 0\.9\)/.test(bars), 'Light with a wallpaper puts no white panel behind paginators');
@@ -7995,7 +7995,7 @@ runTest('Test 165: Custom themes derive every secondary token; the customizer fo
   }
   const panels = fs.readFileSync(path.join(themeDir, 'styles/theme-glass-panels.css'), 'utf8');
   assert.ok(cssHas(panels, '.mat-card {\n  overflow: clip !important;'), 'glass mat-cards must clip with overflow: clip');
-  assert.ok(!/\.cvr-c-card, \.mat-card, \.connectea-panel\) \{\n  overflow: hidden/.test(fs.readFileSync(path.join(themeDir, 'styles/theme.css'), 'utf8')), 'theme.css must not give mat-card overflow: hidden');
+  assert.ok(!/\.cvr-c-card, \.mat-card, \.connectify-panel\) \{\n  overflow: hidden/.test(fs.readFileSync(path.join(themeDir, 'styles/theme.css'), 'utf8')), 'theme.css must not give mat-card overflow: hidden');
 });
 
 runTest('Test 166: Every custom-theme token derives from the 6 Basic tokens by the presets\' own patterns; Full mode has 20 tokens; preview tooltip names text tokens', () => {
@@ -8051,7 +8051,7 @@ runTest('Test 166: Every custom-theme token derives from the 6 Basic tokens by t
   assert.ok(controlsJs.includes('caretRangeFromPoint') && controlsJs.includes("row('Text'"), 'the preview tooltip must report the text token when over glyphs');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8').includes('"src/theme/theme-oklch.js",\n            "src/theme/theme-token-derive.js"'), 'theme-oklch.js must load before theme-token-derive.js');
   // 6. Themes saved before the 20-token Full mode drop the six tokens users could not edit (preset leftovers)
-  const store = { 'connectea:custom_themes_list': JSON.stringify([
+  const store = { 'connectify:custom_themes_list': JSON.stringify([
     { id: 'old', name: 'Old', isCustom: true, colors: { canvas: '#aeb4c2', surface: '#798693', inputBg: '#0e1830', textMuted: '#94a3b8' } },
     { id: 'new', name: 'New', isCustom: true, tokenVersion: 2, colors: { canvas: '#aeb4c2', surface: '#798693', inputBg: '#a9afbd' } }
   ]) };
@@ -8069,7 +8069,7 @@ runTest('Test 166: Every custom-theme token derives from the 6 Basic tokens by t
 runTest('Test 167: Dark and glass rules route theme colours through tokens, so custom themes reach every surface', () => {
   const dir = path.join(BASE_DIR, 'src/theme/styles');
   const read = f => origReadFileSync.call(fs, path.join(dir, f), 'utf8');
-  const darkBlock = read('theme-tokens.css').match(/html\.connectea-dark,\s*\n\[data-connectea-theme="dark"\][^{]*\{([^}]*)\}/)[1];
+  const darkBlock = read('theme-tokens.css').match(/html\.connectify-dark,\s*\n\[data-connectify-theme="dark"\][^{]*\{([^}]*)\}/)[1];
   const darkValues = new Set([...darkBlock.matchAll(/:\s*(#[0-9a-f]{6})/gi)].map(m => m[1].toLowerCase()));
   // Semantic status colours (danger/success/warning/info badges, white on the red clear-cache button, on avatars and on
   // Connect's class-colour bars)
@@ -8081,7 +8081,7 @@ runTest('Test 167: Dark and glass rules route theme colours through tokens, so c
   for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.css') && !['theme-tokens.css', 'theme-customizer-preview.css'].includes(f))) {
     const css = read(f).replace(/\/\*[\s\S]*?\*\//g, '');
     for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      if (!/connectea-dark|connectea-glass|liquid-glass/.test(m[1]) || /not\(\.connectea-dark\)/.test(m[1])) continue;
+      if (!/connectify-dark|connectify-glass|liquid-glass/.test(m[1]) || /not\(\.connectify-dark\)/.test(m[1])) continue;
       let body = m[2], prev;
       do { prev = body; body = body.replace(/var\([^()]*\)/g, ''); } while (body !== prev);
       for (const h of body.replace(/url\([^)]*\)/g, '').matchAll(/#[0-9a-f]{6}\b/gi)) {
@@ -8107,7 +8107,7 @@ runTest('Test 167: Dark and glass rules route theme colours through tokens, so c
     for (const f of fs.readdirSync(toolDir).filter(x => x.endsWith('.css'))) {
       const css = origReadFileSync.call(fs, path.join(toolDir, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
       for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-        if (!/connectea-dark|connectea-glass|liquid-glass/.test(m[1]) || /not\(\.connectea-dark\)/.test(m[1])) continue;
+        if (!/connectify-dark|connectify-glass|liquid-glass/.test(m[1]) || /not\(\.connectify-dark\)/.test(m[1])) continue;
         let body = m[2], prev;
         do { prev = body; body = body.replace(/var\([^()]*\)/g, ''); } while (body !== prev);
         for (const h of body.matchAll(/#[0-9a-f]{6}\b|#[0-9a-f]{3}\b/gi)) {
@@ -8209,11 +8209,11 @@ runTest('Test 171: The theme audit applies themes through the cross-world reques
 
 runTest('Test 172: Dark-classed themes with dark ink are marked light-tone and re-ink data colours; links use the contrast-checked token', () => {
   const tokensJs = fs.readFileSync(path.join(BASE_DIR, 'src/theme/theme-custom-tokens.js'), 'utf8');
-  assert.ok(tokensJs.includes("setAttribute('data-connectea-tone', 'light')") && tokensJs.includes("removeAttribute('data-connectea-tone')") && tokensJs.includes('markTone(c.textPrimary)'),
+  assert.ok(tokensJs.includes("setAttribute('data-connectify-tone', 'light')") && tokensJs.includes("removeAttribute('data-connectify-tone')") && tokensJs.includes('markTone(c.textPrimary)'),
     'applyCustomTokens must mark dark-ink themes light-tone and clearCustomTokens must unmark them');
   const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-light-tone.css'), 'utf8');
   const sels = css.replace(/\/\*[\s\S]*?\*\//g, '').split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
-  assert.ok(sels.length > 0 && sels.every(sel => sel.startsWith('html.connectea-dark[data-connectea-tone="light"]')), 'every light-tone rule must be scoped to the tone hook');
+  assert.ok(sels.length > 0 && sels.every(sel => sel.startsWith('html.connectify-dark[data-connectify-tone="light"]')), 'every light-tone rule must be scoped to the tone hook');
   for (const cls of ['.cx-cat-name-label', '.cx-pred-scenario-label--mid', '.cx-pred-pill--high strong', '.cx-red-key', '.cx-blue-key', '.cx-date-warning', '.connect-green-light']) {
     assert.ok(css.includes(cls), `light tone must re-ink ${cls}`);
   }
@@ -8238,7 +8238,7 @@ runTest('Test 186: Light-tone themes never leave dark-ink radar labels on the da
   assert.ok(cssHas(sideCss, '#connectify-radar-chart {\n  background: transparent;'), 'the plot has no fill of its own in any theme');
   const css = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-light-tone.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   const rule = sel => (css.split('}').find(b => b.split('{')[0].trim().endsWith(sel)) || '').split('{')[1] || '';
-  const tone = 'html.connectea-dark[data-connectea-tone="light"] ';
+  const tone = 'html.connectify-dark[data-connectify-tone="light"] ';
   assert.ok(/color-mix\(in srgb, var\(--cx-text-primary/.test(rule(`${tone}#connectify-radar-chart`)), 'light tone edges it in the ink');
   assert.ok(/fill: var\(--cx-text-primary, #1d1c1c\) !important/.test(rule(`${tone}#connectify-radar-chart .cx-radar-message`)) &&
     /opacity: 1 !important/.test(rule(`${tone}#connectify-radar-chart .cx-radar-message`)), 'labels, ring percentages and messages take the ink at full opacity');
@@ -8304,24 +8304,24 @@ runTest('Test 175: Liquid Glass task rows are tinted blocks inside the glass til
   assert.ok(manifest.indexOf('theme-glass-task-rows.css') > manifest.indexOf('theme-glass-surface.css') && manifest.indexOf('theme-glass-task-rows.css') < manifest.indexOf('"src/theme/styles/theme.css"'),
     'theme-glass-task-rows.css must load after the shared glass recipe and before theme.css');
   const sels = css.split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
-  assert.ok(sels.every(sel => sel.startsWith('html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])')), 'every rule must be Liquid Glass only');
+  assert.ok(sels.every(sel => sel.startsWith('html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])')), 'every rule must be Liquid Glass only');
   const rule = re => (css.match(new RegExp(re + '\\s*\\{([^}]*)\\}')) || [])[1] || '';
-  const strip = rule('\\.connectea-row-wrapper::before');
+  const strip = rule('\\.connectify-row-wrapper::before');
   assert.ok(/background-color: var\(--cx-gl-tint\)/.test(strip) && /inset: 0 -14px 0 0/.test(strip), 'the strip tint is a ::before reaching past the meter');
-  assert.ok(!/padding/.test(rule('\\.connectea-row-wrapper')) && !/border: none/.test(css), 'the strip adds no padding and keeps border boxes, so Connect rows keep their native size');
+  assert.ok(!/padding/.test(rule('\\.connectify-row-wrapper')) && !/border: none/.test(css), 'the strip adds no padding and keeps border boxes, so Connect rows keep their native size');
   for (const block of ['\\.cvr-c-task__achievement']) {
     const body = rule(block);
     assert.ok(/background-color: var\(--cx-gl-tint\)/.test(body) && /backdrop-filter: none/.test(body), `${block} must be a tint without its own blur (the tile is the surface)`);
     assert.ok(!/--cx-gl-fill/.test(body), `${block} must not add a second glass fill inside the tile`);
   }
-  assert.ok(/background: transparent/.test(rule(':where\\(\\.connectea-row-wrapper\\):not\\(#cx-n\\) > \\.connectea-panel')), 'the panel inside the strip must be clear (and outrank the id-weighted glass blur rule)');
+  assert.ok(/background: transparent/.test(rule(':where\\(\\.connectify-row-wrapper\\):not\\(#cx-n\\) > \\.connectify-panel')), 'the panel inside the strip must be clear (and outrank the id-weighted glass blur rule)');
   assert.ok(/background: transparent/.test(rule('\\.cvr-c-task__mark')), 'marks must not add a second fill');
   assert.ok(/\.cvr-c-task__mark \*(:not\(\.cx-n\))?\s*\{\s*color: var\(--cx-text-primary/.test(css), 'text on the task-row blocks must use the primary ink');
 });
 
 runTest('Test 176: Boxplot decoration shapes stay invisible in dark and glass themes; only the box keeps a fill', () => {
   const charts = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-charts-editor.css'), 'utf8');
-  assert.ok(/\.connectea-dark \.cvr-c-task__chart svg > rect\[fill="#FFFFFF"\], \.connectea-dark \.cvr-c-task__chart svg > path\[fill="#FFFFFF"\] \{\s*fill: transparent !important;/.test(charts),
+  assert.ok(/\.connectify-dark \.cvr-c-task__chart svg > rect\[fill="#FFFFFF"\], \.connectify-dark \.cvr-c-task__chart svg > path\[fill="#FFFFFF"\] \{\s*fill: transparent !important;/.test(charts),
     'the chart background and white shapes drawn directly on the svg must be transparent');
   const glass = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-task-rows.css'), 'utf8');
   assert.ok(glass.includes('.cvr-c-task__chart .highcharts-series [fill="#FFFFFF"]') && !/\.cvr-c-task__chart \[fill="#FFFFFF"\]/.test(glass),
@@ -8344,7 +8344,7 @@ runTest('Test 177: Summary-row stats keys are per semester and never built from 
     details.className = 'cvr-c-task__details';
     if (withPanel) {
       const panel = document.createElement('section');
-      panel.className = 'connectea-panel';
+      panel.className = 'connectify-panel';
       const injected = document.createElement('span');
       injected.className = 'v-label';
       injected.textContent = 'Min 24.1%\u2003Q1 56%';
@@ -8384,28 +8384,28 @@ runTest('Test 177: Summary-row stats keys are per semester and never built from 
 runTest('Test 178: A cohort version bump clears derived stats but keeps the student cohort size overrides', () => {
   window.__connectifyDataInitialized = false;
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8'));
-  localStorage.setItem('connectea:cohort:v3:me:2026:physics', JSON.stringify({ size: 120 }));
+  localStorage.setItem('connectify:cohort:v3:me:2026:physics', JSON.stringify({ size: 120 }));
   localStorage.setItem('connectify:stats_cache:me:physics:overall s2', JSON.stringify({ stats: [1, 2, 3, 4, 5] }));
   localStorage.setItem('connectify:cache_version:cohort', 'old');
   window.ConnectifyCache.checkAndInvalidateAll();
-  assert.ok(localStorage.getItem('connectea:cohort:v3:me:2026:physics'), 'cohort size overrides must survive a version bump');
+  assert.ok(localStorage.getItem('connectify:cohort:v3:me:2026:physics'), 'cohort size overrides must survive a version bump');
   assert.strictEqual(localStorage.getItem('connectify:stats_cache:me:physics:overall s2'), null, 'derived stats are cleared on a version bump');
-  localStorage.removeItem('connectea:cohort:v3:me:2026:physics');
+  localStorage.removeItem('connectify:cohort:v3:me:2026:physics');
 });
 
 runTest('Test 179: One surface per block in Liquid Glass; square bars; solid reading views; themed service bar plus; plain stat numbers', () => {
   const read = f => fs.readFileSync(path.join(BASE_DIR, 'src/theme', f), 'utf8');
-  const G = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  const G = 'html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])';
   // Class Summary numbers: the stat cell only, never a substring match that boxes the number span
   const cards = read('styles/theme-cards.css');
-  assert.ok(!cards.includes('[class*="scope-statistic"]') && cards.includes('.connectea-dark .c-scope-statistic {'), 'stat cells must be named explicitly');
+  assert.ok(!cards.includes('[class*="scope-statistic"]') && cards.includes('.connectify-dark .c-scope-statistic {'), 'stat cells must be named explicitly');
   // Banner, category bars, toolbars and empty states have no panel at all (they sit on the page)
   const surface = read('styles/theme-glass-surface.css');
   assert.ok(!/border-radius/.test(surface) && !/mat-paginator/.test(surface.replace(/\/\*[\s\S]*?\*\//g, '')), 'no rounded bars, cards or paginator pills');
   // Reading views beat the wallpaper and include discussion views
   const base = read('styles/theme-surface-base.css');
-  assert.ok(base.includes('html.connectea-dark[data-connectea-reading-view="true"]:not([data-connectea-theme="liquid-glass"]):not([data-connectea-glass="true"]),'),
-    'solid dark themes: the opaque reading canvas outranks html.connectea-dark[data-connectea-has-custom-bg]');
+  assert.ok(base.includes('html.connectify-dark[data-connectify-reading-view="true"]:not([data-connectify-theme="liquid-glass"]):not([data-connectify-glass="true"]),'),
+    'solid dark themes: the opaque reading canvas outranks html.connectify-dark[data-connectify-has-custom-bg]');
   // Liquid Glass: the wallpaper stays and the view has no panel (the wallpaper is dimmed or brightened for the text)
   const reading = read('styles/theme-glass-reading.css');
   const manifestJson = fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8');
@@ -8431,7 +8431,7 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   assert.ok(['thead', 'tbody', 'tfoot', 'tr:not(:hover)', 'th', 'td'].every(s => surfaceNesting.includes(` table :where(${s}):not(#cx-n)`)), 'table rows and cells must be clear inside the table surface');
   assert.ok(surfaceNesting.includes('.cvr-c-service-menu__item:not(.eds-s-is-active):not(.v-selected)'), 'menu items are clear except the active one');
   const surfaceSels = surfaceNesting.replace(/\/\*[\s\S]*?\*\//g, '').split('{').slice(0, -1).map(b => b.split('}').pop().trim()).filter(Boolean);
-  assert.ok(surfaceSels.length >= 10 && surfaceSels.every(sel => sel.startsWith('html.connectea-dark[data-connectea-theme]')), 'inner-layer clearing applies to every dark theme with the glass hook weight');
+  assert.ok(surfaceSels.length >= 10 && surfaceSels.every(sel => sel.startsWith('html.connectify-dark[data-connectify-theme]')), 'inner-layer clearing applies to every dark theme with the glass hook weight');
   assert.ok(manifest.indexOf('theme-surface-nesting.css') > -1 && manifest.indexOf('theme-surface-nesting.css') < manifest.indexOf('theme-glass-nesting.css'), 'theme-surface-nesting.css must be registered before the glass nesting');
   assert.ok(!/background-color: transparent/.test(nesting.replace(/headerui[\s\S]*?\}/, '').replace(/service-bar__container\):not\(#cx-n\) \{[\s\S]*?\}/, '')), 'clearing rules live in theme-surface-nesting.css, not the glass file');
 });
@@ -8490,7 +8490,7 @@ runTest('Test 182: The DOM sweeper confirms a missing component after a cohort p
     assert.strictEqual(scheduled, 1, 'a first miss asks the cohort pass to run');
     const confirm = timers.find(t => t.ms === 3000);
     assert.ok(confirm, 'a confirmation sweep is scheduled');
-    const panel = document.createElement('section'); panel.className = 'connectea-panel'; row.appendChild(panel);
+    const panel = document.createElement('section'); panel.className = 'connectify-panel'; row.appendChild(panel);
     confirm.fn();
     assert.strictEqual(shows.length, 0, 'a panel drawn by the pass clears the suspected miss');
     const src = fs.readFileSync(path.join(BASE_DIR, 'src/system/dom-sweeper.js'), 'utf8');
@@ -8571,7 +8571,7 @@ runTest('Test 185: The theme audit measures SVG chart labels, contrast-checks Co
   const root = el('div');
   for (const [title, marked] of [['Chemistry ATAR Year 11 - Semester 2', true], ['Physics ATAR Year 11 - Semester 2', true], ['Literature ATAR Year 11 - Semester 2', false]]) {
     const tile = el('div', 'eds-c-tile'); tile.appendChild(el('div', 'eds-c-tile__title', title));
-    if (marked) { const tasks = el('div', 'cvr-c-tasks'), row = el('div', 'cvr-c-task'); row.appendChild(el('section', 'connectea-panel')); tasks.appendChild(row); tile.appendChild(tasks); }
+    if (marked) { const tasks = el('div', 'cvr-c-tasks'), row = el('div', 'cvr-c-task'); row.appendChild(el('section', 'connectify-panel')); tasks.appendChild(row); tile.appendChild(tasks); }
     root.appendChild(tile);
   }
   const weakness = el('div', '', '', 'connectify-weakness'), boxes = el('div', '', '', 'cx-weakness-checkboxes');
@@ -8980,7 +8980,7 @@ runTest('Test 194: The top-right user area keeps the bar and popup surfaces, rea
   const find = (needle, state) => user.filter(b => b.sel.includes(needle) && (state ? b.sel.includes(state) : !/:hover/.test(b.sel)));
   // Colours only: nothing in the user area changes Connect's size, spacing, borders or radius
   for (const b of user) {
-    assert.ok(b.sel.startsWith('html.connectea-dark '), `user-area rules are scoped to the theme hook: ${b.sel}`);
+    assert.ok(b.sel.startsWith('html.connectify-dark '), `user-area rules are scoped to the theme hook: ${b.sel}`);
     assert.ok(!/(^|\s|;)(border|border-width|border-style|border-radius|padding[\w-]*|margin[\w-]*|height|width|line-height|font-size|font-weight|display):/.test(b.body),
       `user-area rules set colours only: ${b.sel}`);
   }
@@ -9064,7 +9064,7 @@ runTest('Unmarked task rows show a compact Low / Mid / High prediction panel, hi
   let ui = view.panels.get(row);
   assert.strictEqual(ui.box.hidden, true, 'An unmarked row keeps its statistics panel hidden');
   assert.ok(ui.forecast && !ui.forecast.hidden, 'An unmarked row shows the prediction panel');
-  assert.ok(ui.forecast.classList.contains('connectea-panel'), 'The prediction panel uses the statistics panel style');
+  assert.ok(ui.forecast.classList.contains('connectify-panel'), 'The prediction panel uses the statistics panel style');
   assert.strictEqual(ui.forecast.textContent, window.ConnectifyCohortForecast.NEEDS, 'Without data the panel names what the prediction needs');
   assert.strictEqual(ui._memo.retry, true, 'A row without a prediction is re-evaluated on the next pass');
 
@@ -9076,18 +9076,18 @@ runTest('Unmarked task rows show a compact Low / Mid / High prediction panel, hi
   const html = ui.forecast.innerHTML;
   assert.ok(!/Predicted/i.test(html), 'The prediction panel has no PREDICTED label');
   for (const [level, tag] of [['low', 'span'], ['mid', 'strong'], ['high', 'span']]) {
-    const re = new RegExp(`<${tag} class="connectea-forecast-value connectea-forecast-value--${level}">${level[0].toUpperCase() + level.slice(1)} \\d+%</${tag}>`);
+    const re = new RegExp(`<${tag} class="connectify-forecast-value connectify-forecast-value--${level}">${level[0].toUpperCase() + level.slice(1)} \\d+%</${tag}>`);
     assert.ok(re.test(html), `Prediction panel lists ${level} in its Predictor colour class: ${html}`);
   }
   // Low / Mid / High ink matches the Predictor (light, dark and light-tone), outranking the glass strip's primary ink
   const forecastCss = fs.readFileSync(path.join(SRC_DIR, 'cohort/cohort-forecast.css'), 'utf8');
-  const ink = (scope, level) => new RegExp(`${scope}:is\\(#cx-specificity-anchor, \\.connectea-row-wrapper\\) \\.connectea-forecast-value--${level} \\{[^}]*`, 'm');
+  const ink = (scope, level) => new RegExp(`${scope}:is\\(#cx-specificity-anchor, \\.connectify-row-wrapper\\) \\.connectify-forecast-value--${level} \\{[^}]*`, 'm');
   const block = (scope, level) => (forecastCss.match(ink(scope, level)) || [''])[0];
-  assert.ok(forecastCss.includes(':is(#cx-specificity-anchor, .connectea-row-wrapper) :is(.connectea-forecast-value--low, .connectea-forecast-value--high) { font-weight: 600 !important; }'),
+  assert.ok(forecastCss.includes(':is(#cx-specificity-anchor, .connectify-row-wrapper) :is(.connectify-forecast-value--low, .connectify-forecast-value--high) { font-weight: 600 !important; }'),
     'Low and High are semibold (600), below the 700 Mid strong, outranking the task group\'s first-child span rule (Low is the line\'s first span)');
   assert.ok(block('^', 'low').includes('#475569') && block('^', 'mid').includes('#174c75') && block('^', 'high').includes('#15803d'), 'Light ink matches the Predictor pills');
-  assert.ok(block('html\\.connectea-dark ', 'mid').includes('var(--cx-accent-hover') && block('html\\.connectea-dark ', 'high').includes('#4ade80'), 'Dark ink matches the Predictor scenario values');
-  assert.ok(block('html\\.connectea-dark\\[data-connectea-tone="light"\\] ', 'high').includes('oklch(from #22c55e 0.34 c h)'), 'Light-tone ink matches the Predictor re-inking');
+  assert.ok(block('html\\.connectify-dark ', 'mid').includes('var(--cx-accent-hover') && block('html\\.connectify-dark ', 'high').includes('#4ade80'), 'Dark ink matches the Predictor scenario values');
+  assert.ok(block('html\\.connectify-dark\\[data-connectify-tone="light"\\] ', 'high').includes('oklch(from #22c55e 0.34 c h)'), 'Light-tone ink matches the Predictor re-inking');
   assert.ok(!/breakout|purple|110/i.test(html), 'The breakout threshold stays secret');
   assert.strictEqual(ui._memo.retry, false, 'A predicted row is memoised');
 
@@ -9145,7 +9145,7 @@ runTest('Classes without a final letter show their predicted Low / Mid / High re
   view.render(overall.row, true, 'lit-key', 50, null, subjects);
   let ui = view.panels.get(overall.row);
   assert.ok(ui.upcoming && !ui.upcoming.hidden, 'A class without a letter shows its prediction panel');
-  assert.ok(ui.upcoming.classList.contains('connectea-panel'), 'The panel uses the statistics panel style');
+  assert.ok(ui.upcoming.classList.contains('connectify-panel'), 'The panel uses the statistics panel style');
   for (const level of ['Low', 'Mid', 'High']) assert.ok(new RegExp(`${level} \\d+\\.\\d%`).test(ui.upcoming.innerHTML), `Class prediction lists ${level}: ${ui.upcoming.innerHTML} / ${ui.upcoming.textContent}`);
   assert.ok(!/Extended response/.test(ui.upcoming.innerHTML), 'The panel predicts the class, not its tasks');
   assert.ok(!/breakout|purple/i.test(ui.upcoming.innerHTML), 'The breakout threshold stays secret');
@@ -9382,14 +9382,14 @@ runTest('Test 199: Large stored and imported wallpapers are fitted to the screen
 
   // Migration: active wallpaper (extension-storage fallback) and theme wallpapers, each distinct image fitted once
   function migrator(opts = {}) {
-    const ext = { 'connectea:custom_background': HUGE_A, 'connectea:custom_themes_list': JSON.stringify([
+    const ext = { 'connectify:custom_background': HUGE_A, 'connectify:custom_themes_list': JSON.stringify([
       { id: 't1', wallpaper: HUGE_A }, { id: 't2', wallpaper: SVG }, { id: 't3', wallpaper: SMALL }, { id: 't4', wallpaper: HUGE_B }]) };
-    const local = new Map([['connectea:custom_themes_list', JSON.stringify([{ id: 't1', wallpaper: null }, { id: 't5', wallpaper: HUGE_B }])]]);
+    const local = new Map([['connectify:custom_themes_list', JSON.stringify([{ id: 't1', wallpaper: null }, { id: 't5', wallpaper: HUGE_B }])]]);
     const env = { calls: [], bg: null, written: null, defs: { t1: { id: 't1', wallpaper: HUGE_A } }, ext, local };
     const w = {
       ConnectifyWallpaperFit: { needsFit: F.needsFit, fromDataUrl: async url => {
         env.calls.push(url);
-        if (opts.clearDuring) { delete ext['connectea:custom_background']; env.bg = null; }
+        if (opts.clearDuring) { delete ext['connectify:custom_background']; env.bg = null; }
         return `data:image/jpeg;small-${env.calls.length}`;
       } },
       ConnectifyThemeTokens: { getCustomBackground: () => env.bg, setCustomBackground: u => { env.bg = u; env.setCalls = (env.setCalls || 0) + 1; } },
@@ -9528,14 +9528,14 @@ runTest('Test 200: Progress keeps cohort means under the semester filter and plo
   const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('"src/progress/progress-modes.js"') > -1 && manifest.indexOf('"src/progress/progress-modes.js"') < manifest.indexOf('"src/progress/progress-graph.js"'), 'progress-modes.js loads before progress-graph.js');
   const css = fs.readFileSync(path.resolve(BASE_DIR, 'progress.css'), 'utf8');
-  assert.ok(css.includes('.connectea-dark #connectify-progress .cx-progress-mode select{background:var(--cx-nav-bg'), 'the dropdown is token-routed in dark themes');
+  assert.ok(css.includes('.connectify-dark #connectify-progress .cx-progress-mode select{background:var(--cx-nav-bg'), 'the dropdown is token-routed in dark themes');
 });
 
 runTest('Test 201: Target ATAR, Target Grade and Estimate ATAR course inputs are left-aligned', () => {
   const planner = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/atar-planner.css'), 'utf8');
-  assert.ok(/#connectea-atar \.cta-target-label>\.cta-score\s*\{\s*text-align:\s*left;/.test(planner), 'planner target inputs are left-aligned');
+  assert.ok(/#connectify-atar \.cta-target-label>\.cta-score\s*\{\s*text-align:\s*left;/.test(planner), 'planner target inputs are left-aligned');
   const compact = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/atar-compact.css'), 'utf8');
-  assert.ok(/#connectea-atar \.cta-score\s*\{[^}]*text-align:\s*left;/.test(compact), 'Estimate ATAR school mark inputs are left-aligned too');
+  assert.ok(/#connectify-atar \.cta-score\s*\{[^}]*text-align:\s*left;/.test(compact), 'Estimate ATAR school mark inputs are left-aligned too');
 });
 
 runTest('Test 202: Progress: no subject heading (the pressed chip names it); ATAR Progression heading 700, chips 600, legend 400', () => {
@@ -9552,13 +9552,13 @@ runTest('Test 203: Important tiles (Maintenance Notice) keep their red tint in d
   const manifest = origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('"src/theme/styles/theme-alert-tiles.css"') > manifest.indexOf('"src/theme/styles/theme-tiles.css"') &&
     manifest.indexOf('"src/theme/styles/theme-alert-tiles.css"') < manifest.indexOf('"src/theme/styles/theme.css"'), 'theme-alert-tiles.css loads after the tile rules it overrides');
-  assert.ok(css.includes('html.connectea-dark[data-connectea-theme] :where(.eds-c-tile__header--negative):not(#cx-n) {\n  background-color: color-mix(in srgb, #dc2626 16%, transparent) !important;'), 'negative headers keep a red tint in dark themes');
+  assert.ok(css.includes('html.connectify-dark[data-connectify-theme] :where(.eds-c-tile__header--negative):not(#cx-n) {\n  background-color: color-mix(in srgb, #dc2626 16%, transparent) !important;'), 'negative headers keep a red tint in dark themes');
   assert.ok(css.includes(':where(.eds-c-tile--important) > :where(.eds-c-tile__header):not(#cx-n) {\n  border-bottom-color: #dc2626 !important;'), 'important headers keep a red divider');
   assert.ok(/#f87171 !important;\n  -webkit-text-fill-color: #f87171 !important;/.test(css), 'red icons beat the glyph ink (text-fill too)');
-  assert.ok(css.includes('html.connectea-dark[data-connectea-tone="light"] :where(.eds-c-tile__header--negative):not(#cx-n) {\n  background-color: color-mix(in srgb, #9d000b 10%, transparent) !important;'), 'light-tone themes use Connect\'s own red');
+  assert.ok(css.includes('html.connectify-dark[data-connectify-tone="light"] :where(.eds-c-tile__header--negative):not(#cx-n) {\n  background-color: color-mix(in srgb, #9d000b 10%, transparent) !important;'), 'light-tone themes use Connect\'s own red');
   assert.ok(!/:is\([^)]*::before/.test(css), 'pseudo-elements stay outside :is() (an invalid :is drops the rule)');
   const theme = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme.css'), 'utf8');
-  assert.ok(!/\.eds-c-tile, \.cvr-c-tile, \.c-tile, \.eds-c-card, \.cvr-c-card, \.connectea-panel\) \{\n  overflow: hidden/.test(theme), 'glass tiles never use overflow: hidden (the list margin showed as an extra strip under the notice)');
+  assert.ok(!/\.eds-c-tile, \.cvr-c-tile, \.c-tile, \.eds-c-card, \.cvr-c-card, \.connectify-panel\) \{\n  overflow: hidden/.test(theme), 'glass tiles never use overflow: hidden (the list margin showed as an extra strip under the notice)');
 });
 
 runTest('Test 204: The customizer hue slider covers 0-360 across the whole track; gradient, thumb and picked colour agree', () => {
@@ -9632,20 +9632,20 @@ runTest('Test 205: The wallpaper is a fixed 2px-blurred layer dimmed (light text
   }
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-wallpaper-layer.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   const rule = sel => css.split('}').filter(b => b.split('{')[0].trim() === sel).map(b => b.split('{')[1]).join('\n');
-  const layer = rule('html[data-connectea-has-custom-bg="true"]::before');
+  const layer = rule('html[data-connectify-has-custom-bg="true"]::before');
   assert.ok(/position: fixed;/.test(layer) && /inset: -6px;/.test(layer) && /z-index: -1;/.test(layer) && /filter: blur\(2px\);/.test(layer) &&
     /rgba\(0, 0, 0, var\(--cx-wallpaper-dim-active, 0\)\)/.test(layer) && /var\(--cx-custom-bg-image\) center center \/ cover no-repeat;/.test(layer),
     'the wallpaper is one fixed layer, blurred 2px, under a black overlay at the measured dim');
-  assert.ok(/--cx-wallpaper-dim-active: var\(--cx-wallpaper-dim, /.test(rule('html.connectea-dark[data-connectea-has-custom-bg="true"]:not([data-connectea-tone="light"])')),
+  assert.ok(/--cx-wallpaper-dim-active: var\(--cx-wallpaper-dim, /.test(rule('html.connectify-dark[data-connectify-has-custom-bg="true"]:not([data-connectify-tone="light"])')),
     'only light-ink themes dim the wallpaper');
   assert.ok(/rgba\(255, 255, 255, var\(--cx-wallpaper-brighten-active, 0\)\)/.test(layer) &&
-    /--cx-wallpaper-brighten-active: var\(--cx-wallpaper-brighten, /.test(rule('html[data-connectea-has-custom-bg="true"]:not(.connectea-dark), html[data-connectea-has-custom-bg="true"][data-connectea-tone="light"]')),
+    /--cx-wallpaper-brighten-active: var\(--cx-wallpaper-brighten, /.test(rule('html[data-connectify-has-custom-bg="true"]:not(.connectify-dark), html[data-connectify-has-custom-bg="true"][data-connectify-tone="light"]')),
     'dark-ink themes brighten the wallpaper with a white overlay');
-  assert.ok(/background: transparent !important;/.test(rule('html[data-connectea-has-custom-bg="true"]:not(#cx-specificity-anchor) :where(body):not(#cx-n)')), 'body never covers the layer');
+  assert.ok(/background: transparent !important;/.test(rule('html[data-connectify-has-custom-bg="true"]:not(#cx-specificity-anchor) :where(body):not(#cx-n)')), 'body never covers the layer');
   // body's clearing rule must outrank the dark canvas rule on body (theme-surface-base.css weighs (1,2,1)); it once lost and hid the wallpaper
   const base = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-surface-base.css'), 'utf8');
-  assert.ok(base.includes(':is(html, body).connectea-dark:not([data-connectea-login]) :where(body):not(#cx-n),') &&
-    expandIs.specificity(':is(html, body).connectea-dark:not([data-connectea-login]) :where(body):not(#cx-n)').join() === '1,2,1', 'the canvas rule this outranks is still (1,2,1)');
+  assert.ok(base.includes(':is(html, body).connectify-dark:not([data-connectify-login]) :where(body):not(#cx-n),') &&
+    expandIs.specificity(':is(html, body).connectify-dark:not([data-connectify-login]) :where(body):not(#cx-n)').join() === '1,2,1', 'the canvas rule this outranks is still (1,2,1)');
   assert.ok(!/text-shadow|--cx-label-shadow/.test(css), 'text gets no shadow over the wallpaper (it made text hard to read)');
   assert.ok(!/custom-bg-image\) center center \/ cover no-repeat fixed/.test(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-tokens.css'), 'utf8')), 'html and body no longer paint the wallpaper themselves');
   const tokens = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-custom-tokens.js'), 'utf8');
@@ -9727,10 +9727,10 @@ runTest('Test 208: Text tokens a custom theme sets are used as given; only text 
 
 runTest('Test 209: Card header buttons (View All) use the button tokens and the class-coloured divider uses the strong border', () => {
   const cards = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-cards.css'), 'utf8');
-  const sel = '.connectea-dark:not(cx-n) .mat-card-header :where(.mat-button):not(#cx-n)';
+  const sel = '.connectify-dark:not(cx-n) .mat-card-header :where(.mat-button):not(#cx-n)';
   const rule = cards.slice(cards.indexOf(sel + ' {'), cards.indexOf('}', cards.indexOf(sel + ' {')));
   assert.ok(rule && /background-color: var\(--cx-button-bg, #202c3b\) !important;/.test(rule) && /color: var\(--cx-button-text, #f1f5f9\) !important;/.test(rule), 'View All takes the button background and text');
-  assert.ok(cards.includes('.connectea-dark:not(cx-n) .mat-card-header :where(.mat-button):hover:not(#cx-n) {\n  background-color: var(--cx-button-hover, #2c3b4e) !important;'), 'and the button hover');
+  assert.ok(cards.includes('.connectify-dark:not(cx-n) .mat-card-header :where(.mat-button):hover:not(#cx-n) {\n  background-color: var(--cx-button-hover, #2c3b4e) !important;'), 'and the button hover');
   const scaling = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-search-scaling.css'), 'utf8');
   assert.ok(/\.mat-divider--primary \{\s*border-top-color: var\(--cx-border-strong, #5a7391\) !important;/.test(scaling) && !scaling.includes('#9cb800'), 'the green card divider takes the strong border');
 });
@@ -9848,7 +9848,7 @@ runTest('Test 213: A theme\'s own wallpaper shows only while that theme is activ
   const imageTheme = reg.saveCustomTheme({ id: 'custom_own_wall', name: 'Own Wall', wallpaper: 'data:image/png;base64,THEIRS', colors: { canvas: '#101010' } });
   reg.setTheme(presetTheme.id);
   assert.strictEqual(shown(), `url("${mint}")`, 'a theme\'s preset wallpaper shows while it is active');
-  assert.strictEqual(localStorage.getItem('connectea:custom_background'), 'data:image/png;base64,MINE', 'a theme\'s wallpaper is never stored over the Settings one');
+  assert.strictEqual(localStorage.getItem('connectify:custom_background'), 'data:image/png;base64,MINE', 'a theme\'s wallpaper is never stored over the Settings one');
   reg.setTheme('dark');
   assert.strictEqual(shown(), 'url("data:image/png;base64,MINE")', 'switching to a theme without a wallpaper restores the Settings wallpaper');
   reg.setTheme(imageTheme.id);
@@ -9861,7 +9861,7 @@ runTest('Test 213: A theme\'s own wallpaper shows only while that theme is activ
   reg.clearCustomBackground();
   assert.strictEqual(shown(), 'url("data:image/png;base64,THEIRS")', 'clearing the Settings wallpaper leaves the theme\'s own on screen');
   reg.setTheme('dark');
-  assert.ok(!shown() && !document.documentElement.hasAttribute('data-connectea-has-custom-bg'), 'with no Settings wallpaper, other themes show none');
+  assert.ok(!shown() && !document.documentElement.hasAttribute('data-connectify-has-custom-bg'), 'with no Settings wallpaper, other themes show none');
   // Reload with the preset theme active: its wallpaper is shown at startup (presets load before the registry)
   reg.setTheme(presetTheme.id);
   reg = load();
@@ -9870,18 +9870,18 @@ runTest('Test 213: A theme\'s own wallpaper shows only while that theme is activ
   assert.ok(manifest.indexOf('"src/theme/theme-wallpaper-presets.js"') < manifest.indexOf('"src/theme/theme-registry.js"'), 'preset wallpapers load before the registry');
   assert.ok(fs.readFileSync(path.join(BASE_DIR, 'src/predictor/settings-preferences.js'), 'utf8').includes('(the current theme shows its own wallpaper)'), 'Settings says when the theme\'s own wallpaper is on screen');
   localStorage.clear();
-  delete document.documentElement.dataset.connecteaTheme;
+  delete document.documentElement.dataset.connectifyTheme;
 });
 
 runTest('Test 214: Notice and dialog detail views read in the primary ink (cream in Quantum Dark); feed cards keep the secondary ink', () => {
   const feed = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-feed.css'), 'utf8');
-  assert.ok(/\.connectea-dark cnt-notice-view p, [^{]*\.connectea-dark mat-dialog-container li \{\s*color: var\(--cx-text-primary, #f8fafc\) !important;/.test(feed),
+  assert.ok(/\.connectify-dark cnt-notice-view p, [^{]*\.connectify-dark mat-dialog-container li \{\s*color: var\(--cx-text-primary, #f8fafc\) !important;/.test(feed),
     'detail view text uses --cx-text-primary');
-  assert.ok(/\.connectea-dark \.cvr-c-feed-card p, [^{]*\.connectea-dark \.cvr-c-feed-item li \{\s*color: var\(--cx-text-secondary/.test(feed),
+  assert.ok(/\.connectify-dark \.cvr-c-feed-card p, [^{]*\.connectify-dark \.cvr-c-feed-item li \{\s*color: var\(--cx-text-secondary/.test(feed),
     'feed cards keep --cx-text-secondary');
   assert.ok(!/:is\(cnt-notice-view, mat-dialog-container, \.cvr-c-feed-card[^{]*\{\s*color: var\(--cx-text-secondary/.test(feed), 'detail views never use the secondary ink');
   const tokens = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-tokens.css'), 'utf8');
-  assert.ok(/data-connectea-theme="quantum"[^}]*--cx-text-primary: #fbf1c7;/.test(tokens), 'Quantum Dark\'s primary ink is cream');
+  assert.ok(/data-connectify-theme="quantum"[^}]*--cx-text-primary: #fbf1c7;/.test(tokens), 'Quantum Dark\'s primary ink is cream');
 });
 
 runTest('Test 215: A preset picked in the customizer keeps every colour it sets until a Basic token it derives from changes', () => {
@@ -9948,7 +9948,7 @@ runTest('Test 216: Dark-ink glass themes brighten the page behind a dialog inste
   const css = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles', file), 'utf8');
   const lightTone = css('theme-light-tone.css');
   const rule = lightTone.slice(lightTone.indexOf('/* Dialog backdrops'));
-  assert.ok(rule.includes('html.connectea-dark[data-connectea-tone="light"]:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])'), 'scoped to light-tone glass themes');
+  assert.ok(rule.includes('html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])'), 'scoped to light-tone glass themes');
   for (const sel of ['.cdk-overlay-dark-backdrop', '.cdk-overlay-backdrop', '.v-window-modalitycurtain', '.modal-backdrop']) assert.ok(rule.includes(sel), `${sel} is brightened`);
   assert.ok(/background-color: rgba\(255, 255, 255, 0\.45\) !important/.test(rule), 'a white overlay brightens the backdrop');
   assert.ok(css('theme-tokens.css').includes('background-color: rgba(11, 17, 32, 0.45) !important'), 'light-ink glass themes keep the navy dim');
@@ -10030,7 +10030,7 @@ runTest('Test 217: Filtering Assessment Outlines with "Show this semester\'s cla
     const js = manifest.content_scripts.flatMap(g => g.js || []);
     assert.strictEqual(js.indexOf('src/assessment/semester-filter-notice.js') + 1, js.indexOf('src/assessment/semester-filter.js'), 'the notice loads just before the filter');
     const css = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/semester-filter.css'), 'utf8');
-    assert.ok(css.includes('.connectea-dark .cx-semester-notice-title {\n  color: var(--cx-text-primary'), 'dark themes ink the notice with the theme tokens');
+    assert.ok(css.includes('.connectify-dark .cx-semester-notice-title {\n  color: var(--cx-text-primary'), 'dark themes ink the notice with the theme tokens');
     assert.ok(!/\.cx-semester-notice\s*\{[^}]*background/.test(css), 'the notice is an empty state with no panel of its own');
   } finally {
     document.querySelectorAll = origQSA; document.getElementById = origById; Date.now = origNow;
@@ -10140,8 +10140,8 @@ runTest('Test 219: No stylesheet tests a class substring on an ancestor, so a cl
     }
   })(SRC_DIR);
   assert.deepStrictEqual(offenders, [], 'ancestors are named by class, never by a class substring');
-  assert.ok(ancestorSubstring('.connectea-dark :is(.a, [class*="feed"]) span', true) && ancestorSubstring('.x:not([class*="icon"] *)', true), 'the check catches both forms');
-  assert.ok(!ancestorSubstring('.connectea-dark :is(.a, [class*="feed"])', true) && !ancestorSubstring('.x:not([class*="icon"])', true), 'a substring on the subject is allowed');
+  assert.ok(ancestorSubstring('.connectify-dark :is(.a, [class*="feed"]) span', true) && ancestorSubstring('.x:not([class*="icon"] *)', true), 'the check catches both forms');
+  assert.ok(!ancestorSubstring('.connectify-dark :is(.a, [class*="feed"])', true) && !ancestorSubstring('.x:not([class*="icon"])', true), 'a substring on the subject is allowed');
 });
 
 runTest('Test 220: On Assessment Outlines the shortcut, not My Connect, is the highlighted navigation tab', () => {
@@ -10154,11 +10154,11 @@ runTest('Test 220: On Assessment Outlines the shortcut, not My Connect, is the h
   const myConnect = el('cvr-js-greedy__item eds-s-is-active'), link = document.createElement('a');
   link.setAttribute('href', '/group/students/ui/my-connect'); myConnect.appendChild(link);
   const classes = el('cvr-js-greedy__item');
-  const shortcut = el('cvr-js-greedy__item'); shortcut.dataset.connecteaShortcut = '';
+  const shortcut = el('cvr-js-greedy__item'); shortcut.dataset.connectifyShortcut = '';
   // Mobile drawer: the same pair
   const drawer = el('cvr-c-primary-menu__list');
   const mobileMy = el('cvr-c-primary-menu__item eds-s-is-active'); mobileMy.appendChild(el('cvr-c-primary-menu__item-label', 'My Connect'));
-  const mobileShortcut = el('cvr-c-primary-menu__item'); mobileShortcut.dataset.connecteaShortcut = '';
+  const mobileShortcut = el('cvr-c-primary-menu__item'); mobileShortcut.dataset.connectifyShortcut = '';
   for (const e of [classes, myConnect, shortcut]) bar.appendChild(e);
   for (const e of [mobileMy, mobileShortcut]) drawer.appendChild(e);
   const page = el('cvr-page'), origQSA = document.querySelectorAll, origHref = location.href;
@@ -10297,13 +10297,13 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   const row = makeRow(true, ['Examination', 'Term 1, Week 4', 'Extended response 1'], '21 Out of 30', stats);
   view.render(row, false, 'lit-key', 219, null, []);
   const ui = view.panels.get(row);
-  assert.ok(ui.box.classList.contains('connectea-panel') && ui.box.classList.contains('connectea-panel--expanded'), 'the card is still a statistics panel');
+  assert.ok(ui.box.classList.contains('connectify-panel') && ui.box.classList.contains('connectify-panel--expanded'), 'the card is still a statistics panel');
   assert.deepStrictEqual(ui.wrapper.children, [ui.box], 'the card holds the meter and Type dropdown itself');
   const parts = descendants(ui.box);
-  const labels = parts.filter(e => e.classList.contains('connectea-xp-label')).map(e => e.textContent);
+  const labels = parts.filter(e => e.classList.contains('connectify-xp-label')).map(e => e.textContent);
   assert.deepStrictEqual(labels, ['Score', 'Rank', 'Average', 'Minimum', 'Lower Quartile', 'Median', 'Upper Quartile', 'Maximum']);
   assert.ok(parts.every(e => e.tagName !== 'SPAN' || !e.classList.contains('v-label')) && !parts.some(e => e.classList.contains('v-label')), 'no .v-label inside the card (task labels stay Connect\'s)');
-  const reached = () => ui.xp.quantiles.map(e => e.parentElement.classList.contains('connectea-xp-cell--reached'));
+  const reached = () => ui.xp.quantiles.map(e => e.parentElement.classList.contains('connectify-xp-cell--reached'));
   assert.deepStrictEqual(reached(), [false, false, true, false, false], '70% has reached the Median (68.85%): only that cell is tinted');
   for (const [mark, want, why] of [['13 Out of 30', [false, true, false, false, false], '43.33% (above the minimum, below Q1) tints Lower Quartile'],
     ['9.75 Out of 30', [true, false, false, false, false], '32.5% (at the minimum) tints Minimum']]) {
@@ -10314,7 +10314,7 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   row.querySelector('.cvr-c-task__mark').textContent = '21 Out of 30';
   view.render(row, false, 'lit-key', 219, null, []);
   const css = fs.readFileSync(path.join(SRC_DIR, 'cohort/cohort-expanded.css'), 'utf8');
-  const tint = css.match(/\.connectea-xp-cell--reached::before \{[^}]*background: color-mix\(in srgb, var\(--cx-accent, #[0-9a-f]{6}\) (\d+)%, transparent\)/);
+  const tint = css.match(/\.connectify-xp-cell--reached::before \{[^}]*background: color-mix\(in srgb, var\(--cx-accent, #[0-9a-f]{6}\) (\d+)%, transparent\)/);
   assert.ok(tint && Number(tint[1]) <= 6, 'the tint is the theme accent at a very low opacity, behind the cell');
   assert.strictEqual(ui.xp.score.textContent, '70%');
   assert.deepStrictEqual(ui.xp.quantiles.map(e => e.textContent), ['32.5%', '58%', '68.85%', '79.9%', '96.7%']);
@@ -10330,11 +10330,11 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   assert.strictEqual(compactRank(1, true), '<strong>Top of subject</strong>');
   assert.strictEqual(compactRank(40, false), '<strong>40 / ~232</strong>');
   assert.ok(/^SD [\d.]+\u2003Z-Score -?[\d.]+(\u2003.+)?$/.test(ui.xp.summary.textContent), `footer: ${ui.xp.summary.textContent}`);
-  assert.ok(ui.outcomeBar.parentElement.classList.contains('connectea-xp-head'), 'the outcome meter sits in the header');
+  assert.ok(ui.outcomeBar.parentElement.classList.contains('connectify-xp-head'), 'the outcome meter sits in the header');
   assert.strictEqual(ui.xp.quantiles[0].parentElement.parentElement.parentElement, ui.outcomeBar.parentElement, 'the five quantiles share the header row (wide, short card)');
   assert.strictEqual(ui.typeContainer.parentElement, ui.xp.foot, 'the Type dropdown sits in the footer');
   assert.ok(/^(10|\d)$/.test(ui.xp.score.getAttribute('data-cx-score-step')), 'the Score has a colour step');
-  assert.ok(ui.outcomeBar.dataset.connecteaTooltip.endsWith(xp.SCORE_NOTE), 'the meter tooltip explains the Score colour');
+  assert.ok(ui.outcomeBar.dataset.connectifyTooltip.endsWith(xp.SCORE_NOTE), 'the meter tooltip explains the Score colour');
 
   // A breakout glows; the threshold is never named
   row.querySelector('.cvr-c-task__mark').textContent = '30 Out of 30';
@@ -10350,7 +10350,7 @@ runTest('Test 222: Expanded cards show Score / Rank / Average, the five boxplot 
   assert.ok([b.rankValue, b.average, ...b.quantiles].every(e => e.textContent === '—'), 'unavailable values are dashes');
   assert.strictEqual(b.summary.textContent, 'Cohort statistics unavailable');
   assert.strictEqual(b.score.textContent, '80%', 'the Score is still shown');
-  assert.ok(b.quantiles.every(e => !e.parentElement.classList.contains('connectea-xp-cell--reached')), 'no tint without statistics');
+  assert.ok(b.quantiles.every(e => !e.parentElement.classList.contains('connectify-xp-cell--reached')), 'no tint without statistics');
   loadCohortViewIn(null);
 });
 
@@ -10361,14 +10361,14 @@ runTest('Test 223: Expanded overall cards show the four quartile values, Minimum
   const overall = makeRow(false, ['Semester 2 Cumulative Percent'], '81.2%', [32.5, 58, 68.85, 79.9, 96.7]);
   view.render(overall, true, 'lit-key', 219, null, []);
   const ui = view.panels.get(overall);
-  assert.ok(ui.box.classList.contains('connectea-panel--expanded'));
+  assert.ok(ui.box.classList.contains('connectify-panel--expanded'));
   assert.strictEqual(ui.input.parentElement.parentElement.parentElement, ui.xp.foot, 'the cohort size input sits in the footer');
   assert.strictEqual(ui.xp.rankValue.parentElement.children.length, 1, 'the Rank cell holds only its value');
-  const cellLabels = descendants(ui.xp.quantiles[0].parentElement.parentElement).filter(e => e.classList.contains('connectea-xp-label')).map(e => e.textContent);
+  const cellLabels = descendants(ui.xp.quantiles[0].parentElement.parentElement).filter(e => e.classList.contains('connectify-xp-label')).map(e => e.textContent);
   assert.deepStrictEqual(cellLabels, ['Lower Quartile', 'Median', 'Upper Quartile', 'Maximum'], 'the four quartile values, two by two beside the prediction');
   assert.deepStrictEqual(ui.xp.quantiles.map(e => e.textContent), ['58%', '68.85%', '79.9%', '96.7%']);
   assert.ok(/^Minimum 32\.5%\u2003SD [\d.]+\u2003Z-Score -?[\d.]+/.test(ui.xp.summary.textContent), `Minimum and SD sit in the footer: ${ui.xp.summary.textContent}`);
-  const tinted = () => ui.xp.quantiles.map(e => e.parentElement.classList.contains('connectea-xp-cell--reached'));
+  const tinted = () => ui.xp.quantiles.map(e => e.parentElement.classList.contains('connectify-xp-cell--reached'));
   assert.deepStrictEqual(tinted(), [false, false, true, false], '81.2% has reached the Upper Quartile');
   for (const low of ['40%', '20%']) {
     overall.querySelector('.cvr-c-task__mark').textContent = low;
@@ -10377,14 +10377,14 @@ runTest('Test 223: Expanded overall cards show the four quartile values, Minimum
   }
   overall.querySelector('.cvr-c-task__mark').textContent = '81.2%';
   view.render(overall, true, 'lit-key', 219, null, []);
-  assert.deepStrictEqual(Array.from(ui.box.children, e => e.className), ['connectea-xp-head', 'connectea-xp-prediction', 'connectea-xp-foot'], 'values, class prediction, footer');
+  assert.deepStrictEqual(Array.from(ui.box.children, e => e.className), ['connectify-xp-head', 'connectify-xp-prediction', 'connectify-xp-foot'], 'values, class prediction, footer');
   assert.ok(!ui.upcoming, 'no separate class prediction line');
   assert.ok(!ui.xp.prediction.hidden, 'the class prediction is a section of the card');
-  assert.ok(!/Predicted class result|connectea-xp-title/.test(ui.xp.prediction.innerHTML), 'no "Predicted class result" title while it needs data');
+  assert.ok(!/Predicted class result|connectify-xp-title/.test(ui.xp.prediction.innerHTML), 'no "Predicted class result" title while it needs data');
   window.ConnectifyCohortExpanded.fillPrediction(ui.xp.prediction, { low: 79.7, mid: 83.6, high: 85.8 }, '');
-  const predLabels = [...ui.xp.prediction.innerHTML.matchAll(/<dt class="connectea-xp-label">([^<]*)<\/dt>/g)].map(m => m[1]);
+  const predLabels = [...ui.xp.prediction.innerHTML.matchAll(/<dt class="connectify-xp-label">([^<]*)<\/dt>/g)].map(m => m[1]);
   assert.deepStrictEqual(predLabels, ['Predicted Low', 'Predicted Mid', 'Predicted High'], 'its cells name it, with no title of their own');
-  assert.ok(!/Predicted class result|connectea-xp-title/.test(ui.xp.prediction.innerHTML), 'no "Predicted class result" title');
+  assert.ok(!/Predicted class result|connectify-xp-title/.test(ui.xp.prediction.innerHTML), 'no "Predicted class result" title');
   assert.ok(!ui.outcomeBar, 'overall rows have no meter');
   assert.ok(ui.xp.score.getAttribute('data-cx-score-step') !== 'breakout', 'overall rows never glow');
 
@@ -10397,7 +10397,7 @@ runTest('Test 223: Expanded overall cards show the four quartile values, Minimum
   const task = makeRow(true, ['Examination', 'Term 1, Week 4', 'Extended response 1'], '21 Out of 30', [32.5, 58, 68.85, 79.9, 96.7]);
   view.render(task, false, 'lit-key', 219, null, []);
   const t = view.panels.get(task);
-  assert.ok(!t.xp && !t.box.classList.contains('connectea-panel--expanded') && t.wrapper.children.includes(t.typeContainer), 'subjects mode keeps task rows compact');
+  assert.ok(!t.xp && !t.box.classList.contains('connectify-panel--expanded') && t.wrapper.children.includes(t.typeContainer), 'subjects mode keeps task rows compact');
   loadCohortViewIn(null);
 });
 
@@ -10408,7 +10408,7 @@ runTest('Test 224: Expanded unmarked rows show Low / Mid / High with what the pr
   window.ConnectifyPredictorMath.saveBaselines({ types: {}, subjects: {} });
   view.render(row, false, 'lit-key', 50, null, []);
   let ui = view.panels.get(row);
-  assert.ok(ui.forecast.classList.contains('connectea-panel--expanded'), 'the prediction card is expanded');
+  assert.ok(ui.forecast.classList.contains('connectify-panel--expanded'), 'the prediction card is expanded');
   assert.strictEqual(ui.xpForecast.body.textContent, window.ConnectifyCohortForecast.NEEDS, 'without data it says what the prediction needs');
   assert.strictEqual(ui.typeContainer.parentElement, ui.xpForecast.foot, 'the Type dropdown follows the visible card');
 
@@ -10418,7 +10418,7 @@ runTest('Test 224: Expanded unmarked rows show Low / Mid / High with what the pr
   ui = view.panels.get(row);
   const html = ui.xpForecast.body.innerHTML;
   for (const level of ['low', 'mid', 'high']) {
-    assert.ok(new RegExp(`<dd class="connectea-xp-value connectea-forecast-value connectea-forecast-value--${level}">\\d+%</dd>`).test(html), `${level} in the Predictor colour class`);
+    assert.ok(new RegExp(`<dd class="connectify-xp-value connectify-forecast-value connectify-forecast-value--${level}">\\d+%</dd>`).test(html), `${level} in the Predictor colour class`);
   }
   assert.ok(!/breakout|purple|110/i.test(html), 'the breakout threshold stays secret');
   assert.strictEqual(ui.xpForecast.summary.textContent, 'From your previous-year Exam and Literature averages', `basis: ${ui.xpForecast.summary.textContent}`);
@@ -10474,9 +10474,9 @@ runTest('Test 225: The Score colour steps from Low to High, stays >= 5:1 and onl
   assert.strictEqual(xp.scoreStep(NaN, 60, 80), null, 'no mark, no step');
 
   const css = origReadFileSync.call(fs, path.join(SRC_DIR, 'cohort/cohort-expanded.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-  for (let i = 0; i <= 9; i++) assert.ok(css.includes(`.connectea-xp-score[data-cx-score-step="${i}"] { --cx-score-t: ${i / 10}; }`), `step ${i}`);
+  for (let i = 0; i <= 9; i++) assert.ok(css.includes(`.connectify-xp-score[data-cx-score-step="${i}"] { --cx-score-t: ${i / 10}; }`), `step ${i}`);
   const shadows = [...css.matchAll(/([^{}]+)\{[^{}]*text-shadow[^{}]*\}/g)].map(m => m[1].trim());
-  assert.deepStrictEqual(shadows, ['.connectea-panel--expanded .connectea-xp-score[data-cx-score-step="breakout"]'], 'the breakout Score is the only text shadow');
+  assert.deepStrictEqual(shadows, ['.connectify-panel--expanded .connectify-xp-score[data-cx-score-step="breakout"]'], 'the breakout Score is the only text shadow');
   assert.ok(/rgba\(196, 181, 253/.test(css), 'the glow is pastel purple');
   assert.ok(!/@keyframes|animation/.test(css), 'the glow is static');
   assert.ok(/@supports \(color: oklch\(from red l c h\)\)/.test(css), 'relative colours are guarded, so older browsers keep the base ink');
@@ -10486,7 +10486,7 @@ runTest('Test 225: The Score colour steps from Low to High, stays >= 5:1 and onl
   for (const f of ['theme-oklch.js', 'theme-palettes.js']) new Function('window', origReadFileSync.call(fs, path.join(SRC_DIR, 'theme', f), 'utf8'))(win);
   const O = win.ConnectifyThemeOklch;
   const factors = scope => {
-    const m = css.match(new RegExp(`${scope}:is\\(#cx-specificity-anchor, \\.connectea-panel--expanded\\) \\.connectea-xp-score\\[data-cx-score-step\\] \\{\\s*color: oklch\\(from var\\(--cx-score-base\\) calc\\(l \\* \\(([\\d.]+) ([+-]) ([\\d.]+) \\* var\\(--cx-score-t\\)\\)\\) calc\\(c \\* \\(([\\d.]+) \\+ ([\\d.]+) \\* var\\(--cx-score-t\\)\\)\\) h\\)`));
+    const m = css.match(new RegExp(`${scope}:is\\(#cx-specificity-anchor, \\.connectify-panel--expanded\\) \\.connectify-xp-score\\[data-cx-score-step\\] \\{\\s*color: oklch\\(from var\\(--cx-score-base\\) calc\\(l \\* \\(([\\d.]+) ([+-]) ([\\d.]+) \\* var\\(--cx-score-t\\)\\)\\) calc\\(c \\* \\(([\\d.]+) \\+ ([\\d.]+) \\* var\\(--cx-score-t\\)\\)\\) h\\)`));
     assert.ok(m, `relative step rule for ${scope || 'light'}`);
     const sign = m[2] === '+' ? 1 : -1;
     return t => [Number(m[1]) + sign * Number(m[3]) * t, Number(m[4]) + Number(m[5]) * t];
@@ -10500,8 +10500,8 @@ runTest('Test 225: The Score colour steps from Low to High, stays >= 5:1 and onl
     const v = m[1].split(',').map(Number);
     return hex(v.slice(0, 3).map((x, i) => x * v[3] + rgb(bottom)[i] * (1 - v[3])));
   };
-  const dark = factors('html\\.connectea-dark ');
-  const breakDark = css.match(/html\.connectea-dark :is\(#cx-specificity-anchor, \.connectea-panel--expanded\) \.connectea-xp-score\[data-cx-score-step="breakout"\] \{\s*color: oklch\(from var\(--cx-score-base\) calc\(l \* ([\d.]+)\) calc\(c \* ([\d.]+)\) h\)/);
+  const dark = factors('html\\.connectify-dark ');
+  const breakDark = css.match(/html\.connectify-dark :is\(#cx-specificity-anchor, \.connectify-panel--expanded\) \.connectify-xp-score\[data-cx-score-step="breakout"\] \{\s*color: oklch\(from var\(--cx-score-base\) calc\(l \* ([\d.]+)\) calc\(c \* ([\d.]+)\) h\)/);
   for (const [id, p] of Object.entries(win.ConnectifyThemePalettes.BUILTIN_PALETTES)) {
     if (p.derived || !p.accentHover) continue;
     const bg = over(p.surfaceElevated || p.surface, p.canvas);
@@ -10565,7 +10565,7 @@ runTest('Test 226: Connect\'s missing overall row is restored in its own contain
   // (74.275 x 10 + 53.33 x 10 + 80 x 10 + 75.29 x 15 + 80 x 10 + 75 x 10) / 65; the unmarked exam does not count
   assert.strictEqual(cells[0].querySelector('.v-label').textContent, '73.2%', 'weight-weighted mean, one decimal like Connect');
   assert.ok(!row.querySelector('.cvr-c-task__chart'), 'no boxplot: Connect gives no cohort data for it');
-  assert.strictEqual(row.querySelector('.connectea-subject-average-note').textContent, avg.NOTE, 'a note says Connectify worked it out');
+  assert.strictEqual(row.querySelector('.connectify-subject-average-note').textContent, avg.NOTE, 'a note says Connectify worked it out');
   assert.ok(!row.querySelector('.cvr-c-task__details .v-label'), 'the note is not a Connect label, so it never becomes a task name');
   assert.strictEqual(avg.sync(card), row, 'a later pass updates the same row');
   assert.strictEqual(slot.children.length, 1);
@@ -10603,7 +10603,7 @@ runTest('Test 226: Connect\'s missing overall row is restored in its own contain
   const stats = origReadFileSync.call(fs, path.join(SRC_DIR, 'cohort/cohort-stats.js'), 'utf8');
   assert.ok(stats.indexOf('ConnectifyCohortSubjectAverage?.sync(card)') < stats.indexOf('card._cxTaskRows = rows'), 'the pass restores the row before it lists the card\'s rows');
   const observer = origReadFileSync.call(fs, path.join(SRC_DIR, 'cohort/cohort-observer.js'), 'utf8');
-  assert.ok(observer.includes('.connectea-subject-average-row'), 'restoring the row is Connectify\'s own mutation, so it never loops the observer');
+  assert.ok(observer.includes('.connectify-subject-average-row'), 'restoring the row is Connectify\'s own mutation, so it never loops the observer');
   const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
   const js = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-stats.js')).js;
   assert.ok(js.indexOf('src/cohort/cohort-row-readers.js') < js.indexOf('src/cohort/cohort-subject-average.js') && js.indexOf('src/cohort/cohort-subject-average.js') < js.indexOf('src/cohort/cohort-stats.js'));
@@ -10629,10 +10629,10 @@ runTest('Test 227: Settings saves each category under its own name; a set saved 
     mockLocalStorage.clear();
     const damaged = JSON.stringify({ undefined: { color: '#3498db', keywords: ['oral'] } });
     mockLocalStorage.setItem('cx-categories', damaged);
-    mockLocalStorage.setItem('connectea:categories', damaged);
+    mockLocalStorage.setItem('connectify:categories', damaged);
     ext['cx-categories'] = JSON.parse(damaged);
-    mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:class_categories:economics atar year 11'), JSON.stringify(['undefined', 'Fieldwork']));
-    mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectea:task_type_overrides'), JSON.stringify({ 'Economics ATAR Year 11::Extended Answer': 'undefined' }));
+    mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectify:class_categories:economics atar year 11'), JSON.stringify(['undefined', 'Fieldwork']));
+    mockLocalStorage.setItem(window.ConnectifyUtils.userKey('connectify:task_type_overrides'), JSON.stringify({ 'Economics ATAR Year 11::Extended Answer': 'undefined' }));
     // Shadowed, not deleted: an earlier test leaves window inheriting these from a prototype
     window.ConnectifyCategoryStore = window.ConnectifyCategorySettings = window.ConnectifyTaskTypes = window.cxCategories = undefined;
     eval(fs.readFileSync(path.resolve(BASE_DIR, 'category-settings.js'), 'utf8'));
@@ -10640,7 +10640,7 @@ runTest('Test 227: Settings saves each category under its own name; a set saved 
 
     const store = window.ConnectifyCategoryStore;
     assert.deepStrictEqual(Object.keys(window.cxCategories), defaults, 'the damaged set loads as the defaults');
-    for (const key of ['cx-categories', 'connectea:categories']) {
+    for (const key of ['cx-categories', 'connectify:categories']) {
       assert.deepStrictEqual(Object.keys(JSON.parse(mockLocalStorage.getItem(key))), defaults, `${key} is repaired in place`);
     }
     assert.deepStrictEqual(Object.keys(ext['cx-categories']), defaults, 'the extension storage copy is repaired too');
@@ -10741,10 +10741,10 @@ runTest('Test 230: The account key stays the same whether the outlines were open
   const outlines = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
   try {
     localStorage.store = {
-      'connectea:cohort:v3:current:2026:12 Economics ATAR': '232',
-      'connectea:cohort:v3:current:2026:12 Chemistry ATAR': '150',
-      'connectea:cohort:v3:DomainConnectUser:42:2026:12 Chemistry ATAR': '180',
-      'connectea:theme:id': 'dark'
+      'connectify:cohort:v3:current:2026:12 Economics ATAR': '232',
+      'connectify:cohort:v3:current:2026:12 Chemistry ATAR': '150',
+      'connectify:cohort:v3:DomainConnectUser:42:2026:12 Chemistry ATAR': '180',
+      'connectify:theme:id': 'dark'
     };
     const load = href => {
       location.href = href;
@@ -10756,9 +10756,9 @@ runTest('Test 230: The account key stays the same whether the outlines were open
     assert.strictEqual(load(outlines).accountKey(), 'current', 'no account seen yet: the placeholder');
     let utils = load(`${outlines}?coisp=DomainConnectUser:42`);
     assert.strictEqual(utils.accountKey(), 'DomainConnectUser:42', 'the URL account is used');
-    assert.strictEqual(localStorage.getItem('connectea:cohort:v3:DomainConnectUser:42:2026:12 Economics ATAR'), '232',
+    assert.strictEqual(localStorage.getItem('connectify:cohort:v3:DomainConnectUser:42:2026:12 Economics ATAR'), '232',
       'a cohort size saved under the placeholder moves to the account');
-    assert.strictEqual(localStorage.getItem('connectea:cohort:v3:DomainConnectUser:42:2026:12 Chemistry ATAR'), '180',
+    assert.strictEqual(localStorage.getItem('connectify:cohort:v3:DomainConnectUser:42:2026:12 Chemistry ATAR'), '180',
       'a value already saved for the account is never overwritten');
 
     utils = load(outlines);
@@ -10812,14 +10812,14 @@ runTest('Test 234: ATAR Estimate takes the school mark and shows the scaled scor
   delete window.ConnectifyAtarCalc;
   delete global.ConnectifyAtarCalc; // an earlier test may leave window inheriting from global
   const account = window.ConnectifyUtils.accountKey();
-  const storageKey = `connectea:atar:2025:${account}:${new Date().getFullYear()}`;
+  const storageKey = `connectify:atar:2025:${account}:${new Date().getFullYear()}`;
   localStorage.setItem(storageKey, JSON.stringify({ '0:physics': { include: true, score: 91 } }));
   eval(fs.readFileSync(path.resolve(BASE_DIR, 'atar-calculator.js'), 'utf8'));
   const calc = window.ConnectifyAtarCalc;
   const math = window.ConnectifyMath;
   const atarCss = fs.readFileSync(path.resolve(BASE_DIR, 'atar.css'), 'utf8');
-  assert.ok(/#connectea-atar \.cta-score \{[^}]*appearance: textfield/.test(atarCss), 'school mark inputs hide the spin arrows (Firefox)');
-  assert.ok(/#connectea-atar \.cta-score::-webkit-inner-spin-button[\s\S]*?-webkit-appearance: none/.test(atarCss), 'school mark inputs hide the spin arrows (Chrome, Safari)');
+  assert.ok(/#connectify-atar \.cta-score \{[^}]*appearance: textfield/.test(atarCss), 'school mark inputs hide the spin arrows (Firefox)');
+  assert.ok(/#connectify-atar \.cta-score::-webkit-inner-spin-button[\s\S]*?-webkit-appearance: none/.test(atarCss), 'school mark inputs hide the spin arrows (Chrome, Safari)');
   const courses = [[{ id: 'chemistry', name: 'Chemistry', mark: 83.5 }, { id: 'physics', name: 'Physics', mark: 87.7 }], []];
 
   const box = document.createElement('div');
@@ -10982,7 +10982,7 @@ runTest('Test 237: Subject panels show the lowest and highest final mark still p
     const ui = view.panels.get(overall);
     assert.strictEqual(ui.xp.possible.dl.hidden, false, 'the expanded subject card shows the range');
     assert.deepStrictEqual(ui.xp.possible.values.map(e => e.textContent), ['28%', '88%']);
-    assert.strictEqual(ui.xp.possible.dl.parentElement.className, 'connectea-xp-head', 'it closes the card\'s row, beside the quartiles');
+    assert.strictEqual(ui.xp.possible.dl.parentElement.className, 'connectify-xp-head', 'it closes the card\'s row, beside the quartiles');
     assert.ok(!/possible/i.test(ui.xp.summary.textContent), 'not in the footer');
     const letter = makeRow(false, ['Semester 1 Cumulative Percent'], ['70%', 'B'], [32.5, 58, 68.85, 79.9, 96.7]);
     view.render(letter, true, 'lit-key-2', 219, null, []);
@@ -11005,7 +11005,7 @@ runTest('Test 237: Subject panels show the lowest and highest final mark still p
   }
 
   const css = origReadFileSync.call(fs, path.join(SRC_DIR, 'cohort/cohort-grade-range.css'), 'utf8');
-  assert.ok(/\.connectea-xp-grid--possible\[hidden\] \{ display: none !important; \}/.test(css), 'a hidden range takes no column');
+  assert.ok(/\.connectify-xp-grid--possible\[hidden\] \{ display: none !important; \}/.test(css), 'a hidden range takes no column');
   const manifest = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(g => (g.js || []).includes('src/cohort/cohort-view.js'));
   assert.ok(group.js.indexOf('src/cohort/cohort-subject-average.js') < group.js.indexOf('src/cohort/cohort-grade-range.js') && group.js.indexOf('src/cohort/cohort-grade-range.js') < group.js.indexOf('src/cohort/cohort-view.js'));
@@ -11276,7 +11276,7 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
   assert.ok((group.css || []).includes('src/progress/export-view.css') || manifest.content_scripts.some(g => (g.css || []).includes('src/progress/export-view.css')));
   assert.deepStrictEqual(manifest.permissions, ['storage', 'unlimitedStorage'], 'no new permissions');
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.css'), 'utf8');
-  assert.ok(cssHasToken(css, '.connectea-dark #connectify-sidebar #cx-task-dates button.cx-export-download { background: #2563eb;'), 'dark download buttons take the primary button token');
+  assert.ok(cssHasToken(css, '.connectify-dark #connectify-sidebar #cx-task-dates button.cx-export-download { background: #2563eb;'), 'dark download buttons take the primary button token');
   assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
 });
 
@@ -11595,8 +11595,8 @@ runTest('Test 249: Estimate ATAR marks are left-aligned like every calculator in
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/atar-compact.css'), 'utf8');
   const drawer = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-drawer.css'), 'utf8');
   const rule = (src, sel) => (src.match(new RegExp(sel.replace(/[.*+?^${}()|[\]\\>]/g, '\\$&') + '\\s*\\{([^}]*)\\}')) || [])[1] || '';
-  assert.ok(/text-align:\s*left/.test(rule(css, '#connectea-atar .cta-score')), 'school mark inputs are left-aligned');
-  assert.ok(rule(css, '#connectea-atar .cta-course>small').includes('calc(var(--cta-check-width, 13px) + var(--cta-check-gap, 9px))'), 'the scaled score is indented by the checkbox and its gap');
+  assert.ok(/text-align:\s*left/.test(rule(css, '#connectify-atar .cta-score')), 'school mark inputs are left-aligned');
+  assert.ok(rule(css, '#connectify-atar .cta-course>small').includes('calc(var(--cta-check-width, 13px) + var(--cta-check-gap, 9px))'), 'the scaled score is indented by the checkbox and its gap');
   // Drawer checkbox: 15px wide, 4px right margin, 12px label gap
   const course = rule(drawer, '#connectify-sidebar .cta-course');
   assert.ok(course.includes('--cta-check-width: 15px') && course.includes('--cta-check-gap: 16px'), 'the drawer indent matches its checkbox (15px) plus margin and gap (4px + 12px)');
@@ -11625,7 +11625,7 @@ runTest('Test 251: On touchscreens every Connectify control takes a 44px tap wit
   assert.ok(media >= 0 && body.slice(0, media).trim() === '', 'every rule is for touchscreens only (mouse-only screens are unchanged)');
   const rule = sel => (body.match(new RegExp(sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*\\{([^}]*)\\}')) || [])[1] || '';
   const controls = (body.match(/([^{}]*:is\(button, select[^{]*)\{([^}]*)\}/) || []);
-  for (const host of ['#connectify-sidebar', '#connectea-theme-menu', '#cx-customizer-modal', '#connectify-notifications-container', '#cx-expand-btn', '.connectea-row-wrapper']) {
+  for (const host of ['#connectify-sidebar', '#connectify-theme-menu', '#cx-customizer-modal', '#connectify-notifications-container', '#cx-expand-btn', '.connectify-row-wrapper']) {
     assert.ok((controls[1] || '').includes(host), `${host} controls are covered`);
   }
   assert.ok((controls[1] || '').includes(':not(#cx-customizer-preview *)'), 'the customizer preview mock-up keeps Connect\'s sizes');
@@ -11637,11 +11637,11 @@ runTest('Test 251: On touchscreens every Connectify control takes a 44px tap wit
   const handlePos = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/sidebar-handle-position.js'), 'utf8');
   assert.ok(/--cx-handle-width:\s*30px;\s*width:\s*var\(--cx-handle-width\)/.test(handleCss), 'the handle is 30px wide with a mouse');
   assert.ok(!/100vw - 30px/.test(handleCss + handlePos) && handlePos.includes('calc(100vw - var(--cx-handle-width, 30px))'), 'the docked handle stays on screen at either width');
-  assert.ok(/inset:\s*-10px 0;/.test(rule('#connectea-theme-toggle::before')), 'the theme button takes taps the height of Connect\'s bar and never sideways');
-  assert.ok(/position:\s*relative/.test(rule('#connectea-theme-toggle .connectea-theme-arrow')) && /inset:\s*-14px -12px -14px -6px/.test(rule('#connectea-theme-toggle .connectea-theme-arrow::before')), 'its chevron takes taps from the gap after the label to the button\'s right edge');
-  assert.ok(/inset:\s*-14px -6px -14px -12px/.test(rule('#connectea-theme-toggle[aria-expanded="true"] .connectea-theme-arrow::before')), 'mirrored while the chevron is turned, so the area stays put on screen');
+  assert.ok(/inset:\s*-10px 0;/.test(rule('#connectify-theme-toggle::before')), 'the theme button takes taps the height of Connect\'s bar and never sideways');
+  assert.ok(/position:\s*relative/.test(rule('#connectify-theme-toggle .connectify-theme-arrow')) && /inset:\s*-14px -12px -14px -6px/.test(rule('#connectify-theme-toggle .connectify-theme-arrow::before')), 'its chevron takes taps from the gap after the label to the button\'s right edge');
+  assert.ok(/inset:\s*-14px -6px -14px -12px/.test(rule('#connectify-theme-toggle[aria-expanded="true"] .connectify-theme-arrow::before')), 'mirrored while the chevron is turned, so the area stays put on screen');
   const theme = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme.js'), 'utf8');
-  assert.ok(theme.includes("closest?.('.connectea-theme-arrow')"), 'a tap on the chevron\'s area still opens the menu (the pseudo-element targets the chevron)');
+  assert.ok(theme.includes("closest?.('.connectify-theme-arrow')"), 'a tap on the chevron\'s area still opens the menu (the pseudo-element targets the chevron)');
 });
 
 
@@ -11664,7 +11664,7 @@ runTest('Test 252: After a refresh the estimated cohort size never steps: spread
   };
   const cards = [1, 2].map(n => {
     const card = el('eds-c-tile', '', el('eds-c-tile__title', `${subject} - Semester ${n}`),
-      el('cvr-c-task', '', el('cvr-c-task__details', '', el('connectea-panel', 'Cohort statistics unavailable'))));
+      el('cvr-c-task', '', el('cvr-c-task__details', '', el('connectify-panel', 'Cohort statistics unavailable'))));
     card.dataset.sem = String(n);
     document.body.appendChild(card);
     return card;
@@ -11693,7 +11693,7 @@ runTest('Test 252: After a refresh the estimated cohort size never steps: spread
     // The bridge stamps the same charts and the panels redraw with new text: nothing moves
     stamped = true;
     for (const text of ['Min 30.2%\u2003Q1 62.3%', 'Min 30.2%\u2003Q1 62.3%\u2003Rank 40 / ~261']) {
-      cards.forEach(c => { c.querySelector('.connectea-panel').textContent = text; });
+      cards.forEach(c => { c.querySelector('.connectify-panel').textContent = text; });
       window.ConnectifyCohort.pass();
     }
     assert.ok(sizes.every(s => s === first), `the estimate never steps (${sizes.join(' -> ')})`);
@@ -11820,7 +11820,7 @@ runTest('Test 253: Every Year Progression chart has a dashed line between its Se
 
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/progress.css'), 'utf8');
   assert.ok(/#connectify-progress \.cx-semester-divider\{[^}]*stroke-dasharray:6 4[^}]*pointer-events:none/.test(css), 'the divider is dashed and never takes the pointer');
-  assert.ok(css.includes('.connectea-dark #connectify-progress .cx-semester-divider{stroke:var(--cx-text-muted'), 'token-routed in dark themes');
+  assert.ok(css.includes('.connectify-dark #connectify-progress .cx-semester-divider{stroke:var(--cx-text-muted'), 'token-routed in dark themes');
   const manifest = origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8');
   assert.ok(manifest.indexOf('progress-semester-divider.js') > -1 && manifest.indexOf('progress-semester-divider.js') < manifest.indexOf('progress-chart.js'), 'registered before the chart');
 });
@@ -11881,11 +11881,11 @@ runTest('Test 255: A reload paints the last theme at document_start, and Chrome 
       b64 => Buffer.from(b64, 'base64').toString('binary'), fn => timers.push(fn), () => ({ backgroundColor: 'rgb(11, 19, 43)' }), class {});
     return { win, store, classes, attrs, props, children, blobs, timers, root };
   };
-  const snap = { id: 'quantum', dark: true, attrs: { 'data-connectea-theme': 'quantum', 'data-connectea-has-custom-bg': 'true', onclick: 'x' },
+  const snap = { id: 'quantum', dark: true, attrs: { 'data-connectify-theme': 'quantum', 'data-connectify-has-custom-bg': 'true', onclick: 'x' },
     props: { '--cx-wallpaper-dim': '0.3', color: 'red' }, canvas: 'rgb(40, 40, 40)', bg: { settings: true } };
-  const saved = { 'connectify:theme_boot': JSON.stringify(snap), 'connectea:theme:id': 'quantum', 'connectea:custom_background': 'data:image/png;base64,AAAA' };
+  const saved = { 'connectify:theme_boot': JSON.stringify(snap), 'connectify:theme:id': 'quantum', 'connectify:custom_background': 'data:image/png;base64,AAAA' };
   let b = make({ store: { ...saved } });
-  assert.ok(b.classes.has('connectea-dark') && b.attrs['data-connectea-theme'] === 'quantum', 'the theme classes are on <html> before Connect renders');
+  assert.ok(b.classes.has('connectify-dark') && b.attrs['data-connectify-theme'] === 'quantum', 'the theme classes are on <html> before Connect renders');
   assert.ok(!('onclick' in b.attrs) && !('color' in b.props), 'only theme attributes and --cx-* tokens are restored');
   assert.strictEqual(b.props['--cx-wallpaper-dim'], '0.3', 'the wallpaper dim is restored with the theme');
   assert.strictEqual(b.props['--cx-custom-bg-image'], 'url("data:image/png;base64,AAAA")', 'the Settings wallpaper is read straight from storage');
@@ -11895,15 +11895,15 @@ runTest('Test 255: A reload paints the last theme at document_start, and Chrome 
   b.win.ConnectifyThemeBoot.done();
   assert.strictEqual(b.children.length, 0, 'theme.js removes the boot canvas once the theme is applied');
 
-  b = make({ store: { ...saved, 'connectea:theme:id': 'dark' } });
-  assert.ok(!b.classes.has('connectea-dark') && !b.children.length, 'a snapshot of another theme is never applied');
+  b = make({ store: { ...saved, 'connectify:theme:id': 'dark' } });
+  assert.ok(!b.classes.has('connectify-dark') && !b.children.length, 'a snapshot of another theme is never applied');
   b = make({ store: { ...saved }, pathname: '/login' });
-  assert.ok(!b.classes.has('connectea-dark'), 'login pages stay unthemed');
+  assert.ok(!b.classes.has('connectify-dark'), 'login pages stay unthemed');
   b = make({ store: { ...saved, 'connectify:theme_boot': JSON.stringify({ ...snap, bg: { theme: true } }),
-    'connectea:custom_themes_list': JSON.stringify([{ id: 'quantum', wallpaper: 'data:image/png;base64,BBBB' }]) } });
+    'connectify:custom_themes_list': JSON.stringify([{ id: 'quantum', wallpaper: 'data:image/png;base64,BBBB' }]) } });
   assert.strictEqual(b.props['--cx-custom-bg-image'], 'url("data:image/png;base64,BBBB")', 'a custom theme\'s own wallpaper is read from the theme list');
   b = make({ store: { ...saved, 'connectify:theme_boot': JSON.stringify({ ...snap, canvas: 'red; } body { x', bg: null }) } });
-  assert.ok(!b.children.length && !('data-connectea-has-custom-bg' in b.attrs), 'an unexpected canvas value is never written into CSS');
+  assert.ok(!b.children.length && !('data-connectify-has-custom-bg' in b.attrs), 'an unexpected canvas value is never written into CSS');
 
   // Chrome drops CSS url()s over 2 MB; Firefox keeps the data URL
   const big = 'data:image/gif;base64,' + Buffer.alloc(1.6 * 1024 * 1024).toString('base64');
@@ -11920,16 +11920,16 @@ runTest('Test 255: A reload paints the last theme at document_start, and Chrome 
 
   // save(): one write per task, of what is on <html>
   b = make();
-  b.root.classList.toggle('connectea-dark', true);
-  b.root.setAttribute('data-connectea-theme', 'forest');
+  b.root.classList.toggle('connectify-dark', true);
+  b.root.setAttribute('data-connectify-theme', 'forest');
   b.root.style.setProperty('--cx-canvas-bg', '#0a1914');
   b.root.style.setProperty('--cx-custom-bg-image', 'url("x")');
-  b.store['connectea:theme:id'] = 'forest';
+  b.store['connectify:theme:id'] = 'forest';
   b.win.ConnectifyThemeBoot.save(); b.win.ConnectifyThemeBoot.save();
   assert.strictEqual(b.timers.length, 1, 'saves within a task are coalesced');
   b.timers[0]();
   const written = JSON.parse(b.store['connectify:theme_boot']);
-  assert.deepStrictEqual([written.id, written.dark, written.attrs['data-connectea-theme'], written.props['--cx-canvas-bg'], written.canvas],
+  assert.deepStrictEqual([written.id, written.dark, written.attrs['data-connectify-theme'], written.props['--cx-canvas-bg'], written.canvas],
     ['forest', true, 'forest', '#0a1914', 'rgb(11, 19, 43)'], 'the snapshot holds the theme, its tokens and canvas');
   assert.ok(!('--cx-custom-bg-image' in written.props), 'the (possibly huge) wallpaper itself is never copied into the snapshot');
 
@@ -12563,7 +12563,7 @@ runTest('Test 264: Newly read results bring a Goal Updated toast of its own; goa
   assert.strictEqual(played.length, 1, 'with no celebration');
   const toastCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-notifications.css'), 'utf8');
   const toastDarkCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-notifications-dark.css'), 'utf8');
-  assert.ok(cssHas(toastCss, '.cx-notification--neutral { border-left-color: #94a3b8 !important;') && cssHas(toastDarkCss, '.connectea-dark .cx-notification--neutral { border-left-color: var(--cx-text-muted, #94a3b8) !important;'), 'the gray accent shows in light and dark themes');
+  assert.ok(cssHas(toastCss, '.cx-notification--neutral { border-left-color: #94a3b8 !important;') && cssHas(toastDarkCss, '.connectify-dark .cx-notification--neutral { border-left-color: var(--cx-text-muted, #94a3b8) !important;'), 'the gray accent shows in light and dark themes');
   const plan = win.ConnectifyGoalPlan;
   const semesterOne = { kind: 'grade', target: 80, end: { type: 'semester', semester: 1 } };
   assert.strictEqual(plan.title({ ...semesterOne, name: '12 Literature' }), 'Literature: 80% by Semester 1', 'the year level is trimmed');
@@ -12592,9 +12592,9 @@ runTest('Test 265: Goal bars sit beside the outcome meter: pastel performance ba
   G.save({ kind: 'grade', subject: 'chemistry', name: 'Chemistry', target: 72, end: { type: 'semester', semester: 2 }, priorMarked: [] });
   const B = win.ConnectifyGoalBars;
   const row = rows[1];
-  const wrapper = new MockElement('div', 'connectea-row-wrapper');
-  const outcomeBar = new MockElement('div', 'connectea-outcome-bar');
-  wrapper.append(new MockElement('div', 'connectea-panel'), outcomeBar);
+  const wrapper = new MockElement('div', 'connectify-row-wrapper');
+  const outcomeBar = new MockElement('div', 'connectify-outcome-bar');
+  wrapper.append(new MockElement('div', 'connectify-panel'), outcomeBar);
   const ui = { outcomeBar, box: wrapper.children[0] };
   B.render(ui, row, false);
   const bars = wrapper.querySelector('.cx-goal-bars');
@@ -12779,12 +12779,12 @@ runTest('Test 269: Expand All stays light: week overrides are indexed once, clas
   const dates = sandbox.window.ConnectifyPredictorDates;
   for (let i = 0; i < 50; i++) assert.strictEqual(dates.resolveCustomDate('Biology', { name: `Task ${i}`, id: `id${i}` }), null);
   assert.ok(keyCalls <= 2, `storage keys were read once for 50 tasks (${keyCalls} reads)`);
-  store['connectify:user:acc:connectea:time_override:biology:test #3'] = 'w30';
+  store['connectify:user:acc:connectify:time_override:biology:test #3'] = 'w30';
   assert.strictEqual(dates.resolveCustomDate('Biology', 'Test #3'), 'w30', 'a new override is found case-insensitively');
-  store['connectify:user:acc:connectea:time_override:biology:test #3'] = 'w31';
+  store['connectify:user:acc:connectify:time_override:biology:test #3'] = 'w31';
   assert.strictEqual(dates.resolveCustomDate('Biology', 'Test #3'), 'w31', 'its value is read fresh');
-  delete store['connectify:user:acc:connectea:time_override:biology:test #3'];
-  store['connectify:user:acc:connectea:time_override:biology:test #4'] = 'w32';
+  delete store['connectify:user:acc:connectify:time_override:biology:test #3'];
+  store['connectify:user:acc:connectify:time_override:biology:test #4'] = 'w32';
   listeners['connectify-week-override-saved'].forEach(fn => fn());
   assert.strictEqual(dates.resolveCustomDate('Biology', 'Test #4'), 'w32', 'a saved override (same key count) drops the index');
 
@@ -12823,11 +12823,11 @@ runTest('Test 269: Expand All stays light: week overrides are indexed once, clas
       if (ent.isDirectory()) { walk(full); continue; }
       if (!ent.name.endsWith('.css')) continue;
       const css = origReadFileSync.call(fs, full, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-      if (/:is\(\s*(?:(?:html|body)?\.connectea-dark\s*,\s*)+(?:html|body)?\.connectea-dark\s*\)/.test(css)) offenders.push(`${path.relative(SRC_DIR, full)}: :is() of .connectea-dark hooks`);
+      if (/:is\(\s*(?:(?:html|body)?\.connectify-dark\s*,\s*)+(?:html|body)?\.connectify-dark\s*\)/.test(css)) offenders.push(`${path.relative(SRC_DIR, full)}: :is() of .connectify-dark hooks`);
       if (/:is\([^()]*\b(?:span|div)\b[^()]*\):nth-(?:child|of-type)/.test(css)) offenders.push(`${path.relative(SRC_DIR, full)}: span/div :nth-child`);
     }
   })(SRC_DIR);
-  assert.deepStrictEqual(offenders, [], 'theme hooks are written .connectea-dark:not(cx-n) (same match, same 0,1,1 specificity)');
+  assert.deepStrictEqual(offenders, [], 'theme hooks are written .connectify-dark:not(cx-n) (same match, same 0,1,1 specificity)');
 });
 
 runTest('Test 270: Theme rules are keyed by a class, id or tag: every :is() / :where() list is expanded or split exactly, ancestor exclusions merged (scripts/expand-is.js)', () => {
@@ -12845,7 +12845,7 @@ runTest('Test 270: Theme rules are keyed by a class, id or tag: every :is() / :w
     for (const s of out) assert.deepStrictEqual(x.specificity(s), x.specificity(sel), `${s} keeps the specificity of ${sel}`);
   };
   // Arguments as specific as the list stand alone; less specific ones are padded to it
-  same('.connectea-dark :is(mat-toolbar, .mat-toolbar)', ['.connectea-dark :where(mat-toolbar):not(.cx-n)', '.connectea-dark .mat-toolbar']);
+  same('.connectify-dark :is(mat-toolbar, .mat-toolbar)', ['.connectify-dark :where(mat-toolbar):not(.cx-n)', '.connectify-dark .mat-toolbar']);
   same('.a :is(span, .b):hover', ['.a :where(span):hover:not(.cx-n)', '.a .b:hover']);
   // Complex arguments stay inside their own :is() (P :is(A B) is not P A B); their lists are expanded inside it
   same('.p :is(.a .b, .c)', ['.p :is(.a .b)', '.p .c:not(.cx-n)']);
@@ -12853,9 +12853,9 @@ runTest('Test 270: Theme rules are keyed by a class, id or tag: every :is() / :w
   // Ancestors are expanded too; :where() arguments stay in :where(); the unused anchor only lends its id weight
   same(':is(.a, .b) > span', ['.a > span', '.b > span']);
   same('.p :where(.a, b)', ['.p :where(.a)', '.p :where(b)']);
-  same('html.connectea-dark :is(#cx-specificity-anchor, .a)', ['html.connectea-dark :where(.a):not(#cx-n)']);
+  same('html.connectify-dark :is(#cx-specificity-anchor, .a)', ['html.connectify-dark :where(.a):not(#cx-n)']);
   // Lists that only name <html> / <body> hooks are ancestors of everything: left whole
-  same(':is(.connectea-dark, body, html) :is(.a, .b)', [':is(.connectea-dark, body, html) .a', ':is(.connectea-dark, body, html) .b']);
+  same(':is(.connectify-dark, body, html) :is(.a, .b)', [':is(.connectify-dark, body, html) .a', ':is(.connectify-dark, body, html) .b']);
   // A compound already keyed by a class keeps its list
   same('.x:is(.a, .b) span', ['.x:is(.a, .b) span']);
   // Ancestor exclusions walk every ancestor each: one compound's become one :not(:is(...) *), padded to the same
@@ -12865,7 +12865,7 @@ runTest('Test 270: Theme rules are keyed by a class, id or tag: every :is() / :w
     assert.deepStrictEqual(x.specificity(out), x.specificity(sel), `${out} keeps the specificity of ${sel}`);
     assert.strictEqual(x.mergeExclusions(out), out, 'merging again changes nothing');
   };
-  merged('.connectea-dark div:not(.a *):not(#b *):not([style*="font-family"] *):not(.c)', '.connectea-dark div:not(:is(.a, #b, [style*="font-family"]) *):not(.c):not(.cx-n):not(.cx-n)');
+  merged('.connectify-dark div:not(.a *):not(#b *):not([style*="font-family"] *):not(.c)', '.connectify-dark div:not(:is(.a, #b, [style*="font-family"]) *):not(.c):not(.cx-n):not(.cx-n)');
   merged('.p:not(.a > *):not(.b *)::before', '.p:not(.a > *):not(.b *)::before');
   merged('.p:not(:is(.a, .b) *):not(#c *)', '.p:not(:is(.a, .b, #c) *):not(.cx-n)');
   // A single complex argument is never bucketed by Chrome (tried on every element): after <html> / <body> hooks it is
@@ -12875,15 +12875,15 @@ runTest('Test 270: Theme rules are keyed by a class, id or tag: every :is() / :w
     assert.deepStrictEqual(x.specificity(out), x.specificity(sel), `${out} keeps the specificity of ${sel}`);
     assert.strictEqual(x.splitSingle(out), out, 'splitting again changes nothing');
   };
-  split(':is(html, body).connectea-dark:not([data-connectea-login]) :is(.cvr-c-classes span):not(.cx-n)', ':is(html, body).connectea-dark:not([data-connectea-login]) .cvr-c-classes span:not(.cx-n)');
-  split('.connectea-dark :where(.cvr-c-a > .cvr-c-b div)', '.connectea-dark :where(.cvr-c-a) > :where(.cvr-c-b) :where(div)');
-  split('html.connectea-dark :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__mark)::before', 'html.connectea-dark :is(.cvr-c-task:not(.cvr-c-tasks *)) .cvr-c-task__mark::before');
+  split(':is(html, body).connectify-dark:not([data-connectify-login]) :is(.cvr-c-classes span):not(.cx-n)', ':is(html, body).connectify-dark:not([data-connectify-login]) .cvr-c-classes span:not(.cx-n)');
+  split('.connectify-dark :where(.cvr-c-a > .cvr-c-b div)', '.connectify-dark :where(.cvr-c-a) > :where(.cvr-c-b) :where(div)');
+  split('html.connectify-dark :is(.cvr-c-task:not(.cvr-c-tasks *) .cvr-c-task__mark)::before', 'html.connectify-dark :is(.cvr-c-task:not(.cvr-c-tasks *)) .cvr-c-task__mark::before');
   // After any other ancestor the list stays (.tile :is(.a span) also matches an .a outside the tile), and so does a
   // first compound that could be <html> / <body> itself
-  split('.connectea-dark .eds-c-tile :is(.cvr-c-a span)', '.connectea-dark .eds-c-tile :is(.cvr-c-a span)');
-  split('.connectea-dark :is(.wf-active span)', '.connectea-dark :is(.wf-active span)');
-  split('.connectea-dark [data-connectea-surface] :is(.cvr-c-a span)', '.connectea-dark [data-connectea-surface] :is(.cvr-c-a span)');
-  const typography = origReadFileSync.call(fs, path.join(dir, 'theme-core.css'), 'utf8').split('\n').find(l => l.startsWith('.connectea-dark :where(div):not('));
+  split('.connectify-dark .eds-c-tile :is(.cvr-c-a span)', '.connectify-dark .eds-c-tile :is(.cvr-c-a span)');
+  split('.connectify-dark :is(.wf-active span)', '.connectify-dark :is(.wf-active span)');
+  split('.connectify-dark [data-connectify-surface] :is(.cvr-c-a span)', '.connectify-dark [data-connectify-surface] :is(.cvr-c-a span)');
+  const typography = origReadFileSync.call(fs, path.join(dir, 'theme-core.css'), 'utf8').split('\n').find(l => l.startsWith('.connectify-dark :where(div):not('));
   assert.ok(typography && (typography.match(/ \*\)/g) || []).length === 1, 'the typography rule walks the ancestors once');
 });
 
@@ -12955,45 +12955,45 @@ runTest('Test 272: Task types, class categories, week overrides, calibration and
     location.href = 'https://connect.det.wa.edu.au/group/students/ui/my-settings/assessment-outlines';
     localStorage.store = {
       'connectify:account': 'DomainConnectUser:42',
-      'connectea:task_type_overrides': '{"Chemistry::Test 1":"Exam"}',
-      'connectea:class_categories:chemistry': '["Fieldwork"]',
-      'connectea:time_override:Chemistry ATAR:Test 1': 'w12',
+      'connectify:task_type_overrides': '{"Chemistry::Test 1":"Exam"}',
+      'connectify:class_categories:chemistry': '["Fieldwork"]',
+      'connectify:time_override:Chemistry ATAR:Test 1': 'w12',
       'connectify:time_override:Physics ATAR:Lab': 't3w2',
-      'connectea:preferences': '{"sem1_calibration:chemistry":{"raw":80,"scaled":75}}',
+      'connectify:preferences': '{"sem1_calibration:chemistry":{"raw":80,"scaled":75}}',
       'connectify:weakness_disabled_subjects': '["Physics"]',
-      'connectea:theme:id': 'dark'
+      'connectify:theme:id': 'dark'
     };
 
     // A page with no signed-in user leaves the shared values where they are
     document.scripts = [];
     load('system/utils.js', 'ConnectifyUtils');
     assert.strictEqual(load('system/user-settings-migrate.js', 'ConnectifyUserSettingsMigrate').run(), false, 'no user: nothing moves');
-    assert.strictEqual(localStorage.getItem('connectea:task_type_overrides'), '{"Chemistry::Test 1":"Exam"}');
+    assert.strictEqual(localStorage.getItem('connectify:task_type_overrides'), '{"Chemistry::Test 1":"Exam"}');
 
     // The first signed-in page moves every one of them to that student, once
     document.scripts = liferay('23317222');
     let utils = load('system/utils.js', 'ConnectifyUtils');
     load('system/user-settings-migrate.js', 'ConnectifyUserSettingsMigrate');
     const mine = 'connectify:user:DomainConnectUser:42:';
-    assert.strictEqual(utils.userKey('connectea:preferences'), `${mine}connectea:preferences`);
-    for (const key of ['connectea:task_type_overrides', 'connectea:class_categories:chemistry', 'connectea:time_override:Chemistry ATAR:Test 1',
-      'connectify:time_override:Physics ATAR:Lab', 'connectea:preferences', 'connectify:weakness_disabled_subjects']) {
+    assert.strictEqual(utils.userKey('connectify:preferences'), `${mine}connectify:preferences`);
+    for (const key of ['connectify:task_type_overrides', 'connectify:class_categories:chemistry', 'connectify:time_override:Chemistry ATAR:Test 1',
+      'connectify:time_override:Physics ATAR:Lab', 'connectify:preferences', 'connectify:weakness_disabled_subjects']) {
       assert.strictEqual(localStorage.getItem(key), null, `${key} is no longer shared`);
       assert.notStrictEqual(localStorage.getItem(mine + key), null, `${key} moved to the signed-in student`);
     }
-    assert.strictEqual(localStorage.getItem('connectea:theme:id'), 'dark', 'browser-wide settings stay shared');
+    assert.strictEqual(localStorage.getItem('connectify:theme:id'), 'dark', 'browser-wide settings stay shared');
     assert.strictEqual(utils.readTimeOverride(['Chemistry ATAR'], ['Test 1']), 'w12', 'week overrides are read from the student\'s own keys');
-    assert.deepStrictEqual(utils.userKeys(k => k.startsWith('connectea:class_categories:')), [`${mine}connectea:class_categories:chemistry`]);
+    assert.deepStrictEqual(utils.userKeys(k => k.startsWith('connectify:class_categories:')), [`${mine}connectify:class_categories:chemistry`]);
     assert.strictEqual(localStorage.getItem('connectify:user_settings_migrated'), '1');
 
     // Another student sees none of them, and a later shared value (an old tab) is never moved to them
     document.scripts = liferay('99887766');
     utils = load('system/utils.js', 'ConnectifyUtils');
-    localStorage.setItem('connectea:task_type_overrides', '{"Old::Tab":"Test"}');
+    localStorage.setItem('connectify:task_type_overrides', '{"Old::Tab":"Test"}');
     load('system/user-settings-migrate.js', 'ConnectifyUserSettingsMigrate');
     assert.strictEqual(utils.readTimeOverride(['Chemistry ATAR'], ['Test 1']), null, 'another student never reads the first one\'s overrides');
     assert.deepStrictEqual(utils.userKeys(() => true), [], 'another student starts with no settings of their own');
-    assert.strictEqual(localStorage.getItem('connectify:user:user99887766:connectea:task_type_overrides'), null, 'the migration runs once');
+    assert.strictEqual(localStorage.getItem('connectify:user:user99887766:connectify:task_type_overrides'), null, 'the migration runs once');
 
     // Every reader and writer goes through the student's keys
     const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
@@ -13001,7 +13001,7 @@ runTest('Test 272: Task types, class categories, week overrides, calibration and
       'progress/progress-week-editor.js', 'progress/progress-math.js', 'predictor/predictor-dates.js', 'predictor/predictor-atar-projection.js',
       'predictor/category-baselines.js', 'atar/scaling-calibration.js', 'atar/atar-calculator.js'];
     for (const file of files) {
-      const unkeyed = read(file).match(/(?:getItem\(|setItem\(|removeItem\(|e\.key ===|e\.key\?\.startsWith\()\s*[`'](?:connectea:(?:task_type_overrides|class_categories|time_override|preferences)|connectify:(?:time_override|weakness_disabled_subjects))/);
+      const unkeyed = read(file).match(/(?:getItem\(|setItem\(|removeItem\(|e\.key ===|e\.key\?\.startsWith\()\s*[`'](?:connectify:(?:task_type_overrides|class_categories|time_override|preferences)|connectify:(?:time_override|weakness_disabled_subjects))/);
       assert.ok(!unkeyed, `${file} reads a shared key: ${unkeyed && unkeyed[0]}`);
     }
     const manifest = JSON.parse(read('../manifest.json'));
@@ -13123,10 +13123,10 @@ runTest('Test 275: On iPadOS / iOS Connectify buttons drop native appearance, so
   const supports = body.indexOf('@supports (-webkit-touch-callout: none)');
   assert.ok(supports >= 0 && body.slice(0, supports).trim() === '', 'every rule is for iOS WebKit only (desktop browsers are unchanged)');
   const [, selector = '', decls = ''] = body.match(/\{\s*([^{}]*)\{([^}]*)\}/) || [];
-  for (const host of ['#connectify-sidebar', '#connectea-theme-menu', '#cx-customizer-modal', '#connectify-notifications-container', '#cx-expand-btn', '.cx-goal-overlay', '.connectea-row-wrapper', '.connectea-panel']) {
+  for (const host of ['#connectify-sidebar', '#connectify-theme-menu', '#cx-customizer-modal', '#connectify-notifications-container', '#cx-expand-btn', '.cx-goal-overlay', '.connectify-row-wrapper', '.connectify-panel']) {
     assert.ok(selector.includes(host), `${host} buttons are covered`);
   }
-  assert.ok(selector.includes('#connectify-sidebar-handle') && selector.includes('#connectea-theme-toggle'), 'the handle and the theme button are buttons themselves');
+  assert.ok(selector.includes('#connectify-sidebar-handle') && selector.includes('#connectify-theme-toggle'), 'the handle and the theme button are buttons themselves');
   assert.ok(!/\bselect\b/.test(selector), 'selects keep their native arrow');
   assert.ok(/(^|[;\s])appearance:\s*none/.test(decls) && /-webkit-appearance:\s*none/.test(decls), 'native appearance is off');
   assert.ok(!/radius|padding|margin|!important/.test(decls), 'each button keeps its own geometry and spacing');
@@ -13139,7 +13139,7 @@ runTest('Test 276: Feed cards keep Connect\'s white class thumbnail and item ico
   const selectors = rule[1].split(',').map(s => s.trim());
   for (const target of ['.card-scope-thumbnail .mat-icon', '.card-scope-icon']) {
     const sel = selectors.find(s => s.endsWith(target));
-    assert.ok(sel && sel.startsWith('.connectea-dark') && sel.includes(':not(#cx-n)'),
+    assert.ok(sel && sel.startsWith('.connectify-dark') && sel.includes(':not(#cx-n)'),
       `${target} is scoped to dark themes with an id weight, so it beats the generic icon rule (no id) in theme-material.css`);
   }
   assert.ok(/(^|[;\s])color:\s*#ffffff !important/.test(rule[2]) && /fill:\s*#ffffff !important/.test(rule[2]),
@@ -13209,7 +13209,7 @@ runTest('Test 280: Type dropdowns size to the chosen type with a cap, and new ca
   const read = rel => origReadFileSync.call(fs, path.resolve(BASE_DIR, rel), 'utf8');
   for (const [file, css] of [['sidebar-weakness-types.css', read('src/sidebar/styles/sidebar-weakness-types.css')], ['cohort-styles.js', read('src/cohort/cohort-styles.js')]]) {
     const rule = css.slice(css.indexOf('field-sizing: content;') - 300, css.indexOf('field-sizing: content;') + 320);
-    assert.ok(rule.includes('.connectea-type-select'), `${file}: field-sizing sits on the Type dropdown`);
+    assert.ok(rule.includes('.connectify-type-select'), `${file}: field-sizing sits on the Type dropdown`);
     assert.ok(rule.includes('max-width: calc(160px / var(--cx-display-scale, 1));') && rule.includes('text-overflow: ellipsis;'), `${file}: a long category name is truncated, never widening the row`);
   }
 
@@ -13259,7 +13259,7 @@ runTest('Test 281: Prediction panels on unmarked tasks a goal covers show the go
   assert.strictEqual(F.signature(rows[1], true), '', 'overall rows have no prediction panel');
 
   // Compact line: "Goal target 86%" and the tier label at its end
-  const box = new MockElement('section', 'connectea-panel connectea-forecast');
+  const box = new MockElement('section', 'connectify-panel connectify-forecast');
   F.render({ forecast: box }, rows[1], prediction);
   F.render({ forecast: box }, rows[1], prediction);
   const compact = box.querySelectorAll('.cx-goal-target');
@@ -13273,14 +13273,14 @@ runTest('Test 281: Prediction panels on unmarked tasks a goal covers show the go
   assert.ok(box.classList.contains('cx-has-goal-target'));
 
   // Expanded card: a Goal target cell after Low / Mid / High
-  const xpBox = new MockElement('section', 'connectea-panel connectea-forecast connectea-xp-forecast');
-  const body = new MockElement('div', 'connectea-xp-body');
+  const xpBox = new MockElement('section', 'connectify-panel connectify-forecast connectify-xp-forecast');
+  const body = new MockElement('div', 'connectify-xp-body');
   xpBox.append(body);
   F.render({ forecast: xpBox, xpForecast: { body } }, rows[1], prediction);
   const cell = body.querySelector('dl.cx-goal-target');
-  assert.ok(cell && cell.classList.contains('connectea-xp-grid'), 'a cell of the card\'s own grid');
-  assert.strictEqual(cell.querySelector('.connectea-xp-label').textContent, 'Goal target');
-  const xpValue = cell.querySelector('.connectea-xp-value');
+  assert.ok(cell && cell.classList.contains('connectify-xp-grid'), 'a cell of the card\'s own grid');
+  assert.strictEqual(cell.querySelector('.connectify-xp-label').textContent, 'Goal target');
+  const xpValue = cell.querySelector('.connectify-xp-value');
   assert.ok(xpValue.classList.contains('cx-goal-target__value') && xpValue.dataset.tier === target.tier && !cell.querySelector('.cx-goal-tier'),
     'the card\'s value, coloured by the tier, with no tier label');
 
@@ -13300,8 +13300,8 @@ runTest('Test 281: Prediction panels on unmarked tasks a goal covers show the go
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-forecast.css'), 'utf8');
   assert.ok(cssHas(css, 'color: oklch(from var(--cx-goal-tier) 0.46 0.075 h) !important;') && cssHas(css, 'color: oklch(from var(--cx-goal-tier) 0.8 0.075 h) !important;'),
     'the tier\'s hue, desaturated, at a lightness that keeps >= 5:1 (dark ink on light panels, light ink on dark ones)');
-  assert.ok(cssHas(css, ':is(#cx-specificity-anchor, .connectea-row-wrapper, .cx-next-goal) .cx-goal-target__value[data-tier]'), 'the colour outranks the glass strip\'s ink rule');
-  assert.ok(cssHas(css, ':is(#cx-specificity-anchor, .connectea-row-wrapper) span.cx-goal-target > .cx-goal-target__value { font-weight: 600 !important; }'),
+  assert.ok(cssHas(css, ':is(#cx-specificity-anchor, .connectify-row-wrapper, .cx-next-goal) .cx-goal-target__value[data-tier]'), 'the colour outranks the glass strip\'s ink rule');
+  assert.ok(cssHas(css, ':is(#cx-specificity-anchor, .connectify-row-wrapper) span.cx-goal-target > .cx-goal-target__value { font-weight: 600 !important; }'),
     'the compact value is semibold like Low and High, outranking the task group\'s first-child span rule');
   const dialogCss = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-dialog.css'), 'utf8');
   assert.ok(dialogCss.includes(':is(.cx-goal-tier, .cx-goal-hbar, .cx-goal-target__value)[data-tier="hard"] { --cx-goal-tier: #f97316; }'), 'tier colours have one source');
@@ -13364,7 +13364,7 @@ runTest('Test 282: Jump To lists each shown outline\'s cleaned subject name once
     assert.ok(outlines.js.indexOf('src/atar/outline-jump.js') === outlines.js.indexOf('src/atar/outline-controls.js') - 1, 'loaded just before the outline controls');
     assert.ok(outlines.css.includes('src/atar/outline-jump.css'));
     const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'atar/outline-jump.css'), 'utf8');
-    assert.ok(cssHas(css, '.connectea-dark #cx-jump-subject .cx-jump-subject-select { background-color: var(--cx-input-bg, #141a22) !important;'), 'dark themes use the input tokens');
+    assert.ok(cssHas(css, '.connectify-dark #cx-jump-subject .cx-jump-subject-select { background-color: var(--cx-input-bg, #141a22) !important;'), 'dark themes use the input tokens');
     assert.ok(cssHas(css, '#cx-jump-subject .cx-jump-subject-select { box-sizing: border-box; width: 100%;'), 'the dropdown is as wide as the buttons under it');
     assert.ok(/#cx-jump-subject \.cx-jump-subject-select \{[^}]*text-overflow: ellipsis;/.test(css), 'only the closed dropdown ends a long name in an ellipsis');
     assert.ok(/#cx-jump-subject \.cx-jump-subject-list \{[^}]*bottom: calc\(100% \+ 6px\);[^}]*max-height: calc\(100vh - 140px\);/.test(css),
@@ -13563,7 +13563,7 @@ runTest('Test 284: Connect\'s new outline cards are drawn again in the old Vaadi
 
 runTest('Test 285: Pasted text in notices keeps no white highlight on dark themes or a wallpaper', () => {
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-rich-text.css'), 'utf8');
-  for (const hook of ['.connectea-dark:not(cx-n)', 'html:not(.connectea-dark)[data-connectea-has-custom-bg="true"]']) {
+  for (const hook of ['.connectify-dark:not(cx-n)', 'html:not(.connectify-dark)[data-connectify-has-custom-bg="true"]']) {
     for (const value of ['background-color:rgb(255,255,255)', 'background-color: rgb(255, 255, 255)', 'background-color: #ffffff', 'background:white']) {
       assert.ok(css.includes(`${hook} .rtf-content [style*="${value}" i]`), `${hook} clears ${value} on Connect's rich text`);
     }
@@ -13577,12 +13577,12 @@ runTest('Test 285: Pasted text in notices keeps no white highlight on dark theme
 
 runTest('Test 286: Goal bars sit beside the outcome meter on expanded task cards, and the meter tooltip blurs in Liquid Glass', () => {
   const bars = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-bars.css'), 'utf8');
-  assert.ok(cssHas(bars, '.connectea-panel.connectea-xp-stats:not(.connectea-xp-overall):has(> .connectea-xp-head > .cx-goal-bars) { grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(5, minmax(60px, max-content)) auto auto !important;'),
+  assert.ok(cssHas(bars, '.connectify-panel.connectify-xp-stats:not(.connectify-xp-overall):has(> .connectify-xp-head > .cx-goal-bars) { grid-template-columns: repeat(3, minmax(92px, max-content)) repeat(5, minmax(60px, max-content)) auto auto !important;'),
     'a task card with goal bars gains a column after the meter, so it grows wider');
-  assert.ok(cssHas(bars, '.connectea-xp-stats .connectea-xp-head > .cx-goal-bars { grid-column: 10 !important; grid-row: 1 !important;'),
+  assert.ok(cssHas(bars, '.connectify-xp-stats .connectify-xp-head > .cx-goal-bars { grid-column: 10 !important; grid-row: 1 !important;'),
     'the goal bars take that column in the top row, never wrapping under Score');
   const tip = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-outcome-filter.css'), 'utf8');
-  assert.ok(cssHas(tip, 'html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #connectea-outcome-tooltip { backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;'),
+  assert.ok(cssHas(tip, 'html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) #connectify-outcome-tooltip { backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;'),
     'the singleton tooltip (meter and goal bars) blurs like the theme\'s other glass, at the Blur Strength set');
 });
 
@@ -13636,17 +13636,17 @@ runTest('Test 287: Upgrading to 3.3.0 turns "Show this semester\'s classes only"
 
 runTest('Test 288: Connect\'s hover outlines on form fields are off, focus keeps Material\'s outline without a second ring, and dialog fieldsets are clear', () => {
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-field-hover.css'), 'utf8');
-  for (const hook of ['.connectea-dark', 'html:not(.connectea-dark)[data-connectea-has-custom-bg="true"]']) {
+  for (const hook of ['.connectify-dark', 'html:not(.connectify-dark)[data-connectify-has-custom-bg="true"]']) {
     assert.ok(css.includes(`${hook} .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline-thick`), `${hook}: no 2px Material outline on hover, focus untouched`);
     assert.ok(css.includes(`${hook} .mat-form-field-appearance-outline:not(.mat-focused) .mat-form-field-flex:hover .mat-form-field-outline:not(.mat-form-field-outline-thick)`), `${hook}: the 1px outline stays on hover`);
     assert.ok(css.includes(`${hook} .c-floating-form-field:hover:not(:focus-within) .c-floating-form-field-outline-thick`), `${hook}: no black fieldset outline on hover`);
   }
   assert.ok(cssHas(css, '{ opacity: 0 !important; }') && cssHas(css, '{ opacity: 1 !important; }'));
   const nesting = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-surface-nesting.css'), 'utf8');
-  assert.ok(nesting.includes('html.connectea-dark[data-connectea-theme] .mat-dialog-container :where(fieldset.c-floating-form-field):not(#cx-n)'),
+  assert.ok(nesting.includes('html.connectify-dark[data-connectify-theme] .mat-dialog-container :where(fieldset.c-floating-form-field):not(#cx-n)'),
     'Message and Image Gallery fieldsets sit on the dialog\'s one surface, so their padding shows no fill');
   const controls = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-controls.css'), 'utf8');
-  assert.ok(controls.includes('.connectea-dark input:focus:not(.mat-input-element), .connectea-dark textarea:focus:not(.mat-input-element) {'),
+  assert.ok(controls.includes('.connectify-dark input:focus:not(.mat-input-element), .connectify-dark textarea:focus:not(.mat-input-element) {'),
     'the accent focus ring skips Material inputs, whose outlined field already shows focus');
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
   const sheets = manifest.content_scripts.find(g => g.css?.includes('src/theme/styles/theme-field-hover.css')).css;
@@ -13665,7 +13665,7 @@ runTest('Test 289: Goal dialog secondary buttons (Open Settings, Cancel, ✕) ta
 
 runTest('Test 290: The Goals (n) and Cancel Editing buttons wear the theme\'s button tokens, not an inherited ink and fallback border', () => {
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-planner.css'), 'utf8');
-  const sel = '#connectea-atar :is(.cx-goal-cancel-edit, .cx-goals-open)';
+  const sel = '#connectify-atar :is(.cx-goal-cancel-edit, .cx-goals-open)';
   const at = css.indexOf(sel + ' {');
   const block = css.slice(at, css.indexOf('}', at));
   assert.ok(at >= 0 && block.includes('background: var(--cx-button-bg, #263242);') && block.includes('color: var(--cx-button-text, #f8fafc);') &&
@@ -13680,7 +13680,7 @@ runTest('Test 291: The outlines page\'s fixed "All" category bar keeps the Liqui
   assert.ok(surface.includes(' mat-toolbar.c-category-bar:not(.js-pos-category-toolbar-container > *):not(cx-n),'),
     'the clear rule skips the bar in Connect\'s fixed toolbar container (same specificity as before)');
   const bars = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-reports-menus-2.css'), 'utf8');
-  const glassBar = bars.split('}').find(b => b.includes('.connectea-dark .mat-toolbar,')) || '';
+  const glassBar = bars.split('}').find(b => b.includes('.connectify-dark .mat-toolbar,')) || '';
   assert.ok(/backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\) saturate\(160%\) !important;/.test(glassBar) && /--cx-glass-opacity/.test(glassBar),
     'which leaves it the translucent, blurred top-bar glass');
 });
@@ -13753,17 +13753,17 @@ runTest('Test 295: Expanded statistics cards scale to fit their task column with
   const group = manifest.content_scripts.find(c => (c.css || []).includes('src/cohort/cohort-expanded-fit.css'));
   assert.ok(group && group.css.indexOf('src/cohort/cohort-expanded-fit.css') > group.css.indexOf('src/cohort/cohort-expanded.css'), 'loaded on the outlines page after the expanded card styles');
   assert.ok(group.js.indexOf('src/cohort/cohort-expanded-fit.js') > -1 && group.js.indexOf('src/cohort/cohort-expanded-fit.js') < group.js.indexOf('src/cohort/cohort-panel.js'), 'the fit script loads before the panels that use it');
-  const columnRule = css.match(/\.cvr-c-task__details:has\(> \.connectea-xp-fit\) \{([^}]*)\}/);
+  const columnRule = css.match(/\.cvr-c-task__details:has\(> \.connectify-xp-fit\) \{([^}]*)\}/);
   assert.ok(columnRule && /flex:\s*1 1 0% !important/.test(columnRule[1]) && /min-width:\s*0 !important/.test(columnRule[1]), 'only columns holding a card change: they take the row\'s free space, never the card\'s width');
-  const card = css.match(/\.cvr-c-task__details > :is\(#cx-specificity-anchor, \.connectea-xp-fit\) \{([^}]*)\}/);
+  const card = css.match(/\.cvr-c-task__details > :is\(#cx-specificity-anchor, \.connectify-xp-fit\) \{([^}]*)\}/);
   assert.ok(card, 'the card rule outranks Liquid Glass and the display zoom');
   for (const decl of ['zoom: 1 !important', 'width: max-content !important', 'max-width: none !important', 'transform: scale(var(--cx-fit-scale, 1)) !important', 'transform-origin: left top !important']) {
     assert.ok(card[1].includes(decl), `card: ${decl}`);
   }
   assert.ok(/margin-bottom: calc\(var\(--cx-fit-margin, 4px\) - var\(--cx-fit-slack, 0px\)\) !important/.test(card[1]), 'the height the scale frees comes back, so the row never grows');
-  assert.ok(!/@container|zoom: 0\./.test(css) && !/connectea-xp-overall \{ zoom/.test(read('src/cohort/cohort-expanded.css')), 'no card is zoomed: WebKit keeps text at a minimum size under zoom');
+  assert.ok(!/@container|zoom: 0\./.test(css) && !/connectify-xp-overall \{ zoom/.test(read('src/cohort/cohort-expanded.css')), 'no card is zoomed: WebKit keeps text at a minimum size under zoom');
   assert.ok(read('src/cohort/cohort-panel.js').includes('if (expanded) window.ConnectifyCohortExpandedFit?.watch(wrapper, target);'), 'every expanded card, task or overall, is watched');
-  assert.ok(read('src/cohort/cohort-observer.js').includes('.connectea-xp-fit-probe'), 'the probe is Connectify\'s own node, so adding it runs no pass');
+  assert.ok(read('src/cohort/cohort-observer.js').includes('.connectify-xp-fit-probe'), 'the probe is Connectify\'s own node, so adding it runs no pass');
 
   // The real script against a fake ResizeObserver and DOM
   const observers = [];
@@ -13799,7 +13799,7 @@ runTest('Test 295: Expanded statistics cards scale to fit their task column with
   const first = el();
   F.watch(first, column);
   const probe = column.probe;
-  assert.ok(first.classes.has('connectea-xp-fit') && probe.className === 'connectea-xp-fit-probe');
+  assert.ok(first.classes.has('connectify-xp-fit') && probe.className === 'connectify-xp-fit-probe');
   assert.ok(ro.watched.has(first) && ro.watched.has(probe) && !ro.watched.has(column), 'never the column itself: the margin changes its height, a ResizeObserver loop');
   ro.fire([report(probe, 500, 0)]);
   assert.deepStrictEqual(first.props, {}, 'nothing is written before both sizes are known');
@@ -13853,11 +13853,11 @@ runTest('Test 296: Layers over text (sidebar, menus, popups, dialogs, top bars) 
   const css = origReadFileSync.call(fs, path.join(themeDir, 'styles/theme-overlay-blur.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   const rule = css.match(/([^{}]*)\{([^}]*)\}/);
   const sels = rule[1].split(/,\s*\n/).map(x => x.trim());
-  for (const sel of ['#connectify-sidebar', '#connectea-theme-menu', '#connectea-outcome-tooltip', '#cx-jump-subject-list', '.cvr-c-primary-navigation',
+  for (const sel of ['#connectify-sidebar', '#connectify-theme-menu', '#connectify-outcome-tooltip', '#cx-jump-subject-list', '.cvr-c-primary-navigation',
     '.cvr-c-service-bar__container', '.cvr-c-service-menu', '.js-pos-category-toolbar-container', '.v-popupview-popup', '.modal-content', '.ui-dialog', '.cdk-overlay-backdrop']) {
-    assert.ok(sels.includes(`html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) ${sel}`), `${sel} keeps the floor, in Liquid Glass only`);
+    assert.ok(sels.includes(`html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) ${sel}`), `${sel} keeps the floor, in Liquid Glass only`);
   }
-  assert.ok(!sels.some(x => /eds-c-tile|cvr-c-card|connectea-panel/.test(x)), 'tiles and panels over the wallpaper keep the theme\'s own blur');
+  assert.ok(!sels.some(x => /eds-c-tile|cvr-c-card|connectify-panel/.test(x)), 'tiles and panels over the wallpaper keep the theme\'s own blur');
   assert.ok(/--cx-glass-blur:\s*var\(--cx-glass-blur-overlay, 12px\)/.test(rule[2]) && /--cx-gl-blur:\s*blur\(var\(--cx-glass-blur-overlay, 12px\)\) saturate\(160%\)/.test(rule[2]), 'both blur variables are redefined');
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(c => (c.js || []).includes('src/theme/theme-registry.js'));
@@ -13878,7 +13878,7 @@ runTest('Test 297: Page changes adapt only the subtrees they touched, Connectify
   const row = el('row', [leaf]);
   const other = el('other');
   let pageScans = 0;
-  const doc = { documentElement: { classList: { contains: c => c === 'connectea-dark' } }, body: { querySelectorAll: () => { pageScans++; return []; } } };
+  const doc = { documentElement: { classList: { contains: c => c === 'connectify-dark' } }, body: { querySelectorAll: () => { pageScans++; return []; } } };
   const timers = [];
   const w = { getComputedStyle: () => ({ backgroundColor: 'rgb(0, 0, 0)', color: 'rgb(0, 0, 0)' }) };
   new Function('window', 'document', 'setTimeout', 'clearTimeout', src)(w, doc, (fn, ms) => timers.push({ fn, ms }) && timers.length, () => {});
@@ -13899,17 +13899,17 @@ runTest('Test 297: Page changes adapt only the subtrees they touched, Connectify
   assert.ok(pageScans > 0, 'a theme change scans the whole page');
 
   const themeJs = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme.js'), 'utf8');
-  assert.ok(/const OWN_UI = '[^']*#connectea-outcome-tooltip/.test(themeJs) && themeJs.includes('r.target.closest?.(OWN_UI)'), 'the outcome tooltip (shown on every hover) is not a page change');
+  assert.ok(/const OWN_UI = '[^']*#connectify-outcome-tooltip/.test(themeJs) && themeJs.includes('r.target.closest?.(OWN_UI)'), 'the outcome tooltip (shown on every hover) is not a page change');
   assert.ok(themeJs.includes("[...r.addedNodes, ...r.removedNodes].every(isOwnUi)"), 'nor is adding or removing Connectify\'s floating UI');
   assert.ok(themeJs.includes('scheduleAdaptSurfaces(undefined, changes)'), 'page changes pass their records, so only their subtrees are adapted');
 
   const weak = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-weakness-types.css'), 'utf8');
-  const bar = weak.match(/\.connectea-outcome-bar\.connectea-outcome-critical \{([^}]*)\}/)[1];
+  const bar = weak.match(/\.connectify-outcome-bar\.connectify-outcome-critical \{([^}]*)\}/)[1];
   assert.ok(!/animation/.test(bar), 'the critical bar itself never animates (its !important box-shadow hid the animated one, which still restyled every frame)');
-  const glow = weak.match(/\.connectea-outcome-bar\.connectea-outcome-critical::after \{([^}]*)\}/)[1];
-  assert.ok(/animation: connectea-glow-critical 1\.6s ease-in-out infinite alternate;/.test(glow) && /pointer-events: none !important;/.test(glow) && /will-change: opacity;/.test(glow), 'the pulse is a pseudo-element of its own');
+  const glow = weak.match(/\.connectify-outcome-bar\.connectify-outcome-critical::after \{([^}]*)\}/)[1];
+  assert.ok(/animation: connectify-glow-critical 1\.6s ease-in-out infinite alternate;/.test(glow) && /pointer-events: none !important;/.test(glow) && /will-change: opacity;/.test(glow), 'the pulse is a pseudo-element of its own');
   const filter = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-outcome-filter.css'), 'utf8');
-  const frames = filter.match(/@keyframes connectea-glow-critical \{([\s\S]*?)\n\}/)[1];
+  const frames = filter.match(/@keyframes connectify-glow-critical \{([\s\S]*?)\n\}/)[1];
   assert.ok(/opacity: 0/.test(frames) && /opacity: 1/.test(frames) && !/box-shadow|border/.test(frames), 'it animates opacity only, which the compositor runs without restyling the page');
 });
 
@@ -14077,7 +14077,7 @@ runTest('Test 300: Connect builds its hidden outline cards without task rows or 
   const el = name => ({ name, isConnected: true, children: [], closest: () => null, matches: () => false, hasAttribute: () => false,
     setAttribute: () => log.push('write ' + name), querySelectorAll: () => [] });
   const nodes = [el('a'), el('b'), el('c')];
-  const doc = { documentElement: { classList: { contains: c => c === 'connectea-dark' } }, body: { querySelectorAll: sel => (sel.startsWith('[data-connectea-surface]') ? nodes : nodes) } };
+  const doc = { documentElement: { classList: { contains: c => c === 'connectify-dark' } }, body: { querySelectorAll: sel => (sel.startsWith('[data-connectify-surface]') ? nodes : nodes) } };
   const w2 = { getComputedStyle: n => { log.push('read ' + n.name); return { backgroundColor: 'rgb(250, 250, 250)', color: 'rgb(20, 20, 20)' }; } };
   new Function('window', 'document', 'setTimeout', 'clearTimeout', read('theme/theme-surface-adapter.js'))(w2, doc, () => 0, () => {});
   w2.ConnectifyThemeSurfaceAdapter.adaptSurfaces();
@@ -14104,7 +14104,7 @@ runTest('Test 301: Picking one class after another in Connect\'s filter redraws 
 
   // The drawer sits inside the "All" bar: a blurring bar is its backdrop root, so the bar's glass moves to its container's ::before
   const css = read('theme/styles/theme-category-menu.css');
-  const glass = 'html.connectea-dark:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  const glass = 'html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])';
   assert.ok(cssHas(css, `${glass} .js-pos-category-toolbar-container > mat-toolbar.c-category-bar,`) && /mat-toolbar\.c-category-bar \{[^}]*backdrop-filter: none !important;/.test(css),
     'the fixed "All" bar no longer blurs itself, so it is no ancestor blur for the drawer');
   assert.ok(/\.js-pos-category-toolbar-container::before \{[^}]*content: '';[^}]*z-index: -1;[^}]*backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\) saturate\(160%\);/.test(css),
@@ -14112,11 +14112,11 @@ runTest('Test 301: Picking one class after another in Connect\'s filter redraws 
   assert.ok(cssHas(css, `${glass} .c-category-menu.toggle-drawer:not(#cx-n) { backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;`) ||
     /\.c-category-menu\.toggle-drawer:not\(#cx-n\) \{\s*backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\) saturate\(160%\) !important;/.test(css),
     'the drawer blurs the page itself');
-  assert.ok(cssHas(css, 'html.connectea-dark[data-connectea-theme] .c-category-menu.toggle-drawer:not(#cx-n) { background-color: var(--cx-surface-elevated, #1a222d) !important;'),
+  assert.ok(cssHas(css, 'html.connectify-dark[data-connectify-theme] .c-category-menu.toggle-drawer:not(#cx-n) { background-color: var(--cx-surface-elevated, #1a222d) !important;'),
     'in every dark theme the drawer is painted (the toolbar\'s clear-text rule left the page showing through)');
   const material = read('theme/styles/theme-material-2.css');
-  const header = 'html.eds.cvr.ngm.connectea-dark .toggle-drawer.toggle--grey-dark .c-expansion-panel .mat-expansion-panel-header';
-  assert.ok(cssHas(material, `${header}:not(#cx-n), html.eds.cvr.ngm.connectea-dark .toggle-drawer.toggle--grey-dark .c-expansion-panel .mat-expansion-panel-content:not(#cx-n) { background-color: transparent !important;`),
+  const header = 'html.eds.cvr.ngm.connectify-dark .toggle-drawer.toggle--grey-dark .c-expansion-panel .mat-expansion-panel-header';
+  assert.ok(cssHas(material, `${header}:not(#cx-n), html.eds.cvr.ngm.connectify-dark .toggle-drawer.toggle--grey-dark .c-expansion-panel .mat-expansion-panel-content:not(#cx-n) { background-color: transparent !important;`),
     'its panels are clear on it (one surface per block), id-anchored past Connect\'s focused-header #363636 (0,9,0): a clicked header stayed dark under the theme ink');
   assert.ok(cssHas(material, `${header}:hover:not(#cx-n), ${header}.cdk-keyboard-focused:not(#cx-n) { background-color: var(--cx-surface-hover, #24303f) !important;`),
     'hover and keyboard focus keep the theme\'s highlight; a mouse click leaves no highlight behind');
@@ -14198,7 +14198,7 @@ runTest('Test 326: A bare week caption is a school week of the year: 35/36 is Te
 
 runTest('Test 303: Notifications are one glass surface in Liquid Glass, blurred at least as much as the other layers over text', () => {
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-notifications-dark.css'), 'utf8');
-  const glass = 'html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"])';
+  const glass = 'html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])';
   const toast = css.slice(css.indexOf(`${glass} .cx-notification {`));
   const rule = toast.slice(0, toast.indexOf('}'));
   assert.ok(rule.includes('background-color: var(--cx-surface-elevated, rgba(38, 51, 72, 0.80)) !important'), 'a translucent surface fill in the theme\'s own colour, not the 10% button fill');
@@ -14213,18 +14213,18 @@ runTest('Test 304: A compact statistics panel gives way to the Type dropdown and
   const read = rel => origReadFileSync.call(fs, path.resolve(BASE_DIR, rel), 'utf8');
   const sheets = [['sidebar-weakness-types.css', read('src/sidebar/styles/sidebar-weakness-types.css')], ['cohort-styles.js', read('src/cohort/cohort-styles.js')]];
   for (const [file, css] of sheets) {
-    const rule = css.match(/\.connectea-row-wrapper\s*>\s*\.connectea-panel \{([^}]*)\}/);
+    const rule = css.match(/\.connectify-row-wrapper\s*>\s*\.connectify-panel \{([^}]*)\}/);
     assert.ok(rule && /flex: 0 1 auto !important/.test(rule[1]), `${file}: the panel shrinks, wrapping its text, instead of pushing the controls into the marks column`);
   }
   const base = read('src/cohort/cohort-styles.js');
-  assert.ok(/\.connectea-panel \{[^}]*min-width: 0 !important/.test(base), 'a panel can shrink below its one-line width');
-  assert.ok(/\.connectea-panel strong \{[^}]*white-space: nowrap;/.test(base), 'a bold value never splits from its name');
+  assert.ok(/\.connectify-panel \{[^}]*min-width: 0 !important/.test(base), 'a panel can shrink below its one-line width');
+  assert.ok(/\.connectify-panel strong \{[^}]*white-space: nowrap;/.test(base), 'a bold value never splits from its name');
   const view = read('src/cohort/cohort-view.js');
   for (const name of ['Min', 'Q1', 'Q3', 'SD']) assert.ok(view.includes(`${name}&nbsp;\${math().formatPercentage(`), `${name} stays with its value when the line wraps`);
   const forecast = read('src/cohort/cohort-forecast.css');
   assert.ok(!/white-space: nowrap/.test(forecast.slice(0, forecast.indexOf('}'))), 'a prediction line wraps rather than overflowing its panel in a very narrow column');
   const fit = read('src/cohort/cohort-expanded-fit.css').replace(/\/\*[\s\S]*?\*\//g, '');
-  assert.ok(/\.connectea-row-wrapper > \.connectea-panel\.connectea-panel--expanded \{\s*flex: 0 0 auto !important;/.test(fit), 'expanded cards keep their one row: they scale, never reflow');
+  assert.ok(/\.connectify-row-wrapper > \.connectify-panel\.connectify-panel--expanded \{\s*flex: 0 0 auto !important;/.test(fit), 'expanded cards keep their one row: they scale, never reflow');
 });
 
 runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates tabs; the list has modular Group By, its direction and Sort By', () => {
@@ -14366,10 +14366,10 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
       const input = find(dates.list, n => n.tagName === 'INPUT')[0];
       input.value = '1';
       input.dispatchEvent(new MockEvent('input'));
-      assert.strictEqual(localStorage.getItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:p3')), 'w1', 'keyed by the raw subject name, as the data module reads it');
+      assert.strictEqual(localStorage.getItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:p3')), 'w1', 'keyed by the raw subject name, as the data module reads it');
       input.dispatchEvent(new MockEvent('keydown', { key: 'Enter' }));
       assert.strictEqual(refreshes(), count + 1, 'the graph is told too');
-      localStorage.removeItem(window.ConnectifyUtils.userKey('connectea:time_override:Physics ATAR:p3'));
+      localStorage.removeItem(window.ConnectifyUtils.userKey('connectify:time_override:Physics ATAR:p3'));
 
       assert.strictEqual(tabs.active(), 'dates', 'the tab is remembered for the next open');
     });
@@ -14387,9 +14387,9 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
   assert.ok(panelSrc.indexOf("querySelector('.cx-progress-chart')") < panelSrc.indexOf("querySelector('div:not(.cx-subjects)')"), 'a panel adopted after a reload never takes the tab bar for its chart');
   const css = read('progress/task-dates.css');
   assert.ok(!/\[class\*=/.test(css), 'no class-substring selectors');
-  assert.ok(cssHasToken(css, '.connectea-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: #ffffff; }'), 'dark headings take the primary ink');
+  assert.ok(cssHasToken(css, '.connectify-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: #ffffff; }'), 'dark headings take the primary ink');
   // One hairline: rows, headings and control outlines share a colour on both tabs, with no vertical dividers
-  assert.ok(cssHasToken(css, '.connectea-dark #connectify-progress { --cx-progress-line: #3b4d5e; }'), 'dark themes route the hairline through a token');
+  assert.ok(cssHasToken(css, '.connectify-dark #connectify-progress { --cx-progress-line: #3b4d5e; }'), 'dark themes route the hairline through a token');
   assert.ok(!/border-bottom-color|border-left/.test(css), 'no rule gives a row, heading or term a line of its own');
   assert.ok(read('progress/progress.css').includes('border-bottom:1px solid var(--cx-progress-line, #d5dfe9)'), 'the graph table draws the same hairline');
   assert.ok(css.includes('#connectify-progress :is(th, td):first-child { padding-left: 0; }') && css.includes('#connectify-progress :is(th, td):last-child { padding-right: 0; }'), 'table text lines up with the controls and hairlines');
@@ -14401,10 +14401,10 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
   assert.ok(/\.cx-time-edit-btn \{\s*display: inline-flex;[\s\S]*?width: 24px;\s*height: 24px;/.test(css) && !css.includes('.cx-time-edit-btn--unconfigured'), 'the pencil is the row\'s ink and a 24px target');
   // The sidebar's dark button rule weighs two ids (2,1,0): anything lighter leaves every button the same filled box
   const sidebarRule = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'sidebar/styles/sidebar-handle-menu.css'), 'utf8');
-  assert.ok(sidebarRule.includes('.connectea-dark #connectify-sidebar :is(button,'), 'the rule these outrank');
-  assert.ok(css.includes('.connectea-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid'), 'the direction arrow is an outline in dark themes too');
+  assert.ok(sidebarRule.includes('.connectify-dark #connectify-sidebar :is(button,'), 'the rule these outrank');
+  assert.ok(css.includes('.connectify-dark #connectify-sidebar #connectify-progress .cx-dates-direction { border: 1px solid'), 'the direction arrow is an outline in dark themes too');
   const exportCss = read('progress/export-view.css');
-  assert.ok(exportCss.includes('.connectea-dark #connectify-sidebar #cx-task-dates .cx-export-all,') && exportCss.includes('.connectea-dark #connectify-sidebar #cx-export-toggle[aria-pressed="true"],'), 'Select All stays a link and Export shows it is pressed');
+  assert.ok(exportCss.includes('.connectify-dark #connectify-sidebar #cx-task-dates .cx-export-all,') && exportCss.includes('.connectify-dark #connectify-sidebar #cx-export-toggle[aria-pressed="true"],'), 'Select All stays a link and Export shows it is pressed');
 });
 
 runTest('Test 306: The shared tab bars outrank the drawer\'s button rules, so the selected tab shows in every tool and theme', () => {
@@ -14413,11 +14413,11 @@ runTest('Test 306: The shared tab bars outrank the drawer\'s button rules, so th
   const has = sel => new RegExp(`(^|\\n|,\\s*)${sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s*\\{|,)`).test(css);
   for (const [bar, tab] of [['.cx-pred-main-tabs', '.cx-pred-main-tab'], ['.cx-pred-subtabs', '.cx-pred-subtab']]) {
     assert.ok(has(`#connectify-sidebar ${tab}`) && has(`#connectify-sidebar ${tab}.active`), `${tab} outranks #connectify-sidebar button`);
-    const dark = `.connectea-dark #connectify-sidebar ${bar} :is(#cx-specificity-anchor, ${tab})`;
+    const dark = `.connectify-dark #connectify-sidebar ${bar} :is(#cx-specificity-anchor, ${tab})`;
     assert.ok(has(dark) && has(`${dark}:hover`) && has(`${dark}.active`), `${tab} outranks the dark drawer button rule and its hover`);
-    assert.ok(!new RegExp(`(^|\\n)(\\.connectea-dark )?${tab.replace('.', '\\.')}[ .:{]`).test(css), `${tab} has no weaker rule left to lose`);
+    assert.ok(!new RegExp(`(^|\\n)(\\.connectify-dark )?${tab.replace('.', '\\.')}[ .:{]`).test(css), `${tab} has no weaker rule left to lose`);
   }
-  const darkMain = css.slice(css.indexOf('.connectea-dark #connectify-sidebar .cx-pred-main-tabs :is(#cx-specificity-anchor, .cx-pred-main-tab) {'));
+  const darkMain = css.slice(css.indexOf('.connectify-dark #connectify-sidebar .cx-pred-main-tabs :is(#cx-specificity-anchor, .cx-pred-main-tab) {'));
   assert.ok(/^[^}]*border: 0;\s*background: transparent;/.test(darkMain), 'an inactive dark tab is clear, never the drawer\'s filled box');
   assert.ok(css.includes('color: var(--cx-text-primary, #e0eefb);'), 'the active main tab keeps >= 5:1 in Quantum Dark, whose secondary ink is green');
   assert.ok(/oklch\(from var\(--cx-button-primary-bg, #3575b9\) calc\(l \* 0\.82\) c h\);[^}]*color: var\(--cx-button-primary-text, #ffffff\);/.test(css), 'the active subject tab pairs the primary fill with its own ink, darkened to >= 5:1');
@@ -14574,7 +14574,7 @@ runTest('Test 309: Task Dates shows predicted grades when grouped by them, its g
 
   const read = rel => origReadFileSync.call(fs, path.resolve(SRC_DIR, rel), 'utf8');
   for (const file of ['cohort/cohort-styles.js', 'sidebar/styles/sidebar-weakness-types.css', 'progress/task-dates.css', 'theme/styles/theme-task-rows.css']) {
-    const rules = read(file).split('}').filter(block => block.includes('connectea-overridden'));
+    const rules = read(file).split('}').filter(block => block.includes('connectify-overridden'));
     assert.ok(rules.every(block => !block.includes('font-weight')), `${file}: a manually chosen type is not bold`);
   }
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
@@ -14603,7 +14603,7 @@ runTest('Test 310: The drawer has one side margin, and Task Dates\' controls sha
   const blockOf = (css, selector) => { const at = css.indexOf(selector + ' {'); assert.ok(at >= 0, selector); return css.slice(at, css.indexOf('}', at)); };
   const drawer = read('sidebar/styles/sidebar-drawer.css');
   const sideOf = rule => Number(/padding: (?:\d+px )?(\d+)px/.exec(rule)[1]);
-  const panels = blockOf(drawer, '#connectify-sidebar :is(#connectea-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel)');
+  const panels = blockOf(drawer, '#connectify-sidebar :is(#connectify-atar,#connectify-predictor,#connectify-progress,#connectify-weakness,#connectify-categories,.cx-workspace-panel)');
   assert.strictEqual(sideOf(panels), 20, 'every tool panel');
   assert.strictEqual(sideOf(blockOf(drawer, '#connectify-sidebar>header')), 20, 'lines up with the drawer\'s header');
   assert.strictEqual(sideOf(blockOf(drawer, '#connectify-sidebar .cx-tool-menu')), 20, 'and its launcher menu');
@@ -14630,7 +14630,7 @@ runTest('Test 310: The drawer has one side margin, and Task Dates\' controls sha
   // The Subjects and Type lists are glass in Liquid Glass
   const list = blockOf(filter, '#cx-task-dates .cx-dates-filter-list');
   assert.ok(/position: fixed;/.test(list) && /inset: auto;/.test(list) && /margin: 0;/.test(list) && /color: inherit;/.test(list), 'the list overrides the browser\'s popover styles');
-  const glassList = blockOf(filter, 'html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #cx-task-dates .cx-dates-filter-list');
+  const glassList = blockOf(filter, 'html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) #cx-task-dates .cx-dates-filter-list');
   assert.ok(/background-color: var\(--cx-surface-elevated/.test(glassList) && /background-image: none;/.test(glassList) && /backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\)/.test(glassList), 'translucent and blurred in Liquid Glass');
   assert.ok(read('progress/export-view.css').includes('.cx-export-group-head .cx-export-all { margin-right: -4px; }'), 'Select All / None ends on the right edge');
 });
@@ -14768,10 +14768,10 @@ runTest('Test 313: Classes rows\' icon buttons and tab headers inside cards are 
     assert.ok(at > -1, `${sel} has a rule`);
     return css.slice(at, css.indexOf('}', at));
   };
-  const buttons = rule(read('theme-surface-nesting.css'), 'html.connectea-dark[data-connectea-theme] cnt-school-class-metrics-summary-detail .mat-icon-button:not(:hover):not(#cx-n)');
+  const buttons = rule(read('theme-surface-nesting.css'), 'html.connectify-dark[data-connectify-theme] cnt-school-class-metrics-summary-detail .mat-icon-button:not(:hover):not(#cx-n)');
   assert.ok(buttons.includes('background-color: transparent !important'), 'the buttons are clear in every dark theme, and hover keeps its highlight');
   assert.ok(!/padding|margin|width|height|border/.test(buttons), 'only the fill changes: icon buttons keep their native geometry');
-  const dividers = rule(read('theme-surface-nesting.css'), 'html.connectea-dark[data-connectea-theme] cnt-school-class-metrics-summary-detail .mat-icon-button.border-left:not(#cx-n)');
+  const dividers = rule(read('theme-surface-nesting.css'), 'html.connectify-dark[data-connectify-theme] cnt-school-class-metrics-summary-detail .mat-icon-button.border-left:not(#cx-n)');
   assert.ok(dividers.includes('border-left-color: var(--cx-border-subtle, #2e3c4e) !important') && !/border-left:|border-width|border-left-width|border: /.test(dividers.split('{')[1]), 'the dividers stay, in the theme\'s subtle hairline, and keep their 1px');
   const glass = read('theme-glass-nesting.css');
   for (const host of ['.mat-card', '.eds-c-tile', '.cvr-c-tile']) {
@@ -14781,7 +14781,7 @@ runTest('Test 313: Classes rows\' icon buttons and tab headers inside cards are 
   }
   const header = rule(glass, '.mat-card :where(mat-tab-header):not(#cx-n)');
   assert.ok(header.includes('backdrop-filter: none !important') && header.includes('-webkit-backdrop-filter: none !important'), 'a tab header inside a card does not blur the card\'s own fill into a grey band');
-  const ring = rule(read('theme-light-tone.css'), 'html.connectea-dark[data-connectea-tone="light"] .c-empty-content > .rounded-circle');
+  const ring = rule(read('theme-light-tone.css'), 'html.connectify-dark[data-connectify-tone="light"] .c-empty-content > .rounded-circle');
   assert.ok(ring.includes('border-color: #000000 !important'), 'the ring is black, in light tone only');
 });
 
@@ -14847,7 +14847,7 @@ runTest('Test 314: Next Up lists this week and next week between Progress Graph 
       assert.strictEqual(trs()[1].children[0].children[0].textContent, 'This Week');
       const first = trs()[2].children;
       assert.deepStrictEqual([first[0].textContent, first[1].textContent, first[3].textContent], ['Waves Test', 'Physics', '20%'], 'the cleaned subject and the weight');
-      const parts = [4, 5, 6].map(i => find(first[i], n => n.className?.includes('connectea-forecast-value'))[0]).map(n => [n.tagName.toUpperCase(), n.textContent]);
+      const parts = [4, 5, 6].map(i => find(first[i], n => n.className?.includes('connectify-forecast-value'))[0]).map(n => [n.tagName.toUpperCase(), n.textContent]);
       assert.deepStrictEqual(parts, [['SPAN', '62%'], ['STRONG', '70%'], ['SPAN', '79%']], 'Low, Mid and High each have a column, Mid heaviest, the breakout never shown');
       assert.ok(!JSON.stringify(plan).includes('86.5'), 'the secret breakout never leaves the prediction');
       assert.strictEqual(trs()[3].children[4].textContent, '85.5%', 'a marked task shows its grade, with no word for it');
@@ -14924,12 +14924,12 @@ runTest('Test 314: Next Up lists this week and next week between Progress Graph 
   assert.ok(at('task-dates-view.js') < at('next-up.js') && at('next-up.js') < at('next-up-view.js') && at('next-up-view.js') < at('progress-tabs.js'), 'registered after what it reuses, before the tabs');
   assert.ok(group.matches.every(m => m.includes('assessment-outlines')) && group.css.includes('src/progress/next-up.css'), 'outlines page only, with its stylesheet');
   const upcoming = read('cohort/cohort-upcoming.css');
-  assert.ok(upcoming.includes(':is(#cx-specificity-anchor, .connectea-upcoming, .connectea-xp-prediction, .cx-next-prediction) .connectea-forecast-value--mid'), 'Low, Mid and High take the outline panels\' colours');
+  assert.ok(upcoming.includes(':is(#cx-specificity-anchor, .connectify-upcoming, .connectify-xp-prediction, .cx-next-prediction) .connectify-forecast-value--mid'), 'Low, Mid and High take the outline panels\' colours');
   assert.ok(!/[•·]/.test(read('progress/next-up-view.js') + read('progress/next-up.js')), 'no dot separators');
   const css = read('progress/next-up.css');
   assert.ok(css.includes('#cx-next-up .cx-dates-table :is(th, td) { padding-right: 16px; padding-left: 0;') && css.includes('.cx-next-col-assessment { width: 100%; }') && !css.includes('table-layout'), 'one 16px gap between columns as wide as their text, the name taking the rest');
-  assert.ok(read('goals/goal-forecast.css').includes(':is(#cx-specificity-anchor, .connectea-row-wrapper, .cx-next-goal) .cx-goal-target__value[data-tier]'), 'the goal percentage shares the outlines\' tier colours');
-  assert.ok(cssHasToken(css, '.connectea-dark #cx-next-up .cx-next-done { color: #60a5fa; }'), 'the face takes the theme\'s link ink');
+  assert.ok(read('goals/goal-forecast.css').includes(':is(#cx-specificity-anchor, .connectify-row-wrapper, .cx-next-goal) .cx-goal-target__value[data-tier]'), 'the goal percentage shares the outlines\' tier colours');
+  assert.ok(cssHasToken(css, '.connectify-dark #cx-next-up .cx-next-done { color: #60a5fa; }'), 'the face takes the theme\'s link ink');
 });
 
 runTest('Test 315: Content\'s section headings keep Connect\'s margins and height, are one glass layer, and each has a Download beside its View', () => {
@@ -15043,7 +15043,7 @@ runTest('Test 316: Content\'s top Download toggles ticks in the headings\' left 
   assert.ok(/\.cx-content-selectable:not\(#cx-n\):not\(#cx-n\) \{[^}]*overflow: visible !important;/.test(css), 'a selectable card lets its tick past Liquid Glass\'s clip');
   assert.ok(/\.cx-content-bulk \.v-button:hover,[^{]*\{\s*background-color: transparent;/.test(css), 'Connect\'s bar hover fill never hides the caption');
   assert.ok(/accent-color: var\(--cx-text-primary/.test(css), 'ticks take the theme\'s ink');
-  assert.ok(/\[data-connectea-tone="light"\] \.cx-content-check input:not\(#cx-n\):not\(#cx-n\):checked \{\s*background-color: var\(--cx-text-primary/.test(css), 'in light tone too, over the theme\'s pale accent');
+  assert.ok(/\[data-connectify-tone="light"\] \.cx-content-check input:not\(#cx-n\):not\(#cx-n\):checked \{\s*background-color: var\(--cx-text-primary/.test(css), 'in light tone too, over the theme\'s pale accent');
 
   // Own controls are never page changes, and the group loads what it reuses first
   assert.ok(read('content/content-download.js').includes('.cx-content-bulk, .cx-content-check'), 'captions and ticks changing never re-run sync');
@@ -15237,7 +15237,7 @@ runTest('Test 318: The theme audit visits every Year Progression subtab and judg
   assert.ok(/if \(!await pressOpener\(layer\)\) continue;[\s\S]*await pressOpener\(layer\);/.test(glassSource), 'opened, measured, closed by the same button');
   // The floor's layers, as the stylesheet lists them
   const floor = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-overlay-blur.css'), 'utf8');
-  for (const sel of ['#connectify-sidebar', '#connectea-theme-menu', '#connectea-outcome-tooltip', '#cx-jump-subject-list', '.cvr-c-primary-navigation', '.cvr-c-location-bar', '.v-popupview-popup', '.modal-content', '.ui-dialog']) {
+  for (const sel of ['#connectify-sidebar', '#connectify-theme-menu', '#connectify-outcome-tooltip', '#cx-jump-subject-list', '.cvr-c-primary-navigation', '.cvr-c-location-bar', '.v-popupview-popup', '.modal-content', '.ui-dialog']) {
     assert.ok(floor.includes(sel) && ROLES.overlay.includes(sel), `${sel} is judged against the overlay floor`);
   }
 
@@ -15398,7 +15398,7 @@ runTest('Test 321: Page wrappers and dialog contents are clear, Connect\'s dialo
 
   const floor = fs.readFileSync(path.join(styles, 'theme-overlay-blur.css'), 'utf8');
   assert.ok(/\) mat-dialog-container,/.test(floor), 'dialogs keep the overlay blur floor');
-  assert.ok(/\.connectea-dark:is\(\[data-connectea-theme="liquid-glass"\], \[data-connectea-glass="true"\]\) mat-dialog-container \{\s*backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\)/.test(floor), 'and blur in Liquid Glass only');
+  assert.ok(/\.connectify-dark:is\(\[data-connectify-theme="liquid-glass"\], \[data-connectify-glass="true"\]\) mat-dialog-container \{\s*backdrop-filter: blur\(var\(--cx-glass-blur, 12px\)\)/.test(floor), 'and blur in Liquid Glass only');
   const { ROLES, judgeGlass } = require(path.join(BASE_DIR, 'scripts/audit-glass.js'));
   assert.ok(ROLES.overlay.includes('mat-dialog-container'), 'the audit judges them against that floor');
   const tokens = { surfaces: [0.3, 0.33], blur: 4, overlayBlur: 12 };
@@ -15419,8 +15419,8 @@ runTest('Test 322: Connect\'s red status text has no box: an icon and caption in
   assert.ok(tone.includes('span.connect-red:not(.text-primary),') && tone.includes('span.standard-label.connect-red,'), 'the light tint likewise');
   const alert = strip('theme-alert-tiles.css');
   for (const part of ['.mat-caption', 'em', 'cnt-icon', 'svg', 'svg *']) {
-    assert.ok(alert.includes(`.connectea-dark:not(#cx-n) span.connect-red.text-primary ${part},`) || alert.includes(`.connectea-dark:not(#cx-n) span.connect-red.text-primary ${part} {`), `${part} takes the one red`);
-    assert.ok(alert.includes(`[data-connectea-tone="light"]:not(#cx-n) span.connect-red.text-primary ${part}`), `${part} in light tone too`);
+    assert.ok(alert.includes(`.connectify-dark:not(#cx-n) span.connect-red.text-primary ${part},`) || alert.includes(`.connectify-dark:not(#cx-n) span.connect-red.text-primary ${part} {`), `${part} takes the one red`);
+    assert.ok(alert.includes(`[data-connectify-tone="light"]:not(#cx-n) span.connect-red.text-primary ${part}`), `${part} in light tone too`);
   }
   assert.ok(/span\.connect-red\.text-primary \{\s*background-color: transparent !important;/.test(alert), 'no fill');
   assert.ok(!/span\.connect-red\.text-primary[^{}]*\{[^}]*\b(padding|margin|border)/.test(alert), 'and the geometry stays Connect\'s');
@@ -15441,7 +15441,7 @@ runTest('Test 323: Goal bars have a tooltip each; drawer cards are a tint in gla
   // Drawer cards in glass
   const nesting = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-glass-nesting.css'), 'utf8');
   for (const sel of [':where(.cx-pred-card):not(#cx-n)', ':where(.cx-pred-task-card):not(#cx-n)', ':where(.cta-top-four-selector):not(#cx-n)', '#cx-weakness-filters']) {
-    assert.ok(nesting.includes(`[data-connectea-glass="true"]) #connectify-sidebar ${sel}`), `${sel} is a tint on the drawer's glass`);
+    assert.ok(nesting.includes(`[data-connectify-glass="true"]) #connectify-sidebar ${sel}`), `${sel} is a tint on the drawer's glass`);
   }
   assert.ok(nesting.includes('background: color-mix(in srgb, var(--cx-text-primary, #ffffff) 7%, transparent) !important;'), 'at most a tint');
 
@@ -15460,7 +15460,7 @@ runTest('Test 323: Goal bars have a tooltip each; drawer cards are a tint in gla
     return [4.0767416621 * x - 3.3077115913 * y + 0.2309699292 * z, -1.2684380046 * x + 2.6097574011 * y - 0.3413193965 * z, -0.0041960863 * x - 0.7034186147 * y + 1.707614701 * z].map(gamma);
   };
   const dialog = fs.readFileSync(path.join(BASE_DIR, 'src/goals/goal-dialog.css'), 'utf8');
-  assert.ok(/data-connectea-tone="light"\] \.cx-goal-tier \{\s*color: #1d1c1c;\s*color: oklch\(from var\(--cx-goal-tier\) 0\.26 c h\);/.test(dialog), 'light tone darkens the tier\'s own hue');
+  assert.ok(/data-connectify-tone="light"\] \.cx-goal-tier \{\s*color: #1d1c1c;\s*color: oklch\(from var\(--cx-goal-tier\) 0\.26 c h\);/.test(dialog), 'light tone darkens the tier\'s own hue');
   const tiers = ['#15803d', '#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444', '#991b1b'];
   const lightGlass = mix(hex('#8d99a6'), hex('#aeb4c2'), 0.3);
   for (const tier of tiers) {
@@ -15478,7 +15478,7 @@ runTest('Test 323: Goal bars have a tooltip each; drawer cards are a tint in gla
   }
 
   // Back to top keeps Connect's font stack, so the arrow is the same width
-  assert.ok(/\.connectea-dark #cx-back-to-top-btn \{\s*font-family: inherit !important;/.test(fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-action-buttons-2.css'), 'utf8')));
+  assert.ok(/\.connectify-dark #cx-back-to-top-btn \{\s*font-family: inherit !important;/.test(fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-action-buttons-2.css'), 'utf8')));
 
   // The audit reads oklch() and the like by painting them, never none or a url
   const audit = fs.readFileSync(path.join(BASE_DIR, 'scripts/test-theme-styles.js'), 'utf8');
@@ -15486,11 +15486,11 @@ runTest('Test 323: Goal bars have a tooltip each; drawer cards are a tint in gla
   assert.strictEqual((audit.match(/if \(!match\) return paintedColor\(colorStr\);/g) || []).length, 2, 'both colour readers fall back to the pixel');
   assert.ok(glass.includes('return paintedColor(str);'), 'and the glass check, so such a fill never reads as clear');
   for (const source of [audit, glass]) assert.ok(source.includes('/^(oklch|oklab|lab|lch|hsla?|hwb|color)\\('), 'only colour functions');
-  assert.ok(audit.includes('.connectea-outcome-bar, .cvr-c-task__marks\')'), 'the Summary Marks box keeps its own colour by the palette');
+  assert.ok(audit.includes('.connectify-outcome-bar, .cvr-c-task__marks\')'), 'the Summary Marks box keeps its own colour by the palette');
 });
 
 runTest('Test 324: A table in a dialog or written into a notice is clear, so no grey slab sits on the glass; data tables on the page keep their fill', () => {
-  const hook = 'html.connectea-dark[data-connectea-theme]';
+  const hook = 'html.connectify-dark[data-connectify-theme]';
   const nesting = fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles/theme-surface-nesting.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
   const clearRule = sel => {
     const at = nesting.indexOf(`${hook} ${sel}`);
@@ -15595,12 +15595,12 @@ runTest('Test 329: Certificate and General courses are ignored by default: no st
     heading.textContent = title;
     const row = new MockElement('div', 'cvr-c-task');
     row.closest = () => card;
-    const panel = new MockElement('section', 'connectea-panel');
+    const panel = new MockElement('section', 'connectify-panel');
     row.appendChild(panel);
     card.append(heading, row);
     card.querySelector = sel => sel.includes('.eds-c-tile__title') ? heading : null;
     card.querySelectorAll = sel => sel === '.cvr-c-task' ? [row]
-      : sel.includes('.connectea-panel') ? row.children.filter(c => c === panel) : [];
+      : sel.includes('.connectify-panel') ? row.children.filter(c => c === panel) : [];
     return { card, row, panel };
   };
   const general = makeCard('11 General English');
@@ -16151,7 +16151,7 @@ runTest('Test 342: The launcher buttons sit lower, Settings has no heading, and 
   assert.ok(radar.includes('markedTasks(s).filter(t => t.isUnknown || typeFilter().isIncluded(t.type))'), 'an unticked type\'s results leave the analyzer; untyped tasks stay for the note');
 
   assert.ok(read('sidebar/styles/sidebar-tool-menu.css').includes('#cx-weakness-filters,\n#cx-weakness-type-filters {'), 'the same card');
-  assert.ok(read('sidebar/styles/sidebar-weakness-types.css').includes('.connectea-dark #cx-weakness-type-filters {'), 'token-routed in dark themes');
+  assert.ok(read('sidebar/styles/sidebar-weakness-types.css').includes('.connectify-dark #cx-weakness-type-filters {'), 'token-routed in dark themes');
   assert.ok(read('theme/styles/theme-glass-nesting.css').includes('#connectify-sidebar #cx-weakness-type-filters,'), 'a 7% tint in Liquid Glass');
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(SRC_DIR, '..', 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(g => (g.js || []).includes('src/progress/weakness-radar.js'));
@@ -16416,13 +16416,13 @@ runTest("Test 347: Connect's outline records are kept through the year and go to
     window.ConnectifyOutlineApi = savedApi;
   }
 
-  localStorage.setItem(window.ConnectifyUtils.userKey('connectea:task_type_overrides'), '{"a":"Exam"}');
+  localStorage.setItem(window.ConnectifyUtils.userKey('connectify:task_type_overrides'), '{"a":"Exam"}');
   localStorage.setItem(`connectify:goals:${acct}`, '{"version":1,"goals":[]}');
   localStorage.setItem('connectify:auto_expand', 'true');
-  localStorage.setItem(`connectea:cohort:v3:${acct}:2026:chemistry`, '120');
+  localStorage.setItem(`connectify:cohort:v3:${acct}:2026:chemistry`, '120');
   const settings = C.settings();
-  assert.strictEqual(settings['connectify:user:{account}:connectea:task_type_overrides'], '{"a":"Exam"}', 'templated by account');
-  assert.strictEqual(settings['connectea:cohort:v3:{account}:2026:chemistry'], '120', "the student's cohort sizes belong to the year");
+  assert.strictEqual(settings['connectify:user:{account}:connectify:task_type_overrides'], '{"a":"Exam"}', 'templated by account');
+  assert.strictEqual(settings['connectify:cohort:v3:{account}:2026:chemistry'], '120', "the student's cohort sizes belong to the year");
   assert.ok(!('connectify:auto_expand' in settings) && !Object.keys(settings).some(k => k.startsWith('connectify:goals:')), 'never browser preferences, nor goals (the rollover archives those through endYear)');
 
   const roll = read('predictor/year-rollover.js');
@@ -16464,10 +16464,10 @@ runTest('Test 348: Opening a past year writes its copy under the copy account wi
       classSemesters: { '11 Chemistry ATAR': { 1: { title: '11 Chemistry ATAR - Semester 1', mark: 70, finalLetter: true, tasks: tasks.map(t => [t.id, t.name]) } } },
       goals: { goals: [{ id: 'g1', status: 'achieved' }], verdicts: { g1: {} } },
       settings: {
-        'connectify:user:{account}:connectea:task_type_overrides': '{"x":"Exam"}',
-        'connectify:user:{account}:connectea:time_override:11 Chemistry ATAR:Stoichiometry': 'not a week',
+        'connectify:user:{account}:connectify:task_type_overrides': '{"x":"Exam"}',
+        'connectify:user:{account}:connectify:time_override:11 Chemistry ATAR:Stoichiometry': 'not a week',
         'cx-autologin-enabled': 'true',
-        'connectea:atar:2025:{account}:2026': '{"raw":80}'
+        'connectify:atar:2025:{account}:2026': '{"raw":80}'
       }
     };
     const rebuilt = O.recordsFrom(entry);
@@ -16480,8 +16480,8 @@ runTest('Test 348: Opening a past year writes its copy under the copy account wi
     const copy = O.copyOf(entry, `${live}~pzz`);
     assert.ok(JSON.parse(copy[`connectify:outline_records:${live}~pzz`]).records.length === 1, 'records rebuilt into the copy');
     assert.deepStrictEqual(JSON.parse(copy[`connectify:goals:${live}~pzz`]).goals.map(g => g.id), ['g1'], "the year's goals as the rollover left them");
-    assert.strictEqual(copy[`connectify:user:${live}~pzz:connectea:task_type_overrides`], '{"x":"Exam"}');
-    assert.strictEqual(copy[`connectea:atar:2025:${live}~pzz:2026`], '{"raw":80}', 'year-keyed calculator values under the copy');
+    assert.strictEqual(copy[`connectify:user:${live}~pzz:connectify:task_type_overrides`], '{"x":"Exam"}');
+    assert.strictEqual(copy[`connectify:atar:2025:${live}~pzz:2026`], '{"raw":80}', 'year-keyed calculator values under the copy');
     assert.ok(!Object.keys(copy).some(k => k.includes('time_override') || k.includes('autologin')), 'a key outside the allowlist, or a value of the wrong shape, is never written');
     assert.ok(Object.keys(copy).every(k => k.includes(`${live}~pzz`)), 'nothing is written under the student\'s own keys');
 
@@ -16579,9 +16579,9 @@ runTest('Test 350: A backup moves every section to another browser and account, 
     const a = window.ConnectifyUtils.accountKey();
     const U = k => `connectify:user:${a}:${k}`;
     localStorage.setItem(`connectify:goals:${a}`, JSON.stringify({ version: 1, goals: [{ id: 'g1' }, { id: 'g2', parent: 'g1' }] }));
-    localStorage.setItem(U('connectea:task_type_overrides'), '{"Chem::Test":"Exam"}');
-    localStorage.setItem(U('connectea:time_override:Chem:Test'), 'w17');
-    localStorage.setItem(U('connectea:preferences'), '{"sem1_calibration:chem":{"raw":80}}');
+    localStorage.setItem(U('connectify:task_type_overrides'), '{"Chem::Test":"Exam"}');
+    localStorage.setItem(U('connectify:time_override:Chem:Test'), 'w17');
+    localStorage.setItem(U('connectify:preferences'), '{"sem1_calibration:chem":{"raw":80}}');
     localStorage.setItem(`connectify:baseline:types:${a}`, '{"Exam":70}');
     localStorage.setItem('cx-categories', '{"Exam":{"keywords":["exam"]}}');
     localStorage.setItem('connectify:auto_expand', 'true');
@@ -16593,7 +16593,7 @@ runTest('Test 350: A backup moves every section to another browser and account, 
     const file = B.build({}, A.read());
     assert.strictEqual(file.format, 'connectify-backup');
     assert.ok(file.sections.goals['connectify:goals:{account}'], 'the account is written as {account}');
-    assert.ok(file.sections.types['connectify:user:{account}:connectea:task_type_overrides'] && file.sections.weeks['connectify:user:{account}:connectea:time_override:Chem:Test']);
+    assert.ok(file.sections.types['connectify:user:{account}:connectify:task_type_overrides'] && file.sections.weeks['connectify:user:{account}:connectify:time_override:Chem:Test']);
     const all = JSON.stringify(file);
     assert.ok(!all.includes('autologin') && !all.includes('connectify:prediction:'), 'never flags or caches');
     assert.ok(/^connectify_backup_\d{4}-\d{2}-\d{2}\.json$/.test(B.fileName()));
@@ -16603,7 +16603,7 @@ runTest('Test 350: A backup moves every section to another browser and account, 
     location.href = OUTLINES_HREF.replace('12345', '67890');
     const b = window.ConnectifyUtils.accountKey();
     assert.notStrictEqual(a, b);
-    localStorage.setItem(`connectify:user:${b}:connectea:task_type_overrides`, '{"Mine":"Essay"}');
+    localStorage.setItem(`connectify:user:${b}:connectify:task_type_overrides`, '{"Mine":"Essay"}');
     const parsed = B.parse(JSON.stringify(file));
     const rows = I.plan(parsed);
     const row = id => rows.find(r => r.id === id);
@@ -16616,8 +16616,8 @@ runTest('Test 350: A backup moves every section to another browser and account, 
 
     I.apply(parsed, rows.filter(r => r.ticked).map(r => r.id));
     assert.deepStrictEqual(JSON.parse(localStorage.getItem(`connectify:goals:${b}`)).goals.map(g => g.id), ['g1', 'g2'], 'written under this browser\'s account');
-    assert.strictEqual(localStorage.getItem(`connectify:user:${b}:connectea:time_override:Chem:Test`), 'w17');
-    assert.strictEqual(localStorage.getItem(`connectify:user:${b}:connectea:task_type_overrides`), '{"Mine":"Essay"}', 'an unticked section is left as it was');
+    assert.strictEqual(localStorage.getItem(`connectify:user:${b}:connectify:time_override:Chem:Test`), 'w17');
+    assert.strictEqual(localStorage.getItem(`connectify:user:${b}:connectify:task_type_overrides`), '{"Mine":"Essay"}', 'an unticked section is left as it was');
     assert.deepStrictEqual(baselineSaves[0].types, { Exam: 70 }, 'baselines through their own store (which purges older keys)');
     assert.deepStrictEqual(Object.keys(categories), ['Exam'], 'categories through theirs');
     assert.strictEqual(localStorage.getItem(`connectify:year_snapshot:${b}`), file.sections.archive['connectify:year_snapshot:{account}'], 'a snapshot where this browser had none');
@@ -16729,6 +16729,59 @@ runTest('Test 351: Past Years shows once a year is archived; Settings has Backup
   assert.ok(at('src/predictor/year-archive.js') < at('src/predictor/year-capsule.js') && at('src/predictor/year-capsule.js') < at('src/predictor/year-rollover.js'), 'the archive and the kept records load before the rollover');
   assert.ok(at('src/system/past-year-bar.js') > at('src/assessment/legacy-outlines.js') && outlines.css.includes('src/system/past-year.css'), 'the notice over a past year\'s outlines');
   for (const f of [...both, 'src/predictor/year-capsule.js', 'src/system/past-year-bar.js']) assert.ok(read(f.replace('src/', '')).split('\n').length <= 251, `${f} within 250 lines`);
+});
+
+runTest('Test 352: Saved keys under the old name, connectea, move to connectify once, in both stores, and nothing else is named connectea', async () => {
+  const src = origReadFileSync.call(fs, path.join(SRC_DIR, 'system/storage-rename.js'), 'utf8');
+  const OLD = ['connect', 'ea'].join('');
+  const store = init => {
+    const data = new Map(Object.entries(init));
+    return {
+      get length() { return data.size; }, key: i => [...data.keys()][i] ?? null,
+      getItem: k => (data.has(k) ? data.get(k) : null), setItem: (k, v) => data.set(k, String(v)), removeItem: k => data.delete(k), data
+    };
+  };
+  const local = store({
+    [`${OLD}:theme:id`]: 'quantum',
+    [`connectify:user:me:${OLD}:task_type_overrides`]: '{"a":1}',
+    [`${OLD}:time_override:Physics:Test`]: 'w17', 'connectify:time_override:Physics:Test': 'w3',
+    [`${OLD}:baseline:types`]: '{"Exam":60}', 'connectify:baseline:types': '{"Exam":70}',
+    'connectify:theme_boot': JSON.stringify({ id: 'quantum', attrs: { [`data-${OLD}-theme`]: 'quantum' } }),
+    'connectify:stats_cache:me:Physics:Test': '{}'
+  });
+  const ext = { [`${OLD}:custom_background`]: 'data:image/png;base64,AAAA', [`${OLD}:categories`]: '[]', 'connectify:year_archive:me': '[]' };
+  const browserApi = { storage: { local: {
+    get: async () => ({ ...ext }), set: async o => Object.assign(ext, o), remove: async ks => ks.forEach(k => delete ext[k])
+  } } };
+  const sandbox = { window: {}, localStorage: local, sessionStorage: store({}), browser: browserApi, console };
+  vm.createContext(sandbox);
+  vm.runInContext(src, sandbox);
+  await sandbox.window.ConnectifyStorageRename.ready;
+  const keys = [...local.data.keys()];
+  assert.ok(!keys.some(k => k.includes(`${OLD}:`)), 'no old key is left in localStorage');
+  assert.strictEqual(local.getItem('connectify:theme:id'), 'quantum');
+  assert.strictEqual(local.getItem('connectify:user:me:connectify:task_type_overrides'), '{"a":1}', 'per-student keys keep their prefix');
+  assert.strictEqual(local.getItem('connectify:time_override:Physics:Test'), 'w17', 'the old key was the one in use');
+  assert.strictEqual(local.getItem('connectify:baseline:types'), '{"Exam":70}', 'a current baseline is kept');
+  assert.deepStrictEqual(JSON.parse(local.getItem('connectify:theme_boot')).attrs, { 'data-connectify-theme': 'quantum' }, 'the theme snapshot stamps the new attributes');
+  assert.strictEqual(local.getItem('connectify:stats_cache:me:Physics:Test'), '{}', 'other keys are untouched');
+  assert.ok(local.getItem('connectify:storage_renamed'), 'runs once');
+  assert.strictEqual(ext['connectify:custom_background'], 'data:image/png;base64,AAAA', 'extension storage too');
+  assert.ok(!Object.keys(ext).some(k => k.includes(`${OLD}:`)) && ext['connectify:storage_renamed_ext'] === true);
+  assert.strictEqual(sandbox.window.ConnectifyStorageRename.key(`connectify:user:{account}:${OLD}:class_categories:x`), 'connectify:user:{account}:connectify:class_categories:x');
+
+  // Backups and archived years from before the rename are read under the new names
+  assert.ok(origReadFileSync.call(fs, path.join(SRC_DIR, 'system/backup-sections.js'), 'utf8').includes('renamed(key).split(ACCOUNT)'), 'untemplate renames old keys');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+  const boot = manifest.content_scripts.find(c => (c.js || []).includes('src/theme/theme-boot.js'));
+  assert.ok(boot.run_at === 'document_start' && boot.js[0] === 'src/system/storage-rename.js', 'the rename runs before anything reads storage');
+
+  // The old name survives only in the migration, the notes describing it and the changelog's history
+  const { execSync } = require('child_process');
+  let hits = '';
+  try { hits = execSync(`git grep -l -i -e ${OLD} -e connext`, { cwd: BASE_DIR, encoding: 'utf8' }); } catch {}
+  const allowed = new Set(['src/system/storage-rename.js', 'CHANGELOG.md', 'test_suite.js', 'design_rules.md', 'docs/architecture.md', 'docs/apis_and_storage.md']);
+  assert.deepStrictEqual(hits.split('\n').filter(f => f && !allowed.has(f)), [], 'no file names connectea or connext');
 });
 
 Promise.all(pendingTestPromises).then(() => {

@@ -105,36 +105,36 @@
   opacity: 0.6;
 }
 
-.connectea-dark #cx-jump-subject .cx-jump-subject-select {
+.connectify-dark #cx-jump-subject .cx-jump-subject-select {
   background-color: var(--cx-input-bg, #141a22) !important;
   color: var(--cx-input-text, #f1f5f9) !important;
   border-color: var(--cx-input-border, #496178) !important;
 }
 
-.connectea-dark #cx-jump-subject .cx-jump-subject-select:focus-visible,
-.connectea-dark #cx-jump-subject .cx-jump-subject-select[aria-expanded="true"] {
+.connectify-dark #cx-jump-subject .cx-jump-subject-select:focus-visible,
+.connectify-dark #cx-jump-subject .cx-jump-subject-select[aria-expanded="true"] {
   border-color: var(--cx-border-focus, #60a5fa) !important;
   outline: 2px solid var(--cx-accent, #60a5fa) !important;
 }
 
-.connectea-dark #cx-jump-subject .cx-jump-subject-list {
+.connectify-dark #cx-jump-subject .cx-jump-subject-list {
   background-color: var(--cx-surface-elevated, #182230) !important;
   border-color: var(--cx-border, #3d5066) !important;
   box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.55) !important;
 }
 
-.connectea-dark #cx-jump-subject .cx-jump-subject-option {
+.connectify-dark #cx-jump-subject .cx-jump-subject-option {
   background: transparent !important;
   color: var(--cx-text-primary, #f1f5f9) !important;
 }
 
-.connectea-dark #cx-jump-subject .cx-jump-subject-option:hover,
-.connectea-dark #cx-jump-subject .cx-jump-subject-option:focus-visible {
+.connectify-dark #cx-jump-subject .cx-jump-subject-option:hover,
+.connectify-dark #cx-jump-subject .cx-jump-subject-option:focus-visible {
   background: var(--cx-surface-hover, #2b394b) !important;
 }
 
 /* Liquid Glass: the translucent list blurs what is under it, like the theme's other popups */
-html:is([data-connectea-theme="liquid-glass"], [data-connectea-glass="true"]) #cx-jump-subject .cx-jump-subject-list {
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) #cx-jump-subject .cx-jump-subject-list {
   backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
   -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
 }

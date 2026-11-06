@@ -15,8 +15,8 @@
   if (!fit || !tokens || !registry) return;
 
   const DONE_KEY = 'connectify:wallpaper_fit_done';
-  const BG_KEY = 'connectea:custom_background';
-  const THEMES_KEY = 'connectea:custom_themes_list';
+  const BG_KEY = 'connectify:custom_background';
+  const THEMES_KEY = 'connectify:custom_themes_list';
   const START_DELAY = 5000;
   const extensionStorage = () => (typeof chrome !== 'undefined' && chrome.storage?.local) || null;
 
