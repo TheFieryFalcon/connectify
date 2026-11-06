@@ -66,12 +66,48 @@
 /* The service bar's "+" (cnt-navigation-reveal-menu): Connect paints the circle in the class colour; it takes the
    theme's primary button colours instead, keeping its native 32px circle. Connect's class-colour rule
    (.eds.cvr.ngm .connect-purple .bg-primary) is !important, so an id weight (:not(#cx-n), which every element passes) outranks it */
-.connectify-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm {
+.connectify-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm:not(.bg-dark) {
   background-color: var(--cx-button-primary-bg, #2563eb) !important;
   color: var(--cx-button-primary-text, #ffffff) !important;
 }
 
-.connectify-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm cnt-icon,
-.connectify-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm mat-icon {
+.connectify-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm:not(.bg-dark) cnt-icon,
+.connectify-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm:not(.bg-dark) mat-icon {
   color: var(--cx-button-primary-text, #ffffff) !important;
+}
+
+/* A neutral service bar circle (the Library's search, Connect's .bg-dark: a dark grey circle and white glyph on the
+   light bar) is never the class or button colour: it inverts the bar in the theme's own colours, ink circle, canvas glyph */
+.connectify-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm.bg-dark {
+  background-color: var(--cx-text-primary, #f1f5f9) !important;
+  color: var(--cx-canvas-bg, #12171f) !important;
+}
+
+.connectify-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm.bg-dark cnt-icon,
+.connectify-dark :where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm.bg-dark mat-icon {
+  color: var(--cx-canvas-bg, #12171f) !important;
+}
+
+/* Icon buttons in Connect's bars (the Library's tools) are clear on the bar like Connect's, never a box in the button
+   colour; the generic .v-button fill carries an id weight (:not(:is(#connectify-sidebar, ...) *)), hence two */
+.connectify-dark .cvr-c-location-bar .eds-o-button--bar .v-button.eds-c-icon-button:not(#cx-n):not(#cx-n),
+.connectify-dark .cvr-c-service-bar .eds-o-button--bar .v-button.eds-c-icon-button:not(#cx-n):not(#cx-n) {
+  background-color: transparent !important;
+}
+
+.connectify-dark .cvr-c-location-bar .eds-o-button--bar .v-button.eds-c-icon-button:hover:not(#cx-n):not(#cx-n),
+.connectify-dark .cvr-c-service-bar .eds-o-button--bar .v-button.eds-c-icon-button:hover:not(#cx-n):not(#cx-n) {
+  background-color: var(--cx-surface-hover, #313f50) !important;
+}
+
+/* Their separators take the theme's hairline: Connect's light grey #d4d4d4 (.eds.cvr .cvr-c-location-bar
+   .eds-u-separator--left, !important) drew bright lines down the dark and glass bars */
+.connectify-dark .cvr-c-location-bar .eds-u-separator--left:not(#cx-n),
+.connectify-dark .cvr-c-service-bar .eds-u-separator--left:not(#cx-n) {
+  border-left-color: var(--cx-border, #455a73) !important;
+}
+
+.connectify-dark .cvr-c-location-bar .eds-u-separator--right:not(#cx-n),
+.connectify-dark .cvr-c-service-bar .eds-u-separator--right:not(#cx-n) {
+  border-right-color: var(--cx-border, #455a73) !important;
 }

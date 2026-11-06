@@ -473,6 +473,15 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Service Bar `+`**
   - the reveal-menu circle (`.c-control-panel-button .mat-icon-button--size-sm`)
     - uses the primary button colours instead of Connect's class colour (colours only)
+  - a neutral circle (Connect's `.bg-dark`, the Library's search)
+    - never the button colour: it inverts the bar, `--cx-text-primary` circle and `--cx-canvas-bg` glyph, as Connect's dark circle does on its light bar
+- **Top Bars** (`.cvr-c-location-bar`, `.cvr-c-service-bar`, primary navigation; `theme-action-buttons-2.css`, `theme-reports-menus-3.css`, every dark theme)
+  - Active tab
+    - its 2px accent underline sits under that tab only (the link is `position: relative`), never across the whole bar
+  - Bar icon buttons (`.eds-o-button--bar .eds-c-icon-button`, the Library's tools)
+    - clear on the bar like Connect's, `--cx-surface-hover` on hover, never a box in the button colour
+  - Separators (`.eds-u-separator--left` / `--right`)
+    - the theme's hairline (`--cx-border`), never Connect's light grey `#d4d4d4`
 - **Toolbar Icon Toggles** (`.c-toolbar-button`, e.g. the outlines' class filter; `theme-action-buttons.css`, `theme-category-menu.css`)
   - Never the theme's button colour
     - the toolbar button rule (`--cx-button-bg`) skips `.c-toolbar-button` and `.mat-icon-button`, so a custom theme's Buttons colour never fills them

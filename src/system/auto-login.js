@@ -36,6 +36,32 @@
     } catch (e) {}
   };
 
+  // Only a saved password / browser autofill may log in: a student who types, pastes or clicks in a credential
+  // field (or tabs to one) is entering their own (the click is also what makes Chromium release a saved password).
+  // Never counted: password managers' own fill events (Bitwarden, 1Password simulate keydown: isTrusted false),
+  // clicks elsewhere on the page (the DET form wraps the whole layout) and modifiers or shortcuts (Ctrl+Tab, Cmd).
+  // Watched from the start, never after the storage read: Firefox's extension storage (wallpapers, past years) can
+  // answer seconds late, and keys typed meanwhile went unseen, so the half-typed password was submitted
+  let userEntering = false;
+  const isCredentialField = el => !!el && (el.id === 'ssousername' || el.id === 'password');
+  const MODIFIER_KEYS = new Set(['Shift', 'Control', 'Alt', 'AltGraph', 'Meta', 'OS', 'CapsLock', 'Fn', 'FnLock', 'NumLock', 'ScrollLock']);
+  const markEntering = e => { if (e && e.isTrusted) userEntering = true; };
+  const markKeyEntry = e => {
+    if (!e || !e.isTrusted || MODIFIER_KEYS.has(e.key)) return;
+    if ((e.ctrlKey || e.metaKey) && !e.getModifierState?.('AltGraph')) return;
+    if (e.key === 'Tab' || isCredentialField(e.target)) userEntering = true;
+  };
+  // Typing, deleting, pasting or dropping text, read from the edit itself; autofill is insertReplacementText (Firefox)
+  // or an input event with no inputType (Chromium). Captured, so it runs before the field's own retry listener
+  const TYPED = /^(insert(Text|CompositionText|FromPaste|FromDrop|LineBreak)|delete)/;
+  const markTyped = e => { if (e && e.isTrusted && isCredentialField(e.target) && TYPED.test(e.inputType || '')) userEntering = true; };
+  document.addEventListener('keydown', markKeyEntry, true);
+  document.addEventListener('beforeinput', markTyped, true);
+  document.addEventListener('input', markTyped, true);
+  for (const field of [document.getElementById('ssousername'), document.getElementById('password')]) {
+    for (const type of ['pointerdown', 'paste', 'drop']) field?.addEventListener(type, markEntering);
+  }
+
   // An expired session signs straight back in: only a manual logout or a login in the last 30s pause it
   storageGet(['cx-manual-logout', 'cx-autologin-enabled', 'cx-last-autologin'], (result) => {
       // 1. Detect if this page was reached by logging out
@@ -97,19 +123,6 @@
           return; // Do not auto-login: let a manual logout take effect
       }
 
-      // Only a saved password / browser autofill may log in: a student who types, pastes or clicks in a credential
-      // field (or tabs to one) is entering their own (the click is also what makes Chromium release a saved password).
-      // Never counted: password managers' own fill events (Bitwarden, 1Password simulate keydown: isTrusted false),
-      // clicks elsewhere on the page (the DET form wraps the whole layout) and modifiers or shortcuts (Ctrl+Tab, Cmd)
-      let userEntering = false;
-      const isCredentialField = el => !!el && (el.id === 'ssousername' || el.id === 'password');
-      const MODIFIER_KEYS = new Set(['Shift', 'Control', 'Alt', 'AltGraph', 'Meta', 'OS', 'CapsLock', 'Fn', 'FnLock', 'NumLock', 'ScrollLock']);
-      const markEntering = e => { if (e && e.isTrusted) userEntering = true; };
-      const markKeyEntry = e => {
-        if (!e || !e.isTrusted || MODIFIER_KEYS.has(e.key)) return;
-        if ((e.ctrlKey || e.metaKey) && !e.getModifierState?.('AltGraph')) return;
-        if (e.key === 'Tab' || isCredentialField(e.target)) userEntering = true;
-      };
       // Chromium matches :autofill before it releases a saved password's value to the page (and to a submitted form):
       // only a readable value counts, and the release fires 'input', which retries the login
       const isFilled = el => el.value.trim() !== '';
@@ -158,10 +171,6 @@
       const userField = document.getElementById('ssousername');
       const passField = document.getElementById('password');
       if (userField && passField) {
-          document.addEventListener('keydown', markKeyEntry, true);
-          for (const field of [userField, passField]) {
-              for (const type of ['pointerdown', 'paste', 'drop']) field.addEventListener(type, markEntering);
-          }
           userField.addEventListener('input', attemptLogin);
           passField.addEventListener('input', attemptLogin);
           userField.addEventListener('change', attemptLogin);

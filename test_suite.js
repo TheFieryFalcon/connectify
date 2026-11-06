@@ -7830,9 +7830,13 @@ runTest('Test 162: Auto-login only fires for a saved password, browser or passwo
     'a key press in a credential field, or Tab to one, must mark the form as user-entered');
   assert.ok(js.includes("if (!e || !e.isTrusted || MODIFIER_KEYS.has(e.key)) return;") && js.includes("const markEntering = e => { if (e && e.isTrusted) userEntering = true; };"),
     'password managers\' own fill events (isTrusted false) and bare modifier keys must never count as the student entering');
-  assert.ok(js.includes("for (const type of ['pointerdown', 'paste', 'drop']) field.addEventListener(type, markEntering);") && !js.includes('userField.form'),
+  assert.ok(js.includes("for (const type of ['pointerdown', 'paste', 'drop']) field?.addEventListener(type, markEntering);") && !js.includes('userField.form'),
     'clicking or pasting in a credential field marks it as user-entered (the click is what makes Chromium release a saved password); the DET form wraps the whole page, so a click elsewhere never does');
   assert.ok(js.includes("=== false || userEntering) return;"), 'auto-login must not fire once the student is entering their own');
+  assert.ok(js.indexOf("document.addEventListener('keydown', markKeyEntry, true)") < js.indexOf('storageGet(['),
+    'typing is watched from the start: Firefox\'s extension storage can answer seconds late, and keys typed meanwhile went unseen');
+  assert.ok(js.includes("document.addEventListener('input', markTyped, true);") && js.includes("const TYPED = /^(insert(Text|CompositionText|FromPaste|FromDrop|LineBreak)|delete)/;"),
+    'typed, deleted, pasted or dropped text marks the form as user-entered from the edit itself; autofill (insertReplacementText) never does');
 });
 
 runTest('Test 278: In Chromium, auto-login signs in with the password saved in the browser, which the page never sees autofilled', async () => {
@@ -7841,19 +7845,20 @@ runTest('Test 278: In Chromium, auto-login signs in with the password saved in t
   assert.deepStrictEqual(entry.js, ['src/system/auto-login-credentials.js', 'src/system/auto-login.js'], 'the credential reader loads first');
   const credSrc = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login-credentials.js'), 'utf8');
   const loginSrc = fs.readFileSync(path.join(BASE_DIR, 'src/system/auto-login.js'), 'utf8');
-  const run = async ({ flags = {}, cred = { type: 'password', id: 'student', password: 'pw' }, chromium = true, typeFirst = false, clickFirst = false } = {}) => {
+  const run = async ({ flags = {}, cred = { type: 'password', id: 'student', password: 'pw' }, chromium = true, typeFirst = false, clickFirst = false, slowStorage = false, edit = null } = {}) => {
     const field = id => ({ id, value: '', listeners: {}, addEventListener(type, fn) { this.listeners[type] = fn; } });
     const fields = { ssousername: field('ssousername'), password: field('password') };
     const docListeners = {};
     let clicks = 0;
     let asked = null;
+    let answerStorage = null;
     fields.login = { value: 'Log in', style: {}, parentElement: { appendChild() {} }, addEventListener() {}, click: () => { clicks++; } };
     const terms = { checked: false };
     const window = chromium ? { PasswordCredential: function () {} } : {};
     const sandbox = {
       window,
       navigator: { credentials: { get: opts => { asked = opts; return new Promise(r => setTimeout(() => r(cred), 5)); } } },
-      chrome: { storage: { local: { get: (keys, cb) => cb(flags), set() {}, remove() {} } } },
+      chrome: { storage: { local: { get: (keys, cb) => (slowStorage && !answerStorage ? (answerStorage = () => cb(flags)) : cb(flags)), set() {}, remove() {} } } },
       document: { addEventListener(type, fn) { docListeners[type] = fn; }, getElementById: id => fields[id] || null, querySelector: () => terms, createElement: () => ({ style: {}, appendChild() {}, addEventListener() {} }), createTextNode: () => ({}) },
       setInterval: () => 0, clearInterval() {}, setTimeout, Date, Promise
     };
@@ -7861,6 +7866,14 @@ runTest('Test 278: In Chromium, auto-login signs in with the password saved in t
     require('vm').runInNewContext(loginSrc, sandbox);
     if (typeFirst) docListeners.keydown({ isTrusted: true, key: 'a', target: fields.ssousername, ...typeFirst });
     if (clickFirst) fields.password.listeners.pointerdown({ isTrusted: true });
+    if (edit) {
+      // Both fields hold text (typed, or autofilled); the edit reaches the document's capture listener before the field's own
+      fields.ssousername.value = 'student';
+      fields.password.value = 'p';
+      docListeners.input({ isTrusted: true, target: fields.password, ...edit });
+    }
+    if (answerStorage) answerStorage();
+    if (edit) fields.password.listeners.input?.();
     await new Promise(r => setTimeout(r, 20));
     return { clicks, asked, user: fields.ssousername.value, pass: fields.password.value, terms: terms.checked };
   };
@@ -7880,6 +7893,14 @@ runTest('Test 278: In Chromium, auto-login signs in with the password saved in t
   const clicked = await run({ clickFirst: true });
   assert.ok(clicked.clicks === 0 && clicked.pass === '', 'clicking into a field before the credential arrives leaves the form and its fields to the student');
   assert.strictEqual((await run({ cred: null })).clicks, 0, 'no saved password (or the chooser cancelled): nothing is submitted');
+  assert.strictEqual((await run({ chromium: false, slowStorage: true, typeFirst: {} })).clicks, 0,
+    'keys typed while extension storage is still answering leave the form to the student (Firefox submitted the half-typed password)');
+  assert.strictEqual((await run({ chromium: false, slowStorage: true, edit: { inputType: 'insertText' } })).clicks, 0,
+    'typing seen only in the edit itself (no key press reached the page) leaves the form to the student');
+  assert.strictEqual((await run({ chromium: false, edit: { inputType: 'deleteContentBackward' } })).clicks, 0, 'deleting a character is typing too');
+  assert.strictEqual((await run({ chromium: false, edit: { inputType: 'insertReplacementText' } })).clicks, 1, 'Firefox autofill (insertReplacementText) still logs in');
+  assert.strictEqual((await run({ chromium: false, edit: {} })).clicks, 1, 'Chromium autofill (an input event with no inputType) still logs in');
+  assert.strictEqual((await run({ chromium: false, edit: { inputType: 'insertText', isTrusted: false } })).clicks, 1, 'a password manager\'s own input event is no typing');
   assert.strictEqual((await run({ chromium: false })).asked, null, 'Firefox has no PasswordCredential: its autofill path is used');
 });
 
@@ -8401,6 +8422,24 @@ runTest('Test 178: A cohort version bump clears derived stats but keeps the stud
   localStorage.removeItem('connectify:cohort:v3:me:2026:physics');
 });
 
+runTest('Test 354: Connect\'s top bars keep their colours: the active tab\'s underline under its tab, bar icon buttons clear, separators in the theme hairline', () => {
+  const read = f => fs.readFileSync(path.join(BASE_DIR, 'src/theme/styles', f), 'utf8');
+  const menus = read('theme-reports-menus-3.css');
+  assert.ok(menus.includes('.connectify-dark .cvr-c-primary-navigation__links .eds-s-is-active a {\n  position: relative !important;\n}') &&
+    menus.includes('.eds-s-is-active a::after {\n  content: \'\';\n  position: absolute;'),
+    'the active tab holds its absolute underline, which otherwise ran the full width of the bar');
+  const bars = read('theme-action-buttons-2.css');
+  for (const bar of ['cvr-c-location-bar', 'cvr-c-service-bar']) {
+    assert.ok(bars.includes(`.connectify-dark .${bar} .eds-o-button--bar .v-button.eds-c-icon-button:not(#cx-n):not(#cx-n)`),
+      `${bar}: icon buttons (the Library's tools) are clear like Connect's, outranking the id-weighted .v-button fill`);
+    assert.ok(bars.includes(`.connectify-dark .${bar} .eds-u-separator--left:not(#cx-n)`) && bars.includes(`.connectify-dark .${bar} .eds-u-separator--right:not(#cx-n)`),
+      `${bar}: separators outrank Connect's !important light grey`);
+  }
+  assert.ok(/eds-c-icon-button:not\(#cx-n\):not\(#cx-n\) \{\n  background-color: transparent !important;/.test(bars) &&
+    /border-left-color: var\(--cx-border, #455a73\) !important;/.test(bars) && /border-right-color: var\(--cx-border, #455a73\) !important;/.test(bars),
+    'clear icon buttons and theme hairlines');
+});
+
 runTest('Test 179: One surface per block in Liquid Glass; square bars; solid reading views; themed service bar plus; plain stat numbers', () => {
   const read = f => fs.readFileSync(path.join(BASE_DIR, 'src/theme', f), 'utf8');
   const G = 'html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])';
@@ -8425,7 +8464,10 @@ runTest('Test 179: One surface per block in Liquid Glass; square bars; solid rea
   assert.ok(base.includes(':where(cnt-discussion-item-view):not(:is(mat-dialog-container, .mat-dialog-container) *)') && base.includes(':where(cnt-message-detail-view):not(:is(mat-dialog-container, .mat-dialog-container) *)'), 'discussion views must get the solid reading canvas');
   assert.ok(read('theme.js').includes('cnt-discussion-item-view'), 'discussion views must be detected as reading views');
   // Service bar "+": theme colours, outranking Connect's !important class colour
-  assert.ok(read('styles/theme-action-buttons.css').includes(':where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm {\n  background-color: var(--cx-button-primary-bg'), 'the + circle must use the primary button colour');
+  const plus = read('styles/theme-action-buttons-2.css');
+  assert.ok(plus.includes(':where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm:not(.bg-dark) {\n  background-color: var(--cx-button-primary-bg'), 'the + circle must use the primary button colour');
+  assert.ok(plus.includes(':where(.c-control-panel-button):not(#cx-n) .mat-icon-button--size-sm.bg-dark {\n  background-color: var(--cx-text-primary, #f1f5f9) !important;\n  color: var(--cx-canvas-bg, #12171f) !important;'),
+    'a neutral service bar circle (Connect\'s .bg-dark, the Library\'s search) inverts the bar in the theme\'s ink and canvas, never the button colour');
   // Nesting: inner layers are clear in every dark theme (theme-surface-nesting.css); blur placement is glass only
   const surfaceNesting = read('styles/theme-surface-nesting.css');
   const nesting = read('styles/theme-glass-nesting.css');
