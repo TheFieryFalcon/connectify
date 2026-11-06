@@ -79,7 +79,7 @@
             ? 'Semester 1 Target ATAR is closed.'
             : ((ctx.getGradeCourses()[1] || []).some(r => r.finalLetter)
                 ? 'Semester 2 Target ATAR is closed because overall A–E grades have been published.'
-                : 'Semester 2 Target ATAR is not open yet. Use semester 1 until overall A–E grades are published.')
+                : 'Semester 2 Target ATAR opens once your Semester 2 classes appear.')
         )
       );
       return;

@@ -6961,7 +6961,7 @@ runTest('Test 231: Off the outlines page the cache is read as is: no tile is scr
   const read = f => fs.readFileSync(path.resolve(__dirname, f), 'utf8');
   assert.ok(/const onOutlines = window\.ConnectifyUtils\.isOutlinesPage\(\);/.test(read('src/assessment/assessment-data.js')) &&
     read('src/assessment/assessment-data.js').includes('const allCards = !onOutlines ? [] :'), 'collect() reads no cards off the outlines page');
-  assert.ok(read('src/assessment/class-semesters.js').includes('if (!window.ConnectifyUtils.isOutlinesPage()) return null;'), 'semester detection ignores other pages\' tiles');
+  assert.ok(read('src/assessment/class-semesters.js').includes('if (!window.ConnectifyUtils.isOutlinesPage()) return false;'), 'semester detection ignores other pages\' tiles');
   assert.ok(read('src/assessment/semester-filter.js').includes('isOutlinesPage?.() === false ? null'), 'the semester filter hides nothing off the outlines page');
 
   // Settings dropdowns: styled like the number inputs, no inline styles
@@ -8608,6 +8608,8 @@ function loadSemesterModules() {
   window.ConnectifyClassSemesters = undefined;
   window.ConnectifySemesterFilterNotice = undefined;
   window.ConnectifySemesterFilter = undefined;
+  // The current semester comes from the term calendar
+  if (!window.ConnectifySchoolTerms) eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/school-terms.js'), 'utf8'));
   for (const f of ['class-semesters.js', 'semester-filter-notice.js', 'semester-filter.js']) {
     eval(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment', f), 'utf8'));
   }
@@ -8635,19 +8637,39 @@ runTest('Test 187: The class registry records each semester outline and detects 
     const stored = JSON.parse(mockLocalStorage.getItem(`connectify:class_semesters:${window.ConnectifyUtils.accountKey()}`));
     assert.strictEqual(stored['12 Art'][1].mark, 70, 'the registry is persisted');
 
-    assert.strictEqual(classes.detectSemester(), 2, 'a final Semester 1 grade means Semester 2');
+    // The term calendar decides, from school week 17 (Term 2 Week 8 in 2026, an Early Easter year); final letters never do
+    const day = iso => { now = new Date(`${iso}T12:00:00`).getTime(); };
+    day('2026-03-10');
+    assert.strictEqual(classes.detectSemester(), 1, 'Term 1 is Semester 1, even with a final Semester 1 grade on the page');
+    day('2026-06-03');
+    assert.strictEqual(classes.detectSemester(), 1, 'Term 2 Week 7 is still Semester 1 under Early Easter');
+    day('2026-06-10');
+    assert.strictEqual(classes.detectSemester(), 2, 'Term 2 Week 8 starts Semester 2');
     const art = makeOutlineCard('12 Art - Semester 1', { overall: '70%' });
     cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%' }), makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '-' }), art];
-    assert.strictEqual(classes.detectSemester(), 1, 'no final grades mean Semester 1');
-    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 1', { overall: '80%' }), makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '85%', tasks: [['Chem Test 2', '88%']] }), art];
-    assert.strictEqual(classes.detectSemester(), 1, 'a marked Semester 2 task before Semester 1 grades are final stays Semester 1');
-    // A Connect filter showing some of the classes: no letter there proves nothing, the registry decides
+    day('2026-08-10');
+    assert.strictEqual(classes.detectSemester(), 2, 'Term 3 is Semester 2 before any final grade shows');
+    // A Connect filter showing some of the classes changes nothing
     cards = [makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: '85%' })];
-    assert.strictEqual(classes.detectSemester(), 2, 'a filtered page without final letters keeps the registry\'s Semester 2');
+    assert.strictEqual(classes.detectSemester(), 2, 'a filtered page keeps Semester 2');
     cards = [makeOutlineCard('11 Biology - Semester 1', { overall: '75%' })];
-    assert.strictEqual(classes.detectSemester(), 1, 'classes the registry has never seen (a new year) are a whole page');
-    cards = [makeOutlineCard('12 Chemistry ATAR - Semester 2', { overall: ['82%', 'A'] })];
-    assert.strictEqual(classes.detectSemester(), 2, 'a final grade on a Semester 2 card (the year is over) is still Semester 2');
+    assert.strictEqual(classes.detectSemester(), 1, 'classes the registry has never seen (a new year, before the rollover) are Semester 1');
+    assert.strictEqual(classes.detectSemester(new Date('2026-08-11T12:00:00')), 1, 'and so is any day asked about');
+
+    // A new school year begun in Term 4 (Year 12 courses start then) is Semester 1 until next year's week 17
+    cards = [chem1, chem2, art1];
+    assert.strictEqual(classes.detectSemester(new Date('2026-11-06T12:00:00')), 2, 'Term 4 of a running year is Semester 2');
+    classes.startNewYear(new Date('2026-11-02T12:00:00'));
+    assert.ok(mockLocalStorage.getItem(`${classes.NEW_YEAR_PREFIX}${window.ConnectifyUtils.accountKey()}`), 'the rollover day is kept per student');
+    day('2026-11-06');
+    assert.strictEqual(classes.detectSemester(), 1, 'the new year starts at once, held past the old year\'s cutoff');
+    day('2027-03-10');
+    assert.strictEqual(classes.detectSemester(), 1, 'through next year\'s Term 1');
+    day('2027-08-10');
+    assert.strictEqual(classes.detectSemester(), 2, 'until next year\'s Semester 2');
+    // A year begun in January turns at its own week 17
+    classes.startNewYear(new Date('2027-01-20T12:00:00'));
+    assert.deepStrictEqual(['2027-03-10', '2027-08-10'].map(d => classes.detectSemester(new Date(`${d}T12:00:00`))), [1, 2]);
     // A card element is read once; a scrape re-reads it
     const before = JSON.stringify(classes.get());
     chem1.querySelector('.cvr-c-task__mark').textContent = '90%';
@@ -8662,7 +8684,9 @@ runTest('Test 187: The class registry records each semester outline and detects 
 
 runTest('Test 188: "Show this semester\'s classes only" hides the other semester, refreshes only its cards and filters sidebar data', () => {
   const dataJs = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
-  const origQSA = document.querySelectorAll;
+  const origQSA = document.querySelectorAll, origNow = Date.now;
+  let now = new Date('2026-08-10T12:00:00').getTime();
+  Date.now = () => (now += 5000); // Term 3: Semester 2 by the term calendar
   try {
     mockLocalStorage.clear();
     const { filter } = loadSemesterModules();
@@ -8683,7 +8707,7 @@ runTest('Test 188: "Show this semester\'s classes only" hides the other semester
     assert.deepStrictEqual(names(window.ConnectifyData.collect(true)), ['12 Art', '12 Chemistry ATAR']);
     assert.deepStrictEqual(names(window.ConnectifyData.collectClasses(true)), ['12 Art', '12 Chemistry ATAR']);
 
-    // This semester only: a final Semester 1 grade means Semester 2
+    // This semester only: Term 3 is Semester 2
     filter.save(true);
     assert.strictEqual(filter.currentSemester(), 2, 'the semester is always the detected one');
     assert.strictEqual(filter.activeSemester(), 2);
@@ -8716,6 +8740,7 @@ runTest('Test 188: "Show this semester\'s classes only" hides the other semester
     const css = fs.readFileSync(path.join(BASE_DIR, 'src/assessment/semester-filter.css'), 'utf8');
     assert.ok(/\.cx-semester-hidden\s*\{\s*display:\s*none !important;/.test(css));
   } finally {
+    Date.now = origNow;
     document.querySelectorAll = origQSA; mockLocalStorage.clear();
   }
 });
@@ -9924,8 +9949,8 @@ runTest('Test 216: Dark-ink glass themes brighten the page behind a dialog inste
 
 runTest('Test 217: Filtering Assessment Outlines with "Show this semester\'s classes only" keeps the filtered class visible, or says why it is hidden', () => {
   const origQSA = document.querySelectorAll, origById = document.getElementById, origNow = Date.now, origSidebarFilter = window.ConnectifySidebarFilter;
-  let now = 2e12;
-  Date.now = () => (now += 5000); // detection is memoised for a second
+  let now = new Date('2026-08-10T12:00:00').getTime();
+  Date.now = () => (now += 5000); // Term 3, Semester 2; detection is memoised for a second
   // The mock DOM has no ChildNode.before / previousElementSibling
   const page = new MockElement('div', 'v-verticallayout');
   const place = card => {
@@ -13462,7 +13487,7 @@ runTest('Test 283: Outlines come from Connect\'s API: records number tasks as th
     assert.deepStrictEqual(window.ConnectifyData.getTaskStats('Chemistry ATAR Year 11', 'Overall S1'), [30.2, 62.3, 70.8, 79.05, 92.7], 'and the class boxplot');
     const reg = window.ConnectifyClassSemesters.get()['Chemistry ATAR Year 11'];
     assert.ok(reg[1].mark === 83.3 && reg[1].finalLetter && reg[2].mark === 84.9 && !reg[2].finalLetter, 'the class registry');
-    assert.strictEqual(window.ConnectifyClassSemesters.detectSemester(), 2, 'a final Semester 1 letter in the API makes it Semester 2');
+    assert.strictEqual(window.ConnectifyClassSemesters.detectSemester(new Date('2026-08-10T12:00:00')), 2, 'a class the registry knows from the API runs by the calendar: Term 3 is Semester 2');
     eval(read('system/grade-snapshot.js'));
     const entries = window.ConnectifyGradeSnapshot.currentEntries();
     assert.deepStrictEqual(entries.map(e => [e.subjectName, e.semester, e.mark]), [['Chemistry', 2, 84.9]], 'the grade check reads the API\'s running marks');
@@ -13881,7 +13906,7 @@ runTest('Test 297: Page changes adapt only the subtrees they touched, Connectify
 
 runTest('Test 298: Startup Expand All waits for the other semester\'s outlines to be hidden, and Connect\'s cards arriving never move the drawn outlines', () => {
   const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
-  // Semester detection reads Connect's first outlines (grades come before any boxplot), at once
+  // Semester detection re-reads Connect's first outlines at once: a class set never seen is a new year
   const listeners = {};
   let drawable = [];
   const w = {
@@ -13892,12 +13917,22 @@ runTest('Test 298: Startup Expand All waits for the other semester\'s outlines t
   };
   new Function('window', read('assessment/class-semesters.js'))(w);
   const S = w.ConnectifyClassSemesters;
-  drawable = [{ apiOutline: true, title: 'Physics - Semester 1', subject: 'Physics', semester: 1, grade: '' }];
-  assert.strictEqual(S.detectSemester(), 1, 'no final letter yet: Semester 1');
-  drawable = [{ apiOutline: true, title: 'Physics - Semester 1', subject: 'Physics', semester: 1, grade: 'B' }, { apiOutline: true, title: 'Physics - Semester 2', subject: 'Physics', semester: 2, grade: '' }];
-  assert.strictEqual(S.detectSemester(), 1, 'detection is held for a second');
-  listeners['connectify-outlines-preview']();
-  assert.strictEqual(S.detectSemester(), 2, 'Connect\'s first outlines decide at once, before every boxplot (and the whole load) has arrived');
+  const realNow = Date.now;
+  let now = new Date('2026-08-10T12:00:00').getTime();
+  Date.now = () => (now += 100);
+  try {
+    const physics = { apiOutline: true, title: 'Physics - Semester 1', subject: 'Physics', semester: 1, grade: '' };
+    S.recordCards([physics]);
+    drawable = [physics];
+    assert.strictEqual(S.detectSemester(), 2, 'Term 3: Semester 2');
+    drawable = [{ apiOutline: true, title: 'Biology - Semester 1', subject: 'Biology', semester: 1, grade: '' }];
+    assert.strictEqual(S.detectSemester(), 2, 'detection is held for a second');
+    listeners['connectify-outlines-preview']();
+    assert.strictEqual(S.detectSemester(), 1, 'Connect\'s first outlines decide at once, before every boxplot (and the whole load) has arrived');
+  } finally {
+    Date.now = realNow;
+    mockLocalStorage.clear();
+  }
 
   const features = read('atar/atar-features.js');
   const start = features.slice(features.indexOf('function checkStartupAutoExpand()'), features.indexOf('function syncFeatures()'));

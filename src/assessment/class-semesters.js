@@ -5,8 +5,9 @@
  * tasks it lists: { subject: { 1: { title, mark, finalLetter, tasks: [[id, name]] }, 2: {...} } },
  * persisted at connectify:class_semesters:<student> (written only on change). The subjects cache merges
  * both semesters under one name, so sidebar tools read semester groupings from here instead of the
- * outline tiles. Also detects the current semester (Semester 2 once any class shows a final Semester 1
- * grade). Cards are Connect's API records once loaded (outline-api.js), else its tiles.
+ * outline tiles. Also detects the current semester from the school calendar (Semester 2 from school week 17;
+ * a new school year is Semester 1 until its own). Cards are Connect's API records once loaded (outline-api.js),
+ * else its tiles.
  * Exposes window.ConnectifyClassSemesters.
  */
 (() => {
@@ -129,79 +130,74 @@
   /** Subject names with an outline in the given semester. */
   const classesIn = semester => Object.keys(load()).filter(s => load()[s]?.[semester]);
 
-  const SEMESTER_KEY = 'connectify:current_semester';
+  // The current semester comes from the school calendar: Semester 2 from canonical school week 17 (Term 2
+  // Week 7, Week 8 under Early Easter), the week a task's own semester turns (taskSemester). Final letters never
+  // decide it. A new school year is Semester 1 until its own week 17, even when its classes appear in Term 4 of
+  // the year before: the rollover stamps the day it happened, and a year begun past the cutoff waits for the next.
+  const NEW_YEAR_PREFIX = 'connectify:new_year_at:';
+  const newYearKey = () => `${NEW_YEAR_PREFIX}${accountKey()}`;
 
-  function isNewYear() {
-    if (window.ConnectifyUtils?.isOutlinesPage?.() === false) return false;
-    const records = window.ConnectifyOutlineApi?.drawable?.() || [];
-    const cards = records.length ? records : (typeof document !== 'undefined' ? Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester) : []);
-    if (!cards.length) return false;
-    const known = Object.keys(load());
-    if (!known.length) return false;
-    const live = [...new Set(cards.map(card => cardInfo(card).subject).filter(Boolean))];
-    if (live.length && !live.some(s => known.includes(s))) {
-      return true;
+  function newYearAt() {
+    try {
+      const at = Number(localStorage.getItem(newYearKey()));
+      return Number.isFinite(at) && at > 0 ? at : null;
+    } catch {
+      return null;
     }
-    return false;
   }
 
-  function isSemesterTwoCutoff(date = new Date(Date.now())) {
+  /** Whether a date is at or past its year's Semester 2 week (June without the term calendar). */
+  function pastCutoff(date) {
     const terms = window.ConnectifySchoolTerms;
     const helpers = window.ConnectifyParseHelpers;
-    if (terms) {
-      const order = terms.orderOf(date);
-      const cutoff = helpers?.semesterTwoOrder ? helpers.semesterTwoOrder(date.getFullYear()) : (terms.weekOrder ? terms.weekOrder(helpers?.SEMESTER_TWO_WEEK ?? 17, date.getFullYear()) : 19);
-      if (Number.isFinite(order) && Number.isFinite(cutoff)) {
-        return order >= cutoff;
-      }
-      const sw = terms.schoolWeek ? terms.schoolWeek(order, date.getFullYear()) : null;
-      if (Number.isFinite(sw)) {
-        return sw >= (helpers?.SEMESTER_TWO_WEEK ?? 17);
-      }
-    }
+    const year = date.getFullYear();
+    const order = terms?.orderOf?.(date);
+    const cutoff = helpers?.semesterTwoOrder?.(year) ?? terms?.weekOrder?.(helpers?.SEMESTER_TWO_WEEK ?? 17, year);
+    if (Number.isFinite(order) && Number.isFinite(cutoff)) return order >= cutoff;
     return date.getMonth() >= 5;
   }
 
-  function evidenceFromPage() {
-    if (!window.ConnectifyUtils.isOutlinesPage()) return null;
+  /** Whether a date falls in Semester 2: past the cutoff, unless this school year began after it. */
+  function isSemesterTwoCutoff(date = new Date(Date.now())) {
+    if (!pastCutoff(date)) return false;
+    const at = newYearAt();
+    if (!at || at > date.getTime()) return true;
+    const start = new Date(at);
+    return !(start.getFullYear() === date.getFullYear() && pastCutoff(start));
+  }
+
+  /**
+   * Classes the registry has never seen: a new school year (or an earlier one) before the rollover has run,
+   * which counts as Semester 1. A Connect filter shows only known classes, so it never looks like one.
+   */
+  function isNewYear() {
+    if (!window.ConnectifyUtils.isOutlinesPage()) return false;
+    const known = Object.keys(load());
+    if (!known.length) return false;
     const records = window.ConnectifyOutlineApi?.drawable?.() || [];
-    if (records.length) return records.some(r => cardSummary(r).finalLetter || r?.semester === 2) ? 2 : 1;
-    const cards = Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester);
-    if (!cards.length) return null;
-    if (cards.some(card => cardSummary(card).finalLetter)) return 2;
-    return isNewYear() ? 1 : null;
+    const cards = records.length ? records : Array.from(document.querySelectorAll(CARD_SELECTOR)).filter(card => cardInfo(card).semester);
+    const live = [...new Set(cards.map(card => cardInfo(card).subject).filter(Boolean))];
+    return live.length > 0 && !live.some(s => known.includes(s));
   }
 
   let detected = null;
   let detectedAt = 0;
-
-  function setSemester(sem) {
-    const s = Number(sem) === 1 ? 1 : 2;
-    detected = s;
-    detectedAt = Date.now();
-    try { localStorage.setItem(SEMESTER_KEY, String(s)); } catch {}
-    return s;
+  /** Current semester (1 or 2), re-read at most once a second; forDate asks about another day, uncached. */
+  function detectSemester(forDate) {
+    const now = Date.now();
+    if (!forDate && detected && now - detectedAt < 1000) return detected;
+    const semester = isNewYear() ? 1 : (isSemesterTwoCutoff(forDate || new Date(now)) ? 2 : 1);
+    if (!forDate) {
+      detected = semester;
+      detectedAt = now;
+    }
+    return semester;
   }
 
-  /**
-   * Sets the current semester using existing semester cutoff times instead of searching for letter grades.
-   * If the current school week is in Semester 2, set the current semester to 2; if a new year is detected, set to 1.
-   */
-  function detectSemester(forDate = new Date(Date.now())) {
-    const now = Date.now();
-    if (detected && now - detectedAt < 1000) return detected;
-
-    if (isNewYear()) {
-      return setSemester(1);
-    }
-
-    if (window.ConnectifySchoolTerms || window.ConnectifyParseHelpers) {
-      return setSemester(isSemesterTwoCutoff(forDate) ? 2 : 1);
-    }
-
-    const fromPage = evidenceFromPage();
-    if (fromPage !== null) return setSemester(fromPage);
-    return setSemester(isSemesterTwoCutoff(forDate) ? 2 : 1);
+  /** The year rollover: a new school year starts now, in Semester 1 until its own Semester 2 week. */
+  function startNewYear(date = new Date(Date.now())) {
+    try { localStorage.setItem(newYearKey(), String(date.getTime())); } catch {}
+    detected = null;
   }
 
   // Connect's first outlines decide at once (startup Expand All hides the other semester's tiles first)
@@ -215,7 +211,7 @@
   }
 
   window.ConnectifyClassSemesters = {
-    PREFIX, SEMESTER_KEY, cardInfo, cardSummary, recordCards, recordTasks, classesIn, detectSemester, setSemester, isSemesterTwoCutoff, clear,
+    PREFIX, NEW_YEAR_PREFIX, cardInfo, cardSummary, recordCards, recordTasks, classesIn, detectSemester, startNewYear, isSemesterTwoCutoff, clear,
     get: () => load()
   };
 })();

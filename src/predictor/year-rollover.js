@@ -174,7 +174,7 @@
     rollingOver = true;
     try { rollOver(state, liveNames); } finally { rollingOver = false; }
     saveState({ classNames: liveNames, seen: [...new Set([...(state.seen || []), signature(state.classNames || []), signature(liveNames)])].slice(-8), snapshot: null });
-    window.ConnectifyClassSemesters?.setSemester?.(1);
+    window.ConnectifyClassSemesters?.startNewYear?.();
   }
 
   /**

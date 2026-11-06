@@ -56,12 +56,11 @@
     }
     const isGradeMode = () => markupMod.isGradeMode(mode);
 
+    // Semester 2 starts by the school calendar (detectSemester) or once a final letter shows; Semester 1 then closes
     const hasSemesterTwoStarted = () =>
-      window.ConnectifyClassSemesters?.detectSemester?.() === 2 ||
-      markupMod.hasSemesterTwoStarted(gradeCourses);
+      window.ConnectifyClassSemesters?.detectSemester?.() === 2 || markupMod.hasSemesterTwoStarted(gradeCourses);
     const isTargetClosed = semesterIdx =>
-      (semesterIdx === 0 && (window.ConnectifyClassSemesters?.detectSemester?.() === 2 || hasSemesterTwoStarted())) ||
-      markupMod.isTargetClosed(gradeCourses, semesterIdx);
+      (semesterIdx === 0 && hasSemesterTwoStarted()) || markupMod.isTargetClosed(gradeCourses, semesterIdx);
 
     const semesterButtons = markupMod.semesterButtons(semesterCardsContainer, semesterIdx => {
       if (isTargetClosed(semesterIdx)) return;

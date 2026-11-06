@@ -665,7 +665,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - Grade first, ATAR second
     - Each launcher opens on Grade, then reopens on the tab it was left on
   - Semester buttons
-    - Target Grade's and Target ATAR's semester buttons read plain `Semester N` (`Semester N (Closed)` once its grades are final)
+    - Target Grade's and Target ATAR's semester buttons read plain `Semester N` (`Semester N (Closed)` once its grades are final, and Semester 1 once Semester 2 starts)
     - only Estimate ATAR's add the semester ATAR
 - **Secondary Tool Buttons**
   - Settings and Weakness Analyzer feature clean white buttons
@@ -857,6 +857,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - When
     - when every class on the outlines page has a new name and the new set is a later year (by year level or calendar year, or never seen before when titles carry neither)
     - The class registry (`class-semesters.js`) triggers it as soon as it sees a wholly new class set
+    - the new year starts in Semester 1 (`startNewYear`), even in Term 4
     - viewing an earlier year never triggers it or enters the registry
   - Baselines
     - last year's averages of assessment types and subjects (the cache's final state over the last snapshot; grade cache marks preferred, only last year's classes)
@@ -866,11 +867,13 @@ Extremely concise summary of the core visual design language, contrast standards
     - Connect never shows last year's marks again, so the cache is the only copy
     - last year's cached results are archived (`connectify:year_archive:`, last two years) before being cleared
 - **Show This Semester's Classes Only** (`semester-filter.js`, Settings checkbox, off by default)
-  - The semester is always the detected one (no picker)
-    - Semester 2 only once a class shows a final A–E grade
-    - marks never count (Semester 2 panels list the Semester 1 tasks and a cumulative percent from day one, and a Semester 2 task can be marked before Semester 1 grades are final)
-    - The Target ATAR / Grade planners use the same start rule
-    - A Connect filter showing only some classes never decides Semester 1 (its class may simply have no final letter; the class registry decides)
+  - The semester is always the detected one (no picker), from the term calendar (`ConnectifyClassSemesters.detectSemester`)
+    - Semester 2 from canonical school week 17, the week a task's own semester turns (Term 2 Week 7, Week 8 under Early Easter)
+    - final letters and marks never decide it, and a Connect filter changes nothing
+    - The Target ATAR / Grade planners use the same start rule (a final letter also starts Semester 2 there)
+  - A new school year is Semester 1 until its own week 17
+    - classes the registry has never seen count as Semester 1 at once, before the rollover runs
+    - the rollover stamps its day (`startNewYear`, `connectify:new_year_at:<account>`): a year begun past the cutoff (Year 12 courses start in Term 4) waits for next year's
   - Effect
     - The other semester's outline tiles are hidden
     - only this semester's cards refresh the cache (the other semester's cached results stay frozen and are still used)
