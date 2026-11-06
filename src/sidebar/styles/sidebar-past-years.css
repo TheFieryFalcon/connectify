@@ -117,3 +117,7 @@
 .connectea-dark #connectify-sidebar #connectify-past-years .cx-past-years-status {
   color: #fca5a5;
 }
+
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar #connectify-past-years .cx-past-years-status {
+  color: oklch(from #b91c1c 0.30 c h);
+}

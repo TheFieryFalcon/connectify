@@ -4,7 +4,7 @@
  * Export Data and Import Data are the canonical primary blue of Settings' Save buttons, on one 28px row with the
  * status beside them. An imported file is reviewed in place under them: a tick per section in three columns (section,
  * what the file holds, what importing does here), split by hairlines, then Import (n) and Cancel. Spacing follows
- * Settings' scale: 16px between blocks, 8px between rows.
+ * Settings' scale: 16px between blocks, 8px between rows. Every ink reaches 5:1 in light, dark and light-tone themes.
  */
 
 #connectify-sidebar .cx-backup-actions {
@@ -55,7 +55,7 @@
 }
 
 #connectify-sidebar .cx-backup-review .cx-backup-warning {
-  color: #b45309;
+  color: #92400e;
 }
 
 #connectify-sidebar .cx-backup-list {
@@ -87,12 +87,17 @@
 }
 
 #connectify-sidebar .cx-backup-row--replaces .cx-backup-effect {
-  color: #b45309;
+  color: #92400e;
 }
 
+/* A row that cannot be ticked fades its tick only: its name stays in the ink, as readable as the rest */
 #connectify-sidebar .cx-backup-row:is(.cx-backup-row--same, .cx-backup-row--invalid) .cx-settings-check {
   cursor: default;
-  opacity: 0.6;
+}
+
+#connectify-sidebar .cx-backup-row:is(.cx-backup-row--same, .cx-backup-row--invalid) .cx-settings-check input {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .connectea-dark #connectify-sidebar :is(.cx-backup-list, .cx-backup-row) {
@@ -105,6 +110,12 @@
 
 .connectea-dark #connectify-sidebar :is(.cx-backup-row--replaces .cx-backup-effect, .cx-backup-warning) {
   color: #fbbf24;
+}
+
+/* Light tone (light glass, light custom themes): the dark themes' amber sits on light glass, so it takes the hue at
+   OKLCH 0.30, as the Settings delete ✕ does (theme-light-tone.css) */
+html.connectea-dark[data-connectea-tone="light"] #connectify-sidebar :is(.cx-backup-row--replaces .cx-backup-effect, .cx-backup-warning) {
+  color: oklch(from #92400e 0.30 c h);
 }
 
 @media (max-width: 650px) {
