@@ -15702,13 +15702,18 @@ runTest('Test 331: Settings keeps one spacing scale, past Connect\'s own label a
     '#connectify-sidebar .cx-settings-section { margin: 24px 0 0; padding-top: 24px; }',
     '#connectify-sidebar #connectify-categories .cx-settings-section > header { margin-bottom: 12px; }',
     '#connectify-sidebar .cx-settings-check + .cx-settings-desc { margin: 4px 0 0 24px; }',
-    '#connectify-sidebar .cx-settings-fields .cx-settings-desc { margin: 4px 0 0; }',
+    '#connectify-sidebar .cx-settings-control { display: flex; align-items: center; gap: 8px; }',
     '#connectify-sidebar .cx-settings-label { margin-bottom: 4px; }',
     '#connectify-sidebar .cx-settings-heading { margin-bottom: 8px; }'
   ]) assert.ok(css.includes(rule), rule);
   assert.ok(/gap: 16px 20px;\s+align-items: flex-start;\s+margin-top: 16px;\s+\}/.test(css), 'fields sit 16px from the checkboxes and each other');
   assert.ok(!html.includes('cx-settings-divider'), 'a line only ever splits sections, never the inside of one');
   assert.ok(/grid-template-columns: max-content minmax\(0, 1fr\);/.test(css) && html.includes('class="cx-bg-settings"'), 'the wallpaper rows share one grid');
+  assert.ok(/<select id="cx-panel-view-select" class="cx-settings-select">[\s\S]*?<\/select>\s*<span class="cx-settings-hint">Takes effect after reload\.<\/span>\s*<\/div>/.test(html), 'the reload note sits beside its dropdown, so no field column runs taller than the rest');
+  assert.ok(css.includes('#connectify-sidebar .cx-settings-control :is(.cx-settings-number-input, .cx-settings-select) { box-sizing: border-box; height: 28px; margin: 0; font-size: 12px; }'), 'inputs and dropdowns are one 28px height, like the wallpaper buttons');
+  assert.ok(/#connectify-sidebar \.cx-settings-desc,\s+#connectify-sidebar \.cx-settings-hint \{ font-size: 11px;/.test(css), 'notes stay 11px past Connect\'s 13px paragraphs');
+  const general = html.slice(html.indexOf('cx-settings-fields'), html.indexOf('cx-bg-settings-container'));
+  assert.ok(!/style=/.test(general), 'the fields carry no inline styles');
 
   const drawer = read('sidebar/styles/sidebar-drawer.css');
   assert.ok(/\.cx-cat-wrap label \{\s+margin: 0;/.test(drawer), 'category names stay centred on their inputs');

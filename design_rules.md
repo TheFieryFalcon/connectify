@@ -236,7 +236,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - no intro line above the buttons: their names say it
   - Settings
     - no description of what a control or section does, or of its default: the label and placeholder say it
-    - only what the screen cannot show stays: `Current Semester: Semester 2` under Show This Semester's Classes Only, `Takes effect after reload.` under Statistics Panels, the wallpaper status and notes on missing subjects
+    - only what the screen cannot show stays: `Current Semester: Semester 2` under Show This Semester's Classes Only, `Takes effect after reload.` beside Statistics Panels, the wallpaper status and notes on missing subjects
 - **Changelog Popup** (`changelog-popup.js`, `changelog-popup.css`)
   - Opening
     - What's new on the update notice opens the shared goal dialog, never GitHub or a new window
@@ -680,8 +680,12 @@ Extremely concise summary of the core visual design language, contrast standards
     - a line only splits sections, never the inside of one
     - the wallpaper rows share one grid: names in one column, Upload and the thumbnails on one edge, 28px buttons
     - 8px between rows, 4px from a label to its control or note
+  - Fields
+    - every input and dropdown is 28px tall, like the wallpaper buttons, so a row of fields lines up
+    - a field's note sits beside its control (`.cx-settings-control`), never under it, so no column runs taller and the wallpaper rows keep 16px under every field
+    - labels 12px, notes and hints 11px
   - Written past Connect
-    - `.eds.cvr label` (5px) and `p` (14px) would otherwise add their own margins
+    - `.eds.cvr label` (5px) and `p` (14px, 13px type) would otherwise add their own margins and size
     - spacing lives in classes, never inline on the controls
 - **Subject Names** (`ConnectifyUtils.cleanSubjectName`, `ConnectifyUtils.subjectLabels`)
   - Shown

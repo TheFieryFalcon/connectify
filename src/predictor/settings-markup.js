@@ -24,50 +24,50 @@
         <label class="cx-settings-check">
           <input type="checkbox" id="cx-early-meters-toggle"> Hide potentially inaccurate prediction bars
         </label>
-      		<div class="cx-settings-fields">
-                <div>
-                  <label for="cx-general-cohort-input" class="cx-settings-label">Year Group Size</label>
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <input type="number" id="cx-general-cohort-input" class="cx-settings-number-input" min="1" step="1" placeholder="500" style="box-sizing:border-box;width:80px;padding:3px 6px;border-radius:4px;font-size:12px;">
-                  </div>
-                </div>
-                <div>
-                  <label for="cx-atar-percentage-input" class="cx-settings-label">ATAR Student Percentage</label>
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <input type="number" id="cx-atar-percentage-input" class="cx-settings-number-input" min="1" max="100" step="1" placeholder="60" style="box-sizing:border-box;width:75px;padding:3px 6px;border-radius:4px;font-size:12px;">
-                    <span class="cx-settings-hint">%</span>
-                  </div>
-                </div>
-                <div>
-                  <label for="cx-theme-select-input" class="cx-settings-label">Color Theme</label>
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <select id="cx-theme-select-input" class="cx-settings-select">
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label for="cx-panel-view-select" class="cx-settings-label">Statistics Panels</label>
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <select id="cx-panel-view-select" class="cx-settings-select">
-                      <option value="compact">Compact view</option>
-                      <option value="subjects">Expanded view on subject panels only</option>
-                      <option value="all">Expanded view on all panels</option>
-                    </select>
-                  </div>
-                  <p class="cx-settings-desc">Takes effect after reload.</p>
-                </div>
-                <div id="cx-bg-settings-container" class="cx-bg-settings">
-                  <label class="cx-settings-label">Custom Wallpaper:</label>
-                  <div class="cx-bg-actions">
-                    <input type="file" id="cx-bg-upload-input" accept="image/*" style="display:none;">
-                    <button type="button" id="cx-bg-upload-btn" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:0 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">🖼 Upload Background</button>
-                    <button type="button" id="cx-bg-remove-btn" class="eds-c-button" style="display:none;background:#64748b;color:#fff;border:none;padding:0 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">✕ Remove</button>
-                    <span id="cx-bg-status-label" class="cx-settings-hint" style="font-size:11px;">No custom background set</span>
-                  </div>
-                  <span class="cx-settings-label">Preset Backgrounds:</span>
-                  <div id="cx-bg-presets" class="cx-bg-presets" role="group" aria-label="Preset backgrounds"></div>
-                </div>
-              </div>
+        <div class="cx-settings-fields">
+          <div>
+            <label for="cx-general-cohort-input" class="cx-settings-label">Year Group Size</label>
+            <div class="cx-settings-control">
+              <input type="number" id="cx-general-cohort-input" class="cx-settings-number-input" min="1" step="1" placeholder="500">
+            </div>
+          </div>
+          <div>
+            <label for="cx-atar-percentage-input" class="cx-settings-label">ATAR Student Percentage</label>
+            <div class="cx-settings-control">
+              <input type="number" id="cx-atar-percentage-input" class="cx-settings-number-input" min="1" max="100" step="1" placeholder="60">
+              <span class="cx-settings-hint">%</span>
+            </div>
+          </div>
+          <div>
+            <label for="cx-theme-select-input" class="cx-settings-label">Color Theme</label>
+            <div class="cx-settings-control">
+              <select id="cx-theme-select-input" class="cx-settings-select">
+              </select>
+            </div>
+          </div>
+          <div>
+            <label for="cx-panel-view-select" class="cx-settings-label">Statistics Panels</label>
+            <div class="cx-settings-control">
+              <select id="cx-panel-view-select" class="cx-settings-select">
+                <option value="compact">Compact view</option>
+                <option value="subjects">Expanded view on subject panels only</option>
+                <option value="all">Expanded view on all panels</option>
+              </select>
+              <span class="cx-settings-hint">Takes effect after reload.</span>
+            </div>
+          </div>
+          <div id="cx-bg-settings-container" class="cx-bg-settings">
+            <label class="cx-settings-label">Custom Wallpaper:</label>
+            <div class="cx-bg-actions">
+              <input type="file" id="cx-bg-upload-input" accept="image/*" style="display:none;">
+              <button type="button" id="cx-bg-upload-btn" class="eds-c-button" style="background:#2563eb;color:#fff;border:none;padding:0 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">🖼 Upload Background</button>
+              <button type="button" id="cx-bg-remove-btn" class="eds-c-button" style="display:none;background:#64748b;color:#fff;border:none;padding:0 10px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;">✕ Remove</button>
+              <span id="cx-bg-status-label" class="cx-settings-hint">No custom background set</span>
+            </div>
+            <span class="cx-settings-label">Preset Backgrounds:</span>
+            <div id="cx-bg-presets" class="cx-bg-presets" role="group" aria-label="Preset backgrounds"></div>
+          </div>
+        </div>
       </section>
       <section class="cx-settings-section">
         <header><strong>Semester 1 Scaled Marks</strong></header>

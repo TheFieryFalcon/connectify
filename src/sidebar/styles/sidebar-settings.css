@@ -66,7 +66,13 @@
   align-items: flex-start;
   margin-top: 16px;
 }
-#connectify-sidebar .cx-settings-fields .cx-settings-desc { margin: 4px 0 0; }
+/* Notes and hints sit under the 12px labels at 11px, past Connect's .eds.cvr p (13px) */
+#connectify-sidebar .cx-settings-desc,
+#connectify-sidebar .cx-settings-hint { font-size: 11px; line-height: 1.4; }
+/* Every field is one 28px row (inputs, dropdowns, the wallpaper buttons), its note beside it, so no column runs taller */
+#connectify-sidebar .cx-settings-control { display: flex; align-items: center; gap: 8px; }
+#connectify-sidebar .cx-settings-control :is(.cx-settings-number-input, .cx-settings-select) { box-sizing: border-box; height: 28px; margin: 0; font-size: 12px; }
+#connectify-sidebar .cx-settings-control .cx-settings-number-input { width: 80px; }
 #connectify-sidebar .cx-settings-label { margin-bottom: 4px; }
 #connectify-sidebar label.cx-settings-label { font-size: 12px; font-weight: 600; }
 /* Wallpaper rows share one grid: names in one column, Upload and the thumbnails on one edge, buttons one height */

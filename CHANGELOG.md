@@ -13,6 +13,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - The current semester now follows the school calendar: Semester 2 starts in Term 2 Week 7 (Week 8 in an Early Easter year), instead of waiting for a final A–E grade. Show this semester's classes only, Goal Setter and Estimator follow it, and Semester 1 closes in the calculator once Semester 2 starts.
 - A new school year is Semester 1 until its own Semester 2, even when its classes appear in Term 4.
 - The outcome meter shows again from a subject's second marked result, as before 3.3.2. Turn on Hide potentially inaccurate prediction bars to keep the 3.3.2 behaviour.
+- Settings' General Preferences line up: every field is the same height, the reload note sits beside Statistics Panels, and the wallpaper rows keep an even gap below the fields.
 
 ---
 
