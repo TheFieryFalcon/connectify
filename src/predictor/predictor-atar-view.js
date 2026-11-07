@@ -71,7 +71,7 @@
           </div>
         </div>
         <div style="margin-top:12px; font-size:11px; opacity:0.8; text-align:center; line-height:1.4;">
-          TEA ${atarProj.mid?.tea ?? 0} = best four ${atarProj.mid?.baseTEA ?? 0} + bonuses ${atarProj.mid?.bonusTEA ?? 0}
+          TEA ${atarProj.mid?.tea ?? 0} = best four ${atarProj.mid?.baseTEA ?? 0} + ${atarProj.mid?.typicalBonus ? 'typical bonus' : 'bonuses'} ${atarProj.mid?.bonusTEA ?? 0}
         </div>
       </div>
 

@@ -80,15 +80,12 @@
     const convertTEAtoATAR = math.convertTEAtoATAR;
     const round = v => (Number.isFinite(v) ? Math.round(v * 10) / 10 : '—');
 
+    const yearLevel = window.ConnectifyTypicalBonus?.yearLevel?.() ?? 12;
+    // From the class of 2028 calculate adds the typical bonus for the TEA instead of subject bonuses (atar-typical-bonus.js)
     const results = [0, 1].map(i => {
       if (!calculate || !courses[i]) return { error: 'Calculator unavailable' };
       return calculate(courses[i].map(row => getCourseState(row, i, courses)));
     });
-
-    const titles = Array.from(document.querySelectorAll('.eds-c-tile__title')).map(el => el.textContent || '');
-    const hasYear12 = titles.some(t => /\b(?:year\s*12|12)\b/i.test(t) || /\bAT[A-Z]{3}\b/.test(t));
-    const hasYear11 = titles.some(t => /\b(?:year\s*11|11)\b/i.test(t) || /\bAE[A-Z]{3}\b/.test(t));
-    const yearLevel = (hasYear11 && !hasYear12) ? 11 : 12;
     const teaAdjustment = 0; // Year 11 TEA scaling adjustment penalty removed
 
     try {
@@ -99,7 +96,7 @@
         const finalTEA = Math.max(0, (result.tea || 0) + teaAdjustment);
         const finalAtar = convertTEAtoATAR ? convertTEAtoATAR(finalTEA) : '—';
         const detailText =
-          `TEA ${round(finalTEA)} = best four ${round(result.base)} + bonuses ${round(
+          `TEA ${round(finalTEA)} = best four ${round(result.base)} + ${result.typicalBonus ? 'typical bonus' : 'bonuses'} ${round(
             result.bonus
           )}. Best four: ${result.top.map(x => x.name).join(', ')}.`;
 

@@ -22,7 +22,7 @@ This document indexes global namespace APIs, persistent storage keys, custom DOM
 | `window.ConnectifyCohort` | `cohort-stats.js` | Controller orchestrating passes, mutation observer, styles |
 | `window.ConnectifyTaskTypes` / `ConnectifyTaskTypeRules` | `task-types.js` / `task-type-rules.js` | Category keyword detection, overrides, class category sharing; `classify(name, labels, subject, categories, defaults)` (most specific keyword wins), `matches`, `words`, `TIERS`, `VOCABULARY`, `SUBJECT_RULES` |
 | `window.ConnectifyScalingData` | `scaling-data.js` | TISC scaled-score statistics per course (mean, SD, percentiles) |
-| `window.ConnectifyMath` | `atar-math.js` | TEA-to-ATAR conversion, 10% bonus rules, TISC Average Marks Scaling model |
+| `window.ConnectifyMath` / `ConnectifyTypicalBonus` | `atar-math.js` / `atar-typical-bonus.js` | typical bonus from the class of 2028 (`rate`, `bonus`, `yearLevel`, `schoolYear`, `classOf`, `phasedOut`, `RATES`, `FIRST_CLASS`); TEA-to-ATAR conversion, 10% bonus rules, TISC Average Marks Scaling model |
 | `window.ConnectifyTargetDifficulty` | `target-difficulty.js` | Difficulty-weighted task baselines, effort model and bisection |
 | `window.ConnectifyTargetSolver` | `target-solver.js` | Target Grade and difficulty-weighted Target ATAR solver |
 | `window.ConnectifyAtarScraper` | `atar-scraper.js` | ATAR courses per semester from the cache (registry, subjects, grade cache); `readCourses` never reads tiles |

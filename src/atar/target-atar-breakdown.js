@@ -33,7 +33,7 @@
       targetOutputContainer.append(createEl('strong', '', bannerText));
     }
 
-    const bonusNote = plan.bonus > 0 ? ` (TEA bonus ${round(plan.bonus)})` : '';
+    const bonusNote = plan.bonus > 0 ? ` (${plan.typicalBonus ? 'typical bonus' : 'TEA bonus'} ${round(plan.bonus)})` : '';
     targetOutputContainer.append(
       createEl('p', 'cta-note', `Highest possible ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}.`)
     );

@@ -119,14 +119,21 @@
     const sorted = [...used].sort((a, b) => b.score - a.score);
     const topFour = sorted.slice(0, 4);
 
+    const baseTEA = topFour.reduce((sum, r) => sum + r.score, 0);
+    // From the class of 2028: no subject bonuses, the TEA share students at this TEA typically earned (atar-typical-bonus.js)
+    const typical = window.ConnectifyTypicalBonus;
+    const phasedOut = Boolean(typical) && typical.phasedOut(options?.classOf ?? typical.classOf());
     let bonusTEA = 0;
-    if (options?.fixedBonus !== undefined && Number.isFinite(Number(options.fixedBonus))) {
+    if (options?.ignoreBonus) {
+      bonusTEA = 0;
+    } else if (phasedOut) {
+      bonusTEA = typical.bonus(baseTEA);
+    } else if (options?.fixedBonus !== undefined && Number.isFinite(Number(options.fixedBonus))) {
       bonusTEA = Number(options.fixedBonus);
-    } else if (!options?.ignoreBonus) {
+    } else {
       bonusTEA = teaBonus(used);
     }
 
-    const baseTEA = topFour.reduce((sum, r) => sum + r.score, 0);
     const totalTEA = Math.min(430, baseTEA + bonusTEA);
 
     return {
@@ -134,6 +141,7 @@
       tea: totalTEA,
       base: baseTEA,
       bonus: bonusTEA,
+      typicalBonus: phasedOut && !options?.ignoreBonus,
       top: topFour
     };
   }

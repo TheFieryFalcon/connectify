@@ -97,6 +97,7 @@
           tea: round(finalTEA, 1),
           baseTEA: round(res.base, 1),
           bonusTEA: round(res.bonus, 1),
+          typicalBonus: Boolean(res.typicalBonus),
           topCourses: res.top || [],
           courses: coursesForCalc,
           yearAdjustment: 0

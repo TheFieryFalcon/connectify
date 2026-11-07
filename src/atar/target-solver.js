@@ -192,7 +192,7 @@
     const maximumResult = calculateAtVal(maxVal);
     if (maximumResult.error) return { error: maximumResult.error };
     if (!reachesTarget(maximumResult)) {
-      return { impossible: true, maximum: maximumResult, rows: projectedRows(maxVal), difficultyWeighted, bonus: currentBonus };
+      return { impossible: true, maximum: maximumResult, rows: projectedRows(maxVal), difficultyWeighted, bonus: maximumResult.bonus ?? currentBonus, typicalBonus: Boolean(maximumResult.typicalBonus) };
     }
 
     let finalT = D.bisect(v => reachesTarget(calculateAtVal(v)), minVal, maxVal);
@@ -223,7 +223,9 @@
       result: finalResult,
       rows: finalProjected,
       taskRequirements,
-      bonus: currentBonus
+      // From the class of 2028: the typical bonus at the plan's TEA (calculate never holds it), else the held subject bonus
+      bonus: finalResult?.typicalBonus ? finalResult.bonus : currentBonus,
+      typicalBonus: Boolean(finalResult?.typicalBonus)
     };
   }
 

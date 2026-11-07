@@ -215,7 +215,7 @@
   }
 
   window.ConnectifyClassSemesters = {
-    PREFIX, NEW_YEAR_PREFIX, cardInfo, cardSummary, recordCards, recordTasks, classesIn, detectSemester, startNewYear, isSemesterTwoCutoff, clear,
+    PREFIX, NEW_YEAR_PREFIX, cardInfo, cardSummary, recordCards, recordTasks, classesIn, detectSemester, startNewYear, newYearAt, isSemesterTwoCutoff, clear,
     get: () => load()
   };
 })();

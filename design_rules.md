@@ -214,6 +214,11 @@ Extremely concise summary of the core visual design language, contrast standards
     - kept to two decimals
   - Disclaimer
     - at the bottom of Predict ATAR and Estimate ATAR: school marks only, WACE exams and moderation not included (`ATAR_DISCLAIMER`)
+  - **Bonuses end with the class of 2028** (`atar-typical-bonus.js`, Test 359)
+    - a student finishing Year 12 in 2028 or later gets no Methods, Specialist or language bonus in any ATAR: Estimate, Target, Predict, goals
+    - the class: the school year (a calendar year in the class titles, else today's, the next one when this year's classes arrived from July on) plus 1 in Year 11
+    - the TEA rises instead by the share of TEA students at that best four typically earned in bonuses: 0 below 140, 0.5% at 200, 1.2% at 250, 2.25% at 300, 3.4% at 340, 4.25% at 370, 4.5% from 400 (straight Cs about 1%, straight As about 3.5%)
+    - it follows the projected TEA, never held like an earlier class's current bonus, and reads `typical bonus`
 - **Weakness Analyzer** (`weakness-model.js`, `sidebar-radar.css`)
   - Measure
     - by type: each type's results averaged, weighted, every subject together

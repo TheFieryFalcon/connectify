@@ -2558,7 +2558,7 @@ runTest('Test 96: atar-calculator.js defines yearLevel and target-atar-ui.js pre
   const atarUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'atar-ui.js'), 'utf8');
   const targetUiJs = fs.readFileSync(path.resolve(BASE_DIR, 'target-atar-ui.js'), 'utf8');
 
-  assert.ok(calcJs.includes('const yearLevel = (hasYear11 && !hasYear12) ? 11 : 12;'), 'atar-calculator.js must define yearLevel');
+  assert.ok(calcJs.includes('const yearLevel = window.ConnectifyTypicalBonus?.yearLevel?.() ?? 12;'), 'atar-calculator.js must define yearLevel');
   assert.ok(calcJs.includes('try {') && calcJs.includes('catch (err) {'), 'calculateResults must have try-catch error boundary');
   assert.ok(atarUiJs.includes('calc?.calculateResults ? calc.calculateResults(courses) : [{}, {}]'), 'atar-ui.js must safely invoke calculateResults');
   assert.ok(targetUiJs.includes('targetOutputContainer.replaceChildren();'), 'target-atar-ui.js must pre-clear container before calculating');
@@ -17159,6 +17159,63 @@ runTest('Test 358: Light-tone themes never keep a dark theme\'s dark fill or pal
   assert.ok(!/style\.(background|color|border)\s*=/.test(countdown), 'no inline colours on the countdown');
   const countdownCss = origReadFileSync.call(fs, path.join(SRC_DIR, 'progress/wace-countdown.css'), 'utf8');
   assert.ok(countdownCss.includes('html.connectify-dark:not([data-connectify-tone="light"]) #connectify-wace-countdown') && order.includes('src/progress/wace-countdown.css'), 'dark card only in dark-ink themes, registered');
+});
+
+runTest('Test 359: From the class of 2028 ATAR estimates add the typical bonus for their TEA, never subject bonuses', () => {
+  const read = f => origReadFileSync.call(fs, path.join(SRC_DIR, f), 'utf8');
+  const saved = { typical: window.ConnectifyTypicalBonus, semesters: window.ConnectifyClassSemesters, archive: window.ConnectifyYearArchive };
+  try {
+    eval(read('atar/atar-typical-bonus.js'));
+    const T = window.ConnectifyTypicalBonus;
+    // Stronger students typically earned a larger share of their TEA in bonuses, never more than two courses' 10%
+    assert.strictEqual(T.rate(120), 0, 'no bonus at the bottom');
+    assert.ok(T.rate(230) < T.rate(300) && T.rate(300) < T.rate(340) && T.rate(340) < T.rate(380), 'rises with the TEA');
+    assert.ok(Math.abs(T.rate(250) - 0.012) < 1e-9 && Math.abs(T.rate(275) - 0.01725) < 1e-9, 'linear between points');
+    assert.ok(T.rate(430) <= 0.05 && T.rate(430) === T.rate(400), 'flat at the 5% ceiling end');
+    assert.ok(T.rate(240) < 0.012 && T.rate(340) > 0.03, 'straight Cs about 1%, straight As about 3.5%');
+    assert.strictEqual(T.bonus(340), Math.round(340 * 0.034 * 10) / 10);
+
+    // The class: the school year plus the years left to Year 12
+    window.ConnectifyYearArchive = { yearMarker: names => ({ calendar: (names.join(' ').match(/\b20\d{2}\b/) || [])[0] ? Number(names.join(' ').match(/\b20\d{2}\b/)[0]) : null }) };
+    window.ConnectifyClassSemesters = { get: () => ({}), newYearAt: () => null };
+    const y11 = ['Literature ATAR Year 11', 'Chemistry ATAR Year 11 (AECHE)'];
+    const y12 = ['12 Literature ATAR', '12 Chemistry ATAR'];
+    assert.strictEqual(T.yearLevel(['12 Literature ATAR', 'Chemistry ATAR Year 11']), 12, 'any Year 12 class makes it Year 12');
+    assert.strictEqual(T.classOf(y11, new Date(2026, 10, 8)), 2027, 'Year 11 in 2026 is the class of 2027');
+    assert.strictEqual(T.classOf(y12, new Date(2027, 4, 1)), 2027);
+    assert.strictEqual(T.classOf(y11, new Date(2027, 4, 1)), 2028, 'Year 11 in 2027 is the class of 2028');
+    assert.strictEqual(T.classOf(['Literature ATAR Year 12 2028'], new Date(2027, 11, 1)), 2028, 'a year named in the titles decides');
+    window.ConnectifyClassSemesters.newYearAt = () => new Date(2026, 9, 20).getTime();
+    assert.strictEqual(T.classOf(y12, new Date(2026, 10, 8)), 2027, 'Year 12 courses begun in Term 4 are next year\'s');
+    assert.ok(!T.phasedOut(2027) && T.phasedOut(2028) && T.phasedOut(2030));
+
+    // calculate: the class of 2028 swaps subject bonuses (and a held one) for the typical bonus at its best four
+    const M = window.ConnectifyMath;
+    const rows = [['Mathematics Methods', 90], ['Mathematics Specialist', 88], ['Literature', 80], ['Chemistry', 82], ['Physics', 79]]
+      .map(([name, score]) => ({ name, score, include: true }));
+    const old = M.calculate(rows, { classOf: 2027 });
+    assert.ok(old.bonus > 17 && !old.typicalBonus, 'the class of 2027 keeps Methods and Specialist bonuses');
+    const later = M.calculate(rows, { classOf: 2028 });
+    assert.strictEqual(later.bonus, T.bonus(later.base));
+    assert.ok(later.typicalBonus && later.bonus < old.bonus, 'the class of 2028: the typical bonus, no subject bonus');
+    assert.strictEqual(M.calculate(rows, { classOf: 2028, fixedBonus: 17 }).bonus, later.bonus, 'a held subject bonus never applies');
+    window.ConnectifyClassSemesters = { get: () => ({ a: { 1: { title: 'Literature ATAR Year 12 2028' } } }), newYearAt: () => null };
+    assert.strictEqual(M.calculate(rows).typicalBonus, true, 'detected from the class registry when not passed');
+
+    // Shown as such in Estimate ATAR, Target ATAR and Predict ATAR
+    assert.ok(read('atar/atar-calculator.js').includes("result.typicalBonus ? 'typical bonus' : 'bonuses'"));
+    assert.ok(read('atar/target-atar-breakdown.js').includes("plan.typicalBonus ? 'typical bonus' : 'TEA bonus'"));
+    assert.ok(read('predictor/predictor-atar-view.js').includes("atarProj.mid?.typicalBonus ? 'typical bonus' : 'bonuses'"));
+    assert.ok(read('atar/target-solver.js').includes('typicalBonus: Boolean(finalResult?.typicalBonus)'));
+    const manifest = JSON.parse(origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+    for (const g of manifest.content_scripts.filter(g => (g.js || []).includes('src/atar/atar-math.js'))) {
+      assert.strictEqual(g.js.indexOf('src/atar/atar-typical-bonus.js'), g.js.indexOf('src/atar/atar-math.js') + 1, 'loaded after atar-math.js in every group');
+    }
+  } finally {
+    window.ConnectifyTypicalBonus = saved.typical;
+    window.ConnectifyClassSemesters = saved.semesters;
+    window.ConnectifyYearArchive = saved.archive;
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {
