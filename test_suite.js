@@ -16581,6 +16581,7 @@ runTest('Test 349: A past year is read-only and quiet: drawn from its records, n
   assert.ok(read('assessment/legacy-outlines.js').includes('if (connectPending() || window.ConnectifyPastYearMode?.active()) {'), 'every record is drawn, never matched to Connect\'s cards');
   const css = read('system/past-year.css');
   assert.ok(cssHas(css, 'html[data-cx-past-year] cnt-sao-card') && cssHas(css, 'html[data-cx-past-year] cnt-category-bar'), "Connect's cards and filter bar are this year's: hidden");
+  assert.ok(cssHas(css, 'html[data-cx-past-year] cnt-student-assessment-outlines cnt-no-content-panel'), "Connect's \"No Assessment Outlines available.\" is about this year: hidden");
   for (const [file, what] of [
     ['system/new-grade.js', 'grade toasts'], ['system/grade-tasks.js', 'new results'], ['goals/goal-events.js', 'goal toasts'],
     ['system/update-notice.js', 'the update notice'], ['system/overhaul-notice.js', 'the overhaul notice'], ['progress/wace-countdown.js', 'the countdown'],

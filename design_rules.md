@@ -910,6 +910,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - every per-student key is the year's copy (`<account>~p<id>`), so nothing done there reaches this year's data
     - the clock is that year's last day wherever the date decides something (term weeks, Early Easter, semesters, Next Up)
     - Connect's cards and filter bar are this year's, so they are hidden; the outlines are drawn from the year's records
+    - Connect's `No Assessment Outlines available.` speaks of this year (exam weeks), so it is hidden too
   - Read-only, in place
     - Type dropdowns, the week ✎, Set as Goal, goal Edit and Delete, cohort sizes and Export are locked where they are; Settings is disabled
     - no rollover, grade or goal toasts, notices, countdown, semester or Connect filter

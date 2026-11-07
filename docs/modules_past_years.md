@@ -34,7 +34,7 @@ Past Years shows a finished school year as it stood at its end: Assessment Outli
 
 ### The page
 - `outline-api.js`: the copy's records stand in for Connect's (`pastRecords`, after the rest of the group has loaded); nothing is fetched.
-- `legacy-outlines.js`: every record is drawn, after Connect's cards, which `past-year.css` hides with its filter bar, the fixed All bar, the semester notice and the countdown. Teacher and school names link nowhere.
+- `legacy-outlines.js`: every record is drawn, after Connect's cards, which `past-year.css` hides with its filter bar, the fixed All bar, its "No Assessment Outlines available." (`cnt-no-content-panel`), the semester notice and the countdown. Teacher and school names link nowhere.
 - `past-year-bar.js` (`#cx-past-year-bar`): above the drawn outlines, sticky under Connect's fixed top bars (`--cx-past-year-top`, measured again after each scroll, since Connect moves its service bar up as the page scrolls): the year, `Marks as of <date>`, Back to This Year.
 
 ### Off and locked
