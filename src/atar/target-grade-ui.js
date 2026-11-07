@@ -15,11 +15,10 @@
   /** A plan's headline. `scope` names the tasks it covers (a custom end week: only those up to that week). */
   function planSummary(plan, target, { difficulty = false, scope = 'remaining assessments' } = {}) {
     if (plan.impossible) return `Goal unattainable. Highest possible mark: ${round(plan.maximum)}%.`;
-    if (plan.finished) return `All weighted tasks completed. Final mark: ${round(plan.final)}%.`;
-    if (plan.required === 0) return `Target secured with ${scope} at 0%.`;
-    if (difficulty) return `Requires marks averaging ${round(plan.required)}% on ${scope} to achieve ${target}% overall.`;
-    if (plan.effort) return `Requires marks averaging ${round(plan.required)}% on ${scope} to achieve ${target}% overall.`;
-    return `Requires ${plan.required}% on ${scope} to achieve ${target}% overall.`;
+    if (plan.finished) return `All tasks marked. Final mark: ${round(plan.final)}%.`;
+    if (plan.required === 0) return 'Target secured.';
+    if (difficulty || plan.effort) return `Requires ${round(plan.required)}% average on ${scope} for ${target}%.`;
+    return `Requires ${plan.required}% on ${scope} for ${target}%.`;
   }
 
   function createGradeView(ctx) {
@@ -45,7 +44,7 @@
     difficultyCheckbox.checked = Boolean(saved.gradeDifficultyWeighted);
     difficultyLabel.append(
       difficultyCheckbox,
-      document.createTextNode(' Adjust by how you do on each task type')
+      document.createTextNode(' Adjust by task type performance')
     );
 
     difficultyCheckbox.addEventListener('change', () => {
@@ -161,9 +160,9 @@
       createEl(
         'p',
         'cta-note',
-        `${round(progress.total - progress.rawRemaining)} of ${round(progress.total)} marked, ${round(progress.rawRemaining)} still to come, average so far ${
-          progress.remaining < 100 ? `${round((progress.earned / (100 - progress.remaining)) * 100)}%` : 'not marked'
-        }.`
+        progress.remaining < 100
+          ? `${round(progress.total - progress.rawRemaining)} of ${round(progress.total)} marked, averaging ${round((progress.earned / (100 - progress.remaining)) * 100)}%.`
+          : 'Nothing marked yet.'
       )
     );
 

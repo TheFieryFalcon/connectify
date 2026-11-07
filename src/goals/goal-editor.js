@@ -187,7 +187,7 @@
     if (parent) S().renderGradeTasks(parent, { course: { ...info.course, progress: { tasks: tasks.filter(t => !P().isMarked(t)) } }, tasks: tasks.map(t => ({ ...t, pending: !P().isMarked(t) })), plan: state.plan, onChange: () => info.ctx.renderGradeOutput() });
     if (headline) {
       headline.textContent = window.ConnectifyTargetGradeUI.planSummary(state.plan, info.refs.gradeTargetInput.value, {
-        difficulty: draft.difficultyWeighted, scope: `remaining assessments up to Week ${week}`
+        difficulty: draft.difficultyWeighted, scope: `assessments up to Week ${week}`
       });
     }
   }

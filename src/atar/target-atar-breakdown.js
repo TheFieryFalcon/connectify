@@ -19,33 +19,23 @@
         createEl(
           'strong',
           '',
-          `Goal unattainable. Highest possible ATAR: ${plan.maximum?.atar ?? '—'}, with 100% on every remaining assessment.`
+          'Goal unattainable.'
         )
       );
     } else {
       const bannerText =
         plan.required === 0
-          ? 'Target secured under current assumptions.'
-          : difficultyWeighted
-          ? `Requires marks averaging ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
-              plan.result?.atar ?? '—'
-            }.`
-          : `Requires ${round(plan.required)}% on remaining assessments for an estimated ATAR of ${
+          ? 'Target secured.'
+          : `Requires ${round(plan.required)}%${difficultyWeighted ? ' average' : ''} on remaining assessments for an ATAR of ${
               plan.result?.atar ?? '—'
             }.`;
 
       targetOutputContainer.append(createEl('strong', '', bannerText));
     }
 
-    const bonusNote = plan.bonus > 0 ? `, with your current TEA bonus of ${round(plan.bonus)}` : '';
+    const bonusNote = plan.bonus > 0 ? ` (TEA bonus ${round(plan.bonus)})` : '';
     targetOutputContainer.append(
-      createEl(
-        'p',
-        'cta-note',
-        difficultyWeighted
-          ? `Highest possible ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}. Each task's mark follows how you do in that subject and task type.`
-          : `Highest possible ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}. The same mark on every remaining task.`
-      )
+      createEl('p', 'cta-note', `Highest possible ATAR: ${plan.maximum?.atar ?? '—'}${bonusNote}.`)
     );
 
     const taskDetails = createEl('section', 'cta-assessment-details');
@@ -83,7 +73,7 @@
         createEl(
           'small',
           '',
-          `${round(course.progress?.earned ?? 0)} of ${round(course.progress?.total ?? 0)} marks earned, ${round(course.progress?.remaining ?? 0)}% still to come, scaled mark ${wholeScore(projectedScore)} at this target`
+          `${round(course.progress?.earned ?? 0)} of ${round(course.progress?.total ?? 0)} earned, scaled ${wholeScore(projectedScore)} at this target`
         )
       );
 

@@ -2297,7 +2297,7 @@ runTest('target-solver.js and target-grade-ui.js support dynamic prior performan
   assert.ok(solverCode.includes('options.difficultyWeighted') || solverCode.includes('difficultyWeighted = Boolean(options.difficultyWeighted)'), 'target-solver.js gradePlan must accept options.difficultyWeighted');
   assert.ok(solverCode.includes('taskMetaList') && solverCode.includes('calcTaskScore'), 'target-solver.js gradePlan must calculate category baselines and adjust task requirements');
   assert.ok(gradeUiCode.includes('cta-difficulty-label'), 'target-grade-ui.js must mount difficulty label');
-  assert.ok(gradeUiCode.includes('Adjust by how you do on each task type'), 'target-grade-ui.js must contain prior performance adjustment checkbox text');
+  assert.ok(gradeUiCode.includes('Adjust by task type performance'), 'target-grade-ui.js must contain prior performance adjustment checkbox text');
   assert.ok(gradeUiCode.includes('gradeDifficultyWeighted'), 'target-grade-ui.js must persist gradeDifficultyWeighted preference');
 });
 
@@ -14719,10 +14719,10 @@ runTest('Test 311: With a custom end week, Set as Goal\'s headline and sliders m
   });
   for (const f of ['atar/target-ui-helpers.js', 'atar/target-grade-ui.js']) new Function('window', origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8'))(win);
   const { planSummary } = win.ConnectifyTargetGradeUI;
-  assert.strictEqual(planSummary({ required: 82 }, 80), 'Requires 82% on remaining assessments to achieve 80% overall.', 'the semester\'s wording is unchanged');
-  assert.strictEqual(planSummary({ required: 0 }, 30), 'Target secured with remaining assessments at 0%.');
-  assert.strictEqual(planSummary({ required: 81.25, effort: true }, 80), 'Requires marks averaging 81.3% on remaining assessments to achieve 80% overall.');
-  assert.strictEqual(planSummary({ required: 81, effort: true }, 80, { difficulty: true }), 'Requires marks averaging 81% on remaining assessments to achieve 80% overall.');
+  assert.strictEqual(planSummary({ required: 82 }, 80), 'Requires 82% on remaining assessments for 80%.', 'the semester\'s wording');
+  assert.strictEqual(planSummary({ required: 0 }, 30), 'Target secured.');
+  assert.strictEqual(planSummary({ required: 81.25, effort: true }, 80), 'Requires 81.3% average on remaining assessments for 80%.');
+  assert.strictEqual(planSummary({ required: 81, effort: true }, 80, { difficulty: true }), 'Requires 81% average on remaining assessments for 80%.');
 
   // The planner flow itself: its output redrawn on every change, as renderGradeOutput does
   let current = null;
@@ -14756,14 +14756,14 @@ runTest('Test 311: With a custom end week, Set as Goal\'s headline and sliders m
   };
 
   const within = at(80, 20);
-  assert.ok(within.headline.startsWith('Requires 82% on remaining assessments up to Week 20 to achieve 80% overall.'), `within reach names the week: ${within.headline}`);
+  assert.ok(within.headline.startsWith('Requires 82% on assessments up to Week 20 for 80%.'), `within reach names the week: ${within.headline}`);
   assert.deepStrictEqual([within.rows, within.sliders], [3, 1], 'one table: the marked task, the one left in the range and the heading, and that one\'s slider');
   const beyond = at(95, 20);
   assert.ok(beyond.headline.startsWith('Goal unattainable. Highest possible mark: 89%.') && beyond.headline.includes('Impossible'), `out of reach never says Requires beside Impossible: ${beyond.headline}`);
   const secured = at(30, 20);
-  assert.ok(secured.headline.startsWith('Target secured with remaining assessments up to Week 20 at 0%.'), `already secured says so: ${secured.headline}`);
+  assert.ok(secured.headline.startsWith('Target secured.'), `already secured says so: ${secured.headline}`);
   const finished = at(70, 6);
-  assert.ok(finished.headline.startsWith('All weighted tasks completed. Final mark: 78%.'), `all marked says so: ${finished.headline}`);
+  assert.ok(finished.headline.startsWith('All tasks marked. Final mark: 78%.'), `all marked says so: ${finished.headline}`);
   assert.deepStrictEqual([finished.rows, finished.sliders], [2, 0], 'its marked task, with no sliders left');
   const none = at(80, 3);
   assert.strictEqual(none.headline, 'No assessments up to Week 3.', 'an empty range says so, never the semester\'s plan');

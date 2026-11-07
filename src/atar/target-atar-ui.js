@@ -31,7 +31,7 @@
     difficultyCheckbox.checked = Boolean(saved.targetDifficultyWeighted);
     difficultyLabel.append(
       difficultyCheckbox,
-      document.createTextNode(' Adjust by how you do in each subject and task type')
+      document.createTextNode(' Adjust by subject and task type performance')
     );
 
     difficultyCheckbox.addEventListener('change', () => {
@@ -102,11 +102,11 @@
       topHeader.style.alignItems = 'center';
       topHeader.style.marginBottom = '6px';
 
-      const topTitle = createEl('strong', '', 'Subjects That Can Count:');
+      const topTitle = createEl('strong', '', 'Top Four From:');
       topTitle.style.fontSize = '12px';
 
       const selectedCount = eligibleCourses.filter(c => !excludedSubjects.has(c.id || c.name)).length;
-      const countSpan = createEl('span', 'cta-count-span', `${selectedCount} of ${eligibleCourses.length} ticked, your best 4 count`);
+      const countSpan = createEl('span', 'cta-count-span', `${selectedCount} of ${eligibleCourses.length} selected`);
 
       topHeader.append(topTitle, countSpan);
       topFourContainer.append(topHeader);
