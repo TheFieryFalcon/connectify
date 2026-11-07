@@ -217,7 +217,8 @@ Extremely concise summary of the core visual design language, contrast standards
   - **Bonuses end with the class of 2028** (`atar-typical-bonus.js`, Test 359)
     - a student finishing Year 12 in 2028 or later gets no Methods, Specialist or language bonus in any ATAR: Estimate, Target, Predict, goals
     - the class: the school year (a calendar year in the class titles, else today's, the next one when this year's classes arrived from July on) plus 1 in Year 11
-    - the TEA rises instead by the share of TEA students at that best four typically earned in bonuses: 0.35% at TEA 216 (ATAR 70), 0.8% at 235 (80), 1.8% at 264 (90), 3.2% at 303 (97), 3.7% from 350 (99.5) (straight Cs about 1%, straight As about 3.5%)
+    - the TEA rises instead by the share of TEA students at that best four typically earned in bonuses: 0.4% at TEA 236 (ATAR 80), 1.8% at 265 (90), 3.8% at 301 (97), 4.4% at 330 (99), 4.5% from 347 (99.5) (straight Cs under 1%, straight As about 4.5%)
+    - students who took a bonus course without using it in their ATAR rank above its users' median ATAR: four other courses beat it (Methods 92% and Specialist 75% at ATAR 99)
     - only the best two of Methods, Specialist and a language earn a bonus: a student with all three counts two
     - derived, never typed in: `scripts/derive-typical-bonus.js` reads TISC's 2025 TR307C (students and median ATAR per course) and ATAR distribution (`scripts/data/tisc-atar-frequency-2025.json`), fits each bonus course's take-up by ATAR to both, and Test 359 checks `RATES` against it
     - it follows the projected TEA, never held like an earlier class's current bonus, and reads `typical bonus`

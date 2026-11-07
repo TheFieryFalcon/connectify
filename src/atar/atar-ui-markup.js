@@ -12,7 +12,7 @@
   const { createEl } = window.ConnectifyTargetUiHelpers;
 
   const METHOD_NOTES = [
-    'Scores round to whole numbers before the best four and bonuses are calculated; exact .5 values round down (69.9 → 70; 69.5 → 69). Each school mark (entered or from Connect) is scaled with TISC Average Marks Scaling; best four included scaled scores, plus 10% of Methods, 10% of Specialist and 10% of the best language score. From the class of 2028 these bonuses are phased out: the TEA rises instead by the share students with that TEA typically earned in bonuses among 2025 school leavers (about 1% for straight Cs, 3.5% for straight As). General and other non-ATAR subjects are excluded. Estimates interpolate the published 2025 TISC table. Below the table range, <30 is shown.',
+    'Scores round to whole numbers before the best four and bonuses are calculated; exact .5 values round down (69.9 → 70; 69.5 → 69). Each school mark (entered or from Connect) is scaled with TISC Average Marks Scaling; best four included scaled scores, plus 10% of Methods, 10% of Specialist and 10% of the best language score. From the class of 2028 these bonuses are phased out: the TEA rises instead by the share students with that TEA typically earned in bonuses among 2025 school leavers (under 1% for straight Cs, about 4.5% for straight As). General and other non-ATAR subjects are excluded. Estimates interpolate the published 2025 TISC table. Below the table range, <30 is shown.',
     'Semester 2 uses the cumulative percentage shown by Connect. This does not check WACE eligibility, English competency or unacceptable course combinations. Exclude an incompatible subject before calculating. No marks are sent to another website.'
   ];
 

@@ -17174,9 +17174,13 @@ runTest('Test 359: From the class of 2028 ATAR estimates add the typical bonus f
     assert.strictEqual(model.students, 8445 + 1553 + 198, 'every student through English, Literature and EAL/D');
     assert.strictEqual(model.published, 10265, 'over the published 2025 ATAR distribution');
     assert.ok(Math.abs(model.median - 83.9) < 0.1, 'whose median ATAR is 83.9');
-    const tr = Object.fromEntries(derived.TR307C_2025.map(([name, n, median]) => [name, { n, median }]));
+    const tr = Object.fromEntries(derived.TR307C_2025.map(([name, n, used, median]) => [name, { n, used, median }]));
     assert.deepStrictEqual([tr['Mathematics Methods'], tr['Mathematics Specialist'], tr['Japanese: Second Language']],
-      [{ n: 3724, median: 92.55 }, { n: 1179, median: 97.00 }, { n: 240, median: 93.45 }], 'TR307C as published');
+      [{ n: 3724, used: 2936, median: 92.55 }, { n: 1179, used: 851, median: 97.00 }, { n: 240, used: 179, median: 93.45 }], 'TR307C as published');
+    assert.ok(derived.TR307C_2025.every(([, n, used]) => used <= n), 'users never outnumber students');
+    // Students who took a course without using it rank above its users' median (four other courses beat it)
+    const src = origReadFileSync.call(fs, path.join(BASE_DIR, 'scripts/derive-typical-bonus.js'), 'utf8');
+    assert.ok(src.includes('fitTakeUp(grid, n, m, used / 2 + (n - used))'), 'half the users and every non-user above the median');
     const levels = model.rows;
     assert.ok(levels.every((r, i) => !i || (r.methods >= levels[i - 1].methods && r.specialist >= levels[i - 1].specialist && r.expected > levels[i - 1].expected && r.tea > levels[i - 1].tea)), 'stronger students take more bonus courses');
     assert.ok(levels.every(r => r.specialist <= r.methods && r.expected <= 2), 'Specialist students take Methods; two bonuses at most');
@@ -17186,7 +17190,9 @@ runTest('Test 359: From the class of 2028 ATAR estimates add the typical bonus f
     assert.strictEqual(T.rate(100), T.RATES[0][1], 'flat below the first point');
     assert.ok(Math.abs(T.rate((T.RATES[3][0] + T.RATES[4][0]) / 2) - (T.RATES[3][1] + T.RATES[4][1]) / 2) < 1e-9, 'linear between points');
     assert.ok(T.rate(430) < 0.05 && T.rate(430) === T.RATES[T.RATES.length - 1][1], 'flat past the last point, under the 5% ceiling');
-    assert.ok(T.rate(240) < 0.011 && T.rate(340) > 0.035, 'straight Cs about 1%, straight As about 3.5%');
+    assert.ok(T.rate(240) < 0.01 && T.rate(340) > 0.044, 'straight Cs under 1%, straight As about 4.5%');
+    const at99 = levels.find(r => r.atar === 99);
+    assert.ok(at99.methods > 0.9 && at99.specialist > 0.7, 'nearly every ATAR 99 student takes Methods, most Specialist');
     assert.strictEqual(T.bonus(300), Math.round(300 * T.rate(300) * 10) / 10);
 
     // The class: the school year plus the years left to Year 12
