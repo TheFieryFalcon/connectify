@@ -168,18 +168,18 @@ html.connectify-dark[data-connectify-tone="light"] .connect-blue-light strong {
   color: inherit !important;
 }
 
-/* Dialog backdrops: dark-ink glass themes brighten the page behind a dialog (detail views such as View Notice)
-   instead of the navy dim the dark glass themes use (theme-tokens.css), so the dark text keeps its contrast */
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .v-window-modalitycurtain,
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .modal-backdrop,
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .yui3-widget-mask,
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .ui-widget-overlay,
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cdk-overlay-backdrop,
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cdk-overlay-dark-backdrop,
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .mat-drawer-backdrop,
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .eds-c-modal-overlay,
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .eds-c-overlay,
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cvr-c-overlay,
-html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) .cx-overlay {
+/* Dialog backdrops: every dark-ink theme brightens the page behind a dialog (detail views such as View Notice)
+   instead of the black or navy dim of the dark themes (theme-tables.css, theme-tokens.css), so nothing turns dark */
+html.connectify-dark[data-connectify-tone="light"] .v-window-modalitycurtain,
+html.connectify-dark[data-connectify-tone="light"] .modal-backdrop,
+html.connectify-dark[data-connectify-tone="light"] .yui3-widget-mask,
+html.connectify-dark[data-connectify-tone="light"] .ui-widget-overlay,
+html.connectify-dark[data-connectify-tone="light"] .cdk-overlay-backdrop,
+html.connectify-dark[data-connectify-tone="light"] .cdk-overlay-dark-backdrop,
+html.connectify-dark[data-connectify-tone="light"] .mat-drawer-backdrop,
+html.connectify-dark[data-connectify-tone="light"] .eds-c-modal-overlay,
+html.connectify-dark[data-connectify-tone="light"] .eds-c-overlay,
+html.connectify-dark[data-connectify-tone="light"] .cvr-c-overlay,
+html.connectify-dark[data-connectify-tone="light"] .cx-overlay {
   background-color: rgba(255, 255, 255, 0.45) !important;
 }

@@ -567,9 +567,16 @@ Extremely concise summary of the core visual design language, contrast standards
   - `theme-light-tone.css`
     - re-inks data colours (category labels, scenario labels, High pills/cards, chart keys, date warning, Attendance labels) at OKLCH lightness 0.34 keeping hue and chroma
     - turns Connect's dark status pills (Overdue, locked, blue-light) into light tints with dark ink
+  - **No dark colours in a light theme** (`theme-light-tone-2.css`, Test 358)
+    - every dark fill or pale ink a `.connectify-dark` rule writes as a literal has a light-tone rule for the same element
+    - semantic boxes (Top 4, the cold-start notice, Connect's alerts, badges and status labels) become a 14% tint of their hue with a 45% edge, inked at OKLCH 0.34
+    - Low and Mid prediction cards and pills a faint ink or accent tint, task-type badges a tint of their category colour
+    - dialog backdrops brighten (white 45%) in every light-tone theme, glass or solid
+    - the WACE countdown is a light gold tint in Light and light tone, its dark card only in dark-ink themes (`wace-countdown.css`)
+    - kept: white glyphs on Connect's class colour, white ink on the red Clear Cache and the notification buttons
     - edges the sidebar handle in the ink colour
     - draws the ring around an empty state's icon in black (`#000000`; other themes keep Connect's pale ring)
-    - in Liquid Glass brightens the page behind a dialog (white 45%) instead of the dark glass themes' navy dim, so detail views such as View Notice keep their dark text readable
+    - brightens the page behind a dialog (white 45%) instead of the dark themes' black or navy dim, so detail views such as View Notice keep their dark text readable
   - The Weaknesses plot
     - its labels, ring percentages and messages take the ink
     - its scores and warning, like the Settings delete ✕ and "Cache cleared!" note, go to OKLCH 0.30 because they sit straight on the drawer glass (Test 186)

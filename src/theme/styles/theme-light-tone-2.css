@@ -1,0 +1,104 @@
+/**
+ * Connectify Theme: light-tone fills. The dark themes paint semantic boxes (Top 4, the cold-start notice, Connect's
+ * alerts, badges and status labels) as dark fills with pale ink; a light tone (grey Liquid Glass, light custom themes)
+ * has dark ink on light surfaces, so each becomes a light tint of its own hue (14%, a 45% edge) with the hue at OKLCH
+ * lightness 0.34 as its ink, like the High card in theme-light-tone.css. Low and Mid prediction cards and pills,
+ * and task-type badges, take a tint instead of the dark theme's elevated surface. Each element names its hue once
+ * (--cx-lt-hue); one rule paints them all. Browsers without relative colours keep the theme ink.
+ */
+
+html.connectify-dark[data-connectify-tone="light"] .cx-pred-top4-badge:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .badge-success:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-success:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-inverse-success:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .alert-success:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .portlet-msg-success:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n) {
+  --cx-lt-hue: #22c55e;
+}
+
+html.connectify-dark[data-connectify-tone="light"] .badge-info:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-info:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-inverse-info:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .alert-info:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .portlet-msg-info:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .portlet-msg-help:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n) {
+  --cx-lt-hue: #3b82f6;
+}
+
+html.connectify-dark[data-connectify-tone="light"] .cx-pred-unpredicted-notice:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .badge-warning:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-warning:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-inverse-warning:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .cvr-c-status-label--featured:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .alert-warning:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .portlet-msg-alert:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n) {
+  --cx-lt-hue: #eab308;
+}
+
+html.connectify-dark[data-connectify-tone="light"] .eds-u-theme-multiplier.eds-t-red .cvr-c-standard-label:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .cvr-c-attendance .eds-t-red.cvr-c-standard-label:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .badge-danger:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-danger:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-inverse-danger:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .alert-danger:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .portlet-msg-error:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n) {
+  --cx-lt-hue: #ef4444;
+}
+
+html.connectify-dark[data-connectify-tone="light"] .cvr-c-status-label--draft:not(#cx-n) {
+  --cx-lt-hue: var(--cx-text-primary, #1d1c1c);
+}
+
+html.connectify-dark[data-connectify-tone="light"] .cx-pred-top4-badge:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .badge-success:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-success:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-inverse-success:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .alert-success:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .portlet-msg-success:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .badge-info:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-info:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-inverse-info:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .alert-info:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .portlet-msg-info:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .portlet-msg-help:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .cx-pred-unpredicted-notice:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .badge-warning:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-warning:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-inverse-warning:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .cvr-c-status-label--featured:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .alert-warning:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .portlet-msg-alert:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .eds-u-theme-multiplier.eds-t-red .cvr-c-standard-label:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .cvr-c-attendance .eds-t-red.cvr-c-standard-label:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .badge-danger:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-danger:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .label-inverse-danger:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .alert-danger:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .portlet-msg-error:not([class*="timeout"]):not([class*="session"]):not([id*="session"]):not([id*="timeout"]):not(.popup-alert-notice):not(.popup-alert-warning):not(.portal-session-warning):not(.session-timeout):not(.cvr-c-timeout-alert):not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .cvr-c-status-label--draft:not(#cx-n) {
+  background-color: color-mix(in srgb, var(--cx-lt-hue) 14%, transparent) !important;
+  border-color: color-mix(in srgb, var(--cx-lt-hue) 45%, transparent) !important;
+  color: var(--cx-text-primary, #1d1c1c) !important;
+  color: oklch(from var(--cx-lt-hue) 0.34 c h) !important;
+}
+
+/* Low prediction cards and pills: a faint ink tint, never the dark theme's elevated surface */
+html.connectify-dark[data-connectify-tone="light"] .cx-pred-scenario-card--low:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .cx-pred-pill--low:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .cx-pred-pill:not(.cx-pred-pill--mid):not(.cx-pred-pill--high):not(#cx-n) {
+  background: color-mix(in srgb, var(--cx-text-primary, #1d1c1c) 5%, transparent) !important;
+  border-color: color-mix(in srgb, var(--cx-text-primary, #1d1c1c) 22%, transparent) !important;
+}
+
+/* Mid: a light accent tint with the accent edge, never mixed into the surface (dark on a glass surface) */
+html.connectify-dark[data-connectify-tone="light"] .cx-pred-scenario-card--mid:not(#cx-n),
+html.connectify-dark[data-connectify-tone="light"] .cx-pred-pill--mid:not(#cx-n) {
+  background: color-mix(in srgb, var(--cx-accent, #3b82f6) 14%, transparent) !important;
+  box-shadow: none !important;
+}
+
+/* Task-type badges: a tint of the category's own colour (their ink is re-inked in theme-light-tone.css) */
+html.connectify-dark[data-connectify-tone="light"] #connectify-sidebar .cx-pred-task-type-badge:not(#cx-n) {
+  background-color: color-mix(in srgb, var(--cx-cat-color, #94a3b8) 14%, transparent) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cx-cat-color, #94a3b8) 45%, transparent) !important;
+}

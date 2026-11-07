@@ -8107,7 +8107,7 @@ runTest('Test 167: Dark and glass rules route theme colours through tokens, so c
   const allowed = new Set(['theme-feed.css #ffffff', 'theme-feed-3.css #ffffff', 'theme-search-scaling.css #991b1b', 'theme-search-scaling.css #ffffff',
     'theme-surfaces.css #166534', 'theme-surfaces.css #854d0e', 'theme-surfaces.css #991b1b', 'theme-surfaces.css #1e40af',
     'theme-surfaces.css #3b82f6', 'theme-surfaces-2.css #166534', 'theme-surfaces-2.css #854d0e', 'theme-surfaces-2.css #991b1b',
-    'theme-surfaces-2.css #1e40af', 'theme-surfaces-2.css #3b82f6', 'theme-tile-actions.css #1e40af']);
+    'theme-surfaces-2.css #1e40af', 'theme-surfaces-2.css #3b82f6', 'theme-tile-actions.css #1e40af', 'theme-light-tone-2.css #3b82f6']);
   const bare = [];
   for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.css') && !['theme-tokens.css', 'theme-customizer-preview.css'].includes(f))) {
     const css = read(f).replace(/\/\*[\s\S]*?\*\//g, '');
@@ -9996,11 +9996,11 @@ runTest('Test 215: A preset picked in the customizer keeps every colour it sets 
   assert.ok(core.includes('tokenSet.fromPreset(state, preset, themeTokens(preset))') && core.includes('tokenSet.track(state, '), 'the preset select goes through fromPreset; opening tracks the theme\'s own colours');
 });
 
-runTest('Test 216: Dark-ink glass themes brighten the page behind a dialog instead of dimming it', () => {
+runTest('Test 216: Dark-ink themes brighten the page behind a dialog instead of dimming it', () => {
   const css = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles', file), 'utf8');
   const lightTone = css('theme-light-tone.css');
   const rule = lightTone.slice(lightTone.indexOf('/* Dialog backdrops'));
-  assert.ok(rule.includes('html.connectify-dark[data-connectify-tone="light"]:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])'), 'scoped to light-tone glass themes');
+  assert.ok(rule.includes('html.connectify-dark[data-connectify-tone="light"] .v-window-modalitycurtain') && !rule.includes('liquid-glass'), 'every light-tone theme, glass or solid');
   for (const sel of ['.cdk-overlay-dark-backdrop', '.cdk-overlay-backdrop', '.v-window-modalitycurtain', '.modal-backdrop']) assert.ok(rule.includes(sel), `${sel} is brightened`);
   assert.ok(/background-color: rgba\(255, 255, 255, 0\.45\) !important/.test(rule), 'a white overlay brightens the backdrop');
   assert.ok(css('theme-tokens.css').includes('background-color: rgba(11, 17, 32, 0.45) !important'), 'light-ink glass themes keep the navy dim');
@@ -17097,6 +17097,68 @@ runTest("Test 355: Exam weeks never start a new year: Connect's empty outlines d
     window.ConnectifyOutlineApi = saved.api; window.ConnectifyYearHold = saved.hold; window.ConnectifyYearCapsule = saved.capsule;
     mockLocalStorage.clear();
   }
+});
+
+runTest('Test 358: Light-tone themes never keep a dark theme\'s dark fill or pale ink', () => {
+  // A dark-classed theme with dark ink (grey Liquid Glass, light custom themes) inherits every .connectify-dark rule, so a
+  // literal dark fill or pale ink there needs a light-tone rule for the same element (theme-light-tone*.css or beside it)
+  const files = [];
+  (function walk(dir) {
+    for (const f of fs.readdirSync(dir)) {
+      const p = path.join(dir, f);
+      if (fs.statSync(p).isDirectory()) walk(p); else if (p.endsWith('.css')) files.push(p);
+    }
+  })(SRC_DIR);
+  const withoutVars = v => v.replace(/var\((?:[^()]|\([^()]*\))*\)/g, 'VAR');
+  const lum = h => {
+    let x = h.slice(1); if (x.length === 3) x = [...x].map(c => c + c).join('');
+    return [0, 2, 4].map(i => parseInt(x.slice(i, i + 2), 16) / 255)
+      .map(c => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+      .reduce((a, c, i) => a + c * [0.2126, 0.7152, 0.0722][i], 0);
+  };
+  const subjects = sel => sel.split(',').map(s => (s.trim().split(/\s+/).pop() || '')
+    .replace(/:(not|where|is)\((?:[^()]|\([^()]*\))*\)/g, '').match(/[.#][\w-]+/g) || []).filter(s => s.length);
+  const rules = [];
+  for (const f of files) {
+    const css = origReadFileSync.call(fs, f, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const re = /([^{}]+)\{([^{}]*)\}/g; let m;
+    while ((m = re.exec(css))) rules.push({ file: path.relative(SRC_DIR, f), sel: m[1].trim(), body: m[2] });
+  }
+  const covered = new Set(rules.filter(r => r.sel.includes('[data-connectify-tone="light"]'))
+    .flatMap(r => subjects(r.sel).flat()));
+  // Kept on purpose: white glyphs on Connect's class colour, the danger and accent buttons' white-ink fills
+  const allowed = ['.mat-icon', '.card-scope-icon', '.cx-clear-cache-btn', '.cx-notification-btn--accent', '.cx-notification-btn--primary'];
+  const missing = [];
+  for (const r of rules) {
+    if (!r.sel.includes('connectify-dark') || r.sel.includes('data-connectify-tone')) continue;
+    for (const decl of r.body.split(';')) {
+      const [prop, ...rest] = decl.split(':'); const name = (prop || '').trim();
+      if (!/^(background|background-color|color|border|border-color|fill|-webkit-text-fill-color)$/.test(name)) continue;
+      const ink = /^(color|fill|-webkit-text-fill-color)$/.test(name);
+      for (const hex of withoutVars(rest.join(':')).match(/#[0-9a-f]{6}\b|#[0-9a-f]{3}\b/gi) || []) {
+        if (ink ? lum(hex) <= 0.45 : lum(hex) >= 0.2) continue;
+        const open = subjects(r.sel).filter(s => !s.some(t => covered.has(t) || allowed.includes(t)));
+        if (open.length) missing.push(`${r.file}: ${name} ${hex} on ${open.map(s => s.join('')).join(', ')}`);
+      }
+    }
+  }
+  assert.deepStrictEqual(missing, [], 'every dark-only colour has a light-tone rule');
+
+  // The fills theme-light-tone-2.css takes over are light tints of their hue, inked at OKLCH 0.34
+  const fills = origReadFileSync.call(fs, path.join(SRC_DIR, 'theme/styles/theme-light-tone-2.css'), 'utf8');
+  for (const sel of ['.cx-pred-top4-badge', '.cx-pred-unpredicted-notice', '.alert-warning', '.badge-danger', '.cx-pred-scenario-card--low', '.cx-pred-scenario-card--mid', '.cx-pred-task-type-badge']) {
+    assert.ok(fills.includes(`html.connectify-dark[data-connectify-tone="light"] ${sel}`) || fills.includes(`html.connectify-dark[data-connectify-tone="light"] #connectify-sidebar ${sel}`), `${sel} is re-filled in light tone`);
+  }
+  assert.ok(fills.includes('color-mix(in srgb, var(--cx-lt-hue) 14%, transparent)') && fills.includes('oklch(from var(--cx-lt-hue) 0.34 c h)'), 'a 14% tint with ink at 0.34');
+  const order = JSON.parse(origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8')).content_scripts.flatMap(g => g.css || []);
+  assert.strictEqual(order.indexOf('src/theme/styles/theme-light-tone-2.css'), order.indexOf('src/theme/styles/theme-light-tone.css') + 1, 'loaded right after theme-light-tone.css');
+  assert.ok(fills.split('\n').length <= 250, 'within 250 lines');
+
+  // The WACE countdown is styled in its stylesheet, never a dark inline box in Light
+  const countdown = origReadFileSync.call(fs, path.join(SRC_DIR, 'progress/wace-countdown.js'), 'utf8');
+  assert.ok(!/style\.(background|color|border)\s*=/.test(countdown), 'no inline colours on the countdown');
+  const countdownCss = origReadFileSync.call(fs, path.join(SRC_DIR, 'progress/wace-countdown.css'), 'utf8');
+  assert.ok(countdownCss.includes('html.connectify-dark:not([data-connectify-tone="light"]) #connectify-wace-countdown') && order.includes('src/progress/wace-countdown.css'), 'dark card only in dark-ink themes, registered');
 });
 
 Promise.all(pendingTestPromises).then(() => {

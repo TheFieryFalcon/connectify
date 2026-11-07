@@ -1,0 +1,24 @@
+/**
+ * Connectify: Year 12 WACE countdown card. A gold card with gold ink: on a dark surface in the dark themes, a light gold
+ * tint with the gold at OKLCH lightness 0.34 in Light and light-tone themes, so it is never a dark box on a light page.
+ */
+
+#connectify-wace-countdown.connectify-panel {
+  text-align: center !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  margin: 16px auto !important;
+  max-width: 600px !important;
+  border-radius: 6px !important;
+  padding: 8px 16px !important;
+  background: color-mix(in srgb, #d4b483 18%, transparent) !important;
+  border: 1px solid color-mix(in srgb, #a07a3a 55%, transparent) !important;
+  color: #5c4a24 !important;
+  color: oklch(from #d4b483 0.34 c h) !important;
+}
+
+html.connectify-dark:not([data-connectify-tone="light"]) #connectify-wace-countdown.connectify-panel {
+  background: var(--cx-surface-secondary, #333333) !important;
+  border-color: #d4b483 !important;
+  color: #d4b483 !important;
+}

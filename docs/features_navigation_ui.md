@@ -65,7 +65,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 ### 6. Year 12 WACE Exam Countdown Banner
 - **Source Module**: [`wace-countdown.js`](file:///Users/uwong/Downloads/2.1.14_0/wace-countdown.js)
 - **DOM Insertion**: Pre-pended to `#main-content` (`#connectify-wace-countdown`).
-- **UI Appearance**: Centered dark gold card with gold border and countdown typography (`⏳ 142 days until WACE Exams`).
+- **UI Appearance**: Centered gold card (`wace-countdown.css`: dark in dark themes, a light gold tint with dark gold ink in Light and light-tone themes) with gold border and countdown typography (`⏳ 142 days until WACE Exams`).
 - **Functionality**: Detects Year 12 ATAR enrolment, computes days until WACE examinations (late October), and dynamically indicates exam progress during active examination weeks.
 
 ### 7. Compound Subject Progress Bars

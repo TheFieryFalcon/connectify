@@ -25,16 +25,7 @@
       countdown = document.createElement('div');
       countdown.id = 'connectify-wace-countdown';
       countdown.className = 'connectify-panel';
-      countdown.style.textAlign = 'center';
-      countdown.style.fontWeight = 'bold';
-      countdown.style.fontSize = '14px';
-      countdown.style.margin = '16px auto';
-      countdown.style.maxWidth = '600px';
-      countdown.style.background = '#333333';
-      countdown.style.color = '#d4b483';
-      countdown.style.border = '1px solid #d4b483';
-      countdown.style.borderRadius = '6px';
-      countdown.style.padding = '8px 16px';
+      // Look in wace-countdown.css: a dark gold card in dark themes, a light gold tint in light ones
       mainContent.prepend(countdown);
     }
 
