@@ -37,7 +37,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 15. `src/cohort/cohort-size-baselines.js` (typical cohort sizes per subject and year level)
 16. `src/cohort/cohort-estimator.js` (cohort size estimate refined by boxplot spreads)
 17. `src/cohort/category-store.js` (default and saved assessment categories)
-18. `src/cohort/task-types.js` (assessment categorizer & overrides)
+18. `src/cohort/task-type-rules.js` (type detection by keyword specificity and subject), then `src/cohort/task-types.js` (assessment categorizer & overrides)
 19. `src/cohort/task-type-select.js` (row metadata, Type dropdown and Auto rescan)
 20. `src/cohort/cohort-outcome.js` (outcome meter DOM & breakout evaluation)
 21. `src/cohort/cohort-row-readers.js` (task row mark and boxplot readers, DOM helpers)

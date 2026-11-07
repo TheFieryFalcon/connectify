@@ -84,7 +84,7 @@ This document details user-facing visual features 1 through 10, covering direct 
 - **Source Modules**: [`cohort-view.js`](file:///Users/uwong/Downloads/2.1.14_0/cohort-view.js), [`task-types.js`](file:///Users/uwong/Downloads/2.1.14_0/task-types.js)
 - **DOM Insertion**: Inline in `.connectify-row-wrapper` adjacent to statistics panel.
 - **UI Appearance**: Compact dropdown selector (`Type: [ Auto (Exam) v ]`) with highlighted styling when overridden.
-- **Functionality**: Automated keyword categorizing; manual overrides (`Exam`, `Test`, `Application`, `Essay`, `Take-Home`); supports `+ Custom...` category creation shared across Semester 1 and 2 in that class (new names up to 16 characters). The dropdown is as wide as the chosen type (at most 160px, longer names end in an ellipsis), never its longest option.
+- **Functionality**: Automated keyword categorizing (the most specific keyword in the name or Connect's labels wins, so an Extended Response labelled Examination is an Exam and a Maths Response a Test); manual overrides (`Exam`, `Test`, `Application`, `Essay`, `Take-Home`); supports `+ Custom...` category creation shared across Semester 1 and 2 in that class (new names up to 16 characters). The dropdown is as wide as the chosen type (at most 160px, longer names end in an ellipsis), never its longest option.
 
 ### 9b. Content Page Downloads
 - **Source Modules**: `src/content/content-files.js`, `src/content/content-download.js`

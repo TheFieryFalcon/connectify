@@ -39,7 +39,7 @@
 
   // `chosenOnly` lists just the current choice: a long list of dropdowns builds the rest when one is used
   function updateTypeSelect(select, subjectName, taskName, labelsKey, allLabels, { chosenOnly = false } = {}) {
-    const autoType = categorizeTask(taskName, allLabels);
+    const autoType = categorizeTask(taskName, allLabels, subjectName);
     const savedOverride = getSavedTaskType(subjectName, taskName, labelsKey);
     const categories = getCategories();
     const classCustoms = getCustomCategoriesForClass(subjectName);

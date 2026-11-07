@@ -161,7 +161,7 @@ const SPLIT_PARTS = {
   'sidebar-predictor.css': ['sidebar-predictor.css', 'sidebar-predictor-results.css', 'sidebar-predictor-scroll.css'],
   'sidebar-settings.css': ['sidebar-settings.css', 'sidebar-progress-scaling.css'],
   'assessment-cache.js': ['cache-versions.js', 'assessment-cache.js'],
-  'task-types.js': ['category-store.js', 'task-types.js', 'task-type-select.js'],
+  'task-types.js': ['category-store.js', 'task-type-rules.js', 'task-types.js', 'task-type-select.js'],
   'cohort-estimator.js': ['cohort-size-baselines.js', 'cohort-estimator.js'],
   'target-solver.js': ['target-difficulty.js', 'target-solver.js'],
   'target-atar-ui.js': ['target-ui-helpers.js', 'target-atar-breakdown.js', 'target-atar-ui.js'],
@@ -2417,8 +2417,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v25_20261108_pred'"), 'predictor-math.js must use v25_20261108_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v25_20261108_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v25_20261108_pred');
+  assert.ok(predMathCode.includes("'v26_20261108_pred'"), 'predictor-math.js must use v26_20261108_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v26_20261108_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v26_20261108_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2512,9 +2512,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v25_20261108_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v26_20261108_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v25_20261108_pred'), 'predictor-math.js must bump version to v25_20261108_pred');
+  assert.ok(predMathJs.includes('v26_20261108_pred'), 'predictor-math.js must bump version to v26_20261108_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -16040,12 +16040,68 @@ runTest('Test 337: The radar measures a type within each subject and draws the c
 runTest('Test 338: A task nothing identifies reads as Unknown: never a guess at Take-Home', () => {
   const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
   const store = read('cohort/category-store.js'), typesJs = read('cohort/task-types.js'), select = read('cohort/task-type-select.js'), engine = read('predictor/predictor-engine.js');
-  assert.ok(store.includes("const UNKNOWN_TYPE = 'Unknown';") && typesJs.includes('return UNKNOWN_TYPE;'), 'the fallback');
-  assert.ok(!/return 'Take-Home';\s*\}\s*\/\/ Task ids/.test(typesJs), 'no fallback to Take-Home');
-  assert.ok(/\b(?:assignment\|project\|take\[- \]home\|oral\|creative)/.test(typesJs), 'named take-home work still reads as Take-Home');
+  assert.ok(store.includes("const UNKNOWN_TYPE = 'Unknown';") && typesJs.includes('defaultCategories) || UNKNOWN_TYPE;'), 'the fallback');
+  assert.ok(!typesJs.includes("return 'Take-Home';"), 'no fallback to Take-Home');
   assert.ok(select.includes("isUnknown ? 'Choose a type'"), 'its dropdown asks');
   assert.ok(engine.includes('const shifted = typed ? typeShift(historical, taskType) : null;'), 'and its prediction takes the subject\'s results alone');
   assert.ok(typesJs.includes('if (cat === UNKNOWN_TYPE) return UNKNOWN_COLOR;'), 'in one neutral colour');
+});
+
+runTest('Test 356: The most specific keyword decides a task\'s type, read in its subject\'s sense', () => {
+  const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
+  const saved = { Rules: window.ConnectifyTaskTypeRules, cats: window.cxCategories };
+  try {
+    delete window.ConnectifyTaskTypeRules;
+    eval(read('cohort/task-type-rules.js'));
+    const rules = window.ConnectifyTaskTypeRules;
+    const defaults = JSON.parse(JSON.stringify(window.ConnectifyCategoryStore.defaultCategories));
+    const type = (name, labels, subject, cats = defaults) => rules.classify(name, labels, subject, cats, defaults);
+    for (const [name, labels, subject, expected, why] of [
+      ['Extended Response', ['Examination', 'Term 4, Week 3', 'Extended Response'], 'Literature ATAR Year 12', 'Exam', 'an exam section: the condition outranks the vague word'],
+      ['Extended Response', ['Extended written response', 'Term 2, Week 4'], 'Literature ATAR Year 12', 'Essay', 'with nothing else named, a written response'],
+      ['Take-home extended response', [], 'Literature ATAR Year 12', 'Take-Home', 'take-home outranks response'],
+      ['Response 3', ['Response', 'Term 1, Week 6'], 'Mathematics Methods ATAR Year 12', 'Test', 'a Maths response is a test'],
+      ['Response 3', ['Response'], 'English ATAR Year 12', 'Essay', 'anywhere else a written response'],
+      ['Oral communication', ['Oral communication'], 'Japanese: Second Language ATAR Year 11', 'Application', 'a language oral is speaking'],
+      ['Oral presentation', [], 'English ATAR Year 11', 'Take-Home', 'other orals are presentations'],
+      ['Response: Listening', ['Response: Listening'], 'French: Second Language ATAR', 'Application', 'listening outranks response'],
+      ['Written communication', [], 'Indonesian: Second Language ATAR', 'Essay', 'writing in a language'],
+      ['Choral performance', [], 'Music ATAR Year 11', 'Application', 'never "oral" inside "Choral"'],
+      ['Moral dilemma essay', [], 'Philosophy and Ethics', 'Essay', 'never "oral" inside "Moral"'],
+      ['Worked example set', [], 'Chemistry ATAR', 'Unknown', 'never "exam" inside "example"'],
+      ['Science Inquiry: Enzymes', ['Science inquiry'], 'Biology ATAR Year 11', 'Application', 'a science inquiry'],
+      ['Extended response: Homeostasis', ['Extended response'], 'Human Biology ATAR', 'Essay', 'a science extended response'],
+      ['Source analysis', ['Source analysis'], 'Modern History ATAR', 'Essay', 'a source analysis'],
+      ['Historical inquiry', [], 'Modern History ATAR', 'Application', 'a historical inquiry'],
+      ['Explanation', ['Explanation'], 'Politics and Law ATAR', 'Essay', 'an explanation'],
+      ['Data interpretation/Short answer', [], 'Economics ATAR', 'Application', 'the longer phrase decides a tie'],
+      ['Case study', [], 'Legal Studies', 'Application', 'a case study'],
+      ['Aural and analysis', [], 'Music ATAR', 'Application', 'aural outranks analysis'],
+      ['Composition and arrangement', [], 'Music ATAR', 'Take-Home', 'a composition'],
+      ['Production', ['Production'], 'Media Production and Analysis ATAR', 'Take-Home', 'a media production'],
+      ['Semester 1 Investigation', [], 'Physics ATAR', 'Application', 'semester names a time, investigation the task'],
+      ['Semester 1', [], 'Physics ATAR', 'Exam', 'semester alone still reads as the exam'],
+      ['Validation test', [], 'Chemistry ATAR', 'Application', 'a validation is the investigation\'s'],
+      ['In-class essay', [], 'English ATAR', 'Test', 'in class is a condition'],
+      ['Test1', [], 'Chemistry ATAR', 'Test', 'a number after the word'],
+      ['Language study', ['Language study'], 'English as an Additional Language or Dialect ATAR', 'Unknown', 'nothing named']
+    ]) assert.strictEqual(type(name, labels, subject) || 'Unknown', expected, `${name} (${subject}): ${why}`);
+
+    // Settings decides its own words, and a custom category's keywords outrank a default's
+    const moved = JSON.parse(JSON.stringify(defaults));
+    moved.Essay.keywords = moved.Essay.keywords.filter(k => k !== 'response');
+    moved.Test.keywords.push('response');
+    assert.strictEqual(type('Response 2', [], 'English ATAR', moved), 'Test', 'a keyword moved in Settings moves with it');
+    assert.strictEqual(type('Lab report', [], 'Chemistry ATAR', { ...defaults, Lab: { color: '#123456', keywords: ['lab report'] } }), 'Lab');
+    assert.strictEqual(type('Exam', [], 'Chemistry ATAR', { ...defaults, Exam: { ...defaults.Exam, keywords: [] } }), null, 'a keyword removed in Settings is gone');
+
+    const typesJs = read('cohort/task-types.js');
+    assert.ok(typesJs.includes('return categorizeTask(taskName, labelsList, subjectName);') && read('cohort/task-type-select.js').includes('categorizeTask(taskName, allLabels, subjectName)'), 'every caller passes the subject');
+    const manifest = read('../manifest.json');
+    assert.strictEqual(manifest.split('"src/cohort/task-type-rules.js",\n            "src/cohort/task-types.js"').length, 3, 'loaded before task-types.js in both groups');
+  } finally {
+    window.ConnectifyTaskTypeRules = saved.Rules; window.cxCategories = saved.cats;
+  }
 });
 
 runTest('Test 339: Task Dates tells a repeated name by its semester, and asks for a week only on unmarked tasks', () => {

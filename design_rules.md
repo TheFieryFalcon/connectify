@@ -75,6 +75,12 @@ Extremely concise summary of the core visual design language, contrast standards
   - A task nothing identifies
     - reads as `Unknown` (grey `#94a3b8`), never a guess at Take-Home; its dropdown says `Choose a type`
     - its prediction takes the subject's results alone, and it is on no axis of the Weakness Analyzer, which counts such tasks in a note
+  - Detection (`task-type-rules.js`)
+    - the most specific keyword in the name or Connect's labels wins, never the first category listed
+    - conditions (exam, test, in class, take home, assignment) outrank formats (essay, investigation), which outrank vague words (response, analysis, semester)
+    - so an Extended Response labelled Examination is an Exam, a take-home one Take-Home, one with nothing else named an Essay
+    - a word reads in its subject's sense: a Maths Response is a Test, a language's oral is Application
+    - whole words only: `oral` is never `Choral`, `exam` never `example`
   - Text
     - Always formatted as `"Type: "` with trailing colon and space
   - The dropdown sizes to the chosen type, never its longest option

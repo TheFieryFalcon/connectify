@@ -127,39 +127,9 @@
     }));
   }
 
-  function categorizeTask(taskName, allLabels = []) {
-    const nameStr = (taskName || '').toLowerCase();
-    const cats = getCategories();
-
-    // 1. Prioritize explicit keyword match on taskName itself
-    for (const [cat, data] of Object.entries(cats)) {
-      if (data?.keywords?.some(k => k && nameStr.includes(k.toLowerCase()))) {
-        return cat;
-      }
-    }
-
-    // 2. Direct regex match on taskName for standard WA assessment types
-    if (/\b(?:exam|semester)\b/i.test(nameStr)) return 'Exam';
-    if (/\b(?:test|quiz)\b/i.test(nameStr)) return 'Test';
-    if (/\b(?:essay|short answer)\b/i.test(nameStr)) return 'Essay';
-    if (/\b(?:investigation|practical|experiment|validation|portfolio|speaking|listening|dictation)\b/i.test(nameStr)) return 'Application';
-    if (/\b(?:assignment|project|take[- ]home|oral|creative)\b/i.test(nameStr)) return 'Take-Home';
-
-    // 3. Match against labels
-    const labelsStr = (allLabels || []).join(' ').toLowerCase();
-    for (const [cat, data] of Object.entries(cats)) {
-      if (data?.keywords?.some(k => k && labelsStr.includes(k.toLowerCase()))) {
-        return cat;
-      }
-    }
-
-    // 4. Regex fallback on labels
-    if (/\b(?:exam|semester)\b/i.test(labelsStr)) return 'Exam';
-    if (/\b(?:test|quiz)\b/i.test(labelsStr)) return 'Test';
-    if (/\b(?:essay|short answer)\b/i.test(labelsStr)) return 'Essay';
-    if (/\b(?:investigation|practical|experiment|validation|portfolio)\b/i.test(labelsStr)) return 'Application';
-
-    return UNKNOWN_TYPE;
+  // The most specific keyword in the name and labels decides, read in the subject's sense (task-type-rules.js)
+  function categorizeTask(taskName, allLabels = [], subjectName = '') {
+    return window.ConnectifyTaskTypeRules.classify(taskName, allLabels, subjectName, getCategories(), defaultCategories) || UNKNOWN_TYPE;
   }
 
   // Task ids are JSON.stringify([labels, maxScore]) + ':n', so tasks cached before labelsKey existed still carry their labels
@@ -196,7 +166,7 @@
     }
 
     const labelsList = actualLabelsKey ? actualLabelsKey.split('::') : (task?.caption ? [task.caption] : []);
-    return categorizeTask(taskName, labelsList);
+    return categorizeTask(taskName, labelsList, subjectName);
   }
 
   function getCategoryColor(cat) {
