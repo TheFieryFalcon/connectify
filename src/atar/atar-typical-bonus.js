@@ -5,16 +5,29 @@
  * TEA that students with that best-four TEA typically earned in bonuses: stronger students took Methods and Specialist
  * far more often, and scored higher in them.
  *
- * The rates are derived from TISC's 2023 to 2025 scaled-score statistics (scaling-data.js) by
- * scripts/derive-typical-bonus.js: per 10-mark band of scaled score, how many students take Methods, Specialist and a
- * language (each course's enrolments scoring in the band against all students there), the best two worth 10% of the
- * score, as a share of the best-four TEA. Regenerate them with that script; Test 359 checks they match.
+ * The rates are derived from TISC's "WACE courses used in ATAR for 2025 school leavers" (TR307C) by
+ * scripts/derive-typical-bonus.js: each bonus course's take-up by ATAR, fitted to its number of students and their median
+ * ATAR, the best two worth 10% of a best-four average, as a share of the best-four TEA the TISC table gives that ATAR.
+ * Regenerate them with that script; Test 359 checks they match.
  */
 (function () {
   'use strict';
 
   /** [best-four TEA, bonus as a share of it]; linear between points, flat past the ends. */
-  const RATES = [[146, 0.0055], [186, 0.0069], [226, 0.0097], [266, 0.0151], [306, 0.0203], [346, 0.0252], [386, 0.0406]];
+  const RATES = [
+    [179, 0.0003],
+    [197, 0.0005],
+    [216, 0.001],
+    [236, 0.0053],
+    [248, 0.0131],
+    [263, 0.0241],
+    [275, 0.0313],
+    [286, 0.0367],
+    [300, 0.042],
+    [311, 0.0442],
+    [329, 0.0459],
+    [347, 0.0466]
+  ];
 
   function rate(baseTEA) {
     const tea = Number(baseTEA);
