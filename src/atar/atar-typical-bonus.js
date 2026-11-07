@@ -5,9 +5,10 @@
  * TEA that students with that best-four TEA typically earned in bonuses: stronger students took Methods and Specialist
  * far more often, and scored higher in them.
  *
- * The rates are derived from TISC's "WACE courses used in ATAR for 2025 school leavers" (TR307C) by
+ * The rates are derived from TISC's 2025 tables (WACE courses used in ATAR, TR307C, and the ATAR distribution) by
  * scripts/derive-typical-bonus.js: each bonus course's take-up by ATAR, fitted to its number of students and their median
- * ATAR, the best two worth 10% of a best-four average, as a share of the best-four TEA the TISC table gives that ATAR.
+ * ATAR over the real spread of ATARs, only the best two of the three earning 10% of a best-four average, as a share of
+ * the best-four TEA the TISC table gives that ATAR.
  * Regenerate them with that script; Test 359 checks they match.
  */
 (function () {
@@ -15,18 +16,18 @@
 
   /** [best-four TEA, bonus as a share of it]; linear between points, flat past the ends. */
   const RATES = [
-    [179, 0.0003],
-    [197, 0.0005],
-    [216, 0.001],
-    [236, 0.0053],
-    [248, 0.0131],
-    [263, 0.0241],
-    [275, 0.0313],
-    [286, 0.0367],
-    [300, 0.042],
-    [311, 0.0442],
-    [329, 0.0459],
-    [347, 0.0466]
+    [179, 0.0008],
+    [197, 0.0015],
+    [216, 0.0035],
+    [235, 0.0083],
+    [248, 0.0124],
+    [264, 0.0182],
+    [277, 0.0231],
+    [288, 0.0271],
+    [303, 0.0317],
+    [314, 0.034],
+    [333, 0.0362],
+    [350, 0.0373]
   ];
 
   function rate(baseTEA) {

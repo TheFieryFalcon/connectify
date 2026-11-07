@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 /**
  * Derives ConnectifyTypicalBonus.RATES (src/atar/atar-typical-bonus.js): the share of best-four TEA that students at
- * each level earned in Methods, Specialist and language bonuses, from TISC's "WACE courses used in ATAR for 2025 school
- * leavers" (TR307C, 18/12/2025): for every course, the 2025 school leavers with an ATAR and a scaled score in it, and the
- * median ATAR of those using it.
+ * each level earned in Methods, Specialist and language bonuses, from two TISC tables for 2025 school leavers:
+ * "WACE courses used in ATAR" (TR307C, 18/12/2025: for every course, the students with an ATAR and a scaled score in it,
+ * and the median ATAR of those using it) and the "ATAR Distribution for ATAR Calculator Population" (18/12/2025: how many
+ * students got each ATAR, data/tisc-atar-frequency-2025.json).
  *
- * 1. Every school leaver's ATAR. English, Literature and EAL/D hold one course per student (N students, their median M
- *    the student-weighted mean of the three medians). The ATAR ranks the whole age cohort, so above M, where nearly
- *    every member of the cohort is an ATAR student, students are spread evenly (N/2 over 100 - M); below, they thin out
- *    linearly to none (the other N/2).
+ * 1. Every school leaver's ATAR: the published distribution (10,265 students), scaled to TR307C's 10,196 (English,
+ *    Literature and EAL/D hold one course per student; TR307C leaves out mature age and international students).
  * 2. Each bonus course's take-up at ATAR a: a logistic curve in a, fitted so the course has its TR307C number of
  *    students and half of them above its median ATAR. Languages without a median (under 5 students) take the shape of
  *    the fitted languages, scaled to their numbers. Which courses carry a bonus: atar-math.js's bonusType.
- * 3. Expected bonus courses E(a), the best two counting: P_M + P_S + P_L - P_S P_L (Specialist students all take
- *    Methods; a language is taken independently of them). Each is worth 10% of the course's scaled score, taken as the
- *    student's best-four average (TEA / 4), so the bonus is 0.025 min(2, E) of the best-four TEA.
+ * 3. Expected bonus courses E(a): only the best two of Methods, Specialist and a language earn a bonus, so a student
+ *    with all three counts two. E = P_M + P_S + P_L - P(all three), with P(all three) = P_S P_L (Specialist students
+ *    all take Methods; a language is taken independently of them). Each is worth 10% of the course's scaled score, taken
+ *    as the student's best-four average (TEA / 4), so the bonus is 0.025 E of the best-four TEA (E is at most 2).
  * 4. The best-four TEA at ATAR a: the TISC table's TEA for a (atar-math.js), less the typical bonus it carried.
  *
  * Run `node scripts/derive-typical-bonus.js` to print the table; Test 359 checks RATES against it.
@@ -50,7 +50,6 @@ const TR307C_2025 = [
 
 /** ATARs the table is drawn at. */
 const ATARS = [50, 60, 70, 80, 85, 90, 93, 95, 97, 98, 99, 99.5];
-const STEP = 0.1;
 
 function load() {
   const window = { ConnectifyUtils: { normalize: s => String(s || '').toLowerCase().trim() } };
@@ -59,17 +58,15 @@ function load() {
   return window.ConnectifyMath;
 }
 
-/** Students per ATAR point: even above the median, thinning linearly below it. */
+/** Students at each ATAR: TISC's published distribution, scaled to TR307C's school leavers. */
 function atarDensity() {
-  const english = TR307C_2025.slice(0, 3);
-  const students = english.reduce((sum, [, n]) => sum + n, 0);
-  const median = english.reduce((sum, [, n, m]) => sum + n * m, 0) / students;
-  const top = students / 2 / (100 - median);
-  const floor = median - students / top;
-  const density = a => (a >= median ? top : a <= floor ? 0 : top * (a - floor) / (median - floor));
-  const grid = [];
-  for (let a = Math.max(0, floor); a <= 100 + 1e-9; a += STEP) grid.push([a, density(a) * STEP]);
-  return { students, median, top, floor, grid };
+  const students = TR307C_2025.slice(0, 3).reduce((sum, [, n]) => sum + n, 0);
+  const frequency = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/tisc-atar-frequency-2025.json'), 'utf8'));
+  const scale = students / frequency.students;
+  const grid = frequency.rows.map(([atar, count]) => [atar, count * scale]);
+  let below = 0;
+  const median = grid.slice().sort((x, y) => x[0] - y[0]).find(([, w]) => (below += w) >= students / 2)[0];
+  return { students, published: frequency.students, median, grid };
 }
 
 const logistic = (alpha, beta, a) => 1 / (1 + Math.exp(-(alpha + beta * (a - 90))));
@@ -94,7 +91,7 @@ function fitTakeUp(grid, n, median) {
 
 function derive() {
   const math = load();
-  const { students, median, top, floor, grid } = atarDensity();
+  const { students, published, median, grid } = atarDensity();
   const take = {};
   for (const [name, n, m] of TR307C_2025.slice(3)) {
     const type = math.bonusType(name);
@@ -114,11 +111,11 @@ function derive() {
   const rows = ATARS.map(atar => {
     const pm = methods(atar), ps = specialist(atar), pl = language(atar);
     const expected = pm + ps + pl - ps * pl;
-    const rate = 0.025 * Math.min(2, expected);
+    const rate = 0.025 * expected;
     const tea = teaAt(atar);
     return { atar, tea: Math.round(tea / (1 + rate)), methods: pm, specialist: ps, language: pl, expected, rate: Math.round(rate * 10000) / 10000 };
   });
-  return { students, median, top, floor, rows };
+  return { students, published, median, rows };
 }
 
 /** The table for atar-typical-bonus.js: [best-four TEA, rate], rising. */
@@ -130,8 +127,8 @@ function rates(rows = derive().rows) {
 module.exports = { TR307C_2025, derive, rates };
 
 if (require.main === module) {
-  const { students, median, top, floor, rows } = derive();
-  console.log(`${students} students, median ATAR ${median.toFixed(2)}: ${top.toFixed(0)} per ATAR point above it, none below ${floor.toFixed(1)}\n`);
+  const { students, published, median, rows } = derive();
+  console.log(`${published} students in the ATAR distribution, scaled to ${students}; median ATAR ${median.toFixed(2)}\n`);
   console.log('ATAR\tTEA\tMethods\tSpecial\tLanguage\tE\trate');
   for (const r of rows) {
     console.log([r.atar, r.tea, r.methods.toFixed(3), r.specialist.toFixed(3), r.language.toFixed(3), r.expected.toFixed(3), `${(r.rate * 100).toFixed(2)}%`].join('\t'));

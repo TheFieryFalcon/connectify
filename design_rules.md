@@ -217,8 +217,9 @@ Extremely concise summary of the core visual design language, contrast standards
   - **Bonuses end with the class of 2028** (`atar-typical-bonus.js`, Test 359)
     - a student finishing Year 12 in 2028 or later gets no Methods, Specialist or language bonus in any ATAR: Estimate, Target, Predict, goals
     - the class: the school year (a calendar year in the class titles, else today's, the next one when this year's classes arrived from July on) plus 1 in Year 11
-    - the TEA rises instead by the share of TEA students at that best four typically earned in bonuses: 0.1% at TEA 216 (ATAR 70), 0.5% at 236 (80), 2.4% at 263 (90), 4.2% at 300 (97), 4.7% from 347 (99.5) (straight Cs under 1%, straight As about 4.5%)
-    - derived, never typed in: `scripts/derive-typical-bonus.js` reads TISC's TR307C (2025 school leavers: students and median ATAR per course), fits each bonus course's take-up by ATAR to both, the best two worth 10%, and Test 359 checks `RATES` against it
+    - the TEA rises instead by the share of TEA students at that best four typically earned in bonuses: 0.35% at TEA 216 (ATAR 70), 0.8% at 235 (80), 1.8% at 264 (90), 3.2% at 303 (97), 3.7% from 350 (99.5) (straight Cs about 1%, straight As about 3.5%)
+    - only the best two of Methods, Specialist and a language earn a bonus: a student with all three counts two
+    - derived, never typed in: `scripts/derive-typical-bonus.js` reads TISC's 2025 TR307C (students and median ATAR per course) and ATAR distribution (`scripts/data/tisc-atar-frequency-2025.json`), fits each bonus course's take-up by ATAR to both, and Test 359 checks `RATES` against it
     - it follows the projected TEA, never held like an earlier class's current bonus, and reads `typical bonus`
 - **Weakness Analyzer** (`weakness-model.js`, `sidebar-radar.css`)
   - Measure
