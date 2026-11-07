@@ -13,7 +13,7 @@
  * chart lands; the caches wait for the whole load. A record whose content is unchanged keeps its object, so
  * only tiles that changed are drawn again.
  * Loads once per outlines page; fires connectify-outlines-loaded / connectify-outlines-failed. While a past year is
- * viewed (Past Years), its saved records stand in for Connect's and nothing is fetched.
+ * viewed (Past Years), its saved records stand in for Connect's and nothing is fetched; so do mock outlines'.
  * Exposes window.ConnectifyOutlineApi.
  */
 (() => {
@@ -158,11 +158,22 @@
     return preview;
   }
 
+  // Mock outlines (mock-outlines.js) stand in for Connect's: nothing is fetched. They arrive once the page has
+  // loaded, as a fetch's would, so every script (the rollover too) has heard of them
+  async function mockRecords() {
+    await new Promise(resolve => (document.readyState === 'complete' ? setTimeout(resolve, 0)
+      : window.addEventListener('load', () => setTimeout(resolve, 0), { once: true })));
+    preview = window.ConnectifyMockOutlines.records();
+    window.dispatchEvent(new CustomEvent('connectify-outlines-preview'));
+    return preview;
+  }
+
   /** Loads (or with force, reloads) every outline; resolves to the records, or null when Connect refused. */
   function load({ force = false } = {}) {
     if (pending) return pending;
     if (records && !force) return Promise.resolve(records);
-    pending = (window.ConnectifyPastYearMode?.active() ? pastRecords() : fetchRecords()).then(list => {
+    const source = window.ConnectifyPastYearMode?.active() ? pastRecords() : window.ConnectifyMockOutlines?.active() ? mockRecords() : fetchRecords();
+    pending = source.then(list => {
       records = list;
       failed = null;
       version++;

@@ -96,7 +96,8 @@
       label: shown.get(cleanSubjectName(s.name) || s.name),
       tasks: markedTasks(s).filter(t => t.isUnknown || typeFilter().isIncluded(t.type))
     }));
-    const { labels, you: data, cohort, untyped } = window.ConnectifyWeaknessModel.compute(groups, mode);
+    typeFilter().renderRelative(document.getElementById('cx-weakness-relative'), mode === 'type', renderChart);
+    const { labels, you: data, cohort, untyped } = window.ConnectifyWeaknessModel.compute(groups, mode, { relative: typeFilter().relative() });
 
     if (labels.length === 0) return show(view().message('No completed assessments to plot for the selected subjects and types.'));
     if (labels.length < 3) {

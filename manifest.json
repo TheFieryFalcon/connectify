@@ -107,11 +107,13 @@
             "src/atar/outline-jump.css",
             "src/goals/goal-celebrate.css",
             "src/system/changelog-popup.css",
-            "src/system/past-year.css"
+            "src/system/past-year.css",
+            "src/system/mock-outlines.css"
          ],
          "js": [
             "src/system/scheduler.js",
             "src/system/past-year-mode.js",
+            "src/system/mock-outlines.js",
             "src/system/utils.js",
             "src/system/user-settings-migrate.js",
             "src/system/subject-choice.js",
@@ -445,6 +447,7 @@
          "js": [
             "src/system/scheduler.js",
             "src/system/past-year-mode.js",
+            "src/system/mock-outlines.js",
             "src/system/utils.js",
             "src/system/user-settings-migrate.js",
             "src/system/subject-choice.js",

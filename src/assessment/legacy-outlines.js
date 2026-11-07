@@ -117,8 +117,8 @@
     let shown = [];
     let parent = null;
     let before = null;
-    // A past year's records (Past Years) are drawn whatever Connect shows, after its hidden cards
-    if (connectPending() || window.ConnectifyPastYearMode?.active()) {
+    // A past year's records (Past Years) and mock outlines are drawn whatever Connect shows, after its hidden cards
+    if (connectPending() || window.ConnectifyPastYearMode?.active() || window.ConnectifyMockOutlines?.active()) {
       parent = zone();
       if (!parent) return;
       shown = records;

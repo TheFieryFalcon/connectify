@@ -31,6 +31,8 @@
     const cache = window.ConnectifyCache;
     const classes = window.ConnectifyClassSemesters;
     if (!helpers || !cache?.subjectsCache || !classes) return console.warn('Connectify playground: Connectify scripts did not load');
+    // Mock outlines (scripts/mock-outlines-console.js) fill the caches themselves: the editor leaves them alone
+    if (window.ConnectifyMockOutlines?.active()) return;
     const { subjects, registry } = M.toConnectify(state, helpers);
 
     cache.subjectsCache.clear();

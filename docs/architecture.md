@@ -15,7 +15,7 @@ Connectify executes across both the webpage's `MAIN` execution world and the ext
 ### Execution Lifecycle & Dependency Pipeline
 All scripts for the assessment outlines page (`/group/students/ui/my-settings/assessment-outlines*`) load in strict dependency sequence under `src/`:
 1. `src/system/scheduler.js` (shared page observer and heartbeat; first in every isolated group)
-2. `src/system/past-year-mode.js` (the tab's Past Years choice, read by `accountKey()`), then `src/system/utils.js` (shared helpers: `normalize`, the signed-in user's account and `userKey`, storage key scans, baseline keys), then `src/system/user-settings-migrate.js` (once: shared student settings move to the signed-in student's keys) and `src/system/subject-choice.js` (the subject picked across tools)
+2. `src/system/past-year-mode.js` (the tab's Past Years choice, read by `accountKey()`) and `src/system/mock-outlines.js` (mock records instead of Connect's, as the `<account>~mock` student; styles `mock-outlines.css`), then `src/system/utils.js` (shared helpers: `normalize`, the signed-in user's account and `userKey`, storage key scans, baseline keys), then `src/system/user-settings-migrate.js` (once: shared student settings move to the signed-in student's keys) and `src/system/subject-choice.js` (the subject picked across tools)
 3. `src/assessment/cache-versions.js` (subsystem cache versions and isolated clearing, ConnectifyCache)
 4. `src/assessment/assessment-cache.js` (in-memory subjects and persistent stats cache)
 4b. `src/assessment/school-terms.js` (generated WA term dates, Early Easter choice, a date's term and week)

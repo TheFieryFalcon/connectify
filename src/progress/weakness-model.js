@@ -1,10 +1,11 @@
 /**
  * Connectify Weaknesses: what the radar plots
  *
- * Per subject: the student's and the cohort's weighted averages. Per type: the same measure the Predictor's type
- * shift uses, the overall average plus how each result of that type sits against its own subject's average, pooled,
- * so a weak subject full of one type says nothing about the type. The cohort's means go through the same sums, so the
- * two lines compare like with like. Tasks with no type yet count towards no type's axis.
+ * Per subject: the student's and the cohort's weighted averages. Per type: the weighted average of that type's
+ * results across subjects; with "Compare against subject average" (relative) the Predictor's type shift instead, the
+ * overall average plus how each result of that type sits against its own subject's average, pooled, so a weak subject
+ * full of one type says nothing about the type. The cohort's means go through the same sums, so the two lines compare
+ * like with like. Tasks with no type yet count towards no type's axis.
  * Exposes window.ConnectifyWeaknessModel.
  */
 (() => {
@@ -40,11 +41,21 @@
     return Object.fromEntries(Object.entries(gaps).map(([type, g]) => [type, clamp(overall + g.sx / g.sw)]));
   }
 
+  /** One line's value per type: the weighted average of that type's results, every subject together. */
+  function rawTypeValues(groups, key) {
+    const byType = {};
+    for (const { tasks } of groups) {
+      for (const t of tasks) if (Number.isFinite(t[key]) && !t.isUnknown) (byType[t.type] || (byType[t.type] = [])).push(t);
+    }
+    return Object.fromEntries(Object.entries(byType).map(([type, tasks]) => [type, clamp(mean(tasks, key))]));
+  }
+
   /**
    * `groups`: `[{ label, tasks: [{ score, mean, weight, type, isUnknown }] }]`, completed weighted tasks of the
    * included subjects -> `{ labels, you, cohort, untyped }`; cohort holds null where no mean is known.
+   * `relative`: types measured against each result's subject average (typeValues) instead of raw averages.
    */
-  function compute(groups, mode) {
+  function compute(groups, mode, { relative = false } = {}) {
     const untyped = groups.reduce((n, g) => n + g.tasks.filter(t => t.isUnknown).length, 0);
     if (mode === 'subject') {
       const shown = groups.filter(g => g.tasks.length);
@@ -55,8 +66,9 @@
         untyped
       };
     }
-    const you = typeValues(groups, 'score');
-    const cohort = typeValues(groups, 'mean');
+    const measure = relative ? typeValues : rawTypeValues;
+    const you = measure(groups, 'score');
+    const cohort = measure(groups, 'mean');
     const labels = Object.keys(you);
     return { labels, you: labels.map(l => you[l]), cohort: labels.map(l => cohort[l] ?? null), untyped };
   }

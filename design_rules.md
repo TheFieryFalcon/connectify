@@ -216,7 +216,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - at the bottom of Predict ATAR and Estimate ATAR: school marks only, WACE exams and moderation not included (`ATAR_DISCLAIMER`)
 - **Weakness Analyzer** (`weakness-model.js`, `sidebar-radar.css`)
   - Measure
-    - by type: the overall average plus how each result of the type sits against its own subject's average, pooled, so a weak subject full of one type says nothing about the type
+    - by type: each type's results averaged, weighted, every subject together
+    - with `Compare against subject average` (a tick under the type ticks, per student, off by default, greyed out by subject): the overall average plus how each result of the type sits against its own subject's average, pooled, so a weak subject full of one type says nothing about the type
     - by subject: plain weighted averages
   - Cohort
     - the cohort's means through the same sums, as a dashed line and a value under each label, with a You / Cohort legend
@@ -994,6 +995,14 @@ Extremely concise summary of the core visual design language, contrast standards
     - hands Connect its outlines response without task rows or class boxplots once Connectify has its own outlines
     - unchanged if Connectify's request fails, or after 10s
     - so Connect fetches no boxplots and renders bare cards whose titles, teacher links and filter menu Connectify still uses
+- **Mock Outlines** (`mock-outlines.js`, `scripts/mock-outlines-console.js`)
+  - What it is
+    - while localStorage holds `connectify:mock_outlines` (`{ records }`), Connectify draws those records instead of fetching Connect's, for testing while Connect shows no outlines
+  - A separate student
+    - every per-student key is the mock account's (`<account>~mock`), so the student's own class registry, snapshot and records are never read or written
+    - so Connect's real outlines can never start a new year from mock classes
+  - On screen
+    - Connect's cards, filter bars and empty state are hidden; a toast says mock outlines are on, with Exit
 - **Zero-Flicker Observers**
   - Page-wide observation and periodic work go through `ConnectifyScheduler`
     - `onMutations` with a filter and `mute`, `every` gated on activity, visibility and open panels

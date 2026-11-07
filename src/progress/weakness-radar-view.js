@@ -129,7 +129,7 @@
   }
 
   /** One card of include ticks with its Select All / Deselect All. */
-  const filterCard = (id, title, allId, noneId, boxesId) => `
+  const filterCard = (id, title, allId, noneId, boxesId, extra = '') => `
       <div id="${id}">
          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <strong style="font-size:12px;">${title}</strong>
@@ -139,7 +139,7 @@
               <button type="button" id="${noneId}" class="cx-weakness-filter-btn">Deselect All</button>
             </div>
          </div>
-         <div id="${boxesId}"></div>
+         <div id="${boxesId}"></div>${extra}
       </div>`;
 
   const PANEL_HTML = `
@@ -154,7 +154,7 @@
       <div id="connectify-radar-chart" style="width:100%;height:350px;overflow:hidden;"></div>
       <p id="cx-radar-note" class="cx-radar-note" hidden></p>
       ${filterCard('cx-weakness-filters', 'Include Subjects:', 'cx-weakness-all', 'cx-weakness-none', 'cx-weakness-checkboxes')}
-      ${filterCard('cx-weakness-type-filters', 'Include Types:', 'cx-weakness-types-all', 'cx-weakness-types-none', 'cx-weakness-type-checkboxes')}
+      ${filterCard('cx-weakness-type-filters', 'Include Types:', 'cx-weakness-types-all', 'cx-weakness-types-none', 'cx-weakness-type-checkboxes', '<div id="cx-weakness-relative"></div>')}
     `;
 
   window.ConnectifyWeaknessView = { message, warning, radarSvg, PANEL_HTML };

@@ -112,10 +112,12 @@
 
   /**
    * The student account: the signed-in user's own (see accountForUser); on a page that does not name its
-   * user, ?coisp=... (class ids excluded), else the last account seen, else 'current'. accountKey() is this one, but
-   * while a past year is viewed (past-year-mode.js) it names that year's copy, so every per-student key is the copy's.
+   * user, ?coisp=... (class ids excluded), else the last account seen, else 'current'; with mock outlines on
+   * (mock-outlines.js) the mock account beside it. accountKey() is this one, but while a past year is viewed
+   * (past-year-mode.js) it names that year's copy, so every per-student key is the copy's.
    */
-  function liveAccountKey() {
+  const liveAccountKey = () => ownAccountKey() + (window.ConnectifyMockOutlines?.suffix() || '');
+  function ownAccountKey() {
     if (userAccount) return userAccount;
     let coisp = null;
     try { coisp = new URL(location.href).searchParams.get('coisp'); } catch {}

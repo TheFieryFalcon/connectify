@@ -147,6 +147,19 @@
   padding: 12px 16px;
 }
 
+/* "Compare against subject average" under the type ticks, split from them by the card's hairline */
+#cx-weakness-relative:not(:empty) {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid;
+  border-top-color: inherit;
+}
+
+#connectify-sidebar #cx-weakness-relative .cx-weakness-checkbox-label:has(input:disabled) {
+  opacity: 0.55;
+  cursor: default !important;
+}
+
 #cx-weakness-checkboxes,
 #cx-weakness-type-checkboxes {
   display: grid;

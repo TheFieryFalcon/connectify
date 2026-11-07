@@ -7539,9 +7539,9 @@ runTest('Test 154: Shared utilities, settings reset clears every baseline key, a
 
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
   const outlines = manifest.content_scripts.find(cs => (cs.js || []).includes('src/assessment/assessment-cache.js'));
-  // The shared scheduler comes first (it depends on nothing), then the past-year switch utils.js reads, then utils.js
-  // before every other outlines script
-  assert.deepStrictEqual(outlines.js.slice(0, 3), ['src/system/scheduler.js', 'src/system/past-year-mode.js', 'src/system/utils.js'], 'scheduler.js, past-year-mode.js then utils.js must load before every other outlines content script');
+  // The shared scheduler comes first (it depends on nothing), then the past-year and mock switches utils.js reads, then
+  // utils.js before every other outlines script
+  assert.deepStrictEqual(outlines.js.slice(0, 4), ['src/system/scheduler.js', 'src/system/past-year-mode.js', 'src/system/mock-outlines.js', 'src/system/utils.js'], 'scheduler.js, past-year-mode.js, mock-outlines.js then utils.js must load before every other outlines content script');
   // The document_start boot group (pointer-kind.js, theme-boot.js) runs before the scheduler exists and never uses it
   const usesScheduler = c => (c.js || []).some(f => origReadFileSync.call(fs, path.resolve(__dirname, f), 'utf8').includes('ConnectifyScheduler'));
   for (const cs of manifest.content_scripts.filter(c => c.world !== 'MAIN' && (c.js || []).some(f => !f.includes('auto-login')) && (c.run_at !== 'document_start' || usesScheduler(c)))) {
@@ -16012,7 +16012,7 @@ runTest('Test 336: A subject picked in one tool is the subject another tool open
   assert.ok(groups.length && groups.every(g => g.js.indexOf('src/system/subject-choice.js') > g.js.indexOf('src/system/utils.js')), 'it loads after utils in every group');
 });
 
-runTest('Test 337: The radar measures a type within each subject and draws the cohort beside the student', () => {
+runTest('Test 337: The radar averages each type, or measures it within each subject, and draws the cohort beside the student', () => {
   const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
   const win = {};
   new Function('window', read('progress/weakness-model.js'))(win);
@@ -16024,8 +16024,18 @@ runTest('Test 337: The radar measures a type within each subject and draws the c
   ];
   const byType = win.ConnectifyWeaknessModel.compute(groups, 'type');
   assert.ok(!byType.labels.includes('Unknown') && byType.untyped === 1, 'a task with no type is on no axis, and counted');
-  assert.strictEqual(byType.you[byType.labels.indexOf('Essay')], byType.you[byType.labels.indexOf('Test')], 'a weak subject full of one type says nothing about the type');
+  const at = (result, type) => result.you[result.labels.indexOf(type)];
+  assert.deepStrictEqual([at(byType, 'Essay'), at(byType, 'Test'), at(byType, 'Exam')], [60, 90, 75], 'by default each type is its results\' plain weighted average');
+  assert.strictEqual(byType.cohort[byType.labels.indexOf('Exam')], 65, 'and the cohort\'s the same');
+  const relative = win.ConnectifyWeaknessModel.compute(groups, 'type', { relative: true });
+  assert.strictEqual(at(relative, 'Essay'), at(relative, 'Test'), 'compared against subject average, a weak subject full of one type says nothing about the type');
   assert.strictEqual(byType.you.length, byType.cohort.length, 'the cohort has a value per axis');
+
+  // "Compare against subject average": under the type ticks, per student, off by default, greyed out by subject
+  const filter = read('progress/weakness-type-filter.js');
+  assert.ok(filter.includes("const RELATIVE_KEY = 'connectify:weakness_relative';") && filter.includes("checkbox('Compare against subject average', relative()") && filter.includes('.disabled = !byType;'), 'the checkbox');
+  assert.ok(read('progress/weakness-radar-view.js').includes(`'cx-weakness-type-checkboxes', '<div id="cx-weakness-relative"></div>')`), 'in the Include Types card');
+  assert.ok(read('progress/weakness-radar.js').includes("compute(groups, mode, { relative: typeFilter().relative() })"), 'the radar reads it');
   const bySubject = win.ConnectifyWeaknessModel.compute(groups, 'subject');
   assert.deepStrictEqual([bySubject.labels, bySubject.you, bySubject.cohort], [['Literature', 'Physics'], [60, 90], [60, 70]], 'by subject: plain averages');
   const noMeans = win.ConnectifyWeaknessModel.compute([{ label: 'Art', tasks: [{ score: 70, weight: 10, type: 'Essay' }] }], 'subject');
@@ -16035,6 +16045,46 @@ runTest('Test 337: The radar measures a type within each subject and draws the c
   const svg = window.ConnectifyWeaknessView.radarSvg(['Exam', 'Test', 'Essay'], [72, 85, 64], [60, 70, 62]);
   assert.ok(svg.includes('class="cx-radar-cohort"') && svg.includes('Cohort 62%') && svg.includes('>You</text>'), 'a dashed cohort line, its values and a legend');
   assert.ok(!window.ConnectifyWeaknessView.radarSvg(['Exam', 'Test', 'Essay'], [72, 85, 64], [60, null, 62]).includes('cx-radar-cohort'), 'no partial cohort line');
+});
+
+runTest('Test 357: Mock outlines run as a separate student, drawn from records in localStorage, never fetching Connect\'s', () => {
+  const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
+  const make = stored => {
+    const win = { document: { documentElement: { setAttribute() {} } } };
+    const store = { 'connectify:mock_outlines': stored };
+    new Function('window', 'localStorage', 'document', 'setTimeout', 'location', read('system/mock-outlines.js'))(
+      win, { getItem: k => store[k] ?? null, removeItem: k => { delete store[k]; } }, win.document, () => {}, {});
+    return win.ConnectifyMockOutlines;
+  };
+  assert.strictEqual(make(null).suffix(), '', 'off without the key');
+  assert.strictEqual(make('{"records":"x"}').active(), false, 'records must be a list');
+  const on = make(JSON.stringify({ records: [{ title: 'A - Semester 1' }] }));
+  assert.ok(on.active() && on.suffix() === '~mock' && on.records().length === 1, 'on with records');
+
+  assert.ok(read('system/utils.js').includes("const liveAccountKey = () => ownAccountKey() + (window.ConnectifyMockOutlines?.suffix() || '');"), 'every per-student key is the mock account\'s');
+  const api = read('assessment/outline-api.js');
+  assert.ok(api.includes("window.ConnectifyMockOutlines?.active() ? mockRecords() : fetchRecords()") && api.includes("window.addEventListener('load'"), 'its records stand in for Connect\'s once the page has loaded, as a fetch\'s would');
+  assert.ok(read('assessment/legacy-outlines.js').includes('window.ConnectifyPastYearMode?.active() || window.ConnectifyMockOutlines?.active()'), 'every record is drawn');
+  const css = read('system/mock-outlines.css');
+  assert.ok(cssHas(css, 'html[data-cx-mock] cnt-sao-card') && cssHas(css, 'html[data-cx-mock] cnt-student-assessment-outlines cnt-no-content-panel'), 'Connect\'s cards and empty state are hidden');
+  const manifest = JSON.parse(read('../manifest.json'));
+  for (const group of manifest.content_scripts.filter(g => g.js?.includes('src/system/utils.js'))) {
+    assert.strictEqual(group.js.indexOf('src/system/mock-outlines.js'), group.js.indexOf('src/system/utils.js') - 1, 'right before utils.js in every group');
+  }
+
+  // The console helper builds a year as Connect's API reads: Semester 2 lists every task, weights total 100
+  const consoleWin = {};
+  new Function('window', 'localStorage', 'location', 'console', origReadFileSync.call(fs, path.resolve(BASE_DIR, 'scripts/mock-outlines-console.js'), 'utf8'))(consoleWin, {}, {}, { log() {} });
+  const records = consoleWin.cxMock.build();
+  assert.strictEqual(records.length, 14, 'seven classes, two outlines each');
+  for (const r of records.filter(r => r.semester === 2)) {
+    const tasks = r.outlines.flatMap(o => o.tasks);
+    assert.strictEqual(tasks.reduce((s, t) => s + Number(t.weightedMax), 0), 100, `${r.subject} weights total 100`);
+    const first = records.find(x => x.subject === r.subject && x.semester === 1);
+    assert.ok(first.outlines[0].tasks.every(t => tasks.some(u => u.taskId === t.taskId)) && /^[A-E]$/.test(first.grade) && !r.grade, `${r.subject}: Semester 1 graded, its tasks on Semester 2 too`);
+  }
+  assert.ok(records.some(r => r.outlines.some(o => o.tasks.some(t => !t.mark))), 'tasks left to mark');
+  assert.ok(consoleWin.cxMock.buildYear12().every(r => r.subject.startsWith('12 ')), 'and a Year 12 set for the rollover');
 });
 
 runTest('Test 338: A task nothing identifies reads as Unknown: never a guess at Take-Home', () => {
@@ -16646,8 +16696,8 @@ runTest('Test 349: A past year is read-only and quiet: drawn from its records, n
   const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
   const G = 'window.ConnectifyPastYearMode?.active()';
   const api = read('assessment/outline-api.js');
-  assert.ok(api.includes('(window.ConnectifyPastYearMode?.active() ? pastRecords() : fetchRecords())') && api.includes('`connectify:outline_records:${window.ConnectifyUtils.accountKey()}`'), "the year's saved records stand in for Connect's, nothing is fetched");
-  assert.ok(read('assessment/legacy-outlines.js').includes('if (connectPending() || window.ConnectifyPastYearMode?.active()) {'), 'every record is drawn, never matched to Connect\'s cards');
+  assert.ok(api.includes('window.ConnectifyPastYearMode?.active() ? pastRecords() : ') && api.includes('`connectify:outline_records:${window.ConnectifyUtils.accountKey()}`'), "the year's saved records stand in for Connect's, nothing is fetched");
+  assert.ok(read('assessment/legacy-outlines.js').includes('if (connectPending() || window.ConnectifyPastYearMode?.active() || '), 'every record is drawn, never matched to Connect\'s cards');
   const css = read('system/past-year.css');
   assert.ok(cssHas(css, 'html[data-cx-past-year] cnt-sao-card') && cssHas(css, 'html[data-cx-past-year] cnt-category-bar'), "Connect's cards and filter bar are this year's: hidden");
   assert.ok(cssHas(css, 'html[data-cx-past-year] cnt-student-assessment-outlines cnt-no-content-panel'), "Connect's \"No Assessment Outlines available.\" is about this year: hidden");
