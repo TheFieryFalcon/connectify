@@ -99,7 +99,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 63. `src/predictor/predictor-grade-projection.js` (subject grade projection)
 64. `src/predictor/predictor-atar-projection.js` (ATAR projection)
 65. `src/predictor/predictor-math.js` (predictor coordinator & Grade/ATAR projections)
-66. `src/predictor/year-archive.js` / `year-capsule.js` / `past-year-open.js` (Past Years: the archive, Connect's records kept through the year, opening a year's copy; `modules_past_years.md`), then `year-rollover.js` (new school year: last year's averages become baselines, last year archived)
+66. `src/predictor/year-archive.js` / `year-capsule.js` / `past-year-open.js` (Past Years: the archive, Connect's records kept through the year, opening a year's copy; `modules_past_years.md`), then `year-hold.js` (a new year waits until the old one is over: exam weeks) and `year-rollover.js` (new school year: last year's averages become baselines, last year archived)
 67. `src/predictor/predictor-task-cards.js` (upcoming assessment cards with escaped names)
 67b. `src/predictor/predictor-tab-scroll.js` (plain scrollbar under the subject tabs, no hover change)
 68. `src/predictor/predictor-grade-view.js` (subject grade predictor sub-tab renderer)

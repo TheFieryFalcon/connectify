@@ -887,6 +887,12 @@ Extremely concise summary of the core visual design language, contrast standards
     - The class registry (`class-semesters.js`) triggers it as soon as it sees a wholly new class set
     - the new year starts in Semester 1 (`startNewYear`), even in Term 4
     - viewing an earlier year never triggers it or enters the registry
+  - Exam weeks (`year-hold.js`)
+    - Connect hides outlines at times ("No Assessment Outlines available."), and Year 12 courses start in Term 4
+    - a load with fewer than two classes decides nothing: no rollover, snapshot, registry or records written
+    - a wholly new class set waits (`held`, not recorded) until the old year is over: every old class's latest outline shows its final letter, or its classes were last seen 21 days ago (`seenAt`, longer than an exam block)
+    - next year's classes shown beside this year's never join this year's snapshot, so the year still rolls over once this year's are gone
+    - the archive takes last year's classes only (tasks, marks, registry, records), never next year's read while it waited
   - Baselines
     - last year's averages of assessment types and subjects (the cache's final state over the last snapshot; grade cache marks preferred, only last year's classes)
     - become the baselines for types that are still categories and subjects still present (matched year-independently, e.g. `11 Chemistry ATAR` -> `12 Chemistry ATAR`)
@@ -894,7 +900,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - Archive
     - Connect never shows last year's marks again, so the cache is the only copy
     - last year's cached results are archived (`connectify:year_archive:`, last three years) before being cleared
-    - with Connect's own outline records of the year's last load, kept through the year apart from every cache (`year-capsule.js`), and the year's per-student settings
+    - with Connect's own outline records of the year, kept through the year apart from every cache (`year-capsule.js`; each load merged in, so a class hidden or shown without tasks keeps its record), and the year's per-student settings
     - in localStorage and in extension storage, one copy per class set (the richer one), so neither a full localStorage nor clearing the site's data loses a year
 - **Past Years** (`sidebar-past-years.js`, `past-year-open.js`, `past-year-mode.js`, `past-year-bar.js`)
   - What it is

@@ -8,6 +8,7 @@ Past Years shows a finished school year as it stood at its end: Assessment Outli
 
 ### Kept records (`year-capsule.js`, `ConnectifyYearCapsule`, outlines group)
 - **Why**: Connect never shows last year's marks again, so Connect's own outline records are kept through the year: `connectify:outline_records:<account>` (`{ classNames, records, savedAt }`), written on `connectify-outlines-loaded` when they changed. No cache version bump or Clear Cache removes them.
+- **Merged** (`mergeRecords`): Connect hides outlines at times (exam weeks), so a load never drops a class the year's records hold, and a record without tasks never replaces one with them; Connect's order first. `takeRecords` leaves out next year's classes (Year 12 courses shown in Term 4).
 - **New year first**: a load whose classes are all new waits until the rollover has taken last year's (`takeRecords(classNames)`), unless the year snapshot already names the new classes.
 - `settings()`: the year's per-student keys the rollover archives with it (task types, class categories, week overrides, calibration and calculators, baselines, cohort sizes), `{account}`-templated (`backup-sections.js`).
 

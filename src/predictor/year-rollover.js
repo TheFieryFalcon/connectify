@@ -7,8 +7,10 @@
  * cleared. Connect never shows last year's marks again, so before clearing, the final cached averages
  * (last year's classes only) are taken and the year is archived (year-archive.js) with Connect's outline
  * records of its last load (year-capsule.js), which Past Years draws. The class registry
- * (class-semesters.js) calls handleClassChange() as soon as it sees a wholly new class set. Viewing an
- * earlier year, on Connect or in Past Years, never triggers it. Exposes window.ConnectifyYearRollover.
+ * (class-semesters.js) calls handleClassChange() as soon as it sees a wholly new class set. It waits until the old
+ * year is over (year-hold.js: Connect hides outlines in exam weeks), and a load with fewer than two classes (Connect's
+ * empty state) decides nothing. Viewing an earlier year, on Connect or in Past Years, never triggers it.
+ * Exposes window.ConnectifyYearRollover.
  */
 (() => {
   'use strict';
@@ -19,6 +21,9 @@
   const stateKey = () => `connectify:year_snapshot:${accountKey()}`;
   const readJson = key => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } };
   const round1 = n => Math.round(n * 10) / 10;
+  const hold = () => window.ConnectifyYearHold;
+  // The old year is over (or no hold is loaded): a wholly new class set may roll it over
+  const yearOver = state => hold()?.isOver?.(state) ?? true;
 
   /** Class names on the page without the semester suffix, e.g. "12 Chemistry ATAR". */
   function liveClassNames() {
@@ -48,10 +53,12 @@
   const signature = names => [...names].sort().join('|');
 
   /**
-   * Decides what a page load means. Returns 'first' (nothing stored), 'same' (some class names match),
-   * 'new-year' (all names changed to a later or never-seen year) or 'other-year' (an earlier year).
+   * Decides what a page load means. Returns 'none' (fewer than two classes, e.g. Connect's empty state in exam
+   * weeks), 'first' (nothing stored), 'same' (some class names match), 'new-year' (all names changed to a later or
+   * never-seen year) or 'other-year' (an earlier year).
    */
   function classifyYear(liveNames, state) {
+    if ((liveNames?.length || 0) < (hold()?.MIN_CLASSES ?? 2)) return 'none';
     if (!state?.classNames?.length) return 'first';
     if (liveNames.some(n => state.classNames.includes(n))) return 'same';
     const now = yearMarker(liveNames);
@@ -66,9 +73,10 @@
    * only those classes' grade-cache marks count (a new year's "12 Chemistry" must not replace last
    * year's "11 Chemistry").
    */
+  // Grade-cache keys drop ATAR and "Year N" from the title (grade-snapshot.js extractSubjectName)
+  const gradeName = n => normalize(String(n).replace(/\s*[-–—]\s*Sem(?:ester)?\s*[12].*$/i, '').replace(/\bATAR\b/gi, '').replace(/\bYear\s*\d+\b/gi, ''));
+
   function currentAverages(subjects, classNames = null) {
-    // Grade-cache keys drop ATAR and "Year N" from the title (grade-snapshot.js extractSubjectName)
-    const gradeName = n => normalize(String(n).replace(/\s*[-–—]\s*Sem(?:ester)?\s*[12].*$/i, '').replace(/\bATAR\b/gi, '').replace(/\bYear\s*\d+\b/gi, ''));
     const gradeNames = classNames ? new Set(classNames.map(gradeName)) : null;
     const history = window.ConnectifyPredictorHistory?.getHistoricalData?.(subjects) || {};
     const types = {};
@@ -120,15 +128,19 @@
 
   // The cache is the only copy of last year's marks once Connect moves on: Past Years shows them from the archive
   // (year-archive.js), drawn from Connect's own records of the year's last load (year-capsule.js)
+  // Only last year's classes: next year's, read while the year waited to end (year-hold.js), stay out of its archive
   function archiveYear(state, averages) {
     const cache = window.ConnectifyCache;
     const archive = window.ConnectifyYearArchive;
+    const names = state.classNames || [];
+    const gradeNames = new Set(names.map(gradeName));
+    const only = (obj, keep) => (names.length ? Object.fromEntries(Object.entries(obj || {}).filter(([k]) => keep(k))) : obj || {});
     const entry = {
-      classNames: state.classNames || [],
+      classNames: names,
       averages,
-      subjects: cache?.serializeSubjects?.(cache.subjectsCache) || {},
-      grades: readJson(`connectify:grade_cache:${accountKey()}`) || {},
-      classSemesters: window.ConnectifyClassSemesters?.get?.() || {},
+      subjects: only(cache?.serializeSubjects?.(cache.subjectsCache), k => names.includes(k)),
+      grades: only(readJson(`connectify:grade_cache:${accountKey()}`), k => gradeNames.has(gradeName(k))),
+      classSemesters: only(window.ConnectifyClassSemesters?.get?.(), k => names.includes(k)),
       records: window.ConnectifyYearCapsule?.takeRecords?.(state.classNames || []) || null,
       settings: window.ConnectifyYearCapsule?.settings?.() || {},
       goals: window.ConnectifyGoalEvents?.endYear?.() || null,
@@ -163,14 +175,15 @@
   function startNewYear(state, liveNames) {
     rollingOver = true;
     try { rollOver(state, liveNames); } finally { rollingOver = false; }
-    saveState({ classNames: liveNames, seen: [...new Set([...(state.seen || []), signature(state.classNames || []), signature(liveNames)])].slice(-8), snapshot: null });
+    saveState({ classNames: liveNames, seen: [...new Set([...(state.seen || []), signature(state.classNames || []), signature(liveNames)])].slice(-8), seenAt: Date.now(), snapshot: null });
     window.ConnectifyClassSemesters?.startNewYear?.();
   }
 
   /**
    * Called by the class registry when every class on the page is new to it; previousNames are the
-   * registry's classes, used when no year snapshot was saved yet. Returns the classifyYear() kind,
-   * or 'restricted' while a Connect filter hides classes or a rollover is running.
+   * registry's classes, used when no year snapshot was saved yet. Returns the classifyYear() kind, 'held' for a
+   * new year while the old one is not over (year-hold.js), or 'restricted' while a Connect filter hides classes or a
+   * rollover is running.
    */
   function handleClassChange(liveNames, previousNames = []) {
     // A past year's copy (Past Years) is never a new year
@@ -179,7 +192,9 @@
     const state = loadState() || { classNames: [], seen: [], snapshot: null };
     if (!state.classNames?.length && previousNames.length) state.classNames = previousNames;
     const kind = classifyYear(liveNames, state);
-    if (kind === 'new-year') startNewYear(state, liveNames);
+    if (kind !== 'new-year') return kind;
+    if (!yearOver(state)) return 'held';
+    startNewYear(state, liveNames);
     return kind;
   }
 
@@ -187,24 +202,25 @@
     if (window.ConnectifyPastYearMode?.active()) return;
     if (window.ConnectifySidebarFilter?.isOutlinesFilterRestricted?.()) return;
     const liveNames = liveClassNames();
-    if (liveNames.length < 2) return;
     const state = loadState() || { classNames: [], seen: [], snapshot: null };
-    const sig = signature(liveNames);
     const kind = classifyYear(liveNames, state);
-    if (kind === 'other-year') return;
+    if (kind === 'none' || kind === 'other-year') return;
 
     if (kind === 'new-year') {
-      startNewYear(state, liveNames);
+      if (yearOver(state)) startNewYear(state, liveNames);
       return;
     }
 
-    // Same year (or first visit): remember the classes and refresh the snapshot from completed results
-    const subjects = (window.ConnectifyData?.collect?.(true) || []).filter(s => liveNames.includes(s.name));
+    // Same year (or first visit): remember the classes, when they were seen, and refresh the snapshot from
+    // completed results of every class this year (some may be hidden this load); next year's stay out
+    const yearNames = [...new Set([...(state.classNames || []), ...(hold()?.sameYearNames?.(liveNames, state) || liveNames)])];
+    const subjects = (window.ConnectifyData?.collect?.(true) || []).filter(s => yearNames.includes(s.name));
     const averages = currentAverages(subjects);
     const hasAverages = Object.keys(averages.types).length > 0 || Object.keys(averages.subjects).length > 0;
     saveState({
-      classNames: [...new Set([...(state.classNames || []), ...liveNames])],
-      seen: [...new Set([...(state.seen || []), sig])].slice(-8),
+      classNames: yearNames,
+      seen: [...new Set([...(state.seen || []), signature(liveNames)])].slice(-8),
+      seenAt: Date.now(),
       snapshot: hasAverages ? { ...averages, savedAt: Date.now() } : state.snapshot
     });
   }

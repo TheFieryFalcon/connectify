@@ -7687,7 +7687,9 @@ runTest('Test 157: A new school year turns last year\'s averages into baselines 
   assert.strictEqual(yr.classifyYear(['10 Science', '10 English'], y11), 'other-year', 'viewing an earlier year must not roll over');
   assert.strictEqual(yr.classifyYear(['Art', 'Drama'], { classNames: ['Chemistry', 'Physics'], seen: ['Art|Drama'] }), 'other-year');
   assert.strictEqual(yr.classifyYear(['Art', 'Drama'], { classNames: ['Chemistry', 'Physics'], seen: [] }), 'new-year');
-  assert.strictEqual(yr.classifyYear(['12 Chemistry ATAR'], { classNames: [] }), 'first');
+  assert.strictEqual(yr.classifyYear(['12 Chemistry ATAR', '12 Physics ATAR'], { classNames: [] }), 'first');
+  assert.strictEqual(yr.classifyYear([], y11), 'none', "Connect's empty state (exam weeks) decides nothing");
+  assert.strictEqual(yr.classifyYear(['12 Chemistry ATAR'], y11), 'none', 'nor does one class');
 
   // Only types that are still categories and subjects that still exist are carried over
   const snapshot = { types: { Exam: 71.26, Test: 80, Retired: 60 }, subjects: { chemistry: 83.5, literature: 59.6 } };
@@ -16851,6 +16853,130 @@ runTest('Test 353: Connect\'s toolbar icon toggles (the outlines\' class filter)
   assert.ok(menu.includes('.js-pos-category-toolbar-container .c-toolbar-button:not(#cx-n) {\n  background-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 10%, transparent) !important;') &&
     menu.includes('.js-pos-category-toolbar-container .c-toolbar-button:hover:not(#cx-n) {\n  background-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 14%, transparent) !important;'),
     'in Liquid Glass the filter toggle is a faint ink tint on the bar, never a pane of its own');
+});
+
+runTest("Test 355: Exam weeks never start a new year: Connect's empty outlines decide nothing, next year's classes wait until this year is over, and the year's records keep every class", () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  const origQSA = document.querySelectorAll;
+  const saved = {
+    cache: window.ConnectifyCache, scrape: window.ConnectifyAssessmentScrape, history: window.ConnectifyPredictorHistory, data: window.ConnectifyData,
+    store: window.ConnectifyPredictorBaselines, sidebarFilter: window.ConnectifySidebarFilter, notes: window.ConnectifyNotifications,
+    api: window.ConnectifyOutlineApi, hold: window.ConnectifyYearHold, capsule: window.ConnectifyYearCapsule
+  };
+  const DAY = 24 * 60 * 60 * 1000;
+  try {
+    mockLocalStorage.clear();
+    const { classes } = loadSemesterModules();
+    eval(read('predictor/year-archive.js'));
+    window.ConnectifyYearHold = undefined;
+    eval(read('predictor/year-hold.js'));
+    eval(read('predictor/year-rollover.js'));
+    const H = window.ConnectifyYearHold;
+    const yr = window.ConnectifyYearRollover;
+    const account = window.ConnectifyUtils.accountKey();
+    const snapKey = `connectify:year_snapshot:${account}`;
+    const y11Names = ['11 Chemistry ATAR', '11 Physics ATAR'];
+    const savedBaselines = [];
+    let cleared = 0;
+    window.ConnectifySidebarFilter = { isOutlinesFilterRestricted: () => false };
+    window.ConnectifyNotifications = { show: () => {} };
+    window.ConnectifyData = { collect: () => [] };
+    window.ConnectifyPredictorBaselines = { getBaselines: () => ({ types: {}, subjects: {} }), saveBaselines: b => savedBaselines.push(b) };
+    window.ConnectifyCache = {
+      subjectsCache: new Map(),
+      serializeSubjects: m => Object.fromEntries([...m].map(([k, v]) => [k, [...v.values()]])),
+      clearResultsCache: () => { cleared++; classes.clear(); }
+    };
+    window.ConnectifyAssessmentScrape = { formatCollectedSubjects: () => [] };
+    window.ConnectifyPredictorHistory = { getHistoricalData: () => ({ types: {}, subjects: {} }) };
+    const show = cards => { document.querySelectorAll = sel => (sel.includes('eds-c-tile') ? cards : origQSA(sel)); };
+
+    // This year's classes were on the page yesterday, without final letters
+    classes.recordCards([makeOutlineCard('11 Chemistry ATAR - Semester 2', { overall: '83%' }), makeOutlineCard('11 Physics ATAR - Semester 2', { overall: '77%' })]);
+    mockLocalStorage.setItem(snapKey, JSON.stringify({ classNames: y11Names, seen: [], seenAt: Date.now() - DAY, snapshot: null }));
+
+    // "No Assessment Outlines available.": nothing is read, decided or written
+    show([]);
+    yr.check();
+    assert.deepStrictEqual(JSON.parse(mockLocalStorage.getItem(snapKey)).classNames, y11Names, 'an empty page leaves the year as it was');
+    assert.strictEqual(yr.handleClassChange([], y11Names), 'none');
+    assert.strictEqual(cleared, 0);
+
+    // Only next year's classes while this year's are hidden for exams: the new year waits
+    const y12 = [makeOutlineCard('12 Chemistry ATAR - Semester 1'), makeOutlineCard('12 Physics ATAR - Semester 1')];
+    show(y12);
+    classes.recordCards(y12);
+    yr.check();
+    assert.strictEqual(cleared, 0, "this year's results are kept while its outlines are only hidden");
+    assert.strictEqual(savedBaselines.length, 0, 'no baselines roll over yet');
+    assert.strictEqual(mockLocalStorage.getItem(`connectify:year_archive:${account}`), null, 'nothing is archived');
+    assert.deepStrictEqual(Object.keys(classes.get()).sort(), y11Names, "next year's classes are not recorded while the year waits");
+    assert.deepStrictEqual(JSON.parse(mockLocalStorage.getItem(snapKey)).classNames, y11Names);
+
+    // This year's classes come back beside next year's: they are seen again, next year's never join this year
+    show([...y12, makeOutlineCard('11 Chemistry ATAR - Semester 2'), makeOutlineCard('11 Physics ATAR - Semester 2')]);
+    yr.check();
+    const back = JSON.parse(mockLocalStorage.getItem(snapKey));
+    assert.deepStrictEqual(back.classNames, y11Names, "Year 12 courses shown in Term 4 stay out of Year 11's classes");
+    assert.ok(Date.now() - back.seenAt < 1000, 'when this year was last seen');
+
+    // The year is over once every class shows its final letter on its latest outline...
+    const registry = { '11 Chemistry ATAR': { 1: { finalLetter: true }, 2: { finalLetter: false } }, '11 Physics ATAR': { 2: { finalLetter: true } } };
+    const state = { classNames: y11Names, seenAt: Date.now() };
+    assert.strictEqual(H.isOver(state, { registry }), false, 'a Semester 1 letter alone does not end the year');
+    registry['11 Chemistry ATAR'][2].finalLetter = true;
+    assert.strictEqual(H.isOver(state, { registry }), true);
+    // ...or once its classes have been gone longer than an exam block
+    assert.strictEqual(H.isOver(state, { registry: {}, now: Date.now() + (H.HOLD_DAYS - 1) * DAY }), false);
+    assert.strictEqual(H.isOver(state, { registry: {}, now: Date.now() + H.HOLD_DAYS * DAY }), true);
+    assert.strictEqual(H.isOver({ classNames: y11Names, snapshot: { savedAt: Date.now() } }, { registry: {} }), false, 'older snapshots count from when their averages were saved');
+    assert.strictEqual(H.isOver({ classNames: y11Names }, { registry: {} }), true, 'a snapshot that never says when keeps the old behaviour');
+    assert.ok(H.HOLD_DAYS >= 14 && H.MIN_CLASSES === 2);
+
+    // Gone for good: the rollover runs, and the archive holds last year's classes only
+    window.ConnectifyCache.subjectsCache = new Map([['11 Chemistry ATAR', new Map([['t', { id: 't', name: 'Test 1', score: 80 }]])], ['12 Chemistry ATAR', new Map([['u', { id: 'u', name: 'Quiz' }]])]]);
+    mockLocalStorage.setItem(`connectify:grade_cache:${account}`, JSON.stringify({ '11 Chemistry': { mark: 83 }, '12 Chemistry': { mark: 50 } }));
+    mockLocalStorage.setItem(snapKey, JSON.stringify({ ...back, seenAt: Date.now() - H.HOLD_DAYS * DAY }));
+    show(y12);
+    yr.check();
+    assert.strictEqual(cleared, 1, 'the new year starts once the old one is over');
+    const archive = JSON.parse(mockLocalStorage.getItem(`connectify:year_archive:${account}`));
+    assert.deepStrictEqual(Object.keys(archive[0].subjects), ['11 Chemistry ATAR'], "next year's tasks read while the year waited stay out of its archive");
+    assert.deepStrictEqual(Object.keys(archive[0].grades), ['11 Chemistry']);
+
+    // The year's outline records: a partial or task-less load never loses a class or its tasks
+    mockLocalStorage.clear();
+    window.ConnectifyYearCapsule = undefined;
+    eval(read('predictor/year-capsule.js'));
+    const C = window.ConnectifyYearCapsule;
+    const rec = (subject, tasks = 1) => ({ apiOutline: true, title: `${subject} - Semester 2`, subject, semester: 2, outlines: [{ tasks: Array.from({ length: tasks }, () => ({ name: 'Test' })) }] });
+    let records = [rec('11 Chemistry ATAR'), rec('11 Physics ATAR'), rec('11 English ATAR')];
+    window.ConnectifyOutlineApi = { records: () => records };
+    assert.ok(C.capture());
+    records = [rec('11 Chemistry ATAR', 0)];
+    assert.ok(!C.capture(), 'one class shown without its tasks changes nothing');
+    records = [rec('11 Chemistry ATAR', 2), rec('12 Chemistry ATAR')];
+    assert.ok(C.capture());
+    const kept = JSON.parse(mockLocalStorage.getItem(C.key()));
+    assert.deepStrictEqual(kept.records.map(r => [r.subject, r.outlines[0].tasks.length]),
+      [['11 Chemistry ATAR', 2], ['12 Chemistry ATAR', 1], ['11 Physics ATAR', 1], ['11 English ATAR', 1]], "Connect's order first, hidden classes kept");
+    assert.deepStrictEqual(C.takeRecords(['11 Chemistry ATAR', '11 Physics ATAR', '11 English ATAR']).map(r => r.subject),
+      ['11 Chemistry ATAR', '11 Physics ATAR', '11 English ATAR'], "the archive takes last year's classes only");
+
+    // The class registry waits too
+    assert.ok(read('assessment/class-semesters.js').includes("return !['other-year', 'restricted', 'held'].includes(kind);"));
+    const manifest = JSON.parse(origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8'));
+    const outlines = manifest.content_scripts.find(g => (g.js || []).includes('src/predictor/year-rollover.js'));
+    const at = f => outlines.js.indexOf(f);
+    assert.ok(at('src/predictor/year-archive.js') < at('src/predictor/year-hold.js') && at('src/predictor/year-hold.js') < at('src/predictor/year-rollover.js'), 'the hold loads before the rollover');
+    for (const f of ['predictor/year-hold.js', 'predictor/year-rollover.js', 'predictor/year-capsule.js']) assert.ok(read(f).split('\n').length <= 251, `${f} within 250 lines`);
+  } finally {
+    document.querySelectorAll = origQSA;
+    window.ConnectifyCache = saved.cache; window.ConnectifyAssessmentScrape = saved.scrape; window.ConnectifyPredictorHistory = saved.history; window.ConnectifyData = saved.data;
+    window.ConnectifyPredictorBaselines = saved.store; window.ConnectifySidebarFilter = saved.sidebarFilter; window.ConnectifyNotifications = saved.notes;
+    window.ConnectifyOutlineApi = saved.api; window.ConnectifyYearHold = saved.hold; window.ConnectifyYearCapsule = saved.capsule;
+    mockLocalStorage.clear();
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

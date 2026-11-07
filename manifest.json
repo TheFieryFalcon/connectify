@@ -238,6 +238,7 @@
             "src/predictor/year-archive.js",
             "src/predictor/year-capsule.js",
             "src/predictor/past-year-open.js",
+            "src/predictor/year-hold.js",
             "src/predictor/year-rollover.js",
             "src/predictor/predictor-task-cards.js",
             "src/predictor/predictor-tab-scroll.js",

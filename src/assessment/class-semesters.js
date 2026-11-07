@@ -87,14 +87,15 @@
   /**
    * A page whose classes share no name with the registry is a new school year or an earlier one.
    * The year rollover decides: a new year turns last year's averages into baselines and archives and
-   * clears last year's results (this registry too); an earlier year is not recorded.
+   * clears last year's results (this registry too); an earlier year, or a new one waiting for the old one to end
+   * (year-hold.js: this year's outlines hidden in exam weeks), is not recorded.
    */
   function acceptsClassSet(cards) {
     const known = Object.keys(load());
     const live = [...new Set(cards.map(c => cardInfo(c)).filter(i => i.subject && i.semester).map(i => i.subject))];
     if (!known.length || live.length < 2 || live.some(s => known.includes(s))) return true;
     const kind = window.ConnectifyYearRollover?.handleClassChange?.(live, known);
-    return kind !== 'other-year' && kind !== 'restricted';
+    return !['other-year', 'restricted', 'held'].includes(kind);
   }
 
   // Cards already recorded; a card is read again only when it is scraped (force)
