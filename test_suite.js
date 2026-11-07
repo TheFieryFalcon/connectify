@@ -2417,8 +2417,8 @@ runTest('predictor-math.js dampens high score leverage on mid and scales low pen
   const predMathCode = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
   const dataJsCode = fs.readFileSync(path.resolve(BASE_DIR, 'assessment-data.js'), 'utf8');
 
-  assert.ok(predMathCode.includes("'v24_20261105_pred'"), 'predictor-math.js must use v24_20261105_pred');
-  assert.ok(dataJsCode.includes("PREDICTOR: 'v24_20261105_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v24_20261105_pred');
+  assert.ok(predMathCode.includes("'v25_20261108_pred'"), 'predictor-math.js must use v25_20261108_pred');
+  assert.ok(dataJsCode.includes("PREDICTOR: 'v25_20261108_pred'"), 'assessment-data.js CACHE_VERSIONS.PREDICTOR must be v25_20261108_pred');
 
   const historicalElevated = {
     subjects: { 'Chemistry': 90 },
@@ -2512,9 +2512,9 @@ runTest('Test 92: readCourses() ingests connectify:grade_cache data and populate
   assert.ok(names.includes('philosophy and ethics'), 'Semester 2 must contain Philosophy and Ethics');
 });
 
-runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v24_20261105_pred', () => {
+runTest('Test 93: predictTask() preserves student momentum above 82% and PREDICTOR_ALGO_VERSION is v25_20261108_pred', () => {
   const predMathJs = fs.readFileSync(path.resolve(BASE_DIR, 'predictor-math.js'), 'utf8');
-  assert.ok(predMathJs.includes('v24_20261105_pred'), 'predictor-math.js must bump version to v24_20261105_pred');
+  assert.ok(predMathJs.includes('v25_20261108_pred'), 'predictor-math.js must bump version to v25_20261108_pred');
 
   const historicalHigh = {
     subjects: { 'Mathematics Methods': 93.5 },
@@ -10456,7 +10456,7 @@ runTest('Test 223: Expanded overall cards show the four quartile values, Minimum
 runTest('Test 224: Expanded unmarked rows show Low / Mid / High with what the prediction is based on', () => {
   const { view, xp } = loadCohortViewIn('all');
   const { makeRow } = expandedFixture();
-  const row = makeRow(true, ['Examination', 'Term 4, Week 3', 'Extended response 1'], '');
+  const row = makeRow(true, ['Examination', 'Term 4, Week 3', 'Paper 1'], '');
   window.ConnectifyPredictorMath.saveBaselines({ types: {}, subjects: {} });
   view.render(row, false, 'lit-key', 50, null, []);
   let ui = view.panels.get(row);
@@ -10719,6 +10719,19 @@ runTest('Test 227: Settings saves each category under its own name; a set saved 
     assert.deepStrictEqual(stored.Essay.keywords, ['essay', 'source analysis']);
     assert.strictEqual(stored.Essay.color, '#9b59b6', 'colours are kept');
     assert.deepStrictEqual(stored.Fieldwork.keywords, ['field']);
+
+    // Reset Defaults resets at once, with no prompt, to the default keywords
+    const savedConfirm = global.confirm;
+    global.confirm = () => { throw new Error('Reset Defaults never prompts'); };
+    try { settings.catPanel.querySelector('#cx-cat-reset').onclick(); } finally { global.confirm = savedConfirm; }
+    assert.strictEqual(mockLocalStorage.getItem('cx-categories'), null, 'the saved categories are gone');
+    assert.deepStrictEqual(Object.fromEntries(Object.entries(window.cxCategories).map(([n, c]) => [n, c.keywords])), {
+      Exam: ['semester', 'exam'],
+      Test: ['test', 'quiz', 'in-class', 'in class'],
+      Application: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'],
+      Essay: ['essay', 'short answer', 'response', 'close reading', 'analysis'],
+      'Take-Home': ['take-home', 'assignment', 'project', 'presentation', 'oral', 'creative']
+    }, 'the default categories and keywords');
     store.saveCategories({ undefined: { keywords: ['x'] } });
     assert.deepStrictEqual(Object.keys(window.cxCategories), defaults, 'a save can never store "undefined"');
   } finally {

@@ -50,6 +50,14 @@ Extremely concise summary of the core visual design language, contrast standards
     - Take-Home (Yellow `#f1c40f`)
   - Labels
     - Labels bind to `--cx-cat-color` via `.cx-cat-name-label`
+  - Default keywords, in the same file
+    - Exam: semester, exam
+    - Test: test, quiz, in-class, in class
+    - Application: application, investigation, portfolio, validation, practical, speaking, listening, dictation
+    - Essay: essay, short answer, response, close reading, analysis
+    - Take-Home: take-home, assignment, project, presentation, oral, creative
+  - Reset Defaults
+    - in Settings resets at once, with no prompt
 - **Important Tiles** (`.eds-c-tile--important`, e.g. Maintenance Notice; `theme-alert-tiles.css`)
   - Keep Connect's red in every dark theme
     - `__header--negative` tinted (`#dc2626` 16%, or Connect's `#9d000b` 10% in light tone)

@@ -174,16 +174,15 @@
       setTimeout(() => { saveBtn.textContent = origText; }, 2000);
     };
 
+    // Reset Defaults resets at once, with no prompt
     catPanel.querySelector('#cx-cat-reset').onclick = () => {
-      if (confirm('Reset assessment category keywords to factory defaults?')) {
-        store.resetCategories();
-        renderCategoryInputs(catPanel, () => renderBaselines());
-        renderBaselines();
-        if (window.ConnectifyTaskTypes?.rescanAllAutoAssessments) {
-          window.ConnectifyTaskTypes.rescanAllAutoAssessments();
-        } else {
-          window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
-        }
+      store.resetCategories();
+      renderCategoryInputs(catPanel, () => renderBaselines());
+      renderBaselines();
+      if (window.ConnectifyTaskTypes?.rescanAllAutoAssessments) {
+        window.ConnectifyTaskTypes.rescanAllAutoAssessments();
+      } else {
+        window.dispatchEvent(new CustomEvent('connectify-task-type-changed'));
       }
     };
 

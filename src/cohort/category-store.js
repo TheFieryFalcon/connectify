@@ -11,10 +11,10 @@
   if (window.ConnectifyCategoryStore) return;
 
   const defaultCategories = {
-    Exam: { color: '#e74c3c', keywords: ['exam', 'semester'] },
+    Exam: { color: '#e74c3c', keywords: ['semester', 'exam'] },
     Test: { color: '#2ecc71', keywords: ['test', 'quiz', 'in-class', 'in class'] },
     Application: { color: '#3498db', keywords: ['application', 'investigation', 'portfolio', 'validation', 'practical', 'speaking', 'listening', 'dictation'] },
-    Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'written response', 'close reading'] },
+    Essay: { color: '#9b59b6', keywords: ['essay', 'short answer', 'response', 'close reading', 'analysis'] },
     'Take-Home': { color: '#f1c40f', keywords: ['take-home', 'assignment', 'project', 'presentation', 'oral', 'creative'] }
   };
   // What a task reads as when nothing about it names a category: never a guess, until the student chooses
