@@ -17167,13 +17167,19 @@ runTest('Test 359: From the class of 2028 ATAR estimates add the typical bonus f
   try {
     eval(read('atar/atar-typical-bonus.js'));
     const T = window.ConnectifyTypicalBonus;
-    // Stronger students typically earned a larger share of their TEA in bonuses, never more than two courses' 10%
-    assert.strictEqual(T.rate(120), 0, 'no bonus at the bottom');
+    // The rates are derived from TISC's scaled-score statistics, never typed in by hand
+    const derived = require(path.join(BASE_DIR, 'scripts/derive-typical-bonus.js'));
+    assert.deepStrictEqual(T.RATES, derived.rates(), 'RATES match node scripts/derive-typical-bonus.js');
+    const bands = derived.derive();
+    assert.ok(bands.every(r => r.students > 300), 'every band rests on hundreds of students a year');
+    assert.ok(bands.every((r, i) => !i || (r.methods >= bands[i - 1].methods - 0.01 && r.expected > bands[i - 1].expected)), 'stronger students take more bonus courses');
+    // Stronger students earned a larger share of their TEA in bonuses, never more than two courses' 10%
     assert.ok(T.rate(230) < T.rate(300) && T.rate(300) < T.rate(340) && T.rate(340) < T.rate(380), 'rises with the TEA');
-    assert.ok(Math.abs(T.rate(250) - 0.012) < 1e-9 && Math.abs(T.rate(275) - 0.01725) < 1e-9, 'linear between points');
-    assert.ok(T.rate(430) <= 0.05 && T.rate(430) === T.rate(400), 'flat at the 5% ceiling end');
-    assert.ok(T.rate(240) < 0.012 && T.rate(340) > 0.03, 'straight Cs about 1%, straight As about 3.5%');
-    assert.strictEqual(T.bonus(340), Math.round(340 * 0.034 * 10) / 10);
+    assert.strictEqual(T.rate(100), T.RATES[0][1], 'flat below the first band');
+    assert.ok(Math.abs(T.rate(246) - (T.RATES[2][1] + T.RATES[3][1]) / 2) < 1e-9, 'linear between points');
+    assert.ok(T.rate(430) < 0.05 && T.rate(430) === T.RATES[T.RATES.length - 1][1], 'flat past the last band, under the 5% ceiling');
+    assert.ok(T.rate(240) < 0.012 && T.rate(340) > 0.024, 'straight Cs about 1%, straight As about 2.5%');
+    assert.strictEqual(T.bonus(346), Math.round(346 * T.RATES[5][1] * 10) / 10);
 
     // The class: the school year plus the years left to Year 12
     window.ConnectifyYearArchive = { yearMarker: names => ({ calendar: (names.join(' ').match(/\b20\d{2}\b/) || [])[0] ? Number(names.join(' ').match(/\b20\d{2}\b/)[0]) : null }) };

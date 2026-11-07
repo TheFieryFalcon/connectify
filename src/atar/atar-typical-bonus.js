@@ -5,27 +5,21 @@
  * TEA that students with that best-four TEA typically earned in bonuses: stronger students took Methods and Specialist
  * far more often, and scored higher in them.
  *
- * The rates are an estimate of expected bonus / best-four TEA: for an average scaled score s (TEA ~ 4s), the chance of
- * taking Methods, Specialist and a language (roughly 15%, 2%, 3% at s = 50 rising to 90%, 65%, 20% at s = 92), the best
- * two worth 10% of s each. The ceiling is 5%: two bonus courses at the student's own average.
+ * The rates are derived from TISC's 2023 to 2025 scaled-score statistics (scaling-data.js) by
+ * scripts/derive-typical-bonus.js: per 10-mark band of scaled score, how many students take Methods, Specialist and a
+ * language (each course's enrolments scoring in the band against all students there), the best two worth 10% of the
+ * score, as a share of the best-four TEA. Regenerate them with that script; Test 359 checks they match.
  */
 (function () {
   'use strict';
 
-  /** [best-four TEA, bonus as a share of it]; linear between points, flat past the ends (0 below the first). */
-  const RATES = [
-    [140, 0],
-    [200, 0.005],
-    [250, 0.012],
-    [300, 0.0225],
-    [340, 0.034],
-    [370, 0.0425],
-    [400, 0.045]
-  ];
+  /** [best-four TEA, bonus as a share of it]; linear between points, flat past the ends. */
+  const RATES = [[146, 0.0055], [186, 0.0069], [226, 0.0097], [266, 0.0151], [306, 0.0203], [346, 0.0252], [386, 0.0406]];
 
   function rate(baseTEA) {
     const tea = Number(baseTEA);
-    if (!Number.isFinite(tea) || tea <= RATES[0][0]) return 0;
+    if (!Number.isFinite(tea) || tea <= 0) return 0;
+    if (tea <= RATES[0][0]) return RATES[0][1];
     for (let i = 1; i < RATES.length; i++) {
       const [x1, y1] = RATES[i];
       if (tea <= x1) {
