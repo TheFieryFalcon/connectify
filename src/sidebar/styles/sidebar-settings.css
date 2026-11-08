@@ -237,9 +237,9 @@ body.cx-freeze-scroll {
 #connectify-sidebar .cx-bg-preset:hover { border-color: var(--cx-accent-hover, #60a5fa); }
 #connectify-sidebar .cx-bg-preset[aria-pressed="true"] { outline: 2px solid var(--cx-accent, #3b82f6); outline-offset: 2px; }
 
-/* Category names on light surfaces: each colour keeps its hue and chroma at OKLCH lightness 0.34 (>= 5:1) */
+/* Category names on light surfaces: each colour keeps its hue and chroma at OKLCH lightness 0.41 (>= 5:1) */
 html:not(.connectify-dark) #connectify-sidebar .cx-cat-name-label,
 html:not(.connectify-dark) #connectify-sidebar .cx-cat-text {
   color: #1d1c1c !important;
-  color: oklch(from var(--cx-cat-color, #3498db) 0.34 c h) !important;
+  color: oklch(from var(--cx-cat-color, #3498db) 0.41 c h) !important;
 }

@@ -41,7 +41,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - transparent over custom wallpapers or Liquid Glass
 - **Category Colors**
   - Text
-    - a category name on a light surface keeps its hue and chroma at OKLCH lightness 0.34 (>= 5:1); the saved colour stays for bars and badges
+    - a category name on a light surface keeps its hue and chroma at OKLCH lightness 0.41 in Light and in a light tone over a wallpaper, 0.34 on plain light-tone glass, which has no room for more (>= 5:1); the saved colour stays for bars and badges
   - Values, defined once in `src/cohort/category-store.js`
     - Exam (Red `#e74c3c`)
     - Test (Green `#2ecc71`)

@@ -8285,6 +8285,15 @@ runTest('Test 186: Light-tone themes never leave dark-ink radar labels on the da
     const src = O.toOklch(m[1]), ink = O.fromOklch(Number(m[2]) * 100, src.C, src.h);
     assert.ok(O.contrast(ink, drawer) >= 5, `${sel} must reach 5:1 on the drawer glass (${O.contrast(ink, drawer).toFixed(2)})`);
   }
+  // Category names: a lighter ink in Light and over a wallpaper, never on plain grey glass, which has no room for it
+  const lightSheet = fs.readFileSync(path.join(BASE_DIR, 'src/sidebar/styles/sidebar-settings.css'), 'utf8');
+  assert.ok(/html:not\(\.connectify-dark\) #connectify-sidebar \.cx-cat-text \{[^}]*0\.41 c h/.test(lightSheet), 'Light uses the lighter category ink');
+  assert.ok(/0\.34 c h/.test(rule(`${tone}#connectify-sidebar .cx-pred-task-type-badge`)), 'plain light-tone glass keeps 0.34');
+  assert.ok(/0\.41 c h/.test(rule(`${tone.trim()}[data-connectify-has-custom-bg="true"] #connectify-sidebar .cx-cat-text`)), 'a light tone over a wallpaper uses the lighter ink');
+  for (const hex of ['#e74c3c', '#2ecc71', '#3498db', '#9b59b6', '#f1c40f']) {
+    const src = O.toOklch(hex), ink = O.fromOklch(41, src.C, src.h);
+    for (const bg of ['#f7f9fc', '#d9c8ac']) assert.ok(O.contrast(ink, bg) >= 5, `${hex} at 0.41 must reach 5:1 on ${bg} (${O.contrast(ink, bg).toFixed(2)})`);
+  }
   // Dark themes: the labels take the theme's secondary text straight on its own surface
   for (const [id, p] of Object.entries(pal)) {
     if (/^#[0-9a-f]{6}$/i.test(p.textSecondary || '') && /^#[0-9a-f]{6}$/i.test(p.surface || '')) assert.ok(O.contrast(p.textSecondary, p.surface) >= 5, `${id} radar labels must reach 5:1 on its surface`);

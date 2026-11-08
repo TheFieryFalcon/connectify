@@ -19,6 +19,12 @@ html.connectify-dark[data-connectify-tone="light"] #connectify-sidebar .cx-pred-
   color: oklch(from var(--cx-cat-color, #3498db) 0.34 c h) !important;
 }
 
+/* Category names over a wallpaper: the brightened glass leaves room for a lighter ink (>= 5:1); plain grey glass does not */
+html.connectify-dark[data-connectify-tone="light"][data-connectify-has-custom-bg="true"] #connectify-sidebar .cx-cat-name-label,
+html.connectify-dark[data-connectify-tone="light"][data-connectify-has-custom-bg="true"] #connectify-sidebar .cx-cat-text {
+  color: oklch(from var(--cx-cat-color, #3498db) 0.41 c h) !important;
+}
+
 /* Middle (expected) scenario label: accent family */
 html.connectify-dark[data-connectify-tone="light"] #connectify-sidebar .cx-pred-scenario-label--mid {
   color: var(--cx-text-primary, #1d1c1c) !important;
