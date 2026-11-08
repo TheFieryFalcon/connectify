@@ -68,7 +68,7 @@
             ${esc(taskDateLabel(task))}&emsp;Weight: ${Number.isFinite(task?.weight) ? task.weight + '%' : '—'}
           </div>
         </div>
-        <span class="cx-pred-task-type-badge" data-cat="${esc(taskType)}" style="font-size:10.5px; font-weight:700; color:${typeTextColor}; background:${typeColor}; padding:2.5px 8px; border-radius:10px;">
+        <span class="cx-pred-task-type-badge" data-cat="${esc(taskType)}" style="--cx-cat-color:${esc(typeColor)}; font-size:10.5px; font-weight:700; color:${typeTextColor}; background:${typeColor}; padding:2.5px 8px; border-radius:10px;">
           ${esc(taskType)}
         </span>
       `;

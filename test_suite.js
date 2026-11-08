@@ -17150,6 +17150,8 @@ runTest('Test 358: Light-tone themes never keep a dark theme\'s dark fill or pal
     assert.ok(fills.includes(`html.connectify-dark[data-connectify-tone="light"] ${sel}`) || fills.includes(`html.connectify-dark[data-connectify-tone="light"] #connectify-sidebar ${sel}`), `${sel} is re-filled in light tone`);
   }
   assert.ok(fills.includes('color-mix(in srgb, var(--cx-lt-hue) 14%, transparent)') && fills.includes('oklch(from var(--cx-lt-hue) 0.34 c h)'), 'a 14% tint with ink at 0.34');
+  const taskCards = origReadFileSync.call(fs, path.join(SRC_DIR, 'predictor/predictor-task-cards.js'), 'utf8');
+  assert.ok(/class="cx-pred-task-type-badge"[^>]*style="--cx-cat-color:\$\{esc\(typeColor\)\}/.test(taskCards), 'each task-type badge names its own category colour, which its tint and ink read');
   const order = JSON.parse(origReadFileSync.call(fs, path.join(BASE_DIR, 'manifest.json'), 'utf8')).content_scripts.flatMap(g => g.css || []);
   assert.strictEqual(order.indexOf('src/theme/styles/theme-light-tone-2.css'), order.indexOf('src/theme/styles/theme-light-tone.css') + 1, 'loaded right after theme-light-tone.css');
   assert.ok(fills.split('\n').length <= 250, 'within 250 lines');

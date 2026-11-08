@@ -578,7 +578,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - **No dark colours in a light theme** (`theme-light-tone-2.css`, Test 358)
     - every dark fill or pale ink a `.connectify-dark` rule writes as a literal has a light-tone rule for the same element
     - semantic boxes (Top 4, the cold-start notice, Connect's alerts, badges and status labels) become a 14% tint of their hue with a 45% edge, inked at OKLCH 0.34
-    - Low and Mid prediction cards and pills a faint ink or accent tint, task-type badges a tint of their category colour
+    - Low and Mid prediction cards and pills a faint ink or accent tint, task-type badges a tint of their category colour (each badge carries it as `--cx-cat-color`)
     - dialog backdrops brighten (white 45%) in every light-tone theme, glass or solid
     - the WACE countdown is a light gold tint in Light and light tone, its dark card only in dark-ink themes (`wace-countdown.css`)
     - kept: white glyphs on Connect's class colour, white ink on the red Clear Cache and the notification buttons
