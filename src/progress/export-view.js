@@ -3,7 +3,7 @@
  *
  * The Export toggle in the Task Dates toolbar keeps the list where it is and adds to it: ticks and days on its rows
  * (export-rows.js), the exam merge option (both files), Select All / None and the Google Calendar (.ics) / Notion
- * (CSV) downloads, with Show: Unmarked forced. Choices are kept in connectify:calendar_export:<account>.
+ * (CSV) downloads, with Show: Uncompleted forced: tasks whose week is over stay out of the files. Choices are kept in connectify:calendar_export:<account>.
  * Exposes window.ConnectifyExportView.
  */
 (() => {

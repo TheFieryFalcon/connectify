@@ -11294,10 +11294,15 @@ function withTaskDatesPanel(subjects, body) {
   }
 }
 
-runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks and days added, Show: Unmarked forced, choices stored', () => {
+runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks and days added, Show: Uncompleted forced, choices stored', () => {
+  // 20 May: Term 2 Week 5, so Missed's week (Term 1 Week 6) is over, unmarked, and Lab's (Term 3 Week 2) is to come
+  const savedPastYear = window.ConnectifyPastYearMode;
+  window.ConnectifyPastYearMode = { active: () => false, year: () => null, suffix: () => '', ...savedPastYear, today: () => new Date(2026, 4, 20, 12) };
+  try {
   withTaskDatesPanel([{ name: 'Physics ATAR', tasks: [
     { id: 'p0', name: 'Quiz', order: 5, score: 80, pending: false, sequence: 0 },
-    { id: 'p1', name: 'Lab', caption: 'Term 3 Week 2', order: 26, pending: true, sequence: 1 }
+    { id: 'p1', name: 'Lab', caption: 'Term 3 Week 2', order: 26, pending: true, sequence: 1 },
+    { id: 'p2', name: 'Missed', order: 6, pending: true, sequence: 2 }
   ] }], ({ terms: T, head, find }) => {
     const view = window.ConnectifyExportView;
     const dates = window.ConnectifyTaskDatesView;
@@ -11313,8 +11318,9 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     assert.strictEqual(view.toggleBtn.textContent, 'Export', 'one button, pressed: no second view to come back from');
     assert.strictEqual(view.toggleBtn.getAttribute('aria-pressed'), 'true');
     assert.ok(find(dates.section, n => n.className === 'cx-dates-table').length === 1 && !document.getElementById('cx-export-view'), 'still the one table');
-    assert.ok(box().value === 'unmarked' && box().disabled, 'Show: Unmarked is forced, as the files hold unmarked tasks');
-    assert.ok(!find(dates.list, () => true).some(n => n.textContent === 'Quiz'), 'so a marked task leaves the list');
+    assert.ok(box().value === 'uncompleted' && box().disabled, 'Show: Uncompleted is forced');
+    assert.ok(!find(dates.list, () => true).some(n => n.textContent === 'Quiz' || n.textContent === 'Missed'), 'so a marked task and one whose week is over leave the list');
+    assert.ok(!find(dates.list, n => n.dataset?.cxFocus === 'tick:Physics ATAR::p2').length && find(dates.list, n => n.dataset?.cxFocus === 'tick:Physics ATAR::p1').length, 'and the files: only Lab is ticked to export');
     const heads = find(dates.list, n => n.tagName === 'TH').filter(n => n.children.length === 0).map(n => n.textContent);
     assert.deepStrictEqual(heads, ['Assessment', 'Date', 'Day', 'Export Date'], 'the right half swaps to the export columns');
     assert.strictEqual(find(dates.list, n => n.className.includes?.('cx-dates-type')).length, 0, 'no Type or Grade while exporting');
@@ -11342,6 +11348,9 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     assert.ok(cacheSrc.includes("k.startsWith('connectify:calendar_export:')"));
     localStorage.removeItem(view.storageKey());
   });
+  } finally {
+    window.ConnectifyPastYearMode = savedPastYear;
+  }
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
   const group = manifest.content_scripts.find(g => (g.js || []).includes('src/progress/progress-graph.js'));
   const order = ['progress-graph.js', 'export-tasks.js', 'export-ics.js', 'export-csv.js', 'export-rows.js', 'task-dates.js', 'task-dates-cells.js', 'task-dates-view.js', 'export-view.js', 'progress-tabs.js'].map(f => group.js.indexOf(`src/progress/${f}`));
@@ -14624,7 +14633,7 @@ runTest('Test 309: Task Dates shows predicted grades when grouped by them, its g
       window.ConnectifyExportTasks.build = (list, opts) => { exported = list.flatMap(item => item.tasks.map(t => `${item.name}: ${t.name}`)); return realBuild(list, opts); };
       window.ConnectifyExportView.setActive(true);
       window.ConnectifyExportTasks.build = realBuild;
-      assert.deepStrictEqual(exported, ['Physics ATAR: Marked'], 'no hidden task reaches a file');
+      assert.deepStrictEqual(exported, [], 'no hidden task reaches a file, and nor does Marked, which is completed');
       window.ConnectifyExportView.setActive(false);
 
       // One button: Show All while any is hidden, else Hide All, which says why the list is empty

@@ -5,7 +5,7 @@
  * Predicted Grade: unmarked tasks only, Grade Achieved: marked tasks only; grades in university bands) with
  * a direction for the groups (not Completed), then Sort By inside each group (Chronological, Alphabetical,
  * Mark: the predicted grade when grouped by it, else the grade achieved), Show (All, Completed, Uncompleted, Marked,
- * Unmarked; Export mode forces Unmarked) and the subjects and types hidden from the list. A task is completed once it
+ * Unmarked; Export mode forces Uncompleted) and the subjects and types hidden from the list. A task is completed once it
  * is marked or its week is over, by the calendar. A task without the value sorted on comes last whatever the
  * direction. The choices are kept in connectify:task_dates_view.
  * Exposes window.ConnectifyTaskDates.
@@ -98,12 +98,12 @@
   }
 
   /**
-   * The view as listed. `exporting` forces Show: Unmarked; a group or sort that says nothing about the tasks shown
+   * The view as listed. `exporting` forces Show: Uncompleted (a calendar holds what is still to come); a group or sort that says nothing about the tasks shown
    * falls back to the default, leaving the saved choice for when Show changes back. Sorting by grade stays while the
    * predicted grades are listed.
    */
   function effectiveView(view, exporting) {
-    const show = exporting ? 'unmarked' : pick(SHOWS, view.show).id;
+    const show = exporting ? 'uncompleted' : pick(SHOWS, view.show).id;
     const groupBy = fits(pick(GROUPS, view.groupBy), show) ? view.groupBy : 'subject';
     const sortBy = fits(pick(SORTS, view.sortBy), show) || showsPredicted(groupBy) ? view.sortBy : 'chronological';
     return { ...view, show, groupBy, sortBy };
@@ -187,11 +187,15 @@
   /** Whether the Subjects and Type filters leave a row on the list. */
   const isShown = (row, view) => !view.hiddenSubjects.includes(row.subject) && !view.hiddenTypes.includes(row.type);
 
-  /** The classes with only the tasks those filters leave, for what Export builds from. */
-  function shownSubjects(subjects, view) {
+  /**
+   * The classes with only the tasks those filters leave, for what Export builds from; given the list's rows, only
+   * the tasks Show lists too, so the files hold what the table shows.
+   */
+  function shownSubjects(subjects, view, list) {
     const cleanSubject = window.ConnectifyExportTasks.cleanSubject;
+    const listed = list && new Set(list.filter(row => pick(SHOWS, view.show).keep(row)).map(row => row.task));
     return (subjects || []).filter(s => !view.hiddenSubjects.includes(cleanSubject(s.name))).map(s => ({
-      ...s, tasks: (s.tasks || []).filter(t => t && !view.hiddenTypes.includes(typeOf(s.name, t)))
+      ...s, tasks: (s.tasks || []).filter(t => t && !view.hiddenTypes.includes(typeOf(s.name, t)) && (!listed || listed.has(t)))
     }));
   }
 

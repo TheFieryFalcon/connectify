@@ -6,7 +6,7 @@
  * and Type (task-dates-filter.js) and Show: (All, Completed, Uncompleted, Marked, Unmarked), then the task table: each task with its short week and the week
  * editor (progress-week-editor.js), then its subject, type and grade, or predicted grade when grouped by it
  * (task-dates-cells.js). Export mode (export-view.js) adds the ticks and downloads to this same table,
- * swaps that right half for the day and export date, leaving the left half where it was, and forces Show: Unmarked.
+ * swaps that right half for the day and export date, leaving the left half where it was, and forces Show: Uncompleted.
  * Exposes window.ConnectifyTaskDatesView.
  */
 (() => {
@@ -208,7 +208,7 @@
       expandSlot.replaceChildren(...(uncached ? [window.ConnectifyTargetUiHelpers.expandOutlinesButton({ scanAndRefresh: () => render(true) })] : []));
       paintFilters(rows, view);
       // What is hidden from the list is left out of the downloads too
-      const exportCtx = exporting ? exportView.prepare(dates.shownSubjects(subjects, view), track) : null;
+      const exportCtx = exporting ? exportView.prepare(dates.shownSubjects(subjects, view, rows), track) : null;
       const groups = dates.arrange(rows, view);
       list.replaceChildren(groups.length ? table(groups, view, exportCtx, track) : createElement('p', emptyText(rows, view), 'cx-dates-empty'));
       if (focusId && focusables.has(focusId)) focusables.get(focusId).focus();
