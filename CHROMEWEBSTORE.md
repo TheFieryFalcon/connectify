@@ -123,8 +123,13 @@ https://github.com/TheFieryFalcon/connectify/blob/main/PRIVACY.md
 | **Store Icon** | 128×128 PNG | ✅ Ready | `icons/icon-128.png` |
 | **Toolbar Icon** | 48×48 PNG | ✅ Ready | `icons/icon-48.png` |
 | **Small Icon** | 16×16 PNG | ✅ Ready | `icons/icon-16.png` |
-| **Screenshot 1** | 1280×800 PNG | Recommended | In-app capture of assessment outlines with sidebar open |
-| **Screenshot 2** | 1280×800 PNG | Recommended | Weakness radar chart and ATAR calculation breakdown |
+| **Screenshot 1** | 1280×800 PNG | ✅ Ready | `assets/store/1-themes-liquid-glass.png`: Liquid Glass with the theme menu, outlines with goal bars |
+| **Screenshot 2** | 1280×800 PNG | ✅ Ready | `assets/store/2-grade-predictor-midnight.png`: Predict Grade (Midnight Navy) |
+| **Screenshot 3** | 1280×800 PNG | ✅ Ready | `assets/store/3-target-atar-quantum.png`: Target ATAR with a saved goal (Quantum Dark) |
+| **Screenshot 4** | 1280×800 PNG | ✅ Ready | `assets/store/4-year-progression-forest.png`: Year Progression with the goal line (Emerald Forest) |
+| **Screenshot 5** | 1280×800 PNG | ✅ Ready | `assets/store/5-next-up-dark.png`: Next Up with goal targets (Dark) |
+
+Screenshots are mock outlines (`scripts/mock-outlines-console.js`, Term 3 Week 8, a 98.5 ATAR goal), captured at 1920×950 (a maximised browser on a 1920×1080 screen) and set on a gradient backdrop at 1280×800.
 | **Small Promo Tile** | 440×280 PNG | Optional | Branded tile for CWS promotion |
 
 ---
