@@ -39,7 +39,7 @@
     // Low, Mid and High, each a column in the outline panels' colours; a marked or unpredicted task spans the three
     function predictionCells(row) {
       if (!row.prediction) {
-        const cell = createElement('td', row.completed ? taskCells.gradeText(row) : '—', row.completed ? 'cx-next-prediction cx-next-grade' : 'cx-next-prediction');
+        const cell = createElement('td', row.marked ? taskCells.gradeText(row) : '—', row.marked ? 'cx-next-prediction cx-next-grade' : 'cx-next-prediction');
         cell.setAttribute('colspan', '3');
         return [cell];
       }
@@ -52,7 +52,7 @@
       if (!row.goal) return cell;
       const value = createElement('span', percent(row.goal.required), 'cx-next-goal-value cx-goal-target__value');
       cell.append(value);
-      if (row.goal.tier && !row.completed) {
+      if (row.goal.tier && !row.marked) {
         // Tinted like the goal target on the outlines' prediction panels (goal-forecast.css)
         value.dataset.tier = row.goal.tier;
         cell.append(window.ConnectifyGoalModal.tierLabel(row.goal.tier));
@@ -61,7 +61,7 @@
     }
 
     function taskRow(row, showGoal, track) {
-      const tr = createElement('tr', null, row.completed ? 'cx-dates-row cx-dates-row--done' : 'cx-dates-row');
+      const tr = createElement('tr', null, row.marked ? 'cx-dates-row cx-dates-row--done' : 'cx-dates-row');
       tr.append(
         createElement('td', row.label),
         createElement('td', taskCells.subjectText(row), 'cx-dates-subject-cell'),
@@ -135,7 +135,7 @@
       const plan = model.build(subjects, model.now());
       const uncached = window.ConnectifyTaskDatesView.hasUncachedClasses(subjects);
       // What the tab shows, not the row's task records: a task elsewhere in the year changes nothing here
-      const shown = plan.weeks.map(w => [w.label, w.detail, w.done, w.rows.map(r => [r.key, r.name, r.subject, r.type, r.completed, r.score, r.weight, r.prediction, r.goal])]);
+      const shown = plan.weeks.map(w => [w.label, w.detail, w.done, w.rows.map(r => [r.key, r.name, r.subject, r.type, r.marked, r.score, r.weight, r.prediction, r.goal])]);
       const signature = JSON.stringify([shown, plan.undated, uncached]);
       if (!force && signature === lastSignature) return;
       lastSignature = signature;

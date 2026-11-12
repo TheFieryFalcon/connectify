@@ -11294,7 +11294,7 @@ function withTaskDatesPanel(subjects, body) {
   }
 }
 
-runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks and days added, uncompleted only forced on, choices stored', () => {
+runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks and days added, Show: Unmarked forced, choices stored', () => {
   withTaskDatesPanel([{ name: 'Physics ATAR', tasks: [
     { id: 'p0', name: 'Quiz', order: 5, score: 80, pending: false, sequence: 0 },
     { id: 'p1', name: 'Lab', caption: 'Term 3 Week 2', order: 26, pending: true, sequence: 1 }
@@ -11303,7 +11303,7 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     const dates = window.ConnectifyTaskDatesView;
     window.ConnectifyProgressTabs.select('dates');
     const names = () => find(dates.list, n => n.tagName === 'TD').map(n => n.textContent);
-    const box = () => dates.filterRow.children.find(n => n.className === 'cx-dates-check').children[0];
+    const box = () => find(dates.filterRow, n => n.tagName === 'SELECT')[0];
     assert.ok(dates.toolbar.children.includes(view.toggleBtn) && !head.children.includes(view.toggleBtn), 'Export sits in the Task Dates toolbar, not the panel header');
     assert.ok(names().includes('Quiz'), 'the list starts with every task');
     assert.ok(find(dates.list, n => n.tagName === 'SELECT').every(n => n.className.includes('cx-dates-type')), 'with no export controls, only each task\'s Type');
@@ -11313,8 +11313,8 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     assert.strictEqual(view.toggleBtn.textContent, 'Export', 'one button, pressed: no second view to come back from');
     assert.strictEqual(view.toggleBtn.getAttribute('aria-pressed'), 'true');
     assert.ok(find(dates.section, n => n.className === 'cx-dates-table').length === 1 && !document.getElementById('cx-export-view'), 'still the one table');
-    assert.ok(box().checked && box().disabled, 'Show Uncompleted Only is forced on');
-    assert.ok(!find(dates.list, () => true).some(n => n.textContent === 'Quiz'), 'so a completed task leaves the list');
+    assert.ok(box().value === 'unmarked' && box().disabled, 'Show: Unmarked is forced, as the files hold unmarked tasks');
+    assert.ok(!find(dates.list, () => true).some(n => n.textContent === 'Quiz'), 'so a marked task leaves the list');
     const heads = find(dates.list, n => n.tagName === 'TH').filter(n => n.children.length === 0).map(n => n.textContent);
     assert.deepStrictEqual(heads, ['Assessment', 'Date', 'Day', 'Export Date'], 'the right half swaps to the export columns');
     assert.strictEqual(find(dates.list, n => n.className.includes?.('cx-dates-type')).length, 0, 'no Type or Grade while exporting');
@@ -11335,7 +11335,7 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     // Opening Progress (or any tool) fires connectify-open, which leaves Export mode
     assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.js'), 'utf8').includes("window.addEventListener('connectify-open', () => setActive(false))"));
     view.toggleBtn.dispatchEvent(new MockEvent('click'));
-    assert.ok(names().includes('Quiz') && box().disabled === false && box().checked === false, 'toggling off gives the same list back, its own option restored');
+    assert.ok(names().includes('Quiz') && box().disabled === false && box().value === 'all', 'toggling off gives the same list back, its own choice restored');
     assert.ok(dates.optionsSlot.children.length === 0 && dates.footerSlot.children.length === 0);
     // A settings reset removes the choices; Clear Cache keeps them
     const cacheSrc = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/cache-versions.js'), 'utf8');
@@ -14301,7 +14301,7 @@ runTest('Test 304: A compact statistics panel gives way to the Type dropdown and
   assert.ok(/\.connectify-row-wrapper > \.connectify-panel\.connectify-panel--expanded \{\s*flex: 0 0 auto !important;/.test(fit), 'expanded cards keep their one row: they scale, never reflow');
 });
 
-runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates tabs; the list has modular Group By, its direction and Sort By', () => {
+runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates tabs; the list has modular Group By, its direction, Sort By and Show', () => {
   const subjects = [
     { name: 'Physics ATAR', tasks: [
       { id: 'p1', name: 'Test 10', order: 30, pending: true, sequence: 0 },
@@ -14324,6 +14324,9 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
   };
   const predicted = { p1: 91, c2: 63 };
   window.ConnectifyPredictorMath = { getOrComputeTaskPrediction: (subject, task) => (predicted[task.id] ? { mid: predicted[task.id] } : null) };
+  // Completed goes by the calendar: on 20 May (Term 2 Week 5, order 17) lab's week (6) is over, Test 10's (30) is not
+  const savedPastYear = window.ConnectifyPastYearMode;
+  window.ConnectifyPastYearMode = { active: () => false, year: () => null, suffix: () => '', ...savedPastYear, today: () => new Date(2026, 4, 20, 12) };
   try {
     withTaskDatesPanel(subjects, ({ panel, head, chips, chart, find, refreshes }) => {
       const tabs = window.ConnectifyProgressTabs;
@@ -14393,7 +14396,7 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
       assert.strictEqual(tableRows()[1].children[2].textContent, 'Physics');
       assert.strictEqual(tableRows()[2].children[2].textContent, 'Chemistry', 'the semester suffix is not part of the subject');
       assert.strictEqual(direction.hidden, true);
-      assert.deepStrictEqual(JSON.parse(localStorage.getItem(T.KEY)), { groupBy: 'none', direction: 'asc', sortBy: 'chronological', uncompletedOnly: false, hiddenSubjects: [], hiddenTypes: [] }, 'the choices are kept');
+      assert.deepStrictEqual(JSON.parse(localStorage.getItem(T.KEY)), { groupBy: 'none', direction: 'asc', sortBy: 'chronological', show: 'all', hiddenSubjects: [], hiddenTypes: [] }, 'the choices are kept');
 
       // Type, in both directions
       pick(group, 'type');
@@ -14403,10 +14406,11 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
       assert.strictEqual(firstCells()[0], 'Test');
       setDirection('asc');
 
-      // Completed: fixed order, no direction
+      // Completed: by the calendar, so unmarked lab, whose week is over, is completed; fixed order, no direction
       pick(group, 'completed');
       assert.strictEqual(direction.hidden, true);
-      assert.deepStrictEqual(firstCells(), ['Not completed', 'lab', 'Test 10', 'Undated', 'Completed', 'Test 2', 'Essay', 'Exam']);
+      assert.deepStrictEqual(firstCells(), ['Not completed', 'Test 10', 'Undated', 'Completed', 'Test 2', 'lab', 'Essay', 'Exam']);
+      assert.strictEqual(tableRows().find(tr => tr.children[0]?.textContent === 'lab').className, 'cx-dates-row cx-dates-row--done', 'and recedes like the marked ones');
 
       // Predicted Grade: uncompleted tasks only, university bands tied to school letters, no prediction last
       pick(group, 'predicted');
@@ -14422,17 +14426,31 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
       assert.deepStrictEqual([95, 80, 79.9, 70, 69, 60, 50, 49.9, 0].map(v => T.gradeBand(v, '').label),
         ['High Distinction (A)', 'High Distinction (A)', 'Distinction (B)', 'Distinction (B)', 'Credit (C)', 'Credit (C)', 'Pass (C)', 'Fail (D)', 'Fail (D)'], 'the bands\' cutoffs');
 
-      // Show Uncompleted Only: what needs completed tasks is off and falls back, the saved choice kept
-      const box = dates.filterRow.children.find(n => n.className === 'cx-dates-check').children[0];
-      box.checked = true;
-      box.dispatchEvent(new MockEvent('change'));
-      assert.strictEqual(group.value, 'subject', 'Grade Achieved says nothing about uncompleted tasks');
-      assert.ok(group.children.find(o => o.value === 'achieved').disabled && group.children.find(o => o.value === 'completed').disabled && sort.children.find(o => o.value === 'grade').disabled);
-      assert.ok(!find(dates.list, () => true).some(n => n.textContent === 'Exam'), 'completed tasks leave the list');
+      // Show: a dropdown on the second row; what says nothing about the tasks shown is off and falls back, the saved choice kept
+      const show = find(dates.filterRow, n => n.tagName === 'SELECT')[0];
+      assert.deepStrictEqual(show.children.map(o => o.textContent), ['All', 'Completed', 'Uncompleted', 'Marked', 'Unmarked']);
+      assert.strictEqual(show.parentNode.children[0].textContent, 'Show:');
+      const shown = () => tableRows().filter(tr => tr.className.startsWith('cx-dates-row')).map(tr => tr.children[0].textContent);
+      const disabled = (sel, value) => sel.children.find(o => o.value === value).disabled;
+      pick(show, 'unmarked');
+      assert.strictEqual(group.value, 'subject', 'Grade Achieved says nothing about unmarked tasks');
+      assert.ok(disabled(group, 'achieved') && !disabled(group, 'completed') && disabled(sort, 'grade'), 'Completed still splits them');
+      assert.deepStrictEqual(shown(), ['lab', 'Test 10', 'Undated']);
+      assert.ok(!tableRows()[0].children.some(n => n.textContent === 'Mark'), 'and no Mark column');
       assert.strictEqual(T.readView().groupBy, 'achieved', 'the choice is still saved');
-      box.checked = false;
-      box.dispatchEvent(new MockEvent('change'));
-      assert.strictEqual(group.value, 'achieved', 'and comes back with the option off');
+      pick(show, 'uncompleted');
+      assert.deepStrictEqual(shown(), ['Test 10', 'Undated'], 'Uncompleted leaves out lab, whose week is over');
+      assert.ok(disabled(group, 'completed') && disabled(group, 'achieved'));
+      pick(show, 'completed');
+      assert.strictEqual(group.value, 'achieved', 'the saved grouping comes back once it fits');
+      pick(group, 'none');
+      assert.deepStrictEqual(shown(), ['Test 2', 'lab', 'Essay', 'Exam'], 'Completed: marked, or its week is over');
+      pick(show, 'marked');
+      assert.deepStrictEqual(shown(), ['Test 2', 'Essay', 'Exam']);
+      assert.ok(disabled(group, 'predicted') && disabled(group, 'completed') && !disabled(sort, 'grade'));
+      pick(show, 'all');
+      localStorage.setItem(T.KEY, JSON.stringify({ uncompletedOnly: true }));
+      assert.strictEqual(T.readView().show, 'unmarked', 'Show Uncompleted Only, saved before Show, lists what it did');
 
       // A saved week moves the task at once, on the list and the graph
       pick(group, 'none');
@@ -14450,6 +14468,7 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
   } finally {
     window.ConnectifyTaskTypes = savedTypes;
     window.ConnectifyPredictorMath = savedPred;
+    window.ConnectifyPastYearMode = savedPastYear;
     localStorage.removeItem('connectify:task_dates_view');
   }
 
@@ -14537,26 +14556,26 @@ runTest('Test 309: Task Dates shows predicted grades when grouped by them, its g
       const names = () => body().map(tr => tr.children[0].textContent);
       const [group, sort] = find(dates.toolbar, n => n.tagName === 'SELECT');
       const pick = (sel, value) => { sel.value = value; sel.dispatchEvent(new MockEvent('change')); };
-      const uncompleted = dates.filterRow.children.find(n => n.className === 'cx-dates-check').children[0];
-      const setUncompleted = on => { uncompleted.checked = on; uncompleted.dispatchEvent(new MockEvent('change')); };
+      const show = find(dates.filterRow, n => n.tagName === 'SELECT')[0];
+      const setUnmarked = on => pick(show, on ? 'unmarked' : 'all');
 
-      // Grouped by Predicted Grade, the grade column is the prediction, Show Uncompleted Only or not
+      // Grouped by Predicted Grade, the grade column is the prediction, whatever Show lists
       pick(group, 'predicted');
       const head = () => tableRows()[0].children.map(n => n.textContent);
       assert.strictEqual(head().at(-1), 'Predicted');
       const predictedOf = name => body().find(tr => tr.children[0].textContent === name).children.at(-1).textContent;
       assert.deepStrictEqual(['Low', 'High', 'Lab', 'Unknown'].map(predictedOf), ['81.3%', '94%', '88%', '—'], 'each task\'s prediction, or a dash');
-      setUncompleted(true);
-      assert.strictEqual(head().at(-1), 'Predicted', 'Show Uncompleted Only keeps the predictions');
+      setUnmarked(true);
+      assert.strictEqual(head().at(-1), 'Predicted', 'Show: Unmarked keeps the predictions');
       assert.strictEqual(sort.children.find(o => o.value === 'grade').disabled, false, 'and its grade sort, which has predictions to sort');
       pick(sort, 'grade');
       assert.strictEqual(sort.value, 'grade');
       assert.deepStrictEqual(names(), ['High', 'Lab', 'Low', 'Unknown'], 'highest prediction first, none last');
       pick(group, 'none');
-      assert.ok(!head().includes('Mark') && !head().includes('Predicted'), 'other groupings under Show Uncompleted Only list no grades');
+      assert.ok(!head().includes('Mark') && !head().includes('Predicted'), 'other groupings under Show: Unmarked list no grades');
       assert.strictEqual(sort.value, 'chronological', 'and have no grade to sort by');
       assert.strictEqual(sort.children.find(o => o.value === 'grade').disabled, true);
-      setUncompleted(false);
+      setUnmarked(false);
 
       // Any other grouping sorts by the grade achieved
       assert.strictEqual(head().at(-1), 'Mark');
@@ -14565,7 +14584,7 @@ runTest('Test 309: Task Dates shows predicted grades when grouped by them, its g
       pick(sort, 'chronological');
       pick(group, 'subject');
 
-      // The second row, right under the toolbar: Subjects, Type and Show Uncompleted Only
+      // The second row, right under the toolbar: Subjects, Type and Show
       assert.strictEqual(dates.section.children[dates.section.children.indexOf(dates.toolbar) + 1], dates.filterRow);
       assert.ok(!find(dates.toolbar, n => n.type === 'checkbox').length, 'the first row keeps Group By, Sort By and Export');
       const filters = find(dates.filterRow, n => n.className === 'cx-dates-control cx-dates-filter');
@@ -14685,13 +14704,13 @@ runTest('Test 310: The drawer has one side margin, and Task Dates\' controls sha
 
   const css = read('progress/task-dates.css');
   const filter = read('progress/task-dates-filter.css');
-  for (const [sheet, selector] of [[css, '#cx-task-dates .cx-dates-toolbar .cx-dates-select'], [css, '#connectify-progress .cx-dates-direction'], [css, '#connectify-progress .cx-refresh-btn'], [filter, '#connectify-progress .cx-dates-filter-btn']]) {
+  for (const [sheet, selector] of [[css, '#cx-task-dates .cx-dates-show .cx-dates-select'], [css, '#connectify-progress .cx-dates-direction'], [css, '#connectify-progress .cx-refresh-btn'], [filter, '#connectify-progress .cx-dates-filter-btn']]) {
     assert.ok(/height: 28px/.test(blockOf(sheet, selector)), `${selector} is 28px tall`);
   }
   assert.ok(css.includes('#cx-task-dates .cx-dates-controls { grid-template-columns: var(--cx-dates-columns); }') && css.includes('#cx-task-dates .cx-dates-filters { grid-template-columns: var(--cx-dates-columns) 1fr; }'), 'both rows share one set of columns');
-  assert.ok(css.includes('#cx-task-dates .cx-dates-toolbar .cx-dates-control::after,\n#cx-task-dates .cx-dates-filter::after {'), 'with one arrow on every dropdown');
-  assert.ok(/appearance: none/.test(blockOf(css, '#cx-task-dates .cx-dates-toolbar .cx-dates-select')), 'instead of each browser\'s own');
-  assert.ok(css.includes('#cx-task-dates .cx-dates-terms > .cx-dates-check { margin-left: auto; }') && css.includes('#cx-task-dates .cx-dates-filters > .cx-dates-check { grid-column: 6; justify-self: end; }'), 'Early Easter and Show Uncompleted Only end on the right edge, like Export');
+  assert.ok(css.includes('#cx-task-dates .cx-dates-toolbar .cx-dates-control::after,\n#cx-task-dates .cx-dates-show::after,\n#cx-task-dates .cx-dates-filter::after {'), 'with one arrow on every dropdown');
+  assert.ok(/appearance: none/.test(blockOf(css, '#cx-task-dates .cx-dates-show .cx-dates-select')), 'instead of each browser\'s own');
+  assert.ok(css.includes('#cx-task-dates .cx-dates-terms > .cx-dates-check { margin-left: auto; }') && css.includes('#cx-task-dates .cx-dates-filters > .cx-dates-show { --cx-dates-label: 0; grid-column: 6; justify-self: end; width: 170px; }'), 'Early Easter and Show end on the right edge, like Export');
   assert.ok(css.includes('.cx-progress-tabs { margin: 0 0 16px; }') && /\.cx-dates-toolbar,\n#cx-task-dates \.cx-dates-export-options \{ margin-top: 12px; \}/.test(css) && css.includes('.cx-dates-filters { margin-top: 8px; }') && css.includes('.cx-dates-list { margin-top: 20px; }'), 'the gaps run 16, 12, 8, then 20 to the table');
   assert.ok(css.includes('#cx-task-dates .cx-dates-row td { box-sizing: border-box; height: 35px; }'), 'every row is one height');
   // One font, size and weight across the toolbar

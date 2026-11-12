@@ -2,11 +2,12 @@
  * Connectify Task Dates: rows, groups and order
  *
  * The Task Dates tab's list: every cached task of every class. Group By (None, Subject, Type, Completed,
- * Predicted Grade: uncompleted tasks only, Grade Achieved: completed tasks only; grades in university bands) with
+ * Predicted Grade: unmarked tasks only, Grade Achieved: marked tasks only; grades in university bands) with
  * a direction for the groups (not Completed), then Sort By inside each group (Chronological, Alphabetical,
- * Grade Achieved/Predicted Grade: the predicted grade when grouped by it, else the grade achieved), Show Uncompleted
- * Only, which Export mode forces on, and the subjects and types hidden from the list. A task without the value sorted on comes
- * last whatever the direction. The choices are kept in connectify:task_dates_view.
+ * Mark: the predicted grade when grouped by it, else the grade achieved), Show (All, Completed, Uncompleted, Marked,
+ * Unmarked; Export mode forces Unmarked) and the subjects and types hidden from the list. A task is completed once it
+ * is marked or its week is over, by the calendar. A task without the value sorted on comes last whatever the
+ * direction. The choices are kept in connectify:task_dates_view.
  * Exposes window.ConnectifyTaskDates.
  */
 (() => {
@@ -34,7 +35,18 @@
     return { key: band.min, label: band.label };
   }
 
-  // needsCompleted: says nothing once only uncompleted tasks are listed
+  // Show: which tasks are listed; `none` is the list's empty text
+  const SHOWS = [
+    { id: 'all', label: 'All', keep: () => true },
+    { id: 'completed', label: 'Completed', keep: r => r.completed, none: 'No completed assessments.' },
+    { id: 'uncompleted', label: 'Uncompleted', keep: r => !r.completed, none: 'No upcoming assessments.' },
+    { id: 'marked', label: 'Marked', keep: r => r.marked, none: 'No marked assessments.' },
+    { id: 'unmarked', label: 'Unmarked', keep: r => !r.marked, none: 'No unmarked assessments.' }
+  ];
+  // Whether a Show choice can list a mark (an uncompleted task is never marked)
+  const listsMarks = show => show === 'all' || show === 'completed' || show === 'marked';
+
+  // fits(show): says something about the tasks that Show choice lists
   const GROUPS = [
     { id: 'none', label: 'None' },
     { id: 'subject', label: 'Subject', ordered: true, of: r => {
@@ -42,17 +54,18 @@
       return { key: label, label };
     } },
     { id: 'type', label: 'Type', ordered: true, of: r => ({ key: r.type, label: r.type || 'No type' }) },
-    { id: 'completed', label: 'Completed', needsCompleted: true, of: r => ({ key: r.completed ? 1 : 0, label: r.completed ? 'Completed' : 'Not completed' }) },
-    { id: 'predicted', label: 'Predicted Grade', ordered: true, only: r => !r.completed, of: r => gradeBand(r.predicted, 'No prediction') },
-    { id: 'achieved', label: 'Grade Achieved', ordered: true, needsCompleted: true, only: r => r.completed, of: r => gradeBand(r.score, 'No grade') }
+    { id: 'completed', label: 'Completed', fits: show => show === 'all' || show === 'unmarked', of: r => ({ key: r.completed ? 1 : 0, label: r.completed ? 'Completed' : 'Not completed' }) },
+    { id: 'predicted', label: 'Predicted Grade', ordered: true, fits: show => show !== 'marked', only: r => !r.marked, of: r => gradeBand(r.predicted, 'No prediction') },
+    { id: 'achieved', label: 'Grade Achieved', ordered: true, fits: listsMarks, only: r => r.marked, of: r => gradeBand(r.score, 'No grade') }
   ];
   const DIRECTIONS = [{ id: 'asc', label: 'Ascending' }, { id: 'desc', label: 'Descending' }];
   const SORTS = [
     { id: 'chronological', label: 'Chronological' },
     { id: 'alphabetical', label: 'Alphabetical' },
-    { id: 'grade', label: 'Mark', needsCompleted: true }
+    { id: 'grade', label: 'Mark', fits: listsMarks }
   ];
   const pick = (list, id) => list.find(item => item.id === id) || list[0];
+  const fits = (option, show) => !option.fits || option.fits(show);
 
   const rank = value => (Number.isFinite(value) ? -value : Infinity);
   const chronological = (a, b) => byNumber(a.at, b.at) || byText(a.subject, b.subject) || a.sequence - b.sequence;
@@ -73,7 +86,8 @@
       groupBy: saved.groupBy === undefined ? 'subject' : pick(GROUPS, saved.groupBy).id,
       direction: pick(DIRECTIONS, saved.direction).id,
       sortBy: pick(SORTS, saved.sortBy).id,
-      uncompletedOnly: saved.uncompletedOnly === true,
+      // Show Uncompleted Only, saved before Show, listed the unmarked tasks
+      show: saved.show === undefined ? (saved.uncompletedOnly === true ? 'unmarked' : 'all') : pick(SHOWS, saved.show).id,
       hiddenSubjects: Array.isArray(saved.hiddenSubjects) ? saved.hiddenSubjects : [],
       hiddenTypes: Array.isArray(saved.hiddenTypes) ? saved.hiddenTypes : []
     };
@@ -84,20 +98,15 @@
   }
 
   /**
-   * The view as listed. `exporting` forces Show Uncompleted Only; a group or sort that needs completed tasks then
-   * falls back to the default, leaving the saved choice for when the option is off. Sorting by grade stays while the
+   * The view as listed. `exporting` forces Show: Unmarked; a group or sort that says nothing about the tasks shown
+   * falls back to the default, leaving the saved choice for when Show changes back. Sorting by grade stays while the
    * predicted grades are listed.
    */
   function effectiveView(view, exporting) {
-    const uncompletedOnly = Boolean(exporting || view.uncompletedOnly);
-    if (!uncompletedOnly) return { ...view, uncompletedOnly };
-    const groupBy = pick(GROUPS, view.groupBy).needsCompleted ? 'subject' : view.groupBy;
-    return {
-      ...view,
-      uncompletedOnly,
-      groupBy,
-      sortBy: pick(SORTS, view.sortBy).needsCompleted && !showsPredicted(groupBy) ? 'chronological' : view.sortBy
-    };
+    const show = exporting ? 'unmarked' : pick(SHOWS, view.show).id;
+    const groupBy = fits(pick(GROUPS, view.groupBy), show) ? view.groupBy : 'subject';
+    const sortBy = fits(pick(SORTS, view.sortBy), show) || showsPredicted(groupBy) ? view.sortBy : 'chronological';
+    return { ...view, show, groupBy, sortBy };
   }
 
   const isOrdered = groupBy => Boolean(pick(GROUPS, groupBy).ordered);
@@ -119,12 +128,24 @@
     }
   }
 
+  // The last school week a task's caption runs to ("Term 4 Week 5-6"), unless a week override moved it off it
+  function lastWeek(task, at) {
+    const helpers = window.ConnectifyParseHelpers;
+    const span = task.caption ? helpers?.weekSpan?.(task.caption) || 0 : 0;
+    if (!span || !Number.isFinite(at)) return at;
+    const start = window.ConnectifySchoolTerms.normalizeOrder(helpers.orderHint(task.caption));
+    return start === at ? at + span : at;
+  }
+
   /**
-   * One row per task; `siblings` and `subjectName` are what the week editor keys overrides by. Predictions are
-   * read only for opts.predictions, on uncompleted tasks. `key` is the export's task key.
+   * One row per task; `siblings` and `subjectName` are what the week editor keys overrides by. `marked`: it has a
+   * mark; `completed`: marked, or its last week (`lastAt`) is over by `opts.today` (a past year: its last day).
+   * Predictions are read only for opts.predictions, on unmarked tasks. `key` is the export's task key.
    */
   function rows(subjects, opts = {}) {
     const terms = window.ConnectifySchoolTerms;
+    const today = opts.today || (window.ConnectifyPastYearMode?.today() ?? new Date());
+    const thisWeek = Math.floor(terms.orderOf(terms.utc(today.getFullYear(), today.getMonth(), today.getDate())));
     const cleanSubject = window.ConnectifyExportTasks.cleanSubject;
     const seen = new Set();
     const out = [];
@@ -136,15 +157,16 @@
         const key = `${name}::${task.id ?? task.name}`;
         if (seen.has(key)) continue;
         seen.add(key);
-        const completed = !task.pending && Number.isFinite(task.score);
+        const marked = !task.pending && Number.isFinite(task.score);
+        // The week the row shows: a date caption in the holidays reads as the next term's first week
+        const at = Number.isFinite(task.order) ? terms.normalizeOrder(task.order) ?? task.order : Infinity;
+        const lastAt = lastWeek(task, at);
         out.push({
           key, task, subject: name, name: task.name || '', siblings: subject.tasks, subjectName: subject.name,
-          type: typeOf(subject.name, task), completed, score: completed ? task.score : null,
-          gradeRank: completed ? -task.score : Infinity,
-          predicted: opts.predictions && !completed ? predictedMid(subject.name, task, subjects) : null,
-          // The week the row shows: a date caption in the holidays reads as the next term's first week
-          at: Number.isFinite(task.order) ? terms.normalizeOrder(task.order) ?? task.order : Infinity,
-          sequence: task.sequence ?? 0
+          type: typeOf(subject.name, task), marked, completed: marked || (Number.isFinite(lastAt) && lastAt < thisWeek),
+          score: marked ? task.score : null, gradeRank: marked ? -task.score : Infinity,
+          predicted: opts.predictions && !marked ? predictedMid(subject.name, task, subjects) : null,
+          at, lastAt, sequence: task.sequence ?? 0
         });
       }
     }
@@ -178,7 +200,7 @@
     const group = pick(GROUPS, view.groupBy);
     const sortId = pick(SORTS, view.sortBy).id;
     const sorted = list
-      .filter(row => isShown(row, view) && (!view.uncompletedOnly || !row.completed) && (!group.only || group.only(row)))
+      .filter(row => isShown(row, view) && pick(SHOWS, view.show).keep(row) && (!group.only || group.only(row)))
       .sort(COMPARE[sortId === 'grade' && showsPredicted(view.groupBy) ? 'predicted' : sortId]);
     if (!group.of) return sorted.length ? [{ label: null, rows: sorted }] : [];
     const groups = new Map();
@@ -195,5 +217,5 @@
     });
   }
 
-  window.ConnectifyTaskDates = { KEY, GROUPS, DIRECTIONS, SORTS, readView, saveView, effectiveView, isOrdered, showsPredicted, rows, isShown, shownSubjects, arrange, gradeBand };
+  window.ConnectifyTaskDates = { KEY, SHOWS, GROUPS, DIRECTIONS, SORTS, fits, listsMarks, pick, readView, saveView, effectiveView, isOrdered, showsPredicted, rows, isShown, shownSubjects, arrange, gradeBand };
 })();

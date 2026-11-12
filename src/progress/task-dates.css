@@ -26,7 +26,7 @@
 #cx-task-dates .cx-dates-term-list { display: flex; flex-wrap: wrap; gap: 4px 20px; }
 #cx-task-dates .cx-dates-term { display: inline-flex; gap: 5px; }
 #cx-task-dates .cx-dates-term span:first-child { font-weight: 600; }
-/* Early Easter, Export and Show Uncompleted Only all end on the panel's right edge */
+/* Early Easter, Export and Show all end on the panel's right edge */
 #cx-task-dates .cx-dates-terms > .cx-dates-check { margin-left: auto; }
 
 /* Controls: thin outlines, so they read as controls without weighing on the list. Both rows share one set of columns
@@ -41,7 +41,7 @@
 #cx-task-dates .cx-dates-controls > .cx-dates-direction { grid-column: 3; }
 #cx-task-dates .cx-dates-controls > .cx-dates-direction + .cx-dates-control,
 #cx-task-dates .cx-dates-filters > :nth-child(2) { grid-column: 5; }
-#cx-task-dates .cx-dates-filters > .cx-dates-check { grid-column: 6; justify-self: end; }
+#cx-task-dates .cx-dates-filters > .cx-dates-show { --cx-dates-label: 0; grid-column: 6; justify-self: end; width: 170px; }
 #cx-task-dates .cx-dates-control { position: relative; display: flex; align-items: center; gap: 6px; min-width: 0; font-weight: 400; }
 #cx-task-dates .cx-dates-control > span { flex: none; min-width: var(--cx-dates-label, 56px); }
 #cx-task-dates .cx-dates-select {
@@ -58,7 +58,8 @@
   font-weight: 400;
   cursor: pointer;
 }
-#cx-task-dates .cx-dates-toolbar .cx-dates-select {
+#cx-task-dates .cx-dates-toolbar .cx-dates-select,
+#cx-task-dates .cx-dates-show .cx-dates-select {
   flex: 1 1 0;
   box-sizing: border-box;
   field-sizing: fixed;
@@ -73,6 +74,7 @@
 }
 /* One arrow on every toolbar dropdown, in every browser and theme */
 #cx-task-dates .cx-dates-toolbar .cx-dates-control::after,
+#cx-task-dates .cx-dates-show::after,
 #cx-task-dates .cx-dates-filter::after {
   content: '';
   position: absolute;
@@ -88,6 +90,8 @@
 }
 #cx-task-dates .cx-dates-select:hover { border-color: #94adc3 !important; }
 #cx-task-dates .cx-dates-select:disabled { cursor: default; }
+/* Export lists unmarked tasks only, so Show stays put greyed out */
+#cx-task-dates .cx-dates-show:has(.cx-dates-select:disabled) { opacity: 0.6; }
 /* Inside the table a day is a detail */
 #cx-task-dates .cx-dates-table .cx-dates-select { padding: 1px 4px; vertical-align: middle; }
 #connectify-progress .cx-dates-direction {
@@ -171,6 +175,7 @@
 .connectify-dark #cx-task-dates .cx-dates-table .cx-dates-group th { color: var(--cx-text-primary, #ffffff); }
 .connectify-dark #cx-task-dates .cx-dates-select { color: var(--cx-text-primary, #ffffff) !important; }
 .connectify-dark #cx-task-dates .cx-dates-toolbar .cx-dates-control::after,
+.connectify-dark #cx-task-dates .cx-dates-show::after,
 .connectify-dark #cx-task-dates .cx-dates-filter::after { border-color: var(--cx-text-primary, #ffffff); }
 .connectify-dark #cx-task-dates .cx-dates-select:hover { border-color: var(--cx-border-strong, #556c84) !important; }
 .connectify-dark #cx-task-dates .cx-dates-select option { background: var(--cx-nav-bg, #1a222d); color: var(--cx-text-primary, #ffffff); }
@@ -184,6 +189,8 @@
   #cx-task-dates .cx-dates-toolbar { flex-wrap: wrap; }
   #cx-task-dates .cx-dates-controls,
   #cx-task-dates .cx-dates-filters { display: flex; flex-wrap: wrap; gap: 8px 16px; }
-  #cx-task-dates .cx-dates-toolbar .cx-dates-select { flex: none; width: 140px; }
+  #cx-task-dates .cx-dates-toolbar .cx-dates-select,
+  #cx-task-dates .cx-dates-show .cx-dates-select { flex: none; width: 140px; }
+  #cx-task-dates .cx-dates-filters > .cx-dates-show { width: auto; }
   #cx-task-dates .cx-dates-toolbar .cx-dates-control:last-child .cx-dates-select { width: 240px; }
 }

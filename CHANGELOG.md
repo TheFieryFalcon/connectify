@@ -19,6 +19,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - New default category keywords, and Reset Defaults in Settings resets at once.
 - A task with no detected type shows an amber Choose a type in its dropdown, so it stands out.
 - The Weakness Analyzer shows each type's plain average again by default.
+- Task Dates' Show Uncompleted Only is now a Show dropdown: All, Completed, Uncompleted, Marked or Unmarked. Completed goes by the calendar, so a task whose week is over counts as completed before its mark arrives.
 - The outcome meter shows again from a subject's second marked result, as before 3.3.2.
 - Shorter wording in Target Grade and Target ATAR.
 - Settings' General Preferences fields line up evenly.

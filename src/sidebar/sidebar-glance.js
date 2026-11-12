@@ -20,16 +20,6 @@
     const subjectText = row => window.ConnectifyUtils.cleanSubjectName(row.subject) || row.subject;
     const line = (...parts) => parts.filter(Boolean).join(', ');
 
-    // The last school week a row's caption runs to ("Term 4 Week 5-6"), unless a week override moved the task off it
-    function lastWeek(row) {
-      const helpers = window.ConnectifyParseHelpers;
-      const caption = row.task.caption;
-      const span = caption ? helpers?.weekSpan?.(caption) || 0 : 0;
-      if (!span) return row.at;
-      const start = window.ConnectifySchoolTerms.normalizeOrder(helpers.orderHint(caption));
-      return start === row.at ? row.at + span : row.at;
-    }
-
     function hasFinalGrades(row, registry) {
       return Boolean(registry[row.subjectName]?.[row.task.semester || 1]?.finalLetter);
     }
@@ -40,8 +30,8 @@
       const registry = window.ConnectifyClassSemesters?.get?.() || {};
       const week = window.ConnectifyNextUp.weeks(today);
       const now = T.orderOf(T.utc(today.getFullYear(), today.getMonth(), today.getDate()));
-      const unmarked = window.ConnectifyTaskDates.rows(subjects)
-        .filter(row => !row.completed && row.task.weight !== 0 && Number.isFinite(row.at));
+      const unmarked = window.ConnectifyTaskDates.rows(subjects, { today })
+        .filter(row => !row.marked && row.task.weight !== 0 && Number.isFinite(row.at));
 
       const nextUp = unmarked
         .map(row => ({ row, when: week.find(w => w.order === Math.floor(row.at)) }))
@@ -51,7 +41,8 @@
         .map(({ row, when }) => ({ key: row.key, name: row.label, detail: line(subjectText(row), weightText(row.task), when.label) }));
 
       const awaiting = unmarked
-        .filter(row => lastWeek(row) < Math.floor(now) && !hasFinalGrades(row, registry))
+        // A caption's range counts to its end (lastAt)
+        .filter(row => row.lastAt < Math.floor(now) && !hasFinalGrades(row, registry))
         .sort((a, b) => b.at - a.at || byText(a.subject, b.subject) || a.sequence - b.sequence)
         .slice(0, MAX_ROWS)
         .map(row => ({ key: row.key, name: row.label, detail: line(subjectText(row), window.ConnectifyProgressMath.shortTimestamp(row.task.order, row.task.caption)) }));

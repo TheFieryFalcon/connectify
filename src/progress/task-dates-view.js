@@ -3,11 +3,10 @@
  *
  * The Year Progression panel's Task Dates tab (#cx-task-dates), one list for dates and export: the term starts with
  * Early Easter in one line, Group By (and its direction arrow), Sort By and the Export toggle, then a row with Subjects
- * and Type (task-dates-filter.js) and Show Uncompleted Only, then the task table: each task with its short week and the week
+ * and Type (task-dates-filter.js) and Show: (All, Completed, Uncompleted, Marked, Unmarked), then the task table: each task with its short week and the week
  * editor (progress-week-editor.js), then its subject, type and grade, or predicted grade when grouped by it
  * (task-dates-cells.js). Export mode (export-view.js) adds the ticks and downloads to this same table,
- * swaps that right half for the day and export date, leaving the left half where it was, and forces Show Uncompleted
- * Only on.
+ * swaps that right half for the day and export date, leaving the left half where it was, and forces Show: Unmarked.
  * Exposes window.ConnectifyTaskDatesView.
  */
 (() => {
@@ -45,7 +44,7 @@
       dates.saveView({ ...dates.readView(), ...next });
       render(true);
     };
-    const dropdown = (label, options, onChange) => {
+    const dropdown = (label, options, onChange, parent = controls) => {
       const wrap = createElement('label', null, 'cx-dates-control');
       const select = createElement('select', null, 'cx-dates-select');
       for (const option of options) {
@@ -53,7 +52,7 @@
       }
       select.addEventListener('change', () => onChange(select.value));
       wrap.append(createElement('span', label), select);
-      controls.append(wrap);
+      parent.append(wrap);
       return { wrap, select };
     };
     const group = dropdown('Group By:', dates.GROUPS, groupBy => change({ groupBy }));
@@ -66,12 +65,13 @@
     });
     controls.append(direction);
     const sort = dropdown('Sort By:', dates.SORTS, sortBy => change({ sortBy }));
-    const uncompleted = exportRows.checkbox('Show Uncompleted Only', false, uncompletedOnly => change({ uncompletedOnly }));
     toolbar.append(controls);
     const filterRow = createElement('div', null, 'cx-dates-filters');
     const subjectFilter = window.ConnectifyTaskDatesFilter.create('Subjects', hiddenSubjects => change({ hiddenSubjects }));
     const typeFilter = window.ConnectifyTaskDatesFilter.create('Type', hiddenTypes => change({ hiddenTypes }));
-    filterRow.append(subjectFilter.wrap, typeFilter.wrap, uncompleted.wrap);
+    filterRow.append(subjectFilter.wrap, typeFilter.wrap);
+    const show = dropdown('Show:', dates.SHOWS, value => change({ show: value }), filterRow);
+    show.wrap.classList.add('cx-dates-show');
 
     // Filled by export-view.js in Export mode
     const optionsSlot = createElement('div', null, 'cx-dates-export-options');
@@ -111,11 +111,11 @@
       direction.title = descending ? 'Descending' : 'Ascending';
       direction.setAttribute('aria-label', `Group order: ${direction.title}`);
       direction.hidden = !dates.isOrdered(view.groupBy);
-      uncompleted.input.checked = view.uncompletedOnly;
-      uncompleted.input.disabled = exporting;
-      // Options that say nothing about uncompleted tasks are off while only those are listed
+      show.select.value = view.show;
+      show.select.disabled = exporting;
+      // Options that say nothing about the tasks Show lists are off
       const needs = (select, options, exempt) => options.forEach((option, i) => {
-        select.children[i].disabled = view.uncompletedOnly && Boolean(option.needsCompleted) && !exempt;
+        select.children[i].disabled = !dates.fits(option, view.show) && !exempt;
       });
       needs(group.select, dates.GROUPS, false);
       needs(sort.select, dates.SORTS, dates.showsPredicted(view.groupBy));
@@ -148,9 +148,9 @@
     }
 
     function table(groups, view, exportCtx, track) {
-      // A subject heading already names the subject; Show Uncompleted Only lists no grades, only predicted ones
+      // A subject heading already names the subject; a Show choice with no marked tasks lists no grades, only predicted ones
       const predicted = dates.showsPredicted(view.groupBy);
-      const columns = { subject: view.groupBy !== 'subject', grade: predicted || !view.uncompletedOnly, predicted };
+      const columns = { subject: view.groupBy !== 'subject', grade: predicted || dates.listsMarks(view.show), predicted };
       const rightHalf = exportCtx ? ['Day', 'Export Date'] : [...(columns.subject ? ['Subject'] : []), 'Type', ...(columns.grade ? [predicted ? 'Predicted' : 'Mark'] : [])];
       const headers = ['Assessment', 'Date', ...rightHalf];
       const el = createElement('table', null, 'cx-dates-table');
@@ -177,7 +177,8 @@
     function emptyText(rows, view) {
       if (!rows.length) return 'No assessments found. Expand subjects in Connect to load data.';
       if (!rows.some(row => dates.isShown(row, view))) return 'All tasks are hidden.';
-      return view.groupBy === 'achieved' ? 'No completed assessments.' : 'No upcoming assessments.';
+      const none = dates.pick(dates.SHOWS, view.show).none;
+      return none || (view.groupBy === 'achieved' ? 'No marked assessments.' : view.groupBy === 'predicted' ? 'No unmarked assessments.' : 'No assessments.');
     }
 
     function render(force = false) {

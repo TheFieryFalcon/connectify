@@ -98,7 +98,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - Reach for a dialog only for what the panel does not already show
   - Export is a toggle on the Task Dates list
     - ticks, days and downloads on the same rows
-    - Show Uncompleted Only forced on
+    - Show forced to Unmarked (the files hold unmarked tasks)
   - Set as Goal turns into Confirm and Cancel where its button was and adds End beside the target
     - under no progress bar or points of its own (the planner already shows them)
     - its task table and sliders live (a custom end week narrows that table)
@@ -163,8 +163,8 @@ Extremely concise summary of the core visual design language, contrast standards
   - Normal view: Assessment, Date, Subject, Type, Grade
     - Subject (cleaned: no year level or ATAR; no column when grouped by Subject)
     - Type (the outline rows' own dropdown and saved overrides, each change reaching the other)
-    - Mark (`85.5%`, `—` unmarked; no column under Show Uncompleted Only)
-    - grouped by Predicted Grade it is `Predicted`, the Predictor's Mid, Show Uncompleted Only or not
+    - Mark (`85.5%`, `—` unmarked; no column when Show lists no marked task: Uncompleted, Unmarked)
+    - grouped by Predicted Grade it is `Predicted`, the Predictor's Mid, whatever Show lists
     - A manually chosen type is never bold, here or on the outlines
   - Export view: Assessment, Date, Day, Export Date
     - Assessment and Date are a fixed left half (34% + 16%), in the same place in both views
@@ -181,25 +181,27 @@ Extremely concise summary of the core visual design language, contrast standards
     - a marked task with no week reads a quiet `No week` with its ✎; only an unmarked one has the red `No week` and an open input
     - a name a subject lists in both semesters reads with its semester (`Close reading (Semester 1)`), here and on Next Up
     - its week input opens on the week shown, read from the task until overridden, never blank
-    - finished tasks in muted ink
+    - completed tasks in muted ink
     - term starts on one small line above the controls
     - only the downloads are filled
   - Every task, modular
-    - `Group By:` None / Subject / Type / Completed / Predicted Grade (uncompleted only) / Grade Achieved (completed only)
+    - `Group By:` None / Subject / Type / Completed / Predicted Grade (unmarked only) / Grade Achieved (marked only)
     - a ↑ / ↓ arrow for the groups' direction (not None or Completed)
     - `Sort By:` Chronological / Alphabetical / Mark inside each group
     - highest first: the predicted grade when grouped by Predicted Grade, else the grade achieved
-    - `Show Uncompleted Only`, which greys out and falls back from what needs completed tasks (the saved choice returns with the option off)
+    - `Show:` All / Completed / Uncompleted / Marked / Unmarked, a dropdown like the rest; a grouping or sort that says nothing about what it lists greys out and falls back (the saved choice returns once it fits)
+    - Completed goes by the calendar: a task is completed once it is marked or its week (a caption's range to its end) is over, unmarked or not; Marked has a mark
+    - a saved Show Uncompleted Only reads as Unmarked, the tasks it listed
     - A group without the value ("No prediction") stays last in either direction
   - Toolbar text
     - Toolbar text (labels, dropdowns, arrow, Export) is one font, size and regular weight
     - never Connect's label font
   - Spacing
     - every toolbar control is 28px tall on one set of columns (Subjects under Group By, Type under Sort By, one arrow on each dropdown)
-    - Early Easter, Export and Show Uncompleted Only end on the right edge
+    - Early Easter, Export and Show end on the right edge
     - the gaps run 16 tabs to terms, 12 terms to controls, 8 between control rows, 20 to the table
-  - A second row: `Subjects:` and `Type:` and `Show Uncompleted Only`
-    - each drawn like a dropdown: All, `4 of 6` or None
+  - A second row: `Subjects:` and `Type:` and `Show:`
+    - Subjects and Type each drawn like a dropdown: All, `4 of 6` or None
     - opening a list of ticks with Hide All / Show All over the table
     - solid in solid themes and translucent with a blur in Liquid Glass
     - it opens in the top layer (`popover`), because a blur nested in the drawer never reaches the drawer's own text

@@ -18,7 +18,7 @@
 
   const percent = value => `${Math.round(value * 10) / 10}%`;
   /** A completed task's grade ("85.5%"), or a dash. */
-  const gradeText = row => (row.completed ? percent(row.score) : '—');
+  const gradeText = row => (row.marked ? percent(row.score) : '—');
   /** A task's predicted grade (the Predictor's Mid), or a dash. */
   const predictedText = row => (Number.isFinite(row.predicted) ? percent(row.predicted) : '—');
 

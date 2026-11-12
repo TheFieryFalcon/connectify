@@ -32,7 +32,7 @@
   }
 
   function predictionOf(row, subjects) {
-    if (row.completed) return null;
+    if (row.marked) return null;
     try {
       const p = window.ConnectifyPredictorMath?.getOrComputeTaskPrediction?.(row.subjectName, row.task, subjects);
       return window.ConnectifyCohortForecast.isPredicted(p) ? { low: p.low, mid: p.mid, high: p.high } : null;
@@ -66,7 +66,7 @@
         .map(row => detailed(row, subjects, goals)),
       done: week.holiday || !rows.some(row => Number.isFinite(row.at) && Math.floor(row.at) >= week.order)
     }));
-    return { weeks: list, undated: rows.filter(row => !row.completed && !Number.isFinite(row.task.order)).length };
+    return { weeks: list, undated: rows.filter(row => !row.marked && !Number.isFinite(row.task.order)).length };
   }
 
   window.ConnectifyNextUp = { now: () => (window.ConnectifyPastYearMode?.today() ?? new Date()), weeks, build };
