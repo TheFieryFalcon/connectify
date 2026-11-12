@@ -20,6 +20,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - A task with no detected type shows an amber Choose a type in its dropdown, so it stands out.
 - The Weakness Analyzer shows each type's plain average again by default.
 - Task Dates' Show Uncompleted Only is now a Show dropdown: All, Completed, Uncompleted, Marked or Unmarked. Completed goes by the calendar, so a task whose week is over counts as completed before its mark arrives.
+- Group By Completed on Task Dates splits tasks into Uncompleted, Unmarked (week over, no mark yet), Marked and Completed.
 - Export starts on Show: Uncompleted, so a task whose week has passed stays out of your calendar or Notion unless you choose to show it.
 - The outcome meter shows again from a subject's second marked result, as before 3.3.2.
 - Shorter wording in Target Grade and Target ATAR.

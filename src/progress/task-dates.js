@@ -2,7 +2,8 @@
  * Connectify Task Dates: rows, groups and order
  *
  * The Task Dates tab's list: every cached task of every class. Group By (None, Subject, Type, Completed,
- * Predicted Grade: unmarked tasks only, Grade Achieved: marked tasks only; grades in university bands) with
+ * Predicted Grade: unmarked tasks only, Grade Achieved: marked tasks only; grades in university bands; Completed in
+ * four: Uncompleted, Unmarked (its week over), Marked (its week not over or unknown), Completed (both)) with
  * a direction for the groups (not Completed), then Sort By inside each group (Chronological, Alphabetical,
  * Mark: the predicted grade when grouped by it, else the grade achieved), Show (All, Completed, Uncompleted, Marked,
  * Unmarked; Export mode starts on Uncompleted) and the subjects and types hidden from the list. A task is completed once it
@@ -46,6 +47,10 @@
   // Whether a Show choice can list a mark (an uncompleted task is never marked)
   const listsMarks = show => show === 'all' || show === 'completed' || show === 'marked';
 
+  // Group By Completed: a task's mark and its calendar week together, in this order
+  const STAGES = ['Uncompleted', 'Unmarked', 'Marked', 'Completed'];
+  const stageOf = r => (r.marked ? 2 : 0) + (r.past ? 1 : 0);
+
   // fits(show): says something about the tasks that Show choice lists
   const GROUPS = [
     { id: 'none', label: 'None' },
@@ -54,7 +59,7 @@
       return { key: label, label };
     } },
     { id: 'type', label: 'Type', ordered: true, of: r => ({ key: r.type, label: r.type || 'No type' }) },
-    { id: 'completed', label: 'Completed', fits: show => show === 'all' || show === 'unmarked', of: r => ({ key: r.completed ? 1 : 0, label: r.completed ? 'Completed' : 'Not completed' }) },
+    { id: 'completed', label: 'Completed', fits: show => show !== 'uncompleted', of: r => ({ key: stageOf(r), label: STAGES[stageOf(r)] }) },
     { id: 'predicted', label: 'Predicted Grade', ordered: true, fits: show => show !== 'marked', only: r => !r.marked, of: r => gradeBand(r.predicted, 'No prediction') },
     { id: 'achieved', label: 'Grade Achieved', ordered: true, fits: listsMarks, only: r => r.marked, of: r => gradeBand(r.score, 'No grade') }
   ];
@@ -138,7 +143,7 @@
 
   /**
    * One row per task; `siblings` and `subjectName` are what the week editor keys overrides by. `marked`: it has a
-   * mark; `completed`: marked, or its last week (`lastAt`) is over by `opts.today` (a past year: its last day).
+   * mark; `past`: its last week (`lastAt`) is over by `opts.today` (a past year: its last day); `completed`: either.
    * Predictions are read only for opts.predictions, on unmarked tasks. `key` is the export's task key.
    */
   function rows(subjects, opts = {}) {
@@ -160,9 +165,10 @@
         // The week the row shows: a date caption in the holidays reads as the next term's first week
         const at = Number.isFinite(task.order) ? terms.normalizeOrder(task.order) ?? task.order : Infinity;
         const lastAt = lastWeek(task, at);
+        const past = Number.isFinite(lastAt) && lastAt < thisWeek;
         out.push({
           key, task, subject: name, name: task.name || '', siblings: subject.tasks, subjectName: subject.name,
-          type: typeOf(subject.name, task), marked, completed: marked || (Number.isFinite(lastAt) && lastAt < thisWeek),
+          type: typeOf(subject.name, task), marked, past, completed: marked || past,
           score: marked ? task.score : null, gradeRank: marked ? -task.score : Infinity,
           predicted: opts.predictions && !marked ? predictedMid(subject.name, task, subjects) : null,
           at, lastAt, sequence: task.sequence ?? 0

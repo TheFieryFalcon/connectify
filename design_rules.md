@@ -192,6 +192,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - highest first: the predicted grade when grouped by Predicted Grade, else the grade achieved
     - `Show:` All / Completed / Uncompleted / Marked / Unmarked, a dropdown like the rest; a grouping or sort that says nothing about what it lists greys out and falls back (the saved choice returns once it fits)
     - Completed goes by the calendar: a task is completed once it is marked or its week (a caption's range to its end) is over, unmarked or not; Marked has a mark
+    - Group By Completed splits by both, in this order: Uncompleted (neither), Unmarked (its week over, no mark), Marked (a mark, its week not over or unknown), Completed (both); off only under Show: Uncompleted
     - a saved Show Uncompleted Only reads as Unmarked, the tasks it listed
     - A group without the value ("No prediction") stays last in either direction
   - Toolbar text

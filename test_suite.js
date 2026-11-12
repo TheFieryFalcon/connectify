@@ -14427,10 +14427,11 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
       assert.strictEqual(firstCells()[0], 'Test');
       setDirection('asc');
 
-      // Completed: by the calendar, so unmarked lab, whose week is over, is completed; fixed order, no direction
+      // Completed: a task's mark and its week together, in four groups in a fixed order, no direction. Unmarked lab's
+      // week is over; Essay and Exam are marked before their weeks (20, 40) are over; Test 2 is marked and past
       pick(group, 'completed');
       assert.strictEqual(direction.hidden, true);
-      assert.deepStrictEqual(firstCells(), ['Not completed', 'Test 10', 'Undated', 'Completed', 'Test 2', 'lab', 'Essay', 'Exam']);
+      assert.deepStrictEqual(firstCells(), ['Uncompleted', 'Test 10', 'Undated', 'Unmarked', 'lab', 'Marked', 'Essay', 'Exam', 'Completed', 'Test 2']);
       assert.strictEqual(tableRows().find(tr => tr.children[0]?.textContent === 'lab').className, 'cx-dates-row cx-dates-row--done', 'and recedes like the marked ones');
 
       // Predicted Grade: uncompleted tasks only, university bands tied to school letters, no prediction last
@@ -14468,7 +14469,7 @@ runTest('Test 305: Year Progression has Progress Graph, Next Up and Task Dates t
       assert.deepStrictEqual(shown(), ['Test 2', 'lab', 'Essay', 'Exam'], 'Completed: marked, or its week is over');
       pick(show, 'marked');
       assert.deepStrictEqual(shown(), ['Test 2', 'Essay', 'Exam']);
-      assert.ok(disabled(group, 'predicted') && disabled(group, 'completed') && !disabled(sort, 'grade'));
+      assert.ok(disabled(group, 'predicted') && !disabled(group, 'completed') && !disabled(sort, 'grade'), 'marked tasks still split into Marked and Completed');
       pick(show, 'all');
       localStorage.setItem(T.KEY, JSON.stringify({ uncompletedOnly: true }));
       assert.strictEqual(T.readView().show, 'unmarked', 'Show Uncompleted Only, saved before Show, lists what it did');
