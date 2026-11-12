@@ -7,7 +7,8 @@
  * outline-api.js serves these records instead of fetching Connect's. The student's own account is never read or
  * written, so their class registry never sees the mock classes and Connect's real outlines can never start a new
  * year from them. A toast on the outlines page says so, with Exit (removes the key and reloads). Global settings
- * (theme, categories, Settings checkboxes) are shared. Loaded right after past-year-mode.js, before utils.js.
+ * (theme, categories, Settings checkboxes) are shared. A mock saved with a school week (`at`) is that week's Wednesday
+ * wherever the date decides something (past-year-mode.js' today()). Loaded right after past-year-mode.js, before utils.js.
  * Exposes window.ConnectifyMockOutlines.
  */
 (() => {
@@ -34,6 +35,15 @@
   const suffix = () => (state ? SUFFIX : '');
   /** The mock records as saved now (a result released from the console since load is read on the next load). */
   const records = () => read()?.records || [];
+  /** The mock's own date (`at`: { term, week }, cxMock.seed): Wednesday of that school week this year, else null. */
+  function today() {
+    const at = state?.at;
+    const terms = window.ConnectifySchoolTerms;
+    if (!at || !terms) return null;
+    const year = window.ConnectifyPastYearMode?.year() ?? new Date().getFullYear();
+    const d = terms.dateFor(year, at.term, at.week, 3, terms.earlyEaster(year));
+    return d ? new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12) : null;
+  }
 
   function exit() {
     try { localStorage.removeItem(KEY); } catch {}
@@ -53,5 +63,5 @@
   }
   if (state) setTimeout(notify, 3000);
 
-  window.ConnectifyMockOutlines = { KEY, SUFFIX, active, suffix, records, exit };
+  window.ConnectifyMockOutlines = { KEY, SUFFIX, active, suffix, records, today, exit };
 })();

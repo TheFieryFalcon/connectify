@@ -1,10 +1,11 @@
 /**
  * Connectify Goals: bars on assessment rows (goal-bars.js)
  *
- * Two 18 x 56 bars right of the outcome meter, in its track style, so rows never grow. Goal-performance:
- * four pastel segments lit from the bottom (red, orange, yellow, green) and a secret purple breakout segment
- * (20px, the bar grows upwards like the meter's). Goal-progress: one smooth fill from the bottom in the goal
- * tier's colour (not pastel). Segments never take the pointer (one tooltip per bar).
+ * Two 18 x 56 bars right of the outcome meter, on its track with its unlit segments, so the three read as one set
+ * 4px apart and rows never grow. Goal-performance: four segments lit from the bottom in rose, amber, lime and cyan
+ * (bad to good, never the meter's own colours) and a secret purple breakout segment
+ * (20px, the bar grows upwards like the meter's). Goal-progress: one smooth fill from the bottom in the goal tier's
+ * colour. Segments never take the pointer (one tooltip per bar).
  */
 
 .cx-goal-bars {
@@ -17,6 +18,12 @@
   cursor: help;
 }
 
+/* Beside the outcome meter they close up to the bars' own 4px (the row wrapper's gap: 14px, narrower screens less) */
+.connectify-row-wrapper > .connectify-outcome-bar + .cx-goal-bars { margin-left: -10px; }
+@media (max-width: 950px) { .connectify-row-wrapper > .connectify-outcome-bar + .cx-goal-bars { margin-left: -4px; } }
+@media (max-width: 800px) { .connectify-row-wrapper > .connectify-outcome-bar + .cx-goal-bars { margin-left: -2px; } }
+@media (max-width: 650px) { .connectify-row-wrapper > .connectify-outcome-bar + .cx-goal-bars { margin-left: 0; } }
+
 :is(.cx-goal-perf, .cx-goal-progress) {
   position: relative;
   box-sizing: border-box;
@@ -24,8 +31,14 @@
   height: 56px;
   padding: 3px;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--cx-text-primary, #0f172a) 5%, transparent);
-  border: 1px solid color-mix(in srgb, var(--cx-text-primary, #0f172a) 14%, transparent);
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* The meter's dark track (sidebar-outcome-filter.css) */
+.connectify-dark :is(.cx-goal-perf, .cx-goal-progress) {
+  background: color-mix(in srgb, var(--cx-text-primary, #ffffff) 6%, transparent);
+  border-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 16%, transparent);
 }
 
 .cx-goal-perf {
@@ -44,15 +57,20 @@
   height: 10px;
   flex: 0 0 auto;
   border-radius: 2.5px;
-  background: color-mix(in srgb, var(--cx-text-primary, #0f172a) 18%, transparent);
+  background: #cbd5e1;
+  opacity: 0.35;
   pointer-events: none !important;
 }
+/* Unlit like the meter's: its dark rule's button-hover fill */
+.connectify-dark .cx-goal-seg { background: var(--cx-button-hover, #334155); opacity: 0.4; }
 
-.cx-goal-seg--red { background: #f4a3a3; }
-.cx-goal-seg--orange { background: #f8c99b; }
-.cx-goal-seg--yellow { background: #f5e19a; }
-.cx-goal-seg--green { background: #a7e3b5; }
-.cx-goal-seg--purple { height: 20px; background: #cdb5f7; }
+/* Lit: two classes, after the dark unlit rule, so they win in every theme. A cooler set than the meter's red, orange,
+   yellow and green (rose, amber, lime, cyan), so the two never read as each other, still bad to good */
+.cx-goal-seg.cx-goal-seg--red { opacity: 1; background: #fb7185; }
+.cx-goal-seg.cx-goal-seg--orange { opacity: 1; background: #fbbf24; }
+.cx-goal-seg.cx-goal-seg--yellow { opacity: 1; background: #a3e635; }
+.cx-goal-seg.cx-goal-seg--green { opacity: 1; background: #22d3ee; }
+.cx-goal-seg.cx-goal-seg--purple { opacity: 1; height: 20px; background: #c084fc; }
 
 .cx-goal-progress {
   display: flex;
@@ -93,7 +111,7 @@
   grid-column: 10 !important;
   grid-row: 1 !important;
   align-self: center !important;
-  margin: 0 !important;
+  margin: 0 0 0 -14px !important; /* 4px after the meter's column, not the grid's 18px */
 }
 
 .connectify-panel.cx-has-goal-bars > .cx-goal-bars {

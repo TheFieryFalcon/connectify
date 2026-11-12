@@ -12674,7 +12674,7 @@ runTest('Test 264: Newly read results bring a Goal Updated toast of its own; goa
   localStorage.clear();
 });
 
-runTest('Test 265: Goal bars sit beside the outcome meter: pastel performance bands with a secret purple breakout, progress in the tier colour', () => {
+runTest('Test 265: Goal bars sit beside the outcome meter: rose-to-cyan performance bands with a secret purple breakout, progress in the tier colour', () => {
   localStorage.clear();
   const card = makeOutlineCard('Chemistry ATAR - Semester 2', { overall: '75.4%', tasks: [['Test 1', '39 Out of 50'], ['Test 2', '36 Out of 50']] });
   const rows = card.querySelectorAll('.cvr-c-tasks .cvr-c-task');
@@ -12714,11 +12714,16 @@ runTest('Test 265: Goal bars sit beside the outcome meter: pastel performance ba
 
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-bars.css'), 'utf8');
   assert.ok(cssHas(css, 'width: 18px;') && cssHas(css, 'height: 56px;'), 'each bar is 18 x 56');
-  assert.ok(cssHas(css, '.cx-goal-seg--purple { height: 20px; background: #cdb5f7; }'), 'the breakout segment is double height');
+  assert.ok(cssHas(css, '.cx-goal-seg.cx-goal-seg--purple { opacity: 1; height: 20px; background: #c084fc; }'), 'the breakout segment is double height');
   assert.ok(css.match(/pointer-events: none !important/g).length >= 2, 'segments and fill never take the pointer');
-  for (const [band, color] of Object.entries({ red: '#f4a3a3', orange: '#f8c99b', yellow: '#f5e19a', green: '#a7e3b5' })) {
-    assert.ok(cssHas(css, `.cx-goal-seg--${band} { background: ${color}; }`), `${band} is pastel`);
+  // One set with the meter (4px after it, its track and unlit segments), lit in a cooler set than its colours
+  for (const [band, color] of Object.entries({ red: '#fb7185', orange: '#fbbf24', yellow: '#a3e635', green: '#22d3ee' })) {
+    assert.ok(cssHas(css, `.cx-goal-seg.cx-goal-seg--${band} { opacity: 1; background: ${color}; }`), `${band} band is ${color} in every theme`);
   }
+  const segRules = css.split('}').filter(rule => rule.includes('.cx-goal-seg')).join('}');
+  assert.ok(!/#ef4444|#f97316|#eab308|#10b981|#f4a3a3|#f8c99b|#f5e19a|#a7e3b5|#cdb5f7/i.test(segRules), "segments are never the meter's colours or the old chalky pastels");
+  assert.ok(cssHas(css, '.connectify-row-wrapper > .connectify-outcome-bar + .cx-goal-bars { margin-left: -10px; }'), 'beside the meter they close up to 4px (the wrapper gap is 14px)');
+  assert.ok(cssHas(css, '.connectify-dark .cx-goal-seg { background: var(--cx-button-hover, #334155); opacity: 0.4; }') && cssHas(css, 'background: #cbd5e1;'), 'unlit segments are the meter\'s');
   const view = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'cohort/cohort-view.js'), 'utf8');
   assert.ok(view.includes('memo.goalSig === goalSig') && view.includes('window.ConnectifyGoalBars?.render(ui, row, isOverall);'), 'rows memoise and draw their goal bars');
   localStorage.clear();
@@ -15038,19 +15043,18 @@ runTest('Test 314: Next Up lists this week and next week between Progress Graph 
       find(note, n => n.tagName === 'BUTTON')[0].dispatchEvent(new MockEvent('click'));
       assert.strictEqual(tabs.active(), 'dates', 'the note opens Task Dates, where a week is set');
 
-      // A goal adds its target and tier; rows it does not cover get a dash
+      // A goal adds its target, coloured by its tier with no tier label; rows it does not cover get a dash
       const asked = [];
       window.ConnectifyGoalStore = { all: () => [{ id: 'g' }] };
       window.ConnectifyGoalForecast = { targetForTask: (subject, task, prediction, goals) => {
         asked.push([subject, task.id, prediction?.mid, goals.length]);
         return task.id === 'p1' ? { required: 86.4, tier: 'hard' } : task.id === 'p2' ? { required: 80, tier: 'trivial' } : null;
       } };
-      window.ConnectifyGoalModal = { tierLabel: tier => Object.assign(new MockElement('span', 'cx-goal-tier'), { textContent: tier }) };
       tabs.select('next');
       assert.deepStrictEqual(trs()[0].children.map(n => n.textContent).pop(), 'Goal');
       assert.strictEqual(find(trs()[2], n => n.className === 'cx-next-goal').length, 1);
       assert.deepStrictEqual(asked[0], ['12 Physics ATAR', 'p1', 70.2, 1], 'the goal is asked about the task with its prediction');
-      assert.deepStrictEqual(find(trs()[2].children[7], () => true).map(n => n.textContent), ['86%', 'hard']);
+      assert.deepStrictEqual(find(trs()[2].children[7], () => true).map(n => n.textContent), ['86%'], 'the target alone: its tier shows only as colour');
       const goalValue = trs()[2].children[7].children[0];
       assert.ok(goalValue.className.includes('cx-goal-target__value') && goalValue.dataset.tier === 'hard', 'the percentage takes the goal target\'s tier colour');
       assert.strictEqual(trs()[3].children[5].children[0].dataset.tier, undefined, 'a marked task has no difficulty to colour it by');
@@ -16163,8 +16167,8 @@ runTest('Test 337: The radar averages each type, or measures it within each subj
 
 runTest('Test 357: Mock outlines run as a separate student, drawn from records in localStorage, never fetching Connect\'s', () => {
   const read = file => origReadFileSync.call(fs, path.resolve(SRC_DIR, file), 'utf8');
-  const make = stored => {
-    const win = { document: { documentElement: { setAttribute() {} } } };
+  const make = (stored, extra = {}) => {
+    const win = { document: { documentElement: { setAttribute() {} } }, ...extra };
     const store = { 'connectify:mock_outlines': stored };
     new Function('window', 'localStorage', 'document', 'setTimeout', 'location', read('system/mock-outlines.js'))(
       win, { getItem: k => store[k] ?? null, removeItem: k => { delete store[k]; } }, win.document, () => {}, {});
@@ -16174,13 +16178,19 @@ runTest('Test 357: Mock outlines run as a separate student, drawn from records i
   assert.strictEqual(make('{"records":"x"}').active(), false, 'records must be a list');
   const on = make(JSON.stringify({ records: [{ title: 'A - Semester 1' }] }));
   assert.ok(on.active() && on.suffix() === '~mock' && on.records().length === 1, 'on with records');
+  assert.strictEqual(on.today(), null, 'no date of its own unless saved with a school week');
+  const y = new Date().getFullYear();
+  const terms = { earlyEaster: () => false, dateFor: (year, term, week, weekday) => (year === y && term === 3 && week === 8 && weekday === 3 ? new Date(Date.UTC(y, 8, 9)) : null) };
+  const mockDay = make(JSON.stringify({ records: [{ title: 'A - Semester 1' }], at: { term: 3, week: 8 } }), { ConnectifySchoolTerms: terms }).today();
+  assert.ok(mockDay && mockDay.getFullYear() === y && mockDay.getMonth() === 8 && mockDay.getDate() === 9, "a saved school week is that week's Wednesday this year");
+  assert.ok(read('system/past-year-mode.js').includes('(window.ConnectifyMockOutlines?.today() || new Date())'), 'wherever the date decides something');
 
   assert.ok(read('system/utils.js').includes("const liveAccountKey = () => ownAccountKey() + (window.ConnectifyMockOutlines?.suffix() || '');"), 'every per-student key is the mock account\'s');
   const api = read('assessment/outline-api.js');
   assert.ok(api.includes("window.ConnectifyMockOutlines?.active() ? mockRecords() : fetchRecords()") && api.includes("window.addEventListener('load'"), 'its records stand in for Connect\'s once the page has loaded, as a fetch\'s would');
   assert.ok(read('assessment/legacy-outlines.js').includes('window.ConnectifyPastYearMode?.active() || window.ConnectifyMockOutlines?.active()'), 'every record is drawn');
   const css = read('system/mock-outlines.css');
-  assert.ok(cssHas(css, 'html[data-cx-mock] cnt-sao-card') && cssHas(css, 'html[data-cx-mock] cnt-student-assessment-outlines cnt-no-content-panel'), 'Connect\'s cards and empty state are hidden');
+  assert.ok(cssHas(css, 'html[data-cx-mock] cnt-sao-card') && cssHas(css, 'html[data-cx-mock] cnt-student-assessment-outlines cnt-no-content-panel') && cssHas(css, 'html[data-cx-mock] #ng-zone__student-assessment-outline > cnt-no-content-panel'), 'Connect\'s cards and empty state are hidden');
   const manifest = JSON.parse(read('../manifest.json'));
   for (const group of manifest.content_scripts.filter(g => g.js?.includes('src/system/utils.js'))) {
     assert.strictEqual(group.js.indexOf('src/system/mock-outlines.js'), group.js.indexOf('src/system/utils.js') - 1, 'right before utils.js in every group');
@@ -16198,6 +16208,10 @@ runTest('Test 357: Mock outlines run as a separate student, drawn from records i
     assert.ok(first.outlines[0].tasks.every(t => tasks.some(u => u.taskId === t.taskId)) && /^[A-E]$/.test(first.grade) && !r.grade, `${r.subject}: Semester 1 graded, its tasks on Semester 2 too`);
   }
   assert.ok(records.some(r => r.outlines.some(o => o.tasks.some(t => !t.mark))), 'tasks left to mark');
+  const when = t => { const [, term, week] = t.when.match(/Term (\d+), Week (\d+)/); return term * 100 + Number(week); };
+  const early = consoleWin.cxMock.build({ term: 3, week: 8 }).flatMap(r => r.outlines.flatMap(o => o.tasks));
+  assert.ok(early.every(t => (when(t) >= 308 ? !t.mark : true)) && early.some(t => when(t) < 308 && t.mark), 'from its own week on nothing is marked yet');
+  assert.ok(early.filter(t => when(t) === 308 || when(t) === 309).length >= 8, 'its first fortnight is busy');
   assert.ok(consoleWin.cxMock.buildYear12().every(r => r.subject.startsWith('12 ')), 'and a Year 12 set for the rollover');
 });
 
@@ -16821,7 +16835,7 @@ runTest('Test 349: A past year is read-only and quiet: drawn from its records, n
   assert.ok(read('assessment/legacy-outlines.js').includes('if (connectPending() || window.ConnectifyPastYearMode?.active() || '), 'every record is drawn, never matched to Connect\'s cards');
   const css = read('system/past-year.css');
   assert.ok(cssHas(css, 'html[data-cx-past-year] cnt-sao-card') && cssHas(css, 'html[data-cx-past-year] cnt-category-bar'), "Connect's cards and filter bar are this year's: hidden");
-  assert.ok(cssHas(css, 'html[data-cx-past-year] cnt-student-assessment-outlines cnt-no-content-panel'), "Connect's \"No Assessment Outlines available.\" is about this year: hidden");
+  assert.ok(cssHas(css, 'html[data-cx-past-year] cnt-student-assessment-outlines cnt-no-content-panel') && cssHas(css, 'html[data-cx-past-year] #ng-zone__student-assessment-outline > cnt-no-content-panel'), "Connect's \"No Assessment Outlines available.\" is about this year: hidden");
   for (const [file, what] of [
     ['system/new-grade.js', 'grade toasts'], ['system/grade-tasks.js', 'new results'], ['goals/goal-events.js', 'goal toasts'],
     ['system/update-notice.js', 'the update notice'], ['system/overhaul-notice.js', 'the overhaul notice'], ['progress/wace-countdown.js', 'the countdown'],

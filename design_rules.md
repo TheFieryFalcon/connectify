@@ -138,7 +138,7 @@ Extremely concise summary of the core visual design language, contrast standards
   - One table, drawn like the Task Dates list
     - Assessment, Subject, Type (the same dropdown), Weight, Low, Mid, High, Goal
     - Low, Mid and High in the outline panels' colours; `85.5%` centred across the three once marked (finished tasks in muted ink)
-    - Goal is the mark the goal asks, semibold in the task tier's desaturated hue like every goal target, with its tier label
+    - Goal is the mark the goal asks, semibold in the task tier's desaturated hue like every goal target, never a tier label
     - a marked task shows what it needed, no tier or colour; no column when no goal covers these tasks
   - Spacing
     - every column as wide as its text with one 16px gap, the last ending on the panel's right edge
@@ -860,11 +860,13 @@ Extremely concise summary of the core visual design language, contrast standards
 - **Goal Bars** (`goal-bars.css`)
   - Placement
     - beside the outcome meter, each 18px x 56px, rows never grow
-    - on expanded task cards they take a grid column after the meter (the card widens), never wrapping under Score
+    - meter and goal bars are one set: 4px apart, on the meter's track with its unlit segments and corners
+    - on expanded task cards they take a grid column after the meter (the card widens, still 4px after it), never wrapping under Score
   - **Goal-performance** (completed tasks)
-    - 4 pastel segments against the task's requirement R before it was marked
-    - Red `#f4a3a3` < R-5, Orange `#f8c99b` < R, Yellow `#f5e19a` < R+5, Green `#a7e3b5`
-    - plus a **secret** pastel purple (`#cdb5f7`, 20px) breakout above 1.10 x R on Green, never disclosed
+    - 4 segments against the task's requirement R before it was marked, in a cooler set than the meter's so the two never read as each other, still bad to good, the same in every theme
+    - Rose `#fb7185` < R-5, Amber `#fbbf24` < R, Lime `#a3e635` < R+5, Cyan `#22d3ee`
+    - never the meter's own colours, nor white-mixed pastels (chalky on dark and glass)
+    - plus a **secret** purple (`#c084fc`, 20px) breakout above 1.10 x R on Cyan, never disclosed
   - **Year Progression**
     - plots the goal's target mark per task as a dashed line
     - the remaining tasks' part starting at the last plotted score
@@ -1024,8 +1026,10 @@ Extremely concise summary of the core visual design language, contrast standards
   - A separate student
     - every per-student key is the mock account's (`<account>~mock`), so the student's own class registry, snapshot and records are never read or written
     - so Connect's real outlines can never start a new year from mock classes
+  - A date of its own
+    - a mock saved with a school week (`at`, Term 3 Week 8 from `cxMock.seed()`) is that week's Wednesday wherever the date decides something (`ConnectifyPastYearMode.today()`), and its tasks from that week on are unmarked
   - On screen
-    - Connect's cards, filter bars and empty state are hidden; a toast says mock outlines are on, with Exit
+    - Connect's cards, filter bars and empty state are hidden (in exam weeks the empty state sits straight in Connect's outlines zone); a toast says mock outlines are on, with Exit
 - **Zero-Flicker Observers**
   - Page-wide observation and periodic work go through `ConnectifyScheduler`
     - `onMutations` with a filter and `mute`, `every` gated on activity, visibility and open panels

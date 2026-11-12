@@ -24,7 +24,7 @@
 #cx-next-up .cx-next-empty { color: #4a5d70; }
 #cx-next-up :is(.cx-next-weight, .cx-next-prediction, .cx-next-goal) { font-variant-numeric: tabular-nums; }
 /* Low / Mid / High take the outline panels' colours and weights (cohort-upcoming.css) */
-#cx-next-up .cx-next-goal-value { margin-right: 6px; font-weight: 600; }
+#cx-next-up .cx-next-goal-value { font-weight: 600; }
 /* A grade spans Low, Mid and High, so centred it never reads as the Low */
 #cx-next-up .cx-dates-table .cx-next-grade { text-align: center; }
 #cx-next-up .cx-dates-row--done .cx-next-goal-value { font-weight: 400; }

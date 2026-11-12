@@ -53,8 +53,8 @@
   }
 
   const active = () => Boolean(state);
-  // The last day of the year shown: its Semester 2, its holidays after the last task
-  const today = () => (state ? new Date(state.year, 11, 31, 12) : new Date());
+  // The last day of the year shown: its Semester 2, its holidays after the last task; else mock outlines' own week
+  const today = () => (state ? new Date(state.year, 11, 31, 12) : (window.ConnectifyMockOutlines?.today() || new Date()));
 
   window.ConnectifyPastYearMode = {
     KEY,

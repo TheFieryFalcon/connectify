@@ -6,7 +6,7 @@ Status: implemented (2026-10-26). Revised 2026-11-02: Set as Goal opens on the p
 The Goal Setter's **Target Grade** and **Target ATAR** planners get a **Set as Goal** button that opens a modal dialog (preview, end point, Confirm) to save the plan as a **goal**. A **Goals** button opens a second modal listing saved goals. A saved goal:
 - has a **difficulty tier** worked out from the chance of reaching it: **Trivial, Easy, Medium, Hard, Hell**, plus **Guaranteed** and **Impossible**, which end the goal as soon as they happen (early lock-in);
 - carries **effort sliders** (5 notches) on each remaining task (Target Grade) or each top-four subject (Target ATAR) that shift the required marks between them without touching outline weights;
-- adds two vertical bars to assessment rows on the outlines page: a **goal-performance bar** on completed tasks (four pastel segments plus a secret purple breakout) and a **goal-progress bar** (smooth, unsegmented fill coloured by the goal's tier) on completed tasks and the subject's overall row;
+- adds two vertical bars to assessment rows on the outlines page: a **goal-performance bar** on completed tasks (four segments in rose, amber, lime and cyan plus a secret purple breakout) and a **goal-progress bar** (smooth, unsegmented fill coloured by the goal's tier) on completed tasks and the subject's overall row;
 - is **saved**, **editable** and listed in the Goals modal, with finished goals kept under Past goals;
 - for Target ATAR, creates **linked subject goals** for the top four, re-solved after every new mark.
 
@@ -52,7 +52,7 @@ Taken from Connectify's existing projections, so a goal never disagrees with the
 - **Per-task tier** (planner only): the chance of scoring at least the task's required mark R against that task's own prediction (`predictTask` Low / Mid / High, same σ rule). Tasks without a prediction get no tier.
 
 ### 3.2 Tiers
-| Tier | Rule | Progress colour (not pastel) |
+| Tier | Rule | Progress colour (full strength) |
 |---|---|---|
 | Guaranteed | met at 0% on everything left (→ Achieved) | `#15803d` |
 | Trivial | chance ≥ 90% | `#22c55e` |
@@ -189,7 +189,7 @@ The planners stay planners. Goals are made in a **Set as Goal** dialog and manag
   - Green: M ≥ R + 5
   - **Purple breakout**: M > 1.10 × R on top of Green. Secret, as with the outcome meter: never shown in tooltips, legends or docs aimed at users. (When R > 90.9, purple cannot happen, as with the outcome meter.)
 - Geometry mirrors the outcome meter: 4 segments of 10 px, plus a purple 5th segment of 20 px; the active segment is fully opaque on the inactive track token.
-- Pastel colours, so it never reads as the outcome meter: red `#f4a3a3`, orange `#f8c99b`, yellow `#f5e19a`, green `#a7e3b5`, purple `#cdb5f7`.
+- A cooler set than the outcome meter's, so it never reads as it: rose `#fb7185` (red band), amber `#fbbf24` (orange), lime `#a3e635` (yellow), cyan `#22d3ee` (green), purple `#c084fc`, the same in every theme. The meter and both goal bars sit 4px apart on one track style, as one set.
 
 ### 6.3 Goal-progress bar
 - **Fill** = earned weighted points / required weighted points, capped at 1, where required = target × (total weight of the tasks in range) / 100. A smooth fill from the bottom up, **no segments**.
@@ -337,7 +337,7 @@ Changes to existing files stay small: `target-solver.js` gains the `offsets` opt
 - `docs/apis_and_storage.md`: globals and the two keys.
 - `docs/architecture.md`: script order.
 - `docs/features_analytics_publishing.md`: Feature 11.
-- `design_rules.md`: Section 4: goal bars (geometry, pastel performance tiers, secret purple, tier-coloured progress).
+- `design_rules.md`: Section 4: goal bars (geometry, rose-to-cyan performance tiers, secret purple, tier-coloured progress).
 
 ## 14. Defaults chosen without asking (revisit if wrong)
 - The planner and dialogs show tier names only, with no chance percentage (UI copy rule).

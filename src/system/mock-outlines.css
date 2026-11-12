@@ -2,12 +2,14 @@
  * Connectify: mock outlines (mock-outlines.js)
  *
  * Connectify draws the mock records whatever Connect shows, so Connect's own cards, its class filter bars and its
- * "No Assessment Outlines available." are hidden while mock outlines are on.
+ * "No Assessment Outlines available." are hidden while mock outlines are on. In exam weeks Connect puts that notice
+ * straight into its outlines zone, with no outlines component around it.
  */
 
 html[data-cx-mock] cnt-sao-card,
 html[data-cx-mock] cnt-category-bar,
 html[data-cx-mock] .js-pos-category-toolbar-container,
-html[data-cx-mock] cnt-student-assessment-outlines cnt-no-content-panel {
+html[data-cx-mock] cnt-student-assessment-outlines cnt-no-content-panel,
+html[data-cx-mock] #ng-zone__student-assessment-outline > cnt-no-content-panel {
   display: none !important;
 }

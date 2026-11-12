@@ -3,7 +3,7 @@
  *
  * The Year Progression panel's Next Up tab (#cx-next-up): one table, drawn like the Task Dates list, of this week's and
  * next week's assessments, each with its subject, type (the outline rows' own dropdown), weight, Low / Mid / High
- * prediction, or its grade once marked, and what an active goal asks of it (no Goal column when no goal covers these
+ * prediction, or its grade once marked, and what an active goal asks of it, in its tier's colour (no Goal column when no goal covers these
  * tasks). A week with no tasks shows a happy face: "All Done!" in the holidays or once no task is dated later, else
  * "No Tasks This Week" or "No Tasks Next Week". A week is edited on Task Dates, which a note points to
  * when unmarked tasks have none.
@@ -52,11 +52,8 @@
       if (!row.goal) return cell;
       const value = createElement('span', percent(row.goal.required), 'cx-next-goal-value cx-goal-target__value');
       cell.append(value);
-      if (row.goal.tier && !row.marked) {
-        // Tinted like the goal target on the outlines' prediction panels (goal-forecast.css)
-        value.dataset.tier = row.goal.tier;
-        cell.append(window.ConnectifyGoalModal.tierLabel(row.goal.tier));
-      }
+      // Tinted like the goal target on the outlines' prediction panels (goal-forecast.css): colour only, no tier label
+      if (row.goal.tier && !row.marked) value.dataset.tier = row.goal.tier;
       return cell;
     }
 

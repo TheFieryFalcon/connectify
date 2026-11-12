@@ -3,13 +3,14 @@
  *
  * Connect's own cards and its class filter bar are this year's, so while a past year is viewed only the outlines
  * Connectify draws from the year's records show, under one notice. Connect's "No Assessment Outlines available." is
- * about this year (exam weeks, a new year not started), so it is hidden too. Its teacher and school names link nowhere: their
+ * about this year (exam weeks, a new year not started; then it sits straight in the outlines zone), so it is hidden too. Its teacher and school names link nowhere: their
  * links belong to Connect's cards. The notice is one surface in the theme's tokens, kept under Connect's top bars.
  */
 
 html[data-cx-past-year] cnt-sao-card,
 html[data-cx-past-year] cnt-category-bar,
 html[data-cx-past-year] cnt-student-assessment-outlines cnt-no-content-panel,
+html[data-cx-past-year] #ng-zone__student-assessment-outline > cnt-no-content-panel,
 html[data-cx-past-year] .js-pos-category-toolbar-container,
 html[data-cx-past-year] #cx-semester-notice,
 html[data-cx-past-year] #connectify-wace-countdown {
