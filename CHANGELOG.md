@@ -4,27 +4,35 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
-## Unreleased
+## 3.3.3 (Unreleased)
 
 ### Additions
-- **Past Years**: a sidebar tool, once a school year has ended, that opens Assessment Outlines and every tool as that year stood at its end, read-only. Connect stops showing last year's marks, so Connectify now keeps them, in both of the browser's stores.
-- **Backup**: Export Data and Import Data in Settings move everything Connectify keeps (goals, types, weeks, calibration, baselines, categories, past years, themes and preferences) to another browser or computer. An import lists what it would change, and nothing that would replace data starts ticked.
-- **Hide potentially inaccurate prediction bars**: a Settings option, off by default, that hides the outcome meter on a subject's second and third marked results, when the prediction behind it rests on only one or two results.
+- **Past Years**: a sidebar tool, once a school year has ended, that opens Assessment Outlines and every tool as that year ended, read-only. Connectify now keeps the marks Connect stops showing.
+- **Backup**: Export Data and Import Data in Settings move everything Connectify keeps to another browser or computer. An import lists what it would change, and nothing that would replace data starts ticked.
+- **Hide potentially inaccurate prediction bars**: a Settings option, off by default, that hides the outcome meter on a subject's second and third marked results.
+- **Compare against subject average**: a Weakness Analyzer option that measures each type against its own subject's average.
 
 ### Changes
-- The current semester now follows the school calendar: Semester 2 starts in Term 2 Week 7 (Week 8 in an Early Easter year), instead of waiting for a final A–E grade. Show this semester's classes only, Goal Setter and Estimator follow it, and Semester 1 closes in the calculator once Semester 2 starts.
-- A new school year is Semester 1 until its own Semester 2, even when its classes appear in Term 4.
-- The outcome meter shows again from a subject's second marked result, as before 3.3.2. Turn on Hide potentially inaccurate prediction bars to keep the 3.3.2 behaviour.
-- Settings' General Preferences line up: every field is the same height, the reload note sits beside Statistics Panels, and the wallpaper rows keep an even gap below the fields.
-- Everything Connectify still named after its old name, Connectea, is now named Connectify: page classes and attributes, events and saved keys. Saved themes, wallpapers, task types, week overrides, categories, calibration and cohort sizes move to the new names once on the first page load, and backups and past years saved before the change still import and open.
+- **Class of 2028 onwards**: subject bonuses are phased out, so Methods, Specialist and languages add no bonus to any ATAR. Instead the TEA rises by the bonus students at that level typically earned.
+- The current semester follows the school calendar: Semester 2 starts in Term 2 Week 7 (Week 8 in an Early Easter year), instead of waiting for a final grade. A new school year is Semester 1 until its own Semester 2.
+- A task's type comes from the most specific word in its name and Connect's labels, read in its subject's sense: an Extended Response labelled Examination is an Exam, and a Maths Response a Test.
+- New default category keywords, and Reset Defaults in Settings resets at once.
+- A task with no detected type shows an amber Choose a type in its dropdown, so it stands out.
+- The Weakness Analyzer shows each type's plain average again by default.
+- The outcome meter shows again from a subject's second marked result, as before 3.3.2.
+- Shorter wording in Target Grade and Target ATAR.
+- Settings' General Preferences fields line up evenly.
+- Everything still named Connectea is now named Connectify. Saved settings, themes and data move over once, and older backups still import.
 
 ### Fixes
-- Category names in Settings are a lighter, clearer colour in Light and in light themes over a wallpaper.
-- The Predictor's type badges keep their category colours in Liquid Glass and light custom themes, and custom categories keep theirs in dark themes, instead of every badge turning the same blue.
-- Auto-login no longer signs in while you type your own username and password. In Firefox it could start watching for typing only after reading its settings from extension storage, which takes a moment with a wallpaper or past years saved, and then submitted the half-typed password. It now watches from the moment the page opens, and reads typing from the text edits themselves too.
-- Connect's top bars keep their colours in every dark theme: the active tab's underline sits under that tab instead of running across the whole bar, the Library's tools button is no longer a box in the button colour, its search circle uses the theme's own colours instead of the button blue, and the bars' separators are the theme's hairline instead of Connect's light grey.
-- The class filter button on Assessment Outlines no longer takes a custom theme's Buttons colour: it keeps the theme's own surface and ink, and a faint tint on Liquid Glass.
-- Auto-login signs in again with password managers such as Bitwarden and 1Password, and after a click elsewhere on the sign-in page or a shortcut such as Ctrl+Tab. Only typing, pasting or clicking in the username or password field leaves the page to you.
+- A new school year no longer starts by mistake in exam weeks, when Connect hides outlines or shows next year's classes early.
+- Light-tone themes (Liquid Glass, light custom themes) no longer show dark boxes or pale text.
+- Category names in Settings are clearer in Light and over a wallpaper.
+- The Predictor's type badges keep their category colours in every theme.
+- Connect's top bars keep their colours in dark themes: the active tab's underline, the Library's tools and search buttons and the separators.
+- The outlines' class filter button no longer takes a custom theme's button colour.
+- Auto-login no longer submits while you type your own username and password.
+- Auto-login works again with password managers such as Bitwarden and 1Password.
 
 ---
 
