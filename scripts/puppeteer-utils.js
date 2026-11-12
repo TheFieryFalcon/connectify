@@ -205,12 +205,27 @@ async function isAuthenticated(page) {
   }
 }
 
+const STUDENT_LINK = 'a.login-btn--student, a[href$="/login/student"]';
+const SSO_FORM = '#ssousername';
+
+/** Connect's Staff / Parent / Student chooser or the DET sign-in form: the login is already under way there */
+function isSignInUrl(url) {
+  return /^https:\/\/login\.det\.wa\.edu\.au\//.test(url || '') || /^https:\/\/connect\.det\.wa\.edu\.au\/login(?:[/?#]|$)/.test(url || '');
+}
+
 /**
  * Connect's sign-in page first asks who is signing in (Staff / Parent / Student); picks Student.
+ * Connectify's own auto-login presses Student too (auto-login-student.js): once the DET form shows, or the
+ * extension's press navigates, nothing is pressed again, since a second press restarts the sign-in.
  */
 async function chooseStudentLogin(page) {
-  const student = await page.waitForSelector('a.login-btn--student, a[href$="/login/student"]', { timeout: 10000 }).catch(() => null);
-  if (!student) return false;
+  const found = await page.waitForSelector(`${STUDENT_LINK}, ${SSO_FORM}`, { timeout: 10000 }).catch(() => null);
+  if (!found) return false;
+  if (await page.$(SSO_FORM).catch(() => null)) return true;
+  const pressed = await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 1500 }).then(() => true, () => false);
+  if (pressed) return true;
+  const student = await page.$(STUDENT_LINK).catch(() => null);
+  if (!student) return true;
   await Promise.all([
     page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {}),
     student.click()
@@ -305,10 +320,14 @@ async function authenticate(page, options = {}) {
     console.log('The script will automatically detect login and proceed.');
     console.log('='.repeat(64) + '\n');
 
-    await page.goto('https://connect.det.wa.edu.au/login', {
-      waitUntil: 'domcontentloaded',
-      timeout: 30000
-    }).catch(() => {});
+    // The expired session check above already landed on the sign-in page, where the student may be typing:
+    // loading it again threw them back to the Staff / Parent / Student chooser mid-password
+    if (!isSignInUrl(page.url())) {
+      await page.goto('https://connect.det.wa.edu.au/login', {
+        waitUntil: 'domcontentloaded',
+        timeout: 30000
+      }).catch(() => {});
+    }
     await chooseStudentLogin(page);
 
     const startTime = Date.now();
@@ -543,6 +562,7 @@ module.exports = {
   getChromeExecutablePath,
   launchBrowser,
   chooseStudentLogin,
+  isSignInUrl,
   saveSession,
   loadSession,
   isAuthenticated,

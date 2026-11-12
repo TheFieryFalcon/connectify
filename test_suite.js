@@ -17297,6 +17297,61 @@ runTest('Test 359: From the class of 2028 ATAR estimates add the typical bonus f
   }
 });
 
+runTest('Test 360: The interactive Puppeteer login never reloads the sign-in page the student is typing on, and presses Student once', async () => {
+  const os = require('os');
+  const utils = require(path.resolve(__dirname, 'scripts/puppeteer-utils.js'));
+  const DET = 'https://login.det.wa.edu.au/oam/server/obrareq.cgi?encquery=x';
+  const CHOOSER = 'https://connect.det.wa.edu.au/login';
+  // A fake page: `landing` is where Connect's redirects (and Connectify pressing Student) end up after a goto
+  const fakePage = ({ url = 'about:blank', landing = DET, extensionPresses = true } = {}) => {
+    const page = { gotos: [], clicks: 0, current: url };
+    const onForm = () => page.current.startsWith('https://login.det.wa.edu.au/');
+    const link = { click: async () => { page.clicks++; page.current = DET; } };
+    Object.assign(page, {
+      url: () => page.current,
+      browser: () => ({ process: () => ({ spawnargs: [] }) }),
+      setCookie: async () => {},
+      goto: async target => { page.gotos.push(target); page.current = target.endsWith('/login') ? (extensionPresses ? DET : CHOOSER) : landing; },
+      waitForSelector: async () => ({}),
+      $: async sel => (sel === '#ssousername' ? (onForm() ? {} : null) : (onForm() ? null : link)),
+      waitForNavigation: async ({ timeout }) => {
+        if (timeout === 1500 && !extensionPresses) throw new Error('no navigation');
+      },
+      waitForFunction: async () => {},
+      waitForNetworkIdle: async () => {},
+      evaluate: async () => false
+    });
+    return page;
+  };
+  const quiet = console.log;
+  console.log = () => {};
+  const stale = path.join(os.tmpdir(), `cx-test-stale-session-${process.pid}.json`);
+  try {
+    fs.writeFileSync(stale, JSON.stringify([{ name: 'JSESSIONID', value: 'stale', domain: 'connect.det.wa.edu.au', path: '/' }]));
+    const run = async (page, sessionFile) => {
+      await utils.authenticate(page, { interactive: true, sessionFile, timeoutMs: 1 }).catch(() => {});
+      return page;
+    };
+    // The expired session check lands on the DET form (Connect's redirect, then Connectify pressing Student),
+    // where the window is already showing: loading Connect's /login again threw the student back to the chooser
+    const expired = await run(fakePage(), stale);
+    assert.deepStrictEqual(expired.gotos, ['https://connect.det.wa.edu.au/group/students/ui/my-connect'], 'the sign-in page the session check reached is never loaded again');
+    assert.strictEqual(expired.clicks, 0, 'Student is never pressed on the DET form');
+    const noSession = await run(fakePage(), path.join(os.tmpdir(), 'cx-test-no-session.json'));
+    assert.deepStrictEqual(noSession.gotos, [CHOOSER], 'without a saved session the login starts at Connect\'s chooser');
+    assert.strictEqual(noSession.clicks, 0, 'Connectify pressed Student: a second press would restart the sign-in');
+    const noExtension = await run(fakePage({ extensionPresses: false }), path.join(os.tmpdir(), 'cx-test-no-session.json'));
+    assert.strictEqual(noExtension.clicks, 1, 'without the extension the script presses Student itself, once');
+    assert.strictEqual((await run(fakePage({ url: CHOOSER, extensionPresses: false }), path.join(os.tmpdir(), 'cx-test-no-session.json'))).gotos.length, 0,
+      'already on the chooser: not loaded again');
+    assert.ok(utils.isSignInUrl(DET) && utils.isSignInUrl(CHOOSER) && utils.isSignInUrl(`${CHOOSER}?reason=timeout`) && !utils.isSignInUrl('https://connect.det.wa.edu.au/login-help') &&
+      !utils.isSignInUrl('https://connect.det.wa.edu.au/group/students/ui/my-connect') && !utils.isSignInUrl('about:blank'), 'sign-in pages: the DET form and Connect\'s chooser');
+  } finally {
+    console.log = quiet;
+    fs.rmSync(stale, { force: true });
+  }
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);
