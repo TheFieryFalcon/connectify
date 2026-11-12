@@ -73,7 +73,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - an id-weighted rule beats the generic icon rule
 - **Assessment Type Label**
   - A task nothing identifies
-    - reads as `Unknown` (grey `#94a3b8`), never a guess at Take-Home; its dropdown says `Choose a type`
+    - reads as `Unknown` (grey `#94a3b8`), never a guess at Take-Home
+    - its dropdown warns until a type is chosen, since a plain one was easy to miss: `⚠ Choose a type` in an amber box (`.cx-type-unknown`, `task-type-unknown.css`), on the outlines, Task Dates and Next Up, >= 5:1 in every theme
     - its prediction takes the subject's results alone, and it is on no axis of the Weakness Analyzer, which counts such tasks in a note
   - Detection (`task-type-rules.js`)
     - the most specific keyword in the name or Connect's labels wins, never the first category listed

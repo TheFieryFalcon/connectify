@@ -16101,7 +16101,14 @@ runTest('Test 338: A task nothing identifies reads as Unknown: never a guess at 
   const store = read('cohort/category-store.js'), typesJs = read('cohort/task-types.js'), select = read('cohort/task-type-select.js'), engine = read('predictor/predictor-engine.js');
   assert.ok(store.includes("const UNKNOWN_TYPE = 'Unknown';") && typesJs.includes('defaultCategories) || UNKNOWN_TYPE;'), 'the fallback');
   assert.ok(!typesJs.includes("return 'Take-Home';"), 'no fallback to Take-Home');
-  assert.ok(select.includes("isUnknown ? 'Choose a type'"), 'its dropdown asks');
+  assert.ok(select.includes("isUnknown ? '\\u26A0\\uFE0E Choose a type'"), 'its dropdown asks, behind a warning sign');
+  assert.ok(select.includes("select.classList.toggle('cx-type-unknown', isUnknown && !currentSelection);"), 'and warns until a type is chosen');
+  const warn = read('cohort/task-type-unknown.css');
+  const manifestJson = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  assert.ok(manifestJson.content_scripts.some(g => (g.css || []).includes('src/cohort/task-type-unknown.css')), 'its stylesheet is registered');
+  for (const hook of ['', '.connectify-dark ', '[data-connectify-tone="light"] ']) {
+    assert.ok(warn.includes(`${hook}:is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n) {`), `an amber box over every theme's dropdown rules (${hook || 'light'})`);
+  }
   assert.ok(engine.includes('const shifted = typed ? typeShift(historical, taskType) : null;'), 'and its prediction takes the subject\'s results alone');
   assert.ok(typesJs.includes('if (cat === UNKNOWN_TYPE) return UNKNOWN_COLOR;'), 'in one neutral colour');
 });

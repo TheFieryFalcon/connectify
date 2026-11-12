@@ -64,7 +64,7 @@
       if (!chosenOnly || !savedOverride) {
         const autoOpt = document.createElement('option');
         autoOpt.value = '';
-        autoOpt.textContent = isUnknown ? 'Choose a type' : `Auto (${autoType})`;
+        autoOpt.textContent = isUnknown ? '\u26A0\uFE0E Choose a type' : `Auto (${autoType})`;
         select.appendChild(autoOpt);
       }
 
@@ -86,6 +86,8 @@
     select.value = currentSelection;
     // A past year (Past Years) shows its types as they were, never changed
     select.disabled = Boolean(window.ConnectifyPastYearMode?.active());
+    // A task nothing identifies warns until a type is chosen (task-type-unknown.css), as it is easy to miss
+    select.classList.toggle('cx-type-unknown', isUnknown && !currentSelection);
     if (currentSelection) {
       select.classList.add('connectify-overridden');
       select.title = `Assessment type manually set to "${currentSelection}". Click to change or reset to Auto.`;

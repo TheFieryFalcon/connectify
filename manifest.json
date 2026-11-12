@@ -99,6 +99,7 @@
             "src/cohort/cohort-expanded.css",
             "src/cohort/cohort-subject-average.css",
             "src/cohort/cohort-grade-range.css",
+            "src/cohort/task-type-unknown.css",
             "src/goals/goal-dialog.css",
             "src/goals/goal-planner.css",
             "src/goals/goal-list.css",

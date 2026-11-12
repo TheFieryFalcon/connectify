@@ -1,0 +1,66 @@
+/*
+ * A task nothing identifies (`Unknown`): its Type dropdown is an amber warning until a type is chosen,
+ * on the outline rows, Task Dates and Next Up alike (`.cx-type-unknown`, set by task-type-select.js).
+ * The id weight (`#cx-specificity-anchor`, `:not(#cx-n)`) outranks every theme's dropdown rules.
+ */
+:is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n) {
+  border: 1px solid #d97706 !important;
+  background: #fff4dc !important;
+  background-image: none !important;
+  color: #8a3a07 !important;
+  font-weight: 600 !important;
+}
+
+:is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n):hover {
+  border-color: #b45309 !important;
+  background: #ffeac2 !important;
+}
+
+:is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n):focus {
+  outline: 2px solid #d97706 !important;
+  outline-offset: 1px;
+}
+
+/* The open list keeps the dropdowns' usual ink: only the closed box warns */
+:is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n) option {
+  background: #ffffff;
+  color: #203c5e;
+  font-weight: 400;
+}
+
+.connectify-dark :is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n) {
+  border-color: #f59e0b !important;
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #fcd34d !important;
+}
+
+.connectify-dark :is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n):hover {
+  border-color: #fbbf24 !important;
+  background: rgba(245, 158, 11, 0.26) !important;
+}
+
+.connectify-dark :is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n):focus {
+  outline-color: #fbbf24 !important;
+}
+
+.connectify-dark :is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n) option {
+  background: var(--cx-nav-bg, #1a222d);
+  color: var(--cx-text-primary, #e1eaf3);
+}
+
+/* Light tone (grey Liquid Glass, light custom themes): a 14% amber tint with a 45% edge, dark amber ink (>= 5:1 on grey glass) */
+[data-connectify-tone="light"] :is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n) {
+  border-color: rgba(180, 83, 9, 0.45) !important;
+  background: rgba(217, 119, 6, 0.14) !important;
+  color: #4f2000 !important;
+}
+
+[data-connectify-tone="light"] :is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n):hover {
+  border-color: rgba(180, 83, 9, 0.7) !important;
+  background: rgba(217, 119, 6, 0.22) !important;
+}
+
+[data-connectify-tone="light"] :is(#cx-specificity-anchor, .connectify-type-select, .cx-dates-type).cx-type-unknown:not(#cx-n) option {
+  background: #ffffff;
+  color: var(--cx-text-primary, #0f172a);
+}
