@@ -9,12 +9,15 @@ on:
     paths:
       - 'assets/store/*.png'
       - 'assets/store/captions.json'
+      - '.github/scripts/amo-previews.js'
+      - '.github/workflows/amo-screenshots.yml'
   workflow_dispatch:
 
 jobs:
   amo-screenshots:
     name: Upload screenshots to AMO
     runs-on: ubuntu-latest
+    timeout-minutes: 180 # AMO's 10-an-hour throttle can hold a run for an hour
     permissions:
       contents: read
 

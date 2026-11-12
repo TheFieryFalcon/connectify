@@ -2,13 +2,14 @@
  * Connectify: AMO listing screenshots
  *
  * Makes the Firefox Add-ons listing's screenshots ("previews") the PNGs in assets/store/, in file name order, with
- * the captions in assets/store/captions.json. Every screenshot is uploaded first (Preview Create, with its caption
- * and position), and only then are the previews that were there before deleted, so a failed run never leaves the
+ * the captions in assets/store/captions.json. Every screenshot is uploaded first (Preview Create with its position,
+ * then Preview Edit for its caption: v5 takes a caption only as a {locale: text} object, which a multipart upload
+ * cannot carry), and only then are the previews that were there before deleted, so a failed run never leaves the
  * listing without screenshots.
  *
  * AMO throttles these endpoints per user at 3 a minute, 10 an hour and 24 a day, every method counted: writes are
- * spaced 21s apart, a 429 waits as long as AMO says, the current previews are read without signing in, and a
- * caption only costs an edit if the upload did not keep it. Five screenshots: 10 writes.
+ * spaced 21s apart, a 429 waits as long as AMO says (five screenshots are 15 writes, so one hourly wait), and the
+ * current previews are read without signing in.
  *
  * Env: AMO_JWT_ISSUER / AMO_JWT_SECRET (or AMO_API_KEY / AMO_API_SECRET), AMO_ADDON_SLUG (default connectify).
  * Run: node .github/scripts/amo-previews.js
@@ -52,7 +53,7 @@ async function main() {
       if (json && body) headers['Content-Type'] = 'application/json';
       const res = await fetch(`${AMO_API_BASE}${url}`, { method, headers, body: json && body ? JSON.stringify(body) : body });
       const text = await res.text();
-      if (res.status === 429 && attempt <= 3) {
+      if (res.status === 429 && attempt <= 4) {
         const seconds = Number(res.headers.get('retry-after')) || Number((text.match(/(\d+) seconds?/) || [])[1]) || 600;
         console.log(`  throttled by AMO, waiting ${seconds}s`);
         await sleep((seconds + 5) * 1000);
@@ -78,10 +79,8 @@ async function main() {
     const form = new FormData();
     form.append('image', new Blob([fs.readFileSync(path.join(STORE_DIR, file))], { type: 'image/png' }), file);
     form.append('position', String(position));
-    form.append('caption', captions[file]);
     const created = await api('POST', `${addonUrl}/previews/`, form, false);
-    const kept = typeof created.caption === 'string' ? created.caption : created.caption?.['en-US'];
-    if (kept !== captions[file]) await api('PATCH', `${addonUrl}/previews/${created.id}/`, { caption: { 'en-US': captions[file] } });
+    await api('PATCH', `${addonUrl}/previews/${created.id}/`, { caption: { 'en-US': captions[file] } });
     console.log(`  ${position + 1}. ${file} -> preview ${created.id}`);
   }
 
@@ -93,6 +92,7 @@ async function main() {
 }
 
 main().catch(err => {
-  console.error(`AMO screenshots not updated: ${err.message}`);
+  // ::error:: shows in the run's annotations, which can be read without signing in to GitHub
+  console.error(`::error title=AMO screenshots not updated::${String(err.message).replace(/\r?\n/g, ' ')}`);
   process.exit(1);
 });
