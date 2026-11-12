@@ -1,0 +1,30 @@
+name: Update AMO Screenshots
+
+# The Firefox Add-ons listing's screenshots follow assets/store/ (the Chrome Web Store's are uploaded by hand:
+# its API has no listing images)
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'assets/store/*.png'
+      - 'assets/store/captions.json'
+  workflow_dispatch:
+
+jobs:
+  amo-screenshots:
+    name: Upload screenshots to AMO
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Replace the AMO listing's screenshots
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER || secrets.AMO_API_KEY }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET || secrets.AMO_API_SECRET }}
+          AMO_ADDON_SLUG: ${{ vars.AMO_ADDON_SLUG || secrets.AMO_ADDON_SLUG || 'connectify' }}
+        run: node .github/scripts/amo-previews.js
