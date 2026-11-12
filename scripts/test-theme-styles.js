@@ -935,18 +935,19 @@ async function discoverSidebarViews(page, options = {}) {
                   isInitial: false
                 });
               });
-              // A plan on this tab can be set as a goal: End and Confirm join the same planner (nothing is saved). Last
-              // on its tab, since it stays open until cancelled; a theme pass keeps it, as reopening the tool redraws it
-              if (Array.from(sidebar.querySelectorAll('.cx-goal-set:not([disabled])')).some(b => b.getClientRects().length > 0)) {
+              // A grade plan can be set as a goal ending on a custom week: Custom End brings End and Confirm onto the
+              // same planner (nothing is saved; Set as Goal itself would save at once). Last on its tab, since it stays
+              // open until cancelled; a theme pass keeps it, as reopening the tool redraws it
+              if (Array.from(sidebar.querySelectorAll('.cx-goal-custom-end:not([disabled])')).some(b => b.getClientRects().length > 0)) {
                 views.push({
                   id: `cx-sidebar-${cfg.id}-${mode}-compose`,
-                  title: `Sidebar: ${toolName} [${modeName} - Set as Goal]`,
+                  title: `Sidebar: ${toolName} [${modeName} - Custom End]`,
                   auditScope: 'sidebar',
                   toolId: cfg.id,
                   toolName,
                   tabSelector,
                   tabName: modeName,
-                  steps: [{ click: '.cx-goal-set:not([disabled])' }],
+                  steps: [{ click: '.cx-goal-custom-end:not([disabled])' }],
                   keepOpen: true,
                   isInitial: false
                 });

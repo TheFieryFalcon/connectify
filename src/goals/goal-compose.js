@@ -1,13 +1,13 @@
 /**
  * Connectify Goals: Set as Goal, in the planner
  *
- * Saving a plan as a goal happens on the planner itself, whose task table and sliders stay live: the End (Semester
- * 1 / 2, which are the planner's semester buttons, or a custom school week for grade goals), which goal-editor.js puts
- * beside the planner's inputs, and Confirm (Save Changes when editing) where Set as Goal was; what the plan needs and
- * how far along it is are on the planner already. Confirm is disabled, with the reason, for a goal
- * already secured or out of reach and for one that clashes with an ATAR goal; a plan for a subject that has a goal
- * changes that goal (same id, tasks it has judged and notices kept), and an ATAR goal over subject goals asks to
- * replace them. Exposes window.ConnectifyGoalCompose.
+ * Set as Goal saves the plan at once (`quickSave`) when it replaces nothing, ending on the planner's semester. The
+ * controls below open on the planner itself, whose task table and sliders stay live, only where more is needed:
+ * Custom End (a school week for grade goals), a save that is blocked (the reason under a disabled Confirm: a goal
+ * already secured or out of reach, one that clashes with an ATAR goal), an ATAR goal over subject goals (asks to
+ * Replace them) and Update Goal (Save Changes: same id, tasks it has judged and notices kept). The End (Semester 1 /
+ * 2, which are the planner's semester buttons, or a custom week) goes beside the planner's inputs (goal-editor.js).
+ * Exposes window.ConnectifyGoalCompose.
  */
 (() => {
   'use strict';
@@ -49,16 +49,43 @@
     return null;
   }
 
+  /** Draft `goal` as it would be saved: the goal it changes, its plan's state and why it cannot be saved. */
+  function prepare(goal) {
+    const saved = store().current(goal);
+    const draft = { ...(saved || {}), ...goal, id: saved?.id, end: { ...(goal.end || { type: 'semester', semester: 2 }) } };
+    const ctx = P().context();
+    const state = window.ConnectifyGoalReplay.evaluate(draft, { ...ctx, noReplay: true });
+    return { isEdit: Boolean(saved), draft, ctx, state, block: blocker(draft, state) };
+  }
+
+  /** Subject goals an ATAR draft would replace. */
+  const replaced = draft => (draft.kind === 'atar' ? store().conflicts(draft).subjects.filter(c => c.goal.kind !== 'atar') : []);
+
+  function commit({ isEdit, draft, ctx, state }) {
+    for (const clash of store().conflicts(draft).subjects) if (clash.goal.kind !== 'atar') store().remove(clash.goal.id);
+    // An edit keeps what the goal judges; it is no new result, so the toast's next "was" tier starts from the edit
+    const marked = markedNow(draft, ctx);
+    store().save({ ...draft, ...(isEdit ? { seenMarked: marked, lastTier: state.tier } : { priorMarked: marked }) });
+  }
+
+  /** Set as Goal's one click: `'saved'`, or why the controls must open (`'blocked'`, `'replace'`, `'edit'`). */
+  function quickSave(goal) {
+    const prep = prepare(goal);
+    if (prep.isEdit) return 'edit';
+    if (prep.block) return 'blocked';
+    if (replaced(prep.draft).length) return 'replace';
+    commit(prep);
+    return 'saved';
+  }
+
   /**
    * The controls for draft `goal` (a saved goal it changes means editing). `onEnd(end)`: another end was picked; the
    * planner applies it and draws again. `isClosed(semester)`: that semester's button is disabled. `lockEnd`: the
-   * end cannot change (ATAR-held subject). `cancelLabel` names the way out.
+   * end cannot change (ATAR-held subject). `cancelLabel` names the way out. `ask`: open on the Replace question.
    */
-  function create({ goal, lockEnd = false, onEnd, isClosed, onSaved, onCancel, cancelLabel = 'Cancel' }) {
-    const saved = store().current(goal);
-    const isEdit = Boolean(saved);
-    const draft = { ...(saved || {}), ...goal, id: saved?.id, end: { ...(goal.end || { type: 'semester', semester: 2 }) } };
-    const ctx = P().context();
+  function create({ goal, lockEnd = false, onEnd, isClosed, onSaved, onCancel, cancelLabel = 'Cancel', ask = false }) {
+    const prep = prepare(goal);
+    const { isEdit, draft, state, block } = prep;
     const node = M().el('div', 'cx-goal-compose');
 
     const endRow = M().el('div', 'cx-goal-end');
@@ -85,9 +112,7 @@
       endRow.append(week, M().el('span', 'cx-goal-week-hint', P().weekTerm(draft.end.week || 20)));
     }
 
-    const state = window.ConnectifyGoalReplay.evaluate(draft, { ...ctx, noReplay: true });
     const undated = state.undated?.length ? M().el('p', 'cta-note', `No week: ${state.undated.join(', ')}. Set one in Task Dates.`) : null;
-    const block = blocker(draft, state);
     const reason = M().el('p', 'cx-goal-reason', block ? block.text : '');
     reason.setAttribute('aria-live', 'polite');
 
@@ -101,14 +126,11 @@
     node.append(...[undated, reason, actions].filter(Boolean));
 
     const save = () => {
-      for (const clash of store().conflicts(draft).subjects) if (clash.goal.kind !== 'atar') store().remove(clash.goal.id);
-      // An edit keeps what the goal judges; it is no new result, so the toast's next "was" tier starts from the edit
-      const marked = markedNow(draft, ctx);
-      store().save({ ...draft, ...(isEdit ? { seenMarked: marked, lastTier: state.tier } : { priorMarked: marked }) });
+      commit(prep);
       onSaved?.();
     };
-    confirm.addEventListener('click', () => {
-      const replace = draft.kind === 'atar' ? store().conflicts(draft).subjects.filter(c => c.goal.kind !== 'atar') : [];
+    const askReplace = () => {
+      const replace = replaced(draft);
       if (!replace.length) return save();
       const [first] = replace;
       const names = replace.map(c => window.ConnectifyGoalPlan.shownName(c.goal)).join(', ');
@@ -123,7 +145,9 @@
       });
       actions.replaceChildren(yes, back);
       yes.focus();
-    });
+    };
+    confirm.addEventListener('click', askReplace);
+    if (ask && !block && replaced(draft).length) askReplace();
     cancel.addEventListener('click', () => onCancel?.());
 
     endSelect.addEventListener('change', () => {
@@ -142,5 +166,5 @@
     return { node, endRow, state, focus: () => focused?.focus?.() };
   }
 
-  window.ConnectifyGoalCompose = { create, blocker, markedNow };
+  window.ConnectifyGoalCompose = { create, quickSave, blocker, markedNow };
 })();

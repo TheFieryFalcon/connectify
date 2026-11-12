@@ -97,7 +97,7 @@ html:is([data-connectify-theme="liquid-glass"], [data-connectify-theme="liquid-g
   background: var(--cx-button-primary-hover, #1d4ed8);
 }
 
-:is(.cx-goal-overlay, #connectify-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set, .cx-goals-open):disabled {
+:is(.cx-goal-overlay, #connectify-atar, #cx-specificity-anchor#cx-specificity-anchor#cx-specificity-anchor) :is(.cx-goal-confirm, .cx-goal-set, .cx-goal-custom-end, .cx-goals-open):disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }

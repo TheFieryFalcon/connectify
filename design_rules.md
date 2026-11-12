@@ -100,7 +100,10 @@ Extremely concise summary of the core visual design language, contrast standards
     - ticks, days and downloads on the same rows
     - Show starts on Uncompleted each time Export is turned on, and can be changed; the saved Show returns after
     - the files hold what the list shows, marked tasks too when Show lists them
-  - Set as Goal turns into Confirm and Cancel where its button was and adds End beside the target
+  - Set as Goal saves at once when it replaces nothing: one click, ending on the planner's semester
+    - Custom End beside it (Target Grade) opens the controls on a school week instead
+    - so do a blocked goal (its reason under a disabled Confirm, where another end can be picked) and an ATAR goal over subject goals (Replace them?)
+    - the controls turn Set as Goal into Confirm and Cancel where its button was and add End beside the target
     - under no progress bar or points of its own (the planner already shows them)
     - its task table and sliders live (a custom end week narrows that table)
     - on a subject with a goal it is Update Goal and Save Changes: the same goal with its judged tasks, never deleted and set again

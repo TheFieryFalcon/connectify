@@ -1,12 +1,12 @@
 /**
  * Connectify Goals: planner controls (#connectify-atar)
  *
- * Set as Goal / Update Goal and its end and Confirm on the planner (goal-compose.js), Cancel Editing, the Goals (n)
+ * Set as Goal / Update Goal, Custom End and the end and Confirm on the planner (goal-compose.js), Cancel Editing, the Goals (n)
  * heading button, the saved status, and the effort sliders in Target Grade's task table and Target ATAR's subject
  * rows. Theme tokens only.
  */
 
-/* Set as Goal, open: Confirm and Cancel where its button was */
+/* The goal controls, open: Confirm and Cancel where Set as Goal was */
 #connectify-atar .cx-goal-compose {
   display: flex;
   flex-direction: column;
@@ -54,7 +54,7 @@
 }
 
 /* Secondary planner buttons wear the theme's button tokens, like the goal dialogs' Cancel and Edit */
-#connectify-atar :is(.cx-goal-cancel-edit, .cx-goals-open) {
+#connectify-atar :is(.cx-goal-cancel-edit, .cx-goal-custom-end, .cx-goals-open) {
   padding: 5px 10px;
   border: 1px solid var(--cx-button-border, #455a73);
   border-radius: 5px;
@@ -64,13 +64,13 @@
   cursor: pointer;
 }
 
-/* Cancel matches the Confirm beside it */
-#connectify-atar .cx-goal-actions .cx-goal-cancel-edit {
+/* Cancel and Custom End match the Confirm or Set as Goal beside them */
+#connectify-atar .cx-goal-actions :is(.cx-goal-cancel-edit, .cx-goal-custom-end) {
   padding: 6px 14px;
   font-weight: 600;
 }
 
-#connectify-atar :is(.cx-goal-cancel-edit, .cx-goals-open):hover:not(:disabled) {
+#connectify-atar :is(.cx-goal-cancel-edit, .cx-goal-custom-end, .cx-goals-open):hover:not(:disabled) {
   background: var(--cx-button-hover, #31415a);
 }
 

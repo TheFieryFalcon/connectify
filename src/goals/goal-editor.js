@@ -1,10 +1,11 @@
 /**
  * Connectify Goals: planner controls
  *
- * Adds to the Goal Setter's planners: the goal tier beside each plan's headline, Set as Goal (Update Goal while
- * editing), which opens the end and Confirm on the planner itself (goal-compose.js), and the Goals (n) button in
- * the panel heading. A custom end week narrows the planner's own task table to that range. Edit loads a saved goal
- * into its planner tab. A subject an ATAR goal holds plans for the target that goal gives it.
+ * Adds to the Goal Setter's planners: the goal tier beside each plan's headline, Set as Goal (saved at once, ending
+ * on the planner's semester, when it replaces nothing), Custom End beside it on Target Grade and Update Goal, which
+ * open the end and Confirm on the planner itself (goal-compose.js), and the Goals (n) button in the panel heading.
+ * A custom end week narrows the planner's own task table to that range. Edit loads a saved goal into its planner
+ * tab. A subject an ATAR goal holds plans for the target that goal gives it.
  * Exposes window.ConnectifyGoalEditor.
  */
 (() => {
@@ -21,7 +22,8 @@
   // The goal each tab is editing ({ goal, before }: the planner as it was, for Cancel Editing)
   const editing = { grade: null, target: null };
   const latest = { grade: null, target: null };
-  // Set as Goal open on a tab: { week } (a custom end week, null for the planner's semester)
+  // The goal controls open on a tab: { week } (a custom end week, null for the planner's semester), `ask` to open on
+  // the Replace question
   const composing = { grade: null, target: null };
   let status = { kind: null, until: 0 };
 
@@ -118,8 +120,10 @@
 
     if (composing[kind]) {
       const goal = info.held ? { ...info.held.goal, childSliders: S().childSliders(info.held.goal.topFour || []) } : draft;
+      const ask = Boolean(composing[kind].ask);
+      composing[kind].ask = false;
       const compose = window.ConnectifyGoalCompose.create({
-        goal, lockEnd: Boolean(info.held), cancelLabel: edit ? 'Cancel Editing' : 'Cancel',
+        goal, ask, lockEnd: Boolean(info.held), cancelLabel: edit ? 'Cancel Editing' : 'Cancel',
         isClosed: semester => Boolean(semesterButton(semester - 1)?.disabled),
         onEnd: end => {
           composing[kind] = { week: end.type === 'week' ? end.week : null };
@@ -144,12 +148,23 @@
     const setBtn = M().el('button', 'cx-goal-set', info.held || current ? 'Update Goal' : 'Set as Goal');
     setBtn.type = 'button';
     setBtn.disabled = Boolean(info.plan.error) || !window.ConnectifyUtils.isOutlinesPage() || Boolean(window.ConnectifyPastYearMode?.active());
+    // One click saves a goal that replaces nothing; a blocked one or one replacing subject goals opens the controls
     setBtn.addEventListener('click', () => {
       if (current) return openOnEnd(kind, current, info);
-      composing[kind] = { week: null };
+      const outcome = info.held ? 'edit' : window.ConnectifyGoalCompose.quickSave(draft);
+      if (outcome === 'saved') return saved(kind, info);
+      composing[kind] = { week: null, ask: outcome === 'replace' };
       redraw(kind, info);
     });
     bar.append(setBtn);
+    // A grade goal's other end: a school week, set beside the target before Confirm
+    if (kind === 'grade' && !info.held && !current) {
+      const customBtn = M().el('button', 'cx-goal-custom-end', 'Custom End');
+      customBtn.type = 'button';
+      customBtn.disabled = setBtn.disabled;
+      customBtn.addEventListener('click', () => { composing[kind] = { week: 20 }; redraw(kind, info); });
+      bar.append(customBtn);
+    }
     if (status.kind === kind && Date.now() < status.until) bar.append(M().el('span', 'cx-goal-status', 'Goal set.'));
     container.append(bar);
   }

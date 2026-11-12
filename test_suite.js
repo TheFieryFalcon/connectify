@@ -12499,7 +12499,7 @@ runTest('Test 262: An ATAR goal re-solves its four subjects\' targets; subject s
 // Text of a mock element and its children, as the browser's textContent would read it
 const mockText = el => (el ? `${el.textContent || ''}${(el.children || []).map(mockText).join('')}` : '');
 
-runTest('Test 263: Set as Goal previews the goal with its end and confirms it; the Goals dialog lists, edits and deletes goals', () => {
+runTest('Test 263: The goal controls (Custom End, a blocked goal, Update Goal) show the end and confirm it; the Goals dialog lists, edits and deletes goals', () => {
   localStorage.clear();
   const tasks = [
     { id: 't1', name: 'Test 1', weight: 30, pending: false, score: 78, earned: 23.4, order: 5, semester: 1 },
@@ -12536,7 +12536,7 @@ runTest('Test 263: Set as Goal previews the goal with its end and confirms it; t
   let cancelled = 0;
   const compose = goal => win.ConnectifyGoalCompose.create({ goal, onEnd: end => ends.push(end), onSaved: () => saved++, onCancel: () => cancelled++ });
   const first = compose(draft);
-  assert.ok(!document.getElementById('cx-goal-dialog') && first.node.className === 'cx-goal-compose', 'Set as Goal opens on the planner, never a dialog over it');
+  assert.ok(!document.getElementById('cx-goal-dialog') && first.node.className === 'cx-goal-compose', 'the goal controls open on the planner, never a dialog over it');
   assert.ok(!first.node.querySelector('table'), 'with no second copy of the planner\'s task table');
   const confirm0 = first.node.querySelector('.cx-goal-confirm');
   assert.strictEqual(confirm0.disabled, false, 'a goal within reach can be confirmed');
@@ -13758,9 +13758,9 @@ runTest('Test 289: Goal dialog secondary buttons (Open Settings, Cancel, ✕) ta
   assert.ok(css.includes(sel + ':hover {'), 'the hover rule carries the same weight');
 });
 
-runTest('Test 290: The Goals (n) and Cancel Editing buttons wear the theme\'s button tokens, not an inherited ink and fallback border', () => {
+runTest('Test 290: The Goals (n), Cancel Editing and Custom End buttons wear the theme\'s button tokens, not an inherited ink and fallback border', () => {
   const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'goals/goal-planner.css'), 'utf8');
-  const sel = '#connectify-atar :is(.cx-goal-cancel-edit, .cx-goals-open)';
+  const sel = '#connectify-atar :is(.cx-goal-cancel-edit, .cx-goal-custom-end, .cx-goals-open)';
   const at = css.indexOf(sel + ' {');
   const block = css.slice(at, css.indexOf('}', at));
   assert.ok(at >= 0 && block.includes('background: var(--cx-button-bg, #263242);') && block.includes('color: var(--cx-button-text, #f8fafc);') &&
@@ -14750,7 +14750,7 @@ runTest('Test 310: The drawer has one side margin, and Task Dates\' controls sha
   assert.ok(read('progress/export-view.css').includes('.cx-export-group-head .cx-export-all { margin-right: -4px; }'), 'Select All / None ends on the right edge');
 });
 
-runTest('Test 311: With a custom end week, Set as Goal\'s headline and sliders match the plan for that range, whatever its outcome', () => {
+runTest('Test 311: With a custom end week (Custom End), the goal\'s headline and sliders match the plan for that range, whatever its outcome', () => {
   localStorage.clear();
   const savedHref = location.href;
   location.href = OUTLINES_HREF;
@@ -14797,8 +14797,9 @@ runTest('Test 311: With a custom end week, Set as Goal\'s headline and sliders m
   let onEnd = null;
   win.ConnectifyGoalCompose.create = opts => { onEnd = opts.onEnd; return realCreate(opts); };
   draw();
-  current.querySelector('.cx-goal-set').click();
-  assert.ok(current.querySelector('.cx-goal-compose'), 'Set as Goal is open');
+  current.querySelector('.cx-goal-custom-end').click();
+  assert.ok(current.querySelector('.cx-goal-compose') && !win.ConnectifyGoalStore.all().length, 'Custom End opens the end and Confirm, saving nothing yet');
+  assert.ok(current.querySelectorAll('.cx-goal-tasks tr').length > 0 && mockText(current.querySelector('strong')).includes('up to Week 20'), 'on a custom week, which narrows the planner at once');
   const at = (target, week) => {
     info.refs.gradeTargetInput.value = String(target);
     onEnd({ type: 'week', week });
@@ -14822,6 +14823,69 @@ runTest('Test 311: With a custom end week, Set as Goal\'s headline and sliders m
   const later = at(70, 40);
   assert.ok(later.headline.startsWith('Requires') && later.headline.includes('up to Week 40'), `a finished semester still plans a later end week: ${later.headline}`);
   assert.deepStrictEqual([later.rows, later.sliders], [4, 2], 'with sliders for both tasks left in range');
+  location.href = savedHref;
+  localStorage.clear();
+});
+
+runTest('Test 361: Set as Goal saves at once when it replaces nothing; a blocked goal or one replacing subject goals opens the controls', () => {
+  localStorage.clear();
+  const savedHref = location.href;
+  location.href = OUTLINES_HREF;
+  const mk = (id, name, marks) => ({
+    id, name, subject: `${name} ATAR`, mark: 75,
+    tasks: marks.map((m, i) => ({ id: `${id}${i}`, name: `Task ${i + 1}`, weight: 25, pending: m === null, score: m ?? undefined, earned: m === null ? 0 : m / 4, order: 5 + i * 8, semester: i < 2 ? 1 : 2 }))
+  });
+  const sem2 = [mk('chemistry', 'Chemistry', [80, 70, null, null]), mk('physics', 'Physics', [75, 72, null, null]),
+    mk('english', 'English', [68, 74, null, null]), mk('mathematics methods', 'Mathematics Methods', [82, 85, null, null])];
+  const win = loadGoalModules({
+    ConnectifySchoolTerms: { schoolWeek: o => o, weekOrder: n => n },
+    ConnectifyProgressMath: { termWeek: o => ({ term: Math.floor((o - 1) / 10) + 1, week: ((o - 1) % 10) + 1 }) },
+    ConnectifyPredictorCache: { getOrComputeTaskPrediction: () => ({ low: 68, mid: 75, high: 82 }) },
+    ConnectifyAtarCalc: { getCourseState: r => ({ ...r, score: r.mark, raw: r.mark }), calculateResults: () => [{ bonus: 0 }, { bonus: 0 }] },
+    ConnectifyAtarScraper: { readCourses: () => [[], sem2] },
+    ConnectifyData: { collect: () => [] }
+  });
+  for (const c of sem2) c.progress = win.ConnectifyTargetSolver.taskProgress(c.tasks, undefined, 2);
+  for (const f of ['atar/target-ui-helpers.js', 'atar/target-grade-ui.js']) new Function('window', origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8'))(win);
+  const G = win.ConnectifyGoalStore;
+  const C = win.ConnectifyGoalCompose;
+  let current = null;
+  const info = { refs: { gradeTargetInput: { value: '75' }, difficultyCheckbox: { checked: false }, gradeSelectedSubjects: ['', ''] }, ctx: { getActiveSemester: () => 1 }, course: sem2[0], plan: { required: 75 }, held: null };
+  const draw = () => {
+    current = document.createElement('div');
+    current.append(document.createElement('strong'));
+    win.ConnectifyGoalEditor.afterGrade(current, info);
+  };
+  info.ctx.renderGradeOutput = draw;
+
+  draw();
+  assert.deepStrictEqual([current.querySelector('.cx-goal-set').textContent, current.querySelector('.cx-goal-custom-end').textContent], ['Set as Goal', 'Custom End'], 'Custom End sits beside Set as Goal');
+  current.querySelector('.cx-goal-set').click();
+  const goal = G.active()[0];
+  assert.deepStrictEqual([G.all().length, goal.subject, goal.target, goal.end, goal.priorMarked], [1, 'chemistry', 75, { type: 'semester', semester: 2 }, ['chemistry::chemistry0', 'chemistry::chemistry1']],
+    'one click saves the goal, ending on the planner\'s semester, with what is marked now');
+  assert.ok(!current.querySelector('.cx-goal-compose') && mockText(current.querySelector('.cx-goal-status')) === 'Goal set.', 'with no Confirm to press, only the saved status');
+  assert.ok(current.querySelector('.cx-goal-set').textContent === 'Update Goal' && !current.querySelector('.cx-goal-custom-end'), 'the subject now has a goal to update, and its end is set there');
+  current.querySelector('.cx-goal-set').click();
+  assert.strictEqual(current.querySelector('.cx-goal-confirm').textContent, 'Save Changes', 'Update Goal still opens the end and Save Changes');
+  current.querySelector('.cx-goal-cancel-edit').click();
+  G.remove(goal.id);
+
+  info.refs.gradeTargetInput.value = '20';
+  draw();
+  current.querySelector('.cx-goal-set').click();
+  assert.deepStrictEqual([G.all().length, current.querySelector('.cx-goal-confirm').disabled, mockText(current.querySelector('.cx-goal-reason'))], [0, true, 'Already secured.'],
+    'a blocked goal saves nothing and opens the controls with the reason, where another end can be picked');
+  current.querySelector('.cx-goal-cancel-edit').click();
+
+  const sub = G.save({ kind: 'grade', subject: 'physics', name: 'Physics', target: 75, end: { type: 'semester', semester: 2 }, priorMarked: [] });
+  const atar = { kind: 'atar', target: 80, end: { type: 'semester', semester: 2 }, included: sem2.map(c => c.id), topFour: sem2.map(c => c.id) };
+  assert.deepStrictEqual([C.quickSave(atar), G.all().length], ['replace', 1], 'an ATAR goal over a subject goal is never saved by one click');
+  const asked = C.create({ goal: atar, ask: true }).node;
+  assert.ok(mockText(asked.querySelector('.cx-goal-reason')).includes('Physics already has a goal') && mockText(asked.querySelector('.cx-goal-actions')).startsWith('Replace'),
+    'its controls open on the Replace question');
+  asked.querySelector('.cx-goal-confirm').click();
+  assert.ok(!G.byId(sub.id) && G.active().some(g => g.kind === 'atar'), 'Replace saves it over the subject goal');
   location.href = savedHref;
   localStorage.clear();
 });
