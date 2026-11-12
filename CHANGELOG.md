@@ -4,7 +4,7 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
-## 3.3.3 (Unreleased)
+## 3.3.3 (2026-11-13)
 
 ### Additions
 - **Past Years**: a sidebar tool, once a school year has ended, that opens Assessment Outlines and every tool as that year ended, read-only. Connectify now keeps the marks Connect stops showing.
