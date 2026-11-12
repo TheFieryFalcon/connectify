@@ -6,7 +6,8 @@
  * and Type (task-dates-filter.js) and Show: (All, Completed, Uncompleted, Marked, Unmarked), then the task table: each task with its short week and the week
  * editor (progress-week-editor.js), then its subject, type and grade, or predicted grade when grouped by it
  * (task-dates-cells.js). Export mode (export-view.js) adds the ticks and downloads to this same table,
- * swaps that right half for the day and export date, leaving the left half where it was, and forces Show: Uncompleted.
+ * swaps that right half for the day and export date, leaving the left half where it was, and starts Show on Uncompleted:
+ * a choice of its own for as long as Export is on, so the saved Show returns after.
  * Exposes window.ConnectifyTaskDatesView.
  */
 (() => {
@@ -70,7 +71,14 @@
     const subjectFilter = window.ConnectifyTaskDatesFilter.create('Subjects', hiddenSubjects => change({ hiddenSubjects }));
     const typeFilter = window.ConnectifyTaskDatesFilter.create('Type', hiddenTypes => change({ hiddenTypes }));
     filterRow.append(subjectFilter.wrap, typeFilter.wrap);
-    const show = dropdown('Show:', dates.SHOWS, value => change({ show: value }), filterRow);
+    // In Export mode Show is the export's own: Uncompleted each time Export is turned on, never saved
+    let exportShow = 'uncompleted';
+    let wasExporting = false;
+    const show = dropdown('Show:', dates.SHOWS, value => {
+      if (!window.ConnectifyExportView?.active()) return change({ show: value });
+      exportShow = value;
+      render(true);
+    }, filterRow);
     show.wrap.classList.add('cx-dates-show');
 
     // Filled by export-view.js in Export mode
@@ -103,7 +111,7 @@
       easter.input.checked = early;
     }
 
-    function paintControls(view, exporting) {
+    function paintControls(view) {
       group.select.value = view.groupBy;
       sort.select.value = view.sortBy;
       const descending = view.direction === 'desc';
@@ -112,7 +120,6 @@
       direction.setAttribute('aria-label', `Group order: ${direction.title}`);
       direction.hidden = !dates.isOrdered(view.groupBy);
       show.select.value = view.show;
-      show.select.disabled = exporting;
       // Options that say nothing about the tasks Show lists are off
       const needs = (select, options, exempt) => options.forEach((option, i) => {
         select.children[i].disabled = !dates.fits(option, view.show) && !exempt;
@@ -191,7 +198,10 @@
       const early = terms.earlyEaster(year);
       const exportView = window.ConnectifyExportView;
       const exporting = Boolean(exportView?.active());
-      const view = dates.effectiveView(dates.readView(), exporting);
+      if (exporting && !wasExporting) exportShow = 'uncompleted';
+      wasExporting = exporting;
+      const saved = dates.readView();
+      const view = dates.effectiveView(exporting ? { ...saved, show: exportShow } : saved);
       const rows = dates.rows(subjects, { predictions: view.groupBy === 'predicted' });
       const uncached = hasUncachedClasses(subjects);
       const signature = JSON.stringify([subjects, view, exporting, year, early, uncached, rows.map(r => [r.type, r.predicted])]);
@@ -204,7 +214,7 @@
       const track = (el, id) => { el.dataset.cxFocus = id; focusables.set(id, el); return el; };
 
       paintTerms(year, early);
-      paintControls(view, exporting);
+      paintControls(view);
       expandSlot.replaceChildren(...(uncached ? [window.ConnectifyTargetUiHelpers.expandOutlinesButton({ scanAndRefresh: () => render(true) })] : []));
       paintFilters(rows, view);
       // What is hidden from the list is left out of the downloads too

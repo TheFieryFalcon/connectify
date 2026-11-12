@@ -98,7 +98,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - Reach for a dialog only for what the panel does not already show
   - Export is a toggle on the Task Dates list
     - ticks, days and downloads on the same rows
-    - Show forced to Uncompleted: the files hold only what the list shows, never a task whose week is over
+    - Show starts on Uncompleted each time Export is turned on, and can be changed; the saved Show returns after
+    - the files hold what the list shows, marked tasks too when Show lists them
   - Set as Goal turns into Confirm and Cancel where its button was and adds End beside the target
     - under no progress bar or points of its own (the planner already shows them)
     - its task table and sliders live (a custom end week narrows that table)

@@ -1,7 +1,7 @@
 /**
  * Connectify Assessment Export: tasks and dates
  *
- * Turns the cached classes into the export list: every unmarked task, grouped by subject, placed on a
+ * Turns the cached classes into the export list: every task it is given (the Task Dates list's), grouped by subject, placed on a
  * day from the Progress graph's own date system (each task's `order` from ConnectifyData: the Progress
  * week override, else its caption's week; read through ConnectifyProgressMath.termWeek) and the task's
  * or subject's weekday (ConnectifySchoolTerms). Tasks with no week, or past Term 4, are left out and
@@ -41,7 +41,7 @@
       const name = cleanSubject(subject.name);
       if (!name) continue;
       for (const task of subject.tasks || []) {
-        if (!task?.pending) continue;
+        if (!task) continue;
         const key = `${name}::${task.id}`;
         if (seen.has(key)) continue;
         seen.add(key);

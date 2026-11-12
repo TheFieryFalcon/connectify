@@ -5,7 +5,7 @@
  * Predicted Grade: unmarked tasks only, Grade Achieved: marked tasks only; grades in university bands) with
  * a direction for the groups (not Completed), then Sort By inside each group (Chronological, Alphabetical,
  * Mark: the predicted grade when grouped by it, else the grade achieved), Show (All, Completed, Uncompleted, Marked,
- * Unmarked; Export mode forces Uncompleted) and the subjects and types hidden from the list. A task is completed once it
+ * Unmarked; Export mode starts on Uncompleted) and the subjects and types hidden from the list. A task is completed once it
  * is marked or its week is over, by the calendar. A task without the value sorted on comes last whatever the
  * direction. The choices are kept in connectify:task_dates_view.
  * Exposes window.ConnectifyTaskDates.
@@ -98,12 +98,11 @@
   }
 
   /**
-   * The view as listed. `exporting` forces Show: Uncompleted (a calendar holds what is still to come); a group or sort that says nothing about the tasks shown
-   * falls back to the default, leaving the saved choice for when Show changes back. Sorting by grade stays while the
-   * predicted grades are listed.
+   * The view as listed: a group or sort that says nothing about the tasks Show lists falls back to the default,
+   * leaving the saved choice for when Show changes back. Sorting by grade stays while the predicted grades are listed.
    */
-  function effectiveView(view, exporting) {
-    const show = exporting ? 'uncompleted' : pick(SHOWS, view.show).id;
+  function effectiveView(view) {
+    const show = pick(SHOWS, view.show).id;
     const groupBy = fits(pick(GROUPS, view.groupBy), show) ? view.groupBy : 'subject';
     const sortBy = fits(pick(SORTS, view.sortBy), show) || showsPredicted(groupBy) ? view.sortBy : 'chronological';
     return { ...view, show, groupBy, sortBy };

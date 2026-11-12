@@ -90,8 +90,6 @@
 }
 #cx-task-dates .cx-dates-select:hover { border-color: #94adc3 !important; }
 #cx-task-dates .cx-dates-select:disabled { cursor: default; }
-/* Export lists uncompleted tasks only, so Show stays put greyed out */
-#cx-task-dates .cx-dates-show:has(.cx-dates-select:disabled) { opacity: 0.6; }
 /* Inside the table a day is a detail */
 #cx-task-dates .cx-dates-table .cx-dates-select { padding: 1px 4px; vertical-align: middle; }
 #connectify-progress .cx-dates-direction {

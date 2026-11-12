@@ -11183,8 +11183,8 @@ runTest('Test 239: Export tasks use the Progress graph\'s dates, weekdays, left-
     const { groups, leftOut } = tasks.build(subjects, {
       year: 2026, early: true, subjectDays: { 'Chemistry ATAR': 3 }, taskDays: { 'Chemistry ATAR::c3': 5 }, unticked: new Set(['Chemistry ATAR::c1'])
     });
-    assert.deepStrictEqual(groups.map(g => g.subject), ['Chemistry ATAR', 'Physics ATAR'], 'subjects by next due, Semester suffix removed');
-    const chem = groups[0].tasks;
+    assert.deepStrictEqual(groups.map(g => g.subject), ['Physics ATAR', 'Chemistry ATAR'], 'subjects by next due, Semester suffix removed');
+    const chem = groups[1].tasks;
     assert.deepStrictEqual(chem.map(t => t.name), ['Quiz', 'Test 2', 'Exam'], 'tasks by date');
     assert.strictEqual(isoDay(chem[0].date), '2026-03-18', 'order 7 is Term 1 Week 7, on the subject day (Wed)');
     assert.strictEqual(chem[0].when, 'Term 1, Week 7', 'the week reads as in the Progress graph');
@@ -11192,11 +11192,11 @@ runTest('Test 239: Export tasks use the Progress graph\'s dates, weekdays, left-
     assert.strictEqual(isoDay(chem[2].date), '2026-06-17', 'the subject day (Wed) in Term 2 Week 9');
     assert.strictEqual(chem[1].type, 'Exam', 'Type overrides count');
     assert.strictEqual(chem[2].ticked, false, 'unticked tasks stay unticked');
-    const lab = groups[1].tasks[0];
+    const lab = groups[0].tasks.find(t => t.name === 'Lab');
     assert.strictEqual(isoDay(lab.date), '2026-06-01', 'order 19 (a week override of 17) is Term 2 Week 7, whatever the caption says');
-    assert.ok(groups[1].tasks.every(t => t.name !== 'Test 1'), 'marked tasks are not exported');
+    assert.ok(groups[0].tasks.some(t => t.name === 'Test 1'), 'a marked task it is given is exported: the Task Dates list decides what goes in');
     assert.deepStrictEqual(leftOut.map(t => [t.name, t.reason]), [['Report', 'noWeek'], ['Late', 'afterTerm4']], 'no order means no week, whatever the caption says');
-    assert.deepStrictEqual(tasks.ticked(groups).map(t => t.name), ['Quiz', 'Test 2', 'Lab']);
+    assert.deepStrictEqual(tasks.ticked(groups).map(t => t.name), ['Test 1', 'Lab', 'Quiz', 'Test 2']);
     const src = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-tasks.js'), 'utf8');
     assert.ok(!/caption|readTimeOverride|querySelector/.test(src.replace(/\/\*[\s\S]*?\*\//, '')), 'the export never reads captions, overrides or the DOM itself');
   } finally {
@@ -11294,7 +11294,7 @@ function withTaskDatesPanel(subjects, body) {
   }
 }
 
-runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks and days added, Show: Uncompleted forced, choices stored', () => {
+runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks and days added, Show starting on Uncompleted, choices stored', () => {
   // 20 May: Term 2 Week 5, so Missed's week (Term 1 Week 6) is over, unmarked, and Lab's (Term 3 Week 2) is to come
   const savedPastYear = window.ConnectifyPastYearMode;
   window.ConnectifyPastYearMode = { active: () => false, year: () => null, suffix: () => '', ...savedPastYear, today: () => new Date(2026, 4, 20, 12) };
@@ -11312,15 +11312,21 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     assert.ok(dates.toolbar.children.includes(view.toggleBtn) && !head.children.includes(view.toggleBtn), 'Export sits in the Task Dates toolbar, not the panel header');
     assert.ok(names().includes('Quiz'), 'the list starts with every task');
     assert.ok(find(dates.list, n => n.tagName === 'SELECT').every(n => n.className.includes('cx-dates-type')), 'with no export controls, only each task\'s Type');
-    assert.strictEqual(box().disabled, false);
+    assert.ok(!box().disabled, "Show can be changed");
 
     view.toggleBtn.dispatchEvent(new MockEvent('click'));
     assert.strictEqual(view.toggleBtn.textContent, 'Export', 'one button, pressed: no second view to come back from');
     assert.strictEqual(view.toggleBtn.getAttribute('aria-pressed'), 'true');
     assert.ok(find(dates.section, n => n.className === 'cx-dates-table').length === 1 && !document.getElementById('cx-export-view'), 'still the one table');
-    assert.ok(box().value === 'uncompleted' && box().disabled, 'Show: Uncompleted is forced');
+    assert.ok(box().value === 'uncompleted' && !box().disabled, 'Show starts on Uncompleted, and can be changed');
     assert.ok(!find(dates.list, () => true).some(n => n.textContent === 'Quiz' || n.textContent === 'Missed'), 'so a marked task and one whose week is over leave the list');
     assert.ok(!find(dates.list, n => n.dataset?.cxFocus === 'tick:Physics ATAR::p2').length && find(dates.list, n => n.dataset?.cxFocus === 'tick:Physics ATAR::p1').length, 'and the files: only Lab is ticked to export');
+    const choose = value => { box().value = value; box().dispatchEvent(new MockEvent('change')); };
+    choose('marked');
+    assert.strictEqual(window.ConnectifyTaskDates.readView().show, 'all', 'the export\'s choice is its own, never saved');
+    choose('all');
+    assert.ok(['p0', 'p1', 'p2'].every(id => find(dates.list, n => n.dataset?.cxFocus === `tick:Physics ATAR::${id}`).length), 'Show: All puts every task in the files, the marked Quiz too');
+    choose('uncompleted');
     const heads = find(dates.list, n => n.tagName === 'TH').filter(n => n.children.length === 0).map(n => n.textContent);
     assert.deepStrictEqual(heads, ['Assessment', 'Date', 'Day', 'Export Date'], 'the right half swaps to the export columns');
     assert.strictEqual(find(dates.list, n => n.className.includes?.('cx-dates-type')).length, 0, 'no Type or Grade while exporting');
@@ -11341,7 +11347,13 @@ runTest('Test 242: Export is a toggle on the Task Dates list: same table, ticks 
     // Opening Progress (or any tool) fires connectify-open, which leaves Export mode
     assert.ok(origReadFileSync.call(fs, path.resolve(SRC_DIR, 'progress/export-view.js'), 'utf8').includes("window.addEventListener('connectify-open', () => setActive(false))"));
     view.toggleBtn.dispatchEvent(new MockEvent('click'));
-    assert.ok(names().includes('Quiz') && box().disabled === false && box().value === 'all', 'toggling off gives the same list back, its own choice restored');
+    assert.ok(names().includes('Quiz') && !box().disabled && box().value === 'all', 'toggling off gives the same list back, its own choice restored');
+    view.toggleBtn.dispatchEvent(new MockEvent('click'));
+    choose('marked');
+    view.toggleBtn.dispatchEvent(new MockEvent('click'));
+    view.toggleBtn.dispatchEvent(new MockEvent('click'));
+    assert.strictEqual(box().value, 'uncompleted', 'each time Export is turned on, Show starts on Uncompleted');
+    view.toggleBtn.dispatchEvent(new MockEvent('click'));
     assert.ok(dates.optionsSlot.children.length === 0 && dates.footerSlot.children.length === 0);
     // A settings reset removes the choices; Clear Cache keeps them
     const cacheSrc = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'assessment/cache-versions.js'), 'utf8');
