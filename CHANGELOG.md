@@ -33,6 +33,8 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - A new school year no longer starts by mistake in exam weeks, when Connect hides outlines or shows next year's classes early.
 - Light-tone themes (Liquid Glass, light custom themes) no longer show dark boxes or pale text.
 - Category names in Settings are clearer in Light and over a wallpaper.
+- A table in a notice no longer sits on a grey slab in Liquid Glass and the dark themes.
+- Text pasted into a notice with an off-white page colour (cream, ivory, light grey) no longer leaves boxes or strips beside its highlights on a dark theme or wallpaper.
 - The Predictor's type badges keep their category colours in every theme.
 - Connect's top bars keep their colours in dark themes: the active tab's underline, the Library's tools and search buttons and the separators.
 - The outlines' class filter button no longer takes a custom theme's button colour.

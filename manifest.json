@@ -378,6 +378,7 @@
             "src/theme/theme-customizer-popover.js",
             "src/theme/theme-customizer-controls.js",
             "src/theme/theme-customizer.js",
+            "src/theme/theme-rich-text-paper.js",
             "src/theme/theme-surface-adapter.js",
             "src/theme/theme-toggle.js",
             "src/theme/theme-menu.js",

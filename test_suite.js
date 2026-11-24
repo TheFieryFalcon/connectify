@@ -17431,6 +17431,48 @@ runTest('Test 360: The interactive Puppeteer login never reloads the sign-in pag
   }
 });
 
+runTest('Test 362: Off-white page colours pasted into rich text are cleared like white in any spelling; highlights are kept', () => {
+  const src = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/theme-rich-text-paper.js'), 'utf8');
+  // A canvas parser stand-in: hex and rgb(a) as the browser normalises them, a few names
+  const NAMES = { white: '#ffffff', cornsilk: '#fff8dc', ivory: '#fffff0', yellow: '#ffff00', lime: '#00ff00' };
+  const normalise = v => {
+    const t = v.trim().toLowerCase();
+    if (NAMES[t]) return NAMES[t];
+    const short = t.match(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/);
+    if (short) return '#' + short.slice(1).map(c => c + c).join('');
+    if (/^#[0-9a-f]{6}$/.test(t)) return t;
+    const rgb = t.match(/^rgba?\(([^)]+)\)$/);
+    if (!rgb) return null;
+    const p = rgb[1].split(/[\s,\/]+/).filter(Boolean).map(Number);
+    if (p.length === 4 && p[3] < 1) return `rgba(${p.slice(0, 3).join(', ')}, ${p[3]})`;
+    return '#' + p.slice(0, 3).map(n => n.toString(16).padStart(2, '0')).join('');
+  };
+  const ctx = { _v: '#000000', get fillStyle() { return this._v; }, set fillStyle(v) { const n = normalise(String(v)); if (n) this._v = n; } };
+  const win = {};
+  const doc = { createElement: () => ({ getContext: () => ctx }), querySelectorAll: () => [] };
+  new Function('window', 'document', src)(win, doc);
+  const paper = win.ConnectifyRichTextPaper;
+  for (const c of ['white', '#fff', '#FFFFFF', 'cornsilk', 'ivory', '#FFFDE6', 'rgb(255 250 230)', 'rgb(217, 217, 217)']) {
+    assert.strictEqual(paper.isPaper(c), true, `${c} is a page colour`);
+  }
+  for (const c of ['lime', 'yellow', '#ccffcc', '#92D050', 'rgba(255, 255, 255, 0)', 'transparent', '', 'nonsense']) {
+    assert.strictEqual(paper.isPaper(c), false, `${c} is kept`);
+  }
+
+  const tagged = [];
+  const el = (bg, inside = []) => ({ nodeType: 1, isConnected: true, style: { backgroundColor: bg },
+    matches: () => true, querySelectorAll: () => inside, setAttribute: (name) => tagged.push([bg, name]) });
+  paper.tag([el('cornsilk', [el('lime'), el('#fff')])]);
+  assert.deepStrictEqual(tagged, [['cornsilk', 'data-cx-paper-bg'], ['#fff', 'data-cx-paper-bg']], 'only page colours are tagged');
+
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-rich-text.css'), 'utf8');
+  assert.ok(/\.connectify-dark:not\(cx-n\) \.rtf-content \[data-cx-paper-bg\]/.test(css), 'dark themes clear tagged backgrounds');
+  assert.ok(/\[data-connectify-has-custom-bg="true"\] \.rtf-content \[data-cx-paper-bg\]/.test(css), 'Light over a wallpaper clears them');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const themeGroup = manifest.content_scripts.find(g => g.js?.includes('src/theme/theme.js')).js;
+  assert.ok(themeGroup.indexOf('src/theme/theme-rich-text-paper.js') > themeGroup.indexOf('src/system/scheduler.js'), 'loads after the scheduler on every page');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

@@ -458,6 +458,7 @@ Extremely concise summary of the core visual design language, contrast standards
     - so text copied from a document carries `background-color: rgb(255, 255, 255)`
   - Rule, in every dark theme and in Light over a wallpaper
     - a white inline background (`rgb(255, 255, 255)`, `#ffffff`, `white`) is cleared
+    - so is any off-white page colour in any spelling (every channel >= 205, at most 40 apart: cornsilk, ivory, `#fff`, `hsl()`, a light grey shading), tagged `data-cx-paper-bg` by `theme-rich-text-paper.js` from inline styles alone; a space between two runs kept a cream strip beside each highlight
     - other highlight colours kept
 - **Light Mode over a Wallpaper**
   - feed tabs, sub-headers and toolbars

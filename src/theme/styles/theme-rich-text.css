@@ -5,7 +5,8 @@
  * from a document carries background-color: rgb(255, 255, 255) on every run of text. On Connect's white page
  * that is invisible; on a dark theme or a wallpaper each line became a white box. A white inline background
  * (rgb(255, 255, 255), #ffffff or white) is cleared there, so the text sits on the page like the rest;
- * highlights in other colours are kept.
+ * highlights in other colours are kept. Off-white page colours in any spelling (cornsilk, ivory, hsl) are tagged
+ * data-cx-paper-bg by theme-rich-text-paper.js and cleared the same way.
  */
 .connectify-dark:not(cx-n) .rtf-content [style*="background-color:rgb(255,255,255)" i],
 .connectify-dark:not(cx-n) .rtf-content [style*="background-color:rgb(255, 255, 255)" i],
@@ -38,6 +39,8 @@ html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .rtf-content [s
 html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .rtf-content [style*="background: rgb(255,255,255)" i],
 html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .rtf-content [style*="background: rgb(255, 255, 255)" i],
 html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .rtf-content [style*="background: #ffffff" i],
-html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .rtf-content [style*="background: white" i] {
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .rtf-content [style*="background: white" i],
+.connectify-dark:not(cx-n) .rtf-content [data-cx-paper-bg],
+html:not(.connectify-dark)[data-connectify-has-custom-bg="true"] .rtf-content [data-cx-paper-bg] {
   background-color: transparent !important;
 }
