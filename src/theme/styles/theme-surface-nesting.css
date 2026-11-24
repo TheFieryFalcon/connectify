@@ -59,8 +59,10 @@ html.connectify-dark[data-connectify-theme] .v-window :where(table):not(#cx-n) {
 }
 
 /* A table written into a notice or section (rich text, or no Connect table class) is text, not a data table: it sits
-   on the page as on Connect's white one, its hairlines kept. Any fill of its own showed as a grey slab on the wallpaper */
+   on the page as on Connect's white one, its hairlines kept. Any fill of its own showed as a grey slab on the wallpaper.
+   CKEditor 5 wraps it in figure.table, which Bootstrap's .table rule filled with the panel colour */
 html.connectify-dark[data-connectify-theme] :where(table:not([class*="table"]):not(.cvr-c-tree-panel)):not(#cx-n):not(.cx-n),
+html.connectify-dark[data-connectify-theme] figure.table:not(#cx-n),
 html.connectify-dark[data-connectify-theme] .rtf-content :where(table):not(#cx-n),
 html.connectify-dark[data-connectify-theme] .rtf-content .table-responsive:not(#cx-n) {
   background-color: transparent !important;

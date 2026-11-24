@@ -15682,6 +15682,7 @@ runTest('Test 324: A table in a dialog or written into a notice is clear, so no 
   };
   for (const sel of ['.mat-dialog-container :where(table):not(#cx-n)', '.v-window :where(table):not(#cx-n)',
     ':where(table:not([class*="table"]):not(.cvr-c-tree-panel)):not(#cx-n):not(.cx-n)',
+    'figure.table:not(#cx-n)',
     '.rtf-content :where(table):not(#cx-n)', '.rtf-content .table-responsive:not(#cx-n)']) {
     assert.ok(clearRule(sel), `${sel} is clear`);
   }
