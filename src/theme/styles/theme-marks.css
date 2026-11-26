@@ -1,0 +1,53 @@
+/**
+ * Connectify Theme: a class's My Marks page (Connect's Angular marksbook: cnt-mark-display rows, cnt-mark-comment-display
+ * comments), every dark theme. Connect paints each row's mark cell light grey (.bg-lighter, #f2f2f2), its comment as a
+ * white speech box with a white tail, and the row's lines #4f4f4f / #d4d4d4, all !important at (0,3,0). On a dark page
+ * the cell and box were pale slabs whose theme ink was unreadable (a white "-" on #f2f2f2, white text on white), so:
+ * the mark cell is the theme's surface (a faint ink tint in Liquid Glass, which sits on the page like the outlines'
+ * achievement column), the speech box and its tail are one surface with a hairline (glass with blur in Liquid Glass),
+ * and the lines take the theme's hairlines. Colours only: sizes, padding and Connect's square corners are kept.
+ * :not(#cx-n) (which every element passes) outranks Connect's rules.
+ */
+
+/* Row lines: the strong top line and the faint bottom and cell dividers, as Connect draws them on white */
+.connectify-dark:not(cx-n) cnt-mark-display .border-connect-grey-dark-top:not(#cx-n) {
+  border-top-color: var(--cx-border-strong, #5a7391) !important;
+}
+
+.connectify-dark:not(cx-n) cnt-mark-display .border-bottom:not(#cx-n) {
+  border-bottom-color: var(--cx-border-subtle, #2e3c4e) !important;
+}
+
+.connectify-dark:not(cx-n) cnt-mark-display .border-left:not(#cx-n) {
+  border-left-color: var(--cx-border-subtle, #2e3c4e) !important;
+}
+
+/* Mark cell: a tick, a mark or "-" on the theme's surface, in the theme's ink */
+.connectify-dark:not(cx-n) cnt-mark-display .bg-lighter:not(#cx-n) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+}
+
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) cnt-mark-display .bg-lighter:not(#cx-n) {
+  background-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 7%, transparent) !important;
+}
+
+/* Comment: the speech box and its tail are one surface; an outline drawn as a shadow keeps the box's size, and the
+   tail's fill covers that outline where it meets the box */
+.connectify-dark:not(cx-n) cnt-mark-comment-display .c-speech-box:not(#cx-n) {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  color: var(--cx-text-primary, #f1f5f9) !important;
+  box-shadow: 0 0 0 1px var(--cx-border, #455a73), 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+}
+
+.connectify-dark:not(cx-n) cnt-mark-comment-display .c-speech-box-tail:not(#cx-n)::before {
+  background-color: var(--cx-surface-bg, #1e2632) !important;
+  box-shadow: 0 0 0 1px var(--cx-border, #455a73) !important;
+}
+
+/* Liquid Glass: the box is the outermost surface on the page, so it also blurs; the tail stays unblurred beside it */
+html.connectify-dark:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"]) cnt-mark-comment-display .c-speech-box:not(#cx-n) {
+  backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--cx-glass-blur, 12px)) saturate(160%) !important;
+  box-shadow: 0 0 0 1px var(--cx-border, rgba(255, 255, 255, 0.18)) !important;
+}

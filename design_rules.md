@@ -460,6 +460,17 @@ Extremely concise summary of the core visual design language, contrast standards
     - a white inline background (`rgb(255, 255, 255)`, `#ffffff`, `white`) is cleared
     - so is any off-white page colour in any spelling (every channel >= 205, at most 40 apart: cornsilk, ivory, `#fff`, `hsl()`, a light grey shading), tagged `data-cx-paper-bg` by `theme-rich-text-paper.js` from inline styles alone; a space between two runs kept a cream strip beside each highlight
     - other highlight colours kept
+- **My Marks** (`theme-marks.css`, a class's marksbook: `cnt-mark-display`, `cnt-mark-comment-display`)
+  - Mark cell (`.bg-lighter`, Connect's `#f2f2f2`)
+    - the theme surface in the theme ink in every dark theme, so a `-` or mark stays readable
+    - a 7% ink tint in Liquid Glass, like the outlines' achievement column
+  - Teacher comment (`.c-speech-box` and its tail)
+    - one surface with a hairline drawn as a shadow, never Connect's white box
+    - glass with blur in Liquid Glass, the outermost surface on the page
+  - Row lines
+    - the strong top line `--cx-border-strong`, the bottom and cell dividers `--cx-border-subtle`, never Connect's `#d4d4d4`
+  - Geometry
+    - colours only: Connect's sizes, padding and square corners are kept
 - **Light Mode over a Wallpaper**
   - feed tabs, sub-headers and toolbars
     - have no panel (the white 90% contrast panels were removed)

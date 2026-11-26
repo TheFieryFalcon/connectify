@@ -17473,6 +17473,28 @@ runTest('Test 362: Off-white page colours pasted into rich text are cleared like
   assert.ok(themeGroup.indexOf('src/theme/theme-rich-text-paper.js') > themeGroup.indexOf('src/system/scheduler.js'), 'loads after the scheduler on every page');
 });
 
+runTest('Test 363: My Marks rows keep no light grey mark cell, white speech box or pale lines in dark themes', () => {
+  const css = origReadFileSync.call(fs, path.resolve(SRC_DIR, 'theme/styles/theme-marks.css'), 'utf8');
+  // Connect's own rules are !important at (0,3,0) (.eds.cvr.ngm .bg-lighter), so each needs an id weight to lose
+  assert.ok(cssHas(css, '.connectify-dark:not(cx-n) cnt-mark-display .bg-lighter:not(#cx-n) { background-color: var(--cx-surface-bg, #1e2632) !important; color: var(--cx-text-primary, #f1f5f9) !important;'),
+    'the mark cell is the theme surface in the theme ink');
+  assert.ok(cssHas(css, 'cnt-mark-display .bg-lighter:not(#cx-n) { background-color: color-mix(in srgb, var(--cx-text-primary, #ffffff) 7%, transparent) !important;'),
+    'a faint ink tint in Liquid Glass');
+  assert.ok(cssHas(css, '.connectify-dark:not(cx-n) cnt-mark-comment-display .c-speech-box:not(#cx-n) { background-color: var(--cx-surface-bg, #1e2632) !important;')
+    && cssHas(css, '.connectify-dark:not(cx-n) cnt-mark-comment-display .c-speech-box-tail:not(#cx-n)::before { background-color: var(--cx-surface-bg, #1e2632) !important;'),
+    'the comment box and its tail are one surface');
+  assert.ok(css.includes('cnt-mark-comment-display .c-speech-box:not(#cx-n) {\n  backdrop-filter: blur(var(--cx-glass-blur, 12px))'), 'the box blurs in Liquid Glass');
+  for (const [cls, side, token] of [['border-connect-grey-dark-top', 'top', 'border-strong'], ['border-bottom', 'bottom', 'border-subtle'], ['border-left', 'left', 'border-subtle']]) {
+    assert.ok(css.includes(`cnt-mark-display .${cls}:not(#cx-n) {\n  border-${side}-color: var(--cx-${token},`), `.${cls} takes --cx-${token}`);
+  }
+  const rules = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.ok(!/(^|;|\{)\s*(border(-(top|bottom|left|right))?(-width)?|padding|margin|width|height|border-radius)\s*:/m.test(rules), 'colours only: Connect\'s sizes and square corners are kept');
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  const sheets = manifest.content_scripts.find(g => g.css?.includes('src/theme/styles/theme-marks.css')).css;
+  assert.strictEqual(sheets.indexOf('src/theme/styles/theme-marks.css'), sheets.indexOf('src/theme/styles/theme-discussions.css') + 1, 'loads after the discussion speech boxes');
+  assert.ok(manifest.content_scripts.find(g => g.css?.includes('src/theme/styles/theme-marks.css')).matches.includes('https://connect.det.wa.edu.au/*'), 'on every Connect page');
+});
+
 Promise.all(pendingTestPromises).then(() => {
   console.log('\n================================================================');
   console.log(`ALL CONNECTIFY MASTER TESTS COMPLETED: ${passedTests}/${totalTests} TESTS PASSED!`);

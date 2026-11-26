@@ -324,6 +324,7 @@
             "src/theme/styles/theme-field-hover.css",
             "src/theme/styles/theme-navigation.css",
             "src/theme/styles/theme-discussions.css",
+            "src/theme/styles/theme-marks.css",
             "src/theme/styles/theme-surfaces.css",
             "src/theme/styles/theme-surfaces-2.css",
             "src/theme/styles/theme-search-scaling.css",
