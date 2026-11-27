@@ -199,7 +199,8 @@
   }
 
   function check() {
-    if (window.ConnectifyPastYearMode?.active()) return;
+    // A past year, or outlines remembered while Connect shows none: nothing on the page was seen today
+    if (window.ConnectifyPastYearMode?.active() || window.ConnectifyRememberedOutlines?.active()) return;
     if (window.ConnectifySidebarFilter?.isOutlinesFilterRestricted?.()) return;
     const liveNames = liveClassNames();
     const state = loadState() || { classNames: [], seen: [], snapshot: null };

@@ -1033,6 +1033,16 @@ Extremely concise summary of the core visual design language, contrast standards
     - hands Connect its outlines response without task rows or class boxplots once Connectify has its own outlines
     - unchanged if Connectify's request fails, or after 10s
     - so Connect fetches no boxplots and renders bare cards whose titles, teacher links and filter menu Connectify still uses
+- **Remembered Outlines** (`remembered-outlines.js`, `remembered-outlines.css`)
+  - When Connect shows none
+    - Connect's API returns no outlines ("No Assessment Outlines available.", e.g. exam weeks)
+    - the outlines kept through the year (`connectify:outline_records:<account>`, `year-capsule.js`) stand in as the load
+    - drawn in Connect's zone like a past year's, Connect's notice hidden; every tool reads them
+  - Nothing remembered
+    - nothing is drawn and Connect's "No Assessment Outlines available." stays
+  - Nothing in them is news
+    - no rollover decision or `seenAt` refresh, no record capture, no grade toasts
+    - Connect's own outlines always win once it shows any
 - **Mock Outlines** (`mock-outlines.js`, `scripts/mock-outlines-console.js`)
   - What it is
     - while localStorage holds `connectify:mock_outlines` (`{ records }`), Connectify draws those records instead of fetching Connect's, for testing while Connect shows no outlines

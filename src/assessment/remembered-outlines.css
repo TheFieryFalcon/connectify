@@ -1,0 +1,11 @@
+/**
+ * Connectify Assessment: remembered outlines (remembered-outlines.js)
+ *
+ * While Connectify draws the outlines it remembers, Connect's "No Assessment Outlines available." is hidden. In exam
+ * weeks Connect puts it straight into its outlines zone, with no outlines component around it.
+ */
+
+html[data-cx-remembered-outlines] cnt-student-assessment-outlines cnt-no-content-panel,
+html[data-cx-remembered-outlines] #ng-zone__student-assessment-outline > cnt-no-content-panel {
+  display: none !important;
+}

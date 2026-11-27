@@ -34,7 +34,7 @@
 
   /** Keeps Connect's outline records from this load (merged into the year's), unless they are a new year's waiting for the rollover. */
   function capture() {
-    if (window.ConnectifyPastYearMode?.active() || !utils.isOutlinesPage()) return false;
+    if (window.ConnectifyPastYearMode?.active() || window.ConnectifyRememberedOutlines?.active() || !utils.isOutlinesPage()) return false;
     const loaded = window.ConnectifyOutlineApi?.records?.() || [];
     if (!loaded.length) return false;
     const saved = readJson(key());

@@ -105,8 +105,8 @@
    * saves the marks, then starts the newly-marked-task check (grade-tasks.js).
    */
   function checkGrades() {
-    // A past year (Past Years) has no news: its marks are the year's last
-    if (!document.body || window.ConnectifyPastYearMode?.active()) return;
+    // A past year (Past Years) has no news: its marks are the year's last; nor do outlines remembered while Connect shows none
+    if (!document.body || window.ConnectifyPastYearMode?.active() || window.ConnectifyRememberedOutlines?.active()) return;
 
     const currentEntries = snapshot.currentEntries();
     if (!currentEntries.length) return;

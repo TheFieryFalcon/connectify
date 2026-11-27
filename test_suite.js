@@ -13615,7 +13615,8 @@ runTest('Test 284: Connect\'s new outline cards are drawn again in the old Vaadi
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(__dirname, 'manifest.json'), 'utf8'));
   const js = manifest.content_scripts.find(g => g.js?.includes('src/assessment/legacy-outlines.js')).js;
   const at = f => js.indexOf(`src/assessment/${f}`);
-  assert.ok(at('outline-api.js') === at('assessment-parser.js') + 1 && at('assessment-api-parse.js') === at('outline-api.js') + 1, 'the API modules follow the parser');
+  assert.ok(at('remembered-outlines.js') === at('assessment-parser.js') + 1 && at('outline-api.js') === at('remembered-outlines.js') + 1 &&
+    at('assessment-api-parse.js') === at('outline-api.js') + 1, 'the API modules follow the parser, the remembered outlines first');
   assert.ok(at('legacy-outlines-markup.js') === at('assessment-data.js') + 1 && at('legacy-outlines.js') === at('legacy-outlines-markup.js') + 1 &&
     at('legacy-outlines.js') > at('assessment-accordion-watch.js'), 'the renderer follows the data module, after the accordion watch (it reads Show Details before a toggle)');
   const css = read('assessment/legacy-outlines.css');
@@ -16857,7 +16858,8 @@ runTest('Test 349: A past year is read-only and quiet: drawn from its records, n
   // Settings is off in a past year: it would change the copy, never the student's own settings
   const sidebar = read('sidebar/sidebar.js');
   assert.ok(sidebar.includes("!(pastYear() && id === 'connectify-categories-toggle')"));
-  assert.ok(read('predictor/year-capsule.js').includes("if (window.ConnectifyPastYearMode?.active() || !utils.isOutlinesPage()) return false;"), 'a past year never overwrites the records it was drawn from');
+  assert.ok(read('predictor/year-capsule.js').includes("if (window.ConnectifyPastYearMode?.active() || window.ConnectifyRememberedOutlines?.active() || !utils.isOutlinesPage()) return false;"),
+    'a past year (or remembered outlines) never overwrites the records it was drawn from');
 });
 
 function loadBackupModules() {
@@ -17493,6 +17495,60 @@ runTest('Test 363: My Marks rows keep no light grey mark cell, white speech box 
   const sheets = manifest.content_scripts.find(g => g.css?.includes('src/theme/styles/theme-marks.css')).css;
   assert.strictEqual(sheets.indexOf('src/theme/styles/theme-marks.css'), sheets.indexOf('src/theme/styles/theme-discussions.css') + 1, 'loads after the discussion speech boxes');
   assert.ok(manifest.content_scripts.find(g => g.css?.includes('src/theme/styles/theme-marks.css')).matches.includes('https://connect.det.wa.edu.au/*'), 'on every Connect page');
+});
+
+runTest('Test 364: When Connect shows no outlines, Connectify draws the ones it remembers; with none remembered Connect\'s notice stays', async () => {
+  const read = f => origReadFileSync.call(fs, path.resolve(SRC_DIR, f), 'utf8');
+  const prev = { remembered: window.ConnectifyRememberedOutlines, api: window.ConnectifyOutlineApi };
+  const acct = window.ConnectifyUtils.accountKey();
+  const KEY = `connectify:outline_records:${acct}`;
+  const kept = [{ apiOutline: true, title: 'Chemistry ATAR Year 11 - Semester 1', subject: 'Chemistry ATAR Year 11', semester: 1, outlines: [] }];
+  // Connect's reply in exam weeks: a student with no outline groups. Handed to this test's copy of outline-api.js
+  // alone (it keeps pageFetch from when it loads), so other async tests' fetches are untouched
+  const emptyFetch = async url => ({ ok: true, status: 200, json: async () => (url.includes('default_student')
+    ? { status: 'SUCCESS', items: [{ entityId: 42 }] } : { status: 'SUCCESS', items: [{ semester1Groups: [], semester2Groups: [] }] }) });
+  const fresh = () => {
+    const utils = window.ConnectifyUtils;
+    const own = utils.pageFetch;
+    delete window.ConnectifyRememberedOutlines;
+    delete window.ConnectifyOutlineApi;
+    document.documentElement.removeAttribute?.('data-cx-remembered-outlines');
+    eval(read('assessment/remembered-outlines.js'));
+    utils.pageFetch = emptyFetch;
+    try { eval(read('assessment/outline-api.js')); } finally { utils.pageFetch = own; }
+    const mine = { api: window.ConnectifyOutlineApi, remembered: window.ConnectifyRememberedOutlines };
+    window.ConnectifyOutlineApi = prev.api;
+    return mine;
+  };
+  try {
+    localStorage.removeItem(KEY);
+    let { api, remembered } = fresh();
+    let records = await api.refresh();
+    assert.deepStrictEqual(records, [], 'nothing remembered: nothing is drawn');
+    assert.ok(!remembered.active() && !document.documentElement.hasAttribute?.('data-cx-remembered-outlines'), 'Connect\'s notice stays');
+
+    localStorage.setItem(KEY, JSON.stringify({ classNames: ['Chemistry ATAR Year 11'], records: kept, savedAt: 1 }));
+    ({ api, remembered } = fresh());
+    records = await api.refresh();
+    assert.deepStrictEqual(records.map(r => r.title), ['Chemistry ATAR Year 11 - Semester 1'], 'the outlines kept through the year stand in');
+    assert.ok(remembered.active() && api.drawable() === records && api.isLoaded(), 'they are the load every tool reads');
+    assert.ok(document.documentElement.hasAttribute?.('data-cx-remembered-outlines') !== false, 'the page is marked for the stylesheet');
+    assert.deepStrictEqual(remembered.standIn([kept[0], kept[0]]).length, 2, 'Connect\'s own outlines always win over remembered ones');
+  } finally {
+    localStorage.removeItem(KEY);
+    window.ConnectifyRememberedOutlines = prev.remembered;
+    window.ConnectifyOutlineApi = prev.api;
+  }
+
+  // Drawn whatever Connect shows, over its hidden notice; nothing in a remembered load is news
+  assert.ok(/window\.ConnectifyRememberedOutlines\?\.active\(\)\) \{/.test(read('assessment/legacy-outlines.js')), 'drawn in Connect\'s zone like a past year');
+  const css = read('assessment/remembered-outlines.css');
+  assert.ok(cssHas(css, 'html[data-cx-remembered-outlines] #ng-zone__student-assessment-outline > cnt-no-content-panel { display: none !important;'), 'Connect\'s notice hidden under them');
+  for (const f of ['predictor/year-rollover.js', 'predictor/year-capsule.js', 'system/new-grade.js']) {
+    assert.ok(read(f).includes('window.ConnectifyRememberedOutlines?.active()'), `${f} skips a remembered load`);
+  }
+  const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
+  assert.ok(manifest.content_scripts.some(g => g.css?.includes('src/assessment/remembered-outlines.css')), 'the stylesheet is registered');
 });
 
 Promise.all(pendingTestPromises).then(() => {

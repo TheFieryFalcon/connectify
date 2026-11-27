@@ -13,7 +13,8 @@
  * chart lands; the caches wait for the whole load. A record whose content is unchanged keeps its object, so
  * only tiles that changed are drawn again.
  * Loads once per outlines page; fires connectify-outlines-loaded / connectify-outlines-failed. While a past year is
- * viewed (Past Years), its saved records stand in for Connect's and nothing is fetched; so do mock outlines'.
+ * viewed (Past Years), its saved records stand in for Connect's and nothing is fetched; so do mock outlines'. When
+ * Connect returns no outlines, the ones kept through the year stand in (remembered-outlines.js).
  * Exposes window.ConnectifyOutlineApi.
  */
 (() => {
@@ -127,7 +128,12 @@
       window.dispatchEvent(new CustomEvent('connectify-outlines-preview'));
       return preview;
     };
-    build();
+    // Connect has no outlines ("No Assessment Outlines available."): the ones kept through the year stand in
+    if (!build().length) {
+      const remembered = window.ConnectifyRememberedOutlines?.standIn?.(preview) || preview;
+      if (remembered !== preview) { preview = remembered; window.dispatchEvent(new CustomEvent('connectify-outlines-preview')); }
+      return preview;
+    }
     await Promise.all(groups.map(async group => {
       if (!group.assessmentGroupId || !group.chartAssessmentOutlineId) return;
       try {

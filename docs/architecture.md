@@ -21,7 +21,7 @@ All scripts for the assessment outlines page (`/group/students/ui/my-settings/as
 4b. `src/assessment/school-terms.js` (generated WA term dates, Early Easter choice, a date's term and week)
 5. `src/assessment/assessment-parse-helpers.js` (order hints, cohort mean, weighted mean)
 6. `src/assessment/assessment-parser.js` (task row & score parser; `taskRecord` shared with API records)
-6a. `src/assessment/outline-api.js` (Connect's outlines and boxplots from its API, one record per card)
+6a. `src/assessment/remembered-outlines.js` (the outlines kept through the year, when Connect returns none), then `src/assessment/outline-api.js` (Connect's outlines and boxplots from its API, one record per card)
 6b. `src/assessment/assessment-api-parse.js` (API records as the parser's tasks, with the old rows' ids)
 7. `src/assessment/class-semesters.js` (class registry by semester, current-semester detection, new-year trigger)
 7a. `src/system/overhaul-notice.js` (once, upgrading to 3.3.0: semester filter off and a popup on Connect's overhaul; before the filter reads it)
