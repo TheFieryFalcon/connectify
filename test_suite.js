@@ -17532,6 +17532,7 @@ runTest('Test 364: When Connect shows no outlines, Connectify draws the ones it 
     records = await api.refresh();
     assert.deepStrictEqual(records.map(r => r.title), ['Chemistry ATAR Year 11 - Semester 1'], 'the outlines kept through the year stand in');
     assert.ok(remembered.active() && api.drawable() === records && api.isLoaded(), 'they are the load every tool reads');
+    assert.strictEqual(remembered.savedAt(), 1, 'the notice dates their marks by when they were kept');
     assert.ok(document.documentElement.hasAttribute?.('data-cx-remembered-outlines') !== false, 'the page is marked for the stylesheet');
     assert.deepStrictEqual(remembered.standIn([kept[0], kept[0]]).length, 2, 'Connect\'s own outlines always win over remembered ones');
   } finally {
@@ -17549,6 +17550,17 @@ runTest('Test 364: When Connect shows no outlines, Connectify draws the ones it 
   }
   const manifest = JSON.parse(origReadFileSync.call(fs, path.resolve(BASE_DIR, 'manifest.json'), 'utf8'));
   assert.ok(manifest.content_scripts.some(g => g.css?.includes('src/assessment/remembered-outlines.css')), 'the stylesheet is registered');
+
+  // The Past Years notice, over remembered outlines: only when their marks were kept, nothing to go back to
+  const bar = read('system/past-year-bar.js');
+  assert.ok(bar.includes("build('cx-remembered-bar', '', remembered().savedAt(), false)") && bar.includes("if (label) text.append(") &&
+    bar.includes('`Marks as of ${saved}`') && bar.includes("build('cx-past-year-bar', info.label || String(info.year), info.savedAt, true)"),
+    'one notice: a past year with its label and Back to This Year, remembered outlines with Marks as of alone');
+  const notice = read('system/past-year.css');
+  for (const rule of ['html[data-cx-remembered-outlines] #cx-remembered-bar {', 'html.connectify-dark[data-cx-remembered-outlines] #cx-remembered-bar {',
+    'html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])[data-cx-remembered-outlines] #cx-remembered-bar {']) {
+    assert.ok(notice.includes(rule), `styled like the past year's notice: ${rule}`);
+  }
 });
 
 Promise.all(pendingTestPromises).then(() => {

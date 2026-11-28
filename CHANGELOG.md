@@ -4,6 +4,18 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 
 ---
 
+## 3.3.4 (2026-11-28)
+
+### Additions
+- **Remembered outlines**: when Connect shows No Assessment Outlines Available (in exam weeks, for example), Connectify shows the outlines it last saw, under a notice with the date of their marks. Every tool keeps working from them. If it has seen none, Connect's message stays.
+
+### Fixes
+- My Marks is readable in the dark themes: mark cells, teacher comments and the lines between tasks take the theme's colours instead of Connect's light grey and white.
+- A table in a notice no longer sits on a grey slab in Liquid Glass and the dark themes.
+- Text pasted into a notice with an off-white page colour (cream, ivory, light grey) no longer leaves boxes or strips beside its highlights on a dark theme or wallpaper.
+
+---
+
 ## 3.3.3 (2026-11-13)
 
 ### Additions
@@ -33,8 +45,6 @@ Every release since Connectify was forked from Connext 2.1.14, newest first. Not
 - A new school year no longer starts by mistake in exam weeks, when Connect hides outlines or shows next year's classes early.
 - Light-tone themes (Liquid Glass, light custom themes) no longer show dark boxes or pale text.
 - Category names in Settings are clearer in Light and over a wallpaper.
-- A table in a notice no longer sits on a grey slab in Liquid Glass and the dark themes.
-- Text pasted into a notice with an off-white page colour (cream, ivory, light grey) no longer leaves boxes or strips beside its highlights on a dark theme or wallpaper.
 - The Predictor's type badges keep their category colours in every theme.
 - Connect's top bars keep their colours in dark themes: the active tab's underline, the Library's tools and search buttons and the separators.
 - The outlines' class filter button no longer takes a custom theme's button colour.

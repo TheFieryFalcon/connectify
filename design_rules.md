@@ -1038,6 +1038,8 @@ Extremely concise summary of the core visual design language, contrast standards
     - Connect's API returns no outlines ("No Assessment Outlines available.", e.g. exam weeks)
     - the outlines kept through the year (`connectify:outline_records:<account>`, `year-capsule.js`) stand in as the load
     - drawn in Connect's zone like a past year's, Connect's notice hidden; every tool reads them
+  - The notice
+    - the Past Years notice over them (`#cx-remembered-bar`, `past-year-bar.js`) with `Marks as of <date>` alone: when they were kept, no label or button
   - Nothing remembered
     - nothing is drawn and Connect's "No Assessment Outlines available." stays
   - Nothing in them is news

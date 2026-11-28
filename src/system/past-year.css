@@ -4,7 +4,8 @@
  * Connect's own cards and its class filter bar are this year's, so while a past year is viewed only the outlines
  * Connectify draws from the year's records show, under one notice. Connect's "No Assessment Outlines available." is
  * about this year (exam weeks, a new year not started; then it sits straight in the outlines zone), so it is hidden too. Its teacher and school names link nowhere: their
- * links belong to Connect's cards. The notice is one surface in the theme's tokens, kept under Connect's top bars.
+ * links belong to Connect's cards. The notice is one surface in the theme's tokens, kept under Connect's top bars; the
+ * same notice sits over remembered outlines when Connect shows none (#cx-remembered-bar, remembered-outlines.js).
  */
 
 html[data-cx-past-year] cnt-sao-card,
@@ -22,7 +23,8 @@ html[data-cx-past-year] #cx-legacy-outlines .cvr-c-data-nav-link {
   cursor: default;
 }
 
-html[data-cx-past-year] #cx-past-year-bar {
+html[data-cx-past-year] #cx-past-year-bar,
+html[data-cx-remembered-outlines] #cx-remembered-bar {
   position: sticky;
   top: var(--cx-past-year-top, 0px);
   z-index: 20;
@@ -39,7 +41,8 @@ html[data-cx-past-year] #cx-past-year-bar {
   border-radius: 8px;
 }
 
-html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__text {
+html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__text,
+html[data-cx-remembered-outlines] #cx-remembered-bar .cx-past-year-bar__text {
   flex: 1 1 auto;
   display: flex;
   flex-wrap: wrap;
@@ -48,20 +51,23 @@ html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__text {
   min-width: 0;
 }
 
-html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__label {
+html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__label,
+html[data-cx-remembered-outlines] #cx-remembered-bar .cx-past-year-bar__label {
   font-size: 15px;
   line-height: 20px;
   font-weight: 700;
 }
 
-html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__saved {
+html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__saved,
+html[data-cx-remembered-outlines] #cx-remembered-bar .cx-past-year-bar__saved {
   font-size: 13px;
   line-height: 18px;
   font-weight: 400;
   color: #4a5d70;
 }
 
-html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back {
+html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back,
+html[data-cx-remembered-outlines] #cx-remembered-bar .cx-past-year-bar__back {
   flex: none;
   min-height: 28px;
   margin: 0;
@@ -74,36 +80,42 @@ html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back {
   cursor: pointer;
 }
 
-html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back:hover {
+html[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back:hover,
+html[data-cx-remembered-outlines] #cx-remembered-bar .cx-past-year-bar__back:hover {
   background: #e9f2fb;
   border-color: #709fc4;
   color: #174c75;
 }
 
-html.connectify-dark[data-cx-past-year] #cx-past-year-bar {
+html.connectify-dark[data-cx-past-year] #cx-past-year-bar,
+html.connectify-dark[data-cx-remembered-outlines] #cx-remembered-bar {
   background: var(--cx-surface-bg, #1e2632);
   color: var(--cx-text-primary, #e6edf5);
   border-color: var(--cx-border, #2e3c4e);
 }
 
-html.connectify-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__saved {
+html.connectify-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__saved,
+html.connectify-dark[data-cx-remembered-outlines] #cx-remembered-bar .cx-past-year-bar__saved {
   color: var(--cx-text-secondary, #b7c5d6);
 }
 
-html.connectify-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back {
+html.connectify-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back,
+html.connectify-dark[data-cx-remembered-outlines] #cx-remembered-bar .cx-past-year-bar__back {
   background: var(--cx-button-bg, var(--cx-nav-bg, #18222d));
   color: var(--cx-button-text, var(--cx-text-secondary, #e1eaf3));
   border-color: var(--cx-button-border, var(--cx-nav-border, #3b4d5e));
 }
 
-html.connectify-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back:hover {
+html.connectify-dark[data-cx-past-year] #cx-past-year-bar .cx-past-year-bar__back:hover,
+html.connectify-dark[data-cx-remembered-outlines] #cx-remembered-bar .cx-past-year-bar__back:hover {
   background: var(--cx-button-hover, var(--cx-badge-bg, #24303e));
   border-color: var(--cx-border-strong, #556c84);
   color: var(--cx-text-primary, #ffffff);
 }
 
 /* Liquid Glass: one glass surface like the theme's top bars, rounded like its panels */
-html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])[data-cx-past-year] #cx-past-year-bar {
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])[data-cx-past-year] #cx-past-year-bar,
+html:is([data-connectify-theme="liquid-glass"], [data-connectify-glass="true"])[data-cx-remembered-outlines] #cx-remembered-bar {
   background: var(--cx-surface-elevated, rgba(18, 26, 40, 0.65));
   backdrop-filter: blur(var(--cx-glass-blur-overlay, 12px)) saturate(160%);
   -webkit-backdrop-filter: blur(var(--cx-glass-blur-overlay, 12px)) saturate(160%);
